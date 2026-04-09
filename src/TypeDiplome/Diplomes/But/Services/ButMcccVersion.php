@@ -185,22 +185,26 @@ class ButMcccVersion extends AbstractButMccc
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FI, 0, 1),
             substr(self::CEL_REGIME_FI, 1, 1),
-            $diffDescriptifs['regimeInscription']['FI']
+            $diffDescriptifs['regimeInscription']['FI'],
+            ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FC, 0, 1),
             substr(self::CEL_REGIME_FC, 1, 2),
-            $diffDescriptifs['regimeInscription']['FC']
+            $diffDescriptifs['regimeInscription']['FC'],
+            ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FI_APPRENTISSAGE, 0, 1),
             substr(self::CEL_REGIME_FI_APPRENTISSAGE, 1, 2),
-            $diffDescriptifs['regimeInscription']['FIA']
+            $diffDescriptifs['regimeInscription']['FIA'],
+            ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FC_CONTRAT_PRO, 0, 1),
             substr(self::CEL_REGIME_FC_CONTRAT_PRO, 1, 2),
-            $diffDescriptifs['regimeInscription']['FCCP']
+            $diffDescriptifs['regimeInscription']['FCCP'],
+            ['withLighterGreen' => true]
         );
 
         $index = 1;
