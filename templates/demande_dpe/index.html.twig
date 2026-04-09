@@ -4,6 +4,10 @@
     DPE ouverts{% if type == 'composante' %} : {{ composante.libelle }}{% endif %}
 {% endset %}
 
+{% set header_description %}
+    Consultez les demandes de modifications ouvertes, filtrez rapidement par contexte et suivez leur état de validation.
+{% endset %}
+
 {% block content %}
     <section
             class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">

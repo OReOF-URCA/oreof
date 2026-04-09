@@ -506,7 +506,7 @@ class ExcelWriter
 
                 $richText = new RichText();
                 if ($diffObject->original !== null && $diffObject->original !== '') {
-                    $ancienneValeur = $richText->createTextRun((string)$diffObject->original);
+                    $ancienneValeur = $richText->createTextRun($diffObject->original);
                     $ancienneValeur->getFont()?->setStrikethrough(true);
                     $ancienneValeur->getFont()?->setColor(new Color(Color::COLOR_RED));
                 }
@@ -516,13 +516,19 @@ class ExcelWriter
                     $this->sheet->getCell([$col, $row])->getStyle()->getAlignment()->setWrapText(true);
                     $currentSize = $this->sheet->getRowDimension($row)->getRowHeight();
                     $this->getRowDimension($row, $currentSize * 2);
-                }   
+                }
 
                 if ($diffObject->new !== null && $diffObject->new !== '') {
-                    $nouvelleValeur = $richText->createTextRun((string)$diffObject->new);
+                    $colorNew = new Color(Color::COLOR_DARKGREEN);
+                    if (($options['withLighterGreen'] ?? false) === true) {
+                        // vert clair
+                        $colorNew = new Color('34EB67');
+                    }
+
+                    $nouvelleValeur = $richText->createTextRun($diffObject->new);
                     $nouvelleValeur->getFont()?->setStrikethrough(false);
                     $nouvelleValeur->getFont()?->setBold(true);
-                    $nouvelleValeur->getFont()?->setColor(new Color(Color::COLOR_DARKGREEN));
+                    $nouvelleValeur->getFont()?->setColor($colorNew);
                 }
 
                 $this->sheet->setCellValue([$col, $row], $richText);

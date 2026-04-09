@@ -88,3 +88,6 @@ page:
     app_parcours_lheo_invalid_list:
       title: Contrôle LHEO de l'offre
       description: Contrôle de la conformité au format LHEO de l'offre
+    structure_composante_index:
+      title: Gestion de l'offre de formation
+      description: Détail de l'offre de formation par composante

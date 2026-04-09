@@ -25,28 +25,41 @@
         />
     {% endif %}
 
-    <twig:Button
-            href="{{ path('app_demande_dpe_edit', {'id': item.id}) }}"
-            variant="warning"
-            size="sm"
-            icon="icon:edit"
-            label="Modifier"
-            tooltip="Modifier l'argumentaire"
-            dataAction="click->modalturbo#open"
-
-    />
+        {% set dropdownItems = [
+                {
+                        label: 'Modifier',
+                        icon: 'icon:edit',
+                        color: 'warning',
+                        url: path('app_demande_dpe_edit', {'id': item.id}),
+                        modal: true,
+                        help: "Modifier l'argumentaire"
+                }
+        ] %}
 
     {% if is_granted('ROLE_ADMIN') %}
-        <twig:Button
-                variant="danger"
-                size="sm"
-                icon="icon:delete"
-                label="Supprimer"
-                tooltip="Supprimer la demande"
-                dataAction="click->crud#delete"
-                data-crud-url-param="{{ path('app_demande_dpe_delete', {'id': item.id}) }}"
-                data-crud-csrf-param="{{ csrf_token('delete' ~ item.id) }}"
-        />
+            {% set dropdownItems = dropdownItems|merge([
+                    {
+                            type: 'delete',
+                            label: 'Supprimer',
+                            icon: 'icon:delete',
+                            color: 'danger',
+                            url: path('app_demande_dpe_delete', {'id': item.id}),
+                            method: 'DELETE',
+                            csrfTokenId: 'delete' ~ item.id,
+                            title: "Supprimer la demande",
+                            message: "Cette action est irréversible. Voulez-vous continuer ?",
+                            confirmLabel: "Supprimer",
+                            cancelLabel: "Annuler",
+                            id: "demande-" ~ item.id
+                    }
+            ]) %}
     {% endif %}
+
+        {{ component('dropdown_actions', {
+                label: 'Actions',
+                help: 'Actions disponibles',
+                icon: 'icon:ellipsis-vertical',
+                items: dropdownItems
+        }) }}
 </div>
 

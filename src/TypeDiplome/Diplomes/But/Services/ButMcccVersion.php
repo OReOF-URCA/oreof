@@ -331,7 +331,7 @@ class ButMcccVersion extends AbstractButMccc
                     $this->excelWriter->writeCellXY(self::COL_CODE_EC, $ligne, $fiche->getSigle(), ['style' => 'HORIZONTAL_CENTER']);
                     $this->excelWriter->writeCellXYDiff(self::COL_INTITULE, $ligne, $ec['diff']['libelle'], ['style' => 'HORIZONTAL_CENTER']);
                     $this->excelWriter->writeCellXYDiff(self::COL_VOL_ETUDIANT, $ligne, $ec['diff']['heuresEctsEc']['sommeEcTotalPres'], ['style' => 'HORIZONTAL_CENTER']);
-                    $this->excelWriter->writeCellXYDiff(self::COL_CM, $ligne, $ec['diff']['heuresEctsEc']['cmPres'] , ['style' => 'HORIZONTAL_CENTER']);
+                    $this->excelWriter->writeCellXYDiff(self::COL_CM, $ligne, $ec['diff']['heuresEctsEc']['cmPres'], ['style' => 'HORIZONTAL_CENTER']);
                     $this->excelWriter->writeCellXYDiff(self::COL_TD, $ligne, $ec['diff']['heuresEctsEc']['tdPres'], ['style' => 'HORIZONTAL_CENTER']);
                     $this->excelWriter->writeCellXYDiff(self::COL_TP, $ligne, $ec['diff']['heuresEctsEc']['tpPres'], ['style' => 'HORIZONTAL_CENTER']);
                     $this->excelWriter->writeCellXYDiff(self::COL_HEURE_AUTONOMIE, $ligne, $ec['diff']['heuresEctsEc']['tePres']);
@@ -375,8 +375,12 @@ class ButMcccVersion extends AbstractButMccc
                 }
                 // affichage des "totaux"
                 $this->excelWriter->writeCellXYDiff(self::COL_CM, $ligne + 2, new DiffObject($totalHeuresAvant['CM'], $totalHeuresApres['CM']), ['style' => 'HORIZONTAL_CENTER']);
-                $this->excelWriter->writeCellXYDiff(self::COL_TD, $ligne + 2,
-                    new DiffObject($totalHeuresAvant['TD'], $totalHeuresApres['TD']), ['style' => 'HORIZONTAL_CENTER']);
+                $this->excelWriter->writeCellXYDiff(
+                    self::COL_TD,
+                    $ligne + 2,
+                    new DiffObject($totalHeuresAvant['TD'], $totalHeuresApres['TD']),
+                    ['style' => 'HORIZONTAL_CENTER']
+                );
                 $this->excelWriter->writeCellXYDiff(self::COL_TP, $ligne + 2, new DiffObject($totalHeuresAvant['TP'], $totalHeuresApres['TP']), ['style' => 'HORIZONTAL_CENTER']);
                 $this->excelWriter->writeCellXYDiff(self::COL_HEURE_AUTONOMIE, $ligne + 2, new DiffObject($totalHeuresAvant['TE'], $totalHeuresApres['TE']), ['style' => 'HORIZONTAL_CENTER']);
 
