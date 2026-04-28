@@ -21,6 +21,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\PseudoTypes\ArrayShapeItem;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -195,7 +196,7 @@ class Formation
     private ?TypeModificationDpeEnum $etatReconduction = null;
 
     /** @var Formation $formationOrigineCopie Référence la formation d'origine, depuis la copie */
-    #[ORM\OneToOne(inversedBy: 'formationCopieAnneeUniversitaire', targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'formationCopieAnneeUniversitaire', targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $formationOrigineCopie = null;
 
     /** @var Formation $formationCopieAnneeUniversitaire Référence la formation copiée, depuis celle d'origine */
@@ -222,6 +223,9 @@ class Formation
      */
     #[ORM\OneToMany(mappedBy: 'formation', targetEntity: ChangeParcours::class)]
     private Collection $changeParcours;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $logo = [];
 
     public function __construct(?CampagneCollecte $anneeUniversitaire)
     {
@@ -1274,4 +1278,23 @@ class Formation
     {
         return $this->etatReconduction === TypeModificationDpeEnum::FERMETURE_DEFINITIVE;
     }
+
+    public function getLogo(): ?array
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?array $logo): static
+    {
+        $this->logo = $logo;
+
+        return $this;
+    }
+
+    public function addLogo(string $filename): static
+    {
+        $this->logo[] = $filename;
+        return $this;
+    }
+
 }

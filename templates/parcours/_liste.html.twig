@@ -53,6 +53,7 @@
         <th>BCC</th>
         <th>MCCC</th>
         <th>PV</th>
+        <th>logos</th> <!-- temporaire pour vérifier le bon affichage -->
         <th>Remplissage</th>
         <th></th>
     </tr>
@@ -92,6 +93,18 @@
             </td>
             <td>
                 {{ component('historique_pv', {parcours:parcour}) }}
+            </td>
+            <td> <!-- temporaire pour vérifier le bon affichage -->
+                {% if parcour.formation.logo %}
+                    {% for filename in parcour.formation.logo %}
+                        <img src="{{ asset('uploads/logos/' ~ filename) }}"
+                             alt="Logo"
+                             style="max-height: 40px; max-width: 80px; object-fit: contain;"
+                        >
+                    {% endfor %}
+                {% else %}
+                    <span class="badge bg-secondary" style="display:flex; justify-content: center">Aucun</span>
+                {% endif %}
             </td>
             <td>
                 {{ component('remplissage_progress', { value: parcour.remplissage }) }}

@@ -46,7 +46,7 @@ class Competence
     #[ORM\ManyToMany(targetEntity: ElementConstitutif::class, mappedBy: 'competences')]
     private Collection $elementConstitutifs;
 
-    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $competenceOrigineCopie = null;
 
 

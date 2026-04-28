@@ -271,7 +271,7 @@ class Parcours
     private ?NiveauLangueEnum $niveauFrancais;
 
     /** @var Parcours $parcoursOrigineCopie Référence le parcours d'origine, depuis la copie */
-    #[ORM\OneToOne(inversedBy: 'parcoursCopieAnneeUniversitaire', targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'parcoursCopieAnneeUniversitaire', targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $parcoursOrigineCopie = null;
 
     /** @var Parcours $parcoursCopieAnneeUniversitaire Référence l'élément copié, depuis le parcours d'origine */
@@ -321,6 +321,9 @@ class Parcours
 
     #[ORM\Column(nullable: true)]
     private ?int $semestreFin = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $logo = [];
 
     public function __construct(?Formation $formation)
     {
@@ -1596,7 +1599,7 @@ class Parcours
             TypeModificationDpeEnum::MODIFICATION_TEXTE,
             TypeModificationDpeEnum::MODIFICATION_MCCC,
             TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE,
-        ], true);
+        ]);
     }
 
     public function withCfvu() : bool
@@ -1808,6 +1811,24 @@ class Parcours
             }
         }
 
+        return $this;
+    }
+
+    public function getLogo(): ?array
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?array $logo): static
+    {
+        $this->logo = $logo;
+
+        return $this;
+    }
+
+    public function addLogo(string $filename): static
+    {
+        $this->logo[] = $filename;
         return $this;
     }
 

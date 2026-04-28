@@ -229,7 +229,7 @@ class FicheMatiere implements McccCompletionCheckerInterface
     private ?string $typeApogee = null;
 
     /** @var FicheMatiere $ficheMatiereOrigineCopie Référence la fiche matière d'origine, depuis la copie */
-    #[ORM\OneToOne(inversedBy: 'ficheMatiereCopieAnneeUniversitaire', targetEntity: self::class)]
+    #[ORM\ManyToOne(inversedBy: 'ficheMatiereCopieAnneeUniversitaire', targetEntity: self::class)]
     private ?self $ficheMatiereOrigineCopie = null;
 
     /** @var FicheMatiere $ficheMatiereCopieAnneeUniversitaire Accès à la fiche matière copiée, depuis celle d'origine */

@@ -121,6 +121,9 @@ class TypeDiplome
     #[ORM\OneToMany(targetEntity: TypeDiplomePlateformeAdmission::class, mappedBy: 'typeDiplome')]
     private Collection $typeDiplomePlateformeAdmissions;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $logo = '';
+
     public function __construct()
     {
         $this->formations = new ArrayCollection();
@@ -616,6 +619,18 @@ class TypeDiplome
     public function setControleAssiduite(?bool $controleAssiduite): static
     {
         $this->controleAssiduite = $controleAssiduite;
+
+        return $this;
+    }
+
+    public function getLogo(): ?string
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?string $logo): static
+    {
+        $this->logo = $logo;
 
         return $this;
     }

@@ -22,7 +22,7 @@ class ButCompetence
     private ?string $libelle = null;
 
     #[Groups('parcours_json_versioning')]
-    #[ORM\Column(length: 40, nullable: true)]
+    #[ORM\Column(length: 50, nullable: true)]
     private ?string $nomCourt = null;
 
     #[Groups('parcours_json_versioning')]
@@ -45,7 +45,7 @@ class ButCompetence
     #[ORM\OrderBy(['ordre' => 'ASC'])]
     private Collection $butNiveaux;
 
-    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $butCompetenceOrigineCopie = null;
 
     #[ORM\ManyToOne(inversedBy: 'butCompetences')]

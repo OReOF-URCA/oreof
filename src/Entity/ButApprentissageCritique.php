@@ -32,7 +32,7 @@ class ButApprentissageCritique
     #[ORM\ManyToMany(targetEntity: FicheMatiere::class, mappedBy: 'apprentissagesCritiques')]
     private Collection $ficheMatieres;
 
-    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $butApprentissageCritiqueOrigineCopie = null;
 
     public function __construct()

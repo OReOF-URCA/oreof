@@ -182,7 +182,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     #[ORM\Column(nullable: true)]
     private ?bool $ects_specifiques = null;
 
-    #[ORM\OneToOne(targetEntity: self::class)]
+    #[ORM\ManyToOne(targetEntity: self::class)]
     private ?self $ecOrigineCopie = null;
 
 

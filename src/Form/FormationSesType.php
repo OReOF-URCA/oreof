@@ -29,6 +29,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use UnitEnum;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class FormationSesType extends AbstractType
 {
@@ -179,7 +180,13 @@ class FormationSesType extends AbstractType
                 },
 
             ])
-
+            ->add('logo', FileType::class, [
+                'multiple' => true,
+                'required' => false,
+                'mapped' => false,
+                // Restriction du type de fichier pour afficher un feedback à l'utilisateur
+                'attr' => ['accept' => 'image/png, image/jpeg'],
+            ])
             ->addEventListener(
                 FormEvents::POST_SUBMIT,
                 static function (FormEvent $event) use ($mentionRepository) {
