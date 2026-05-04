@@ -23,6 +23,7 @@ use App\Entity\HistoriqueParcours;
 use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
 use App\Entity\UserProfil;
+use App\Entity\Constantes;
 use App\Enums\TypeModificationDpeEnum;
 use App\Events\AddCentreFormationEvent;
 use App\Form\FormationSesType;
@@ -52,6 +53,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[Route('/formation')]
 class FormationController extends BaseController
@@ -263,13 +266,27 @@ class FormationController extends BaseController
 
             $logoFiles = $form->get('logo')->getData();
             if ($logoFiles) {
+                $hasFormatError = false;
+                $hasSizeError = false;
+
                 foreach ($logoFiles as $logoFile) {
                     try {
                         $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
-                        $formation->addLogo($uploaded->getStoredFilename());
+                        $formation->addLogo($uploaded->getStoredFilename()); // $parcours->addLogo() in ParcoursController
                     } catch (FileUploadException $e) {
-                        $this->addFlash('error', 'Erreur upload logo : ' . $e->getMessage());
+                        if (str_contains($e->getMessage(), 'volumineux')) {
+                            $hasSizeError = true;
+                        } else {
+                            $hasFormatError = true;
+                        }
                     }
+                }
+
+                if ($hasSizeError) {
+                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) est/sont trop lourd(s) (10 Mo max)');
+                }
+                if ($hasFormatError) {
+                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) n\'est/ne sont pas au bon format (PNG/JPEG/JPG uniquement)');
                 }
             }
 
@@ -360,14 +377,23 @@ class FormationController extends BaseController
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {//todo: si validate le choice de mention ne fonctionne pas
+        if ($form->isSubmitted()) {
+            $savedMention = $formation->getMention();
+            $savedMentionTexte = $formation->getMentionTexte();
+
             if (array_key_exists(
-                'mention',
-                $request->request->all()['formation_ses']
-            ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre') {
+                    'mention',
+                    $request->request->all()['formation_ses']
+                ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre')
+            {
                 $mention = $mentionRepository->find($request->request->all()['formation_ses']['mention']);
                 $formation->setMentionTexte(null);
                 $formation->setMention($mention);
+            }
+            else
+            {
+                $formation->setMention($savedMention);
+                $formation->setMentionTexte($savedMentionTexte);
             }
 
             $uow = $entityManager->getUnitOfWork();
@@ -390,13 +416,25 @@ class FormationController extends BaseController
 
             $logoFiles = $form->get('logo')->getData();
             if ($logoFiles) {
+                $hasFormatError = false;
+                $hasSizeError = false;
                 foreach ($logoFiles as $logoFile) {
                     try {
                         $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
                         $formation->addLogo($uploaded->getStoredFilename());
                     } catch (FileUploadException $e) {
-                        $this->addFlash('error', 'Erreur upload logo : ' . $e->getMessage());
+                        if (str_contains($e->getMessage(), 'volumineux')) {
+                            $hasSizeError = true;
+                        } else {
+                            $hasFormatError = true;
+                        }
                     }
+                }
+                if ($hasSizeError) {
+                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) est/sont trop lourd(s) (10 Mo max)');
+                }
+                if ($hasFormatError) {
+                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) n\'est/ne sont pas au bon format (PNG/JPEG/JPG uniquement)');
                 }
             }
 
@@ -706,5 +744,110 @@ class FormationController extends BaseController
             $this->addFlashBag('error', 'Une erreur est survenue lors de la visualisation');
             return $this->redirectToRoute('app_formation_show', ['slug' => $versionFormation->getFormation()->getSlug()]);
         }
+    }
+
+    #[Route('/{slug}/upload-logo', name: 'app_formation_upload_logo', methods: ['POST'])]
+    public function uploadLogo(Request $request, Formation $formation): JsonResponse
+    {
+
+        if (!(
+            $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $formation]) ||
+            $this->isGranted('EDIT', ['route' => 'app_composante', 'subject' => $formation]) ||
+            $this->isGranted('EDIT', ['route' => 'app_etablissement', 'subject' => $formation]) ||
+            $this->isGranted('ROLE_ADMIN')
+        )) {
+            return new JsonResponse(['success' => false, 'error' => 'Accès refusé'], 403);
+        }
+
+        $files = $request->files->get('logo');
+
+        if (!$files) {
+            return new JsonResponse(['success' => false, 'error' => 'Aucun fichier reçu'], 400);
+        }
+
+        $hasFormatError = false;
+        $hasSizeError = false;
+
+        foreach ($files as $file) {
+            try {
+                $uploaded = $this->secureUploadService->upload($file, 'logos');
+                $logos = $formation->getLogo() ?? [];
+                $logos[] = $uploaded->getStoredFilename();
+                $formation->setLogo($logos);
+            } catch (\Exception $e) {
+                if (str_contains($e->getMessage(), 'volumineux')) {
+                    $hasSizeError = true;
+                } else {
+                    $hasFormatError = true;
+                }
+            }
+        }
+
+        if ($hasFormatError || $hasSizeError) {
+            $errors = [];
+            if ($hasSizeError) $errors[] = 'Un ou plusieurs fichier(s) est/sont trop lourd(s) (10 Mo max)';
+            if ($hasFormatError) $errors[] = 'Un ou plusieurs fichier(s) n\'est/ne sont pas au bon format (PNG/JPEG/JPG uniquement)';
+            return new JsonResponse(['success' => false, 'errors' => $errors], 422);
+        }
+
+        $this->entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/{slug}/logos', name: 'app_formation_logos', methods: ['GET'])]
+    public function logos(Formation $formation, Request $request): Response
+    {
+        return $this->render('formation/_logos.html.twig', [
+            'formation' => $formation,
+            'editable' => $request->query->getBoolean('editable'),
+        ]);
+    }
+
+    #[Route('/{slug}/delete-logo', name: 'app_formation_delete_logo', methods: ['DELETE'])]
+    public function deleteLogo(Request $request, Formation $formation): JsonResponse
+    {
+        if (!(
+            $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $formation]) ||
+            $this->isGranted('EDIT', ['route' => 'app_composante', 'subject' => $formation]) ||
+            $this->isGranted('EDIT', ['route' => 'app_etablissement', 'subject' => $formation]) ||
+            $this->isGranted('ROLE_ADMIN')
+        )) {
+            return new JsonResponse(['success' => false, 'error' => 'Accès refusé'], 403);
+        }
+
+        $data = json_decode($request->getContent(), true);
+        $filename = $data['filename'] ?? null;
+
+        if (!$filename) {
+            return new JsonResponse(['success' => false, 'error' => 'Nom de fichier manquant'], 400);
+        }
+
+        $logos = $formation->getLogo() ?? [];
+
+        if (!in_array($filename, $logos)) {
+            return new JsonResponse(['success' => false, 'error' => 'Fichier introuvable'], 404);
+        }
+
+        $logos = array_values(array_filter($logos, fn($l) => $l !== $filename));
+        $formation->setLogo($logos);
+        $this->entityManager->flush();
+
+        $this->secureUploadService->delete('logos', $filename);
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    // Route directe vers un logo pour alimenter l'API
+    #[Route('/{slug}/logo/{filename}', name: 'app_formation_logo', methods: ['GET'])]
+    public function logo(Formation $formation, string $filename): Response
+    {
+        $filePath = $this->secureUploadService->resolveStoredFilePath('logos', $filename);
+
+        if (!file_exists($filePath)) {
+            throw $this->createNotFoundException();
+        }
+
+        return new BinaryFileResponse($filePath);
     }
 }

@@ -171,5 +171,21 @@ class SecureUploadService
 
         return $this->sanitizeOriginalFilename($storedFilename);
     }
+
+
+
+    private const DELETABLE_CONTEXTS = ['logos']; // La méthode ne marche que pour les logos, car je n'ai pas encore regardé si l'upload de PDF en a besoin.
+
+    public function delete(string $context, string $storedFilename): void
+    {
+        if (!in_array($context, self::DELETABLE_CONTEXTS, true)) {
+            throw FileUploadException::contextNotConfigured($context);
+        }
+
+        $filePath = $this->resolveStoredFilePath($context, $storedFilename);
+        if ($this->filesystem->exists($filePath)) {
+            $this->filesystem->remove($filePath);
+        }
+    }
 }
 

@@ -20,6 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class ParcoursType extends AbstractType
 {
@@ -117,6 +118,13 @@ class ParcoursType extends AbstractType
                         ->orderBy('p.libelle', 'ASC');
                 },
                 'choice_label' => 'getDisplay',
+            ])
+            ->add('logo', FileType::class, [
+                'help' => 'Logo du parcours',
+                'multiple' => true,
+                'required' => false,
+                'mapped' => false,
+                'attr' => ['accept' => 'image/png, image/jpeg'],
             ]);
 
         if ($options['isAdmin'] === true) {

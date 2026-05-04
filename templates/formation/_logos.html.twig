@@ -1,0 +1,50 @@
+<turbo-frame id="logos-container">
+    <div class="d-flex flex-wrap gap-3 p-2">
+        {% for filename in formation.logo %}
+            <div class="position-relative logo-container" style="display: inline-block;">
+                <img src="{{ asset('uploads/logos/' ~ filename) }}"
+                     alt="Logo"
+                     style="max-height: 75px; max-width: 100px; object-fit: contain;"
+                >
+                {% if editable is defined and editable == true %}
+                    <button class="btn btn-danger btn-sm position-absolute top-0 end-0 logo-delete-btn"
+                            style="display: none; line-height: 1; width: 24px; height: 24px; padding: 0; align-items: center; justify-content: center;"
+                            data-action="click->logos#deleteLogo"
+                            data-filename="{{ filename }}">
+                        <i class="fas fa-times" style="font-size: 14px;"></i>
+                    </button>
+                {% endif %}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_formation_logo', {slug: formation.slug, filename: filename}) }}"
+                       target="_blank"
+                       class="btn btn-sm btn-secondary position-absolute top-0 start-0 logo-api-btn"
+                       style="display: none; line-height: 1; width: 24px; height: 24px; padding: 0; align-items: center; justify-content: center;"
+                       title="Voir le fichier via l'API"
+                    >
+                        <i class="fal fa-arrow-up-right-from-square" style="font-size: 14px;"></i>
+                    </a>
+                {% endif %}
+            </div>
+        {% else %}
+            <p>Aucun logo</p>
+        {% endfor %}
+    </div>
+
+    <style>
+        .logo-container:hover .logo-delete-btn,
+        .logo-container:hover .logo-api-btn {
+            display: flex !important;
+        }
+        .logo-api-btn {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+        .logo-api-btn:hover {
+            filter: brightness(0.8);
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: white !important;
+        }
+    </style>
+</turbo-frame>

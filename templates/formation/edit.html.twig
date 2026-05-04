@@ -1,8 +1,37 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
+
     {% set step = 1 %}
     {{ include('formation/_synthese_formation.html.twig') }}
+
+    <div class="card mt-3">
+        <div class="card-body"
+                {{ stimulus_controller('logos', {
+                    url: path('app_formation_save', {formation: formation.slug}),
+                    logosUrl: path('app_formation_logos', {slug: formation.slug, editable: true}),
+                    deleteLogoUrl: path('app_formation_delete_logo', {slug: formation.slug}),
+                }) }}>
+            <h5 class="card-title">Logos de la formation</h5>
+            <turbo-frame id="logos-container">
+                {% include 'formation/_logos.html.twig' with {editable: true} %}
+            </turbo-frame>
+            <div class="mt-3">
+                <form id="logo-upload-form"
+                      action="{{ path('app_formation_upload_logo', {slug: formation.slug}) }}"
+                      method="POST"
+                      enctype="multipart/form-data">
+                    <input type="file" name="logo[]" accept="image/png, image/jpeg" class="form-control" multiple>
+                    <button type="button"
+                            class="btn btn-primary mt-2"
+                            data-action="click->logos#uploadLogo">
+                        Envoyer le logo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="mt-3"
             {{ stimulus_controller('formation_wizard', {
                 url: path('app_formation_wizard'),
@@ -12,6 +41,7 @@
             }) }}
             {{ stimulus_action('formation_wizard', 'refreshStep', 'base:refreshStep@window') }}
     >
+
         <ul class="nav nav-tabs nav-tabs-title nav-tabs-line-title responsive-tabs" id="lineTitleTabsContainer"
             role="tablist">
             <li class="nav-item" role="presentation">
