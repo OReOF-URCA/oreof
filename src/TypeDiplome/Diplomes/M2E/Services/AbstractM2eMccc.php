@@ -38,8 +38,8 @@ class AbstractM2eMccc
     public const CEL_REGIME_FI_APPRENTISSAGE = 'C11';
     public const CEL_REGIME_FC_CONTRAT_PRO = 'C13';
 
-    public const CEL_DATE_CFVU = 'W26';
-    public const CEL_DATE_CONSEIL = 'W25';
+    public const CEL_DATE_CFVU = 'Y26';
+    public const CEL_DATE_CONSEIL = 'Y25';
 
     //Colonnes sur Modèles
 

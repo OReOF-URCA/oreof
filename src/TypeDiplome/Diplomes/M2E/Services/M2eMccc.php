@@ -221,7 +221,7 @@ class M2eMccc extends AbstractM2eMccc
                                     $this->excelWriter->borderOutsiteInside(self::COL_MCCC_SECONDE_CHANCE_CC_SANS_TP, $debut, self::COL_MCCC_SECONDE_CHANCE_CC_AVEC_TP, $ligne - 1);
                                 }
                             }
-                            $this->excelWriter->writeCellXY(self::COL_UE, $debut, $ue->display, ['wrap' => true, 'style' => 'HORIZONTAL_CENTER', 'font-weight' => false]);
+                            $this->excelWriter->writeCellXY(self::COL_UE, $debut, $ue->ue->display(), ['wrap' => true, 'style' => 'HORIZONTAL_CENTER', 'font-weight' => false]);
                             $this->excelWriter->writeCellXY(self::COL_INTITULE_UE, $debut, $ue->ue->getLibelle(), ['wrap' => true]);
                         }
                         foreach ($ue->uesEnfants() as $uee) {
