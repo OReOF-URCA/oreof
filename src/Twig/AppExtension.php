@@ -120,9 +120,7 @@ class AppExtension extends AbstractExtension
         }
 
         if (is_string($heures)) {
-            $heures = (float)str_replace(',', '.', $heures);
-            $heures = number_format($heures, 2, ',', ' ');
-            return Tools::filtreHeures($heures);
+            return $heures;
         }
 
         return Tools::filtreHeures($heures);
