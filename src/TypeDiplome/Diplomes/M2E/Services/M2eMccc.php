@@ -174,10 +174,8 @@ class M2eMccc extends AbstractM2eMccc
                     foreach ($semestre->ues as $ue) {
                         //colonnes des BC/UE
                         $tabColUes[$ue->ue->getId()] = $colUe;
-                        $this->excelWriter->writeCellXY($colUe, 18, 'BC' . $ue->ue->getOrdre(), ['style' => 'HORIZONTAL_CENTER']);
+                        $this->excelWriter->writeCellXY($colUe, 17, 'BC' . $ue->ue->getOrdre(), ['style' => 'HORIZONTAL_CENTER']);
                         // $this->excelWriter->writeCellXY($colUe, 26, $ue->ue->getEcts(), ['style' => 'HORIZONTAL_CENTER']);
-                        $this->excelWriter->writeCellXY($colUe, 19, $ue->ue->getLibelle(), ['style' => 'HORIZONTAL_CENTER']);
-                        $this->excelWriter->mergeCellsCaR($colUe, 19, $colUe, 22);
                         $colUe++;
                     }
 
