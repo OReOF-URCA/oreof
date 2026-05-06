@@ -7,7 +7,7 @@
  * @lastUpdate 24/05/2023 16:14
  */
 
-namespace App\TypeDiplome\Diplomes\M2E\Services;
+namespace App\TypeDiplome\M2E\Services;
 
 use App\Classes\Excel\ExcelWriter;
 use App\DTO\StructureEc;
@@ -148,7 +148,6 @@ class M2eMccc extends AbstractM2eMccc
         $modele->setCellValue(self::COL_DETAIL_TYPE_EPREUVES, $texte);
 
         $index = 1;
-        $colUe = self::COL_FIRST_UE;
         foreach ($tabSemestresAnnee as $i => $semestres) {
             $clonedWorksheet = clone $modele;
             $clonedWorksheet->setTitle('Année ' . $i);
@@ -168,16 +167,34 @@ class M2eMccc extends AbstractM2eMccc
                 $this->lignesSemestre = [];
                 $this->lignesEcColorees = [];
                 $tabColUes = [];
+                $colUe = self::COL_FIRST_UE;
+
+                // Duplique la colonne UE du modele pour avoir une colonne par UE.
+                $nbUesAnnee = 0;
+                foreach ($semestres as $semestre) {
+                    $nbUesAnnee += count($semestre->ues);
+                }
+
+                if ($nbUesAnnee > 1) {
+                    $clonedWorksheet->insertNewColumnBefore(
+                        Coordinate::stringFromColumnIndex(self::COL_FIRST_UE + 1),
+                        $nbUesAnnee - 1
+                    );
+                }
                 /** @var StructureSemestre $semestre */
                 foreach ($semestres as $semestre) {
 
                     foreach ($semestre->ues as $ue) {
                         //colonnes des BC/UE
                         $tabColUes[$ue->ue->getId()] = $colUe;
-                        $this->excelWriter->writeCellXY($colUe, 17, 'BC' . $ue->ue->getOrdre(), ['style' => 'HORIZONTAL_CENTER']);
+                        $this->excelWriter->mergeCellsCaR($colUe, 15, $colUe, 16);
+                        $this->excelWriter->writeCellXY($colUe, 15, 'UE ' . $ue->ue->getOrdre(), [
+                            'style' => 'HORIZONTAL_CENTER',
+                            'valign' => 'VERTICAL_CENTER',
+                            'wrap' => true,
+                        ]);
                         $colUe++;
                     }
-                    $this->excelWriter->mergeCellsCaR(self::COL_FIRST_UE, 15, $colUe - 1, 16);
 
 
 
