@@ -177,6 +177,8 @@ class M2eMccc extends AbstractM2eMccc
                         $this->excelWriter->writeCellXY($colUe, 17, 'BC' . $ue->ue->getOrdre(), ['style' => 'HORIZONTAL_CENTER']);
                         $colUe++;
                     }
+                    $this->excelWriter->mergeCellsCaR(self::COL_FIRST_UE, 15, $colUe - 1, 16);
+
 
 
                     $totalAnnee->addSemestre($semestre->heuresEctsSemestre);
@@ -239,7 +241,7 @@ class M2eMccc extends AbstractM2eMccc
                             }
                             $this->excelWriter->writeCellXY(self::COL_UE, $debut, $ue->ue->display(), ['wrap' => true, 'style' => 'HORIZONTAL_CENTER', 'font-weight' => false]);
                             $this->excelWriter->writeCellXY(self::COL_INTITULE_UE, $debut, $ue->ue->getLibelle(), ['wrap' => true]);
-                            $this->excelWriter->writeCellXY($tabColUes[$ue->ue->getId()], $debut, $ue->ue->getEcts(), ['wrap' => true, 'style' => 'HORIZONTAL_CENTER']);
+                            $this->excelWriter->writeCellXY($tabColUes[$ue->ue->getId()], $debut, $ue->ue->getEcts(), ['wrap' => true, 'style' => 'HORIZONTAL_CENTER', 'valign' => 'VERTICAL_CENTER']);
                         }
                         foreach ($ue->uesEnfants() as $uee) {
                             $debut = $ligne;
