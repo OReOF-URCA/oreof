@@ -187,14 +187,19 @@ class M2eMccc extends AbstractM2eMccc
                     foreach ($semestre->ues as $ue) {
                         //colonnes des BC/UE
                         $tabColUes[$ue->ue->getId()] = $colUe;
-                        $this->excelWriter->mergeCellsCaR($colUe, 15, $colUe, 16);
-                        $this->excelWriter->writeCellXY($colUe, 15, 'UE ' . $ue->ue->getOrdre(), [
-                            'style' => 'HORIZONTAL_CENTER',
+
+                        $this->excelWriter->writeCellXY($colUe, 17, "BC" . $ue->ue->getOrdre(), ['style' => 'HORIZONTAL_CENTER',
                             'valign' => 'VERTICAL_CENTER',
-                            'wrap' => true,
-                        ]);
+                            'wrap' => true,]);
                         $colUe++;
                     }
+
+                    $this->excelWriter->mergeCellsCaR(self::COL_FIRST_UE, 15, $colUe - 1, 16);
+                    $this->excelWriter->writeCellXY($colUe, 15, 'Coefficients sur les BC', [
+                        'style' => 'HORIZONTAL_CENTER',
+                        'valign' => 'VERTICAL_CENTER',
+                        'wrap' => true,
+                    ]);
 
 
 
