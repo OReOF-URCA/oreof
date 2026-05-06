@@ -201,6 +201,12 @@ class M2eMccc extends AbstractM2eMccc
                                     $this->excelWriter->mergeCellsCaR(self::COL_UE, $debut, self::COL_UE, $ligne - 1);
                                     $this->excelWriter->mergeCellsCaR(self::COL_INTITULE_UE, $debut, self::COL_INTITULE_UE, $ligne - 1);
 
+                                    //boucle sur les UE
+                                    foreach ($tabColUes as $col => $ueCol) {
+                                        $this->excelWriter->mergeCellsCaR($ueCol, $debut, $ueCol, $ligne - 1);
+                                    }
+
+
                                     // bordure fine
 
                                     $this->excelWriter->borderOutsiteInside(self::COL_UE, $debut, self::COL_INTITULE_UE, $ligne - 1);
@@ -234,6 +240,7 @@ class M2eMccc extends AbstractM2eMccc
                             }
                             $this->excelWriter->writeCellXY(self::COL_UE, $debut, $ue->ue->display(), ['wrap' => true, 'style' => 'HORIZONTAL_CENTER', 'font-weight' => false]);
                             $this->excelWriter->writeCellXY(self::COL_INTITULE_UE, $debut, $ue->ue->getLibelle(), ['wrap' => true]);
+                            $this->excelWriter->writeCellXY($tabColUes[$ue->ue->getId()], $debut, $ue->ue->getEcts(), ['wrap' => true]);
                         }
                         foreach ($ue->uesEnfants() as $uee) {
                             $debut = $ligne;
