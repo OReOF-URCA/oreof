@@ -148,7 +148,7 @@ class M2eMccc extends AbstractM2eMccc
         $modele->setCellValue(self::COL_DETAIL_TYPE_EPREUVES, $texte);
 
         $index = 1;
-
+        $colUe = self::COL_FIRST_UE;
         foreach ($tabSemestresAnnee as $i => $semestres) {
             $clonedWorksheet = clone $modele;
             $clonedWorksheet->setTitle('Année ' . $i);
@@ -167,8 +167,21 @@ class M2eMccc extends AbstractM2eMccc
                 $this->excelWriter->writeCellName(self::CEL_ANNEE_ETUDE, Tools::adjNumeral($i) . ' année');
                 $this->lignesSemestre = [];
                 $this->lignesEcColorees = [];
+                $tabColUes = [];
                 /** @var StructureSemestre $semestre */
                 foreach ($semestres as $semestre) {
+
+                    foreach ($semestre->ues as $ue) {
+                        //colonnes des BC/UE
+                        $tabColUes[$ue->ue->getId()] = $colUe;
+                        $this->excelWriter->writeCellXY($colUe, 18, 'BC' . $ue->ue->getOrdre(), ['style' => 'HORIZONTAL_CENTER']);
+                        // $this->excelWriter->writeCellXY($colUe, 26, $ue->ue->getEcts(), ['style' => 'HORIZONTAL_CENTER']);
+                        $this->excelWriter->writeCellXY($colUe, 19, $ue->ue->getLibelle(), ['style' => 'HORIZONTAL_CENTER']);
+                        $this->excelWriter->mergeCellsCaR($colUe, 19, $colUe, 22);
+                        $colUe++;
+                    }
+
+
                     $totalAnnee->addSemestre($semestre->heuresEctsSemestre);
                     $totalEcts += $semestre->heuresEctsSemestre->sommeSemestreEcts;
                     foreach ($semestre->ues as $ue) { //todo: changement ici avec modif du DTO ? un impact ?

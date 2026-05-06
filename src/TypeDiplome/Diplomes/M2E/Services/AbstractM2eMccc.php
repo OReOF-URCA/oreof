@@ -71,6 +71,7 @@ class AbstractM2eMccc
     public const COL_MCCC_SECONDE_CHANCE_CC_AVEC_TP = 25;
     public const COL_MCCC_SECONDE_CHANCE_CC_SUP_10 = 26;
     public const COL_MCCC_SECONDE_CHANCE_CT = 27;
+    public const COL_FIRST_UE = 28;
 
     public const COL_DETAIL_TYPE_EPREUVES = "A28";
 
