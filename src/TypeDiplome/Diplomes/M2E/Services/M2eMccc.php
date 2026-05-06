@@ -175,7 +175,6 @@ class M2eMccc extends AbstractM2eMccc
                         //colonnes des BC/UE
                         $tabColUes[$ue->ue->getId()] = $colUe;
                         $this->excelWriter->writeCellXY($colUe, 17, 'BC' . $ue->ue->getOrdre(), ['style' => 'HORIZONTAL_CENTER']);
-                        // $this->excelWriter->writeCellXY($colUe, 26, $ue->ue->getEcts(), ['style' => 'HORIZONTAL_CENTER']);
                         $colUe++;
                     }
 
@@ -240,7 +239,7 @@ class M2eMccc extends AbstractM2eMccc
                             }
                             $this->excelWriter->writeCellXY(self::COL_UE, $debut, $ue->ue->display(), ['wrap' => true, 'style' => 'HORIZONTAL_CENTER', 'font-weight' => false]);
                             $this->excelWriter->writeCellXY(self::COL_INTITULE_UE, $debut, $ue->ue->getLibelle(), ['wrap' => true]);
-                            $this->excelWriter->writeCellXY($tabColUes[$ue->ue->getId()], $debut, $ue->ue->getEcts(), ['wrap' => true]);
+                            $this->excelWriter->writeCellXY($tabColUes[$ue->ue->getId()], $debut, $ue->ue->getEcts(), ['wrap' => true, 'style' => 'HORIZONTAL_CENTER']);
                         }
                         foreach ($ue->uesEnfants() as $uee) {
                             $debut = $ligne;
