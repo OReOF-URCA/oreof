@@ -34,7 +34,7 @@ class ButNiveau
     #[ORM\OrderBy(['code' => 'ASC'])]
     private Collection $butApprentissageCritiques;
  
-    #[ORM\ManyToOne(inversedBy: 'butNiveaux')]
+    #[ORM\OneToOne(inversedBy: 'butNiveaux')]
     private ?ButCompetence $competence = null;
 
     #[ORM\ManyToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]

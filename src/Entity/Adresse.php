@@ -38,7 +38,7 @@ class Adresse
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $ville = null;
 
-    #[ORM\ManyToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $adresseOrigineCopie = null;
 
     public function __toString(): string

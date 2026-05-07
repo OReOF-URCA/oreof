@@ -36,7 +36,7 @@ class Annee
     #[ORM\Column]
     private ?bool $isOuvert = true;
 
-    #[ORM\ManyToOne(inversedBy: 'anneeCopieAnneeUniversitaire', targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'anneeCopieAnneeUniversitaire', targetEntity: self::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: true)]
     private ?self $anneeOrigineCopie = null;
 

@@ -67,7 +67,7 @@ class Semestre
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $codeApogee = null;
 
-    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\OneToOne(targetEntity: self::class)]
     private ?self $semestreOrigineCopie = null;
 
     #[ORM\Column]

@@ -81,7 +81,7 @@ class Ue
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $codeApogee = null;
 
-    #[ORM\ManyToOne(targetEntity: self::class)]
+    #[ORM\OneToOne(targetEntity: self::class)]
     private ?self $ueOrigineCopie = null;
 
     private ?int $deserializedId = null;

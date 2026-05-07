@@ -45,7 +45,7 @@ class ButCompetence
     #[ORM\OrderBy(['ordre' => 'ASC'])]
     private Collection $butNiveaux;
 
-    #[ORM\ManyToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $butCompetenceOrigineCopie = null;
 
     #[ORM\ManyToOne(inversedBy: 'butCompetences')]
