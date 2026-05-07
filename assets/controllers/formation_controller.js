@@ -63,6 +63,12 @@ export default class extends Controller {
         }
     }
 
+    changeMentionTexte(event) {
+        if (event.target.value.trim() !== '') {
+            document.getElementById('formation_ses_mention').value = 'autre'
+        }
+    }
+
     // async _updateListePersonnel(composante) {
     //   await fetch(`${this.urlListePersonnelValue}?composante=${composante}`).then((response) => response.json()).then(
     //     (data) => {
