@@ -21,10 +21,17 @@ export default class extends Controller {
             return
         }
 
-        const data = new FormData()
-        for (const file of files) {
-            data.append('logo[]', file)
+        const existingLogo = this.element.querySelector('turbo-frame img')
+        if (existingLogo && !confirm('Un logo existe déjà. Voulez-vous le remplacer ?')) {
+            this.fileInputTarget.value = ''
+            return
         }
+
+        const data = new FormData()
+        data.append('logo[]', files[0]) // Only one logo for type diplome
+
+        const fileInput = this.fileInputTarget
+        fileInput.value = ''
 
         try {
             const response = await fetch(this.uploadLogoUrlValue, {
@@ -36,7 +43,6 @@ export default class extends Controller {
 
             if (json.success) {
                 await this._refreshLogos()
-                this.fileInputTarget.value = ''
                 const errContainer = this.element.querySelector('#logo-upload-errors')
                 if (errContainer) errContainer.innerHTML = ''
             } else {
@@ -46,7 +52,6 @@ export default class extends Controller {
             console.error('Upload failed:', err)
         }
     }
-
 
     async deleteLogo(event) {
         event.preventDefault()
@@ -80,10 +85,7 @@ export default class extends Controller {
 
     async _refreshLogos() {
         const frame = this.element.querySelector('turbo-frame')
-        if (!frame) {
-            console.error('Turbo frame not found')
-            return
-        }
+        if (!frame) return
         frame.src = ''
         frame.src = this.logosUrlValue
     }

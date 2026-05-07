@@ -59,13 +59,40 @@
 
                 <div class="col-12">{{ form_row(form.coResponsable) }}</div>
 
-                <div class="col-12">
-                    {{ include('formation/_logos.html.twig', {formation: formation, editable: true}) }}
-                    {{ form_row(form.logo) }}
+                <div class="col-12 mt-3">
+                        <div {{ stimulus_controller('logos', {
+                            logosUrl: path('app_formation_logos', {slug: formation.slug, editable: true}),
+                            deleteLogoUrl: path('app_formation_delete_logo', {slug: formation.slug}),
+                            uploadLogoUrl: path('app_formation_upload_logo', {slug: formation.slug}),
+                        }) }}>
+                            <turbo-frame id="logos-container">
+                                {{ include('formation/_logos.html.twig', {formation: formation, editable: true}) }}
+                            </turbo-frame>
+                            <div class="mt-3">
+                                    <div id="logo-upload-area">
+                                        <input
+                                                type="file"
+                                                name="logo[]"
+                                                accept="image/png, image/jpeg"
+                                                class="form-control"
+                                                multiple
+                                                {{ stimulus_target('logos', 'fileInput') }}
+                                        >
+                                        <button type="button"
+                                                class="btn btn-primary mt-2"
+                                                data-action="click->logos#uploadLogo">
+                                            Confirmer l'envoi du/des logo(s)
+                                        </button>
+                                        <div id="logo-upload-errors" class="mt-2"></div>
+                                    </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <button class="btn btn-success">
+            <button class="btn btn-success mt-3">
                 <i class="fal fa-floppy-disk"></i>
                 Modifier
             </button>

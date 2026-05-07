@@ -70,7 +70,7 @@ class ParcoursController extends BaseController
     public function __construct(
         private WorkflowInterface $dpeParcoursWorkflow,
         private readonly EntityManagerInterface $entityManager,
-        private readonly \App\Service\SecureUploadService $secureUploadService
+        private readonly \App\Service\SecureUploadService $secureUploadService,
     ) {
     }
 

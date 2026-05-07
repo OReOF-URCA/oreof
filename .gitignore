@@ -107,3 +107,14 @@ migrations/Version*.php
 assets/icons/symfony.svg
 config/reference.php
 /*.png
+
+
+### exclude logos ###
+/public/uploads/logos/
+
+###> liip/imagine-bundle ###
+/public/media/cache/
+###< liip/imagine-bundle ###
+
+###Le token FontAwesome ###
+.npmrc

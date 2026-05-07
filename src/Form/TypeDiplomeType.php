@@ -16,6 +16,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class TypeDiplomeType extends AbstractType
 {
@@ -96,7 +97,15 @@ class TypeDiplomeType extends AbstractType
             ->add('hasProjet', YesNoType::class)
             ->add('ectsObligatoireSurEc', YesNoType::class, ['empty_data' => true])
             ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true])
-            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
+            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
+            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
+            ->add('logo', FileType::class, [
+                'label' => 'Logo',
+                'multiple' => false,
+                'required' => false,
+                'mapped' => false,
+                'attr' => ['accept' => 'image/png, image/jpeg'],
+            ]);
 
         // Pré-remplir les plateformes déjà associées avec leurs années
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
@@ -138,6 +147,7 @@ class TypeDiplomeType extends AbstractType
                 ],
             ]);
         });
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void

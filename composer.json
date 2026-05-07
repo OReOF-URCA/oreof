@@ -28,6 +28,7 @@
     "psr/http-client": "*",
     "scienta/doctrine-json-functions": "^6.5.0",
     "sensiolabs/gotenberg-bundle": "*",
+    "liip/imagine-bundle": "^2.15",
     "stof/doctrine-extensions-bundle": "*",
     "swaggest/json-diff": "*",
     "symfony/console": "8.0.*",

@@ -40,6 +40,7 @@ use App\Service\VersioningParcours;
 use App\Service\SecureUploadService;
 use App\Utils\Access;
 use App\Utils\JsonRequest;
+use App\Exception\FileUploadException;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -251,43 +252,46 @@ class FormationController extends BaseController
         $formation = new Formation($this->getCampagneCollecte());
         $form = $this->createForm(FormationSesType::class, $formation, [
             'action' => $this->generateUrl('app_formation_new'),
+            'with_logo' => true,
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             if (array_key_exists(
-                'mention',
-                $request->request->all()['formation_ses']
-            ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre') {
+                    'mention',
+                    $request->request->all()['formation_ses']
+                ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre') {
                 $mention = $mentionRepository->find($request->request->all()['formation_ses']['mention']);
                 $formation->setMentionTexte(null);
                 $formation->setMention($mention);
             }
 
-            $logoFiles = $form->get('logo')->getData();
-            if ($logoFiles) {
-                $hasFormatError = false;
-                $hasSizeError = false;
+            $logoData = $form->get('logo')->getData();
+            $hasLogoError = false;
+
+            if ($logoData) {
+                $logoFiles = is_array($logoData) ? $logoData : [$logoData];
 
                 foreach ($logoFiles as $logoFile) {
                     try {
                         $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
-                        $formation->addLogo($uploaded->getStoredFilename()); // $parcours->addLogo() in ParcoursController
+                        $formation->addLogo($uploaded->getStoredFilename());
                     } catch (FileUploadException $e) {
+                        $hasLogoError = true;
                         if (str_contains($e->getMessage(), 'volumineux')) {
-                            $hasSizeError = true;
+                            $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) est/sont trop lourd(s) (10 Mo max)');
                         } else {
-                            $hasFormatError = true;
+                            $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) n\'est/ne sont pas au bon format (PNG/JPEG/JPG uniquement)');
                         }
                     }
                 }
+            }
 
-                if ($hasSizeError) {
-                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) est/sont trop lourd(s) (10 Mo max)');
-                }
-                if ($hasFormatError) {
-                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) n\'est/ne sont pas au bon format (PNG/JPEG/JPG uniquement)');
-                }
+            if ($hasLogoError) {
+                return $this->render('formation/new.html.twig', [
+                    'formation' => $formation,
+                    'form' => $form->createView()
+                ]);
             }
 
             $formation->addComposantesInscription($formation->getComposantePorteuse());
@@ -412,30 +416,6 @@ class FormationController extends BaseController
                 // ajouter le nouveau resp, ajouter centre et droits et envoyer mail
                 $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][1], $profil, $this->getCampagneCollecte());
                 $eventDispatcher->dispatch($event, AddCentreFormationEvent::ADD_CENTRE_FORMATION);
-            }
-
-            $logoFiles = $form->get('logo')->getData();
-            if ($logoFiles) {
-                $hasFormatError = false;
-                $hasSizeError = false;
-                foreach ($logoFiles as $logoFile) {
-                    try {
-                        $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
-                        $formation->addLogo($uploaded->getStoredFilename());
-                    } catch (FileUploadException $e) {
-                        if (str_contains($e->getMessage(), 'volumineux')) {
-                            $hasSizeError = true;
-                        } else {
-                            $hasFormatError = true;
-                        }
-                    }
-                }
-                if ($hasSizeError) {
-                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) est/sont trop lourd(s) (10 Mo max)');
-                }
-                if ($hasFormatError) {
-                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) n\'est/ne sont pas au bon format (PNG/JPEG/JPG uniquement)');
-                }
             }
 
             $formationRepository->save($formation, true);
