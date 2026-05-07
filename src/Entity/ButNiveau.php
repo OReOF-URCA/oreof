@@ -34,10 +34,10 @@ class ButNiveau
     #[ORM\OrderBy(['code' => 'ASC'])]
     private Collection $butApprentissageCritiques;
  
-    #[ORM\OneToOne(inversedBy: 'butNiveaux')]
+    #[ORM\ManyToOne(inversedBy: 'butNiveaux')]
     private ?ButCompetence $competence = null;
 
-    #[ORM\ManyToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $butNiveauOrigineCopie = null;
 
     public function __construct()
