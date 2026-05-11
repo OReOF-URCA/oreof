@@ -11,6 +11,7 @@
                     url: path('app_formation_save', {formation: formation.slug}),
                     logosUrl: path('app_formation_logos', {slug: formation.slug, editable: true}),
                     deleteLogoUrl: path('app_formation_delete_logo', {slug: formation.slug}),
+                    uploadLogoUrl: path('app_formation_upload_logo', {slug: formation.slug}),
                 }) }}>
             <h5 class="card-title">Logos de la formation</h5>
             <turbo-frame id="logos-container">
@@ -21,7 +22,8 @@
                       action="{{ path('app_formation_upload_logo', {slug: formation.slug}) }}"
                       method="POST"
                       enctype="multipart/form-data">
-                    <input type="file" name="logo[]" accept="image/png, image/jpeg" class="form-control" multiple>
+                    <input type="file" name="logo[]" accept="image/png, image/jpeg" class="form-control" multiple
+                           data-logos-target="fileInput">
                     <button type="button"
                             class="btn btn-primary mt-2"
                             data-action="click->logos#uploadLogo">
