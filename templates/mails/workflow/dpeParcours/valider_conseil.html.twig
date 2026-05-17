@@ -11,7 +11,7 @@
     {% endif %}
     </p>
 
-    {% if historique != null %}
+    {% if historique is defined and historique != null %}
         {# tester si PV ou laisser passer et indiquer? #}
         {% if historique.complements.laisserPasser is defined %}
             <p><strong>Demande de laissez-passer.</strong></p>
