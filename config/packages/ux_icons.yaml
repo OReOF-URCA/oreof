@@ -30,6 +30,8 @@ ux_icons:
     icon:chevron-down: 'ph:caret-down-light'
     icon:chevron-up: 'ph:caret-up-light'
     icon:ellipsis-vertical: 'ph:dots-three-vertical-light'
+    icon:ellipsis: 'ph:dots-three-vertical-bold'
+    icon:more-vertical: 'ph:dots-three-vertical-bold'
 
     # Actions
     icon:save: 'ph:floppy-disk-light'
@@ -68,6 +70,10 @@ ux_icons:
     icon:phone: 'ph:phone-light'
     icon:mail: 'ph:envelope-light'
     icon:link: 'ph:link-light'
+    icon:login: 'ph:door-open-bold'
+    icon:document: 'ph:file-light'
+    icon:document-copy: 'ph:copy-bold'
+    icon:pencil: 'ph:pencil-light'
 
     # Métier / navigation ORéOF
     icon:school: 'ph:student-light'

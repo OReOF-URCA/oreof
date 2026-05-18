@@ -1,21 +1,20 @@
 {% set blockId = 'stats-block-' ~ random() %}
-<div class="row gy-2">
-    {#    <div class="card-header"> #}
-    {#        {% if collapsible %} #}
-    {#            <button type="button" onclick="document.getElementById('{{ blockId }}').classList.toggle('d-none')"> #}
-    {#                Masquer / Afficher #}
-    {#            </button> #}
-    {#        {% endif %} #}
-    {#    </div> #}
-    {% for chart in charts %}
-        <div class="col-sm-3">
-            <div class="card card-body">
-                <div id="{{ blockId }}" class="row">
-                    <h3>{{ titles[loop.index0] }}</h3>
-                    {{ render_chart(chart) }}
-                </div>
+{% if charts|length > 0 %}
+    <div class="row gy-2">
+        {% for chart in charts %}
+            <div class="col-sm-3">
+                <div class="card card-body">
+                    <div id="{{ blockId }}" class="row">
+                        <h3>{{ titles[loop.index0] }}</h3>
+                        {{ render_chart(chart) }}
+                    </div>
 
+                </div>
             </div>
-        </div>
-    {% endfor %}
-</div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+        Aucun graphique n’est disponible pour le moment.
+    </div>
+{% endif %}

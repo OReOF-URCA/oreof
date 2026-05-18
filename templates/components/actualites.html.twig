@@ -1,13 +1,17 @@
 {% if this.actualites|length > 0 %}
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="alert alert-info">
-            {% for actualite in this.actualites %}
-                <p class="mb-2">
-                    <strong>{{ actualite.datePublication|date('d/m/Y H:i') }} | {{ actualite.titre }}</strong>. {{ actualite.texte|striptags|slice(0, 100) }}...
-                </p>
-            {% endfor %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                {% for actualite in this.actualites %}
+                    <p class="mb-2">
+                        <strong>{{ actualite.datePublication|date('d/m/Y H:i') }} | {{ actualite.titre }}</strong>. {{ actualite.texte|striptags|slice(0, 100) }}...
+                    </p>
+                {% endfor %}
+            </div>
         </div>
     </div>
-</div>
+{% else %}
+    <div class="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+        Aucune actualité n’est publiée pour le moment.
+    </div>
 {% endif %}

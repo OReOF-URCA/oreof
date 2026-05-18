@@ -1,0 +1,201 @@
+<div class="relative inline-block text-left overflow-visible"
+     data-controller="dropdown"
+     {% if id %}id="{{ id }}"{% endif %}
+>
+    <button
+            type="button"
+            class="inline-flex items-center justify-center rounded-sm bg-slate-100 p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-300
+               focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            aria-haspopup="true"
+            aria-expanded="false"
+            data-action="click->dropdown#toggle"
+            data-dropdown-target="button"
+            {% if help != '' %}
+                data-bs-toggle="tooltip"
+                data-bs-placement="bottom"
+                title="{{ help }}"
+            {% endif %}
+
+    >
+        <twig:UX:Icon :name="icon" class="inline-block h-4 w-4 shrink-0"/>
+        <span class="{% if labelSrOnly %}sr-only{% endif %}">{{ label }}</span>
+    </button>
+
+    <div
+            class="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 hidden"
+            role="menu"
+            data-dropdown-target="menu"
+    >
+        <div class="py-1" role="none">
+            {% for item in items %}
+                {% set danger = item.danger ?? false %}
+                {% set disabled = item.disabled ?? false %}
+                {% set method = item.method ?? 'GET' %}
+                {% set turboFrame = item.turboFrame ?? null %}
+                {% set hasConfirm = item.confirm is defined %}
+                {% set modal = item.modal is defined and item.modal == true %}
+                {% set color = item.color is defined ? item.color : 'slate' %}
+                {% set itemHelp = item.help is defined ? item.help : '' %}
+                {% if modal %}
+                    {% if disabled and itemHelp != '' %}
+                        <span class="inline-block"
+                              data-controller="tooltip"
+                              data-tooltip-placement-value="bottom"
+                              title="{{ itemHelp }}">
+                            <a
+                                    class="flex items-center gap-2 px-4 py-2 text-sm
+                                       {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-'~color~'-700 hover:bg-'~color~'-100' }}
+                                       opacity-50 pointer-events-none"
+                                    role="menuitem"
+                                    disabled
+                                    href="{{ item.url }}"
+                                    data-turbo="true"
+                                    data-action="click->modalturbo#open"
+                            >
+                                {% if item.icon is defined %}
+                                    <twig:UX:Icon :name="item.icon" class="inline-block h-4 w-4 shrink-0"/>{% endif %}
+                                {{ item.label }}
+                            </a>
+                        </span>
+                    {% else %}
+                        <a
+                                class="flex items-center gap-2 px-4 py-2 text-sm
+                                   {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-'~color~'-700 hover:bg-'~color~'-100' }}
+                                   {{ disabled ? 'opacity-50 pointer-events-none' : '' }}"
+                                role="menuitem"
+                                {% if disabled %}disabled{% endif %}
+                                href="{{ item.url }}"
+                                data-turbo="true"
+                                data-action="click->modalturbo#open"
+                                {% if itemHelp != '' and not disabled %}
+                                    data-controller="tooltip"
+                                    data-tooltip-placement-value="bottom"
+                                    title="{{ itemHelp }}"
+                                {% endif %}
+                        >
+                            {% if item.icon is defined %}
+                                <twig:UX:Icon :name="item.icon" class="inline-block h-4 w-4 shrink-0"/>{% endif %}
+                            {{ item.label }}
+                        </a>
+                    {% endif %}
+
+                {% else %}
+                {% if method == 'GET' %}
+                    {% if disabled and itemHelp != '' %}
+                        <span class="inline-block"
+                              data-controller="tooltip"
+                              data-tooltip-placement-value="bottom"
+                              title="{{ itemHelp }}">
+                            <a
+                                    href="{{ item.url ?? '#' }}"
+                                    class="flex items-center gap-2 px-4 py-2 text-sm
+                                       {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-'~color~'-700 hover:bg-'~color~'-100' }}
+                                       opacity-50 pointer-events-none"
+                                    role="menuitem"
+                                    disabled
+                                    {% if turboFrame != null %}data-turbo-frame="{{ turboFrame }}"{% endif %}
+                                    {% if hasConfirm %}data-action="click->dropdown#confirm" data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
+                            >
+                                {% if item.icon is defined %}
+                                    <twig:UX:Icon :name="item.icon" class="inline-block h-4 w-4 shrink-0"/>{% endif %}
+                                {{ item.label }}
+                            </a>
+                        </span>
+                    {% else %}
+                        <a
+                                href="{{ item.url ?? '#' }}"
+                                class="flex items-center gap-2 px-4 py-2 text-sm
+                                   {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-'~color~'-700 hover:bg-'~color~'-100' }}
+                                   {{ disabled ? 'opacity-50 pointer-events-none' : '' }}"
+                                role="menuitem"
+                                {% if disabled %}disabled{% endif %}
+                                {% if turboFrame != null %}data-turbo-frame="{{ turboFrame }}"{% endif %}
+                                {% if hasConfirm %}data-action="click->dropdown#confirm" data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
+                                {% if itemHelp != '' and not disabled %}
+                                    data-controller="tooltip"
+                                    data-tooltip-placement-value="bottom"
+                                    title="{{ itemHelp }}"
+                                {% endif %}
+                        >
+                            {% if item.icon is defined %}
+                                <twig:UX:Icon :name="item.icon" class="inline-block h-4 w-4 shrink-0"/>{% endif %}
+                            {{ item.label }}
+                        </a>
+                    {% endif %}
+                {% else %}
+                    {# Actions non-GET : petit form pour respecter HTTP + CSRF si besoin #}
+                    {% if disabled and itemHelp != '' %}
+                        <span class="inline-block"
+                              data-controller="tooltip"
+                              data-tooltip-placement-value="bottom"
+                              title="{{ itemHelp }}">
+                            <form method="post"
+                                  action="{{ item.url ?? '#' }}"
+                                  class="block"
+                                  {% if hasConfirm %}data-action="submit->dropdown#confirm"
+                                  data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
+                            >
+                                {% if item.csrf is defined %}
+                                    <input type="hidden" name="csrf_token" value="{{ item.csrf }}">
+                                {% endif %}
+                                {# Si tu veux : _method pour DELETE/PUT #}
+                                {% if method != 'POST' %}
+                                    <input type="hidden" name="_method" value="{{ method }}">
+                                {% endif %}
+
+                                <button
+                                        type="submit"
+                                        disabled
+                                        class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm
+                                           {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-100' }}
+                                           opacity-50 pointer-events-none"
+                                        role="menuitem"
+                                >
+                                    {% if item.icon is defined %}
+                                        <twig:UX:Icon :name="item.icon"
+                                                      class="inline-block h-4 w-4 shrink-0"/>{% endif %}
+                                    {{ item.label }}
+                                </button>
+                            </form>
+                        </span>
+                    {% else %}
+                        <form method="post"
+                              action="{{ item.url ?? '#' }}"
+                              class="block"
+                              {% if hasConfirm %}data-action="submit->dropdown#confirm"
+                              data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
+                        >
+                            {% if item.csrf is defined %}
+                                <input type="hidden" name="csrf_token" value="{{ item.csrf }}">
+                            {% endif %}
+                            {# Si tu veux : _method pour DELETE/PUT #}
+                            {% if method != 'POST' %}
+                                <input type="hidden" name="_method" value="{{ method }}">
+                            {% endif %}
+
+                            <button
+                                    type="submit"
+                                    {% if disabled %}disabled{% endif %}
+                                    class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm
+                                       {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-100' }}
+                                       {{ disabled ? 'opacity-50 pointer-events-none' : '' }}"
+                                    role="menuitem"
+                                    {% if itemHelp != '' and not disabled %}
+                                        data-controller="tooltip"
+                                        data-tooltip-placement-value="bottom"
+                                        title="{{ itemHelp }}"
+                                    {% endif %}
+                            >
+                                {% if item.icon is defined %}
+                                    <twig:UX:Icon :name="item.icon" class="inline-block h-4 w-4 shrink-0"/>{% endif %}
+                                {{ item.label }}
+                            </button>
+                        </form>
+                    {% endif %}
+                {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+

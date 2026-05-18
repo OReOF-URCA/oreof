@@ -1,0 +1,470 @@
+{% if parcours.isParcoursDefaut == true %}
+    {% set prefix = 'formation' %}
+{% else %}
+    {% set prefix = 'parcours' %}
+{% endif %}
+
+{% set metaLabelClass = 'mb-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500' %}
+{% set metaValueClass = 'text-sm font-medium text-slate-700 dark:text-slate-200' %}
+{% set emptyBadgeClass = 'inline-flex items-center rounded-full bg-rose-100 px-2 py-1 text-xs font-semibold text-rose-700 dark:bg-rose-500/15 dark:text-rose-300' %}
+{% set quickBtnBase = 'inline-flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2' %}
+{% set quickBtnSecondary = quickBtnBase ~ ' border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 focus-visible:ring-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:bg-slate-700 dark:hover:text-white dark:focus-visible:ring-slate-500 dark:focus-visible:ring-offset-slate-900' %}
+{% set quickBtnInfo = quickBtnBase ~ ' border-cyan-300 bg-cyan-50 text-cyan-700 hover:border-cyan-400 hover:bg-cyan-100 focus-visible:ring-cyan-400 dark:border-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300 dark:hover:border-cyan-600 dark:hover:bg-cyan-500/20 dark:focus-visible:ring-cyan-500 dark:focus-visible:ring-offset-slate-900' %}
+{% set quickBtnWarning = quickBtnBase ~ ' border-amber-300 bg-amber-50 text-amber-700 hover:border-amber-400 hover:bg-amber-100 focus-visible:ring-amber-400 dark:border-amber-700 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:border-amber-600 dark:hover:bg-amber-500/20 dark:focus-visible:ring-amber-500 dark:focus-visible:ring-offset-slate-900' %}
+{% set quickBtnPrimary = quickBtnBase ~ ' border-indigo-300 bg-indigo-50 text-indigo-700 hover:border-indigo-400 hover:bg-indigo-100 focus-visible:ring-indigo-400 dark:border-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300 dark:hover:border-indigo-600 dark:hover:bg-indigo-500/20 dark:focus-visible:ring-indigo-500 dark:focus-visible:ring-offset-slate-900' %}
+{% set quickBtnSuccess = quickBtnBase ~ ' border-emerald-300 bg-emerald-50 text-emerald-700 hover:border-emerald-400 hover:bg-emerald-100 focus-visible:ring-emerald-400 dark:border-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:border-emerald-600 dark:hover:bg-emerald-500/20 dark:focus-visible:ring-emerald-500 dark:focus-visible:ring-offset-slate-900' %}
+{% set quickBtnDanger = quickBtnBase ~ ' border-rose-300 bg-rose-50 text-rose-700 hover:border-rose-400 hover:bg-rose-100 focus-visible:ring-rose-400 dark:border-rose-700 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:border-rose-600 dark:hover:bg-rose-500/20 dark:focus-visible:ring-rose-500 dark:focus-visible:ring-offset-slate-900' %}
+{% set panelClass = 'mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hidden dark:border-slate-700 dark:bg-slate-900' %}
+{% set panelGridClass = 'grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4' %}
+{% set dpeItemStyles = {
+    'success': {
+        badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+        title: 'text-emerald-800 dark:text-emerald-200',
+        hover: 'hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
+    },
+    'warning': {
+        badge: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+        title: 'text-amber-800 dark:text-amber-200',
+        hover: 'hover:bg-amber-50 dark:hover:bg-amber-500/10'
+    },
+    'danger': {
+        badge: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',
+        title: 'text-rose-800 dark:text-rose-200',
+        hover: 'hover:bg-rose-50 dark:hover:bg-rose-500/10'
+    },
+    'info': {
+        badge: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',
+        title: 'text-cyan-800 dark:text-cyan-200',
+        hover: 'hover:bg-cyan-50 dark:hover:bg-cyan-500/10'
+    },
+    'secondary': {
+        badge: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200',
+        title: 'text-slate-800 dark:text-slate-100',
+        hover: 'hover:bg-slate-50 dark:hover:bg-slate-800'
+    }
+} %}
+{% set statusBadgeMap = {
+    'completed': {
+        bubble: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+        line: 'bg-emerald-200 dark:bg-emerald-500/30',
+        icon: 'icon:check',
+        date: 'text-emerald-700 dark:text-emerald-300'
+    },
+    'active': {
+        bubble: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300',
+        line: 'bg-cyan-200 dark:bg-cyan-500/30',
+        icon: 'icon:clock',
+        date: 'text-cyan-700 dark:text-cyan-300'
+    },
+    'reserved': {
+        bubble: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300',
+        line: 'bg-amber-200 dark:bg-amber-500/30',
+        icon: 'icon:warning',
+        date: 'text-amber-700 dark:text-amber-300'
+    },
+    'refused': {
+        bubble: 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300',
+        line: 'bg-rose-200 dark:bg-rose-500/30',
+        icon: 'icon:danger',
+        date: 'text-rose-700 dark:text-rose-300'
+    },
+    'pending': {
+        bubble: 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500',
+        line: 'bg-slate-200 dark:bg-slate-700',
+        icon: 'icon:question',
+        date: 'text-slate-400 dark:text-slate-500'
+    }
+} %}
+
+<div {{ attributes }}
+        class="mb-4 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <div class="space-y-4 p-4 sm:p-5">
+        <section
+                class="rounded-2xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/50">
+            <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
+                <div>
+                    <dt class="{{ metaLabelClass }}">Domaine</dt>
+                    <dd class="{{ metaValueClass }}">
+                        {% for domaine in this.formation.domaines %}
+                            {{ domaine.libelle }}{% if not loop.last %}, {% endif %}
+                        {% else %}
+                            <span class="{{ emptyBadgeClass }}">Non défini</span>
+                        {% endfor %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="{{ metaLabelClass }}">Type de diplôme</dt>
+                    <dd class="{{ metaValueClass }}">{{ formation.typeDiplome|typeDiplome }}</dd>
+                </div>
+                <div>
+                    <dt class="{{ metaLabelClass }}">Composante</dt>
+                    <dd class="{{ metaValueClass }}">
+                        {% if formation.composantePorteuse != null %}
+                            {{ formation.composantePorteuse.libelle }}
+                        {% else %}
+                            <span class="{{ emptyBadgeClass }}">Non définie</span>
+                        {% endif %}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="{{ metaLabelClass }}">Mention</dt>
+                    <dd class="{{ metaValueClass }}">{{ formation.display }}</dd>
+                </div>
+                <div>
+                    <dt class="{{ metaLabelClass }}">Responsable mention</dt>
+                    <dd class="{{ metaValueClass }}">{{ formation.responsableMention != null ? formation.responsableMention.display : 'Non défini' }}</dd>
+                </div>
+                <div>
+                    <dt class="{{ metaLabelClass }}">Responsable parcours</dt>
+                    <dd class="{{ metaValueClass }} flex flex-wrap items-center gap-2">
+                        <span>{{ parcours.respParcours != null ? parcours.respParcours.display : 'Non défini' }}</span>
+                        {% if parcours.coResponsable != null %}
+                            <span class="inline-flex items-center gap-1 rounded-full bg-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                                  {{ stimulus_controller('tooltip') }}
+                                  title="Co-responsable : {{ parcours.coResponsable.display }}">
+                                {{ ux_icon('icon:users', {class: 'h-3.5 w-3.5'}) }}
+                                Co-responsable
+                            </span>
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+
+            <div class="mt-4 border-t border-slate-200 pt-4 dark:border-slate-700">
+                <p class="{{ metaLabelClass }}">Dates de validation</p>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    {% for key, process in this.process %}
+                        {% if process.isTimeline %}
+                            {% set completed = this.status(key) == 'completed' %}
+                            <div class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full {{ completed ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500' }}">
+                                        {{ ux_icon(completed ? 'icon:check-circle' : 'icon:clock', {class: 'h-4 w-4'}) }}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-semibold text-slate-700 dark:text-slate-200">{{ (process.label~'.timeline')|trans({}, 'process') }}</p>
+                                        <p class="text-xs {{ completed ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-400 dark:text-slate-500' }}">{{ this.dateHistorique(key) }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <section class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            <div class="flex items-center gap-3 rounded-2xl border px-4 py-3 shadow-sm {{ hasDemande ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800/70 dark:bg-emerald-500/10 dark:text-emerald-300' : 'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800/70 dark:bg-amber-500/10 dark:text-amber-300' }}">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full {{ hasDemande ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300' }}"
+                        {{ stimulus_controller('tooltip') }}
+                     data-bs-title="{{ hasDemande ? 'Parcours en cours de modification.' : 'Parcours verrouillé.' }}">
+                    {{ ux_icon(hasDemande ? 'icon:unlock' : 'icon:lock', {class: 'h-4 w-4'}) }}
+                </div>
+                <div>
+                    <p class="text-sm font-semibold">{{ hasDemande ? 'Parcours en cours de modification.' : 'Parcours verrouillé.' }}</p>
+                    <p class="text-xs opacity-80">Suivez l'avancement et les actions disponibles pour ce DPE.</p>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-800/70">
+                <p class="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+                    Avancement du process</p>
+                <div class="flex flex-wrap items-center justify-center gap-2">
+                    {% for key, step in processSteps %}
+                        {% if validationSteps[key] is defined and validationSteps[key].status == 'completed' %}
+                            {% set state = 'completed' %}
+                        {% elseif validationSteps[key] is defined and validationSteps[key].status == 'active' %}
+                            {% set state = 'active' %}
+                        {% elseif validationSteps[key] is defined and validationSteps[key].status == 'reserved' %}
+                            {% set state = 'reserved' %}
+                        {% elseif validationSteps[key] is defined and validationSteps[key].status == 'refused' %}
+                            {% set state = 'refused' %}
+                        {% else %}
+                            {% set state = 'pending' %}
+                        {% endif %}
+                        {% set stateConfig = statusBadgeMap[state] %}
+                        <div class="flex items-center">
+                            <div class="flex h-10 w-10 items-center justify-center rounded-full ring-2 ring-white {{ stateConfig.bubble }} dark:ring-slate-900"
+                                    {{ stimulus_controller('tooltip') }}
+                                 aria-label="{{ (prefix~'.'~step.label~'.btn-'~state)|trans({}, 'process') }}"
+                                 data-bs-title="{{ (prefix~'.'~step.label~'.btn-'~state)|trans({}, 'process') }}">
+                                {{ ux_icon(stateConfig.icon, {class: 'h-4 w-4'}) }}
+                            </div>
+                            {% if not loop.last %}
+                                <div class="mx-1 h-0.5 w-5 rounded-full {{ stateConfig.line }}"></div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <section class="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <div class="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+                Actions rapides
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <button class="{{ quickBtnSecondary }}">
+                    {{ ux_icon('icon:download', {class: 'h-4 w-4'}) }}
+                    <span>Voir PV</span>
+                </button>
+
+                <div class="relative" data-controller="navbar-dropdown"
+                     data-action="click@window->navbar-dropdown#close">
+                    <button class="{{ quickBtnSuccess }}"
+                            type="button"
+                            data-action="click->navbar-dropdown#toggle"
+                            aria-expanded="false">
+                        {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
+                        <span>Gestion du DPE</span>
+                        {{ ux_icon('icon:chevron-down', {class: 'h-4 w-4'}) }}
+                    </button>
+                    <ul data-navbar-dropdown-target="content"
+                        class="hidden absolute right-0 top-full z-30 mt-2 min-w-[22rem] rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                        {% for key, option in validationOptions %}
+                            {% set itemStyle = dpeItemStyles[option.metadata.button_class]|default(dpeItemStyles['secondary']) %}
+                            <li>
+                                <a class="flex items-start gap-3 rounded-xl px-3 py-3 text-sm text-slate-700 transition {{ itemStyle.hover }} dark:text-slate-200"
+                                   data-action="click->modalturbo#open"
+                                   data-turbo="true"
+                                   href="{{ path('parcours_process_apply', {type: option.metadata.type, dpeParcours: dpeParcours.id, transition: key }) }}">
+                                    <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ itemStyle.badge }}">
+                                        <i class="fas {{ option.metadata.button_icon }} text-xs"></i>
+                                    </span>
+                                    <span class="min-w-0">
+                                        <span class="block font-semibold {{ itemStyle.title }}">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>
+                                        <span class="block text-xs text-slate-500 dark:text-slate-400">{{ ('workflow.'~key~'.menu.description')|trans({}, 'process') }}</span>
+                                    </span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <button class="{{ quickBtnSecondary }}"
+                        data-toggle-group="accordion-1"
+                        data-toggle="actions" data-target="#actions-panel"
+                        data-toggle-icon-open="rotate-0"
+                        data-toggle-icon-close="rotate-180">
+                    {{ ux_icon('icon:gear', {class: 'h-4 w-4'}) }}
+                    <span>Actions complémentaires</span>
+                    {{ ux_icon('icon:chevron-up', {class: 'h-4 w-4 data-toggle-icon rotate-180 transition-transform duration-200'}) }}
+                </button>
+
+                <button class="{{ quickBtnInfo }}"
+                        data-toggle-group="accordion-1"
+                        data-toggle="actions" data-target="#exports-panel"
+                        data-toggle-icon-open="rotate-0"
+                        data-toggle-icon-close="rotate-180">
+                    {{ ux_icon('icon:download', {class: 'h-4 w-4'}) }}
+                    <span>Exports</span>
+                    {{ ux_icon('icon:chevron-up', {class: 'h-4 w-4 data-toggle-icon rotate-180 transition-transform duration-200'}) }}
+                </button>
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    <button class="{{ quickBtnSecondary }} relative"
+                            data-toggle-group="accordion-1"
+                            data-toggle="actions"
+                            data-target="#actions-panel-admin"
+                            data-toggle-icon-open="rotate-0"
+                            data-toggle-icon-close="rotate-180">
+                        {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
+                        <span>Gestion SES</span>
+                        {{ ux_icon('icon:chevron-up', {class: 'h-4 w-4 data-toggle-icon rotate-180 transition-transform duration-200'}) }}
+                        {% if parcours.commentaire != null %}
+                            <span class="absolute -right-1 -top-1 inline-flex h-3 w-3 rounded-full border border-white bg-orange-500 dark:border-slate-900"></span>
+                        {% endif %}
+                    </button>
+                {% endif %}
+            </div>
+        </section>
+
+        <div class="{{ panelClass }}" id="actions-panel">
+            <div class="{{ panelGridClass }}">
+                <div>
+                    <a class="{{ quickBtnPrimary }} w-full"
+                       href="{{ path('app_parcours_bcc', {parcours:parcours.id}) }}">
+                        {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
+                        <span>Contrôler les BCC</span>
+                    </a>
+                </div>
+                <div>
+                    <a class="{{ quickBtnPrimary }} w-full"
+                       href="{{ path('app_parcours_ec', {parcours:parcours.id}) }}">
+                        {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
+                        <span>Contrôler la maquette</span>
+                    </a>
+                </div>
+                <div>
+                    <a
+                            href="{{ path('app_parcours_state', {parcours:parcours.id}) }}"
+                            class="{{ quickBtnSuccess }} w-full"
+                            {{ stimulus_controller('tooltip') }}
+                            data-turbo="true"
+                            data-action="click->modalturbo#open"
+                            title="{{ 'verifier.la.saisie.parcours.infobulle'|trans({}, 'process') }}">
+                        {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
+                        <span>Vérifier la saisie</span>
+                    </a>
+                </div>
+                <div>
+                    <a href="{{ path('fiche_matiere_valide_parcours', {parcours: this.parcours.id}) }}"
+                       class="{{ quickBtnSuccess }} w-full"
+                            {{ stimulus_controller('tooltip') }}
+                       title="{{ 'verifier.fiches.ec.matieres.infobulle'|trans({}, 'process') }}">
+                        {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
+                        <span>Valider les fiches EC/matières</span>
+                    </a>
+                </div>
+                <div>
+                    <a class="{{ quickBtnPrimary }} w-full"
+                       href="{{ path('app_historique_parcours', {parcours:this.parcours.id}) }}"
+                            {{ stimulus_controller('tooltip') }}
+                       data-turbo="true"
+                       data-action="click->modalturbo#open"
+                       title="{{ 'historique.de.validation.parcours.infobulle'|trans({}, 'process') }}">
+                        {{ ux_icon('icon:timeline', {class: 'h-4 w-4'}) }}
+                        <span>Historique</span>
+                    </a>
+                </div>
+                <div>
+                    {% if is_granted('ROLE_ADMIN') and hasLastVersion is defined and hasLastVersion == true %}
+                        <a class="{{ quickBtnWarning }} w-full"
+                           data-bs-toggle="collapse" data-bs-target="#diffGlobalParcours">
+                            {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
+                            <span>Comparer les descriptifs</span>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="{{ panelClass }}" id="exports-panel">
+            <div class="space-y-4">
+                <div>
+                    <p class="{{ metaLabelClass }}">Fiche descriptive</p>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        <a class="{{ quickBtnPrimary }} w-full"
+                           href="{{ path('app_parcours_export', {parcours:parcours.id}) }}"
+                                {{ stimulus_controller('tooltip') }}
+                           title="Télécharger en PDF">
+                            {{ ux_icon('icon:download', {class: 'h-4 w-4'}) }}
+                            <span>Fiche descriptive (PDF)</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="{{ metaLabelClass }}">MCCC</p>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        {% if hasLastVersion is defined and hasLastVersion == true %}
+                            <a class="{{ quickBtnInfo }} w-full"
+                               href="{{ path('app_parcours_mccc_export_versionning', {parcours:parcours.id, _format:'xlsx'}) }}">
+                                <span>Export MCCC Version (xlsx)</span>
+                            </a>
+                            <a class="{{ quickBtnInfo }} w-full"
+                               href="{{ path('app_parcours_mccc_export_cfvu_valid', {parcours:parcours.id, format:'complet'}) }}">
+                                <span>Version complète (pdf)</span>
+                            </a>
+                            <a class="{{ quickBtnInfo }} w-full"
+                               href="{{ path('app_parcours_mccc_export_cfvu_valid', {parcours:parcours.id, format:'simplifie'}) }}">
+                                <span>Version simplifiée (pdf)</span>
+                            </a>
+                        {% else %}
+                            <a class="{{ quickBtnInfo }} w-full"
+                               href="{{ path('app_parcours_mccc_export', {parcours:parcours.id, _format:'xlsx'}) }}">
+                                <span>Version complète (xlsx)</span>
+                            </a>
+                            <a class="{{ quickBtnInfo }} w-full"
+                               href="{{ path('app_parcours_mccc_export_light', {parcours:parcours.id, _format:'xlsx'}) }}">
+                                <span>Version simplifiée (xlsx)</span>
+                            </a>
+                            <a class="{{ quickBtnInfo }} w-full"
+                               href="{{ path('app_parcours_mccc_export_cfvu_valid', {parcours:parcours.id, format:'complet'}) }}">
+                                <span>Version complète (pdf)</span>
+                            </a>
+                            <a class="{{ quickBtnInfo }} w-full"
+                               href="{{ path('app_parcours_mccc_export_cfvu_valid', {parcours:parcours.id, format:'simplifie'}) }}">
+                                <span>Version simplifiée (pdf)</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <p class="{{ metaLabelClass }}">BCC</p>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        <a class="{{ quickBtnWarning }} w-full"
+                           href="{{ path('app_parcours_bcc', {parcours:parcours.id}) }}">
+                            <span>Voir en ligne</span>
+                        </a>
+                        <a class="{{ quickBtnWarning }} w-full"
+                           href="{{ path('app_competence_export_bcc', {parcours:parcours.id}) }}">
+                            <span>Export des BCC (pdf)</span>
+                        </a>
+                        <a class="{{ quickBtnWarning }} w-full"
+                           href="{{ path('app_competence_export_croise', {parcours:parcours.id}) }}">
+                            <span>Croisé BCC/EC, semestre (pdf)</span>
+                        </a>
+                        <a class="{{ quickBtnWarning }} w-full"
+                           href="{{ path('app_competence_export_croise_global', {parcours:parcours.id}) }}">
+                            <span>Croisé BCC/EC, global (xslx)</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <div class="{{ panelClass }}" id="actions-panel-admin">
+                <div class="{{ panelGridClass }}">
+                    <div>
+                        <a class="{{ quickBtnSecondary }} w-full"
+                           data-action="click->modalturbo#open"
+                           data-turbo="true"
+                           href="{{ path('parcours_ses_changer_etat', { dpeParcours: dpeParcours.id }) }}">
+                            {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
+                            <span>Changer état DPE</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a class="{{ quickBtnSecondary }} w-full"
+                           data-action="click->modalturbo#open"
+                           data-turbo="true"
+                           href="{{ path('parcours_ses_changer_ouverture', { dpeParcours: dpeParcours.id }) }}">
+                            {{ ux_icon('icon:unlock', {class: 'h-4 w-4'}) }}
+                            <span>Modifier ouverture</span>
+                        </a>
+                    </div>
+                    <div>
+                        <a class="{{ quickBtnSecondary }} relative w-full"
+                           data-action="click->modalturbo#open"
+                           data-turbo="true"
+                           href="{{ path('parcours_ses_commentaires', { dpeParcours: dpeParcours.id }) }}">
+                            {{ ux_icon('icon:info', {class: 'h-4 w-4'}) }}
+                            <span>Commentaires</span>
+                            {% if parcours.commentaire != null %}
+                                <span class="absolute -right-1 -top-1 inline-flex h-3 w-3 rounded-full border border-white bg-red-500 dark:border-slate-900"></span>
+                            {% endif %}
+                        </a>
+                    </div>
+                    <div>
+                        <button class="{{ quickBtnSecondary }} w-full">
+                            {{ ux_icon('icon:print', {class: 'h-4 w-4'}) }}
+                            <span>Mettre à jours PDF</span>
+                        </button>
+                    </div>
+                    <div>
+                        <button class="{{ quickBtnSecondary }} w-full">
+                            {{ ux_icon('icon:gear', {class: 'h-4 w-4'}) }}
+                            <span>Gérer codification</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+

@@ -11,7 +11,7 @@ namespace App\Twig\Components;
 
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
-#[AsTwigComponent(name: 'dropdown_actions')]
+#[AsTwigComponent(name: 'dropdown_actions', template: 'components/_layout/dropdown_actions.html.twig')]
 class DropdownActionsComponent
 {
     /**
@@ -33,6 +33,9 @@ class DropdownActionsComponent
     public string $label = 'Actions';
     public string $help = 'Actions';
     public bool $labelSrOnly = false;
+    // Utiliser l'alias standardisé défini dans `icons-migration.md` : `icon:ellipsis`
+    // (correspond à trois points verticaux)
+    public string $icon = 'icon:ellipsis';
 
     /** Permet de distinguer plusieurs dropdown sur une page (facultatif) */
     public ?string $id = null;

@@ -16,12 +16,24 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 #[AsTwigComponent('actualites')]
 final class ActualitesComponent extends AbstractController
 {
+    /**
+     * Données de démonstration pour le catalogue UI.
+     * Si renseigné, ces valeurs sont affichées à la place de la requête BDD.
+     *
+     * @var array<int, array{datePublication: \DateTimeInterface, titre: string, texte: string}>
+     */
+    public array $demoActualites = [];
+
     public function __construct(private ActualiteRepository $actualiteRepository)
     {
     }
 
     public function getActualites(): array
     {
+        if ($this->demoActualites !== []) {
+            return $this->demoActualites;
+        }
+
         return $this->actualiteRepository->findBy(['affiche' => true], ['datePublication' => 'DESC']);
     }
 }

@@ -1,0 +1,409 @@
+<div {{ attributes }} class="datatable-wrapper space-y-4">
+
+    {# ── Compteurs UX (résultats + filtres actifs) ─────────────────────────── #}
+    {% set activeFilters = 0 %}
+    {% for column in columns %}
+        {% if column.filterable %}
+            {% set currentFilter = filters[column.id]|default(null) %}
+            {% if column.type == 'date' %}
+                {% if currentFilter is iterable and (currentFilter.from|default('') != '' or currentFilter.to|default('') != '') %}
+                    {% set activeFilters = activeFilters + 1 %}
+                {% endif %}
+            {% elseif currentFilter is not null and currentFilter is not same as('') %}
+                {% set activeFilters = activeFilters + 1 %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    {# ── Toolbar ─────────────────────────────────────────────────────────────── #}
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div class="border-b border-slate-100 px-4 py-3 dark:border-slate-700">
+            <div class="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span>
+                        <strong>{{ this.getTotal }}</strong> résultat{{ this.getTotal > 1 ? 's' : '' }}
+                    </span>
+                    {% if activeFilters > 0 %}
+                        <span class="opacity-70">•</span>
+                        <span class="inline-flex items-center gap-1 rounded-full bg-cyan-200 px-2 py-0.5 font-semibold dark:bg-cyan-900">
+                            <twig:UX:Icon name="icon:filter" class="h-3.5 w-3.5"/>
+                            {{ activeFilters }} filtre{{ activeFilters > 1 ? 's' : '' }} actif{{ activeFilters > 1 ? 's' : '' }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+
+            {# Recherche globale #}
+            <div class="relative w-full sm:max-w-sm">
+                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                    <twig:UX:Icon name="icon:search" class="h-4 w-4"/>
+                </span>
+                <label for="recherche-datatable" class="sr-only">Recherche globale</label>
+                <input
+                        id="recherche-datatable"
+                        type="text"
+                        class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400"
+                        placeholder="Rechercher..."
+                        data-model="debounce(100)|globalSearch"
+                        data-action="live#update"
+                >
+            </div>
+
+            {# Actions toolbar #}
+            <div class="flex shrink-0 items-center gap-2 self-end sm:self-auto">
+                <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 shadow-sm transition hover:border-red-400 hover:text-red-900 dark:border-red-600 dark:bg-red-900/30 dark:text-red-200 dark:hover:border-red-500"
+                        data-action="live#action"
+                        data-live-action-param="resetFilters"
+                        title="Réinitialiser les filtres"
+                >
+                    <twig:UX:Icon name="icon:sync" class="h-4 w-4"/>
+                    Réinitialiser
+                </button>
+
+                <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold shadow-sm transition
+                        {% if filtersOpen %}
+                            border-indigo-300 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-300
+                        {% else %}
+                            border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200
+                        {% endif %}"
+                        data-action="live#action"
+                        data-live-action-param="toggleFilters"
+                        aria-controls="filters-panel"
+                        aria-expanded="{{ filtersOpen ? 'true' : 'false' }}"
+                >
+                    <twig:UX:Icon name="icon:filter" class="h-4 w-4"/>
+                    Filtres
+                    {% if activeFilters > 0 %}
+                        <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1.5 py-0.5 text-[10px] font-bold text-white dark:bg-indigo-500">
+                            {{ activeFilters }}
+                        </span>
+                    {% endif %}
+                </button>
+            </div>
+        </div>
+
+        {# ── Filtres avancés ──────────────────────────────────────────────────── #}
+        {% if filtersOpen %}
+            <div id="filters-panel"
+                 class="border-t border-slate-100 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-800/40">
+                <p class="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Filtres
+                    avancés</p>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {% for column in columns %}
+                        {% if column.filterable %}
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-semibold text-slate-600 dark:text-slate-300"
+                                       for="col_{{ column.id }}">{{ column.label }}</label>
+
+                                {% set inputClass = "w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100" %}
+
+                                {% if column.type == 'text' %}
+                                    <input id="col_{{ column.id }}" type="text" class="{{ inputClass }}"
+                                           data-model="debounce(100)|filters.{{ column.id }}"
+                                           value="{{ filters[column.id]|default('') }}" placeholder="Filtrer…">
+
+                                {% elseif column.type == 'select' %}
+                                    <select id="col_{{ column.id }}" class="{{ inputClass }}"
+                                            data-model="on(change)|filters.{{ column.id }}">
+                                        <option value="">Tous</option>
+                                        {% for key, value in column.choices %}
+                                            <option value="{{ key }}" {{ filters[column.id]|default('') == key ? 'selected' : '' }}>{{ value }}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                {% elseif column.type in ['entity', 'collection'] and column.entity %}
+                                    {% set entityChoices = this.getEntityChoices(column) %}
+                                    <select id="col_{{ column.id }}" class="{{ inputClass }}"
+                                            data-model="on(change)|filters.{{ column.id }}">
+                                        <option value="">Tous</option>
+                                        {% for choice in entityChoices %}
+                                            <option value="{{ choice.value }}" {{ filters[column.id]|default('') == choice.value ? 'selected' : '' }}>{{ choice.label }}</option>
+                                        {% endfor %}
+                                    </select>
+
+                                {% elseif column.type == 'date' %}
+                                    <div class="flex items-center gap-1">
+                                        <input id="col_{{ column.id }}" type="date" class="{{ inputClass }}"
+                                               data-model="filters.{{ column.id }}.from"
+                                               value="{{ filters[column.id].from|default('') }}">
+                                        <span class="text-xs text-slate-400">→</span>
+                                        <label for="col_{{ column.id }}_to" class="sr-only">Au</label>
+                                        <input id="col_{{ column.id }}_to" type="date" class="{{ inputClass }}"
+                                               data-model="filters.{{ column.id }}.to"
+                                               value="{{ filters[column.id].to|default('') }}">
+                                    </div>
+
+                                {% elseif column.type == 'boolean' %}
+                                    <select id="col_{{ column.id }}" class="{{ inputClass }}"
+                                            data-model="on(change)|filters.{{ column.id }}">
+                                        <option value="">Tous</option>
+                                        <option value="1" {{ filters[column.id]|default('') == '1' ? 'selected' : '' }}>
+                                            Oui
+                                        </option>
+                                        <option value="0" {{ filters[column.id]|default('') == '0' ? 'selected' : '' }}>
+                                            Non
+                                        </option>
+                                    </select>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    {# ── Table ───────────────────────────────────────────────────────────────── #}
+    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+
+        {# Méta-barre : résultats + per page #}
+        <div class="flex flex-col gap-2 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700">
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+                <span class="font-semibold text-slate-700 dark:text-slate-200">{{ ((page - 1) * perPage + 1) }}–{{ min(page * perPage, this.getTotal) }}</span>
+                sur <span class="font-semibold text-slate-700 dark:text-slate-200">{{ this.getTotal }}</span> résultats
+            </p>
+            <div class="flex items-center gap-2">
+                <label for="perPage" class="text-xs text-slate-500 dark:text-slate-400">Par page</label>
+                <select id="perPage"
+                        class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-indigo-400 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                        data-model="perPage">
+                    <option value="10" {{ perPage == 10 ? 'selected' : '' }}>10</option>
+                    <option value="20" {{ perPage == 20 ? 'selected' : '' }}>20</option>
+                    <option value="50" {{ perPage == 50 ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ perPage == 100 ? 'selected' : '' }}>100</option>
+                </select>
+            </div>
+        </div>
+
+        {# Tableau principal #}
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-slate-700 dark:text-slate-200">
+                    <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-300">
+                    <tr>
+                        {% for column in columns %}
+                            <th class="px-4 py-3 {{ column.class }}">
+                                {% if column.sortable %}
+                                    <button
+                                            type="button"
+                                            class="inline-flex items-center gap-1.5 transition hover:text-indigo-600 dark:hover:text-indigo-400"
+                                            data-action="live#action"
+                                            data-live-action-param="sort"
+                                            data-live-field-param="{{ column.field }}"
+                                    >
+                                        {{ column.label }}
+                                        {% if sortField == column.field %}
+                                            <twig:UX:Icon
+                                                    name="{{ sortDirection == 'asc' ? 'icon:chevron-up' : 'icon:chevron-down' }}"
+                                                    class="h-3.5 w-3.5 text-indigo-500"/>
+                                        {% else %}
+                                            <twig:UX:Icon name="icon:chevron-down" class="h-3.5 w-3.5 opacity-30"/>
+                                        {% endif %}
+                                    </button>
+                                {% else %}
+                                    {{ column.label }}
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+                        {% if actions is not empty %}
+                            <th class="px-4 py-3 text-right">
+                                Actions
+                            </th>
+                        {% endif %}
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                    {% for item in this.getData %}
+                        <tr class="align-top hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+                            {% for column in columns %}
+                                <td class="px-4 py-3 {{ column.class }}">
+                                    {% if column.template %}
+                                        {% include column.template with {item: item, value: this.getFieldValue(item, column.field)} %}
+                                    {% else %}
+                                        {% set value = this.getFieldValue(item, column.field) %}
+
+                                        {% if column.format == 'date' and value %}
+                                            {{ value|date('d/m/Y') }}
+
+                                        {% elseif column.format == 'datetime' and value %}
+                                            {{ value|date('d/m/Y H:i') }}
+
+                                        {% elseif column.format == 'currency' and value %}
+                                            {{ value|number_format(2, ',', ' ') }} €
+
+                                        {% elseif column.format == 'boolean' %}
+                                            {% if value %}
+                                                <twig:Badge label="Oui" variant="success" icon="icon:check"/>
+                                            {% else %}
+                                                <twig:Badge label="Non" variant="secondary"/>
+                                            {% endif %}
+
+                                        {% elseif column.format == 'badge' %}
+                                            {% set badgeClass = column.badge_map[value] ?? column.badge_class %}
+                                            <span class="badge {{ badgeClass }}">
+                                            {{ column.choices[value] ?? value }}
+                                        </span>
+
+                                        {% elseif column.format == 'badges' and value %}
+                                            {# Pour les collections ManyToMany #}
+                                            {% if value is iterable %}
+                                                {% for badgeItem in value %}
+                                                    {% if column.collection_property == '__toString' %}
+                                                        {% set itemValue = badgeItem %}
+                                                    {% else %}
+                                                        {% set getter = 'get' ~ column.collection_property|capitalize %}
+                                                        {% set itemValue = attribute(badgeItem, getter) %}
+                                                    {% endif %}
+                                                    <span class="badge {{ column.badge_class }} me-1">{{ itemValue }}</span>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="text-slate-400">–</span>
+                                            {% endif %}
+
+                                        {% elseif column.format == 'entity_badge' %}
+                                            {% set entityLabel = this.getEntityDisplayLabel(value, column) %}
+                                            {% set entityBadgeClass = value is null
+                                                ? (column.null_badge_class|default('bg-secondary'))
+                                                : (column.badge_class|default('bg-info')) %}
+                                            <span class="badge {{ entityBadgeClass }}">{{ entityLabel ?: '–' }}</span>
+
+                                        {% elseif column.type == 'collection' and value %}
+                                            {# Pour les collections ManyToMany en texte simple #}
+                                            {% if value is iterable %}
+                                                {% set items = [] %}
+                                                {% for collItem in value %}
+                                                    {% if column.collection_property == '__toString' %}
+                                                        {% set itemValue = collItem %}
+                                                    {% else %}
+                                                        {% set getter = 'get' ~ column.collection_property|capitalize %}
+                                                        {% set itemValue = attribute(collItem, getter) %}
+                                                    {% endif %}
+                                                    {% set items = items|merge([itemValue]) %}
+                                                {% endfor %}
+                                                {{ items|join(column.separator) }}
+                                            {% else %}
+                                                –
+                                            {% endif %}
+
+                                        {% elseif value is not null and value is not same as '' %}
+                                            {% if column.is_html %}
+                                                {{ value|raw }}
+                                            {% else %}
+                                                {{ value }}
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-slate-300 dark:text-slate-600">–</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+
+                            {% if actions is not empty %}
+                                <td class="px-4 py-3 text-right">
+                                    <div class="flex items-center justify-end gap-1 flex-wrap">
+                                        {% for name, action in actions %}
+                                            {% set show = action.condition is null or action.condition(item) %}
+                                            {% if show %}
+                                                {% set routeUrl = path(action.route, {id: item.id}|merge(action.route_params)) %}
+                                                {% if action.method == 'delete' %}
+                                                    <button
+                                                            {{ stimulus_action('crud', 'delete', 'click', {
+                                                                url: routeUrl,
+                                                                csrf: csrf_token('delete' ~ item.id)
+                                                            }) }}
+                                                            class="{{ action.class }}"
+                                                            title="{{ action.label }}"
+                                                            type="button"
+                                                    >
+                                                        {% if action.icon %}<i class="{{ action.icon }}"></i>{% endif %}
+                                                        {{ action.label }}
+                                                    </button>
+                                                {% elseif action.method == 'duplicate' %}
+                                                    <button
+                                                            {{ stimulus_action('crud', 'duplicate', 'click', {
+                                                                url: routeUrl
+                                                            }) }}
+                                                            class="{{ action.class }}"
+                                                            title="{{ action.label }}"
+                                                            type="button"
+                                                    >
+                                                        {% if action.icon %}<i class="{{ action.icon }}"></i>{% endif %}
+                                                        {{ action.label }}
+                                                    </button>
+                                                {% elseif action.modal %}
+                                                    <a href="{{ routeUrl }}" data-turbo="true"
+                                                       data-action="click->modalturbo#open" title="{{ action.label }}"
+                                                       class="{{ action.class }}">
+                                                        {% if action.icon %}<i class="{{ action.icon }}"></i>{% endif %}
+                                                        {{ action.label }}
+                                                    </a>
+                                                {% else %}
+                                                    <a href="{{ routeUrl }}" class="{{ action.class }}"
+                                                       {% if action.confirm %}onclick="return confirm('{{ action.confirm }}')"{% endif %}>
+                                                        {% if action.icon %}<i class="{{ action.icon }}"></i>{% endif %}
+                                                        {{ action.label }}
+                                                    </a>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="{{ columns|length + (actions is not empty ? 1 : 0) }}"
+                                class="px-4 py-16 text-center">
+                                {{ include('_ui/_empty_table.html.twig', {
+                                    message: 'Aucune donnée à afficher'
+                                }) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# ── Pagination ──────────────────────────────────────────────────────── #}
+        {% set totalPages = this.getTotalPages %}
+        {% if totalPages > 1 %}
+            <div class="flex items-center justify-center gap-1 border-t border-slate-100 px-4 py-3 dark:border-slate-700">
+                <button class="inline-flex h-8 w-8 items-center justify-center rounded-lg border text-slate-500 transition {{ page == 1 ? 'cursor-not-allowed border-slate-100 text-slate-300 dark:border-slate-700 dark:text-slate-600' : 'border-slate-200 hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-600' }}"
+                        {{ live_action('goToPage', {'page': 1}) }} {{ page == 1 ? 'disabled' : '' }}
+                        title="Première page">
+                    <twig:UX:Icon name="icon:chevrons-left" class="h-3.5 w-3.5"/>
+                </button>
+                <button class="inline-flex h-8 w-8 items-center justify-center rounded-lg border text-slate-500 transition {{ page == 1 ? 'cursor-not-allowed border-slate-100 text-slate-300 dark:border-slate-700 dark:text-slate-600' : 'border-slate-200 hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-600' }}"
+                        {{ live_action('goToPage', {'page': page - 1}) }} {{ page == 1 ? 'disabled' : '' }}
+                        title="Précédent">
+                    <twig:UX:Icon name="icon:chevron-left" class="h-3.5 w-3.5"/>
+                </button>
+
+                {% for p in range(max(1, page - 2), min(totalPages, page + 2)) %}
+                    <button class="inline-flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-sm font-semibold transition {{ p == page ? 'border-indigo-500 bg-indigo-500 text-white shadow-sm' : 'border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-600 dark:text-slate-300' }}"
+                            {{ live_action('goToPage', {'page': p}) }}>{{ p }}</button>
+                {% endfor %}
+
+                <button class="inline-flex h-8 w-8 items-center justify-center rounded-lg border text-slate-500 transition {{ page == totalPages ? 'cursor-not-allowed border-slate-100 text-slate-300 dark:border-slate-700 dark:text-slate-600' : 'border-slate-200 hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-600' }}"
+                        {{ live_action('goToPage', {'page': page + 1}) }} {{ page == totalPages ? 'disabled' : '' }}
+                        title="Suivant">
+                    <twig:UX:Icon name="icon:chevron-right" class="h-3.5 w-3.5"/>
+                </button>
+                <button class="inline-flex h-8 w-8 items-center justify-center rounded-lg border text-slate-500 transition {{ page == totalPages ? 'cursor-not-allowed border-slate-100 text-slate-300 dark:border-slate-700 dark:text-slate-600' : 'border-slate-200 hover:border-indigo-300 hover:text-indigo-600 dark:border-slate-600' }}"
+                        {{ live_action('goToPage', {'page': totalPages}) }} {{ page == totalPages ? 'disabled' : '' }}
+                        title="Dernière page">
+                    <twig:UX:Icon name="icon:chevrons-right" class="h-3.5 w-3.5"/>
+                </button>
+            </div>
+        {% endif %}
+    </div>
+</div>
+

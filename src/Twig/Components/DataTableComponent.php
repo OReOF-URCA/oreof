@@ -20,7 +20,7 @@ use Doctrine\ORM\QueryBuilder;
 use Symfony\UX\TwigComponent\Attribute\PostMount;
 use Symfony\UX\TwigComponent\Attribute\PreMount;
 
-#[AsLiveComponent('DataTable', template: 'components/datatable.html.twig')]
+#[AsLiveComponent('DataTable', template: 'components/_layout/datatable.html.twig')]
 class DataTableComponent
 {
     use DefaultActionTrait;

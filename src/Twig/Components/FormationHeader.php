@@ -20,7 +20,7 @@ use Symfony\UX\LiveComponent\Attribute\LiveProp;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\PostMount;
 
-#[AsLiveComponent]
+#[AsLiveComponent(template: 'components/_domain/formation_header.html.twig')]
 final class FormationHeader
 {
     use DefaultActionTrait;

@@ -1,0 +1,284 @@
+{% extends 'base.html.twig' %}
+
+{# Définit le titre et la description de l'en-tête du layout principal #}
+{% set header_title = 'Catalogue UI' %}
+{% set header_description = 'Catalogue visuel des composants Twig présents dans le projet.' %}
+
+{% set color_palette = [
+    {'name': 'Fond', 'var': '--color-bg', 'text': 'var(--color-text)', 'chip': 'var(--color-surface)', 'chipText': 'var(--color-text)'},
+    {'name': 'Surface', 'var': '--color-surface', 'text': 'var(--color-text)', 'chip': 'var(--color-bg)', 'chipText': '#ffffff'},
+    {'name': 'Texte', 'var': '--color-text', 'text': 'var(--color-surface)', 'chip': 'var(--color-bg)', 'chipText': '#ffffff'},
+    {'name': 'Texte secondaire', 'var': '--color-text-muted', 'text': 'var(--color-surface)', 'chip': 'var(--color-bg)', 'chipText': '#ffffff'},
+    {'name': 'Bordure', 'var': '--color-border', 'text': 'var(--color-text)', 'chip': 'var(--color-surface)', 'chipText': 'var(--color-text)'},
+    {'name': 'Primaire', 'var': '--color-primary', 'text': 'white', 'chip': 'rgba(255,255,255,.18)', 'chipText': 'white'},
+    {'name': 'Succès', 'var': '--color-success', 'text': 'white', 'chip': 'rgba(255,255,255,.18)', 'chipText': 'white'},
+    {'name': 'Info', 'var': '--color-info', 'text': 'white', 'chip': 'rgba(255,255,255,.18)', 'chipText': 'white'},
+    {'name': 'Attention', 'var': '--color-warning', 'text': 'white', 'chip': 'rgba(255,255,255,.18)', 'chipText': 'white'},
+    {'name': 'Danger', 'var': '--color-danger', 'text': 'white', 'chip': 'rgba(255,255,255,.18)', 'chipText': 'white'},
+] %}
+
+{% block content %}
+    <div class="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+        <header class="rounded-2xl border p-6 shadow-sm" style="background-color: var(--color-surface); color: var(--color-text); border-color: var(--color-border);">
+            <p class="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">Prototype</p>
+            <h1 class="mt-2 text-2xl font-bold">Catalogue des composants UI</h1>
+            <p class="mt-2 max-w-3xl text-sm" style="color: var(--color-text-muted);">
+                Cette page sert de référence visuelle pour les composants Twig déjà présents dans le projet.
+                L'objectif est de centraliser les variantes, d'harmoniser les usages et d'accélérer la création de nouvelles pages.
+            </p>
+        </header>
+
+        <section class="space-y-4 rounded-2xl border p-6 shadow-sm" style="background-color: var(--color-surface); color: var(--color-text); border-color: var(--color-border);">
+            <div>
+                <h2 class="text-lg font-semibold">Palette de couleurs</h2>
+                <p class="mt-1 text-sm" style="color: var(--color-text-muted);">Valeurs CSS actuellement utilisées par le thème via les variables `--color-*`.</p>
+            </div>
+
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                {% for color in color_palette %}
+                    <div class="overflow-hidden rounded-xl border shadow-sm" style="border-color: var(--color-border); background-color: var(--color-surface);">
+                        <div class="h-24 flex items-end p-3" style="background-color: var({{ color.var }}); color: {{ color.text }};">
+                            <div class="rounded-md px-2 py-1 text-xs font-semibold backdrop-blur-sm" style="background-color: {{ color.chip }}; color: {{ color.chipText }};">{{ color.name }}</div>
+                        </div>
+                        <div class="border-t p-3 text-xs" style="border-color: var(--color-border); color: var(--color-text-muted);">
+                            <div class="font-semibold" style="color: var(--color-text);">{{ color.var }}</div>
+                            <div class="mt-1">La couleur s’adapte au thème clair / sombre.</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="space-y-4 rounded-2xl border p-6 shadow-sm" style="background-color: var(--color-surface); color: var(--color-text); border-color: var(--color-border);">
+            <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold">Filtrer les composants</h2>
+                    <p class="mt-1 text-sm" style="color: var(--color-text-muted);">Recherche rapide + filtre par importance pour faire ressortir les composants courants.</p>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" class="catalog-filter-btn rounded-full px-3 py-1.5 text-xs font-semibold" data-catalog-filter="all" style="background-color: var(--color-primary); color: white;">Tous</button>
+                    <button type="button" class="catalog-filter-btn rounded-full px-3 py-1.5 text-xs font-semibold" data-catalog-filter="core" style="background-color: var(--color-border); color: var(--color-text);">Core</button>
+                    <button type="button" class="catalog-filter-btn rounded-full px-3 py-1.5 text-xs font-semibold" data-catalog-filter="frequent" style="background-color: var(--color-border); color: var(--color-text);">Fréquents</button>
+                    <button type="button" class="catalog-filter-btn rounded-full px-3 py-1.5 text-xs font-semibold" data-catalog-filter="specific" style="background-color: var(--color-border); color: var(--color-text);">Spécifiques</button>
+                </div>
+            </div>
+
+            <div class="grid gap-3 lg:grid-cols-[1fr_auto]">
+                <input id="catalog-search" type="search" placeholder="Rechercher un composant, une catégorie ou un template..." class="w-full rounded-xl border px-4 py-2 text-sm" style="background-color: var(--color-bg); border-color: var(--color-border); color: var(--color-text);">
+                <div class="flex items-center gap-2 text-xs" style="color: var(--color-text-muted);">
+                    <span id="catalog-visible-count">0</span>
+                    <span>composant(s) visible(s)</span>
+                </div>
+            </div>
+        </section>
+
+        {% if featured_components is defined and featured_components|length > 0 %}
+            <section class="space-y-4 rounded-2xl border p-6 shadow-sm" style="background-color: var(--color-surface); color: var(--color-text); border-color: var(--color-border);">
+                <div>
+                    <h2 class="text-lg font-semibold">Composants les plus utilisés</h2>
+                    <p class="mt-1 text-sm" style="color: var(--color-text-muted);">Ceux-ci remontent automatiquement en fonction de leur usage dans le projet.</p>
+                </div>
+
+                <div class="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+                    {% for item in featured_components %}
+                        <article class="catalog-item rounded-2xl border p-4 shadow-sm" data-catalog-card data-catalog-importance="{{ item.importanceGroup|default('specific') }}" data-catalog-kind="{{ item.category|lower }}" data-catalog-search="{{ (item.name ~ ' ' ~ item.category ~ ' ' ~ item.template)|lower|e('html_attr') }}" style="background-color: color-mix(in srgb, var(--color-surface) 94%, var(--color-text) 6%); color: var(--color-text); border-color: var(--color-border);">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <h3 class="text-sm font-bold uppercase tracking-[0.16em]" style="color: var(--color-text-muted);">{{ item.name }}</h3>
+                                    <p class="mt-1 text-xs" style="color: var(--color-text-muted);">{{ item.category }}</p>
+                                </div>
+                                <span class="rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide" style="background-color: var(--color-primary); color: white;">
+                                    {{ item.usageCount }} usage{% if item.usageCount > 1 %}s{% endif %}
+                                </span>
+                            </div>
+
+                            {% set previewProps = item.previewProps|default({}) %}
+                            {% if item.previewHtml is defined and item.previewHtml %}
+                                <div class="mt-4 rounded-xl border border-dashed p-4" style="background-color: var(--color-bg); border-color: var(--color-border);">
+                                    {{ item.previewHtml|raw }}
+                                </div>
+                            {% elseif item.preview is defined and item.preview and item.componentName is defined %}
+                                <div class="mt-4 rounded-xl border border-dashed p-4" style="background-color: var(--color-bg); border-color: var(--color-border);">
+                                    {{ component(item.componentName, previewProps) }}
+                                </div>
+                            {% endif %}
+
+                            {% if item.note is defined and item.note %}
+                                <p class="mt-3 text-sm" style="color: var(--color-text-muted);">{{ item.note }}</p>
+                            {% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
+        {% for section in sections %}
+            <details class="catalog-section space-y-4 rounded-2xl border p-6 shadow-sm" data-catalog-section data-catalog-section-title="{{ section.title|lower }}" {% if not section.collapsedByDefault|default(false) %}open{% endif %} style="background-color: var(--color-surface); color: var(--color-text); border-color: var(--color-border);">
+                <summary class="cursor-pointer list-none">
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-lg font-semibold">{{ section.title }}</h2>
+                            <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style="background-color: var(--color-border); color: var(--color-text);">{{ section.sectionLabel|default('Core') }}</span>
+                        </div>
+                        <p class="text-sm" style="color: var(--color-text-muted);">{{ section.description }}</p>
+                    </div>
+                </summary>
+
+                <div class="grid gap-4 lg:grid-cols-2">
+                    {% for item in section.items %}
+                        <article class="catalog-item rounded-2xl border p-4 shadow-sm" data-catalog-card data-catalog-importance="{{ item.importanceGroup|default('specific') }}" data-catalog-kind="{{ section.title|lower }}" data-catalog-search="{{ (item.name ~ ' ' ~ section.title ~ ' ' ~ item.template ~ ' ' ~ item.component)|lower|e('html_attr') }}" style="background-color: color-mix(in srgb, var(--color-surface) 94%, var(--color-text) 6%); color: var(--color-text); border-color: var(--color-border);">
+                            <div class="flex items-start justify-between gap-3">
+                                <div>
+                                    <h3 class="text-sm font-bold uppercase tracking-[0.16em]" style="color: var(--color-text-muted);">{{ item.name }}</h3>
+                                    <p class="mt-1 text-xs" style="color: var(--color-text-muted);">{{ item.usageCount|default(0) }} usage{% if item.usageCount|default(0) > 1 %}s{% endif %}</p>
+                                </div>
+                                {% if item.importanceGroup|default('specific') == 'core' %}
+                                    <span class="rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide" style="background-color: var(--color-success); color: white;">Core</span>
+                                {% elseif item.importanceGroup|default('specific') == 'frequent' %}
+                                    <span class="rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide" style="background-color: var(--color-primary); color: white;">Fréquent</span>
+                                {% else %}
+                                    <span class="rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wide" style="background-color: var(--color-border); color: var(--color-text);">Spécifique</span>
+                                {% endif %}
+                            </div>
+
+                            {% set previewProps = item.previewProps|default(item.props|default({})) %}
+
+                            {% if item.previewHtml is defined and item.previewHtml %}
+                                <div class="mt-4 rounded-xl border border-dashed p-4" style="background-color: var(--color-bg); border-color: var(--color-border);">
+                                    {{ item.previewHtml|raw }}
+                                </div>
+                            {% elseif item.preview is defined and item.preview and item.componentName is defined %}
+                                <div class="mt-4 rounded-xl border border-dashed p-4" style="background-color: var(--color-bg); border-color: var(--color-border);">
+                                    {{ component(item.componentName, previewProps) }}
+                                </div>
+                            {% endif %}
+
+                            <div class="mt-4 space-y-2">
+                                <p class="text-xs font-semibold uppercase tracking-[0.14em]" style="color: var(--color-text-muted);">Exemple d’usage</p>
+                                <div class="flex items-start gap-2">
+                                    <button type="button" class="copy-btn inline-flex items-center gap-2 rounded-md px-2 py-1 text-xs font-semibold transition" style="background-color: var(--color-border); color: var(--color-text);" data-code="{{ item.component|e('html_attr') }}">Copier</button>
+                                    <span class="text-xs" style="color: var(--color-text-muted);">Clique sur "Copier" pour copier le code d'exemple dans le presse-papier.</span>
+                                </div>
+                                <pre class="mt-2 overflow-x-auto rounded-xl p-3 text-xs leading-relaxed shadow-inner" style="background-color: var(--color-bg); color: var(--color-text);"><code class="example-code">{{ item.component|e }}</code></pre>
+
+                                {% if item.note is defined %}
+                                    <p class="text-sm" style="color: var(--color-text-muted);">{{ item.note }}</p>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endfor %}
+            </details>
+        {# Liste complète des composants détectés #}
+        {% if all_components is defined %}
+            <section class="space-y-4 rounded-2xl border p-6 shadow-sm" style="background-color: var(--color-surface); color: var(--color-text); border-color: var(--color-border);">
+                <div>
+                    <h2 class="text-lg font-semibold">Liste complète des composants</h2>
+                    <p class="mt-1 text-sm" style="color: var(--color-text-muted);">Registre généré : templates + classes PHP associées.</p>
+                </div>
+
+                <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                    {% for category, items in all_components %}
+                        <div class="rounded-xl border p-4" style="background-color: color-mix(in srgb, var(--color-surface) 94%, var(--color-text) 6%); color: var(--color-text); border-color: var(--color-border);">
+                            <h3 class="text-sm font-semibold" style="color: var(--color-text);">{{ category }}</h3>
+                            <ul class="mt-2 space-y-2 text-sm" style="color: var(--color-text-muted);">
+                                {% for c in items %}
+                                    <li>
+                                        <strong style="color: var(--color-text);">{{ c.name }}</strong>
+                                        <div class="text-xs">Template: <code>{{ c.template }}</code></div>
+                                        <div class="text-xs">Classe: <code>{{ c.class }}</code></div>
+                                        {% if c.preview %}
+                                            <div class="mt-1 text-xs text-emerald-600">Preview disponible</div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </div>
+    <script>
+        // Copie le contenu de l'exemple dans le presse-papier
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('.copy-btn');
+            if (!btn) return;
+            const code = btn.getAttribute('data-code') || '';
+            navigator.clipboard.writeText(code).then(function () {
+                const original = btn.textContent;
+                btn.textContent = 'Copié ✓';
+                setTimeout(() => btn.textContent = original, 1500);
+            }).catch(function () {
+                alert('Impossible de copier');
+            });
+        });
+
+        // Filtre simple: recherche + importance (core/frequent/specific)
+        (function () {
+            const searchInput = document.getElementById('catalog-search');
+            const filterButtons = document.querySelectorAll('[data-catalog-filter]');
+            const cards = document.querySelectorAll('[data-catalog-card]');
+            const sections = document.querySelectorAll('[data-catalog-section]');
+            const visibleCount = document.getElementById('catalog-visible-count');
+            let currentFilter = 'all';
+
+            function normalize(text) {
+                return (text || '').toString().toLowerCase();
+            }
+
+            function applyFilter() {
+                const query = normalize(searchInput ? searchInput.value : '');
+                let visible = 0;
+
+                cards.forEach((card) => {
+                    const importance = card.getAttribute('data-catalog-importance') || 'specific';
+                    const haystack = normalize(card.getAttribute('data-catalog-search'));
+                    const matchesQuery = query === '' || haystack.includes(query);
+                    const matchesFilter = currentFilter === 'all' || importance === currentFilter;
+                    const show = matchesQuery && matchesFilter;
+
+                    card.classList.toggle('hidden', !show);
+                    if (show) {
+                        visible++;
+                    }
+                });
+
+                sections.forEach((section) => {
+                    const items = section.querySelectorAll('[data-catalog-card]');
+                    const hasVisible = Array.from(items).some((item) => !item.classList.contains('hidden'));
+                    section.classList.toggle('hidden', !hasVisible);
+                    if (hasVisible && (currentFilter !== 'all' || query !== '')) {
+                        section.open = true;
+                    }
+                });
+
+                if (visibleCount) {
+                    visibleCount.textContent = visible;
+                }
+            }
+
+            filterButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    currentFilter = button.getAttribute('data-catalog-filter') || 'all';
+                    filterButtons.forEach((btn) => {
+                        const active = btn === button;
+                        btn.style.backgroundColor = active ? 'var(--color-primary)' : 'var(--color-border)';
+                        btn.style.color = active ? 'white' : 'var(--color-text)';
+                    });
+                    applyFilter();
+                });
+            });
+
+            if (searchInput) {
+                searchInput.addEventListener('input', applyFilter);
+            }
+
+            applyFilter();
+        })();
+    </script>
+{% endblock %}
+

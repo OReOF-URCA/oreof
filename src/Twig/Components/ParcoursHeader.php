@@ -24,7 +24,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\LiveComponent\LiveResponder;
 use Symfony\UX\TwigComponent\Attribute\PostMount;
 
-#[AsLiveComponent]
+#[AsLiveComponent(template: 'components/_domain/parcours_header.html.twig')]
 final class ParcoursHeader
 {
     use DefaultActionTrait;
