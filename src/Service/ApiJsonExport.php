@@ -26,23 +26,28 @@ class ApiJsonExport
 
     private UrlGeneratorInterface $router;
 
+    private SecureUploadService $secureUploadService;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         GetHistorique $getHistorique,
         VersioningParcours $versioningParcours,
         UrlGeneratorInterface $router,
+        SecureUploadService $secureUploadService,
     )
     {
         $this->entityManager = $entityManager;
         $this->getHistorique = $getHistorique;
         $this->versioningParcours = $versioningParcours;
         $this->router = $router;
+        $this->secureUploadService = $secureUploadService;
     }
 
     public function generateApiVersioning(
         string $hostname,
         SymfonyStyle $io,
-        LheoXML $lheoXmlService
+        LheoXML $lheoXmlService,
+        bool    $isV2 = false,
     ): array
     {
         $dataJSON = [];
@@ -101,7 +106,10 @@ class ApiJsonExport
                             'id_old' => $parcours->getParcoursOrigineCopie()?->getId(),
                             'id' => $parcours->getId(),
                             'libelle' => $lastVersionData['parcours']->getDisplay(),
-                            'url' => $urlPrefix . $this->router->generate(
+                            'url' => $isV2
+                                ? $urlPrefix . $this->router->generate('app_export_json_urca_v2_cfvu_valid',
+                                    ['parcours' => $lastVersion[0]->getParcours()->getId()])
+                                : $urlPrefix . $this->router->generate(
                                     'app_parcours_export_json_urca_cfvu_valid',
                                     ['parcours' => $lastVersion[0]->getParcours()->getId()]
                             )
@@ -133,13 +141,17 @@ class ApiJsonExport
                 }
 
                 if (count($tParcours) > 0) {
-                    $dataJSON[] = [
+                    $forma = [
                         'id_old' => $formation->getFormationOrigineCopie()?->getId(),
                         'id' => $formation->getId(),
                         'libelle' => $formation->getDisplayLong(),
                         'parcours' => $tParcours,
-                        'dateValidation' => $dateValidationFormation?->format('Y-m-d H:i:s') ?? null
+                        'dateValidation' => $dateValidationFormation?->format('Y-m-d H:i:s') ?? null,
                     ];
+                    if ($isV2) {
+                        $forma['logos-formation'] = $this->getFormationLogosArrayApiV2($formation, $urlPrefix);
+                    }
+                    $dataJSON[] = $forma;
                 }
 
                 $io?->progressAdvance();
@@ -183,9 +195,12 @@ class ApiJsonExport
                                     'id_old' => $parcoursAnneeSuivante->getParcoursOrigineCopie()?->getId(),
                                     'id' => $parcoursAnneeSuivante->getId(),
                                     'libelle' => $parcoursAnneeSuivante->getDisplay(),
-                                    'url' => $urlPrefix . $this->router->generate(
-                                        'app_parcours_export_json_urca_annee_suivante_light',
-                                        ['parcours' => $parcoursAnneeSuivante->getId()]
+                                    'url' => $isV2
+                                        ? $urlPrefix . $this->router->generate('app_export_json_urca_v2_annee_suivante_light',
+                                            ['parcours' => $parcoursAnneeSuivante->getId()])
+                                        : $urlPrefix . $this->router->generate(
+                                            'app_parcours_export_json_urca_annee_suivante_light',
+                                            ['parcours' => $parcoursAnneeSuivante->getId()]
                                     )
                                 ];
                             }
@@ -195,13 +210,17 @@ class ApiJsonExport
                     }
                 }
                 if (count($addedParcours) > 0) {
-                    $dataJSON[] = [
+                    $formationAppend = [
                         'id_old' => $formationAnneeSuivante->getFormationOrigineCopie()?->getId(),
                         'id' => $formationAnneeSuivante->getId(),
                         'libelle' => $formationAnneeSuivante->getDisplayLong(),
                         'parcours' => $addedParcours,
-                        'dateValidation' => (new DateTime('2025-12-15'))->format('Y-m-d H:i:s')
+                        'dateValidation' => (new DateTime('2025-12-15'))->format('Y-m-d H:i:s'),
                     ];
+                    if ($isV2) {
+                        $formationAppend['logos-formation'] = $this->getFormationLogosArrayApiV2($formationAnneeSuivante, $urlPrefix);
+                    }
+                    $dataJSON[] = $formationAppend;
                 }
 
                 $io?->progressAdvance();
@@ -225,5 +244,25 @@ class ApiJsonExport
         }
 
         return $dataJSON;
+    }
+
+    private function getFormationLogosArrayApiV2(Formation $formation, string $urlPrefix)
+    {
+        $result = [];
+        foreach ($formation->getLogo() ?? [] as $logoFile) {
+            $result[] = [
+                'image_data' => $urlPrefix . $this->router->generate(
+                        'app_formation_logo',
+                        [
+                            'slug' => $formation->getSlug(), 'filename' => $logoFile
+                        ],
+                        UrlGeneratorInterface::ABSOLUTE_URL
+                    ),
+                'image_type' => mime_content_type(
+                    $this->secureUploadService->resolveStoredFilePath('logos', $logoFile)
+                )
+            ];
+        }
+        return $result;
     }
 }
