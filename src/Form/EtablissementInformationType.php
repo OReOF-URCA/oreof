@@ -6,7 +6,6 @@ use App\Entity\EtablissementInformation;
 use App\Form\Type\TextareaAutoSaveType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class EtablissementInformationType extends AbstractType
@@ -24,10 +23,10 @@ class EtablissementInformationType extends AbstractType
                 'required' => true,
                 'attr' => ['maxlength' => 2500]
             ])
-            ->add('tarif_inscription', MoneyType::class, [
+            ->add('tarif_inscription', TextareaAutoSaveType::class, [
                 'label' => "Tarif d'inscription",
-                'required' => false,
-                'currency' => 'EUR',
+                'required' => true,
+                'attr' => ['maxlength' => 2500]
             ])
             ->add('informations_pratiques', TextareaAutoSaveType::class, [
                 'label' => 'Informations pratiques',

@@ -20,7 +20,7 @@ class EtablissementInformation
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $calendrier_inscription = null;
 
-    #[ORM\Column(type: 'decimal', precision: 10, scale: 2, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $tarif_inscription = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

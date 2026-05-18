@@ -9,5 +9,5 @@ ALTER TABLE formation
     ADD logo JSON DEFAULT NULL COMMENT '(DC2Type:json)';
 
 ALTER TABLE etablissement_information
-    ADD tarif_inscription DECIMAL(10, 2) DEFAULT NULL;
+    ADD tarif_inscription LONGTEXT DEFAULT NULL;
 ```
