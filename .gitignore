@@ -44,6 +44,7 @@ versioning_json/*
 
 ### API JSON Versioning ###
 public/api_json/
+public/api_json_v2/
 
 ###> phpunit/phpunit ###
 /phpunit.xml
