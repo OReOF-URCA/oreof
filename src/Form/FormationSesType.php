@@ -166,15 +166,6 @@ class FormationSesType extends AbstractType
                 }
             );
 
-        if ($options['with_logo']) {
-            $builder->add('logo', FileType::class, [
-                'label' => 'Logo',
-                'multiple' => true,
-                'mapped' => false,
-                'required' => false,
-                'attr' => ['accept' => 'image/png, image/jpeg'],
-            ]);
-        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -182,8 +173,7 @@ class FormationSesType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Formation::class,
             'typesDiplomes' => [],
-            'translation_domain' => 'form',
-            'with_logo' => false
+            'translation_domain' => 'form'
         ]);
     }
 }

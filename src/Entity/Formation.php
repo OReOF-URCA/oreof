@@ -223,10 +223,6 @@ class Formation
      */
     #[ORM\OneToMany(mappedBy: 'formation', targetEntity: ChangeParcours::class)]
     private Collection $changeParcours;
-
-    #[ORM\Column(nullable: true)]
-    private ?array $logo = [];
-
     public function __construct(?CampagneCollecte $anneeUniversitaire)
     {
         $this->dpe = $anneeUniversitaire;
@@ -1215,24 +1211,6 @@ class Formation
     public function isNonOuvert(): bool
     {
         return $this->etatReconduction === TypeModificationDpeEnum::FERMETURE_DEFINITIVE;
-    }
-
-    public function getLogo(): ?array
-    {
-        return $this->logo;
-    }
-
-    public function setLogo(?array $logo): static
-    {
-        $this->logo = $logo;
-
-        return $this;
-    }
-
-    public function addLogo(string $filename): static
-    {
-        $this->logo[] = $filename;
-        return $this;
     }
 
 }
