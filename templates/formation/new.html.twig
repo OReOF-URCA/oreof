@@ -28,15 +28,12 @@
                 <div class="col-6">{{ form_row(form.responsableMention) }}</div>
                 <div class="col-6">{{ form_row(form.coResponsable) }}</div>
 
-                <div class="col-12">{{ form_row(form.logo) }}</div>
-
             </div>
 
             <button class="btn btn-success">
                 <i class="fal fa-floppy-disk"></i>
                 Enregistrer
             </button>
-            <div id="logo-upload-errors" class="mt-2"></div>
 
             {{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont
 obligatoires'}) }}
