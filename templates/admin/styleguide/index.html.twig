@@ -210,6 +210,56 @@
             </div>
         </section>
 
+        {# Section Composant : Badge #}
+        <section class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+            <h2 class="text-xl font-semibold text-slate-800 mb-4 border-b pb-2">Composant : Badge</h2>
+
+            <div class="mb-6 flex flex-col gap-6">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Tailles et Formes (Pill)</h3>
+                <div class="flex items-center gap-2">
+                    <twig:Badge label="Badge Petit" size="sm" variant="primary" />
+                    <twig:Badge label="Badge Moyen" size="md" variant="primary" />
+                    <twig:Badge label="Forme Pilule (Pill)" size="sm" variant="primary" :pill="true" />
+                </div>
+
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Couleurs Soft (Par défaut)</h3>
+                <div class="flex flex-wrap gap-2">
+                    <twig:Badge label="Primary" variant="primary" />
+                    <twig:Badge label="Success" variant="success" />
+                    <twig:Badge label="Warning" variant="warning" />
+                    <twig:Badge label="Danger" variant="danger" />
+                    <twig:Badge label="Info" variant="info" />
+                    <twig:Badge label="Secondary" variant="secondary" />
+                </div>
+
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Couleurs Solid</h3>
+                <div class="flex flex-wrap gap-2">
+                    <twig:Badge label="Primary" variant="primary" :soft="false" />
+                    <twig:Badge label="Success" variant="success" :soft="false" />
+                    <twig:Badge label="Warning" variant="warning" :soft="false" />
+                    <twig:Badge label="Danger" variant="danger" :soft="false" />
+                    <twig:Badge label="Info" variant="info" :soft="false" />
+                    <twig:Badge label="Secondary" variant="secondary" :soft="false" />
+                </div>
+
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Avec Icônes</h3>
+                <div class="flex flex-wrap gap-2">
+                    <twig:Badge label="Brouillon" variant="secondary" icon="fa-solid:edit" />
+                    <twig:Badge label="Validé" variant="success" icon="fa-solid:check" />
+                    <twig:Badge label="Alerte" variant="danger" icon="fa-solid:exclamation-triangle" :iconEnd="true" />
+                </div>
+
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Usage Twig</h3>
+                    <pre class="bg-slate-900 text-slate-200 p-4 rounded-md text-sm overflow-x-auto"><code>&lt;twig:badge label="Publié" variant="success" /&gt;
+
+&lt;twig:Badge label="Brouillon" variant="secondary" icon="fa-solid:edit" /&gt;
+
+&lt;twig:Badge label="Pilule Solid" variant="danger" :soft="false" :pill="true" /&gt;</code></pre>
+                </div>
+            </div>
+        </section>
+
         {# Répéter la structure pour les composants : Alerte, Badge, Card, Breadcrumb, etc. #}
 
     </div>
