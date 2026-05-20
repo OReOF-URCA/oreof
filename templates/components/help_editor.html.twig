@@ -54,6 +54,7 @@
                         {{ form_widget(form.isActive, { attr: { class: 'h-4 w-4 rounded' } }) }}
                         <span class="text-lg font-semibold text-slate-900 dark:text-slate-50">{{ form_label(form.isActive) }}</span>
                     </label>
+                    {{ form_errors(form.isActive) }}
                 </div>
 
                 <!-- Boutons d'action -->
@@ -94,6 +95,9 @@
             </div>
         </div>
     </div>
+
+    {# Composant de gestion des images (modal) #}
+    {{ component('help_image_manager', { showModal: true, editorTextarea: 'textarea[name="help[content]"]' }) }}
 </div>
 
 <script src="/js/editor_helpers.js"></script>

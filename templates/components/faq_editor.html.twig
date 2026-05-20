@@ -41,9 +41,9 @@
                 </div>
 
                 <!-- Toggle Actif -->
-                <div>
-                    <label class="inline-flex items-center gap-3 cursor-pointer">
-                        {{ form_widget(form.isActive, { attr: { class: 'h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-800 dark:text-blue-500 dark:focus:ring-blue-400' } }) }}
+                <div class="flex items-center gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        {{ form_widget(form.isActive, { attr: { class: 'h-4 w-4 rounded' } }) }}
                         <span class="text-lg font-semibold text-slate-900 dark:text-slate-50">Afficher cette question</span>
                     </label>
                     {{ form_errors(form.isActive) }}
