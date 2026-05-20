@@ -1,21 +1,30 @@
-{% extends '_layout/_section_shell.html.twig' %}
+{% extends 'base.html.twig' %}
 
-{# 1. Alignement strict du fil d'Ariane #}
-{% block breadcrumb %}
-    {% include 'communs/_breadcrumb.html.twig' with {
-        'items': [
-            {'label': 'Administration', 'url': '#'},
-            {'label': 'Page Modèle Liste', 'active': true}
-        ]
-    } %}
+{# 1. Titre et descrition de la page #}
+
+{% block header %}
+    Insérer un titre de page général.
 {% endblock %}
 
-{# 2. Titre de la page #}
-{% block page_title %}Gestion des Entités (Page Type){% endblock %}
+{% set header_description %}
+    Insérer une description générale de la page, qui peut être utilisée pour contextualiser les composants présentés et expliquer leur usage dans l'application.
+{% endset %}
+
+{# 2. Alignement strict du fil d'Ariane #}
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {
+            href:'',
+            title: 'Ici le titre de la page (ex: "Gestion des Entités")',
+        }
+    ]}) }}
+{% endblock %}
+
 
 {# 3. Actions globales en haut à droite #}
-{% block page_actions %}
-    <twig:UI:Button color="primary" icon="fa-solid fa-plus">Ajouter un élément</twig:UI:Button>
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="/administration/styleguide">Revenir sur styleguide</twig:Button>
+    <twig:Button variant="primary" icon="fa-solid:plus">Ajouter un élément</twig:Button>
 {% endblock %}
 
 {# 4. Grille de contenu unifiée #}
@@ -36,8 +45,8 @@
                     <td class="px-6 py-4 text-sm text-slate-900 font-mono">{{ item.id }}</td>
                     <td class="px-6 py-4 text-sm text-slate-700">{{ item.label }}</td>
                     <td class="px-6 py-4 text-sm text-right space-x-2">
-                        <twig:UI:Button color="secondary" size="sm" icon="fa-solid fa-pen" />
-                        <twig:UI:Button color="danger" size="sm" icon="fa-solid fa-trash" />
+                        <twig:Button label="Modifier" variant="warning" :outline="true" :soft="true" icon="fa-solid:pen"/>
+                        <twig:Button variant="danger" icon="fa-solid:trash"/>
                     </td>
                 </tr>
             {% endfor %}
