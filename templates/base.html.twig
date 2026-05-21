@@ -412,6 +412,9 @@
                                                 <li><a href="{{ path('app_faq_index') }}"
                                                        class="text-sm text-gray-700 hover:text-indigo-600">{{ 'menu.config.faq'|trans({}, 'menu') }}</a>
                                                 </li>
+                                                <li><a href="{{ path('admin_styleguide_index') }}"
+                                                       class="text-sm text-gray-700 hover:text-indigo-600">{{ 'menu.config.styleguide'|trans({}, 'menu') }}</a>
+                                                </li>
                                             </ul>
                                         </div>
                                         <div class="bg-gray-50 p-6 rounded-xl">
@@ -605,7 +608,7 @@
     <!-- Main Content End -->
 
     <!-- Footer Content Start -->
-    <footer class="mt-auto">
+    <footer class="mt-6">
         <div class="footer-content border-t border-slate-200/80 bg-white/90 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/90">
             <div class="mx-auto w-full px-4 py-4 sm:px-6 lg:px-8">
                 <div class="grid gap-4 lg:grid-cols-3 lg:items-center">
@@ -672,14 +675,6 @@
 
 </div>
 <!-- Content Container End -->
-
-<div {{ stimulus_controller('base') }}
-     data-action="modal:openModal@window->base#openModal
-     base:refreshPage@window->base#refreshPage
-     base:redirectEdit@window->base#redirectEdit
- ">
-    {{ include('communs/_modal.html.twig') }}
-</div>
 
 
 <!-- modal delete -->

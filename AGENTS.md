@@ -2,18 +2,10 @@
 
 ## À lire en premier
 
-- `README.md` pour le périmètre produit.
-- `install.md` pour le flux Docker/Makefile et production.
-- `command.md` pour les commandes métier exposées.
-- `bootstrap-to-tailwind-style-guide.md` pour la transition de bootstrap à tailwind.
-- `docs/architecture/maquette-modulaire.md` pour la direction d’architecture.
-- `doc-api.md` et `dpe.md` pour la documentation technique et métier liée au versioning/DPE.
-- `CHANGELOG.md` pour l'historique des changements et évolutions.
-- `Update_BDD.md` pour les procédures de migration/import de base de données.
-- `Recopie_FicheMatiere.md` pour les opérations de recopie des fiches matières.
-- `python_worker/README.md` pour les scripts Python liés à la génération/export.
-- `UX_IMPROVEMENTS.md` et `UX_IMPROVEMENTS_SUMMARY.md` pour le contexte UX et les décisions récentes.
-- `config/services.yaml`, `config/routes.yaml`, `config/packages/security.yaml`, `config/packages/workflow.yaml` pour les points d’intégration.
+- `docs/README.md` : index de la documentation interne.
+- `docs/ops/command.md` : commandes utiles pour le développement et l’exploitation.
+- `docs/index_ia.md` : index de documentation pour l’IA, à consulter impérativement avant toute proposition de code ou d’architecture.
+- `docs/ui-conventions/README.md` : conventions d’interface utilisateur et migration Tail
 
 ## Vue d’ensemble
 

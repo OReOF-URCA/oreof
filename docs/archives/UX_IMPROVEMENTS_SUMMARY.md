@@ -1,3 +1,7 @@
+{% set DEPRECATED_summary %}
+DEPRECATED — Ce fichier est un résumé redondant; voir `docs/archives/UX_IMPROVEMENTS.md` pour la version détaillée et canonique.
+{% endset %}
+
 # 📋 Résumé des Améliorations UX - Page Listing des Formations
 
 ## 🎯 Objectif
@@ -271,5 +275,3 @@ Document complet des améliorations et recommandations futures.
 Route : `/formation/liste`
 Template : `templates/formation/_liste.html.twig`
 Contrôleur PHP : `src/Controller/FormationController.php::liste()`
-
-

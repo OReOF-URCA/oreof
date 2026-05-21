@@ -1,18 +1,22 @@
 {% extends 'base.html.twig' %}
 
+{% set header_description %}
+    Créez ou modifiez une question pour une page spécifique.
+{% endset %}
+
 {% block header %}{{ faq.id ? 'Modifier' : 'Créer' }} une question FAQ{% endblock %}
 
 {% block content %}
-    <div class="py-4">
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-50 flex items-center gap-3">
-                <twig:UX:Icon name="icon:question" class="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                {{ faq.id ? 'Modifier la question' : 'Nouvelle question' }}
-            </h1>
-        </div>
+    <div class="w-full">
+        <div class="space-y-6">
 
-        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 p-6">
-            {{ component('faq_editor', { initialFormData: faq }) }}
+            <!-- Formulaire dans une card -->
+            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
+                <div class="p-6">
+                    {# Appel du composant Live #}
+                    {{ component('faq_editor', { initialFormData: faq }) }}
+                </div>
+            </div>
         </div>
     </div>
 

@@ -1,15 +1,14 @@
 {% extends 'base.html.twig' %}
 
+{% set header_description %}
+    Créez ou modifiez une aide contextuelle pour une page spécifique.
+{% endset %}
+
 {% block header %}{{ help.id ? 'Modifier' : 'Créer' }} une aide{% endblock %}
 
 {% block content %}
     <div class="w-full">
         <div class="space-y-6">
-            <!-- Header avec titre -->
-            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 flex items-center gap-3">
-                <twig:UX:Icon name="mdi:book-open-outline" class="h-8 w-8 text-blue-600 dark:text-blue-400" />
-                {{ help.id ? 'Modifier l\'aide contextuelle' : 'Nouvelle aide contextuelle' }}
-            </h1>
 
             <!-- Formulaire dans une card -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
@@ -20,9 +19,6 @@
             </div>
         </div>
     </div>
-
-    {# Composant de gestion des images (modal) #}
-    {{ component('help_image_manager', { showModal: true, editorTextarea: 'textarea[name="help[content]"]' }) }}
 
     <script src="/js/editor_helpers.js"></script>
 {% endblock %}

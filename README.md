@@ -11,14 +11,11 @@ Un outil pour accompagner les universités dans la rédaction de l'offre de form
 
 Le guide d'installation complet (développement Docker/Makefile + production) est disponible ici:
 
-- [`install.md`](install.md)
+- [`/docs/ops/install.md`](docs/ops/install.md)
 
 ## Documentation
 
-- [`doc-api.md`](doc-api.md)
-- [`dpe.md`](dpe.md)
-- [`Update_BDD.md`](Update_BDD.md)
-- [`Recopie_FicheMatiere.md`](Recopie_FicheMatiere.md)
+- [`/docs`](/docs)
 
 ## ORéBUT et ORéOF
 

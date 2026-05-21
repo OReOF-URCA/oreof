@@ -1,129 +1,143 @@
 {% extends 'base.html.twig' %}
 
-{# CACHE INVALIDATION: 2026-05-07 11:34:00 - FIXED ROUTE GENERATION - TAILWIND MIGRATION #}
+{% set header_description %}
+    Créez et gérez les aides contextuelles pour chaque page de l'application.
+{% endset %}
 
-{% block header %}Gestion des Aides{% endblock %}
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {
+            href:'',
+            title: 'Administration',
+        }
+    ]}) }}
+{% endblock %}
+
+{% block header %}
+    Gestion des Aides contextuelles
+{% endblock %}
+
+{% block bouton_header %}
+    <twig:Button
+            label="Galerie d'images"
+            variant="secondary"
+            icon="mdi:image-multiple-outline"
+            size="sm"
+            onclick="toggleHelpImagesModal()"
+            tooltip="Gérer la galerie d'images pour les aides"
+            class="mx-2"
+    />
+    <twig:Button
+            label="Ajouter une aide"
+            variant="success"
+            icon="icon:add"
+            size="sm"
+            href="{{ path('app_help_new') }}"
+            tooltip="Créer une nouvelle aide pour une page"
+            class="mx-2"
+    />
+{% endblock %}
 
 {% block content %}
-    {{ include('communs/_breadcrumb.html.twig', {liens: [{title: 'Gestion des Aides'}]}) }}
-
-    <div class="w-full">
-        <div class="space-y-6">
-            <!-- Header avec titre et actions -->
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 flex items-center gap-3">
-                    <twig:UX:Icon name="icon:question" class="h-8 w-8 text-cyan-600 dark:text-cyan-400" />
-                    Gestion des Aides contextuelles
-                </h1>
-
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <button type="button"
-                            class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition"
-                            onclick="toggleHelpImagesModal()"
-                            title="Gérer la galerie d'images pour les aides">
-                        <twig:UX:Icon name="mdi:image-multiple-outline" class="h-5 w-5" />
-                        <span>Galerie d'images</span>
-                    </button>
-
-                    <a href="{{ path('app_help_new') }}"
-                       class="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 transition"
-                       title="Créer une nouvelle aide pour une page">
-                        <twig:UX:Icon name="ic:round-plus" class="h-5 w-5" />
-                        <span>Ajouter une aide</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Tableau de gestion des aides -->
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
-                                <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Statut</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Page (Route)</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Titre</th>
-                                <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Centres</th>
-                                <th class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-slate-50">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-                            {% for help in helps %}
-                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition">
-                                    <td class="px-4 py-3">
-                                        {% if help.isActive %}
-                                            <span class="inline-block px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Actif</span>
-                                        {% else %}
-                                            <span class="inline-block px-2.5 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">Inactif</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-4 py-3 align-middle">
-                                        <code class="px-2.5 py-1 rounded bg-slate-100 text-slate-900 font-mono text-xs dark:bg-slate-800 dark:text-slate-100">{{ help.routeSlug }}</code>
-                                    </td>
-                                    <td class="px-4 py-3 align-middle font-semibold text-slate-900 dark:text-slate-50">{{ help.title }}</td>
-                                    <td class="px-4 py-3 align-middle">
-                                        {% if help.centresShow|length > 0 %}
-                                            <div class="flex flex-wrap gap-1">
-                                                {% for centre in help.centresShow %}
-                                                    {% if centre == 'cg_composante' %}
-                                                        <span class="inline-block px-2.5 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">Composante</span>
-                                                    {% elseif centre == 'cg_etablissement' %}
-                                                        <span class="inline-block px-2.5 py-1 text-xs font-semibold rounded-full bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400">Établissement</span>
-                                                    {% elseif centre == 'cg_formation' %}
-                                                        <span class="inline-block px-2.5 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Formation</span>
-                                                    {% elseif centre == 'cg_parcours' %}
-                                                        <span class="inline-block px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-200">Parcours</span>
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </div>
-                                        {% else %}
-                                            <span class="text-slate-500 dark:text-slate-400 italic">Tous les centres</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-4 py-3 align-middle">
-                                        <div class="flex justify-end gap-2">
-                                            {% set previewUrl = previewUrls[help.id] ?? null %}
-                                            {% if previewUrl %}
-                                                <a href="{{ previewUrl }}"
-                                                   class="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition"
-                                                   title="Voir la page">
-                                                    <twig:UX:Icon name="wordpress:external" class="h-5 w-5" />
-                                                </a>
-                                            {% else %}
-                                                <button type="button"
-                                                        class="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-slate-500"
-                                                        title="Route avec paramètres obligatoires : aperçu direct indisponible"
-                                                        disabled>
-                                                    <twig:UX:Icon name="wordpress:external" class="h-5 w-5" />
-                                                </button>
-                                            {% endif %}
-
-                                            <a href="{{ path('app_help_edit', {'id': help.id}) }}"
-                                               class="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition"
-                                               title="Modifier le contenu de cette aide">
-                                                <twig:UX:Icon name="icon:edit" class="h-5 w-5" />
-                                            </a>
-
-                                            <form method="post" action="{{ path('app_help_delete', {'id': help.id}) }}" onsubmit="return confirm('Vraiment supprimer cette aide ?');" class="inline">
-                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ help.id) }}">
-                                                <button type="submit"
-                                                        class="inline-flex items-center justify-center h-9 w-9 rounded-lg border border-slate-300 bg-white text-red-700 hover:bg-red-50 dark:border-slate-600 dark:bg-slate-800 dark:text-red-400 dark:hover:bg-red-900/20 transition"
-                                                        title="Supprimer définitivement cette aide">
-                                                    <twig:UX:Icon name="boxicons:trash" class="h-5 w-5" />
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                <tr class="border-b border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
+                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Statut</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Page (Route)</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Titre</th>
+                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Centres</th>
+                    <th class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-slate-50">Actions</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                {% for help in helps %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                        <td class="px-4 py-3">
+                            {% if help.isActive %}
+                                <twig:Badge label="Actif" variant="success" icon="icon:check" size="sm" />
                             {% else %}
-                                <tr>
-                                    <td colspan="5" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">Aucune aide configurée pour le moment.</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                <twig:Badge label="Inactif" variant="danger" icon="icon:close" size="sm" />
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 align-middle">
+                            <code class="px-2.5 py-1 rounded bg-slate-100 text-slate-900 font-mono text-xs dark:bg-slate-800 dark:text-slate-100">{{ help.routeSlug }}</code>
+                        </td>
+                        <td class="px-4 py-3 align-middle font-semibold text-slate-900 dark:text-slate-50">{{ help.title }}</td>
+                        <td class="px-4 py-3 align-middle">
+                            {% if help.centresShow|length > 0 %}
+                                <div class="flex flex-wrap gap-1">
+                                    {% for centre in help.centresShow %}
+                                        {% if centre == 'cg_composante' %}
+                                            <twig:Badge label="Composante" variant="info" size="sm" />
+                                        {% elseif centre == 'cg_etablissement' %}
+                                            <twig:Badge label="Établissement" variant="info" size="sm" />
+                                        {% elseif centre == 'cg_formation' %}
+                                            <twig:Badge label="Formation" variant="success" size="sm" />
+                                        {% elseif centre == 'cg_parcours' %}
+                                            <twig:Badge label="Parcours" variant="secondary" size="sm" />
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span class="text-slate-500 dark:text-slate-400 italic">Tous les centres</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 align-middle">
+                            <div class="flex justify-end gap-2">
+                                {% set previewUrl = previewUrls[help.id] ?? null %}
+                                {% if previewUrl %}
+                                    <twig:Button
+                                            icon="wordpress:external"
+                                            variant="info"
+                                            size="md"
+                                            href="{{ previewUrl }}"
+                                            tooltip="Voir la page"
+                                    />
+                                {% else %}
+                                    <button type="button"
+                                            class="inline-flex items-center justify-center h-9 w-9 rounded-md border border-slate-300 bg-slate-200 text-slate-400 cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-slate-500 disabled:opacity-50"
+                                            title="Route avec paramètres obligatoires : aperçu direct indisponible"
+                                            disabled
+                                            aria-label="Aperçu indisponible">
+                                        <twig:UX:Icon name="wordpress:external" class="h-4 w-4" />
+                                    </button>
+                                {% endif %}
+
+                                <twig:Button
+                                        icon="icon:edit"
+                                        variant="warning"
+                                        size="md"
+                                        href="{{ path('app_help_edit', {'id': help.id}) }}"
+                                        tooltip="Modifier cette aide"
+                                />
+
+                                <form method="post"
+                                      action="{{ path('app_help_delete', {'id': help.id}) }}"
+                                      onsubmit="return confirm('Vraiment supprimer cette aide ?');"
+                                      class="inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ help.id) }}">
+                                    <twig:Button
+                                            type="submit"
+                                            icon="ph:trash-light"
+                                            variant="danger"
+                                            size="md"
+                                            tooltip="Supprimer cette aide"
+                                    />
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
+                            Aucune aide configurée pour le moment.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -142,7 +156,7 @@
                         Galerie d'images des aides
                     </h2>
                     <button type="button"
-                            class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
+                            class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 focus:outline-none"
                             onclick="closeHelpImagesModal()"
                             aria-label="Fermer">
                         <twig:UX:Icon name="basil:cross-solid" class="h-6 w-6" />
@@ -151,7 +165,6 @@
 
                 <!-- Modal body -->
                 <div class="px-6 py-4">
-                    {# Composant de gestion des images #}
                     {{ component('help_image_manager', { showModal: false, editorTextarea: '' }) }}
                 </div>
             </div>
