@@ -271,5 +271,54 @@
                 </div>
             </div>
         </section>
+
+        {# Section Composant : Spinner #}
+        <section class="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Spinner</h2>
+                <p class="text-slate-600 text-sm">Composant d’indication de chargement avec variantes de couleur et tailles.</p>
+            </div>
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Tailles (size)</h3>
+                    <p class="text-xs text-slate-500 mb-3">size : sm / md / lg</p>
+                    <div class="flex items-center gap-6">
+                        <twig:Spinner size="sm" variant="primary" />
+                        <twig:Spinner size="md" variant="primary" />
+                        <twig:Spinner size="lg" variant="primary" />
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Variantes de couleur (variant)</h3>
+                    <p class="text-xs text-slate-500 mb-3">variant : primary / success / warning / danger / info / secondary</p>
+                    <div class="flex flex-wrap items-center gap-6">
+                        <twig:Spinner size="md" variant="primary" />
+                        <twig:Spinner size="md" variant="success" />
+                        <twig:Spinner size="md" variant="warning" />
+                        <twig:Spinner size="md" variant="danger" />
+                        <twig:Spinner size="md" variant="info" />
+                        <twig:Spinner size="md" variant="secondary" />
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Avec libellé</h3>
+                    <p class="text-xs text-slate-500 mb-3">label : texte d’accessibilité / aide visuelle optionnelle</p>
+                    <div class="flex items-center gap-3">
+                        <twig:Spinner size="md" variant="primary" label="Chargement..." />
+                        <span class="text-sm text-slate-600">Chargement en cours</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-slate-900 text-slate-200 p-4 rounded-md text-xs overflow-x-auto"><code>&lt;twig:Spinner size="md" variant="primary" /&gt;
+&lt;twig:Spinner size="sm" variant="secondary" label="Chargement..." /&gt;
+&lt;twig:Spinner size="lg" variant="success" /&gt;</code></pre>
+                </div>
+            </div>
+        </section>
     </div>
 {% endblock %}

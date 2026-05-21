@@ -1,0 +1,29 @@
+{#
+Composant Spinner — exemples :
+  <twig:Spinner />
+  <twig:Spinner size="sm" />
+  <twig:Spinner size="lg" variant="primary" />
+  <twig:Spinner size="md" variant="danger" label="Chargement..." />
+#}
+
+{% set sizeClass = {
+    'sm': 'h-4 w-4',
+    'md': 'h-6 w-6',
+    'lg': 'h-8 w-8',
+}[size] ?? 'h-6 w-6' %}
+
+{% set variantClass = {
+    'primary': 'text-blue-600',
+    'success': 'text-emerald-600',
+    'warning': 'text-amber-600',
+    'danger': 'text-rose-600',
+    'info': 'text-cyan-600',
+    'secondary': 'text-slate-600',
+}[variant] ?? 'text-slate-600' %}
+
+{% set classes = 'inline-flex items-center justify-center animate-spin ' ~ sizeClass ~ ' ' ~ variantClass ~ (extraClass ? ' ' ~ extraClass : '') %}
+
+<div class="{{ classes }}" role="status" aria-live="polite" {{- attributes -}}>
+    {{ ux_icon('tabler:loader-2', {class: 'h-full w-full', 'aria-hidden': 'true'}) }}
+    <span class="sr-only">{{ label|default('Chargement...') }}</span>
+</div>
