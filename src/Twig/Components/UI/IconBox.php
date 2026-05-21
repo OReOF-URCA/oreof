@@ -41,12 +41,12 @@ class IconBox
         $color = $this->getResolvedColor();
 
         return match ($color) {
-            'emerald' => 'bg-emerald-100 text-emerald-700',
-            'red' => 'bg-red-100 text-red-700',
-            'amber' => 'bg-amber-100 text-amber-700',
-            'blue' => 'bg-blue-100 text-blue-700',
-            'slate' => 'bg-slate-100 text-slate-700',
-            default => 'bg-slate-100 text-slate-700',
+            'success' => 'bg-success-100 text-success-500',
+            'danger' => 'bg-danger-100 text-red-700',
+            'warning' => 'bg-warning-100 text-warning-500',
+            'primary' => 'bg-primary-100 text-primary-600',
+            'secondary' => 'bg-secondary-100 text-secondary-500',
+            default => 'bg-secondary-100 text-secondary-500',
         };
     }
 
@@ -57,11 +57,11 @@ class IconBox
         }
 
         return match ($this->variant) {
-            'success' => 'emerald',
-            'danger' => 'red',
-            'warning' => 'amber',
-            'info' => 'blue',
-            default => 'slate',
+            'success' => 'success',
+            'danger' => 'danger',
+            'warning' => 'warning',
+            'info' => 'info',
+            default => 'secondary',
         };
     }
 }
