@@ -11,7 +11,7 @@
         </td>
         <td class="{{ valueCellClass }}">
             {{ ec.erreur|displayErreurs }}
-            {{ ec.global|badgeValide }}</td>
+            {{ component('Badge', { dto: ec.global|badgeValideDto }) }}</td>
     </tr>
     {% if ec.enfants is defined %}
         {% for ece in ec.enfants %}
@@ -20,7 +20,7 @@
                     EC {{ ece.display }}</td>
                 <td class="{{ valueCellClass }}">
                     {{ ece.erreur|displayErreurs }}
-                    {{ ece.global|badgeValide }}</td>
+                    {{ component('Badge', { dto: ece.global|badgeValideDto }) }}</td>
             </tr>
         {% endfor %}
     {% endif %}

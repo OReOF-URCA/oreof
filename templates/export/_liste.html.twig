@@ -51,7 +51,7 @@
                         {% endif %}
                     </td>
                     <td class="px-4 py-3">{{ component('remplissage_progress', { value: parcours.remplissage }) }}</td>
-                    <td class="px-4 py-3">{{ dpe.etatValidation|badgeDpe }}</td>
+                    <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: dpe.etatValidation|badgeDpeDto }) }}</td>
                 </tr>
             {% else %}
                 <tr>

@@ -71,9 +71,9 @@
                                             <span class="inline-flex w-full items-center justify-center rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-300">Parcours non ouvert</span>
                                         </td>
                                     {% else %}
-                                        <td class="px-4 py-3">{{ dpesParcours[parcours.id].etatValidation|badgeDpe }}</td>
-                                        <td class="px-4 py-3">{{ parcours.etatStep(3)|badgeStep }}</td>
-                                        <td class="px-4 py-3">{{ parcours.etatStep(4)|badgeStep }}</td>
+                                        <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: dpesParcours[parcours.id].etatValidation|badgeDpeDto }) }}</td>
+                                        <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(3)|badgeStepDto }) }}</td>
+                                        <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(4)|badgeStepDto }) }}</td>
                                         <td class="px-4 py-3">{{ component('historique_pv', {parcours:parcours}) }}</td>
                                         <td class="px-4 py-3">{{ component('remplissage_progress', { value: parcours.remplissage }) }}</td>
                                     {% endif %}
@@ -143,9 +143,9 @@
                                             <span class="inline-flex w-full items-center justify-center rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-300">Parcours non ouvert</span>
                                         </td>
                                     {% else %}
-                                        <td class="px-4 py-3">{{ dpesParcours[parcours.id].etatValidation|badgeDpe }}</td>
-                                        <td class="px-4 py-3">{{ parcours.etatStep(3)|badgeStep }}</td>
-                                        <td class="px-4 py-3">{{ parcours.etatStep(4)|badgeStep }}</td>
+                                        <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: dpesParcours[parcours.id].etatValidation|badgeDpeDto }) }}</td>
+                                        <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(3)|badgeStepDto }) }}</td>
+                                        <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(4)|badgeStepDto }) }}</td>
                                         <td class="px-4 py-3">{{ component('historique_pv', {parcours:parcours}) }}</td>
                                         <td class="px-4 py-3">{{ component('remplissage_progress', { value: parcours.remplissage }) }}</td>
                                     {% endif %}

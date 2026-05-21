@@ -58,7 +58,7 @@
                         </td>
                     {% endif %}
 
-                    <td class="px-4 py-3">{{ fiche.etatFiche|badgeFiche }}</td>
+                    <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: fiche.etatFiche|badgeFicheDto }) }}</td>
                     <td class="px-4 py-3">{{ component('remplissage_progress', { value: fiche.remplissage }) }}</td>
                     <td class="px-4 py-3 text-right">
                         <twig:Button

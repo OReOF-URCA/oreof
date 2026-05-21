@@ -49,8 +49,8 @@
                 <td>{{ type_diplome.codeApogee|displayOrBadge }}</td>
                 <td>S{{ type_diplome.semestreDebut }}</td>
                 <td>S{{ type_diplome.semestreFin }}</td>
-                <td>{{ type_diplome.hasStage|badgeBoolean }}</td>
-                <td>{{ type_diplome.hasMemoire|badgeBoolean }}</td>
+                <td>{{ component('Badge', { dto: type_diplome.hasStage|badgeBooleanDto }) }}</td>
+                <td>{{ component('Badge', { dto: type_diplome.hasMemoire|badgeBooleanDto }) }}</td>
                 <td class="text-end">
                     <a href="{{ path('app_prototype_type_diplome_edit', {id: type_diplome.id}) }}"
                        class="btn btn-sm text-warning"

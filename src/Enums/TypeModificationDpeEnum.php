@@ -62,15 +62,25 @@ enum TypeModificationDpeEnum: string implements BadgeEnumInterface
         };
     }
 
-    public function getBadge(): string
+    public function getBadgeVariant(): string
     {
         return match ($this) {
-            self::OUVERT => 'bg-success',
-            self::ATTENTE => 'bg-primary',
-            self::CREATION, self::ANNULATION_REOUVERTURE => 'bg-info',
-            self::MODIFICATION, self::MODIFICATION_PARCOURS, self::MODIFICATION_INTITULE, self::MODIFICATION_MCCC, self::MODIFICATION_TEXTE, self::MODIFICATION_MCCC_TEXTE => 'bg-warning',
-            default => 'bg-danger',
+            self::OUVERT => 'success',
+            self::ATTENTE => 'primary',
+            self::CREATION, self::ANNULATION_REOUVERTURE => 'info',
+            self::MODIFICATION, self::MODIFICATION_PARCOURS, self::MODIFICATION_INTITULE, self::MODIFICATION_MCCC, self::MODIFICATION_TEXTE, self::MODIFICATION_MCCC_TEXTE => 'warning',
+            default => 'danger',
         };
+    }
+
+    /**
+     * @deprecated Utiliser getBadgeVariant() et le composant Twig Badge.
+     */
+    public function getBadge(): string
+    {
+        @trigger_error(sprintf('%s::getBadge() is deprecated, use %s::getBadgeVariant() and the Twig Badge component instead.', self::class, self::class), E_USER_DEPRECATED);
+
+        return $this->getBadgeVariant();
     }
 
     public static function listeEtatParcours(): array

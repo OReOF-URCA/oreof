@@ -12,23 +12,23 @@
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">{{ 'formation_step1.labels.responsableMention'|trans({}, 'form') }}</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.respFormation|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.respFormation|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">{{ 'formation_step1.labels.localisationMention.label'|trans({}, 'form') }}</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.localisations|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.localisations|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">{{ 'formation_step1.labels.composantesInscription.label'|trans({}, 'form') }}</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.composantesInscriptions|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.composantesInscriptions|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">{{ 'formation_step1.labels.regimeInscription.label'|trans({}, 'form') }}</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.regimeInscription|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.regimeInscription|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">{{ 'formation_step1.labels.modalitesAlternance'|trans({}, 'form') }}</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.modaliteAlternance|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.modaliteAlternance|badgeValideDto }) }}</td>
             </tr>
 
             <tr>
@@ -36,26 +36,26 @@
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">{{ 'formation_step3.labels.hasParcours'|trans({}, 'form') }}</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.hasParcours|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.hasParcours|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">{{ 'form.labels.objectifsFormation'|trans({}, 'form') }}</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.objectifsFormation|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.objectifsFormation|badgeValideDto }) }}</td>
             </tr>
 
             {% if formation.isHasparcours == true %}
                 <tr class="{{ dataRowClass }}">
                     <td class="{{ labelCellClass }}">Parcours présent ?</td>
-                    <td class="{{ valueCellClass }}">{{ valide.etat.erreurHasParcours|badgeValide }}</td>
+                    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.erreurHasParcours|badgeValideDto }) }}</td>
                 </tr>
             {% else %}
                 <tr class="{{ dataRowClass }}">
                     <td class="{{ labelCellClass }}">Parcours unique présent ?</td>
-                    <td class="{{ valueCellClass }}">{{ valide.etat.erreurHasParcours|badgeValide }}</td>
+                    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.erreurHasParcours|badgeValideDto }) }}</td>
                 </tr>
                 <tr class="{{ dataRowClass }}">
                     <td class="{{ labelCellClass }}">Etat du parcours unique de la formation</td>
-                    <td class="{{ valueCellClass }}">{{ valide.etat.valideParcours|badgeValide }}</td>
+                    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.valideParcours|badgeValideDto }) }}</td>
                 </tr>
 
                 {% if valide.etat.etatParcoursDefaut is defined %}
@@ -64,19 +64,19 @@
                     </tr>
                     <tr class="{{ dataRowClass }}">
                         <td class="{{ labelCellClass }}">Objectifs de la formation</td>
-                        <td class="{{ valueCellClass }}">{{ valide.etat.objectifsFormation|badgeValide }}</td>
+                        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.objectifsFormation|badgeValideDto }) }}</td>
                     </tr>
                     <tr class="{{ dataRowClass }}">
                         <td class="{{ labelCellClass }}">Résultats attendus de la formation</td>
-                        <td class="{{ valueCellClass }}">{{ valide.etat.resultatsAttendus|badgeValide }}</td>
+                        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.resultatsAttendus|badgeValideDto }) }}</td>
                     </tr>
                     <tr class="{{ dataRowClass }}">
                         <td class="{{ labelCellClass }}">Contenu de la formation</td>
-                        <td class="{{ valueCellClass }}">{{ valide.etat.contenuFormation|badgeValide }}</td>
+                        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.contenuFormation|badgeValideDto }) }}</td>
                     </tr>
                     <tr class="{{ dataRowClass }}">
                         <td class="{{ labelCellClass }}">Rythme de la formation</td>
-                        <td class="{{ valueCellClass }}">{{ valide.etat.rythmeFormation|badgeValide }}</td>
+                        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.rythmeFormation|badgeValideDto }) }}</td>
                     </tr>
 
                     {{ include('parcours_state/_commun.html.twig', {valide: valide.etat.etatParcoursDefaut, parcours: formation.parcours[0]}) }}

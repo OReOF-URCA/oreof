@@ -52,7 +52,7 @@
 
                     <div class="mt-2 flex flex-wrap items-center gap-2 text-xs">
                         {% if source is defined and source != 'codification' and ec.elementConstitutif.ficheMatiere != null %}
-                            {{ ec.elementConstitutif.ficheMatiere.etatFiche|badgeFiche }}
+                            {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
                         {% endif %}
 
                         {% if ec.elementConstitutif.natureUeEc is defined

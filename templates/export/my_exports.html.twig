@@ -40,7 +40,7 @@
             <tr>
                 <td>{{ job.type }}</td>
                 <td>{{ job.parameters|json_encode }}</td>
-                <td>{{ job.status|badgeStatus }}</td>
+                <td>{{ component('Badge', { dto: job.status|badgeStatusDto }) }}</td>
                 <td>{{ job.startedAt ? job.startedAt|date('Y-m-d H:i:s') : '-' }}</td>
                 <td>{{ job.finishedAt ? job.finishedAt|date('Y-m-d H:i:s') : '-' }}</td>
                 <td>{{ job.durationSec }}</td>

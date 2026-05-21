@@ -9,33 +9,54 @@
 
 namespace App\Twig\Components\UI;
 
+use App\DTO\BadgeView;
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
+use Symfony\UX\TwigComponent\Attribute\PostMount;
 
 #[AsTwigComponent('Badge', template: 'components/_ui/badge.html.twig')]
 final class Badge
 {
+    public ?BadgeView $dto = null;
+
     /** primary | success | warning | danger | info | secondary */
-    public string $variant = 'secondary';
+    public ?string $variant = null;
 
     /** sm | md */
-    public string $size = 'sm';
+    public ?string $size = null;
 
     /** soft = fond teinte / solid = fond plein */
-    public bool $soft = true;
+    public ?bool $soft = null;
 
     /** rounded-full si true */
-    public bool $pill = true;
+    public ?bool $pill = null;
 
     /** Libelle du badge */
-    public string $label = '';
+    public ?string $label = null;
 
     /** Icone optionnelle (ux_icon) */
-    public string $icon = '';
+    public ?string $icon = null;
 
     /** Icone a droite du libelle */
-    public bool $iconEnd = false;
+    public ?bool $iconEnd = null;
 
     /** Classes CSS supplementaires */
-    public string $extraClass = '';
+    public ?string $extraClass = null;
+
+    #[PostMount]
+    public function mount(): void
+    {
+        if ($this->dto === null) {
+            return;
+        }
+
+        $this->label ??= $this->dto->label;
+        $this->variant ??= $this->dto->variant;
+        $this->size ??= $this->dto->size;
+        $this->soft ??= $this->dto->soft;
+        $this->pill ??= $this->dto->pill;
+        $this->icon ??= $this->dto->icon;
+        $this->iconEnd ??= $this->dto->iconEnd;
+        $this->extraClass ??= $this->dto->extraClass;
+    }
 }
 

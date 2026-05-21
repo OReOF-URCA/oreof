@@ -82,13 +82,13 @@
             <td>{{ parcour.libelle }} {{ parcour.typeParcours|badgeTypeParcours }}</td>
             <td>{{ parcour.localisation != null ? parcour.localisation.libelle : 'Non défini' }}</td>
             <td>
-                {{ parcour.etatDpeParcours|badgeDpe }}
+                {{ include('communs/_badge_collection.html.twig', { badges: parcour.etatDpeParcours|badgeDpeDto }) }}
             </td>
             <td>
-                {{ parcour.etatStep(3)|badgeStep }}
+                {{ component('Badge', { dto: parcour.etatStep(3)|badgeStepDto }) }}
             </td>
             <td>
-                {{ parcour.etatStep(4)|badgeStep }}
+                {{ component('Badge', { dto: parcour.etatStep(4)|badgeStepDto }) }}
             </td>
             <td>
                 {{ component('historique_pv', {parcours:parcour}) }}

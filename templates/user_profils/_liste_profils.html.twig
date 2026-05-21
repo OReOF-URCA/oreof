@@ -28,7 +28,7 @@
                 {% for userProfil in userProfils|filter(userProfil => ((userProfil.campagneCollecte != null and userProfil.campagneCollecte.id == user_data.campagneCollecte.id )) or userProfil.campagneCollecte == null) %}
                     <tr class="transition-colors hover:bg-slate-50">
                         <td class="px-4 py-3 text-sm text-slate-700">{{ userProfil.profil != null ? userProfil.profil.libelle : 'Non précisé' }}</td>
-                        <td class="px-4 py-3 text-sm text-slate-700">{{ userProfil|badgeTypeCentre }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ component('Badge', { dto: userProfil|badgeTypeCentreDto }) }}</td>
                         <td class="px-4 py-3 text-sm text-slate-700">{{ userProfil|centre }}</td>
                         <td class="px-4 py-3 text-right">
                             <button

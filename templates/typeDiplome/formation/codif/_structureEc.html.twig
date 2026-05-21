@@ -17,7 +17,7 @@
 
 
             {% if source is defined and source != 'codification' %}
-            {{ ec.elementConstitutif.ficheMatiere.etatFiche|badgeFiche }}
+                {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
                 {% endif %}
         {% else %}
             <span class="show_versioning d-none">{{ diffEc ? diffEc.libelle|displayDiff : '' }}</span>

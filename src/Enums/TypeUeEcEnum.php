@@ -53,12 +53,22 @@ enum TypeUeEcEnum: string implements BadgeEnumInterface
         };
     }
 
-    public function getBadge(): string
+    public function getBadgeVariant(): string
     {
         return match ($this) {
             self::STAGE => 'primary',
             self::PROJET => 'info',
             self::NORMAL => 'success',
         };
+    }
+
+    /**
+     * @deprecated Utiliser getBadgeVariant() et le composant Twig Badge.
+     */
+    public function getBadge(): string
+    {
+        @trigger_error(sprintf('%s::getBadge() is deprecated, use %s::getBadgeVariant() and the Twig Badge component instead.', self::class, self::class), E_USER_DEPRECATED);
+
+        return $this->getBadgeVariant();
     }
 }

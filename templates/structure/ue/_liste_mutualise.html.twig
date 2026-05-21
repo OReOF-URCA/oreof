@@ -33,7 +33,7 @@
                 <td class="px-3 py-2 text-slate-700">{{ u.parcours != null and u.parcours.formation != null ? u.parcours.formation.composantePorteuse.libelle : 'Erreur formation' }}</td>
                 <td class="px-3 py-2 text-slate-700">{{ u.parcours != null and u.parcours.formation != null ? u.parcours.formation.display : 'Erreur formation' }}</td>
                 <td class="px-3 py-2 text-slate-700">{{ u.parcours != null and u.parcours.formation != null ? u.parcours.libelle : 'Erreur formation' }}</td>
-                <td class="px-3 py-2">{{ u|isUeUtilisee|badgeBoolean }}</td>
+                <td class="px-3 py-2">{{ component('Badge', { dto: (u|isUeUtilisee)|badgeBooleanDto }) }}</td>
                 <td class="px-3 py-2 text-right">
                     <button
                             {{ stimulus_action('ue--mutualise', 'delete', 'click', {ue: u.id}) }}

@@ -245,7 +245,7 @@
 
                         {# État #}
                         <td class="px-4 py-3 text-center">
-                            {{ ficheMatiere.etatFiche|badgeFiche }}
+                            {{ include('communs/_badge_collection.html.twig', { badges: ficheMatiere.etatFiche|badgeFicheDto }) }}
                         </td>
 
                         {# Utilisé #}

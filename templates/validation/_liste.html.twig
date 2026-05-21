@@ -94,11 +94,11 @@
                                 {% endif %}
                             </td>
                             <td class="px-4 py-3">
-                                {{ dpeParcours.etatDemande != null ? dpeParcours.etatDemande.niveauModification|badgeTypeModification : null|badgeTypeModification }}
+                                {{ component('Badge', { dto: (dpeParcours.etatDemande != null ? dpeParcours.etatDemande.niveauModification : null)|badgeTypeModificationDto }) }}
                             </td>
-                            <td class="px-4 py-3">{{ dpeParcours.etatValidation|badgeDpe }}</td>
-                            <td class="px-4 py-3">{{ parcours.etatStep(3)|badgeStep }}</td>
-                            <td class="px-4 py-3">{{ parcours.etatStep(4)|badgeStep }}</td>
+                            <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: dpeParcours.etatValidation|badgeDpeDto }) }}</td>
+                            <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(3)|badgeStepDto }) }}</td>
+                            <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(4)|badgeStepDto }) }}</td>
                             {% if hasConseil %}
                                 <td class="px-4 py-3">{{ component('historique_pv', {parcours: parcours}) }}</td>
                             {% endif %}

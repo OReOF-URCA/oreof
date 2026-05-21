@@ -5,15 +5,24 @@ Composant Badge — exemples :
   <twig:Badge :label="value ? 'Oui' : 'Non'" :variant="value ? 'success' : 'danger'" />
 #}
 
+{% set resolvedSize = size ?? 'sm' %}
+{% set resolvedVariant = variant ?? 'secondary' %}
+{% set resolvedSoft = soft ?? true %}
+{% set resolvedPill = pill ?? true %}
+{% set resolvedLabel = label ?? '' %}
+{% set resolvedIcon = icon ?? '' %}
+{% set resolvedIconEnd = iconEnd ?? false %}
+{% set resolvedExtraClass = extraClass ?? '' %}
+
 {% set sizeClass = {
     'sm': 'px-2 py-0.5 text-xs gap-1',
     'md': 'px-2.5 py-1 text-sm gap-1.5',
-}[size] ?? 'px-2 py-0.5 text-xs gap-1' %}
+}[resolvedSize] ?? 'px-2 py-0.5 text-xs gap-1' %}
 
 {% set iconSizeClass = {
     'sm': 'h-3 w-3',
     'md': 'h-3.5 w-3.5',
-}[size] ?? 'h-3 w-3' %}
+}[resolvedSize] ?? 'h-3 w-3' %}
 
 {% set softColors = {
     'primary':   'border border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
@@ -33,14 +42,14 @@ Composant Badge — exemples :
     'secondary': 'border border-transparent bg-slate-500 text-white',
 } %}
 
-{% set colorClass = soft ? (softColors[variant] ?? softColors['secondary']) : (solidColors[variant] ?? solidColors['secondary']) %}
-{% set radiusClass = pill ? 'rounded-full' : 'rounded-md' %}
-{% set classes = 'inline-flex items-center font-semibold ' ~ radiusClass ~ ' ' ~ sizeClass ~ ' ' ~ colorClass ~ (extraClass ? ' ' ~ extraClass : '') %}
+{% set colorClass = resolvedSoft ? (softColors[resolvedVariant] ?? softColors['secondary']) : (solidColors[resolvedVariant] ?? solidColors['secondary']) %}
+{% set radiusClass = resolvedPill ? 'rounded-full' : 'rounded-md' %}
+{% set classes = 'inline-flex items-center font-semibold ' ~ radiusClass ~ ' ' ~ sizeClass ~ ' ' ~ colorClass ~ (resolvedExtraClass ? ' ' ~ resolvedExtraClass : '') %}
 
 <span class="{{ classes }}" {{- attributes -}}>
-    {% if icon != '' and not iconEnd %}{{ ux_icon(icon, {class: iconSizeClass}) }}{% endif %}
-    {% if label != '' %}<span>{{ label }}</span>{% endif %}
+    {% if resolvedIcon != '' and not resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
+    {% if resolvedLabel != '' %}<span>{{ resolvedLabel }}</span>{% endif %}
     {% block content %}{% endblock %}
-    {% if icon != '' and iconEnd %}{{ ux_icon(icon, {class: iconSizeClass}) }}{% endif %}
+    {% if resolvedIcon != '' and resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
 </span>
 

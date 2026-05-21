@@ -10,7 +10,7 @@
     <tbody>
     {% for userProfil in userProfils %}
         <tr>
-            <td>{{ userProfil|badgeTypeCentre }}</td>
+            <td>{{ component('Badge', { dto: userProfil|badgeTypeCentreDto }) }}</td>
             <td>{{ userProfil|centre }}</td>
             <td>{{ userProfil.profil.libelle }}</td>
             <td><button {{ stimulus_action('centre', 'delete', 'click', {

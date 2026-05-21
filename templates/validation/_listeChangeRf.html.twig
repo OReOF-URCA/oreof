@@ -50,7 +50,7 @@
                     <td class="px-4 py-3">{{ demande.nouveauResponsable != null ? demande.nouveauResponsable.display : 'Non défini' }}</td>
                     <td class="px-4 py-3 whitespace-nowrap">{{ demande.dateDemande|date('d/m/Y H:i') }}</td>
                     <td class="px-4 py-3">{{ component('historique_date', {changeRf:demande, type:'change_rf', step:'soumis_cfvu'}) }}</td>
-                    <td class="px-4 py-3">{{ demande.etatDemande|badgeChangeRf }}</td>
+                    <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: demande.etatDemande|badgeChangeRfDto }) }}</td>
                     <td class="px-4 py-3">{{ component('historique_pv', {changeRf:demande, type:'change_rf'}) }}</td>
                     <td class="px-4 py-3">
                         <div class="flex flex-wrap justify-end gap-2">

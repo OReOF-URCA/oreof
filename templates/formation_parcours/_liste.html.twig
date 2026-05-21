@@ -29,7 +29,7 @@
             </td>
             <td class="px-4 py-3 text-sm">
                 <div class="flex items-center gap-2">
-                    {{ parcour.etatDpeParcours|badgeDpe }}
+                    {{ include('communs/_badge_collection.html.twig', { badges: parcour.etatDpeParcours|badgeDpeDto }) }}
                     {% if parcours.withCfvu is defined and parcours.withCfvu == true %}
                         <twig:Badge label="CFVU" variant="warning" :soft="true" size="sm"/>
                     {% endif %}

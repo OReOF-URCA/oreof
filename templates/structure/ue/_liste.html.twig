@@ -99,7 +99,7 @@
                                                     {% if ue.ueRaccrochee.ue != null %}
                                                         {{ ue.ueRaccrochee.ue.nbElementConstitutifs|badgeNb }}
                                                     {% else %}
-                                                        {{ 'Erreur UE raccrochée'|badge('danger') }}
+                                                        {{ component('Badge', { dto: 'Erreur UE raccrochée'|badgeDto('danger') }) }}
                                                     {% endif %}
                                                 {% else %}
                                                     {% if ue.ueEnfants|length == 0 %}
@@ -114,26 +114,24 @@
                                             <div class="text-muted text-small d-md-none">ue</div>
                                             {% if ue.ueRaccrochee != null %}
                                                 {% if ue.ueRaccrochee.ue != null %}
-                                                    {{ ue.ueRaccrochee.ue.typeUe != null ? ue.ueRaccrochee.ue.typeUe.libelle|badge('success') : 'Erreur, à compléter'|badge('danger') }}
+                                                    {{ ue.ueRaccrochee.ue.typeUe != null ? component('Badge', { dto: ue.ueRaccrochee.ue.typeUe.libelle|badgeDto('success') }) : component('Badge', { dto: 'Erreur, à compléter'|badgeDto('danger') }) }}
                                                 {% else %}
-                                                    {{ 'Erreur UE raccrochée'|badge('danger') }}
+                                                    {{ component('Badge', { dto: 'Erreur UE raccrochée'|badgeDto('danger') }) }}
                                                 {% endif %}
                                             {% else %}
-                                                {{ ue.typeUe != null ? ue.typeUe.libelle|badge('success') :
-                                                'Erreur, à compléter'|badge('danger') }}
+                                                {{ ue.typeUe != null ? component('Badge', { dto: ue.typeUe.libelle|badgeDto('success') }) : component('Badge', { dto: 'Erreur, à compléter'|badgeDto('danger') }) }}
                                             {% endif %}
                                         </div>
                                         <div class="col-md-2 d-flex flex-column justify-content-center">
                                             <div class="text-muted text-small d-md-none">ue</div>
                                             {% if ue.ueRaccrochee != null %}
                                                 {% if ue.ueRaccrochee.ue != null %}
-                                                    {{ ue.ueRaccrochee.ue.natureUeEc != null ? ue.ueRaccrochee.ue.natureUeEc.libelle|badge('success') : 'Erreur, à compléter'|badge('danger') }}
+                                                    {{ ue.ueRaccrochee.ue.natureUeEc != null ? component('Badge', { dto: ue.ueRaccrochee.ue.natureUeEc.libelle|badgeDto('success') }) : component('Badge', { dto: 'Erreur, à compléter'|badgeDto('danger') }) }}
                                                 {% else %}
-                                                    {{ 'Erreur UE raccrochée'|badge('danger') }}
+                                                    {{ component('Badge', { dto: 'Erreur UE raccrochée'|badgeDto('danger') }) }}
                                                 {% endif %}
                                             {% else %}
-                                                {{ ue.natureUeEc != null ? ue.natureUeEc.libelle|badge('success') :
-                                                'Erreur, à compléter'|badge('danger') }}
+                                                {{ ue.natureUeEc != null ? component('Badge', { dto: ue.natureUeEc.libelle|badgeDto('success') }) : component('Badge', { dto: 'Erreur, à compléter'|badgeDto('danger') }) }}
                                             {% endif %}
                                         </div>
 

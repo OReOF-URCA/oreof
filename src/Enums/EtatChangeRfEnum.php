@@ -9,7 +9,7 @@
 
 namespace App\Enums;
 
-enum EtatChangeRfEnum: string
+enum EtatChangeRfEnum: string implements BadgeEnumInterface
 {
 
 
@@ -44,5 +44,25 @@ enum EtatChangeRfEnum: string
             self::soumis_conseil, self::soumis_ses, self::soumis_cfvu, self::verification_pv => 'info',
             self::effectuee  => 'success',
         };
+    }
+
+    public function getLibelle(): string
+    {
+        return $this->libelle();
+    }
+
+    public function getBadgeVariant(): string
+    {
+        return $this->badge();
+    }
+
+    /**
+     * @deprecated Utiliser getBadgeVariant() et le composant Twig Badge.
+     */
+    public function getBadge(): string
+    {
+        @trigger_error(sprintf('%s::getBadge() is deprecated, use %s::getBadgeVariant() and the Twig Badge component instead.', self::class, self::class), E_USER_DEPRECATED);
+
+        return $this->getBadgeVariant();
     }
 }

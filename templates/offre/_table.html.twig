@@ -147,7 +147,7 @@
                         </td>
                         <td>
                             {% if formation.formation.hasParcours == false %}
-                                {{ formation.dpeParcours[0].etatReconduction|badgeTypeModification }}
+                                {{ component('Badge', { dto: formation.dpeParcours[0].etatReconduction|badgeTypeModificationDto }) }}
                             {% endif %}
                         </td>
                         <td>
@@ -219,7 +219,7 @@
                                 <td class="pl-5"
                                     colspan="3">{{ parcours.parcours.libelle }} {{ parcours.parcours.typeParcours|badgeTypeParcours }}</td>
                                 <td>{{ parcours.parcours.localisation != null ? parcours.parcours.localisation.libelle : 'erreur ville' }}</td>
-                                <td>{{ parcours.etatReconduction|badgeTypeModification }}</td>
+                                <td>{{ component('Badge', { dto: parcours.etatReconduction|badgeTypeModificationDto }) }}</td>
                                 <td>
                                     {{ include('offre/_select_offre.html.twig', {id: 'parcours_'~parcours.id, valeur: parcours.etatReconduction.value}) }}
                                 </td>

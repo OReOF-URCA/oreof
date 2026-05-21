@@ -24,19 +24,19 @@
     <tr>
         <td>Libellé de l'enseignement</td>
         <td>
-            {{ valide.etat.libelle|badgeValide }}
+            {{ component('Badge', { dto: valide.etat.libelle|badgeValideDto }) }}
         </td>
     </tr>
     <tr>
         <td>Libellé de l'enseignement en anglais</td>
         <td>
-            {{ valide.etat.libelleAnglais|badgeValide }}
+            {{ component('Badge', { dto: valide.etat.libelleAnglais|badgeValideDto }) }}
         </td>
     </tr>
     <tr>
         <td>Enseignement mutualisé ?</td>
         <td>
-            {{ valide.etat.mutualise|badgeValide }}
+            {{ component('Badge', { dto: valide.etat.mutualise|badgeValideDto }) }}
         </td>
     </tr>
     <tr>
@@ -45,7 +45,7 @@
     <tr>
         <td>Description de l'enseignement</td>
         <td>
-            {{ valide.etat.description|badgeValide }}
+            {{ component('Badge', { dto: valide.etat.description|badgeValideDto }) }}
             {{ valide.erreurs.description is defined ? valide.erreurs.description|displayErreurs : '' }}
 
         </td>
@@ -53,13 +53,13 @@
     <tr>
         <td>Langue enseignement dispensé</td>
         <td>
-            {{ valide.etat.langueDispense|badgeValide }}
+            {{ component('Badge', { dto: valide.etat.langueDispense|badgeValideDto }) }}
         </td>
     </tr>
     <tr>
         <td>Langue support de cours</td>
         <td>
-            {{ valide.etat.langueSupport|badgeValide }}
+            {{ component('Badge', { dto: valide.etat.langueSupport|badgeValideDto }) }}
         </td>
     </tr>
     <tr>
@@ -68,7 +68,7 @@
     <tr>
         <td>Objectifs</td>
         <td>
-            {{ valide.etat.objectifs|badgeValide }}
+            {{ component('Badge', { dto: valide.etat.objectifs|badgeValideDto }) }}
             {{ valide.erreurs.objectifs is defined ? valide.erreurs.objectifs|displayErreurs : '' }}
         </td>
     </tr>
