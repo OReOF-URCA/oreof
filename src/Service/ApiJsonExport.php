@@ -45,9 +45,9 @@ class ApiJsonExport
 
     public function generateApiVersioning(
         string $hostname,
-        SymfonyStyle $io,
+        SymfonyStyle $io = null,
         LheoXML $lheoXmlService,
-        bool    $isV2 = false,
+        bool         $isV2 = false,
     ): array
     {
         $dataJSON = [];
@@ -78,8 +78,7 @@ class ApiJsonExport
         if ($campagneCourante && $campagneCourante->isEnablePublication()) {
             $formationArray = $this->entityManager->getRepository(Formation::class)->findAll();
             $formationArray = array_filter($formationArray, function ($f) use ($campagneCourante) {
-                $parcoursCampagneActuelle = array_filter(
-                    $f->getParcours()->toArray(),
+                $parcoursCampagneActuelle = array_filter($f->getParcours()->toArray(),
                     function ($p) use ($campagneCourante) {
                         $dpeParcours = $p->getDpeParcours()?->last();
                         if ($dpeParcours instanceof DpeParcours) {
@@ -164,19 +163,16 @@ class ApiJsonExport
          */
         if ($campagneSuivante && $campagneSuivante->isEnablePublication()) {
             $formationArray = $this->entityManager->getRepository(Formation::class)->findAll();
-            $formationArray = array_filter(
-                $formationArray,
+            $formationArray = array_filter($formationArray,
                 function ($f) use ($campagneSuivante, $etatReconductionCampagneSuivante) {
-                    $parcoursCampagneSuivante = array_filter(
-                        $f->getParcours()->toArray(),
+                    $parcoursCampagneSuivante = array_filter($f->getParcours()->toArray(),
                         function ($p) use ($campagneSuivante, $etatReconductionCampagneSuivante) {
                             $dpeParcours = $p->getDpeParcours()?->last();
                             if ($dpeParcours instanceof DpeParcours) {
                                 return $dpeParcours->getCampagneCollecte()?->getId() === $campagneSuivante->getId()
                                     && in_array($dpeParcours->getEtatReconduction(), $etatReconductionCampagneSuivante);
                             }
-                        }
-                    );
+                        });
 
                     return count($parcoursCampagneSuivante) > 0;
                 }
@@ -246,18 +242,18 @@ class ApiJsonExport
         return $dataJSON;
     }
 
-    private function getFormationLogosArrayApiV2(Formation $formation, string $urlPrefix)
-    {
+    /*
+    private function getFormationLogosArrayApiV2(Formation $formation, string $urlPrefix) {
         $result = [];
-        foreach ($formation->getLogo() ?? [] as $logoFile) {
+        foreach($formation->getLogo() ?? [] as $logoFile) {
             $result[] = [
                 'image_data' => $urlPrefix . $this->router->generate(
-                        'app_formation_logo',
-                        [
-                            'slug' => $formation->getSlug(), 'filename' => $logoFile
-                        ],
-                        UrlGeneratorInterface::ABSOLUTE_URL
-                    ),
+                    'app_formation_logo',
+                    [
+                        'slug' => $formation->getSlug(), 'filename' => $logoFile
+                    ],
+                    UrlGeneratorInterface::ABSOLUTE_URL
+                ),
                 'image_type' => mime_content_type(
                     $this->secureUploadService->resolveStoredFilePath('logos', $logoFile)
                 )
@@ -265,4 +261,5 @@ class ApiJsonExport
         }
         return $result;
     }
+    */
 }
