@@ -34,11 +34,26 @@ enum ValidationStatusEnum: string implements BadgeEnumInterface
 
     public function getLibelle(): string
     {
-        // TODO: Implement getLibelle() method.
+        return $this->label();
     }
 
+    public function getBadgeVariant(): string
+    {
+        return match ($this) {
+            self::VALID => 'success',
+            self::INVALID => 'danger',
+            self::INCOMPLETE => 'warning',
+            self::NA => 'secondary',
+        };
+    }
+
+    /**
+     * @deprecated Utiliser getBadgeVariant() et le composant Twig Badge.
+     */
     public function getBadge(): string
     {
-        // TODO: Implement getBadge() method.
+        @trigger_error(sprintf('%s::getBadge() is deprecated, use %s::getBadgeVariant() and the Twig Badge component instead.', self::class, self::class), E_USER_DEPRECATED);
+
+        return $this->getBadgeVariant();
     }
 }

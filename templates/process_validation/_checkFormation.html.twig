@@ -16,7 +16,7 @@
             <tr>
                 <td>{{ val.parcours.libelle }}</td>
                 <td>
-                    {{ val.parcours.etatParcours|badgeDpe }}
+                    {{ include('communs/_badge_collection.html.twig', { badges: val.parcours.etatParcours|badgeDpeDto }) }}
                 </td>
                 <td>
                     {% if val.parcours.etatParcours.valide_parcours_rf is defined %}

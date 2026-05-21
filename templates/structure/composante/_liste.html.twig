@@ -69,8 +69,8 @@
                         <div class="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500 lg:hidden">
                             État
                         </div>
-                        <div class="mt-0.5 flex flex-wrap gap-1 [&_.badge]:inline-flex [&_.badge]:rounded-full [&_.badge]:px-2.5 [&_.badge]:py-0.5 [&_.badge]:text-xs [&_.badge]:font-semibold">
-                            {{ composante.etatComposante|badgeEtatComposante }}
+                        <div class="mt-0.5 flex flex-wrap gap-1">
+                            {{ include('communs/_badge_collection.html.twig', { badges: composante.etatComposante|badgeEtatComposanteDto }) }}
                         </div>
                     </div>
 

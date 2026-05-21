@@ -82,7 +82,7 @@
                                 </a>
                             </td>
                             <td class="px-4 py-3">
-                                <span class="inline-block">{{ parcours.dpeParcours[0].etatReconduction|badgeTypeModification }}</span>
+                                {{ component('Badge', { dto: parcours.dpeParcours[0].etatReconduction|badgeTypeModificationDto }) }}
                             </td>
                             <td class="px-4 py-3 text-center">
                                 <twig:Button

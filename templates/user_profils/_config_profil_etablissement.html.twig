@@ -1,13 +1,11 @@
-<h2>Configuration du profil : "{{ profil.libelle }}" ({{ profil.code }})</h2>
-
-<div>
-    <label class="form-label required" for="selectListe">Choisir l'établissement pour ce profil</label>
-    <select id="selectListe" class="form-select"
-            required
-            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
-    >
+{% embed 'user_profils/_config_profil_select.html.twig' with {
+    profil: profil,
+    selectLabel: "Choisir l'etablissement pour ce profil",
+    placeholder: 'Selectionner un etablissement'
+} %}
+    {% block options %}
         {% for etab in etablissements %}
             <option value="{{ etab.id }}">{{ etab.libelle }}</option>
         {% endfor %}
-    </select>
-</div>
+    {% endblock %}
+{% endembed %}

@@ -41,11 +41,13 @@
                     <a
                             data-action="click->modalturbo#open"
                             data-turbo="true"
+                            {{ stimulus_controller('tooltip') }}
+                            title="Saisir/voir les heures pour cet EC"
                             href="{{ path('parcours_ec_saisir_heures', { parcours: parcours.id, id: elem.id }) }}"
                             class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 pe-2 py-1 rounded hover:bg-slate-50">
                         <span class="w-1.5 h-1.5 rounded-full bg-{{ heureComplete }}-500"
                               id="badge_heure_{{ elem.id }}"></span>
-                        Saisir Heures
+                        Heures
                     </a>
                     {% endif %}
 
@@ -53,19 +55,23 @@
                     <a class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-50"
                        data-turbo="true"
                        data-action="click->modalturbo#open"
+                            {{ stimulus_controller('tooltip') }}
+                       title="Saisir/voir les MCCC pour cet EC"
                        href="{{ path('parcours_mccc_saisir', { parcours: parcours.id, id: elem.id }) }}"
                     >
                         <span class="w-1.5 h-1.5 rounded-full bg-{{ mcccComplete }}-500"
                               id="badge_mccc_{{ elem.id }}"></span>
-                        Saisir MCCC
+                        MCCC
                     </a>
                     <a class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-50"
                        data-turbo="true"
                        data-action="click->modalturbo#open"
+                            {{ stimulus_controller('tooltip') }}
+                       title="Saisir/voir les BCC pour cet EC"
                        href="{{ path('parcours_bcc_saisir', { parcours: parcours.id, id: elem.id }) }}"
                     >
                         <span class="w-1.5 h-1.5 rounded-full bg-green-500" id="badge_bcc_{{ elem.id }}"></span>
-                        Saisir BCC
+                        BCC
                     </a>
                     {% if elem.ficheMatiere != null %}
                         {% set ficheMatiere = elem.ficheMatiere %}

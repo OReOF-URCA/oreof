@@ -1,6 +1,6 @@
 <div class="flex flex-wrap gap-1.5">
     {% for centre in item.userProfils %}
-        {{ centre|badgeTypeCentre }}
+            {{ component('Badge', { dto: centre|badgeTypeCentreDto }) }}
     {% else %}
         <twig:Badge label="Aucun profil" variant="secondary"/>
     {% endfor %}

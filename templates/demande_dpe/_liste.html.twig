@@ -116,10 +116,10 @@
                     {% endif %}
                 </td>
                 <td class="px-4 py-3">{{ demande.dateDemande|date('d/m/Y') }}</td>
-                <td class="px-4 py-3">{{ demande.niveauModification|badgeEnum }}</td>
+                <td class="px-4 py-3">{{ component('Badge', { dto: demande.niveauModification|badgeEnumDto }) }}</td>
                 <td class="px-4 py-3">
                     {% if demande.niveauDemande == 'P' %}
-                        {{ demande.etatValidation|badgeEnum }}
+                        {{ component('Badge', { dto: demande.etatValidation|badgeEnumDto }) }}
                     {% else %}
                         <span class="text-slate-300 dark:text-slate-600">-</span>
                     {% endif %}

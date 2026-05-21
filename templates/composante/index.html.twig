@@ -244,8 +244,8 @@
                                     </td>
                                     {# État DPE #}
                                     <td class="px-4 py-3 text-center">
-                                        <div class="flex flex-wrap justify-center gap-1 [&_.badge]:inline-flex [&_.badge]:rounded-full [&_.badge]:px-2 [&_.badge]:py-0.5 [&_.badge]:text-xs [&_.badge]:font-semibold">
-                                            {{ formation.etatDpe|badgeDpe }}
+                                        <div class="flex flex-wrap justify-center gap-1">
+                                            {{ include('communs/_badge_collection.html.twig', { badges: formation.etatDpe|badgeDpeDto }) }}
                                         </div>
                                     </td>
                                     {# Nb parcours #}

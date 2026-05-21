@@ -11,5 +11,11 @@ namespace App\Enums;
 
 interface BadgeEnumInterface {
     public function getLibelle(): string;
+
+    public function getBadgeVariant(): string;
+
+    /**
+     * @deprecated Utiliser getBadgeVariant() et le composant Twig Badge.
+     */
     public function getBadge(): string;
 }

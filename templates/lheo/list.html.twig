@@ -34,9 +34,7 @@
                                 <span class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-950/30 dark:text-slate-300">
                                     ID {{ e.id }}
                                 </span>
-                                <span class="inline-flex rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-950/30 dark:text-slate-300">
-                                    {{ e.etatParcours|badgeDpe }}
-                                </span>
+                                {{ include('communs/_badge_collection.html.twig', { badges: e.etatParcours|badgeDpeDto }) }}
                             </div>
 
                             {% if e.xml_errors|length > 0 %}

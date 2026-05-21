@@ -9,10 +9,11 @@
 
 namespace App\Twig;
 
+use App\DTO\BadgeView;
 use App\Entity\FicheMatiere;
 use App\Enums\EtatChangeRfEnum;
-use App\Enums\EtatDpeEnum;
 use App\Enums\TypeModificationDpeEnum;
+use App\Presenter\BadgePresenter;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
@@ -21,19 +22,33 @@ use Twig\TwigFilter;
  */
 class BadgeDpeExtension extends AbstractExtension
 {
+    public function __construct(private readonly BadgePresenter $badgePresenter)
+    {
+    }
+
     public function getFilters(): array
     {
         return [
             new TwigFilter('badgeDpe', $this->badgeDpe(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeDpeDto', $this->badgeDpeDto(...)),
             new TwigFilter('badgeTypeModification', $this->badgeTypeModification(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeTypeModificationDto', $this->badgeTypeModificationDto(...)),
             new TwigFilter('badgeStep', $this->badgeStep(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeStepDto', $this->badgeStepDto(...)),
             new TwigFilter('badgeEtatComposante', $this->badgeEtatComposante(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeEtatComposanteDto', $this->badgeEtatComposanteDto(...)),
             new TwigFilter('badgeFormation', $this->badgeFormation(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeFormationDto', $this->badgeFormationDto(...)),
             new TwigFilter('badgeEc', $this->badgeEc(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeEcDto', $this->badgeEcDto(...)),
             new TwigFilter('badgeFiche', $this->badgeFiche(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeFicheDto', $this->badgeFicheDto(...)),
             new TwigFilter('badge', $this->badge(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeDto', $this->badgeDto(...)),
             new TwigFilter('badgeValide', $this->badgeValide(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeValideDto', $this->badgeValideDto(...)),
             new TwigFilter('badgeChangeRf', $this->badgeChangeRf(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeChangeRfDto', $this->badgeChangeRfDto(...)),
             new TwigFilter('displayErreurs', $this->displayErreurs(...), ['is_safe' => ['html']]),
             new TwigFilter('isFicheValidable', $this->isFicheValidable(...), ['is_safe' => ['html']])
         ];
@@ -76,94 +91,164 @@ class BadgeDpeExtension extends AbstractExtension
 
     public function badgeEc(array $etatsEc): string
     {
-        return $this->displayDpeBadge($etatsEc);
+        @trigger_error(__METHOD__ . '() is deprecated, use the badgeEcDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
+
+        return $this->renderLegacyBadges($this->badgeEcDto($etatsEc));
+    }
+
+    /**
+     * @return list<BadgeView>
+     */
+    public function badgeEcDto(array $etatsEc): array
+    {
+        return $this->badgePresenter->fromEtatDpeStates($etatsEc);
     }
 
     public function badge(string $texte, string $type): string
     {
-        return '<span class="badge bg-' . $type . ' me-1">' . $texte . '</span>';
+        @trigger_error(__METHOD__ . '() is deprecated, use the badgeDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
+
+        return $this->renderLegacyBadge($this->badgeDto($texte, $type));
+    }
+
+    public function badgeDto(string $texte, string $type): BadgeView
+    {
+        return $this->badgePresenter->fromText($texte, $type);
     }
 
     public function badgeValide(?string $etat): string
     {
-        return match ($etat) {
-            'complet' => '<span class="badge bg-success me-1">Complet</span>',
-            'incomplet' => '<span class="badge bg-warning me-1">Incomplet</span>',
-            'incomplet_ects' => '<span class="badge bg-warning me-1">Incomplet ECTS</span>',
-            'erreur' => '<span class="badge bg-danger me-1">Erreur de saisie</span>',
-            'vide' => '<span class="badge bg-danger me-1">Non complété</span>',
-            'non_concerne' => '<span class="badge bg-info me-1">Non concerné</span>',
-            null => '<span class="badge bg-warning me-1">NULL?</span>',
-        };
+        @trigger_error(__METHOD__ . '() is deprecated, use the badgeValideDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
+
+        return $this->renderLegacyBadge($this->badgeValideDto($etat));
+    }
+
+    public function badgeValideDto(?string $etat): BadgeView
+    {
+        return $this->badgePresenter->fromValide($etat);
     }
 
     public function badgeFormation(array $etatsFormation): string
     {
-        return $this->displayDpeBadge($etatsFormation);
+        @trigger_error(__METHOD__ . '() is deprecated, use the badgeFormationDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
+
+        return $this->renderLegacyBadges($this->badgeFormationDto($etatsFormation));
+    }
+
+    /**
+     * @return list<BadgeView>
+     */
+    public function badgeFormationDto(array $etatsFormation): array
+    {
+        return $this->badgePresenter->fromEtatDpeStates($etatsFormation);
     }
 
     public function badgeEtatComposante(array $etatsComposante): string
     {
-        $etatsComposante = array_keys($etatsComposante);
+        @trigger_error(__METHOD__ . '() is deprecated, use the badgeEtatComposanteDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
 
-        return $this->displayDpeBadge($etatsComposante);
+        return $this->renderLegacyBadges($this->badgeEtatComposanteDto($etatsComposante));
+    }
+
+    /**
+     * @return list<BadgeView>
+     */
+    public function badgeEtatComposanteDto(array $etatsComposante): array
+    {
+        return $this->badgePresenter->fromEtatDpeStates($etatsComposante);
     }
 
     public function badgeDpe(array $etatsDpe): string
     {
-        return $this->displayDpeBadge($etatsDpe);
+        @trigger_error(__METHOD__ . '() is deprecated, use the badgeDpeDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
+
+        return $this->renderLegacyBadges($this->badgeDpeDto($etatsDpe));
+    }
+
+    /**
+     * @return list<BadgeView>
+     */
+    public function badgeDpeDto(array $etatsDpe): array
+    {
+        return $this->badgePresenter->fromEtatDpeStates($etatsDpe);
     }
 
     public function badgeTypeModification(?TypeModificationDpeEnum $typeModificationDpe): string
     {
-        if ($typeModificationDpe === null) {
-            return '<span class="badge bg-success me-1">Pas de demande</span>';
-        }
+        @trigger_error(__METHOD__ . '() is deprecated, use the badgeTypeModificationDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
 
-        return '<span class="badge ' . $typeModificationDpe->getBadge() . ' me-1">' . $typeModificationDpe->getLibelle() . '</span>';
+        return $this->renderLegacyBadge($this->badgeTypeModificationDto($typeModificationDpe));
+    }
+
+    public function badgeTypeModificationDto(?TypeModificationDpeEnum $typeModificationDpe): BadgeView
+    {
+        return $this->badgePresenter->fromTypeModification($typeModificationDpe);
     }
 
     public function badgeStep(?bool $etatsDpe): string
     {
-        return $etatsDpe ? '<span class="badge bg-success me-1">Complet</span>' : '<span class="badge bg-warning me-1">Incomplet</span>';
+        @trigger_error(__METHOD__ . '() is deprecated, use the badgeStepDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
+
+        return $this->renderLegacyBadge($this->badgeStepDto($etatsDpe));
+    }
+
+    public function badgeStepDto(?bool $etatsDpe): BadgeView
+    {
+        return $this->badgePresenter->fromStep($etatsDpe);
     }
 
     public function badgeFiche(array $etatFiche): string
     {
-        return $this->displayDpeBadge($etatFiche);
+        @trigger_error(__METHOD__ . '() is deprecated, use the badgeFicheDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
+
+        return $this->renderLegacyBadges($this->badgeFicheDto($etatFiche));
     }
 
     /**
-     * @param array $etatsEc
-     * @return string
+     * @return list<BadgeView>
      */
-    private function displayDpeBadge(array $etatsEc): string
+    public function badgeFicheDto(array $etatFiche): array
     {
-        if (count($etatsEc) === 0) {
-            return '<span class="badge bg-secondary me-1">Initialisé</span>';
-        }
-
-        $etatsEc = array_keys($etatsEc);
-        $html = '';
-        foreach ($etatsEc as $etatEc) {
-            $html .= '<span class="badge bg-' . EtatDpeEnum::from(strtolower($etatEc))->badge() . ' me-1">' . EtatDpeEnum::from(strtolower($etatEc))->libelle() . '</span>';
-        }
-
-        return $html;
+        return $this->badgePresenter->fromEtatDpeStates($etatFiche);
     }
 
     public function badgeChangeRf(array $etatsEc): string
     {
-        if (count($etatsEc) === 0) {
-            return '<span class="badge bg-secondary me-1">Initialisé</span>';
-        }
+        @trigger_error(__METHOD__ . '() is deprecated, use the badgeChangeRfDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
 
-        $etatsEc = array_keys($etatsEc);
-        $html = '';
-        foreach ($etatsEc as $etatEc) {
-            $html .= '<span class="badge bg-' . EtatChangeRfEnum::from(strtolower($etatEc))->badge() . ' me-1">' . EtatChangeRfEnum::from(strtolower($etatEc))->libelle() . '</span>';
-        }
+        return $this->renderLegacyBadges($this->badgeChangeRfDto($etatsEc));
+    }
 
-        return $html;
+    /**
+     * @return list<BadgeView>
+     */
+    public function badgeChangeRfDto(array $etatsEc): array
+    {
+        return $this->badgePresenter->fromEtatChangeRfStates($etatsEc);
+    }
+
+    private function renderLegacyBadge(BadgeView $badge): string
+    {
+        $label = htmlspecialchars($badge->label, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $colors = [
+            'primary' => 'border border-blue-300 bg-blue-50 text-blue-700',
+            'success' => 'border border-emerald-300 bg-emerald-50 text-emerald-700',
+            'warning' => 'border border-amber-300 bg-amber-50 text-amber-700',
+            'danger' => 'border border-rose-300 bg-rose-50 text-rose-700',
+            'info' => 'border border-cyan-300 bg-cyan-50 text-cyan-700',
+            'secondary' => 'border border-slate-300 bg-slate-100 text-slate-700',
+        ];
+
+        $classes = trim('me-1 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ' . ($colors[$badge->variant] ?? $colors['secondary']));
+
+        return sprintf('<span class="%s">%s</span>', $classes, $label);
+    }
+
+    /**
+     * @param list<BadgeView> $badges
+     */
+    private function renderLegacyBadges(array $badges): string
+    {
+        return implode('', array_map($this->renderLegacyBadge(...), $badges));
     }
 }

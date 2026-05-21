@@ -39,15 +39,25 @@ enum CentreGestionEnum: string implements BadgeEnumInterface
         };
     }
 
-    public function getBadge(): string
+    public function getBadgeVariant(): string
     {
         return match ($this) {
-            self::CENTRE_GESTION_NULL => '',
-            self::CENTRE_GESTION_ETABLISSEMENT => 'badge bg-primary',
-            self::CENTRE_GESTION_COMPOSANTE => 'badge bg-success',
-            self::CENTRE_GESTION_FORMATION => 'badge bg-warning',
-            self::CENTRE_GESTION_PARCOURS => 'badge bg-danger',
+            self::CENTRE_GESTION_NULL => 'secondary',
+            self::CENTRE_GESTION_ETABLISSEMENT => 'primary',
+            self::CENTRE_GESTION_COMPOSANTE => 'success',
+            self::CENTRE_GESTION_FORMATION => 'warning',
+            self::CENTRE_GESTION_PARCOURS => 'danger',
         };
+    }
+
+    /**
+     * @deprecated Utiliser getBadgeVariant() et le composant Twig Badge.
+     */
+    public function getBadge(): string
+    {
+        @trigger_error(sprintf('%s::getBadge() is deprecated, use %s::getBadgeVariant() and the Twig Badge component instead.', self::class, self::class), E_USER_DEPRECATED);
+
+        return $this->getBadgeVariant();
     }
 
     public static function has(string $value): bool

@@ -15,31 +15,31 @@
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">Responsable du parcours</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.respParcours|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.respParcours|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">Objectifs du parcours</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.objectifsParcours|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.objectifsParcours|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">Résultats attendus du parcours</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.resultatsAttendus|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.resultatsAttendus|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">Contenu du parcours</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.contenuParcours|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.contenuParcours|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">Mots clés du parcours</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.motsCles|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.motsCles|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">Rythme de formation du parcours</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.rythmeParcours|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.rythmeParcours|badgeValideDto }) }}</td>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">Localisation du parcours</td>
-                <td class="{{ valueCellClass }}">{{ valide.etat.localisation|badgeValide }}</td>
+                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.localisation|badgeValideDto }) }}</td>
             </tr>
 
             {{ include('parcours_state/_commun.html.twig') }}

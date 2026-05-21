@@ -127,8 +127,18 @@ enum EtatDpeEnum: string implements BadgeEnumInterface
         return $this->libelle();
     }
 
+    public function getBadgeVariant(): string
+    {
+        return $this->badge();
+    }
+
+    /**
+     * @deprecated Utiliser getBadgeVariant() et le composant Twig Badge.
+     */
     public function getBadge(): string
     {
-        return 'bg-'.$this->badge();
+        @trigger_error(sprintf('%s::getBadge() is deprecated, use %s::getBadgeVariant() and the Twig Badge component instead.', self::class, self::class), E_USER_DEPRECATED);
+
+        return $this->getBadgeVariant();
     }
 }

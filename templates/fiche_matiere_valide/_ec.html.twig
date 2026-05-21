@@ -28,14 +28,14 @@
                     </div>
                 </th>
                 <td>
-                    {{ ec.elementConstitutif.ficheMatiere.etatFiche|badgeFiche }}
+                    {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
                 </td>
             {% else %}
                 <td>
                     <span class="badge bg-info"> Raccroché</span>
                 </td>
                 <td>
-                    {{ ec.elementConstitutif.ficheMatiere.etatFiche|badgeFiche }}
+                    {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
                 </td>
             {% endif %}
         {% else %}
@@ -43,7 +43,7 @@
                 <span class="badge bg-info"> Hors Diplôme</span>
             </td>
             <td>
-                {{ ec.elementConstitutif.ficheMatiere.etatFiche|badgeFiche }}
+                {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
             </td>
         {% endif %}
     {% else %}
