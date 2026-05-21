@@ -152,6 +152,21 @@
                                     <i class="fal fa-wrench"></i>
                                 </a>
                             {% endif %}
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a {{ stimulus_controller('modal', {
+                                        modalTitle: 'Confirmer la suppression',
+                                        modalUrl: path('app_formation_confirmation_soft_delete', {slug: this.formation.slug})
+                                    })
+                                }}
+                                    class="btn btn-sm btn-icon btn-icon-only btn-outline-danger ms-1"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="bottom"
+                                    title="Supprimer la formation"
+                                    data-action="click->modal#openModal"   
+                                >
+                                    <i class="fal fa-trash"></i>
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
