@@ -145,9 +145,11 @@ class ApiJsonExport {
                         'parcours' => $tParcours,
                         'dateValidation' => $dateValidationFormation?->format('Y-m-d H:i:s') ?? null,
                     ];
+                    /*
                     if($isV2){
                         $forma['logos-formation'] = $this->getFormationLogosArrayApiV2($formation, $urlPrefix);
                     }
+                    */
                     $dataJSON[] = $forma;
                 }
 
@@ -211,9 +213,11 @@ class ApiJsonExport {
                         'parcours' => $addedParcours,
                         'dateValidation' => (new DateTime('2025-12-15'))->format('Y-m-d H:i:s'),
                     ];
+                    /*
                     if($isV2){
                         $formationAppend['logos-formation'] = $this->getFormationLogosArrayApiV2($formationAnneeSuivante, $urlPrefix);
                     }
+                    */
                     $dataJSON[] = $formationAppend;
                 }
 
@@ -240,6 +244,7 @@ class ApiJsonExport {
         return $dataJSON;
     }
 
+    /* 
     private function getFormationLogosArrayApiV2(Formation $formation, string $urlPrefix) {
         $result = [];
         foreach($formation->getLogo() ?? [] as $logoFile) {
@@ -258,4 +263,5 @@ class ApiJsonExport {
         }
         return $result;
     }
+    */
 }
