@@ -12,6 +12,8 @@ namespace App\Form;
 use App\Entity\Parcours;
 use App\Entity\User;
 use App\Enums\TypeParcoursEnum;
+use App\Form\Type\InlineCreateEntitySelectType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
@@ -28,29 +30,69 @@ class ParcoursType extends AbstractType
                 'help' => '',
                 'required' => true,
             ])
-            ->add('respParcours', EntityType::class, [
-                'required' => false,
+            ->add('respParcours', InlineCreateEntitySelectType::class, [
                 'help' => '',
-                'autocomplete' => true,
                 'class' => User::class,
+                'choice_label' => 'display',
                 'query_builder' => function ($er) {
                     return $er->createQueryBuilder('u')
                         ->orderBy('u.nom', 'ASC')
                         ->addOrderBy('u.prenom', 'ASC');
                 },
-                'choice_label' => 'display', //todo: filtrer sur centre de le formation ? ou ajouter un user
+                'placeholder' => 'Choisir dans la liste ou choisir "+ Créer nouveau" pour ajouter un utilisateur',
+                'new_placeholder' => 'Email du responsable du parcours',
+                'required' => true,
+                'label' => 'Responsable du parcours',
+                'ldap_check' => true,
+
+                // évite doublons (optionnel)
+                'find_existing' => function (string $label, $scope, EntityManagerInterface $em) {
+                    return $em->getRepository(User::class)->createQueryBuilder('t')
+                        ->andWhere('LOWER(t.email) = LOWER(:l)')
+                        ->setParameter('l', $label)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+                },
+
+                // création (obligatoire)
+                'create' => function (string $label, EntityManagerInterface $em) {
+                    $e = new User();
+                    $e->setEmail($label);
+                    return $e; // persist/flush gérés par le type (ou tu peux le faire ici)
+                },
+
             ])
-            ->add('coResponsable', EntityType::class, [
-                'required' => false,
+            ->add('coResponsable', InlineCreateEntitySelectType::class, [
                 'help' => '',
-                'autocomplete' => true,
                 'class' => User::class,
+                'choice_label' => 'display',
                 'query_builder' => function ($er) {
                     return $er->createQueryBuilder('u')
                         ->orderBy('u.nom', 'ASC')
                         ->addOrderBy('u.prenom', 'ASC');
                 },
-                'choice_label' => 'display', //todo: filtrer sur centre de le formation ? ou ajouter un user
+                'placeholder' => 'Choisir dans la liste ou choisir "+ Créer nouveau" pour ajouter un utilisateur',
+                'new_placeholder' => 'Email du co-responsable du parcours',
+                'required' => false,
+                'label' => 'Co-Responsable du parcours',
+                'ldap_check' => true,
+
+                // évite doublons (optionnel)
+                'find_existing' => function (string $label, $scope, EntityManagerInterface $em) {
+                    return $em->getRepository(User::class)->createQueryBuilder('t')
+                        ->andWhere('LOWER(t.email) = LOWER(:l)')
+                        ->setParameter('l', $label)
+                        ->getQuery()
+                        ->getOneOrNullResult();
+                },
+
+                // création (obligatoire)
+                'create' => function (string $label, EntityManagerInterface $em) {
+                    $e = new User();
+                    $e->setEmail($label);
+                    return $e; // persist/flush gérés par le type (ou tu peux le faire ici)
+                },
+
             ])
             ->add('sigle', TextType::class, [
                 'help' => 'Optionnel, sigle/code ou appelation courte du parcours',

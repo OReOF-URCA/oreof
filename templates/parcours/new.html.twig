@@ -1,46 +1,13 @@
-{% form_theme form 'communs/form_theme.html.twig' %}
-{{ form_start(form) }}
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+{{ form_start(form, {
+    'attr': {
+        'id': 'modal_form'
+    }
+}) }}
     {{ form_row(form.libelle, {label: texte == 'option' ? 'options.labels.libelle'|trans({}, 'form') : ''}) }}
     {{ form_row(form.respParcours, {label: texte == 'option' ? 'options.labels.respParcours'|trans({}, 'form') : ''}) }}
-<small>Si le responsable n'est pas dans la liste, vous pourrez l'ajouter lors de la configuration de votre parcours.</small>
-{# todo: modal dans une modal pose problème #}
-{# <a #}
-{#        href="#" #}
-{#        {{ stimulus_controller('modal', { #}
-{#            size: 'lg', #}
-{#            modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'), #}
-{#            nomEvenement: 'refreshStep', #}
-{#            modalUrl: path('app_user_missing', {action: 'responsableParcours', id: parcour is defined ? parcour.id : null}) }) }} #}
-{#        data-action="click->modal#openModal" #}
-{#        data-size="lg" #}
-{#        class="ms-4" #}
-{#        data-bs-toggle="tooltip" #}
-{#        data-bs-placement="bottom" #}
-{#        title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}" #}
-{# > #}
-{#    <i class="{{ iconAdd }}"></i> #}
-{#    <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span> #}
-{# </a> #}
-{{ form_row(form.coResponsable, {label: texte == 'option' ? 'options.labels.coResponsable'|trans({}, 'form') : ''}) }}
-<small>Si le co-responsable n'est pas dans la liste, vous pourrez l'ajouter lors de la configuration de votre parcours.</small>
 
-{# <a #}
-{#        href="#" #}
-{#        {{ stimulus_controller('modal', { #}
-{#            size: 'lg', #}
-{#            modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'), #}
-{#            nomEvenement: 'refreshStep', #}
-{#            modalUrl: path('app_user_missing', {action: 'coResponsableParcours', id: parcour is defined ? parcour.id : null}) }) }} #}
-{#        data-action="click->modal#openModal" #}
-{#        data-size="lg" #}
-{#        class="ms-4" #}
-{#        data-bs-toggle="tooltip" #}
-{#        data-bs-placement="bottom" #}
-{#        title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}" #}
-{# > #}
-{#    <i class="{{ iconAdd }}"></i> #}
-{#    <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span> #}
-{# </a> #}
+{{ form_row(form.coResponsable, {label: texte == 'option' ? 'options.labels.coResponsable'|trans({}, 'form') : ''}) }}
 
 {{ form_row(form.sigle, {label: texte == 'option' ? 'options.labels.sigle'|trans({}, 'form') : ''}) }}
 
@@ -50,15 +17,5 @@
 {% if is_granted('ROLE_ADMIN') %}
     {{ form_row(form.codeMentionApogee) }}
 {% endif %}
-
-<button type="submit" class="btn btn-success"
-        {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
->
-    <i class="fal fa-floppy-disk"></i>
-    Enregistrer
-</button>
-
-{{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont
-obligatoires'}) }}
 {{ form_end(form) }}
 

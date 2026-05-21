@@ -32,6 +32,7 @@
 
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
-        { title: 'Pilotage' }
+        { title: 'Pilotage' },
+        {title: header_title}
     ]}) }}
 {% endblock %}

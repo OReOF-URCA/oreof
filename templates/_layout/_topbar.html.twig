@@ -443,14 +443,7 @@
                         {#                                                modalTitle: 'Signaler un bug', #}
                         {#                                                modalUrl: path('app_bug_report_modal', { #}
                         {#                                                    formation: formation is defined and formation != null ? formation.id : '', #}
-                        {#                                                    parcours: parcours is defined and parcours != null ? parcours.id : '', #}
-                        {#                                                    page: app.request.uri #}
-                        {#                                                }) #}
-                        {#                                            }) }} #}
-                        {#                                            data-action="click->modal#openModal" #}
-                        {#                                    > #}
-                        {#                                        Signaler un bug #}
-                        {#                                    </a> #}
+                        {#                                                    parcours: parcours is defined and parcours != null ? parcours.id : '', #
                         <hr class="my-1 border-gray-100">
                         <a href="{{ path('app_logout') }}"
                            class="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50">

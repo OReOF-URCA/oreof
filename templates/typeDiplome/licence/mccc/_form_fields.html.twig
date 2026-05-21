@@ -5,7 +5,7 @@
 {% endmacro %}
 
 {% macro help(helpKey = '', helpDomain = 'help') %}
-    {% if helpKey is not empty %}
+    {% if helpKey is not empty and helpKey|trans({}, helpDomain)|raw is not empty %}
         <p class="text-[11px] text-slate-400 italic mt-1 pl-1 flex items-start gap-2">
             <span class="shrink-0 w-5 h-5 bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] rounded-full">
                 <twig:UX:Icon name="icon:info"/>

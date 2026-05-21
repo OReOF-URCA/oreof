@@ -2,24 +2,24 @@
 <tr class="parc_{{ parcours.id }} d-none hidden bg-slate-50 dark:bg-slate-900/40">
     <td class="px-2 py-2"></td>
     <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        Annee
+        Année
     </th>
     <th class="px-3 py-2"></th>
     <th class="px-3 py-2"></th>
     <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        Dispensee ?
+        Dispensée ?
     </th>
     <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
         Recrute ?
     </th>
     <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        Sans capacite ?
+        Sans capacité ?
     </th>
     <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        Capacite N-1
+        Capacité N-1
     </th>
     <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
-        Capacite {{ user_data.campagneCollecte.libelle }}</th>
+        Capacité {{ user_data.campagneCollecte.libelle }}</th>
     <th class="px-3 py-2"></th>
 </tr>
 {% for annee in annees %}
@@ -28,7 +28,7 @@
         class="parc_{{ parcours.id }} d-none hidden border-l-2 border-rose-500 bg-white/70 dark:bg-slate-900/20"
     >
         <td class="w-5 px-2 py-2"></td>
-        <td class="px-3 py-2 font-semibold text-slate-700 dark:text-slate-200">Annee {{ annee.ordre }}</td>
+        <td class="px-3 py-2 font-semibold text-slate-700 dark:text-slate-200">Année {{ annee.ordre }}</td>
         <td class="px-3 py-2"></td>
         <td class="px-3 py-2"></td>
         <td class="px-3 py-2">
@@ -69,7 +69,7 @@
             {{ annee.anneeOrigineCopie != null ? annee.anneeOrigineCopie.capaciteAccueil : 'N.C.' }} places
         </td>
         <td class="px-3 py-2">
-            <label for="capacite_{{ annee.id }}" class="sr-only">Capacite accueil pour l'annee N+1</label>
+            <label for="capacite_{{ annee.id }}" class="sr-only">Capacité accueil pour l'annee N+1</label>
             <input type="text"
                    class="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 shadow-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                    id="capacite_{{ annee.id }}" value="{{ annee.capaciteAccueil }}"
@@ -86,7 +86,7 @@
         <td class="px-2 py-2"></td>
         <td colspan="9"
             class="rounded-md bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:bg-red-950/30 dark:text-red-300">
-            Erreur annees / parcours
+            Erreur années / parcours
         </td>
     </tr>
 {% endfor %}

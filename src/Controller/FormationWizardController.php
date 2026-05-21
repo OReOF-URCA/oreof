@@ -30,6 +30,7 @@ class FormationWizardController extends AbstractController
     }
 
     #[Route('/{formation}/1', name: 'app_formation_wizard_step_1', methods: ['GET'])]
+    /** @deprecated */
     public function step1(Formation $formation): Response
     {
         $form = $this->createForm(FormationStep1Type::class, $formation);

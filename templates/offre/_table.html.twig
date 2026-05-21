@@ -244,40 +244,27 @@
                                 <td>
                                     {% if not disabled %}
                                         <button
-                                                {{ stimulus_controller('modal', {
-                                                    size: 'lg',
-                                                    nomEvenement: 'parcoursAdded',
-                                                    modalTitle: 'Modifier un parcours',
-                                                    modalUrl: path('app_parcours_edit_modal', {parcours:parcours.parcours.id}) }) }}
-                                                data-action="click->modal#openModal"
+                                                href="{{ path('app_parcours_edit_modal', {parcours:parcours.parcours.id}) }}"
+                                                data-action="click->modalturbo#open"
                                                 class="app-btn app-btn-warning mb-1"
-                                                data-size="lg"
-                                                data-bs-toggle="tooltip"
-                                                data-bs-placement="bottom"
                                                 title=" Modifier le libellé/Responsable du parcours"
                                         >
-                                            <i class="{{ iconEdit }}"></i>
+                                            <twig:UX:Icon name="icon:edit"/>
                                         </button>
                                         {% if is_granted('ROLE_ADMIN') %}
                                             <button
-                                                    {{ stimulus_controller('modal', {
-                                                        size: 'lg',
-                                                        modalTitle: 'Dupliquer le parcours ' ~ parcours.parcours.display,
-                                                        modalUrl: path('app_parcours_dupliquer_modal', {'id': parcours.parcours.id}) }) }}
-                                                    data-action="click->modal#openModal"
+                                                    href="{{ path('app_parcours_dupliquer_modal', {'id': parcours.parcours.id}) }}"
+                                                    data-action="click->modalturbo#open"
                                                     class="app-btn app-btn-primary"
-                                                    data-size="lg"
-                                                    data-bs-toggle="tooltip"
-                                                    data-bs-placement="bottom"
                                                     title="Dupliquer le parcours {{ parcours.parcours.display }}"
                                             >
-                                                <i class="{{ iconDuplicate }}"></i> Dupliquer
+                                                <twig:UX:Icon name="icon:duplicate"/>
                                             </button>
                                         {% endif %}
                                     {% endif %}
                                     <a class="app-btn app-btn-info mb-1" target="_blank"
                                        href="{{ path('parcours_v2_voir', {parcours: parcours.parcours.id }) }}">
-                                        <i class="{{ iconShow }}"></i>
+                                        <twig:UX:Icon name="icon:info"/>
                                     </a>
                                     <button
                                             {{ stimulus_action('offre', 'ouvreAnnee', 'click', {
@@ -285,7 +272,7 @@
                                             }) }}
                                             class="app-btn app-btn-success"
                                     >
-                                        <i class="fas fa-chevron-circle-down"></i>
+                                        <twig:UX:Icon name="icon:chevron-down"/>
                                     </button>
                                 </td>
                             </tr>
@@ -296,22 +283,16 @@
                         <tr>
                             <td colspan="9">
                                 {% if not disabled %}
-                                    <button
-                                            {{ stimulus_controller('modal', {
-                                                size: 'lg',
-                                                nomEvenement: 'parcoursAdded',
-                                                modalTitle: 'Ajouter un parcours',
-                                                modalUrl: path('app_parcours_new', {formation:formation.formation.id}) }) }}
-                                            data-action="click->modal#openModal"
+                                    <a
+                                            href="{{ path('app_parcours_new', {formation:formation.formation.id}) }}"
+                                            data-turbo="true"
+                                            data-action="click->modalturbo#open"
                                             class="app-btn app-btn-success"
-                                            data-size="lg"
-                                            data-bs-toggle="tooltip"
-                                            data-bs-placement="bottom"
                                             title="Ajouter un parcours"
                                     >
-                                        <i class="{{ iconAdd }}"></i>
+                                        <twig:UX:Icon name="icon:add" class="w-4 h-4"/>
                                         <span> Ajouter un parcours à la formation : {{ formation.formation.display }}</span>
-                                    </button>
+                                    </a>
                                 {% endif %}
                             </td>
                         </tr>

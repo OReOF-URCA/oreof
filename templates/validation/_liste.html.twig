@@ -119,13 +119,9 @@
                                         />
                                         <twig:Button
                                                 variant="success"
-                                                size="sm"
                                                 tooltip="Vérifier la saisie"
-                                                dataAction="click->modal#openModal"
-                                                data-controller="modal"
-                                                data-modal-size-value="lg"
-                                                data-modal-modal-title-value="Vérifier la saisie"
-                                                data-modal-modal-url-value="{{ path('app_parcours_state', {parcours: parcours.id}) }}"
+                                                dataAction="click->modalturbo#open"
+                                                href="{{ path('app_parcours_state', {parcours: parcours.id}) }}"
                                                 :centered="false"
                                         >
                                             <i class="fal fa-binoculars"></i>
@@ -160,13 +156,9 @@
                                         />
                                         <twig:Button
                                                 variant="success"
-                                                size="sm"
                                                 tooltip="Vérifier la saisie"
-                                                dataAction="click->modal#openModal"
-                                                data-controller="modal"
-                                                data-modal-size-value="lg"
-                                                data-modal-modal-title-value="Vérifier la saisie"
-                                                data-modal-modal-url-value="{{ path('app_formation_state', {formation: formation.id}) }}"
+                                                dataAction="click->modalturbo#open"
+                                                href="{{ path('app_formation_state', {slug: formation.slug}) }}"
                                                 :centered="false"
                                         >
                                             <i class="fal fa-binoculars"></i>

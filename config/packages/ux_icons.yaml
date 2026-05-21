@@ -7,6 +7,7 @@ ux_icons:
     # Use current text color to fill the icon
     fill: currentColor
 
+
   # Throw an exception if an icon is not
   ignore_not_found: false
 

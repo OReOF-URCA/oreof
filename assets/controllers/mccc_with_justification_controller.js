@@ -26,10 +26,10 @@ export default class extends Controller {
      */
     checkTextAreaLength() {
         if(this.textareaTarget.value.length >= this.minlengthValue){
-            this.invalidFieldTextTarget.classList.add('d-none');
+            this.invalidFieldTextTarget.classList.add('hidden')
         }
         if(this.textareaTarget.value.length < this.minlengthValue){
-            this.invalidFieldTextTarget.classList.remove('d-none');
+            this.invalidFieldTextTarget.classList.remove('hidden')
         }
     }
 
@@ -69,11 +69,11 @@ export default class extends Controller {
     updateJustification(event){
         this.hasJustificationValue = event.target[event.target.selectedIndex].dataset.hasJustification;
         if(this.hasJustificationValue === "false"){
-            this.displayDivTarget.classList.add('d-none');
+            this.displayDivTarget.classList.add('hidden')
             this.textareaTarget.required = false;
         }
         else if (this.hasJustificationValue === "true") {
-            this.displayDivTarget.classList.remove('d-none');
+            this.displayDivTarget.classList.remove('hidden')
             this.textareaTarget.required = true;
         }
     }

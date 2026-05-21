@@ -13,6 +13,7 @@ use App\Classes\GetDpeParcours;
 use App\Classes\JsonReponse;
 use App\Classes\ParcoursDupliquer;
 use App\Classes\verif\ParcoursState;
+use App\DTO\TranslatableKey;
 use App\Entity\CampagneCollecte;
 use App\Entity\DpeDemande;
 use App\Entity\DpeParcours;
@@ -34,6 +35,7 @@ use App\Service\LheoXML;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
 use App\Utils\JsonRequest;
+use App\Utils\TurboStreamResponseFactory;
 use DateTimeImmutable;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\EntityManagerInterface;
@@ -117,6 +119,7 @@ class ParcoursController extends BaseController
 
     #[Route('/new/{formation}', name: 'app_parcours_new', methods: ['GET', 'POST'])]
     public function new(
+        TurboStreamResponseFactory $turboStreamResponseFactory,
         ProfilRepository $profRepository,
         EventDispatcherInterface $eventDispatcher,
         Request                  $request,
@@ -196,12 +199,18 @@ class ParcoursController extends BaseController
             return $this->json(true);
         }
 
-        return $this->render('parcours/new.html.twig', [
+
+        return $turboStreamResponseFactory->streamOpenModalFromTemplates(
+            new TranslatableKey('parcours.new.title'),
+            new TranslatableKey('parcours.new.description'),
+            'parcours/new.html.twig', [
             'parcour' => $parcour,
             'form' => $form->createView(),
             'parent' => $parent,
             'texte' => $parent ? 'option' : 'parcours',
-        ]);
+        ],
+            '_ui/_footer_submit_cancel.html.twig'
+        );
     }
 
     #[Route('/edit/modal/{parcours}', name: 'app_parcours_edit_modal', methods: ['GET', 'POST'])]
