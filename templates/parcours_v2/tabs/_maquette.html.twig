@@ -18,7 +18,11 @@
 
         {% set parcoursOrdres = [] %}
         {% set semByOrdre = {} %}
+        {# anneeByOrdre must be an associative array (hash) so we can store by ordre key #}
+        {% set anneeByOrdre = {} %}
         {% for annee in parcours.annees %}
+            {# use merge to set an associative key in Twig (direct index assignment is not supported) #}
+            {% set anneeByOrdre = anneeByOrdre | merge({ (annee.ordre) : annee }) %}
             {% for semestre in annee.parcoursSemestre %}
                 {% set parcoursOrdres = parcoursOrdres | merge([semestre.ordre]) %}
                 {% set semByOrdre = semByOrdre | merge({ (semestre.ordre) : semestre }) %}
@@ -44,7 +48,6 @@
                     {% for y in 1..yearsCount %}
                         {% set sem1 = (2 * y - 1) %}
                         {% set sem2 = (2 * y) %}
-
                         <div class="mb-6">
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-3">
@@ -58,6 +61,13 @@
                                 <div class="text-xs text-slate-500">&nbsp;</div>
                             </div>
 
+                            {# avoid undefined index errors by checking defined first #}
+                            {% set anneeOuverte = true %}
+                            {% if anneeByOrdre[y-1] is defined and not anneeByOrdre[y-1].isOuvert %}
+                                <twig:alerte type="warning" class="mb-4">Année non ouverture</twig:alerte>
+                                {% set anneeOuverte = false %}
+                            {% endif %}
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {# Carte pour semestre impaire #}
                                 <div class="p-4 border rounded-lg flex flex-col justify-between h-full">
@@ -67,8 +77,8 @@
                                                 <h4 class="text-sm font-bold text-slate-700">Semestre S{{ sem1 }}</h4>
                                             </div>
                                             <div>
-                                                {% if sem1 in parcoursOrdres %}
-                                                    {% set s = semByOrdre[sem1] %}
+                                                {% if sem1 in parcoursOrdres and anneeOuverte %}
+                                                    {% set s = semByOrdre[sem1-1] %}
                                                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
                                                         <svg class="w-3 h-3 mr-1 text-green-600" fill="currentColor"
                                                              viewBox="0 0 8 8" aria-hidden="true"><circle cx="4" cy="4"
@@ -83,7 +93,8 @@
                                                                   stroke-width="2"
                                                                   d="M13 16h-1v-4h-1m4-4h.01M12 20h.01"></path>
                                                         </svg>
-                                                        <div class="text-xs text-orange-600">Non dispensé</div>
+                                                        <div class="text-xs text-orange-600">Non
+                                                            dispensé {% if not anneeOuverte %}(année fermée){% endif %}</div>
                                                     </div>
                                                 {% endif %}
                                             </div>
@@ -92,9 +103,9 @@
                                         <div class="mt-3">
                                             <div class="text-xs text-slate-500 mb-2"></div>
 
-                                            {% if sem1 in parcoursOrdres %}
+                                            {% if sem1 in parcoursOrdres and anneeOuverte %}
                                                 <div class="flex items-center gap-3">
-                                                    {% set s = semByOrdre[sem1] %}
+                                                    {% set s = semByOrdre[sem1-1] %}
                                                     {% if s.isOuvert %}
                                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Ouvert</span>
                                                     {% else %}
@@ -126,8 +137,8 @@
                                                         S{{ sem2 }}</h4>
                                                 </div>
                                                 <div>
-                                                    {% if sem2 in parcoursOrdres and semByOrdre[sem2]  is defined %}
-                                                        {% set s2 = semByOrdre[sem2] %}
+                                                    {% if sem2 in parcoursOrdres and semByOrdre[sem2-1]  is defined and anneeOuverte %}
+                                                        {% set s2 = semByOrdre[sem2-1] %}
                                                         <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
                                                             <svg class="w-3 h-3 mr-1 text-green-600" fill="currentColor"
                                                                  viewBox="0 0 8 8" aria-hidden="true"><circle cx="4"
@@ -143,7 +154,8 @@
                                                                       stroke-width="2"
                                                                       d="M13 16h-1v-4h-1m4-4h.01M12 20h.01"></path>
                                                             </svg>
-                                                            <div class="text-xs text-orange-600">Non dispensé</div>
+                                                            <div class="text-xs text-orange-600">Non
+                                                                dispensé {% if not anneeOuverte %}(année fermée){% endif %}</div>
                                                         </div>
                                                     {% endif %}
                                                 </div>
@@ -152,9 +164,9 @@
                                             <div class="mt-3">
                                                 <div class="text-xs text-slate-500 mb-2"></div>
 
-                                                {% if sem2 in parcoursOrdres and semByOrdre[sem2]  is defined %}
+                                                {% if sem2 in parcoursOrdres and semByOrdre[sem2-1] is defined and anneeOuverte %}
                                                     <div class="flex items-center gap-3">
-                                                        {% set s2 = semByOrdre[sem2] %}
+                                                        {% set s2 = semByOrdre[sem2-1] %}
                                                         {% if s2.isOuvert %}
                                                             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Ouvert</span>
                                                         {% else %}
