@@ -48,16 +48,6 @@ framework:
             label: 'validation.dpe'
             isTimeline: true
             color: 'success'
-        refuse_rf:
-          metadata:
-            process: false
-            label: 'validation.refuse_rf'
-            color: 'danger'
-        refuse_dpe_composante:
-          metadata:
-            process: false
-            label: 'validation.refuse_dpe_composante'
-            color: 'danger'
         soumis_conseil:
           metadata:
             process: true
@@ -65,14 +55,6 @@ framework:
             label: 'validation.conseil'
             isTimeline: true
             color: 'success'
-        refuse_conseil:
-          metadata:
-            process: false
-            label: 'validation.refuse_conseil'
-        refuse_central:
-          metadata:
-            process: false
-            label: 'validation.refuse_central'
         soumis_central:
           metadata:
             process: true
@@ -85,10 +67,6 @@ framework:
             icon: 'flowbite:shield-check-outline'
             label: 'soumis.cfvu'
             isTimeline: true
-        refuse_definitif_cfvu:
-          metadata:
-            process: false
-            label: 'validation.refuse_definitif_cfvu'
         valide_cfvu:
           metadata:
             process: true
@@ -209,27 +187,6 @@ framework:
                   required: true
                   options:
                     attr: { rows: 6 }
-        refuser_dpe_composante:
-          from: 'soumis_dpe_composante'
-          to: 'refuse_dpe_composante'
-          metadata:
-            recipients: [ 'RF', 'CoRF', 'RP', 'CoRP' ]
-            titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a été refusée par le DPE de votre composante'
-            titre: 'La fiche de la formation %%s a été refusée par le DPE de votre composante'
-            type: refuser
-            btn: danger
-            icon: flowbite:ban-outline
-            label: 'Refuser'
-            button_class: 'danger'
-            button_icon: 'flowbite:ban-outline'
-            handler: "refuser_commentaire"
-            form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
         valider_dpe_composante:
           from: 'soumis_dpe_composante'
           to: 'soumis_conseil'
@@ -257,27 +214,6 @@ framework:
             button_class: 'warning'
             button_icon: 'bi:exclamation-triangle'
             handler: "reserver_commentaire"
-            form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
-        refuser_conseil:
-          from: 'soumis_conseil'
-          to: 'refuse_conseil'
-          metadata:
-            recipients: [ 'RF', 'CoRF', 'RP', 'CoRP' ]
-            titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a été refusée par le conseil de votre composante'
-            titre: 'La fiche de la formation %%s a été refusée par le conseil de votre composante'
-            type: refuser
-            btn: danger
-            icon: flowbite:ban-outline
-            label: 'Refuser'
-            button_class: 'danger'
-            button_icon: 'flowbite:ban-outline'
-            handler: "refuser_conseil"
             form:
               fields:
                 - name: argumentaire
@@ -335,27 +271,6 @@ framework:
                     attr: { rows: 6 }
                 - name: dateConseil
                   type: date
-        refuser_central:
-          from: 'soumis_central'
-          to: 'refuse_central'
-          metadata:
-            recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
-            titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a été refusée par le SES'
-            titre: 'La fiche de la formation %%s a été refusée par le SES'
-            type: refuser
-            btn: danger
-            icon: flowbite:ban-outline
-            label: 'Refuser'
-            button_class: 'danger'
-            button_icon: 'flowbite:ban-outline'
-            handler: "refuser_commentaire"
-            form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
         valider_central:
           from: 'soumis_central'
           to: 'soumis_cfvu'
@@ -405,29 +320,6 @@ framework:
             handler: "valider"
             form:
               fields: [ ]
-        refuser_definitif_cfvu:
-          from: 'soumis_cfvu'
-          to: 'refuse_definitif_cfvu'
-          metadata:
-            recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
-            titre_with_parcours: 'Votre parcours %%s de la formation %%s a reçu une refus définitif de validation par la CFVU'
-            titre: 'Votre formation %%s a reçu une refus définitif de validation par la CFVU'
-            hasDate: true
-            type: refuser
-            btn: danger
-            icon: flowbite:ban-outline
-            button_class: 'danger'
-            button_icon: 'flowbite:ban-outline'
-            handler: "refuser_commentaire_date"
-            form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
-                - name: dateCfvu
-                  type: date
         refuser_revoir_cfvu:
           from: 'soumis_cfvu'
           to: 'en_cours_redaction'
@@ -821,61 +713,21 @@ framework:
             process: true
             icon: 'ph:list-checks-fill'
             label: 'validation.fiche_matiere'
-        #            hasValid: true
-        #            hasReserve: false
-        #            hasRefuse: false
-        #            hasUpload: false
-        #            isTimeline: false
-        #            hasDate: false
-        #            transition: 'en_cours_redaction'
-        #            canValide: 'valider_fiche_compo'
-        #            check: true
-        #            color: 'info'
         'soumis_central':
           metadata:
             process: true
             icon: 'flowbite:school-check-alt-outline'
             label: 'validation.fiche_matiere.ses'
-        #            hasValid: true
-        #            hasReserve: true
-        #            hasRefuse: true
-        #            hasUpload: false
-        #            isTimeline: false
-        #            hasDate: false
-        #            transition: 'transmis_ses'
-        #            canValide: 'valider_fiche_ses'
-        #            canRefuse: 'refuser_fiche_ses'
-        #            canReserve: 'reserver_fiche_ses'
-        #            color: 'warning'
         'valide_pour_publication':
           metadata:
             process: true
             icon: 'mdi:stamper'
             label: 'validation.fiche_matiere.publication'
-        #            hasValid: false
-        #            hasReserve: false
-        #            hasRefuse: false
-        #            hasUpload: false
-        #            isTimeline: true
-        #            hasDate: false
-        #            transition: 'transmis_pour_publication'
-        #            canValide: 'valider_fiche_pour_publication'
-        #            color: 'success'
         'publie':
           metadata:
             process: false
-            #            showOn: false
             icon: 'flowbite:edit-outline'
             label: 'fiche_matiere.rouvrir_fiche_matiere'
-      #            hasValid: false
-      #            hasReserve: false
-      #            hasRefuse: false
-      #            hasUpload: false
-      #            isTimeline: false
-      #            hasDate: false
-      #            transition: 'publie'
-      #            canValide: ''
-      #            color: 'success'
       transitions:
         valider_fiche_compo:
           from: 'en_cours_redaction'

@@ -1,43 +1,43 @@
 #todo: deprecated
 process:
   fiche_matiere:
-    icon: 'fa-ballot-check'
+    icon: 'mdi:ballot'
     label: 'validation.fiche_matiere'
     isTimeline: false
     transition: 'en_cours_redaction'
     check: true
     button_class: 'success'
-    button_icon: 'fa-check'
+    button_icon: 'icon:check'
     description: '--'
   parcours:
-    icon: 'fa-paper-plane'
+    icon: 'ph:paper-plane-tilt'
     label: 'validation.parcours'
     isTimeline: false
     transition: 'en_cours_redaction'
     check: true
     button_class: 'success'
-    button_icon: 'fa-check'
+    button_icon: 'icon:check'
     description: '--'
   formation:
-    icon: 'fa-file-circle-check'
+    icon: 'icon:check'
     label: 'validation.formation'
     isTimeline: false
     transition: 'en_cours_redaction'
     check: true
     button_class: 'success'
-    button_icon: 'fa-check'
+    button_icon: 'icon:check'
     description: '--'
   dpe:
-    icon: 'fa-check-to-slot'
+    icon: 'ph:list-checks'
     label: 'validation.dpe'
     isTimeline: true
     showOn: false
     transition: 'soumis_dpe_composante'
     button_class: 'success'
-    button_icon: 'fa-check'
+    button_icon: 'icon:check'
     description: '--'
   conseil:
-    icon: 'fa-people-line'
+    icon: 'mdi:people-group-outline'
     label: 'validation.conseil'
     isTimeline: true
     showOn: false
@@ -46,27 +46,27 @@ process:
     button_icon: 'fa-check'
     description: '--'
   change_rf:
-    icon: 'fa-person-chalkboard'
+    icon: 'ph:chalkboard-teacher'
     label: 'validation.change_rf'
     isTimeline: false
     transition: 'soumis_cfvu'
     button_class: 'success'
-    button_icon: 'fa-check'
+    button_icon: 'icon:check'
     description: '--'
   cfvu:
-    icon: 'fa-stamp'
+    icon: 'mdi:stamper'
     label: 'validation.cfvu'
     isTimeline: true
     showOn: false
     transition: 'soumis_cfvu'
     button_class: 'success'
-    button_icon: 'fa-check'
+    button_icon: 'icon:check'
     description: '--'
   publication:
-    icon: 'fa-bullhorn'
+    icon: 'flowbite:bullhorn-outline'
     label: 'validation.publication'
     isTimeline: true
     transition: 'valide_pour_publication'
     button_class: 'success'
-    button_icon: 'fa-check'
+    button_icon: 'icon:check'
     description: '--'

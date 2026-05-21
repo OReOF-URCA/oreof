@@ -10,12 +10,7 @@
     'warning': 'bg-amber-200 dark:bg-amber-500/30',
     'success': 'bg-emerald-200 dark:bg-emerald-500/30'
 } %}
-{% set iconMap = {
-    'muted': 'icon:close',
-    'info': 'icon:clock',
-    'warning': 'icon:warning',
-    'success': 'icon:check'
-} %}
+
 
 <div class="{{ this.class }}">
     {% for key, etape in this.process %}
@@ -23,7 +18,6 @@
             {% set state = this.stateProcess(key) %}
             {% set colorClass = colorClasses[state.color]|default(colorClasses['muted']) %}
             {% set lineClass = lineClasses[state.color]|default(lineClasses['muted']) %}
-            {% set iconName = iconMap[state.color]|default('icon:question') %}
 
             {% if mode == 'liste' %}
                 <button class="ml-1 inline-flex h-8 w-8 items-center justify-center rounded-full {{ colorClass }} transition hover:scale-105"
@@ -32,7 +26,7 @@
                         aria-label="{{ etape.label|trans({}, 'process') }}"
                         data-bs-original-title="{{ (etape.label~'.'~state.color)|trans({}, 'process') }}"
                 >
-                    {{ ux_icon(iconName, {class: 'h-4 w-4'}) }}
+                    {{ ux_icon(etape.icon, {class: 'h-4 w-4'}) }}
                 </button>
             {% else %}
                 <div class="flex items-center">
@@ -41,7 +35,7 @@
                          aria-label="{{ etape.label|trans({}, 'process') }}"
                          data-bs-original-title="{{ (etape.label~'.'~state.color)|trans({}, 'process') }}"
                     >
-                        {{ ux_icon(iconName, {class: 'h-4 w-4'}) }}
+                        {{ ux_icon(etape.icon, {class: 'h-4 w-4'}) }}
                     </div>
                     {% if not loop.last %}
                         <div class="mx-1 h-0.5 w-5 rounded-full {{ lineClass }}"></div>
