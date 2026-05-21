@@ -64,21 +64,6 @@
 
     {{ include('formation/_synthese_formation.html.twig') }}
 
-    <div class="card mt-3">
-        <div class="card-body">
-            <h5 class="card-title">Logos de la formation</h5>
-            <div class="d-flex flex-wrap gap-3 p-2">
-                {% for filename in formation.logo %}
-                    <img src="{{ asset('uploads/logos/' ~ filename) }}"
-                         alt="Logo"
-                         style="max-height: 75px; max-width: 100px; object-fit: contain;">
-                {% else %}
-                    <p>Aucun logo</p>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
     {% if is_granted('ROLE_ADMIN') or is_granted('CAN_ETABLISSEMENT_SCOLARITE_ALL') or is_granted('CAN_FORMATION_SCOLARITE_MY', formation) %}
         {# Versioning pour les parcours par défaut #}
         {% if formation.isHasParcours == false and formation.parcours|length == 1 %}

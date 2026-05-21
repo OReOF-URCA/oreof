@@ -21,14 +21,15 @@ export default class extends Controller {
             return
         }
 
-        const existingLogo = this.element.querySelector('turbo-frame img')
-        if (existingLogo && !confirm('Un logo existe déjà. Voulez-vous le remplacer ?')) {
+        const existingLogos = this.element.querySelectorAll('turbo-frame img')
+        if (existingLogos.length >= 2) {
+            this._showErrors(['Le nombre maximum de logos (2) est atteint. Veuillez en supprimer un avant d\'en ajouter un nouveau.'])
             this.fileInputTarget.value = ''
             return
         }
 
         const data = new FormData()
-        data.append('logo[]', files[0]) // Only one logo for type diplome
+        data.append('logo[]', files[0]) // 2 logos max
 
         const fileInput = this.fileInputTarget
         fileInput.value = ''

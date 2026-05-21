@@ -51,7 +51,6 @@
             <th>Nb. Parcours</th>
             <th>Etat</th>
             <th>Remplissage</th>
-            <th>Logos</th>
             <th></th>
 
         </tr>
@@ -127,7 +126,6 @@
 
                     </select>
                 </th>
-                <th></th>
                 <th>
                 </th>
 
@@ -212,30 +210,6 @@
                     </td>
                     <td>
                         {{ formation.remplissage|remplissage }}
-                    </td>
-                    <td>
-                        {% if formation.logo %}
-                            {% set logos = formation.logo %}
-                            <span
-                                {{ stimulus_controller('modal', {
-                                    size: 'lg',
-                                    modalTitle: 'Logos de la formation',
-                                    modalUrl: path('app_formation_logos', {slug: formation.slug})
-                                }) }}
-                                data-action="click->modal#openModal"
-                                style="cursor: pointer;"
-                                                >
-                                <img src="{{ asset('uploads/logos/' ~ logos[0]) }}"
-                                     alt="Logo"
-                                     style="max-height: 40px; max-width: 80px; object-fit: contain;"
-                                >
-                                {% if logos|length > 1 %}
-                                    <span class="badge bg-primary">+{{ logos|length - 1 }}</span>
-                                {% endif %}
-                            </span>
-                        {% else %}
-                            <span class="badge bg-secondary">Aucun</span>
-                        {% endif %}
                     </td>
                     <td class="text-end">
                             <button class="btn btn-sm btn-outline-primary"
