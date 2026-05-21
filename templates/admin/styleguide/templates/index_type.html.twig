@@ -29,21 +29,21 @@
 
 {# 4. Grille de contenu unifiée #}
 {% block content %}
-    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+    <div class="bg-surface rounded-lg border border-secondary-200 shadow-sm overflow-hidden">
         {# Exemple d'intégration d'un composant de tableau unifié #}
-        <table class="min-w-full divide-y divide-slate-200">
-            <thead class="bg-slate-50">
+        <table class="min-w-full divide-y divide-secondary-200">
+            <thead class="bg-bg">
             <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">ID</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Libellé</th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Actions</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase">ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-secondary uppercase">Libellé</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-secondary uppercase">Actions</th>
             </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200">
+            <tbody class="divide-y divide-text">
             {% for item in dummy_items %}
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-4 text-sm text-slate-900 font-mono">{{ item.id }}</td>
-                    <td class="px-6 py-4 text-sm text-slate-700">{{ item.label }}</td>
+                <tr class="hover:bg-bg transition-colors">
+                    <td class="px-6 py-4 text-sm text-text font-mono">{{ item.id }}</td>
+                    <td class="px-6 py-4 text-sm text-text">{{ item.label }}</td>
                     <td class="px-6 py-4 text-sm text-right space-x-2">
                         <twig:Button label="Modifier" variant="warning" :outline="true" :soft="true" icon="fa-solid:pen"/>
                         <twig:Button variant="danger" icon="fa-solid:trash"/>

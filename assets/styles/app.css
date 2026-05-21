@@ -21,32 +21,142 @@
 /* Dark mode via attribut html[data-theme="dark"] */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
+/*
+ * Palette sémantique Tailwind v4
+ * - changer uniquement les variables `--semantic-*-base`
+ * - les utilitaires `bg-primary-200`, `text-danger-700`, etc. sont générés automatiquement
+ * - le mode sombre réutilise la même base en l'éclaircissant légèrement
+ */
+@theme inline {
+  --color-bg: var(--app-bg);
+  --color-surface: var(--app-surface);
+  --color-text: var(--app-text);
+  --color-text-muted: var(--app-text-muted);
+  --color-border: var(--app-border);
+
+  --color-primary: var(--semantic-primary);
+  --color-primary-50: color-mix(in oklab, var(--semantic-primary) 5%, white);
+  --color-primary-100: color-mix(in oklab, var(--semantic-primary) 10%, white);
+  --color-primary-200: color-mix(in oklab, var(--semantic-primary) 20%, white);
+  --color-primary-300: color-mix(in oklab, var(--semantic-primary) 30%, white);
+  --color-primary-400: color-mix(in oklab, var(--semantic-primary) 45%, white);
+  --color-primary-500: var(--semantic-primary);
+  --color-primary-600: color-mix(in oklab, var(--semantic-primary) 82%, black);
+  --color-primary-700: color-mix(in oklab, var(--semantic-primary) 68%, black);
+  --color-primary-800: color-mix(in oklab, var(--semantic-primary) 52%, black);
+  --color-primary-900: color-mix(in oklab, var(--semantic-primary) 36%, black);
+  --color-primary-950: color-mix(in oklab, var(--semantic-primary) 22%, black);
+
+  --color-secondary: var(--semantic-secondary);
+  --color-secondary-50: color-mix(in oklab, var(--semantic-secondary) 5%, white);
+  --color-secondary-100: color-mix(in oklab, var(--semantic-secondary) 10%, white);
+  --color-secondary-200: color-mix(in oklab, var(--semantic-secondary) 20%, white);
+  --color-secondary-300: color-mix(in oklab, var(--semantic-secondary) 30%, white);
+  --color-secondary-400: color-mix(in oklab, var(--semantic-secondary) 45%, white);
+  --color-secondary-500: var(--semantic-secondary);
+  --color-secondary-600: color-mix(in oklab, var(--semantic-secondary) 82%, black);
+  --color-secondary-700: color-mix(in oklab, var(--semantic-secondary) 68%, black);
+  --color-secondary-800: color-mix(in oklab, var(--semantic-secondary) 52%, black);
+  --color-secondary-900: color-mix(in oklab, var(--semantic-secondary) 36%, black);
+  --color-secondary-950: color-mix(in oklab, var(--semantic-secondary) 22%, black);
+
+  --color-success: var(--semantic-success);
+  --color-success-50: color-mix(in oklab, var(--semantic-success) 5%, white);
+  --color-success-100: color-mix(in oklab, var(--semantic-success) 10%, white);
+  --color-success-200: color-mix(in oklab, var(--semantic-success) 20%, white);
+  --color-success-300: color-mix(in oklab, var(--semantic-success) 30%, white);
+  --color-success-400: color-mix(in oklab, var(--semantic-success) 45%, white);
+  --color-success-500: var(--semantic-success);
+  --color-success-600: color-mix(in oklab, var(--semantic-success) 82%, black);
+  --color-success-700: color-mix(in oklab, var(--semantic-success) 68%, black);
+  --color-success-800: color-mix(in oklab, var(--semantic-success) 52%, black);
+  --color-success-900: color-mix(in oklab, var(--semantic-success) 36%, black);
+  --color-success-950: color-mix(in oklab, var(--semantic-success) 22%, black);
+
+  --color-info: var(--semantic-info);
+  --color-info-50: color-mix(in oklab, var(--semantic-info) 5%, white);
+  --color-info-100: color-mix(in oklab, var(--semantic-info) 10%, white);
+  --color-info-200: color-mix(in oklab, var(--semantic-info) 20%, white);
+  --color-info-300: color-mix(in oklab, var(--semantic-info) 30%, white);
+  --color-info-400: color-mix(in oklab, var(--semantic-info) 45%, white);
+  --color-info-500: var(--semantic-info);
+  --color-info-600: color-mix(in oklab, var(--semantic-info) 82%, black);
+  --color-info-700: color-mix(in oklab, var(--semantic-info) 68%, black);
+  --color-info-800: color-mix(in oklab, var(--semantic-info) 52%, black);
+  --color-info-900: color-mix(in oklab, var(--semantic-info) 36%, black);
+  --color-info-950: color-mix(in oklab, var(--semantic-info) 22%, black);
+
+  --color-warning: var(--semantic-warning);
+  --color-warning-50: color-mix(in oklab, var(--semantic-warning) 5%, white);
+  --color-warning-100: color-mix(in oklab, var(--semantic-warning) 10%, white);
+  --color-warning-200: color-mix(in oklab, var(--semantic-warning) 20%, white);
+  --color-warning-300: color-mix(in oklab, var(--semantic-warning) 30%, white);
+  --color-warning-400: color-mix(in oklab, var(--semantic-warning) 45%, white);
+  --color-warning-500: var(--semantic-warning);
+  --color-warning-600: color-mix(in oklab, var(--semantic-warning) 82%, black);
+  --color-warning-700: color-mix(in oklab, var(--semantic-warning) 68%, black);
+  --color-warning-800: color-mix(in oklab, var(--semantic-warning) 52%, black);
+  --color-warning-900: color-mix(in oklab, var(--semantic-warning) 36%, black);
+  --color-warning-950: color-mix(in oklab, var(--semantic-warning) 22%, black);
+
+  --color-danger: var(--semantic-danger);
+  --color-danger-50: color-mix(in oklab, var(--semantic-danger) 5%, white);
+  --color-danger-100: color-mix(in oklab, var(--semantic-danger) 10%, white);
+  --color-danger-200: color-mix(in oklab, var(--semantic-danger) 20%, white);
+  --color-danger-300: color-mix(in oklab, var(--semantic-danger) 30%, white);
+  --color-danger-400: color-mix(in oklab, var(--semantic-danger) 45%, white);
+  --color-danger-500: var(--semantic-danger);
+  --color-danger-600: color-mix(in oklab, var(--semantic-danger) 82%, black);
+  --color-danger-700: color-mix(in oklab, var(--semantic-danger) 68%, black);
+  --color-danger-800: color-mix(in oklab, var(--semantic-danger) 52%, black);
+  --color-danger-900: color-mix(in oklab, var(--semantic-danger) 36%, black);
+  --color-danger-950: color-mix(in oklab, var(--semantic-danger) 22%, black);
+}
+
 :root {
   color-scheme: light;
-  --color-bg: #f8fafc;
-  --color-surface: #ffffff;
-  --color-text: #0f172a;
-  --color-text-muted: #475569;
-  --color-border: #e2e8f0;
-  --color-primary: #187bb9;
-  --color-success: #39832f;
-  --color-info: #1f7b89;
-  --color-warning: #d97706;
-  --color-danger: #dc2626;
+  --semantic-primary-base: #187bb9;
+  --semantic-secondary-base: #64748b;
+  --semantic-success-base: #39832f;
+  --semantic-info-base: #1f7b89;
+  --semantic-warning-base: #d97706;
+  --semantic-danger-base: #dc2626;
+
+  --semantic-primary: var(--semantic-primary-base);
+  --semantic-secondary: var(--semantic-secondary-base);
+  --semantic-success: var(--semantic-success-base);
+  --semantic-info: var(--semantic-info-base);
+  --semantic-warning: var(--semantic-warning-base);
+  --semantic-danger: var(--semantic-danger-base);
+
+  --app-bg: #f8fafc;
+  --app-surface: #ffffff;
+  --app-text: #0f172a;
+  --app-text-muted: #475569;
+  --app-border: #e2e8f0;
+
+  /* Alias legacy pour le CSS existant */
+  --color-bg: var(--app-bg);
+  --color-surface: var(--app-surface);
+  --color-text: var(--app-text);
+  --color-text-muted: var(--app-text-muted);
+  --color-border: var(--app-border);
 }
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --color-bg: #0f172a;
-  --color-surface: #111827;
-  --color-text: #f8fafc;
-  --color-text-muted: #cbd5e1;
-  --color-border: #334155;
-  --color-primary: #38bdf8;
-  --color-success: #4ade80;
-  --color-info: #22d3ee;
-  --color-warning: #f59e0b;
-  --color-danger: #f87171;
+  --semantic-primary: color-mix(in oklab, var(--semantic-primary-base) 82%, white);
+  --semantic-secondary: color-mix(in oklab, var(--semantic-secondary-base) 82%, white);
+  --semantic-success: color-mix(in oklab, var(--semantic-success-base) 82%, white);
+  --semantic-info: color-mix(in oklab, var(--semantic-info-base) 82%, white);
+  --semantic-warning: color-mix(in oklab, var(--semantic-warning-base) 82%, white);
+  --semantic-danger: color-mix(in oklab, var(--semantic-danger-base) 82%, white);
+
+  --app-bg: #0f172a;
+  --app-surface: #111827;
+  --app-text: #f8fafc;
+  --app-text-muted: #cbd5e1;
+  --app-border: #334155;
 }
 
 @layer base {
@@ -54,10 +164,6 @@ html[data-theme="dark"] {
   body {
     background-color: var(--color-bg);
     color: var(--color-text);
-  }
-
-  html[data-a11y-size="large"] {
-    font-size: 112.5%;
   }
 
   html[data-a11y-size="xlarge"] {
@@ -75,29 +181,34 @@ html[data-theme="dark"] {
   }
 
   html[data-a11y-contrast="high"] {
-    --color-bg: #ffffff;
-    --color-surface: #ffffff;
-    --color-text: #0b0b0b;
-    --color-text-muted: #111827;
-    --color-border: #0f172a;
-    --color-primary: #0f172a;
-    --color-success: #14532d;
-    --color-info: #0c4a6e;
-    --color-warning: #92400e;
-    --color-danger: #7f1d1d;
+    --semantic-primary: #0f172a;
+    --semantic-secondary: #334155;
+    --semantic-success: #14532d;
+    --semantic-info: #0c4a6e;
+    --semantic-warning: #92400e;
+    --semantic-danger: #7f1d1d;
+
+    --app-bg: #ffffff;
+    --app-surface: #ffffff;
+    --app-text: #0b0b0b;
+    --app-text-muted: #111827;
+    --app-border: #0f172a;
   }
 
   html[data-theme="dark"][data-a11y-contrast="high"] {
-    --color-bg: #020617;
-    --color-surface: #020617;
-    --color-text: #ffffff;
-    --color-text-muted: #f1f5f9;
-    --color-border: #ffffff;
-    --color-primary: #e2e8f0;
-    --color-success: #86efac;
-    --color-info: #7dd3fc;
-    --color-warning: #fcd34d;
-    --color-danger: #fca5a5;
+    --semantic-primary: #e2e8f0;
+    --semantic-secondary: #cbd5e1;
+    --semantic-success: #86efac;
+    --semantic-info: #7dd3fc;
+    --semantic-warning: #fcd34d;
+    --semantic-danger: #fca5a5;
+
+
+    --app-bg: #020617;
+    --app-surface: #020617;
+    --app-text: #ffffff;
+    --app-text-muted: #f1f5f9;
+    --app-border: #ffffff;
   }
 
   html[data-a11y-contrast="high"] *:focus-visible {
@@ -219,40 +330,37 @@ html[data-theme="dark"] {
     @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold leading-none;
   }
 
-  .bg-primary {
-    @apply bg-blue-600 text-white;
-  }
 
   .bg-secondary {
-    @apply bg-slate-500 text-white;
+    @apply bg-secondary-500 text-white;
   }
 
   .bg-success {
-    @apply bg-green-600 text-white;
+    @apply bg-success-600 text-white;
   }
 
   .bg-danger {
-    @apply bg-red-600 text-white;
+    @apply bg-danger-600 text-white;
   }
 
   .bg-warning {
-    @apply bg-amber-400 text-slate-900;
+    @apply bg-warning-400 text-secondary-900;
   }
 
   .bg-info {
-    @apply bg-cyan-600 text-white;
+    @apply bg-info-600 text-white;
   }
 
   .bg-light {
-    @apply bg-slate-100 text-slate-900;
+    @apply bg-secondary-100 text-secondary-900;
   }
 
   .bg-dark {
-    @apply bg-slate-900 text-white;
+    @apply bg-secondary-900 text-white;
   }
 
   .text-dark {
-    @apply text-slate-900;
+    @apply text-secondary-900;
   }
 
   .text-white {
@@ -260,15 +368,15 @@ html[data-theme="dark"] {
   }
 
   .text-muted {
-    @apply text-slate-500;
+    @apply text-secondary-500;
   }
 
   html[data-theme="dark"] .bg-light {
-    @apply bg-slate-700 text-slate-100;
+    @apply bg-secondary-700 text-secondary-100;
   }
 
   html[data-theme="dark"] .text-muted {
-    @apply text-slate-400;
+    @apply text-secondary-400;
   }
 
   .app-alert {
@@ -284,35 +392,35 @@ html[data-theme="dark"] {
   }
 
   .app-alert--success {
-    @apply bg-green-50 border-green-200 text-green-800;
+    @apply bg-success-50 border-success-200 text-success-800 dark:bg-success-700 dark:text-white dark:border-success-600 ;
   }
 
   .app-alert--success .app-alert-icon {
-    @apply bg-green-600;
+    @apply bg-success-600 dark:bg-success-500 ;
   }
 
   .app-alert--danger {
-    @apply bg-red-50 border-red-200 text-red-800;
+    @apply bg-danger-50 border-danger-200 text-danger-800 dark:bg-danger-700 dark:text-white dark:border-danger-600 ;
   }
 
   .app-alert--danger .app-alert-icon {
-    @apply bg-red-600;
+    @apply bg-danger-600 dark:bg-danger-500 ;
   }
 
   .app-alert--info {
-    @apply bg-blue-50 border-blue-200 text-blue-800;
+    @apply bg-info-50 border-info-200 text-info-800 dark:bg-info-700 dark:text-white dark:border-info-600 ;
   }
 
   .app-alert--info .app-alert-icon {
-    @apply bg-blue-600;
+    @apply bg-info-600 dark:bg-info-500 ;
   }
 
   .app-alert--warning {
-    @apply bg-amber-50 border-amber-200 text-amber-800;
+    @apply bg-warning-50 border-warning-200 text-warning-800 dark:bg-warning-700 dark:text-white dark:border-warning-600 ;
   }
 
   .app-alert--warning .app-alert-icon {
-    @apply bg-amber-500;
+    @apply bg-warning-500 dark:bg-warning-500 ;
   }
 
   /* Markdown in help drawer */
@@ -1070,27 +1178,27 @@ html[data-theme="dark"] {
   }
 
   .app-progress-label {
-    @apply truncate text-slate-600;
+    @apply truncate text-secondary-600;
   }
 
   .app-progress-value {
-    @apply shrink-0 tabular-nums text-slate-500;
+    @apply shrink-0 tabular-nums text-secondary-500;
   }
 
   .app-progress-track {
-    @apply h-2.5 overflow-hidden rounded-full bg-slate-200;
+    @apply h-2.5 overflow-hidden rounded-full bg-secondary-200;
   }
 
   .app-progress-track--danger {
-    @apply bg-rose-100;
+    @apply bg-danger-100;
   }
 
   .app-progress-track--success {
-    @apply bg-emerald-100;
+    @apply bg-success-100;
   }
 
   .app-progress-track--info {
-    @apply bg-indigo-100;
+    @apply bg-primary-100;
   }
 
   .app-progress-bar {
@@ -1098,51 +1206,51 @@ html[data-theme="dark"] {
   }
 
   .app-progress-bar--danger {
-    @apply bg-rose-500;
+    @apply bg-danger-500;
   }
 
   .app-progress-bar--success {
-    @apply bg-emerald-500;
+    @apply bg-success-500;
   }
 
   .app-progress-bar--info {
-    @apply bg-indigo-500;
+    @apply bg-info-500;
   }
 
   html[data-theme="dark"] .app-progress-label {
-    @apply text-slate-300;
+    @apply text-secondary-300;
   }
 
   html[data-theme="dark"] .app-progress-value {
-    @apply text-slate-400;
+    @apply text-secondary-400;
   }
 
   html[data-theme="dark"] .app-progress-track {
-    @apply bg-slate-700;
+    @apply bg-secondary-700;
   }
 
   html[data-theme="dark"] .app-progress-track--danger {
-    @apply bg-rose-950/50;
+    @apply bg-danger-950/50;
   }
 
   html[data-theme="dark"] .app-progress-track--success {
-    @apply bg-emerald-950/50;
+    @apply bg-success-950/50;
   }
 
   html[data-theme="dark"] .app-progress-track--info {
-    @apply bg-indigo-950/50;
+    @apply bg-info-950/50;
   }
 
   html[data-theme="dark"] .app-progress-bar--danger {
-    @apply bg-rose-400;
+    @apply bg-danger-400;
   }
 
   html[data-theme="dark"] .app-progress-bar--success {
-    @apply bg-emerald-400;
+    @apply bg-success-400;
   }
 
   html[data-theme="dark"] .app-progress-bar--info {
-    @apply bg-indigo-400;
+    @apply bg-info-400;
   }
 
   /* Onglets applicatifs (homepage/codification) */
