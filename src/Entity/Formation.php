@@ -223,6 +223,9 @@ class Formation
     #[ORM\OneToMany(mappedBy: 'formation', targetEntity: ChangeParcours::class)]
     private Collection $changeParcours;
 
+    #[ORM\Column(nullable: true)]
+    private ?bool $isSoftDeleted = null;
+
     public function __construct(?CampagneCollecte $anneeUniversitaire)
     {
         $this->dpe = $anneeUniversitaire;
@@ -1211,5 +1214,17 @@ class Formation
     public function isNonOuvert(): bool
     {
         return $this->etatReconduction === TypeModificationDpeEnum::FERMETURE_DEFINITIVE;
+    }
+
+    public function isSoftDeleted(): ?bool
+    {
+        return $this->isSoftDeleted;
+    }
+
+    public function setIsSoftDeleted(?bool $isSoftDeleted): static
+    {
+        $this->isSoftDeleted = $isSoftDeleted;
+
+        return $this;
     }
 }
