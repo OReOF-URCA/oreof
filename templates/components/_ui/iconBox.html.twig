@@ -1,7 +1,7 @@
-{# templates/components/_ui/iconBow.html.twig #}
+{# templates/components/_ui/iconBox.html.twig #}
 
-<div class="flex items-center justify-center w-10 h-10 rounded-lg border-2 {{ this.classes }}">
-    {{ ux_icon(this.resolvedIcon, {
+<div class="flex items-center justify-center w-10 h-10 rounded-lg border-2 {{ this.getClasses() }}">
+    {{ ux_icon(this.getResolvedIcon(), {
         class: 'h-5 w-5'
     }) }}
 </div>

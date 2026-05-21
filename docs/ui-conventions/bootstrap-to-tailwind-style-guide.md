@@ -17,6 +17,14 @@ fonctionnelle (Twig + Stimulus + Turbo).
 
 ## Twig Components d'abord
 
+## Catalogue de Composants et Vues Types
+
+Toutes les nouvelles pages doivent obligatoirement s'aligner sur l'architecture de référence de l'application.
+Consulte les fichiers suivants pour copier la structure exacte de l'UI :
+
+- **Composants atomiques (Boutons, Badges, Alertes)** : Analyse `templates/admin/styleguide/index.html.twig`. Tu as l'interdiction de générer des balises HTML brutes avec des classes Tailwind custom pour ces éléments.
+- **Mise en page d'un CRUD / Index d'administration** : Copie l'agencement exact des blocs (breadcrumb, page_title, page_actions, content) décrit dans `templates/admin/styleguide/templates/index_type.html.twig`.
+
 ### Regle
 
 - Si un composant existe, il est prioritaire sur le markup manuel.
