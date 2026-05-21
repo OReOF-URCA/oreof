@@ -16,6 +16,7 @@ use App\Classes\verif\FormationState;
 use App\Classes\verif\ParcoursState;
 use App\DTO\StatsFichesMatieres;
 use App\Entity\Composante;
+use App\Entity\Constantes;
 use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\FormationVersioning;
@@ -98,6 +99,8 @@ class FormationController extends BaseController
             $this->getCampagneCollecte(),
             $request->query->all()
         );
+
+        $tFormations = array_filter($tFormations, fn($f) => $f->isSoftDeleted() !== true);
 
         $nbFormations = count($tFormations);
         //comtper le nombre de parcours par formation
@@ -646,5 +649,25 @@ class FormationController extends BaseController
             $this->addFlashBag('error', 'Une erreur est survenue lors de la visualisation');
             return $this->redirectToRoute('app_formation_show', ['slug' => $versionFormation->getFormation()->getSlug()]);
         }
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/{slug}/soft-delete/confirm', name: 'app_formation_confirmation_soft_delete')]
+    public function getConfirmationSoftDelete(Formation $formation) {
+        return $this->render('formation/_confirm_soft_delete.html.twig', [
+            'formation_slug' => $formation->getSlug()
+        ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/{slug}/set/soft-delete', name: 'app_formation_set_soft_delete')]
+    public function setFormationSoftDeleted(Formation $formation, EntityManagerInterface $em) {
+        $formation->setIsSoftDeleted(true);
+        foreach($formation->getParcours() as $p){
+            $p->setIsSoftDeleted(true);
+        }
+        $em->flush();
+        $this->addFlashBag(Constantes::FLASHBAG_SUCCESS, "La formation a été supprimée.");
+        return $this->redirectToRoute('app_homepage');
     }
 }
