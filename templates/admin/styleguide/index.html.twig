@@ -1,0 +1,275 @@
+{% extends 'base.html.twig' %}
+{% set header_description %}
+    Liste des composants graphiques disponibles dans l'application, avec des exemples d'utilisation.
+{% endset %}
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {
+            href:'',
+            title: 'Styleguide',
+        }
+    ]}) }}
+{% endblock %}
+{% block header %}
+    Styleguide - Composants graphiques
+{% endblock %}
+{% block bouton_header %}
+    <twig:Button variant="secondary" href="/administration/styleguide/templates/index-type">Voir la page exemple type</twig:Button>
+{% endblock %}
+{% block content %}
+    <div class="space-y-12 pb-12">
+        {# Section Composant : Boutons #}
+        <section class="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Bouton</h2>
+                <p class="text-slate-600 text-sm">Composant bouton polyvalent avec plusieurs variantes de style, taille et état.</p>
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Tailles (size)</h3>
+                    <p class="text-xs text-slate-500 mb-3">size : sm / md / lg</p>
+                    <div class="flex items-center gap-3">
+                        <twig:Button label="Petit" size="sm" variant="primary"/>
+                        <twig:Button label="Moyen" size="md" variant="primary"/>
+                        <twig:Button label="Grand" size="lg" variant="primary"/>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Variantes de couleur (variant)</h3>
+                    <p class="text-xs text-slate-500 mb-3">variant : primary / success / warning / danger / info / secondary</p>
+                    <div class="flex flex-wrap gap-2">
+                        <twig:Button label="Primary" variant="primary" size="md"/>
+                        <twig:Button label="Success" variant="success" size="md"/>
+                        <twig:Button label="Warning" variant="warning" size="md"/>
+                        <twig:Button label="Danger" variant="danger" size="md"/>
+                        <twig:Button label="Info" variant="info" size="md"/>
+                        <twig:Button label="Secondary" variant="secondary" size="md"/>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Style (outline / soft)</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="text-xs text-slate-500 mb-2">outline="true" soft="false"</p>
+                            <div class="flex flex-wrap gap-2">
+                                <twig:Button label="Primary" variant="primary" :outline="true" :soft="false"/>
+                                <twig:Button label="Success" variant="success" :outline="true" :soft="false"/>
+                                <twig:Button label="Danger" variant="danger" :outline="true" :soft="false"/>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-xs text-slate-500 mb-2">outline="false" soft="false" (Solide)</p>
+                            <div class="flex flex-wrap gap-2">
+                                <twig:Button label="Primary" variant="primary" :outline="false" :soft="false"/>
+                                <twig:Button label="Success" variant="success" :outline="false" :soft="false"/>
+                                <twig:Button label="Danger" variant="danger" :outline="false" :soft="false"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Avec icônes (icon / iconEnd)</h3>
+                    <p class="text-xs text-slate-500 mb-3">iconeEnd="false" ou iconeEnd="true" Icône à gauche ou à droite du label</p>
+                    <div class="flex flex-wrap gap-2">
+                        <twig:Button label="Ajouter" variant="primary" icon="fa-solid:plus"/>
+                        <twig:Button label="Suivant" variant="secondary" icon="fa-solid:arrow-right" :iconEnd="true"/>
+                        <twig:Button variant="danger" icon="fa-solid:trash"/>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">États (disabled)</h3>
+                    <p class="text-xs text-slate-500 mb-3">disabled="true"</p>
+                    <div class="flex gap-2">
+                        <twig:Button label="Bouton désactivé" variant="primary" :disabled="true"/>
+                        <twig:Button label="Lien désactivé" variant="secondary" :disabled="true" href="#"/>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-slate-900 text-slate-200 p-4 rounded-md text-xs overflow-x-auto"><code>&lt;twig:Button label="Ajouter" variant="primary" icon="fa-solid:plus" /&gt;
+&lt;twig:Button label="Supprimer" variant="danger" :outline="true" :soft="false" icon="fa-solid:trash" /&gt;
+&lt;twig:Button label="Enregistrer" variant="success" size="lg" type="submit" /&gt;</code></pre>
+                </div>
+            </div>
+        </section>
+        {# Section Composant : DeleteButton #}
+        <section class="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">DeleteButton</h2>
+                <p class="text-slate-600 text-sm">Bouton de suppression avec confirmation modale.</p>
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Exemple avec confirmation</h3>
+                    <twig:DeleteButton
+                        label="Supprimer cet élément"
+                        variant="danger"
+                        size="md"
+                        url="#"
+                        title="Confirmer la suppression"
+                        message="Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible."
+                    />
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Propriétés</h3>
+                    <ul class="text-sm text-slate-600 space-y-1 list-disc list-inside">
+                        <li><code>label</code> - Texte du bouton</li>
+                        <li><code>variant</code> - Couleur (danger, warning, etc.)</li>
+                        <li><code>url</code> - URL de suppression</li>
+                        <li><code>title</code> - Titre de la modale</li>
+                        <li><code>message</code> - Message de confirmation</li>
+                        <li><code>bodyTemplate</code> - Template personnalisé pour le corps (optionnel)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-slate-900 text-slate-200 p-4 rounded-md text-xs overflow-x-auto"><code>&lt;twig:DeleteButton
+    label="Supprimer"
+    variant="danger"
+    url="/path/to/delete"
+    title="Confirmation"
+    message="Voulez-vous vraiment supprimer ?"
+/&gt;</code></pre>
+                </div>
+            </div>
+        </section>
+        {# Section Composant : Alerte #}
+        <section class="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Alerte</h2>
+                <p class="text-slate-600 text-sm">Composant pour afficher des messages contextuels (succès, info, warning, danger).</p>
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Types d'alertes, icone et message</h3>
+                    <p class="text-xs text-slate-500 mb-3">type : success / info / warning / danger<br>icone : fa-solid:check-circle ...<br>message : message de l'alerte</p>
+                    <div class="flex flex-col gap-3">
+                        <twig:alerte type="success" icone="fa-solid:check-circle" message="Opération réussie avec succès." />
+                        <twig:alerte type="info" icone="fa-solid:info-circle" message="Ceci est une information importante pour l'utilisateur." />
+                        <twig:alerte type="warning" icone="fa-solid:exclamation-triangle" message="Attention, vérifie bien tes modifications." />
+                        <twig:alerte type="danger" icone="fa-solid:times-circle" message="Erreur fatale">
+                            <p class="font-bold">Le système n'a pas pu traiter la demande.</p>
+                        </twig:alerte>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-slate-900 text-slate-200 p-4 rounded-md text-xs overflow-x-auto"><code>&lt;twig:alerte type="success" icone="fa-solid:check-circle" message="Succès !" /&gt;
+&lt;twig:alerte type="danger" icone="fa-solid:times-circle" message="Erreur"&gt;
+    &lt;p&gt;Détails de l'erreur...&lt;/p&gt;
+&lt;/twig:alerte&gt;</code></pre>
+                </div>
+            </div>
+        </section>
+        {# Section Composant : IconBox #}
+        <section class="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">IconBox</h2>
+                <p class="text-slate-600 text-sm">Boîte avec icône colorée et stylisée avec variantes.</p>
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Variantes (variant) et icone</h3>
+                    <p class="text-xs text-slate-500 mb-3">variante : info / success / danger / warning<br>icon : fa-solid-circle ...</p>
+                    <div class="flex items-center gap-4">
+                        <twig:IconBox icon="fa-solid:info-circle" variant="info" />
+                        <twig:IconBox icon="fa-solid:check-circle" variant="success" />
+                        <twig:IconBox icon="fa-solid:trash" variant="danger" />
+                        <twig:IconBox icon="fa-solid:exclamation-triangle" variant="warning" />
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-slate-900 text-slate-200 p-4 rounded-md text-xs overflow-x-auto"><code>&lt;twig:IconBox icon="fa-solid:check-circle" variant="success" /&gt;
+&lt;twig:IconBox icon="fa-solid:trash" variant="danger" /&gt;</code></pre>
+                </div>
+            </div>
+        </section>
+        {# Section Composant : Progress #}
+        <section class="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Progress</h2>
+                <p class="text-slate-600 text-sm">Barre de progression avec étiquette et pourcentage.</p>
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Tonalités, progression et label</h3>
+                    <p class="text-xs text-slate-500 mb-3">tone: danger / info / success<br>percent : 25 / 50 / 75 / 100 / ...<br>label : légende</p>
+                    <div class="space-y-4 max-w-lg">
+                        <twig:remplissage_progress label="Progression globale" percent="25" tone="danger" />
+                        <twig:remplissage_progress label="Validation technique" percent="50" tone="info" />
+                        <twig:remplissage_progress label="Étapes critiques" percent="75" tone="info" />
+                        <twig:remplissage_progress label="Finalisation" percent="100" tone="success" />
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-slate-900 text-slate-200 p-4 rounded-md text-xs overflow-x-auto"><code>&lt;twig:remplissage_progress label="Mon étape" percent="45" tone="info" /&gt;
+&lt;twig:remplissage_progress label="Finalisation" percent="100" tone="success" /&gt;</code></pre>
+                </div>
+            </div>
+        </section>
+        {# Section Composant : Badge #}
+        <section class="bg-white p-8 rounded-lg border border-slate-200 shadow-sm">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-slate-900 mb-2">Badge</h2>
+                <p class="text-slate-600 text-sm">Petit composant pour étiqueter, catégoriser ou afficher un statut.</p>
+            </div>
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Tailles (size)</h3>
+                    <p class="text-xs text-slate-500 mb-3">size : sm / md</p>
+                    <div class="flex items-center gap-2">
+                        <twig:Badge label="Badge Petit" size="sm" variant="primary" />
+                        <twig:Badge label="Badge Moyen" size="md" variant="primary" />
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Variantes soft (par défaut)</h3>
+                    <p class="text-xs text-slate-500 mb-3">variant : primary / success / warning / danger / info / secondary</p>
+                    <div class="flex flex-wrap gap-2">
+                        <twig:Badge label="Primary" variant="primary" />
+                        <twig:Badge label="Success" variant="success" />
+                        <twig:Badge label="Warning" variant="warning" />
+                        <twig:Badge label="Danger" variant="danger" />
+                        <twig:Badge label="Info" variant="info" />
+                        <twig:Badge label="Secondary" variant="secondary" />
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Variantes solides (soft="false")</h3>
+                    <p class="text-xs text-slate-500 mb-3">soft : false / true</p>
+                    <div class="flex flex-wrap gap-2">
+                        <twig:Badge label="Primary" variant="primary" :soft="false" />
+                        <twig:Badge label="Success" variant="success" :soft="false" />
+                        <twig:Badge label="Warning" variant="warning" :soft="false" />
+                        <twig:Badge label="Danger" variant="danger" :soft="false" />
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Avec icônes (icon / iconEnd)</h3>
+                    <p class="text-xs text-slate-500 mb-3">icon : fa-solid:edit ...<br>iconeEnd : true / false</p>
+                    <div class="flex flex-wrap gap-2">
+                        <twig:Badge label="Brouillon" variant="secondary" icon="fa-solid:edit" />
+                        <twig:Badge label="Validé" variant="success" icon="fa-solid:check" />
+                        <twig:Badge label="Alerte" variant="danger" icon="fa-solid:exclamation-triangle" :iconEnd="true" />
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Forme pill (arrondie)</h3>
+                    <p class="text-xs text-slate-500 mb-3">:pill : true / false</p>
+                    <div class="flex gap-2">
+                        <twig:Badge label="Pill Soft" size="sm" variant="primary" :pill="true" />
+                        <twig:Badge label="Pill Solid" size="sm" variant="danger" :soft="false" :pill="true" />
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-slate-900 text-slate-200 p-4 rounded-md text-xs overflow-x-auto"><code>&lt;twig:Badge label="Publié" variant="success" /&gt;
+&lt;twig:Badge label="Brouillon" variant="secondary" icon="fa-solid:edit" /&gt;
+&lt;twig:Badge label="Pilule" variant="danger" :soft="false" :pill="true" /&gt;</code></pre>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}

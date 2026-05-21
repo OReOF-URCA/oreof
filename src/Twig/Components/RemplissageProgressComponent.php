@@ -29,25 +29,27 @@ final class RemplissageProgressComponent
     #[PostMount]
     public function mount(): void
     {
-        $this->percent = $this->normalizePercent($this->value);
+        // Si un objet Remplissage est fourni, recalculer automatiquement
+        if ($this->value !== null) {
+            $this->percent = $this->normalizePercent($this->value);
 
-        if ($this->percent <= 10) {
-            $this->label = 'Non complété';
-            $this->tone = 'danger';
+            if ($this->percent <= 10) {
+                $this->label = 'Non complété';
+                $this->tone = 'danger';
+                return;
+            }
 
-            return;
+            if ($this->percent >= 100) {
+                $this->percent = 100;
+                $this->label = 'Complet';
+                $this->tone = 'success';
+                return;
+            }
+
+            $this->label = '';
+            $this->tone = 'info';
         }
-
-        if ($this->percent >= 100) {
-            $this->percent = 100;
-            $this->label = 'Complet';
-            $this->tone = 'success';
-
-            return;
-        }
-
-        $this->label = ''; //sprintf('%d%%', $this->percent);
-        $this->tone = 'info';
+        // Sinon (value=null), garder simplement les valeurs fournies en paramètres
     }
 
     private function normalizePercent(?Remplissage $value): int

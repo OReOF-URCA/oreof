@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{# 1. Titre et descrition de la page #}
+
+{% block header %}
+    Insérer un titre de page général.
+{% endblock %}
+
+{% set header_description %}
+    Insérer une description générale de la page, qui peut être utilisée pour contextualiser les composants présentés et expliquer leur usage dans l'application.
+{% endset %}
+
+{# 2. Alignement strict du fil d'Ariane #}
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {
+            href:'',
+            title: 'Ici le titre de la page (ex: "Gestion des Entités")',
+        }
+    ]}) }}
+{% endblock %}
+
+
+{# 3. Actions globales en haut à droite #}
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="/administration/styleguide">Revenir sur styleguide</twig:Button>
+    <twig:Button variant="primary" icon="fa-solid:plus">Ajouter un élément</twig:Button>
+{% endblock %}
+
+{# 4. Grille de contenu unifiée #}
+{% block content %}
+    <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+        {# Exemple d'intégration d'un composant de tableau unifié #}
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">ID</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Libellé</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase">Actions</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+            {% for item in dummy_items %}
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4 text-sm text-slate-900 font-mono">{{ item.id }}</td>
+                    <td class="px-6 py-4 text-sm text-slate-700">{{ item.label }}</td>
+                    <td class="px-6 py-4 text-sm text-right space-x-2">
+                        <twig:Button label="Modifier" variant="warning" :outline="true" :soft="true" icon="fa-solid:pen"/>
+                        <twig:Button variant="danger" icon="fa-solid:trash"/>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

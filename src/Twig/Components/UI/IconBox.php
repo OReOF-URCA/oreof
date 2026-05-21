@@ -28,11 +28,11 @@ class IconBox
         }
 
         return match ($this->variant) {
-            'success' => 'heroicon:check-circle',
-            'danger' => 'heroicon:exclamation-circle',
-            'warning' => 'heroicon:exclamation-triangle',
-            'info' => 'heroicon:information-circle',
-            default => 'heroicon:information-circle',
+            'success' => 'icon:success',
+            'danger' => 'icon:danger',
+            'warning' => 'icon:warning',
+            'info' => 'icon:info',
+            default => 'icon:info',
         };
     }
 
