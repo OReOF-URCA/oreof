@@ -185,15 +185,15 @@ class FormationResponsableController extends BaseController
                 ])
                 ->addColumn('ancienResponsable.display', [
                     'label' => 'Ancien Co/RF',
-                    'sortable' => false,
-                    'filterable' => false,
-                    'searchable' => false,
+                    'sortable' => true,
+                    'filterable' => true,
+                    'searchable' => true,
                 ])
                 ->addColumn('nouveauResponsable.display', [
                     'label' => 'Nouveau Co/RF',
-                    'sortable' => false,
-                    'filterable' => false,
-                    'searchable' => false,
+                    'sortable' => true,
+                    'filterable' => true,
+                    'searchable' => true,
                 ])
                 ->addColumn('dateDemande', [
                     'label' => 'Date demande',

@@ -1,75 +1,97 @@
 {% extends 'base.html.twig' %}
 
 {% set header_title %}
-    Vos commentaires
+    Mes commentaires
 {% endset %}
 
 
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
+        { title: header_title }
     ]}) }}
 {% endblock %}
 
 {% block bouton_header %}
-    <a href="{{ path('app_commentaire_export')  }}"
-       class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Télécharger en PDF"
-    >
-        <i class="{{ iconDownload }}"></i>
-        <span> Télécharger en PDF</span>
-    </a>
+    <twig:Button
+            href="{{ path('app_commentaire_export') }}"
+            variant="info"
+            size="sm"
+            icon="icon:download"
+            label="Télécharger en PDF"
+            tooltip="Télécharger en PDF"
+    />
 {% endblock %}
 
 {% block content %}
-    <h2 class="small-title">Vos commentaires</h2>
-    <div class="card">
-        <div class="card-title"></div>
-        <div class="card-body">
-            {% for commentaire in commentaires %}
-                <div class="border-bottom border-separator-light mb-2 pb-2">
-                    <div class="row g-0">
-                        <div class="col">
-                            <div class="card-body d-flex flex-row pt-0 pb-0 ps-3 pe-0 h-100 align-items-center justify-content-between">
-                                <div class="d-flex flex-column">
-                                    <div>
-                                        {% if commentaire.formation is defined and commentaire.formation != null %}
-                                            <span class="badge bg-info">Formation</span> {{ commentaire.formation.displayLong }}
-                                        {% elseif commentaire.parcours is defined and commentaire.parcours != null %}
-                                            <span class="badge bg-primary">Parcours</span> {{ commentaire.parcours.libelle }} / {{ commentaire.parcours.formation.displayLong }}
-                                        {% elseif commentaire.ficheMatiere is defined and commentaire.ficheMatiere != null %}
-                                            <span class="badge bg-warning">Fiche EC</span> {{ commentaire.ficheMatiere.display }}
-                                        {% else %}
-                                            Erreur
-                                        {% endif %}
-                                    </div>
-                                    <div class="text-small text-muted">{{ commentaire.zone }}</div>
-                                    <p>
-                                        {{ commentaire.texte|raw }}
-                                    </p>
-                                </div>
-                                <div class="d-flex">
-                                    <a class="btn btn-outline-info btn-sm ms-1" type="button"
-                                            {% if commentaire.formation is defined and commentaire.formation != null %}
-                                                {% set url = path('formation_v2_voir', {slug:commentaire.formation.slug})~'#'~commentaire.zone %}
-                                            {% elseif commentaire.parcours is defined and commentaire.parcours != null %}
-                                                {% set url = path('parcours_v2_voir', {parcours:commentaire.parcours.id})~'#'~commentaire.zone %}
-                                            {% elseif commentaire.ficheMatiere is defined and commentaire.ficheMatiere != null %}
-                                                {% set url = path('fiche_matiere_v2_voir', {slug:commentaire.ficheMatiere.slug})~'#'~commentaire.zone %}
-                                            {% else %}
-                                                {% set url = '' %}
-                                            {% endif %}
-                                       href="{{ url }}"
-                                       target="_blank"
-                                    >Accéder</a>
-                                </div>
+    <section
+            class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6">
+        <div class="space-y-1">
+            <h2 class="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Vos
+                commentaires</h2>
+            <p class="text-sm text-slate-600 dark:text-slate-300">Retrouvez ici vos remarques et accédez directement à
+                la zone concernée.</p>
+        </div>
+
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+            <div class="divide-y divide-slate-200 dark:divide-slate-700">
+                {% for commentaire in commentaires %}
+                    {% if commentaire.formation is defined and commentaire.formation != null %}
+                        {% set contexteLabel = 'Formation' %}
+                        {% set contexteVariant = 'info' %}
+                        {% set contexteDescription = commentaire.formation.displayLong %}
+                        {% set url = path('formation_v2_voir', { slug: commentaire.formation.slug }) ~ '#' ~ commentaire.zone %}
+                    {% elseif commentaire.parcours is defined and commentaire.parcours != null %}
+                        {% set contexteLabel = 'Parcours' %}
+                        {% set contexteVariant = 'primary' %}
+                        {% set contexteDescription = commentaire.parcours.libelle ~ ' / ' ~ commentaire.parcours.formation.displayLong %}
+                        {% set url = path('parcours_v2_voir', { parcours: commentaire.parcours.id }) ~ '#' ~ commentaire.zone %}
+                    {% elseif commentaire.ficheMatiere is defined and commentaire.ficheMatiere != null %}
+                        {% set contexteLabel = 'Fiche EC' %}
+                        {% set contexteVariant = 'warning' %}
+                        {% set contexteDescription = commentaire.ficheMatiere.display %}
+                        {% set url = path('fiche_matiere_v2_voir', { slug: commentaire.ficheMatiere.slug }) ~ '#' ~ commentaire.zone %}
+                    {% else %}
+                        {% set contexteLabel = 'Erreur' %}
+                        {% set contexteVariant = 'danger' %}
+                        {% set contexteDescription = 'Contexte non identifié' %}
+                        {% set url = '' %}
+                    {% endif %}
+
+                    <article class="flex flex-col gap-4 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
+                        <div class="space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                {{ component('Badge', { label: contexteLabel, variant: contexteVariant }) }}
+                                <p class="text-sm font-medium text-slate-800 dark:text-slate-100">{{ contexteDescription }}</p>
+                            </div>
+                            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                                Zone : {{ commentaire.zone }}</p>
+                            <div class="text-sm text-slate-700 dark:text-slate-200">
+                                {{ commentaire.texte|raw }}
                             </div>
                         </div>
+
+                        <div class="shrink-0">
+                            {% if url != '' %}
+                                <twig:Button
+                                        href="{{ url }}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        variant="info"
+                                        size="sm"
+                                        label="Accéder"
+                                />
+                            {% else %}
+                                <span class="inline-flex rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">Lien indisponible</span>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% else %}
+                    <div class="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                        Aucun commentaire pour le moment.
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-    </div>
+    </section>
 
 {% endblock %}

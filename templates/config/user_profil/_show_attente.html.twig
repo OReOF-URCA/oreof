@@ -1,0 +1,120 @@
+<div class="space-y-6">
+    <section class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Utilisateur</h3>
+        <p class="mt-2 text-sm text-slate-700"><span
+                    class="font-medium text-slate-900">Login :</span> {{ user.username }}</p>
+        <p class="mt-2 text-sm text-slate-700"><span class="font-medium text-slate-900">Nom :</span> {{ user.nom }}</p>
+        <p class="mt-2 text-sm text-slate-700"><span
+                    class="font-medium text-slate-900">Prenom :</span> {{ user.prenom }}</p>
+        <p class="mt-2 text-sm text-slate-700"><span class="font-medium text-slate-900">Email :</span> {{ user.email }}
+        </p>
+        <p class="mt-2 text-sm text-slate-700"><span class="font-medium text-slate-900">Centre de gestion :</span>
+            {% if user.composanteDemande != null %}
+                Composante demandée : {{ user.composanteDemande.libelle }}
+            {% elseif user.etablissementDemande != null %}
+                Etablissement demandé : {{ user.etablissementDemande.libelle }}
+            {% else %}
+                <twig:Badge
+                        variant="danger"
+                        label="Erreur de demande"
+                />
+            {% endif %}
+        </p>
+    </section>
+
+    {{ include('user_profils/_gestion_profils.html.twig', {hide:true}) }}
+
+    <div class="mt-2">
+        {% if user.isEnable %}
+            <twig:Button
+                    variant="danger"
+                    :soft="true"
+                    label="Désactiver l'accès"
+                    tooltip="Désactiver l'accès"
+                    href="{{ path('app_user_gestion_revoque_admin', {user:user.id}) }}"
+            />
+        {% else %}
+            {% if (user.isValidDpe == false and (user.userProfils|length >0 and (user.userProfils[0].profil.centre == 'cg_composante' or user.userProfils[0].profil.centre == 'cg_formation'))
+                ) or user.isValideAdministration == false %}
+                <p class="mb-2">
+                    {% if user.isValidDpe == false %}
+                        <twig:Badge variant="warning" label="Non validé par DPE"/>
+                    {% else %}
+                        <twig:Badge variant="success" label="Validé par DPE le {{ user.dateValideDpe|dateTimeFr }}"/>
+                    {% endif %}
+                </p>
+
+                {% if not is_granted('ROLE_ADMIN') %}
+                    <twig:Button
+                            href="{{ path('app_user_gestion_valid_dpe', {user:user.id}) }}"
+                            variant="success"
+                            :soft="false"
+                            label="Valider l'accès"
+                            tooltip="Valider l'accès pour cet utilisateur"
+                    />
+
+                    <twig:Button
+                            variant="danger"
+                            :soft="true"
+                            label="Refuser l'accès"
+                            tooltip="Refuser l'accès pour cet utilisateur"
+                            dataAction="{{ stimulus_action('register', 'refuserAcces') }}"
+                    />
+
+
+                    <div id="motifRefus" class="hidden">
+                        <label class="form-label" for="texteMotifRefus"></label>
+                        <textarea class="form-control" id="texteMotifRefus"></textarea>
+                        <twig:Button
+                                variant="danger"
+                                :soft="true"
+                                label="Confirmer le refus d'accès"
+                                tooltip="Confirmer le refus d'accès"
+                                dataAction="{{ stimulus_action('register', 'confirmeRefusAcces') }}"
+                        />
+                    </div>
+                {% endif %}
+
+            {% endif %}
+            {% if is_granted('ROLE_ADMIN') %}
+                {% if user.isValideAdministration == false %}
+                    <twig:Button
+                            href="{{ path('app_user_gestion_valid_admin', {user:user.id}) }}"
+                            variant="success"
+                            :soft="false"
+                            label="Valider l'accès"
+                            tooltip="Valider l'accès pour cet utilisateur"
+                    />
+
+                    <twig:Button
+                            variant="danger"
+                            :soft="true"
+                            label="Refuser l'accès"
+                            tooltip="Refuser l'accès pour cet utilisateur"
+                            dataAction="{{ stimulus_action('register', 'refuserAcces') }}"
+                    />
+
+                    <div id="motifRefus" class="hidden">
+                        <label class="form-label" for="texteMotifRefus"></label>
+                        <textarea class="form-control" id="texteMotifRefus"></textarea>
+                        <twig:Button
+                                variant="danger"
+                                :soft="true"
+                                label="Confirmer le refus d'accès"
+                                tooltip="Confirmer le refus d'accès"
+                                dataAction="{{ stimulus_action('register', 'confirmeRefusAcces') }}"
+                        />
+                    </div>
+                {% else %}
+                    <twig:Button
+                            href="{{ path('app_user_gestion_revoque_admin', {user:user.id}) }}"
+                            variant="danger"
+                            :soft="false"
+                            label="Révoquer l'accès"
+                            tooltip="Révoquer l'accès pour cet utilisateur"
+                    />
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
