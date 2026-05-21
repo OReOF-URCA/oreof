@@ -1,0 +1,23 @@
+<p class="text-center fw-bold my-3">
+    Voulez vous vraiment supprimer cette formation ?
+</p>
+
+<div class="row my-4 justify-content-center">
+    <div class="col-4 text-center mt-5">
+        <a href="{{ path('app_formation_set_soft_delete', {slug: formation_slug}) }}">
+            <button class="btn btn-sm btn-success"
+                type="button"
+            >
+                Oui
+            </button>
+        </a>
+    </div>
+    <div class="col-4 text-center mt-5">
+        <button class="btn btn-sm btn-danger" 
+            data-bs-dismiss="modal"
+            type="button"
+        >
+            Non
+        </button>
+    </div>
+</div>
