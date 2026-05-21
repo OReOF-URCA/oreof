@@ -764,6 +764,7 @@ class ParcoursController extends BaseController
                 $xmlErrorArray = array_merge($xmlErrorArray, $erreursChampsParcours);
                 $errorArray[] = [
                     'id' => $p->getId(),
+                    'isSoftDeleted' => $p->isSoftDeleted() ?: false,
                     'parcours_libelle' => $p->getLibelle(),
                     'etatParcours' => GetDpeParcours::getFromParcours($p)?->getEtatValidation(),
                     'formation_libelle' => $p->getFormation()?->getMention()?->getLibelle(),

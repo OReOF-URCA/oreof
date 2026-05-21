@@ -17,6 +17,11 @@
                                 ({{ e.etatParcours|badgeDpe }})
                             </strong>
                         </a> - ID : <strong>{{ e.id }}</strong>
+                        {% if e.isSoftDeleted == true %}
+                            <span class="badge rounded-pill text-bg-dark">
+                                Parcours supprimé
+                            </span>
+                        {% endif %}
                     </div>
                     <div class="col-3">
                         {# Bouton pour voir le parcours #}
