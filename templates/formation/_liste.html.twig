@@ -164,6 +164,7 @@
         </thead>
         <tbody>
         {% for formation in formations %}
+        {% if formation.isSoftDeleted != true %}
             {% set remplissage = params['remplissage']|default('all') %}
             {% if remplissage == '100' and formation.remplissage.calcul == 100 or
                 remplissage == '0' and formation.remplissage.calcul < 100 or
@@ -271,6 +272,7 @@
                 </tr>
                 <template id="detailParcours_{{ formation.id }}"></template>
             {% endif %}
+        {% endif %}
         {% else %}
             <tr>
                 <td colspan="9" class="bg-warning">Aucun enregistrement trouvé</td>
