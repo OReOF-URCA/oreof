@@ -1,33 +1,60 @@
-<h3>Liste des profils</h3>
+<section class="space-y-4">
+    <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold text-slate-800">Liste des profils</h3>
+        <span class="text-xs text-slate-500">Gestion des profils affectés à l'utilisateur</span>
+    </div>
 
-<table class="table table-striped">
-    <thead>
-    <tr>
-        <th>Profil</th>
-        <th>Centre</th>
-        <th>Appliqué à</th>
-        <th></th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for userProfil in userProfils|filter(userProfil => (userProfil.campagneCollecte.id == user_data.campagneCollecte.id )) %}
-        <tr>
-            <td>{{ userProfil.profil != null ? userProfil.profil.libelle : 'Non précisé' }}</td>
-            <td>{{ userProfil|badgeTypeCentre }}</td>
-            <td>{{ userProfil|centre }}</td>
-            <td>
-                <button {{ stimulus_action('profil--user', 'delete', 'click', {
-                    url:path('app_user_profils_delete',{'userProfil': userProfil.id}),
-                    csrf: csrf_token('delete' ~ userProfil.id)
-                }) }} class="btn btn-sm text-danger">
-                    <i class="{{ iconDelete }}"></i> Supprimer
-                </button>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="4" class="bg-warning">Aucun profil</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                <tr>
+                    <th scope="col"
+                        class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Profil
+                    </th>
+                    <th scope="col"
+                        class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Centre
+                    </th>
+                    <th scope="col"
+                        class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Appliqué à
+                    </th>
+                    <th scope="col"
+                        class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Action
+                    </th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                {% for userProfil in userProfils|filter(userProfil => ((userProfil.campagneCollecte != null and userProfil.campagneCollecte.id == user_data.campagneCollecte.id )) or userProfil.campagneCollecte == null) %}
+                    <tr class="transition-colors hover:bg-slate-50">
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ userProfil.profil != null ? userProfil.profil.libelle : 'Non précisé' }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ userProfil|badgeTypeCentre }}</td>
+                        <td class="px-4 py-3 text-sm text-slate-700">{{ userProfil|centre }}</td>
+                        <td class="px-4 py-3 text-right">
+                            <button
+                                    type="button"
+                                    {{ stimulus_action('profil--user', 'delete', 'click', {
+                                        url:path('app_user_profils_delete',{'userProfil': userProfil.id}),
+                                        csrf: csrf_token('delete' ~ userProfil.id)
+                                    }) }}
+                                    class="inline-flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                            >
+                                <i class="{{ iconDelete }}"></i>
+                                Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="px-4 py-8 text-center">
+                            <div class="mx-auto max-w-md rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                                Aucun profil associé pour cette campagne.
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

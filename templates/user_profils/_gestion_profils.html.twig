@@ -2,19 +2,29 @@
     urlConfigProfil: path('app_user_profils_config', {user:user.id}),
     urlListe: path('app_user_profils_liste', {user:user.id}),
     urlAdd: path('app_user_profils_add_valide', {user:user.id}),
-}) }}>
-    <div class="alert alert-info mb-2">
-        Nom : {{ user.nom }} <br>
-        Prénom : {{ user.prenom }}
-    </div>
-    <div {{ stimulus_target('profil--user', 'liste') }}>
+}) }} class="space-y-6">
+    <section class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Utilisateur</h3>
+        <p class="mt-2 text-sm text-slate-700"><span class="font-medium text-slate-900">Nom :</span> {{ user.nom }}</p>
+        <p class="text-sm text-slate-700"><span class="font-medium text-slate-900">Prenom :</span> {{ user.prenom }}</p>
+    </section>
 
+    <div class="rounded-xl border border-slate-200 bg-white p-2 shadow-sm">
+        <div {{ stimulus_target('profil--user', 'liste') }}></div>
     </div>
-    <div class="mt-2">
-        <h3>Ajouter un profil</h3>
-        <div>
-            <label class="form-label required" for="typeCentre">Choisir le profil</label>
-            <select id="typeCentre" class="form-select" {{ stimulus_action('profil--user', 'changeProfil') }}
+
+    <section class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm md:p-5">
+        <div class="mb-4 flex items-center justify-between">
+            <h3 class="text-lg font-semibold text-slate-800">Ajouter un profil</h3>
+            <span class="text-xs text-slate-500">Associer un profil à un centre</span>
+        </div>
+
+        <div class="space-y-2">
+            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500" for="typeCentre">Choisir
+                le profil</label>
+            <select id="typeCentre"
+                    class="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+                    {{ stimulus_action('profil--user', 'changeProfil') }}
                     required
                     {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
             >
@@ -24,11 +34,17 @@
                 {% endfor %}
             </select>
         </div>
-        <div
-                class="mt-2"
+
+        <div class="mt-4 rounded-lg border border-dashed border-slate-200 bg-slate-50 p-3"
                 {{ stimulus_target('profil--user', 'configProfil') }}
         ></div>
-        <button class="btn btn-success mt-2" {{ stimulus_action('profil--user', 'addProfil') }}>Ajouter le centre
-        </button>
-    </div>
+
+        <div class="mt-4 flex justify-end">
+            <button type="button"
+                    class="inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100"
+                    {{ stimulus_action('profil--user', 'addProfil') }}>
+                Ajouter le centre
+            </button>
+        </div>
+    </section>
 </div>

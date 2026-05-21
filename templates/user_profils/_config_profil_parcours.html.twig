@@ -1,14 +1,11 @@
-<h2>Configuration du profil : "{{ profil.libelle }}" ({{ profil.code }})</h2>
-
-<div>
-    <label class="form-label required" for="selectListe">Choisir le parcours pour ce profil</label>
-    <select id="selectListe" class="form-select"
-            required
-            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
-    >
-        {% for parcours in parcours %}
-            <option value="{{ parcours.id }}">{{ parcours.display }} - ({{ parcours.formation.displayLong(true) }})
-            </option>
+{% embed 'user_profils/_config_profil_select.html.twig' with {
+    profil: profil,
+    selectLabel: 'Choisir le parcours pour ce profil',
+    placeholder: 'Selectionner un parcours'
+} %}
+    {% block options %}
+        {% for item in parcours %}
+            <option value="{{ item.id }}">{{ item.display }} - ({{ item.formation.displayLong(true) }})</option>
         {% endfor %}
-    </select>
-</div>
+    {% endblock %}
+{% endembed %}
