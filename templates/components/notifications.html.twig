@@ -4,7 +4,7 @@
            title="Effectuer une recherche"
                 {{ stimulus_controller('tooltip') }}
            aria-label="Rechercher"
-           class="p-2 rounded-full text-gray-600 hover:bg-gray-100 transition inline-flex items-center justify-center"
+           class="p-2 rounded-full text-secondary hover:bg-bg transition inline-flex items-center justify-center"
         >
             <twig:UX:Icon name="icon:search" class="w-5 h-5"/>
         </a>
@@ -15,7 +15,7 @@
            title="Mes commentaires"
                 {{ stimulus_controller('tooltip') }}
            aria-label="Mes commentaires"
-           class="p-2 rounded-full text-gray-600 hover:bg-gray-100 transition inline-flex items-center justify-center"
+           class="p-2 rounded-full text-secondary hover:bg-bg transition inline-flex items-center justify-center"
         >
             <twig:UX:Icon name="icon:comment" class="w-5 h-5"/>
         </a>
@@ -35,7 +35,7 @@
            title="Signaler un bug"
                 {{ stimulus_controller('tooltip') }}
            aria-label="Signaler un bug"
-           class="p-2 rounded-full text-gray-600 hover:bg-gray-100 transition inline-flex items-center justify-center"
+           class="p-2 rounded-full text-secondary hover:bg-bg transition inline-flex items-center justify-center"
         >
             <twig:UX:Icon name="icon:bug" class="w-5 h-5"/>
         </a>
@@ -43,7 +43,7 @@
 
     <li>
         <a href="{{ path('app_notification_liste_user') }}"
-           class="relative p-2 rounded-full text-gray-600 hover:bg-gray-100 transition inline-flex items-center justify-center"
+           class="relative p-2 rounded-full text-secondary hover:bg-bg transition inline-flex items-center justify-center"
            data-action="click->modalturbo#open"
            aria-label="Notifications"
            title="Notifications"
@@ -51,7 +51,7 @@
         >
             <twig:UX:Icon name="icon:bell" class="w-5 h-5"/>
             {% if this.notifsNonLu is defined and this.notifsNonLu > 0 %}
-                <span class="absolute -top-0.5 -right-0.5 inline-flex h-3 w-3 rounded-full bg-red-500 ring-2 ring-white"></span>
+                <span class="absolute -top-0.5 -right-0.5 inline-flex h-3 w-3 rounded-full bg-danger-500 ring-2 ring-text"></span>
             {% endif %}
         </a>
     </li>

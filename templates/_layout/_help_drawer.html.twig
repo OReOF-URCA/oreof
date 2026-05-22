@@ -1,0 +1,70 @@
+{# templates/_layout/_help_drawer.html.twig #}
+
+{# Check de l'existant de la route pour l'aide #}
+{% set current_route = app.request.attributes.get('_route', '') %}
+{% set current_help = get_page_help(current_route) %}
+
+{# N'affiche le FAB / offcanvas que si une aide existe pour la page ou si l'utilisateur est admin #}
+{% if current_help or is_granted('ROLE_ADMIN') %}
+
+    <div data-controller="help-drawer" data-action="keydown@window->help-drawer#onEscape">
+
+        <div id="help-fab-container" class="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-fit z-[80]">
+            <button id="helpFabToggle" class="shadow-lg rounded-full flex items-center justify-center w-14 h-14 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-95 transition cursor-pointer" type="button" title="Aide de la page" aria-expanded="false" aria-controls="helpOffcanvas" aria-label="Ouvrir l'aide" data-action="click->help-drawer#toggle" style="background-color: {{ current_help ? 'var(--color-primary)' : 'var(--color-warning)' }};">
+                <twig:UX:Icon name="icon:question" class="w-7 h-7 text-white" />
+            </button>
+        </div>
+
+        <div id="helpBackdrop" class="fixed inset-0 bg-black/40 hidden z-[60]" aria-hidden="true" data-action="click->help-drawer#onBackdropClick"></div>
+
+        <aside id="helpOffcanvas" class="fixed right-0 top-0 h-full w-80 sm:w-[28rem] transform translate-x-full transition-transform duration-300 ease-in-out bg-white border-l border-slate-200 shadow-lg z-[70] overflow-auto dark:bg-slate-900 dark:border-slate-700" aria-hidden="true" role="dialog" aria-labelledby="helpOffcanvasTitle">
+
+            <div class="p-4 flex items-center justify-between" style="background-color: {{ current_help ? 'var(--color-primary)' : 'var(--color-warning)' }}; color: white;">
+                <h5 id="helpOffcanvasTitle" class="mb-0 flex items-center gap-2 text-sm font-semibold">
+                    <twig:UX:Icon name="icon:question" class="w-4 h-4" />
+                    <span>{{ current_help ? current_help.title : 'Aide' }}</span>
+                </h5>
+                <button id="helpOffcanvasClose" class="text-white text-2xl leading-none focus:outline-none cursor-pointer" type="button" aria-label="Fermer l'aide" data-action="click->help-drawer#close">&times;</button>
+            </div>
+
+            <div class="p-4 text-slate-700 dark:text-slate-200">
+                {# BOUTONS D'ADMINISTRATION ET SLUG (Placés en haut, en ligne) #}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <div class="flex flex-wrap items-center gap-2 mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
+                        {% if current_help %}
+                            <a href="{{ path('app_help_edit', {'id': current_help.id}) }}" class="inline-flex items-center gap-2 px-2 py-1.5 border rounded text-sm border-indigo-200 text-indigo-600 dark:border-indigo-800 dark:text-indigo-300">
+                                <twig:UX:Icon name="mingcute:pencil-line" class="w-4 h-4" /> <span>Modifier</span>
+                            </a>
+                        {% else %}
+                            <a href="{{ path('app_help_new', {'route': current_route}) }}" class="inline-flex items-center gap-2 px-2 py-1.5 border rounded text-sm border-green-200 text-green-600 dark:border-green-800 dark:text-green-300">
+                                <twig:UX:Icon name="ph:plus-light" class="w-4 h-4" /> <span>Créer</span>
+                            </a>
+                        {% endif %}
+
+                        <a href="{{ path('app_help_index') }}" class="inline-flex items-center gap-2 px-2 py-1.5 border rounded text-sm border-amber-200 text-amber-600 dark:border-amber-800 dark:text-amber-300">
+                            <twig:UX:Icon name="material-symbols:list-rounded" class="w-4 h-4" /> <span>Gérer</span>
+                        </a>
+
+                        <code class="bg-gray-100 text-gray-800 px-2 py-1 rounded border shadow-sm ml-2 text-sm dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600">{{ current_route }}</code>
+                    </div>
+                {% endif %}
+
+                {# CONTENU DE L'AIDE POUR TOUS #}
+                <div>
+                    {% if current_help %}
+                        <div class="markdown-body app-help-markdown px-2">
+                            {{ current_help.content|markdown_to_html|parse_embeds }}
+                        </div>
+                    {% else %}
+                        <div class="bg-white/60 border border-slate-200 p-4 rounded text-center mt-2 dark:bg-slate-800/70 dark:border-slate-700">
+                            <twig:UX:Icon name="ph:smiley-sad-light" class="w-10 h-10 mb-3 text-slate-500 mx-auto" />
+                            <p class="mb-0 text-slate-500 dark:text-slate-400">Aucune aide n'est actuellement disponible pour cette page.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+{% endif %}

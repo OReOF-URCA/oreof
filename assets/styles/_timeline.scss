@@ -6,50 +6,50 @@
  * @lastUpdate 05/05/2026 11:48
  */
 
-@reference "tailwindcss";
+@reference "./app.css";
 
 .timeline {
-  @apply relative flex items-start justify-between gap-4 overflow-x-auto px-6 pb-4 pt-14;
+  @apply relative flex items-start justify-between gap-4 pt-14;
 }
 
 .timeline::before {
   content: "";
-  @apply pointer-events-none absolute left-6 right-6 top-20 h-1 rounded-full bg-slate-200;
+  @apply pointer-events-none absolute left-6 right-6 top-20 h-1 rounded-full bg-secondary-200;
 }
 
 .progress-line {
-  @apply pointer-events-none absolute left-6 top-20 h-1 rounded-full bg-linear-to-r from-emerald-500 via-cyan-500 to-indigo-500 transition-all duration-500 ease-out;
+  @apply pointer-events-none absolute left-6 top-20 h-1 rounded-full bg-linear-to-r from-success-500 via-info-500 to-primary-500 transition-all duration-500 ease-out;
   z-index: 1;
 }
 
 .today-marker {
-  @apply absolute top-10 z-20 h-10 w-1 rounded-full bg-amber-500 transition-all duration-300 ease-out;
+  @apply absolute top-10 z-20 h-10 w-1 rounded-full bg-warning transition-all duration-300 ease-out;
 }
 
 .today-marker::before {
   content: "Aujourd'hui";
-  @apply absolute -top-10 left-1/2 -translate-x-1/2 rounded-full bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white shadow;
+  @apply absolute -top-5 left-1/2 -translate-x-1/2 rounded-full bg-warning px-2.5 py-1 text-[11px] font-bold text-white shadow;
 }
 
 .today-marker::after {
   content: "";
-  @apply absolute left-1/2 top-9 h-3.5 w-3.5 -translate-x-1/2 rounded-full border-2 border-white bg-amber-500 shadow;
+  @apply absolute left-1/2 top-9 h-3.5 w-3.5 -translate-x-1/2 rounded-full border-2 border-surface bg-warning shadow;
 }
 
 .timeline-step {
-  @apply relative z-10 flex min-w-44 shrink-0 cursor-pointer flex-col items-center text-center transition-transform duration-200 ease-out hover:-translate-y-1;
+  @apply relative z-10 flex min-w-44 shrink-0 flex-col items-center text-center transition-transform duration-200 ease-out;
 }
 
 .step-icon {
-  @apply flex h-14 w-14 items-center justify-center rounded-full border-4 border-slate-200 bg-white text-xl text-slate-500 shadow-sm transition-all duration-300;
+  @apply flex h-14 w-14 items-center justify-center rounded-full border-4 border-secondary-200 bg-surface text-xl text-secondary shadow-sm transition-all duration-300;
 }
 
 .timeline-step.completed .step-icon {
-  @apply border-emerald-500 bg-emerald-500 text-white shadow-emerald-100;
+  @apply border-success bg-success text-white shadow-success-100 dark:shadow-success-800;
 }
 
 .timeline-step.current .step-icon {
-  @apply h-16 w-16 border-indigo-600 bg-indigo-600 text-2xl text-white shadow-lg ring-8 ring-indigo-100;
+  @apply h-16 w-16 border-primary bg-primary text-2xl text-white shadow-lg ring-8 ring-primary-100;
   animation: tl-pulse 2s ease-in-out infinite;
 }
 

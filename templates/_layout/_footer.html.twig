@@ -1,0 +1,62 @@
+<footer class="mt-6">
+    <div class="footer-content border-t border-slate-200/80 bg-white/90 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/90">
+        <div class="mx-auto w-full px-4 py-4 sm:px-6 lg:px-8">
+            <div class="grid gap-4 lg:grid-cols-3 lg:items-center">
+                <div class="space-y-1 lg:justify-self-start">
+                    <p class="text-sm font-semibold text-slate-700 dark:text-slate-200">ORéOF</p>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">&copy; {{ 'now'|date('Y') }} David Annebicque // Emeline
+                        Lang-Lannoy - version {{ user_data.version }}</p>
+                </div>
+
+                <div class="flex flex-col items-center gap-2 lg:justify-self-center">
+                    <div class="flex flex-wrap items-center justify-center gap-2">
+                        <a href="{{ path('app_document') }}"
+                           target="_blank"
+                           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500">
+                            <twig:UX:Icon name="icon:question" class="h-4 w-4"/>
+                            Documents
+                        </a>
+                        <a href="{{ path('app_help') }}"
+                           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500">
+                            <twig:UX:Icon name="icon:question" class="h-4 w-4"/>
+                            Aide
+                        </a>
+                        <a href="{{ path('app_faq') }}"
+                           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500">
+                            <twig:UX:Icon name="mynaui:chat-dots" class="h-4 w-4"/>
+                            FAQ
+                        </a>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-center gap-2">
+                        <a href="{{ path('app_usage_donnees') }}"
+                           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
+                           data-turbo="true" data-action="click->modalturbo#open" title="Usage des données">
+                            <twig:UX:Icon name="icon:question" class="h-4 w-4"/>
+                            Usage des données
+                        </a>
+                        {#                        <button type="button" #}
+                        {#                                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500" #}
+                        {#                                data-bs-toggle="modal" #}
+                        {#                                data-bs-target="#modalUsageDonnees"> #}
+                        {#                           #}
+                        {#                        </button> #}
+                        <a href="mailto:oreof@univ-reims.fr"
+                           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500">
+                            <twig:UX:Icon name="icon:envelope" class="h-4 w-4"/>
+                            Contact
+                        </a>
+                        <a href="https://github.com/Dannebicque/oreof"
+                           target="_blank"
+                           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500">
+                            <twig:UX:Icon name="icon:github" class="h-4 w-4"/>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+
+                <div class="hidden lg:block"></div>
+            </div>
+        </div>
+    </div>
+</footer>
