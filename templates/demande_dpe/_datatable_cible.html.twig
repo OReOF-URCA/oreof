@@ -1,0 +1,9 @@
+{% if item.niveauDemande == 'F' %}
+    <div class="space-y-1">
+        {{ component('Badge', { label: 'Mention', variant: 'info' }) }}
+        <p class="text-sm text-slate-600 dark:text-slate-300">Demande au niveau de la formation</p>
+    </div>
+{% else %}
+    <span class="font-medium text-slate-700 dark:text-slate-200">{{ item.parcours != null ? item.parcours.libelle : '-' }}</span>
+{% endif %}
+

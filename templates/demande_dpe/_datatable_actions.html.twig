@@ -1,0 +1,52 @@
+<div class="flex flex-wrap justify-end gap-2">
+    {% if item.niveauDemande == 'F' %}
+        <twig:Button
+                href="{{ path('formation_v2_voir', {slug: item.formation.slug}) }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="info"
+                size="sm"
+                icon="icon:info"
+                label="Voir"
+                tooltip="Voir la formation"
+                :centered="false"
+        />
+    {% else %}
+        <twig:Button
+                href="{{ path('parcours_v2_voir', {parcours: item.parcours.id}) }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="info"
+                size="sm"
+                icon="icon:info"
+                label="Voir"
+                tooltip="Voir le parcours"
+                :centered="false"
+        />
+    {% endif %}
+
+    <twig:Button
+            href="{{ path('app_demande_dpe_edit', {'id': item.id}) }}"
+            variant="warning"
+            size="sm"
+            icon="icon:edit"
+            label="Modifier"
+            tooltip="Modifier l'argumentaire"
+            dataAction="click->modalturbo#open"
+
+    />
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <twig:Button
+                variant="danger"
+                size="sm"
+                icon="icon:delete"
+                label="Supprimer"
+                tooltip="Supprimer la demande"
+                dataAction="click->crud#delete"
+                data-crud-url-param="{{ path('app_demande_dpe_delete', {'id': item.id}) }}"
+                data-crud-csrf-param="{{ csrf_token('delete' ~ item.id) }}"
+        />
+    {% endif %}
+</div>
+

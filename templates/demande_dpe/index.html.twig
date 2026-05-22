@@ -5,32 +5,16 @@
 {% endset %}
 
 {% block content %}
-    {# todo: passer sur datatable ? #}
     <section
-            class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6"
-            {% if composante is defined %}
-                {{ stimulus_controller('crud', {
-                    url: path('app_dpe_demande_liste', {
-                        type: type,
-                        composante: composante.id}),
-                    storageKey: 'dpe_demande_liste'
-                }
-                ) }}
-            {% else %}
-                {{ stimulus_controller('crud', {
-                    url: path('app_dpe_demande_liste', {type:type}),
-                    storageKey: 'dpe_demande_liste'
-                }) }}
-            {% endif %}
-         data-action="base:refreshListe@window->crud#refreshListe"
-    >
+            class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="space-y-1">
                 <h2 class="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                     Pilotage des demandes DPE
                 </h2>
                 <p class="max-w-3xl text-sm text-slate-600 dark:text-slate-300">
-                    Consultez les demandes de modifications ouvertes et suivez leur etat de validation.
+                    Consultez les demandes de modifications ouvertes, filtrez rapidement par contexte et suivez leur
+                    etat de validation.
                 </p>
             </div>
 
@@ -39,7 +23,8 @@
             </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-950/30 sm:p-4" {{ stimulus_target('crud', 'liste') }}>
+        <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-950/30 sm:p-4">
+            {{ component('DataTable', { config: table }) }}
         </div>
     </section>
 {% endblock %}
