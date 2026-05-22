@@ -94,8 +94,13 @@ class FicheMatiereExportController extends AbstractController
     }
 
     #[Route('/fiche-matiere/export/all/{parcours}', name: 'fiche_matiere_export_all')]
-    public function exportFichesMatieres(Parcours $parcours): Response
+    public function exportFichesMatieres(
+        Parcours $parcours,
+        TypeDiplomeResolver $typeDResolver
+    ): Response
     {
+        $typeDHandler = $typeDResolver->get($parcours->getFormation()?->getTypeDiplome());
+
         return $this->myPdf->render(
             'pdf/ficheMatiereAll.html.twig',
             [
@@ -104,6 +109,8 @@ class FicheMatiereExportController extends AbstractController
                 'fiches' => $parcours->getFicheMatieres(),
                 'typeDiplome' => $parcours->getFormation()?->getTypeDiplome(),
                 'titre' => 'Fiches EC/matières ',
+                'typeEpreuves' => $typeDHandler->getTypeEpreuves(),
+                'typeDiplomeHandler' => $typeDHandler
             ],
             'FichesMatieres' . $parcours->getDisplay()
         );
