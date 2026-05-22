@@ -46,19 +46,19 @@ class AppExtension extends AbstractExtension
             new TwigFilter('dateFr', $this->dateFr(...), ['is_safe' => ['html']]),
             new TwigFilter('dateTimeFr', $this->dateTimeFr(...), ['is_safe' => ['html']]),
             new TwigFilter('rncp_link', $this->rncpLink(...), ['is_safe' => ['html']]),
-            new TwigFilter('badgeBoolean', $this->badgeBoolean(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeBoolean', $this->badgeBoolean(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeBooleanDto', $this->badgeBooleanDto(...)),
             new TwigFilter('badgeDroits', $this->badgeDroits(...), ['is_safe' => ['html']]),
-            new TwigFilter('badgeTypeCentre', $this->badgeTypeCentre(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeTypeCentre', $this->badgeTypeCentre(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeTypeCentreDto', $this->badgeTypeCentreDto(...)),
             new TwigFilter('centre', $this->centre(...), ['is_safe' => ['html']]),
             new TwigFilter('displayOrBadge', $this->displayOrBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('etatRemplissage', $this->etatRemplissage(...), ['is_safe' => ['html']]),
             new TwigFilter('printTexte', $this->printTexte(...), ['is_safe' => ['html']]),
             new TwigFilter('filtreHeures', $this->filtreHeures(...), ['is_safe' => ['html']]),
-            new TwigFilter('badgeEnum', $this->badgeEnum(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeEnum', $this->badgeEnum(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeEnumDto', $this->badgeEnumDto(...)),
-            new TwigFilter('badgeStatus', $this->badgeStatus(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeStatus', $this->badgeStatus(...), ['is_safe' => ['html']]), //deprecated
             new TwigFilter('badgeStatusDto', $this->badgeStatusDto(...)),
             new TwigFilter('startWith', $this->startWith(...), ['is_safe' => ['html']]),
             new TwigFilter('isUeUtilisee', $this->isUeUtilisee(...), ['is_safe' => ['html']]),
@@ -82,6 +82,7 @@ class AppExtension extends AbstractExtension
         return false;
     }
 
+    /** @deprecated */
     public function badgeEnum(?BadgeEnumInterface $value): string
     {
         @trigger_error(__METHOD__ . '() is deprecated, use the badgeEnumDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
@@ -94,6 +95,7 @@ class AppExtension extends AbstractExtension
         return $this->badgePresenter->fromEnum($value);
     }
 
+    /** @deprecated */
     public function badgeStatus(?string $value): string
     {
         @trigger_error(__METHOD__ . '() is deprecated, use the badgeStatusDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
@@ -189,6 +191,7 @@ class AppExtension extends AbstractExtension
         return 'asc';
     }
 
+    /** @deprecated */
     public function badgeBoolean(?bool $value = false): string
     {
         @trigger_error(__METHOD__ . '() is deprecated, use the badgeBooleanDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
@@ -222,6 +225,7 @@ class AppExtension extends AbstractExtension
         return $html;
     }
 
+    /** @deprecated */
     public function badgeTypeCentre(UserProfil $userProfil): string
     {
         @trigger_error(__METHOD__ . '() is deprecated, use the badgeTypeCentreDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);

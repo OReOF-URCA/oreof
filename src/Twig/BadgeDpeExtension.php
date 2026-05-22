@@ -11,7 +11,6 @@ namespace App\Twig;
 
 use App\DTO\BadgeView;
 use App\Entity\FicheMatiere;
-use App\Enums\EtatChangeRfEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Presenter\BadgePresenter;
 use Twig\Extension\AbstractExtension;
@@ -29,25 +28,25 @@ class BadgeDpeExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('badgeDpe', $this->badgeDpe(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeDpe', $this->badgeDpe(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeDpeDto', $this->badgeDpeDto(...)),
-            new TwigFilter('badgeTypeModification', $this->badgeTypeModification(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeTypeModification', $this->badgeTypeModification(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeTypeModificationDto', $this->badgeTypeModificationDto(...)),
-            new TwigFilter('badgeStep', $this->badgeStep(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeStep', $this->badgeStep(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeStepDto', $this->badgeStepDto(...)),
-            new TwigFilter('badgeEtatComposante', $this->badgeEtatComposante(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeEtatComposante', $this->badgeEtatComposante(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeEtatComposanteDto', $this->badgeEtatComposanteDto(...)),
-            new TwigFilter('badgeFormation', $this->badgeFormation(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeFormation', $this->badgeFormation(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeFormationDto', $this->badgeFormationDto(...)),
-            new TwigFilter('badgeEc', $this->badgeEc(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeEc', $this->badgeEc(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeEcDto', $this->badgeEcDto(...)),
-            new TwigFilter('badgeFiche', $this->badgeFiche(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeFiche', $this->badgeFiche(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeFicheDto', $this->badgeFicheDto(...)),
-            new TwigFilter('badge', $this->badge(...), ['is_safe' => ['html']]),
+            new TwigFilter('badge', $this->badge(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeDto', $this->badgeDto(...)),
-            new TwigFilter('badgeValide', $this->badgeValide(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeValide', $this->badgeValide(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeValideDto', $this->badgeValideDto(...)),
-            new TwigFilter('badgeChangeRf', $this->badgeChangeRf(...), ['is_safe' => ['html']]),
+            new TwigFilter('badgeChangeRf', $this->badgeChangeRf(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeChangeRfDto', $this->badgeChangeRfDto(...)),
             new TwigFilter('displayErreurs', $this->displayErreurs(...), ['is_safe' => ['html']]),
             new TwigFilter('isFicheValidable', $this->isFicheValidable(...), ['is_safe' => ['html']])

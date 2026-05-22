@@ -46,10 +46,8 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="4" class="px-4 py-8 text-center">
-                            <div class="mx-auto max-w-md rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                                Aucun profil associé pour cette campagne.
-                            </div>
+                        <td colspan="4">
+                            {{ include('_ui/_empty_table.html.twig', {message: 'Aucun profil associé.'}) }}
                         </td>
                     </tr>
                 {% endfor %}
