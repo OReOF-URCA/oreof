@@ -2,6 +2,14 @@
 
 {% set header_title %}Bienvenue sur ORéOF!{% endset %}
 
+{% set header_description %}
+    ORéOF est un outil de pilotage et d'aide qui permet de suivre l'activité de votre composante, d'obtenir des statistiques sur vos formations et d'accéder à des actualités personnalisées.
+{% endset %}
+
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[]}) }}
+{% endblock %}
+
 {% block content %}
     {{ component('mutualisation_alerts', { user: app.user }) }}
 
@@ -70,7 +78,7 @@
         <div class="app-tab-panel">
             <turbo-frame id="step_1" class="block min-h-24" role="tabpanel" aria-labelledby="tab-{{ step }}"
                          src="{{ path('app_homepage_wizard', { step: step }) }}" {{ stimulus_target('wizard', 'content') }}>
-                <div class="px-3 py-4 text-sm text-slate-500">Chargement...</div>
+                <div class="px-3 py-4 text-sm text-secondary">Chargement...</div>
             </turbo-frame>
         </div>
     </div>
