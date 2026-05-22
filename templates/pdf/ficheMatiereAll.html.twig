@@ -14,7 +14,11 @@
                 {% set getElement = getElementFromEc(ec, parcours) %}
                 {{ include('pdf/ficheMatiere.html.twig', {
                         semestre:semestre,
-                        heures: getElement.getFicheMatiereHeures
+                        heures: getElement.getFicheMatiereHeures,
+                        mcccPdf: typeDiplomeHandler.getDisplayMccc(
+                            getElement.getMcccsFromFicheMatiere(typeDiplomeHandler) ?? [], 
+                            getElement.getTypeMcccFromFicheMatiere() ?? ''
+                        ),
                     }) 
                 }}
                 <div class="page_break"></div>
