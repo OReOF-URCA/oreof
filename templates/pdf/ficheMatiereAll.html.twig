@@ -7,7 +7,7 @@
     {% endif %}
     <div class="page_break"></div>
     {% for semestre in parcours.semestreParcours %}
-        <h1 class="text-center">Fiches EC/matière du semestre {{ semestre.display }}</h1>
+        <h1 class="text-center mt-3">Fiches EC/matière du semestre {{ semestre.display }}</h1>
         <div class="page_break"></div>
         {% for ue in semestre.semestre.ues %}
             {% for ec in ue.elementConstitutifs %}
