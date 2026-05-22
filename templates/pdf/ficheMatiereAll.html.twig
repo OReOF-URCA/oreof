@@ -11,7 +11,12 @@
         <div class="page_break"></div>
         {% for ue in semestre.semestre.ues %}
             {% for ec in ue.elementConstitutifs %}
-                {{ include('pdf/ficheMatiere.html.twig', {semestre:semestre}) }}
+                {% set getElement = getElementFromEc(ec, parcours) %}
+                {{ include('pdf/ficheMatiere.html.twig', {
+                        semestre:semestre,
+                        heures: getElement.getFicheMatiereHeures
+                    }) 
+                }}
                 <div class="page_break"></div>
             {% endfor %}
         {% endfor %}
