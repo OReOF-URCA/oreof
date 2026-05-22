@@ -26,7 +26,7 @@
             <dd>{{ semestre != null ? semestre.display  : 'erreur semestre' }}
                 / {{ ec.ue != null ? ec.ue.display(parcours) : 'erreur UE' }}</dd>
             <dt>Intitulé de l'EC</dt>
-            <dd>{{ ficheMatiere != null ? ficheMatiere.libelle : 'Erreur fiche' }}</dd>
+            <dd>{{ ficheMatiere != null ? ficheMatiere.getDisplay() : 'Erreur fiche' }}</dd>
             <dt>Intitulé de l'EC en anglais</dt>
             <dd>{{ ficheMatiere != null ? ficheMatiere.libelleAnglais : 'Erreur fiche' }}</dd>
             <dt>Enseignement mutualisé ?</dt>
@@ -59,15 +59,15 @@
             <tbody>
             <tr>
                 <td>Présentiel</td>
-                <td>{{ ec.volumeCmPresentiel }}</td>
-                <td>{{ ec.volumeTdPresentiel }}</td>
-                <td>{{ ec.volumeTpPresentiel }}</td>
+                <td>{{ heures.volumeCmPresentiel }}</td>
+                <td>{{ heures.volumeTdPresentiel }}</td>
+                <td>{{ heures.volumeTpPresentiel }}</td>
             </tr>
             <tr>
                 <td>Distanciel</td>
-                <td>{{ ec.volumeCmDistanciel }}</td>
-                <td>{{ ec.volumeTdDistanciel }}</td>
-                <td>{{ ec.volumeTpDistanciel }}</td>
+                <td>{{ heures.volumeCmDistanciel }}</td>
+                <td>{{ heures.volumeTdDistanciel }}</td>
+                <td>{{ heures.volumeTpDistanciel }}</td>
             </tr>
             </tbody>
         </table>
