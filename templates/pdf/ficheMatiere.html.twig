@@ -135,7 +135,7 @@
     </div>
     <div class="col-12 mt-2">
         <h2>MCCC pour le parcours</h2>
-        {% if typeDiplome.libelleCourt != 'BUT' %}
+        {% if templateFormMccc matches '/^licence/' %}
             {{ include('typeDiplome/licence/mccc-non-editable/_show.html.twig',
                     {
                         mcccs: mcccPdf,
@@ -143,13 +143,15 @@
                     }
                 )
             }}
-        {% elseif typeDiplome.libelleCourt == 'BUT' %}
+        {% elseif templateFormMccc matches '/^but/' %}
             {{ include('typeDiplome/but/mccc-non-editable/but.html.twig',
                     {
                         mcccs: mcccPdf
                     }
                 ) 
             }}
+        {% elseif templateFormMccc matches '/^m2e/' %}
+            
         {% else %}
 
         {% endif %}

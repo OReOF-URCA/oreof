@@ -110,7 +110,8 @@ class FicheMatiereExportController extends AbstractController
                 'typeDiplome' => $parcours->getFormation()?->getTypeDiplome(),
                 'titre' => 'Fiches EC/matières ',
                 'typeEpreuves' => $typeDHandler->getTypeEpreuves(),
-                'typeDiplomeHandler' => $typeDHandler
+                'typeDiplomeHandler' => $typeDHandler,
+                'templateFormMccc' => $typeDHandler::TEMPLATE_FORM_MCCC,
             ],
             'FichesMatieres' . $parcours->getDisplay()
         );
