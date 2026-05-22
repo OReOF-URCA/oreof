@@ -1,11 +1,11 @@
 <!-- Stats Start -->
 <section class="space-y-4">
-    <h2 class="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+    <h2 class="text-xl font-black tracking-tight text-text">
         Processus de la campagne de collecte des projets de DPE
-        <span class="text-base font-semibold text-slate-600 dark:text-slate-300">({{ user_data.campagneCollecte.libelle }})</span>
+        <span class="text-base font-semibold text-secondary">({{ user_data.campagneCollecte.libelle }})</span>
     </h2>
 
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white px-2 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <div class="overflow-hidden">
 
         <div class="timeline">
             <div class="progress-line" id="progressLine"></div>
@@ -20,12 +20,6 @@
                     {% endif %}
                 {% endif %}" data-end-date="{{ event.date|date('Y-m-d') }}">
                     <div class="step-icon"
-                            {{ stimulus_controller('tooltip', {
-                                placement: 'bottom',
-                                customClass: 'app-tooltip app-tooltip--timeline',
-                                container: 'body',
-                                title: event.description is not empty ? event.description : event.libelle
-                            }) }}
                          tabindex="0"
                     >
                         <twig:UX:Icon :name="event.icone" class="w-7 h-7"/>
