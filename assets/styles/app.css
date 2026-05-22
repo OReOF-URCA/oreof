@@ -115,7 +115,8 @@
 
 :root {
   color-scheme: light;
-  --semantic-primary-base: #187bb9;
+
+  --semantic-primary-base: #4f46e5;
   --semantic-secondary-base: #64748b;
   --semantic-success-base: #39832f;
   --semantic-info-base: #1f7b89;
@@ -253,7 +254,7 @@ html[data-theme="dark"] {
   }
 
   html[data-theme="dark"] .app-section-card {
-    @apply bg-slate-900 border-slate-700 text-slate-100;
+    @apply bg-secondary-900 border-secondary-700 text-secondary-100;
   }
 
   .app-section-header {
@@ -262,7 +263,7 @@ html[data-theme="dark"] {
   }
 
   html[data-theme="dark"] .app-section-header {
-    @apply border-slate-700;
+    @apply border-secondary-700;
   }
 
   .app-section-header-main {
@@ -270,35 +271,35 @@ html[data-theme="dark"] {
   }
 
   .app-section-header-title {
-    @apply text-2xl font-black tracking-tight italic uppercase text-slate-800;
+    @apply text-2xl font-black tracking-tight italic uppercase text-secondary-800;
   }
 
   html[data-theme="dark"] .app-section-header-title {
-    @apply text-slate-100;
+    @apply text-secondary-100;
   }
 
   .app-section-header-icon {
-    @apply w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg;
+    @apply w-12 h-12 rounded-2xl flex items-center justify-center text-text shadow-lg;
   }
 
   .app-section-header-icon--indigo {
-    @apply bg-indigo-600 shadow-indigo-100;
+    @apply bg-primary-600 shadow-primary-100;
   }
 
   .app-section-header-icon--amber {
-    @apply bg-amber-600 shadow-amber-100;
+    @apply bg-warning-600 shadow-warning-100;
   }
 
   .app-section-header-icon--red {
-    @apply bg-red-600 shadow-red-100;
+    @apply bg-danger-600 shadow-danger-100;
   }
 
   .app-section-header-icon--green {
-    @apply bg-green-600 shadow-green-100;
+    @apply bg-success-600 shadow-success-100;
   }
 
   .app-section-header-icon--teal {
-    @apply bg-teal-600 shadow-teal-100;
+    @apply bg-info-600 shadow-info-100;
   }
 
   .app-parcours-title {
@@ -306,23 +307,23 @@ html[data-theme="dark"] {
   }
 
   .app-parcours-title--indigo {
-    @apply text-indigo-600;
+    @apply text-primary-600;
   }
 
   .app-parcours-title--amber {
-    @apply text-amber-600;
+    @apply text-warning-600;
   }
 
   .app-parcours-title--red {
-    @apply text-red-600;
+    @apply text-danger-600;
   }
 
   .app-parcours-title--green {
-    @apply text-green-600;
+    @apply text-success-600;
   }
 
   .app-parcours-title--teal {
-    @apply text-teal-600;
+    @apply text-info-600;
   }
 
   /* Couche de compatibilité Bootstrap: badges et couleurs d'état */
@@ -503,15 +504,15 @@ html[data-theme="dark"] {
   }
 
   .app-help-markdown code {
-    @apply rounded bg-slate-100 px-1.5 py-0.5 text-[0.85em] text-slate-800;
+    @apply rounded bg-secondary-100 px-1.5 py-0.5 text-[0.85em] text-secondary-800;
   }
 
   html[data-theme="dark"] .app-help-markdown code {
-    @apply bg-slate-800 text-slate-100;
+    @apply bg-secondary-800 text-secondary-100;
   }
 
   .app-help-markdown pre {
-    @apply overflow-x-auto rounded-xl border border-slate-200 bg-slate-950 p-3 text-slate-100;
+    @apply overflow-x-auto rounded-xl border border-secondary-200 bg-secondary-950 p-3 text-secondary-100;
   }
 
   .app-help-markdown pre code {
@@ -519,20 +520,20 @@ html[data-theme="dark"] {
   }
 
   .app-help-markdown blockquote {
-    @apply border-l-4 border-cyan-500 bg-cyan-50/70 px-4 py-2 text-slate-700;
+    @apply border-l-4 border-info-500 bg-info-50/70 px-4 py-2 text-secondary-700;
   }
 
   html[data-theme="dark"] .app-help-markdown blockquote {
-    @apply border-cyan-400 bg-cyan-950/30 text-slate-200;
+    @apply border-info-400 bg-info-950/30 text-secondary-200;
   }
 
   .app-help-markdown details {
-    @apply relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 py-3 pl-5 pr-4 shadow-sm transition-all duration-200 ease-out;
+    @apply relative overflow-hidden rounded-xl border border-secondary-200 bg-secondary-50 py-3 pl-5 pr-4 shadow-sm transition-all duration-200 ease-out;
     --accordion-accent: var(--color-primary);
   }
 
   html[data-theme="dark"] .app-help-markdown details {
-    @apply border-slate-700 bg-slate-800/60;
+    @apply border-secondary-700 bg-secondary-800/60;
   }
 
   .app-help-markdown details details {
@@ -541,7 +542,7 @@ html[data-theme="dark"] {
   }
 
   html[data-theme="dark"] .app-help-markdown details details {
-    @apply border-slate-700 bg-slate-900/40;
+    @apply border-secondary-700 bg-secondary-900/40;
   }
 
   .app-help-markdown details details::before {
@@ -569,15 +570,15 @@ html[data-theme="dark"] {
   }
 
   html[data-theme="dark"] .app-help-markdown summary {
-    @apply text-slate-100;
+    @apply text-secondary-100;
   }
 
   .app-help-markdown summary:hover {
-    @apply bg-slate-100/70;
+    @apply bg-secondary-100/70;
   }
 
   html[data-theme="dark"] .app-help-markdown summary:hover {
-    @apply bg-slate-700/40;
+    @apply bg-secondary-700/40;
   }
 
   .app-help-markdown summary::marker {
@@ -590,7 +591,7 @@ html[data-theme="dark"] {
 
   .app-help-markdown summary::after {
     content: "+";
-    @apply ml-auto text-base font-black text-slate-400 transition-all duration-200 ease-out;
+    @apply ml-auto text-base font-black text-secondary-400 transition-all duration-200 ease-out;
   }
 
   .app-help-markdown details[open] > summary::after {
@@ -599,11 +600,11 @@ html[data-theme="dark"] {
   }
 
   .app-help-markdown details[open] > summary {
-    @apply border-b border-slate-200;
+    @apply border-b border-secondary-200;
   }
 
   html[data-theme="dark"] .app-help-markdown details[open] > summary {
-    @apply border-slate-700;
+    @apply border-secondary-700;
   }
 
   .app-help-markdown details[open] > :not(summary) {
@@ -623,34 +624,34 @@ html[data-theme="dark"] {
   }
 
   .app-help-markdown table {
-    @apply w-full border-collapse overflow-hidden rounded-lg border border-slate-200;
+    @apply w-full border-collapse overflow-hidden rounded-lg border border-secondary-200;
   }
 
   .app-help-markdown thead {
-    @apply bg-slate-100;
+    @apply bg-secondary-100;
   }
 
   .app-help-markdown th,
   .app-help-markdown td {
-    @apply border border-slate-200 px-3 py-2 text-left align-top;
+    @apply border border-secondary-200 px-3 py-2 text-left align-top;
   }
 
   html[data-theme="dark"] .app-help-markdown table,
   html[data-theme="dark"] .app-help-markdown th,
   html[data-theme="dark"] .app-help-markdown td {
-    @apply border-slate-700;
+    @apply border-secondary-700;
   }
 
   html[data-theme="dark"] .app-help-markdown thead {
-    @apply bg-slate-800;
+    @apply bg-secondary-800;
   }
 
   .app-help-markdown hr {
-    @apply my-4 border-0 border-t border-slate-200;
+    @apply my-4 border-0 border-t border-secondary-200;
   }
 
   html[data-theme="dark"] .app-help-markdown hr {
-    @apply border-slate-700;
+    @apply border-secondary-700;
   }
 
   /* Composants de transition: utilisés en double avec les classes Bootstrap */
@@ -662,7 +663,7 @@ html[data-theme="dark"] {
   }
 
   .app-modal-shell {
-    @apply flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl;
+    @apply flex w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-secondary-200 bg-white shadow-2xl;
     max-height: min(82vh, 960px);
   }
 
@@ -680,11 +681,11 @@ html[data-theme="dark"] {
   }
 
   .app-modal-title {
-    @apply text-lg font-bold tracking-tight text-slate-900;
+    @apply text-lg font-bold tracking-tight text-secondary-900;
   }
 
   .app-modal-subtitle {
-    @apply mt-1 text-sm text-slate-500;
+    @apply mt-1 text-sm text-secondary-500;
   }
 
   .app-modal-body {
@@ -696,16 +697,16 @@ html[data-theme="dark"] {
   }
 
   html[data-theme="dark"] .app-modal-shell {
-    @apply border-slate-700 bg-slate-900 shadow-black/40;
+    @apply border-secondary-700 bg-secondary-900 shadow-black/40;
   }
 
   html[data-theme="dark"] .app-modal-header,
   html[data-theme="dark"] .app-modal-footer {
-    @apply border-slate-700 bg-slate-800/85;
+    @apply border-secondary-700 bg-secondary-800/85;
   }
 
   html[data-theme="dark"] .app-modal-title {
-    @apply text-slate-100;
+    @apply text-secondary-100;
   }
 
   html[data-theme="dark"] .app-modal-subtitle {
