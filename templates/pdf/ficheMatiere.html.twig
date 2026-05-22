@@ -1,6 +1,6 @@
 {% set ficheMatiere = ec.ficheMatiere %}
 <header>
-    <h1>{{ ficheMatiere != null ? ficheMatiere.libelle : 'Erreur fiche' }}</h1>
+    <h1 class="mt-3">{{ ficheMatiere != null ? ficheMatiere.getDisplay() : 'Erreur fiche' }}</h1>
 </header>
 
 
