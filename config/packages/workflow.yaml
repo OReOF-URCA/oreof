@@ -160,8 +160,8 @@ framework:
             titre_with_parcours: 'Le parcours %%s de la formation %%s a été validé par son responsable'
             titre: 'La formation %%s a été validée par son responsable'
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
             handler: "valider"
@@ -175,10 +175,10 @@ framework:
             titre_with_parcours: 'Le parcours %%s de la formation %%s a reçu des réserves par le responsable de formation'
             titre: 'Un parcours de la formation %%s a reçu des réserves par le responsable de formation'
             type: reserver
-            btn: warning
-            icon: material-symbols:fact-check-outline-sharp
+            #            btn: warning
+            #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
-            button_icon: 'bi:exclamation-triangle'
+            button_icon: 'material-symbols:fact-check-outline-sharp'
             handler: "reserver_commentaire"
             form:
               fields:
@@ -194,8 +194,8 @@ framework:
           metadata:
             recipients: [ 'RF', 'CoRF', 'RP', 'CoRP' ]
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
             handler: "valider"
@@ -209,10 +209,10 @@ framework:
             titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a reçu des réserves de la part du DPE de votre composante'
             titre: 'La fiche de la formation %%s a reçu des réserves de la part du DPE de votre composante'
             type: reserver
-            btn: warning
-            icon: material-symbols:fact-check-outline-sharp
+            #            btn: warning
+            #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
-            button_icon: 'bi:exclamation-triangle'
+            button_icon: 'material-symbols:fact-check-outline-sharp'
             handler: "reserver_commentaire"
             form:
               fields:
@@ -229,11 +229,11 @@ framework:
             titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a été validée par le conseil de la composante'
             titre: 'La fiche de la formation %%s a été validée par le conseil de la composante'
             type: valider
-            btn: success
+            #            btn: success
             hasDate: true
             hasUpload: true
             hasUploadNote: true
-            icon: ph:check
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
             handler: "valider_conseil"
@@ -257,10 +257,10 @@ framework:
             titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a recu des réserves par le conseil de la composante'
             titre: 'La fiche de la formation %%s a recu des réserves par le conseil de la composante'
             type: reserver
-            btn: warning
-            icon: material-symbols:fact-check-outline-sharp
+            #            btn: warning
+            #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
-            button_icon: 'bi:exclamation-triangle'
+            button_icon: 'material-symbols:fact-check-outline-sharp'
             handler: "reserver_conseil"
             form:
               fields:
@@ -280,8 +280,8 @@ framework:
             titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a été validée par le SES'
             titre: 'La fiche de la formation %%s a été validée par le SES'
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
             handler: "valider"
@@ -295,10 +295,10 @@ framework:
             titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a reçu des réserves par le SES'
             titre: 'La fiche de la formation %%s a reçue des réserves par le SES'
             type: reserver
-            btn: warning
-            icon: material-symbols:fact-check-outline-sharp
+            #            btn: warning
+            #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
-            button_icon: 'bi:exclamation-triangle'
+            button_icon: 'material-symbols:fact-check-outline-sharp'
             handler: "reserver_commentaire"
             form:
               fields:
@@ -313,8 +313,8 @@ framework:
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'flowbite:rocket-outline'
             handler: "valider"
@@ -329,10 +329,10 @@ framework:
             titre: 'Votre formation %%s a reçu des réserves de la CFVU'
             hasDate: true
             type: reserver
-            btn: warning
-            icon: material-symbols:fact-check-outline-sharp
+            #            btn: warning
+            #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
-            button_icon: 'bi:exclamation-triangle'
+            button_icon: 'material-symbols:fact-check-outline-sharp'
             handler: "refuser_commentaire_date"
             form:
               fields:
@@ -351,8 +351,8 @@ framework:
             titre_with_parcours: 'Votre parcours %%s de la formation %%s a été validé par la CFVU'
             titre: 'Votre formation %%s a été validée par la CFVU'
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             display: false
             button_class: 'success'
             button_icon: 'ph:check'
@@ -372,8 +372,8 @@ framework:
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
             handler: "valider_commentaire"
@@ -392,8 +392,8 @@ framework:
             titre_with_parcours: 'Votre parcours %%s de la formation %%s a été validé par la CFVU'
             titre: 'Votre formation %%s a été validée par la CFVU'
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             display: false
             button_class: 'success'
             button_icon: 'ph:check'
@@ -408,8 +408,8 @@ framework:
             titre_with_parcours: 'Votre parcours %%s de la formation %%s a été validé par la CFVU'
             titre: 'Votre formation %%s a été validée par la CFVU'
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
             description: '--'
@@ -424,9 +424,9 @@ framework:
             titre_with_parcours: 'Votre parcours %%s de la formation %%s a été validé par la CFVU'
             titre: 'Votre formation %%s a été validée par la CFVU'
             type: valider
-            btn: success
+            #            btn: success
             hasDate: true
-            icon: ph:check
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'mdi:stamper'
             handler: "valider_date"
@@ -440,8 +440,8 @@ framework:
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'flowbite:bullhorn-outline'
             handler: "valider_date"
@@ -455,8 +455,8 @@ framework:
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:globe'
             handler: "valider"
@@ -468,8 +468,8 @@ framework:
           metadata:
             recipients: [ 'RF', 'CoRF', 'RP', 'CoRP' ]
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             button_class: 'success' #todo: a voir...
             button_icon: 'ph:globe' #todo: a voir...
             handler: "valider" #todo: a voir...
@@ -481,8 +481,8 @@ framework:
           metadata:
             recipients: [ 'RF', 'CoRF', 'RP', 'CoRP' ]
             type: valider
-            btn: success
-            icon: ph:check
+            #            btn: success
+            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
             handler: "valider"

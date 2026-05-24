@@ -14,6 +14,7 @@ export default class extends Controller {
   }
 
   isOpen = false
+  currentValue = null
   static targets = ['content']
 
   connect() {
@@ -43,6 +44,14 @@ export default class extends Controller {
     }
   }
 
+  async refresh () {
+    if (this.isOpen === false) {
+      return
+    }
+
+    await this._loadContent(this.currentValue)
+  }
+
   _normalizeValue (rawValue) {
     if (rawValue === null || rawValue === undefined) {
       return null
@@ -65,7 +74,8 @@ export default class extends Controller {
   }
 
   async _loadContent(value) {
-    const url = new URL(this.urlValue, window.location.origin)
+    this.currentValue = value
+    const url = new window.URL(this.urlValue, window.location.origin)
 
     if (value === null) {
       url.searchParams.delete('value')

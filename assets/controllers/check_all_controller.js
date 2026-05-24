@@ -84,6 +84,14 @@ export default class extends Controller {
     })
 
     this._updateCountersById(idCheckAll, ` ${checked} / ${totalChecked} élément(s) sélectionné(s)`)
+    window.dispatchEvent(new CustomEvent('check-all:changed', {
+      detail: {
+        idCheckAll,
+        classCheckAll,
+        checked,
+        totalChecked,
+      },
+    }))
   }
 
   _updateCountersById (idCheckAll, text) {

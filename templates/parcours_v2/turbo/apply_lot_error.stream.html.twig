@@ -1,0 +1,6 @@
+{{ include('_ui/_toast.stream.html.twig', {
+    message: message|default(('toast.' ~ transition ~ '.' ~ type ~ '.danger')|trans({}, 'process')),
+    undo: null,
+    type: 'danger'
+}) }}
+

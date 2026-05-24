@@ -56,6 +56,15 @@
             <div class="flex shrink-0 items-center gap-2 self-end sm:self-auto">
                 <button
                         type="button"
+                        class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-slate-400 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
+                        data-action="live#$render"
+                        title="Actualiser les données"
+                >
+                    <twig:UX:Icon name="icon:refresh" class="h-4 w-4"/>
+                    Actualiser
+                </button>
+                <button
+                        type="button"
                         class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 shadow-sm transition hover:border-red-400 hover:text-red-900 dark:border-red-600 dark:bg-red-900/30 dark:text-red-200 dark:hover:border-red-500"
                         data-action="live#action"
                         data-live-action-param="resetFilters"
@@ -170,6 +179,12 @@
                 sur <span class="font-semibold text-slate-700 dark:text-slate-200">{{ this.getTotal }}</span> résultats
             </p>
             <div class="flex items-center gap-2">
+                {% if selectable %}
+                    <span class="text-xs text-slate-500 dark:text-slate-400"
+                          data-check-all-counter="{{ selectionAllId }}">
+                        0 / 0 élément(s) sélectionné(s)
+                    </span>
+                {% endif %}
                 <label for="perPage" class="text-xs text-slate-500 dark:text-slate-400">Par page</label>
                 <select id="perPage"
                         class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-indigo-400 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
@@ -185,9 +200,29 @@
         {# Tableau principal #}
         <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm text-slate-700 dark:text-slate-200">
+                <table
+                        class="min-w-full text-sm text-slate-700 dark:text-slate-200"
+                        {% if selectable %}
+                            {{ stimulus_controller('check_all', {
+                                idCheckAll: selectionAllId,
+                                classCheckAll: '.' ~ selectionInputClass
+                            }) }}
+                        {% endif %}
+                >
                     <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-300">
                     <tr>
+                        {% if selectable %}
+                            <th class="w-12 px-4 py-3">
+                                <label class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800">
+                                    <input
+                                            id="{{ selectionAllId }}"
+                                            type="checkbox"
+                                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                            {{ stimulus_action('check_all', 'checkAll', 'change') }}
+                                    >
+                                </label>
+                            </th>
+                        {% endif %}
                         {% for column in columns %}
                             <th class="px-4 py-3 {{ column.class }}">
                                 {% if column.sortable %}
@@ -222,6 +257,20 @@
                     <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
                     {% for item in this.getData %}
                         <tr class="align-top hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+                            {% if selectable %}
+                                <td class="px-4 py-3">
+                                    {% set selectionValue = this.getFieldValue(item, selectionValueField) %}
+                                    <label class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800">
+                                        <input
+                                                type="checkbox"
+                                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 {{ selectionInputClass }}"
+                                                name="{{ selectionName }}"
+                                                value="{{ selectionValue }}"
+                                                {{ stimulus_action('check_all', 'check', 'change') }}
+                                        >
+                                    </label>
+                                </td>
+                            {% endif %}
                             {% for column in columns %}
                                 <td class="px-4 py-3 {{ column.class }}">
                                     {% if column.template %}
@@ -359,7 +408,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="{{ columns|length + (actions is not empty ? 1 : 0) }}"
+                            <td colspan="{{ columns|length + (actions is not empty ? 1 : 0) + (selectable ? 1 : 0) }}"
                                 class="px-4 py-16 text-center">
                                 {{ include('_ui/_empty_table.html.twig', {
                                     message: 'Aucune donnée à afficher'

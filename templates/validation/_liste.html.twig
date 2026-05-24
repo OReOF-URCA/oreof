@@ -1,225 +1,226 @@
-{% set hideLotButtons = hideLotButtons|default(false) %}
-{% set hasSelection = (isCfvu is not defined or not isCfvu) and not hideLotButtons %}
-{% set hasConseil = etape == 'cfvu' or etape == 'publication' or etape == 'valide_cfvu' or etape == 'soumis_cfvu' %}
-{% set totalCols = 10 + (hasSelection ? 1 : 0) + (hasConseil ? 1 : 0) %}
+{# @deprecated: ancien rendu liste validation DPE (non-DataTable). #}
+{# {% set hideLotButtons = hideLotButtons|default(false) %} #}
+{# {% set hasSelection = (isCfvu is not defined or not isCfvu) and not hideLotButtons %} #}
+{# {% set hasConseil = etape == 'cfvu' or etape == 'publication' or etape == 'valide_cfvu' or etape == 'soumis_cfvu' %} #}
+{# {% set totalCols = 10 + (hasSelection ? 1 : 0) + (hasConseil ? 1 : 0) %} #}
 
-<section
-        {% if composante is defined %}
-            {{ stimulus_controller('validation--index', {
-                urlListe: path('app_validation_composante_dpe_liste', {composante: composante.id}),
-            }) }}
-        {% else %}
-            {{ stimulus_controller('validation--index', {
-                urlListe: path('app_validation_dpe_liste'),
-            }) }}
-        {% endif %}
-        class="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-5"
->
-    <div class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100">
-        <strong>{{ nbParcours }}</strong> parcours, pour <strong>{{ nbFormations }}</strong>
-        formation{{ nbFormations > 1 ? 's' : '' }}
-        trouvée{{ nbFormations > 1 ? 's' : '' }}.
-    </div>
+{# <section #}
+{#        {% if composante is defined %} #}
+{#            {{ stimulus_controller('validation--index', { #}
+{#                urlListe: path('app_validation_composante_dpe_liste', {composante: composante.id}), #}
+{#            }) }} #}
+{#        {% else %} #}
+{#            {{ stimulus_controller('validation--index', { #}
+{#                urlListe: path('app_validation_dpe_liste'), #}
+{#            }) }} #}
+{#        {% endif %} #}
+{#        class="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-5" #}
+{# > #}
+{#    <div class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100"> #}
+{#        <strong>{{ nbParcours }}</strong> parcours, pour <strong>{{ nbFormations }}</strong> #}
+{#        formation{{ nbFormations > 1 ? 's' : '' }} #}
+{#        trouvée{{ nbFormations > 1 ? 's' : '' }}. #}
+{#    </div> #}
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div class="overflow-x-auto">
-            <table class="min-w-full text-sm text-slate-700 dark:text-slate-200" {{ stimulus_controller('check_all') }}>
-                <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-300">
-                <tr>
-                    {% if hasSelection %}
-                        <th class="px-4 py-3 w-10">
-                            <label class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800">
-                                <input type="checkbox" id="check-all"
-                                       class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" {{ stimulus_action('check_all', 'checkAll') }}>
-                            </label>
-                        </th>
-                    {% endif %}
-                    <th class="px-4 py-3">Composante</th>
-                    <th class="px-4 py-3">Type de formation</th>
-                    <th class="px-4 py-3">Mention/spécialité</th>
-                    <th class="px-4 py-3">Parcours</th>
-                    <th class="px-4 py-3">Etat demande</th>
-                    <th class="px-4 py-3">Etat DPE</th>
-                    <th class="px-4 py-3">BCC</th>
-                    <th class="px-4 py-3">Maquette</th>
-                    {% if hasConseil %}
-                        <th class="px-4 py-3">Conseil ?</th>
-                    {% endif %}
-                    <th class="px-4 py-3">Remplissage</th>
-                    <th class="px-4 py-3 text-right">Actions</th>
-                </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
-                {% for dpeParcours in allparcours %}
-                    {% if dpeParcours.parcours != null %}
-                        {% set parcours = dpeParcours.parcours %}
-                        {% set formation = parcours.formation %}
-                        <tr class="align-top hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
-                            {% if hasSelection %}
-                                <td class="px-4 py-3">
-                                    <label class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800">
-                                        <input
-                                                {{ stimulus_action('check_all', 'check') }}
-                                                type="checkbox"
-                                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                                                name="parcours[]"
-                                                value="{{ dpeParcours.id }}"
-                                        >
-                                    </label>
-                                </td>
-                            {% endif %}
-                            <td class="px-4 py-3">
-                                {% if formation.composantePorteuse != null %}
-                                    <span class="font-medium text-slate-800 dark:text-slate-100">{{ formation.composantePorteuse.libelle }}</span>
-                                {% else %}
-                                    <span class="inline-flex rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200">Non définie</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-4 py-3">{{ formation.typeDiplome|typeDiplome }}</td>
-                            <td class="px-4 py-3">
-                                {% if formation.mention != null or formation.mentionTexte != null %}
-                                    {{ formation.display }}
-                                {% else %}
-                                    <span class="inline-flex rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200">Non définie</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-4 py-3">
-                                {% if formation.hasParcours %}
-                                    <span class="inline-flex flex-wrap items-center gap-2">
-                                        <span class="font-medium text-slate-800 dark:text-slate-100">{{ parcours.libelle }}</span>
-                                        {{ parcours.typeParcours|badgeTypeParcours }}
-                                    </span>
-                                {% else %}
-                                    <span class="text-slate-400 dark:text-slate-500">Sans parcours</span>
-                                {% endif %}
-                            </td>
-                            <td class="px-4 py-3">
-                                {{ component('Badge', { dto: (dpeParcours.etatDemande != null ? dpeParcours.etatDemande.niveauModification : null)|badgeTypeModificationDto }) }}
-                            </td>
-                            <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: dpeParcours.etatValidation|badgeDpeDto }) }}</td>
-                            <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(3)|badgeStepDto }) }}</td>
-                            <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(4)|badgeStepDto }) }}</td>
-                            {% if hasConseil %}
-                                <td class="px-4 py-3">{{ component('historique_pv', {parcours: parcours}) }}</td>
-                            {% endif %}
-                            <td class="px-4 py-3">{{ component('remplissage_progress', { value: parcours.remplissage }) }}</td>
-                            <td class="px-4 py-3 text-right">
-                                <div class="flex flex-wrap justify-end gap-2">
-                                    {% if formation.hasParcours and formation.parcours|length > 0 %}
-                                        <twig:Button
-                                                href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}"
-                                                variant="info"
-                                                size="sm"
-                                                icon="icon:eye"
-                                                label="Voir"
-                                                tooltip="Voir le parcours"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                :centered="false"
-                                        />
-                                        <twig:Button
-                                                variant="success"
-                                                tooltip="Vérifier la saisie"
-                                                dataAction="click->modalturbo#open"
-                                                href="{{ path('app_parcours_state', {parcours: parcours.id}) }}"
-                                                :centered="false"
-                                        >
-                                            <i class="fal fa-binoculars"></i>
-                                            <span>Vérifier</span>
-                                        </twig:Button>
-                                        {% if isCfvu is not defined or not isCfvu %}
-                                            {% if is_granted('EDIT', {route: 'app_parcours', subject: parcours}) %}
-                                                <twig:Button
-                                                        href="{{ path('parcours_v2_modifier', {parcours: parcours.id}) }}"
-                                                        variant="warning"
-                                                        size="sm"
-                                                        icon="icon:edit"
-                                                        label="Modifier"
-                                                        tooltip="Modifier la fiche d'identité du parcours"
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        :centered="false"
-                                                />
-                                            {% endif %}
-                                        {% endif %}
-                                    {% else %}
-                                        <twig:Button
-                                                href="{{ path('formation_v2_voir', {'slug': formation.slug}) }}"
-                                                variant="info"
-                                                size="sm"
-                                                icon="icon:eye"
-                                                label="Voir"
-                                                tooltip="Voir la formation"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                :centered="false"
-                                        />
-                                        <twig:Button
-                                                variant="success"
-                                                tooltip="Vérifier la saisie"
-                                                dataAction="click->modalturbo#open"
-                                                href="{{ path('app_formation_state', {slug: formation.slug}) }}"
-                                                :centered="false"
-                                        >
-                                            <i class="fal fa-binoculars"></i>
-                                            <span>Vérifier</span>
-                                        </twig:Button>
+{#    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"> #}
+{#        <div class="overflow-x-auto"> #}
+{#            <table class="min-w-full text-sm text-slate-700 dark:text-slate-200" {{ stimulus_controller('check_all') }}> #}
+{#                <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-300"> #}
+{#                <tr> #}
+{#                    {% if hasSelection %} #}
+{#                        <th class="px-4 py-3 w-10"> #}
+{#                            <label class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800"> #}
+{#                                <input type="checkbox" id="check-all" #}
+{#                                       class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" {{ stimulus_action('check_all', 'checkAll') }}> #}
+{#                            </label> #}
+{#                        </th> #}
+{#                    {% endif %} #}
+{#                    <th class="px-4 py-3">Composante</th> #}
+{#                    <th class="px-4 py-3">Type de formation</th> #}
+{#                    <th class="px-4 py-3">Mention/spécialité</th> #}
+{#                    <th class="px-4 py-3">Parcours</th> #}
+{#                    <th class="px-4 py-3">Etat demande</th> #}
+{#                    <th class="px-4 py-3">Etat DPE</th> #}
+{#                    <th class="px-4 py-3">BCC</th> #}
+{#                    <th class="px-4 py-3">Maquette</th> #}
+{#                    {% if hasConseil %} #}
+{#                        <th class="px-4 py-3">Conseil ?</th> #}
+{#                    {% endif %} #}
+{#                    <th class="px-4 py-3">Remplissage</th> #}
+{#                    <th class="px-4 py-3 text-right">Actions</th> #}
+{#                </tr> #}
+{#                </thead> #}
+{#                <tbody class="divide-y divide-slate-200 dark:divide-slate-700"> #}
+{#                {% for dpeParcours in allparcours %} #}
+{#                    {% if dpeParcours.parcours != null %} #}
+{#                        {% set parcours = dpeParcours.parcours %} #}
+{#                        {% set formation = parcours.formation %} #}
+{#                        <tr class="align-top hover:bg-slate-50/70 dark:hover:bg-slate-800/40"> #}
+{#                            {% if hasSelection %} #}
+{#                                <td class="px-4 py-3"> #}
+{#                                    <label class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800"> #}
+{#                                        <input #}
+{#                                                {{ stimulus_action('check_all', 'check') }} #}
+{#                                                type="checkbox" #}
+{#                                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" #}
+{#                                                name="parcours[]" #}
+{#                                                value="{{ dpeParcours.id }}" #}
+{#                                        > #}
+{#                                    </label> #}
+{#                                </td> #}
+{#                            {% endif %} #}
+{#                            <td class="px-4 py-3"> #}
+{#                                {% if formation.composantePorteuse != null %} #}
+{#                                    <span class="font-medium text-slate-800 dark:text-slate-100">{{ formation.composantePorteuse.libelle }}</span> #}
+{#                                {% else %} #}
+{#                                    <span class="inline-flex rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200">Non définie</span> #}
+{#                                {% endif %} #}
+{#                            </td> #}
+{#                            <td class="px-4 py-3">{{ formation.typeDiplome|typeDiplome }}</td> #}
+{#                            <td class="px-4 py-3"> #}
+{#                                {% if formation.mention != null or formation.mentionTexte != null %} #}
+{#                                    {{ formation.display }} #}
+{#                                {% else %} #}
+{#                                    <span class="inline-flex rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200">Non définie</span> #}
+{#                                {% endif %} #}
+{#                            </td> #}
+{#                            <td class="px-4 py-3"> #}
+{#                                {% if formation.hasParcours %} #}
+{#                                    <span class="inline-flex flex-wrap items-center gap-2"> #}
+{#                                        <span class="font-medium text-slate-800 dark:text-slate-100">{{ parcours.libelle }}</span> #}
+{#                                        {{ parcours.typeParcours|badgeTypeParcours }} #}
+{#                                    </span> #}
+{#                                {% else %} #}
+{#                                    <span class="text-slate-400 dark:text-slate-500">Sans parcours</span> #}
+{#                                {% endif %} #}
+{#                            </td> #}
+{#                            <td class="px-4 py-3"> #}
+{#                                {{ component('Badge', { dto: (dpeParcours.etatDemande != null ? dpeParcours.etatDemande.niveauModification : null)|badgeTypeModificationDto }) }} #}
+{#                            </td> #}
+{#                            <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: dpeParcours.etatValidation|badgeDpeDto }) }}</td> #}
+{#                            <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(3)|badgeStepDto }) }}</td> #}
+{#                            <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(4)|badgeStepDto }) }}</td> #}
+{#                            {% if hasConseil %} #}
+{#                                <td class="px-4 py-3">{{ component('historique_pv', {parcours: parcours}) }}</td> #}
+{#                            {% endif %} #}
+{#                            <td class="px-4 py-3">{{ component('remplissage_progress', { value: parcours.remplissage }) }}</td> #}
+{#                            <td class="px-4 py-3 text-right"> #}
+{#                                <div class="flex flex-wrap justify-end gap-2"> #}
+{#                                    {% if formation.hasParcours and formation.parcours|length > 0 %} #}
+{#                                        <twig:Button #}
+{#                                                href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}" #}
+{#                                                variant="info" #}
+{#                                                size="sm" #}
+{#                                                icon="icon:eye" #}
+{#                                                label="Voir" #}
+{#                                                tooltip="Voir le parcours" #}
+{#                                                target="_blank" #}
+{#                                                rel="noopener noreferrer" #}
+{#                                                :centered="false" #}
+{#                                        /> #}
+{#                                        <twig:Button #}
+{#                                                variant="success" #}
+{#                                                tooltip="Vérifier la saisie" #}
+{#                                                dataAction="click->modalturbo#open" #}
+{#                                                href="{{ path('app_parcours_state', {parcours: parcours.id}) }}" #}
+{#                                                :centered="false" #}
+{#                                        > #}
+{#                                            <i class="fal fa-binoculars"></i> #}
+{#                                            <span>Vérifier</span> #}
+{#                                        </twig:Button> #}
+{#                                        {% if isCfvu is not defined or not isCfvu %} #}
+{#                                            {% if is_granted('EDIT', {route: 'app_parcours', subject: parcours}) %} #}
+{#                                                <twig:Button #}
+{#                                                        href="{{ path('parcours_v2_modifier', {parcours: parcours.id}) }}" #}
+{#                                                        variant="warning" #}
+{#                                                        size="sm" #}
+{#                                                        icon="icon:edit" #}
+{#                                                        label="Modifier" #}
+{#                                                        tooltip="Modifier la fiche d'identité du parcours" #}
+{#                                                        target="_blank" #}
+{#                                                        rel="noopener noreferrer" #}
+{#                                                        :centered="false" #}
+{#                                                /> #}
+{#                                            {% endif %} #}
+{#                                        {% endif %} #}
+{#                                    {% else %} #}
+{#                                        <twig:Button #}
+{#                                                href="{{ path('formation_v2_voir', {'slug': formation.slug}) }}" #}
+{#                                                variant="info" #}
+{#                                                size="sm" #}
+{#                                                icon="icon:eye" #}
+{#                                                label="Voir" #}
+{#                                                tooltip="Voir la formation" #}
+{#                                                target="_blank" #}
+{#                                                rel="noopener noreferrer" #}
+{#                                                :centered="false" #}
+{#                                        /> #}
+{#                                        <twig:Button #}
+{#                                                variant="success" #}
+{#                                                tooltip="Vérifier la saisie" #}
+{#                                                dataAction="click->modalturbo#open" #}
+{#                                                href="{{ path('app_formation_state', {slug: formation.slug}) }}" #}
+{#                                                :centered="false" #}
+{#                                        > #}
+{#                                            <i class="fal fa-binoculars"></i> #}
+{#                                            <span>Vérifier</span> #}
+{#                                        </twig:Button> #}
 
-                                        {% if is_granted('EDIT', {route: 'app_formation', subject: formation}) %}
-                                            <twig:Button
-                                                    href="{{ path('formation_v2_modifier', {'slug': formation.slug}) }}"
-                                                    variant="warning"
-                                                    size="sm"
-                                                    icon="icon:edit"
-                                                    label="Modifier"
-                                                    tooltip="Modifier la fiche d'identité de la formation"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    :centered="false"
-                                            />
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                    {% endif %}
-                {% else %}
-                    <tr>
-                        <td colspan="{{ totalCols }}"
-                            class="px-4 py-8 text-center text-sm font-medium text-amber-700 dark:text-amber-300">
-                            Aucun enregistrement trouvé
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+{#                                        {% if is_granted('EDIT', {route: 'app_formation', subject: formation}) %} #}
+{#                                            <twig:Button #}
+{#                                                    href="{{ path('formation_v2_modifier', {'slug': formation.slug}) }}" #}
+{#                                                    variant="warning" #}
+{#                                                    size="sm" #}
+{#                                                    icon="icon:edit" #}
+{#                                                    label="Modifier" #}
+{#                                                    tooltip="Modifier la fiche d'identité de la formation" #}
+{#                                                    target="_blank" #}
+{#                                                    rel="noopener noreferrer" #}
+{#                                                    :centered="false" #}
+{#                                            /> #}
+{#                                        {% endif %} #}
+{#                                    {% endif %} #}
+{#                                </div> #}
+{#                            </td> #}
+{#                        </tr> #}
+{#                    {% endif %} #}
+{#                {% else %} #}
+{#                    <tr> #}
+{#                        <td colspan="{{ totalCols }}" #}
+{#                            class="px-4 py-8 text-center text-sm font-medium text-amber-700 dark:text-amber-300"> #}
+{#                            Aucun enregistrement trouvé #}
+{#                        </td> #}
+{#                    </tr> #}
+{#                {% endfor %} #}
+{#                </tbody> #}
+{#            </table> #}
+{#        </div> #}
+{#    </div> #}
 
-    {% if hasSelection %}
-        <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-950/30">
-            {% set prefix = 'parcours' %}
-            {% if allparcours|length > 0 %}
-                {% set oneParcours = allparcours|first %}
-                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {% for key, state in hasTransitions(oneParcours) %}
-                        {% for keyTrans, transition in state %}
-                            <twig:Button
-                                    variant="{{ transition.meta.btn }}"
-                                    size="sm"
-                                    dataAction="validation--index#{{ key }}"
-                                    data-validation--index-url-param="{{ path('app_validation_'~key~'_lot', {etape: etape, transition: keyTrans}) }}"
-                                    tooltip="{{ ('title.validation.'~prefix~'.'~keyTrans)|trans({}, 'process') }}"
-                                    :centered="false"
-                            >
-                                <i class="fal {{ transition.meta.icon }}"></i>
-                                <span>{{ ('btn.validation.'~prefix~'.'~keyTrans)|trans({}, 'process') }}</span>
-                            </twig:Button>
-                        {% endfor %}
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-        <div class="mt-3" {{ stimulus_target('validation--index', 'action') }}></div>
-    {% endif %}
-</section>
+{#    {% if hasSelection %} #}
+{#        <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-950/30"> #}
+{#            {% set prefix = 'parcours' %} #}
+{#            {% if allparcours|length > 0 %} #}
+{#                {% set oneParcours = allparcours|first %} #}
+{#                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3"> #}
+{#                    {% for key, state in hasTransitions(oneParcours) %} #}
+{#                        {% for keyTrans, transition in state %} #}
+{#                            <twig:Button #}
+{#                                    variant="{{ transition.meta.btn }}" #}
+{#                                    size="sm" #}
+{#                                    dataAction="validation--index#{{ key }}" #}
+{#                                    data-validation--index-url-param="{{ path('app_validation_'~key~'_lot', {etape: etape, transition: keyTrans}) }}" #}
+{#                                    tooltip="{{ ('title.validation.'~prefix~'.'~keyTrans)|trans({}, 'process') }}" #}
+{#                                    :centered="false" #}
+{#                            > #}
+{#                                <i class="fal {{ transition.meta.icon }}"></i> #}
+{#                                <span>{{ ('btn.validation.'~prefix~'.'~keyTrans)|trans({}, 'process') }}</span> #}
+{#                            </twig:Button> #}
+{#                        {% endfor %} #}
+{#                    {% endfor %} #}
+{#                </div> #}
+{#            {% endif %} #}
+{#        </div> #}
+{#        <div class="mt-3" {{ stimulus_target('validation--index', 'action') }}></div> #}
+{#    {% endif %} #}
+{# </section> #}

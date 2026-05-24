@@ -1,0 +1,11 @@
+<div class="space-y-2">
+    <div class="flex flex-wrap items-center gap-1.5">
+        {{ component('Badge', { dto: (item.etatDemande != null ? item.etatDemande.niveauModification : null)|badgeTypeModificationDto }) }}
+        {{ include('communs/_badge_collection.html.twig', { badges: item.etatValidation|badgeDpeDto }) }}
+    </div>
+
+    {% if etape is defined and etape in ['cfvu', 'publication', 'valide_cfvu', 'soumis_cfvu'] %}
+        <div class="inline-flex items-center">{{ component('historique_pv', { parcours: item.parcours }) }}</div>
+    {% endif %}
+</div>
+

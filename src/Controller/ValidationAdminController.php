@@ -13,10 +13,12 @@ use App\Classes\Excel\ExcelWriter;
 use App\Classes\ValidationProcess;
 use App\Classes\ValidationProcessChangeRf;
 use App\Classes\ValidationProcessFicheMatiere;
+use App\Entity\DpeParcours;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\FicheMatiereRepository;
+use App\Service\DataTableBuilder;
 use App\Utils\Tools;
 use DateTime;
 use Symfony\Component\HttpFoundation\Request;
@@ -107,22 +109,22 @@ class ValidationAdminController extends BaseController
         ]);
     }
 
-//    #[Route('dpe', name: 'dpe_index')]
-//    public function dpe(
-//        ComposanteRepository $composanteRepository,
-//        Request              $request,
-//        ValidationProcess    $validationProcess,
-//    ): Response
-//    {
-//
-//        $typeValidation = $request->query->get('typeValidation');
-//
-//        return $this->render('dpe_old.html.twig', [
-//            'types_validation' => $validationProcess->getProcessAll(),
-//            'typeValidation' => $typeValidation,
-//            'composantes' => $composanteRepository->findPorteuse(),
-//        ]);
-//    }
+    //    #[Route('dpe', name: 'dpe_index')]
+    //    public function dpe(
+    //        ComposanteRepository $composanteRepository,
+    //        Request              $request,
+    //        ValidationProcess    $validationProcess,
+    //    ): Response
+    //    {
+    //
+    //        $typeValidation = $request->query->get('typeValidation');
+    //
+    //        return $this->render('dpe_old.html.twig', [
+    //            'types_validation' => $validationProcess->getProcessAll(),
+    //            'typeValidation' => $typeValidation,
+    //            'composantes' => $composanteRepository->findPorteuse(),
+    //        ]);
+    //    }
 
     #[Route('change-rf', name: 'change_rf_index')]
     public function changeRf(
@@ -181,10 +183,21 @@ class ValidationAdminController extends BaseController
         ComposanteRepository $composanteRepository,
         ValidationProcess     $validationProcess,
         DpeParcoursRepository $dpeParcoursRepository,
+        DataTableBuilder $builder,
         Request               $request
     ): Response
     {
-        $typeValidation = $request->query->get('typeValidation');
+        $typeValidation = $request->query->get('typeValidation', $request->query->get('value'));
+        if (!is_string($typeValidation) || $typeValidation === '') {
+            return $this->render('validation/_liste_datatable.html.twig', [
+                'table' => null,
+                'nbFormations' => 0,
+                'nbParcours' => 0,
+                'etape' => null,
+                'process' => null,
+            ]);
+        }
+
         $idComposante = $request->query->get('composante', null);
         $process = $validationProcess->getEtape($typeValidation);
 
@@ -206,12 +219,97 @@ class ValidationAdminController extends BaseController
         // valeurs uniques dans tFormations
         $nbFormations = count(array_unique($tFormations));
 
-        return $this->render('validation/_liste.html.twig', [
+        $campagneCollecte = $this->getCampagneCollecte();
+        if ($campagneCollecte === null) {
+            $builder->addBaseWhere('1 = 0');
+        } else {
+            $builder
+                ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
+                ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId())
+                ->addBaseWhere('JSON_CONTAINS(e.etatValidation, :etatDpe) = 1')
+                ->addBaseParameter('etatDpe', json_encode([$typeValidation => 1]));
+        }
+
+        if ($composante !== null) {
+            $builder
+                ->addBaseWhere('IDENTITY(formation_0.composantePorteuse) = :composanteId')
+                ->addBaseParameter('composanteId', $composante->getId());
+        }
+
+        $table = $builder
+            ->setEntity(DpeParcours::class)
+            ->setPerPage(20)
+            ->setDefaultSort('formation.composantePorteuse.libelle')
+            ->enableCheckboxSelection([
+                'name' => 'parcours[]',
+                'valueField' => 'id',
+                'inputClass' => 'validation-dpe-item',
+                'allId' => 'validation-dpe-all',
+            ])
+            ->addColumn('formation.composantePorteuse.libelle', [
+                'label' => 'Composante',
+                'sortable' => true,
+                'filterable' => true,
+                'sort_expression' => 'composantePorteuse_1.libelle',
+                'filter_expression' => 'composantePorteuse_1.libelle',
+                'class' => 'min-w-[12rem]',
+            ])
+            ->addColumn('parcours.libelle', [
+                'label' => 'Formation / Parcours',
+                'sortable' => true,
+                'filterable' => true,
+                'searchable' => true,
+                'template' => 'validation/datatable/_formation_compact.html.twig',
+                'class' => 'min-w-[20rem]',
+            ])
+            ->addColumn('etatValidation', [
+                'label' => 'Suivi',
+                'sortable' => false,
+                'filterable' => true,
+                'searchable' => false,
+                'template' => 'validation/datatable/_suivi_compact.html.twig',
+                'class' => 'min-w-[15rem]',
+            ])
+            ->addColumn('parcours.id', [
+                'label' => 'BCC',
+                'sortable' => false,
+                'filterable' => false,
+                'searchable' => false,
+                'template' => 'validation/datatable/_bcc.html.twig',
+                'class' => 'min-w-[8rem]',
+            ])
+            ->addColumn('formation.id', [
+                'label' => 'MCCC',
+                'sortable' => false,
+                'filterable' => true,
+                'searchable' => false,
+                'template' => 'validation/datatable/_maquette.html.twig',
+                'class' => 'min-w-[8rem]',
+            ])
+            ->addColumn('parcours.remplissage', [
+                'label' => 'Remplissage',
+                'sortable' => true,
+                'filterable' => true,
+                'searchable' => false,
+                'template' => 'validation/datatable/_remplissage.html.twig',
+            ])
+            ->addColumn('id', [
+                'label' => 'Actions',
+                'sortable' => false,
+                'filterable' => false,
+                'searchable' => false,
+                'template' => 'validation/datatable/_actions.html.twig',
+                'class' => 'text-right min-w-[11rem]',
+            ])
+            ->build();
+
+        return $this->render('validation/_liste_datatable.html.twig', [
+            'table' => $table,
             'nbFormations' => $nbFormations,
             'nbParcours' => $nbParcours,
             'process' => $process,
-            'allparcours' => $allparcours,
             'etape' => $typeValidation ?? null,
+            'oneParcours' => $allparcours[0] ?? null,
         ]);
     }
 

@@ -65,6 +65,21 @@ class DataTableComponent
     #[LiveProp]
     public array $baseParameters = [];
 
+    #[LiveProp]
+    public bool $selectable = false;
+
+    #[LiveProp]
+    public string $selectionName = 'ids[]';
+
+    #[LiveProp]
+    public string $selectionValueField = 'id';
+
+    #[LiveProp]
+    public string $selectionInputClass = 'check-all';
+
+    #[LiveProp]
+    public string $selectionAllId = 'check-all';
+
     #[LiveProp(writable: true)]
     public int $perPage = 20;
 
@@ -84,6 +99,20 @@ class DataTableComponent
         $this->baseJoins = $this->config['baseJoins'] ?? [];
         $this->baseWheres = $this->config['baseWheres'] ?? [];
         $this->baseParameters = $this->config['baseParameters'] ?? [];
+        $selection = is_array($this->config['selection'] ?? null) ? $this->config['selection'] : [];
+
+        $this->selectable = (bool)($selection['enabled'] ?? false);
+        $this->selectionName = (string)($selection['name'] ?? 'ids[]');
+        $this->selectionValueField = (string)($selection['valueField'] ?? 'id');
+        $this->selectionInputClass = (string)($selection['inputClass'] ?? 'check-all');
+        $this->selectionAllId = (string)($selection['allId'] ?? 'check-all');
+
+        if ($this->selectable && ($this->selectionAllId === 'check-all' || $this->selectionInputClass === 'check-all')) {
+            $suffix = substr(md5($this->entityClass), 0, 8);
+            $this->selectionAllId = $this->selectionAllId === 'check-all' ? 'check-all-' . $suffix : $this->selectionAllId;
+            $this->selectionInputClass = $this->selectionInputClass === 'check-all' ? 'check-all-' . $suffix : $this->selectionInputClass;
+        }
+
         $this->perPage = $this->config['perPage'] ?? 20;
         $this->sortField = $this->config['sortField'] ?? '';
         $this->sortDirection = $this->config['sortDirection'] ?? 'asc';

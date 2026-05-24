@@ -13,6 +13,13 @@ class DataTableBuilder
     private array $baseJoins = [];
     private array $baseWheres = [];
     private array $baseParameters = [];
+    private array $selection = [
+        'enabled' => false,
+        'name' => 'ids[]',
+        'valueField' => 'id',
+        'inputClass' => 'check-all',
+        'allId' => 'check-all',
+    ];
 
     public function setEntity(string $entityClass): self
     {
@@ -262,6 +269,31 @@ class DataTableBuilder
         return $this;
     }
 
+    /**
+     * Active une colonne de sélection par checkbox avec un checkbox "tout sélectionner".
+     *
+     * Options:
+     *  - name: string (défaut: ids[])
+     *  - valueField: string (défaut: id)
+     *  - inputClass: string (défaut: check-all)
+     *  - allId: string (défaut: check-all)
+     */
+    public function enableCheckboxSelection(array $options = []): self
+    {
+        $this->selection = array_merge($this->selection, [
+            'enabled' => true,
+        ], $options);
+
+        return $this;
+    }
+
+    public function disableCheckboxSelection(): self
+    {
+        $this->selection['enabled'] = false;
+
+        return $this;
+    }
+
     public function build(): array
     {
         return [
@@ -274,6 +306,7 @@ class DataTableBuilder
             'baseJoins' => $this->baseJoins,
             'baseWheres' => $this->baseWheres,
             'baseParameters' => $this->baseParameters,
+            'selection' => $this->selection,
         ];
     }
 }

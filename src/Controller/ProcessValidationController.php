@@ -431,199 +431,235 @@ class ProcessValidationController extends BaseController
         ]);
     }
 
-    #[Route('/validation/valide-lot/{etape}/{transition}', name: 'app_validation_valider_lot')]
-    public function valideLot(
-        DpeParcoursRepository $dpeParcoursRepository,
-        string                $etape,
-        string                $transition,
-        Request               $request
-    ): Response {
-        $fileName = null;
-        $fileNameNote = null;
-        $fileOriginalName = null;
-        $fileNoteOriginalName = null;
-        if ($request->isMethod('POST')) {
-            $sParcours = $request->request->get('parcours');
+//    #[Route('/validation/valide-lot/{etape}/{transition}', name: 'app_validation_valider_lot')]
+//    public function valideLot(
+//        DpeParcoursRepository $dpeParcoursRepository,
+//        string                $etape,
+//        string                $transition,
+//        Request               $request
+//    ): Response {
+//        $fileName = null;
+//        $fileNameNote = null;
+//        $fileOriginalName = null;
+//        $fileNoteOriginalName = null;
+//        if ($request->isMethod('POST')) {
+//            $sParcours = $request->request->get('parcours');
+//
+//            try {
+//                $uploadedFile = $this->secureUploadService->uploadFromRequest($request, 'file', 'conseils');
+//                if ($uploadedFile !== null) {
+//                    $fileName = $uploadedFile->getStoredFilename();
+//                    $fileOriginalName = $uploadedFile->getOriginalFilename();
+//                }
+//
+//                $uploadedFileNote = $this->secureUploadService->uploadFromRequest($request, 'fileNote', 'conseils');
+//                if ($uploadedFileNote !== null) {
+//                    $fileNameNote = $uploadedFileNote->getStoredFilename();
+//                    $fileNoteOriginalName = $uploadedFileNote->getOriginalFilename();
+//                }
+//            } catch (FileUploadException $exception) {
+//                return JsonReponse::error($exception->getPublicMessage());
+//            }
+//        } else {
+//            $sParcours = $request->query->get('parcours');
+//        }
+//        $allParcours = explode(',', $sParcours);
+//        $process = $this->validationProcess->getEtapeFromAll($etape);
+//        $meta = $this->validationProcess->getMetaFromTransition($transition);
+//        $laisserPasser = false;
+//        $tParcours = [];
+//
+//        foreach ($allParcours as $id) {
+//            // $objet = $dpeParcoursRepository->find($id);
+//
+//            $dpe = $dpeParcoursRepository->find($id);
+//            if ($dpe === null) {
+//                return JsonReponse::error('Parcours non trouvé');
+//            }
+//            $tParcours[] = $dpe;
+//            //            if ($etape === 'cfvu') {
+//            //                $histo = $objet->getHistoriqueFormations();
+//            //                foreach ($histo as $h) {
+//            //                    if ($h->getEtape() === 'conseil') {
+//            //                        if ($h->getEtat() === 'laisserPasser' && ($laisserPasser === false || $laisserPasser->getCreated() < $h->getCreated())) {
+//            //                            $laisserPasser = $h;
+//            //                        } elseif ($h->getEtat() === 'valide' && $laisserPasser->getCreated() < $h->getCreated()) {
+//            //                            $laisserPasser = false;
+//            //                        }
+//            //                    }
+//            //                }
+//            //            }
+//
+//            $processData = $this->parcoursProcess->etatParcours($dpe, $process);
+//
+//            if ($request->isMethod('POST')) {
+//                $this->parcoursProcess->valideParcours(
+//                    $dpe,
+//                    $this->getUser(),
+//                    $transition,
+//                    $request,
+//                    $fileName,
+//                    $fileNameNote,
+//                    $fileOriginalName,
+//                    $fileNoteOriginalName,
+//                );
+//            }
+//        }
+//
+//        if ($request->isMethod('POST')) {
+//            $this->toast('success', 'Parcours validés');
+//            if ($request->isXmlHttpRequest()) {
+//                return (new JsonReponse(
+//                    Response::HTTP_OK,
+//                    'Parcours validés',
+//                    [
+//                        'count' => count($tParcours),
+//                        'transition' => $transition,
+//                        'etape' => $etape,
+//                    ]
+//                ))->getReponse();
+//            }
+//
+//            $redirectRoute = $this->isGranted('ROLE_ADMIN') ? 'app_validation_dpe_index' : 'app_validation_composante_dpe_index';
+//
+//            return $redirectRoute === 'app_validation_dpe_index'
+//                ? $this->redirectToRoute($redirectRoute)
+//                : $this->redirectToRoute($redirectRoute, ['composante' => $request->query->get('composante')]);
+//        }
+//
+//        return $this->render('process_validation/_valide_lot.html.twig', [
+//            'formations' => $tParcours,
+//            'sParcours' => $sParcours,
+//            'process' => $process,
+//            'meta' => $meta,
+//            'type' => 'lot',
+//            'id' => $id,
+//            'etape' => $etape,
+//            'transition' => $transition,
+//            'processData' => $processData ?? null,
+//            'laisserPasser' => $laisserPasser,
+//        ]);
+//    }
 
-            try {
-                $uploadedFile = $this->secureUploadService->uploadFromRequest($request, 'file', 'conseils');
-                if ($uploadedFile !== null) {
-                    $fileName = $uploadedFile->getStoredFilename();
-                    $fileOriginalName = $uploadedFile->getOriginalFilename();
-                }
+//    #[Route('/validation/refuse-lot/{etape}/{transition}', name: 'app_validation_refuser_lot')]
+//    public function refuseLot(
+//        DpeParcoursRepository $dpeParcoursRepository,
+//        string                $etape,
+//        string                $transition,
+//        Request               $request
+//    ): Response {
+//        if ($request->isMethod('POST')) {
+//            $sParcours = $request->request->get('parcours');
+//        } else {
+//            $sParcours = $request->query->get('parcours');
+//        }
+//        $allParcours = explode(',', $sParcours);
+//
+//        $process = $this->validationProcess->getEtape($etape);
+//        $meta = $this->validationProcess->getMetaFromTransition($transition);
+//        $tParcours = [];
+//        foreach ($allParcours as $id) {
+//            $dpe = $dpeParcoursRepository->find($id);
+//            if ($dpe === null) {
+//                return JsonReponse::error('Parcours non trouvé');
+//            }
+//            $tParcours[] = $dpe;
+//            $processData = $this->parcoursProcess->etatParcours($dpe, $process);
+//
+//            if ($request->isMethod('POST')) {
+//                $this->parcoursProcess->refuseParcours($dpe, $this->getUser(), $transition, $request);
+//            }
+//        }
+//
+//        if ($request->isMethod('POST')) {
+//            $this->toast('success', 'Parcours refusés');
+//            if ($request->isXmlHttpRequest()) {
+//                return (new JsonReponse(
+//                    Response::HTTP_OK,
+//                    'Parcours refusés',
+//                    [
+//                        'count' => count($tParcours),
+//                        'transition' => $transition,
+//                        'etape' => $etape,
+//                    ]
+//                ))->getReponse();
+//            }
+//
+//            return $this->redirectToRoute('app_validation_dpe_index');
+//        }
+//
+//        return $this->render('process_validation/_refuse_lot.html.twig', [
+//            'formations' => $tParcours,
+//            'sParcours' => $sParcours,
+//            'process' => $process,
+//            'meta' => $meta,
+//            'type' => 'lot',
+//            'id' => $id,
+//            'etape' => $etape,
+//            'transition' => $transition,
+//            'objet' => $dpe,
+//            'processData' => $processData ?? null,
+//        ]);
+//    }
 
-                $uploadedFileNote = $this->secureUploadService->uploadFromRequest($request, 'fileNote', 'conseils');
-                if ($uploadedFileNote !== null) {
-                    $fileNameNote = $uploadedFileNote->getStoredFilename();
-                    $fileNoteOriginalName = $uploadedFileNote->getOriginalFilename();
-                }
-            } catch (FileUploadException $exception) {
-                return JsonReponse::error($exception->getPublicMessage());
-            }
-        } else {
-            $sParcours = $request->query->get('parcours');
-        }
-        $allParcours = explode(',', $sParcours);
-        $process = $this->validationProcess->getEtapeFromAll($etape);
-        $meta = $this->validationProcess->getMetaFromTransition($transition);
-        $laisserPasser = false;
-        $tParcours = [];
-
-        foreach ($allParcours as $id) {
-            // $objet = $dpeParcoursRepository->find($id);
-
-            $dpe = $dpeParcoursRepository->find($id);
-            if ($dpe === null) {
-                return JsonReponse::error('Parcours non trouvé');
-            }
-            $tParcours[] = $dpe;
-            //            if ($etape === 'cfvu') {
-            //                $histo = $objet->getHistoriqueFormations();
-            //                foreach ($histo as $h) {
-            //                    if ($h->getEtape() === 'conseil') {
-            //                        if ($h->getEtat() === 'laisserPasser' && ($laisserPasser === false || $laisserPasser->getCreated() < $h->getCreated())) {
-            //                            $laisserPasser = $h;
-            //                        } elseif ($h->getEtat() === 'valide' && $laisserPasser->getCreated() < $h->getCreated()) {
-            //                            $laisserPasser = false;
-            //                        }
-            //                    }
-            //                }
-            //            }
-
-            $processData = $this->parcoursProcess->etatParcours($dpe, $process);
-
-            if ($request->isMethod('POST')) {
-                $this->parcoursProcess->valideParcours(
-                    $dpe,
-                    $this->getUser(),
-                    $transition,
-                    $request,
-                    $fileName,
-                    $fileNameNote,
-                    $fileOriginalName,
-                    $fileNoteOriginalName,
-                );
-            }
-        }
-
-        if ($request->isMethod('POST')) {
-            $this->toast('success', 'Parcours validés');
-            if ($this->isGranted('ROLE_ADMIN')) {
-                return $this->redirectToRoute('app_validation_dpe_index');
-            } else {
-                return $this->redirectToRoute('app_validation_composante_dpe_index', ['composante' => $request->query->get('composante')]);
-            }
-        }
-
-        return $this->render('process_validation/_valide_lot.html.twig', [
-            'formations' => $tParcours,
-            'sParcours' => $sParcours,
-            'process' => $process,
-            'meta' => $meta,
-            'type' => 'lot',
-            'id' => $id,
-            'etape' => $etape,
-            'transition' => $transition,
-            'processData' => $processData ?? null,
-            'laisserPasser' => $laisserPasser,
-        ]);
-    }
-
-    #[Route('/validation/refuse-lot/{etape}/{transition}', name: 'app_validation_refuser_lot')]
-    public function refuseLot(
-        DpeParcoursRepository $dpeParcoursRepository,
-        string                $etape,
-        string                $transition,
-        Request               $request
-    ): Response {
-        if ($request->isMethod('POST')) {
-            $sParcours = $request->request->get('parcours');
-        } else {
-            $sParcours = $request->query->get('parcours');
-        }
-        $allParcours = explode(',', $sParcours);
-
-        $process = $this->validationProcess->getEtape($etape);
-        $meta = $this->validationProcess->getMetaFromTransition($transition);
-        $tParcours = [];
-        foreach ($allParcours as $id) {
-            $dpe = $dpeParcoursRepository->find($id);
-            if ($dpe === null) {
-                return JsonReponse::error('Parcours non trouvé');
-            }
-            $tParcours[] = $dpe;
-            $processData = $this->parcoursProcess->etatParcours($dpe, $process);
-
-            if ($request->isMethod('POST')) {
-                $this->parcoursProcess->refuseParcours($dpe, $this->getUser(), $transition, $request);
-            }
-        }
-
-        if ($request->isMethod('POST')) {
-            $this->toast('success', 'Parcours refusés');
-            return $this->redirectToRoute('app_validation_dpe_index');
-        }
-
-        return $this->render('process_validation/_refuse_lot.html.twig', [
-            'formations' => $tParcours,
-            'sParcours' => $sParcours,
-            'process' => $process,
-            'meta' => $meta,
-            'type' => 'lot',
-            'id' => $id,
-            'etape' => $etape,
-            'transition' => $transition,
-            'objet' => $dpe,
-            'processData' => $processData ?? null,
-        ]);
-    }
-
-    #[Route('/validation/reserve-lot/{etape}/{transition}', name: 'app_validation_reserver_lot')]
-    public function reserveLot(
-        DpeParcoursRepository $dpeParcoursRepository,
-        string                $etape,
-        string                $transition,
-        Request               $request
-    ): Response {
-        if ($request->isMethod('POST')) {
-            $sParcours = $request->request->get('parcours');
-        } else {
-            $sParcours = $request->query->get('parcours');
-        }
-        $allParcours = explode(',', $sParcours);
-
-        $process = $this->validationProcess->getEtape($etape);
-        $meta = $this->validationProcess->getMetaFromTransition($transition);
-        $tParcours = [];
-        foreach ($allParcours as $id) {
-            $dpe = $dpeParcoursRepository->find($id);
-            if ($dpe === null) {
-                return JsonReponse::error('Parcours non trouvé');
-            }
-            $tParcours[] = $dpe;
-            $processData = $this->parcoursProcess->etatParcours($dpe, $process);
-
-            if ($request->isMethod('POST')) {
-                $this->parcoursProcess->reserveParcours($dpe, $this->getUser(), $transition, $request);
-            }
-        }
-
-        if ($request->isMethod('POST')) {
-            $this->toast('success', 'Formations marquées avec des réserves');
-            return $this->redirectToRoute('app_validation_dpe_index');
-        }
-
-        return $this->render('process_validation/_reserve_lot.html.twig', [
-            'formations' => $tParcours,
-            'sParcours' => $sParcours,
-            'process' => $process,
-            'meta' => $meta,
-            'transition' => $transition,
-            'objet' => $dpe,
-            'processData' => $processData ?? null,
-            'type' => 'lot',
-            'id' => $id,
-            'etape' => $etape,
-        ]);
-    }
+//    #[Route('/validation/reserve-lot/{etape}/{transition}', name: 'app_validation_reserver_lot')]
+//    public function reserveLot(
+//        DpeParcoursRepository $dpeParcoursRepository,
+//        string                $etape,
+//        string                $transition,
+//        Request               $request
+//    ): Response {
+//        if ($request->isMethod('POST')) {
+//            $sParcours = $request->request->get('parcours');
+//        } else {
+//            $sParcours = $request->query->get('parcours');
+//        }
+//        $allParcours = explode(',', $sParcours);
+//
+//        $process = $this->validationProcess->getEtape($etape);
+//        $meta = $this->validationProcess->getMetaFromTransition($transition);
+//        $tParcours = [];
+//        foreach ($allParcours as $id) {
+//            $dpe = $dpeParcoursRepository->find($id);
+//            if ($dpe === null) {
+//                return JsonReponse::error('Parcours non trouvé');
+//            }
+//            $tParcours[] = $dpe;
+//            $processData = $this->parcoursProcess->etatParcours($dpe, $process);
+//
+//            if ($request->isMethod('POST')) {
+//                $this->parcoursProcess->reserveParcours($dpe, $this->getUser(), $transition, $request);
+//            }
+//        }
+//
+//        if ($request->isMethod('POST')) {
+//            $this->toast('success', 'Formations marquées avec des réserves');
+//            if ($request->isXmlHttpRequest()) {
+//                return (new JsonReponse(
+//                    Response::HTTP_OK,
+//                    'Formations marquées avec des réserves',
+//                    [
+//                        'count' => count($tParcours),
+//                        'transition' => $transition,
+//                        'etape' => $etape,
+//                    ]
+//                ))->getReponse();
+//            }
+//
+//            return $this->redirectToRoute('app_validation_dpe_index');
+//        }
+//
+//        return $this->render('process_validation/_reserve_lot.html.twig', [
+//            'formations' => $tParcours,
+//            'sParcours' => $sParcours,
+//            'process' => $process,
+//            'meta' => $meta,
+//            'transition' => $transition,
+//            'objet' => $dpe,
+//            'processData' => $processData ?? null,
+//            'type' => 'lot',
+//            'id' => $id,
+//            'etape' => $etape,
+//        ]);
+//    }
 }

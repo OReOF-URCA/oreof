@@ -9,28 +9,24 @@
 
 namespace App\Controller\Parcours;
 
-use App\Classes\JsonReponse;
 use App\Classes\ValidationProcess;
 use App\Controller\BaseController;
 use App\Entity\DpeParcours;
+use App\Entity\User;
 use App\Events\HistoriqueParcoursEvent;
-use App\Repository\FicheMatiereRepository;
-use App\Repository\ParcoursRepository;
-use App\Service\LheoXML;
+use App\Repository\DpeParcoursRepository;
 use App\Utils\TurboStreamResponseFactory;
 use App\Workflow\Form\MetaDrivenFormFactory;
-use App\Workflow\Handler\TransitionHandlerInterface;
 use App\Workflow\Handler\TransitionHandlerRegistry;
+use App\Workflow\Handler\TransitionHandlerInterface;
 use App\Workflow\Metadata\WorkflowMetaMapper;
 use App\Workflow\ModalView\TransitionModalViewBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/parcours/v2/process', name: 'parcours_process')]
 class ParcoursProcessController extends BaseController
@@ -193,7 +189,7 @@ class ParcoursProcessController extends BaseController
     #[Route('/{type}/{dpeParcours}/{transition}', name: '_apply')]
     public function applyProcess(
         Request $request,
-        TurbostreamResponseFactory $turboStream,
+        TurboStreamResponseFactory $turboStream,
         DpeParcours                $dpeParcours,
         string                     $transition,
     ): Response
@@ -220,27 +216,30 @@ class ParcoursProcessController extends BaseController
         if ($form->isSubmitted()) {
             // Blocage “report”
             if ($view?->mode === 'report' && $view?->canSubmit === false) {
-                // toast error + rester dans la modal
-            } elseif ($form->isValid()) {
+                return $turboStream->streamToastError('Le traitement est bloqué par un contrôle.', false);
+            }
+
+            if ($form->isValid()) {
                 try {
+                    $user = $this->getCurrentUserOrFail();
                     $handlerCode = $metaDto->handlerCode ?? $transition; // fallback possible
-                    dump($handlerCode);
-                    dump($this->transitionHandlers->get($handlerCode));
-                    $this->transitionHandlers->get($handlerCode)->handle(
+                    $handler = $this->transitionHandlers->get($handlerCode);
+                    if (!$handler instanceof TransitionHandlerInterface) {
+                        throw new \LogicException(sprintf('Handler DPE attendu pour "%s".', $handlerCode));
+                    }
+
+                    $handler->handle(
                         $dpeParcours,
-                        $this->getUser(),
+                        $user,
                         $metaDto,
                         $transition,
                         (array)$form->getData());
                     // l'étape c'est la clé du tableau $dpeParcours->getEtatValidation()
-                    $etape = array_keys($dpeParcours->getEtatValidation($dpeParcours))[0] ?? 'inconnue';
-                    dump($etape);
-                    $histoEvent = new HistoriqueParcoursEvent($dpeParcours->getParcours(), $this->getUser(), $etape, $metaDto->type, $request);
+                    $etape = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
+                    $histoEvent = new HistoriqueParcoursEvent($dpeParcours->getParcours(), $user, $etape, $metaDto->type, $request);
                     $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
 
                 } catch (\Throwable $e) {
-                    //toast erreur
-                    dump($e->getMessage());
                     return $turboStream->stream('parcours_v2/turbo/apply_error.stream.html.twig', [
                         'dpeParcours' => $dpeParcours,
                         'transition' => $transition,
@@ -348,48 +347,204 @@ class ParcoursProcessController extends BaseController
 //        );
     }
 
-    #[Route('/refuser/{dpeParcours}/{transition}', name: '_refuser')]
-    public function refuser(
-        TurbostreamResponseFactory $turboStream,
-        DpeParcours                $dpeParcours,
+    #[Route('/lot/{transition}', name: '_apply_lot')]
+    public function applyLotProcess(
+        Request                    $request,
+        TurboStreamResponseFactory $turboStream,
+        DpeParcoursRepository      $dpeParcoursRepository,
         string                     $transition,
     ): Response
     {
-        $meta = $this->validationProcess->getMetaFromTransition($transition);
+        $selectedIds = $this->parseSelectedParcoursIds($request);
 
-        $form = $this->createFormBuilder(null, [
-            'attr' => ['id' => 'modal_form'],
-            'translation_domain' => 'form'
-        ]);
-
-        if (array_key_exists('hasDate', $meta) && $meta['hasDate'] === true) {
-            $form->add('date_refus', DateType::class, []);
+        if ($selectedIds === []) {
+            return $turboStream->streamToastError('Aucun parcours sélectionné.', true);
         }
 
-        $form->add('argumentaire_refus', TextareaType::class, []);
-        $form = $form->getForm();
+        $firstDpeParcours = null;
+        foreach ($selectedIds as $id) {
+            $candidate = $dpeParcoursRepository->find($id);
+            if ($candidate instanceof DpeParcours) {
+                $firstDpeParcours = $candidate;
+                break;
+            }
+        }
+
+        if (!$firstDpeParcours instanceof DpeParcours) {
+            return $turboStream->streamToastError('Aucun parcours valide trouvé.', true);
+        }
+
+        $rawMeta = $this->validationProcess->getMetaFromTransition($transition);
+        $metaDto = $this->workflowMetaMapper->fromArray($rawMeta);
+        $view = $this->transitionModalViewBuilder->build($transition, $firstDpeParcours, $rawMeta);
+
+        $form = $metaDto->form === null
+            ? $this->metaDrivenFormFactory->createEmpty()
+            : $this->metaDrivenFormFactory->create($metaDto->form, $transition);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            if ($view?->mode === 'report' && $view?->canSubmit === false) {
+                return $turboStream->streamToastError('Le traitement est bloqué par un contrôle de cohérence.', false);
+            }
+
+            if ($form->isValid()) {
+                try {
+                    $user = $this->getCurrentUserOrFail();
+                    $handlerCode = $metaDto->handlerCode ?? $transition;
+                    $processedCount = 0;
+                    $processedParcours = [];
+
+                    foreach ($selectedIds as $id) {
+                        $dpeParcours = $dpeParcoursRepository->find($id);
+                        if (!$dpeParcours instanceof DpeParcours) {
+                            continue;
+                        }
+
+                        $handler = $this->transitionHandlers->get($handlerCode);
+                        if (!$handler instanceof TransitionHandlerInterface) {
+                            throw new \LogicException(sprintf('Handler DPE attendu pour "%s".', $handlerCode));
+                        }
+
+                        $handler->handle(
+                            $dpeParcours,
+                            $user,
+                            $metaDto,
+                            $transition,
+                            (array)$form->getData()
+                        );
+
+                        $etape = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
+                        $histoEvent = new HistoriqueParcoursEvent($dpeParcours->getParcours(), $user, $etape, $metaDto->type, $request);
+                        $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
+
+                        $parcours = $dpeParcours->getParcours();
+                        $formation = $parcours?->getFormation();
+                        $processedParcours[] = [
+                            'id' => $dpeParcours->getId(),
+                            'parcours' => $parcours?->getDisplay() ?? 'Parcours inconnu',
+                            'formation' => $formation?->getDisplay() ?? 'Formation inconnue',
+                        ];
+                        ++$processedCount;
+                    }
+
+                    return $turboStream->stream('parcours_v2/turbo/apply_lot_success.stream.html.twig', [
+                        'transition' => $transition,
+                        'type' => $metaDto->type,
+                        'count' => $processedCount,
+                        'processedParcours' => $processedParcours,
+                    ]);
+                } catch (\Throwable $e) {
+                    return $turboStream->stream('parcours_v2/turbo/apply_lot_error.stream.html.twig', [
+                        'transition' => $transition,
+                        'type' => $metaDto->type,
+                        'message' => $e->getMessage(),
+                    ]);
+                }
+            }
+        }
 
         return $turboStream->streamOpenModalFromTemplates(
-            'Refuser le parcours',
-            'Parcours : ' . $dpeParcours->getParcours()?->getDisplay(),
-            'parcours_v2/process/_refuser.html.twig',
+            'modal_title.' . $transition . '.' . $metaDto->type,
+            $selectedIds === []
+                ? 'Aucun parcours sélectionné'
+                : sprintf('%d parcours sélectionné%s', count($selectedIds), count($selectedIds) > 1 ? 's' : ''),
+            'parcours_v2/process/_apply_lot.html.twig',
             [
-                'parcours' => $dpeParcours->getParcours(),
-                'dpeParcours' => $dpeParcours,
-                'meta' => $meta,
+                'metaDto' => $metaDto,
                 'transition' => $transition,
+                'view' => $view,
                 'form' => $form->createView(),
+                'selectedParcours' => implode(',', $selectedIds),
             ],
             '_ui/_footer_submit_cancel.html.twig',
             [
-                'submitLabel' => 'Valider le parcours',
+                'submitLabel' => 'modal_submit.' . $transition . '.' . $metaDto->type,
+                'submitDisabled' => ($view?->mode === 'report' && $view->canSubmit === false),
             ]
         );
     }
 
+    /**
+     * @return list<int>
+     */
+    private function parseSelectedParcoursIds(Request $request): array
+    {
+        $bag = $request->isMethod('POST') ? $request->request : $request->query;
+
+        // Tente la lecture en tant que tableau (parcours[]=1&parcours[]=2)
+        try {
+            $raw = $bag->all('parcours');
+            if ($raw !== []) {
+                return array_values(array_unique(array_filter(array_map('intval', $raw), static fn(int $id) => $id > 0)));
+            }
+        } catch (\UnexpectedValueException) {
+            // La valeur est une chaîne, on la traite ci-dessous
+        }
+
+        // Lecture en tant que chaîne scalaire (valeur séparée par des virgules)
+        $raw = $bag->get('parcours');
+        if (is_string($raw) && $raw !== '') {
+            $parts = array_map('trim', explode(',', $raw));
+            return array_values(array_unique(array_filter(array_map('intval', $parts), static fn(int $id) => $id > 0)));
+        }
+
+        return [];
+    }
+
+    private function getCurrentUserOrFail(): User
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw new \LogicException('Utilisateur non authentifié.');
+        }
+
+        return $user;
+    }
+
+//    #[Route('/refuser/{dpeParcours}/{transition}', name: '_refuser')]
+//    public function refuser(
+//        TurboStreamResponseFactory $turboStream,
+//        DpeParcours                $dpeParcours,
+//        string                     $transition,
+//    ): Response
+//    {
+//        $meta = $this->validationProcess->getMetaFromTransition($transition);
+//
+//        $form = $this->createFormBuilder(null, [
+//            'attr' => ['id' => 'modal_form'],
+//            'translation_domain' => 'form'
+//        ]);
+//
+//        if (array_key_exists('hasDate', $meta) && $meta['hasDate'] === true) {
+//            $form->add('date_refus', DateType::class, []);
+//        }
+//
+//        $form->add('argumentaire_refus', TextareaType::class, []);
+//        $form = $form->getForm();
+//
+//        return $turboStream->streamOpenModalFromTemplates(
+//            'Refuser le parcours',
+//            'Parcours : ' . $dpeParcours->getParcours()?->getDisplay(),
+//            'parcours_v2/process/_refuser.html.twig',
+//            [
+//                'parcours' => $dpeParcours->getParcours(),
+//                'dpeParcours' => $dpeParcours,
+//                'meta' => $meta,
+//                'transition' => $transition,
+//                'form' => $form->createView(),
+//            ],
+//            '_ui/_footer_submit_cancel.html.twig',
+//            [
+//                'submitLabel' => 'Valider le parcours',
+//            ]
+//        );
+//    }
+
     #[Route('/reserver/{dpeParcours}/{transition}', name: '_reserver')]
     public function reserver(
-        TurbostreamResponseFactory $turboStream,
+        TurboStreamResponseFactory $turboStream,
         DpeParcours                $dpeParcours,
         string                     $transition,
     ): Response

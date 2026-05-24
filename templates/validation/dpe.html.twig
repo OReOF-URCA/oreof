@@ -56,7 +56,7 @@
                 <div {{ stimulus_controller('load_content', {url: path('app_validation_dpe_liste', {
                     typeValidation: value,
                     composante: 'all'
-                })}) }}>
+                })}) }} data-action="validation:bulk-success@window->load-content#refresh">
                     <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-sm transition hover:border-slate-300 dark:border-slate-700 dark:bg-slate-950/30 dark:hover:border-slate-600 sm:p-5">
                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-center">
                             <div class="lg:col-span-4">

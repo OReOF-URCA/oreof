@@ -1,0 +1,77 @@
+{% set parcours = item.parcours %}
+{% set formation = parcours.formation %}
+
+<div class="flex flex-wrap justify-end gap-2">
+    {% if formation.hasParcours and formation.parcours|length > 0 %}
+        <twig:Button
+                href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}"
+                variant="info"
+                size="sm"
+                icon="icon:eye"
+                label="Voir"
+                tooltip="Voir le parcours"
+                target="_blank"
+                rel="noopener noreferrer"
+                :centered="false"
+        />
+        <twig:Button
+                variant="success"
+                tooltip="Verifier la saisie"
+                dataAction="click->modalturbo#open"
+                href="{{ path('app_parcours_state', {parcours: parcours.id}) }}"
+                :centered="false"
+        >
+            <i class="fal fa-binoculars"></i>
+            <span>Verifier</span>
+        </twig:Button>
+        {% if is_granted('EDIT', {route: 'app_parcours', subject: parcours}) %}
+            <twig:Button
+                    href="{{ path('parcours_v2_modifier', {parcours: parcours.id}) }}"
+                    variant="warning"
+                    size="sm"
+                    icon="icon:edit"
+                    label="Modifier"
+                    tooltip="Modifier la fiche d'identite du parcours"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    :centered="false"
+            />
+        {% endif %}
+    {% else %}
+        <twig:Button
+                href="{{ path('formation_v2_voir', {'slug': formation.slug}) }}"
+                variant="info"
+                size="sm"
+                icon="icon:eye"
+                label="Voir"
+                tooltip="Voir la formation"
+                target="_blank"
+                rel="noopener noreferrer"
+                :centered="false"
+        />
+        <twig:Button
+                variant="success"
+                tooltip="Verifier la saisie"
+                dataAction="click->modalturbo#open"
+                href="{{ path('app_formation_state', {slug: formation.slug}) }}"
+                :centered="false"
+        >
+            <i class="fal fa-binoculars"></i>
+            <span>Verifier</span>
+        </twig:Button>
+        {% if is_granted('EDIT', {route: 'app_formation', subject: formation}) %}
+            <twig:Button
+                    href="{{ path('formation_v2_modifier', {'slug': formation.slug}) }}"
+                    variant="warning"
+                    size="sm"
+                    icon="icon:edit"
+                    label="Modifier"
+                    tooltip="Modifier la fiche d'identite de la formation"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    :centered="false"
+            />
+        {% endif %}
+    {% endif %}
+</div>
+

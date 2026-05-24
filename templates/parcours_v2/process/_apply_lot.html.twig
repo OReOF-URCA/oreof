@@ -1,0 +1,32 @@
+{{ component('alerte', {
+    type: 'info',
+    message: ('modal_description.' ~ transition ~ '.' ~ metaDto.type)|trans({}, 'process')|nl2br|raw
+}) }}
+
+{% if view and view.mode == 'report' %}
+    {% if view.messages is empty %}
+        <div class="rounded bg-emerald-50 p-3 text-emerald-800">
+            Aucun blocage detecte.
+        </div>
+    {% else %}
+        <ul class="space-y-2">
+            {% for m in view.messages %}
+                <li class="rounded border p-3">
+                    <strong class="mr-2">{{ m.level|upper }}</strong>{{ m.message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endif %}
+
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+{{ form_start(form, {
+    action: path('parcours_process_apply_lot', { transition: transition }),
+    attr: {
+        'data-bulk-action': 'true'
+    }
+}) }}
+<input type="hidden" name="parcours" value="{{ selectedParcours }}">
+{{ form_widget(form) }}
+{{ form_end(form) }}
+
