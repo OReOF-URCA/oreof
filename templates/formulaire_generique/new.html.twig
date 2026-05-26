@@ -1,0 +1,133 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <div class="card"
+            {{ stimulus_controller('formulaire-generique--creation', {
+                mentionsUrl: path('app_formulaire_generique_mentions_by_type_diplome', {typeDiplome: '__id__'}),
+                formationUrl: path('app_formulaire_generique_formation_by_mention', {mention: '__mention__', typeDiplome: '__typeDiplome__'})
+            }) }}
+    >
+        <div class="card-body">
+            {% form_theme form 'communs/form_theme.html.twig' %}
+
+            {{ form_start(form) }}
+
+            {% for message in app.flashes('danger') %}
+                <div class="alert alert-danger">{{ message }}</div>
+            {% endfor %}
+
+            <h5 class="mb-3">Type de diplôme et mention</h5>
+
+            {{ form_row(form.typeDiplome) }}
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Mention / Spécialité <span class="text-danger">*</span>
+                </label>
+
+                {% if mentionError is defined %}
+                    <div class="alert alert-danger">{{ mentionError }}</div>
+                {% endif %}
+
+                <select name="{{ form.mentionExistante.vars.full_name }}"
+                        id="{{ form.mentionExistante.vars.id }}"
+                        class="form-select"
+                        data-formulaire-generique--creation-target="mentionSelect"
+                        data-action="change->formulaire-generique--creation#changeMention"
+                >
+                    <option value="">Choisissez d'abord un type de diplôme</option>
+                </select>
+                <div class="form-text">
+                    Si la mention n'existe pas, sélectionnez "+ Créer une nouvelle mention".
+                </div>
+
+            </div>
+
+            <div data-formulaire-generique--creation-target="mentionCreationBloc"
+                 class="card border-primary mb-3"
+                 style="display:none"
+            >
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-plus-circle"></i> Nouvelle mention</span>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-light"
+                            data-action="click->formulaire-generique--creation#hideMentionCreation"
+                    >
+                        Annuler
+                    </button>
+                </div>
+                <div class="card-body">
+                    {{ form_row(form.nouvelleMentionLibelle) }}
+                    {{ form_row(form.nouvelleMentionSigle) }}
+                    {{ form_row(form.nouvelleMentionDomaine) }}
+                    {{ form_row(form.nouvelleMentionCodeApogee) }}
+                </div>
+
+                <div data-formulaire-generique--creation-target="formationInfo" style="display:none"></div>
+
+
+                <span class="card-header d-flex gap-1 align-items-center text-white bg-primary"><i class="fas fa-plus-circle"></i> Informations sur la formation</span>
+                <div data-formulaire-generique--creation-target="formationBloc" class="mb-3 card-body">
+
+                    {{ form_row(form.localisationMention) }}
+                    {{ form_row(form.composantesInscription) }}
+                    {{ form_row(form.regimeInscription) }}
+                    {{ form_row(form.sigleFormation) }}
+                </div>
+            </div>
+
+            <hr>
+            <h5 class="mb-3">Formation</h5>
+
+            {{ form_row(form.composantePorteuse) }}
+            {{ form_row(form.niveauEntree) }}
+            {{ form_row(form.niveauSortie) }}
+
+            <hr>
+            <h5 class="mb-3">Parcours</h5>
+
+            {{ form_row(form.libelle) }}
+            {{ form_row(form.sigle) }}
+            {{ form_row(form.typeParcours) }}
+
+            <div class="row">
+                <div class="col-1">
+                    {{ form_row(form.dureeParcours) }}
+                </div>
+                <div class="col-1">
+                    {{ form_row(form.dureeParcoursUnite) }}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success mt-3">
+                <i class="fal fa-floppy-disk"></i> Créer le parcours
+            </button>
+
+            {{ form_widget(form.mentionExistante, {'attr': {'data-formulaire-generique--creation-target': 'mentionExistante'}}) }}
+            {{ form_widget(form.formationExistante, {'attr': {'data-formulaire-generique--creation-target': 'formationExistante'}}) }}
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% set header_title %}Créer un nouveau parcours{% endset %}
+
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {href: path('app_parcours_index'), title: 'Liste des parcours'},
+        {href: '', title: 'Nouveau parcours'},
+    ]}) }}
+{% endblock %}
+
+{% block bouton_header %}
+    <a href="{{ path('app_parcours_index') }}"
+       class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
+       data-bs-toggle="tooltip"
+       data-bs-placement="bottom"
+       title="Retour à la liste"
+    >
+        <i class="{{ iconBack }}"></i>
+        <span> Retour à la liste</span>
+    </a>
+{% endblock %}

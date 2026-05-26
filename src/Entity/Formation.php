@@ -60,11 +60,11 @@ class Formation
     private ?string $mentionTexte = null;
 
     #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
-    #[ORM\Column(type: Types::INTEGER, enumType: NiveauFormationEnum::class)]
+    #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: NiveauFormationEnum::class)]
     private ?NiveauFormationEnum $niveauEntree = null;
 
     #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
-    #[ORM\Column(type: Types::INTEGER, enumType: NiveauFormationEnum::class)]
+    #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: NiveauFormationEnum::class)]
     private ?NiveauFormationEnum $niveauSortie = null;
 
     #[ORM\Column]
@@ -342,7 +342,7 @@ class Formation
         return $this->niveauEntree;
     }
 
-    public function setNiveauEntree(NiveauFormationEnum $niveauEntree): self
+    public function setNiveauEntree(?NiveauFormationEnum $niveauEntree): self
     {
         $this->niveauEntree = $niveauEntree;
 
@@ -354,7 +354,7 @@ class Formation
         return $this->niveauSortie;
     }
 
-    public function setNiveauSortie(NiveauFormationEnum $niveauSortie): self
+    public function setNiveauSortie(?NiveauFormationEnum $niveauSortie): self
     {
         $this->niveauSortie = $niveauSortie;
 

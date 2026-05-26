@@ -10,6 +10,7 @@ use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -76,8 +77,17 @@ class TypeDiplomeType extends AbstractType
                     'maxlength' => 3000
                 ]
             ])
-            ->add('semestreDebut')
-            ->add('semestreFin')
+            ->add('classique', CheckboxType::class, [
+                'label' => 'Structure classique (semestres)',
+                'required' => false,
+                'attr' => ['data-type-diplome-target' => 'classique', 'data-action' => 'change->type-diplome#toggle'],
+            ])
+            ->add('semestreDebut', null, [
+                'row_attr' => ['class' => 'semestre-field'],
+            ])
+            ->add('semestreFin', null, [
+                'row_attr' => ['class' => 'semestre-field'],
+            ])
             ->add('nbUeMin')
             ->add('nbUeMax')
             ->add('nbEctsMaxUe')
@@ -85,7 +95,9 @@ class TypeDiplomeType extends AbstractType
             ->add('ModeleMcc', ChoiceType::class, [
                 'choices' => $choices,
             ])
-            ->add('debutSemestreFlexible')
+            ->add('debutSemestreFlexible', null, [
+                'row_attr' => ['class' => 'semestre-field'],
+            ])
             ->add('hasMemoire', YesNoType::class)
             ->add('hasStage', YesNoType::class)
             ->add('hasSituationPro', YesNoType::class)

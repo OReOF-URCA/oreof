@@ -209,25 +209,25 @@
             </td>
         </tr>
     {% endfor %}
-    {#    <tr> #}
-    {#        <td colspan="{% if constant('SOURCE', typeDiplome) == 'meef' %}7{% else %}6{% endif %}"> #}
-    {#            <button #}
-    {#                    {{ stimulus_controller('modal', { #}
-    {#                        size: 'lg', #}
-    {#                        nomEvenement: 'parcoursAdded', #}
-    {#                        modalTitle: 'Ajouter un parcours', #}
-    {#                        modalUrl: path('app_parcours_new', {formation:formation.id}) }) }} #}
-    {#                    data-action="click->modal#openModal" #}
-    {#                    class="btn btn-sm btn-outline-success btn-icon btn-icon-end" #}
-    {#                    data-size="lg" #}
-    {#                    data-bs-toggle="tooltip" #}
-    {#                    data-bs-placement="bottom" #}
-    {#                    title="Ajouter un parcours" #}
-    {#            > #}
-    {#                <i class="{{ iconAdd }}"></i> #}
-    {#                <span> Ajouter un parcours</span> #}
-    {#            </button> #}
-    {#        </td> #}
-    {#    </tr> #}
+        <tr>
+            <td colspan="{% if constant('SOURCE', typeDiplome) == 'meef' %}7{% else %}6{% endif %}">
+                <button
+                        {{ stimulus_controller('modal', {
+                            size: 'lg',
+                            nomEvenement: 'parcoursAdded',
+                            modalTitle: 'Ajouter un parcours',
+                            modalUrl: path('app_parcours_new', {formation:formation.id}) }) }}
+                        data-action="click->modal#openModal"
+                        class="btn btn-sm btn-outline-success btn-icon btn-icon-end"
+                        data-size="lg"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="bottom"
+                        title="Ajouter un parcours"
+                >
+                    <i class="{{ iconAdd }}"></i>
+                    <span> Ajouter un parcours</span>
+                </button>
+            </td>
+        </tr>
     </tbody>
 </table>

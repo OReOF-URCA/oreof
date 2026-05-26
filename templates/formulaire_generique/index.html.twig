@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+            {{ form_start(form) }}
+            {{ form_row(form.libelle) }}
+            {{ form_row(form.sigle) }}
+            {{ form_row(form.respParcours) }}
+            {{ form_row(form.coResponsable) }}
+            {{ form_row(form.typeParcours) }}
+            <button type="submit" class="btn btn-success">
+                <i class="fal fa-floppy-disk"></i> Enregistrer
+            </button>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% set header_title %}Création d'un parcours (formulaire générique){% endset %}
+
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        { href: '', title: 'Formations' },
+        { href: path('app_formation_show', {slug: formation.slug}), title: formation.display },
+        { href: '', title: 'Nouveau parcours' }
+    ]}) }}
+{% endblock %}

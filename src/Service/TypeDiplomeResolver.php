@@ -77,6 +77,16 @@ final class TypeDiplomeResolver
                 return $h;
             }
         }
+
+        if ($type->isClassique() === false) {
+            foreach ($this->handlers as $h) {
+                if ($h instanceof \App\TypeDiplome\NonClassique\NonClassiqueHandler) {
+                    $this->handler = $h;
+                    return $h;
+                }
+            }
+        }
+
         throw new LogicException("No handler for {$type->getLibelle()}");
     }
 
