@@ -1,11 +1,27 @@
-<div class="relative inline-block text-left overflow-visible"
+{% set semanticColorMap = {
+    'red': 'danger',
+    'danger': 'danger',
+    'orange': 'warning',
+    'amber': 'warning',
+    'yellow': 'warning',
+    'green': 'success',
+    'emerald': 'success',
+    'blue': 'info',
+    'cyan': 'info',
+    'indigo': 'primary',
+    'primary': 'primary',
+    'secondary': 'secondary',
+    'slate': 'secondary',
+    'gray': 'secondary'
+} %}
+
+<div class="relative inline-block overflow-visible text-left"
      data-controller="dropdown"
      {% if id %}id="{{ id }}"{% endif %}
 >
     <button
             type="button"
-            class="inline-flex items-center justify-center rounded-sm bg-secondary-100 dark:bg-secondary-800 p-2 text-secondary-600 hover:text-secondary-900 dark:hover:text-secondary hover:bg-secondary-300 dark:hover:bg-secondary-800
-               focus:outline-none focus:ring-2 focus:ring-primary-500"
+            class="inline-flex h-8 items-center justify-center gap-1.5 rounded-md border border-secondary-200 bg-surface px-2.5 py-2 text-sm font-medium whitespace-nowrap shadow-sm transition-colors hover:border-secondary-300 hover:bg-secondary-50 hover:text-secondary-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 focus-visible:ring-offset-surface dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500 dark:hover:bg-secondary-700 dark:hover:text-white dark:focus-visible:ring-offset-secondary-900"
             aria-haspopup="true"
             aria-expanded="false"
             data-action="click->dropdown#toggle"
@@ -14,18 +30,17 @@
                 {{ stimulus_controller('tooltip') }}
                 title="{{ help }}"
             {% endif %}
-
     >
-        <twig:UX:Icon :name="icon" class="inline-block h-4 w-4 shrink-0"/>
+        {{ ux_icon(icon, {class: 'h-4 w-4 shrink-0'}) }}
         <span class="{% if labelSrOnly %}sr-only{% endif %}">{{ label }}</span>
     </button>
 
     <div
-            class="absolute right-0 z-50 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 hidden"
+            class="absolute right-0 z-50 mt-2 w-56 origin-top-right overflow-hidden rounded-xl border border-secondary-200 bg-surface shadow-xl ring-1 ring-secondary-200/60 hidden dark:border-secondary-700 dark:bg-secondary-900 dark:ring-secondary-700/60"
             role="menu"
             data-dropdown-target="menu"
     >
-        <div class="py-1" role="none">
+        <div class="py-1.5" role="none">
             {% for item in items %}
                 {% set danger = item.danger ?? false %}
                 {% set disabled = item.disabled ?? false %}
@@ -33,37 +48,44 @@
                 {% set turboFrame = item.turboFrame ?? null %}
                 {% set hasConfirm = item.confirm is defined %}
                 {% set modal = item.modal is defined and item.modal == true %}
-                {% set color = item.color is defined ? item.color : 'slate' %}
+                {% set color = item.color is defined ? item.color|lower : 'secondary' %}
                 {% set itemHelp = item.help is defined ? item.help : '' %}
+                {% set semanticColor = danger ? 'danger' : (semanticColorMap[color] ?? 'secondary') %}
+                {% set itemToneClasses = {
+                    'primary': 'text-primary-700 hover:bg-primary-50 focus-visible:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-950/30 dark:focus-visible:bg-primary-950/30',
+                    'success': 'text-success-700 hover:bg-success-50 focus-visible:bg-success-50 dark:text-success-300 dark:hover:bg-success-950/30 dark:focus-visible:bg-success-950/30',
+                    'warning': 'text-warning-700 hover:bg-warning-50 focus-visible:bg-warning-50 dark:text-warning-300 dark:hover:bg-warning-950/30 dark:focus-visible:bg-warning-950/30',
+                    'info': 'text-info-700 hover:bg-info-50 focus-visible:bg-info-50 dark:text-info-300 dark:hover:bg-info-950/30 dark:focus-visible:bg-info-950/30',
+                    'danger': 'text-danger-700 hover:bg-danger-50 focus-visible:bg-danger-50 dark:text-danger-300 dark:hover:bg-danger-950/30 dark:focus-visible:bg-danger-950/30',
+                    'secondary': 'text-secondary-700 hover:bg-secondary-50 focus-visible:bg-secondary-50 dark:text-secondary-200 dark:hover:bg-secondary-800 dark:focus-visible:bg-secondary-800',
+                }[semanticColor] %}
+                {% set itemClasses = 'flex w-full items-center gap-2 rounded-md px-4 py-2.5 text-sm font-medium transition-colors duration-150 focus:outline-none ' ~ itemToneClasses ~ (disabled ? ' opacity-50 pointer-events-none cursor-not-allowed' : '') %}
+
                 {% if modal %}
                     {% if disabled and itemHelp != '' %}
-                        <span class="inline-block"
+                        <div class="inline-block"
                               data-controller="tooltip"
                               data-tooltip-placement-value="bottom"
                               title="{{ itemHelp }}">
                             <a
-                                    class="flex items-center gap-2 px-4 py-2 text-sm
-                                       {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-'~color~'-700 hover:bg-'~color~'-100' }}
-                                       opacity-50 pointer-events-none"
-                                    role="menuitem"
-                                    disabled
                                     href="{{ item.url }}"
+                                    class="{{ itemClasses }}"
+                                    role="menuitem"
+                                    aria-disabled="true"
+                                    tabindex="-1"
                                     data-turbo="true"
                                     data-action="click->modalturbo#open"
                             >
-                                {% if item.icon is defined %}
-                                    <twig:UX:Icon :name="item.icon" class="inline-block h-4 w-4 shrink-0"/>{% endif %}
+                                {{ ux_icon(item.icon, {class: 'h-4 w-4 shrink-0'}) }}
                                 {{ item.label }}
                             </a>
-                        </span>
+                        </div>
                     {% else %}
                         <a
-                                class="flex items-center gap-2 px-4 py-2 text-sm
-                                   {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-'~color~'-700 hover:bg-'~color~'-100' }}
-                                   {{ disabled ? 'opacity-50 pointer-events-none' : '' }}"
-                                role="menuitem"
-                                {% if disabled %}disabled{% endif %}
                                 href="{{ item.url }}"
+                                class="{{ itemClasses }}"
+                                role="menuitem"
+                                {% if disabled %}aria-disabled="true" tabindex="-1"{% endif %}
                                 data-turbo="true"
                                 data-action="click->modalturbo#open"
                                 {% if itemHelp != '' and not disabled %}
@@ -72,126 +94,108 @@
                                     title="{{ itemHelp }}"
                                 {% endif %}
                         >
-                            {% if item.icon is defined %}
-                                <twig:UX:Icon :name="item.icon" class="inline-block h-4 w-4 shrink-0"/>{% endif %}
+                            {{ ux_icon(item.icon, {class: 'h-4 w-4 shrink-0'}) }}
                             {{ item.label }}
                         </a>
                     {% endif %}
-
                 {% else %}
-                {% if method == 'GET' %}
-                    {% if disabled and itemHelp != '' %}
-                        <span class="inline-block"
-                              data-controller="tooltip"
-                              data-tooltip-placement-value="bottom"
-                              title="{{ itemHelp }}">
+                    {% if method == 'GET' %}
+                        {% if disabled and itemHelp != '' %}
+                            <div class="inline-block"
+                                  data-controller="tooltip"
+                                  data-tooltip-placement-value="bottom"
+                                  title="{{ itemHelp }}">
+                                <a
+                                        href="{{ item.url ?? '#' }}"
+                                        class="{{ itemClasses }}"
+                                        role="menuitem"
+                                        aria-disabled="true"
+                                        tabindex="-1"
+                                        {% if turboFrame != null %}data-turbo-frame="{{ turboFrame }}"{% endif %}
+                                        {% if hasConfirm %}data-action="click->dropdown#confirm" data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
+                                >
+                                    {{ ux_icon(item.icon, {class: 'h-4 w-4 shrink-0'}) }}
+                                    {{ item.label }}
+                                </a>
+                        </div>
+                        {% else %}
                             <a
                                     href="{{ item.url ?? '#' }}"
-                                    class="flex items-center gap-2 px-4 py-2 text-sm
-                                       {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-'~color~'-700 hover:bg-'~color~'-100' }}
-                                       opacity-50 pointer-events-none"
+                                    class="{{ itemClasses }}"
                                     role="menuitem"
-                                    disabled
+                                    {% if disabled %}aria-disabled="true" tabindex="-1"{% endif %}
                                     {% if turboFrame != null %}data-turbo-frame="{{ turboFrame }}"{% endif %}
                                     {% if hasConfirm %}data-action="click->dropdown#confirm" data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
-                            >
-                                {% if item.icon is defined %}
-                                    <twig:UX:Icon :name="item.icon" class="inline-block h-4 w-4 shrink-0"/>{% endif %}
-                                {{ item.label }}
-                            </a>
-                        </span>
-                    {% else %}
-                        <a
-                                href="{{ item.url ?? '#' }}"
-                                class="flex items-center gap-2 px-4 py-2 text-sm
-                                   {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-'~color~'-700 hover:bg-'~color~'-100' }}
-                                   {{ disabled ? 'opacity-50 pointer-events-none' : '' }}"
-                                role="menuitem"
-                                {% if disabled %}disabled{% endif %}
-                                {% if turboFrame != null %}data-turbo-frame="{{ turboFrame }}"{% endif %}
-                                {% if hasConfirm %}data-action="click->dropdown#confirm" data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
-                                {% if itemHelp != '' and not disabled %}
-                                    data-controller="tooltip"
-                                    data-tooltip-placement-value="bottom"
-                                    title="{{ itemHelp }}"
-                                {% endif %}
-                        >
-                            {% if item.icon is defined %}
-                                <twig:UX:Icon :name="item.icon" class="inline-block h-4 w-4 shrink-0"/>{% endif %}
-                            {{ item.label }}
-                        </a>
-                    {% endif %}
-                {% else %}
-                    {# Actions non-GET : petit form pour respecter HTTP + CSRF si besoin #}
-                    {% if disabled and itemHelp != '' %}
-                        <span class="inline-block"
-                              data-controller="tooltip"
-                              data-tooltip-placement-value="bottom"
-                              title="{{ itemHelp }}">
-                            <form method="post"
-                                  action="{{ item.url ?? '#' }}"
-                                  class="block"
-                                  {% if hasConfirm %}data-action="submit->dropdown#confirm"
-                                  data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
-                            >
-                                {% if item.csrf is defined %}
-                                    <input type="hidden" name="csrf_token" value="{{ item.csrf }}">
-                                {% endif %}
-                                {# Si tu veux : _method pour DELETE/PUT #}
-                                {% if method != 'POST' %}
-                                    <input type="hidden" name="_method" value="{{ method }}">
-                                {% endif %}
-
-                                <button
-                                        type="submit"
-                                        disabled
-                                        class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm
-                                           {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-100' }}
-                                           opacity-50 pointer-events-none"
-                                        role="menuitem"
-                                >
-                                    {% if item.icon is defined %}
-                                        <twig:UX:Icon :name="item.icon"
-                                                      class="inline-block h-4 w-4 shrink-0"/>{% endif %}
-                                    {{ item.label }}
-                                </button>
-                            </form>
-                        </span>
-                    {% else %}
-                        <form method="post"
-                              action="{{ item.url ?? '#' }}"
-                              class="block"
-                              {% if hasConfirm %}data-action="submit->dropdown#confirm"
-                              data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
-                        >
-                            {% if item.csrf is defined %}
-                                <input type="hidden" name="csrf_token" value="{{ item.csrf }}">
-                            {% endif %}
-                            {# Si tu veux : _method pour DELETE/PUT #}
-                            {% if method != 'POST' %}
-                                <input type="hidden" name="_method" value="{{ method }}">
-                            {% endif %}
-
-                            <button
-                                    type="submit"
-                                    {% if disabled %}disabled{% endif %}
-                                    class="flex w-full items-center gap-2 px-4 py-2 text-left text-sm
-                                       {{ danger ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-100' }}
-                                       {{ disabled ? 'opacity-50 pointer-events-none' : '' }}"
-                                    role="menuitem"
                                     {% if itemHelp != '' and not disabled %}
                                         data-controller="tooltip"
                                         data-tooltip-placement-value="bottom"
                                         title="{{ itemHelp }}"
                                     {% endif %}
                             >
-                                {% if item.icon is defined %}
-                                    <twig:UX:Icon :name="item.icon" class="inline-block h-4 w-4 shrink-0"/>{% endif %}
+                                {{ ux_icon(item.icon, {class: 'h-4 w-4 shrink-0'}) }}
                                 {{ item.label }}
-                            </button>
-                        </form>
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        {# Actions non-GET : petit form pour respecter HTTP + CSRF si besoin #}
+                        {% if disabled and itemHelp != '' %}
+                            <div class="inline-block"
+                                  data-controller="tooltip"
+                                  data-tooltip-placement-value="bottom"
+                                  title="{{ itemHelp }}">
+                                <form method="post"
+                                      action="{{ item.url ?? '#' }}"
+                                      class="block"
+                                      {% if hasConfirm %}data-action="submit->dropdown#confirm" data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
+                                >
+                                    {% if item.csrf is defined %}
+                                        <input type="hidden" name="csrf_token" value="{{ item.csrf }}">
+                                    {% endif %}
+                                    {% if method != 'POST' %}
+                                        <input type="hidden" name="_method" value="{{ method }}">
+                                    {% endif %}
+
+                                    <button
+                                            type="submit"
+                                            disabled
+                                            class="{{ itemClasses }} text-left"
+                                            role="menuitem"
+                                    >
+                                        {{ ux_icon(item.icon, {class: 'h-4 w-4 shrink-0'}) }}
+                                        {{ item.label }}
+                                    </button>
+                                </form>
+                        </div>
+                        {% else %}
+                            <form method="post"
+                                  action="{{ item.url ?? '#' }}"
+                                  class="block"
+                                  {% if hasConfirm %}data-action="submit->dropdown#confirm" data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
+                            >
+                                {% if item.csrf is defined %}
+                                    <input type="hidden" name="csrf_token" value="{{ item.csrf }}">
+                                {% endif %}
+                                {% if method != 'POST' %}
+                                    <input type="hidden" name="_method" value="{{ method }}">
+                                {% endif %}
+
+                                <button
+                                        type="submit"
+                                        {% if disabled %}disabled{% endif %}
+                                        class="{{ itemClasses }} text-left"
+                                        role="menuitem"
+                                        {% if itemHelp != '' and not disabled %}
+                                            data-controller="tooltip"
+                                            data-tooltip-placement-value="bottom"
+                                            title="{{ itemHelp }}"
+                                        {% endif %}
+                                >
+                                    {{ ux_icon(item.icon, {class: 'h-4 w-4 shrink-0'}) }}
+                                    {{ item.label }}
+                                </button>
+                            </form>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
                 {% endif %}
             {% endfor %}
         </div>

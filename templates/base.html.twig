@@ -7,7 +7,7 @@
     <script>
       (function () {
         const savedTheme = localStorage.getItem('oreof-theme')
-        let accessibility = null
+        let accessibility
 
         try {
           accessibility = JSON.parse(localStorage.getItem('oreof-a11y') || 'null')
@@ -34,16 +34,16 @@
     </script>
     <link rel="preconnect" href="https://fonts.gstatic.com"/>
     <style>
-        .markdown-body img, .markdown-body .ratio {
+        .markdown-body img {
             max-width: 100%;
             height: auto;
             border-radius: 4px;
         }
         @media (min-width: 992px) {
-            .markdown-body img, .markdown-body .ratio {
+            .markdown-body img {
                 max-width: 60%;
             }
-            #helpOffcanvas .markdown-body img, #helpOffcanvas .markdown-body .ratio {
+            #helpOffcanvas .markdown-body img {
                 max-width: 100%;
             }
         }
@@ -63,7 +63,7 @@
     {% block javascripts %}
         {#            {% block importmap %}{{ importmap('app') }}{% endblock %} #}
         <script>
-          window.toasts = {{ app.session.flashbag.get('toast')|json_encode|raw }};
+          window.toasts = {{ app.flashes('toast')|json_encode|raw }};
         </script>
         {{ encore_entry_script_tags('app') }}
     {% endblock %}
@@ -72,6 +72,11 @@
     class="min-h-screen"
     data-controller="modalturbo"
 >
+<template id="global-loader-stimulus" hidden>
+    <div class="flex justify-center py-6">
+        <twig:Spinner size="md" variant="secondary" label="Chargement..." />
+    </div>
+</template>
 <!-- toast Tailwindcss-->
 {# todo: peut être boucler sur les flashmessage à la fin ? #}
 <div id="flash_toasts" class="fixed bottom-4 right-4 z-50 w-[min(24rem,calc(100vw-2rem))]"></div>

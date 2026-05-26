@@ -7,9 +7,29 @@
  */
 
 window.da = {
-  loaderStimulus: '<div class="loader-stimulus text-center">... Chargement en cours ...</div>',
   loader: document.getElementById('loader'),
 }
+
+Object.defineProperty(window.da, 'loaderStimulus', {
+  get() {
+    const template = document.getElementById('global-loader-stimulus')
+    if (template) {
+      return template.innerHTML.trim()
+    }
+
+    return `
+      <div class="flex justify-center py-6">
+        <div class="inline-flex items-center justify-center animate-spin h-14 w-14 text-secondary" role="status" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-full w-full" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" opacity="0.2"></circle>
+            <path d="M21 12a9 9 0 0 0-9-9"></path>
+          </svg>
+          <span class="sr-only">Chargement...</span>
+        </div>
+      </div>
+    `
+  },
+})
 
 import * as bootstrap from 'bootstrap'
 import 'trix'
