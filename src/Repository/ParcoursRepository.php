@@ -428,5 +428,4 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-
 }

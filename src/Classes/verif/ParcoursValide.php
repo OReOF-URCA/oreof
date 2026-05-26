@@ -141,7 +141,10 @@ class ParcoursValide extends AbstractValide
         }
 
         //onglet 3
-        if ($this->typeDiplome->getLibelleCourt() !== 'BUT') {
+        if ($this->typeDiplome->isClassique() === false) {
+            $this->etat['competences'] = self::NON_CONCERNE;
+            $this->etat['structure'] = self::NON_CONCERNE;
+        } elseif ($this->typeDiplome->getLibelleCourt() !== 'BUT') {
             $this->etat['competences'] = $this->parcours->getBlocCompetences()->count() > 0 ? self::COMPLET : self::VIDE;
 
             foreach ($this->parcours->getBlocCompetences() as $blocCompetence) {
@@ -154,9 +157,11 @@ class ParcoursValide extends AbstractValide
 
             // onglet 4
             ValideStructure::valideStructure($this->parcours);
+            $this->etat['structure'] = ValideStructure::getStructure();
         } else {
             $this->etat['competences'] = $this->parcours->getFormation()?->getButCompetences()->count() > 0 ? self::COMPLET : self::VIDE;
             ValideStructure::valideStructureBut($this->parcours);
+            $this->etat['structure'] = ValideStructure::getStructure();
         }
         $this->etat['structure'] = ValideStructure::getStructure();
 

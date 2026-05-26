@@ -26,10 +26,10 @@ class TypeDiplome
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $libelle_court = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $semestreDebut = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $semestreFin = null;
 
     #[ORM\Column]
@@ -61,7 +61,7 @@ class TypeDiplome
     #[ORM\ManyToMany(targetEntity: TypeEpreuve::class, mappedBy: 'typeDiplomes')]
     private Collection $typeEpreuves;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?bool $debutSemestreFlexible = null;
 
     #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
@@ -114,6 +114,9 @@ class TypeDiplome
 
     #[ORM\Column(nullable: true)]
     private ?bool $controleAssiduite = null;
+
+    #[ORM\Column]
+    private ?bool $classique = true;
 
     /**
      * @var Collection<int, TypeDiplomePlateformeAdmission>
@@ -171,7 +174,7 @@ class TypeDiplome
         return $this->semestreDebut;
     }
 
-    public function setSemestreDebut(int $semestreDebut): self
+    public function setSemestreDebut(?int $semestreDebut): self
     {
         $this->semestreDebut = $semestreDebut;
 
@@ -183,7 +186,7 @@ class TypeDiplome
         return $this->semestreFin;
     }
 
-    public function setSemestreFin(int $semestreFin): self
+    public function setSemestreFin(?int $semestreFin): self
     {
         $this->semestreFin = $semestreFin;
 
@@ -575,6 +578,9 @@ class TypeDiplome
 
     public function getNbAnnee(): int
     {
+        if ($this->semestreFin === null || $this->semestreDebut === null) {
+            return 0;
+        }
         return ($this->semestreFin - $this->semestreDebut + 1) / 2;
     }
 
@@ -620,6 +626,18 @@ class TypeDiplome
     public function setControleAssiduite(?bool $controleAssiduite): static
     {
         $this->controleAssiduite = $controleAssiduite;
+
+        return $this;
+    }
+
+    public function isClassique(): ?bool
+    {
+        return $this->classique ?? true;
+    }
+
+    public function setClassique(bool $classique): static
+    {
+        $this->classique = $classique;
 
         return $this;
     }
