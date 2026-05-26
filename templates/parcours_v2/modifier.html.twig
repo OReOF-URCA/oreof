@@ -79,21 +79,21 @@
                         <div class="bg-{{ percentColor }}-500 h-full w-[{{ percent|number_format(0) }}%]"></div>
                     </div>
                     {% if parcours.remplissage.isFull() == false %}
-                        <button
-                                {{ stimulus_controller('modal', {
-                                    size: 'lg',
-                                    modalTitle: 'verifier.la.saisie.parcours.title'|trans({}, 'process'),
-                                    modalUrl: path('app_parcours_state', {parcours:parcours.id}) }) }}
-                                data-action="click->modal#openModal"
-                                class="btn text-success p-0 pt-1"
+                        <twig:Button
+                                data-action="click->modalturbo#open"
+                                data-turbo="true"
+                                href="{{ path('app_parcours_state', {parcours: parcours.id})
+                                }) }}"
                                 data-size="lg"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="bottom"
-                                title="{{ 'verifier.la.saisie.parcours.infobulle'|trans({}, 'process') }}"
-                        >
-                            <i class="fas fa-check"></i>
-                            <span> Vérifier la saisie</span>
-                        </button>
+                                variant="success"
+                                :soft="false"
+                                :outline="true"
+                                size="sm"
+                                icon="icon:check"
+                                label="Vérifier la saisie"
+                                tooltip="{{ 'verifier.la.saisie.parcours.infobulle'|trans({}, 'process') }}"
+                                extraClass="mt-2 !p-0 !h-auto border-0 bg-transparent text-success-600 hover:text-success-700 hover:bg-transparent shadow-none"
+                        />
                     {% endif %}
                 </div>
 

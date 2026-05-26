@@ -83,7 +83,9 @@ class HistoriqueController extends BaseController
     }
 
     #[Route('/historique/fiche_matiere/{ficheMatiere}', name: 'app_historique_fiche_matiere')]
-    public function fiche_matiere(FicheMatiere $ficheMatiere): Response
+    public function fiche_matiere(
+        TurboStreamResponseFactory $turboStream,
+        FicheMatiere               $ficheMatiere): Response
     {
         $historiques = [];
         $histo = $ficheMatiere->getHistoriqueFicheMatieres();
@@ -93,11 +95,16 @@ class HistoriqueController extends BaseController
 
         krsort($historiques);
 
-        return $this->render('historique/_formation.html.twig', [
+        return $turboStream->streamOpenModalFromTemplates(
+            new TranslatableKey('fiche_matiere.historique.title'),
+            new TranslatableKey('fiche_matiere.historique.description'),
+            'historique/_formation.html.twig',
+            [
             'historiques' => $historiques,
             'ficheMatiere' => $ficheMatiere,
             'type' => 'fiche_matiere'
-        ]);
+            ]
+        );
     }
 
     #[Route('/historique/edit/{historique}', name: 'app_historique_edit')]

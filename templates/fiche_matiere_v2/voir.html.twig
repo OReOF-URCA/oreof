@@ -3,51 +3,7 @@
 {% block javascripts %}
     {{ parent() }}
 
-    <script type="module">
-      import { Application, Controller } from 'https://unpkg.com/@hotwired/stimulus/dist/stimulus.js'
-
-      window.Stimulus = Application.start()
-
-      Stimulus.register('scroll-spy', class extends Controller {
-        static targets = ['link', 'section']
-
-        connect () {
-          const options = {
-            root: null,
-            rootMargin: '-10% 0px -70% 0px', // Déclenchement quand la section est en haut
-            threshold: 0
-          }
-
-          this.observer = new IntersectionObserver(this.onIntersection.bind(this), options)
-          this.sectionTargets.forEach(section => this.observer.observe(section))
-        }
-
-        onIntersection (entries) {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              this.activateLink(entry.target.id)
-            }
-          })
-        }
-
-        activateLink (id) {
-          this.linkTargets.forEach(link => {
-            const isActive = link.getAttribute('href') === `#${id}`
-            link.classList.toggle('text-indigo-600', isActive)
-            link.classList.toggle('bg-indigo-50', isActive)
-            link.classList.toggle('border-indigo-600', isActive)
-            link.classList.toggle('text-slate-400', !isActive)
-            link.classList.toggle('border-transparent', !isActive)
-          })
-        }
-
-        disconnect () {
-          this.observer.disconnect()
-        }
-      })
-    </script>
-
-    <!-- Test Script -->
+    <!-- Scripts versioning -->
     <script>
       let isSaveClicked = false
 
@@ -81,42 +37,42 @@
     </div>
 
     <div class="flex" data-controller="scroll-spy">
-        <aside class="w-72 bg-white rounded-md shadow-md border-slate-200 flex flex-col p-3 space-y-8">
+        <aside class="app-scrollspy-aside w-72 flex flex-col p-3 space-y-8">
             <div class="sticky top-40 space-y-8">
                 <div>
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6 px-4">Navigation</p>
+                    <p class="app-scrollspy-section-title">Navigation</p>
                     <nav class="space-y-1">
                         <a href="#identite_enseignement" data-scroll-spy-target="link"
-                           class="flex items-center gap-3 px-5 py-3 text-[11px] font-black uppercase tracking-widest rounded-md border-l-4 border-transparent transition-all duration-300">
+                           class="app-scrollspy-link">
                             Identité de l'enseignement
                         </a>
                         <a href="#presentation" data-scroll-spy-target="link"
-                           class="flex items-center gap-3 px-5 py-3 text-[11px] font-black uppercase tracking-widest rounded-md border-l-4 border-transparent transition-all duration-300">
+                           class="app-scrollspy-link">
                             Présentation
                         </a>
                         <a href="#volumes_horaires" data-scroll-spy-target="link"
-                           class="flex items-center gap-3 px-5 py-3 text-[11px] font-black uppercase tracking-widest rounded-md border-l-4 border-transparent transition-all duration-300">
+                           class="app-scrollspy-link">
                             Volumes horaires
                         </a>
 
                         <a href="#mccc" data-scroll-spy-target="link"
-                           class="flex items-center gap-3 px-5 py-3 text-[11px] font-black uppercase tracking-widest rounded-md border-l-4 border-transparent transition-all duration-300">
+                           class="app-scrollspy-link">
                             MCCC
                         </a>
 
                         <a href="#bcc" data-scroll-spy-target="link"
-                           class="flex items-center gap-3 px-5 py-3 text-[11px] font-black uppercase tracking-widest rounded-md border-l-4 border-transparent transition-all duration-300">
+                           class="app-scrollspy-link">
                             Compétences acquises
                         </a>
                         {% if ficheMatiere.enseignementMutualise == true or ficheMatiere.elementConstitutifs|length > 0 %}
                             <a href="#mutualisation" data-scroll-spy-target="link"
-                               class="flex items-center gap-3 px-5 py-3 text-[11px] font-black uppercase tracking-widest rounded-md border-l-4 border-transparent transition-all duration-300">
+                               class="app-scrollspy-link">
                                 Détail des mutualisations
                             </a>
 
                         {% endif %}
                         <a href="#infos" data-scroll-spy-target="link"
-                           class="flex items-center gap-3 px-5 py-3 text-[11px] font-black uppercase tracking-widest rounded-md border-l-4 border-transparent transition-all duration-300">
+                           class="app-scrollspy-link">
                             Infos Pratiques
                         </a>
                     </nav>

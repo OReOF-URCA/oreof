@@ -3,45 +3,6 @@
 {% block javascripts %}
     {{ parent() }}
 
-    <script type="module">
-      import { Application, Controller } from 'https://unpkg.com/@hotwired/stimulus/dist/stimulus.js'
-
-      window.Stimulus = Application.start()
-
-      Stimulus.register('scroll-spy', class extends Controller {
-        static targets = ['link', 'section']
-
-        connect () {
-          const options = {
-            root: null,
-            rootMargin: '-10% 0px -70% 0px', // Déclenchement quand la section est en haut
-            threshold: 0
-          }
-
-          this.observer = new IntersectionObserver(this.onIntersection.bind(this), options)
-          this.sectionTargets.forEach(section => this.observer.observe(section))
-        }
-
-        onIntersection (entries) {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              this.activateLink(entry.target.id)
-            }
-          })
-        }
-
-        activateLink (id) {
-          this.linkTargets.forEach(link => {
-            const isActive = link.getAttribute('href') === `#${id}`
-            link.classList.toggle('app-scrollspy-link-active', isActive)
-          })
-        }
-
-        disconnect () {
-          this.observer.disconnect()
-        }
-      })
-    </script>
 
     <!-- Test Script -->
     <script>

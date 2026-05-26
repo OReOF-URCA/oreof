@@ -23,60 +23,18 @@
             or is_granted('EDIT', {route: 'app_composante', subject: dpeParcours})
             or is_granted('EDIT', {route: 'app_etbalissement', subject: dpeParcours})
             or is_granted('ROLE_ADMIN')) and isOuvert(dpeParcours) %}
-            <a href="{{ path('parcours_v2_modifier', {parcours:parcours.id}) }}"
-               class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 shadow-sm transition hover:border-amber-400 hover:bg-amber-100 hover:text-amber-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 dark:border-amber-700 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:border-amber-600 dark:hover:bg-amber-500/20 dark:focus-visible:ring-amber-500 dark:focus-visible:ring-offset-slate-900"
-               data-bs-toggle="tooltip"
-               data-bs-placement="bottom"
-               title="Modifier le parcours"
-            >
-                <i class="{{ iconEdit }}"></i>
-                <span> Modifier le parcours</span>
-            </a>
+            <twig:Button
+                    href="{{ path('parcours_v2_modifier', {parcours: parcours.id}) }}"
+                    variant="warning"
+                    :soft="false"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:edit"
+                    label="Modifier le parcours"
+                    tooltip="Modifier le parcours"
+            />
         {% endif %}
     </div>
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-    <script type="module">
-      import { Application, Controller } from 'https://unpkg.com/@hotwired/stimulus/dist/stimulus.js'
-
-      window.Stimulus = Application.start()
-
-      Stimulus.register('scroll-spy', class extends Controller {
-        static targets = ['link', 'section']
-
-        connect () {
-          const options = {
-            root: null,
-            rootMargin: '-10% 0px -70% 0px', // Déclenchement quand la section est en haut
-            threshold: 0
-          }
-
-          this.observer = new IntersectionObserver(this.onIntersection.bind(this), options)
-          this.sectionTargets.forEach(section => this.observer.observe(section))
-        }
-
-        onIntersection (entries) {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              this.activateLink(entry.target.id)
-            }
-          })
-        }
-
-        activateLink (id) {
-          this.linkTargets.forEach(link => {
-            const isActive = link.getAttribute('href') === `#${id}`
-            link.classList.toggle('app-scrollspy-link-active', isActive)
-          })
-        }
-
-        disconnect () {
-          this.observer.disconnect()
-        }
-      })
-    </script>
 {% endblock %}
 
 {% block content %}
@@ -218,4 +176,3 @@
         </div>
     </div>
 {% endblock %}
-

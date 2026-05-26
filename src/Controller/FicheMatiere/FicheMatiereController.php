@@ -61,6 +61,7 @@ class FicheMatiereController extends BaseController
         if ($referer === null || false === str_contains($referer, 'parcours')) {
             $source = 'liste';
         } else {
+            //todo: gérer le retour et gérer retour vers hors diploôme
             $source = 'parcours';
             $link = $referer . '?step=4';
         }

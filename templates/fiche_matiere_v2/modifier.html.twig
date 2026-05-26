@@ -20,48 +20,55 @@
 {% endblock %}
 
 {% set header_title %}
-    Fiche EC/matière <strong
+    Fiche EC/matière : <strong
         id="fiche_matiere_libelle">{{ fiche_matiere.libelle }}</strong> {% if fiche_matiere.ficheMatiereParcours|length > 0 %}
     <span class="badge bg-info">Mutualisée</span>{% endif %}
 {% endset %}
 
 {% block bouton_header %}
-    <a href="{{ path('fiche_matiere_v2_voir', {slug:fiche_matiere.slug}) }}"
-       class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Voir la fiche EC/matière"
-    >
-        <i class="{{ iconShow }}"></i>
-        <span> Voir la fiche EC/matière</span>
-    </a>
-    {% if source == 'liste' %}
-        <a href="{{ path('structure_fiche_matiere_index') }}"
-           class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-           data-bs-toggle="tooltip"
-           data-bs-placement="bottom"
-           title="Retour à la liste des fiches EC/matières"
-        >
-            <i class="{{ iconBack }}"></i>
-            <span> Retour à la liste des fiches EC/matières</span>
-        </a>
-    {% else %}
-        <a href="{{ link }}"
-           class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-           data-bs-toggle="tooltip"
-           data-bs-placement="bottom"
-           title="Retour au parcours"
-        >
-            <i class="{{ iconBack }}"></i>
-            <span> Retour au parcours</span>
-        </a>
-    {% endif %}
+    <div class="flex flex-wrap gap-3">
+        <twig:Button
+                href="{{ path('fiche_matiere_v2_voir', {slug: fiche_matiere.slug}) }}"
+                variant="info"
+                :soft="false"
+                :outline="true"
+                size="sm"
+                icon="icon:eye"
+                label="Voir la fiche EC/matière"
+                tooltip="Voir la fiche EC/matière"
+        />
+
+        {% if source == 'liste' %}
+            <twig:Button
+                    href="{{ path('structure_fiche_matiere_index') }}"
+                    variant="success"
+                    :soft="false"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:arrow-left"
+                    label="Retour à la liste des fiches EC/matières"
+                    tooltip="Retour à la liste des fiches EC/matières"
+            />
+        {% else %}
+            <twig:Button
+                    href="{{ link }}"
+                    variant="success"
+                    :soft="false"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:arrow-left"
+                    label="Retour au parcours"
+                    tooltip="Retour au parcours"
+            />
+        {% endif %}
+    </div>
 {% endblock %}
 
 
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
         {href: path('structure_fiche_matiere_index'), title: 'Liste des fiches EC/matières'},
+        {title: header_title}
     ]}) }}
 {% endblock %}
 

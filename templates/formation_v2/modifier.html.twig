@@ -24,24 +24,29 @@
 {% endset %}
 
 {% block bouton_header %}
-    <a href="{{ path('formation_v2_voir', {slug:formation.slug}) }}"
-       class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Voir la formation"
-    >
-        <i class="{{ iconShow }}"></i>
-        <span>Voir la fiche descriptive</span>
-    </a>
-    <a href="{{ path('app_formation_index') }}"
-       class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Retour à la liste des formations"
-    >
-        <i class="{{ iconBack }}"></i>
-        <span> Retour à la liste des formations</span>
-    </a>
+    <div class="flex flex-wrap gap-3">
+        <twig:Button
+                href="{{ path('formation_v2_voir', {slug: formation.slug}) }}"
+                variant="info"
+                :soft="false"
+                :outline="true"
+                size="sm"
+                icon="icon:eye"
+                label="Voir la fiche descriptive"
+                tooltip="Voir la formation"
+        />
+
+        <twig:Button
+                href="{{ path('app_formation_index') }}"
+                variant="success"
+                :soft="false"
+                :outline="true"
+                size="sm"
+                icon="icon:arrow-left"
+                label="Retour à la liste des formations"
+                tooltip="Retour à la liste des formations"
+        />
+    </div>
 {% endblock %}
 
 

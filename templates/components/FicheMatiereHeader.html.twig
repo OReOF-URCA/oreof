@@ -77,9 +77,11 @@
                     <dt class="{{ metaLabelClass }}">Type de fiche matière</dt>
                     <dd class="{{ metaValueClass }}">
                         {% if ficheMatiere.horsDiplome == true %}
-                            <span class="inline-flex items-center rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
-                                Hors Diplôme
-                            </span>
+                            <twig:Badge
+                                    label="Hors Diplôme"
+                                    variant="warning"
+                                    size="xs"
+                            />
                         {% else %}
                             <span class="inline-flex items-center rounded-full bg-cyan-100 px-2 py-1 text-xs font-semibold text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300">
                                 Classique
@@ -91,9 +93,11 @@
                     <dt class="{{ metaLabelClass }}">Type diplôme</dt>
                     <dd class="{{ metaValueClass }}">
                         {% if ficheMatiere.horsDiplome == true %}
-                            <span class="inline-flex items-center rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
-                                Hors Diplôme
-                            </span>
+                            <twig:Badge
+                                    label="Hors Diplôme"
+                                    variant="warning"
+                                    size="xs"
+                            />
                         {% else %}
                             {{ formation.typeDiplome|typeDiplome }}
                         {% endif %}
@@ -102,17 +106,31 @@
                 <div>
                     <dt class="{{ metaLabelClass }}">Mention porteuse</dt>
                     <dd class="{{ metaValueClass }}">
-                        {% if formation != null %}
-                            {{ formation.display }}
+                        {% if ficheMatiere.horsDiplome == true %}
+                            <twig:Badge
+                                    label="Hors Diplôme"
+                                    variant="warning"
+                                    size="xs"
+                            />
                         {% else %}
-                            <span class="{{ emptyBadgeClass }}">Non définie</span>
+                            {% if formation != null %}
+                                {{ formation.display }}
+                            {% else %}
+                                <span class="{{ emptyBadgeClass }}">Non définie</span>
+                            {% endif %}
                         {% endif %}
                     </dd>
                 </div>
                 <div>
                     <dt class="{{ metaLabelClass }}">Parcours porteur</dt>
                     <dd class="{{ metaValueClass }}">
-                        {% if ficheMatiere.horsDiplome == false %}
+                        {% if ficheMatiere.horsDiplome == true %}
+                            <twig:Badge
+                                    label="Hors Diplôme"
+                                    variant="warning"
+                                    size="xs"
+                            />
+                        {% else %}
                             {% if ficheMatiere.parcours != null %}
                                 {% if ficheMatiere.parcours.parcoursDefaut == false %}
                                     {{ ficheMatiere.parcours.libelle }}
@@ -122,22 +140,24 @@
                             {% else %}
                                 <span class="{{ emptyBadgeClass }}">Pas de parcours précisé</span>
                             {% endif %}
-                        {% else %}
-                            —
                         {% endif %}
                     </dd>
                 </div>
                 <div>
                     <dt class="{{ metaLabelClass }}">Composante porteuse</dt>
                     <dd class="{{ metaValueClass }}">
-                        {% if ficheMatiere.horsDiplome == false %}
+                        {% if ficheMatiere.horsDiplome == true %}
+                            <twig:Badge
+                                    label="Hors Diplôme"
+                                    variant="warning"
+                                    size="xs"
+                            />
+                        {% else %}
                             {% if formation != null and formation.composantePorteuse != null %}
                                 {{ formation.composantePorteuse.libelle }}
                             {% else %}
                                 <span class="{{ emptyBadgeClass }}">Non définie</span>
                             {% endif %}
-                        {% else %}
-                            —
                         {% endif %}
                     </dd>
                 </div>
@@ -207,14 +227,20 @@
                 {# Dropdown Gestion fiche matière #}
                 <div class="relative" data-controller="navbar-dropdown"
                      data-action="click@window->navbar-dropdown#close">
-                    <button class="{{ quickBtnSuccess }}"
+                    <twig:Button
                             type="button"
-                            data-action="click->navbar-dropdown#toggle"
-                            aria-expanded="false">
-                        {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
-                        <span>Gestion fiche matière</span>
+                            variant="success"
+                            :soft="false"
+                            :outline="true"
+                            size="sm"
+                            icon="icon:check"
+                            label="Gestion fiche matière"
+                            dataAction="click->navbar-dropdown#toggle"
+                            aria-expanded="false"
+                            extraClass="{{ quickBtnSuccess }}"
+                    >
                         {{ ux_icon('icon:chevron-down', {class: 'h-4 w-4'}) }}
-                    </button>
+                    </twig:Button>
                     <ul data-navbar-dropdown-target="content"
                         class="hidden absolute right-0 top-full z-30 mt-2 min-w-[22rem] rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
                         {% for key, option in validationOptions %}
@@ -237,37 +263,60 @@
                     </ul>
                 </div>
 
-                <button class="{{ quickBtnSecondary }}"
+                <twig:Button
+                        type="button"
+                        variant="secondary"
+                        :soft="false"
+                        :outline="true"
+                        size="sm"
+                        icon="icon:gear"
+                        label="Actions complémentaires"
                         data-toggle-group="accordion-1"
-                        data-toggle="actions" data-target="#actions-panel"
+                        data-toggle="actions"
+                        data-target="#actions-panel"
                         data-toggle-icon-open="rotate-0"
-                        data-toggle-icon-close="rotate-180">
-                    {{ ux_icon('icon:gear', {class: 'h-4 w-4'}) }}
-                    <span>Actions complémentaires</span>
+                        data-toggle-icon-close="rotate-180"
+                        extraClass="{{ quickBtnSecondary }}"
+                >
                     {{ ux_icon('icon:chevron-up', {class: 'h-4 w-4 data-toggle-icon rotate-180 transition-transform duration-200'}) }}
-                </button>
+                </twig:Button>
 
-                <button class="{{ quickBtnInfo }}"
+                <twig:Button
+                        type="button"
+                        variant="info"
+                        :soft="false"
+                        :outline="true"
+                        size="sm"
+                        icon="icon:download"
+                        label="Exports"
                         data-toggle-group="accordion-1"
-                        data-toggle="actions" data-target="#exports-panel"
+                        data-toggle="actions"
+                        data-target="#exports-panel"
                         data-toggle-icon-open="rotate-0"
-                        data-toggle-icon-close="rotate-180">
-                    {{ ux_icon('icon:download', {class: 'h-4 w-4'}) }}
-                    <span>Exports</span>
+                        data-toggle-icon-close="rotate-180"
+                        extraClass="{{ quickBtnInfo }}"
+                >
                     {{ ux_icon('icon:chevron-up', {class: 'h-4 w-4 data-toggle-icon rotate-180 transition-transform duration-200'}) }}
-                </button>
+                </twig:Button>
 
                 {% if is_granted('ROLE_ADMIN') %}
-                    <button class="{{ quickBtnSecondary }}"
+                    <twig:Button
+                            type="button"
+                            variant="secondary"
+                            :soft="false"
+                            :outline="true"
+                            size="sm"
+                            icon="icon:wrench"
+                            label="Gestion SES"
                             data-toggle-group="accordion-1"
                             data-toggle="actions"
                             data-target="#actions-panel-admin"
                             data-toggle-icon-open="rotate-0"
-                            data-toggle-icon-close="rotate-180">
-                        {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
-                        <span>Gestion SES</span>
+                            data-toggle-icon-close="rotate-180"
+                            extraClass="{{ quickBtnSecondary }}"
+                    >
                         {{ ux_icon('icon:chevron-up', {class: 'h-4 w-4 data-toggle-icon rotate-180 transition-transform duration-200'}) }}
-                    </button>
+                    </twig:Button>
                 {% endif %}
             </div>
         </section>
@@ -276,31 +325,37 @@
         <div class="{{ panelClass }}" id="actions-panel">
             <div class="{{ panelGridClass }}">
                 <div>
-                    <button
-                            data-action="click->modal#openModal"
-                            class="{{ quickBtnSuccess }} w-full"
-                            data-size="lg"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="bottom"
-                            title="{{ 'verifier.la.saisie.fiche_matiere.infobulle'|trans({}, 'process') }}">
-                        {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
-                        <span>Vérifier la saisie</span>
-                    </button>
+                    <twig:Button
+                            type="button"
+                            variant="success"
+                            :soft="false"
+                            :outline="true"
+                            size="sm"
+                            icon="icon:check"
+                            label="Vérifier la saisie"
+                            :fullWidth="true"
+                            data-action="click->modalturbo#open"
+                            data-turbo="true"
+                            tooltip="{{ 'verifier.la.saisie.fiche_matiere.infobulle'|trans({}, 'process') }}"
+                            extraClass="{{ quickBtnSuccess }}"
+                    />
                 </div>
                 <div>
-                    <button class="{{ quickBtnPrimary }} w-full" type="button"
-                            {{ stimulus_controller('modal', {
-                                size: 'large',
-                                modalTitle: 'historique.de.validation.fiche_matiere.title'|trans({}, 'process'),
-                                right: true,
-                                modalUrl: path('app_historique_fiche_matiere', {ficheMatiere:ficheMatiere.id}) }) }}
-                            data-action="click->modal#openModal"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="bottom"
-                            title="{{ 'historique.de.validation.fiche_matiere.infobulle'|trans({}, 'process') }}">
-                        {{ ux_icon('icon:timeline', {class: 'h-4 w-4'}) }}
-                        <span>Historique</span>
-                    </button>
+                    <twig:Button
+                            type="button"
+                            variant="primary"
+                            :soft="false"
+                            :outline="true"
+                            size="sm"
+                            icon="icon:timeline"
+                            label="Historique"
+                            :fullWidth="true"
+                            data-action="click->modalturbo#open"
+                            data-turbo="true"
+                            href="{{ path('app_historique_fiche_matiere', {ficheMatiere: ficheMatiere.id}) }}"
+                            tooltip="{{ 'historique.de.validation.fiche_matiere.infobulle'|trans({}, 'process') }}"
+                            extraClass="{{ quickBtnPrimary }}"
+                    />
                 </div>
                 <div>
                     {% if is_granted('ROLE_ADMIN') and hasLastVersion is defined and hasLastVersion == true %}
@@ -336,16 +391,30 @@
             <div class="{{ panelClass }}" id="actions-panel-admin">
                 <div class="{{ panelGridClass }}">
                     <div>
-                        <button class="{{ quickBtnSecondary }} w-full">
-                            {{ ux_icon('icon:gear', {class: 'h-4 w-4'}) }}
-                            <span>Gérer codification</span>
-                        </button>
+                        <twig:Button
+                                type="button"
+                                variant="secondary"
+                                :soft="false"
+                                :outline="true"
+                                size="sm"
+                                icon="icon:gear"
+                                label="Gérer codification"
+                                :fullWidth="true"
+                                extraClass="{{ quickBtnSecondary }}"
+                        />
                     </div>
                     <div>
-                        <button class="{{ quickBtnSecondary }} w-full">
-                            {{ ux_icon('icon:gear', {class: 'h-4 w-4'}) }}
-                            <span>Gérer la version</span>
-                        </button>
+                        <twig:Button
+                                type="button"
+                                variant="secondary"
+                                :soft="false"
+                                :outline="true"
+                                size="sm"
+                                icon="icon:gear"
+                                label="Gérer la version"
+                                :fullWidth="true"
+                                extraClass="{{ quickBtnSecondary }}"
+                        />
                     </div>
                 </div>
             </div>
