@@ -5,54 +5,59 @@
 {% block content %}
     <div class="space-y-6" {{ stimulus_controller('login') }}>
         <div class="space-y-2">
-            <p class="inline-flex items-center rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-700">
+            <p class="inline-flex items-center rounded-full bg-primary-100 dark:bg-primary-800 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-700 dark:text-primary-400">
                 Connexion</p>
-            <h2 class="text-3xl font-black leading-tight text-secondary-900">Bienvenue, connectez-vous</h2>
+            <h2 class="text-3xl font-black leading-tight text-text">Bienvenue, connectez-vous</h2>
             <p class="text-sm text-secondary">Choisissez la methode la plus rapide pour acceder a la plateforme.</p>
         </div>
 
-        <div class="space-y-3">
-            <a href="{{ path('cas_return') }}"
-               class="inline-flex w-full items-center justify-center rounded-xl bg-primary-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2"
-               type="submit">
-                Se connecter avec votre compte URCA
-            </a>
-            <p class="text-center text-xs font-semibold uppercase tracking-[0.2em] text-secondary-400">ou</p>
+        <div class="space-y-3 m-0">
+            <twig:Button
+                    href="{{ path('cas_return') }}"
+                    variant="primary"
+                    size="md"
+                    :solid="true"
+      o              :soft="false"
+                    label="Se connecter avec votre compte URCA"
+                    extraClass="w-full justify-center"
+            />
+            <p class="pt-1 text-center text-xs font-semibold uppercase tracking-[0.2em] text-secondary-400">ou</p>
 
             {% if error %}
                 {{ component('alerte', {type:'danger', message: error.messageKey|trans(error.messageData, 'security') }) }}
             {% endif %}
 
-            <button
-                    class="inline-flex w-full items-center justify-center rounded-xl border border-secondary-300 bg-surface px-5 py-3 text-sm font-semibold text-text transition hover:bg-bg focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-400 focus-visible:ring-offset-2"
+            <twig:Button
+                    variant="secondary"
+                    size="md"
+                    label="Se connecter avec login/mot de passe"
+                    dataAction="click->login#showFormLogin"
+                    extraClass="w-full justify-center"
                     data-login-target="toggleButton"
-                    {{ stimulus_action('login', 'showFormLogin') }}
-            >
-                Se connecter avec login/mot de passe
-            </button>
+            />
         </div>
 
-        <form class="hidden space-y-4 rounded-2xl border border-secondary-200 bg-bg p-4" method="post" id="formLogin">
+        <form class="hidden space-y-4 rounded-2xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4 mt-6 mb-0" method="post" id="formLogin">
             <div class="space-y-1">
-                <label for="inputUsername" class="block text-sm font-medium text-secondary-700">Login</label>
+                <label for="inputUsername" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300">Login</label>
                 <input
                         type="text"
                         value="{{ last_username }}"
                         name="username"
                         id="inputUsername"
-                        class="block w-full rounded-xl border border-secondary-300 bg-surface px-3 py-2 text-secondary-900 placeholder-secondary-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                        class="block w-full rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface px-3 py-2 text-secondary-900 placeholder-secondary-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                         autocomplete="username"
                         required
                         autofocus
                 >
             </div>
             <div class="space-y-1">
-                <label for="inputPassword" class="block text-sm font-medium text-secondary-700">Mot de passe</label>
+                <label for="inputPassword" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300">Mot de passe</label>
                 <input
                         type="password"
                         name="password"
                         id="inputPassword"
-                        class="block w-full rounded-xl border border-secondary-300 bg-surface px-3 py-2 text-secondary-900 placeholder-secondary-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+                        class="block w-full rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface px-3 py-2 text-secondary-900 placeholder-secondary-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                         autocomplete="current-password"
                         required
                 >
@@ -60,25 +65,31 @@
 
             <div class="flex items-center gap-2">
                 <input id="rememberMe" type="checkbox" name="_remember_me" value="on"
-                       class="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-secondary-500">
-                <label for="rememberMe" class="text-sm text-secondary-600">Se souvenir de moi</label>
+                       class="h-4 w-4 rounded border-secondary-200 dark:border-secondary-700 text-primary-600 focus:ring-secondary-500">
+                <label for="rememberMe" class="text-sm text-secondary-600 dark:text-secondary-300">Se souvenir de moi</label>
             </div>
 
             <input type="hidden" name="_csrf_token"
                    value="{{ csrf_token('authenticate') }}"
             >
-            <div class="space-y-2">
-                <button class="inline-flex w-full items-center justify-center rounded-xl bg-secondary-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-secondary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2"
-                        type="submit">Se connecter
-                </button>
-            </div>
+            <twig:Button
+                    type="submit"
+                    variant="secondary"
+                    size="md"
+                    label="Se connecter"
+                    extraClass="w-full justify-center"
+            />
         </form>
 
-        <p class="pt-1 text-center text-xs font-semibold uppercase tracking-[0.2em] text-secondary-400">ou</p>
-        <div>
-            <a href="{{ path('app_register') }}"
-               class="inline-flex w-full items-center justify-center rounded-xl bg-success-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-secondary-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500 focus-visible:ring-offset-2">Demander
-                un acces</a>
-        </div>
+        <p class="pt-1 text-center text-xs font-semibold uppercase tracking-[0.2em] my-3 text-secondary-400">ou</p>
+        <twig:Button
+                href="{{ path('app_register') }}"
+                variant="success"
+                :solid="true"
+                :soft="false"
+                size="md"
+                label="Demander un accès"
+                extraClass="w-full justify-center"
+        />
     </div>
 {% endblock %}

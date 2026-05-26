@@ -9,34 +9,38 @@
 
 {# Affichage des informations contextuelles (lecture seule) #}
 <div class="grid gap-4 md:grid-cols-2">
-    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Personne connectée</label>
+    <div class="rounded-2xl border border-secondary-200 bg-secondary-50 p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800">
+        <label for="bug-report-user" class="text-xs font-semibold uppercase tracking-wide text-secondary-500 dark:text-secondary-400">Personne connectée</label>
         <input type="text"
-               class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+               id="bug-report-user"
+               class="mt-2 w-full rounded-lg border border-secondary-200 bg-surface px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-info-500 focus:ring-2 focus:ring-info-100 dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-200 dark:focus:border-info-500 dark:focus:ring-info-100/20"
                readonly
                value="{{ user.display }}{% if user.email is not empty %} ({{ user.email }}){% endif %}">
     </div>
 
-    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Formation</label>
+    <div class="rounded-2xl border border-secondary-200 bg-secondary-50 p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800">
+        <label for="bug-report-formation" class="text-xs font-semibold uppercase tracking-wide text-secondary-500 dark:text-secondary-400">Formation</label>
         <input type="text"
-               class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+               id="bug-report-formation"
+               class="mt-2 w-full rounded-lg border border-secondary-200 bg-surface px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-info-500 focus:ring-2 focus:ring-info-100 dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-200 dark:focus:border-info-500 dark:focus:ring-info-100/20"
                readonly
                value="{{ context.formationLabel }}">
     </div>
 
-    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Parcours</label>
+    <div class="rounded-2xl border border-secondary-200 bg-secondary-50 p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800">
+        <label for="bug-report-parcours" class="text-xs font-semibold uppercase tracking-wide text-secondary-500 dark:text-secondary-400">Parcours</label>
         <input type="text"
-               class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+               id="bug-report-parcours"
+               class="mt-2 w-full rounded-lg border border-secondary-200 bg-surface px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-info-500 focus:ring-2 focus:ring-info-100 dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-200 dark:focus:border-info-500 dark:focus:ring-info-100/20"
                readonly
                value="{{ context.parcoursLabel }}">
     </div>
 
-    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
-        <label class="text-xs font-semibold uppercase tracking-wide text-slate-500">Page</label>
+    <div class="rounded-2xl border border-secondary-200 bg-secondary-50 p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800">
+        <label for="bug-report-page" class="text-xs font-semibold uppercase tracking-wide text-secondary-500 dark:text-secondary-400">Page</label>
         <input type="text"
-               class="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100"
+               id="bug-report-page"
+               class="mt-2 w-full rounded-lg border border-secondary-200 bg-surface px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-info-500 focus:ring-2 focus:ring-info-100 dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-200 dark:focus:border-info-500 dark:focus:ring-info-100/20"
                readonly
                value="{{ context.page is not empty ? context.page : 'Non définie' }}">
     </div>

@@ -1,5 +1,9 @@
 {% extends 'base.html.twig' %}
 
+{% set header_title %}
+    {{ help.id ? 'Modifier' : 'Créer' }} une aide
+{% endset %}
+
 {% set header_description %}
     Créez ou modifiez une aide contextuelle pour une page spécifique.
 {% endset %}
@@ -11,7 +15,7 @@
         <div class="space-y-6">
 
             <!-- Formulaire dans une card -->
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
+            <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-900 overflow-hidden">
                 <div class="p-6">
                     {# Appel du composant Live #}
                     {{ component('help_editor', { initialFormData: help }) }}
@@ -20,7 +24,7 @@
         </div>
     </div>
 
-    <script src="/js/editor_helpers.js"></script>
+    <script src="{{ asset('js/editor_helpers.js') }}"></script>
 {% endblock %}
 
 {% block breadcrumb %}

@@ -7,6 +7,7 @@ Fichiers importants :
 - `ui-conventions.md` : règles globales d'utilisation des composants Twig UI, badges et boutons.
 - `icons-migration.md` : table de correspondance des icônes et stratégie de migration progressive. Utilisé pour définir les alias (`icon:`) et mappings `ph:*`.
 - `bootstrap-to-tailwind-style-guide.md` : guide de migration détaillé.
+- `opacity-guide.md` : guide d'utilisation des classes d'opacité avec les variables CSS personnalisées.
 
 Usage : lire `ui-conventions.md` en priorité ; `icons-migration.md` est utile pour corriger les alias d'icônes.
 

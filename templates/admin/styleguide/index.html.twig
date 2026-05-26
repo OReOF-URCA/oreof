@@ -1,7 +1,5 @@
 {% extends 'base.html.twig' %}
-{% set header_description %}
-    Liste des composants graphiques disponibles dans l'application, avec des exemples d'utilisation.
-{% endset %}
+
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
         {
@@ -10,18 +8,31 @@
         }
     ]}) }}
 {% endblock %}
+
+{% set header_title %}
+    Styleguide
+{% endset %}
+
 {% block header %}
     Styleguide - Composants graphiques
 {% endblock %}
+
+{% set header_description %}
+    Liste des composants graphiques disponibles dans l'application, avec des exemples d'utilisation.
+{% endset %}
+
 {% block bouton_header %}
     <twig:Button variant="secondary" href="/administration/styleguide/templates/index-type">Voir la page exemple type
     </twig:Button>
 {% endblock %}
 {% block content %}
+
+
+
     <div class="space-y-12 pb-12">
 
         {# Section Composant : Palette couleur #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 shadow-sm">
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-text mb-2">Couleurs</h2>
                 <p class="text-secondary text-sm">Palette de couleurs personnalisée TailwindCSS sous forme de blocs continus.</p>
@@ -30,7 +41,7 @@
             <div class="overflow-x-auto">
                 <table class="w-auto border-collapse p-0 m-0">
                     <thead>
-                    <tr class="text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider border-b border-secondary-200">
+                    <tr class="text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider border-b border-secondary-200 dark:border-secondary-700">
                         <th class="pb-3 pr-4 font-bold text-text bg-surface">Palette</th>
                         <th class="pb-3 text-center w-12 bg-surface">Default</th>
                         <th class="pb-3 text-center w-12 bg-surface">50</th>
@@ -148,7 +159,7 @@
         </section>
 
         {# Section Composant : Boutons #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 shadow-sm">
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-text mb-2">Bouton</h2>
                 <p class="text-secondary text-sm">Composant bouton polyvalent avec plusieurs variantes de style, taille
@@ -226,8 +237,90 @@
                 </div>
             </div>
         </section>
+
+        {# Section Composant : Dropdown Button #}
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-text mb-2">Dropdown Button</h2>
+                <p class="text-secondary text-sm">Bouton d’actions avec menu contextuel (liens, actions avec confirmation, état désactivé).</p>
+            </div>
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple standard</h3>
+                    <div class="flex items-center gap-3">
+                        {{ component('dropdown_actions', {
+                            label: 'Actions',
+                            help: 'Actions disponibles sur cet élément',
+                            icon: 'icon:ellipsis-vertical',
+                            items: [
+                                {
+                                    label: 'Voir',
+                                    icon: 'icon:info',
+                                    color: 'info',
+                                    url: '#'
+                                },
+                                {
+                                    label: 'Modifier',
+                                    icon: 'icon:edit',
+                                    color: 'warning',
+                                    url: '#'
+                                },
+                                {
+                                    label: 'Supprimer',
+                                    icon: 'icon:delete',
+                                    color: 'danger',
+                                    confirm: 'Voulez-vous vraiment supprimer cet élément ?',
+                                    url: '#'
+                                }
+                            ]
+                        }) }}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">État désactivé + aide</h3>
+                    <div class="flex items-center gap-3">
+                        {{ component('dropdown_actions', {
+                            label: 'Actions',
+                            icon: 'icon:ellipsis-vertical',
+                            items: [
+                                {
+                                    label: 'Modifier',
+                                    icon: 'icon:edit',
+                                    color: 'warning',
+                                    disabled: true,
+                                    help: 'Action indisponible tant que le statut est brouillon.',
+                                    url: '#'
+                                }
+                            ]
+                        }) }}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-secondary-900 text-secondary-200 p-4 rounded-md text-xs overflow-x-auto"><code>{{ "{{ component('dropdown_actions', {
+    label: 'Actions',
+    icon: 'icon:ellipsis-vertical',
+    items: [
+        { label: 'Voir', icon: 'icon:info', color: 'info', url: '#' },
+        { label: 'Modifier', icon: 'icon:edit', color: 'warning', url: '#' },
+        {
+            label: 'Supprimer',
+            icon: 'icon:delete',
+            color: 'danger',
+            confirm: 'Voulez-vous vraiment supprimer ?',
+            url: '#'
+        }
+    ]
+}) }}"|e }}</code></pre>
+                </div>
+            </div>
+        </section>
+
         {# Section Composant : DeleteButton #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 shadow-sm">
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-text mb-2">DeleteButton</h2>
                 <p class="text-secondary text-sm">Bouton de suppression avec confirmation modale.</p>
@@ -268,7 +361,7 @@
             </div>
         </section>
         {# Section Composant : Alerte #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 shadow-sm">
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-text mb-2">Alerte</h2>
                 <p class="text-secondary text-sm">Composant pour afficher des messages contextuels (succès, info,
@@ -302,7 +395,7 @@
             </div>
         </section>
         {# Section Composant : IconBox #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 shadow-sm">
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-text mb-2">IconBox</h2>
                 <p class="text-secondary text-sm">Boîte avec icône colorée et stylisée avec variantes.</p>
@@ -328,7 +421,7 @@
             </div>
         </section>
         {# Section Composant : Progress #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 shadow-sm">
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-text mb-2">Progress</h2>
                 <p class="text-secondary text-sm">Barre de progression avec étiquette et pourcentage.</p>
@@ -354,7 +447,7 @@
             </div>
         </section>
         {# Section Composant : Badge #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 shadow-sm">
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-text mb-2">Badge</h2>
                 <p class="text-secondary text-sm">Petit composant pour étiqueter, catégoriser ou afficher un statut.</p>
@@ -421,7 +514,7 @@
         </section>
 
         {# Section Composant : Spinner #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 shadow-sm">
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-text mb-2">Spinner</h2>
                 <p class="text-secondary text-sm">Composant d’indication de chargement avec variantes de couleur et

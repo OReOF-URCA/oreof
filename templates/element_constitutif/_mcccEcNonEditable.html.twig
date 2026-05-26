@@ -1,4 +1,4 @@
-{% import "typeDiplome/mccc-non-editable/licence/_compareMcccVersioning.macro.html.twig" as compareMacro %}
+{% import "typeDiplome/licence/mccc-non-editable/_compareMcccVersioning.macro.html.twig" as compareMacro %}
 
 <div {{ stimulus_controller('modal', {
         size: 'lg',
@@ -6,6 +6,11 @@
 })
 }}>
 
+    <template {{ stimulus_target('modal', 'loadingTemplate') }}>
+        <div class="flex justify-center py-6">
+            <twig:Spinner size="md" variant="secondary" label="Chargement..." />
+        </div>
+    </template>
 
 {# Versioning #}
 {% if typeMcccActuel is not defined %}

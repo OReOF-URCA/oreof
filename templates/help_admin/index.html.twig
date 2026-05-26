@@ -1,5 +1,9 @@
 {% extends 'base.html.twig' %}
 
+{% set header_title %}
+    Gestion des Aides
+{% endset %}
+
 {% set header_description %}
     Créez et gérez les aides contextuelles pour chaque page de l'application.
 {% endset %}
@@ -39,21 +43,21 @@
 {% endblock %}
 
 {% block content %}
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
+    <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-900 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                <tr class="border-b border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
-                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Statut</th>
-                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Page (Route)</th>
-                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Titre</th>
-                    <th class="px-4 py-3 text-left font-semibold text-slate-900 dark:text-slate-50">Centres</th>
-                    <th class="px-4 py-3 text-right font-semibold text-slate-900 dark:text-slate-50">Actions</th>
+                <tr class="border-b border-secondary-200 bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-800">
+                    <th class="px-4 py-3 text-left font-semibold text-secondary-900 dark:text-secondary-50">Statut</th>
+                    <th class="px-4 py-3 text-left font-semibold text-secondary-900 dark:text-secondary-50">Page (Route)</th>
+                    <th class="px-4 py-3 text-left font-semibold text-secondary-900 dark:text-secondary-50">Titre</th>
+                    <th class="px-4 py-3 text-left font-semibold text-secondary-900 dark:text-secondary-50">Centres</th>
+                    <th class="px-4 py-3 text-right font-semibold text-secondary-900 dark:text-secondary-50">Actions</th>
                 </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
                 {% for help in helps %}
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                    <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800 transition">
                         <td class="px-4 py-3">
                             {% if help.isActive %}
                                 <twig:Badge label="Actif" variant="success" icon="icon:check" size="sm" />
@@ -62,9 +66,9 @@
                             {% endif %}
                         </td>
                         <td class="px-4 py-3 align-middle">
-                            <code class="px-2.5 py-1 rounded bg-slate-100 text-slate-900 font-mono text-xs dark:bg-slate-800 dark:text-slate-100">{{ help.routeSlug }}</code>
+                            <code class="px-2.5 py-1 rounded bg-secondary-100 text-secondary-900 font-mono text-xs dark:bg-secondary-800 dark:text-secondary-100">{{ help.routeSlug }}</code>
                         </td>
-                        <td class="px-4 py-3 align-middle font-semibold text-slate-900 dark:text-slate-50">{{ help.title }}</td>
+                        <td class="px-4 py-3 align-middle font-semibold text-secondary-900 dark:text-secondary-50">{{ help.title }}</td>
                         <td class="px-4 py-3 align-middle">
                             {% if help.centresShow|length > 0 %}
                                 <div class="flex flex-wrap gap-1">
@@ -81,7 +85,7 @@
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <span class="text-slate-500 dark:text-slate-400 italic">Tous les centres</span>
+                                <span class="text-secondary-500 dark:text-secondary-400 italic">Tous les centres</span>
                             {% endif %}
                         </td>
                         <td class="px-4 py-3 align-middle">
@@ -96,12 +100,12 @@
                                             tooltip="Voir la page"
                                     />
                                 {% else %}
-                                    <button type="button"
-                                            class="inline-flex items-center justify-center h-9 w-9 rounded-md border border-slate-300 bg-slate-200 text-slate-400 cursor-not-allowed dark:border-slate-600 dark:bg-slate-700 dark:text-slate-500 disabled:opacity-50"
+                                            <button type="button"
+                                            class="inline-flex items-center justify-center h-9 w-9 rounded-md border border-secondary-300 bg-secondary-200 text-secondary-400 cursor-not-allowed dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-500 disabled:opacity-50"
                                             title="Route avec paramètres obligatoires : aperçu direct indisponible"
                                             disabled
                                             aria-label="Aperçu indisponible">
-                                        <twig:UX:Icon name="wordpress:external" class="h-4 w-4" />
+                                        {{ ux_icon('wordpress:external', {class: 'h-4 w-4'}) }}
                                     </button>
                                 {% endif %}
 
@@ -131,7 +135,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5" class="px-4 py-8 text-center text-slate-500 dark:text-slate-400">
+                        <td colspan="5" class="px-4 py-8 text-center text-secondary-500 dark:text-secondary-400">
                             Aucune aide configurée pour le moment.
                         </td>
                     </tr>
@@ -148,18 +152,18 @@
             <div class="fixed inset-0 bg-black/50 transition-opacity" onclick="closeHelpImagesModal()"></div>
 
             <!-- Modal content -->
-            <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="relative bg-surface dark:bg-secondary-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 <!-- Modal header -->
-                <div class="sticky top-0 flex justify-between items-center px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-                    <h2 class="text-xl font-bold text-slate-900 dark:text-slate-50 flex items-center gap-3">
-                        <twig:UX:Icon name="mdi:image-multiple-outline" class="h-6 w-6" />
+                <div class="sticky top-0 flex justify-between items-center px-6 py-4 border-b border-secondary-200 dark:border-secondary-700 bg-surface dark:bg-secondary-900">
+                    <h2 class="text-xl font-bold text-secondary-900 dark:text-secondary-50 flex items-center gap-3">
+                        {{ ux_icon('mdi:image-multiple-outline', {class: 'h-6 w-6'}) }}
                         Galerie d'images des aides
                     </h2>
                     <button type="button"
-                            class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 focus:outline-none"
+                            class="text-secondary-500 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-secondary-300 focus:outline-none"
                             onclick="closeHelpImagesModal()"
                             aria-label="Fermer">
-                        <twig:UX:Icon name="basil:cross-solid" class="h-6 w-6" />
+                        {{ ux_icon('basil:cross-solid', {class: 'h-6 w-6'}) }}
                     </button>
                 </div>
 

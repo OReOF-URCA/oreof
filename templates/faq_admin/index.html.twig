@@ -1,5 +1,9 @@
 {% extends 'base.html.twig' %}
 
+{% set header_title %}
+    Gestion de la FAQ
+{% endset %}
+
 {% set header_description %}
     Organisez et gérez les questions fréquemment posées. Réordonnez les questions par glisser-déposer.
 {% endset %}
@@ -44,37 +48,37 @@
     <div id="faq-reorder-feedback" class="hidden fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition" role="alert"></div>
 
     {% if faqs|length == 0 %}
-        <div class="rounded-lg border border-cyan-200 bg-cyan-50 p-4 text-cyan-900 dark:border-cyan-700 dark:bg-cyan-900/20 dark:text-cyan-200">
+        <div class="rounded-lg border border-info-200 bg-info-50 p-4 text-info-900 dark:border-info-700 dark:bg-info-900/20 dark:text-info-200">
             <div class="flex gap-3">
-                <twig:UX:Icon name="icon:info" class="h-5 w-5 flex-shrink-0 mt-0.5" />
+                {{ ux_icon('icon:info', {class: 'h-5 w-5 flex-shrink-0 mt-0.5'}) }}
                 <div>
                     <p class="font-medium">Aucune question FAQ pour le moment.</p>
-                    <a href="{{ path('app_faq_new') }}" class="text-cyan-700 dark:text-cyan-300 font-semibold hover:underline">Créez la première !</a>
+                    <a href="{{ path('app_faq_new') }}" class="text-info-700 dark:text-info-300 font-semibold hover:underline">Créez la première !</a>
                 </div>
             </div>
         </div>
     {% else %}
-        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
+        <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-900 overflow-hidden">
             <table class="w-full">
                 <thead>
-                <tr class="border-b border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800">
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-100" style="width: 34px;"></th>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-100">Statut</th>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-100">Question</th>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-100">Centres</th>
-                    <th class="px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-100">Ordre</th>
-                    <th class="px-4 py-3 text-right text-sm font-semibold text-slate-900 dark:text-slate-100">Actions</th>
+                <tr class="border-b border-secondary-200 bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-800">
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-100" style="width: 34px;"></th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-100">Statut</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-100">Question</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-100">Centres</th>
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-100">Ordre</th>
+                    <th class="px-4 py-3 text-right text-sm font-semibold text-secondary-900 dark:text-secondary-100">Actions</th>
                 </tr>
                 </thead>
-                <tbody id="faq-sortable-body" class="divide-y divide-slate-200 dark:divide-slate-700">
+                <tbody id="faq-sortable-body" class="divide-y divide-secondary-200 dark:divide-secondary-700">
                 {% for faq in faqs %}
-                    <tr data-faq-id="{{ faq.id }}" class="hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                    <tr data-faq-id="{{ faq.id }}" class="hover:bg-secondary-50 dark:hover:bg-secondary-800 transition">
                         <td class="px-4 py-3 text-center">
                             <button type="button"
-                                    class="faq-drag-handle inline-flex items-center justify-center h-8 w-8 rounded text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-grab active:cursor-grabbing transition"
+                                    class="faq-drag-handle inline-flex items-center justify-center h-8 w-8 rounded text-secondary-400 hover:bg-secondary-200 dark:hover:bg-secondary-700 cursor-grab active:cursor-grabbing transition"
                                     title="Glisser pour réordonner"
                                     aria-label="Poignée de déplacement">
-                                <twig:UX:Icon name="fa7-solid:grip-vertical" class="h-5 w-5" />
+                                {{ ux_icon('fa7-solid:grip-vertical', {class: 'h-5 w-5'}) }}
                             </button>
                         </td>
                         <td class="px-4 py-3">
@@ -85,7 +89,7 @@
                             {% endif %}
                         </td>
                         <td class="px-4 py-3">
-                            <strong class="text-slate-900 dark:text-slate-100">{{ faq.question }}</strong>
+                            <strong class="text-secondary-900 dark:text-secondary-100">{{ faq.question }}</strong>
                         </td>
                         <td class="px-4 py-3 text-sm">
                             {% if faq.centresShow|length > 0 %}
@@ -103,10 +107,10 @@
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <span class="text-slate-500 dark:text-slate-400 italic">Tous les centres</span>
+                                <span class="text-secondary-500 dark:text-secondary-400 italic">Tous les centres</span>
                             {% endif %}
                         </td>
-                        <td class="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">{{ faq.ordre }}</td>
+                        <td class="px-4 py-3 text-sm text-secondary-700 dark:text-secondary-300">{{ faq.ordre }}</td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex justify-end gap-2">
                                 <twig:Button
@@ -145,18 +149,18 @@
             <div class="fixed inset-0 bg-black/50 transition-opacity" onclick="closeFaqImagesModal()"></div>
 
             <!-- Modal content -->
-            <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div class="relative bg-surface dark:bg-secondary-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 <!-- Modal header -->
-                <div class="sticky top-0 flex justify-between items-center px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-                    <h2 class="text-xl font-bold text-slate-900 dark:text-slate-50 flex items-center gap-3">
-                        <twig:UX:Icon name="mdi:image-multiple-outline" class="h-6 w-6" />
+                <div class="sticky top-0 flex justify-between items-center px-6 py-4 border-b border-secondary-200 dark:border-secondary-700 bg-surface dark:bg-secondary-900">
+                    <h2 class="text-xl font-bold text-secondary-900 dark:text-secondary-50 flex items-center gap-3">
+                        {{ ux_icon('mdi:image-multiple-outline', {class: 'h-6 w-6'}) }}
                         Galerie d'images
                     </h2>
                     <button type="button"
-                            class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 focus:outline-none"
+                            class="text-secondary-500 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-secondary-300 focus:outline-none"
                             onclick="closeFaqImagesModal()"
                             aria-label="Fermer">
-                        <twig:UX:Icon name="basil:cross-solid" class="h-6 w-6" />
+                        {{ ux_icon('basil:cross-solid', {class: 'h-6 w-6'}) }}
                     </button>
                 </div>
 
@@ -200,12 +204,12 @@
                 }
 
                 feedback.className = 'fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition';
-                feedback.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'dark:bg-green-900/30', 'dark:text-green-400', 'bg-red-100', 'text-red-800', 'dark:bg-red-900/30', 'dark:text-red-400');
+                feedback.classList.remove('hidden', 'bg-success-100', 'text-success-800', 'dark:bg-success-900/30', 'dark:text-success-400', 'bg-danger-100', 'text-danger-800', 'dark:bg-danger-900/30', 'dark:text-danger-400');
 
                 if (type === 'success') {
-                    feedback.classList.add('bg-green-100', 'text-green-800', 'dark:bg-green-900/30', 'dark:text-green-400');
+                    feedback.classList.add('bg-success-100', 'text-success-800', 'dark:bg-success-900/30', 'dark:text-success-400');
                 } else {
-                    feedback.classList.add('bg-red-100', 'text-red-800', 'dark:bg-red-900/30', 'dark:text-red-400');
+                    feedback.classList.add('bg-danger-100', 'text-danger-800', 'dark:bg-danger-900/30', 'dark:text-danger-400');
                 }
 
                 feedback.textContent = message;

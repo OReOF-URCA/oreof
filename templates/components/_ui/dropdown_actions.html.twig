@@ -1,0 +1,223 @@
+{% set semanticColorMap = {
+    'red': 'danger',
+    'danger': 'danger',
+    'orange': 'warning',
+    'amber': 'warning',
+    'yellow': 'warning',
+    'green': 'success',
+    'emerald': 'success',
+    'blue': 'info',
+    'cyan': 'info',
+    'indigo': 'primary',
+    'primary': 'primary',
+    'secondary': 'secondary',
+    'slate': 'secondary',
+    'gray': 'secondary'
+} %}
+
+<div class="relative inline-block overflow-visible text-left"
+     data-controller="dropdown"
+     {% if id %}id="{{ id }}"{% endif %}
+>
+    <twig:Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            :soft="true"
+            :outline="false"
+            :centered="true"
+            icon="{{ icon }}"
+            :label="labelSrOnly ? '' : label"
+            extraClass="shadow-sm border-secondary-200 bg-surface hover:border-secondary-300 hover:bg-secondary-50 hover:text-secondary-900 focus-visible:ring-primary-500 focus-visible:ring-offset-surface dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500 dark:hover:bg-secondary-700 dark:hover:text-white dark:focus-visible:ring-offset-secondary-900"
+            :tooltip="help != '' ? help : ''"
+            dataAction="click->dropdown#toggle"
+            aria-haspopup="true"
+            aria-expanded="false"
+            data-dropdown-target="button"
+    >
+        {% if labelSrOnly %}
+            <span class="sr-only">{{ label }}</span>
+        {% endif %}
+    </twig:Button>
+
+    <div
+            class="absolute right-0 z-50 mt-2 w-56 origin-top-right overflow-hidden rounded-xl border border-secondary-200 bg-surface shadow-xl ring-1 ring-secondary-200/60 hidden dark:border-secondary-700 dark:bg-secondary-900 dark:ring-secondary-700/60"
+            role="menu"
+            data-dropdown-target="menu"
+    >
+        <div class="py-1.5" role="none">
+            {% for item in items %}
+                {% set danger = item.danger ?? false %}
+                {% set disabled = item.disabled ?? false %}
+                {% set method = item.method ?? 'GET' %}
+                {% set turboFrame = item.turboFrame ?? null %}
+                {% set hasConfirm = item.confirm is defined %}
+                {% set modal = item.modal is defined and item.modal == true %}
+                {% set color = item.color is defined ? item.color|lower : 'secondary' %}
+                {% set itemHelp = item.help is defined ? item.help : '' %}
+                {% set semanticColor = danger ? 'danger' : (semanticColorMap[color] ?? 'secondary') %}
+                {% set itemToneClasses = {
+                    'primary': 'text-primary-700 hover:bg-primary-50 focus-visible:bg-primary-50 dark:text-primary-300 dark:hover:bg-primary-950/30 dark:focus-visible:bg-primary-950/30',
+                    'success': 'text-success-700 hover:bg-success-50 focus-visible:bg-success-50 dark:text-success-300 dark:hover:bg-success-950/30 dark:focus-visible:bg-success-950/30',
+                    'warning': 'text-warning-700 hover:bg-warning-50 focus-visible:bg-warning-50 dark:text-warning-300 dark:hover:bg-warning-950/30 dark:focus-visible:bg-warning-950/30',
+                    'info': 'text-info-700 hover:bg-info-50 focus-visible:bg-info-50 dark:text-info-300 dark:hover:bg-info-950/30 dark:focus-visible:bg-info-950/30',
+                    'danger': 'text-danger-700 hover:bg-danger-50 focus-visible:bg-danger-50 dark:text-danger-300 dark:hover:bg-danger-950/30 dark:focus-visible:bg-danger-950/30',
+                    'secondary': 'text-secondary-700 hover:bg-secondary-50 focus-visible:bg-secondary-50 dark:text-secondary-200 dark:hover:bg-secondary-800 dark:focus-visible:bg-secondary-800',
+                }[semanticColor] %}
+                {% set itemExtraClasses = 'w-full h-auto px-4 py-2.5 rounded-md border-0 shadow-none justify-start text-left focus:ring-0 focus:ring-offset-0 ' ~ itemToneClasses %}
+                {% set itemDataAction = hasConfirm ? 'click->dropdown#confirm' : '' %}
+                {% set itemConfirmValue = hasConfirm ? item.confirm|e('html_attr') : '' %}
+                {% set itemTurboFrame = turboFrame != null ? turboFrame : '' %}
+
+                {% if modal %}
+                    {% if disabled and itemHelp != '' %}
+                        <div class="inline-block"
+                              data-controller="tooltip"
+                              data-tooltip-placement-value="bottom"
+                              title="{{ itemHelp }}">
+                            <twig:Button
+                                    href="{{ item.url }}"
+                                    icon="{{ item.icon }}"
+                                    label="{{ item.label }}"
+                                    size="sm"
+                                    variant="{{ semanticColor }}"
+                                    :soft="true"
+                                    :outline="false"
+                                    :centered="false"
+                                    :disabled="true"
+                                    extraClass="{{ itemExtraClasses }}"
+                                    role="menuitem"
+                                    data-turbo="true"
+                                    data-action="click->modalturbo#open"
+                            />
+                        </div>
+                    {% else %}
+                        <twig:Button
+                                href="{{ item.url }}"
+                                icon="{{ item.icon }}"
+                                label="{{ item.label }}"
+                                size="sm"
+                                variant="{{ semanticColor }}"
+                                :soft="true"
+                                :outline="false"
+                                :centered="false"
+                                :disabled="disabled"
+                                extraClass="{{ itemExtraClasses }}"
+                                :tooltip="itemHelp != '' and not disabled ? itemHelp : ''"
+                                role="menuitem"
+                                data-turbo="true"
+                                data-action="click->modalturbo#open"
+                        />
+                    {% endif %}
+                {% else %}
+                    {% if method == 'GET' %}
+                        {% if disabled and itemHelp != '' %}
+                            <div class="inline-block"
+                                  data-controller="tooltip"
+                                  data-tooltip-placement-value="bottom"
+                                  title="{{ itemHelp }}">
+                                <twig:Button
+                                        href="{{ item.url ?? '#' }}"
+                                        icon="{{ item.icon }}"
+                                        label="{{ item.label }}"
+                                        size="sm"
+                                        variant="{{ semanticColor }}"
+                                        :soft="true"
+                                        :outline="false"
+                                        :centered="false"
+                                        :disabled="true"
+                                        extraClass="{{ itemExtraClasses }}"
+                                        role="menuitem"
+                                        data-turbo-frame="{{ itemTurboFrame }}"
+                                        data-action="{{ itemDataAction }}"
+                                        data-dropdown-confirm-value="{{ itemConfirmValue }}"
+                                />
+                        </div>
+                        {% else %}
+                            <twig:Button
+                                    href="{{ item.url ?? '#' }}"
+                                    icon="{{ item.icon }}"
+                                    label="{{ item.label }}"
+                                    size="sm"
+                                    variant="{{ semanticColor }}"
+                                    :soft="true"
+                                    :outline="false"
+                                    :centered="false"
+                                    :disabled="disabled"
+                                    extraClass="{{ itemExtraClasses }}"
+                                    :tooltip="itemHelp != '' and not disabled ? itemHelp : ''"
+                                    role="menuitem"
+                                    data-turbo-frame="{{ itemTurboFrame }}"
+                                    data-action="{{ itemDataAction }}"
+                                    data-dropdown-confirm-value="{{ itemConfirmValue }}"
+                            />
+                        {% endif %}
+                    {% else %}
+                        {# Actions non-GET : petit form pour respecter HTTP + CSRF si besoin #}
+                        {% if disabled and itemHelp != '' %}
+                            <div class="inline-block"
+                                  data-controller="tooltip"
+                                  data-tooltip-placement-value="bottom"
+                                  title="{{ itemHelp }}">
+                                <form method="post"
+                                      action="{{ item.url ?? '#' }}"
+                                      class="block"
+                                      {% if hasConfirm %}data-action="submit->dropdown#confirm" data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
+                                >
+                                    {% if item.csrf is defined %}
+                                        <input type="hidden" name="csrf_token" value="{{ item.csrf }}">
+                                    {% endif %}
+                                    {% if method != 'POST' %}
+                                        <input type="hidden" name="_method" value="{{ method }}">
+                                    {% endif %}
+
+                                    <twig:Button
+                                            type="submit"
+                                            icon="{{ item.icon }}"
+                                            label="{{ item.label }}"
+                                            size="sm"
+                                            variant="{{ semanticColor }}"
+                                            :soft="true"
+                                            :outline="false"
+                                            :centered="false"
+                                            :disabled="true"
+                                            extraClass="{{ itemExtraClasses }}"
+                                            role="menuitem"
+                                    />
+                                </form>
+                        </div>
+                        {% else %}
+                            <form method="post"
+                                  action="{{ item.url ?? '#' }}"
+                                  class="block"
+                                  {% if hasConfirm %}data-action="submit->dropdown#confirm" data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}
+                            >
+                                {% if item.csrf is defined %}
+                                    <input type="hidden" name="csrf_token" value="{{ item.csrf }}">
+                                {% endif %}
+                                {% if method != 'POST' %}
+                                    <input type="hidden" name="_method" value="{{ method }}">
+                                {% endif %}
+
+                                <twig:Button
+                                        type="submit"
+                                        icon="{{ item.icon }}"
+                                        label="{{ item.label }}"
+                                        size="sm"
+                                        variant="{{ semanticColor }}"
+                                        :soft="true"
+                                        :outline="false"
+                                        :centered="false"
+                                        :disabled="disabled"
+                                        extraClass="{{ itemExtraClasses }}"
+                                        :tooltip="itemHelp != '' and not disabled ? itemHelp : ''"
+                                        role="menuitem"
+                                />
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>

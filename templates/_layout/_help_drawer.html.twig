@@ -32,20 +32,32 @@
                 {% if is_granted('ROLE_ADMIN') %}
                     <div class="flex flex-wrap items-center gap-2 mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
                         {% if current_help %}
-                            <a href="{{ path('app_help_edit', {'id': current_help.id}) }}" class="inline-flex items-center gap-2 px-2 py-1.5 border rounded text-sm border-indigo-200 text-indigo-600 dark:border-indigo-800 dark:text-indigo-300">
-                                <twig:UX:Icon name="mingcute:pencil-line" class="w-4 h-4" /> <span>Modifier</span>
-                            </a>
+                            <twig:Button
+                                    href="{{ path('app_help_edit', {'id': current_help.id}) }}"
+                                    variant="primary"
+                                    size="sm"
+                                    icon="mingcute:pencil-line"
+                                    label="Modifier"
+                            />
                         {% else %}
-                            <a href="{{ path('app_help_new', {'route': current_route}) }}" class="inline-flex items-center gap-2 px-2 py-1.5 border rounded text-sm border-green-200 text-green-600 dark:border-green-800 dark:text-green-300">
-                                <twig:UX:Icon name="ph:plus-light" class="w-4 h-4" /> <span>Créer</span>
-                            </a>
+                            <twig:Button
+                                    href="{{ path('app_help_new', {'route': current_route}) }}"
+                                    variant="success"
+                                    size="sm"
+                                    icon="ph:plus-light"
+                                    label="Créer"
+                            />
                         {% endif %}
 
-                        <a href="{{ path('app_help_index') }}" class="inline-flex items-center gap-2 px-2 py-1.5 border rounded text-sm border-amber-200 text-amber-600 dark:border-amber-800 dark:text-amber-300">
-                            <twig:UX:Icon name="material-symbols:list-rounded" class="w-4 h-4" /> <span>Gérer</span>
-                        </a>
+                        <twig:Button
+                                href="{{ path('app_help_index') }}"
+                                variant="warning"
+                                size="sm"
+                                icon="material-symbols:list-rounded"
+                                label="Gérer"
+                        />
 
-                        <code class="bg-gray-100 text-gray-800 px-2 py-1 rounded border shadow-sm ml-2 text-sm dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600">{{ current_route }}</code>
+                        <code class="bg-secondary-100 text-secondary-800 px-2 py-1 rounded border shadow-sm text-sm dark:bg-secondary-800 dark:text-secondary-200 dark:border-slate-secondary">{{ current_route }}</code>
                     </div>
                 {% endif %}
 
@@ -56,9 +68,9 @@
                             {{ current_help.content|markdown_to_html|parse_embeds }}
                         </div>
                     {% else %}
-                        <div class="bg-white/60 border border-slate-200 p-4 rounded text-center mt-2 dark:bg-slate-800/70 dark:border-slate-700">
-                            <twig:UX:Icon name="ph:smiley-sad-light" class="w-10 h-10 mb-3 text-slate-500 mx-auto" />
-                            <p class="mb-0 text-slate-500 dark:text-slate-400">Aucune aide n'est actuellement disponible pour cette page.</p>
+                        <div class="bg-none border border-slate-200 p-4 rounded text-center mt-2 dark:bg-slate-800/70 dark:border-slate-700">
+                            <twig:UX:Icon name="ph:smiley-sad-light" class="w-10 h-10 mb-3 text-secondary dark:text-secondary-300 mx-auto" />
+                            <p class="mb-0 text-secondary dark:text-secondary-300">Aucune aide n'est actuellement disponible pour cette page.</p>
                         </div>
                     {% endif %}
                 </div>

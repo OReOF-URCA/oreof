@@ -1,28 +1,28 @@
-<table class="w-full border-collapse rounded-lg overflow-hidden border border-slate-200">
+<table class="w-full border-collapse rounded-lg overflow-hidden border border-secondary-200 dark:border-secondary-700">
     <thead>
-    <tr class="bg-slate-100 border-b border-slate-200">
-        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700"
+    <tr class="bg-secondary-50 border-b border-secondary-200 dark:bg-secondary-900/40 dark:border-secondary-700">
+        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300"
             {% if constant('SOURCE', typeDiplome) == 'meef' %}colspan="2"{% endif %}>Libellé du parcours
         </th>
-        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Responsable du parcours</th>
-        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Co Responsable du parcours</th>
-        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Remplissage</th>
-        <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Etat</th>
-        <th class="px-4 py-3 text-right text-sm font-semibold text-slate-700">Actions</th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Responsable du parcours</th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Co Responsable du parcours</th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Remplissage</th>
+        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Etat</th>
+        <th class="px-4 py-3 text-right text-sm font-semibold text-secondary-700 dark:text-secondary-300">Actions</th>
     </tr>
     </thead>
     <tbody>
     {% for parcour in parcours|filter(parcour => parcour.parcoursParent == null) %}
-        <tr class="hover:bg-slate-50 border-b border-slate-200 transition-colors">
+        <tr class="hover:bg-secondary-50 border-b border-secondary-200 transition-colors dark:hover:bg-secondary-800/30 dark:border-secondary-700">
             <td class="px-4 py-3 text-sm" {% if constant('SOURCE', typeDiplome) == 'meef' %}colspan="2"{% endif %}>
-                <div class="font-medium text-gray-900">{{ parcour.libelle }}</div>
-                <div class="text-xs text-gray-500 mt-0.5">{{ parcour.typeParcours|badgeTypeParcours }}</div>
+                <div class="font-medium text-text dark:text-slate-100">{{ parcour.libelle }}</div>
+                <div class="text-xs text-secondary-600 mt-0.5 dark:text-secondary-400">{{ parcour.typeParcours|badgeTypeParcours }}</div>
             </td>
-            <td class="px-4 py-3 text-sm text-gray-600">
-                {{ parcour.respParcours != null ? parcour.respParcours.display : '<span class="text-gray-400">Non défini</span>' }}
+            <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
+                {{ parcour.respParcours != null ? parcour.respParcours.display : '<span class="text-secondary-500 dark:text-secondary-500">Non défini</span>' }}
             </td>
-            <td class="px-4 py-3 text-sm text-gray-600">
-                {{ parcour.coResponsable != null ? parcour.coResponsable.display : '<span class="text-gray-400">Non défini</span>' }}
+            <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
+                {{ parcour.coResponsable != null ? parcour.coResponsable.display : '<span class="text-secondary-500 dark:text-secondary-500">Non défini</span>' }}
             </td>
             <td class="px-4 py-3 text-sm" style="width:15%">
                 {{ component('remplissage_progress', { value: parcour.remplissage }) }}
@@ -84,25 +84,25 @@
                     </div>
                 {% else %}
                     {% if 'non_ouverture' in parcour.etatDpeParcours|keys %}
-                        <span class="text-sm text-blue-600">Parcours non ouvert pour {{ user_data.campagneCollecte.libelle }}</span>
+                        <span class="text-sm text-info-600 dark:text-info-400">Parcours non ouvert pour {{ user_data.campagneCollecte.libelle }}</span>
                     {% else %}
-                        <span class="text-sm text-amber-600">Demande de non ouverture en cours</span>
+                        <span class="text-sm text-warning-600 dark:text-warning-400">Demande de non ouverture en cours</span>
                     {% endif %}
                 {% endif %}
             </td>
         </tr>
         {% if constant('SOURCE', typeDiplome) == 'meef' %}
             {% for parc in parcour.parcoursEnfants %}
-                <tr class="hover:bg-slate-50 border-b border-slate-200 transition-colors border-l-2 border-l-blue-500">
-                    <td class="px-4 py-3 text-sm text-gray-500"></td>
+                <tr class="hover:bg-secondary-50 border-b border-secondary-200 transition-colors border-l-2 border-l-info-500 dark:hover:bg-secondary-800/30 dark:border-secondary-700">
+                    <td class="px-4 py-3 text-sm text-secondary-500 dark:text-secondary-500"></td>
                     <td class="px-4 py-3 text-sm">
-                        <div class="font-medium text-gray-900">{{ parc.libelle }}</div>
+                        <div class="font-medium text-text dark:text-slate-100">{{ parc.libelle }}</div>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
-                        {{ parc.respParcours != null ? parc.respParcours.display : '<span class="text-gray-400">Non défini</span>' }}
+                    <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
+                        {{ parc.respParcours != null ? parc.respParcours.display : '<span class="text-secondary-500 dark:text-secondary-500">Non défini</span>' }}
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
-                        {{ parc.coResponsable != null ? parc.coResponsable.display : '<span class="text-gray-400">Non défini</span>' }}
+                    <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
+                        {{ parc.coResponsable != null ? parc.coResponsable.display : '<span class="text-secondary-500 dark:text-secondary-500">Non défini</span>' }}
                     </td>
                     <td class="px-4 py-3 text-sm" style="width:15%">
                         {{ component('remplissage_progress', { value: parc.remplissage }) }}
@@ -157,15 +157,15 @@
                     </td>
                 </tr>
             {% else %}
-                <tr class="bg-amber-50 border-b border-slate-200 border-l-2 border-l-blue-500">
-                    <td class="px-4 py-3 text-sm text-gray-500"></td>
-                    <td colspan="5" class="px-4 py-3 text-center text-sm text-amber-800 font-medium">Aucune option pour
+                <tr class="bg-warning-50 border-b border-secondary-200 border-l-2 border-l-info-500 dark:bg-warning-950/20 dark:border-secondary-700">
+                    <td class="px-4 py-3 text-sm text-secondary-500 dark:text-secondary-500"></td>
+                    <td colspan="5" class="px-4 py-3 text-center text-sm text-warning-800 font-medium dark:text-warning-300">Aucune option pour
                         ce parcours.
                     </td>
                 </tr>
             {% endfor %}
-            <tr class="hover:bg-slate-50 border-b border-slate-200 border-l-2 border-l-blue-500">
-                <td class="px-4 py-3 text-sm text-gray-500"></td>
+            <tr class="hover:bg-secondary-50 border-b border-secondary-200 border-l-2 border-l-info-500 dark:hover:bg-secondary-800/30 dark:border-secondary-700">
+                <td class="px-4 py-3 text-sm text-secondary-500 dark:text-secondary-500"></td>
                 <td colspan="5" class="px-4 py-3">
                     <twig:Button
                             label="Ajouter une option"
@@ -181,8 +181,8 @@
     {% else %}
         <tr>
             <td colspan="{% if constant('SOURCE', typeDiplome) == 'meef' %}7{% else %}6{% endif %}"
-                class="px-4 py-6 text-center bg-amber-50 border-b border-slate-200">
-                <p class="text-sm text-amber-800 font-medium">Aucun parcours, veuillez en ajouter au moins un.</p>
+                class="px-4 py-6 text-center bg-warning-50 border-b border-secondary-200 dark:bg-warning-950/20 dark:border-secondary-700">
+                <p class="text-sm text-warning-800 font-medium dark:text-warning-300">Aucun parcours, veuillez en ajouter au moins un.</p>
             </td>
         </tr>
     {% endfor %}

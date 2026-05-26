@@ -9,7 +9,7 @@
 import { Controller } from '@hotwired/stimulus'
 
 export default class extends Controller {
-  static targets = ['zoneToRefresh'];
+  static targets = ['zoneToRefresh', 'loadingTemplate'];
 
   static values = {
     modalUrl: String,
@@ -44,22 +44,29 @@ export default class extends Controller {
     })
   }
 
+  loadingMarkup() {
+    if (this.hasLoadingTemplateTarget) {
+      return this.loadingTemplateTarget.innerHTML.trim()
+    }
+
+    return '<div class="flex justify-center py-6"><div class="text-center">... Chargement en cours ...</div></div>'
+  }
+
   async refreshModalWithUrl(event) {
     const errorText = '<div class="text-center">Une erreur est survenue lors du chargement.</div>'
     const { url } = event.params
-    this.zoneToRefreshTarget.innerHTML = '<div class="text-center">... Chargement en cours ...</div>';
+    this.zoneToRefreshTarget.innerHTML = this.loadingMarkup()
     await fetch(url)
       .then(async (response) => {
         if (response.status === 500) {
-          this.zoneToRefreshTarget.innerHTML = errorText;
+          this.zoneToRefreshTarget.innerHTML = errorText
         } else if (response.status === 200) {
           await response.text()
             .then((responseText) => this.zoneToRefreshTarget.innerHTML = responseText);
         }
       })
-      .catch(err => {
-        console.log(err);
+      .catch(() => {
         this.zoneToRefreshTarget.innerHTML = errorText
-      });
+      })
   }
 }

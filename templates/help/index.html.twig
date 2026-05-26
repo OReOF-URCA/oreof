@@ -1,6 +1,10 @@
 {# templates/help/index.html.twig #}
 {% extends 'base.html.twig' %}
 
+{% set header_title %}
+    Aide
+{% endset %}
+
 {% block header %}Centre d'aide{% endblock %}
 
 {% block breadcrumb %}
@@ -12,24 +16,22 @@
 {% block content %}
 <div class="w-full">
     <div class="space-y-4">
-        <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700">
             <div class="p-6">
                 <!-- Search Bar -->
                 <div class="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
                     <div class="relative flex-1">
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                            <twig:UX:Icon name="icon:search" class="h-5 w-5 text-slate-400" />
-                        </div>
+                            <label for="helpSearch" class="sr-only">Rechercher un tutoriel ou une aide</label>
                         <input type="text"
                                id="helpSearch"
-                               class="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-12 pr-4 text-base text-slate-900 placeholder-slate-500 transition focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-400 dark:focus:border-cyan-400 dark:focus:ring-cyan-100/20"
+                               class="w-full rounded-lg border border-secondary-200 bg-surface py-2.5 pl-4 pr-4 text-base text-secondary-900 placeholder-secondary-500 transition focus:border-info-400 focus:ring-2 focus:ring-info-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder-secondary-400 dark:focus:border-info-400 dark:focus:ring-info-100/20"
                                placeholder="Rechercher un tutoriel ou une aide..."
                                onkeyup="filterHelps()" />
                     </div>
                     {% if is_granted('ROLE_ADMIN') %}
                         <a href="{{ path('app_help_index') }}"
-                           class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-base font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500">
-                            <twig:UX:Icon name="mdi:cog" class="h-6 w-6" />
+                           class="inline-flex items-center gap-2 rounded-lg border border-secondary-200 bg-surface px-5 py-2.5 text-base font-semibold text-secondary-600 transition hover:border-secondary-300 hover:text-secondary-900 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500">
+                            {{ ux_icon('mdi:cog', {class: 'h-6 w-6'}) }}
                             <span class="hidden sm:inline">Gérer</span>
                         </a>
                     {% endif %}
@@ -38,52 +40,52 @@
                 <!-- Helps List -->
                 <div class="space-y-3" id="helpsList">
                     {% for help in helps %}
-                        <details class="help-item group rounded-lg border border-slate-200 bg-slate-50 transition hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-slate-600"
+                        <details class="help-item group rounded-lg border border-secondary-200 bg-secondary-50 transition hover:border-secondary-300 dark:border-secondary-700 dark:bg-secondary-800/50 dark:hover:border-secondary-600"
                                  data-title="{{ help.title|default('')|lower }} {{ help.routeSlug|lower }}">
-                            <summary class="flex cursor-pointer select-none items-center justify-between p-5 hover:bg-slate-100 dark:hover:bg-slate-800" style="list-style: none;">
-                                <div class="flex items-center gap-3">
-                                    <twig:UX:Icon name="material-symbols:info-outline" class="h-7 w-7 flex-shrink-0 text-cyan-600 dark:text-cyan-400" />
-                                    <div class="flex items-center gap-3">
-                                        <strong class="text-base text-slate-900 dark:text-slate-100">{{ help.title|default(help.routeSlug) }}</strong>
+                            <summary class="flex cursor-pointer select-none items-center justify-between p-5 hover:bg-secondary-100 dark:hover:bg-secondary-800" style="list-style: none;">
+                                <span class="flex items-center gap-3">
+                                    {{ ux_icon('material-symbols:info-outline', {class: 'h-7 w-7 flex-shrink-0 text-info-600 dark:text-info-400'}) }}
+                                    <span class="flex items-center gap-3">
+                                        <strong class="text-base text-secondary-900 dark:text-secondary-100">{{ help.title|default(help.routeSlug) }}</strong>
                                         {% if is_granted('ROLE_ADMIN') %}
                                             <a href="{{ path('app_help_edit', {'id': help.id}) }}"
-                                               class="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-semibold text-cyan-600 hover:bg-cyan-50 dark:text-cyan-400 dark:hover:bg-cyan-500/20"
+                                               class="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-semibold text-info-600 hover:bg-info-50 dark:text-info-400 dark:hover:bg-info-500/20"
                                                onclick="event.stopPropagation();"
                                                title="Modifier">
-                                                <twig:UX:Icon name="mingcute:pencil-line" class="h-5 w-5" />
+                                                {{ ux_icon('mingcute:pencil-line', {class: 'h-5 w-5'}) }}
                                             </a>
                                         {% endif %}
                                         {% set previewUrl = previewUrls[help.id] ?? null %}
                                         {% if previewUrl %}
                                             <a href="{{ previewUrl }}"
-                                               class="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-semibold text-slate-600 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-700"
+                                               class="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-semibold text-secondary-600 hover:bg-secondary-200 dark:text-secondary-400 dark:hover:bg-secondary-700"
                                                onclick="event.stopPropagation();"
                                                title="Voir la page">
-                                                <twig:UX:Icon name="wordpress:external" class="h-5 w-5" />
+                                                {{ ux_icon('wordpress:external', {class: 'h-5 w-5'}) }}
                                             </a>
                                         {% else %}
                                             <button type="button"
-                                                    class="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-semibold text-slate-400 cursor-not-allowed"
+                                                    class="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-semibold text-secondary-400 cursor-not-allowed"
                                                     onclick="event.stopPropagation();"
                                                     title="Route avec paramètres obligatoires : aperçu direct indisponible"
                                                     disabled>
-                                                <twig:UX:Icon name="icon:external-link" class="h-5 w-5" />
+                                                {{ ux_icon('icon:external-link', {class: 'h-5 w-5'}) }}
                                             </button>
                                         {% endif %}
-                                    </div>
-                                </div>
-                                <twig:UX:Icon name="icon:chevron-down" class="h-7 w-7 text-slate-400 transition group-open:rotate-180 dark:text-slate-500" />
+                                    </span>
+                                </span>
+                                {{ ux_icon('icon:chevron-down', {class: 'chevron-icon h-7 w-7 text-secondary-400 transition group-open:rotate-180 dark:text-secondary-500'}) }}
                             </summary>
-                            <div class="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                            <div class="border-t border-secondary-200 bg-surface p-4 dark:border-secondary-700">
                                 <div class="markdown-body app-help-markdown">
                                     {{ help.content|markdown_to_html|parse_embeds }}
                                 </div>
                             </div>
                         </details>
                     {% else %}
-                        <div class="rounded-lg border border-cyan-200 bg-cyan-50 p-6 text-center dark:border-cyan-800 dark:bg-cyan-950/30">
-                            <twig:UX:Icon name="icon:face-sad" class="mx-auto mb-3 h-14 w-14 text-cyan-600 dark:text-cyan-400" />
-                            <p class="text-sm text-cyan-900 dark:text-cyan-100">Aucune aide enregistrée pour le moment.</p>
+                        <div class="rounded-lg border border-info-200 bg-info-50 p-6 text-center dark:border-info-800 dark:bg-info-950/30">
+                            {{ ux_icon('icon:face-sad', {class: 'mx-auto mb-3 h-14 w-14 text-info-600 dark:text-info-400'}) }}
+                            <p class="text-sm text-info-900 dark:text-info-100">Aucune aide enregistrée pour le moment.</p>
                         </div>
                     {% endfor %}
                 </div>
@@ -119,16 +121,4 @@ function filterHelps() {
 }
 </script>
 
-<style>
-/* Animation custom pour les details */
-details.help-item summary::-webkit-details-marker {
-    display:none; /* Masquer la flèche native sur Safari */
-}
-details.help-item[open] summary .chevron-icon {
-    transform: rotate(180deg);
-}
-details.help-item .chevron-icon {
-    transition: transform 0.3s ease;
-}
-</style>
 {% endblock %}
