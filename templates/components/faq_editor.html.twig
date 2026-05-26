@@ -8,19 +8,19 @@
             <div class="flex flex-col gap-6">
                 <!-- Question -->
                 <div>
-                {{ form_label(form.question, null, { label_attr: { class: 'block text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4' } }) }}
-                {{ form_widget(form.question, { attr: { class: 'w-full px-4 py-2.5 text-base border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400' } }) }}
+                {{ form_label(form.question, null, { label_attr: { class: 'block text-lg font-semibold text-secondary-900 dark:text-secondary-50 mb-4' } }) }}
+                {{ form_widget(form.question, { attr: { class: 'w-full px-4 py-2.5 text-base border border-secondary-300 rounded-lg bg-surface text-secondary-900 placeholder-secondary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-info-500 dark:focus:ring-info-400' } }) }}
                 {{ form_errors(form.question) }}
                 </div>
 
                 <!-- Centres Show -->
                 <div>
-                {{ form_label(form.centresShow, null, { label_attr: { class: 'block text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4' } }) }}
+                {{ form_label(form.centresShow, null, { label_attr: { class: 'block text-lg font-semibold text-secondary-900 dark:text-secondary-50 mb-4' } }) }}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {% for centreChoice in form.centresShow %}
-                        <label class="flex items-center gap-3 px-3 py-2 border border-slate-300 rounded-lg bg-white hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 cursor-pointer transition">
+                        <label class="flex items-center gap-3 px-3 py-2 border border-secondary-300 rounded-lg bg-surface hover:bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800 dark:hover:bg-secondary-700 cursor-pointer transition">
                             {{ form_widget(centreChoice, { attr: { class: 'h-4 w-4 rounded' } }) }}
-                            <span class="text-sm text-slate-900 dark:text-slate-100">{{ centreChoice.vars.label }}</span>
+                            <span class="text-sm text-secondary-900 dark:text-secondary-100">{{ centreChoice.vars.label }}</span>
                         </label>
                     {% endfor %}
                 </div>
@@ -30,13 +30,13 @@
 
                 <!-- Réponse -->
                 <div>
-                {{ form_label(form.reponse, null, { label_attr: { class: 'block text-lg font-semibold text-slate-900 dark:text-slate-50 mb-4' } }) }}
+                {{ form_label(form.reponse, null, { label_attr: { class: 'block text-lg font-semibold text-secondary-900 dark:text-secondary-50 mb-4' } }) }}
 
                 <!-- Barre d'outils Markdown -->
                 {{ component('markdown_toolbar') }}
 
                 <!-- Le champ textarea de Symfony -->
-                {{ form_widget(form.reponse, { attr: { 'class': 'w-full px-4 py-2.5 text-sm border border-slate-300 rounded-b-lg bg-white text-slate-900 placeholder-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 font-mono' } }) }}
+                {{ form_widget(form.reponse, { attr: { 'class': 'w-full px-4 py-2.5 text-sm border border-secondary-300 rounded-b-lg bg-surface text-secondary-900 placeholder-secondary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-info-500 dark:focus:ring-info-400 font-mono' } }) }}
                 {{ form_errors(form.reponse) }}
                 </div>
 
@@ -44,19 +44,19 @@
                 <div class="flex items-center gap-3">
                     <label class="flex items-center gap-2 cursor-pointer">
                         {{ form_widget(form.isActive, { attr: { class: 'h-4 w-4 rounded' } }) }}
-                        <span class="text-lg font-semibold text-slate-900 dark:text-slate-50">Afficher cette question</span>
+                        <span class="text-lg font-semibold text-secondary-900 dark:text-secondary-50">Afficher cette question</span>
                     </label>
                     {{ form_errors(form.isActive) }}
                 </div>
 
                 <!-- Boutons d'action -->
                 <div class="flex gap-3 pt-4">
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 transition">
-                        <twig:UX:Icon name="icon:save" class="h-5 w-5" />
+                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-success-600 text-white hover:bg-success-700 dark:bg-success-700 dark:hover:bg-success-600 transition">
+                        {{ ux_icon('icon:save', {class: 'h-5 w-5'}) }}
                         Enregistrer
                     </button>
-                    <a href="{{ path('app_faq_index') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition">
-                        <twig:UX:Icon name="icon:arrow-left" class="h-5 w-5" />
+                    <a href="{{ path('app_faq_index') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-secondary-300 bg-surface text-secondary-700 hover:bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-300 dark:hover:bg-secondary-700 transition">
+                        {{ ux_icon('icon:arrow-left', {class: 'h-5 w-5'}) }}
                         Retour
                     </a>
                 </div>
@@ -67,20 +67,20 @@
 
         <!-- Zone d'aperçu en direct -->
         <div class="space-y-4 flex flex-col">
-            <h3 class="text-lg font-semibold text-slate-900 dark:text-slate-50 flex items-center gap-2">
-                <twig:UX:Icon name="icon:eye" class="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+            <h3 class="text-lg font-semibold text-secondary-900 dark:text-secondary-50 flex items-center gap-2">
+                {{ ux_icon('icon:eye', {class: 'h-5 w-5 text-info-600 dark:text-info-400'}) }}
                 Aperçu utilisateur
             </h3>
 
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 flex flex-col flex-1">
+            <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-800 flex flex-col flex-1">
                 <div class="p-6 overflow-y-auto">
-                    <h4 class="mb-4 text-base font-semibold text-slate-900 dark:text-slate-50">{{ form.question.vars.value ?: 'Question...' }}</h4>
+                    <h4 class="mb-4 text-base font-semibold text-secondary-900 dark:text-secondary-50">{{ form.question.vars.value ?: 'Question...' }}</h4>
 
-                    <div class="app-help-markdown text-slate-700 dark:text-slate-300 break-words">
+                    <div class="app-help-markdown text-secondary-700 dark:text-secondary-300 break-words">
                         {% if form.reponse.vars.value %}
                             <div id="faq-preview">{{ form.reponse.vars.value|markdown_to_html|parse_embeds }}</div>
                         {% else %}
-                            <div id="faq-preview"><p class="text-slate-500 dark:text-slate-400 italic">Commencez à rédiger pour voir l'aperçu...</p></div>
+                            <div id="faq-preview"><p class="text-secondary-500 dark:text-secondary-400 italic">Commencez à rédiger pour voir l'aperçu...</p></div>
                         {% endif %}
                     </div>
                 </div>
@@ -92,4 +92,4 @@
     {{ component('help_image_manager', { showModal: true, editorTextarea: 'textarea[name="faq[reponse]"]' }) }}
 </div>
 
-<script src="/js/editor_helpers.js"></script>
+<script src="{{ asset('js/editor_helpers.js') }}"></script>

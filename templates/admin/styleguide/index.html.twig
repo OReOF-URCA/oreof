@@ -1,7 +1,23 @@
 {% extends 'base.html.twig' %}
+
+{% set header_title %}
+    Styleguide
+{% endset %}
+
+{% block header %}
+    Styleguide - Composants graphiques
+{% endblock %}
+
 {% set header_description %}
     Liste des composants graphiques disponibles dans l'application, avec des exemples d'utilisation.
 {% endset %}
+
+{% block bouton_header %}
+    <twig:Button variant="secondary" href="/administration/styleguide/templates/index-type">Voir la page exemple type
+    </twig:Button>
+{% endblock %}
+{% block content %}
+
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
         {
@@ -10,14 +26,7 @@
         }
     ]}) }}
 {% endblock %}
-{% block header %}
-    Styleguide - Composants graphiques
-{% endblock %}
-{% block bouton_header %}
-    <twig:Button variant="secondary" href="/administration/styleguide/templates/index-type">Voir la page exemple type
-    </twig:Button>
-{% endblock %}
-{% block content %}
+
     <div class="space-y-12 pb-12">
 
         {# Section Composant : Palette couleur #}

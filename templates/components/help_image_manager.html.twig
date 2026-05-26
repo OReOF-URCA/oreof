@@ -5,407 +5,193 @@
 #}
 
 {% if showModal %}
-<!-- Modal wrapper -->
 <div id="imageManagerModal" class="hidden fixed inset-0 z-50 overflow-y-auto">
-    <div class="flex items-center justify-center min-h-screen px-4">
-        <!-- Backdrop -->
-        <div class="fixed inset-0 bg-black/50 transition-opacity" onclick="closeImageManagerModal()"></div>
+  <div class="flex items-center justify-center min-h-screen px-4">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-black/50 transition-opacity" onclick="closeImageManagerModal()"></div>
 
-        <!-- Modal content -->
-        <div class="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <!-- Modal header -->
-            <div class="sticky top-0 flex justify-between items-center px-6 py-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-                <h2 class="text-xl font-bold text-slate-900 dark:text-slate-50 flex items-center gap-3">
-                    <twig:UX:Icon name="mdi:image-multiple-outline" class="h-6 w-6" />
-                    Galerie d'images
-                </h2>
-                <button type="button"
-                        class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-                        onclick="closeImageManagerModal()"
-                        aria-label="Fermer">
-                    <twig:UX:Icon name="basil:cross-solid" class="h-6 w-6" />
-                </button>
-            </div>
+    <!-- Modal content -->
+    <div class="relative bg-surface dark:bg-secondary-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <!-- Modal header -->
+      <div class="sticky top-0 flex justify-between items-center px-6 py-4 border-b border-secondary-200 dark:border-secondary-700 bg-surface dark:bg-secondary-900">
+        <h2 class="text-xl font-bold text-secondary-900 dark:text-secondary-100 flex items-center gap-3">
+          {{ ux_icon('mdi:image-multiple-outline', {class: 'h-6 w-6'}) }}
+          Galerie d'images
+        </h2>
+        <button type="button" class="text-secondary-500 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-secondary-300" onclick="closeImageManagerModal()" aria-label="Fermer">
+          {{ ux_icon('basil:cross-solid', {class: 'h-6 w-6'}) }}
+        </button>
+      </div>
 
-            <!-- Modal body -->
-            <div class="px-6 py-4">
+      <!-- Modal body -->
+      <div class="px-6 py-4">
 {% endif %}
-                <div {{ attributes.defaults({class: ''}) }}>
-                    <!-- Conteneur des onglets avec Tailwind -->
-                    <div class="space-y-6">
-                        <!-- Onglets (Galerie / Upload) -->
-        <div class="flex gap-2 border-b border-slate-200 dark:border-slate-700">
-            <button type="button"
-                    id="gallery-tab"
-                    data-tab="gallery"
-                    class="inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600 dark:text-blue-400 transition"
-                    onclick="switchTab('gallery')">
-                <twig:UX:Icon name="mdi:image-multiple-outline" class="h-5 w-5" />
-                Galerie d'images
-            </button>
-            <button type="button"
-                    id="upload-tab"
-                    data-tab="upload"
-                    class="inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 transition"
-                    onclick="switchTab('upload')">
-                <twig:UX:Icon name="ic:round-plus" class="h-5 w-5" />
-                Ajouter une nouvelle image
-            </button>
-        </div>
 
-        <!-- Tab panes -->
-        <!-- Onglet Galerie -->
-        <div id="gallery-tab-pane" class="block">
-            <div class="space-y-4">
-                <!-- Barre de recherche -->
-                <div class="relative">
-                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 dark:text-slate-500">
-                        <twig:UX:Icon name="icon:search" class="h-5 w-5" />
-                    </div>
-                    <input type="text"
-                           id="imageSearchInput"
-                           class="w-full pl-10 pr-4 py-2.5 text-base border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-400 transition"
-                           placeholder="Rechercher une image..."
-                           onkeyup="searchImages()">
-                </div>
+<div {{ attributes.defaults({class: ''}) }}>
+  <div class="space-y-6">
+    <!-- Onglets (Galerie / Upload) -->
+    <div class="flex gap-2 border-b border-secondary-200 dark:border-secondary-700">
+      <button type="button" id="gallery-tab" data-tab="gallery" class="inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-info-600 text-info-600 dark:text-info-400 transition" onclick="switchTab('gallery')">
+        {{ ux_icon('mdi:image-multiple-outline', {class: 'h-5 w-5'}) }}
+        Galerie d'images
+      </button>
 
-                <!-- Conteneur grille pour les images -->
-                <div id="imageGallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-auto max-h-[60vh] content-start auto-rows-min">
-                    <!-- État initial de chargement -->
-                    <div class="col-span-2 sm:col-span-3 md:col-span-4 flex flex-col items-center justify-center py-8">
-                        <twig:UX:Icon name="tabler:loader-2" class="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-                        <p class="mt-2 text-slate-500 dark:text-slate-400">Chargement des images...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Onglet Upload -->
-        <div id="upload-tab-pane" class="hidden">
-            <div class="grid grid-cols-1 md:grid-cols-7 gap-6">
-                <div class="md:col-span-4 space-y-4">
-                    <!-- Formulaire d'upload -->
-                    <form id="uploadImageForm" onsubmit="uploadImage(event)" class="space-y-4">
-                        <div>
-                            <label for="uploadName" class="block text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">
-                                Nom sous lequel enregistrer l'image
-                                <span class="text-red-600 dark:text-red-400">*</span>
-                            </label>
-                            <input type="text"
-                                   id="uploadName"
-                                   class="w-full px-4 py-2.5 text-base border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-400 transition"
-                                   placeholder="Ex: accueil_timeline"
-                                   required>
-                        </div>
-
-                        <div>
-                            <label for="uploadFile" class="block text-sm font-medium text-slate-900 dark:text-slate-100 mb-2">
-                                Fichier (.png, .jpg, .jpeg)
-                                <span class="text-red-600 dark:text-red-400">*</span>
-                            </label>
-                            <input type="file"
-                                   id="uploadFile"
-                                   class="w-full px-4 py-2.5 text-base border border-slate-300 rounded-lg bg-white text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900/30 dark:file:text-blue-400 transition"
-                                   accept=".png, .jpg, .jpeg"
-                                   required>
-                            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Taille maximale : 10 Mo.</p>
-                        </div>
-
-                        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-green-600 text-white hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 transition">
-                            <twig:UX:Icon name="icon:upload" class="h-5 w-5" />
-                            Uploader et insérer l'image
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Aperçu de l'image -->
-                <div class="md:col-span-3">
-                    <div id="imagePreviewContainer" class="w-full h-[250px] flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400 p-4">
-                        <div id="previewIcon" class="h-12 w-12 mb-2">
-                            <twig:UX:Icon name="material-symbols:image-outline" class="h-12 w-12" />
-                        </div>
-                        <span id="previewText" class="text-center">Aperçu de l'image</span>
-                        <img id="imagePreview" src="" alt="Aperçu" class="hidden rounded shadow-sm max-h-[250px] object-contain">
-                    </div>
-                </div>
-            </div>
-        </div>
+      <button type="button" id="upload-tab" data-tab="upload" class="inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-secondary-200 transition" onclick="switchTab('upload')">
+        {{ ux_icon('ic:round-plus', {class: 'h-5 w-5'}) }}
+        Ajouter une nouvelle image
+      </button>
     </div>
+
+    <!-- Tab panes -->
+    <div id="gallery-tab-pane" class="block">
+      <div class="space-y-4">
+        <div class="relative">
+          <div class="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-secondary-400 dark:text-secondary-500">
+            {{ ux_icon('icon:search', {class: 'h-5 w-5'}) }}
+          </div>
+          <input type="text" id="imageSearchInput" aria-label="Rechercher des images" class="w-full pl-10 pr-4 py-2.5 text-base border border-secondary-300 rounded-lg bg-surface text-secondary-900 placeholder-secondary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder-secondary-400 transition" placeholder="Rechercher une image..." onkeyup="searchImages()">
+        </div>
+
+        <div id="imageGallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 overflow-auto max-h-[60vh] content-start auto-rows-min">
+          <div class="col-span-2 sm:col-span-3 md:col-span-4 flex flex-col items-center justify-center py-8">
+              <twig:Spinner size="md" variant="primary" label="Chargement..."/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="upload-tab-pane" class="hidden">
+      <div class="grid grid-cols-1 md:grid-cols-7 gap-6">
+        <div class="md:col-span-4 space-y-4">
+          <form id="uploadImageForm" onsubmit="uploadImage(event)" class="space-y-4">
+            <div>
+              <label for="uploadName" class="block text-sm font-medium text-secondary-900 dark:text-secondary-100 mb-2">Nom sous lequel enregistrer l'image <span class="text-danger-600 dark:text-danger-400">*</span></label>
+              <input type="text" id="uploadName" class="w-full px-4 py-2.5 text-base border border-secondary-300 rounded-lg bg-surface text-secondary-900 placeholder-secondary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder-secondary-400 transition" placeholder="Ex: accueil_timeline" required>
+            </div>
+
+            <div>
+              <label for="uploadFile" class="block text-sm font-medium text-secondary-900 dark:text-secondary-100 mb-2">Fichier (.png, .jpg, .jpeg) <span class="text-danger-600 dark:text-danger-400">*</span></label>
+              <input type="file" id="uploadFile" class="w-full px-4 py-2.5 text-base border border-secondary-300 rounded-lg bg-surface text-secondary-900 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-info-50 file:text-info-700 dark:file:bg-info-900/30 dark:file:text-info-400 transition" accept=".png, .jpg, .jpeg" required>
+              <p class="mt-2 text-sm text-secondary-500 dark:text-secondary-400">Taille maximale : 10 Mo.</p>
+            </div>
+
+            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-success-600 text-white hover:bg-success-700 dark:bg-success-700 dark:hover:bg-success-600 transition">
+              {{ ux_icon('icon:upload', {class: 'h-5 w-5'}) }}
+              Uploader et insérer l'image
+            </button>
+          </form>
+        </div>
+
+        <div class="md:col-span-3">
+          <div id="imagePreviewContainer" class="w-full h-[250px] flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-secondary-300 bg-secondary-50 text-secondary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400 p-4">
+            <div id="previewIcon" class="h-12 w-12 mb-2">{{ ux_icon('material-symbols:image-outline', {class: 'h-12 w-12'}) }}</div>
+            <span id="previewText" class="text-center">Aperçu de l'image</span>
+            <img id="imagePreview" src="" alt="Aperçu" class="hidden rounded shadow-sm max-h-[250px] object-contain">
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
+
+{% if showModal %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <script>
-    function switchTab(tabName) {
-        // Cacher tous les onglets et retirer le style actif
-        document.getElementById('gallery-tab-pane').classList.add('hidden');
-        document.getElementById('upload-tab-pane').classList.add('hidden');
-        document.getElementById('gallery-tab').classList.remove('border-blue-600', 'text-blue-600', 'dark:text-blue-400');
-        document.getElementById('gallery-tab').classList.add('border-transparent', 'text-slate-600', 'hover:text-slate-900', 'dark:text-slate-400', 'dark:hover:text-slate-200');
-        document.getElementById('upload-tab').classList.remove('border-blue-600', 'text-blue-600', 'dark:text-blue-400');
-        document.getElementById('upload-tab').classList.add('border-transparent', 'text-slate-600', 'hover:text-slate-900', 'dark:text-slate-400', 'dark:hover:text-slate-200');
+  function switchTab(tabName) {
+    document.getElementById('gallery-tab-pane').classList.add('hidden');
+    document.getElementById('upload-tab-pane').classList.add('hidden');
+    document.getElementById('gallery-tab').classList.remove('border-info-600', 'text-info-600', 'dark:text-info-400');
+    document.getElementById('gallery-tab').classList.add('border-transparent', 'text-secondary-600', 'hover:text-secondary-900', 'dark:text-secondary-400', 'dark:hover:text-secondary-200');
+    document.getElementById('upload-tab').classList.remove('border-info-600', 'text-info-600', 'dark:text-info-400');
+    document.getElementById('upload-tab').classList.add('border-transparent', 'text-secondary-600', 'hover:text-secondary-900', 'dark:text-secondary-400', 'dark:hover:text-secondary-200');
 
-        // Afficher l'onglet actif et le styler
-        if (tabName === 'gallery') {
-            document.getElementById('gallery-tab-pane').classList.remove('hidden');
-            document.getElementById('gallery-tab').classList.add('border-blue-600', 'text-blue-600', 'dark:text-blue-400');
-            document.getElementById('gallery-tab').classList.remove('border-transparent', 'text-slate-600', 'hover:text-slate-900', 'dark:text-slate-400', 'dark:hover:text-slate-200');
-        } else {
-            document.getElementById('upload-tab-pane').classList.remove('hidden');
-            document.getElementById('upload-tab').classList.add('border-blue-600', 'text-blue-600', 'dark:text-blue-400');
-            document.getElementById('upload-tab').classList.remove('border-transparent', 'text-slate-600', 'hover:text-slate-900', 'dark:text-slate-400', 'dark:hover:text-slate-200');
-        }
+    if (tabName === 'gallery') {
+      document.getElementById('gallery-tab-pane').classList.remove('hidden');
+      document.getElementById('gallery-tab').classList.add('border-info-600', 'text-info-600', 'dark:text-info-400');
+      document.getElementById('gallery-tab').classList.remove('border-transparent', 'text-secondary-600', 'hover:text-secondary-900', 'dark:text-secondary-400', 'dark:hover:text-secondary-200');
+    } else {
+      document.getElementById('upload-tab-pane').classList.remove('hidden');
+      document.getElementById('upload-tab').classList.add('border-info-600', 'text-info-600', 'dark:text-info-400');
+      document.getElementById('upload-tab').classList.remove('border-transparent', 'text-secondary-600', 'hover:text-secondary-900', 'dark:text-secondary-400', 'dark:hover:text-secondary-200');
     }
+  }
 
-    function updateImagePreview(url, label = '') {
-        const preview = document.getElementById('imagePreview');
-        const icon = document.getElementById('previewIcon');
-        const text = document.getElementById('previewText');
+  function updateImagePreview(url, label = '') {
+    const preview = document.getElementById('imagePreview');
+    const icon = document.getElementById('previewIcon');
+    const text = document.getElementById('previewText');
 
-        if (!preview) {
-            return;
-        }
-
-        if (url) {
-            preview.src = url;
-            preview.classList.remove('hidden');
-            if (icon) icon.classList.add('hidden');
-            if (text) {
-                text.textContent = label || 'Aperçu de l\'image';
-                text.classList.add('hidden');
-            }
-            return;
-        }
-
-        preview.src = '';
-        preview.classList.add('hidden');
-        if (icon) icon.classList.remove('hidden');
-        if (text) {
-            text.textContent = 'Aperçu de l\'image';
-            text.classList.remove('hidden');
-        }
+    if (!preview) return;
+    if (url) {
+      preview.src = url; preview.classList.remove('hidden'); if (icon) icon.classList.add('hidden'); if (text) { text.textContent = label || 'Aperçu de l\'image'; text.classList.add('hidden'); } return;
     }
+    preview.src = ''; preview.classList.add('hidden'); if (icon) icon.classList.remove('hidden'); if (text) { text.textContent = 'Aperçu de l\'image'; text.classList.remove('hidden'); }
+  }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const uploadFileInput = document.getElementById('uploadFile');
-        if (uploadFileInput) {
-            uploadFileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
+  document.addEventListener('DOMContentLoaded', function() {
+    const uploadFileInput = document.getElementById('uploadFile');
+    if (uploadFileInput) uploadFileInput.addEventListener('change', function(e) { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { updateImagePreview(e.target.result, file.name); }; reader.readAsDataURL(file); } else updateImagePreview(''); });
+    loadImages();
+  });
 
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        updateImagePreview(e.target.result, file.name);
-                    }
-                    reader.readAsDataURL(file);
-                } else {
-                    updateImagePreview('');
-                }
-            });
-        }
+  document.addEventListener('change', function(e) { if (!e.target) return; if (e.target.id !== 'uploadFile') return; const file = e.target.files ? e.target.files[0] : null; if (file) { const reader = new FileReader(); reader.onload = function(ev) { updateImagePreview(ev.target.result, file.name); }; reader.readAsDataURL(file); } else updateImagePreview(''); });
 
-        // Auto-load images
-        loadImages();
-    });
+  function getEditor() { const textareaSelector = '{{ editorTextarea|e('js') }}'; if (!textareaSelector) return document.querySelector('textarea[name="help[content]"]'); return document.querySelector(textareaSelector); }
 
-    // Écouteur délégué : gère #uploadFile inséré dynamiquement
-    document.addEventListener('change', function(e) {
-        if (!e.target) return;
-        if (e.target.id !== 'uploadFile') return;
+  function loadImages(query = '') {
+    const gallery = document.getElementById('imageGallery');
+    gallery.innerHTML = '<div class="col-span-2 sm:col-span-3 md:col-span-4 flex flex-col items-center justify-center py-8"><svg class="animate-spin h-8 w-8 text-info-600 dark:text-info-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="mt-2 text-secondary-500 dark:text-secondary-400">Chargement...</p></div>';
 
-        const file = e.target.files ? e.target.files[0] : null;
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-                updateImagePreview(ev.target.result, file.name);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            updateImagePreview('');
-        }
-    });
-
-    function getEditor() {
-        const textareaSelector = '{{ editorTextarea|e('js') }}';
-        if (!textareaSelector) {
-            return document.querySelector('textarea[name="help[content]"]');
-        }
-        return document.querySelector(textareaSelector);
-    }
-
-    function loadImages(query = '') {
-        const gallery = document.getElementById('imageGallery');
-        gallery.innerHTML = '<div class="col-span-2 sm:col-span-3 md:col-span-4 flex flex-col items-center justify-center py-8"><svg class="animate-spin h-8 w-8 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="mt-2 text-slate-500 dark:text-slate-400">Chargement...</p></div>';
-
-        fetch('/admin/help/images?q=' + encodeURIComponent(query))
-            .then(response => response.json())
-            .then(data => {
-                gallery.innerHTML = '';
-                if (data.length === 0) {
-                    gallery.innerHTML = '<div class="col-span-2 sm:col-span-3 md:col-span-4 text-center py-8 text-slate-500 dark:text-slate-400">Aucune image trouvée.</div>';
-                    return;
-                }
-                data.forEach(img => {
-                    const url = '/uploads/help_images/' + img.fichier;
-                    const col = document.createElement('div');
-                    col.className = 'relative group rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden cursor-pointer hover:shadow-md dark:hover:shadow-lg transition bg-white dark:bg-slate-800';
-                    col.innerHTML = `
-                        <div class="aspect-[4/3] bg-slate-100 dark:bg-slate-900 overflow-hidden js-select-image" data-image-url="${url}" data-image-name="${String(img.nom).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">
-                            <img src="${url}" alt="${img.nom}" class="block w-full h-full object-cover object-center">
-                        </div>
-                        <div class="px-3 py-2 text-xs text-center text-slate-900 dark:text-slate-100 bg-slate-50 dark:bg-slate-700 truncate border-t border-slate-200 dark:border-slate-700" title="${img.nom}">
-                            ${img.nom}
-                        </div>
-                        <button type="button" class="absolute top-1 right-1 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-red-600 text-white opacity-0 group-hover:opacity-100 transition" onclick="deleteImage(event, ${img.id})" title="Supprimer cette image">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                        </button>
-                    `;
-                    gallery.appendChild(col);
-                });
-            })
-            .catch(err => {
-                console.error(err);
-                gallery.innerHTML = '<div class="col-span-2 sm:col-span-3 md:col-span-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-700 dark:text-red-400">Erreur lors du chargement des images.</div>';
-            });
-    }
-
-    let searchTimeout = null;
-    function searchImages() {
-        const input = document.getElementById('imageSearchInput');
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-            loadImages(input.value);
-        }, 400); // 400ms de debounce
-    }
-
-    function uploadImage(e) {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type="submit"]');
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Traitement en cours...';
-        btn.disabled = true;
-
-        const nom = document.getElementById('uploadName').value;
-        const fileInput = document.getElementById('uploadFile');
-
-        const formData = new FormData();
-        formData.append('nom', nom);
-        if (fileInput.files.length > 0) {
-            formData.append('image', fileInput.files[0]);
-        }
-
-        fetch('/admin/help/images/upload', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-
-            if (data.error) {
-                alert('Erreur : ' + data.error);
-            } else {
-                document.getElementById('uploadImageForm').reset();
-                updateImagePreview('/uploads/help_images/' + data.fichier, data.nom);
-
-                // On bascule visuellement sur l'onglet galerie
-                switchTab('gallery');
-
-                // On recharge les images
-                loadImages();
-                // Et on sélectionne et insère directement la nouvelle image
-                selectImage('/uploads/help_images/' + data.fichier, data.nom);
-                // Le modal se ferme via selectImage()
-            }
-        })
-        .catch(err => {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-            alert('Erreur système lors de l\'upload.');
-            console.error(err);
-        });
-    }
-
-    document.addEventListener('click', function(e) {
-        const target = e.target.closest('.js-select-image');
-        if (!target) return;
-        const url = target.getAttribute('data-image-url');
-        const name = target.getAttribute('data-image-name') || '';
-        if (typeof window.insertSelectedImage === 'function') {
-            window.insertSelectedImage(url, name, '{{ editorTextarea|e('js') }}');
-            closeImageManagerModal();
-        }
-    });
-
-    function selectImage(url, altName) {
-        if (typeof window.insertSelectedImage === 'function') {
-            window.insertSelectedImage(url, altName, '{{ editorTextarea|e('js') }}');
-            closeImageManagerModal();
-        }
-    }
-
-    function deleteImage(e, id) {
-        e.stopPropagation(); // Évite de sélectionner l'image
-        if (!confirm('Êtes-vous sûr de vouloir supprimer cette image définitivement ?')) return;
-
-        const btn = e.currentTarget;
-        const originalIcon = btn.innerHTML;
-        btn.innerHTML = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
-        btn.disabled = true;
-
-        fetch('/admin/help/images/' + id + '/delete', {
-            method: 'DELETE'
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                loadImages(document.getElementById('imageSearchInput').value); // Recharge la galerie
-            } else {
-                alert('Erreur : ' + (data.error || 'Impossible de supprimer.'));
-                btn.innerHTML = originalIcon;
-                btn.disabled = false;
-            }
-        })
-        .catch(err => {
-            alert('Erreur système lors de la suppression.');
-            btn.innerHTML = originalIcon;
-            btn.disabled = false;
-        });
-    }
-
-    function updateTextarea(textarea, start, end, newText, newCursorPos) {
-        textarea.focus();
-        textarea.setRangeText(newText, start, end, 'end');
-        textarea.selectionStart = newCursorPos;
-        textarea.selectionEnd = newCursorPos;
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-
-    function openImageModal() {
-        loadImages(); // Charge la galerie
-        const modal = document.getElementById('imageManagerModal');
-        if (modal) {
-            modal.classList.remove('hidden');
-        }
-    }
-
-    function closeImageManagerModal() {
-        const modal = document.getElementById('imageManagerModal');
-        if (modal) {
-            modal.classList.add('hidden');
-        }
-    }
-
-    // Fermer le modal à la touche Escape
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeImageManagerModal();
-        }
-    });
-</script>
-                </div>
-{% if showModal %}
+    fetch('/admin/help/images?q=' + encodeURIComponent(query))
+      .then(response => response.json())
+      .then(data => {
+        gallery.innerHTML = '';
+        if (data.length === 0) { gallery.innerHTML = '<div class="col-span-2 sm:col-span-3 md:col-span-4 text-center py-8 text-secondary-500 dark:text-secondary-400">Aucune image trouvée.</div>'; return; }
+        data.forEach(img => {
+          const url = '/uploads/help_images/' + img.fichier;
+          const col = document.createElement('div');
+          col.className = 'relative group rounded-lg border border-secondary-200 dark:border-secondary-700 overflow-hidden cursor-pointer hover:shadow-md dark:hover:shadow-lg transition bg-surface dark:bg-secondary-800';
+          col.innerHTML = `
+            <div class="aspect-[4/3] bg-secondary-100 dark:bg-secondary-900 overflow-hidden js-select-image" data-image-url="${url}" data-image-name="${String(img.nom).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')}">
+              <img src="${url}" alt="${img.nom}" class="block w-full h-full object-cover object-center">
             </div>
-        </div>
-    </div>
-</div>
-{% endif %}
+            <div class="px-3 py-2 text-xs text-center text-secondary-900 dark:text-secondary-100 bg-secondary-50 dark:bg-secondary-700 truncate border-t border-secondary-200 dark:border-secondary-700" title="${img.nom}">
+              ${img.nom}
+            </div>
+            <button type="button" class="absolute top-1 right-1 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-danger-600 text-white opacity-0 group-hover:opacity-100 transition" onclick="deleteImage(event, ${img.id})" title="Supprimer cette image">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            </button>
+          `;
+          gallery.appendChild(col);
+        });
+      })
+      .catch(err => { console.error(err); gallery.innerHTML = '<div class="col-span-2 sm:col-span-3 md:col-span-4 p-4 rounded-lg bg-danger-50 border border-danger-200 text-danger-800 dark:bg-danger-900/20 dark:border-danger-700 dark:text-danger-400">Erreur lors du chargement des images.</div>'; });
+  }
+
+  let searchTimeout = null;
+  function searchImages() { const input = document.getElementById('imageSearchInput'); clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { loadImages(input.value); }, 400); }
+
+  function uploadImage(e) { e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); const originalHtml = btn.innerHTML; btn.innerHTML = '<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Traitement en cours...'; btn.disabled = true;
+    const nom = document.getElementById('uploadName').value; const fileInput = document.getElementById('uploadFile'); const formData = new FormData(); formData.append('nom', nom); if (fileInput.files.length > 0) { formData.append('image', fileInput.files[0]); }
+    fetch('/admin/help/images/upload', { method: 'POST', body: formData }).then(res => res.json()).then(data => { btn.innerHTML = originalHtml; btn.disabled = false; if (data.error) { alert('Erreur : ' + data.error); } else { document.getElementById('uploadImageForm').reset(); updateImagePreview('/uploads/help_images/' + data.fichier, data.nom); switchTab('gallery'); loadImages(); selectImage('/uploads/help_images/' + data.fichier, data.nom); } }).catch(err => { btn.innerHTML = originalHtml; btn.disabled = false; alert('Erreur système lors de l\'upload.'); console.error(err); }); }
+
+  document.addEventListener('click', function(e) { const target = e.target.closest('.js-select-image'); if (!target) return; const url = target.getAttribute('data-image-url'); const name = target.getAttribute('data-image-name') || ''; if (typeof window.insertSelectedImage === 'function') { window.insertSelectedImage(url, name, '{{ editorTextarea|e('js') }}'); closeImageManagerModal(); } });
+
+  function selectImage(url, altName) { if (typeof window.insertSelectedImage === 'function') { window.insertSelectedImage(url, altName, '{{ editorTextarea|e('js') }}'); closeImageManagerModal(); } }
+
+  function deleteImage(e, id) { e.stopPropagation(); if (!confirm('Êtes-vous sûr de vouloir supprimer cette image définitivement ?')) return; const btn = e.currentTarget; const originalIcon = btn.innerHTML; btn.innerHTML = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'; btn.disabled = true; fetch('/admin/help/images/' + id + '/delete', { method: 'DELETE' }).then(res => res.json()).then(data => { if (data.success) { loadImages(document.getElementById('imageSearchInput').value); } else { alert('Erreur : ' + (data.error || 'Impossible de supprimer.')); btn.innerHTML = originalIcon; btn.disabled = false; } }).catch(err => { alert('Erreur système lors de la suppression.'); console.error(err); btn.innerHTML = originalIcon; btn.disabled = false; }); }
+
+  function updateTextarea(textarea, start, end, newText, newCursorPos) { textarea.focus(); textarea.setRangeText(newText, start, end, 'end'); textarea.selectionStart = newCursorPos; textarea.selectionEnd = newCursorPos; textarea.dispatchEvent(new Event('input', { bubbles: true })); }
+
+  function openImageModal() { loadImages(); const modal = document.getElementById('imageManagerModal'); if (modal) modal.classList.remove('hidden'); }
+  function closeImageManagerModal() { const modal = document.getElementById('imageManagerModal'); if (modal) modal.classList.add('hidden'); }
+
+  // Fermer le modal à la touche Escape
+  document.addEventListener('keydown', function(event) { if (event.key === 'Escape') { closeImageManagerModal(); } });
+</script>
