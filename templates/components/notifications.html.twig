@@ -4,7 +4,7 @@
            title="Effectuer une recherche"
                 {{ stimulus_controller('tooltip') }}
            aria-label="Rechercher"
-           class="p-2 rounded-full text-secondary hover:bg-bg transition inline-flex items-center justify-center"
+           class="p-2 rounded-full text-secondary dark:text-secondary-300 hover:bg-bg transition inline-flex items-center justify-center"
         >
             <twig:UX:Icon name="icon:search" class="w-5 h-5"/>
         </a>
@@ -15,7 +15,7 @@
            title="Mes commentaires"
                 {{ stimulus_controller('tooltip') }}
            aria-label="Mes commentaires"
-           class="p-2 rounded-full text-secondary hover:bg-bg transition inline-flex items-center justify-center"
+           class="p-2 rounded-full text-secondary dark:text-secondary-300 hover:bg-bg transition inline-flex items-center justify-center"
         >
             <twig:UX:Icon name="icon:comment" class="w-5 h-5"/>
         </a>
@@ -35,7 +35,7 @@
            title="Signaler un bug"
                 {{ stimulus_controller('tooltip') }}
            aria-label="Signaler un bug"
-           class="p-2 rounded-full text-secondary hover:bg-bg transition inline-flex items-center justify-center"
+           class="p-2 rounded-full text-secondary dark:text-secondary-300 hover:bg-bg transition inline-flex items-center justify-center"
         >
             <twig:UX:Icon name="icon:bug" class="w-5 h-5"/>
         </a>
@@ -43,7 +43,7 @@
 
     <li>
         <a href="{{ path('app_notification_liste_user') }}"
-           class="relative p-2 rounded-full text-secondary hover:bg-bg transition inline-flex items-center justify-center"
+           class="relative p-2 rounded-full text-secondary dark:text-secondary-300 hover:bg-bg transition inline-flex items-center justify-center"
            data-action="click->modalturbo#open"
            aria-label="Notifications"
            title="Notifications"
