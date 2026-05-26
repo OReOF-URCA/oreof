@@ -1,5 +1,14 @@
 {% extends 'base.html.twig' %}
 
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {
+            href:'',
+            title: 'Styleguide',
+        }
+    ]}) }}
+{% endblock %}
+
 {% set header_title %}
     Styleguide
 {% endset %}
@@ -18,14 +27,7 @@
 {% endblock %}
 {% block content %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Styleguide',
-        }
-    ]}) }}
-{% endblock %}
+
 
     <div class="space-y-12 pb-12">
 
