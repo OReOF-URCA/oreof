@@ -15,6 +15,8 @@ visuelles et accelerer les evolutions.
     - `info`: consultation, information
     - `secondary`: action neutre
 - Toujours definir un libelle explicite (accessibilite) et un etat `disabled` si necessaire.
+- Prendre comme exemple la page `templates/admin/styleguide/index.html.twig pour avoir les composants` en action et les classes Tailwind standard (notamment de couleurs).
+- Pour un template de base pour une page voir la page `templates/admin/styleguide/templates/index_type.html.twig` (qui peut etre dupliquee selon les besoins).
 
 ## 2) Boutons
 

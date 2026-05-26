@@ -1227,31 +1227,31 @@ html[data-theme="dark"] {
   }
 
   html[data-theme="dark"] .app-progress-track {
-    @apply bg-secondary-700;
+    @apply bg-secondary-800 border border-secondary;
   }
 
   html[data-theme="dark"] .app-progress-track--danger {
-    @apply bg-danger-950/50;
+    @apply bg-danger-800 border border-danger;
   }
 
   html[data-theme="dark"] .app-progress-track--success {
-    @apply bg-success-950/50;
+    @apply bg-success-800 border border-success;
   }
 
   html[data-theme="dark"] .app-progress-track--info {
-    @apply bg-info-950/50;
+    @apply bg-info-800 border border-info;
   }
 
   html[data-theme="dark"] .app-progress-bar--danger {
-    @apply bg-danger-400;
+    @apply bg-danger-500;
   }
 
   html[data-theme="dark"] .app-progress-bar--success {
-    @apply bg-success-400;
+    @apply bg-success-500;
   }
 
   html[data-theme="dark"] .app-progress-bar--info {
-    @apply bg-info-400;
+    @apply bg-info-500;
   }
 
   /* Onglets applicatifs (homepage/codification) */
