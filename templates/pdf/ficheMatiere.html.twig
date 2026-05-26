@@ -121,6 +121,7 @@
     </div>
     <div class="col-12 mt-2">
         <h2>BCC pour le parcours</h2>
+        {% if templateFormMccc matches '/^licence/' %}
         <ul>
             {% if ficheMatiere != null and ficheMatiere.parcours != null and  ficheMatiere.parcours.id == parcours.id %}
                 {% for competence in ec.ficheMatiere.competences %}
@@ -132,6 +133,30 @@
                 {% endfor %}
             {% endif %}
         </ul>
+        {% elseif templateFormMccc matches '/^but/' %}
+            {% set appCritList = ficheMatiere.getApprentissagesCritiques()|sort((a, b) => b.niveau.ordre <=> a.niveau.ordre) %}
+            {% set butNiveaux = [] %}
+
+            {% for niv in appCritList|map(a => a.niveau) %}
+                {% if niv.id not in butNiveaux|map(k => k.id) %}
+                    {% set butNiveaux = butNiveaux|merge([niv]) %}
+                {% endif %}
+            {% endfor %}
+
+            <ul>
+                {% for n in butNiveaux %}
+                    <li> {{ n.annee }} - {{ n.libelle }}
+                        <ul>
+                        {% for crit in appCritList|filter(q => q.niveau.id == n.id) %}
+                            <li>{{ crit.code }} - {{ crit.libelle }}</li>
+                        {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% elseif templateFormMccc matches '/^m2e/' %}
+
+        {% endif %}
     </div>
     <div class="col-12 mt-2">
         <h2>MCCC pour le parcours</h2>
