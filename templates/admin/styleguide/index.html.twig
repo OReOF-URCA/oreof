@@ -235,6 +235,88 @@
                 </div>
             </div>
         </section>
+
+        {# Section Composant : Dropdown Button #}
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-text mb-2">Dropdown Button</h2>
+                <p class="text-secondary text-sm">Bouton d’actions avec menu contextuel (liens, actions avec confirmation, état désactivé).</p>
+            </div>
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple standard</h3>
+                    <div class="flex items-center gap-3">
+                        {{ component('dropdown_actions', {
+                            label: 'Actions',
+                            help: 'Actions disponibles sur cet élément',
+                            icon: 'icon:ellipsis-vertical',
+                            items: [
+                                {
+                                    label: 'Voir',
+                                    icon: 'icon:info',
+                                    color: 'info',
+                                    url: '#'
+                                },
+                                {
+                                    label: 'Modifier',
+                                    icon: 'icon:edit',
+                                    color: 'warning',
+                                    url: '#'
+                                },
+                                {
+                                    label: 'Supprimer',
+                                    icon: 'icon:delete',
+                                    color: 'danger',
+                                    confirm: 'Voulez-vous vraiment supprimer cet élément ?',
+                                    url: '#'
+                                }
+                            ]
+                        }) }}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">État désactivé + aide</h3>
+                    <div class="flex items-center gap-3">
+                        {{ component('dropdown_actions', {
+                            label: 'Actions',
+                            icon: 'icon:ellipsis-vertical',
+                            items: [
+                                {
+                                    label: 'Modifier',
+                                    icon: 'icon:edit',
+                                    color: 'warning',
+                                    disabled: true,
+                                    help: 'Action indisponible tant que le statut est brouillon.',
+                                    url: '#'
+                                }
+                            ]
+                        }) }}
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-secondary-900 text-secondary-200 p-4 rounded-md text-xs overflow-x-auto"><code>{{ "{{ component('dropdown_actions', {
+    label: 'Actions',
+    icon: 'icon:ellipsis-vertical',
+    items: [
+        { label: 'Voir', icon: 'icon:info', color: 'info', url: '#' },
+        { label: 'Modifier', icon: 'icon:edit', color: 'warning', url: '#' },
+        {
+            label: 'Supprimer',
+            icon: 'icon:delete',
+            color: 'danger',
+            confirm: 'Voulez-vous vraiment supprimer ?',
+            url: '#'
+        }
+    ]
+}) }}"|e }}</code></pre>
+                </div>
+            </div>
+        </section>
+
         {# Section Composant : DeleteButton #}
         <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">

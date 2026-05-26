@@ -88,3 +88,5 @@ Commentaire: Commentaire
 'Nouveau responsable de formation': 'Nouveau responsable de formation'
 'Commentaire sur le changement de responsable de formation': 'Commentaire sur le changement de responsable de formation'
 fiche_matiere.step1_change_rf.title: 'Changement de responsable ou de co-responsable de formation'
+bug_report.titre: 'Signaler un bug'
+bug_report.description: 'Vous avez rencontré un bug sur l’application ? Merci de nous aider à l’améliorer en nous le signalant !'

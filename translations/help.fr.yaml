@@ -19,6 +19,8 @@ annee_universitaire.helps.datePublication: ''
 annee_universitaire.helps.dateTransmissionSes: "Correspond à la date de fin de la période d'enrichissement des projets de DPE."
 annee_universitaire.helps.defaut.help: ''
 annee_universitaire.helps.libelle: ''
+bug_report.helps.title: 'Indiquez un titre court et explicite pour votre rapport de bug.'
+bug_report.helps.message: 'Indiquez une description détaillée du bug rencontré, les étapes pour le reproduire.'
 bloc_competence.helps.libelle: 'Indiquez le libellé du bloc de compétences.'
 campagne_collecte.helps.anneeUniversitaire: campagne_collecte.helps.anneeUniversitaire
 campagne_collecte.helps.codeApogee: 'Code Apogée de la campagne de collecte'

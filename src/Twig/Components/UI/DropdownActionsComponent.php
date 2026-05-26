@@ -1,17 +1,17 @@
 <?php
 /*
  * Copyright (c) 2026. | David Annebicque | ORéOF  - All Rights Reserved
- * @file /Users/davidannebicque/Sites/oreof/src/Twig/Components/DropdownActionsComponent.php
- * @author davidannebicque
- * @project oreof
- * @lastUpdate 17/01/2026 08:33
+ * @file //wsl.localhost/Ubuntu/home/louca/oreof-stack/oreofv2/src/Twig/Components/UI/DropdownActionsComponent.php
+ * @author louca
+ * @project oreofv2
+ * @lastUpdate 19/05/2026 13:58
  */
 
-namespace App\Twig\Components;
+namespace App\Twig\Components\UI;
 
 use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
-#[AsTwigComponent(name: 'dropdown_actions')]
+#[AsTwigComponent(name: 'dropdown_actions', template: 'components/_ui/dropdown_actions.html.twig')]
 class DropdownActionsComponent
 {
     /**
