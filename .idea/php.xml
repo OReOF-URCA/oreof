@@ -12,6 +12,7 @@
   <component name="PhpCSFixer">
     <phpcsfixer_settings>
       <PhpCSFixerConfiguration standards="DoctrineAnnotation;PER;PHP54Migration;PHP56Migration;PHP70Migration;PHP71Migration;PHP73Migration;PHP74Migration;PHP80Migration;PHP81Migration;PHP82Migration;PHPUnit100Migration;PHPUnit30Migration;PHPUnit32Migration;PHPUnit35Migration;PHPUnit43Migration;PHPUnit48Migration;PHPUnit50Migration;PHPUnit52Migration;PHPUnit54Migration;PHPUnit55Migration;PHPUnit56Migration;PHPUnit57Migration;PHPUnit60Migration;PHPUnit75Migration;PHPUnit84Migration;PSR1;PSR12;PSR2;PhpCsFixer;Symfony" tool_path="$PROJECT_DIR$/tools/php-cs-fixer/vendor/bin/php-cs-fixer" />
+      <phpcs_fixer_by_interpreter asDefaultInterpreter="true" interpreter_id="466f54d1-bdc8-44df-9b2f-1fe3db8b355b" standards="DoctrineAnnotation;PER;PHP54Migration;PHP56Migration;PHP70Migration;PHP71Migration;PHP73Migration;PHP74Migration;PHP80Migration;PHP81Migration;PHP82Migration;PHPUnit100Migration;PHPUnit30Migration;PHPUnit32Migration;PHPUnit35Migration;PHPUnit43Migration;PHPUnit48Migration;PHPUnit50Migration;PHPUnit52Migration;PHPUnit54Migration;PHPUnit55Migration;PHPUnit56Migration;PHPUnit57Migration;PHPUnit60Migration;PHPUnit75Migration;PHPUnit84Migration;PSR1;PSR12;PSR2;PhpCsFixer;Symfony" tool_path="/Users/davidannebicque/Sites/oreof/oreofv2/tools/php-cs-fixer/vendor/bin/php-cs-fixer" timeout="30000" />
     </phpcsfixer_settings>
   </component>
   <component name="PhpCodeSniffer">
@@ -226,6 +227,39 @@
       <path value="$PROJECT_DIR$/vendor/thecodingmachine/safe" />
       <path value="$PROJECT_DIR$/vendor/sebastian/git-state" />
       <path value="$PROJECT_DIR$/vendor/sensiolabs/gotenberg-bundle" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/sebastian/diff" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/friendsofphp/php-cs-fixer" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/deprecation-contracts" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/console" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/finder" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/options-resolver" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/stopwatch" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/polyfill-intl-grapheme" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/event-dispatcher" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/polyfill-php80" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/polyfill-intl-normalizer" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/string" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/polyfill-php81" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/polyfill-ctype" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/service-contracts" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/filesystem" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/composer" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/event-dispatcher-contracts" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/polyfill-mbstring" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/symfony/process" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/psr/event-dispatcher" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/psr/log" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/psr/container" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/clue/ndjson-react" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/react/event-loop" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/react/stream" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/react/cache" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/react/dns" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/evenement/evenement" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/react/promise" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/react/child-process" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/react/socket" />
+      <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/fidry/cpu-core-counter" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2">

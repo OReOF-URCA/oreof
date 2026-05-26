@@ -106,3 +106,4 @@ migrations/Version*.php
 
 assets/icons/symfony.svg
 config/reference.php
+/*.png

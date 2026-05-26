@@ -280,9 +280,40 @@ ALTER TABLE ue
 UPDATE semestre
 SET validation_status = 'incomplete'
 WHERE validation_status IS NULL;
+
 UPDATE ue
 SET validation_status = 'incomplete'
 WHERE validation_status IS NULL;
+
 UPDATE element_constitutif
 SET validation_status = 'incomplete'
 WHERE validation_status IS NULL;
+
+
+CREATE TABLE volume_horaire_parcours
+(
+    id                   INT AUTO_INCREMENT NOT NULL,
+    parcours_id          INT              NOT NULL,
+    campagne_collecte_id INT              NOT NULL,
+    heures_cm_pres       DOUBLE PRECISION NOT NULL,
+    heures_td_pres       DOUBLE PRECISION NOT NULL,
+    heures_tp_pres       DOUBLE PRECISION NOT NULL,
+    heures_te_pres       DOUBLE PRECISION NOT NULL,
+    heures_cm_dist       DOUBLE PRECISION NOT NULL,
+    heures_td_dist       DOUBLE PRECISION NOT NULL,
+    heures_tp_dist       DOUBLE PRECISION NOT NULL,
+    volumes_annee        JSON DEFAULT NULL,
+    volumes_semestre     JSON DEFAULT NULL,
+    date_calcul          DATETIME         NOT NULL,
+    INDEX                IDX_9596F3826E38C0DB (parcours_id),
+    INDEX                IDX_9596F382D2CFEAA (campagne_collecte_id),
+    PRIMARY KEY (id)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB;
+ALTER TABLE volume_horaire_parcours
+    ADD CONSTRAINT FK_9596F3826E38C0DB FOREIGN KEY (parcours_id) REFERENCES parcours (id);
+ALTER TABLE volume_horaire_parcours
+    ADD CONSTRAINT FK_9596F382D2CFEAA FOREIGN KEY (campagne_collecte_id) REFERENCES campagne_collecte (id);
+
+
+ALTER TABLE change_rf
+    ADD date_prise_fonction DATETIME DEFAULT NULL;

@@ -74,7 +74,6 @@
     </script>
 {% endblock %}
 
-{% block title %}Formation{% endblock %}
 
 {% block content %}
     <div id="fiche_matiere_header_component">
@@ -131,7 +130,7 @@
 {% endblock %}
 
 {% set header_title %}
-    Fiche EC/matière <strong
+    Fiche EC/matière : <strong
         id="fiche_matiere_libelle">{{ ficheMatiere.libelle }}</strong> {% if ficheMatiere.ficheMatiereParcours|length > 0 %}
     <span class="badge bg-info">Mutualisée</span>{% endif %}
 {% endset %}
@@ -139,44 +138,51 @@
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
         {href: path('structure_fiche_matiere_index'), title: 'Liste des fiches EC/matières'},
+        {title: header_title}
     ]}) }}
 {% endblock %}
 
 {% block bouton_header %}
-    {% if
-        is_granted('EDIT', {route: 'app_fiche_matiere', subject: ficheMatiere})
-        or is_granted('EDIT', {route: 'app_fiche_matiere_hd', subject: 'etablissement'})
-        or is_granted('EDIT', {route: 'app_fiche_matiere', subject: 'formation'})
-        or is_granted('EDIT', {route: 'app_fiche_matiere', subject: 'parcours'})
-        or is_granted('ROLE_ADMIN') %}
-        <a
-                href="{{ path('fiche_matiere_v2_modifier',{slug: ficheMatiere.slug}) }}"
-                class="btn btn-sm btn-outline-warning"
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
-                title="Modifier une fiche EC/matière"
-        >
-            <i class="{{ iconEdit }}"></i>
-            <span> modifier</span>
-        </a>
-    {% endif %}
+    <div class="flex flex-wrap gap-3">
+        {% if
+            is_granted('EDIT', {route: 'app_fiche_matiere', subject: ficheMatiere})
+            or is_granted('EDIT', {route: 'app_fiche_matiere_hd', subject: 'etablissement'})
+            or is_granted('EDIT', {route: 'app_fiche_matiere', subject: 'formation'})
+            or is_granted('EDIT', {route: 'app_fiche_matiere', subject: 'parcours'})
+            or is_granted('ROLE_ADMIN') %}
+            <twig:Button
+                    label="Modifier"
+                    variant="warning"
+                    :soft="false"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:edit"
+                    href="{{ path('fiche_matiere_v2_modifier', {slug: ficheMatiere.slug}) }}"
+                    tooltip="Modifier une fiche EC/matière"
+            />
+        {% endif %}
 
-    <a href="{{ path('app_fiche_matiere_export', {id:ficheMatiere.id}) }}"
-       class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Télécharger en PDF"
-    >
-        <i class="{{ iconDownload }}"></i>
-        <span> Télécharger en PDF</span>
-    </a>
-    <a href="{{ path('structure_fiche_matiere_index') }}"
-       class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Retour à la liste des fiches EC/matières"
-    >
-        <i class="{{ iconBack }}"></i>
-        <span> Retour à la liste des fiches EC/matières</span>
-    </a>
+        <twig:Button
+                label="Télécharger en PDF"
+                variant="info"
+                :soft="false"
+                :outline="true"
+                size="sm"
+                icon="icon:download"
+                :iconEnd="true"
+                href="{{ path('app_fiche_matiere_export', {id: ficheMatiere.id}) }}"
+                tooltip="Télécharger en PDF"
+        />
+
+        <twig:Button
+                label="Retour à la liste des fiches EC/matières"
+                variant="success"
+                :soft="false"
+                :outline="true"
+                size="sm"
+                icon="icon:arrow-left"
+                href="{{ path('structure_fiche_matiere_index') }}"
+                tooltip="Retour à la liste des fiches EC/matières"
+        />
+    </div>
 {% endblock %}
