@@ -379,28 +379,23 @@
                                             {% if show %}
                                                 {% set routeUrl = path(action.route, {id: item.id}|merge(action.route_params)) %}
                                                 {% if action.method == 'delete' %}
-                                                    <twig:Button
-                                                            type="button"
-                                                            variant="danger"
-                                                            size="sm"
-                                                            {{ stimulus_action('crud', 'delete', 'click', {
-                                                                url: routeUrl,
-                                                                csrf: csrf_token('delete' ~ item.id)
-                                                            }) }}
-                                                            label="{{ action.label }}"
-                                                            tooltip="{{ action.label }}"
-                                                            extraClass="{{ action.class }}"
-                                                    >
-                                                        {% if action.icon %}<i class="{{ action.icon }}"></i>{% endif %}
-                                                    </twig:Button>
+                                                    <twig:DeleteButton
+                                                            :soft="true"
+                                                            tooltip="Supprimer"
+                                                            url="{{ routeUrl }}"
+                                                            csrfTokenId="{{ 'delete' ~ item.id }}"
+                                                            title="{{ action.label }}"
+                                                            message="Cette action supprimera définitivement."
+                                                            confirmLabel="Supprimer"
+                                                            cancelLabel="Annuler"
+                                                            id="competence-{{ item.id }}"
+                                                    />
                                                 {% elseif action.method == 'duplicate' %}
                                                     <twig:Button
                                                             type="button"
                                                             variant="success"
                                                             size="sm"
-                                                            {{ stimulus_action('crud', 'duplicate', 'click', {
-                                                                url: routeUrl
-                                                            }) }}
+                                                            href="{{ routeUrl }}"
                                                             label="{{ action.label }}"
                                                             tooltip="{{ action.label }}"
                                                             extraClass="{{ action.class }}"
@@ -454,9 +449,10 @@
                         icon="icon:chevrons-left"
                         :disabled="page == 1"
                         tooltip="Première page"
-                        {{ live_action('goToPage', {'page': 1}) }}
                         extraClass="!h-8 !w-8 !min-w-0 !px-0"
                 />
+                {#                        {{ live_action('goToPage', {'page': 1}) }} #}
+
                 <twig:Button
                         type="button"
                         variant="secondary"
@@ -465,9 +461,9 @@
                         icon="icon:chevron-left"
                         :disabled="page == 1"
                         tooltip="Précédent"
-                        {{ live_action('goToPage', {'page': page - 1}) }}
                         extraClass="!h-8 !w-8 !min-w-0 !px-0"
                 />
+                {#                        {{ live_action('goToPage', {'page': page - 1}) }} #}
 
                 {% for p in range(max(1, page - 2), min(totalPages, page + 2)) %}
                     <twig:Button
@@ -476,9 +472,10 @@
                             :variant="p == page ? 'primary' : 'secondary'"
                             :soft="p == page ? false : true"
                             size="sm"
-                            {{ live_action('goToPage', {'page': p}) }}
                             extraClass="!h-8 !min-w-8 !px-2"
                     />
+                    {#                            {{ live_action('goToPage', {'page': p}) }} #}
+
                 {% endfor %}
 
                 <twig:Button
@@ -489,9 +486,10 @@
                         icon="icon:chevron-right"
                         :disabled="page == totalPages"
                         tooltip="Suivant"
-                        {{ live_action('goToPage', {'page': page + 1}) }}
                         extraClass="!h-8 !w-8 !min-w-0 !px-0"
                 />
+                {#                        {{ live_action('goToPage', {'page': page + 1}) }} #}
+
                 <twig:Button
                         type="button"
                         variant="secondary"
@@ -500,9 +498,10 @@
                         icon="icon:chevrons-right"
                         :disabled="page == totalPages"
                         tooltip="Dernière page"
-                        {{ live_action('goToPage', {'page': totalPages}) }}
                         extraClass="!h-8 !w-8 !min-w-0 !px-0"
                 />
+                {#                        {{ live_action('goToPage', {'page': totalPages}) }} #}
+
             </div>
         {% endif %}
     </div>
