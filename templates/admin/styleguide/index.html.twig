@@ -28,14 +28,14 @@
 {% block content %}
 
 
-
     <div class="space-y-12 pb-12">
 
         {# Section Composant : Palette couleur #}
         <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-text mb-2">Couleurs</h2>
-                <p class="text-secondary text-sm">Palette de couleurs personnalisée TailwindCSS sous forme de blocs continus.</p>
+                <p class="text-secondary text-sm">Palette de couleurs personnalisée TailwindCSS sous forme de blocs
+                    continus.</p>
             </div>
 
             <div class="overflow-x-auto">
@@ -60,98 +60,315 @@
                     <tbody class="text-sm">
                     <tr class="p-0 border-none">
                         <td class="pt-4 pb-2 pr-4 font-medium text-text capitalize align-middle bg-surface">Primary</td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-50"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-100"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-200"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-300"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-400"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-500"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-600"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-700"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-800"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-900"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-primary-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-primary-950"></div></td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-50"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-100"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-200"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-300"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-400"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-500"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-600"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-700"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-800"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-900"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-primary-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-primary-950"></div>
+                        </td>
                     </tr>
 
                     <tr class="p-0 border-none">
-                        <td class="pt-4 pb-2 pr-4 font-medium text-text capitalize align-middle bg-surface">Secondary</td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-50"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-100"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-200"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-300"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-400"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-500"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-600"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-700"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-800"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-900"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-secondary-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-secondary-950"></div></td>
+                        <td class="pt-4 pb-2 pr-4 font-medium text-text capitalize align-middle bg-surface">Secondary
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-50"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-100"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-200"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-300"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-400"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-500"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-600"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-700"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-800"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-900"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-secondary-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-secondary-950"></div>
+                        </td>
                     </tr>
 
                     <tr class="p-0 border-none">
                         <td class="pt-4 pb-2 pr-4 font-medium text-text capitalize align-middle bg-surface">Success</td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-50"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-100"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-200"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-300"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-400"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-500"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-600"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-700"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-800"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-900"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-success-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-success-950"></div></td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-50"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-100"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-200"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-300"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-400"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-500"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-600"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-700"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-800"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-900"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-success-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-success-950"></div>
+                        </td>
                     </tr>
 
                     <tr class="p-0 border-none">
                         <td class="pt-4 pb-2 pr-4 font-medium text-text capitalize align-middle bg-surface">Info</td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-50"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-100"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-200"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-300"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-400"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-500"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-600"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-700"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-800"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-900"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-info-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-info-950"></div></td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-50"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-100"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-200"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-300"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-400"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-500"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-600"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-700"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-800"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-900"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-info-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-info-950"></div>
+                        </td>
                     </tr>
 
                     <tr class="p-0 border-none">
                         <td class="pt-4 pb-2 pr-4 font-medium text-text capitalize align-middle bg-surface">Warning</td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-50"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-100"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-200"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-300"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-400"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-500"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-600"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-700"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-800"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-900"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-warning-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-warning-950"></div></td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-50"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-100"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-200"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-300"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-400"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-500"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-600"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-700"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-800"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-900"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-warning-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-warning-950"></div>
+                        </td>
                     </tr>
 
                     <tr class="p-0 border-none">
                         <td class="pt-4 pb-2 pr-4 font-medium text-text capitalize align-middle bg-surface">Danger</td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-50"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-100"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-200"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-300"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-400"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-500"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-600"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-700"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-800"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-900"></div></td>
-                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14"><div class="w-full h-12 bg-danger-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help" title="bg-danger-950"></div></td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-50 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-50"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-100 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-100"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-200 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-200"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-300 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-300"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-400 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-400"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-500 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-500"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-600 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-600"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-700 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-700"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-800 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-800"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-900 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-900"></div>
+                        </td>
+                        <td class="pt-2 pb-0 px-0 m-0 border-none w-12 h-14">
+                            <div class="w-full h-12 bg-danger-950 rounded-none transition-transform hover:scale-115 hover:z-10 relative cursor-help"
+                                 title="bg-danger-950"></div>
+                        </td>
                     </tr>
                     </tbody>
                 </table>
@@ -242,7 +459,9 @@
         <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
             <div class="mb-6">
                 <h2 class="text-2xl font-bold text-text mb-2">Dropdown Button</h2>
-                <p class="text-secondary text-sm">Bouton d’actions avec menu contextuel (liens, actions avec confirmation, état désactivé).</p>
+                <p class="text-secondary text-sm">Bouton d’actions avec menu contextuel (liens, actions avec
+                    confirmation,
+                    état désactivé).</p>
             </div>
 
             <div class="space-y-8">
@@ -565,5 +784,101 @@
                 </div>
             </div>
         </section>
+
+        {# Section Composant : Card #}
+        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-text mb-2">Card</h2>
+                <p class="text-secondary text-sm">Composant carte réutilisable : titre, description, actions à droite,
+                    contenu et footer optionnel.</p>
+            </div>
+
+            <div>
+                <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Propriétés</h3>
+                <ul class="text-sm text-secondary space-y-1 list-disc list-inside">
+                    <li><code>title</code> - Titre affiché dans l’en-tête de la carte</li>
+                    <li><code>description</code> - Sous-titre ou texte d’aide sous le titre</li>
+                    <li><code>actions</code> - Boutons ou actions affichés à droite de l’en-tête</li>
+                    <li><code>footer</code> - Contenu HTML du pied de carte</li>
+                    <li><code>variant</code> - Style visuel du conteneur : <code>default</code>, <code>elevated</code>
+                        ou
+                        <code>flat</code></li>
+                    <li><code>extraClass</code> - Classes CSS additionnelles pour personnaliser le conteneur</li>
+                </ul>
+            </div>
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple simple</h3>
+                    <twig:Card title="Carte simple" description="Une description sommaire">
+                        <p class="text-sm text-text">Contenu du corps de la carte. Utilisez ce composant pour encapsuler
+                            des
+                            blocs d'information.</p>
+                    </twig:Card>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Avec actions</h3>
+                    <twig:Card
+                            variant="elevated"
+                            title="Carte avec actions"
+                            description="Actions disponibles à droite"
+                            :actions="[
+                                { label: 'Modifier', variant: 'secondary', size: 'sm', href: '#' },
+                                { label: 'Supprimer', variant: 'danger', size: 'sm', outline: true, href: '#' }
+                            ]"
+                    >
+                        <p class="text-sm text-text">La zone principale peut contenir n'importe quel contenu HTML/Twig
+                            (tableau, liste, formulaire réduit...).</p>
+                    </twig:Card>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Avec footer</h3>
+                    {% set card_footer %}
+                        <div class="flex items-center justify-end gap-2">
+                            {{ component('Button', { label: 'Annuler', variant: 'danger', size: 'sm' }) }}
+                            {{ component('Button', { label: 'Enregistrer', variant: 'success', size: 'sm', soft: false }) }}
+                        </div>
+                    {% endset %}
+                    <twig:Card
+                            variant="flat"
+                            title="Carte avec footer"
+                            description="Footer contenant des actions"
+                            footer="{{ card_footer|trim }}">
+                        <p class="text-sm text-text">Contenu principal de la carte. Le footer propose des actions
+                            contextuelles.</p>
+                    </twig:Card>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-secondary-900 text-secondary-200 p-4 rounded-md text-xs overflow-x-auto"><code>{% verbatim %}&lt;twig:Card
+    title="Formulaire"
+    description="Éditer les informations"
+    :actions="[
+        { label: 'Supprimer', variant: 'danger', size: 'sm', outline: true, href: '#' }
+    ]">
+    &lt;p>Contenu et formulaire de la carte&lt;/p>
+&lt;/twig:Card>
+
+{# Avec footer rendu via component('Button', ...) #}
+{% set card_footer %}
+    &lt;div class="flex items-center justify-end gap-2">
+        {{ component('Button', { label: 'Annuler', variant: 'danger', size: 'sm' }) }}
+        {{ component('Button', { label: 'Enregistrer', variant: 'success', size: 'sm', soft: false }) }}
+    &lt;/div>
+{% endset %}
+
+&lt;twig:Card
+    title="Formulaire avec actions"
+    footer="{{ card_footer|trim }}"
+>
+    &lt;p>Contenu principal avec footer personnalisé&lt;/p>
+&lt;/twig:Card>{% endverbatim %}</code></pre>
+                </div>
+            </div>
+        </section>
+
     </div>
 {% endblock %}
