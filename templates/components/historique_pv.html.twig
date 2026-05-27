@@ -3,64 +3,66 @@
     {% if this.type == 'parcours' %}
         {% if this.hasPv == false %}
             {# todo: filtrer uniquement sur DPE pour la mise à jour #}
-            <a
+            <twig:Button
+                    label="{{ 'deposer.le.pv'|trans({}, 'process') }}"
+                    variant="warning"
+                    :outline="true"
+                    :soft="false"
+                    icon="icon:edit"
+                    size="sm"
                     href="{{ path('app_deposer_pv_conseil', {parcours:this.parcours.id}) }}"
-                    class="btn btn-outline-warning btn-sm ms-1"
-                    {{ stimulus_controller('tooltip') }}
-                    data-turbo="true"
-                    data-action="click->modalturbo#open"
-                    title="{{ 'deposer.le.pv.infobulle'|trans({}, 'process') }}"
-            >
-                <i class="{{ iconEdit }}"></i>
-                <span> {{ 'deposer.le.pv'|trans({}, 'process') }}</span>
-            </a>
+                    tooltip="{{ 'deposer.le.pv.infobulle'|trans({}, 'process') }}"
+                    dataAction="click->modalturbo#open"
+            />
         {% else %}
-            <a
+            <twig:Button
+                    label="{{ 'voir.le.pv'|trans({}, 'process') }}"
+                    variant="info"
+                    :outline="true"
+                    :soft="false"
+                    icon="icon:download"
+                    size="sm"
                     href="{{ path('app_upload_download', {context: 'conseils', filename: this.fichier, originalName: this.fichierOriginal|default(this.fichier)}) }}"
                     target="_blank"
-                    class="btn btn-outline-info btn-sm ms-1"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"
-                    title="{{ 'voir.le.pv.infobulle'|trans({}, 'process') }}"
-            >
-                <i class="{{ iconDownload }}"></i>
-                <span> {{ 'voir.le.pv'|trans({}, 'process') }}</span>
-            </a>
+                    rel="noopener noreferrer"
+                    tooltip="{{ 'voir.le.pv.infobulle'|trans({}, 'process') }}"
+            />
         {% endif %}
     {% elseif this.type == 'change_rf' %}
-        {% if this.hasPv == false and this.hasHistorique == true %}
-            <button
-                    {{ stimulus_controller('modal', {
-                        size: 'lg',
-                        nomEvenement: 'refreshPage',
-                        modalTitle: 'deposer.le.pv.title'|trans({}, 'process'),
-                        modalUrl: path('app_deposer_pv_conseil_change_rf', {changeRf:this.changeRf.id}) }) }}
-                    data-action="click->modal#openModal"
-                    class="btn btn-outline-warning btn-sm ms-1"
-                    data-size="lg"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"
-                    title="{{ 'deposer.le.pv.infobulle'|trans({}, 'process') }}"
-            >
-                <i class="{{ iconEdit }}"></i>
-                <span> {{ 'deposer.le.pv'|trans({}, 'process') }}</span>
-            </button>
+         {% if this.hasPv == false and this.hasHistorique == true %}
+            <div {{ stimulus_controller('modal', {
+                size: 'lg',
+                nomEvenement: 'refreshPage',
+                modalTitle: 'deposer.le.pv.title'|trans({}, 'process'),
+                modalUrl: path('app_deposer_pv_conseil_change_rf', {changeRf:this.changeRf.id}) }) }}>
+                <twig:Button
+                        label="{{ 'deposer.le.pv'|trans({}, 'process') }}"
+                        variant="warning"
+                        :outline="true"
+                        :soft="false"
+                        icon="icon:edit"
+                        size="sm"
+                        type="button"
+                        tooltip="{{ 'deposer.le.pv.infobulle'|trans({}, 'process') }}"
+                        dataAction="click->modal#openModal"
+                />
+            </div>
         {% elseif this.hasPv == true and this.hasHistorique == true %}
-            <a
+            <twig:Button
+                    label="{{ 'voir.le.pv'|trans({}, 'process') }}"
+                    variant="info"
+                    :outline="true"
+                    :soft="false"
+                    icon="icon:download"
+                    size="sm"
                     href="{{ path('app_upload_download', {context: 'conseils', filename: this.fichier, originalName: this.fichierOriginal|default(this.fichier)}) }}"
                     target="_blank"
-                    class="btn btn-outline-info btn-sm ms-1"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"
-                    title="{{ 'voir.le.pv.infobulle'|trans({}, 'process') }}"
-            >
-                <i class="{{ iconDownload }}"></i>
-                <span> {{ 'voir.le.pv'|trans({}, 'process') }}</span>
-            </a>
+                    rel="noopener noreferrer"
+                    tooltip="{{ 'voir.le.pv.infobulle'|trans({}, 'process') }}"
+            />
             {% else %}
             -
         {% endif %}
-    {% else %}
-        <span class="badge bg-danger">Erreur de type</span>
+     {% else %}
+        <twig:Badge label="Erreur de type" variant="danger" size="sm"/>
     {% endif %}
-</div>

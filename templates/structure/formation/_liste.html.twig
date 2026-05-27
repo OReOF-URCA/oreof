@@ -67,14 +67,15 @@
                                             mb-1 mb-md-0 justify-content-center">
                                         <div class="text-muted text-small d-md-none">Détails</div>
 
-                                        <button class="ms-2 btn btn-sm btn-outline-primary"
+                                        <button class="inline-flex items-center gap-1 rounded-md border border-primary-200 bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 shadow-sm transition-colors duration-150 cursor-pointer hover:border-primary-300 hover:bg-primary-100 hover:text-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-300 dark:border-primary-700 dark:bg-primary-900 dark:bg-opacity-25 dark:text-primary-200 dark:hover:border-primary-500 dark:hover:bg-primary-900 dark:hover:bg-opacity-35 dark:hover:text-white"
                                                 {{ stimulus_action('structure--formation', 'detail', 'click',
                                                     {formation:formation.id, url: path
                                                         ('structure_parcours_detail_formation', {formation:formation
                                                         .id})}
                                                 ) }}
                                         >
-                                            <i class="fal fa-caret-right"></i> Voir les parcours
+                                            {{ ux_icon('icon:chevron-right', {class: 'h-3.5 w-3.5'}) }}
+                                            <span>Voir les parcours</span>
                                         </button>
 
                                     </div>
