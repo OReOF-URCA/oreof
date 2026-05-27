@@ -58,7 +58,7 @@
 }
 
 .step-label {
-  @apply text-sm font-bold text-slate-700;
+  @apply text-sm font-bold text-secondary-700;
 }
 
 .timeline-step.current .step-label {
@@ -66,7 +66,7 @@
 }
 
 .step-dates {
-  @apply text-xs text-slate-500;
+  @apply text-xs text-secondary-500;
 }
 
 .step-date {
@@ -74,15 +74,15 @@
 }
 
 html[data-theme="dark"] .timeline::before {
-  @apply bg-slate-700;
+  @apply bg-secondary-700;
 }
 
 html[data-theme="dark"] .step-icon {
-  @apply border-slate-600 bg-slate-800 text-slate-100;
+  @apply border-secondary-600 bg-secondary-800 text-secondary-100;
 }
 
 html[data-theme="dark"] .step-label {
-  @apply text-slate-100;
+  @apply text-secondary-100;
 }
 
 html[data-theme="dark"] .timeline-step.current .step-label {
@@ -90,7 +90,7 @@ html[data-theme="dark"] .timeline-step.current .step-label {
 }
 
 html[data-theme="dark"] .step-dates {
-  @apply text-slate-300;
+  @apply text-secondary-300;
 }
 
 html[data-theme="dark"] .timeline-step.current .step-icon {
@@ -98,7 +98,7 @@ html[data-theme="dark"] .timeline-step.current .step-icon {
 }
 
 html[data-theme="dark"] .today-marker::after {
-  @apply border-slate-900;
+  @apply border-secondary-900;
 }
 
 @keyframes tl-pulse {

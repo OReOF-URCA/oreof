@@ -1,10 +1,10 @@
 <div class="space-y-6" {{ stimulus_controller('accessibility') }}>
-    <p class="text-sm text-slate-600 dark:text-slate-300">
+    <p class="text-sm text-secondary-600 dark:text-secondary-300">
         Ces reglages sont appliques immediatement et memorises sur cet appareil.
     </p>
 
     <section class="space-y-2">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Theme</h3>
+        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">Theme</h3>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <button type="button"
                     class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
@@ -28,7 +28,7 @@
     </section>
 
     <section class="space-y-2">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Police</h3>
+        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">Police</h3>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button type="button"
                     class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
@@ -46,7 +46,7 @@
     </section>
 
     <section class="space-y-2">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Taille du texte</h3>
+        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">Taille du texte</h3>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <button type="button"
                     class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
@@ -70,25 +70,25 @@
     </section>
 
     <section class="space-y-3">
-        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Lisibilite</h3>
-        <label class="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800/60">
-            <span class="font-medium text-slate-700 dark:text-slate-200">Mode haut contraste</span>
+        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">Lisibilite</h3>
+        <label class="flex items-center justify-between gap-3 rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2 text-sm dark:border-secondary-700 dark:bg-secondary-800/60">
+            <span class="font-medium text-secondary-700 dark:text-secondary-200">Mode haut contraste</span>
             <input type="checkbox"
-                   class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                   class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500"
                    data-accessibility-target="contrast"
                    data-action="change->accessibility#toggleContrast">
         </label>
-        <label class="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800/60">
-            <span class="font-medium text-slate-700 dark:text-slate-200">Reduire les animations</span>
+        <label class="flex items-center justify-between gap-3 rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2 text-sm dark:border-secondary-700 dark:bg-secondary-800/60">
+            <span class="font-medium text-secondary-700 dark:text-secondary-200">Reduire les animations</span>
             <input type="checkbox"
-                   class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                   class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500"
                    data-accessibility-target="motion"
                    data-action="change->accessibility#toggleMotion">
         </label>
     </section>
 
-    <div class="flex items-center justify-between gap-3 border-t border-slate-200 pt-4 dark:border-slate-700">
-        <p class="text-xs text-slate-500 dark:text-slate-400">Vous pouvez revenir aux reglages par defaut a tout
+    <div class="flex items-center justify-between gap-3 border-t border-secondary-200 pt-4 dark:border-secondary-700">
+        <p class="text-xs text-secondary-500 dark:text-secondary-400">Vous pouvez revenir aux reglages par defaut a tout
             moment.</p>
         <button type="button"
                 class="app-modal-footer-btn app-modal-footer-btn--secondary"

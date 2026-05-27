@@ -66,13 +66,13 @@
 {% block form_widget_simple %}
     {#    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-white border border-slate-200 rounded-sm font-semibold text-slate-700 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm placeholder:text-slate-300' }) %}    #}
 
-    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-slate-50 border border-slate-200 rounded-sm font-bold' }) %}
+    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-slate-50 text-slate-800 border border-slate-200 rounded-sm font-bold placeholder:text-slate-400 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-500' }) %}
     {{ parent() }}
 {% endblock form_widget_simple %}
 
 {# --- TEXTAREA --- #}
 {% block textarea_widget %}
-    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-slate-50 border border-slate-200 rounded-sm font-medium text-slate-700 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm min-h-[150px]' }) %}
+    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-slate-50 text-slate-800 border border-slate-200 rounded-sm font-medium focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm min-h-[150px] placeholder:text-slate-400 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-500' }) %}
     {{ parent() }}
 {% endblock textarea_widget %}
 
@@ -80,8 +80,8 @@
 {% block choice_widget_collapsed %}
     {% set isDisabled = (attr.disabled is defined and attr.disabled) or (disabled is defined and disabled) or (form.vars.disabled is defined and form.vars.disabled) %}
     {% set baseClass = ' w-full p-4 rounded-sm font-semibold focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm appearance-none' %}
-    {% set normalClass = ' bg-slate-50 border border-slate-200 text-slate-700 cursor-pointer' %}
-    {% set disabledClass = ' bg-slate-200 border border-slate-200 text-slate-400 cursor-not-allowed opacity-70' %}
+    {% set normalClass = ' bg-slate-50 border border-slate-200 text-slate-700 cursor-pointer dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100' %}
+    {% set disabledClass = ' bg-slate-200 border border-slate-200 text-slate-400 cursor-not-allowed opacity-70 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500' %}
     {% set attr = attr|merge({ class: attr.class|default('') ~ baseClass ~ (isDisabled ? disabledClass : normalClass) }) %}
     <div class="relative">
         {{ parent() }}
@@ -132,7 +132,7 @@
 
     {% if help is defined and help|trim|trans({}, 'help') != '' %}
         <p class="text-[11px] text-slate-400 italic mt-1 pl-1 flex items-start gap-2">
-            <span class="flex-shrink-0 w-5 h-5 bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] rounded-full">
+            <span class="flex-shrink-0 w-5 h-5 bg-slate-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
                 <twig:UX:Icon name="icon:info"/>
             </span>
             <span>{{ help|trim|trans({}, 'help')|raw }}</span>
@@ -297,9 +297,9 @@
         <div class="flex items-center gap-4">
             <div class="flex-1">
                 <label for="{{ name_field_to_add }}" class="sr-only">{{ name_field_to_add }}</label>
-                <input type="text" class="w-full p-2 bg-white border border-slate-200 rounded-sm text-slate-700"
+                <input type="text" class="w-full p-2 bg-white border border-secondary-200 rounded-sm text-secondary-700"
                        name="{{ name_field_to_add }}" id="{{ name_field_to_add }}">
-                <span class="text-sm text-slate-500 block mt-1">{{ help_to_add }}</span>
+                <span class="text-sm text-secondary-500 block mt-1">{{ help_to_add }}</span>
             </div>
             <div class="flex-none w-24">
                 &nbsp;
@@ -311,7 +311,7 @@
 {# {% block inline_create_entity_select_widget %} #}
 {#    <div class="field-group space-y-2" data-controller="inline-create"> #}
 {#        <div class="flex justify-between items-center"> #}
-{#            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest"> #}
+{#            <label class="text-[10px] font-black text-secondary-400 uppercase tracking-widest"> #}
 {#                {{ form.vars.label ?: 'Sélection' }} #}
 {#            </label> #}
 
@@ -324,7 +324,7 @@
 
 {#        {{ form_widget(form.entity, { #}
 {#            attr: { #}
-{#                class: 'select-field w-full p-4 bg-white border border-slate-200 rounded-2xl font-semibold appearance-none cursor-pointer focus:ring-4 focus:ring-indigo-50', #}
+{#                class: 'select-field w-full p-4 bg-white border border-secondary-200 rounded-2xl font-semibold appearance-none cursor-pointer focus:ring-4 focus:ring-indigo-50', #}
 {#                'data-inline-create-target': 'select' #}
 {#            } #}
 {#        }) }} #}
@@ -346,7 +346,7 @@
 
         {{ form_widget(form.entity, {
             attr: {
-                class: 'select-field w-full p-4 bg-white border border-slate-200 rounded-2xl font-semibold appearance-none cursor-pointer focus:ring-4 focus:ring-indigo-50',
+                class: 'select-field w-full p-4 bg-white border border-secondary-200 rounded-2xl font-semibold appearance-none cursor-pointer focus:ring-4 focus:ring-indigo-50',
                 'data-inline-create-target': 'select',
                 'data-inline-create-original-required': form.entity.vars.required ? '1' : '0'
 
@@ -385,7 +385,7 @@
             {#                {% set childId = child.vars.id %} #}
 
 
-            {#                <label for="{{ childId }}" class="relative flex flex-col p-4 bg-white border border-slate-200 rounded-sm cursor-pointer shadow-sm hover:border-indigo-300 transition-all group"> #}
+            {#                <label for="{{ childId }}" class="relative flex flex-col p-4 bg-white border border-secondary-200 rounded-sm cursor-pointer shadow-sm hover:border-indigo-300 transition-all group"> #}
 
             {#                    {{ form_widget(child, { #}
             {#                    id: childId, #}
@@ -401,28 +401,28 @@
 
             {#                    <div class="relative z-10"> #}{# On met le contenu dans un z-index pour rester au dessus du fond #}
             {#                        <div class="flex justify-between items-start mb-2"> #}
-            {#            <span class="w-10 h-10 bg-slate-50 text-slate-600 rounded-sm flex items-center justify-center peer-checked:group-[]:bg-indigo-600 peer-checked:group-[]:text-white transition-colors mr-3 p-1"> #}
+            {#            <span class="w-10 h-10 bg-secondary-50 text-secondary-600 rounded-sm flex items-center justify-center peer-checked:group-[]:bg-indigo-600 peer-checked:group-[]:text-white transition-colors mr-3 p-1"> #}
             {#                {% if icon %} #}
             {#                    <i class="{{ icon }} text-xl" aria-hidden="true"></i> #}
             {#                {% endif %} #}
             {#            </span> #}
 
-            {#            <div class="h-4 w-4 rounded-full border-2 border-slate-300 peer-checked:group-[]:border-indigo-600 peer-checked:group-[]:bg-indigo-600 flex items-center justify-center transition-all"> #}
+            {#            <div class="h-4 w-4 rounded-full border-2 border-secondary-300 peer-checked:group-[]:border-indigo-600 peer-checked:group-[]:bg-indigo-600 flex items-center justify-center transition-all"> #}
             {#                <div class="h-1.5 w-1.5 rounded-full bg-white opacity-0 peer-checked:group-[]:opacity-100 transition-opacity"></div> #}
             {#            </div> #}
             {#        </div> #}
 
-            {#        <span class="font-bold text-slate-900 leading-tight block">{{ child.vars.label|trans }}</span> #}
+            {#        <span class="font-bold text-secondary-900 leading-tight block">{{ child.vars.label|trans }}</span> #}
 
             {#        {% if subtitle %} #}
-            {#            <span class="text-xs text-slate-500 leading-tight mt-1 block"> #}
+            {#            <span class="text-xs text-secondary-500 leading-tight mt-1 block"> #}
             {#                {{ subtitle|trans }} #}
             {#            </span> #}
             {#        {% endif %} #}
             {#    </div> #}
             {# </label> #}
 
-            {#                <label for="{{ childId }}" class="relative flex flex-col p-4 bg-white border border-slate-200 rounded-sm cursor-pointer shadow-sm hover:border-indigo-300 transition-all has-[:checked]:border-indigo-600 has-[:checked]:ring-2 has-[:checked]:ring-indigo-100 group"> #}
+            {#                <label for="{{ childId }}" class="relative flex flex-col p-4 bg-white border border-secondary-200 rounded-sm cursor-pointer shadow-sm hover:border-indigo-300 transition-all has-[:checked]:border-indigo-600 has-[:checked]:ring-2 has-[:checked]:ring-indigo-100 group"> #}
             {#                    {{ form_widget(child, #}{# } #}
             {#                        attr: #}{# } #}
             {#                            class: 'sr-only', #}
@@ -431,17 +431,17 @@
             {#                    }) }} #}
             {#                    <input type="radio" name="mccc_type" value="ct" class="sr-only"> #}
             {#                    <div class="flex justify-between items-start mb-2"> #}
-            {#                        <span class="w-10 h-10 bg-slate-50 text-slate-600 rounded-sm flex items-center justify-center group-has-[:checked]:bg-indigo-600 group-has-[:checked]:text-white transition-colors mr-3 p-1"> #}
+            {#                        <span class="w-10 h-10 bg-secondary-50 text-secondary-600 rounded-sm flex items-center justify-center group-has-[:checked]:bg-indigo-600 group-has-[:checked]:text-white transition-colors mr-3 p-1"> #}
             {#                            {% if icon %} #}
             {#                                <i class="{{ icon }} text-xl" aria-hidden="true"></i> #}
             {#                            {% endif %} #}
             {#                        </span> #}
-            {#                        <div class="h-4 w-4 rounded-full border-2 border-slate-300 group-has-[:checked]:border-indigo-600 group-has-[:checked]:bg-indigo-600 flex items-center justify-center"> #}
+            {#                        <div class="h-4 w-4 rounded-full border-2 border-secondary-300 group-has-[:checked]:border-indigo-600 group-has-[:checked]:bg-indigo-600 flex items-center justify-center"> #}
             {#                            <div class="h-1.5 w-1.5 rounded-full bg-white"></div> #}
             {#                        </div> #}
             {#                    </div> #}
-            {#                    <span class="font-bold text-slate-900">{{ child.vars.label }}</span> #}
-            {#                    <span class="text-xs text-slate-500 leading-tight"> #}
+            {#                    <span class="font-bold text-secondary-900">{{ child.vars.label }}</span> #}
+            {#                    <span class="text-xs text-secondary-500 leading-tight"> #}
             {#                         {% if subtitle %} #}
             {#                            {{ subtitle }} #}
             {#                        {% endif %} #}
@@ -467,28 +467,28 @@
                     }) }}
 
                     {# 2. Le LABEL est un frère de l'input. On lui donne une classe de base. #}
-                    <label for="{{ childId }}" class="relative flex flex-col h-full p-4 bg-white border-2 border-slate-200 rounded-lg cursor-pointer transition-all
+                    <label for="{{ childId }}" class="relative flex flex-col h-full p-4 bg-white border-2 border-secondary-200 rounded-lg cursor-pointer transition-all
             peer-checked:border-indigo-600 peer-checked:ring-4 peer-checked:ring-indigo-50">
 
                         <div class="flex justify-between items-start mb-3">
                             {# ICI : On utilise les sélecteurs arbitraires de Tailwind pour cibler l'état du PEER (l'input) #}
-                            <div class="w-10 h-10 bg-slate-100 text-slate-500 rounded-md flex items-center justify-center transition-colors
+                            <div class="w-10 h-10 bg-secondary-100 text-secondary-500 rounded-md flex items-center justify-center transition-colors
                     peer-checked:bg-indigo-600 peer-checked:text-white">
                                 {% if icon %}
                                     <i class="{{ icon }} text-lg"></i>
                                 {% endif %}
                             </div>
 
-                            <div class="h-5 w-5 rounded-full border-2 border-slate-300 flex items-center justify-center transition-all
+                            <div class="h-5 w-5 rounded-full border-2 border-secondary-300 flex items-center justify-center transition-all
                     peer-checked:border-indigo-600 peer-checked:bg-indigo-600">
                                 <div class="h-2 w-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
                             </div>
                         </div>
 
-                        <span class="font-bold text-slate-900 leading-tight">{{ child.vars.label|trans }}</span>
+                        <span class="font-bold text-secondary-900 leading-tight">{{ child.vars.label|trans }}</span>
 
                         {% if subtitle %}
-                            <span class="text-xs text-slate-500 mt-1 italic">{{ subtitle|trans }}</span>
+                            <span class="text-xs text-secondary-500 mt-1 italic">{{ subtitle|trans }}</span>
                         {% endif %}
                     </label>
                 </div>
@@ -500,7 +500,7 @@
             {#                    {% set childId = child.vars.id %} #}
 
             {#                    #}{# On place le 'group' ici pour qu'il soit UNIQUE à chaque carte #}
-            {#                    <label for="{{ childId }}" class="group relative flex flex-col p-4 bg-white border-2 border-slate-200 rounded-lg cursor-pointer transition-all #}
+            {#                    <label for="{{ childId }}" class="group relative flex flex-col p-4 bg-white border-2 border-secondary-200 rounded-lg cursor-pointer transition-all #}
             {#        has-[:checked]:border-indigo-600 has-[:checked]:ring-4 has-[:checked]:ring-indigo-50"> #}
 
             {#                        {{ form_widget(child, { #}
@@ -515,7 +515,7 @@
             {#                        <div class="flex justify-between items-start mb-3"> #}
             {#                            #}{# ICI : On dit à la div de l'icône de ne regarder QUE si son propre parent direct est coché #}
             {#                            <div class="w-10 h-10 rounded-md flex items-center justify-center transition-colors #}
-            {#                bg-slate-100 text-slate-500 #}
+            {#                bg-secondary-100 text-secondary-500 #}
             {#                group-has-[:checked]:bg-indigo-600 group-has-[:checked]:text-white"> #}
 
             {#                                {% if icon %} #}
@@ -524,23 +524,23 @@
             {#                            </div> #}
 
             {#                            #}{# IDEM pour le cercle radio #}
-            {#                            <div class="h-5 w-5 rounded-full border-2 border-slate-300 flex items-center justify-center transition-all #}
+            {#                            <div class="h-5 w-5 rounded-full border-2 border-secondary-300 flex items-center justify-center transition-all #}
             {#                group-has-[:checked]:border-indigo-600 group-has-[:checked]:bg-indigo-600"> #}
             {#                                <div class="h-2 w-2 rounded-full bg-white opacity-0 group-has-[:checked]:opacity-100 transition-opacity"></div> #}
             {#                            </div> #}
             {#                        </div> #}
 
-            {#                        <span class="font-bold text-slate-900 leading-tight">{{ child.vars.label|trans }}</span> #}
+            {#                        <span class="font-bold text-secondary-900 leading-tight">{{ child.vars.label|trans }}</span> #}
 
             {#                        {% if subtitle %} #}
-            {#                            <span class="text-xs text-slate-500 mt-1 italic">{{ subtitle|trans }}</span> #}
+            {#                            <span class="text-xs text-secondary-500 mt-1 italic">{{ subtitle|trans }}</span> #}
             {#                        {% endif %} #}
             {#                    </label> #}
             {#                {% endfor %} #}
         </div>
 
         {% if form.vars.help %}
-            <p class="text-xs text-slate-500">{{ form.vars.help }}</p>
+            <p class="text-xs text-secondary-500">{{ form.vars.help }}</p>
         {% endif %}
     </div>
 {% endblock %}
@@ -552,7 +552,7 @@
         <label class="flex items-start gap-3 cursor-pointer">
             {{ form_widget(form, {
                 attr: {
-                    class: 'mt-1 h-4 w-4 rounded border-gray-300'
+                    class: 'mt-1 h-4 w-4 rounded border-gray-300 dark:border-secondary-600 dark:bg-secondary-900 dark:checked:bg-indigo-600 dark:checked:border-indigo-600'
                 }
             }) }}
             {{ form_label(form) }}

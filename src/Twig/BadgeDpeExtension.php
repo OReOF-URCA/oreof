@@ -235,7 +235,7 @@ class BadgeDpeExtension extends AbstractExtension
             'warning' => 'border border-amber-300 bg-amber-50 text-amber-700',
             'danger' => 'border border-rose-300 bg-rose-50 text-rose-700',
             'info' => 'border border-cyan-300 bg-cyan-50 text-cyan-700',
-            'secondary' => 'border border-slate-300 bg-slate-100 text-slate-700',
+            'secondary' => 'border border-secondary-300 bg-secondary-100 text-secondary-700',
         ];
 
         $classes = trim('me-1 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ' . ($colors[$badge->variant] ?? $colors['secondary']));

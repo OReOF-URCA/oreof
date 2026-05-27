@@ -174,20 +174,20 @@ export default class extends Controller {
     const div = document.createElement('div')
     const nbEpreuves = document.querySelectorAll('.epreuve').length
     const numEp = nbEpreuves + 1
-    div.className = 'epreuve grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-12'
+    div.className = 'epreuve grid grid-cols-1 gap-3 rounded-lg border border-secondary-200 bg-white p-4 md:grid-cols-12'
     div.innerHTML = `
       <div class="md:col-span-4">
-        <strong class="text-slate-800">Epreuve N°${numEp}</strong>
+        <strong class="text-secondary-800">Epreuve N°${numEp}</strong>
       </div>
       <div class="md:col-span-6">
-        <label for="pourcentage_s${numEp}_cc" class="mb-1 block text-sm font-medium text-slate-700">Pourcentage</label>
-        <div class="flex rounded-lg border border-slate-300 bg-white">
-          <input type="text" class="pourcentage synchro-mccc block w-full rounded-l-lg border-0 bg-transparent px-3 py-2 text-sm text-slate-900"
+        <label for="pourcentage_s${numEp}_cc" class="mb-1 block text-sm font-medium text-secondary-700">Pourcentage</label>
+        <div class="flex rounded-lg border border-secondary-300 bg-white">
+          <input type="text" class="pourcentage synchro-mccc block w-full rounded-l-lg border-0 bg-transparent px-3 py-2 text-sm text-secondary-900"
                  id="pourcentage_s${numEp}_cc"
                  name="pourcentage[${numEp}]"
                  data-action="change->mccc--licence#saveDataCci"
                  value="">
-          <span class="inline-flex items-center rounded-r-lg border-l border-slate-300 bg-slate-50 px-3 text-sm text-slate-600">%</span>
+          <span class="inline-flex items-center rounded-r-lg border-l border-secondary-300 bg-secondary-50 px-3 text-sm text-secondary-600">%</span>
         </div>
       </div>
       <div class="md:col-span-2 md:pt-6">
@@ -207,7 +207,7 @@ export default class extends Controller {
     const div = document.createElement('div')
     const nbEpreuves = document.querySelectorAll('.epreuve_s2_ct').length
     const numEp = nbEpreuves + 1
-    div.className = 'epreuve_s2_ct grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-12'
+    div.className = 'epreuve_s2_ct grid grid-cols-1 gap-3 rounded-lg border border-secondary-200 bg-white p-4 md:grid-cols-12'
 
     // récupérer le contenu de la première épreuve, et le dupliquer
     // const epreuve1 = document.querySelector('.epreuve_s2_ct')
@@ -302,7 +302,7 @@ export default class extends Controller {
       </div>`
 
     const div = document.createElement('div')
-    div.className = 'epreuve_ct grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-12'
+    div.className = 'epreuve_ct grid grid-cols-1 gap-3 rounded-lg border border-secondary-200 bg-white p-4 md:grid-cols-12'
     div.innerHTML = html.innerHTML
     document.getElementById('epreuves_ct').appendChild(div)
 
@@ -358,7 +358,7 @@ export default class extends Controller {
       </div>`
 
     const div = document.createElement('div')
-    div.className = 'epreuve_cc_autre grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-12'
+    div.className = 'epreuve_cc_autre grid grid-cols-1 gap-3 rounded-lg border border-secondary-200 bg-white p-4 md:grid-cols-12'
     div.innerHTML = html.innerHTML
     document.getElementById('epreuves_cc_autre').appendChild(div)
 

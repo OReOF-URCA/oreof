@@ -125,27 +125,27 @@ export default class extends Controller {
     row.dataset.isNew = 'true'
     row.dataset.translationKey = ''
     row.dataset.originalValue = ''
-    row.classList.add('border-b', 'border-slate-200', 'bg-blue-50/40')
+    row.classList.add('border-b', 'border-secondary-200', 'bg-blue-50/40')
 
     row.innerHTML = `
       <td class="px-4 py-2 align-top">
-        <span data-role="key-display" class="hidden font-mono text-xs text-slate-700"></span>
+        <span data-role="key-display" class="hidden font-mono text-xs text-secondary-700"></span>
         <input
           data-role="key-input"
           type="text"
           placeholder="nouvelle.cle"
-          class="w-full rounded-md border border-blue-400 bg-white px-2 py-1.5 font-mono text-xs text-slate-800
+          class="w-full rounded-md border border-blue-400 bg-white px-2 py-1.5 font-mono text-xs text-secondary-800
                  focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
         />
       </td>
       <td class="px-4 py-2 align-top">
-        <span data-role="value-display" class="hidden text-sm text-slate-700"></span>
+        <span data-role="value-display" class="hidden text-sm text-secondary-700"></span>
         <div class="flex flex-col gap-1">
           <input
             data-role="value-input"
             type="text"
             placeholder="Valeur de la traduction"
-            class="w-full rounded-md border border-blue-400 bg-white px-3 py-1.5 text-sm text-slate-800
+            class="w-full rounded-md border border-blue-400 bg-white px-3 py-1.5 text-sm text-secondary-800
                    focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
           <p data-role="error" class="hidden text-xs text-red-600"></p>
@@ -165,8 +165,8 @@ export default class extends Controller {
           </button>
           <button type="button"
                   data-action="translations#cancel"
-                  class="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white
-                         px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                  class="inline-flex items-center gap-1 rounded-md border border-secondary-300 bg-white
+                         px-2.5 py-1.5 text-xs font-medium text-secondary-600 hover:bg-secondary-50 transition-colors">
             Annuler
           </button>
         </div>
