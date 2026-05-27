@@ -1,0 +1,10 @@
+{# Colonne : Référent #}
+{% if item.responsableFicheMatiere != null %}
+    {{ item.responsableFicheMatiere.display }}
+{% else %}
+    <twig:Badge
+            label="Référent non défini"
+            variant="warning"
+    />
+{% endif %}
+

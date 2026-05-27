@@ -1,0 +1,43 @@
+{# Colonne : Actions #}
+{% if item.slug != "" %}
+    <div class="flex items-center justify-end gap-2">
+        <a href="{{ path('fiche_matiere_v2_voir',{slug: item.slug}) }}"
+           class="inline-flex items-center gap-1 rounded-lg border border-cyan-200 bg-white px-2 py-1 text-xs font-semibold text-cyan-600 shadow-sm transition hover:border-cyan-400 hover:text-cyan-900 dark:border-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-200 dark:hover:border-cyan-500"
+           title="Voir la fiche EC/matière"
+           target="_blank">
+            {{ ux_icon('icon:info', {class: 'h-4 w-4'}) }}
+            <span>Voir</span>
+        </a>
+
+        {{ component('dropdown_actions', {
+            label: 'Actions',
+            help: 'Actions disponibles pour cette fiche',
+            icon: 'icon:ellipsis-vertical',
+            items: [
+                {
+                    label: 'Modifier',
+                    icon: 'icon:edit',
+                    color: 'warning',
+                    url: path('fiche_matiere_v2_modifier', {slug: item.slug}),
+                    target: '_blank'
+                },
+                {
+                    label: 'Dupliquer',
+                    icon: 'icon:duplicate',
+                    color: 'info',
+                    url: path('app_fiche_matiere_dupliquer', {slug: item.slug})
+                },
+                {
+                    label: 'Supprimer',
+                    icon: 'icon:delete',
+                    color: 'danger',
+                    url: path('app_fiche_matiere_delete', {slug: item.slug}),
+                    csrf: csrf_token('delete' ~ item.id)
+                }
+            ]
+        }) }}
+    </div>
+{% else %}
+    <span class="inline-flex rounded-full border border-rose-300 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:border-rose-700 dark:bg-rose-950/30 dark:text-rose-300">Erreur</span>
+{% endif %}
+

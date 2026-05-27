@@ -1,0 +1,25 @@
+{# Colonne : Libellé + Contexte + Référent #}
+<div class="space-y-2">
+    <div class="flex flex-col gap-1">
+        <span class="font-semibold text-slate-900 dark:text-white">{{ item.libelle }}</span>
+        {% if item.sigle != null %}
+            <span class="text-xs text-slate-500 dark:text-slate-400">{{ item.sigle }}</span>
+        {% endif %}
+    </div>
+    <div class="text-xs text-slate-500 dark:text-slate-400">
+        {% if item.parcours != null %}
+            {% if item.parcours.formation.hasParcours == true %}
+                <span class="font-medium">{{ item.parcours.formation.display }}</span> › {{ item.parcours.libelle }}
+            {% else %}
+                <span class="font-medium">{{ item.parcours.formation.display }}</span>
+            {% endif %}
+        {% else %}
+            <twig:Badge
+                    label="Sans parcours"
+                    variant="warning"
+                    size="xs"
+            />
+        {% endif %}
+    </div>
+</div>
+

@@ -9,6 +9,7 @@
 
 namespace App\Twig\Components;
 
+use Doctrine\Common\Collections\Collection;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\Attribute\LiveArg;
 use Symfony\UX\LiveComponent\Attribute\LiveProp;
@@ -18,14 +19,16 @@ use Symfony\UX\TwigComponent\Attribute\ExposeInTemplate;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\UX\TwigComponent\Attribute\PostMount;
-use Symfony\UX\TwigComponent\Attribute\PreMount;
 
 #[AsLiveComponent('DataTable', template: 'components/datatable.html.twig')]
 class DataTableComponent
 {
     use DefaultActionTrait;
 
-    #[LiveProp]
+    /**
+     * config n'est pas un LiveProp : il n'est utilisé qu'au premier mount.
+     * Il ne doit pas être sérialisé (peut contenir des Entity objects).
+     */
     public array $config = [];
 
     #[LiveProp(writable: true)]
@@ -38,10 +41,10 @@ class DataTableComponent
     public string $sortDirection = 'asc';
 
     #[LiveProp(writable: true)]
-    public array $filters = [];
+    public string $globalSearch = '';
 
     #[LiveProp(writable: true)]
-    public string $globalSearch = '';
+    public array $filters = [];
 
     #[LiveProp(writable: true)]
     public bool $filtersOpen = false;
@@ -50,6 +53,9 @@ class DataTableComponent
     #[LiveProp]
     public string $entityClass = '';
 
+    /**
+     * Contient uniquement des scalaires/tableaux de scalaires : sérialisable.
+     */
     #[LiveProp]
     public array $columns = [];
 
@@ -62,6 +68,12 @@ class DataTableComponent
     #[LiveProp]
     public array $baseWheres = [];
 
+    /**
+     * Stocke des références sérialisables aux entités :
+     *   entity  → ['__type' => 'entity',     '__entity' => FQCN, '__id' => id]
+     *   collection → ['__type' => 'collection', '__entity' => FQCN, '__ids' => [id, …]]
+     *   scalar  → valeur brute
+     */
     #[LiveProp]
     public array $baseParameters = [];
 
@@ -89,6 +101,74 @@ class DataTableComponent
     {
     }
 
+    // ─── Helpers de sérialisation ────────────────────────────────────────────
+
+    /**
+     * Converts entity/collection values to serializable reference arrays.
+     */
+    private function dehydrateEntityParameters(array $params): array
+    {
+        $result = [];
+        foreach ($params as $key => $value) {
+            if ($value instanceof Collection) {
+                $entityClass = null;
+                $ids = [];
+                foreach ($value as $item) {
+                    if ($entityClass === null) {
+                        $entityClass = $item::class;
+                    }
+                    if (method_exists($item, 'getId')) {
+                        $ids[] = $item->getId();
+                    }
+                }
+                $result[$key] = [
+                    '__type' => 'collection',
+                    '__entity' => $entityClass,
+                    '__ids' => $ids,
+                ];
+            } elseif (is_object($value) && method_exists($value, 'getId')) {
+                $result[$key] = [
+                    '__type' => 'entity',
+                    '__entity' => $value::class,
+                    '__id' => $value->getId(),
+                ];
+            } else {
+                $result[$key] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Re-fetches entity/collection from the stored reference array.
+     */
+    private function rehydrateParameter(mixed $value): mixed
+    {
+        if (!is_array($value) || !isset($value['__type'])) {
+            return $value;
+        }
+
+        if ($value['__type'] === 'entity') {
+            return $this->entityManager->getReference($value['__entity'], $value['__id']);
+        }
+
+        if ($value['__type'] === 'collection') {
+            if (empty($value['__ids']) || empty($value['__entity'])) {
+                return [];
+            }
+
+            return array_map(
+                fn(int|string $id) => $this->entityManager->getReference($value['__entity'], $id),
+                $value['__ids']
+            );
+        }
+
+        return $value;
+    }
+
+    // ─── Mount ───────────────────────────────────────────────────────────────
+
     #[PostMount]
     public function mount(): void
     {
@@ -98,7 +178,12 @@ class DataTableComponent
         $this->actions = $this->config['actions'] ?? [];
         $this->baseJoins = $this->config['baseJoins'] ?? [];
         $this->baseWheres = $this->config['baseWheres'] ?? [];
-        $this->baseParameters = $this->config['baseParameters'] ?? [];
+
+        // Convertir les entités en références sérialisables
+        $this->baseParameters = $this->dehydrateEntityParameters(
+            $this->config['baseParameters'] ?? []
+        );
+
         $selection = is_array($this->config['selection'] ?? null) ? $this->config['selection'] : [];
 
         $this->selectable = (bool)($selection['enabled'] ?? false);
@@ -130,7 +215,10 @@ class DataTableComponent
                 continue;
             }
 
-            $columnId = $column['id'] ?? $column['field'];
+            $columnId = $column['id'] ?? $column['field'] ?? null;
+            if (null === $columnId) {
+                continue;
+            }
 
             if (($column['type'] ?? 'text') === 'date') {
                 $existingValue = $this->filters[$columnId] ?? null;
@@ -201,12 +289,16 @@ class DataTableComponent
             if (!is_string($name) || '' === $name) {
                 continue;
             }
-            $qb->setParameter($name, $value);
+            // Réhydrate les références d'entités stockées sous forme sérialisable
+            $qb->setParameter($name, $this->rehydrateParameter($value));
         }
 
         // Auto-join des relations utilisées dans les colonnes
         foreach ($this->columns as $column) {
-            $field = $column['field'];
+            $field = $column['field'] ?? null;
+            if (null === $field || strpos($field, '.') === false) {
+                continue;
+            }
             if (strpos($field, '.') !== false) {
                 $parts = explode('.', $field);
                 $currentAlias = 'e';
@@ -240,7 +332,10 @@ class DataTableComponent
                 continue;
             }
 
-            $field = $column['field'];
+            $field = $column['field'] ?? null;
+            if (null === $field) {
+                continue;
+            }
 
             $paramName = 'f_' . str_replace('-', '_', (string)$filterKey);
 
@@ -422,7 +517,7 @@ class DataTableComponent
     private function findColumn(string $field): ?array
     {
         foreach ($this->columns as $column) {
-            if ($column['field'] === $field) {
+            if (($column['field'] ?? null) === $field) {
                 return $column;
             }
         }
@@ -436,7 +531,6 @@ class DataTableComponent
                 return $column;
             }
         }
-
         return null;
     }
 
@@ -467,7 +561,7 @@ class DataTableComponent
             return;
         }
 
-        $searchableColumns = array_filter($this->columns, fn($col) => $col['searchable'] ?? true);
+        $searchableColumns = array_filter($this->columns, fn($col) => ($col['searchable'] ?? true) && isset($col['field']));
 
         if (empty($searchableColumns)) {
             return;

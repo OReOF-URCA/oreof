@@ -1,0 +1,325 @@
+<div class="space-y-4">
+    {% set sort = params.sort is defined ? params.sort : 'mention' %}
+    {% set direction = params.direction is defined ? params.direction : 'asc' %}
+    {% set activeFilters = 0 %}
+
+    {# Compter les filtres actifs #}
+    {% if params['mention'] is defined and params['mention'] %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+    {% if params['parcours'] is defined and params['parcours'] %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+    {% if params['libelle'] is defined and params['libelle'] %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+    {% if params['referent'] is defined and params['referent'] %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+    {% if params['utilise'] is defined and params['utilise'] and params['utilise'] != 'all' %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+    {% if params['remplissage'] is defined and params['remplissage'] and params['remplissage'] != 'all' %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+
+    {# Résumé informatif #}
+    <div class="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100">
+        <div class="flex flex-wrap items-center gap-2">
+            <span><strong>{{ ficheMatieres|length }}</strong> sur <strong>{{ totalFiches }}</strong> fiche{{ ficheMatieres|length > 1 ? 's' : '' }} matière{{ ficheMatieres|length > 1 ? 's' : '' }} affichée{{ ficheMatieres|length > 1 ? 's' : '' }}</span>
+
+            {% if activeFilters > 0 %}
+                <span class="text-xs opacity-75">•</span>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-cyan-200 px-2.5 py-1 text-xs font-semibold dark:bg-cyan-900">
+                    {{ ux_icon('icon:filter', {class: 'h-3.5 w-3.5'}) }}
+                    {{ activeFilters }} filtre{{ activeFilters > 1 ? 's' : '' }} actif{{ activeFilters > 1 ? 's' : '' }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Panneau de filtres repliable #}
+    {% embed 'components/filter_panel.html.twig' with {
+        title: 'Filtres',
+        activeFilters: activeFilters,
+        fieldsTitle: 'Filtres avancés',
+        collapsible: true,
+        collapsedByDefault: true
+    } %}
+        {% block search %}
+            <label for="filter-libelle" class="sr-only">Recherche</label>
+            <div class="relative">
+                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                    {{ ux_icon('icon:search', {class: 'h-4 w-4'}) }}
+                </span>
+                <input type="text"
+                       id="filter-libelle"
+                       class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400"
+                       placeholder="Rechercher un libellé..."
+                       value="{{ params.libelle|default('') }}"
+                        {{ stimulus_action('crud', 'filter', 'change', {'field': 'libelle'}) }}>
+            </div>
+        {% endblock %}
+
+        {% block actions %}
+            <button type="button"
+                    class="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 shadow-sm transition hover:border-red-400 hover:text-red-900 dark:border-red-600 dark:bg-red-900/30 dark:text-red-200 dark:hover:border-red-500"
+                    {{ stimulus_action('crud', 'effaceFiltre', 'click', {}) }}>
+                {{ ux_icon('icon:sync', {class: 'h-4 w-4'}) }}
+                Réinitialiser
+            </button>
+
+            {% if collapsible|default(false) %}
+                <label for="{{ 'filter-panel-toggle-' ~ random() }}"
+                       class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:text-white"
+                       title="Afficher/masquer les filtres"
+                       aria-label="Afficher ou masquer les filtres">
+                    {{ ux_icon('icon:filter', {class: 'h-4 w-4'}) }}
+                    Filtres
+                    {% if activeFilters > 0 %}
+                        <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1.5 py-0.5 text-[10px] font-bold text-white dark:bg-indigo-500">
+                            {{ activeFilters }}
+                        </span>
+                    {% endif %}
+                </label>
+            {% else %}
+                <span class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                    {{ ux_icon('icon:filter', {class: 'h-4 w-4'}) }}
+                    Filtres
+                    {% if activeFilters > 0 %}
+                        <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1.5 py-0.5 text-[10px] font-bold text-white dark:bg-indigo-500">
+                            {{ activeFilters }}
+                        </span>
+                    {% endif %}
+                </span>
+            {% endif %}
+        {% endblock %}
+
+        {% block fields %}
+            {% if hd == false %}
+                <div>
+                    <label for="filter-mention"
+                           class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Mention</label>
+                    <select id="filter-mention"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                            {{ stimulus_action('crud', 'filter', 'change', {'field': 'mention'}) }}
+                            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                        <option value="">Toutes les mentions</option>
+                        {% for mention in mentions %}
+                            <option value="{{ mention.id }}"
+                                    {% if params['mention'] is defined and params['mention'] == mention.id %}selected{% endif %}>{{ mention.display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+
+                <div>
+                    <label for="filter-parcours"
+                           class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Parcours</label>
+                    <select id="filter-parcours"
+                            class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                            {{ stimulus_action('crud', 'filter', 'change', {'field': 'parcours'}) }}
+                            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                        <option value="">Tous les parcours</option>
+                        {% for parc in parcours %}
+                            <option value="{{ parc.id }}"
+                                    {% if params['parcours'] is defined and params['parcours'] == parc.id %}selected{% endif %}>{{ parc.libelle }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+
+            <div>
+                <label for="filter-referent"
+                       class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Référent</label>
+                <select id="filter-referent"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                        {{ stimulus_action('crud', 'filter', 'change', {'field': 'referent'}) }}
+                        {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                    <option value="">Tous les référents</option>
+                    <option value="vide"
+                            {% if params['referent'] is defined and params['referent'] == 'vide' %}selected{% endif %}>
+                        Non défini
+                    </option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}"
+                                {% if params['referent'] is defined and params['referent'] == user.id %}selected{% endif %}>{{ user.display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="filter-utilise"
+                       class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Utilisé</label>
+                <select id="filter-utilise"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                        {{ stimulus_action('crud', 'filter', 'change', {'field': 'utilise'}) }}>
+                    <option value="all">Tous</option>
+                    <option value="1"
+                            {% if params['utilise'] is defined and params['utilise'] == 1 %}selected{% endif %}>Oui
+                    </option>
+                    <option value="0"
+                            {% if params['utilise'] is defined and params['utilise'] == 0 %}selected{% endif %}>Non
+                    </option>
+                </select>
+            </div>
+
+            <div>
+                <label for="filter-remplissage"
+                       class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Remplissage</label>
+                <select id="filter-remplissage"
+                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                        {{ stimulus_action('crud', 'filter', 'change', {'field': 'remplissage'}) }}>
+                    <option value="all">Tous</option>
+                    <option value="0"
+                            {% if params['remplissage'] is defined and params['remplissage'] == 0 %}selected{% endif %}>
+                        Non complété
+                    </option>
+                    <option value="100"
+                            {% if params['remplissage'] is defined and params['remplissage'] == 100 %}selected{% endif %}>
+                        Complet
+                    </option>
+                </select>
+            </div>
+        {% endblock %}
+    {% endembed %}
+
+    {# Table Tailwind #}
+    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-slate-700 dark:text-slate-200">
+                <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-300">
+                <tr>
+                    <th class="px-4 py-3 w-2/5">
+                        <a href="#" class="inline-flex items-center gap-1 hover:text-slate-900 dark:hover:text-white"
+                                {{ stimulus_action('crud', 'sort', 'click', {
+                                    'sort': 'libelle',
+                                    'direction': getDirection('libelle', sort, direction)
+                                }) }}>
+                            Fiche matière {{ displaySort('libelle', sort, direction) }}
+                        </a>
+                    </th>
+                    <th class="px-4 py-3 text-center w-1/6">État</th>
+                    <th class="px-4 py-3 text-center w-1/12">Utilisé</th>
+                    <th class="px-4 py-3 w-1/6">Remplissage</th>
+                    <th class="px-4 py-3 text-right w-1/6">Actions</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                {% for ficheMatiere in ficheMatieres %}
+                    <tr class="align-top hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+                        {# Colonne principale : Libellé + Contexte + Référent #}
+                        <td class="px-4 py-3">
+                            <div class="space-y-2">
+                                <div class="flex flex-col gap-1">
+                                    <span class="font-semibold text-slate-900 dark:text-white">{{ ficheMatiere.libelle }}</span>
+                                    {% if ficheMatiere.sigle != null %}
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ ficheMatiere.sigle }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if hd == false %}
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                                        {% if ficheMatiere.parcours != null %}
+                                            {% if ficheMatiere.parcours.formation.hasParcours == true %}
+                                                <span class="font-medium">{{ ficheMatiere.parcours.formation.display }}</span> › {{ ficheMatiere.parcours.libelle }}
+                                            {% else %}
+                                                <span class="font-medium">{{ ficheMatiere.parcours.formation.display }}</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="inline-flex rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-300">Sans parcours</span>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    {% if ficheMatiere.responsableFicheMatiere != null %}
+                                        <span class="text-xs text-slate-500 dark:text-slate-400">
+                                            Référent: <span
+                                                    class="font-medium text-slate-700 dark:text-slate-200">{{ ficheMatiere.responsableFicheMatiere.display }}</span>
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-300">Référent non défini</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+
+                        {# État #}
+                        <td class="px-4 py-3 text-center">
+                            {{ include('communs/_badge_collection.html.twig', { badges: ficheMatiere.etatFiche|badgeFicheDto }) }}
+                        </td>
+
+                        {# Utilisé #}
+                        <td class="px-4 py-3 text-center">
+                            {% if ficheMatiere.elementConstitutifs|length > 0 %}
+                                <span class="inline-flex rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">Oui</span>
+                            {% else %}
+                                <span class="inline-flex rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Non</span>
+                            {% endif %}
+                        </td>
+
+                        {# Remplissage #}
+                        <td class="px-4 py-3">{{ component('remplissage_progress', { value: ficheMatiere.remplissage }) }}</td>
+
+                        {# Actions via dropdown #}
+                        <td class="px-4 py-3 text-right">
+                            {% if ficheMatiere.slug != "" %}
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ path('fiche_matiere_v2_voir',{slug: ficheMatiere.slug}) }}"
+                                       class="inline-flex items-center gap-1 rounded-lg border border-cyan-200 bg-white px-2 py-1 text-xs font-semibold text-cyan-600 shadow-sm transition hover:border-cyan-400 hover:text-cyan-900 dark:border-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-200 dark:hover:border-cyan-500"
+                                       title="Voir la fiche EC/matière"
+                                       target="_blank">
+                                        {{ ux_icon('icon:info', {class: 'h-4 w-4'}) }}
+                                        <span>Voir</span>
+                                    </a>
+
+                                    {{ component('dropdown_actions', {
+                                        label: 'Actions',
+                                        help: 'Actions disponibles pour cette fiche',
+                                        icon: 'icon:ellipsis-vertical',
+                                        items: [
+                                            {
+                                                label: 'Modifier',
+                                                icon: 'icon:edit',
+                                                color: 'warning',
+                                                url: path('fiche_matiere_v2_modifier', {slug: ficheMatiere.slug}),
+                                                target: '_blank'
+                                            },
+                                            {
+                                                label: 'Dupliquer',
+                                                icon: 'icon:duplicate',
+                                                color: 'info',
+                                                url: path('app_fiche_matiere_dupliquer', {slug: ficheMatiere.slug})
+                                            },
+                                            {
+                                                label: 'Supprimer',
+                                                icon: 'icon:delete',
+                                                color: 'danger',
+                                                url: path('app_fiche_matiere_delete', {slug: ficheMatiere.slug}),
+                                                csrf: csrf_token('delete' ~ ficheMatiere.id)
+                                            }
+                                        ]
+                                    }) }}
+                                </div>
+                            {% else %}
+                                <span class="inline-flex rounded-full border border-rose-300 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:border-rose-700 dark:bg-rose-950/30 dark:text-rose-300">Erreur</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5"
+                            class="px-4 py-16 text-center">
+                            {{ include('_ui/_empty_table.html.twig', {
+                                message: 'Aucune fiche EC/matière'
+                            }) }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{ include('communs/_pagination.html.twig') }}
+
+</div>

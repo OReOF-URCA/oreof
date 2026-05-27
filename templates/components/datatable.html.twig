@@ -3,9 +3,9 @@
     {# ── Compteurs UX (résultats + filtres actifs) ─────────────────────────── #}
     {% set activeFilters = 0 %}
     {% for column in columns %}
-        {% if column.filterable %}
+        {% if column.filterable|default(false) %}
             {% set currentFilter = filters[column.id]|default(null) %}
-            {% if column.type == 'date' %}
+            {% if column.type|default("text") == 'date' %}
                 {% if currentFilter is iterable and (currentFilter.from|default('') != '' or currentFilter.to|default('') != '') %}
                     {% set activeFilters = activeFilters + 1 %}
                 {% endif %}
@@ -116,28 +116,28 @@
                     avancés</p>
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {% for column in columns %}
-                        {% if column.filterable %}
+                        {% if column.filterable|default(false) %}
                             <div class="flex flex-col gap-1">
                                 <label class="text-xs font-semibold text-secondary-600 dark:text-secondary-300"
                                        for="col_{{ column.id }}">{{ column.label }}</label>
 
                                 {% set inputClass = "w-full rounded-lg border border-secondary-200 bg-white px-3 py-1.5 text-sm text-secondary-800 transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100" %}
 
-                                {% if column.type == 'text' %}
+                                {% if column.type|default("text") == 'text' %}
                                     <input id="col_{{ column.id }}" type="text" class="{{ inputClass }}"
                                            data-model="debounce(100)|filters.{{ column.id }}"
                                            value="{{ filters[column.id]|default('') }}" placeholder="Filtrer…">
 
-                                {% elseif column.type == 'select' %}
+                                {% elseif column.type|default("text") == 'select' %}
                                     <select id="col_{{ column.id }}" class="{{ inputClass }}"
                                             data-model="on(change)|filters.{{ column.id }}">
                                         <option value="">Tous</option>
-                                        {% for key, value in column.choices %}
+                                        {% for key, value in column.choices|default({}) %}
                                             <option value="{{ key }}" {{ filters[column.id]|default('') == key ? 'selected' : '' }}>{{ value }}</option>
                                         {% endfor %}
                                     </select>
 
-                                {% elseif column.type in ['entity', 'collection'] and column.entity %}
+                                {% elseif column.type|default("text") in ['entity', 'collection'] and column.entity|default(null) %}
                                     {% set entityChoices = this.getEntityChoices(column) %}
                                     <select id="col_{{ column.id }}" class="{{ inputClass }}"
                                             data-model="on(change)|filters.{{ column.id }}">
@@ -147,7 +147,7 @@
                                         {% endfor %}
                                     </select>
 
-                                {% elseif column.type == 'date' %}
+                                {% elseif column.type|default("text") == 'date' %}
                                     <div class="flex items-center gap-1">
                                         <input id="col_{{ column.id }}" type="date" class="{{ inputClass }}"
                                                data-model="filters.{{ column.id }}.from"
@@ -159,7 +159,7 @@
                                                value="{{ filters[column.id].to|default('') }}">
                                     </div>
 
-                                {% elseif column.type == 'boolean' %}
+                                {% elseif column.type|default("text") == 'boolean' %}
                                     <select id="col_{{ column.id }}" class="{{ inputClass }}"
                                             data-model="on(change)|filters.{{ column.id }}">
                                         <option value="">Tous</option>
@@ -234,8 +234,8 @@
                             </th>
                         {% endif %}
                         {% for column in columns %}
-                            <th class="px-4 py-3 {{ column.class }}">
-                                {% if column.sortable %}
+                            <th class="px-4 py-3 {{ column.class|default('') }}">
+                                {% if column.sortable|default(false) and column.field is defined %}
                                     <twig:Button
                                             type="button"
                                             variant="secondary"
@@ -279,41 +279,47 @@
                                 </td>
                             {% endif %}
                             {% for column in columns %}
-                                <td class="px-4 py-3 {{ column.class }}">
-                                    {% if column.template %}
+                            <td class="px-4 py-3 {{ column.class|default('') }}">
+                                {% if column.template|default(null) %}
+                                    {% if column.field is defined %}
                                         {% include column.template with {item: item, value: this.getFieldValue(item, column.field)} %}
                                     {% else %}
-                                        {% set value = this.getFieldValue(item, column.field) %}
+                                        {% include column.template with {item: item} %}
+                                    {% endif %}
+                                {% elseif column.field is defined %}
+                                    {% set value = this.getFieldValue(item, column.field) %}
 
-                                        {% if column.format == 'date' and value %}
+                                    {% if column.format|default(null) == 'date' and value %}
                                             {{ value|date('d/m/Y') }}
 
-                                        {% elseif column.format == 'datetime' and value %}
+                                    {% elseif column.format|default(null) == 'datetime' and value %}
                                             {{ value|date('d/m/Y H:i') }}
 
-                                        {% elseif column.format == 'currency' and value %}
+                                    {% elseif column.format|default(null) == 'currency' and value %}
                                             {{ value|number_format(2, ',', ' ') }} €
 
-                                        {% elseif column.format == 'boolean' %}
+                                    {% elseif column.format|default(null) == 'boolean' %}
                                             {% if value %}
                                                 <twig:Badge label="Oui" variant="success" icon="icon:check"/>
                                             {% else %}
-                                                <twig:Badge label="Non" variant="secondary"/>
+                                                <twig:Badge label="Non" variant="danger"
+                                                            icon="icon:close"
+                                                />
                                             {% endif %}
 
-                                        {% elseif column.format == 'badge' %}
-                                            {% set badgeClass = column.badge_map[value] ?? column.badge_class %}
+                                    {% elseif column.format|default(null) == 'badge' %}
+                                        {% set badgeClass = column.badge_map|default({})[value] ?? column.badge_class|default('') %}
                                             <twig:Badge
-                                                    :label="column.choices[value] ?? value"
+                                                    :label="column.choices|default({})[value] ?? value"
                                                     variant="secondary"
                                                     extraClass="{{ badgeClass }}"
                                             />
 
-                                        {% elseif column.format == 'badges' and value %}
+                                    {% elseif column.format|default(null) == 'badges' and value %}
                                             {# Pour les collections ManyToMany #}
                                             {% if value is iterable %}
                                                 {% for badgeItem in value %}
-                                                    {% if column.collection_property == '__toString' %}
+                                                    {% if column.collection_property|default('__toString') == '__toString' %}
                                                         {% set itemValue = badgeItem %}
                                                     {% else %}
                                                         {% set getter = 'get' ~ column.collection_property|capitalize %}
@@ -322,14 +328,14 @@
                                                     <twig:Badge
                                                             :label="itemValue"
                                                             variant="secondary"
-                                                            extraClass="{{ column.badge_class }} me-1"
+                                                            extraClass="{{ column.badge_class|default('') }} me-1"
                                                     />
                                                 {% endfor %}
                                             {% else %}
                                                 <span class="text-secondary-400">–</span>
                                             {% endif %}
 
-                                        {% elseif column.format == 'entity_badge' %}
+                                    {% elseif column.format|default(null) == 'entity_badge' %}
                                             {% set entityLabel = this.getEntityDisplayLabel(value, column) %}
                                             {% set entityBadgeClass = value is null
                                                 ? (column.null_badge_class|default('bg-secondary'))
@@ -340,12 +346,12 @@
                                                     extraClass="{{ entityBadgeClass }}"
                                             />
 
-                                        {% elseif column.type == 'collection' and value %}
+                                    {% elseif column.type|default("text") == 'collection' and value %}
                                             {# Pour les collections ManyToMany en texte simple #}
                                             {% if value is iterable %}
                                                 {% set items = [] %}
                                                 {% for collItem in value %}
-                                                    {% if column.collection_property == '__toString' %}
+                                                    {% if column.collection_property|default('__toString') == '__toString' %}
                                                         {% set itemValue = collItem %}
                                                     {% else %}
                                                         {% set getter = 'get' ~ column.collection_property|capitalize %}
@@ -353,13 +359,13 @@
                                                     {% endif %}
                                                     {% set items = items|merge([itemValue]) %}
                                                 {% endfor %}
-                                                {{ items|join(column.separator) }}
+                                                {{ items|join(column.separator|default(', ')) }}
                                             {% else %}
                                                 –
                                             {% endif %}
 
                                         {% elseif value is not null and value is not same as '' %}
-                                            {% if column.is_html %}
+                                            {% if column.is_html|default(false) %}
                                                 {{ value|raw }}
                                             {% else %}
                                                 {{ value }}
@@ -368,8 +374,8 @@
                                             <span class="text-secondary-300 dark:text-secondary-600">–</span>
                                         {% endif %}
                                     {% endif %}
-                                </td>
-                            {% endfor %}
+
+                                {% endfor %}
 
                             {% if actions is not empty %}
                                 <td class="px-4 py-3 text-right">
