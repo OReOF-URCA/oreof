@@ -61,18 +61,21 @@ Consulte les fichiers suivants pour copier la structure exacte de l'UI :
 
 ### 2) Cartes / panneaux
 
-- `card card-body` -> `rounded-xl border bg-white p-4 shadow-sm dark:*`
+- `card card-body` -> `rounded-xl border bg-surface p-4 shadow-sm dark:*`
 - Uniformiser avec ces tokens:
-    - Bordure: `border-slate-200 dark:border-slate-700`
-    - Fond: `bg-white dark:bg-slate-900`
+    - Bordure: `border-secondary-200 dark:border-secondary-700`
+    - Fond: `bg-bg` dark mode auto sur bg
+    - paneau`bg-surface` dark mode auto sur surface
     - Elevation: `shadow-sm`
+    - texte: `text-text` dark mode auto sur text
+    - texte secondaire: `text-secondary-500 dark:text-secondary-400`
 
 ### 3) Formulaires
 
 - `form-control`, `form-select` -> classes Tailwind communes:
-    - `w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm`
+    - `w-full rounded-lg border border-secondary-200 bg-white px-3 py-2 text-sm`
     - `focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100`
-    - `dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100`
+    - `dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100`
 - Toujours garder un `label` (visuel ou `sr-only`).
 
 ### 4) Boutons
@@ -87,7 +90,7 @@ Consulte les fichiers suivants pour copier la structure exacte de l'UI :
 - Wrapper obligatoire: `overflow-x-auto`.
 - Table: `w-full min-w-* text-sm`.
 - `thead`: texte compact (`text-[11px] uppercase tracking-*`).
-- `tbody`: `divide-y divide-slate-200 dark:divide-slate-700`.
+- `tbody`: `divide-y divide-secondary-200 dark:divide-secondary-700`.
 - Etats de ligne (information, warning, etc.) via classes Tailwind dediees.
 
 ### 6) Etats et badges
@@ -144,4 +147,4 @@ Consulte les fichiers suivants pour copier la structure exacte de l'UI :
 | `form-control`           | `w-full rounded-lg border px-3 py-2 text-sm`                     |
 | `form-select`            | `w-full rounded-lg border px-3 py-2 text-sm`                     |
 | `table table-striped`    | `w-full text-sm` + `divide-y` + `hover:bg-*`                     |
-| `text-muted`             | `text-slate-500 dark:text-slate-400`                             |
+| `text-muted`             | `text-secondary-500 dark:text-secondary-400`                             |
