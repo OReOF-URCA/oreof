@@ -15,7 +15,7 @@
 
 {# Avec taille Tailwind #}
 <twig:UX:Icon name="icon:home" class="w-5 h-5" />
-<twig:UX:Icon name="icon:pencil-ruler" class="w-6 h-6 text-indigo-500" />
+<twig:UX:Icon name="icon:pencil-ruler" class="w-6 h-6 text-primary-500" />
 ```
 
 ## Table de correspondance complète

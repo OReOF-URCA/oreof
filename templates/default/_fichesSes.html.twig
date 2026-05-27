@@ -1,12 +1,12 @@
 <section
-        class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6">
+        class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
     {% set composantesAvecFormation = composantes|filter(composante => (composanteFormationCounts[composante.id]|default(0)) > 0) %}
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div class="space-y-1">
-            <h2 class="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Fiches
+            <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">Fiches
                 matières</h2>
-            <p class="max-w-3xl text-sm text-slate-600 dark:text-slate-300">
+            <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
                 Sélectionnez une composante pour charger à la demande le bilan des fiches matières associées.
                 Ce fonctionnement évite de charger l'ensemble des tableaux en une seule fois.
             </p>
@@ -20,25 +20,25 @@
     <div class="space-y-3">
         {% for composante in composantesAvecFormation %}
             <section
-                    class="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/80 shadow-sm transition hover:border-cyan-300 hover:bg-white dark:border-slate-700 dark:bg-slate-950/30 dark:hover:border-cyan-700 dark:hover:bg-slate-900"
+                    class="overflow-hidden rounded-2xl border border-secondary-200 bg-secondary-50/80 shadow-sm transition hover:border-cyan-300 hover:bg-white dark:border-secondary-700 dark:bg-secondary-950/30 dark:hover:border-cyan-700 dark:hover:bg-secondary-900"
                     {{ stimulus_controller('load_content', {url: path('app_fiches_composantes')}) }}
             >
                 <div class="flex flex-col gap-4 px-4 py-4 sm:px-5 lg:flex-row lg:items-center lg:justify-between">
                     <div class="min-w-0 flex-1">
-                        <div class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                        <div class="text-[11px] font-black uppercase tracking-[0.2em] text-secondary-400 dark:text-secondary-500">
                             Composante
                         </div>
-                        <div class="mt-1 text-base font-semibold text-slate-900 dark:text-slate-100">
+                        <div class="mt-1 text-base font-semibold text-secondary-900 dark:text-secondary-100">
                             {{ composante.libelle }}
                         </div>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-3 lg:justify-end">
-                        <div class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                            <div class="text-[11px] font-black uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                        <div class="rounded-xl border border-secondary-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                            <div class="text-[11px] font-black uppercase tracking-[0.16em] text-secondary-400 dark:text-secondary-500">
                                 Mentions
                             </div>
-                            <div class="mt-1 font-semibold text-slate-800 dark:text-slate-100">
+                            <div class="mt-1 font-semibold text-secondary-800 dark:text-secondary-100">
                                 {% set nbFormationsCampagne = composanteFormationCounts[composante.id]|default(0) %}
                                 {{ nbFormationsCampagne }} mention{{ nbFormationsCampagne > 1 ? 's' : '' }}
                             </div>
@@ -55,7 +55,7 @@
                     </div>
                 </div>
 
-                <div class="empty:hidden border-t border-slate-200 bg-white/80 px-4 py-4 dark:border-slate-700 dark:bg-slate-900/80 sm:px-5" {{ stimulus_target('load_content', 'content') }}></div>
+                <div class="empty:hidden border-t border-secondary-200 bg-white/80 px-4 py-4 dark:border-secondary-700 dark:bg-secondary-900/80 sm:px-5" {{ stimulus_target('load_content', 'content') }}></div>
             </section>
         {% else %}
             <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-6 text-center text-sm font-medium text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">

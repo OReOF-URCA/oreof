@@ -42,7 +42,7 @@ class IconBox
 
         return match ($color) {
             'success' => 'bg-success-100 text-success-500 dark:bg-success-900',
-            'danger' => 'bg-danger-100 text-red-700 dark:bg-danger-900',
+            'danger' => 'bg-danger-100 text-danger-700 dark:bg-danger-900',
             'warning' => 'bg-warning-100 text-warning-500 dark:bg-warning-900',
             'primary' => 'bg-primary-100 text-primary-600 dark:bg-primary-900',
             'secondary' => 'bg-secondary-100 text-secondary-500 dark:bg-secondary-900',

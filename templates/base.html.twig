@@ -105,15 +105,15 @@
 
             {% block page_header %}
                 <section
-                        class="mb-8 rounded-2xl border border-slate-200 bg-white/90 p-4 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/80 sm:mb-10 sm:p-5">
+                        class="mb-8 rounded-2xl border border-secondary-200 bg-white/90 p-4 shadow-sm backdrop-blur-sm dark:border-secondary-700 dark:bg-secondary-900/80 sm:mb-10 sm:p-5">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div class="min-w-0 lg:basis-1/2 lg:pr-6">
-                            <h1 class="text-xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap dark:text-slate-100"
+                            <h1 class="text-xl font-black leading-tight tracking-tight text-secondary-900 sm:text-3xl lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap dark:text-secondary-100"
                                 id="title">
                                 {% block header %}
                                     {{ header_title|default('Titre par défaut') }}
                                 {% endblock %}</h1>
-                            <p class="max-w-3xl text-sm text-slate-600 dark:text-slate-300">
+                            <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
                                 {{ header_description|default('Description par défaut') }}
                             </p>
                         </div>
@@ -125,7 +125,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 border-t border-slate-100 pt-3 dark:border-slate-700/80">
+                    <div class="mt-4 border-t border-secondary-100 pt-3 dark:border-secondary-700/80">
                         <nav class="breadcrumb-container" aria-label="breadcrumb">
                             {% block breadcrumb %}
                             {% endblock %}

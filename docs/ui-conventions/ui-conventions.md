@@ -84,7 +84,7 @@ Pour les actions standard:
 - Contenu principal dans des sections `rounded-xl border ... shadow-sm`.
 - Espacement vertical standard: `space-y-4` ou `space-y-6`.
 - Champs formulaires: classes Tailwind unifiees (focus ring + dark mode).
-- Etats vides: texte court + style discret (`text-slate-400`).
+- Etats vides: texte court + style discret (`text-secondary-400`).
 
 ## 6) Migration progressive
 

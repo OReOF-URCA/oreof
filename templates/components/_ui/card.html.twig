@@ -1,0 +1,94 @@
+{#
+Composant Card — exemples :
+  <twig:Card title="Carte simple" description="Sous-titre">
+      <p>Contenu de la carte</p>
+  </twig:Card>
+
+  <twig:Card
+      title="Carte avec actions"
+      description="Actions à droite"
+      :actions="[
+          { label: 'Modifier', variant: 'secondary', size: 'sm', href: '#' },
+          { label: 'Supprimer', variant: 'danger', size: 'sm', outline: true, href: '#' }
+      ]"
+  >
+      <p>Contenu de la carte</p>
+  </twig:Card>
+#}
+
+{% set resolvedTitle = title ?? '' %}
+{% set resolvedDescription = description ?? '' %}
+{% set resolvedVariant = variant ?? 'default' %}
+{% set resolvedActions = actions ?? [] %}
+{% set resolvedFooter = footer ?? null %}
+{% set resolvedExtraClass = extraClass ?? '' %}
+
+{% set wrapperClasses = {
+    'default': 'rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700',
+    'elevated': 'rounded-xl border border-secondary-200 bg-surface shadow-md dark:border-secondary-700',
+    'flat': 'rounded-xl border border-secondary-200 bg-surface dark:border-secondary-700',
+}[resolvedVariant] ?? 'rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700' %}
+
+{% if resolvedExtraClass != '' %}
+    {% set wrapperClasses = wrapperClasses ~ ' ' ~ resolvedExtraClass %}
+{% endif %}
+
+{% set slotContent %}
+    {% block content %}{% endblock %}
+{% endset %}
+
+<div class="{{ wrapperClasses }}" {{- attributes -}}>
+    {% if resolvedTitle != '' or resolvedDescription != '' or resolvedActions is not empty %}
+        <div class="p-8 border-b border-secondary-200 dark:border-secondary-700">
+            <div class="flex items-start justify-between gap-4">
+                <div class="min-w-0">
+                    {% if resolvedTitle != '' %}
+                        <h2 class="text-2xl font-bold text-text dark:text-slate-100 truncate">{{ resolvedTitle }}</h2>
+                    {% endif %}
+                    {% if resolvedDescription != '' %}
+                        <p class="text-secondary text-sm mt-1 dark:text-slate-400">{{ resolvedDescription }}</p>
+                    {% endif %}
+                </div>
+
+                {% if resolvedActions is not empty %}
+                    <div class="flex items-center gap-2 shrink-0">
+                        {% for a in resolvedActions %}
+                            {% if a is iterable %}
+                                {{ component('Button', {
+                                    label: a.label|default(''),
+                                    variant: a.variant|default('secondary'),
+                                    size: a.size|default('sm'),
+                                    icon: a.icon|default(''),
+                                    iconEnd: a.iconEnd|default(false),
+                                    outline: a.outline|default(false),
+                                    soft: a.soft is defined ? a.soft : true,
+                                    href: a.href|default(''),
+                                    disabled: a.disabled|default(false)
+                                }) }}
+                            {% else %}
+                                {{ a|raw }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    {% if slotContent|trim != '' %}
+        <div class="p-8 bg-surface text-text dark:text-slate-100 rounded-xl">
+            {{ slotContent|raw }}
+        </div>
+    {% endif %}
+
+    {% if resolvedFooter is not same as(null) %}
+        <div class="p-3 border-t border-secondary-200 bg-surface dark:border-secondary-700">
+            {% if resolvedFooter is iterable %}
+                {% for f in resolvedFooter %}{{ f|raw }}{% endfor %}
+            {% else %}
+                {{ resolvedFooter|raw }}
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+

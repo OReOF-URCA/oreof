@@ -128,7 +128,7 @@ class DataTableBuilder
             'route' => null,
             'route_params' => [],
             'icon' => null,
-            'class' => 'inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-slate-50',
+            'class' => 'inline-flex items-center gap-1 rounded-md border border-secondary-300 bg-white px-2.5 py-1 text-xs font-semibold text-secondary-700 transition hover:bg-secondary-50',
             'confirm' => null,
             'condition' => null,
             'modal' => false,

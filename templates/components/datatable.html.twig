@@ -16,8 +16,8 @@
     {% endfor %}
 
     {# ── Toolbar ─────────────────────────────────────────────────────────────── #}
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-        <div class="border-b border-slate-100 px-4 py-3 dark:border-slate-700">
+    <div class="rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="border-b border-secondary-100 px-4 py-3 dark:border-secondary-700">
             <div class="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100">
                 <div class="flex flex-wrap items-center gap-2">
                     <span>
@@ -40,14 +40,14 @@
 
             {# Recherche globale #}
             <div class="relative w-full sm:max-w-sm">
-                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-secondary-400">
                     <twig:UX:Icon name="icon:search" class="h-4 w-4"/>
                 </span>
                 <label for="recherche-datatable" class="sr-only">Recherche globale</label>
                 <input
                         id="recherche-datatable"
                         type="text"
-                        class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400"
+                        class="w-full rounded-lg border border-secondary-300 bg-white py-2 pl-9 pr-3 text-sm text-secondary-700 shadow-sm outline-none transition placeholder:text-secondary-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder:text-secondary-400"
                         placeholder="Rechercher..."
                         data-model="debounce(100)|globalSearch"
                         data-action="live#update"
@@ -111,17 +111,17 @@
         {# ── Filtres avancés ──────────────────────────────────────────────────── #}
         {% if filtersOpen %}
             <div id="filters-panel"
-                 class="border-t border-slate-100 bg-slate-50/60 p-4 dark:border-slate-700 dark:bg-slate-800/40">
-                <p class="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Filtres
+                 class="border-t border-secondary-100 bg-secondary-50/60 p-4 dark:border-secondary-700 dark:bg-secondary-800/40">
+                <p class="mb-3 text-xs font-bold uppercase tracking-wider text-secondary-400 dark:text-secondary-500">Filtres
                     avancés</p>
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {% for column in columns %}
                         {% if column.filterable %}
                             <div class="flex flex-col gap-1">
-                                <label class="text-xs font-semibold text-slate-600 dark:text-slate-300"
+                                <label class="text-xs font-semibold text-secondary-600 dark:text-secondary-300"
                                        for="col_{{ column.id }}">{{ column.label }}</label>
 
-                                {% set inputClass = "w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-800 transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100" %}
+                                {% set inputClass = "w-full rounded-lg border border-secondary-200 bg-white px-3 py-1.5 text-sm text-secondary-800 transition focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100" %}
 
                                 {% if column.type == 'text' %}
                                     <input id="col_{{ column.id }}" type="text" class="{{ inputClass }}"
@@ -152,7 +152,7 @@
                                         <input id="col_{{ column.id }}" type="date" class="{{ inputClass }}"
                                                data-model="filters.{{ column.id }}.from"
                                                value="{{ filters[column.id].from|default('') }}">
-                                        <span class="text-xs text-slate-400">→</span>
+                                        <span class="text-xs text-secondary-400">→</span>
                                         <label for="col_{{ column.id }}_to" class="sr-only">Au</label>
                                         <input id="col_{{ column.id }}_to" type="date" class="{{ inputClass }}"
                                                data-model="filters.{{ column.id }}.to"
@@ -180,24 +180,24 @@
     </div>
 
     {# ── Table ───────────────────────────────────────────────────────────────── #}
-    <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <div class="rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
 
         {# Méta-barre : résultats + per page #}
-        <div class="flex flex-col gap-2 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-slate-700">
-            <p class="text-xs text-slate-500 dark:text-slate-400">
-                <span class="font-semibold text-slate-700 dark:text-slate-200">{{ ((page - 1) * perPage + 1) }}–{{ min(page * perPage, this.getTotal) }}</span>
-                sur <span class="font-semibold text-slate-700 dark:text-slate-200">{{ this.getTotal }}</span> résultats
+        <div class="flex flex-col gap-2 border-b border-secondary-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-secondary-700">
+            <p class="text-xs text-secondary-500 dark:text-secondary-400">
+                <span class="font-semibold text-secondary-700 dark:text-secondary-200">{{ ((page - 1) * perPage + 1) }}–{{ min(page * perPage, this.getTotal) }}</span>
+                sur <span class="font-semibold text-secondary-700 dark:text-secondary-200">{{ this.getTotal }}</span> résultats
             </p>
             <div class="flex items-center gap-2">
                 {% if selectable %}
-                    <span class="text-xs text-slate-500 dark:text-slate-400"
+                    <span class="text-xs text-secondary-500 dark:text-secondary-400"
                           data-check-all-counter="{{ selectionAllId }}">
                         0 / 0 élément(s) sélectionné(s)
                     </span>
                 {% endif %}
-                <label for="perPage" class="text-xs text-slate-500 dark:text-slate-400">Par page</label>
+                <label for="perPage" class="text-xs text-secondary-500 dark:text-secondary-400">Par page</label>
                 <select id="perPage"
-                        class="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 focus:border-indigo-400 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                        class="rounded-lg border border-secondary-200 bg-white px-2 py-1 text-xs text-secondary-700 focus:border-indigo-400 focus:outline-none dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200"
                         data-model="perPage">
                     <option value="10" {{ perPage == 10 ? 'selected' : '' }}>10</option>
                     <option value="20" {{ perPage == 20 ? 'selected' : '' }}>20</option>
@@ -208,10 +208,10 @@
         </div>
 
         {# Tableau principal #}
-        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div class="overflow-hidden rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
             <div class="overflow-x-auto">
                 <table
-                        class="min-w-full text-sm text-slate-700 dark:text-slate-200"
+                        class="min-w-full text-sm text-secondary-700 dark:text-secondary-200"
                         {% if selectable %}
                             {{ stimulus_controller('check_all', {
                                 idCheckAll: selectionAllId,
@@ -219,15 +219,15 @@
                             }) }}
                         {% endif %}
                 >
-                    <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-300">
+                    <thead class="bg-secondary-50 text-left text-xs font-black uppercase tracking-wider text-secondary-500 dark:bg-secondary-800/70 dark:text-secondary-300">
                     <tr>
                         {% if selectable %}
                             <th class="w-12 px-4 py-3">
-                                <label class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800">
+                                <label class="inline-flex items-center justify-center rounded-md border border-secondary-300 bg-white p-2 dark:border-secondary-600 dark:bg-secondary-800">
                                     <input
                                             id="{{ selectionAllId }}"
                                             type="checkbox"
-                                            class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                            class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500"
                                             {{ stimulus_action('check_all', 'checkAll', 'change') }}
                                     >
                                 </label>
@@ -261,16 +261,16 @@
                         {% endif %}
                     </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                    <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
                     {% for item in this.getData %}
-                        <tr class="align-top hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+                        <tr class="align-top hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40">
                             {% if selectable %}
                                 <td class="px-4 py-3">
                                     {% set selectionValue = this.getFieldValue(item, selectionValueField) %}
-                                    <label class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800">
+                                    <label class="inline-flex items-center justify-center rounded-md border border-secondary-300 bg-white p-2 dark:border-secondary-600 dark:bg-secondary-800">
                                         <input
                                                 type="checkbox"
-                                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 {{ selectionInputClass }}"
+                                                class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500 {{ selectionInputClass }}"
                                                 name="{{ selectionName }}"
                                                 value="{{ selectionValue }}"
                                                 {{ stimulus_action('check_all', 'check', 'change') }}
@@ -326,7 +326,7 @@
                                                     />
                                                 {% endfor %}
                                             {% else %}
-                                                <span class="text-slate-400">–</span>
+                                                <span class="text-secondary-400">–</span>
                                             {% endif %}
 
                                         {% elseif column.format == 'entity_badge' %}
@@ -365,7 +365,7 @@
                                                 {{ value }}
                                             {% endif %}
                                         {% else %}
-                                            <span class="text-slate-300 dark:text-slate-600">–</span>
+                                            <span class="text-secondary-300 dark:text-secondary-600">–</span>
                                         {% endif %}
                                     {% endif %}
                                 </td>
@@ -440,7 +440,7 @@
         {# ── Pagination ──────────────────────────────────────────────────────── #}
         {% set totalPages = this.getTotalPages %}
         {% if totalPages > 1 %}
-            <div class="flex items-center justify-center gap-1 border-t border-slate-100 px-4 py-3 dark:border-slate-700">
+            <div class="flex items-center justify-center gap-1 border-t border-secondary-100 px-4 py-3 dark:border-secondary-700">
                 <twig:Button
                         type="button"
                         variant="secondary"

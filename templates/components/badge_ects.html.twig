@@ -5,9 +5,9 @@
         danger: 'bg-red-100 text-red-800',
         info: 'bg-cyan-100 text-cyan-800',
         primary: 'bg-indigo-100 text-indigo-800',
-        secondary: 'bg-slate-200 text-slate-700'
+        secondary: 'bg-secondary-200 text-secondary-700'
     } %}
-    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold {{ etatClasses[etatEcts]|default('bg-slate-100 text-slate-700') }}">{{ ects }}
+    <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold {{ etatClasses[etatEcts]|default('bg-secondary-100 text-secondary-700') }}">{{ ects }}
         {% if this.isParcoursProprietaire == false and this.isEctsSpecifique == false %} <i class="fal fa-link" title="Repris de la fiche matière"></i>{% endif %}
     </span>
 </div>
