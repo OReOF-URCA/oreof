@@ -31,12 +31,8 @@
     <div class="space-y-12 pb-12">
 
         {# Section Composant : Palette couleur #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-text mb-2">Couleurs</h2>
-                <p class="text-secondary text-sm">Palette de couleurs personnalisée TailwindCSS sous forme de blocs
-                    continus.</p>
-            </div>
+        <twig:Card title="Couleurs" description="Palette de couleurs personnalisée TailwindCSS sous forme de blocs
+                    continus.">
 
             <div class="overflow-x-auto">
                 <table class="w-auto border-collapse p-0 m-0">
@@ -373,15 +369,13 @@
                     </tbody>
                 </table>
             </div>
-        </section>
+            </twig:Card>
 
-        {# Section Composant : Boutons #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-text mb-2">Bouton</h2>
-                <p class="text-secondary text-sm">Composant bouton polyvalent avec plusieurs variantes de style, taille
-                    et état.</p>
-            </div>
+
+            {# Section Composant : Boutons #}
+        <twig:Card title="Bouton" description="Composant bouton polyvalent avec plusieurs variantes de style, taille
+                    et état.">
+
             <div class="space-y-8">
                 <div>
                     <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Tailles (size)</h3>
@@ -453,16 +447,13 @@
 &lt;twig:Button label="Enregistrer" variant="success" size="lg" type="submit" /&gt;</code></pre>
                 </div>
             </div>
-        </section>
+        </twig:Card>
+
 
         {# Section Composant : Dropdown Button #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-text mb-2">Dropdown Button</h2>
-                <p class="text-secondary text-sm">Bouton d’actions avec menu contextuel (liens, actions avec
+        <twig:Card title="Dropdown Button" description="Bouton d’actions avec menu contextuel (liens, actions avec
                     confirmation,
-                    état désactivé).</p>
-            </div>
+                    état désactivé).">
 
             <div class="space-y-8">
                 <div>
@@ -536,14 +527,12 @@
 }) }}"|e }}</code></pre>
                 </div>
             </div>
-        </section>
+        </twig:Card>
 
-        {# Section Composant : DeleteButton #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-text mb-2">DeleteButton</h2>
-                <p class="text-secondary text-sm">Bouton de suppression avec confirmation modale.</p>
-            </div>
+
+            {# Section Composant : DeleteButton #}
+        <twig:Card title="DeleteButton" description="Bouton de suppression avec confirmation modale.">
+
             <div class="space-y-8">
                 <div>
                     <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple avec confirmation</h3>
@@ -578,14 +567,11 @@
 /&gt;</code></pre>
                 </div>
             </div>
-        </section>
+        </twig:Card>
         {# Section Composant : Alerte #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-text mb-2">Alerte</h2>
-                <p class="text-secondary text-sm">Composant pour afficher des messages contextuels (succès, info,
-                    warning, danger).</p>
-            </div>
+        <twig:Card title="Alerte" description="Composant pour afficher des messages contextuels (succès, info,
+                    warning, danger).">
+
             <div class="space-y-8">
                 <div>
                     <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Types d'alertes, icone et
@@ -612,13 +598,10 @@
 &lt;/twig:alerte&gt;</code></pre>
                 </div>
             </div>
-        </section>
+        </twig:Card>
         {# Section Composant : IconBox #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-text mb-2">IconBox</h2>
-                <p class="text-secondary text-sm">Boîte avec icône colorée et stylisée avec variantes.</p>
-            </div>
+        <twig:Card title="IconBox" description="Boîte avec icône colorée et stylisée avec variantes.">
+
             <div class="space-y-8">
                 <div>
                     <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Variantes (variant) et
@@ -638,13 +621,10 @@
 &lt;twig:IconBox icon="fa-solid:trash" variant="danger" /&gt;</code></pre>
                 </div>
             </div>
-        </section>
+        </twig:Card>
         {# Section Composant : Progress #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-text mb-2">Progress</h2>
-                <p class="text-secondary text-sm">Barre de progression avec étiquette et pourcentage.</p>
-            </div>
+        <twig:Card title="Progress" description="Barre de progression avec étiquette et pourcentage.">
+
             <div class="space-y-8">
                 <div>
                     <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Tonalités, progression et
@@ -664,13 +644,10 @@
 &lt;twig:remplissage_progress label="Finalisation" percent="100" tone="success" /&gt;</code></pre>
                 </div>
             </div>
-        </section>
+        </twig:Card>
         {# Section Composant : Badge #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-text mb-2">Badge</h2>
-                <p class="text-secondary text-sm">Petit composant pour étiqueter, catégoriser ou afficher un statut.</p>
-            </div>
+        <twig:Card title="Badge" description="Petit composant pour étiqueter, catégoriser ou afficher un statut.">
+
             <div class="space-y-8">
                 <div>
                     <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Tailles (size)</h3>
@@ -730,15 +707,11 @@
 &lt;twig:Badge label="Pilule" variant="danger" :soft="false" :pill="true" /&gt;</code></pre>
                 </div>
             </div>
-        </section>
+        </twig:Card>
 
         {# Section Composant : Spinner #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-text mb-2">Spinner</h2>
-                <p class="text-secondary text-sm">Composant d’indication de chargement avec variantes de couleur et
-                    tailles.</p>
-            </div>
+        <twig:Card title="Spinner" description="Composant d’indication de chargement avec variantes de couleur et
+                    tailles.">
 
             <div class="space-y-8">
                 <div>
@@ -783,15 +756,10 @@
 &lt;twig:Spinner size="lg" variant="success" /&gt;</code></pre>
                 </div>
             </div>
-        </section>
+        </twig:Card>
 
         {# Section Composant : Card #}
-        <section class="bg-surface p-8 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-sm">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-text mb-2">Card</h2>
-                <p class="text-secondary text-sm">Composant carte réutilisable : titre, description, actions à droite,
-                    contenu et footer optionnel.</p>
-            </div>
+        <twig:Card title="Card" description="Composant carte réutilisable : titre, description.">
 
             <div>
                 <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Propriétés</h3>
@@ -810,7 +778,7 @@
             <div class="space-y-8">
                 <div>
                     <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple simple</h3>
-                    <twig:Card title="Carte simple" description="Une description sommaire">
+                    <twig:Card title="Carte simple" description="Une description sommaire" variant="flat">
                         <p class="text-sm text-text">Contenu du corps de la carte. Utilisez ce composant pour encapsuler
                             des
                             blocs d'information.</p>
@@ -834,24 +802,6 @@
                 </div>
 
                 <div>
-                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Avec footer</h3>
-                    {% set card_footer %}
-                        <div class="flex items-center justify-end gap-2">
-                            {{ component('Button', { label: 'Annuler', variant: 'danger', size: 'sm' }) }}
-                            {{ component('Button', { label: 'Enregistrer', variant: 'success', size: 'sm', soft: false }) }}
-                        </div>
-                    {% endset %}
-                    <twig:Card
-                            variant="flat"
-                            title="Carte avec footer"
-                            description="Footer contenant des actions"
-                            footer="{{ card_footer|trim }}">
-                        <p class="text-sm text-text">Contenu principal de la carte. Le footer propose des actions
-                            contextuelles.</p>
-                    </twig:Card>
-                </div>
-
-                <div>
                     <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple de code</h3>
                     <pre class="bg-secondary-900 text-secondary-200 p-4 rounded-md text-xs overflow-x-auto"><code>{% verbatim %}&lt;twig:Card
     title="Formulaire"
@@ -859,26 +809,13 @@
     :actions="[
         { label: 'Supprimer', variant: 'danger', size: 'sm', outline: true, href: '#' }
     ]">
+
     &lt;p>Contenu et formulaire de la carte&lt;/p>
-&lt;/twig:Card>
 
-{# Avec footer rendu via component('Button', ...) #}
-{% set card_footer %}
-    &lt;div class="flex items-center justify-end gap-2">
-        {{ component('Button', { label: 'Annuler', variant: 'danger', size: 'sm' }) }}
-        {{ component('Button', { label: 'Enregistrer', variant: 'success', size: 'sm', soft: false }) }}
-    &lt;/div>
-{% endset %}
-
-&lt;twig:Card
-    title="Formulaire avec actions"
-    footer="{{ card_footer|trim }}"
->
-    &lt;p>Contenu principal avec footer personnalisé&lt;/p>
 &lt;/twig:Card>{% endverbatim %}</code></pre>
                 </div>
             </div>
-        </section>
+        </twig:Card>
 
     </div>
 {% endblock %}
