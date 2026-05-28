@@ -1,5 +1,7 @@
 {% extends 'pdf/base-pdf.html.twig' %}
 
+{% set basePdfExtension = true %}
+
 {% block content %}
     <h1 class="text-center">{{ formation.display }}</h1>
     {% if parcours.parcoursDefaut == false %}
