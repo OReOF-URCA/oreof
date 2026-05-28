@@ -11,6 +11,7 @@ namespace App\Controller;
 
 use App\Classes\JsonReponse;
 use App\Classes\MyGotenbergPdf;
+use App\Entity\Constantes;
 use App\Entity\FicheMatiere;
 use App\Entity\Parcours;
 use App\Message\Export;
@@ -128,6 +129,11 @@ class FicheMatiereExportController extends AbstractController
             [$parcours->getId()]
         ));
 
-        return JsonReponse::success('Les documents sont en cours de génération, vous recevrez un mail lorsque les documents seront prêts');
+        $this->addFlash('toast', [
+            'type' => Constantes::FLASHBAG_SUCCESS,
+            'text' => 'Les documents sont en cours de génération, vous recevrez un mail lorsque les documents seront prêts'
+        ]);
+
+        return $this->redirectToRoute('app_homepage');
     }
 }
