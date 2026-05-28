@@ -1,9 +1,9 @@
-{% set sectionTitleClass = sectionTitleClass|default('border-y border-slate-200 bg-slate-100/90 px-4 py-3.5 text-left text-sm font-extrabold tracking-wide text-slate-700 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-100') %}
-{% set dataRowClass = dataRowClass|default('border-b border-slate-200 dark:border-slate-700') %}
-{% set labelCellClass = labelCellClass|default('px-4 py-4 align-top font-medium leading-relaxed text-slate-700 dark:text-slate-200') %}
-{% set valueCellClass = valueCellClass|default('px-4 py-4 align-top leading-relaxed text-slate-700 dark:text-slate-200') %}
-{% set subLabelCellClass = subLabelCellClass|default('px-4 py-3.5 pl-8 align-top leading-relaxed text-slate-600 dark:text-slate-300') %}
-{% set deepSubLabelCellClass = deepSubLabelCellClass|default('px-4 py-3.5 pl-12 align-top leading-relaxed text-slate-600 dark:text-slate-300') %}
+{% set sectionTitleClass = sectionTitleClass|default('border-y border-secondary-200 bg-secondary-100/90 px-4 py-3.5 text-left text-sm font-extrabold tracking-wide text-secondary-700 dark:border-secondary-700 dark:bg-secondary-800/80 dark:text-secondary-100') %}
+{% set dataRowClass = dataRowClass|default('border-b border-secondary-200 dark:border-secondary-700') %}
+{% set labelCellClass = labelCellClass|default('px-4 py-4 align-top font-medium leading-relaxed text-secondary-700 dark:text-secondary-200') %}
+{% set valueCellClass = valueCellClass|default('px-4 py-4 align-top leading-relaxed text-secondary-700 dark:text-secondary-200') %}
+{% set subLabelCellClass = subLabelCellClass|default('px-4 py-3.5 pl-8 align-top leading-relaxed text-secondary-600 dark:text-secondary-300') %}
+{% set deepSubLabelCellClass = deepSubLabelCellClass|default('px-4 py-3.5 pl-12 align-top leading-relaxed text-secondary-600 dark:text-secondary-300') %}
 {% set choiceBadgeClass = choiceBadgeClass|default('ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200') %}
 
 <tr>
@@ -89,7 +89,7 @@
 </tr>
 {% for key, semestre in valide.etat.structure.semestres %}
     <tr class="{{ dataRowClass }}">
-        <td class="px-4 py-3.5 pl-6 align-top font-semibold leading-relaxed text-slate-700 dark:text-slate-200">
+        <td class="px-4 py-3.5 pl-6 align-top font-semibold leading-relaxed text-secondary-700 dark:text-secondary-200">
             Semestre {{ key }}</td>
         <td class="{{ valueCellClass }}">
             {{ semestre.erreur|displayErreurs }}

@@ -1,5 +1,5 @@
 <div class="space-y-1.5">
-    <div class="font-semibold text-slate-900 dark:text-slate-100">
+    <div class="font-semibold text-secondary-900 dark:text-secondary-100">
         {% if item.formation.mention != null or item.formation.mentionTexte != null %}
             {{ item.formation.display }}
         {% else %}
@@ -7,16 +7,16 @@
         {% endif %}
     </div>
 
-    <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+    <div class="flex flex-wrap items-center gap-2 text-xs text-secondary-500 dark:text-secondary-400">
         <span class="inline-flex rounded-full border border-cyan-300 bg-cyan-50 px-2.5 py-0.5 font-semibold text-cyan-700 dark:border-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-300">
             {{ item.formation.typeDiplome|typeDiplome }}
         </span>
 
         {% if item.formation.hasParcours %}
-            <span class="font-medium text-slate-700 dark:text-slate-200">{{ item.parcours.libelle }}</span>
+            <span class="font-medium text-secondary-700 dark:text-secondary-200">{{ item.parcours.libelle }}</span>
             {{ item.parcours.typeParcours|badgeTypeParcours }}
         {% else %}
-            <span class="text-slate-400 dark:text-slate-500">Sans parcours</span>
+            <span class="text-secondary-400 dark:text-secondary-500">Sans parcours</span>
         {% endif %}
     </div>
 </div>

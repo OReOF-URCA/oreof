@@ -1,6 +1,6 @@
 {% if item.niveauDemande == 'P' %}
     {{ component('Badge', { dto: item.etatValidation|badgeEnumDto }) }}
 {% else %}
-    <span class="text-slate-300 dark:text-slate-600">-</span>
+    <span class="text-secondary-300 dark:text-secondary-600">-</span>
 {% endif %}
 

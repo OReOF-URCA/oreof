@@ -1,6 +1,6 @@
 {% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-indigo-500' %}
-{% set ddClass = 'mt-2 text-sm leading-relaxed text-slate-700' %}
-{% set blockClass = 'rounded-xl border border-slate-200 bg-slate-50 p-4' %}
+{% set ddClass = 'mt-2 text-sm leading-relaxed text-secondary-700' %}
+{% set blockClass = 'rounded-xl border border-secondary-200 bg-secondary-50 p-4' %}
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <div>
@@ -42,9 +42,9 @@
             <div>
                 <p class="{{ dtClass }}">Composante d'inscription</p>
                 <article
-                        class="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                    <p class="text-sm font-semibold text-slate-800">{{ parcours.composanteInscription.libelle }}</p>
-                    <div class="mt-2 space-y-1 text-sm text-slate-600">
+                        class="mt-2 rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+                    <p class="text-sm font-semibold text-secondary-800">{{ parcours.composanteInscription.libelle }}</p>
+                    <div class="mt-2 space-y-1 text-sm text-secondary-600">
                         <p>{{ parcours.composanteInscription.adresse != null ? parcours.composanteInscription.adresse.display|raw : 'Erreur' }}</p>
                         <p>{{ parcours.composanteInscription.telStandard|tel_format }} {% if parcours.composanteInscription.telComplementaire != null %}ou {{ parcours.composanteInscription.telComplementaire|tel_format }}{% endif %}</p>
                         <p>{{ parcours.composanteInscription.mailContact|mailto }}</p>
@@ -53,7 +53,7 @@
                 </article>
             </div>
         {% else %}
-            <p class="text-sm text-slate-500">Non précisé</p>
+            <p class="text-sm text-secondary-500">Non précisé</p>
         {% endif %}
     </div>
 </div>

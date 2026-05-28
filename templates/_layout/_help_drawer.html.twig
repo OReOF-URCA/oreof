@@ -17,7 +17,7 @@
 
         <div id="helpBackdrop" class="fixed inset-0 bg-black/40 hidden z-[60]" aria-hidden="true" data-action="click->help-drawer#onBackdropClick"></div>
 
-        <aside id="helpOffcanvas" class="fixed right-0 top-0 h-full w-80 sm:w-[28rem] transform translate-x-full transition-transform duration-300 ease-in-out bg-white border-l border-slate-200 shadow-lg z-[70] overflow-auto dark:bg-slate-900 dark:border-slate-700" aria-hidden="true" role="dialog" aria-labelledby="helpOffcanvasTitle">
+        <aside id="helpOffcanvas" class="fixed right-0 top-0 h-full w-80 sm:w-[28rem] transform translate-x-full transition-transform duration-300 ease-in-out bg-white border-l border-secondary-200 shadow-lg z-[70] overflow-auto dark:bg-secondary-900 dark:border-secondary-700" aria-hidden="true" role="dialog" aria-labelledby="helpOffcanvasTitle">
 
             <div class="p-4 flex items-center justify-between" style="background-color: {{ current_help ? 'var(--color-primary)' : 'var(--color-warning)' }}; color: white;">
                 <h5 id="helpOffcanvasTitle" class="mb-0 flex items-center gap-2 text-sm font-semibold">
@@ -27,10 +27,10 @@
                 <button id="helpOffcanvasClose" class="text-white text-2xl leading-none focus:outline-none cursor-pointer" type="button" aria-label="Fermer l'aide" data-action="click->help-drawer#close">&times;</button>
             </div>
 
-            <div class="p-4 text-slate-700 dark:text-slate-200">
+            <div class="p-4 text-secondary-700 dark:text-secondary-200">
                 {# BOUTONS D'ADMINISTRATION ET SLUG (Placés en haut, en ligne) #}
                 {% if is_granted('ROLE_ADMIN') %}
-                    <div class="flex flex-wrap items-center gap-2 mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
+                    <div class="flex flex-wrap items-center gap-2 mb-4 pb-3 border-b border-secondary-200 dark:border-secondary-700">
                         {% if current_help %}
                             <twig:Button
                                     href="{{ path('app_help_edit', {'id': current_help.id}) }}"
@@ -57,7 +57,7 @@
                                 label="Gérer"
                         />
 
-                        <code class="bg-secondary-100 text-secondary-800 px-2 py-1 rounded border shadow-sm text-sm dark:bg-secondary-800 dark:text-secondary-200 dark:border-slate-secondary">{{ current_route }}</code>
+                        <code class="bg-secondary-100 text-secondary-800 px-2 py-1 rounded border shadow-sm text-sm dark:bg-secondary-800 dark:text-secondary-200 dark:border-secondary-secondary">{{ current_route }}</code>
                     </div>
                 {% endif %}
 
@@ -68,7 +68,7 @@
                             {{ current_help.content|markdown_to_html|parse_embeds }}
                         </div>
                     {% else %}
-                        <div class="bg-none border border-slate-200 p-4 rounded text-center mt-2 dark:bg-slate-800/70 dark:border-slate-700">
+                        <div class="bg-none border border-secondary-200 p-4 rounded text-center mt-2 dark:bg-secondary-800/70 dark:border-secondary-700">
                             <twig:UX:Icon name="ph:smiley-sad-light" class="w-10 h-10 mb-3 text-secondary dark:text-secondary-300 mx-auto" />
                             <p class="mb-0 text-secondary dark:text-secondary-300">Aucune aide n'est actuellement disponible pour cette page.</p>
                         </div>

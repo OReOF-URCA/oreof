@@ -49,12 +49,12 @@
         {% block search %}
             <label for="filter-libelle" class="sr-only">Recherche</label>
             <div class="relative">
-                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
+                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-secondary-400">
                     {{ ux_icon('icon:search', {class: 'h-4 w-4'}) }}
                 </span>
                 <input type="text"
                        id="filter-libelle"
-                       class="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-400"
+                       class="w-full rounded-lg border border-secondary-300 bg-white py-2 pl-9 pr-3 text-sm text-secondary-700 shadow-sm outline-none transition placeholder:text-secondary-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder:text-secondary-400"
                        placeholder="Rechercher un libellé..."
                        value="{{ params.libelle|default('') }}"
                         {{ stimulus_action('crud', 'filter', 'change', {'field': 'libelle'}) }}>
@@ -71,7 +71,7 @@
 
             {% if collapsible|default(false) %}
                 <label for="{{ 'filter-panel-toggle-' ~ random() }}"
-                       class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500 dark:hover:text-white"
+                       class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-secondary-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-600 transition hover:border-secondary-300 hover:text-secondary-900 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500 dark:hover:text-white"
                        title="Afficher/masquer les filtres"
                        aria-label="Afficher ou masquer les filtres">
                     {{ ux_icon('icon:filter', {class: 'h-4 w-4'}) }}
@@ -83,7 +83,7 @@
                     {% endif %}
                 </label>
             {% else %}
-                <span class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200">
+                <span class="inline-flex items-center gap-2 rounded-lg border border-secondary-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-600 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200">
                     {{ ux_icon('icon:filter', {class: 'h-4 w-4'}) }}
                     Filtres
                     {% if activeFilters > 0 %}
@@ -99,9 +99,9 @@
             {% if hd == false %}
                 <div>
                     <label for="filter-mention"
-                           class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Mention</label>
+                           class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Mention</label>
                     <select id="filter-mention"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                            class="w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100"
                             {{ stimulus_action('crud', 'filter', 'change', {'field': 'mention'}) }}
                             {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                         <option value="">Toutes les mentions</option>
@@ -115,9 +115,9 @@
 
                 <div>
                     <label for="filter-parcours"
-                           class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Parcours</label>
+                           class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Parcours</label>
                     <select id="filter-parcours"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                            class="w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100"
                             {{ stimulus_action('crud', 'filter', 'change', {'field': 'parcours'}) }}
                             {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                         <option value="">Tous les parcours</option>
@@ -131,9 +131,9 @@
 
             <div>
                 <label for="filter-referent"
-                       class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Référent</label>
+                       class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Référent</label>
                 <select id="filter-referent"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                        class="w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100"
                         {{ stimulus_action('crud', 'filter', 'change', {'field': 'referent'}) }}
                         {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                     <option value="">Tous les référents</option>
@@ -150,9 +150,9 @@
 
             <div>
                 <label for="filter-utilise"
-                       class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Utilisé</label>
+                       class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Utilisé</label>
                 <select id="filter-utilise"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                        class="w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100"
                         {{ stimulus_action('crud', 'filter', 'change', {'field': 'utilise'}) }}>
                     <option value="all">Tous</option>
                     <option value="1"
@@ -166,9 +166,9 @@
 
             <div>
                 <label for="filter-remplissage"
-                       class="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">Remplissage</label>
+                       class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Remplissage</label>
                 <select id="filter-remplissage"
-                        class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-xs font-medium text-slate-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+                        class="w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100"
                         {{ stimulus_action('crud', 'filter', 'change', {'field': 'remplissage'}) }}>
                     <option value="all">Tous</option>
                     <option value="0"
@@ -185,13 +185,13 @@
     {% endembed %}
 
     {# Table Tailwind #}
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+    <div class="rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
         <div class="overflow-x-auto">
-            <table class="min-w-full text-sm text-slate-700 dark:text-slate-200">
-                <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-300">
+            <table class="min-w-full text-sm text-secondary-700 dark:text-secondary-200">
+                <thead class="bg-secondary-50 text-left text-xs font-black uppercase tracking-wider text-secondary-500 dark:bg-secondary-800/70 dark:text-secondary-300">
                 <tr>
                     <th class="px-4 py-3 w-2/5">
-                        <a href="#" class="inline-flex items-center gap-1 hover:text-slate-900 dark:hover:text-white"
+                        <a href="#" class="inline-flex items-center gap-1 hover:text-secondary-900 dark:hover:text-white"
                                 {{ stimulus_action('crud', 'sort', 'click', {
                                     'sort': 'libelle',
                                     'direction': getDirection('libelle', sort, direction)
@@ -205,20 +205,20 @@
                     <th class="px-4 py-3 text-right w-1/6">Actions</th>
                 </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
                 {% for ficheMatiere in ficheMatieres %}
-                    <tr class="align-top hover:bg-slate-50/70 dark:hover:bg-slate-800/40">
+                    <tr class="align-top hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40">
                         {# Colonne principale : Libellé + Contexte + Référent #}
                         <td class="px-4 py-3">
                             <div class="space-y-2">
                                 <div class="flex flex-col gap-1">
-                                    <span class="font-semibold text-slate-900 dark:text-white">{{ ficheMatiere.libelle }}</span>
+                                    <span class="font-semibold text-secondary-900 dark:text-white">{{ ficheMatiere.libelle }}</span>
                                     {% if ficheMatiere.sigle != null %}
-                                        <span class="text-xs text-slate-500 dark:text-slate-400">{{ ficheMatiere.sigle }}</span>
+                                        <span class="text-xs text-secondary-500 dark:text-secondary-400">{{ ficheMatiere.sigle }}</span>
                                     {% endif %}
                                 </div>
                                 {% if hd == false %}
-                                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                                    <div class="text-xs text-secondary-500 dark:text-secondary-400">
                                         {% if ficheMatiere.parcours != null %}
                                             {% if ficheMatiere.parcours.formation.hasParcours == true %}
                                                 <span class="font-medium">{{ ficheMatiere.parcours.formation.display }}</span> › {{ ficheMatiere.parcours.libelle }}
@@ -232,9 +232,9 @@
                                 {% endif %}
                                 <div>
                                     {% if ficheMatiere.responsableFicheMatiere != null %}
-                                        <span class="text-xs text-slate-500 dark:text-slate-400">
+                                        <span class="text-xs text-secondary-500 dark:text-secondary-400">
                                             Référent: <span
-                                                    class="font-medium text-slate-700 dark:text-slate-200">{{ ficheMatiere.responsableFicheMatiere.display }}</span>
+                                                    class="font-medium text-secondary-700 dark:text-secondary-200">{{ ficheMatiere.responsableFicheMatiere.display }}</span>
                                         </span>
                                     {% else %}
                                         <span class="inline-flex rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-300">Référent non défini</span>
@@ -253,7 +253,7 @@
                             {% if ficheMatiere.elementConstitutifs|length > 0 %}
                                 <span class="inline-flex rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">Oui</span>
                             {% else %}
-                                <span class="inline-flex rounded-full border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300">Non</span>
+                                <span class="inline-flex rounded-full border border-secondary-300 bg-secondary-50 px-2.5 py-1 text-xs font-semibold text-secondary-700 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-300">Non</span>
                             {% endif %}
                         </td>
 

@@ -2,7 +2,7 @@
 {% set valueClass = 'px-2 py-4 text-center align-middle tabular-nums' %}
 {% set presClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-blue-700 bg-blue-50/30' %}
 {% set distClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-orange-700 bg-orange-50/30' %}
-{% set totalClass = 'px-4 py-4 text-right align-middle tabular-nums font-black text-slate-900 bg-slate-50/70' %}
+{% set totalClass = 'px-4 py-4 text-right align-middle tabular-nums font-black text-secondary-900 bg-secondary-50/70' %}
 
 <tr class="border-t-2 border-indigo-100 bg-indigo-50/30 dark:border-indigo-800 dark:bg-indigo-950/20">
 
@@ -11,7 +11,7 @@
         colspan="2">
         <span class="inline-flex items-center gap-2">
             <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-black text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-200">Total</span>
-            <span class="text-slate-800 dark:text-slate-100">{{ ue.display }}</span>
+            <span class="text-secondary-800 dark:text-secondary-100">{{ ue.display }}</span>
             {% if enfant == false and ue.ue.ueEnfants|length > 0 %}
                 <span class="text-[9px] font-medium text-indigo-400 dark:text-indigo-500 normal-case">(Total max.)</span>
             {% endif %}
@@ -20,7 +20,7 @@
 
     {# ECTS — badge proportionné #}
     <th class="{{ valueClass }}">
-        <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">
+        <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">
             {{ diffUe ? diffUe.heuresEctsUe.sommeUeEcts|displayDiff : '' }} ECTS
         </span>
         <span class="show_current">{{ ue.heuresEctsUe.sommeUeEcts|badgeEcts('primary') }}</span>
@@ -28,42 +28,42 @@
 
     {% if presentiel %}
         <th class="{{ presClass }}">
-            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeCmPres|displayDiff : '' }}</span>
+            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeCmPres|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeCmPres|filtreHeures }}</span>
         </th>
         <th class="{{ presClass }}">
-            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTdPres|displayDiff : '' }}</span>
+            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTdPres|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTdPres|filtreHeures }}</span>
         </th>
         <th class="{{ presClass }}">
-            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTpPres|displayDiff : '' }}</span>
+            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTpPres|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTpPres|filtreHeures }}</span>
         </th>
         <th class="{{ presClass }} font-black text-blue-800 bg-blue-50/50">
-            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalPres|displayDiff : '' }}</span>
+            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalPres|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTotalPres|filtreHeures }}</span>
         </th>
-        <th class="{{ presClass }} border-r border-slate-200">
-            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTePres|displayDiff : '' }}</span>
+        <th class="{{ presClass }} border-r border-secondary-200">
+            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTePres|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTePres|filtreHeures }}</span>
         </th>
     {% endif %}
 
     {% if distanciel %}
         <th class="{{ distClass }}">
-            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeCmDist|displayDiff : '' }}</span>
+            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeCmDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeCmDist|filtreHeures }}</span>
         </th>
         <th class="{{ distClass }}">
-            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTdDist|displayDiff : '' }}</span>
+            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTdDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTdDist|filtreHeures }}</span>
         </th>
         <th class="{{ distClass }}">
-            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTpDist|displayDiff : '' }}</span>
+            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTpDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTpDist|filtreHeures }}</span>
         </th>
-        <th class="{{ distClass }} font-black text-orange-700 bg-orange-50/50 border-r border-slate-200">
-            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalDist|displayDiff : '' }}</span>
+        <th class="{{ distClass }} font-black text-orange-700 bg-orange-50/50 border-r border-secondary-200">
+            <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTotalDist|filtreHeures }}</span>
         </th>
     {% endif %}
@@ -72,7 +72,7 @@
         <th class="{{ totalClass }}">
             <div class="flex items-end justify-end gap-3">
                 <span>
-                    <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-slate-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalPresDist|displayDiff : '' }}</span>
+                    <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalPresDist|displayDiff : '' }}</span>
                     <span class="show_current block text-2xl font-black">{{ ue.heuresEctsUe.sommeUeTotalPresDist|filtreHeures }}</span>
                     {% if ue.heuresEctsUe.sommeUeTePres > 0 %}
                         <span class="mt-1 block text-[11px] font-medium text-emerald-600 dark:text-emerald-300">+ {{ ue.heuresEctsUe.sommeUeTePres|filtreHeures }} h autonomie</span>

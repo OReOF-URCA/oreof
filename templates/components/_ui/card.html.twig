@@ -43,10 +43,10 @@ Composant Card — exemples :
             <div class="flex items-start justify-between gap-4">
                 <div class="min-w-0">
                     {% if resolvedTitle != '' %}
-                        <h2 class="text-2xl font-bold text-text dark:text-slate-100 truncate">{{ resolvedTitle }}</h2>
+                        <h2 class="text-2xl font-bold text-text dark:text-secondary-100 truncate">{{ resolvedTitle }}</h2>
                     {% endif %}
                     {% if resolvedDescription != '' %}
-                        <p class="text-secondary text-sm mt-1 dark:text-slate-400">{{ resolvedDescription }}</p>
+                        <p class="text-secondary text-sm mt-1 dark:text-secondary-400">{{ resolvedDescription }}</p>
                     {% endif %}
                 </div>
 
@@ -76,7 +76,7 @@ Composant Card — exemples :
     {% endif %}
 
     {% if slotContent|trim != '' %}
-        <div class="p-8 bg-surface text-text dark:text-slate-100 rounded-xl">
+        <div class="p-8 bg-surface text-text dark:text-secondary-100 rounded-xl">
             {{ slotContent|raw }}
         </div>
     {% endif %}
