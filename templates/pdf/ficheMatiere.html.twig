@@ -1,3 +1,8 @@
+{% if basePdfExtension ?? false == false %}
+    {% extends 'pdf/base-pdf.html.twig' %}
+{% endif %}
+
+{% block content %}
 {% set ficheMatiere = ec.ficheMatiere %}
 <header>
     <h1 class="mt-3">{{ ficheMatiere != null ? ficheMatiere.getDisplay() : 'Erreur fiche' }}</h1>
@@ -182,3 +187,4 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
