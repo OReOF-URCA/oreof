@@ -129,11 +129,6 @@ class FicheMatiereExportController extends AbstractController
             [$parcours->getId()]
         ));
 
-        $this->addFlash('toast', [
-            'type' => Constantes::FLASHBAG_SUCCESS,
-            'text' => 'Les documents sont en cours de génération, vous recevrez un mail lorsque les documents seront prêts'
-        ]);
-
-        return $this->redirectToRoute('app_homepage');
+        return JsonReponse::success('Les documents sont en cours de génération, vous recevrez un mail lorsque les documents seront prêts');
     }
 }
