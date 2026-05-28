@@ -160,6 +160,37 @@ html[data-theme="dark"] {
   --app-border: #334155;
 }
 
+/* Surcharge du thème de couleur (le mode normal utilise le :root par défaut) */
+html[data-color-theme="vert"] {
+  --semantic-primary-base: #11b838; /* À remplacer par le vert URCA */
+  --semantic-secondary-base: #64748b;
+  --semantic-success-base: #11dcaa;
+  --semantic-info-base: #1f7b89;
+  --semantic-warning-base: #d97706;
+  --semantic-danger-base: #dc2626;
+
+}
+
+html[data-color-theme="rouge"] {
+  --semantic-primary-base: #ed1414; /* À remplacer par le rouge URCA */
+  --semantic-secondary-base: #64748b;
+  --semantic-success-base: #10b981;
+  --semantic-info-base: #1f7b89;
+  --semantic-warning-base: #d97706;
+  --semantic-danger-base: #ff0b71;
+
+}
+
+html[data-color-theme="jaune"] {
+  --semantic-primary-base: #efb00d; /* À remplacer par le jaune URCA */
+  --semantic-secondary-base: #64748b;
+  --semantic-success-base: #10b981;
+  --semantic-info-base: #1f7b89;
+  --semantic-warning-base: #ec700b;
+  --semantic-danger-base: #dc2626;
+
+}
+
 @layer base {
   html,
   body {
@@ -1072,7 +1103,7 @@ html[data-theme="dark"] {
   }
 
   .app-scrollspy-link-active {
-    @apply text-indigo-600 bg-indigo-50 border-indigo-600;
+    @apply text-primary-600 bg-primary-50 border-primary-600;
   }
 
   html[data-theme="dark"] .app-scrollspy-link {

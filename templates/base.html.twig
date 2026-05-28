@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
 {% include '_layout/_help_drawer.html.twig' %}
 
 <template id="global-spinner-template">
-    <div class="turbo-spinner-overlay absolute top-0 left-0 w-full h-full flex justify-center items-center z-50">
+    <div class="turbo-spinner-overlay absolute top-0 left-0 w-full h-full flex justify-center items-center z-50 pointer-events-none">
         <twig:Spinner variant="primary" size="lg" />
     </div>
 </template>

@@ -2,93 +2,104 @@ import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
     connect() {
-        // 1. Interception automatique des Turbo Frames (Attribut "busy")
-        this.observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && mutation.attributeName === 'busy') {
-                    const frame = mutation.target;
-                    if (frame.tagName === 'TURBO-FRAME') {
-                        if (frame.hasAttribute('busy')) {
-                            this.addSpinner(frame);
-                        } else {
-                            this.removeSpinner(frame);
-                        }
-                    }
-                }
-            });
-        });
-
-        this.observer.observe(this.element, {
-            attributes: true,
-            subtree: true,
-            attributeFilter: ['busy']
-        });
-
         // Liaison du contexte pour les écouteurs d'événements
-        this.showGlobalLoader = this.showGlobalLoader.bind(this);
-        this.hideGlobalLoader = this.hideGlobalLoader.bind(this);
+        this.showGlobal = this.showGlobal.bind(this);
+        this.hideGlobal = this.hideGlobal.bind(this);
+        this.showFrame = this.showFrame.bind(this);
+        this.hideFrame = this.hideFrame.bind(this);
 
-        // 2. Interception des navigations globales (Turbo Drive) et Formulaires
-        document.addEventListener('turbo:visit', this.showGlobalLoader);
-        document.addEventListener('turbo:submit-start', this.showGlobalLoader);
-        document.addEventListener('turbo:load', this.hideGlobalLoader);
-        document.addEventListener('turbo:submit-end', this.hideGlobalLoader);
+        // --- 1. Événements Globaux (Turbo Drive : changement de page, formulaires) ---
+        document.addEventListener('turbo:visit', this.showGlobal);
+        document.addEventListener('turbo:submit-start', this.showGlobal);
+        document.addEventListener('turbo:load', this.hideGlobal);
+        document.addEventListener('turbo:submit-end', this.hideGlobal);
+        document.addEventListener('turbo:render', this.hideGlobal); // Sécurité supplémentaire
 
-        // 3. Interception des requêtes Fetch/Ajax manuelles (via événements personnalisés)
-        document.addEventListener('app:show-loader', this.showGlobalLoader);
-        document.addEventListener('app:hide-loader', this.hideGlobalLoader);
+        // Custom events pour tes anciens scripts (fetch manuels)
+        document.addEventListener('app:show-loader', this.showGlobal);
+        document.addEventListener('app:hide-loader', this.hideGlobal);
+
+        // --- 2. Événements Locaux (Turbo Frames : Modals, Tableaux, etc.) ---
+        document.addEventListener('turbo:before-fetch-request', this.showFrame);
+        document.addEventListener('turbo:frame-render', this.hideFrame);
+        document.addEventListener('turbo:frame-load', this.hideFrame);
+
+        // --- 3. Les filets de sécurité critiques ---
+        // S'il manque un frame cible ou qu'il y a une erreur serveur (500/404), on cache tout !
+        document.addEventListener('turbo:frame-missing', this.hideFrame);
+        document.addEventListener('turbo:fetch-request-error', this.hideFrame);
+        document.addEventListener('turbo:fetch-offline-error', this.hideGlobal);
     }
 
     disconnect() {
-        if (this.observer) this.observer.disconnect();
+        // Nettoyage des événements
+        document.removeEventListener('turbo:visit', this.showGlobal);
+        document.removeEventListener('turbo:submit-start', this.showGlobal);
+        document.removeEventListener('turbo:load', this.hideGlobal);
+        document.removeEventListener('turbo:submit-end', this.hideGlobal);
+        document.removeEventListener('turbo:render', this.hideGlobal);
 
-        // Nettoyage des événements Turbo
-        document.removeEventListener('turbo:visit', this.showGlobalLoader);
-        document.removeEventListener('turbo:submit-start', this.showGlobalLoader);
-        document.removeEventListener('turbo:load', this.hideGlobalLoader);
-        document.removeEventListener('turbo:submit-end', this.hideGlobalLoader);
+        document.removeEventListener('app:show-loader', this.showGlobal);
+        document.removeEventListener('app:hide-loader', this.hideGlobal);
 
-        // Nettoyage des événements personnalisés
-        document.removeEventListener('app:show-loader', this.showGlobalLoader);
-        document.removeEventListener('app:hide-loader', this.hideGlobalLoader);
+        document.removeEventListener('turbo:before-fetch-request', this.showFrame);
+        document.removeEventListener('turbo:frame-render', this.hideFrame);
+        document.removeEventListener('turbo:frame-load', this.hideFrame);
+
+        document.removeEventListener('turbo:frame-missing', this.hideFrame);
+        document.removeEventListener('turbo:fetch-request-error', this.hideFrame);
+        document.removeEventListener('turbo:fetch-offline-error', this.hideGlobal);
     }
 
-    showGlobalLoader() {
+    showGlobal() {
         this.addSpinner(document.body, true);
     }
 
-    hideGlobalLoader() {
+    hideGlobal() {
         this.removeSpinner(document.body, true);
+
+        // Filet de sécurité ultime : suppression en force de tout loader persistant
+        document.querySelectorAll('.turbo-spinner-overlay.fixed').forEach(el => el.remove());
+    }
+
+    showFrame(event) {
+        const element = event.target;
+        // On s'assure que l'événement vient bien d'un Turbo Frame
+        if (element && element.tagName === 'TURBO-FRAME') {
+            this.addSpinner(element, false);
+        }
+    }
+
+    hideFrame(event) {
+        const element = event.target;
+        if (element && element.tagName === 'TURBO-FRAME') {
+            this.removeSpinner(element, false);
+        }
     }
 
     addSpinner(element, isGlobal = false) {
         const template = document.getElementById('global-spinner-template');
         if (!template) return;
 
-        // Anti-doublon : on ne remet pas de loader s'il y en a déjà un
-        if (element.querySelector(':scope > .turbo-spinner-overlay')) return;
+        // Anti-doublon global et local
+        if (isGlobal && document.querySelector('body > .turbo-spinner-overlay.fixed:not([data-frame-id])')) return;
+        if (!isGlobal && element.querySelector(':scope > .turbo-spinner-overlay')) return;
 
-        // Détection critique : si le frame fait moins de 10px de haut (ex: modal vide),
-        // on force l'affichage en plein écran pour qu'il soit bien visible.
-        const isElementEmpty = element.clientHeight < 10;
+        const isElementEmpty = !isGlobal && element.clientHeight < 10;
         const forceGlobal = isGlobal || isElementEmpty;
 
         const clone = template.content.cloneNode(true);
         const overlay = clone.querySelector('.turbo-spinner-overlay');
 
         if (forceGlobal) {
-            // Mode "Plein écran" (Modals vides, requêtes globales ou appels fetch manuels)
             overlay.classList.remove('absolute', 'w-full', 'h-full');
             overlay.classList.add('fixed', 'w-screen', 'h-screen');
-            // On l'attache toujours au body pour éviter les problèmes de z-index ou de débordement
             document.body.appendChild(clone);
 
-            // On identifie l'overlay pour pouvoir le supprimer spécifiquement plus tard
             if (!isGlobal && element.id) {
                 overlay.setAttribute('data-frame-id', element.id);
             }
         } else {
-            // Mode "Local" (Contenu ciblé, ex: rechargement d'un tableau spécifique)
             if (getComputedStyle(element).position === 'static') {
                 element.style.position = 'relative';
             }
@@ -98,16 +109,15 @@ export default class extends Controller {
 
     removeSpinner(element, isGlobal = false) {
         if (isGlobal) {
-            // Suppression des loaders globaux
-            document.querySelectorAll('.turbo-spinner-overlay.fixed').forEach(el => el.remove());
+            document.querySelectorAll('body > .turbo-spinner-overlay.fixed:not([data-frame-id])').forEach(el => el.remove());
         } else {
-            // Suppression du loader local
+            // Suppression d'un loader local ciblé
             const localOverlay = element.querySelector(':scope > .turbo-spinner-overlay.absolute');
             if (localOverlay) localOverlay.remove();
 
-            // Si c'était un frame vide passé en global, on le cherche par son ID et on le supprime
+            // Si le frame était vide (modale) et a généré un loader plein écran, on l'enlève via son ID
             if (element.id) {
-                const detachedGlobalOverlay = document.querySelector(`.turbo-spinner-overlay[data-frame-id="${element.id}"]`);
+                const detachedGlobalOverlay = document.querySelector(`body > .turbo-spinner-overlay[data-frame-id="${element.id}"]`);
                 if (detachedGlobalOverlay) detachedGlobalOverlay.remove();
             }
         }
