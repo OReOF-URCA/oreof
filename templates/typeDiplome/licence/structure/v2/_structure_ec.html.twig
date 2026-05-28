@@ -1,11 +1,11 @@
 {% set cellClass = 'px-3 py-3 align-top' %}
-{% set metricCellClass = 'px-3 py-3 align-top text-center tabular-nums font-semibold text-slate-700' %}
+{% set metricCellClass = 'px-3 py-3 align-top text-center tabular-nums font-semibold text-secondary-700' %}
 {% set metricPresClass = metricCellClass ~ ' bg-blue-50/20' %}
 {% set metricDistClass = metricCellClass ~ ' bg-orange-50/20 text-orange-700' %}
-{% set metricTotalClass = metricCellClass ~ ' font-black text-slate-900' %}
-{% set rowClass = ecEnfant ? 'bg-indigo-50/40 hover:bg-indigo-50/70' : 'hover:bg-slate-50/70' %}
+{% set metricTotalClass = metricCellClass ~ ' font-black text-secondary-900' %}
+{% set rowClass = ecEnfant ? 'bg-indigo-50/40 hover:bg-indigo-50/70' : 'hover:bg-secondary-50/70' %}
 
-<tr class="ec border-b border-slate-100 transition-colors {{ rowClass }}">
+<tr class="ec border-b border-secondary-100 transition-colors {{ rowClass }}">
     <td class="{{ cellClass }} border-l-4 border-indigo-500">
         <div class="flex flex-col gap-2">
             <div class="flex items-start gap-3">
@@ -20,7 +20,7 @@
                     <div class="flex flex-wrap items-center gap-2">
                         {% if not ecEnfant %}
                             {% if (isBut is defined and isBut == false) or isBut is not defined %}
-                                <span class="mt-1 inline-flex shrink-0 items-center gap-2 rounded-full border border-indigo-200 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-600 shadow-sm bg-slate-100">
+                                <span class="mt-1 inline-flex shrink-0 items-center gap-2 rounded-full border border-indigo-200 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-600 shadow-sm bg-secondary-100">
                             {{ ec.elementConstitutif.code }}</span>
                             {% endif %}
                         {% endif %}
@@ -28,7 +28,7 @@
                         {% if ec.elementConstitutif.ficheMatiere != null %}
                             <a href="{{ url('fiche_matiere_v2_voir', {slug: ec.elementConstitutif.ficheMatiere.slug}) }}"
                                target="_blank"
-                               class="min-w-0 text-sm font-semibold leading-relaxed text-slate-800 hover:text-indigo-700 hover:underline">
+                               class="min-w-0 text-sm font-semibold leading-relaxed text-secondary-800 hover:text-indigo-700 hover:underline">
                                 {% if isBut is defined and isBut == true %}
                                     <span class="font-black">{{ ec.elementConstitutif.ficheMatiere.sigle }}</span>
                                     {{ ec.elementConstitutif.ficheMatiere.libelle }}
@@ -38,7 +38,7 @@
                                 {% endif %}
                             </a>
                         {% else %}
-                            <span class="text-sm font-semibold leading-relaxed text-slate-800">
+                            <span class="text-sm font-semibold leading-relaxed text-secondary-800">
                                 <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.libelle|displayDiff : '' }}</span>
                                 <span class="show_current">{{ ec.elementConstitutif.libelle }}</span>
                             </span>
@@ -46,7 +46,7 @@
                     </div>
 
                     {% if isVersioning is not defined or isVersioning == false %}
-                        <p class="mt-1 text-xs font-medium {% if ecEnfant %}text-indigo-500/80{% else %}text-slate-500{% endif %}">
+                        <p class="mt-1 text-xs font-medium {% if ecEnfant %}text-indigo-500/80{% else %}text-secondary-500{% endif %}">
                             Code Apogée : {{ ec.elementConstitutif.displayCodeApogee }}</p>
                     {% endif %}
 
@@ -68,7 +68,7 @@
                         {% endif %}
 
                         {% if is_granted('ROLE_ADMIN') %}
-                            <span class="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-500">#{{ ec.elementConstitutif.id }}</span>
+                            <span class="rounded-full bg-secondary-100 px-2 py-1 text-[11px] font-semibold text-secondary-500">#{{ ec.elementConstitutif.id }}</span>
                         {% endif %}
                     </div>
                 </div>
@@ -126,7 +126,7 @@
                 <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.sommeEcTotalPres|displayDiff : '' }}</span>
                 <span class="show_current">{{ ec.heuresEctsEc.sommeEcTotalPres|filtreHeures }}</span>
             </td>
-            <td class="{{ metricPresClass }} border-r border-slate-100 text-slate-600">
+            <td class="{{ metricPresClass }} border-r border-secondary-100 text-secondary-600">
                 <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.tePres|displayDiff : '' }}</span>
                 <span class="show_current">{{ ec.heuresEctsEc.tePres|filtreHeures }}</span>
             </td>
@@ -149,7 +149,7 @@
                 <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.tpDist|displayDiff : '' }}</span>
                 <span class="show_current">{{ ec.heuresEctsEc.tpDist|filtreHeures }}</span>
             </td>
-            <td class="{{ metricDistClass }} border-r border-slate-100 font-black">
+            <td class="{{ metricDistClass }} border-r border-secondary-100 font-black">
                 <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.sommeEcTotalDist|displayDiff : '' }}</span>
                 <span class="show_current">{{ ec.heuresEctsEc.sommeEcTotalDist|filtreHeures }}</span>
             </td>
@@ -157,7 +157,7 @@
     {% endif %}
 
     {% if parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 1) %}
-        <td class="px-5 py-3 align-top text-right font-black tabular-nums text-slate-900">
+        <td class="px-5 py-3 align-top text-right font-black tabular-nums text-secondary-900">
             <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.sommeEcTotalPresDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ec.heuresEctsEc.sommeEcTotalPresDist|filtreHeures }}</span>
         </td>

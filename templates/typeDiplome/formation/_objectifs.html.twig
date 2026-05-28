@@ -1,10 +1,10 @@
 <div class="space-y-4">
-    <p class="text-sm font-black uppercase tracking-wide text-slate-500">Blocs de compétences</p>
+    <p class="text-sm font-black uppercase tracking-wide text-secondary-500">Blocs de compétences</p>
     <div class="space-y-3">
         {% for bloc in bccs %}
-            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <p class="text-sm font-semibold text-slate-900">{{ bloc.bcc.display }}</p>
-                <ul class="mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed text-slate-700">
+            <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+                <p class="text-sm font-semibold text-secondary-900">{{ bloc.bcc.display }}</p>
+                <ul class="mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed text-secondary-700">
                     {% for comp in bloc.competences %}
                         <li>{{ comp.display }}</li>
                     {% else %}
@@ -13,7 +13,7 @@
                 </ul>
             </div>
         {% else %}
-            <div class="rounded-xl border border-dashed border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
+            <div class="rounded-xl border border-dashed border-secondary-200 bg-white px-4 py-3 text-sm text-secondary-500">
                 Aucun bloc de compétences associé.
             </div>
         {% endfor %}

@@ -1,11 +1,11 @@
 {% import 'typeDiplome/licence/mccc/_form_fields.html.twig' as fields %}
 
-<h3 class="mb-3 text-lg font-semibold text-slate-900">1ᵉ Session</h3>
+<h3 class="mb-3 text-lg font-semibold text-secondary-900">1ᵉ Session</h3>
 <div>
     <div id="epreuve_cci" class="space-y-3">
-        <div class="epreuve grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-12">
+        <div class="epreuve grid grid-cols-1 gap-3 rounded-lg border border-secondary-200 bg-white p-4 md:grid-cols-12">
             <div class="md:col-span-4">
-                <strong class="text-slate-800">Epreuve N°1</strong>
+                <strong class="text-secondary-800">Epreuve N°1</strong>
             </div>
             <div class="md:col-span-8">
                 {{ fields.label('pourcentage_s1_cc', 'Pourcentage') }}
@@ -17,15 +17,15 @@
                     'text',
                     false,
                     stimulus_action('mccc--licence', 'saveDataCci', 'change'),
-                    'pourcentage synchro-mccc block w-full rounded-l-sm border-0 bg-slate-50 p-2 font-bold text-slate-700'
+                    'pourcentage synchro-mccc block w-full rounded-l-sm border-0 bg-secondary-50 p-2 font-bold text-secondary-700'
                 ) }}
                 {{ fields.help('mccc_licence.helps.cc.pourcentage_s1_et.help') }}
             </div>
         </div>
 
-        <div class="epreuve grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-12">
+        <div class="epreuve grid grid-cols-1 gap-3 rounded-lg border border-secondary-200 bg-white p-4 md:grid-cols-12">
             <div class="md:col-span-4">
-                <strong class="text-slate-800">Epreuve N°2</strong>
+                <strong class="text-secondary-800">Epreuve N°2</strong>
             </div>
             <div class="md:col-span-8">
                 {{ fields.label('pourcentage_s2_cc', 'Pourcentage') }}
@@ -37,15 +37,15 @@
                     'text',
                     false,
                     stimulus_action('mccc--licence', 'saveDataCci', 'change'),
-                    'pourcentage synchro-mccc block w-full rounded-l-sm border-0 bg-slate-50 p-2 font-bold text-slate-700'
+                    'pourcentage synchro-mccc block w-full rounded-l-sm border-0 bg-secondary-50 p-2 font-bold text-secondary-700'
                 ) }}
                 {{ fields.help('mccc_licence.helps.cc.pourcentage_s1_et.help') }}
             </div>
         </div>
 
-        <div class="epreuve grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-12">
+        <div class="epreuve grid grid-cols-1 gap-3 rounded-lg border border-secondary-200 bg-white p-4 md:grid-cols-12">
             <div class="md:col-span-4">
-                <strong class="text-slate-800">Epreuve N°3</strong>
+                <strong class="text-secondary-800">Epreuve N°3</strong>
             </div>
             <div class="md:col-span-8">
                 {{ fields.label('pourcentage_s3_cc', 'Pourcentage') }}
@@ -57,7 +57,7 @@
                     'text',
                     false,
                     stimulus_action('mccc--licence', 'saveDataCci', 'change'),
-                    'pourcentage synchro-mccc block w-full rounded-l-sm border-0 bg-slate-50 p-2 font-bold text-slate-700'
+                    'pourcentage synchro-mccc block w-full rounded-l-sm border-0 bg-secondary-50 p-2 font-bold text-secondary-700'
                 ) }}
                 {{ fields.help('mccc_licence.helps.cc.pourcentage_s1_et.help') }}
             </div>
@@ -65,9 +65,9 @@
 
         {% if mcccs|length > 3 %}
             {% for i in 4..mcccs|length %}
-                <div class="epreuve grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-12">
+                <div class="epreuve grid grid-cols-1 gap-3 rounded-lg border border-secondary-200 bg-white p-4 md:grid-cols-12">
                     <div class="md:col-span-4">
-                        <strong class="text-slate-800">Epreuve N°{{ i }}</strong>
+                        <strong class="text-secondary-800">Epreuve N°{{ i }}</strong>
                     </div>
                     <div class="md:col-span-6">
                         {{ fields.label('pourcentage_s' ~ i ~ '_cc', 'Pourcentage') }}
@@ -79,7 +79,7 @@
                             'text',
                             false,
                             stimulus_action('mccc--licence', 'saveDataCci', 'change'),
-                            'pourcentage synchro-mccc block w-full rounded-l-sm border-0 bg-slate-50 p-2 font-bold text-slate-700'
+                            'pourcentage synchro-mccc block w-full rounded-l-sm border-0 bg-secondary-50 p-2 font-bold text-secondary-700'
                         ) }}
                         {{ fields.help('mccc_licence.helps.cc.pourcentage_s1_et.help') }}
                     </div>

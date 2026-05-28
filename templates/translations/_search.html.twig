@@ -1,42 +1,42 @@
-<div class="overflow-hidden rounded-lg border border-slate-200 dark:border-slate-700"
+<div class="overflow-hidden rounded-lg border border-secondary-200 dark:border-secondary-700"
      data-controller="translations"
 >
-    <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-700">
-        <thead class="bg-slate-50 dark:bg-slate-800">
+    <table class="min-w-full divide-y divide-secondary-200 text-sm dark:divide-secondary-700">
+        <thead class="bg-secondary-50 dark:bg-secondary-800">
         <tr>
-            <th class="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-200">Cle</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-200">Valeur</th>
-            <th class="w-40 px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-200">Actions</th>
+            <th class="px-4 py-3 text-left font-semibold text-secondary-700 dark:text-secondary-200">Cle</th>
+            <th class="px-4 py-3 text-left font-semibold text-secondary-700 dark:text-secondary-200">Valeur</th>
+            <th class="w-40 px-4 py-3 text-right font-semibold text-secondary-700 dark:text-secondary-200">Actions</th>
         </tr>
         </thead>
-        <tbody class="divide-y divide-slate-200 bg-white dark:divide-slate-700 dark:bg-slate-900">
+        <tbody class="divide-y divide-secondary-200 bg-white dark:divide-secondary-700 dark:bg-secondary-900">
         {% for filename, translation in translations %}
-            <tr class="bg-slate-50 dark:bg-slate-800/70">
+            <tr class="bg-secondary-50 dark:bg-secondary-800/70">
                 <td colspan="3"
-                    class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                    class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-secondary-600 dark:text-secondary-300">
                     {{ filename }}
                 </td>
             </tr>
             {% for k, v in translation %}
-                <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                <tr class="group hover:bg-secondary-50 dark:hover:bg-secondary-800/60 transition-colors"
                     data-translation-key="{{ k }}"
                     data-original-value="{{ v|e('html_attr') }}"
                     data-is-new="false"
                     data-save-url="{{ path('translations_save_one', {filename: filename}) }}"
                 >
-                    <td class="whitespace-nowrap px-4 py-2 align-top font-mono text-xs text-slate-700 dark:text-slate-200">
+                    <td class="whitespace-nowrap px-4 py-2 align-top font-mono text-xs text-secondary-700 dark:text-secondary-200">
                         <span data-role="key-display">{{ k }}</span>
                     </td>
                     <td class="px-4 py-2 align-top">
                         <div class="flex flex-col gap-1">
                             <span data-role="value-display"
-                                  class="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap wrap-break-word">{{ v }}</span>
+                                  class="text-sm text-secondary-800 dark:text-secondary-200 whitespace-pre-wrap wrap-break-word">{{ v }}</span>
                             <input
                                     data-role="value-input"
                                     type="text"
                                 value="{{ v|e('html_attr') }}"
                                 aria-label="Valeur de traduction pour {{ k }}"
-                                    class="hidden w-full rounded-md border border-indigo-400 bg-white px-2.5 py-1.5 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                                    class="hidden w-full rounded-md border border-indigo-400 bg-white px-2.5 py-1.5 text-sm text-secondary-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-blue-400 dark:focus:ring-blue-900"
                             />
                             <p data-role="error" class="hidden text-xs text-red-600"></p>
                         </div>
@@ -60,7 +60,7 @@
                             </button>
                             <button type="button"
                                     data-action="translations#cancel"
-                                    class="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                                    class="inline-flex items-center gap-1 rounded-md border border-secondary-300 bg-white px-2.5 py-1.5 text-xs font-medium text-secondary-600 hover:bg-secondary-50 transition-colors">
                                 Annuler
                             </button>
                         </div>
@@ -69,7 +69,7 @@
             {% endfor %}
         {% else %}
             <tr>
-                <td colspan="3" class="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                <td colspan="3" class="px-4 py-6 text-center text-sm text-secondary-500 dark:text-secondary-400">
                     Aucune traduction trouvee.
                 </td>
             </tr>

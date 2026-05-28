@@ -33,8 +33,8 @@ export default class extends Controller {
       if (el) {
         // au choix : scroll / highlight / refresh turbo frame...
         el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        el.classList.add('ring-2', 'ring-indigo-200')
-        setTimeout(() => el.classList.remove('ring-2', 'ring-indigo-200'), 600)
+        el.classList.add('ring-2', 'ring-primary-200')
+        setTimeout(() => el.classList.remove('ring-2', 'ring-primary-200'), 600)
       }
     }
   }

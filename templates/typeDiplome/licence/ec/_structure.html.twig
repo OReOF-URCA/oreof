@@ -1,7 +1,7 @@
-<div class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+<div class="overflow-hidden rounded-xl border border-secondary-200 bg-secondary-50">
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200 text-sm text-slate-700">
-            <thead class="bg-slate-100 text-left text-xs font-black uppercase tracking-wide text-slate-500">
+        <table class="min-w-full divide-y divide-secondary-200 text-sm text-secondary-700">
+            <thead class="bg-secondary-100 text-left text-xs font-black uppercase tracking-wide text-secondary-500">
             <tr>
                 <th scope="col" class="px-4 py-3">Modalité</th>
                 <th scope="col" class="px-4 py-3">CM</th>
@@ -11,29 +11,29 @@
                 <th scope="col" class="px-4 py-3">Total</th>
             </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200 bg-white">
+            <tbody class="divide-y divide-secondary-200 bg-white">
             <tr>
-                <th scope="row" class="px-4 py-3 font-semibold text-slate-800">Présentiel</th>
+                <th scope="row" class="px-4 py-3 font-semibold text-secondary-800">Présentiel</th>
                 <td class="px-4 py-3">{{ ficheMatiere.volumeCmPresentiel }} h</td>
                 <td class="px-4 py-3">{{ ficheMatiere.volumeTdPresentiel }} h</td>
                 <td class="px-4 py-3">{{ ficheMatiere.volumeTpPresentiel }} h</td>
-                <td rowspan="2" class="px-4 py-3 align-middle font-medium text-slate-800">{{ ficheMatiere.volumeTe }}h
+                <td rowspan="2" class="px-4 py-3 align-middle font-medium text-secondary-800">{{ ficheMatiere.volumeTe }}h
                 </td>
-                <td class="px-4 py-3 font-medium text-slate-800">{{ ficheMatiere.volumeCmPresentiel + ficheMatiere.volumeTdPresentiel + ficheMatiere.volumeTpPresentiel }}
+                <td class="px-4 py-3 font-medium text-secondary-800">{{ ficheMatiere.volumeCmPresentiel + ficheMatiere.volumeTdPresentiel + ficheMatiere.volumeTpPresentiel }}
                     h
                 </td>
             </tr>
             <tr>
-                <th scope="row" class="px-4 py-3 font-semibold text-slate-800">Distanciel</th>
+                <th scope="row" class="px-4 py-3 font-semibold text-secondary-800">Distanciel</th>
                 <td class="px-4 py-3">{{ ficheMatiere.volumeCmDistanciel }} h</td>
                 <td class="px-4 py-3">{{ ficheMatiere.volumeTdDistanciel }} h</td>
                 <td class="px-4 py-3">{{ ficheMatiere.volumeTpDistanciel }} h</td>
-                <td class="px-4 py-3 font-medium text-slate-800">{{ ficheMatiere.volumeCmDistanciel + ficheMatiere.volumeTdDistanciel + ficheMatiere.volumeTpDistanciel }}
+                <td class="px-4 py-3 font-medium text-secondary-800">{{ ficheMatiere.volumeCmDistanciel + ficheMatiere.volumeTdDistanciel + ficheMatiere.volumeTpDistanciel }}
                     h
                 </td>
             </tr>
-            <tr class="bg-slate-50">
-                <th scope="row" class="px-4 py-3 font-black text-slate-900">Total</th>
+            <tr class="bg-secondary-50">
+                <th scope="row" class="px-4 py-3 font-black text-secondary-900">Total</th>
                 <td class="px-4 py-3 font-semibold">{{ ficheMatiere.volumeCmPresentiel + ficheMatiere.volumeCmDistanciel }}
                     h
                 </td>
@@ -44,10 +44,10 @@
                     h
                 </td>
                 <td class="px-4 py-3 font-semibold">{{ ficheMatiere.volumeTe }} h</td>
-                <td class="px-4 py-3 font-black text-slate-900">
+                <td class="px-4 py-3 font-black text-secondary-900">
                     {{ ficheMatiere.volumeCmDistanciel + ficheMatiere.volumeTdDistanciel + ficheMatiere.volumeTpDistanciel + ficheMatiere.volumeCmPresentiel + ficheMatiere.volumeTdPresentiel + ficheMatiere.volumeTpPresentiel }}
                     h
-                    <div class="mt-1 text-xs font-medium text-slate-500">+ {{ ficheMatiere.volumeTe }} h en autonomie
+                    <div class="mt-1 text-xs font-medium text-secondary-500">+ {{ ficheMatiere.volumeTe }} h en autonomie
                     </div>
                 </td>
             </tr>

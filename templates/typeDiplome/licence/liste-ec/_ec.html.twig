@@ -1,8 +1,8 @@
-<tr class="{% if enfant %}border-l-2 border-blue-500{% endif %} hover:bg-slate-50 transition-colors">
-    <th class="px-4 py-2 text-left text-sm font-medium text-slate-800" scope="row">
+<tr class="{% if enfant %}border-l-2 border-blue-500{% endif %} hover:bg-secondary-50 transition-colors">
+    <th class="px-4 py-2 text-left text-sm font-medium text-secondary-800" scope="row">
         {{ ec.elementConstitutif.code }} {{ ec.elementConstitutif.display }} {% if raccrocheUe == true %}
             <twig:UX:icon name="icon:link"/>{% endif %}
-        {% if is_granted('ROLE_ADMIN') %}<span class="font-normal text-slate-500">
+        {% if is_granted('ROLE_ADMIN') %}<span class="font-normal text-secondary-500">
             (#{{ ec.elementConstitutif.id }})</span>{% endif %}
     </th>
     <td class="px-4 py-2">
@@ -33,7 +33,7 @@
             {% else %}
                 <a
                         href="{{ path('fiche_matiere_v2_voir',{slug: ec.elementConstitutif.ficheMatiere.slug}) }}"
-                        class="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                        class="inline-flex items-center gap-2 rounded-md border border-secondary-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-secondary-700 hover:bg-secondary-50 transition-colors"
                         data-bs-toggle="tooltip"
                         data-bs-placement="bottom"
                         target="_blank"
@@ -51,7 +51,7 @@
         <label for="typeEc_{{ ec.elementConstitutif.id }}" class="sr-only">Type EC</label>
         {% if isAccessible(dpeParcours, 'cfvu') %} {# todo: isGranted ? #}
             <select
-                    class="w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                    class="w-full rounded-md border border-secondary-300 bg-white px-2 py-1.5 text-sm text-secondary-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                     name="typeEc_{{ ec.elementConstitutif.id }}"
                     id="typeEc_{{ ec.elementConstitutif.id }}"
                     data-bs-toggle="tooltip"

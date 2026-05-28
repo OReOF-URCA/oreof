@@ -21,7 +21,7 @@
 {% block form_label %}
     {% if label is not same as(false) %}
         <div class="flex justify-between items-center mb-1">
-            <label {% with { attr: label_attr|merge({ class: 'text-[12px] font-black text-slate-500 group-focus-within:text-indigo-500 transition-colors uppercase' }) } %}{{ block('attributes') }}{% endwith %}>
+            <label {% with { attr: label_attr|merge({ class: 'text-[12px] font-black text-secondary-500 group-focus-within:text-indigo-500 transition-colors uppercase' }) } %}{{ block('attributes') }}{% endwith %}>
                 {{- block('form_label_content') -}}
             </label>
             {% if required %}<span class="text-[10px] font-bold text-red-300 uppercase">Champs Requis</span>{% endif %}
@@ -36,7 +36,7 @@
                 {# todo: gérer le label translate comme les autres champs #}
                 <label
                         {% with { attr: label_attr|merge({
-                            class: 'text-[12px] font-black text-slate-500 group-focus-within:text-indigo-500 transition-colors uppercase'
+                            class: 'text-[12px] font-black text-secondary-500 group-focus-within:text-indigo-500 transition-colors uppercase'
                         }) } %}
                             {{ block('attributes') }}
                         {% endwith %}
@@ -64,15 +64,15 @@
 
 {# --- INPUT TEXT / EMAIL / PASSWORD --- #}
 {% block form_widget_simple %}
-    {#    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-white border border-slate-200 rounded-sm font-semibold text-slate-700 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm placeholder:text-slate-300' }) %}    #}
+    {#    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-white border border-secondary-200 rounded-sm font-semibold text-secondary-700 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm placeholder:text-secondary-300' }) %}    #}
 
-    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-slate-50 text-slate-800 border border-slate-200 rounded-sm font-bold placeholder:text-slate-400 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-500' }) %}
+    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-secondary-50 text-secondary-800 border border-secondary-200 rounded-sm font-bold placeholder:text-secondary-400 dark:bg-secondary-900 dark:text-secondary-100 dark:border-secondary-700 dark:placeholder:text-secondary-500' }) %}
     {{ parent() }}
 {% endblock form_widget_simple %}
 
 {# --- TEXTAREA --- #}
 {% block textarea_widget %}
-    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-slate-50 text-slate-800 border border-slate-200 rounded-sm font-medium focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm min-h-[150px] placeholder:text-slate-400 dark:bg-slate-900 dark:text-slate-100 dark:border-slate-700 dark:placeholder:text-slate-500' }) %}
+    {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-secondary-50 text-secondary-800 border border-secondary-200 rounded-sm font-medium focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm min-h-[150px] placeholder:text-secondary-400 dark:bg-secondary-900 dark:text-secondary-100 dark:border-secondary-700 dark:placeholder:text-secondary-500' }) %}
     {{ parent() }}
 {% endblock textarea_widget %}
 
@@ -80,12 +80,12 @@
 {% block choice_widget_collapsed %}
     {% set isDisabled = (attr.disabled is defined and attr.disabled) or (disabled is defined and disabled) or (form.vars.disabled is defined and form.vars.disabled) %}
     {% set baseClass = ' w-full p-4 rounded-sm font-semibold focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm appearance-none' %}
-    {% set normalClass = ' bg-slate-50 border border-slate-200 text-slate-700 cursor-pointer dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100' %}
-    {% set disabledClass = ' bg-slate-200 border border-slate-200 text-slate-400 cursor-not-allowed opacity-70 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-500' %}
+    {% set normalClass = ' bg-secondary-50 border border-secondary-200 text-secondary-700 cursor-pointer dark:bg-secondary-900 dark:border-secondary-700 dark:text-secondary-100' %}
+    {% set disabledClass = ' bg-secondary-200 border border-secondary-200 text-secondary-400 cursor-not-allowed opacity-70 dark:bg-secondary-800 dark:border-secondary-700 dark:text-secondary-500' %}
     {% set attr = attr|merge({ class: attr.class|default('') ~ baseClass ~ (isDisabled ? disabledClass : normalClass) }) %}
     <div class="relative">
         {{ parent() }}
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-secondary-400">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
             </svg>
@@ -131,8 +131,8 @@
     {%- endif -%}
 
     {% if help is defined and help|trim|trans({}, 'help') != '' %}
-        <p class="text-[11px] text-slate-400 italic mt-1 pl-1 flex items-start gap-2">
-            <span class="flex-shrink-0 w-5 h-5 bg-slate-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
+        <p class="text-[11px] text-secondary-400 italic mt-1 pl-1 flex items-start gap-2">
+            <span class="flex-shrink-0 w-5 h-5 bg-secondary-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
                 <twig:UX:Icon name="icon:info"/>
             </span>
             <span>{{ help|trim|trans({}, 'help')|raw }}</span>

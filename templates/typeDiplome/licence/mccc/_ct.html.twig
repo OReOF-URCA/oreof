@@ -1,4 +1,4 @@
-<h3 class="mb-3 text-lg font-semibold text-slate-900">1ᵉ Session</h3>
+<h3 class="mb-3 text-lg font-semibold text-secondary-900">1ᵉ Session</h3>
 <div id="epreuves_ct" class="space-y-3">
     {% if mcccs[1]['et'] is defined %}
         {% for i in 1..mcccs[1]['et']|length %}
@@ -19,7 +19,7 @@
         extraClass="synchro-mccc mb-3"
         dataAction="click->mccc--licence#addEpreuveCt"
 />
-<h3 class="mb-3 text-lg font-semibold text-slate-900">2ᵉ Session</h3>
+<h3 class="mb-3 text-lg font-semibold text-secondary-900">2ᵉ Session</h3>
 <div id="epreuves_s2_ct" class="space-y-3">
     {% if mcccs[2]['et'] is defined %}
         {% for i in 1..mcccs[2]['et']|length %}

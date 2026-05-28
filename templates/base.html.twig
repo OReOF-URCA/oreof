@@ -70,7 +70,7 @@
 </head>
 <body
     class="min-h-screen"
-    data-controller="modalturbo"
+    data-controller="modalturbo frame-loader"
 >
 <template id="global-loader-stimulus" hidden>
     <div class="flex justify-center py-6">
@@ -305,6 +305,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 {# Inclusion du menu d'aide contextuel externalisé #}
 {% include '_layout/_help_drawer.html.twig' %}
+
+<template id="global-spinner-template">
+    <div class="turbo-spinner-overlay absolute top-0 left-0 w-full h-full flex justify-center items-center z-50 pointer-events-none">
+        <twig:Spinner variant="primary" size="lg" />
+    </div>
+</template>
 
 </body>
 </html>

@@ -1,13 +1,13 @@
 {% macro label(id, text) %}
-    <label for="{{ id }}" class="mb-1 block text-[12px] font-black uppercase text-slate-500">
+    <label for="{{ id }}" class="mb-1 block text-[12px] font-black uppercase text-secondary-500">
         {{ text }}
     </label>
 {% endmacro %}
 
 {% macro help(helpKey = '', helpDomain = 'help') %}
     {% if helpKey is not empty and helpKey|trans({}, helpDomain)|raw is not empty %}
-        <p class="text-[11px] text-slate-400 italic mt-1 pl-1 flex items-start gap-2">
-            <span class="shrink-0 w-5 h-5 bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] rounded-full">
+        <p class="text-[11px] text-secondary-400 italic mt-1 pl-1 flex items-start gap-2">
+            <span class="shrink-0 w-5 h-5 bg-secondary-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
                 <twig:UX:Icon name="icon:info"/>
             </span>
             <span>{{ helpKey|trans({}, helpDomain)|raw }}</span>
@@ -15,8 +15,8 @@
     {% endif %}
 {% endmacro %}
 
-{% macro input_with_suffix(id, name, value = '', suffix = '%', type = 'text', disabled = false, actionAttr = '', inputClass = 'synchro-mccc block w-full rounded-l-sm border-0 bg-slate-50 p-2 font-bold text-slate-700') %}
-    <div class="flex rounded-sm border border-slate-200 bg-white">
+{% macro input_with_suffix(id, name, value = '', suffix = '%', type = 'text', disabled = false, actionAttr = '', inputClass = 'synchro-mccc block w-full rounded-l-sm border-0 bg-secondary-50 p-2 font-bold text-secondary-700') %}
+    <div class="flex rounded-sm border border-secondary-200 bg-white">
         <input type="{{ type }}"
                id="{{ id }}"
                name="{{ name }}"
@@ -25,11 +25,11 @@
                 {% if value is not same as('') and value is not null %}value="{{ value }}"{% endif %}
                 {{ actionAttr|raw }}
         >
-        <span class="inline-flex items-center rounded-r-sm border-l border-slate-200 bg-slate-100 px-3 text-sm text-slate-600">{{ suffix }}</span>
+        <span class="inline-flex items-center rounded-r-sm border-l border-secondary-200 bg-secondary-100 px-3 text-sm text-secondary-600">{{ suffix }}</span>
     </div>
 {% endmacro %}
 
-{% macro input(id, name, value = '', type = 'text', disabled = false, actionAttr = '', inputClass = 'synchro-mccc block w-full rounded-sm border border-slate-200 bg-slate-50 p-2 font-bold text-slate-700') %}
+{% macro input(id, name, value = '', type = 'text', disabled = false, actionAttr = '', inputClass = 'synchro-mccc block w-full rounded-sm border border-secondary-200 bg-secondary-50 p-2 font-bold text-secondary-700') %}
     <input type="{{ type }}"
            id="{{ id }}"
            name="{{ name }}"
@@ -55,7 +55,7 @@
     </div>
 {% endmacro %}
 
-{% macro type_epreuve_select(id, name, options, selectedId = null, actionAttr = '', selectClass = 'synchro-mccc block w-full appearance-none rounded-sm border border-slate-200 bg-slate-50 p-4 font-semibold text-slate-700') %}
+{% macro type_epreuve_select(id, name, options, selectedId = null, actionAttr = '', selectClass = 'synchro-mccc block w-full appearance-none rounded-sm border border-secondary-200 bg-secondary-50 p-4 font-semibold text-secondary-700') %}
     <select id="{{ id }}"
             name="{{ name }}"
             class="{{ selectClass }}"

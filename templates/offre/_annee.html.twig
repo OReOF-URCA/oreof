@@ -1,40 +1,40 @@
 {% set disabled = (valeur == 'NON_OUVERTURE_CFVU' or valeur == 'FERMETURE_DEFINITIVE') and disabled %}
-<tr class="parc_{{ parcours.id }} d-none hidden bg-slate-50 dark:bg-slate-900/40">
+<tr class="parc_{{ parcours.id }} d-none hidden bg-secondary-50 dark:bg-secondary-900/40">
     <td class="px-2 py-2"></td>
-    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-secondary-500 dark:text-secondary-400">
         Année
     </th>
     <th class="px-3 py-2"></th>
     <th class="px-3 py-2"></th>
-    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-secondary-500 dark:text-secondary-400">
         Dispensée ?
     </th>
-    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-secondary-500 dark:text-secondary-400">
         Recrute ?
     </th>
-    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-secondary-500 dark:text-secondary-400">
         Sans capacité ?
     </th>
-    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-secondary-500 dark:text-secondary-400">
         Capacité N-1
     </th>
-    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-slate-400">
+    <th class="px-3 py-2 text-left text-[11px] font-black uppercase tracking-[0.16em] text-secondary-500 dark:text-secondary-400">
         Capacité {{ user_data.campagneCollecte.libelle }}</th>
     <th class="px-3 py-2"></th>
 </tr>
 {% for annee in annees %}
     <tr data-parcours-id="{{ parcours.id }}"
         data-formation-id="{{ formation.formation.id }}"
-        class="parc_{{ parcours.id }} d-none hidden border-l-2 border-rose-500 bg-white/70 dark:bg-slate-900/20"
+        class="parc_{{ parcours.id }} d-none hidden border-l-2 border-rose-500 bg-white/70 dark:bg-secondary-900/20"
     >
         <td class="w-5 px-2 py-2"></td>
-        <td class="px-3 py-2 font-semibold text-slate-700 dark:text-slate-200">Année {{ annee.ordre }}</td>
+        <td class="px-3 py-2 font-semibold text-secondary-700 dark:text-secondary-200">Année {{ annee.ordre }}</td>
         <td class="px-3 py-2"></td>
         <td class="px-3 py-2"></td>
         <td class="px-3 py-2">
             <label for="dispense_{{ annee.id }}" class="sr-only">Annee dispensee ?</label>
             <input type="checkbox" id="dispense_{{ annee.id }}" name="dispense_{{ annee.id }}" value="false"
-                   class="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 dark:border-slate-600"
+                   class="h-4 w-4 rounded border-secondary-300 text-cyan-600 focus:ring-cyan-500 dark:border-secondary-600"
                     {{ stimulus_action('offre', 'changeOuvertureAnnee', 'change', {
                         id:annee.id
                     }) }}
@@ -45,7 +45,7 @@
         <td class="px-3 py-2">
             <label for="recrut_{{ annee.id }}" class="sr-only">Annee ouverte au recrutement ?</label>
             <input type="checkbox" id="recrut_{{ annee.id }}" name="recrut_{{ annee.id }}" value="false"
-                   class="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 dark:border-slate-600"
+                   class="h-4 w-4 rounded border-secondary-300 text-cyan-600 focus:ring-cyan-500 dark:border-secondary-600"
                     {{ stimulus_action('offre', 'changeRecrutementAnnee', 'change', {
                         id:annee.id
                     }) }}
@@ -57,7 +57,7 @@
         <td class="px-3 py-2">
             <label for="has_capacite_{{ annee.id }}" class="sr-only">Annee sans capacites a definir ?</label>
             <input type="checkbox" id="has_capacite_{{ annee.id }}" name="has_capacite_{{ annee.id }}" value="false"
-                   class="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500 dark:border-slate-600"
+                   class="h-4 w-4 rounded border-secondary-300 text-cyan-600 focus:ring-cyan-500 dark:border-secondary-600"
                     {{ stimulus_action('offre', 'changeHasCapacite', 'change', {
                         id:annee.id
                     }) }}
@@ -65,13 +65,13 @@
                     {% if disabled %}disabled{% endif %}
             >
         </td>
-        <td class="px-3 py-2 text-slate-600 dark:text-slate-300">
+        <td class="px-3 py-2 text-secondary-600 dark:text-secondary-300">
             {{ annee.anneeOrigineCopie != null ? annee.anneeOrigineCopie.capaciteAccueil : 'N.C.' }} places
         </td>
         <td class="px-3 py-2">
             <label for="capacite_{{ annee.id }}" class="sr-only">Capacité accueil pour l'annee N+1</label>
             <input type="text"
-                   class="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 shadow-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                   class="w-24 rounded-lg border border-secondary-200 bg-white px-2 py-1 text-sm text-secondary-700 shadow-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100"
                    id="capacite_{{ annee.id }}" value="{{ annee.capaciteAccueil }}"
                     {{ stimulus_action('offre', 'changeCapacite', 'change', {
                         id:annee.id

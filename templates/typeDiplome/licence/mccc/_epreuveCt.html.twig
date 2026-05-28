@@ -1,8 +1,8 @@
 {% import 'typeDiplome/licence/mccc/_form_fields.html.twig' as fields %}
 
-<div class="epreuve_ct grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-white p-4 md:grid-cols-12">
+<div class="epreuve_ct grid grid-cols-1 gap-3 rounded-lg border border-secondary-200 bg-white p-4 md:grid-cols-12">
     <div class="md:col-span-4">
-        <strong class="text-slate-800">Contrôle terminal N°{{ index }}</strong>
+        <strong class="text-secondary-800">Contrôle terminal N°{{ index }}</strong>
     </div>
     <div class="md:col-span-4">
         {{ fields.label('pourcentage_s1_ct' ~ index, 'Pourcentage') }}
@@ -37,7 +37,7 @@
             typeEpreuves,
             mcccs[1]['et'][index] is defined and mcccs[1]['et'][index].typeEpreuve[0] is defined ? mcccs[1]['et'][index].typeEpreuve[0] : null,
             stimulus_action('mccc--licence', 'changeTypeEpreuveCt', 'change')|stimulus_action('mccc-with-justification', 'updateJustification', 'change'),
-            'typeEpreuveSelectCt synchro-mccc block w-full appearance-none rounded-sm border border-slate-200 bg-slate-50 p-4 font-semibold text-slate-700'
+            'typeEpreuveSelectCt synchro-mccc block w-full appearance-none rounded-sm border border-secondary-200 bg-secondary-50 p-4 font-semibold text-secondary-700'
         ) }}
         {{ fields.help('mccc_licence.helps.cc_ct.typeEpreuve_s1_et.help') }}
         <div class="md:col-span-12 {{ hasJustification == 'true' ? '' : 'd-none' }}"

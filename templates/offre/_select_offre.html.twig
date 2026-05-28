@@ -5,7 +5,7 @@
         }) }}
         id="{{ id }}"
         {% if disabled %}disabled{% endif %}
-        class="w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-700 shadow-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+        class="w-full rounded-lg border border-secondary-200 bg-white px-2 py-1 text-sm text-secondary-700 shadow-sm outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100">
     <option value="OUVERT" {% if valeur == 'OUVERT' %}selected{% endif %}>Ouvert / reconduit</option>
     <option value="NON_OUVERTURE" {% if valeur == 'NON_OUVERTURE_CFVU' %}selected{% endif %}>Non ouverture</option>
     {% if is_granted('ROLE_ADMIN') %}

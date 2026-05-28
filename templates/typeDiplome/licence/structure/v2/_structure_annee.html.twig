@@ -1,8 +1,8 @@
 {% set displayAnnee = typeDiplome.libelleCourt ~' '~ annee.annee.ordre %}
 {% set semestresActifs = annee.semestres|filter(semestre => (semestre.semestre.nonDispense == false)) %}
 <section id="annee{{ annee.annee.ordre }}" class="mb-24">
-    <div class="sticky-year bg-slate-50/95 backdrop-blur-sm py-4 border-b border-slate-200 mb-8 flex items-center justify-between">
-        <h2 class="text-xl font-black text-slate-800 uppercase tracking-tighter">{{ displayAnnee }}</h2>
+    <div class="sticky-year bg-secondary-50/95 backdrop-blur-sm py-4 border-b border-secondary-200 mb-8 flex items-center justify-between">
+        <h2 class="text-xl font-black text-secondary-800 uppercase tracking-tighter">{{ displayAnnee }}</h2>
         <div class="flex gap-4">
             <div class="flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-100 rounded-md">
                 <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
@@ -24,17 +24,17 @@
     {% endfor %}
 
     {% if semestresActifs|length > 0 %}
-        <details class="ml-6 mt-10 overflow-hidden rounded-2xl bg-slate-900 text-white shadow-2xl group">
+        <details class="ml-6 mt-10 overflow-hidden rounded-2xl bg-secondary-900 text-white shadow-2xl group">
             <summary
                     class="flex cursor-pointer list-none flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between">
                 <span class="flex flex-wrap items-center gap-6 md:gap-10">
                     <span class="flex flex-col">
                         <span class="block text-xs font-black uppercase tracking-[0.2em] text-indigo-400">Bilan annuel {{ displayAnnee }}</span>
-                        <span class="mt-1 block text-xs text-slate-400">Vue synthétique, détail disponible au clic</span>
+                        <span class="mt-1 block text-xs text-secondary-400">Vue synthétique, détail disponible au clic</span>
                     </span>
 
                     <span class="text-center">
-                        <span class="block text-[9px] font-bold uppercase text-slate-400">Crédits</span>
+                        <span class="block text-[9px] font-bold uppercase text-secondary-400">Crédits</span>
                         <span class="block text-xl font-black">{{ annee.heuresEctsAnnee.sommeAnneeEcts }} ECTS</span>
                     </span>
 
@@ -51,13 +51,13 @@
 
                 <span class="flex items-center gap-4 md:text-right">
                     <span>
-                        <span class="block text-[9px] font-bold uppercase text-slate-400">Volume annuel</span>
+                        <span class="block text-[9px] font-bold uppercase text-secondary-400">Volume annuel</span>
                         <span class="block text-3xl font-black italic tracking-tighter">{{ annee.heuresEctsAnnee.sommeAnneeTotalPresDist|filtreHeures }} h</span>
                         {% if annee.heuresEctsAnnee.sommeAnneeTePres > 0 %}
                             <span class="mt-1 block text-[11px] font-medium text-emerald-300">+ {{ annee.heuresEctsAnnee.sommeAnneeTePres|filtreHeures }} h autonomie</span>
                         {% endif %}
                     </span>
-                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition group-open:rotate-180">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-secondary-300 transition group-open:rotate-180">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -66,14 +66,14 @@
                 </span>
             </summary>
 
-            <div class="border-t border-white/10 bg-slate-950/40 px-6 py-5">
+            <div class="border-t border-white/10 bg-secondary-950/40 px-6 py-5">
                 <div class="grid gap-4 lg:grid-cols-3">
                     <div class="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
                         <p class="text-[10px] font-black uppercase tracking-[0.18em] text-blue-300">Détail
                             présentiel</p>
                         <p class="mt-2 text-2xl font-black text-white">{{ annee.heuresEctsAnnee.sommeAnneeTotalPres|filtreHeures }}
                             h</p>
-                        <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-200">
+                        <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-secondary-200">
                             <span class="rounded-full bg-white/10 px-3 py-1">CM {{ annee.heuresEctsAnnee.sommeAnneeCmPres|filtreHeures }} h</span>
                             <span class="rounded-full bg-white/10 px-3 py-1">TD {{ annee.heuresEctsAnnee.sommeAnneeTdPres|filtreHeures }} h</span>
                             <span class="rounded-full bg-white/10 px-3 py-1">TP {{ annee.heuresEctsAnnee.sommeAnneeTpPres|filtreHeures }} h</span>
@@ -85,7 +85,7 @@
                             distanciel</p>
                         <p class="mt-2 text-2xl font-black text-white">{{ annee.heuresEctsAnnee.sommeAnneeTotalDist|filtreHeures }}
                             h</p>
-                        <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-200">
+                        <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-secondary-200">
                             <span class="rounded-full bg-white/10 px-3 py-1">CM {{ annee.heuresEctsAnnee.sommeAnneeCmDist|filtreHeures }} h</span>
                             <span class="rounded-full bg-white/10 px-3 py-1">TD {{ annee.heuresEctsAnnee.sommeAnneeTdDist|filtreHeures }} h</span>
                             <span class="rounded-full bg-white/10 px-3 py-1">TP {{ annee.heuresEctsAnnee.sommeAnneeTpDist|filtreHeures }} h</span>
@@ -96,7 +96,7 @@
                         <p class="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-300">Vue globale</p>
                         <p class="mt-2 text-2xl font-black text-white">{{ annee.heuresEctsAnnee.sommeAnneeTotalPresDist|filtreHeures }}
                             h</p>
-                        <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-slate-200">
+                        <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-secondary-200">
                             <span class="rounded-full bg-white/10 px-3 py-1">CM {{ (annee.heuresEctsAnnee.sommeAnneeCmPres + annee.heuresEctsAnnee.sommeAnneeCmDist)|filtreHeures }} h</span>
                             <span class="rounded-full bg-white/10 px-3 py-1">TD {{ (annee.heuresEctsAnnee.sommeAnneeTdPres + annee.heuresEctsAnnee.sommeAnneeTdDist)|filtreHeures }} h</span>
                             <span class="rounded-full bg-white/10 px-3 py-1">TP {{ (annee.heuresEctsAnnee.sommeAnneeTpPres + annee.heuresEctsAnnee.sommeAnneeTpDist)|filtreHeures }} h</span>

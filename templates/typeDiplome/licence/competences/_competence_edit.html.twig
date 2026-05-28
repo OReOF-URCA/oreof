@@ -1,8 +1,8 @@
 <turbo-frame id="tab-content">
-    {#    <header class="border-b border-slate-100 flex justify-between items-center bg-slate-50/50"> #}
+    {#    <header class="border-b border-secondary-100 flex justify-between items-center bg-secondary-50/50"> #}
     {#        <div> #}
-    {#            <h2 class="text-xl font-black text-slate-800 tracking-tight">Référentiel de compétences</h2> #}
-    {#            <p class="text-xs text-slate-400 font-bold uppercase mt-1">Construire le référentiel de compétences pour le #}
+    {#            <h2 class="text-xl font-black text-secondary-800 tracking-tight">Référentiel de compétences</h2> #}
+    {#            <p class="text-xs text-secondary-400 font-bold uppercase mt-1">Construire le référentiel de compétences pour le #}
     {#                parcours. Définir les blocs et les compétences.</p> #}
     {#        </div> #}
     {#        <div class="flex gap-3"> #}
@@ -14,10 +14,10 @@
     {#                           class="sr-only peer" #}
     {#                           {% if parcours.getEtatStep(2) %}checked{% endif %} #}
     {#                            {{ stimulus_action('parcours--step2', 'etatStep', 'change') }}> #}
-    {#                    <span class="w-10 h-6 bg-slate-200 rounded-full relative transition-colors duration-200 peer-checked:bg-green-500"> #}
+    {#                    <span class="w-10 h-6 bg-secondary-200 rounded-full relative transition-colors duration-200 peer-checked:bg-green-500"> #}
     {#                        <span class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-200 peer-checked:translate-x-4"></span> #}
     {#                    </span> #}
-    {#                    <span class="text-sm font-medium text-slate-700"> #}
+    {#                    <span class="text-sm font-medium text-secondary-700"> #}
     {#                        Cochez cette case si vous avez terminé ... #}
     {#                    </span> #}
     {#                </label> #}
@@ -37,10 +37,10 @@
             <form method="post" action="{{ path('parcours_v2_competences_reset', {parcours: parcours.id}) }}"
                   class="flex-1 flex flex-col"
                   data-turbo-frame="parcours-step3-{{ parcours.id }}">
-                <div class="bg-white border border-slate-100 rounded-lg p-4 shadow-sm flex flex-col h-full">
+                <div class="bg-white border border-secondary-100 rounded-lg p-4 shadow-sm flex flex-col h-full">
                     <div class="flex-1">
                         <h3 class="text-sm font-semibold text-red-700 mb-2">Réinitialiser les blocs de compétences</h3>
-                        <p class="text-xs text-slate-500 mb-4">
+                        <p class="text-xs text-secondary-500 mb-4">
                             Cette action supprimera toutes les compétences et blocs de compétences associés à cette
                             formation et aux fiches EC/matière.
                         </p>
@@ -67,13 +67,13 @@
                   class="flex-1 flex flex-col"
                   action="{{ path('parcours_v2_competences_recopie_bcc', {parcours: parcours.id}) }}"
                   data-turbo-frame="parcours-step3-{{ parcours.id }}">
-                <div class="bg-white border border-slate-100 rounded-lg p-4 shadow-sm flex flex-col h-full">
+                <div class="bg-white border border-secondary-100 rounded-lg p-4 shadow-sm flex flex-col h-full">
 
                     <input type="hidden" name="_token" value="{{ csrf_token('recopie_bcc'~parcours.id) }}">
 
                     <div class="flex-1 mb-3">
-                        <h3 class="text-sm font-semibold text-slate-800 mb-2">Récupérer des compétences</h3>
-                        <p class="text-xs text-slate-500 mb-3">
+                        <h3 class="text-sm font-semibold text-secondary-800 mb-2">Récupérer des compétences</h3>
+                        <p class="text-xs text-secondary-500 mb-3">
                             Récupérez les compétences d'un autre parcours de cette mention. Les compétences seront
                             copiées et ajoutées à ce parcours.
                         </p>
@@ -81,12 +81,12 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div class="md:col-span-2">
                                 {% if listeParcours|length > 1 %}
-                                    <label for="parcoursSource" class="block text-xs font-medium text-slate-600 mb-1">Parcours
+                                    <label for="parcoursSource" class="block text-xs font-medium text-secondary-600 mb-1">Parcours
                                         source</label>
                                     <select
                                             id="parcoursSource"
                                             name="parcoursSource"
-                                            class="block w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                                            class="block w-full rounded-md border border-secondary-200 bg-white px-3 py-2 text-sm text-secondary-700 focus:outline-none focus:ring-2 focus:ring-indigo-300">
                                         <option value="">Choisissez un parcours de cette mention</option>
                                         {% for lp in listeParcours|filter(lp => lp.id != parcours.id) %}
                                             <option value="{{ lp.id }}">{{ lp.libelle }}</option>

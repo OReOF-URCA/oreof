@@ -1,14 +1,14 @@
 <div class="space-y-6">
-    <section class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm">
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Utilisateur</h3>
-        <p class="mt-2 text-sm text-slate-700"><span
-                    class="font-medium text-slate-900">Login :</span> {{ user.username }}</p>
-        <p class="mt-2 text-sm text-slate-700"><span class="font-medium text-slate-900">Nom :</span> {{ user.nom }}</p>
-        <p class="mt-2 text-sm text-slate-700"><span
-                    class="font-medium text-slate-900">Prenom :</span> {{ user.prenom }}</p>
-        <p class="mt-2 text-sm text-slate-700"><span class="font-medium text-slate-900">Email :</span> {{ user.email }}
+    <section class="rounded-xl border border-secondary-200 bg-secondary-50 px-4 py-3 shadow-sm">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-secondary-500">Utilisateur</h3>
+        <p class="mt-2 text-sm text-secondary-700"><span
+                    class="font-medium text-secondary-900">Login :</span> {{ user.username }}</p>
+        <p class="mt-2 text-sm text-secondary-700"><span class="font-medium text-secondary-900">Nom :</span> {{ user.nom }}</p>
+        <p class="mt-2 text-sm text-secondary-700"><span
+                    class="font-medium text-secondary-900">Prenom :</span> {{ user.prenom }}</p>
+        <p class="mt-2 text-sm text-secondary-700"><span class="font-medium text-secondary-900">Email :</span> {{ user.email }}
         </p>
-        <p class="mt-2 text-sm text-slate-700"><span class="font-medium text-slate-900">Centre de gestion :</span>
+        <p class="mt-2 text-sm text-secondary-700"><span class="font-medium text-secondary-900">Centre de gestion :</span>
             {% if user.composanteDemande != null %}
                 Composante demandée : {{ user.composanteDemande.libelle }}
             {% elseif user.etablissementDemande != null %}

@@ -1,10 +1,10 @@
 {% import 'typeDiplome/licence/mccc/_form_fields.html.twig' as fields %}
 
-<h3 class="mb-3 text-lg font-semibold text-slate-900">1ᵉ Session</h3>
+<h3 class="mb-3 text-lg font-semibold text-secondary-900">1ᵉ Session</h3>
 <div class="space-y-3">
     <div class="grid grid-cols-1 gap-3 md:grid-cols-12">
         <div class="md:col-span-4">
-            <strong class="text-slate-800">Contrôle continu</strong>
+            <strong class="text-secondary-800">Contrôle continu</strong>
         </div>
         <div class="md:col-span-4">
             {{ fields.label('pourcentage_s1_cc', 'Pourcentage') }}
@@ -81,7 +81,7 @@
             dataAction="click->mccc--licence#addEpreuveCt"
     />
 </div>
-<h3 class="mb-3 text-lg font-semibold text-slate-900">2ᵉ Session</h3>
+<h3 class="mb-3 text-lg font-semibold text-secondary-900">2ᵉ Session</h3>
 <div id="epreuves_s2_ct" class="space-y-3">
     {% if mcccs[2]['et'] is defined %}
         {% for i in 1..mcccs[2]['et']|length %}

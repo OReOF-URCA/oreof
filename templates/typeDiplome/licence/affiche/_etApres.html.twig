@@ -1,6 +1,6 @@
 {% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-indigo-500' %}
-{% set ddClass = 'mt-2 text-sm leading-relaxed text-slate-700' %}
-{% set blockClass = 'rounded-xl border border-slate-200 bg-slate-50 p-4' %}
+{% set ddClass = 'mt-2 text-sm leading-relaxed text-secondary-700' %}
+{% set blockClass = 'rounded-xl border border-secondary-200 bg-secondary-50 p-4' %}
 
 <div class="space-y-4">
     <dl class="space-y-4">
@@ -32,7 +32,7 @@
                 {% for code in parcours.codesRome %}
                     <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700">{{ code.code }}</span>
                 {% else %}
-                    <span class="text-sm text-slate-500">Aucun code ROME.</span>
+                    <span class="text-sm text-secondary-500">Aucun code ROME.</span>
                 {% endfor %}
             </dd>
         </div>

@@ -1,7 +1,7 @@
 {# todo: par parcours uniquement ? #}
 {% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-indigo-500' %}
-{% set ddClass = 'mt-2 text-sm leading-relaxed text-slate-700' %}
-{% set blockClass = 'rounded-xl border border-slate-200 bg-slate-50 p-4' %}
+{% set ddClass = 'mt-2 text-sm leading-relaxed text-secondary-700' %}
+{% set blockClass = 'rounded-xl border border-secondary-200 bg-secondary-50 p-4' %}
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <div>
@@ -42,10 +42,10 @@
     <div class="space-y-4">
         {% for composante in formation.composantesInscription %}
             <article
-                    class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
                 <p class="{{ dtClass }}">Composante d'inscription</p>
-                <p class="mt-2 text-sm font-semibold text-slate-800">{{ composante.libelle }}</p>
-                <div class="mt-2 space-y-1 text-sm text-slate-600">
+                <p class="mt-2 text-sm font-semibold text-secondary-800">{{ composante.libelle }}</p>
+                <div class="mt-2 space-y-1 text-sm text-secondary-600">
                     <p>{{ composante.adresse != null ? composante.adresse.display|raw : 'Erreur' }}</p>
                     <p>{{ composante.telStandard|tel_format }} {% if composante.telComplementaire != null %}ou {{ composante.telComplementaire|tel_format }}{% endif %}</p>
                     <p>{{ composante.mailContact|mailto }}</p>
@@ -53,7 +53,7 @@
                 </div>
             </article>
         {% else %}
-            <p class="text-sm text-slate-500">Aucune composante d'inscription renseignée.</p>
+            <p class="text-sm text-secondary-500">Aucune composante d'inscription renseignée.</p>
         {% endfor %}
     </div>
 </div>

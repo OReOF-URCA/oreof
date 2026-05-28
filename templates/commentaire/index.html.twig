@@ -24,16 +24,16 @@
 
 {% block content %}
     <section
-            class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6">
+            class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
         <div class="space-y-1">
-            <h2 class="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Vos
+            <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">Vos
                 commentaires</h2>
-            <p class="text-sm text-slate-600 dark:text-slate-300">Retrouvez ici vos remarques et accédez directement à
+            <p class="text-sm text-secondary-600 dark:text-secondary-300">Retrouvez ici vos remarques et accédez directement à
                 la zone concernée.</p>
         </div>
 
-        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-            <div class="divide-y divide-slate-200 dark:divide-slate-700">
+        <div class="overflow-hidden rounded-xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <div class="divide-y divide-secondary-200 dark:divide-secondary-700">
                 {% for commentaire in commentaires %}
                     {% if commentaire.formation is defined and commentaire.formation != null %}
                         {% set contexteLabel = 'Formation' %}
@@ -61,11 +61,11 @@
                         <div class="space-y-2">
                             <div class="flex flex-wrap items-center gap-2">
                                 {{ component('Badge', { label: contexteLabel, variant: contexteVariant }) }}
-                                <p class="text-sm font-medium text-slate-800 dark:text-slate-100">{{ contexteDescription }}</p>
+                                <p class="text-sm font-medium text-secondary-800 dark:text-secondary-100">{{ contexteDescription }}</p>
                             </div>
-                            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            <p class="text-xs font-medium uppercase tracking-wide text-secondary-500 dark:text-secondary-400">
                                 Zone : {{ commentaire.zone }}</p>
-                            <div class="text-sm text-slate-700 dark:text-slate-200">
+                            <div class="text-sm text-secondary-700 dark:text-secondary-200">
                                 {{ commentaire.texte|raw }}
                             </div>
                         </div>
@@ -81,12 +81,12 @@
                                         label="Accéder"
                                 />
                             {% else %}
-                                <span class="inline-flex rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">Lien indisponible</span>
+                                <span class="inline-flex rounded-md border border-secondary-200 bg-secondary-50 px-3 py-1.5 text-xs font-medium text-secondary-500 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-300">Lien indisponible</span>
                             {% endif %}
                         </div>
                     </article>
                 {% else %}
-                    <div class="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                    <div class="p-8 text-center text-sm text-secondary-500 dark:text-secondary-400">
                         Aucun commentaire pour le moment.
                     </div>
                 {% endfor %}

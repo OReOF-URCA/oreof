@@ -68,24 +68,24 @@
     {% endif %}
 
     <div class="flex">
-        <aside class="w-72 bg-white rounded-md shadow-md border-slate-200 flex flex-col p-3 space-y-8">
+        <aside class="w-72 bg-white rounded-md shadow-md border-secondary-200 flex flex-col p-3 space-y-8">
             <nav class="flex-1 space-y-1">
-                <p class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest px-3">Configuration
+                <p class="text-[10px] font-black text-secondary-400 uppercase mb-4 tracking-widest px-3">Configuration
                     Formation</p>
 
                 <div class="p-6 bg-gray-200" id="pecent_completude">{# a mettre à jour avec turbo #}
                     {% set percent = formation.remplissage.calcul() %}
                     {% set percentColor = formation.remplissage.isFull() == true ? 'green' : 'orange' %}
                     <div class="flex justify-between items-end mb-2">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Complétude Formation</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-secondary-500">Complétude Formation</span>
                         <span class="text-xs font-bold text-{{ percentColor }}-600 italic">{{ percent|number_format(2) }}%</span>
                     </div>
-                    <div class="w-full h-1 bg-slate-700 rounded-full overflow-hidden">
+                    <div class="w-full h-1 bg-secondary-700 rounded-full overflow-hidden">
                         <div class="bg-{{ percentColor }}-500 h-full w-[{{ percent|number_format(0) }}%]"></div>
                     </div>
                 </div>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                    href="{{ path('formation_v2_tabs', { formation: formation.id, tab: 'localisation' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -98,7 +98,7 @@
                     </span>
                 </a>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                    href="{{ path('formation_v2_tabs', { formation: formation.id, tab: 'presentation' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -111,7 +111,7 @@
                     </span>
                 </a>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                    href="{{ path('formation_v2_tabs', { formation: formation.id, tab: 'structure' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -126,7 +126,7 @@
 
                 {% if formation.hasParcours == false %}
                     {% set parcours = formation.parcours[0] %}
-                    <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                    <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                        href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'descriptif' }) }}"
                        data-turbo-frame="tab-content"
                        data-turbo-action="advance"
@@ -139,7 +139,7 @@
                     </span>
                     </a>
 
-                    <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                    <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                        href="{{ path('parcours_v2_competences_index', { parcours: parcours.id }) }}"
                        data-turbo-frame="tab-content"
                        data-turbo-action="advance"
@@ -171,7 +171,7 @@
                         {{ include('parcours_v2/_sideBarStructure.html.twig') }}
                     </turbo-frame>
 
-                    <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                    <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                        href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'admission' }) }}"
                        data-turbo-frame="tab-content"
                        data-turbo-action="advance"
@@ -185,7 +185,7 @@
                     </span>
                     </a>
 
-                    <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                    <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                        href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'et_apres' }) }}"
                        data-turbo-frame="tab-content"
                        data-turbo-action="advance"
@@ -199,7 +199,7 @@
                     </a>
                     {% if is_granted('ROLE_ADMIN') %}
                         <div class="pt-8">
-                            <a class="w-full flex items-center gap-3 p-3 rounded-2xl text-sm font-bold text-slate-400 hover:text-slate-800 transition"
+                            <a class="w-full flex items-center gap-3 p-3 rounded-2xl text-sm font-bold text-secondary-400 hover:text-secondary-800 transition"
                                href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'configuration' }) }}"
                                data-turbo-frame="tab-content"
                                data-turbo-action="advance"
@@ -214,7 +214,7 @@
             </nav>
         </aside>
 
-        <div class="p-3 flex-1 overflow-y-auto bg-white ms-2 rounded-md shadow-md border-slate-200 flex flex-col">
+        <div class="p-3 flex-1 overflow-y-auto bg-white ms-2 rounded-md shadow-md border-secondary-200 flex flex-col">
             <turbo-frame
                     id="tab-content"
             >

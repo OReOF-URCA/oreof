@@ -4,9 +4,9 @@
         {% set payload = notif.payload ?? {} %}
         {% if notif.isRead == false %}
             {% set status = {
-                'border': 'border-amber-200',
-                'bg': 'bg-amber-100',
-                'text': 'text-amber-700',
+                'border': 'border-warning-200',
+                'bg': 'bg-warning-100',
+                'text': 'text-warning-700',
                 'icon': 'fa-exclamation'
             } %}
         {% else %}
@@ -18,7 +18,7 @@
             } %}
         {% endif %}
         <button type="button"
-                class="{{ notif.isRead == false ? 'non-lu' : '' }} w-full rounded-2xl border border-secondary-200 bg-white p-4 text-left shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50/50 dark:border-secondary-700 dark:bg-secondary-900 dark:hover:border-indigo-500/40 dark:hover:bg-secondary-800/80"
+                class="{{ notif.isRead == false ? 'non-lu' : '' }} w-full rounded-2xl border border-secondary-200 bg-white p-4 text-left shadow-sm transition hover:border-primary-200 hover:bg-primary-50/50 dark:border-secondary-700 dark:bg-secondary-900 dark:hover:border-primary-500/40 dark:hover:bg-secondary-800/80"
                 {{ stimulus_action('notification', 'lu', 'click', {id: notif.id}) }}>
             <div class="flex items-start gap-4">
                 <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border {{ status.border }} {{ status.bg }} {{ status.text }}">

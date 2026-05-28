@@ -14,18 +14,18 @@
 <turbo-stream action="update" target="modal_body">
     <template>
         <div class="space-y-3">
-            <p class="text-sm text-slate-700 dark:text-slate-200">
+            <p class="text-sm text-secondary-700 dark:text-secondary-200">
                 Le traitement <span class="font-semibold">{{ transition }}</span>
                 a été appliqué sur {{ count }} parcours.
             </p>
 
             {% if processedParcours is defined and processedParcours is not empty %}
-                <div class="max-h-72 overflow-auto rounded-xl border border-slate-200 dark:border-slate-700">
-                    <ul class="divide-y divide-slate-200 text-sm dark:divide-slate-700">
+                <div class="max-h-72 overflow-auto rounded-xl border border-secondary-200 dark:border-secondary-700">
+                    <ul class="divide-y divide-secondary-200 text-sm dark:divide-secondary-700">
                         {% for item in processedParcours %}
                             <li class="space-y-1 px-3 py-2">
-                                <p class="font-medium text-slate-900 dark:text-slate-100">{{ item.parcours }}</p>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">{{ item.formation }}</p>
+                                <p class="font-medium text-secondary-900 dark:text-secondary-100">{{ item.parcours }}</p>
+                                <p class="text-xs text-secondary-500 dark:text-secondary-400">{{ item.formation }}</p>
                             </li>
                         {% endfor %}
                     </ul>

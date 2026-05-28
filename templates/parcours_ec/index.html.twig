@@ -5,7 +5,7 @@
     <div class="space-y-4">
         {{ component('alerte', {type:'warning', message: 'Actuellement les indicateurs ne sont pas mis à jour en temps réel. Merci d\'actualiser cette page si nécessaire.'}) }}
 
-        <div class="rounded-xl border border-slate-200 bg-white p-4 md:p-6 shadow-sm">
+        <div class="rounded-xl border border-secondary-200 bg-white p-4 md:p-6 shadow-sm">
             {{ include('typeDiplome/' ~ constant('TEMPLATE_FOLDER', typeD) ~ '/liste-ec.html.twig') }}
         </div>
     </div>

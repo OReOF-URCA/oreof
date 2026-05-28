@@ -1,4 +1,4 @@
-<h3 class="mb-3 text-lg font-semibold text-slate-900">1ᵉ Session</h3>
+<h3 class="mb-3 text-lg font-semibold text-secondary-900">1ᵉ Session</h3>
 <input type="hidden" value="cc_autre" name="type_cc">
 <div id="epreuves_cc_autre" class="space-y-3">
     {{ include('typeDiplome/licence/mccc/_epreuveCc.html.twig', {index: 1, btn: false}) }}
@@ -18,7 +18,7 @@
         dataAction="click->mccc--licence#addEpreuveCcAutresDiplomes"
 />
 
-<h3 class="mb-3 mt-4 text-lg font-semibold text-slate-900">2ᵉ Session</h3>
+<h3 class="mb-3 mt-4 text-lg font-semibold text-secondary-900">2ᵉ Session</h3>
 <div id="epreuves_s2_ct" class="space-y-3">
     {% if mcccs[2]['et'] is defined %}
         {% for i in 1..mcccs[2]['et']|length %}

@@ -6,16 +6,16 @@
              data-translations-save-url-value="{{ path('translations_save_one', {filename: filename}) }}"
              data-translations-delete-url-value="{{ path('translations_delete_one', {filename: filename}) }}"
     >
-        <div class="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+        <div class="rounded-xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
 
             {# ── En-tête ── #}
-            <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4 dark:border-slate-700">
+            <div class="flex items-center justify-between border-b border-secondary-200 px-5 py-4 dark:border-secondary-700">
                 <div>
-                    <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">
+                    <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100">
                         Edition du fichier
                     </h2>
-                    <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">
-                        Cliquez sur <span class="font-medium text-slate-700 dark:text-slate-300">Modifier</span>
+                    <p class="mt-0.5 text-sm text-secondary-500 dark:text-secondary-400">
+                        Cliquez sur <span class="font-medium text-secondary-700 dark:text-secondary-300">Modifier</span>
                         sur une ligne pour éditer la valeur, puis
                         <span class="font-medium text-emerald-700">Enregistrer</span> pour sauvegarder
                         individuellement sans recharger la page.
@@ -32,19 +32,19 @@
 
             {# ── Tableau ── #}
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-700">
-                    <thead class="bg-slate-50 dark:bg-slate-800">
+                <table class="min-w-full divide-y divide-secondary-200 text-sm dark:divide-secondary-700">
+                    <thead class="bg-secondary-50 dark:bg-secondary-800">
                     <tr>
-                        <th class="w-2/5 px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-200">Clé</th>
-                        <th class="px-4 py-3 text-left font-semibold text-slate-700 dark:text-slate-200">Valeur</th>
-                        <th class="w-40 px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-200">Actions
+                        <th class="w-2/5 px-4 py-3 text-left font-semibold text-secondary-700 dark:text-secondary-200">Clé</th>
+                        <th class="px-4 py-3 text-left font-semibold text-secondary-700 dark:text-secondary-200">Valeur</th>
+                        <th class="w-40 px-4 py-3 text-right font-semibold text-secondary-700 dark:text-secondary-200">Actions
                         </th>
                     </tr>
                     </thead>
                     <tbody data-translations-target="tbody"
-                           class="divide-y divide-slate-100 bg-white dark:divide-slate-700 dark:bg-slate-900">
+                           class="divide-y divide-secondary-100 bg-white dark:divide-secondary-700 dark:bg-secondary-900">
                     {% for key, value in translations %}
-                        <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                        <tr class="group hover:bg-secondary-50 dark:hover:bg-secondary-800/60 transition-colors"
                             data-translation-key="{{ key }}"
                             data-original-value="{{ value|e('html_attr') }}"
                             data-is-new="false"
@@ -52,22 +52,22 @@
                             {# Clé (lecture seule) #}
                             <td class="px-4 py-2.5 align-top">
                                 <span data-role="key-display"
-                                      class="font-mono text-xs text-slate-600 dark:text-slate-400 select-all">{{ key }}</span>
+                                      class="font-mono text-xs text-secondary-600 dark:text-secondary-400 select-all">{{ key }}</span>
                             </td>
 
                             {# Valeur : display OU input #}
                             <td class="px-4 py-2.5 align-middle">
                                 <div class="flex flex-col gap-1">
                                     <span data-role="value-display"
-                                          class="text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap wrap-break-word">{{ value }}</span>
+                                          class="text-sm text-secondary-800 dark:text-secondary-200 whitespace-pre-wrap wrap-break-word">{{ value }}</span>
                                     <input
                                             data-role="value-input"
                                             type="text"
                                             value="{{ value|e('html_attr') }}"
                                             aria-label="Valeur pour la clé {{ key }}"
                                             class="hidden w-full rounded-md border border-indigo-400 bg-white px-3 py-1.5 text-sm
-                                                   text-slate-800 focus:border-indigo-500 focus:outline-none focus:ring-2
-                                                   focus:ring-indigo-200 dark:border-indigo-600 dark:bg-slate-800 dark:text-slate-100"
+                                                   text-secondary-800 focus:border-indigo-500 focus:outline-none focus:ring-2
+                                                   focus:ring-indigo-200 dark:border-indigo-600 dark:bg-secondary-800 dark:text-secondary-100"
                                     />
                                     <p data-role="error" class="hidden text-xs text-red-600"></p>
                                 </div>
@@ -107,8 +107,8 @@
                                     </button>
                                     <button type="button"
                                             data-action="translations#cancel"
-                                            class="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white
-                                                   px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+                                            class="inline-flex items-center gap-1 rounded-md border border-secondary-300 bg-white
+                                                   px-2.5 py-1.5 text-xs font-medium text-secondary-600 hover:bg-secondary-50 transition-colors">
                                         Annuler
                                     </button>
                                 </div>
@@ -116,7 +116,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="3" class="px-4 py-8 text-center text-sm text-slate-500">
+                            <td colspan="3" class="px-4 py-8 text-center text-sm text-secondary-500">
                                 Aucune traduction dans ce fichier.
                             </td>
                         </tr>
@@ -126,7 +126,7 @@
             </div>
 
             {# ── Pied : bouton Ajouter #}
-            <div class="border-t border-slate-200 px-5 py-3 dark:border-slate-700">
+            <div class="border-t border-secondary-200 px-5 py-3 dark:border-secondary-700">
                 <twig:Button
                         label="Ajouter une ligne"
                         variant="secondary"

@@ -165,16 +165,16 @@ export default class extends Controller {
     }
 
     if (this.codes.length === 0) {
-      this.listeCodesTarget.innerHTML = '<p class="text-sm text-slate-500">Aucun code ROME ajoute.</p>'
+      this.listeCodesTarget.innerHTML = '<p class="text-sm text-secondary-500">Aucun code ROME ajoute.</p>'
       return
     }
 
     const badges = this.codes.map((code) => `
-      <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm font-medium text-slate-700">
+      <span class="inline-flex items-center gap-2 rounded-full border border-secondary-200 bg-secondary-50 px-3 py-1 text-sm font-medium text-secondary-700">
         <span>${code}</span>
         <button
           type="button"
-          class="inline-flex h-5 w-5 items-center justify-center rounded-full text-slate-500 hover:bg-slate-200 hover:text-slate-800"
+          class="inline-flex h-5 w-5 items-center justify-center rounded-full text-secondary-500 hover:bg-secondary-200 hover:text-secondary-800"
           data-action="click->parcours--rome#removeCode"
           data-parcours--rome-code-param="${code}"
           aria-label="Supprimer ${code}"

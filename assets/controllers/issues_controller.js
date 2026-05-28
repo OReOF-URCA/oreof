@@ -29,8 +29,8 @@ export default class extends Controller {
     }
 
     // Highlight
-    el.classList.add('ring-2', 'ring-amber-400', 'rounded')
-    setTimeout(() => el.classList.remove('ring-2', 'ring-amber-400', 'rounded'), 1500)
+    el.classList.add('ring-2', 'ring-warning-400', 'rounded')
+    setTimeout(() => el.classList.remove('ring-2', 'ring-warning-400', 'rounded'), 1500)
 
     // Focus (trix-editor a focus())
     el.focus?.({ preventScroll: true })

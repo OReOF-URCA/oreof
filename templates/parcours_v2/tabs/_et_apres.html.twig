@@ -28,7 +28,7 @@
                     initialCodes: romeCodes
                 }) }}>
             <div class="flex justify-between items-center mb-1">
-                <label class="text-[12px] font-black text-slate-500 uppercase">
+                <label class="text-[12px] font-black text-secondary-500 uppercase">
                     {{ 'parcours_step6.labels.codeRome'|trans({}, 'form') }}
                 </label>
                 <span class="text-[10px] font-bold text-red-300 uppercase">Champs Requis</span>
@@ -45,7 +45,7 @@
                        type="text"
                        maxlength="5"
                        placeholder="Ex: M1805"
-                       class="w-full p-2 bg-slate-50 border border-slate-200 rounded-sm font-bold"
+                       class="w-full p-2 bg-secondary-50 border border-secondary-200 rounded-sm font-bold"
                         {{ stimulus_target('parcours--rome', 'codeInput') }}
                         {{ stimulus_action('parcours--rome', 'addCodeFromEnter', 'keydown') }}>
                 <button type="button"
@@ -57,8 +57,8 @@
 
             <div {{ stimulus_target('parcours--rome', 'listeCodes') }}></div>
 
-            <p class="text-[11px] text-slate-400 italic mt-1 pl-1 flex items-start gap-2">
-                <span class="flex-shrink-0 w-5 h-5 bg-slate-200 text-slate-500 flex items-center justify-center text-[10px] rounded-full">
+            <p class="text-[11px] text-secondary-400 italic mt-1 pl-1 flex items-start gap-2">
+                <span class="flex-shrink-0 w-5 h-5 bg-secondary-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
                     <i class="fa-sharp fa-solid fa-circle-info"></i>
                 </span>
                 <span>{{ 'parcours_step6.helps.codeRome.help'|trans({}, 'help')|raw }}</span>

@@ -1,7 +1,7 @@
 {% for keyEc, ec in ecs %}
-    {% set dataRowClass = dataRowClass|default('border-b border-slate-200 dark:border-slate-700') %}
-    {% set deepSubLabelCellClass = deepSubLabelCellClass|default('px-4 py-3.5 pl-12 align-top leading-relaxed text-slate-600 dark:text-slate-300') %}
-    {% set valueCellClass = valueCellClass|default('px-4 py-4 align-top leading-relaxed text-slate-700 dark:text-slate-200') %}
+    {% set dataRowClass = dataRowClass|default('border-b border-secondary-200 dark:border-secondary-700') %}
+    {% set deepSubLabelCellClass = deepSubLabelCellClass|default('px-4 py-3.5 pl-12 align-top leading-relaxed text-secondary-600 dark:text-secondary-300') %}
+    {% set valueCellClass = valueCellClass|default('px-4 py-4 align-top leading-relaxed text-secondary-700 dark:text-secondary-200') %}
     {% set choiceBadgeClass = choiceBadgeClass|default('ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200') %}
 
     <tr class="{{ dataRowClass }}">

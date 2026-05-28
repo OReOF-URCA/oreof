@@ -1,4 +1,4 @@
-<div class="rounded-xl border border-slate-200 bg-white overflow-hidden"
+<div class="rounded-xl border border-secondary-200 bg-white overflow-hidden"
         {{ stimulus_controller('parcours--ec', {
             urlUpdate: path('app_parcours_ec_update',{parcours: parcours.id}),
         }) }}
@@ -9,7 +9,7 @@
             {% for ordre, semestre in dto.semestres|filter(semestre => (semestre.semestre.nonDispense == false)) %}
                 <tr>
                     <th colspan="7"
-                        class="px-4 py-3 text-center text-sm font-bold bg-slate-50 border-b border-slate-200 text-slate-800">
+                        class="px-4 py-3 text-center text-sm font-bold bg-secondary-50 border-b border-secondary-200 text-secondary-800">
                         {{ semestre.semestreParcours.display }} {% if semestre.raccroche == true %}
                             <twig:UX:icon name="icon:link"/>{% endif %}
                     </th>

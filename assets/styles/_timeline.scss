@@ -62,7 +62,7 @@
 }
 
 .timeline-step.current .step-label {
-  @apply text-indigo-600;
+  @apply text-primary-600;
 }
 
 .step-dates {
@@ -86,7 +86,7 @@ html[data-theme="dark"] .step-label {
 }
 
 html[data-theme="dark"] .timeline-step.current .step-label {
-  @apply text-indigo-300;
+  @apply text-primary-300;
 }
 
 html[data-theme="dark"] .step-dates {
@@ -94,7 +94,7 @@ html[data-theme="dark"] .step-dates {
 }
 
 html[data-theme="dark"] .timeline-step.current .step-icon {
-  @apply ring-indigo-900/40;
+  @apply ring-primary-900;
 }
 
 html[data-theme="dark"] .today-marker::after {

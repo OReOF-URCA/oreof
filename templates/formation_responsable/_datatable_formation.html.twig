@@ -1,11 +1,11 @@
 <div class="space-y-1">
-    <p class="font-medium text-slate-900 dark:text-slate-100">
+    <p class="font-medium text-secondary-900 dark:text-secondary-100">
         {{ item.formation ? item.formation.display : '–' }}
     </p>
 
     {% if item.commentaire %}
-        <p class="text-xs leading-5 text-slate-500 dark:text-slate-400">
-            <span class="font-semibold text-slate-600 dark:text-slate-300">Commentaire :</span>
+        <p class="text-xs leading-5 text-secondary-500 dark:text-secondary-400">
+            <span class="font-semibold text-secondary-600 dark:text-secondary-300">Commentaire :</span>
             {{ item.commentaire }}
         </p>
     {% endif %}

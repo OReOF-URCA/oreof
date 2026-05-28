@@ -70,6 +70,11 @@ window.addEventListener('load', () => { // le dom est chargé
     document.documentElement.setAttribute('data-theme', savedTheme)
   }
 
+  const savedColorTheme = localStorage.getItem('oreof-color-theme');
+  if (savedColorTheme && savedColorTheme !== 'normal') {
+    document.documentElement.setAttribute('data-color-theme', savedColorTheme);
+  }
+
   const toastQueue = Array.isArray(window.toasts) ? window.toasts : []
   // toast
   toastQueue.forEach((toast) => {

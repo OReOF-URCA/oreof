@@ -4,9 +4,9 @@
 
         {% if toast_type == 'info' %}
             {% set bg = 'bg-white/80 dark:bg-blue-800/80' %}
-            {% set icon_color = 'text-indigo-700 dark:text-indigo-300' %}
+            {% set icon_color = 'text-primary-700 dark:text-primary-300' %}
             {% set border = 'border-blue-100 dark:border-blue-700' %}
-            {% set progress = 'bg-indigo-500 dark:bg-indigo-400' %}
+            {% set progress = 'bg-primary-500 dark:bg-primary-400' %}
             {% set icon_svg %}
                 <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                      stroke="currentColor" aria-hidden="true">
@@ -75,7 +75,7 @@
                         {% if undo is defined and undo %}
                             <button
                                     type="button"
-                                    class="inline-flex items-center gap-2 px-2 py-1 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-md transition"
+                                    class="inline-flex items-center gap-2 px-2 py-1 text-sm font-medium text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-md transition"
                                     data-action="toast#undo"
                                     data-toast-undo-payload-value="{{ undo.payload|json_encode|e('html_attr') }}"
                                     data-toast-undo-url-value="{{ undo.url }}"

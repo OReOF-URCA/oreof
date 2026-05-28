@@ -29,11 +29,7 @@
                                onkeyup="filterHelps()" />
                     </div>
                     {% if is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('app_help_index') }}"
-                           class="inline-flex items-center gap-2 rounded-lg border border-secondary-200 bg-surface px-5 py-2.5 text-base font-semibold text-secondary-600 transition hover:border-secondary-300 hover:text-secondary-900 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500">
-                            {{ ux_icon('mdi:cog', {class: 'h-6 w-6'}) }}
-                            <span class="hidden sm:inline">Gérer</span>
-                        </a>
+                        <twig:Button size="lg" label="Gérer" variant="secondary" :outline="true" :soft="false" icon="fa-solid:cog" href="{{ path('app_faq_index') }}"/>
                     {% endif %}
                 </div>
 
@@ -48,29 +44,15 @@
                                     <span class="flex items-center gap-3">
                                         <strong class="text-base text-secondary-900 dark:text-secondary-100">{{ help.title|default(help.routeSlug) }}</strong>
                                         {% if is_granted('ROLE_ADMIN') %}
-                                            <a href="{{ path('app_help_edit', {'id': help.id}) }}"
-                                               class="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-semibold text-info-600 hover:bg-info-50 dark:text-info-400 dark:hover:bg-info-500/20"
-                                               onclick="event.stopPropagation();"
-                                               title="Modifier">
-                                                {{ ux_icon('mingcute:pencil-line', {class: 'h-5 w-5'}) }}
-                                            </a>
+                                            <twig:Button onclick="event.stopPropagation();" size="md" title="Modifier" variant="info" :outline="true" :soft="false" icon="mingcute:pencil-line" href="{{ path('app_help_edit', {'id': help.id}) }}"/>
                                         {% endif %}
                                         {% set previewUrl = previewUrls[help.id] ?? null %}
                                         {% if previewUrl %}
-                                            <a href="{{ previewUrl }}"
-                                               class="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-semibold text-secondary-600 hover:bg-secondary-200 dark:text-secondary-400 dark:hover:bg-secondary-700"
-                                               onclick="event.stopPropagation();"
-                                               title="Voir la page">
-                                                {{ ux_icon('wordpress:external', {class: 'h-5 w-5'}) }}
-                                            </a>
+                                            <twig:Button onclick="event.stopPropagation();" title="Voir la page" size="md" variant="secondary" :outline="true" :soft="false" icon="wordpress:external" href="{{ previewUrl }}"/>
                                         {% else %}
-                                            <button type="button"
-                                                    class="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-semibold text-secondary-400 cursor-not-allowed"
-                                                    onclick="event.stopPropagation();"
-                                                    title="Route avec paramètres obligatoires : aperçu direct indisponible"
-                                                    disabled>
-                                                {{ ux_icon('icon:external-link', {class: 'h-5 w-5'}) }}
-                                            </button>
+
+                                            <twig:Button onclick="event.stopPropagation();" title="Route avec paramètres obligatoires : aperçu direct indisponible" :disabled="true" size="md" variant="secondary" :outline="true" :soft="false" icon="wordpress:external"/>
+
                                         {% endif %}
                                     </span>
                                 </span>

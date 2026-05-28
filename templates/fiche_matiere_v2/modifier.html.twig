@@ -78,24 +78,24 @@
     </div>
 
     <div class="flex">
-        <aside class="w-72 bg-white rounded-md shadow-md border-slate-200 flex flex-col p-3 space-y-8">
+        <aside class="w-72 bg-white rounded-md shadow-md border-secondary-200 flex flex-col p-3 space-y-8">
             <nav class="flex-1 space-y-1">
-                <p class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest px-3">Configuration
+                <p class="text-[10px] font-black text-secondary-400 uppercase mb-4 tracking-widest px-3">Configuration
                     Fiche Matière</p>
 
                 <div class="p-6 bg-gray-200" id="pecent_completude">{# a mettre à jour avec turbo #}
                     {% set percent = fiche_matiere.remplissage.calcul() %}
                     {% set percentColor = fiche_matiere.remplissage.isFull() == true ? 'green' : 'orange' %}
                     <div class="flex justify-between items-end mb-2">
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Complétude Fiche Matière</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-secondary-500">Complétude Fiche Matière</span>
                         <span class="text-xs font-bold text-{{ percentColor }}-600 italic">{{ percent|number_format(2) }}%</span>
                     </div>
-                    <div class="w-full h-1 bg-slate-700 rounded-full overflow-hidden">
+                    <div class="w-full h-1 bg-secondary-700 rounded-full overflow-hidden">
                         <div class="bg-{{ percentColor }}-500 h-full w-[{{ percent|number_format(0) }}%]"></div>
                     </div>
                 </div>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                    href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'identite' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -108,7 +108,7 @@
                     </span>
                 </a>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                    href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'mutualisation' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -121,7 +121,7 @@
                     </span>
                 </a>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                    href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'presentation' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -134,7 +134,7 @@
                     </span>
                 </a>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                    href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'volumes_horaires' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -147,7 +147,7 @@
                     </span>
                 </a>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-slate-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
                    href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'mccc' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -162,7 +162,7 @@
             </nav>
         </aside>
 
-        <div class="p-3 flex-1 overflow-y-auto bg-white ms-2 rounded-md shadow-md border-slate-200 flex flex-col">
+        <div class="p-3 flex-1 overflow-y-auto bg-white ms-2 rounded-md shadow-md border-secondary-200 flex flex-col">
             <turbo-frame
                     id="tab-content"
             >
