@@ -178,6 +178,8 @@
                                             Version complète (toutes les fiches dans 1 pdf)
                                         </a>
                                         <a class="dropdown-item"
+                                            {{ stimulus_controller('linkjs') }}
+                                            {{ stimulus_action('linkjs', 'openLink') }}
                                            href="{{ path('fiche_matiere_export_zip', {parcours:parcours.id}) }}">
                                             Version zip (1 pdf par fiche)
                                         </a>

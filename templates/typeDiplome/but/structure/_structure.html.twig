@@ -22,7 +22,12 @@
                         <a class="dropdown-item" href="{{ path('fiche_matiere_export_all', {parcours:parcours.id}) }}">
                             Version complète (toutes les fiches dans 1 pdf)
                         </a>
-                        <a class="dropdown-item" href="{{ path('fiche_matiere_export_zip', {parcours:parcours.id}) }}">
+                        <a 
+                            {{ stimulus_controller('linkjs') }}
+                            {{ stimulus_action('linkjs', 'openLink') }}
+                            class="dropdown-item" 
+                            href="{{ path('fiche_matiere_export_zip', {parcours:parcours.id}) }}"
+                        >
                             Version zip (1 pdf par fiche)
                         </a>
                     </div>
