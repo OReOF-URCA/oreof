@@ -4,9 +4,9 @@
         {% set payload = notif.payload ?? {} %}
         {% if notif.isRead == false %}
             {% set status = {
-                'border': 'border-amber-200',
-                'bg': 'bg-amber-100',
-                'text': 'text-amber-700',
+                'border': 'border-warning-200',
+                'bg': 'bg-warning-100',
+                'text': 'text-warning-700',
                 'icon': 'fa-exclamation'
             } %}
         {% else %}

@@ -14,87 +14,82 @@
 {% endblock %}
 
 {% block content %}
-<div class="w-full">
-    <div class="space-y-4">
-        <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700">
-            <div class="p-6">
-                <!-- Search Bar -->
-                <div class="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
-                    <div class="relative flex-1">
-                        <label for="faqSearch" class="sr-only">Rechercher une question</label>
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                            {{ ux_icon('icon:search', {class: 'h-5 w-5 text-secondary-400', 'aria-hidden': 'true'}) }}
+    <div class="w-full">
+        <div class="space-y-4">
+            <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700">
+                <div class="p-6">
+                    <!-- Search Bar -->
+                    <div class="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-4">
+                        <div class="relative flex-1">
+                            <label for="faqSearch" class="sr-only">Rechercher une question</label>
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                {{ ux_icon('icon:search', {class: 'h-5 w-5 text-secondary-400', 'aria-hidden': 'true'}) }}
+                            </div>
+                            <input type="text"
+                                   id="faqSearch"
+                                   class="w-full rounded-lg border border-secondary-200 bg-surface py-2.5 pl-12 pr-4 text-base text-secondary-900 placeholder-secondary-500 transition focus:border-info-400 focus:ring-2 focus:ring-info-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder-secondary-400 dark:focus:border-info-400 dark:focus:ring-info-100/20"
+                                   placeholder="Rechercher une question..."
+                                   onkeyup="filterFaqs()"/>
                         </div>
-                        <input type="text"
-                               id="faqSearch"
-                               class="w-full rounded-lg border border-secondary-200 bg-surface py-2.5 pl-12 pr-4 text-base text-secondary-900 placeholder-secondary-500 transition focus:border-info-400 focus:ring-2 focus:ring-info-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder-secondary-400 dark:focus:border-info-400 dark:focus:ring-info-100/20"
-                               placeholder="Rechercher une question..."
-                               onkeyup="filterFaqs()" />
+                        {% if is_granted('ROLE_ADMIN') %}
+                                <twig:Button size="lg" label="Gérer" variant="secondary" :outline="true" :soft="false" icon="fa-solid:cog" href="{{ path('app_faq_index') }}"/>
+                        {% endif %}
                     </div>
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('app_faq_index') }}"
-                           class="inline-flex items-center gap-2 rounded-lg border border-secondary-200 bg-surface px-5 py-2.5 text-base font-semibold text-secondary-600 transition hover:border-secondary-300 hover:text-secondary-900 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500">
-                            {{ ux_icon('mdi:cog', {class: 'h-6 w-6'}) }}
-                            <span class="hidden sm:inline">Gérer</span>
-                        </a>
-                    {% endif %}
-                </div>
 
-                <!-- FAQs List -->
-                {% if faqs|length == 0 %}
-                    <div class="rounded-lg border border-info-200 bg-info-50 p-6 text-center dark:border-info-800 dark:bg-info-950/30">
-                        {{ ux_icon('icon:info-circle', {class: 'mx-auto mb-3 h-14 w-14 text-info-600 dark:text-info-400'}) }}
-                        <p class="text-sm text-info-900 dark:text-info-100">Aucune question FAQ disponible pour le moment.</p>
-                    </div>
-                {% else %}
-                    <div class="space-y-3" id="faqsList">
-                        {% for faq in faqs %}
-                            <details class="faq-item group rounded-lg border border-secondary-200 bg-secondary-50 transition hover:border-secondary-300 dark:border-secondary-700 dark:bg-secondary-800/50 dark:hover:border-secondary-600"
-                                     data-question="{{ faq.question|default('')|lower }}">
-                                    <summary class="flex cursor-pointer select-none items-center justify-between p-5 hover:bg-secondary-100 dark:hover:bg-secondary-800" style="list-style: none;">
+                    <!-- FAQs List -->
+                    {% if faqs|length == 0 %}
+                        <div class="rounded-lg border border-info-200 bg-info-50 p-6 text-center dark:border-info-800 dark:bg-info-950/30">
+                            {{ ux_icon('icon:info-circle', {class: 'mx-auto mb-3 h-14 w-14 text-info-600 dark:text-info-400'}) }}
+                            <p class="text-sm text-info-900 dark:text-info-100">Aucune question FAQ disponible pour le
+                                moment.</p>
+                        </div>
+                    {% else %}
+                        <div class="space-y-3" id="faqsList">
+                            {% for faq in faqs %}
+                                <details
+                                        class="faq-item group rounded-lg border border-secondary-200 bg-secondary-50 transition hover:border-secondary-300 dark:border-secondary-700 dark:bg-secondary-800/50 dark:hover:border-secondary-600"
+                                        data-question="{{ faq.question|default('')|lower }}">
+                                    <summary
+                                            class="flex cursor-pointer select-none items-center justify-between p-5 hover:bg-secondary-100 dark:hover:bg-secondary-800"
+                                            style="list-style: none;">
                                         <span class="flex items-center gap-3">
                                             {{ ux_icon('material-symbols:help-outline-rounded', {class: 'h-7 w-7 flex-shrink-0 text-info-600 dark:text-info-400'}) }}
                                             <span class="flex items-center gap-3">
                                                 <strong class="text-base text-secondary-900 dark:text-secondary-100">{{ faq.question }}</strong>
                                                 {% if is_granted('ROLE_ADMIN') %}
-                                                    <a href="{{ path('app_faq_edit', {'id': faq.id}) }}"
-                                                       class="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-sm font-semibold text-info-600 hover:bg-info-50 dark:text-info-400 dark:hover:bg-info-500/20"
-                                                       onclick="event.stopPropagation();"
-                                                       title="Modifier">
-                                                        {{ ux_icon('mingcute:pencil-line', {class: 'h-5 w-5'}) }}
-                                                    </a>
+                                                    <twig:Button onclick="event.stopPropagation();" size="md" variant="info" :outline="true" :soft="false" icon="mingcute:pencil-line" href="{{ path('app_faq_edit', {'id': faq.id}) }}"/>
                                                 {% endif %}
                                             </span>
                                         </span>
                                         {{ ux_icon('icon:chevron-down', {class: 'chevron-icon h-7 w-7 text-secondary-400 transition group-open:rotate-180 dark:text-secondary-500'}) }}
-                                </summary>
-                                <div class="border-t border-secondary-200 bg-surface p-4 dark:border-secondary-700">
-                                    <div class="markdown-body app-help-markdown">
-                                        {{ faq.reponse|markdown_to_html|parse_embeds }}
+                                    </summary>
+                                    <div class="border-t border-secondary-200 bg-surface p-4 dark:border-secondary-700">
+                                        <div class="markdown-body app-help-markdown">
+                                            {{ faq.reponse|markdown_to_html|parse_embeds }}
+                                        </div>
                                     </div>
-                                </div>
-                            </details>
-                        {% endfor %}
-                    </div>
-                {% endif %}
+                                </details>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    function filterFaqs() {
-        const searchInput = document.getElementById('faqSearch').value.toLowerCase();
-        const faqItems = document.querySelectorAll('.faq-item');
+    <script>
+        function filterFaqs() {
+            const searchInput = document.getElementById('faqSearch').value.toLowerCase();
+            const faqItems = document.querySelectorAll('.faq-item');
 
-        faqItems.forEach(item => {
-            const question = item.getAttribute('data-question');
-            if (question.includes(searchInput)) {
-                item.style.display = '';
-            } else {
-                item.style.display = 'none';
-            }
-        });
-    }
-</script>
+            faqItems.forEach(item => {
+                const question = item.getAttribute('data-question');
+                if (question.includes(searchInput)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+    </script>
 {% endblock %}
