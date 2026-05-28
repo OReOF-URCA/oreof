@@ -1,12 +1,12 @@
-{% set color = color is defined ? color : 'indigo' %}
+{% set color = color is defined ? color : 'primary' %}
 {% set color_map = {
-    'indigo': 'app-section-header-icon--indigo',
+    'primary': 'app-section-header-icon--primary',
     'amber': 'app-section-header-icon--amber',
     'red': 'app-section-header-icon--red',
     'green': 'app-section-header-icon--green',
     'teal': 'app-section-header-icon--teal'
 } %}
-{% set icon_color_class = color_map[color]|default(color_map['indigo']) %}
+{% set icon_color_class = color_map[color]|default(color_map['primary']) %}
 
 <div class="app-section-header">
     <div class="app-section-header-main">
