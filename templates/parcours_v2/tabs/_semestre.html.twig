@@ -3,10 +3,10 @@
     {% if semestre == null %}
         Semestre inexistant
     {% else %}
-        <header class="border-b border-slate-100 flex justify-between items-center bg-slate-50 p-2">
+        <header class="border-b border-secondary-100 flex justify-between items-center bg-secondary-50 p-2">
             <div>
                 <div class="flex flex-wrap items-center gap-3">
-                    <h2 class="text-xl font-black text-slate-800 tracking-tight">
+                    <h2 class="text-xl font-black text-secondary-800 tracking-tight">
                         Semestre {{ semestreParcours.ordre }}</h2>
                     <span class="inline-flex items-center gap-1 px-2 py-1 {% if semestreParcours.isOuvert == false %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} text-[10px] font-black rounded uppercase leading-none">{% if semestreParcours.isOuvert == false %}
                             <i class="fal fa-do-not-enter shrink-0"></i><span>Non ouvert</span>{% else %}
@@ -27,7 +27,7 @@
                     </span>
                     {% endif %}
                 </div>
-                <p class="text-xs text-slate-400 font-bold uppercase mt-1">Total horaire
+                <p class="text-xs text-secondary-400 font-bold uppercase mt-1">Total horaire
                     : {{ semestre.heuresEctsSemestre.sommeSemestreTotalPres }}
                     heures</p> {# todo à update avec turbo... #}
                 <div class="flex items-center gap-4 mt-1" id="valide_semestre_{{ semestreParcours.id }}">
@@ -74,7 +74,7 @@
                 }) }}
 
                 <div class="text-right">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <p class="text-[10px] font-black text-secondary-400 uppercase tracking-widest">
                         Total ECTS S{{ semestreParcours.ordre }}
                     </p>
                     <p class="text-2xl font-black text-{% if semestre.heuresEctsSemestre.sommeSemestreEcts < 30 %}red{% else %}green{% endif %}-600">

@@ -1,4 +1,4 @@
-{% set sectionClass = 'scroll-mt-32 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm' %}
+{% set sectionClass = 'scroll-mt-32 rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm' %}
 
 <div class="space-y-4">
     <section
@@ -104,24 +104,24 @@
                                 {% if ec.parcours.isParcoursDefaut == true %}
                                     <a href="{{ path('formation_v2_voir', {slug:ec.parcours.formation.slug}) }}"
                                        target="_blank"
-                                       class="group flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700">
-                                        <i class="fas fa-eye mt-0.5 text-slate-400 transition group-hover:text-indigo-500"></i>
+                                       class="group flex items-start gap-3 rounded-xl border border-secondary-200 bg-secondary-50 px-4 py-3 text-sm text-secondary-700 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700">
+                                        <i class="fas fa-eye mt-0.5 text-secondary-400 transition group-hover:text-indigo-500"></i>
                                         <span class="space-y-1">
-                                            <span class="block font-semibold text-slate-900">Formation sans parcours</span>
+                                            <span class="block font-semibold text-secondary-900">Formation sans parcours</span>
                                             <span class="block">{{ ec.ue.display(ec.parcours) }}</span>
-                                            <span class="block text-xs text-slate-500">{{ ec.code }} · {{ ec.parcours.formation.displayLong }} · {{ ec.parcours.formation.composantePorteuse.libelle }}</span>
+                                            <span class="block text-xs text-secondary-500">{{ ec.code }} · {{ ec.parcours.formation.displayLong }} · {{ ec.parcours.formation.composantePorteuse.libelle }}</span>
                                         </span>
                                     </a>
                                 {% else %}
                                     {% if ec.parcours != null and ec.parcours.formation != null %}
                                         <a href="{{ path('parcours_v2_voir', {parcours:ec.parcours.id}) }}"
                                            target="_blank"
-                                           class="group flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700">
-                                            <i class="fas fa-eye mt-0.5 text-slate-400 transition group-hover:text-indigo-500"></i>
+                                           class="group flex items-start gap-3 rounded-xl border border-secondary-200 bg-secondary-50 px-4 py-3 text-sm text-secondary-700 transition hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700">
+                                            <i class="fas fa-eye mt-0.5 text-secondary-400 transition group-hover:text-indigo-500"></i>
                                             <span class="space-y-1">
-                                                <span class="block font-semibold text-slate-900">{{ ec.parcours.libelle }} {% if ec.parcours.typeparcours != null and ec.parcours.typeparcours.value != 'classique' %} {{ ec.parcours.typeparcours|badgeTypeParcours }}{% endif %}</span>
+                                                <span class="block font-semibold text-secondary-900">{{ ec.parcours.libelle }} {% if ec.parcours.typeparcours != null and ec.parcours.typeparcours.value != 'classique' %} {{ ec.parcours.typeparcours|badgeTypeParcours }}{% endif %}</span>
                                                 <span class="block">{{ ec.ue.display(ec.parcours) }}</span>
-                                                <span class="block text-xs text-slate-500">{{ ec.code }} · {{ ec.parcours.formation.displayLong }} · {{ ec.parcours.formation.composantePorteuse.libelle }}</span>
+                                                <span class="block text-xs text-secondary-500">{{ ec.code }} · {{ ec.parcours.formation.displayLong }} · {{ ec.parcours.formation.composantePorteuse.libelle }}</span>
                                             </span>
                                         </a>
                                     {% endif %}

@@ -76,7 +76,7 @@ export default class extends Controller {
       Turbo.renderStreamMessage(`
         <turbo-stream action="append" target="flash_toasts">
           <template>
-            <div class="rounded-lg bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">
+            <div class="rounded-lg bg-danger-50 px-4 py-3 text-sm font-semibold text-danger-800">
               ❌ Impossible d’enregistrer l’ordre. Modification annulée.
             </div>
           </template>

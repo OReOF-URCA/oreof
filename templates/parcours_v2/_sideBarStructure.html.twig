@@ -1,6 +1,6 @@
 <div class="space-y-1">
     {% for annee in dto.annees %}
-        <div class="flex items-center p-2 bg-gray-200 rounded-md text-[11px] font-black text-slate-500">
+        <div class="flex items-center p-2 bg-gray-200 rounded-md text-[11px] font-black text-secondary-500">
                                 <span class="inline-flex items-center gap-1 whitespace-nowrap">
 {#                                    <a href="{{ path('parcours_v2_annee', { parcours: parcours.id, annee: annee.annee.id }) }}" #}
                                     {#                                       data-turbo-frame="tab-content" #}
@@ -21,9 +21,9 @@
             {#            </div> #}
         </div>
 
-        <div class="ml-4 pl-2 border-l border-slate-700 space-y-1 pt-1">
+        <div class="ml-4 pl-2 border-l border-secondary-700 space-y-1 pt-1">
             {% for sem in annee.semestres %}
-                <div class="flex items-center p-2 text-[10px] font-bold text-slate-500">
+                <div class="flex items-center p-2 text-[10px] font-bold text-secondary-500">
                     <span>
                         <a href="{{ path('parcours_v2_semestre', { parcours: parcours.id, semestreParcours: sem.semestreParcours.id }) }}"
                            data-turbo-frame="tab-content"
@@ -45,7 +45,7 @@
                     </div>
                 </div>
             {% else %}
-                <div class="flex items-center p-2 text-[10px] font-bold text-slate-500">
+                <div class="flex items-center p-2 text-[10px] font-bold text-secondary-500">
                     Pas de semestres
                 </div>
             {% endfor %}

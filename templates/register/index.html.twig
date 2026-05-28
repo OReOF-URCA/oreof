@@ -11,8 +11,8 @@
             <p class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700">
                 Demande d'acces
             </p>
-            <h2 class="text-3xl font-black leading-tight text-slate-900">Bienvenue, completez votre demande</h2>
-            <p class="text-sm text-slate-500">Renseignez vos informations institutionnelles pour ouvrir un acces a la
+            <h2 class="text-3xl font-black leading-tight text-secondary-900">Bienvenue, completez votre demande</h2>
+            <p class="text-sm text-secondary-500">Renseignez vos informations institutionnelles pour ouvrir un acces a la
                 plateforme.</p>
         </div>
 
@@ -40,7 +40,7 @@
             {% endfor %}
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50">
+        <div class="rounded-2xl border border-secondary-200 bg-secondary-50 p-4 dark:border-secondary-700 dark:bg-secondary-900/50">
             {% form_theme form 'communs/form_theme_v2.html.twig' %}
             {{ form_start(form, { attr: { class: 'space-y-1' } }) }}
 
@@ -53,9 +53,9 @@
                 <div class="sm:col-span-2">{{ form_row(form.centreDemande) }}</div>
 
                 <div class="sm:col-span-2 space-y-2">
-                    <label for="selectListe" class="block text-[12px] font-black uppercase text-slate-500">Si
+                    <label for="selectListe" class="block text-[12px] font-black uppercase text-secondary-500">Si
                         composante, precisez</label>
-                    <select class="w-full rounded-sm border border-slate-200 bg-slate-50 p-2 font-bold text-slate-700"
+                    <select class="w-full rounded-sm border border-secondary-200 bg-secondary-50 p-2 font-bold text-secondary-700"
                             name="selectListe" id="selectListe">
                         <option value="">Choisissez un centre</option>
                     </select>

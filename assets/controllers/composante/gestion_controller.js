@@ -21,11 +21,11 @@ export default class extends Controller {
         if (e.target.files.length > 0) {
           const name = e.target.files[0].name
           if (span) span.textContent = name
-          label.classList.add('border-indigo-400', 'bg-indigo-50/50')
-          label.classList.remove('border-indigo-200')
+          label.classList.add('border-primary-400', 'bg-primary-50/50')
+          label.classList.remove('border-primary-200')
         } else {
           if (span) span.textContent = 'Déposer ou sélectionner un PDF'
-          label.classList.remove('border-indigo-400', 'bg-indigo-50/50')
+          label.classList.remove('border-primary-400', 'bg-primary-50/50')
         }
       })
     }

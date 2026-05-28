@@ -2,7 +2,7 @@
 
 {% block content %}
     <section
-            class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6"
+            class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6"
             {{ stimulus_controller('crud', {
                 url: path('app_formation_liste'),
                 storageKey: 'formation_liste',
@@ -15,7 +15,7 @@
             badge_card: 'Détails des mentions/specialites'
         }) }}
 
-        <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-950/30 sm:p-4" {{ stimulus_target('crud', 'liste') }}>
+        <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-3 dark:border-secondary-700 dark:bg-secondary-950/30 sm:p-4" {{ stimulus_target('crud', 'liste') }}>
         </div>
     </section>
 {% endblock %}

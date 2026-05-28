@@ -192,7 +192,7 @@ export default class extends Controller {
       </div>
       <div class="md:col-span-2 md:pt-6">
         <button type="button"
-                class="synchro-mccc inline-flex h-9 w-9 items-center justify-center rounded-md bg-red-600 text-white transition-colors hover:bg-red-700"
+                class="synchro-mccc inline-flex h-9 w-9 items-center justify-center rounded-md bg-danger-600 text-white transition-colors hover:bg-danger-700"
                 data-action="click->mccc--licence#removeEpreuveCci">
           <i class="fas fa-trash"></i>
         </button>
@@ -223,7 +223,7 @@ export default class extends Controller {
       <div class="hidden md:col-span-8 md:block"></div>
       <div class="md:col-span-4 md:pt-2">
         <button type="button"
-                class="synchro-mccc inline-flex h-9 w-9 items-center justify-center rounded-md bg-red-600 text-white transition-colors hover:bg-red-700"
+                class="synchro-mccc inline-flex h-9 w-9 items-center justify-center rounded-md bg-danger-600 text-white transition-colors hover:bg-danger-700"
                 data-action="click->mccc--licence#removeEpreuveCt">
           <i class="fas fa-trash"></i>
         </button>
@@ -295,7 +295,7 @@ export default class extends Controller {
       <div class="hidden md:col-span-8 md:block"></div>
       <div class="md:col-span-4 md:pt-2">
         <button type="button"
-                class="synchro-mccc inline-flex h-9 w-9 items-center justify-center rounded-md bg-red-600 text-white transition-colors hover:bg-red-700"
+                class="synchro-mccc inline-flex h-9 w-9 items-center justify-center rounded-md bg-danger-600 text-white transition-colors hover:bg-danger-700"
                 data-action="click->mccc--licence#removeEpreuveCtS1">
           <i class="fas fa-trash"></i>
         </button>
@@ -351,7 +351,7 @@ export default class extends Controller {
       <div class="hidden md:col-span-8 md:block"></div>
       <div class="md:col-span-4 md:pt-2">
         <button type="button"
-                class="synchro-mccc inline-flex h-9 w-9 items-center justify-center rounded-md bg-red-600 text-white transition-colors hover:bg-red-700"
+                class="synchro-mccc inline-flex h-9 w-9 items-center justify-center rounded-md bg-danger-600 text-white transition-colors hover:bg-danger-700"
                 data-action="click->mccc--licence#removeEpreuveCcAutre">
           <i class="fas fa-trash"></i>
         </button>

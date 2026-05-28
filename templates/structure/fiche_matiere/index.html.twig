@@ -2,7 +2,7 @@
 
 {% block content %}
     <section
-            class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6"
+            class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6"
             {#            {{ stimulus_controller('crud', { #}
             {#                url: type == 'hd' ? path('structure_fiche_matiere_liste_hd') : path('structure_fiche_matiere_liste'), #}
             {#                storageKey: type == 'hd' ? 'structure_fiche_matiere_liste_hd' : 'structure_fiche_matiere_liste', #}
@@ -12,14 +12,14 @@
     >
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="space-y-1">
-                <h2 class="text-sm font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
                     {% if type == 'hd' %}
                         Fiches EC/matières "hors diplôme"
                     {% else %}
                         Fiches EC/matières
                     {% endif %}
                 </h2>
-                <p class="max-w-3xl text-sm text-slate-600 dark:text-slate-300">
+                <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
                     Consultez et gérez les fiches d'enseignement ou matières.
                 </p>
             </div>
@@ -34,7 +34,7 @@
         </div>
 
 
-        {#        <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-950/30 sm:p-4" {{ stimulus_target('crud', 'liste') }}> #}
+        {#        <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-3 dark:border-secondary-700 dark:bg-secondary-950/30 sm:p-4" {{ stimulus_target('crud', 'liste') }}> #}
         {#        </div> #}
         <turbo-frame
                 id="liste_fiche_matiere"

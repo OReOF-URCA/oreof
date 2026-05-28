@@ -63,11 +63,11 @@ export default class extends Controller {
     this.colorButtonTargets.forEach(btn => {
       if (btn.dataset.themeName === activeTheme) {
         // Bouton ACTIF : on ajoute un anneau de sélection (adapté au mode clair et sombre)
-        btn.classList.add('ring-2', 'ring-offset-2', 'ring-slate-800', 'dark:ring-slate-100')
+        btn.classList.add('ring-2', 'ring-offset-2', 'ring-secondary-800', 'dark:ring-secondary-100')
         btn.setAttribute('aria-pressed', 'true')
       } else {
         // Bouton INACTIF : on retire l'anneau
-        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-slate-800', 'dark:ring-slate-100')
+        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-secondary-800', 'dark:ring-secondary-100')
         btn.setAttribute('aria-pressed', 'false')
       }
     })

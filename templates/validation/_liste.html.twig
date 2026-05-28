@@ -14,7 +14,7 @@
 {#                urlListe: path('app_validation_dpe_liste'), #}
 {#            }) }} #}
 {#        {% endif %} #}
-{#        class="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-5" #}
+{#        class="space-y-4 rounded-xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-5" #}
 {# > #}
 {#    <div class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100"> #}
 {#        <strong>{{ nbParcours }}</strong> parcours, pour <strong>{{ nbFormations }}</strong> #}
@@ -22,16 +22,16 @@
 {#        trouvée{{ nbFormations > 1 ? 's' : '' }}. #}
 {#    </div> #}
 
-{#    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"> #}
+{#    <div class="overflow-hidden rounded-xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900"> #}
 {#        <div class="overflow-x-auto"> #}
-{#            <table class="min-w-full text-sm text-slate-700 dark:text-slate-200" {{ stimulus_controller('check_all') }}> #}
-{#                <thead class="bg-slate-50 text-left text-xs font-black uppercase tracking-wider text-slate-500 dark:bg-slate-800/70 dark:text-slate-300"> #}
+{#            <table class="min-w-full text-sm text-secondary-700 dark:text-secondary-200" {{ stimulus_controller('check_all') }}> #}
+{#                <thead class="bg-secondary-50 text-left text-xs font-black uppercase tracking-wider text-secondary-500 dark:bg-secondary-800/70 dark:text-secondary-300"> #}
 {#                <tr> #}
 {#                    {% if hasSelection %} #}
 {#                        <th class="px-4 py-3 w-10"> #}
-{#                            <label class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800"> #}
+{#                            <label class="inline-flex items-center justify-center rounded-md border border-secondary-300 bg-white p-2 dark:border-secondary-600 dark:bg-secondary-800"> #}
 {#                                <input type="checkbox" id="check-all" #}
-{#                                       class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" {{ stimulus_action('check_all', 'checkAll') }}> #}
+{#                                       class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500" {{ stimulus_action('check_all', 'checkAll') }}> #}
 {#                            </label> #}
 {#                        </th> #}
 {#                    {% endif %} #}
@@ -50,19 +50,19 @@
 {#                    <th class="px-4 py-3 text-right">Actions</th> #}
 {#                </tr> #}
 {#                </thead> #}
-{#                <tbody class="divide-y divide-slate-200 dark:divide-slate-700"> #}
+{#                <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700"> #}
 {#                {% for dpeParcours in allparcours %} #}
 {#                    {% if dpeParcours.parcours != null %} #}
 {#                        {% set parcours = dpeParcours.parcours %} #}
 {#                        {% set formation = parcours.formation %} #}
-{#                        <tr class="align-top hover:bg-slate-50/70 dark:hover:bg-slate-800/40"> #}
+{#                        <tr class="align-top hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40"> #}
 {#                            {% if hasSelection %} #}
 {#                                <td class="px-4 py-3"> #}
-{#                                    <label class="inline-flex items-center justify-center rounded-md border border-slate-300 bg-white p-2 dark:border-slate-600 dark:bg-slate-800"> #}
+{#                                    <label class="inline-flex items-center justify-center rounded-md border border-secondary-300 bg-white p-2 dark:border-secondary-600 dark:bg-secondary-800"> #}
 {#                                        <input #}
 {#                                                {{ stimulus_action('check_all', 'check') }} #}
 {#                                                type="checkbox" #}
-{#                                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" #}
+{#                                                class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500" #}
 {#                                                name="parcours[]" #}
 {#                                                value="{{ dpeParcours.id }}" #}
 {#                                        > #}
@@ -71,7 +71,7 @@
 {#                            {% endif %} #}
 {#                            <td class="px-4 py-3"> #}
 {#                                {% if formation.composantePorteuse != null %} #}
-{#                                    <span class="font-medium text-slate-800 dark:text-slate-100">{{ formation.composantePorteuse.libelle }}</span> #}
+{#                                    <span class="font-medium text-secondary-800 dark:text-secondary-100">{{ formation.composantePorteuse.libelle }}</span> #}
 {#                                {% else %} #}
 {#                                    <span class="inline-flex rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200">Non définie</span> #}
 {#                                {% endif %} #}
@@ -87,11 +87,11 @@
 {#                            <td class="px-4 py-3"> #}
 {#                                {% if formation.hasParcours %} #}
 {#                                    <span class="inline-flex flex-wrap items-center gap-2"> #}
-{#                                        <span class="font-medium text-slate-800 dark:text-slate-100">{{ parcours.libelle }}</span> #}
+{#                                        <span class="font-medium text-secondary-800 dark:text-secondary-100">{{ parcours.libelle }}</span> #}
 {#                                        {{ parcours.typeParcours|badgeTypeParcours }} #}
 {#                                    </span> #}
 {#                                {% else %} #}
-{#                                    <span class="text-slate-400 dark:text-slate-500">Sans parcours</span> #}
+{#                                    <span class="text-secondary-400 dark:text-secondary-500">Sans parcours</span> #}
 {#                                {% endif %} #}
 {#                            </td> #}
 {#                            <td class="px-4 py-3"> #}
@@ -198,7 +198,7 @@
 {#    </div> #}
 
 {#    {% if hasSelection %} #}
-{#        <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-slate-700 dark:bg-slate-950/30"> #}
+{#        <div class="rounded-xl border border-secondary-200 bg-secondary-50/80 p-4 dark:border-secondary-700 dark:bg-secondary-950/30"> #}
 {#            {% set prefix = 'parcours' %} #}
 {#            {% if allparcours|length > 0 %} #}
 {#                {% set oneParcours = allparcours|first %} #}

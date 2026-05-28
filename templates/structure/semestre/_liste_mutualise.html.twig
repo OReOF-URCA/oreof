@@ -1,25 +1,25 @@
-<div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+<div class="rounded-lg border border-secondary-200 bg-white overflow-hidden">
     <table class="w-full text-sm">
-        <thead class="bg-slate-50 border-b border-slate-200">
+        <thead class="bg-secondary-50 border-b border-secondary-200">
         <tr>
-            <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Composante</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500">Composante</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500">
                 Mention/Spécialité
             </th>
-            <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Parcours</th>
-            <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Semestre
+            <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500">Parcours</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500">Semestre
                 utilisé ?
             </th>
             <th class="px-3 py-2"></th>
         </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
+        <tbody class="divide-y divide-secondary-100">
         {% for sem in semestres %}
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="px-3 py-2 text-slate-700">{{ sem.parcours != null and sem.parcours.formation != null ? sem.parcours.formation.composantePorteuse.libelle : 'Erreur formation' }}</td>
-                <td class="px-3 py-2 text-slate-700">{{ sem.parcours != null and sem.parcours.formation != null ? sem.parcours.formation.display : 'Erreur formation' }}</td>
-                <td class="px-3 py-2 text-slate-700">{{ sem.parcours != null ? sem.parcours.libelle : 'Erreur formation' }}</td>
-                <td class="px-3 py-2 text-slate-400">-</td>
+            <tr class="hover:bg-secondary-50 transition-colors">
+                <td class="px-3 py-2 text-secondary-700">{{ sem.parcours != null and sem.parcours.formation != null ? sem.parcours.formation.composantePorteuse.libelle : 'Erreur formation' }}</td>
+                <td class="px-3 py-2 text-secondary-700">{{ sem.parcours != null and sem.parcours.formation != null ? sem.parcours.formation.display : 'Erreur formation' }}</td>
+                <td class="px-3 py-2 text-secondary-700">{{ sem.parcours != null ? sem.parcours.libelle : 'Erreur formation' }}</td>
+                <td class="px-3 py-2 text-secondary-400">-</td>
                 <td class="px-3 py-2 text-right">
                     <button
                             {{ stimulus_action('semestre--mutualise', 'delete', 'click', {sem: sem.id}) }}
@@ -33,7 +33,7 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="5" class="px-3 py-4 text-center text-sm text-slate-500">Semestre mutualisé avec aucun
+                <td colspan="5" class="px-3 py-4 text-center text-sm text-secondary-500">Semestre mutualisé avec aucun
                     parcours/mention.
                 </td>
             </tr>

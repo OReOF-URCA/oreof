@@ -6,10 +6,10 @@
 {% endblock %}
 
 {% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-indigo-500' %}
-{% set textBoxClass = 'mt-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-700' %}
+{% set textBoxClass = 'mt-2 rounded-xl border border-secondary-200 bg-secondary-50 px-4 py-3 text-sm leading-relaxed text-secondary-700' %}
 
 <div class="space-y-4">
-    <div class="rounded-xl border border-slate-200 bg-white/70 p-4">
+    <div class="rounded-xl border border-secondary-200 bg-white/70 p-4">
         <dl>
             <dt class="{{ dtClass }}">Description de l’enseignement</dt>
             <dd class="{{ textBoxClass }}">
@@ -28,10 +28,10 @@
     </div>
 
     <div class="grid gap-4 md:grid-cols-2">
-        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
             <dl>
                 <dt class="{{ dtClass }}">Enseignement dispensé en</dt>
-                <dd class="mt-2 text-sm text-slate-700">
+                <dd class="mt-2 text-sm text-secondary-700">
                     <ul class="list-disc space-y-1 pl-5">
                     {% for langue in ficheMatiere.langueDispense %}
                         <li>{{ langue.libelle }}</li>
@@ -51,10 +51,10 @@
         </dl>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
             <dl>
                 <dt class="{{ dtClass }}">Support de cours en</dt>
-                <dd class="mt-2 text-sm text-slate-700">
+                <dd class="mt-2 text-sm text-secondary-700">
                     <ul class="list-disc space-y-1 pl-5">
                     {% for langue in ficheMatiere.langueSupport %}
                         <li>{{ langue.libelle }}</li>
@@ -75,7 +75,7 @@
         </div>
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white/70 p-4">
+    <div class="rounded-xl border border-secondary-200 bg-white/70 p-4">
         <dl>
             <dt class="{{ dtClass }}">Objectifs de l'enseignement</dt>
             <dd class="{{ textBoxClass }}">

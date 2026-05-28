@@ -1,14 +1,14 @@
 {% set elem = ec.elementConstitutif %}
 <section
         id="ec-{{ elem.id }}"
-        class="bg-white border border-slate-200 rounded-sm shadow-sm overflow-hidden border-l-8 mt-2">
-    <div class="p-2 flex items-center justify-between border-b border-slate-100">
+        class="bg-white border border-secondary-200 rounded-sm shadow-sm overflow-hidden border-l-8 mt-2">
+    <div class="p-2 flex items-center justify-between border-b border-secondary-100">
         <div class="flex items-center gap-4">
             <div class="min-w-12 px-2 h-20 bg-indigo-600 text-white rounded-md flex items-center justify-center font-black shadow-lg shadow-indigo-100">
                 {{ elem.code }}
             </div>
             <div>
-                <h4 class="text-sm font-black text-slate-700 max-w-[60ch] wrap-break-word whitespace-normal">
+                <h4 class="text-sm font-black text-secondary-700 max-w-[60ch] wrap-break-word whitespace-normal">
                     {{ elem.display }} {{ elem.validationStatus|badgeValidationShort(2) }}
                 </h4>
                 <div class="flex mt-2 gap-x-2">
@@ -34,7 +34,7 @@
                 </div>
                 <div class="flex items-center gap-x-2 mt-2 flex-wrap">
                     {% if ec.elementConstitutif.natureUeEc != null and  ec.elementConstitutif.natureUeEc.isLibre == true %}
-                        <span class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 pe-2 py-1 rounded hover:bg-slate-50"> <span
+                        <span class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 pe-2 py-1 rounded hover:bg-secondary-50"> <span
                                     class="w-1.5 h-1.5 rounded-full bg-green-500"></span> EC Libre</span>
                     {% else %}
                         {% set heureComplete = elem.isHeuresComplete ? 'green' : 'orange' %}
@@ -44,7 +44,7 @@
                             {{ stimulus_controller('tooltip') }}
                             title="Saisir/voir les heures pour cet EC"
                             href="{{ path('parcours_ec_saisir_heures', { parcours: parcours.id, id: elem.id }) }}"
-                            class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 pe-2 py-1 rounded hover:bg-slate-50">
+                            class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 pe-2 py-1 rounded hover:bg-secondary-50">
                         <span class="w-1.5 h-1.5 rounded-full bg-{{ heureComplete }}-500"
                               id="badge_heure_{{ elem.id }}"></span>
                         Heures
@@ -52,7 +52,7 @@
                     {% endif %}
 
                     {% set mcccComplete = elem.isMcccComplete(parcours) ? 'green' : 'orange' %}
-                    <a class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-50"
+                    <a class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 px-2 py-1 rounded hover:bg-secondary-50"
                        data-turbo="true"
                        data-action="click->modalturbo#open"
                             {{ stimulus_controller('tooltip') }}
@@ -63,7 +63,7 @@
                               id="badge_mccc_{{ elem.id }}"></span>
                         MCCC
                     </a>
-                    <a class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-50"
+                    <a class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 px-2 py-1 rounded hover:bg-secondary-50"
                        data-turbo="true"
                        data-action="click->modalturbo#open"
                             {{ stimulus_controller('tooltip') }}
@@ -76,7 +76,7 @@
                     {% if elem.ficheMatiere != null %}
                         {% set ficheMatiere = elem.ficheMatiere %}
                         {% set ficheComplete = ficheMatiere.remplissage.calcul() == 100 ? 'green' : 'orange' %}
-                        <a class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 px-2 py-1 rounded hover:bg-slate-50"
+                        <a class="text-[10px] font-black text-indigo-600 group-hover:underline uppercase flex items-center gap-1.5 px-2 py-1 rounded hover:bg-secondary-50"
                            href="{{ path('fiche_matiere_v2_voir', {slug: ficheMatiere.slug}) }}"
                            target="_blank"
                         >
@@ -104,7 +104,7 @@
                 {% if ec.elementConstitutif.natureUeEc.isLibre == true %}
                     <span class="text-xs font-bold text-blue-500 bg-blue-100 px-3 py-1 rounded-full">EC Libre</span>
                 {% else %}
-                    <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">{{ ec.heuresEctsEc.cmPres }}h CM • {{ ec.heuresEctsEc.tdPres }}h TD • {{ ec.heuresEctsEc.tpPres }}h TP</span>
+                    <span class="text-xs font-bold text-secondary-500 bg-secondary-100 px-3 py-1 rounded-full">{{ ec.heuresEctsEc.cmPres }}h CM • {{ ec.heuresEctsEc.tdPres }}h TD • {{ ec.heuresEctsEc.tpPres }}h TP</span>
                 {% endif %}
             {% else %}
                 <span
@@ -151,7 +151,7 @@
                 items: items
             }) }}
 
-            <span class="text-xs font-black text-slate-700">{{ ec.heuresEctsEc.ects }} ECTS</span>
+            <span class="text-xs font-black text-secondary-700">{{ ec.heuresEctsEc.ects }} ECTS</span>
         </div>
     </div>
     <div class="p-2 mt-2">
