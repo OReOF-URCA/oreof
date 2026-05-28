@@ -15,6 +15,7 @@ use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\UX\Turbo\Helper\TurboStream;
 
 #[Route('/structure/fiche-matiere', name: 'structure_fiche_matiere_')]
 class FicheMatiereController extends BaseController
@@ -34,6 +35,7 @@ class FicheMatiereController extends BaseController
 
     #[Route('/liste', name: 'liste')]
     public function liste(
+        TurboStream $turboStream,
 //        UserRepository $userRepository,
 //        Request $request
     ): Response {

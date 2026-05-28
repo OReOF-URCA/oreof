@@ -3,12 +3,12 @@
 {% block content %}
     <section
             class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-6"
-            {{ stimulus_controller('crud', {
-                url: type == 'hd' ? path('structure_fiche_matiere_liste_hd') : path('structure_fiche_matiere_liste'),
-                storageKey: type == 'hd' ? 'structure_fiche_matiere_liste_hd' : 'structure_fiche_matiere_liste',
-                page: page
-            }) }}
-            data-action="base:refreshListe@window->crud#refreshListe base:modalClose@window->crud#refreshListe"
+            {#            {{ stimulus_controller('crud', { #}
+            {#                url: type == 'hd' ? path('structure_fiche_matiere_liste_hd') : path('structure_fiche_matiere_liste'), #}
+            {#                storageKey: type == 'hd' ? 'structure_fiche_matiere_liste_hd' : 'structure_fiche_matiere_liste', #}
+            {#                page: page #}
+            {#            }) }} #}
+            {#            data-action="base:refreshListe@window->crud#refreshListe base:modalClose@window->crud#refreshListe" #}
     >
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="space-y-1">
@@ -34,8 +34,11 @@
         </div>
 
 
-        <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-950/30 sm:p-4" {{ stimulus_target('crud', 'liste') }}>
-        </div>
+        {#        <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-3 dark:border-slate-700 dark:bg-slate-950/30 sm:p-4" {{ stimulus_target('crud', 'liste') }}> #}
+        {#        </div> #}
+        <turbo-frame
+                id="liste_fiche_matiere"
+                src="{{ type == 'hd' ? path('structure_fiche_matiere_liste_hd') : path('structure_fiche_matiere_liste') }}"></turbo-frame>
     </section>
 {% endblock %}
 
