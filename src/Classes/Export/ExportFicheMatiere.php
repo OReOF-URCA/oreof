@@ -9,9 +9,11 @@
 
 namespace App\Classes\Export;
 
+use App\Classes\GetElementConstitutif;
 use App\Classes\MyGotenbergPdf;
 use App\Repository\ParcoursRepository;
 use App\Service\ProjectDirProvider;
+use App\Service\TypeDiplomeResolver;
 use App\Utils\Tools;
 use Exception;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -23,7 +25,8 @@ class ExportFicheMatiere
     public function __construct(
         ProjectDirProvider $projectDirProvider,
         protected MyGotenbergPdf     $myPdf,
-        protected ParcoursRepository $parcoursRepository
+        protected ParcoursRepository $parcoursRepository,
+        protected TypeDiplomeResolver $typeDResolver
     )
     {
         $this->dir = $projectDirProvider->getProjectDir() . '/public/';
@@ -41,8 +44,11 @@ class ExportFicheMatiere
             throw new Exception('Formation non trouvée');
         }
         $typeDiplome = $formation?->getTypeDiplome();
+        $typeDHandler = $this->typeDResolver->get($typeDiplome);
+
         $fichiers = [];
         foreach ($ecs as $ec) {
+            $getElement = new GetElementConstitutif($ec, $parcours);
             $ficheMatieres = $ec->getFicheMatiere();
             if ($ficheMatieres !== null) {
                 $fichiers[] = $this->myPdf->renderAndSave(
@@ -55,6 +61,14 @@ class ExportFicheMatiere
                         'parcours' => $parcours,
                         'typeDiplome' => $typeDiplome,
                         'titre' => 'Fiche EC/matière ' . $ficheMatieres->getLibelle(),
+                        'heures' => $getElement->getFicheMatiereHeures(),
+                        'templateFormMccc' => $typeDHandler::TEMPLATE_FORM_MCCC,
+                        'mcccPdf' => $typeDHandler->getDisplayMccc(
+                            $getElement->getMcccsFromFicheMatiere($typeDHandler) ?? [],
+                            $getElement->getTypeMcccFromFicheMatiere() ?? ''
+                        ),
+                        'typeEpreuves' => $typeDHandler->getTypeEpreuves()
+
                     ],
                     Tools::FileName($ficheMatieres->getSlug())
                 );
