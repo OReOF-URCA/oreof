@@ -10,16 +10,8 @@
         let accessibility
 
         try {
-          accessibility = JSON.parse(localStorage.getItem('oreof-a11y') || 'null')
+    data-controller="modalturbo frame-loader"
         } catch (e) {
-          accessibility = null
-        }
-
-        const preferredTheme = accessibility && accessibility.theme ? accessibility.theme : null
-        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        const themeFromPref = preferredTheme === 'system' ? null : preferredTheme
-        const theme = (themeFromPref === 'dark' || themeFromPref === 'light')
-          ? themeFromPref
           : ((savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : (prefersDark ? 'dark' : 'light'))
 
         document.documentElement.setAttribute('data-theme', theme)

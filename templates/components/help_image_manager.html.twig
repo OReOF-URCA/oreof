@@ -63,6 +63,7 @@
     <div id="upload-tab-pane" class="hidden">
       <div class="grid grid-cols-1 md:grid-cols-7 gap-6">
         <div class="md:col-span-4 space-y-4">
+          <div id="uploadFormContainer">
           <form id="uploadImageForm" onsubmit="uploadImage(event)" class="space-y-4">
             <div>
               <label for="uploadName" class="block text-sm font-medium text-secondary-900 dark:text-secondary-100 mb-2">Nom sous lequel enregistrer l'image <span class="text-danger-600 dark:text-danger-400">*</span></label>
@@ -80,6 +81,7 @@
               Uploader et insérer l'image
             </button>
           </form>
+          </div>
         </div>
 
         <div class="md:col-span-3">
@@ -177,9 +179,56 @@
   let searchTimeout = null;
   function searchImages() { const input = document.getElementById('imageSearchInput'); clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { loadImages(input.value); }, 400); }
 
-  function uploadImage(e) { e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); const originalHtml = btn.innerHTML; btn.innerHTML = '<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Traitement en cours...'; btn.disabled = true;
-    const nom = document.getElementById('uploadName').value; const fileInput = document.getElementById('uploadFile'); const formData = new FormData(); formData.append('nom', nom); if (fileInput.files.length > 0) { formData.append('image', fileInput.files[0]); }
-    fetch('/admin/help/images/upload', { method: 'POST', body: formData }).then(res => res.json()).then(data => { btn.innerHTML = originalHtml; btn.disabled = false; if (data.error) { alert('Erreur : ' + data.error); } else { document.getElementById('uploadImageForm').reset(); updateImagePreview('/uploads/help_images/' + data.fichier, data.nom); switchTab('gallery'); loadImages(); selectImage('/uploads/help_images/' + data.fichier, data.nom); } }).catch(err => { btn.innerHTML = originalHtml; btn.disabled = false; alert('Erreur système lors de l\'upload.'); console.error(err); }); }
+  function uploadImage(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Traitement en cours...';
+    btn.disabled = true;
+
+    // Afficher le spinner dans le conteneur du formulaire
+    const container = document.getElementById('uploadFormContainer');
+    document.dispatchEvent(new CustomEvent('app:show-loader-in', {
+      detail: { element: container }
+    }));
+
+    const nom = document.getElementById('uploadName').value;
+    const fileInput = document.getElementById('uploadFile');
+    const formData = new FormData();
+    formData.append('nom', nom);
+    if (fileInput.files.length > 0) {
+      formData.append('image', fileInput.files[0]);
+    }
+
+    fetch('/admin/help/images/upload', { method: 'POST', body: formData })
+      .then(res => res.json())
+      .then(data => {
+        // ← Traitement terminé, MAINTENANT on cache le spinner
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+        if (data.error) {
+          alert('Erreur : ' + data.error);
+          // Cacher le spinner EN CAS D'ERREUR
+          document.dispatchEvent(new CustomEvent('app:hide-loader'));
+        } else {
+          document.getElementById('uploadImageForm').reset();
+          updateImagePreview('/uploads/help_images/' + data.fichier, data.nom);
+          switchTab('gallery');
+          loadImages();
+          selectImage('/uploads/help_images/' + data.fichier, data.nom);
+          // Cacher le spinner APRÈS que tout le traitement soit fini
+          document.dispatchEvent(new CustomEvent('app:hide-loader'));
+        }
+      })
+      .catch(err => {
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+        alert('Erreur système lors de l\'upload.');
+        console.error(err);
+        // Cacher le spinner EN CAS D'EXCEPTION
+        document.dispatchEvent(new CustomEvent('app:hide-loader'));
+      });
+  }
 
   document.addEventListener('click', function(e) { const target = e.target.closest('.js-select-image'); if (!target) return; const url = target.getAttribute('data-image-url'); const name = target.getAttribute('data-image-name') || ''; if (typeof window.insertSelectedImage === 'function') { window.insertSelectedImage(url, name, '{{ editorTextarea|e('js') }}'); closeImageManagerModal(); } });
 
