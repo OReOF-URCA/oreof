@@ -2,6 +2,16 @@
     Voulez vous vraiment supprimer cette formation ?
 </p>
 
+{% for c in checkData %}
+    {{ include('parcours/_confirm_soft_delete_parcours.html.twig',
+            {
+                linkedData: c
+            }
+        ) 
+    
+    }}
+{% endfor %}
+
 <div class="row my-4 justify-content-center">
     <div class="col-4 text-center mt-5">
         <a href="{{ path('app_formation_set_soft_delete', {slug: formation_slug}) }}">

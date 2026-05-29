@@ -1,0 +1,55 @@
+<h1 class="text-center fw-bold">{{ linkedData.parcoursDisplay }}</h1>
+
+<div class="row justify-content-center mt-3">
+    <div class="col-12">
+        {% if linkedData.semestres|length > 0 %}
+            <p class="fw-bold">
+                Semestres mutualisés
+            </p>
+            <ul>
+                {% for s in linkedData.semestres %}
+                    <li>ID : {{ s.id }} - {{ s.display }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="fst-italic fw-bold">
+                Aucun semestre mutualisé
+            </p>
+        {% endif %}
+        {% if linkedData.ues|length > 0 %}
+            <p class="fw-bold">
+                UE mutualisées
+            </p>
+            <ul>
+                {% for ue in linkedData.ues %}
+                    <li>ID : {{ ue.id }} - {{ ue.display }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="fst-italic fw-bold">
+                Aucune UE mutualisée
+            </p>
+        {% endif %}
+        {% if linkedData.fiches_matieres|length > 0 %}
+            <p class="fw-bold">
+                Fiches matières mutualisées
+            </p>
+            <ul>
+                {% for fm in linkedData.fiches_matieres %}
+                    <li>
+                        ID : {{ fm.id }} - <b>{{ fm.display }}</b>
+                        <ul>
+                            {% for fmP in fm.mutualisations %}
+                                <li>ID : {{ fmP.parcours_id}} - {{ fmP.parcours_libelle }}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="fst-italic fw-bold">
+                Aucune fiche matière mutualisée
+            </p>
+        {% endif %}
+    </div>
+</div>
