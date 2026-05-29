@@ -15,7 +15,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-class ApiJsonExport {
+class ApiJsonExport
+{
 
     private EntityManagerInterface $entityManager;
 
@@ -30,7 +31,8 @@ class ApiJsonExport {
         GetHistorique $getHistorique,
         VersioningParcours $versioningParcours,
         UrlGeneratorInterface $router,
-    ){
+    )
+    {
         $this->entityManager = $entityManager;
         $this->getHistorique = $getHistorique;
         $this->versioningParcours = $versioningParcours;
@@ -68,13 +70,14 @@ class ApiJsonExport {
         /**
          * Filtrage sur la campagne de collecte en cours (ANNEE COURANTE) (N)
          */
-        if($campagneCourante && $campagneCourante->isEnablePublication()){
+        if ($campagneCourante && $campagneCourante->isEnablePublication()) {
             $formationArray = $this->entityManager->getRepository(Formation::class)->findAll();
-            $formationArray = array_filter($formationArray, function($f) use ($campagneCourante){
-                $parcoursCampagneActuelle = array_filter($f->getParcours()->toArray(),
-                    function($p) use ($campagneCourante) {
+            $formationArray = array_filter($formationArray, function ($f) use ($campagneCourante) {
+                $parcoursCampagneActuelle = array_filter(
+                    $f->getParcours()->toArray(),
+                    function ($p) use ($campagneCourante) {
                         $dpeParcours = $p->getDpeParcours()?->last();
-                        if($dpeParcours instanceof DpeParcours){
+                        if ($dpeParcours instanceof DpeParcours) {
                             return $dpeParcours->getCampagneCollecte()?->getId() === $campagneCourante->getId();
                         }
                         return false;
@@ -85,14 +88,14 @@ class ApiJsonExport {
 
             $io?->writeln('Génération de l\'année en cours (N)...');
             $io?->progressStart(count($formationArray));
-            foreach($formationArray as $formation){
+            foreach ($formationArray as $formation) {
                 $dateValidationFormation = [];
                 $tParcours = [];
                 /** @var Parcours $parcours */
-                foreach($formation->getParcours() as $parcours){
+                foreach ($formation->getParcours() as $parcours) {
                     $lastVersion = $this->entityManager->getRepository(ParcoursVersioning::class)
                         ->findLastCfvuVersion($parcours);
-                    if(count($lastVersion) > 0 && $lheoXmlService->isValidLHEO($parcours)){
+                    if (count($lastVersion) > 0 && $lheoXmlService->isValidLHEO($parcours)) {
                         $lastVersionData = $this->versioningParcours->loadParcoursFromVersion($lastVersion[0]);
                         $tParcours[] = [
                             'id_old' => $parcours->getParcoursOrigineCopie()?->getId(),
@@ -111,10 +114,10 @@ class ApiJsonExport {
                             ->getHistoriqueParcoursLastStep($parcours->getDpeParcours()->last(), 'valide_a_publier')
                             ?->getDate();
 
-                        if($dateValideCfvu !== null){
+                        if ($dateValideCfvu !== null) {
                             $dateValidationFormation[] = $dateValideCfvu;
                         }
-                        if($dateValideAPublier !== null){
+                        if ($dateValideAPublier !== null) {
                             $dateValidationFormation[] = $dateValideAPublier;
                         }
                         ++$countParcoursCampagneActuelle;
@@ -122,14 +125,14 @@ class ApiJsonExport {
                     }
                 }
                 // Date de validation : la plus récente des dates de publication de parcours
-                if(count($dateValidationFormation) > 0){
+                if (count($dateValidationFormation) > 0) {
                     rsort($dateValidationFormation);
                     $dateValidationFormation = $dateValidationFormation[0];
-                }else {
+                } else {
                     $dateValidationFormation = null;
                 }
 
-                if(count($tParcours) > 0){
+                if (count($tParcours) > 0) {
                     $dataJSON[] = [
                         'id_old' => $formation->getFormationOrigineCopie()?->getId(),
                         'id' => $formation->getId(),
@@ -147,18 +150,21 @@ class ApiJsonExport {
         /**
          * Filtrage sur la campagne de collecte suivante (ANNEE SUIVANTE) (N + 1)
          */
-        if($campagneSuivante && $campagneSuivante->isEnablePublication()){
+        if ($campagneSuivante && $campagneSuivante->isEnablePublication()) {
             $formationArray = $this->entityManager->getRepository(Formation::class)->findAll();
-            $formationArray = array_filter($formationArray,
-                function($f) use ($campagneSuivante, $etatReconductionCampagneSuivante) {
-                    $parcoursCampagneSuivante = array_filter($f->getParcours()->toArray(),
-                        function($p) use ($campagneSuivante, $etatReconductionCampagneSuivante) {
+            $formationArray = array_filter(
+                $formationArray,
+                function ($f) use ($campagneSuivante, $etatReconductionCampagneSuivante) {
+                    $parcoursCampagneSuivante = array_filter(
+                        $f->getParcours()->toArray(),
+                        function ($p) use ($campagneSuivante, $etatReconductionCampagneSuivante) {
                             $dpeParcours = $p->getDpeParcours()?->last();
-                            if($dpeParcours instanceof DpeParcours){
+                            if ($dpeParcours instanceof DpeParcours) {
                                 return $dpeParcours->getCampagneCollecte()?->getId() === $campagneSuivante->getId()
                                     && in_array($dpeParcours->getEtatReconduction(), $etatReconductionCampagneSuivante);
                             }
-                    });
+                        }
+                    );
 
                     return count($parcoursCampagneSuivante) > 0;
                 }
@@ -166,13 +172,13 @@ class ApiJsonExport {
 
             $io?->writeln('Génération de l\'année suivante (N + 1)...');
             $io?->progressStart(count($formationArray));
-            foreach($formationArray as $formationAnneeSuivante){
+            foreach ($formationArray as $formationAnneeSuivante) {
                 $addedParcours = [];
-                foreach($formationAnneeSuivante->getParcours() as $parcoursAnneeSuivante) {
-                    if($lheoXmlService->isValidLHEO($parcoursAnneeSuivante)){
+                foreach ($formationAnneeSuivante->getParcours() as $parcoursAnneeSuivante) {
+                    if ($lheoXmlService->isValidLHEO($parcoursAnneeSuivante)) {
                         $dpeParcoursToAdd = $parcoursAnneeSuivante->getDpeParcours()?->last();
-                        if($dpeParcoursToAdd instanceof DpeParcours){
-                            if(in_array($dpeParcoursToAdd->getEtatReconduction(), $etatReconductionCampagneSuivante)){
+                        if ($dpeParcoursToAdd instanceof DpeParcours) {
+                            if (in_array($dpeParcoursToAdd->getEtatReconduction(), $etatReconductionCampagneSuivante)) {
                                 $addedParcours[] = [
                                     'id_old' => $parcoursAnneeSuivante->getParcoursOrigineCopie()?->getId(),
                                     'id' => $parcoursAnneeSuivante->getId(),
@@ -188,7 +194,7 @@ class ApiJsonExport {
                         ++$countParcoursCampagneSuivante;
                     }
                 }
-                if(count($addedParcours) > 0) {
+                if (count($addedParcours) > 0) {
                     $dataJSON[] = [
                         'id_old' => $formationAnneeSuivante->getFormationOrigineCopie()?->getId(),
                         'id' => $formationAnneeSuivante->getId(),
@@ -203,18 +209,18 @@ class ApiJsonExport {
             $io?->progressFinish();
         }
 
-        if($campagneCourante && !$campagneCourante?->isEnablePublication()){
+        if ($campagneCourante && !$campagneCourante?->isEnablePublication()) {
             $io?->writeln("La publication n'est pas activée pour l'année courante (N).");
         }
-        if($campagneSuivante && !$campagneSuivante?->isEnablePublication()){
+        if ($campagneSuivante && !$campagneSuivante?->isEnablePublication()) {
             $io?->writeln("La publication n'est pas activée pour l'année suivante (N + 1).");
         }
         $io?->writeln($countParcoursCampagneActuelle . ' Parcours de la Campagne Actuelle (N) ont été ajoutés à l\'API');
         $io?->writeln($countParcoursCampagneSuivante . ' Parcours de la Campagne Suivante (N + 1) ont été ajoutés à l\'API');
-        if($campagneCourante === null){
+        if ($campagneCourante === null) {
             $io?->writeln('Aucune campagne courante (N) n\'a été trouvée en base de données.');
         }
-        if($campagneSuivante === null){
+        if ($campagneSuivante === null) {
             $io?->writeln('Aucune campagne suivante (N + 1) n\'a été trouvée en base de données.');
         }
 

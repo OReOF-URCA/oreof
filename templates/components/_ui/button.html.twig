@@ -65,6 +65,16 @@ Composant Button — exemples d'usage :
 {% set allClasses = baseClass ~ justifyClass ~ widthClass ~ ' ' ~ sizeClass ~ ' ' ~ colorClass ~ disabledClass ~ (extraClass ? ' ' ~ extraClass : '') %}
 {% set isLink = href|trim != '' %}
 {% set isModalLink = isLink and dataAction|trim != '' %}
+{% set extraAttrs = attr|default({}) %}
+{% set extraAttrsRendered %}
+    {% if extraAttrs is iterable %}
+        {% for attrName, attrValue in extraAttrs %}
+            {% if attrValue is same as(true) %} {{ attrName|e('html_attr') }}{% elseif attrValue is not same as(false) and attrValue is not null %} {{ attrName|e('html_attr') }}="{{ attrValue|e('html_attr') }}"{% endif %}
+        {% endfor %}
+    {% elseif extraAttrs is not empty %}
+        {{ extraAttrs|raw }}
+    {% endif %}
+{% endset %}
 
 {# ── Slot unique du composant ─────────────────────────────────── #}
 {% set slotContent %}
@@ -85,6 +95,7 @@ Composant Button — exemples d'usage :
             {% if isModalLink %}data-turbo="true" aria-haspopup="dialog"{% endif %}
             {% if dataAction != '' %}data-action="{{ dataAction }}"{% endif %}
             {% if disabled %}aria-disabled="true" tabindex="-1"{% endif %}
+            {{- extraAttrsRendered|raw -}}
             {{- attributes -}}
     >
         {% if icon != '' and not iconEnd %}{{ ux_icon(icon, {class: iconSizeClass}) }}{% endif %}
@@ -104,6 +115,7 @@ Composant Button — exemples d'usage :
             }) }}{% endif %}
             {% if dataAction != '' %}data-action="{{ dataAction }}"{% endif %}
             {% if disabled %}disabled{% endif %}
+            {{- extraAttrsRendered|raw -}}
             {{- attributes -}}
     >
         {% if icon != '' and not iconEnd %}{{ ux_icon(icon, {class: iconSizeClass}) }}{% endif %}

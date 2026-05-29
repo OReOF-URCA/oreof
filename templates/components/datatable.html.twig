@@ -245,8 +245,10 @@
                                             :icon="sortField == column.field ? (sortDirection == 'asc' ? 'icon:chevron-up' : 'icon:chevron-down') : 'icon:chevron-down'"
                                             :label="column.label"
                                             dataAction="live#action"
-                                            data-live-action-param="sort"
-                                            data-live-field-param="{{ column.field }}"
+                                            :attr="{
+                                                'data-live-action-param': 'sort',
+                                                'data-live-field-param': column.field
+                                            }"
                                             extraClass="!border-0 !bg-transparent !px-0 !py-0 !h-auto hover:!text-indigo-600 dark:hover:!text-indigo-400"
                                     />
                                 {% else %}
@@ -454,10 +456,10 @@
                         size="sm"
                         icon="icon:chevrons-left"
                         :disabled="page == 1"
+                        :attr="live_action('goToPage', {'page': 1})"
                         tooltip="Première page"
                         extraClass="!h-8 !w-8 !min-w-0 !px-0"
                 />
-                {#                        {{ live_action('goToPage', {'page': 1}) }} #}
 
                 <twig:Button
                         type="button"
@@ -466,10 +468,10 @@
                         size="sm"
                         icon="icon:chevron-left"
                         :disabled="page == 1"
+                        :attr="live_action('goToPage', {'page': page - 1})"
                         tooltip="Précédent"
                         extraClass="!h-8 !w-8 !min-w-0 !px-0"
                 />
-                {#                        {{ live_action('goToPage', {'page': page - 1}) }} #}
 
                 {% for p in range(max(1, page - 2), min(totalPages, page + 2)) %}
                     <twig:Button
@@ -478,9 +480,9 @@
                             :variant="p == page ? 'primary' : 'secondary'"
                             :soft="p == page ? false : true"
                             size="sm"
+                            :attr="live_action('goToPage', {'page': p})"
                             extraClass="!h-8 !min-w-8 !px-2"
                     />
-                    {#                            {{ live_action('goToPage', {'page': p}) }} #}
 
                 {% endfor %}
 
@@ -491,10 +493,10 @@
                         size="sm"
                         icon="icon:chevron-right"
                         :disabled="page == totalPages"
+                        :attr="live_action('goToPage', {'page': page + 1})"
                         tooltip="Suivant"
                         extraClass="!h-8 !w-8 !min-w-0 !px-0"
                 />
-                {#                        {{ live_action('goToPage', {'page': page + 1}) }} #}
 
                 <twig:Button
                         type="button"
@@ -503,10 +505,10 @@
                         size="sm"
                         icon="icon:chevrons-right"
                         :disabled="page == totalPages"
+                        :attr="live_action('goToPage', {'page': totalPages})"
                         tooltip="Dernière page"
                         extraClass="!h-8 !w-8 !min-w-0 !px-0"
                 />
-                {#                        {{ live_action('goToPage', {'page': totalPages}) }} #}
 
             </div>
         {% endif %}
