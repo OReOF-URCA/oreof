@@ -207,6 +207,7 @@ class FormationController extends BaseController
         TypeDiplomeRepository $typeDiplomeRepository,
         ComposanteRepository  $composanteRepository,
         FormationRepository   $formationRepository,
+        UserRepository        $userRepository,
         Composante            $composante,
         Request               $request
     ): Response {
@@ -225,6 +226,9 @@ class FormationController extends BaseController
         }
 
         return $this->render('formation/_liste.html.twig', [
+            'nbFormations' => count($formations),
+            'nbParcours' => $nbParcours,
+            'responsables' => $userRepository->findUserWithResponsabilites(),
             'formations' => $formations,
             'nbFormations' => count($formations),
             'nbParcours' => $nbParcours,
