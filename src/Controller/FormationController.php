@@ -203,6 +203,7 @@ class FormationController extends BaseController
         TypeDiplomeRepository $typeDiplomeRepository,
         ComposanteRepository  $composanteRepository,
         FormationRepository   $formationRepository,
+        UserRepository        $userRepository,
         Composante            $composante,
         Request               $request
     ): Response {
@@ -215,7 +216,15 @@ class FormationController extends BaseController
             $composante
         );
 
+        $nbParcours = 0;
+        foreach ($formations as $formation) {
+            $nbParcours += count($formation->getParcours());
+        }
+
         return $this->render('formation/_liste.html.twig', [
+            'nbFormations' => count($formations),
+            'nbParcours' => $nbParcours,
+            'responsables' => $userRepository->findUserWithResponsabilites(),
             'formations' => $formations,
             'params' => $request->query->all(),
             'isCfvu' => false,
