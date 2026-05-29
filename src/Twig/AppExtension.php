@@ -46,19 +46,19 @@ class AppExtension extends AbstractExtension
             new TwigFilter('dateFr', $this->dateFr(...), ['is_safe' => ['html']]),
             new TwigFilter('dateTimeFr', $this->dateTimeFr(...), ['is_safe' => ['html']]),
             new TwigFilter('rncp_link', $this->rncpLink(...), ['is_safe' => ['html']]),
-            new TwigFilter('badgeBoolean', $this->badgeBoolean(...), ['is_safe' => ['html']]),  //deprecated
+            // new TwigFilter('badgeBoolean', $this->badgeBoolean(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeBooleanDto', $this->badgeBooleanDto(...)),
-            new TwigFilter('badgeDroits', $this->badgeDroits(...), ['is_safe' => ['html']]),
-            new TwigFilter('badgeTypeCentre', $this->badgeTypeCentre(...), ['is_safe' => ['html']]),  //deprecated
+            // new TwigFilter('badgeDroits', $this->badgeDroits(...), ['is_safe' => ['html']]),
+            //new TwigFilter('badgeTypeCentre', $this->badgeTypeCentre(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeTypeCentreDto', $this->badgeTypeCentreDto(...)),
             new TwigFilter('centre', $this->centre(...), ['is_safe' => ['html']]),
             new TwigFilter('displayOrBadge', $this->displayOrBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('etatRemplissage', $this->etatRemplissage(...), ['is_safe' => ['html']]),
             new TwigFilter('printTexte', $this->printTexte(...), ['is_safe' => ['html']]),
             new TwigFilter('filtreHeures', $this->filtreHeures(...), ['is_safe' => ['html']]),
-            new TwigFilter('badgeEnum', $this->badgeEnum(...), ['is_safe' => ['html']]),  //deprecated
+            //   new TwigFilter('badgeEnum', $this->badgeEnum(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeEnumDto', $this->badgeEnumDto(...)),
-            new TwigFilter('badgeStatus', $this->badgeStatus(...), ['is_safe' => ['html']]), //deprecated
+            //  new TwigFilter('badgeStatus', $this->badgeStatus(...), ['is_safe' => ['html']]), //deprecated
             new TwigFilter('badgeStatusDto', $this->badgeStatusDto(...)),
             new TwigFilter('startWith', $this->startWith(...), ['is_safe' => ['html']]),
             new TwigFilter('isUeUtilisee', $this->isUeUtilisee(...), ['is_safe' => ['html']]),
@@ -213,6 +213,7 @@ class AppExtension extends AbstractExtension
         return '';
     }
 
+    /** @deprecated */
     public function badgeDroits(array $droits): string
     {
         $html = '';

@@ -34,6 +34,7 @@ export default class extends Controller {
   }
 
   close () {
+
     // clear modal frames content when closing to avoid leaking previous data
     const titleFrame = document.getElementById('modal_title')
     const bodyFrame = document.getElementById('modal_body')
@@ -42,7 +43,6 @@ export default class extends Controller {
     if (titleFrame) titleFrame.innerHTML = ''
     if (bodyFrame) bodyFrame.innerHTML = ''
     if (footerFrame) footerFrame.innerHTML = ''
-
     this.wrapperTarget.classList.add('hidden')
     document.documentElement.classList.remove('overflow-hidden')
   }

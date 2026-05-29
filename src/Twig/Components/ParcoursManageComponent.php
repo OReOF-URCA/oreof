@@ -23,6 +23,7 @@ use Symfony\UX\TwigComponent\Attribute\PostMount;
 
 /** @deprecated */
 #[AsLiveComponent('parcours_manage')]
+/** @deprecated */
 final class ParcoursManageComponent extends AbstractController
 {
     public const TAB = [

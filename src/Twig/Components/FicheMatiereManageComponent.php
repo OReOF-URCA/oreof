@@ -15,6 +15,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\PostMount;
 
 #[AsLiveComponent('fiche_matiere_manage')]
+/** @deprecated */
 final class FicheMatiereManageComponent extends AbstractController
 {
 

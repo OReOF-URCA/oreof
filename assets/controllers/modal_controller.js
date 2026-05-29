@@ -6,6 +6,7 @@
  * @lastUpdate 08/03/2023 14:53
  */
 
+/** @deprecated **/
 import { Controller } from '@hotwired/stimulus'
 
 export default class extends Controller {

@@ -17,6 +17,7 @@ use Symfony\UX\LiveComponent\DefaultActionTrait;
 use Symfony\UX\TwigComponent\Attribute\PostMount;
 
 #[AsLiveComponent('mention_manage')]
+/** @deprecated */
 final class MentionManageComponent extends AbstractController
 {
     public const TAB = [
