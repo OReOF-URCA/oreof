@@ -15,5 +15,17 @@ export default class extends Controller {
             })
             row.classList.toggle('opacity-50', !enabled)
         })
+
+        const modeleMcc = document.querySelector('#type_diplome_ModeleMcc')
+        if (modeleMcc) {
+            if (!enabled) {
+                modeleMcc.value = 'App\\TypeDiplome\\NonClassique\\NonClassiqueHandler'
+                modeleMcc.disabled = true
+                modeleMcc.closest('.mb-3, .form-group, div').classList.add('opacity-50')
+            } else {
+                modeleMcc.disabled = false
+                modeleMcc.closest('.mb-3, .form-group, div').classList.remove('opacity-50')
+            }
+        }
     }
 }

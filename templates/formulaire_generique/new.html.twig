@@ -1,100 +1,84 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-    <div class="card"
-            {{ stimulus_controller('formulaire-generique--creation', {
-                mentionsUrl: path('app_formulaire_generique_mentions_by_type_diplome', {typeDiplome: '__id__'}),
-                formationUrl: path('app_formulaire_generique_formation_by_mention', {mention: '__mention__', typeDiplome: '__typeDiplome__'})
-            }) }}
-    >
+<div {{ stimulus_controller('formulaire-generique--creation', {
+    mentionsUrl: path('app_formulaire_generique_mentions_by_type_diplome', {typeDiplome: '__id__'}),
+    formationUrl: path('app_formulaire_generique_formation_by_mention', {mention: '__mention__', typeDiplome: '__typeDiplome__'}),
+    mentionNewUrl: path('app_formulaire_generique_mention_new')
+}) }}>
+
+    <div class="card mb-3">
         <div class="card-body">
             {% form_theme form 'communs/form_theme.html.twig' %}
-
             {{ form_start(form) }}
 
             {% for message in app.flashes('danger') %}
                 <div class="alert alert-danger">{{ message }}</div>
             {% endfor %}
 
-            <h5 class="mb-3">Type de diplôme et mention</h5>
-
+            {# ── Type de diplôme ── #}
+            <h5 class="mb-3">Type de diplôme</h5>
             {{ form_row(form.typeDiplome) }}
 
-            <div class="mb-3">
-                <label class="form-label">
-                    Mention / Spécialité <span class="text-danger">*</span>
-                </label>
+            {# ── Mention ── #}
+            <h5 class="mb-3 mt-4">Mention / Spécialité</h5>
 
-                {% if mentionError is defined %}
-                    <div class="alert alert-danger">{{ mentionError }}</div>
-                {% endif %}
+            {% if mentionError is defined %}
+                <div class="alert alert-danger">{{ mentionError }}</div>
+            {% endif %}
 
-                <select name="{{ form.mentionExistante.vars.full_name }}"
-                        id="{{ form.mentionExistante.vars.id }}"
-                        class="form-select"
-                        data-formulaire-generique--creation-target="mentionSelect"
-                        data-action="change->formulaire-generique--creation#changeMention"
-                >
-                    <option value="">Choisissez d'abord un type de diplôme</option>
-                </select>
-                <div class="form-text">
-                    Si la mention n'existe pas, sélectionnez "+ Créer une nouvelle mention".
-                </div>
-
-            </div>
-
-            <div data-formulaire-generique--creation-target="mentionCreationBloc"
-                 class="card border-primary mb-3"
-                 style="display:none"
-            >
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-plus-circle"></i> Nouvelle mention</span>
-                    <button type="button"
-                            class="btn btn-sm btn-outline-light"
-                            data-action="click->formulaire-generique--creation#hideMentionCreation"
+            <div class="d-flex align-items-start gap-2 mb-1">
+                <div class="flex-grow-1">
+                    <select name="{{ form.mentionExistante.vars.full_name }}"
+                            id="{{ form.mentionExistante.vars.id }}"
+                            class="form-select"
+                            data-formulaire-generique--creation-target="mentionSelect"
+                            data-action="change->formulaire-generique--creation#changeMention"
                     >
-                        Annuler
-                    </button>
+                        <option value="">Choisissez d'abord un type de diplôme</option>
+                    </select>
                 </div>
-                <div class="card-body">
-                    {{ form_row(form.nouvelleMentionLibelle) }}
-                    {{ form_row(form.nouvelleMentionSigle) }}
-                    {{ form_row(form.nouvelleMentionDomaine) }}
-                    {{ form_row(form.nouvelleMentionCodeApogee) }}
-                </div>
+                <button type="button"
+                        class="btn btn-outline-primary text-nowrap"
+                        data-formulaire-generique--creation-target="mentionModalBtn"
+                        data-action="click->formulaire-generique--creation#openMentionModal"
+                        disabled>
+                    <i class="fal fa-plus-circle"></i> Créer une mention
+                </button>
+            </div>
+            <div class="form-text mb-3">
+                Si la mention n'existe pas encore, utilisez le bouton pour la créer.
+            </div>
 
-                <div data-formulaire-generique--creation-target="formationInfo" style="display:none"></div>
+            <div data-formulaire-generique--creation-target="formationInfo"></div>
 
+            {# Champs formation — affichés si aucune formation n'existe pour la mention sélectionnée #}
+            <div data-formulaire-generique--creation-target="formationBloc" style="display:none">
+                <h5 class="mb-3 mt-4">Informations sur la formation</h5>
 
-                <span class="card-header d-flex gap-1 align-items-center text-white bg-primary"><i class="fas fa-plus-circle"></i> Informations sur la formation</span>
-                <div data-formulaire-generique--creation-target="formationBloc" class="mb-3 card-body">
+                {{ form_row(form.localisationMention) }}
+                {{ form_row(form.composantesInscription) }}
+                {{ form_row(form.composantePorteuse) }}
+                
+                {{ form_row(form.niveauEntree) }}
+                {{ form_row(form.niveauSortie) }}
 
-                    {{ form_row(form.localisationMention) }}
-                    {{ form_row(form.composantesInscription) }}
-                    {{ form_row(form.regimeInscription) }}
-                    {{ form_row(form.sigleFormation) }}
-                </div>
+                {{ form_row(form.regimeInscription) }}
             </div>
 
             <hr>
-            <h5 class="mb-3">Formation</h5>
 
-            {{ form_row(form.composantePorteuse) }}
-            {{ form_row(form.niveauEntree) }}
-            {{ form_row(form.niveauSortie) }}
-
-            <hr>
+            {# ── Parcours ── #}
             <h5 class="mb-3">Parcours</h5>
-
             {{ form_row(form.libelle) }}
-            {{ form_row(form.sigle) }}
-            {{ form_row(form.typeParcours) }}
+            {{ form_row(form.rythmeFormation) }}
+            {{ form_row(form.rythmeFormationTexte) }}
 
             <div class="row">
-                <div class="col-1">
+                <div class="col-2">
                     {{ form_row(form.dureeParcours) }}
                 </div>
-                <div class="col-1">
+                <div class="col-2">
                     {{ form_row(form.dureeParcoursUnite) }}
                 </div>
             </div>
@@ -109,6 +93,72 @@
             {{ form_end(form) }}
         </div>
     </div>
+
+    {# ── Modale création de mention ── #}
+    <div class="modal fade" id="mentionCreationModal" tabindex="-1" aria-labelledby="mentionCreationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="mentionCreationModalLabel">
+                        <i class="fal fa-plus-circle"></i> Créer une nouvelle mention
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden"
+                           data-formulaire-generique--creation-target="mentionTypeDiplomeInput">
+                    <input type="hidden"
+                           value="{{ csrf_token('mention_creation') }}"
+                           data-formulaire-generique--creation-target="mentionCsrfInput">
+
+                    <div class="mb-3">
+                        <label class="form-label">Libellé <span class="text-danger">*</span></label>
+                        <input type="text"
+                               class="form-control"
+                               data-formulaire-generique--creation-target="mentionLibelleInput"
+                               maxlength="255">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Sigle</label>
+                        <input type="text"
+                               class="form-control"
+                               data-formulaire-generique--creation-target="mentionSigleInput"
+                               maxlength="50">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Domaine</label>
+                        <select class="form-select"
+                                data-formulaire-generique--creation-target="mentionDomaineInput">
+                            <option value="">— aucun —</option>
+                            {% for domaine in domaines %}
+                                <option value="{{ domaine.id }}">{{ domaine.libelle }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Code Apogée</label>
+                        <input type="text"
+                               class="form-control"
+                               data-formulaire-generique--creation-target="mentionCodeApogeeInput"
+                               maxlength="1">
+                    </div>
+
+                    <div class="alert alert-danger d-none"
+                         data-formulaire-generique--creation-target="mentionModalError"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button"
+                            class="btn btn-success"
+                            data-action="click->formulaire-generique--creation#saveMention">
+                        <i class="fal fa-floppy-disk"></i> Créer la mention
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
 {% endblock %}
 
 {% set header_title %}Créer un nouveau parcours{% endset %}

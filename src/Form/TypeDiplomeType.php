@@ -80,6 +80,7 @@ class TypeDiplomeType extends AbstractType
             ->add('classique', CheckboxType::class, [
                 'label' => 'Structure classique (semestres)',
                 'required' => false,
+                'row_attr' => ['class' => 'mt-3 mb-3 font-weight-bold'],
                 'attr' => ['data-type-diplome-target' => 'classique', 'data-action' => 'change->type-diplome#toggle'],
             ])
             ->add('semestreDebut', null, [
@@ -104,7 +105,15 @@ class TypeDiplomeType extends AbstractType
             ->add('hasProjet', YesNoType::class)
             ->add('ectsObligatoireSurEc', YesNoType::class, ['empty_data' => true])
             ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true])
-            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
+            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
+            ->add('hasEcts', YesNoType::class, [
+                'label' => 'Utilise les ECTS',
+                'empty_data' => true,
+            ])
+            ->add('nbEctsParSemestre', null, [
+                'label' => 'Nombre d\'ECTS par semestre (laisser vide si pas de quota fixe)',
+                'required' => false,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

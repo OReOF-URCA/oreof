@@ -17,6 +17,7 @@ use App\Repository\MentionRepository;
 use App\Repository\ParcoursRepository;
 use App\Repository\ProfilRepository;
 use App\Repository\TypeDiplomeRepository;
+use App\Repository\DomaineRepository;
 use App\Repository\FormationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -41,6 +42,7 @@ final class FormulaireGeneriqueController extends BaseController
         MentionRepository        $mentionRepository,
         TypeDiplomeRepository    $typeDiplomeRepository,
         FormationRepository      $formationRepository,
+        DomaineRepository        $domaineRepository,
         EventDispatcherInterface $eventDispatcher,
     ): Response {
         $form = $this->createForm(FormulaireGeneriqueCreationCompletType::class, null, [
@@ -51,150 +53,182 @@ final class FormulaireGeneriqueController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $mention = null;
             $mentionId = $form->get('mentionExistante')->getData();
-            $nouvelleMentionLibelle = $data['nouvelleMentionLibelle'] ?? null;
-
-            if (empty($mentionId) && empty($nouvelleMentionLibelle)) {
+            if (empty($mentionId)) {
                 return $this->render('formulaire_generique/new.html.twig', [
-                    'form' => $form->createView(),
+                    'form'         => $form->createView(),
+                    'domaines'     => $domaineRepository->findBy([], ['libelle' => 'ASC']),
                     'mentionError' => 'Veuillez sélectionner ou créer une mention.',
                 ]);
             }
 
-            if (!empty($mentionId)) {
-                $mention = $mentionRepository->find($mentionId);
-            } elseif (!empty($nouvelleMentionLibelle)) {
-                $mention = new Mention();
-                $mention->setLibelle($data['nouvelleMentionLibelle']);
-                $mention->setTypeDiplome($data['typeDiplome']);
-                if (!empty($data['nouvelleMentionSigle'])) {
-                    $mention->setSigle($data['nouvelleMentionSigle']);
-                }
-                if (!empty($data['nouvelleMentionDomaine'])) {
-                    $mention->addDomaine($data['nouvelleMentionDomaine']);
-                }
-                if (!empty($data['nouvelleMentionCodeApogee'])) {
-                    $mention->setCodeApogee($data['nouvelleMentionCodeApogee']);
-                }
-                $this->entityManager->persist($mention);
+            $mention = $mentionRepository->find($mentionId);
+            if ($mention === null) {
+                return $this->render('formulaire_generique/new.html.twig', [
+                    'form' => $form->createView(),
+                    'mentionError' => 'Mention introuvable.',
+                ]);
             }
 
-// Check for existing formation
-            $formationId = $form->get('formationExistante')->getData();
-            $formation = null;
+            try {
+                $formationId = $form->get('formationExistante')->getData();
+                $formation = null;
 
-            if (!empty($formationId)) {
-                // Case 1: existing formation found
-                $formation = $formationRepository->find($formationId);
-            }
-
-            if ($formation === null) {
-                // Case 2 & 3: create new formation
-                $formation = new Formation($this->getCampagneCollecte());
-                $formation->setTypeDiplome($data['typeDiplome']);
-                $formation->setMention($mention);
-                $formation->setComposantePorteuse($data['composantePorteuse'] ?? null);
-                if (!empty($data['composantePorteuse'])) {
-                    $formation->addComposantesInscription($data['composantePorteuse']);
+                if (!empty($formationId)) {
+                    $formation = $formationRepository->find($formationId);
                 }
-                $formation->setResponsableMention($this->getUser());
-                $formation->setHasParcours(true);
-                $formation->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_PARCOURS);
-                $formation->setNiveauEntree($data['niveauEntree']);
-                $formation->setNiveauSortie($data['niveauSortie']);
-                if (!empty($data['localisationMention'])) {
-                    foreach ($data['localisationMention'] as $ville) {
-                        $formation->addLocalisationMention($ville);
+
+                if ($formation === null) {
+                    $formation = new Formation($this->getCampagneCollecte());
+                    $formation->setTypeDiplome($data['typeDiplome']);
+                    $formation->setMention($mention);
+                    $formation->setComposantePorteuse($data['composantePorteuse'] ?? null);
+                    if (!empty($data['composantePorteuse'])) {
+                        $formation->addComposantesInscription($data['composantePorteuse']);
                     }
-                }
-                if (!empty($data['composantesInscription'])) {
-                    foreach ($data['composantesInscription'] as $composante) {
-                        $formation->addComposantesInscription($composante);
+                    $formation->setResponsableMention($this->getUser());
+                    $formation->setHasParcours(true);
+                    $formation->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_PARCOURS);
+                    $formation->setNiveauEntree($data['niveauEntree']);
+                    $formation->setNiveauSortie($data['niveauSortie']);
+                    if (!empty($data['localisationMention'])) {
+                        foreach ($data['localisationMention'] as $ville) {
+                            $formation->addLocalisationMention($ville);
+                        }
                     }
+                    if (!empty($data['composantesInscription'])) {
+                        foreach ($data['composantesInscription'] as $composante) {
+                            $formation->addComposantesInscription($composante);
+                        }
+                    }
+                    if (!empty($data['regimeInscription'])) {
+                        $formation->setRegimeInscription($data['regimeInscription']);
+                    }
+                    $this->entityManager->persist($formation);
                 }
-                if (!empty($data['regimeInscription'])) {
-                    $formation->setRegimeInscription($data['regimeInscription']);
+
+                // Create the parcours
+                $parcours = new Parcours($formation);
+                $parcours->setLibelle($data['libelle']);
+                $parcours->setRythmeFormation($data['rythmeFormation'] ?? null);
+                $parcours->setRythmeFormationTexte($data['rythmeFormationTexte'] ?? null);
+                $parcours->setRespParcours($this->getUser());
+                $parcours->setModalitesEnseignement(null);
+                $parcours->setDureeParcours($data['dureeParcours'] ?? null);
+                $parcours->setDureeParcoursUnite($data['dureeParcoursUnite'] ?? null);
+
+                $this->entityManager->persist($parcours);
+
+                // Create DpeParcours
+                $dpeParcours = new DpeParcours();
+                $dpeParcours->setParcours($parcours);
+                $dpeParcours->setFormation($formation);
+                $dpeParcours->setCampagneCollecte($this->getCampagneCollecte());
+                $dpeParcours->setVersion('0.1');
+                $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE);
+                $this->dpeParcoursWorkflow->apply($dpeParcours, 'initialiser');
+                $this->dpeParcoursWorkflow->apply($dpeParcours, 'autoriser');
+                $parcours->addDpeParcour($dpeParcours);
+
+                $this->entityManager->persist($dpeParcours);
+
+                // Create DpeDemande
+                $dpeDemande = new DpeDemande();
+                $dpeDemande->setParcours($parcours);
+                $dpeDemande->setFormation($formation);
+                $dpeDemande->setCampagneCollecte($this->getCampagneCollecte());
+                $dpeDemande->setNiveauDemande('P');
+                $dpeDemande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
+                $dpeDemande->setArgumentaireDemande('Création d\'un nouveau parcours');
+                $dpeDemande->setNiveauModification(TypeModificationDpeEnum::CREATION);
+                $dpeDemande->setAuteur($this->getUser());
+
+                $this->entityManager->persist($dpeDemande);
+
+                // UserProfil for responsable formation
+                $profilRespFormation = $profilRepository->findOneBy(['code' => 'ROLE_RESP_FORMATION']);
+                if ($profilRespFormation !== null) {
+                    $uc = new UserProfil();
+                    $uc->setUser($this->getUser());
+                    $uc->setCampagneCollecte($this->getCampagneCollecte());
+                    $uc->setFormation($formation);
+                    $uc->setProfil($profilRespFormation);
+                    $this->entityManager->persist($uc);
                 }
-                if (!empty($data['sigleFormation'])) {
-                    $formation->setSigle($data['sigleFormation']);
+
+                $this->entityManager->flush();
+
+                $parcoursRepository->save($parcours, true);
+
+                // Dispatch centre events
+                $respParcoursProfil = $profilRepository->findOneBy(['code' => 'ROLE_RESP_PARCOURS']);
+                if ($respParcoursProfil !== null) {
+                    $event = new AddCentreParcoursEvent(
+                        $parcours,
+                        $this->getUser(),
+                        $respParcoursProfil,
+                        $this->getCampagneCollecte()
+                    );
+                    $eventDispatcher->dispatch($event, AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
                 }
-                $this->entityManager->persist($formation);
+
+                $this->addFlashBag('success', 'Le parcours a été créé avec succès.');
+
+                return $this->redirectToRoute('app_parcours_show', ['id' => $parcours->getId()]);
+
+            } catch (\Throwable $e) {
+                $this->entityManager->clear();
+                $this->addFlashBag('danger', 'Une erreur est survenue lors de la création du parcours. Veuillez réessayer.');
             }
-
-            // Create the parcours
-            $parcours = new Parcours($formation);
-            $parcours->setLibelle($data['libelle']);
-            $parcours->setSigle($data['sigle'] ?? null);
-            $parcours->setTypeParcours($data['typeParcours']);
-            $parcours->setRespParcours($this->getUser());
-            $parcours->setModalitesEnseignement(null);
-            $parcours->setDureeParcours($data['dureeParcours'] ?? null);
-            $parcours->setDureeParcoursUnite($data['dureeParcoursUnite'] ?? null);
-
-            $this->entityManager->persist($parcours);
-
-            // Create DpeParcours
-            $dpeParcours = new DpeParcours();
-            $dpeParcours->setParcours($parcours);
-            $dpeParcours->setFormation($formation);
-            $dpeParcours->setCampagneCollecte($this->getCampagneCollecte());
-            $dpeParcours->setVersion('0.1');
-            $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE);
-            $this->dpeParcoursWorkflow->apply($dpeParcours, 'initialiser');
-            $this->dpeParcoursWorkflow->apply($dpeParcours, 'autoriser');
-            $parcours->addDpeParcour($dpeParcours);
-
-            $this->entityManager->persist($dpeParcours);
-
-            // Create DpeDemande
-            $dpeDemande = new DpeDemande();
-            $dpeDemande->setParcours($parcours);
-            $dpeDemande->setFormation($formation);
-            $dpeDemande->setCampagneCollecte($this->getCampagneCollecte());
-            $dpeDemande->setNiveauDemande('P');
-            $dpeDemande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
-            $dpeDemande->setArgumentaireDemande('Création d\'un nouveau parcours');
-            $dpeDemande->setNiveauModification(TypeModificationDpeEnum::CREATION);
-            $dpeDemande->setAuteur($this->getUser());
-
-            $this->entityManager->persist($dpeDemande);
-
-            // UserProfil for responsable formation
-            $profilRespFormation = $profilRepository->findOneBy(['code' => 'ROLE_RESP_FORMATION']);
-            if ($profilRespFormation !== null) {
-                $uc = new UserProfil();
-                $uc->setUser($this->getUser());
-                $uc->setCampagneCollecte($this->getCampagneCollecte());
-                $uc->setFormation($formation);
-                $uc->setProfil($profilRespFormation);
-                $this->entityManager->persist($uc);
-            }
-
-            $this->entityManager->flush();
-
-            $parcoursRepository->save($parcours, true);
-
-            // Dispatch centre events
-            $respParcoursProfil = $profilRepository->findOneBy(['code' => 'ROLE_RESP_PARCOURS']);
-            if ($respParcoursProfil !== null) {
-                $event = new AddCentreParcoursEvent(
-                    $parcours,
-                    $this->getUser(),
-                    $respParcoursProfil,
-                    $this->getCampagneCollecte()
-                );
-                $eventDispatcher->dispatch($event, AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
-            }
-
-            $this->addFlashBag('success', 'Le parcours a été créé avec succès.');
-
-            return $this->redirectToRoute('app_parcours_index');
         }
 
         return $this->render('formulaire_generique/new.html.twig', [
-            'form' => $form->createView(),
+            'form'     => $form->createView(),
+            'domaines' => $domaineRepository->findBy([], ['libelle' => 'ASC']),
         ]);
+    }
+
+    #[Route('/mention/new', name: 'app_formulaire_generique_mention_new', methods: ['POST'])]
+    public function newMention(
+        Request               $request,
+        TypeDiplomeRepository $typeDiplomeRepository,
+        DomaineRepository     $domaineRepository,
+    ): Response {
+        if (!$this->isCsrfTokenValid('mention_creation', $request->request->get('_token'))) {
+            return $this->json(['success' => false, 'error' => 'Token CSRF invalide.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $typeDiplome = $typeDiplomeRepository->find((int) $request->request->get('typeDiplomeId', 0));
+        $libelle     = trim($request->request->get('libelle', ''));
+
+        if ($typeDiplome === null || $libelle === '') {
+            return $this->json(['success' => false, 'error' => 'Données invalides.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $mention = new Mention();
+        $mention->setLibelle($libelle);
+        $mention->setTypeDiplome($typeDiplome);
+
+        $sigle = trim($request->request->get('sigle', ''));
+        if ($sigle !== '') {
+            $mention->setSigle($sigle);
+        }
+        $codeApogee = trim($request->request->get('codeApogee', ''));
+        if ($codeApogee !== '') {
+            $mention->setCodeApogee($codeApogee);
+        }
+        $domaineId = (int) $request->request->get('domaineId', 0);
+        if ($domaineId > 0) {
+            $domaine = $domaineRepository->find($domaineId);
+            if ($domaine !== null) {
+                $mention->addDomaine($domaine);
+            }
+        }
+
+        $this->entityManager->persist($mention);
+        $this->entityManager->flush();
+
+        return $this->json(['success' => true, 'id' => $mention->getId(), 'libelle' => $mention->getLibelle()]);
     }
 
     #[Route('/mentions-by-type-diplome/{typeDiplome}', name: 'app_formulaire_generique_mentions_by_type_diplome', methods: ['GET'])]

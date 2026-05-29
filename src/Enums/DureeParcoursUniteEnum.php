@@ -9,7 +9,6 @@ enum DureeParcoursUniteEnum : string
     case JOURS = 'jours';
     case SEMAINES = 'semaines';
     case MOIS = 'mois';
-    case TRIMESTRES = 'trimestres';
     case SEMESTRES = 'semestres';
     case ANNEES = 'annees';
 
@@ -20,7 +19,6 @@ enum DureeParcoursUniteEnum : string
             self::JOURS => 'Jour(s)',
             self::SEMAINES => 'Semaine(s)',
             self::MOIS => 'Mois',
-            self::TRIMESTRES => 'Trimestre(s)',
             self::SEMESTRES => 'Semestre(s)',
             self::ANNEES => 'Année(s)',
         };

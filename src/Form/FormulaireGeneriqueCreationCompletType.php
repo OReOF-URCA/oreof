@@ -3,21 +3,19 @@
 namespace App\Form;
 
 use App\Entity\Composante;
-use App\Entity\Domaine;
+use App\Entity\RythmeFormation;
 use App\Entity\TypeDiplome;
 use App\Entity\Ville;
 use App\Enums\NiveauFormationEnum;
-use App\Enums\TypeParcoursEnum;
 use App\Enums\DureeParcoursUniteEnum;
 use App\Enums\RegimeInscriptionEnum;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use UnitEnum;
@@ -65,45 +63,10 @@ class FormulaireGeneriqueCreationCompletType extends AbstractType
                 'choice_label' => fn(UnitEnum $c) => $c->libelle(),
             ])
 
-            // --- Inline mention creation ---
-            ->add('nouvelleMentionLibelle', TextType::class, [
-                'label' => 'Libellé',
-                'required' => false,
-            ])
-            ->add('nouvelleMentionSigle', TextType::class, [
-                'label' => 'Sigle',
-                'help' => 'La dénomination courte de la mention, si elle existe.',
-                'required' => false,
-            ])
-            ->add('nouvelleMentionDomaine', EntityType::class, [
-                'class' => Domaine::class,
-                'query_builder' => fn($er) => $er->createQueryBuilder('d')->orderBy('d.libelle', 'ASC'),
-                'choice_label' => 'libelle',
-                'label' => 'Domaine',
-                'placeholder' => 'Choisissez un domaine',
-                'required' => false,
-                'autocomplete' => true,
-            ])
-            ->add('nouvelleMentionCodeApogee', TextType::class, [
-                'label' => 'Code Apogée',
-                'required' => false,
-                'attr' => ['maxlength' => 1],
-            ])
-
             // --- Parcours fields ---
             ->add('libelle', TextType::class, [
                 'label' => 'Libellé du parcours',
                 'required' => true,
-            ])
-            ->add('sigle', TextType::class, [
-                'label' => 'Sigle du parcours',
-                'required' => false,
-                'attr' => ['maxlength' => 15],
-            ])
-            ->add('typeParcours', EnumType::class, [
-                'class' => TypeParcoursEnum::class,
-                'label' => 'Type de parcours',
-                'translation_domain' => 'form',
             ])
             ->add('dureeParcours', NumberType::class, [
                 'label' => 'Durée du parcours',
@@ -147,10 +110,17 @@ class FormulaireGeneriqueCreationCompletType extends AbstractType
                 'expanded' => true,
                 'required' => false,
             ])
-            ->add('sigleFormation', TextType::class, [
-                'label' => 'Sigle de la formation',
+            ->add('rythmeFormation', EntityType::class, [
+                'class' => RythmeFormation::class,
+                'choice_label' => 'libelle',
+                'label' => 'Rythme de formation du parcours',
+                'placeholder' => 'Choisissez un rythme de formation ou complétez le champ ci-dessous',
                 'required' => false,
-                'mapped' => false,
+            ])
+            ->add('rythmeFormationTexte', TextareaType::class, [
+                'label' => 'Ou précisez ici le rythme en texte libre',
+                'required' => false,
+                'attr' => ['rows' => 5, 'maxlength' => 3000],
             ])
         ;
     }
