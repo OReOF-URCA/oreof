@@ -119,3 +119,4 @@ config/reference.php
 
 ###Le token FontAwesome ###
 .npmrc
+.yarnrc.yml
