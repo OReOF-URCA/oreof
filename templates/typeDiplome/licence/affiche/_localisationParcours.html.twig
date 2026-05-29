@@ -16,7 +16,7 @@
                     {% if parcours != null and parcours.regimeInscription != null %}
                         <div class="flex flex-wrap gap-2">
                             {% for regime in parcours.regimeInscription %}
-                                <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700">{{ regime.value }}</span>
+                                <span class="inline-flex items-center rounded-full bg-primary-100 dark:bg-primary-800 px-2.5 py-1 text-xs font-bold text-primary-700 dark:text-primary-400">{{ regime.value }}</span>
                             {% endfor %}
                         </div>
                     {% endif %}

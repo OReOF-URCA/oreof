@@ -30,7 +30,7 @@
             <dt class="{{ dtClass }}">Code ROME</dt>
             <dd class="mt-1 flex flex-wrap gap-2">
                 {% for code in parcours.codesRome %}
-                    <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700">{{ code.code }}</span>
+                    <span class="inline-flex items-center rounded-full bg-primary-100 dark:bg-primary-800 px-2.5 py-1 text-xs font-bold text-primary-700 dark:text-primary-400">{{ code.code }}</span>
                 {% else %}
                     <span class="text-sm text-secondary-500">Aucun code ROME.</span>
                 {% endfor %}
