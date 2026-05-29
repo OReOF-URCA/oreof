@@ -37,6 +37,7 @@ use App\Repository\UserRepository;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
 use App\Utils\Access;
+use App\Utils\CheckParcours;
 use App\Utils\JsonRequest;
 use DateTime;
 use DateTimeImmutable;
@@ -653,9 +654,13 @@ class FormationController extends BaseController
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/{slug}/soft-delete/confirm', name: 'app_formation_confirmation_soft_delete')]
-    public function getConfirmationSoftDelete(Formation $formation) {
+    public function getConfirmationSoftDelete(Formation $formation, CheckParcours $check) {
+        $idParcoursF = array_map(fn($p) => $p->getId(), $formation->getParcours()->toArray());
+        $checkFormationData = $check->checkFormationIsSafeToDelete($idParcoursF);
+
         return $this->render('formation/_confirm_soft_delete.html.twig', [
-            'formation_slug' => $formation->getSlug()
+            'formation_slug' => $formation->getSlug(),
+            'checkData' => $checkFormationData
         ]);
     }
 
