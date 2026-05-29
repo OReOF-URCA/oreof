@@ -2,7 +2,7 @@
     <p class="text-sm font-black uppercase tracking-wide text-secondary-500">Blocs de compétences</p>
     <div class="space-y-3">
         {% for bloc in bccs %}
-            <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+            <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4">
                 <p class="text-sm font-semibold text-secondary-900">{{ bloc.bcc.display }}</p>
                 <ul class="mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed text-secondary-700">
                     {% for comp in bloc.competences %}

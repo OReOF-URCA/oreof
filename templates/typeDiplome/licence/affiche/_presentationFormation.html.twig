@@ -1,7 +1,7 @@
-{% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-indigo-500' %}
-{% set ddClass = 'mt-2 text-sm leading-relaxed text-secondary-700' %}
-{% set blockClass = 'rounded-xl border border-secondary-200 bg-secondary-50 p-4' %}
-{% set proseBoxClass = 'mt-2 rounded-xl border border-secondary-200 bg-white px-4 py-3 text-sm leading-relaxed text-secondary-700' %}
+{% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-primary-500 dark:text-primary-300' %}
+{% set ddClass = 'mt-2 text-sm leading-relaxed text-secondary-700 dark:text-secondary-400' %}
+{% set blockClass = 'rounded-xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4' %}
+{% set proseBoxClass = 'mt-2 rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface px-4 py-3 text-sm leading-relaxed text-secondary-700 dark:text-secondary-300' %}
 
 {% if formation.hasParcours == false %}
     <dl class="space-y-4">
@@ -55,28 +55,28 @@
 {% if (print is defined and print == false) %}
     {% if formation.isHasParcours == true %}
         <div>
-            <h3 class="mt-3 text-[12px] font-black uppercase tracking-wide text-indigo-500">Parcours</h3>
+            <h3 class="mt-3 text-[12px] font-black uppercase tracking-wide text-primary-500 dark:text-primary-300">Parcours</h3>
             <div class="w-full overflow-x-auto">
                 <table class="w-full min-w-[720px] table-auto divide-y divide-secondary-200 rounded-lg bg-white shadow-sm">
-                    <thead class="bg-secondary-50">
+                    <thead class="bg-bg">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-secondary-600">Parcours</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-secondary-600">Statut</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase text-secondary-600">Fiche</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase text-secondary-600">Export MCCC
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-secondary-600 dark:text-secondary-400">Parcours</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase text-secondary-600 dark:text-secondary-400">Statut</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase text-secondary-600 dark:text-secondary-400">Fiche</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase text-secondary-600 dark:text-secondary-400">Export MCCC
                         </th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase text-secondary-600">BCC</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase text-secondary-600">Fiches EC /
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase text-secondary-600 dark:text-secondary-400">BCC</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase text-secondary-600 dark:text-secondary-400">Fiches EC /
                             matières
                         </th>
                     </tr>
                     </thead>
-                    <tbody class="divide-y divide-secondary-100 text-sm text-secondary-700">
+                    <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800 text-sm text-secondary-700 dark:text-secondary-300">
                     {% for parcours in formation.parcours %}
-                        <tr class="hover:bg-secondary-50">
+                        <tr class="bg-surface hover:bg-bg">
                             <td class="px-4 py-3">
                                 <a href="#presentation_{{ parcours.id }}"
-                                   class="inline-flex items-center gap-2 text-secondary-800 hover:text-indigo-600">
+                                   class="inline-flex items-center gap-2 text-secondary-800 dark:text-secondary-300 hover:text-primary-600 dark:hover:text-primary-400">
                                     <span class="font-medium">{{ parcours.libelle }}</span>
                                     <span class="inline-block">{{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}</span>
                                 </a>
@@ -133,7 +133,7 @@
         </div>
     {% else %}
         <div class="rounded-xl border border-secondary-200 bg-white p-4 shadow-sm">
-            <h3 class="text-sm font-semibold text-secondary-800">Parcours</h3>
+            <h3 class="text-sm font-semibold text-secondary-800 dark:text-secondary-100">Parcours</h3>
             <p class="mt-1 text-sm text-secondary-600">Il n'y a pas de parcours pour cette formation.</p>
         </div>
     {% endif %}

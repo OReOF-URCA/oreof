@@ -10,16 +10,16 @@
     <div data-controller="help-drawer" data-action="keydown@window->help-drawer#onEscape">
 
         <div id="help-fab-container" class="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-fit z-[80]">
-            <button id="helpFabToggle" class="shadow-lg rounded-full flex items-center justify-center w-14 h-14 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-95 transition cursor-pointer" type="button" title="Aide de la page" aria-expanded="false" aria-controls="helpOffcanvas" aria-label="Ouvrir l'aide" data-action="click->help-drawer#toggle" style="background-color: {{ current_help ? 'var(--color-primary)' : 'var(--color-warning)' }};">
+            <button id="helpFabToggle" class="shadow-lg rounded-full flex items-center justify-center w-14 h-14 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 hover:opacity-95 transition cursor-pointer" type="button" title="Aide de la page" aria-expanded="false" aria-controls="helpOffcanvas" aria-label="Ouvrir l'aide" data-action="click->help-drawer#toggle" style="background-color: {{ current_help ? 'var(--semantic-primary)' : 'var(--semantic-warning)' }};">
                 <twig:UX:Icon name="icon:question" class="w-7 h-7 text-white" />
             </button>
         </div>
 
         <div id="helpBackdrop" class="fixed inset-0 bg-black/40 hidden z-[60]" aria-hidden="true" data-action="click->help-drawer#onBackdropClick"></div>
 
-        <aside id="helpOffcanvas" class="fixed right-0 top-0 h-full w-80 sm:w-[28rem] transform translate-x-full transition-transform duration-300 ease-in-out bg-white border-l border-secondary-200 shadow-lg z-[70] overflow-auto dark:bg-secondary-900 dark:border-secondary-700" aria-hidden="true" role="dialog" aria-labelledby="helpOffcanvasTitle">
+        <aside id="helpOffcanvas" class="fixed right-0 top-0 h-full w-80 sm:w-[28rem] transform translate-x-full transition-transform duration-300 ease-in-out bg-white border-l border-none shadow-lg z-[70] overflow-auto dark:bg-secondary-900 dark:border-secondary-700" aria-hidden="true" role="dialog" aria-labelledby="helpOffcanvasTitle">
 
-            <div class="p-4 flex items-center justify-between" style="background-color: {{ current_help ? 'var(--color-primary)' : 'var(--color-warning)' }}; color: white;">
+            <div class="p-4 flex items-center justify-between" style="background-color: {{ current_help ? 'var(--semantic-primary)' : 'var(--semantic-warning)' }}; color: white;">
                 <h5 id="helpOffcanvasTitle" class="mb-0 flex items-center gap-2 text-sm font-semibold">
                     <twig:UX:Icon name="icon:question" class="w-4 h-4" />
                     <span>{{ current_help ? current_help.title : 'Aide' }}</span>

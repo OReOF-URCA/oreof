@@ -1,10 +1,10 @@
 {% set color = color is defined ? color : 'primary' %}
 {% set color_map = {
     'primary': 'app-section-header-icon--primary',
-    'amber': 'app-section-header-icon--amber',
-    'red': 'app-section-header-icon--red',
-    'green': 'app-section-header-icon--green',
-    'teal': 'app-section-header-icon--teal'
+    'warning': 'app-section-header-icon--warning',
+    'danger': 'app-section-header-icon--danger',
+    'success': 'app-section-header-icon--success',
+    'info': 'app-section-header-icon--info'
 } %}
 {% set icon_color_class = color_map[color]|default(color_map['primary']) %}
 

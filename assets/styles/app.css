@@ -289,12 +289,7 @@ html[data-color-theme="jaune"] {
   }
 
   .app-section-header {
-    @apply flex items-center justify-between gap-4 mb-8 border-b pb-6;
-    border-color: rgb(248 250 252 / 1);
-  }
-
-  html[data-theme="dark"] .app-section-header {
-    @apply border-secondary-700;
+    @apply flex items-center justify-between gap-4 mb-8 border-b pb-6 border-secondary-200 dark:border-secondary-700;
   }
 
   .app-section-header-main {
@@ -302,59 +297,55 @@ html[data-color-theme="jaune"] {
   }
 
   .app-section-header-title {
-    @apply text-2xl font-black tracking-tight italic uppercase text-secondary-800;
-  }
-
-  html[data-theme="dark"] .app-section-header-title {
-    @apply text-secondary-100;
+    @apply text-2xl font-black tracking-tight italic uppercase text-secondary-800 dark:text-secondary-100;
   }
 
   .app-section-header-icon {
-    @apply w-12 h-12 rounded-2xl flex items-center justify-center text-text shadow-lg;
+    @apply w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg;
   }
 
-  .app-section-header-icon--indigo {
-    @apply bg-primary-600 shadow-primary-100;
+  .app-section-header-icon--primary {
+    @apply bg-primary-600 shadow-primary-100 dark:shadow-primary-900/50 dark:bg-primary-700;
   }
 
-  .app-section-header-icon--amber {
-    @apply bg-warning-600 shadow-warning-100;
+  .app-section-header-icon--warning {
+    @apply bg-warning-600 shadow-warning-100 dark:shadow-warning-900/50 dark:bg-warning-700;
   }
 
-  .app-section-header-icon--red {
-    @apply bg-danger-600 shadow-danger-100;
+  .app-section-header-icon--danger {
+    @apply bg-danger-600 shadow-danger-100 dark:shadow-danger-900/50 dark:bg-danger-700;
   }
 
-  .app-section-header-icon--green {
-    @apply bg-success-600 shadow-success-100;
+  .app-section-header-icon--success {
+    @apply bg-success-600 shadow-success-100 dark:shadow-success-900/50 dark:bg-success-700;
   }
 
-  .app-section-header-icon--teal {
-    @apply bg-info-600 shadow-info-100;
+  .app-section-header-icon--info {
+    @apply bg-info-600 shadow-info-100 dark:shadow-info-900/50 dark:bg-info-700;
   }
 
   .app-parcours-title {
-    @apply font-black uppercase tracking-tighter italic text-3xl mb-8 mt-8;
+    @apply font-black uppercase tracking-tighter italic text-3xl mb-8 mt-8 text-secondary-900 dark:text-secondary-100;
   }
 
-  .app-parcours-title--indigo {
-    @apply text-primary-600;
+  .app-parcours-title--primary {
+    @apply text-primary-600 dark:text-primary-400;
   }
 
-  .app-parcours-title--amber {
-    @apply text-warning-600;
+  .app-parcours-title--warning {
+    @apply text-warning-600 dark:text-warning-400;
   }
 
-  .app-parcours-title--red {
-    @apply text-danger-600;
+  .app-parcours-title--danger {
+    @apply text-danger-600 dark:text-danger-400;
   }
 
-  .app-parcours-title--green {
-    @apply text-success-600;
+  .app-parcours-title--success {
+    @apply text-success-600 dark:text-success-400;
   }
 
-  .app-parcours-title--teal {
-    @apply text-info-600;
+  .app-parcours-title--info {
+    @apply text-info-600 dark:text-info-400;
   }
 
   /* Couche de compatibilité Bootstrap: badges et couleurs d'état */
@@ -1071,51 +1062,23 @@ html[data-color-theme="jaune"] {
 
   /* Menu lateral scroll-spy (formation_v2/voir) */
   .app-scrollspy-aside {
-    @apply rounded-md shadow-md border border-secondary-200 bg-white;
-  }
-
-  html[data-theme="dark"] .app-scrollspy-aside {
-    @apply bg-secondary-900 border-secondary-700 shadow-black/30;
+    @apply rounded-md shadow-md border border-secondary-200 bg-surface dark:border-secondary-700 dark:bg-secondary-900 dark:shadow-black/30;
   }
 
   .app-scrollspy-section-title {
-    @apply text-[10px] font-black uppercase tracking-[0.2em] mb-6 px-4 text-secondary-400;
+    @apply text-[10px] font-black uppercase tracking-[0.2em] mb-6 px-4 text-secondary-400 dark:text-secondary-500;
   }
 
   .app-scrollspy-section-title--accent {
-    @apply text-amber-800;
-  }
-
-  html[data-theme="dark"] .app-scrollspy-section-title {
-    @apply text-secondary-500;
-  }
-
-  html[data-theme="dark"] .app-scrollspy-section-title--accent {
-    @apply text-amber-300;
+    @apply text-amber-800 dark:text-amber-300;
   }
 
   .app-scrollspy-link {
-    @apply flex items-center gap-3 px-5 py-3 text-[11px] font-black uppercase tracking-widest rounded-md border-l-4 border-transparent transition-all duration-300 text-secondary-500;
-  }
-
-  .app-scrollspy-link:hover {
-    @apply bg-secondary-50 text-secondary-700;
+    @apply flex items-center gap-3 px-5 py-3 text-[11px] font-black uppercase tracking-widest rounded-md border-l-4 border-transparent transition-all duration-300 text-secondary-500 dark:text-secondary-400 hover:bg-secondary-50 dark:hover:bg-secondary-800 dark:hover:text-secondary-200;
   }
 
   .app-scrollspy-link-active {
-    @apply text-primary-600 bg-primary-50 border-primary-600;
-  }
-
-  html[data-theme="dark"] .app-scrollspy-link {
-    @apply text-secondary-400;
-  }
-
-  html[data-theme="dark"] .app-scrollspy-link:hover {
-    @apply bg-secondary-800 text-secondary-200;
-  }
-
-  html[data-theme="dark"] .app-scrollspy-link-active {
-    @apply text-indigo-300 bg-indigo-500/15 border-indigo-400;
+    @apply text-primary-600 bg-primary-50 border-primary-600 dark:text-indigo-300 dark:bg-indigo-500/15 dark:border-indigo-400;
   }
 
   #nav .user-menu button {
