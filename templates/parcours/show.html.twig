@@ -231,7 +231,7 @@
 {% endblock %}
 
 {% set header_title %}
-    Détail du parcours : {{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}
+    Détail du parcours : {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
 {% endset %}
 
 {% block breadcrumb %}

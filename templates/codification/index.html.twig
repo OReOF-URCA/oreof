@@ -16,7 +16,7 @@
                     <a class="nav-link {% if (loop.first and step is not defined or step == parcours.id) or (not loop.first and step == parcours.id)  %}active{% endif %}" data-bs-toggle="tab" href="#" role="tab"
                             {{ stimulus_action('wizard', 'changeStep', 'click', {step: parcours.id}) }}
                     >
-                        {{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}
+                        {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
                     </a>
                 </li>
             {% endfor %}

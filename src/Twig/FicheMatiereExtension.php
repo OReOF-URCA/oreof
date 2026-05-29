@@ -28,12 +28,12 @@ class FicheMatiereExtension extends AbstractExtension
 
     public function hasParcours(FicheMatiere $ficheMatiere, Parcours $parcours): bool
     {
-       foreach($ficheMatiere->getElementConstitutifs() as $elementConstitutif) {
-           if($elementConstitutif->getParcours() === $parcours) {
-               return true;
-           }
-       }
+        foreach ($ficheMatiere->getElementConstitutifs() as $elementConstitutif) {
+            if ($elementConstitutif->getParcours() === $parcours) {
+                return true;
+            }
+        }
 
-       return false;
+        return false;
     }
 }

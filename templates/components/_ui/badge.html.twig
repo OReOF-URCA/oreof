@@ -46,10 +46,12 @@ Composant Badge — exemples :
 {% set radiusClass = resolvedPill ? 'rounded-full' : 'rounded-md' %}
 {% set classes = 'inline-flex items-center font-semibold ' ~ radiusClass ~ ' ' ~ sizeClass ~ ' ' ~ colorClass ~ (resolvedExtraClass ? ' ' ~ resolvedExtraClass : '') %}
 
-<span class="{{ classes }}" {{- attributes -}}>
-    {% if resolvedIcon != '' and not resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
-    {% if resolvedLabel != '' %}<span>{{ resolvedLabel }}</span>{% endif %}
-    {% block content %}{% endblock %}
-    {% if resolvedIcon != '' and resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
-</span>
+{% if resolvedLabel != '' or resolvedIcon != '' or dto is not null %}
+    <span class="{{ classes }}" {{- attributes -}}>
+        {% if resolvedIcon != '' and not resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
+        {% if resolvedLabel != '' %}<span>{{ resolvedLabel }}</span>{% endif %}
+        {% block content %}{% endblock %}
+        {% if resolvedIcon != '' and resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
+    </span>
+{% endif %}
 

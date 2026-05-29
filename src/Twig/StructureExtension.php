@@ -9,32 +9,34 @@
 
 namespace App\Twig;
 
+use App\DTO\BadgeView;
+use App\Presenter\BadgePresenter;
 use App\Enums\TypeParcoursEnum;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
 class StructureExtension extends AbstractExtension
 {
+    public function __construct(private readonly BadgePresenter $badgePresenter)
+    {
+    }
+
     public function getFilters(): array
     {
+        // todo: Encore utile ?
         return [
             new TwigFilter('badgeEctsSemestre', $this->badgeEctsSemestre(...), ['is_safe' => ['html']]),
             new TwigFilter('badgeEctsUe', $this->badgeEctsUe(...), ['is_safe' => ['html']]),
             new TwigFilter('badgeEcts', $this->badgeEcts(...), ['is_safe' => ['html']]),
             new TwigFilter('badgeCoeff', $this->badgeCoeff(...), ['is_safe' => ['html']]),
             new TwigFilter('badgeNb', $this->badgeNb(...), ['is_safe' => ['html']]),
-            new TwigFilter('badgeTypeParcours', $this->badgeTypeParcours(...), ['is_safe' => ['html']])
+            new TwigFilter('badgeTypeParcours', $this->badgeTypeParcours(...))
         ];
     }
 
-    public function badgeTypeParcours(?TypeParcoursEnum $typeParcoursEnum = null): string
+    public function badgeTypeParcours(?TypeParcoursEnum $typeParcoursEnum = null): ?BadgeView
     {
-        if (null === $typeParcoursEnum || $typeParcoursEnum === TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
-            return '';
-        }
-
-        $badge = '<span class="badge bg-%s">%s</span>';
-        return sprintf($badge, $typeParcoursEnum->getColor(), $typeParcoursEnum->getLabel());
+        return $this->badgePresenter->fromTypeParcours($typeParcoursEnum);
     }
 
     public function badgeNb(?int $nb): string

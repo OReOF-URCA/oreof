@@ -90,7 +90,8 @@ Cela entrainera la vérification des informations saisies. Seules les fiches EC/
                             <div class="row g-0 h-100 align-content-center">
                                 <div class="col-12 col-md-4 d-flex flex-column justify-content-center mb-1 mb-md-0">
                                     <div class="text-muted d-md-none">Parcours</div>
-                                    {{ parcours.libelle }} <span>{{ parcours.typeParcours|badgeTypeParcours }}</span>
+                                    {{ parcours.libelle }}
+                                    <span>{{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}</span>
                                 </div>
                                 <div class="col-6 col-md-1 d-flex flex-column justify-content-center mb-1 mb-md-0">
                                     <div class="text-muted d-md-none">En Cours rédaction</div>

@@ -16,7 +16,10 @@
         <tr class="hover:bg-secondary-50 border-b border-secondary-200 transition-colors dark:hover:bg-secondary-800/30 dark:border-secondary-700">
             <td class="px-4 py-3 text-sm" {% if constant('SOURCE', typeDiplome) == 'meef' %}colspan="2"{% endif %}>
                 <div class="font-medium text-text dark:text-secondary-100">{{ parcour.libelle }}</div>
-                <div class="text-xs text-secondary-600 mt-0.5 dark:text-secondary-400">{{ parcour.typeParcours|badgeTypeParcours }}</div>
+                {% set typeParcoursBadge = parcour.typeParcours|badgeTypeParcours %}
+                {% if typeParcoursBadge is not null %}
+                    <div class="text-xs text-secondary-600 mt-0.5 dark:text-secondary-400">{{ component('Badge', { dto: typeParcoursBadge }) }}</div>
+                {% endif %}
             </td>
             <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
                 {{ parcour.respParcours != null ? parcour.respParcours.display : '<span class="text-secondary-500 dark:text-secondary-500">Non défini</span>' }}

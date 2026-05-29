@@ -147,7 +147,7 @@
             } %}
             {% set title_color_class = title_color_map[color]|default('app-parcours-title--indigo') %}
             <h3 class="app-parcours-title {{ title_color_class }}">
-                Parcours {{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}</h3>
+                Parcours {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}</h3>
 
 
             <section data-scroll-spy-target="section"

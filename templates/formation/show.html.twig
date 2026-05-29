@@ -145,7 +145,7 @@
                 {% else %}
                     {% for parcours in formation.parcours %}
                         <li>
-                            <strong>Parcours {{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}</strong>
+                            <strong>Parcours {{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</strong>
                         </li>
                         <li class="border-left-parcours border-left-parcours-{{ loop.index }}">
                             <a class="nav-link p-2" href="#presentation_{{ parcours.id }}">

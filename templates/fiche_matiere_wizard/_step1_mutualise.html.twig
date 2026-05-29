@@ -32,7 +32,7 @@
             <td>{{ fiche.parcours != null and fiche.parcours.formation != null ? fiche.parcours.formation.display :
                 'Erreur
             formation' }}</td>
-            <td>{{ fiche.parcours != null ? fiche.parcours.libelle : 'Erreur formation' }} {{ fiche.parcours.typeparcours|badgeTypeParcours }}</td>
+            <td>{{ fiche.parcours != null ? fiche.parcours.libelle : 'Erreur formation' }} {{ component('Badge', { dto: fiche.parcours.typeParcours|badgeTypeParcours }) }}</td>
             <td>{{ fiche.parcours != null  and ficheMatiere|hasParcours(fiche.parcours) == true ? '<span class="badge
             bg-success">Oui</span>' :
                 '<span class="badge bg-danger">Non</span>' }}</td>

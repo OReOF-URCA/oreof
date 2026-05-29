@@ -27,9 +27,9 @@ class ImpersonationExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('is_impersonating', [$this, 'isImpersonating']),
-            new TwigFunction('get_impersonated_user_id', [$this, 'getImpersonatedUserId']),
-            new TwigFunction('get_original_user_id', [$this, 'getOriginalUserId']),
+            new TwigFunction('is_impersonating', $this->isImpersonating(...)),
+            new TwigFunction('get_impersonated_user_id', $this->getImpersonatedUserId(...)),
+            new TwigFunction('get_original_user_id', $this->getOriginalUserId(...)),
         ];
     }
 
@@ -73,7 +73,3 @@ class ImpersonationExtension extends AbstractExtension
         return $this->extractUserId($token->getOriginalToken()->getUser());
     }
 }
-
-
-
-

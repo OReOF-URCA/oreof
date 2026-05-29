@@ -217,7 +217,7 @@
                                 data-formation-id="{{ formation.formation.id }}"
                             >
                                 <td class="pl-5"
-                                    colspan="3">{{ parcours.parcours.libelle }} {{ parcours.parcours.typeParcours|badgeTypeParcours }}</td>
+                                    colspan="3">{{ parcours.parcours.libelle }} {{ component('Badge', { dto: parcours.parcours.typeParcours|badgeTypeParcours }) }}</td>
                                 <td>{{ parcours.parcours.localisation != null ? parcours.parcours.localisation.libelle : 'erreur ville' }}</td>
                                 <td>{{ component('Badge', { dto: parcours.etatReconduction|badgeTypeModificationDto }) }}</td>
                                 <td>

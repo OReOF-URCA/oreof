@@ -60,7 +60,7 @@
                                 {% for ec in ficheMatiere.ficheMatiereParcours %}
                                     <li>{{ (ec.parcours != null and ec.parcours.formation != null) ? ec.parcours.formation
                                         .display : 'non défini' }}
-                                        / {{ ec.parcours != null ? ec.parcours.libelle : 'non défini' }} {{ ec.parcours.typeparcours|badgeTypeParcours }}</li>
+                                        / {{ ec.parcours != null ? ec.parcours.libelle : 'non défini' }} {{ component('Badge', { dto: ec.parcours.typeParcours|badgeTypeParcours }) }}</li>
                                 {% endfor %}
                             </ul>
                         {% else %}

@@ -16,6 +16,7 @@ use App\DTO\DotView;
 use App\Enums\BadgeEnumInterface;
 use App\Enums\EtatChangeRfEnum;
 use App\Enums\EtatDpeEnum;
+use App\Enums\TypeParcoursEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\ValidationStatusEnum;
 
@@ -53,6 +54,18 @@ final class BadgePresenter
     public function fromText(string $texte, string $variant): BadgeView
     {
         return new BadgeView(label: $texte, variant: $variant);
+    }
+
+    public function fromTypeParcours(?TypeParcoursEnum $typeParcoursEnum): ?BadgeView
+    {
+        if (null === $typeParcoursEnum || $typeParcoursEnum === TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+            return null;
+        }
+
+        return new BadgeView(
+            label: $typeParcoursEnum->getLabel(),
+            variant: $typeParcoursEnum->getColor(),
+        );
     }
 
     public function fromValide(?string $etat): BadgeView

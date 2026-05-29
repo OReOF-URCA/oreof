@@ -126,7 +126,7 @@
                         {% else %}
                             {% for parcours in formation.parcours %}
                                 <p class="app-scrollspy-section-title app-scrollspy-section-title--accent">
-                                    Parcours {{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}</p>
+                                    Parcours {{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</p>
 
 
                                 <a href="#presentation_{{ parcours.id }}" data-scroll-spy-target="link"

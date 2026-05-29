@@ -193,7 +193,7 @@
                         <tr>
                             <td>{{ formation.composantePorteuse != null ? formation.composantePorteuse.sigle : '-' }}</td>
                             <td>{{ formation.displayLong }}</td>
-                            <td>{{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}</td>
+                            <td>{{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}</td>
                             <td>{{ formation.mention.domaine.sigle }}</td>
                             <td>{{ parcours.localisation != null ? parcours.localisation.libelle : '' }}</td>
                             <td>{{ parcours.codeDiplome(annee) }}</td>

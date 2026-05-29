@@ -110,7 +110,7 @@
 {% endblock %}
 
 {% set header_title %}
-    EC : {{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}
+    EC : {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
 {% endset %}
 
 {% block breadcrumb %}

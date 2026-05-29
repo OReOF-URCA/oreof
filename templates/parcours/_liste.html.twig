@@ -79,7 +79,7 @@
                     <span class="badge bg-danger">Non définie</span>
                 {% endif %}
             </td>
-            <td>{{ parcour.libelle }} {{ parcour.typeParcours|badgeTypeParcours }}</td>
+            <td>{{ parcour.libelle }}{% set typeParcoursBadge = parcour.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</td>
             <td>{{ parcour.localisation != null ? parcour.localisation.libelle : 'Non défini' }}</td>
             <td>
                 {{ include('communs/_badge_collection.html.twig', { badges: parcour.etatDpeParcours|badgeDpeDto }) }}

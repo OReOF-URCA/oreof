@@ -140,7 +140,7 @@
                     {% for parcours in formation.parcours %}
                         <tr>
                             <td>{# todo: uniquement si dans formation, sinon des liens ? #}
-                                <a href="#presentation_{{ parcours.id }}">{{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}</a>
+                                <a href="#presentation_{{ parcours.id }}">{{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}</a>
                             </td>
                             <td>
                                 {{ component('Badge', { dto: parcours.dpeParcours[0].etatReconduction|badgeTypeModificationDto }) }}

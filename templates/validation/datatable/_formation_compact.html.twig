@@ -14,7 +14,7 @@
 
         {% if item.formation.hasParcours %}
             <span class="font-medium text-secondary-700 dark:text-secondary-200">{{ item.parcours.libelle }}</span>
-            {{ item.parcours.typeParcours|badgeTypeParcours }}
+            {{ component('Badge', { dto: item.parcours.typeParcours|badgeTypeParcours }) }}
         {% else %}
             <span class="text-secondary-400 dark:text-secondary-500">Sans parcours</span>
         {% endif %}

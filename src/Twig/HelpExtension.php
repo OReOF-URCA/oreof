@@ -25,9 +25,9 @@ class HelpExtension extends AbstractExtension
     private CommonMarkConverter $converter;
 
     public function __construct(
-        private EntityManagerInterface $em,
-        private Security $security,
-        private HelpGrantService $helpGrantService,
+        private readonly EntityManagerInterface $em,
+        private readonly Security               $security,
+        private readonly HelpGrantService       $helpGrantService,
     )
     {
         $this->converter = new CommonMarkConverter([
@@ -38,14 +38,14 @@ class HelpExtension extends AbstractExtension
 
     public function getFunctions(): array
     {
-        return [new TwigFunction('get_page_help', [$this, 'getPageHelp'])];
+        return [new TwigFunction('get_page_help', $this->getPageHelp(...))];
     }
 
     public function getFilters(): array
     {
         return [
-            new TwigFilter('parse_embeds', [$this, 'parseEmbeds'], ['is_safe' => ['html']]),
-            new TwigFilter('markdown_to_html', [$this, 'markdownToHtml'], ['is_safe' => ['html']]),
+            new TwigFilter('parse_embeds', $this->parseEmbeds(...), ['is_safe' => ['html']]),
+            new TwigFilter('markdown_to_html', $this->markdownToHtml(...), ['is_safe' => ['html']]),
         ];
     }
 
@@ -78,10 +78,10 @@ class HelpExtension extends AbstractExtension
         // syntaxe attendue dans le markdown: [embed](https://youtube.com/watch?v=xxx)
         // en html apres markdown: <a href="https://youtube.com/watch?v=xxx">embed</a>
         $pattern = '/<a href="([^"]+)">(embed|video)<\/a>/i';
-        
+
         return preg_replace_callback($pattern, function ($matches) {
             $url = $matches[1];
-            
+
             // Transformer les urls standards en versions embed
             $url = str_replace(
                 ['watch?v=', 'youtu.be/', 'vimeo.com/'],

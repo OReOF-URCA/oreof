@@ -78,7 +78,7 @@
                                 <a href="#presentation_{{ parcours.id }}"
                                    class="inline-flex items-center gap-2 text-secondary-800 hover:text-indigo-600">
                                     <span class="font-medium">{{ parcours.libelle }}</span>
-                                    <span class="inline-block">{{ parcours.typeParcours|badgeTypeParcours }}</span>
+                                    <span class="inline-block">{{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}</span>
                                 </a>
                             </td>
                             <td class="px-4 py-3">

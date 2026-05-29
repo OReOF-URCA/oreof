@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% set header_title %}
-    Ressources/SAE ECTS : {{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}
+    Ressources/SAE ECTS : {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
 {% endset %}
 
 {% block breadcrumb %}

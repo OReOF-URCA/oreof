@@ -33,9 +33,9 @@ class HistoriqueExtension extends AbstractExtension
     ];
 
     public function __construct(
-        private ValidationProcess             $validationProcess,
-        private ValidationProcessChangeRf    $validationProcessChangeRf,
-        private ValidationProcessFicheMatiere $validationProcessFicheMatiere,
+        private readonly ValidationProcess             $validationProcess,
+        private readonly ValidationProcessChangeRf     $validationProcessChangeRf,
+        private readonly ValidationProcessFicheMatiere $validationProcessFicheMatiere,
     ) {
     }
 

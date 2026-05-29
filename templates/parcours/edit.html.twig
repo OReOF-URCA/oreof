@@ -19,7 +19,8 @@
 
 {% set header_title %}
     {% if parcours.parcoursParent == null %}
-        Parcours <strong>{{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}</strong>
+        Parcours
+        <strong>{{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</strong>
     {% else %}
         Option <strong>{{ parcours.libelle }}</strong> (parcours <strong>{{ parcours.parcoursParent.libelle }}</strong>)
     {% endif %}
