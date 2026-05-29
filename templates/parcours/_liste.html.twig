@@ -54,7 +54,9 @@
         <th>MCCC</th>
         <th>PV</th>
         <th>Remplissage</th>
+        <th>logos</th>
         <th></th>
+
     </tr>
     </thead>
     <tbody>
@@ -97,7 +99,31 @@
                 {{ parcour.remplissage|remplissage }}
             </td>
             <td>
-                <a href="{{ path('app_parcours_show',{'id': parcour.id}) }} }}"
+                {% if parcour.logo %}
+                    {% set logos = parcour.logo %}
+                    <span
+                        {{ stimulus_controller('modal', {
+                            size: 'lg',
+                            modalTitle: 'Logos du parcours',
+                            modalUrl: path('app_parcours_logos', {id: parcour.id})
+                        }) }}
+                        data-action="click->modal#openModal"
+                        style="cursor: pointer;"
+                                >
+                        <img src="{{ asset('uploads/logos/' ~ logos[0]) }}"
+                             alt="Logo"
+                             style="max-height: 40px; max-width: 80px; object-fit: contain;"
+                        >
+                        {% if logos|length > 1 %}
+                            <span class="badge bg-primary">+{{ logos|length - 1 }}</span>
+                        {% endif %}
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary">Aucun</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ path('app_parcours_show',{'id': parcour.id}) }}"
                    class="btn btn-sm text-info"
                    data-bs-toggle="tooltip"
                    data-bs-placement="bottom"

@@ -22,6 +22,7 @@ use App\Entity\FormationVersioning;
 use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
 use App\Entity\UserProfil;
+use App\Entity\Constantes;
 use App\Enums\TypeModificationDpeEnum;
 use App\Events\AddCentreFormationEvent;
 use App\Form\FormationSesType;
@@ -35,8 +36,10 @@ use App\Repository\TypeDiplomeRepository;
 use App\Repository\UserRepository;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
+use App\Service\SecureUploadService;
 use App\Utils\Access;
 use App\Utils\JsonRequest;
+use App\Exception\FileUploadException;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -49,12 +52,15 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/formation')]
 class FormationController extends BaseController
 {
-    public function __construct(private readonly EntityManagerInterface $entityManager)
-    {
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly SecureUploadService $secureUploadService
+    ){
     }
 
     #[Route('/', name: 'app_formation_index', methods: ['GET'])]
@@ -197,6 +203,7 @@ class FormationController extends BaseController
         TypeDiplomeRepository $typeDiplomeRepository,
         ComposanteRepository  $composanteRepository,
         FormationRepository   $formationRepository,
+        UserRepository        $userRepository,
         Composante            $composante,
         Request               $request
     ): Response {
@@ -209,7 +216,15 @@ class FormationController extends BaseController
             $composante
         );
 
+        $nbParcours = 0;
+        foreach ($formations as $formation) {
+            $nbParcours += count($formation->getParcours());
+        }
+
         return $this->render('formation/_liste.html.twig', [
+            'nbFormations' => count($formations),
+            'nbParcours' => $nbParcours,
+            'responsables' => $userRepository->findUserWithResponsabilites(),
             'formations' => $formations,
             'params' => $request->query->all(),
             'isCfvu' => false,
@@ -236,11 +251,11 @@ class FormationController extends BaseController
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             if (array_key_exists(
-                'mention',
-                $request->request->all()['formation_ses']
-            ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre') {
+                    'mention',
+                    $request->request->all()['formation_ses']
+                ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre') {
                 $mention = $mentionRepository->find($request->request->all()['formation_ses']['mention']);
                 $formation->setMentionTexte(null);
                 $formation->setMention($mention);
@@ -286,7 +301,6 @@ class FormationController extends BaseController
                 $this->entityManager->persist($ucCo);
             }
 
-
             $this->entityManager->flush();
             $dpeParcoursWorkflow->apply($dpeParcours, 'initialiser');
             $dpeParcoursWorkflow->apply($dpeParcours, 'autoriser');
@@ -315,14 +329,23 @@ class FormationController extends BaseController
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {//todo: si validate le choice de mention ne fonctionne pas
+        if ($form->isSubmitted()) {
+            $savedMention = $formation->getMention();
+            $savedMentionTexte = $formation->getMentionTexte();
+
             if (array_key_exists(
-                'mention',
-                $request->request->all()['formation_ses']
-            ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre') {
+                    'mention',
+                    $request->request->all()['formation_ses']
+                ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre')
+            {
                 $mention = $mentionRepository->find($request->request->all()['formation_ses']['mention']);
                 $formation->setMentionTexte(null);
                 $formation->setMention($mention);
+            }
+            else
+            {
+                $formation->setMention($savedMention);
+                $formation->setMentionTexte($savedMentionTexte);
             }
 
             $uow = $entityManager->getUnitOfWork();
@@ -647,4 +670,5 @@ class FormationController extends BaseController
             return $this->redirectToRoute('app_formation_show', ['slug' => $versionFormation->getFormation()->getSlug()]);
         }
     }
+
 }

@@ -1,11 +1,44 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
+
+    {% if type_diplome.id is not null and is_granted('ROLE_ADMIN') %}
+        <div class="card mb-3">
+            <div class="card-body"
+                    {{ stimulus_controller('type-diplome-logos', {
+                        logosUrl: path('app_type_diplome_logos', {id: type_diplome.id, editable: true}),
+                        deleteLogoUrl: path('app_type_diplome_delete_logo', {id: type_diplome.id}),
+                        uploadLogoUrl: path('app_type_diplome_upload_logo', {id: type_diplome.id}),
+                    }) }}>
+                <h5 class="card-title">Logo du type de diplôme</h5>
+                <turbo-frame id="type-diplome-logos-container">
+                    {% include 'config/type_diplome/_logos.html.twig' with {typeDiplome: type_diplome, editable: true} %}
+                </turbo-frame>
+                <div class="mt-3">
+                    <div class="mt-3">
+                        <input type="file"
+                               name="logo[]"
+                               accept="image/png, image/jpeg"
+                               class="form-control"
+                               data-type-diplome-logos-target="fileInput">
+                        <button type="button"
+                                class="btn btn-primary mt-2"
+                                data-action="click->type-diplome-logos#uploadLogo">
+                            Confirmer l'envoi du/des logo(s)
+                        </button>
+                        <div id="logo-upload-errors" class="mt-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     <div class="card">
         <div class="card-body">
             {{ include('communs/_form.html.twig') }}
         </div>
     </div>
+
 {% endblock %}
 
 {% set header_title %}

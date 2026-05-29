@@ -115,6 +115,9 @@ class TypeDiplome
     #[ORM\Column(nullable: true)]
     private ?bool $controleAssiduite = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?array $logo = [];
+
     public function __construct()
     {
         $this->formations = new ArrayCollection();
@@ -610,6 +613,23 @@ class TypeDiplome
     {
         $this->controleAssiduite = $controleAssiduite;
 
+        return $this;
+    }
+
+    public function getLogo(): ?array
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?array $logo): static
+    {
+        $this->logo = $logo;
+        return $this;
+    }
+
+    public function addLogo(string $filename): static
+    {
+        $this->logo[] = $filename;
         return $this;
     }
 

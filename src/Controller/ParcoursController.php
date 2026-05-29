@@ -20,8 +20,9 @@ use App\Entity\FicheMatiere;
 use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
-use App\Enums\ConfigurationPublicationEnum;
 use App\Entity\User;
+use App\Entity\Constantes;
+use App\Enums\ConfigurationPublicationEnum;
 use App\Enums\EtatDpeEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
@@ -59,13 +60,15 @@ use Symfony\Component\Serializer\Normalizer\BackedEnumNormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[Route('/parcours')]
 class ParcoursController extends BaseController
 {
     public function __construct(
         private WorkflowInterface $dpeParcoursWorkflow,
-        private readonly EntityManagerInterface $entityManager
+        private readonly EntityManagerInterface $entityManager,
+        private readonly \App\Service\SecureUploadService $secureUploadService,
     ) {
     }
 
@@ -150,6 +153,29 @@ class ParcoursController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $logoFiles = $form->get('logo')->getData();
+            if ($logoFiles) {
+                $hasFormatError = false;
+                $hasSizeError = false;
+                foreach ($logoFiles as $logoFile) {
+                    try {
+                        $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
+                        $parcour->addLogo($uploaded->getStoredFilename());
+                    } catch (FileUploadException $e) {
+                        if (str_contains($e->getMessage(), 'volumineux')) {
+                            $hasSizeError = true;
+                        } else {
+                            $hasFormatError = true;
+                        }
+                    }
+                }
+                if ($hasSizeError) {
+                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) est/sont trop lourd(s) (10 Mo max)');
+                }
+                if ($hasFormatError) {
+                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) n\'est/ne sont pas au bon format (PNG/JPEG/JPG uniquement)');
+                }
+            }
             $dpeParcours = new DpeParcours();
             $dpeParcours->setParcours($parcour);
             $dpeParcours->setFormation($formation);
@@ -241,6 +267,31 @@ class ParcoursController extends BaseController
                 $eventDispatcher->dispatch($event, AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
             }
 
+            $logoFiles = $form->get('logo')->getData();
+            if ($logoFiles) {
+                $hasFormatError = false;
+                $hasSizeError = false;
+                foreach ($logoFiles as $logoFile) {
+                    try {
+                        $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
+                        $logos = $parcours->getLogo() ?? [];
+                        $logos[] = $uploaded->getStoredFilename();
+                        $parcours->setLogo($logos);
+                    } catch (FileUploadException $e) {
+                        if (str_contains($e->getMessage(), 'volumineux')) {
+                            $hasSizeError = true;
+                        } else {
+                            $hasFormatError = true;
+                        }
+                    }
+                }
+                if ($hasSizeError) {
+                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) est/sont trop lourd(s) (10 Mo max)');
+                }
+                if ($hasFormatError) {
+                    $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Un ou plusieurs fichier(s) n\'est/ne sont pas au bon format (PNG/JPEG/JPG uniquement)');
+                }
+            }
             $parcoursRepository->save($parcours, true);
 
             return $this->json(true);
@@ -1053,5 +1104,96 @@ class ParcoursController extends BaseController
         ];
 
         return new JsonResponse($data);
+    }
+
+    #[Route('/{id}/upload-logo', name: 'app_parcours_upload_logo', methods: ['POST'])]
+    public function uploadLogo(Request $request, Parcours $parcours): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('EDIT', ['route' => 'app_parcours', 'subject' => $parcours]);
+
+        $files = $request->files->get('logo');
+
+        if (!$files) {
+            return new JsonResponse(['success' => false, 'error' => 'Aucun fichier reçu'], 400);
+        }
+
+        $hasFormatError = false;
+        $hasSizeError = false;
+
+        foreach ($files as $file) {
+            try {
+                $uploaded = $this->secureUploadService->upload($file, 'logos');
+                $logos = $parcours->getLogo() ?? [];
+                $logos[] = $uploaded->getStoredFilename();
+                $parcours->setLogo($logos);
+            } catch (\Exception $e) {
+                if (str_contains($e->getMessage(), 'volumineux')) {
+                    $hasSizeError = true;
+                } else {
+                    $hasFormatError = true;
+                }
+            }
+        }
+
+        if ($hasFormatError || $hasSizeError) {
+            $errors = [];
+            if ($hasSizeError) $errors[] = 'Un ou plusieurs fichier(s) est/sont trop lourd(s) (10 Mo max)';
+            if ($hasFormatError) $errors[] = 'Un ou plusieurs fichier(s) n\'est/ne sont pas au bon format (PNG/JPEG/JPG uniquement)';
+            return new JsonResponse(['success' => false, 'errors' => $errors], 422);
+        }
+
+        $this->entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[Route('/{id}/logos', name: 'app_parcours_logos', methods: ['GET'])]
+    public function logos(Parcours $parcours, Request $request): Response
+    {
+        return $this->render('parcours/_logos.html.twig', [
+            'parcours' => $parcours,
+            'editable' => $request->query->getBoolean('editable'),
+        ]);
+    }
+
+    #[Route('/{id}/delete-logo', name: 'app_parcours_delete_logo', methods: ['DELETE'])]
+    public function deleteLogo(Request $request, Parcours $parcours): JsonResponse
+    {
+        $this->denyAccessUnlessGranted('EDIT', ['route' => 'app_parcours', 'subject' => $parcours]);
+
+        $data = json_decode($request->getContent(), true);
+        $filename = $data['filename'] ?? null;
+
+        if (!$filename) {
+            return new JsonResponse(['success' => false, 'error' => 'Nom de fichier manquant'], 400);
+        }
+
+        $logos = $parcours->getLogo() ?? [];
+
+        if (!in_array($filename, $logos)) {
+            return new JsonResponse(['success' => false, 'error' => 'Fichier introuvable'], 404);
+        }
+
+        $logos = array_values(array_filter($logos, fn($l) => $l !== $filename));
+        $parcours->setLogo($logos);
+        $this->entityManager->flush();
+
+        $this->secureUploadService->delete('logos', $filename);
+
+        return new JsonResponse(['success' => true]);
+    }
+
+
+    // Route directe vers un logo pour alimenter l'API
+    #[Route('/{id}/logo/{filename}', name: 'app_parcours_logo', methods: ['GET'])]
+    public function logo(Parcours $parcours, string $filename): Response
+    {
+        $filePath = $this->secureUploadService->resolveStoredFilePath('logos', $filename);
+
+        if (!file_exists($filePath)) {
+            throw $this->createNotFoundException();
+        }
+
+        return new BinaryFileResponse($filePath);
     }
 }

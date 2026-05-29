@@ -166,16 +166,38 @@ final class ParcoursManageComponent extends AbstractController
 
     private function getHistorique(): void
     {
-        $historiques = $this->historiqueFormationRepository->findBy(['formation' => $this->parcours->getFormation()], ['created' => 'ASC']);
+        $historiques = $this->historiqueFormationRepository->findBy(
+            ['formation' => $this->parcours->getFormation()],
+            ['created' => 'ASC']
+        );
+
         foreach ($historiques as $historique) {
-            if ($historique->getChangeRf() === null && self::TAB_PROCESS[$historique->getEtape()] < self::TAB_PROCESS[self::TAB[$this->place]]) {
+            $placeKey = self::TAB[$this->place] ?? null;
+
+            if (
+                $historique->getChangeRf() === null
+                && $placeKey !== null
+                && isset(self::TAB_PROCESS[$historique->getEtape()], self::TAB_PROCESS[$placeKey])
+                && self::TAB_PROCESS[$historique->getEtape()] < self::TAB_PROCESS[$placeKey]
+            ) {
                 $this->historiques[$historique->getEtape()] = $historique;
             }
         }
-        $historiques = $this->historiqueParcoursRepository->findBy(['parcours' => $this->parcours], ['created' => 'ASC']);
+
+        $historiques = $this->historiqueParcoursRepository->findBy(
+            ['parcours' => $this->parcours],
+            ['created' => 'ASC']
+        );
+
 //todo: gérer le cas d'une réouverture sans CFVU
         foreach ($historiques as $historique) {
-            if (self::TAB_PROCESS[$historique->getEtape()] < self::TAB_PROCESS[self::TAB[$this->place]]) {
+            $placeKey = self::TAB[$this->place] ?? null;
+
+            if (
+                $placeKey !== null
+                && isset(self::TAB_PROCESS[$historique->getEtape()], self::TAB_PROCESS[$placeKey])
+                && self::TAB_PROCESS[$historique->getEtape()] < self::TAB_PROCESS[$placeKey]
+            ) {
                 $this->historiques[$historique->getEtape()] = $historique;
             }
         }

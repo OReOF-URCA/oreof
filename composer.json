@@ -23,6 +23,7 @@
         "gotenberg/gotenberg-php": "^1.1",
         "jfcherng/php-diff": "^6.15",
         "knplabs/knp-snappy-bundle": "^1.9",
+        "liip/imagine-bundle": "^2.15",
         "mpdf/mpdf": "^8.1",
         "phpdocumentor/reflection-docblock": "^5.4",
         "phpoffice/phpspreadsheet": "^5.1",

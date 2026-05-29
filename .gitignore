@@ -58,3 +58,15 @@ public/api_json/
 ### exclude sql ###
 /*.sql
 /pense-bete.md
+
+
+### exclude logos ###
+/public/uploads/logos/
+
+###> liip/imagine-bundle ###
+/public/media/cache/
+###< liip/imagine-bundle ###
+
+###Le token FontAwesome ###
+.npmrc
+.yarnrc.yml

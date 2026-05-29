@@ -124,7 +124,11 @@ class ParcoursRepository extends ServiceEntityRepository
                     $direction
                 );
             } else {
-                $qb->addOrderBy('p.' . $sort, $direction);
+                $validSortFields = ['libelle', 'sigle', 'typeParcours']; // Règle un crash qui arrive parfois quand on supprime ce que l'on a écrit dans la recherche de parcours.
+                if (in_array($sort, $validSortFields))
+                {
+                    $qb->addOrderBy('p.' . $sort, $direction);
+                }
             }
         }
 

@@ -622,7 +622,8 @@ HTML;
                                 'adresse' => [
                                     $adresseSiegeURCA
                                 ]
-                            ]
+                            ],
+                            'modalites-inscription' => $localisation?->getEtablissement()?->getEtablissementInformation()?->getTarifInscription() ?? "Non renseigné."
                         ],
                         'adresse-information' => ['adresse' => $adresseSiegeURCA],
                         'restauration' => $localisation?->getEtablissement()?->getEtablissementInformation()?->getRestauration() ?? "Non renseigné.",

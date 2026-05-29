@@ -10,6 +10,7 @@
         <th>Situation Pro. ?</th>
         <th>Projet ?</th>
         <th>ECTS Obli. ?</th>
+        <th>Logo</th>
         <th></th>
     </tr>
     </thead>
@@ -25,6 +26,17 @@
             <td>{{ type_diplome.hasSituationPro|badgeBoolean }}</td>
             <td>{{ type_diplome.hasProjet|badgeBoolean }}</td>
             <td>{{ type_diplome.ectsObligatoireSurEc|badgeBoolean }}</td>
+
+            <td>
+                {% for filename in type_diplome.logo ?? [] %}
+                    <img src="{{ asset('uploads/logos/' ~ filename) }}"
+                         alt="Logo"
+                         style="max-height: 40px; max-width: 60px; object-fit: contain;">
+                {% else %}
+                    <span class="text-muted">Aucun logo</span>
+                {% endfor %}
+            </td>
+
             <td class="text-end">
                 <button
                         {{ stimulus_controller('modal', {
