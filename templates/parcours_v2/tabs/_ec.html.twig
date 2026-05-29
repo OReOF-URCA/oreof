@@ -9,7 +9,8 @@
             </div>
             <div>
                 <h4 class="text-sm font-black text-secondary-700 max-w-[60ch] wrap-break-word whitespace-normal">
-                    {{ elem.display }} {{ elem.validationStatus|badgeValidationShort(2) }}
+                    {{ elem.display }}
+                    <twig:Dot :dto="elem.validationStatus|badgeValidationDot(2)"/>
                 </h4>
                 <div class="flex mt-2 gap-x-2">
                     {% if ec.elementConstitutif.natureUeEc == null %}

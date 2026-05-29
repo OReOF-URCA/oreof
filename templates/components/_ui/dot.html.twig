@@ -1,0 +1,8 @@
+<span
+        class="inline-flex items-center justify-center rounded-full {{ this.getVariantClasses() }}{{ this.extraClass ? ' ' ~ this.extraClass : '' }}"
+        style="width: {{ this.getSizeValue() }}rem; height: {{ this.getSizeValue() }}rem;"
+    {% if this.tooltip %}
+        {{ stimulus_controller('tooltip') }}
+        title="{{ this.tooltip }}"{% endif %}
+></span>
+

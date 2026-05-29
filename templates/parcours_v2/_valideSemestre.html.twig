@@ -1,4 +1,4 @@
 <span class="flex items-center gap-1">
-    {{ sem.validationStatus|badgeValidationLong }}
+    <twig:Badge :dto="sem.validationStatus|badgeValidationLongDto"/>
 </span>
 <span class="text-xs font-medium text-secondary-400 flex items-center">Dernière modif. : {{ sem.lastModification|time_ago }}</span>

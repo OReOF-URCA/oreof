@@ -41,7 +41,7 @@
                     </span>
                     <div class="flex items-center gap-2 ml-auto">
                         <span class="text-[8px] opacity-80">{{ sem.heuresEctsSemestre.sommeSemestreEcts }} ECTS</span>
-                        {{ sem.semestre.validationStatus|badgeValidationShort }}
+                        <twig:Dot :dto="sem.semestre.validationStatus|badgeValidationDot('xs')"/>
                     </div>
                 </div>
             {% else %}

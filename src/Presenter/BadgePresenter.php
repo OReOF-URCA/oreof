@@ -12,10 +12,12 @@ declare(strict_types=1);
 namespace App\Presenter;
 
 use App\DTO\BadgeView;
+use App\DTO\DotView;
 use App\Enums\BadgeEnumInterface;
 use App\Enums\EtatChangeRfEnum;
 use App\Enums\EtatDpeEnum;
 use App\Enums\TypeModificationDpeEnum;
+use App\Enums\ValidationStatusEnum;
 
 final class BadgePresenter
 {
@@ -145,5 +147,101 @@ final class BadgePresenter
             $stateValues,
         );
     }
-}
 
+    public function fromValidationStatusLong(ValidationStatusEnum $status): BadgeView
+    {
+        return match ($status) {
+            ValidationStatusEnum::VALID => new BadgeView(
+                label: 'Conforme aux règles',
+                variant: 'success',
+                icon: 'icon:check:bold',
+                soft: false,
+                pill: true,
+            ),
+            ValidationStatusEnum::INVALID => new BadgeView(
+                label: 'Non conforme aux règles',
+                variant: 'danger',
+                icon: 'mdi:close-outline',
+                soft: false,
+                pill: true,
+            ),
+            ValidationStatusEnum::INCOMPLETE => new BadgeView(
+                label: 'Incomplet',
+                variant: 'warning',
+                icon: 'mdi:alert-outline',
+                soft: false,
+                pill: true,
+            ),
+            ValidationStatusEnum::NA => new BadgeView(
+                label: 'Non applicable',
+                variant: 'secondary',
+                soft: false,
+                pill: true,
+            ),
+        };
+    }
+
+    public function fromValidationStatusShort(ValidationStatusEnum $status, string $size = '1.5'): BadgeView
+    {
+        return match ($status) {
+            ValidationStatusEnum::VALID => new BadgeView(
+                label: '',
+                variant: 'success',
+                size: $size,
+                soft: false,
+                pill: true,
+                extraClass: "inline-block w-{$size} h-{$size} rounded-full",
+            ),
+            ValidationStatusEnum::INVALID => new BadgeView(
+                label: '',
+                variant: 'danger',
+                size: $size,
+                soft: false,
+                pill: true,
+                extraClass: "inline-block w-{$size} h-{$size} rounded-full",
+            ),
+            ValidationStatusEnum::INCOMPLETE => new BadgeView(
+                label: '',
+                variant: 'warning',
+                size: $size,
+                soft: false,
+                pill: true,
+                extraClass: "inline-block w-{$size} h-{$size} rounded-full",
+            ),
+            ValidationStatusEnum::NA => new BadgeView(
+                label: '',
+                variant: 'secondary',
+                size: $size,
+                soft: false,
+                pill: true,
+                extraClass: "inline-block w-{$size} h-{$size} rounded-full",
+            ),
+        };
+    }
+
+    /**
+     * Retourne un DotView pour le composant Dot (simple rond coloré avec tooltip)
+     */
+    public function fromValidationStatusDot(ValidationStatusEnum $status, string $size = 'md', string $tooltip = ''): DotView
+    {
+        $variantMapping = match ($status) {
+            ValidationStatusEnum::VALID => 'success',
+            ValidationStatusEnum::INVALID => 'danger',
+            ValidationStatusEnum::INCOMPLETE => 'warning',
+            ValidationStatusEnum::NA => 'secondary',
+        };
+
+        $tooltipMapping = match ($status) {
+            ValidationStatusEnum::VALID => 'Conforme aux règles',
+            ValidationStatusEnum::INVALID => 'Non conforme aux règles',
+            ValidationStatusEnum::INCOMPLETE => 'Incomplet',
+            ValidationStatusEnum::NA => 'Non applicable',
+        };
+
+        return new DotView(
+            variant: $variantMapping,
+            size: $size,
+            tooltip: $tooltip ?: $tooltipMapping,
+        );
+    }
+}

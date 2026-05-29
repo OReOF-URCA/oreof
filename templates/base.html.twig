@@ -10,19 +10,21 @@
         let accessibility
 
         try {
-    data-controller="modalturbo frame-loader"
+          accessibility = JSON.parse(localStorage.getItem('oreof-a11y') || 'null')
         } catch (e) {
+          accessibility = null
+        }
+
+          const preferredTheme = accessibility && accessibility.theme ? accessibility.theme : null
+          const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+          const themeFromPref = preferredTheme === 'system' ? null : preferredTheme
+          const theme = (themeFromPref === 'dark' || themeFromPref === 'light')
+            ? themeFromPref
           : ((savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : (prefersDark ? 'dark' : 'light'))
 
-        document.documentElement.setAttribute('data-theme', theme)
-
-        if (accessibility) {
-          document.documentElement.setAttribute('data-a11y-font', accessibility.font || 'default')
-          document.documentElement.setAttribute('data-a11y-size', accessibility.size || 'normal')
-          document.documentElement.setAttribute('data-a11y-contrast', accessibility.contrast ? 'high' : 'normal')
-          document.documentElement.setAttribute('data-a11y-motion', accessibility.motion ? 'reduced' : 'normal')
+          document.documentElement.setAttribute('data-theme', theme)
         }
-      })()
+      )
     </script>
     <link rel="preconnect" href="https://fonts.gstatic.com"/>
     <style>
@@ -31,14 +33,17 @@
             height: auto;
             border-radius: 4px;
         }
+
         @media (min-width: 992px) {
             .markdown-body img {
                 max-width: 60%;
             }
+
             #helpOffcanvas .markdown-body img {
                 max-width: 100%;
             }
         }
+
         .markdown-body iframe {
             border-radius: 4px;
         }
@@ -61,12 +66,12 @@
     {% endblock %}
 </head>
 <body
-    class="min-h-screen"
-    data-controller="modalturbo frame-loader"
+        class="min-h-screen"
+        data-controller="modalturbo frame-loader"
 >
 <template id="global-loader-stimulus" hidden>
     <div class="flex justify-center py-6">
-        <twig:Spinner size="md" variant="secondary" label="Chargement..." />
+        <twig:Spinner size="md" variant="secondary" label="Chargement..."/>
     </div>
 </template>
 <!-- toast Tailwindcss-->
@@ -134,9 +139,12 @@
         {% for label, messages in app.flashes %}
             {% for message in messages %}
                 {% set bgClass = label == 'info' ? 'bg-indigo-600' : label == 'success' ? 'bg-green-600' : label == 'warning' ? 'bg-yellow-500' : label == 'danger' ? 'bg-red-600' : 'bg-gray-600' %}
-                <div class="fixed top-4 right-4 z-50 max-w-[28rem] flex items-start space-x-3 p-3 rounded-lg shadow-lg text-white {{ bgClass }}" role="status">
+                <div class="fixed top-4 right-4 z-50 max-w-[28rem] flex items-start space-x-3 p-3 rounded-lg shadow-lg text-white {{ bgClass }}"
+                     role="status">
                     <div class="flex-1 text-sm">{{ message }}</div>
-                    <button type="button" class="ml-2 text-white opacity-80 hover:opacity-100" aria-label="Close" onclick="this.closest('[role=\'status\']').remove()">&times;</button>
+                    <button type="button" class="ml-2 text-white opacity-80 hover:opacity-100" aria-label="Close"
+                            onclick="this.closest('[role=\'status\']').remove()">&times;
+                    </button>
                 </div>
             {% endfor %}
         {% endfor %}
@@ -229,68 +237,71 @@
 {# </div> #}
 
 <!-- Modal Image Fullscreen (Tailwind) -->
-<div id="imageFullscreenModal" class="hidden fixed inset-0 z-[100] items-center justify-center bg-black/70 p-4" aria-hidden="true" role="dialog">
+<div id="imageFullscreenModal" class="hidden fixed inset-0 z-[100] items-center justify-center bg-black/70 p-4"
+     aria-hidden="true" role="dialog">
     <div class="relative max-w-[90vw] max-h-[90vh] w-full">
-        <button id="imageFullscreenModalCloseBtn" class="absolute top-4 right-4 text-white text-2xl leading-none" aria-label="Fermer">&times;</button>
+        <button id="imageFullscreenModalCloseBtn" class="absolute top-4 right-4 text-white text-2xl leading-none"
+                aria-label="Fermer">&times;
+        </button>
         <div class="flex items-center justify-center">
-            <img id="fullscreenModalImage" src="" alt="Plein écran" class="max-h-[90vh] max-w-full rounded" />
+            <img id="fullscreenModalImage" src="" alt="Plein écran" class="max-h-[90vh] max-w-full rounded"/>
         </div>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', () => {
     // Click on markdown images -> open fullscreen modal
-    document.body.addEventListener('click', function(e) {
-        if (e.target.tagName === 'IMG' && e.target.closest('.markdown-body')) {
-            const src = e.target.src;
-            const modalImg = document.getElementById('fullscreenModalImage');
-            const modal = document.getElementById('imageFullscreenModal');
-            if (modalImg && modal) {
-                modalImg.src = src;
-                modal.classList.remove('hidden');
-                modal.classList.add('flex');
-            }
+    document.body.addEventListener('click', function (e) {
+      if (e.target.tagName === 'IMG' && e.target.closest('.markdown-body')) {
+        const src = e.target.src
+        const modalImg = document.getElementById('fullscreenModalImage')
+        const modal = document.getElementById('imageFullscreenModal')
+        if (modalImg && modal) {
+          modalImg.src = src
+          modal.classList.remove('hidden')
+          modal.classList.add('flex')
         }
-    });
+      }
+    })
 
     // Close modal handlers
-    const modal = document.getElementById('imageFullscreenModal');
-    const modalClose = document.getElementById('imageFullscreenModalCloseBtn');
+    const modal = document.getElementById('imageFullscreenModal')
+    const modalClose = document.getElementById('imageFullscreenModalCloseBtn')
     if (modal) {
-        modal.addEventListener('click', (ev) => {
-            if (ev.target === modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                const modalImg = document.getElementById('fullscreenModalImage');
-                if (modalImg) modalImg.src = '';
-            }
-        });
+      modal.addEventListener('click', (ev) => {
+        if (ev.target === modal) {
+          modal.classList.add('hidden')
+          modal.classList.remove('flex')
+          const modalImg = document.getElementById('fullscreenModalImage')
+          if (modalImg) modalImg.src = ''
+        }
+      })
     }
     if (modalClose) {
-        modalClose.addEventListener('click', () => {
-            if (modal) {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                const modalImg = document.getElementById('fullscreenModalImage');
-                if (modalImg) modalImg.src = '';
-            }
-        });
+      modalClose.addEventListener('click', () => {
+        if (modal) {
+          modal.classList.add('hidden')
+          modal.classList.remove('flex')
+          const modalImg = document.getElementById('fullscreenModalImage')
+          if (modalImg) modalImg.src = ''
+        }
+      })
     }
 
     // Simple zoom-ready helper for markdown images
     const applyZoomReady = () => {
-        const imgs = document.querySelectorAll('.markdown-body img:not(.zoom-ready)');
-        imgs.forEach(img => {
-            img.classList.add('zoom-ready');
-            img.style.cursor = 'zoom-in';
-            img.title = "Cliquez pour agrandir";
-        });
-    };
-    applyZoomReady();
-    const observer = new MutationObserver(() => applyZoomReady());
-    observer.observe(document.body, { childList: true, subtree: true });
-});
+      const imgs = document.querySelectorAll('.markdown-body img:not(.zoom-ready)')
+      imgs.forEach(img => {
+        img.classList.add('zoom-ready')
+        img.style.cursor = 'zoom-in'
+        img.title = 'Cliquez pour agrandir'
+      })
+    }
+    applyZoomReady()
+    const observer = new MutationObserver(() => applyZoomReady())
+    observer.observe(document.body, { childList: true, subtree: true })
+  })
 </script>
 
 {% include '_ui/modal_wrapper.html.twig' with { open: false } %}
@@ -300,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <template id="global-spinner-template">
     <div class="turbo-spinner-overlay absolute top-0 left-0 w-full h-full flex justify-center items-center z-50 pointer-events-none">
-        <twig:Spinner variant="primary" size="lg" />
+        <twig:Spinner variant="primary" size="lg"/>
     </div>
 </template>
 

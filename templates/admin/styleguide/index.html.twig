@@ -709,6 +709,156 @@
             </div>
         </twig:Card>
 
+        {# Section Composant : Dot #}
+        <twig:Card title="Dot"
+                   description="Point coloré minimaliste pour indiquer un statut, une validation ou une présence. Idéal dans les tableaux et listes compactes.">
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Tailles (size)</h3>
+                    <p class="text-xs text-secondary-500 mb-3">size : xs / sm / md / lg / xl</p>
+                    <div class="flex items-center gap-4">
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="primary" size="xs"/>
+                            <span class="text-[10px] text-secondary-400">xs</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="primary" size="sm"/>
+                            <span class="text-[10px] text-secondary-400">sm</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="primary" size="md"/>
+                            <span class="text-[10px] text-secondary-400">md</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="primary" size="lg"/>
+                            <span class="text-[10px] text-secondary-400">lg</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="primary" size="xl"/>
+                            <span class="text-[10px] text-secondary-400">xl</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Variantes de couleur
+                        (variant)</h3>
+                    <p class="text-xs text-secondary-500 mb-3">variant : primary / success / warning / danger / info /
+                        secondary</p>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="primary" size="md"/>
+                            <span class="text-[10px] text-secondary-400">primary</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="success" size="md"/>
+                            <span class="text-[10px] text-secondary-400">success</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="warning" size="md"/>
+                            <span class="text-[10px] text-secondary-400">warning</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="danger" size="md"/>
+                            <span class="text-[10px] text-secondary-400">danger</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="info" size="md"/>
+                            <span class="text-[10px] text-secondary-400">info</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot variant="secondary" size="md"/>
+                            <span class="text-[10px] text-secondary-400">secondary</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Avec tooltip (survol)</h3>
+                    <p class="text-xs text-secondary-500 mb-3">tooltip : texte affiché au survol via l'attribut <code>title</code>
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <twig:Dot variant="success" size="md" tooltip="Conforme aux règles"/>
+                        <twig:Dot variant="warning" size="md" tooltip="Incomplet"/>
+                        <twig:Dot variant="danger" size="md" tooltip="Non conforme aux règles"/>
+                        <twig:Dot variant="secondary" size="md" tooltip="Non applicable"/>
+                        <span class="text-xs text-secondary-400 italic">← Survolez pour voir les tooltips</span>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Via filtre de validation
+                        (badgeValidationDot)</h3>
+                    <p class="text-xs text-secondary-500 mb-3">Utilisation recommandée pour les statuts de validation
+                        avec <code>ValidationStatusEnum</code></p>
+                    <div class="flex items-center gap-6">
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot
+                                    :dto="constant('App\\Enums\\ValidationStatusEnum::VALID')|badgeValidationDot('lg')"/>
+                            <span class="text-[10px] text-secondary-400">VALID</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot
+                                    :dto="constant('App\\Enums\\ValidationStatusEnum::INCOMPLETE')|badgeValidationDot('lg')"/>
+                            <span class="text-[10px] text-secondary-400">INCOMPLETE</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot
+                                    :dto="constant('App\\Enums\\ValidationStatusEnum::INVALID')|badgeValidationDot('lg')"/>
+                            <span class="text-[10px] text-secondary-400">INVALID</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-1">
+                            <twig:Dot :dto="constant('App\\Enums\\ValidationStatusEnum::NA')|badgeValidationDot('lg')"/>
+                            <span class="text-[10px] text-secondary-400">NA</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Utilisation inline dans un
+                        tableau</h3>
+                    <table class="w-full text-sm border-collapse">
+                        <thead>
+                        <tr class="border-b border-secondary-200 text-secondary-500 text-xs uppercase">
+                            <th class="text-left py-2 pr-4 font-semibold">Élément</th>
+                            <th class="text-center py-2 w-16 font-semibold">Statut</th>
+                            <th class="text-left py-2 font-semibold">Description</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-secondary-100">
+                        <tr>
+                            <td class="py-2 pr-4 font-medium">Formation A</td>
+                            <td class="py-2 text-center">
+                                <twig:Dot variant="success" size="sm" tooltip="Conforme"/>
+                            </td>
+                            <td class="py-2 text-secondary-500">Validation complète</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 pr-4 font-medium">Formation B</td>
+                            <td class="py-2 text-center">
+                                <twig:Dot variant="warning" size="sm" tooltip="Incomplet"/>
+                            </td>
+                            <td class="py-2 text-secondary-500">Données manquantes</td>
+                        </tr>
+                        <tr>
+                            <td class="py-2 pr-4 font-medium">Formation C</td>
+                            <td class="py-2 text-center">
+                                <twig:Dot variant="danger" size="sm" tooltip="Non conforme"/>
+                            </td>
+                            <td class="py-2 text-secondary-500">Erreurs détectées</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-secondary-900 text-secondary-200 p-4 rounded-md text-xs overflow-x-auto"><code>&lt;twig:Dot variant="success" size="md" /&gt;
+&lt;twig:Dot variant="warning" size="lg" tooltip="Incomplet" /&gt;
+
+{# Via filtre (recommandé pour ValidationStatusEnum) #}
+&lt;twig:Dot :dto="validationStatus|badgeValidationDot('md')" /&gt;
+&lt;twig:Dot :dto="validationStatus|badgeValidationDot('sm', 'Mon tooltip personnalisé')" /&gt;</code></pre>
+                </div>
+            </div>
+        </twig:Card>
+
         {# Section Composant : Spinner #}
         <twig:Card title="Spinner" description="Composant d’indication de chargement avec variantes de couleur et
                     tailles.">
