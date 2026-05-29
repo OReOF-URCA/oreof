@@ -34,6 +34,7 @@ use App\Repository\ProfilRepository;
 use App\Service\LheoXML;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
+use App\Utils\CheckParcours;
 use App\Utils\JsonRequest;
 use DateTimeImmutable;
 use Doctrine\Common\Annotations\AnnotationReader;
@@ -1068,9 +1069,12 @@ class ParcoursController extends BaseController
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/{parcours}/soft-delete/confirm', name: 'app_parcours_soft_delete_confirm')]
-    public function confirmSoftDeleteParcours(Parcours $parcours) {
+    public function confirmSoftDeleteParcours(Parcours $parcours, CheckParcours $check) {
+        $linkedData = $check->checkParcoursIsSafeToDelete($parcours->getId());
+
         return $this->render('parcours/_confirm_soft_delete.html.twig', [
-            'parcours_id' => $parcours->getId()
+            'parcours_id' => $parcours->getId(),
+            'checkData' => [$linkedData]
         ]);
     }
 }
