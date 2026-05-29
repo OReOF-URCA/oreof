@@ -158,8 +158,16 @@ class TypeDiplomeType extends AbstractType
                     'class' => 'plateformes-collection',
                 ],
             ]);
-        });
-
+        })
+            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
+            ->add('hasEcts', YesNoType::class, [
+                'label' => 'Utilise les ECTS',
+                'empty_data' => true,
+            ])
+            ->add('nbEctsParSemestre', null, [
+                'label' => 'Nombre d\'ECTS par semestre (laisser vide si pas de quota fixe)',
+                'required' => false,
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

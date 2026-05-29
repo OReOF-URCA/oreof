@@ -91,6 +91,7 @@ final class ParcoursManageComponent extends AbstractController
         'non_ouverture_cfvu' => 7,
         'non_ouverture' => 8,
         'cloture' => 8,
+        'tacite_reconduction' => 4,
     ];
 
     use DefaultActionTrait;

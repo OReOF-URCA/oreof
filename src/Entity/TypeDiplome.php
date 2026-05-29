@@ -118,6 +118,12 @@ class TypeDiplome
     #[ORM\Column]
     private ?bool $classique = true;
 
+    #[ORM\Column(options: ['default' => true])]
+    private bool $hasEcts = true;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $nbEctsParSemestre = 30;
+
     /**
      * @var Collection<int, TypeDiplomePlateformeAdmission>
      */
@@ -642,6 +648,29 @@ class TypeDiplome
         return $this;
     }
 
+    public function isHasEcts(): bool
+    {
+        return $this->hasEcts;
+    }
+
+    public function setHasEcts(bool $hasEcts): static
+    {
+        $this->hasEcts = $hasEcts;
+
+        return $this;
+    }
+
+    public function getNbEctsParSemestre(): ?int
+    {
+        return $this->nbEctsParSemestre;
+    }
+
+    public function setNbEctsParSemestre(?int $nbEctsParSemestre): static
+    {
+        $this->nbEctsParSemestre = $nbEctsParSemestre;
+
+        return $this;
+    }
     public function getLogo(): ?array
     {
         return $this->logo;

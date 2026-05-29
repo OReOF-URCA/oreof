@@ -9,6 +9,12 @@
                         mb-md-0 text-small justify-content-center">
                             EC
                         </div>
+                        {% if not isBut %}
+                            <div class="col-md-1 d-flex align-items-center justify-content-center
+                        text-secondary text-small">
+                                ECTS
+                            </div>
+                        {% endif %}
                         <div class="col-md-3 d-flex align-items-center mb-2 justify-content-center
                         text-secondary mb-md-0 text-small">
                             Fiche EC/matière associée
@@ -23,7 +29,6 @@
                             BCC
                         </div>
                         {% if not isBut %}
-
                             <div class="col-md-1 d-flex align-items-center justify-content-center
                         text-secondary text-small">
                                 Volumes Horaires
@@ -33,7 +38,7 @@
                                 MCCC
                             </div>
                         {% endif %}
-                        <div class="col-md-4 d-flex align-items-center justify-content-center
+                        <div class="col-md-{% if isBut %}4{% else %}3{% endif %} d-flex align-items-center justify-content-center
                         text-secondary text-small">
                             Actions
                         </div>
@@ -51,6 +56,15 @@
                                             <div class="text-muted text-small d-md-none">ec</div>
                                             {{ ec.code }}
                                         </div>
+                                        {% if not isBut %}
+                                            <div class="col-md-1 d-flex flex-column align-items-center justify-content-center">
+                                                <div class="text-muted text-small d-md-none">ECTS</div>
+                                                {{ component('badge_ects', {
+                                                    elementConstitutif: ec,
+                                                    parcours: parcours
+                                                }) }}
+                                            </div>
+                                        {% endif %}
                                         <div class="col-12 col-md-3 d-flex flex-column justify-content-center">
                                             <div class="text-muted text-small d-md-none">Matière</div>
                                             {% if ec.ficheMatiere != null %}
@@ -162,7 +176,7 @@
                                                 }) }}
                                             </div>
                                         {% endif %}
-                                        <div class="col-md-4 d-flex flex-column justify-content-center">
+                                        <div class="col-md-{% if isBut %}4{% else %}3{% endif %} d-flex flex-column justify-content-center">
                                             <div class="text-muted text-small d-md-none">Actions</div>
                                             <div class="row">
                                                 {% if isUeRaccrochee == true %}
@@ -430,6 +444,13 @@
                                                     <div class="text-muted text-small d-md-none">ec</div>
                                                     {{ ece.code }}
                                                 </div>
+                                                <div class="col-md-1 d-flex flex-column align-items-center justify-content-center">
+                                                    <div class="text-muted text-small d-md-none">ECTS</div>
+                                                    {{ component('badge_ects', {
+                                                        elementConstitutif: ece,
+                                                        parcours: parcours
+                                                    }) }}
+                                                </div>
                                                 <div class="col-md-3 d-flex flex-column justify-content-center">
                                                     <div class="text-muted text-small d-md-none">Matière</div>
                                                     {% if ece.ficheMatiere != null %}
@@ -532,7 +553,7 @@
                                                         ue: ue
                                                     }) }}
                                                 </div>
-                                                <div class="col-md-4 d-flex flex-column justify-content-center">
+                                                <div class="col-md-3 d-flex flex-column justify-content-center">
                                                     <div class="text-muted text-small d-md-none">Actions</div>
                                                     <div class="row">
                                                         {% if isUeRaccrochee == true %}

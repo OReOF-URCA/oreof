@@ -68,7 +68,6 @@ public/api_json_v2/
 *.swo
 *~
 .DS_Store
-.npmrc
 .yarnrc.yaml
 
 ###> Dependency files ###
@@ -97,7 +96,6 @@ migrations/Version*.php
 ###> Uploads & Temporary Files ###
 /public/uploads/help_images/
 /public/uploads/
-.npmrc
 
 ###> symfony/asset-mapper ###
 /public/assets/
@@ -120,3 +118,4 @@ config/reference.php
 ###Le token FontAwesome ###
 .npmrc
 .yarnrc.yml
+
