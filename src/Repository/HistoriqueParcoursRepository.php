@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\HistoriqueParcours;
 use App\Entity\Parcours;
+use App\Entity\CampagneCollecte;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -52,5 +53,49 @@ class HistoriqueParcoursRepository extends ServiceEntityRepository
             ->getResult();
 
         return count($data) > 0 ? $data[0] : null;
+    }
+
+    /**
+     * @return list<HistoriqueParcours>
+     */
+    public function findForConseilDocuments(
+        ?CampagneCollecte $campagneCollecte,
+        ?int              $composanteId = null,
+        ?int              $formationId = null,
+        ?int              $parcoursId = null,
+    ): array
+    {
+        $qb = $this->createQueryBuilder('h')
+            ->addSelect('p', 'f', 'c')
+            ->innerJoin('h.parcours', 'p')
+            ->innerJoin('p.formation', 'f')
+            ->leftJoin('f.composantePorteuse', 'c')
+            ->orderBy('h.created', 'DESC');
+
+        if ($campagneCollecte !== null) {
+            $qb
+                ->andWhere('f.dpe = :dpe')
+                ->setParameter('dpe', $campagneCollecte);
+        }
+
+        if ($composanteId !== null) {
+            $qb
+                ->andWhere('c.id = :composanteId')
+                ->setParameter('composanteId', $composanteId);
+        }
+
+        if ($formationId !== null) {
+            $qb
+                ->andWhere('f.id = :formationId')
+                ->setParameter('formationId', $formationId);
+        }
+
+        if ($parcoursId !== null) {
+            $qb
+                ->andWhere('p.id = :parcoursId')
+                ->setParameter('parcoursId', $parcoursId);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 }

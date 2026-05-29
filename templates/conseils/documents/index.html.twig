@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    Documents de conseil (PV & justificatifs)
+{% endset %}
+
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {title: 'Conseils'},
+        {title: header_title}
+    ]}) }}
+{% endblock %}
+
+{% block bouton_header %}
+    <twig:Button
+            href="{{ path('app_conseils_documents_download', {
+                composante: selectedComposanteId,
+                formation: selectedFormationId,
+                parcours: selectedParcoursId,
+                hasPv: selectedHasPv,
+                hasJustification: selectedHasJustification
+            }) }}"
+            variant="info"
+            icon="icon:download"
+            label="Télécharger les documents filtrés (ZIP)"
+            tooltip="Télécharger tous les PV et justificatifs correspondant aux filtres"
+    />
+{% endblock %}
+
+{% block content %}
+    {{ component('DataTable', { config: table }) }}
+{% endblock %}
+
+

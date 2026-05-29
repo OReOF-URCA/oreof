@@ -1,0 +1,25 @@
+{% set complements = item.complements ?? {} %}
+{% set fichier = complements.fichier_note|default(null) %}
+{% set fichierOriginal = complements.fichier_note_original|default(fichier) %}
+
+{% if fichier %}
+    <div class="flex items-center gap-2">
+        <twig:Badge label="Oui" variant="success" size="sm"/>
+        <twig:Button
+                href="{{ path('app_upload_download', {
+                    context: 'conseils',
+                    filename: fichier,
+                    originalName: fichierOriginal
+                }) }}"
+                variant="warning"
+                size="sm"
+                icon="icon:download"
+                label="Télécharger"
+                target="_blank"
+                rel="noopener noreferrer"
+        />
+    </div>
+{% else %}
+    <twig:Badge label="Non" variant="danger" size="sm"/>
+{% endif %}
+
