@@ -86,8 +86,8 @@
                     </div>
                     <hr class="hr-plaquette">
                 {% else %}
-                    {{ render(controller('App\\Controller\\StructureShowController::licence', {
-                        parcours: formation.parcours[0].id,
+                    {{ render(controller('App\\Controller\\StructureShowController::parcoursShow', {
+                        parcours: parcours.id,
                         hasLastVersion: hasLastVersion ?? false,
                     })) }}
                 {% endif %}
