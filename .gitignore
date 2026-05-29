@@ -69,3 +69,4 @@ public/api_json/
 
 ###Le token FontAwesome ###
 .npmrc
+.yarnrc.yml
