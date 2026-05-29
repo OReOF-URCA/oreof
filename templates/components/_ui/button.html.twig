@@ -18,6 +18,7 @@ Composant Button — exemples d'usage :
     'md': 'h-4 w-4',
     'lg': 'h-4 w-4',
 }[size] ?? 'h-4 w-4' %}
+{% set iconSizeStyle = 'width: 1rem; height: 1rem; min-width: 1rem; min-height: 1rem; flex: 0 0 auto;' %}
 
 {# ── Couleurs soft (défaut) : fond teinté, bordure légère ─────── #}
 {% set softColors = {
@@ -98,10 +99,10 @@ Composant Button — exemples d'usage :
             {{- extraAttrsRendered|raw -}}
             {{- attributes -}}
     >
-        {% if icon != '' and not iconEnd %}{{ ux_icon(icon, {class: iconSizeClass}) }}{% endif %}
+        {% if icon != '' and not iconEnd %}{{ ux_icon(icon, {class: iconSizeClass, style: iconSizeStyle}) }}{% endif %}
         {% if label != '' %}<span>{{ label }}</span>{% endif %}
         {{ slotContent|trim }}
-        {% if icon != '' and iconEnd %}{{ ux_icon(icon, {class: iconSizeClass}) }}{% endif %}
+        {% if icon != '' and iconEnd %}{{ ux_icon(icon, {class: iconSizeClass, style: iconSizeStyle}) }}{% endif %}
     </a>
 {% else %}
     <button
@@ -118,9 +119,9 @@ Composant Button — exemples d'usage :
             {{- extraAttrsRendered|raw -}}
             {{- attributes -}}
     >
-        {% if icon != '' and not iconEnd %}{{ ux_icon(icon, {class: iconSizeClass}) }}{% endif %}
+        {% if icon != '' and not iconEnd %}{{ ux_icon(icon, {class: iconSizeClass, style: iconSizeStyle}) }}{% endif %}
         {% if label != '' %}<span>{{ label }}</span>{% endif %}
         {{ slotContent|trim }}
-        {% if icon != '' and iconEnd %}{{ ux_icon(icon, {class: iconSizeClass}) }}{% endif %}
+        {% if icon != '' and iconEnd %}{{ ux_icon(icon, {class: iconSizeClass, style: iconSizeStyle}) }}{% endif %}
     </button>
 {% endif %}

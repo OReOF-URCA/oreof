@@ -2,10 +2,9 @@
 
 namespace App\Controller;
 
-use App\Classes\CalculStructureParcours;
 use App\Classes\MyGotenbergPdf;
 use App\Entity\Formation;
-use App\Service\TypeDiplomeResolver;
+use App\TypeDiplome\TypeDiplomeResolver;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
