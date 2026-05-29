@@ -30,6 +30,13 @@
                 column-gap: 20px; /* Espace entre les colonnes */
             }
 
+            .two-columns p,
+            .two-columns ul,
+            .two-columns li,
+            .two-columns div {
+                break-inside: avoid;
+            }
+
             .header {
                 margin-bottom: 1em;
                 text-align: right;
@@ -52,11 +59,107 @@
                 padding-bottom: 0.5em;
             }
 
+            .header {
+                position: relative;
+                padding-right: 110px;
+            }
+
+            .header::after {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 95px;
+                height: 95px;
+                background-image: url('{{ absolute_url(asset('images/logo_urca_quadri.png')) }}');
+                background-repeat: no-repeat;
+                background-size: contain;
+                background-position: center;
+                opacity: 0.25;
+            }
+
+            .rubrique-card {
+                position: relative;
+                margin-bottom: 10px;
+                padding: 10px 12px;
+                border: 1px solid #d8c7c5;
+                border-radius: 8px;
+                background: #ffffff;
+                overflow: hidden;
+            }
+
+            .rubrique-card::before {
+                content: '';
+                position: absolute;
+                right: -8px;
+                top: -8px;
+                width: 115px;
+                height: 115px;
+                background-image: url('{{ absolute_url(asset('images/vague_urca.jpg')) }}');
+                background-repeat: no-repeat;
+                background-size: cover;
+                opacity: 0.08;
+            }
+
+            .rubrique-content {
+                position: relative;
+                z-index: 1;
+            }
+
+            .section-title {
+                display: inline-block;
+                margin-top: 0.8em;
+                margin-bottom: 0.5em;
+            }
+
+            .section-title .icon {
+                display: inline-block;
+                width: 18px;
+                height: 18px;
+                line-height: 18px;
+                margin-right: 6px;
+                text-align: center;
+                font-size: 10px;
+                font-weight: bold;
+                color: #ffffff;
+                background: #660800;
+                border-radius: 50%;
+                vertical-align: middle;
+            }
+
+            .section-title .label {
+                vertical-align: middle;
+            }
+
+            i,
+            .fa,
+            .fal,
+            .far,
+            .fas {
+                font-size: 10px;
+                line-height: 1;
+                vertical-align: middle;
+            }
+
 
         </style>
     {% endblock %}
 
 {% block content %}
+    {% set section_icons = {
+        identiteFormation: 'ID',
+        localisationFormation: 'LO',
+        presentationFormation: 'PR',
+        presentationParcours: 'PA',
+        descriptifParcours: 'DS',
+        competences: 'CP',
+        structure: 'ST',
+        admission: 'AD',
+        inscription: 'IN',
+        etApres: 'EA',
+        contacts: 'CO'
+    } %}
+
     {% for parcours in formation.parcours %}
         <div class="header">
             <p>{{ formation.typeDiplome.libelle }}</p>
@@ -66,9 +169,11 @@
         {% for key, rubrique in rubriques|filter(rubrique => rubrique != null) %}
             {# test si se termine par formation, si oui afficher #}
             {% if key|slice(-9) == 'Formation' and formation.hasParcours == false %}
-                <h2>{{ key|trans({}, 'communication') }}</h2>
-                <div class="two-columns">
-                    {{ include('typeDiplome/formation/plaquette/_'~key~'.html.twig') }}
+                <h2 class="section-title"><span class="icon">{{ section_icons[key]|default('FR') }}</span><span class="label">{{ key|trans({}, 'communication') }}</span></h2>
+                <div class="rubrique-card">
+                    <div class="rubrique-content two-columns">
+                        {{ include('typeDiplome/formation/plaquette/_'~key~'.html.twig') }}
+                    </div>
                 </div>
                 {#            <hr class="hr-plaquette"> #}
             {% endif %}
@@ -81,15 +186,24 @@
             {% if key|slice(-9) != 'Formation' %}
                 {% if key != 'structure' %}
                     {#                    <h3>{{ key|trans({}, 'communication') }}</h3> #}
-                    <div class="two-columns">
-                        {{ include('typeDiplome/formation/plaquette/_'~key~'.html.twig') }}
+                    <h3 class="section-title"><span class="icon">{{ section_icons[key]|default('PC') }}</span><span class="label">{{ key|trans({}, 'communication') }}</span></h3>
+                    <div class="rubrique-card">
+                        <div class="rubrique-content two-columns">
+                            {{ include('typeDiplome/formation/plaquette/_'~key~'.html.twig') }}
+                        </div>
                     </div>
                     <hr class="hr-plaquette">
                 {% else %}
-                    {{ render(controller('App\\Controller\\StructureShowController::parcoursShow', {
-                        parcours: parcours.id,
-                        hasLastVersion: hasLastVersion ?? false,
-                    })) }}
+                    <h3 class="section-title"><span class="icon">{{ section_icons[key]|default('ST') }}</span><span class="label">{{ key|trans({}, 'communication') }}</span></h3>
+                    <div class="rubrique-card">
+                        <div class="rubrique-content">
+                            {{ render(controller('App\\Controller\\StructureShowController::parcoursShow', {
+                                parcours: parcours.id,
+                                hasLastVersion: hasLastVersion ?? false,
+                                print: true,
+                            })) }}
+                        </div>
+                    </div>
                 {% endif %}
             {% endif %}
         {% endfor %}

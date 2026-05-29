@@ -21,7 +21,8 @@ class StructureShowController extends AbstractController
         Versioningstructure $versioningStructure,
         VersioningParcours $versioningParcours,
         Parcours $parcours,
-        bool $hasLastVersion = false
+        bool $hasLastVersion = false,
+        bool $print = false
     ): Response {
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours?->getTypeDiplome());
@@ -55,6 +56,7 @@ class StructureShowController extends AbstractController
             'diffStructureCampagne' => $diffStructureCampagnePrecedente ?? null,
             'dto' => $dto,
             'hasLastVersion' => $hasLastVersion,
+            'print' => $print,
         ]);
     }
 
@@ -63,7 +65,8 @@ class StructureShowController extends AbstractController
         Versioningstructure $versioningStructure,
         VersioningParcours $versioningParcours,
         Parcours           $parcours,
-        bool               $hasLastVersion = false
+        bool               $hasLastVersion = false,
+        bool               $print = false
     ): Response
     {
 
@@ -85,6 +88,7 @@ class StructureShowController extends AbstractController
             'diffStructure' => $diffStructure ?? null,
             'dto' => $dto,
             'hasLastVersion' => $hasLastVersion,
+            'print' => $print,
         ]);
     }
 }
