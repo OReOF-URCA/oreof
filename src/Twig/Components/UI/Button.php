@@ -68,6 +68,12 @@ final class Button
     /** data-action Stimulus optionnel */
     public string $dataAction = '';
 
+    /** Attributs HTML additionnels.
+     * - array : ['data-live-action-param' => 'sort']
+     * - string : live_action(...) ou tout bloc d'attributs brut
+     */
+    public mixed $attr = [];
+
     /** Bouton pleine largeur */
     public bool $fullWidth = false;
 

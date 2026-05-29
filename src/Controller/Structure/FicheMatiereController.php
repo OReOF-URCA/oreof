@@ -34,11 +34,8 @@ class FicheMatiereController extends BaseController
     }
 
     #[Route('/liste', name: 'liste')]
-    public function liste(
-        TurboStream $turboStream,
-//        UserRepository $userRepository,
-//        Request $request
-    ): Response {
+    public function liste(): Response
+    {
         // Déterminer les conditions de base selon les droits
         $baseWheres = ['e.campagneCollecte = :campagne'];
         $baseParameters = ['campagne' => $this->getCampagneCollecte()];
@@ -82,10 +79,8 @@ class FicheMatiereController extends BaseController
     }
 
     #[Route('/liste/hors-diplome', name: 'liste_hd')]
-    public function listeHorsDiplome(
-        UserRepository $userRepository,
-        Request $request
-    ): Response {
+    public function listeHorsDiplome(): Response
+    {
         $baseWheres = ['e.campagneCollecte = :campagne', 'e.horsDiplome = 1'];
         $baseParameters = ['campagne' => $this->getCampagneCollecte()];
         $baseJoins = [];
