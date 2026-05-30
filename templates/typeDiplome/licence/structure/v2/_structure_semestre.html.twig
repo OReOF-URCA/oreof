@@ -25,7 +25,7 @@
                         <span class="block text-base font-black">{{ semestre.heuresEctsSemestre.sommeSemestreTotalPres|filtreHeures }} h</span>
                     </span>
                 {% endif %}
-                {% if distanciel %}
+                {% if distanciel or semestre.heuresEctsSemestre.sommeSemestreTotalDist > 0 %}
                     <span class="text-center">
                         <span class="block text-[9px] font-bold uppercase text-orange-400">Distanciel</span>
                         <span class="block text-base font-black">{{ semestre.heuresEctsSemestre.sommeSemestreTotalDist|filtreHeures }} h</span>

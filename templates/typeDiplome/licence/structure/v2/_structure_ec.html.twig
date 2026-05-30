@@ -4,6 +4,7 @@
 {% set metricDistClass = metricCellClass ~ ' bg-orange-50/20 text-orange-700' %}
 {% set metricTotalClass = metricCellClass ~ ' font-black text-secondary-900' %}
 {% set rowClass = ecEnfant ? 'bg-indigo-50/40 hover:bg-indigo-50/70' : 'hover:bg-secondary-50/70' %}
+{% set showDistancielInline = distancielInline is defined and distancielInline %}
 
 <tr class="ec border-b border-secondary-100 transition-colors {{ rowClass }}">
     <td class="{{ cellClass }} border-l-4 border-indigo-500">
@@ -19,23 +20,16 @@
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                         {% if not ecEnfant %}
-                            {% if (isBut is defined and isBut == false) or isBut is not defined %}
                                 <span class="mt-1 inline-flex shrink-0 items-center gap-2 rounded-full border border-indigo-200 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-600 shadow-sm bg-secondary-100">
                             {{ ec.elementConstitutif.code }}</span>
-                            {% endif %}
                         {% endif %}
 
                         {% if ec.elementConstitutif.ficheMatiere != null %}
                             <a href="{{ url('fiche_matiere_v2_voir', {slug: ec.elementConstitutif.ficheMatiere.slug}) }}"
                                target="_blank"
                                class="min-w-0 text-sm font-semibold leading-relaxed text-secondary-800 hover:text-indigo-700 hover:underline">
-                                {% if isBut is defined and isBut == true %}
-                                    <span class="font-black">{{ ec.elementConstitutif.ficheMatiere.sigle }}</span>
-                                    {{ ec.elementConstitutif.ficheMatiere.libelle }}
-                                {% else %}
                                     <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.libelle|displayDiff : '' }}</span>
                                     <span class="show_current">{{ ec.elementConstitutif.ficheMatiere.display }}</span>
-                                {% endif %}
                             </a>
                         {% else %}
                             <span class="text-sm font-semibold leading-relaxed text-secondary-800">
@@ -112,19 +106,47 @@
             <td class="{{ metricPresClass }}">
                 <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.cmPres|displayDiff : '' }}</span>
                 <span class="show_current">{{ ec.heuresEctsEc.cmPres|filtreHeures }}</span>
+                {% if showDistancielInline and ec.heuresEctsEc.cmDist > 0 %}
+                    <div class="mt-1 text-[10px] font-semibold text-orange-700">
+                        <span class="rounded-full bg-orange-100 px-1.5 py-0.5 font-black uppercase tracking-wide">Dist.</span>
+                        <span class="ml-1 show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.cmDist|displayDiff : '' }}</span>
+                        <span class="ml-1 show_current">{{ ec.heuresEctsEc.cmDist|filtreHeures }}</span>
+                    </div>
+                {% endif %}
             </td>
             <td class="{{ metricPresClass }}">
                 <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.tdPres|displayDiff : '' }}</span>
                 <span class="show_current">{{ ec.heuresEctsEc.tdPres|filtreHeures }}</span>
+                {% if showDistancielInline and ec.heuresEctsEc.tdDist > 0 %}
+                    <div class="mt-1 text-[10px] font-semibold text-orange-700">
+                        <span class="rounded-full bg-orange-100 px-1.5 py-0.5 font-black uppercase tracking-wide">Dist.</span>
+                        <span class="ml-1 show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.tdDist|displayDiff : '' }}</span>
+                        <span class="ml-1 show_current">{{ ec.heuresEctsEc.tdDist|filtreHeures }}</span>
+                    </div>
+                {% endif %}
             </td>
             <td class="{{ metricPresClass }}">
                 <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.tpPres|displayDiff : '' }}</span>
                 <span class="show_current">{{ ec.heuresEctsEc.tpPres|filtreHeures }}</span>
+                {% if showDistancielInline and ec.heuresEctsEc.tpDist > 0 %}
+                    <div class="mt-1 text-[10px] font-semibold text-orange-700">
+                        <span class="rounded-full bg-orange-100 px-1.5 py-0.5 font-black uppercase tracking-wide">Dist.</span>
+                        <span class="ml-1 show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.tpDist|displayDiff : '' }}</span>
+                        <span class="ml-1 show_current">{{ ec.heuresEctsEc.tpDist|filtreHeures }}</span>
+                    </div>
+                {% endif %}
             </td>
 
             <td class="{{ metricPresClass }} font-black text-blue-700">
                 <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.sommeEcTotalPres|displayDiff : '' }}</span>
                 <span class="show_current">{{ ec.heuresEctsEc.sommeEcTotalPres|filtreHeures }}</span>
+                {% if showDistancielInline and ec.heuresEctsEc.sommeEcTotalDist > 0 %}
+                    <div class="mt-1 text-[10px] font-semibold text-orange-700">
+                        <span class="rounded-full bg-orange-100 px-1.5 py-0.5 font-black uppercase tracking-wide">Dist.</span>
+                        <span class="ml-1 show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.sommeEcTotalDist|displayDiff : '' }}</span>
+                        <span class="ml-1 show_current">{{ ec.heuresEctsEc.sommeEcTotalDist|filtreHeures }}</span>
+                    </div>
+                {% endif %}
             </td>
             <td class="{{ metricPresClass }} border-r border-secondary-100 text-secondary-600">
                 <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.tePres|displayDiff : '' }}</span>
@@ -133,7 +155,7 @@
         {% endif %}
     {% endif %}
 
-    {% if distanciel %}
+    {% if distanciel and not showDistancielInline %}
         {% if ec.elementsConstitutifsEnfants|length > 0 %}
             <td colspan="4" class="bg-orange-50/10"></td>
         {% else %}
@@ -163,5 +185,3 @@
         </td>
     {% endif %}
 </tr>
-
-

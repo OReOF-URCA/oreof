@@ -1,3 +1,5 @@
+{% set hasDistancielData = ue.heuresEctsUe.sommeUeTotalDist > 0 %}
+
 <div class="flex items-start justify-between gap-4 border-b border-secondary-200 bg-secondary-50 px-4 py-3 text-[10px] font-bold uppercase tracking-tight text-secondary-400 {% if enfant is defined and enfant %}border-l-4 border-l-amber-300 bg-amber-50/40{% endif %}">
 
     <div class="flex items-center gap-4">
@@ -41,12 +43,16 @@
         {% if ue.uesEnfants|length > 0 %}
             <twig:Badge label="UE a choix restreint : {{ ue.uesEnfants|length }} choix possibles" variant="info"/>
         {% endif %}
+        {% if hasDistancielData %}
+            <twig:Badge label="Distanciel : {{ ue.heuresEctsUe.sommeUeTotalDist|filtreHeures }} h" variant="warning"/>
+        {% endif %}
     </span>
 </div>
 
 {% if ue.ue.natureUeEc is defined and ue.ue.natureUeEc != null and ue.ue.natureUeEc.libre == true %}
 
     {# ---- Cas 1 : UE à choix libre ---- #}
+    {% set hasDistancielData = ue.heuresEctsUe.sommeUeTotalDist > 0 %}
     {% if presentiel %}{% set colspan = 4 %}{% elseif distanciel %}{% set colspan = 8 %}{% else %}{% set colspan = 0 %}{% endif %}
     <table class="w-full text-xs">
         <tbody>
@@ -77,10 +83,19 @@
 {% else %}
 
     {# ---- Cas 3 : UE normale avec ECs ---- #}
+    {% set hasDistancielData = ue.heuresEctsUe.sommeUeTotalDist > 0 %}
+    {% set distancielInline = presentiel and (not distanciel) and hasDistancielData %}
     <table class="w-full text-xs bg-white">
         <thead class="text-[10px] font-black uppercase tracking-tighter text-secondary-400 bg-secondary-50/50 border-b border-secondary-100 text-center">
         <tr class="ec">
-            <th class="px-5 py-3 text-left w-2/5 font-bold">Fiche EC/Matière</th>
+            <th class="px-5 py-3 text-left w-2/5 font-bold">
+                Fiche EC/Matiere
+                {% if distancielInline %}
+                    <span class="ml-2 inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[9px] font-black text-orange-700">
+                        Dist. integre
+                    </span>
+                {% endif %}
+            </th>
             <th class="py-3">MCCC</th>
             <th class="py-3">ECTS</th>
             {% if presentiel %}
@@ -111,7 +126,9 @@
                 diffEc: diffUe.elementConstitutifs[ordEc] ?? null,
                 indexEc: indexEc,
                 indexEcEnfant: -1,
-                UeDisplay: ue.display
+                UeDisplay: ue.display,
+                distancielAuto: hasDistancielData,
+                distancielInline: distancielInline
             }) }}
             {% for ordEce, ece in ec.elementsConstitutifsEnfants %}
                 {% set indexEcEnfant = loop.index0 %}
@@ -122,7 +139,9 @@
                     diffEc: diffUe.elementConstitutifs[ordEc].ecEnfants[ordEce] ?? null,
                     indexEc: indexEc,
                     indexEcEnfant: indexEcEnfant,
-                    UeDisplay: ue.display
+                    UeDisplay: ue.display,
+                    distancielAuto: hasDistancielData,
+                    distancielInline: distancielInline
                 }) }}
             {% endfor %}
         {% endfor %}
@@ -133,4 +152,3 @@
     </table>
 
 {% endif %}
-
