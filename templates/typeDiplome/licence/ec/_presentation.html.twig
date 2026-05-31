@@ -5,7 +5,7 @@
     </style>
 {% endblock %}
 
-{% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-indigo-500' %}
+{% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-primary-500 dark:text-primary-300' %}
 {% set textBoxClass = 'mt-2 rounded-xl border border-secondary-200 bg-secondary-50 px-4 py-3 text-sm leading-relaxed text-secondary-700' %}
 
 <div class="space-y-4">
@@ -28,7 +28,7 @@
     </div>
 
     <div class="grid gap-4 md:grid-cols-2">
-        <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+        <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4">
             <dl>
                 <dt class="{{ dtClass }}">Enseignement dispensé en</dt>
                 <dd class="mt-2 text-sm text-secondary-700">
@@ -51,7 +51,7 @@
         </dl>
         </div>
 
-        <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+        <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4">
             <dl>
                 <dt class="{{ dtClass }}">Support de cours en</dt>
                 <dd class="mt-2 text-sm text-secondary-700">

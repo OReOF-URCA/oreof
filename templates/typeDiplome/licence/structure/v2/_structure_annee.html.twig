@@ -1,16 +1,16 @@
 {% set displayAnnee = typeDiplome.libelleCourt ~' '~ annee.annee.ordre %}
 {% set semestresActifs = annee.semestres|filter(semestre => (semestre.semestre.nonDispense == false)) %}
 <section id="annee{{ annee.annee.ordre }}" class="mb-24">
-    <div class="sticky-year bg-secondary-50/95 backdrop-blur-sm py-4 border-b border-secondary-200 mb-8 flex items-center justify-between">
-        <h2 class="text-xl font-black text-secondary-800 uppercase tracking-tighter">{{ displayAnnee }}</h2>
+    <div class="sticky-year bg-bg backdrop-blur-sm py-4 border-b border-secondary-200 dark:border-secondary-700 mb-8 flex items-center justify-between">
+        <h2 class="text-xl font-black text-secondary-800 dark:text-secondary-300 uppercase tracking-tighter">{{ displayAnnee }}</h2>
         <div class="flex gap-4">
-            <div class="flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-100 rounded-md">
-                <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <span class="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Présentiel</span>
+            <div class="flex items-center gap-2 px-3 py-1 bg-primary-50 dark:bg-primary-900 border border-primary-100 dark:border-primary-800 rounded-md">
+                <div class="w-2 h-2 bg-primary-500 rounded-full"></div>
+                <span class="text-[10px] font-bold text-primary-700 dark:text-primary-500 uppercase tracking-wider">Présentiel</span>
             </div>
-            <div class="flex items-center gap-2 px-3 py-1 bg-orange-50 border border-orange-100 rounded-md">
-                <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                <span class="text-[10px] font-bold text-orange-700 uppercase tracking-wider">Distanciel</span>
+            <div class="flex items-center gap-2 px-3 py-1 bg-warning-50 dark:bg-warning-900 border border-orange-100 dark:border-warning-800 rounded-md">
+                <div class="w-2 h-2 bg-warning-500 rounded-full"></div>
+                <span class="text-[10px] font-bold text-warning-700 dark:text-warning-500 uppercase tracking-wider">Distanciel</span>
             </div>
         </div>
     </div>
@@ -39,7 +39,7 @@
                     </span>
 
                     <span class="text-center">
-                        <span class="block text-[9px] font-bold uppercase text-blue-400">Présentiel</span>
+                        <span class="block text-[9px] font-bold uppercase text-primary-400">Présentiel</span>
                         <span class="block text-xl font-black">{{ annee.heuresEctsAnnee.sommeAnneeTotalPres|filtreHeures }} h</span>
                     </span>
 
@@ -69,7 +69,7 @@
             <div class="border-t border-white/10 bg-secondary-950/40 px-6 py-5">
                 <div class="grid gap-4 lg:grid-cols-3">
                     <div class="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
-                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-blue-300">Détail
+                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-primary-300">Détail
                             présentiel</p>
                         <p class="mt-2 text-2xl font-black text-white">{{ annee.heuresEctsAnnee.sommeAnneeTotalPres|filtreHeures }}
                             h</p>

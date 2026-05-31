@@ -1,195 +1,197 @@
-<div class="scroll-track-visible" id="settings" {{ stimulus_controller('settings') }}>
+{% deprecated %}
 
-    <div class="mb-5" id="color">
-        <label class="mb-3 d-inline-block form-label">Dysléxique</label>
-        <div class="form-check">
-            <input type="checkbox" name="dyslexique"
-                   value="1"
-                   id="dyslexique"
-                   class="form-check-input"
-                    {{ stimulus_action('settings', 'changeDyslexique', 'change') }}
-            >
-            <label for="dyslexique" class="form-check-label">Activer la police "dysléxique"</label>
-        </div>
-    </div>
-    <div class="mb-5" id="color">
-        <label class="mb-3 d-inline-block form-label">Color</label>
-        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-blue" data-parent="color"
-            {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="blue-light"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">LIGHT BLUE</span>
-                </div>
-            </a>
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-blue" data-parent="color"
-               {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="blue-dark"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">DARK BLUE</span>
-                </div>
-            </a>
-        </div>
-        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-teal" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="teal-light"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">LIGHT TEAL</span>
-                </div>
-            </a>
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-teal" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="teal-dark"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">DARK TEAL</span>
-                </div>
-            </a>
-        </div>
-        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-sky" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="sky-light"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">LIGHT SKY</span>
-                </div>
-            </a>
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-sky" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="sky-dark"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">DARK SKY</span>
-                </div>
-            </a>
-        </div>
-        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-red" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="red-light"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">LIGHT RED</span>
-                </div>
-            </a>
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-red" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="red-dark"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">DARK RED</span>
-                </div>
-            </a>
-        </div>
-        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-green" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="green-light"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">LIGHT GREEN</span>
-                </div>
-            </a>
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-green" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="green-dark"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">DARK GREEN</span>
-                </div>
-            </a>
-        </div>
-        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-lime" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="lime-light"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">LIGHT LIME</span>
-                </div>
-            </a>
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-lime" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="lime-dark"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">DARK LIME</span>
-                </div>
-            </a>
-        </div>
-        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-pink" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="pink-light"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">LIGHT PINK</span>
-                </div>
-            </a>
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-pink" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="pink-dark"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">DARK PINK</span>
-                </div>
-            </a>
-        </div>
-        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-purple" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="purple-light"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">LIGHT PURPLE</span>
-                </div>
-            </a>
-            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-purple" data-parent="color"
-                    {{ stimulus_action('settings', 'changeColor') }}
-            >
-                <div class="card rounded-md p-3 mb-1 no-shadow color">
-                    <div class="purple-dark"></div>
-                </div>
-                <div class="text-muted text-part">
-                    <span class="text-extra-small align-middle">DARK PURPLE</span>
-                </div>
-            </a>
-        </div>
-    </div>
-</div>
+{#<div class="scroll-track-visible" id="settings" {{ stimulus_controller('settings') }}>#}
+
+{#    <div class="mb-5" id="color">#}
+{#        <label class="mb-3 d-inline-block form-label">Dysléxique</label>#}
+{#        <div class="form-check">#}
+{#            <input type="checkbox" name="dyslexique"#}
+{#                   value="1"#}
+{#                   id="dyslexique"#}
+{#                   class="form-check-input"#}
+{#                    {{ stimulus_action('settings', 'changeDyslexique', 'change') }}#}
+{#            >#}
+{#            <label for="dyslexique" class="form-check-label">Activer la police "dysléxique"</label>#}
+{#        </div>#}
+{#    </div>#}
+{#    <div class="mb-5" id="color">#}
+{#        <label class="mb-3 d-inline-block form-label">Color</label>#}
+{#        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-blue" data-parent="color"#}
+{#            {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="blue-light"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">LIGHT BLUE</span>#}
+{#                </div>#}
+{#            </a>#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-blue" data-parent="color"#}
+{#               {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="blue-dark"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">DARK BLUE</span>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+{#        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-teal" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="teal-light"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">LIGHT TEAL</span>#}
+{#                </div>#}
+{#            </a>#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-teal" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="teal-dark"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">DARK TEAL</span>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+{#        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-sky" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="sky-light"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">LIGHT SKY</span>#}
+{#                </div>#}
+{#            </a>#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-sky" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="sky-dark"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">DARK SKY</span>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+{#        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-red" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="red-light"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">LIGHT RED</span>#}
+{#                </div>#}
+{#            </a>#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-red" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="red-dark"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">DARK RED</span>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+{#        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-green" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="green-light"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">LIGHT GREEN</span>#}
+{#                </div>#}
+{#            </a>#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-green" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="green-dark"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">DARK GREEN</span>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+{#        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-lime" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="lime-light"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">LIGHT LIME</span>#}
+{#                </div>#}
+{#            </a>#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-lime" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="lime-dark"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">DARK LIME</span>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+{#        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-pink" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="pink-light"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">LIGHT PINK</span>#}
+{#                </div>#}
+{#            </a>#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-pink" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="pink-dark"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">DARK PINK</span>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+{#        <div class="row d-flex g-3 justify-content-between flex-wrap mb-3">#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="light-purple" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="purple-light"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">LIGHT PURPLE</span>#}
+{#                </div>#}
+{#            </a>#}
+{#            <a href="#" class="flex-grow-1 w-50 option col" data-value="dark-purple" data-parent="color"#}
+{#                    {{ stimulus_action('settings', 'changeColor') }}#}
+{#            >#}
+{#                <div class="card rounded-md p-3 mb-1 no-shadow color">#}
+{#                    <div class="purple-dark"></div>#}
+{#                </div>#}
+{#                <div class="text-muted text-part">#}
+{#                    <span class="text-extra-small align-middle">DARK PURPLE</span>#}
+{#                </div>#}
+{#            </a>#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
 

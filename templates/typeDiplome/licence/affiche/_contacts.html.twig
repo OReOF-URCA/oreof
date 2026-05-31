@@ -1,6 +1,6 @@
-{% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-indigo-500' %}
-{% set ddClass = 'mt-2 text-sm leading-relaxed text-secondary-700' %}
-{% set blockClass = 'rounded-xl border border-secondary-200 bg-secondary-50 p-4' %}
+{% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-primary-500 dark:text-primary-300' %}
+{% set ddClass = 'mt-2 text-sm leading-relaxed text-secondary-700 dark:text-secondary-400' %}
+{% set blockClass = 'rounded-xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4' %}
 
 <div class="space-y-6">
     <dl class="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -61,7 +61,7 @@
         <div class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {% for contact in parcours.contacts %}
                 <article
-                        class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+                        class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4">
                     <p class="text-[10px] font-black uppercase tracking-widest text-secondary-500">{{ contact.denomination }}</p>
                     <p class="mt-2 text-sm font-medium text-secondary-700">{{ contact.display }}</p>
                     <p class="mt-2 text-sm text-secondary-600">{{ contact.telephone|tel_format }}</p>

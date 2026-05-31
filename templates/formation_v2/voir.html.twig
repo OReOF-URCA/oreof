@@ -74,7 +74,7 @@
     {#    {% endif %} #}
 
 
-    <div class="flex" data-controller="scroll-spy">
+    <div class="flex bg-surface dark:bg-secondary-900" data-controller="scroll-spy">
         <aside class="app-scrollspy-aside w-72 flex flex-col p-3 space-y-8">
             <div class="sticky top-40 space-y-8">
                 <div>
@@ -82,93 +82,93 @@
                     <nav class="space-y-1">
                         <a href="#identite_formation" data-scroll-spy-target="link"
                            class="app-scrollspy-link">
-                            Identité de la formation
-                        </a>
-                        <a href="#localisation" data-scroll-spy-target="link"
-                           class="app-scrollspy-link">
-                            Localisation
-                        </a>
-                        <a href="#presentation" data-scroll-spy-target="link"
-                           class="app-scrollspy-link">
-                            Présentation de la formation
-                        </a>
+                             Identité de la formation
+                         </a>
+                         <a href="#localisation" data-scroll-spy-target="link"
+                            class="app-scrollspy-link">
+                             Localisation
+                         </a>
+                         <a href="#presentation" data-scroll-spy-target="link"
+                            class="app-scrollspy-link">
+                             Présentation de la formation
+                         </a>
 
-                        {% if formation.isHasParcours == false %}
-                            {# formation sans parcours #}
-                            <a href="#competences" data-scroll-spy-target="link"
-                               class="app-scrollspy-link">
-                                Compétences Acquises
-                            </a>
+                         {% if formation.isHasParcours == false %}
+                             {# formation sans parcours #}
+                             <a href="#competences" data-scroll-spy-target="link"
+                                class="app-scrollspy-link">
+                                 Compétences Acquises
+                             </a>
 
-                            <a href="#structure" data-scroll-spy-target="link"
-                               class="app-scrollspy-link">
-                                Structure & maquette
-                            </a>
-                            <a href="#admission" data-scroll-spy-target="link"
-                               class="app-scrollspy-link">
-                                Admission
-                            </a>
+                             <a href="#structure" data-scroll-spy-target="link"
+                                class="app-scrollspy-link">
+                                 Structure & maquette
+                             </a>
+                             <a href="#admission" data-scroll-spy-target="link"
+                                class="app-scrollspy-link">
+                                 Admission
+                             </a>
 
-                            <a href="#inscription" data-scroll-spy-target="link"
-                               class="app-scrollspy-link">
-                                Inscription
-                            </a>
+                             <a href="#inscription" data-scroll-spy-target="link"
+                                class="app-scrollspy-link">
+                                 Inscription
+                             </a>
 
-                            <a href="#et_apres" data-scroll-spy-target="link"
-                               class="app-scrollspy-link">
-                                Et après...
-                            </a>
+                             <a href="#et_apres" data-scroll-spy-target="link"
+                                class="app-scrollspy-link">
+                                 Et après...
+                             </a>
 
-                            <a href="#contacts" data-scroll-spy-target="link"
-                               class="app-scrollspy-link">
-                                Contacts pédagogiques
-                            </a>
-                        {% else %}
-                            {% for parcours in formation.parcours %}
-                                <p class="app-scrollspy-section-title app-scrollspy-section-title--accent">
-                                    Parcours {{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</p>
+                             <a href="#contacts" data-scroll-spy-target="link"
+                                class="app-scrollspy-link">
+                                 Contacts pédagogiques
+                             </a>
+                         {% else %}
+                             {% for parcours in formation.parcours %}
+                                 <p class="app-scrollspy-section-title--accent">
+                                     Parcours {{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</p>
 
 
-                                <a href="#presentation_{{ parcours.id }}" data-scroll-spy-target="link"
-                                   class="app-scrollspy-link">
-                                    Présentation du parcours
-                                </a>
+                                 <a href="#presentation_{{ parcours.id }}" data-scroll-spy-target="link"
+                                    class="app-scrollspy-link">
+                                     Présentation du parcours
+                                 </a>
 
-                                <a href="#descriptif_{{ parcours.id }}" data-scroll-spy-target="link"
-                                   class="app-scrollspy-link">
-                                    Descriptif du parcours
-                                </a>
+                                 <a href="#descriptif_{{ parcours.id }}" data-scroll-spy-target="link"
+                                    class="app-scrollspy-link">
+                                     Descriptif du parcours
+                                 </a>
 
-                                <a href="#competences_{{ parcours.id }}" data-scroll-spy-target="link"
-                                   class="app-scrollspy-link">
-                                    Compétences Acquises
-                                </a>
+                                 <a href="#competences_{{ parcours.id }}" data-scroll-spy-target="link"
+                                    class="app-scrollspy-link">
+                                     Compétences Acquises
+                                 </a>
 
-                                <a href="#structure_{{ parcours.id }}" data-scroll-spy-target="link"
-                                   class="app-scrollspy-link">
-                                    Structure & maquette
-                                </a>
-                                <a href="#admission_{{ parcours.id }}" data-scroll-spy-target="link"
-                                   class="app-scrollspy-link">
-                                    Admission
-                                </a>
+                                 <a href="#structure_{{ parcours.id }}" data-scroll-spy-target="link"
+                                    class="app-scrollspy-link">
+                                     Structure & maquette
+                                 </a>
+                                 <a href="#admission_{{ parcours.id }}" data-scroll-spy-target="link"
+                                    class="app-scrollspy-link">
+                                     Admission
+                                 </a>
 
-                                <a href="#inscription_{{ parcours.id }}" data-scroll-spy-target="link"
-                                   class="app-scrollspy-link">
-                                    Inscription
-                                </a>
+                                 <a href="#inscription_{{ parcours.id }}" data-scroll-spy-target="link"
+                                    class="app-scrollspy-link">
+                                     Inscription
+                                 </a>
 
-                                <a href="#et_apres_{{ parcours.id }}" data-scroll-spy-target="link"
-                                   class="app-scrollspy-link">
-                                    Et après...
-                                </a>
+                                 <a href="#et_apres_{{ parcours.id }}" data-scroll-spy-target="link"
+                                    class="app-scrollspy-link">
+                                     Et après...
+                                 </a>
 
-                                <a href="#contacts_{{ parcours.id }}" data-scroll-spy-target="link"
-                                   class="app-scrollspy-link">
-                                    Contacts pédagogiques
-                                </a>
-                            {% endfor %}
-                        {% endif %}
+                                 <a href="#contacts_{{ parcours.id }}" data-scroll-spy-target="link"
+                                    class="app-scrollspy-link">
+                                     Contacts pédagogiques
+                                 </a>
+                             {% endfor %}
+                         {% endif %}
                     </nav>
                 </div>
             </div>

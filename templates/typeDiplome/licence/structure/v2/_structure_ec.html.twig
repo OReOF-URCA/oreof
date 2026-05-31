@@ -3,15 +3,15 @@
 {% set metricPresClass = metricCellClass ~ ' bg-blue-50/20' %}
 {% set metricDistClass = metricCellClass ~ ' bg-orange-50/20 text-orange-700' %}
 {% set metricTotalClass = metricCellClass ~ ' font-black text-secondary-900' %}
-{% set rowClass = ecEnfant ? 'bg-indigo-50/40 hover:bg-indigo-50/70' : 'hover:bg-secondary-50/70' %}
+{% set rowClass = ecEnfant ? 'bg-bg hover:bg-primary-100 dark:hover:bg-primary-800' : 'hover:bg-secondary-50 dark:hover:bg-secondary-800' %}
 {% set showDistancielInline = distancielInline is defined and distancielInline %}
 
 <tr class="ec border-b border-secondary-100 transition-colors {{ rowClass }}">
-    <td class="{{ cellClass }} border-l-4 border-indigo-500">
+    <td class="{{ cellClass }} border-l-4 border-primary-500">
         <div class="flex flex-col gap-2">
             <div class="flex items-start gap-3">
                 {% if ecEnfant %}
-                    <span class="mt-1 inline-flex shrink-0 items-center gap-2 rounded-full border border-indigo-200 bg-white/90 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-600 shadow-sm">
+                    <span class="mt-1 inline-flex shrink-0 items-center gap-2 rounded-full border border-primary-200 bg-white/90 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-indigo-600 shadow-sm">
                         <span class="inline-flex h-2 w-2 rounded-full bg-indigo-500"></span>
                         {{ ec.elementConstitutif.code }}
                     </span>
@@ -185,3 +185,5 @@
         </td>
     {% endif %}
 </tr>
+
+

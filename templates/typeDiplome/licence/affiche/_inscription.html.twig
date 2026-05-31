@@ -1,7 +1,7 @@
 {# todo: par parcours uniquement ? #}
-{% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-indigo-500' %}
-{% set ddClass = 'mt-2 text-sm leading-relaxed text-secondary-700' %}
-{% set blockClass = 'rounded-xl border border-secondary-200 bg-secondary-50 p-4' %}
+{% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-primary-500' %}
+{% set ddClass = 'mt-2 text-sm leading-relaxed text-secondary-700 dark:text-secondary-400' %}
+{% set blockClass = 'rounded-xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4' %}
 
 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
     <div>
@@ -17,7 +17,7 @@
                     {% if formation.hasParcours %}
                         <div class="flex flex-wrap gap-2">
                             {% for regime in parcours.regimeInscription %}
-                                <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700">{{ regime.value }}</span>
+                                <span class="inline-flex items-center rounded-full bg-primary-100 dark:bg-primary-800 px-2.5 py-1 text-xs font-bold text-primary-700 dark:text-primary-400">{{ regime.value }}</span>
                             {% endfor %}
                         </div>
                     {% else %}
@@ -42,10 +42,10 @@
     <div class="space-y-4">
         {% for composante in formation.composantesInscription %}
             <article
-                    class="rounded-xl border border-secondary-200 bg-secondary-50 p-4">
+                    class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4">
                 <p class="{{ dtClass }}">Composante d'inscription</p>
-                <p class="mt-2 text-sm font-semibold text-secondary-800">{{ composante.libelle }}</p>
-                <div class="mt-2 space-y-1 text-sm text-secondary-600">
+                <p class="mt-2 text-sm font-semibold text-secondary-800 dark:text-secondary-100 dark:text-secondary-300">{{ composante.libelle }}</p>
+                <div class="mt-2 space-y-1 text-sm text-secondary-600 dark:text-secondary-300">
                     <p>{{ composante.adresse != null ? composante.adresse.display|raw : 'Erreur' }}</p>
                     <p>{{ composante.telStandard|tel_format }} {% if composante.telComplementaire != null %}ou {{ composante.telComplementaire|tel_format }}{% endif %}</p>
                     <p>{{ composante.mailContact|mailto }}</p>
