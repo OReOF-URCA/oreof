@@ -124,11 +124,10 @@ class ParcoursRepository extends ServiceEntityRepository
                     $direction
                 );
             } else {
-                // $validSortFields = ['libelle', 'sigle', 'typeParcours']; // Règle un crash quand la recherche de parcours est vide. La requête bug quand même car elle est beaucoup trop grosse.
-                // if (in_array($sort, $validSortFields))
-                // {
+                $validSortFields = ['libelle', 'sigle', 'typeParcours']; // Règle un crash quand la recherche de parcours est vide. La requête bug quand même car elle est beaucoup trop grosse.
+                if (in_array($sort, $validSortFields)) {
                     $qb->addOrderBy('p.' . $sort, $direction);
-                // }
+                }
             }
         }
 
@@ -428,5 +427,5 @@ class ParcoursRepository extends ServiceEntityRepository
             ->setParameter(':idCampagne', $campagneC->getId())
             ->getQuery()
             ->getResult();
-    } 
+    }
 }
