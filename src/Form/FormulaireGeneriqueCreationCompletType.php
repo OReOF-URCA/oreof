@@ -35,6 +35,7 @@ class FormulaireGeneriqueCreationCompletType extends AbstractType
                 'label' => 'Type de diplôme',
                 'placeholder' => 'Choisissez un type de diplôme',
                 'required' => true,
+                'autocomplete' => true,
                 'attr' => [
                     'data-action' => 'change->formulaire-generique--creation#changeTypeDiplome',
                 ],
