@@ -60,7 +60,7 @@
                 <div class="card-body">
                     <ul class="list-unstyled">
                         {% for ec in ecParcours %}
-                            {% if ec.parcours != null %}
+                            {% if ec.parcours != null and ((ec.parcours.isSoftDeleted ?? false) != true) %}
                                 <li>
                                     {% if ec.parcours.isParcoursDefaut == true %}
                                         <a href="{{ path('app_formation_show', {slug:ec.parcours.formation.slug}) }}"

@@ -19,7 +19,10 @@
             <dd>
                 {% if ficheMatiere.parcours != null %}
                     {% if ficheMatiere.parcours.parcoursDefaut == false %}
-                        {{ ficheMatiere.parcours.libelle }}
+                        {{ ficheMatiere.parcours.libelle }} 
+                        {% if (ficheMatiere.parcours.isSoftDeleted ?? false) == true %}
+                            - <span class="badge rounded-pill text-bg-info">Supprimé</span>
+                        {% endif %}
                     {% else %}
                         Mention sans parcours
                     {% endif %}
