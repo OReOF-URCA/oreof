@@ -142,7 +142,7 @@
                         </a>
                     </li>
                 {% else %}
-                    {% for parcours in formation.parcours %}
+                    {% for parcours in formation.parcours|filter(p => (p.isSoftDeleted ?? false) != true) %}
                         <li>
                             <strong>Parcours {{ parcours.libelle }} {{ parcours.typeParcours|badgeTypeParcours }}</strong>
                         </li>

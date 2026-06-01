@@ -164,7 +164,7 @@
                 </div>
             </div>
         </section>
-        {% for parcours in formation.parcours %}
+        {% for parcours in formation.parcours|filter(p => (p.isSoftDeleted ?? false) != true) %}
             {% set stringDifferencesParcours = versioningParcours.getDifferencesBetweenParcoursAndLastVersion(parcours) ?? [] %}
             {% set stringDifferencesParcoursCampagne = versioningParcours.getDifferencesBetweenParcoursAndLastVersion(parcours, true) ?? [] %}
 
