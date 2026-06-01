@@ -341,7 +341,8 @@
                             {% if is_granted('ROLE_ADMIN') %}
                                 <a {{ stimulus_controller('modal', {
                                                 modalTitle: 'Confirmer la suppression',
-                                                modalUrl: path('app_parcours_soft_delete_confirm', {parcours: this.parcours.id})
+                                                modalUrl: path('app_parcours_soft_delete_confirm', {parcours: this.parcours.id}),
+                                                size: 'lg'
                                             }
                                         )
                                     }}
