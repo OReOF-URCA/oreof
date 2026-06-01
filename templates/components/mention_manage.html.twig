@@ -155,7 +155,8 @@
                             {% if is_granted('ROLE_ADMIN') %}
                                 <a {{ stimulus_controller('modal', {
                                         modalTitle: 'Confirmer la suppression',
-                                        modalUrl: path('app_formation_confirmation_soft_delete', {slug: this.formation.slug})
+                                        modalUrl: path('app_formation_confirmation_soft_delete', {slug: this.formation.slug}),
+                                        size: 'lg'
                                     })
                                 }}
                                     class="btn btn-sm btn-icon btn-icon-only btn-outline-danger ms-1"
