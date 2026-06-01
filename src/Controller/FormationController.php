@@ -107,7 +107,11 @@ class FormationController extends BaseController
         //comtper le nombre de parcours par formation
         $nbParcours = 0;
         foreach ($tFormations as $formation) {
-            $nbParcours += count($formation->getParcours());
+            $nbParcours += count(array_filter(
+                    $formation->getParcours()->toArray(),
+                    fn($p) => ($p->isSoftDeleted() ?? false) !== true
+                    )
+                );
         }
 
         return $this->render('formation/_liste.html.twig', [
