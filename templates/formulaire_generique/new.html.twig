@@ -34,6 +34,7 @@
                             class="form-select"
                             data-formulaire-generique--creation-target="mentionSelect"
                             data-action="change->formulaire-generique--creation#changeMention"
+                            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
                     >
                         <option value="">Choisissez d'abord un type de diplôme</option>
                     </select>
