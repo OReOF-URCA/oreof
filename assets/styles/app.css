@@ -350,7 +350,7 @@ html[data-color-theme="jaune"] {
 
   /* Couche de compatibilité Bootstrap: badges et couleurs d'état */
   .badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold leading-none;
+    @apply inline-flex items-center rounded-full text-white px-2.5 py-1 text-xs font-semibold leading-none;
   }
 
 

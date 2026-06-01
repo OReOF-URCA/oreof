@@ -151,14 +151,14 @@
                                         </div>
 
                                         <div class="col-6 col-md-2 d-flex flex-column justify-content-center mb-1 mb-md-0">
-                                            <div class="text-muted text-small d-md-none">Commun ?</div>
+                                            <div class="text-text text-small d-md-none">Commun ?</div>
                                             {% if raccroche %}
-                                                <span class="badge bg-warning me-2">Raccroché</span>
+                                                <span class="badge bg-warning text-white me-2">Raccroché</span>
                                             {% else %}
                                                 {% if sem.semestreMutualisables|length > 0 %}
-                                                    <span class="badge bg-secondary me-2">Mutualisé</span>
+                                                    <span class="badge bg-secondary text-white me-2">Mutualisé</span>
                                                 {% else %}
-                                                    <span class="badge bg-primary me-2">Classique</span>
+                                                    <span class="badge bg-primary text-white me-2">Classique</span>
                                                 {% endif %}
                                             {% endif %}
 

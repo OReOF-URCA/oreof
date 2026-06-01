@@ -2,13 +2,13 @@
     {% set hasDistancielData = ue.heuresEctsUe.sommeUeTotalDist > 0 %}
 
     <div class="flex items-center gap-4">
-        <div class="flex h-12 min-w-12 items-center justify-center rounded-md {% if enfant is defined and enfant %}bg-amber-600 shadow-amber-100{% else %}bg-indigo-600 shadow-indigo-100{% endif %} text-white font-black shadow-lg">
+        <div class="flex h-12 min-w-12 items-center justify-center rounded-md {% if enfant is defined and enfant %}bg-warning-600 shadow-warning-100 dark:shadow-warning-800{% else %}bg-primary-600 shadow-primary-100 dark:shadow-primary-800{% endif %} text-white font-black shadow-lg">
             <span>{{ ue.display }}</span>
         </div>
 
         <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
-                <span class="text-sm font-semibold normal-case tracking-normal text-secondary-800">
+                <span class="text-sm font-semibold normal-case tracking-normal text-secondary-800 dark:text-secondary-400">
                     {{ ue.ue.libelle }}
                 </span>
                 {% if ue.raccroche == true %}
@@ -98,24 +98,24 @@
             <th class="py-3">MCCC</th>
             <th class="py-3">ECTS</th>
             {% if presentiel %}
-                <th class="w-14 py-3 bg-blue-50/30 text-blue-500">CM</th>
-                <th class="w-14 py-3 bg-blue-50/30 text-blue-500">TD</th>
-                <th class="w-14 py-3 bg-blue-50/30 text-blue-500">TP</th>
-                <th class="w-14 py-3 bg-blue-50/30 text-blue-500">Total Prés.</th>
-                <th class="w-14 py-3 bg-blue-50/30 text-blue-500 border-r border-secondary-100">TE</th>
+                <th class="w-14 py-3 bg-primary-50 dark:bg-primary-800 bg-opacity-30 text-primary dark:text-primary-400">CM</th>
+                <th class="w-14 py-3 bg-primary-50 dark:bg-primary-800 bg-opacity-30 text-primary dark:text-primary-400">TD</th>
+                <th class="w-14 py-3 bg-primary-50 dark:bg-primary-800 bg-opacity-30 text-primary dark:text-primary-400">TP</th>
+                <th class="w-14 py-3 bg-primary-50 dark:bg-primary-800 bg-opacity-30 text-primary dark:text-primary-400">Total Prés.</th>
+                <th class="w-14 py-3 bg-primary-50 dark:bg-primary-800 bg-opacity-30 text-primary dark:text-primary-400">TE</th>
             {% endif %}
             {% if distanciel %}
-                <th class="w-14 py-3 bg-orange-50/30 text-orange-400">CM</th>
-                <th class="w-14 py-3 bg-orange-50/30 text-orange-400">TD</th>
-                <th class="w-14 py-3 bg-orange-50/30 text-orange-400">TP</th>
-                <th class="w-14 py-3 bg-orange-50/30 text-orange-400 border-r border-secondary-100">Total Dis.</th>
+                <th class="w-14 py-3 bg-warning-50 dark:bg-warning-800 bg-opacity-30 text-warning-400 dark:text-warning-300">CM</th>
+                <th class="w-14 py-3 bg-warning-50 dark:bg-warning-800 bg-opacity-30 text-warning-400 dark:text-warning-300">TD</th>
+                <th class="w-14 py-3 bg-warning-50 dark:bg-warning-800 bg-opacity-30 text-warning-400 dark:text-warning-300">TP</th>
+                <th class="w-14 py-3 bg-warning-50 dark:bg-warning-800 bg-opacity-30 text-warning-400 dark:text-warning-300">Total Dis.</th>
             {% endif %}
             {% if parcours.modalitesEnseignement != null and parcours.modalitesEnseignement.value == 1 %}
-                <th class="px-5 py-3 text-right text-secondary-900">Total</th>
+                <th class="px-5 py-3 text-right text-secondary-900 dark:text-secondary">Total</th>
             {% endif %}
         </tr>
         </thead>
-        <tbody class="divide-y divide-secondary-100">
+        <tbody class="divide-y divide-secondary-100 dark:divide-secondary-700">
         {% for ordEc, ec in ue.elementConstitutifs %}
             {% set indexEc = loop.index0 %}
             {{ include('typeDiplome/licence/structure/v2/_structure_ec.html.twig', {

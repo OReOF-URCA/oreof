@@ -1,26 +1,26 @@
-{% set labelClass = 'px-4 py-4 text-left align-middle text-[11px] font-black uppercase tracking-[0.18em] text-indigo-700 dark:text-indigo-300 whitespace-nowrap' %}
+{% set labelClass = 'px-4 py-4 text-left align-middle text-[11px] font-black uppercase tracking-[0.18em] text-primary-700 dark:text-primary-300 whitespace-nowrap' %}
 {% set valueClass = 'px-2 py-4 text-center align-middle tabular-nums' %}
-{% set presClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-blue-700 bg-blue-50/30' %}
-{% set distClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-orange-700 bg-orange-50/30' %}
-{% set totalClass = 'px-4 py-4 text-right align-middle tabular-nums font-black text-secondary-900 bg-secondary-50/70' %}
+{% set presClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-primary-700 dark:text-primary-400 bg-primary-50 dark:bg-primary-700' %}
+{% set distClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-warning-700 dark:text-warning-400 bg-warning-50 dark:bg-warning-700' %}
+{% set totalClass = 'px-4 py-4 text-right align-middle tabular-nums font-black text-text bg-secondary-50 dark:bg-secondary-700' %}
 
-<tr class="border-t-2 border-indigo-100 bg-indigo-50/30 dark:border-indigo-800 dark:bg-indigo-950/20">
+<tr class="border-t-2 border-primary-100 bg-primary-50 dark:border-indigo-800 dark:bg-primary-800">
 
     {# Label "Total UE" — aligné à gauche, lisible #}
     <th class="{{ labelClass }}"
         colspan="2">
         <span class="inline-flex items-center gap-2">
-            <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-black text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-200">Total</span>
+            <span class="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-black text-primary-700 dark:bg-primary-900 dark:text-priamry-200">Total</span>
             <span class="text-secondary-800 dark:text-secondary-100">{{ ue.display }}</span>
             {% if enfant == false and ue.ue.ueEnfants|length > 0 %}
-                <span class="text-[9px] font-medium text-indigo-400 dark:text-indigo-500 normal-case">(Total max.)</span>
+                <span class="text-[9px] font-medium text-primary-400 dark:text-primary-500 normal-case">(Total max.)</span>
             {% endif %}
         </span>
     </th>
 
     {# ECTS — badge proportionné #}
     <th class="{{ valueClass }}">
-        <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">
+        <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary">
             {{ diffUe ? diffUe.heuresEctsUe.sommeUeEcts|displayDiff : '' }} ECTS
         </span>
         <span class="show_current">{{ ue.heuresEctsUe.sommeUeEcts|badgeEcts('primary') }}</span>

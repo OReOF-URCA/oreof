@@ -3,7 +3,7 @@
     <h3 class="text-2xl font-black mb-8 text-secondary-800 dark:text-secondary-400">Semestre {{ ordre }}</h3>
 
     <div class="space-y-6">
-        <div class="bg-white rounded-sm border border-secondary-200 shadow-sm overflow-hidden">
+        <div class="bg-surface rounded-sm border border-secondary-200 dark:border-secondary-700 shadow-sm overflow-hidden">
             {% for ordUe, ue in semestre.ues %}
                 {{ include('typeDiplome/licence/structure/v2/_structure_ue.html.twig', {
                     semestreOrdre:ordre,
