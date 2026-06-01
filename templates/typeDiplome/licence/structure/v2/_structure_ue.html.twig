@@ -115,7 +115,7 @@
             {% endif %}
         </tr>
         </thead>
-        <tbody class="divide-y divide-secondary-100 dark:divide-secondary-700">
+        <tbody class="divide-y divide-secondary-100 dark:divide-secondary-700 dark:border-secondary-700">
         {% for ordEc, ec in ue.elementConstitutifs %}
             {% set indexEc = loop.index0 %}
             {{ include('typeDiplome/licence/structure/v2/_structure_ec.html.twig', {

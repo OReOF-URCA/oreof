@@ -1,8 +1,8 @@
 {% set labelClass = 'px-4 py-4 text-left align-middle text-[11px] font-black uppercase tracking-[0.18em] text-primary-700 dark:text-primary-300 whitespace-nowrap' %}
-{% set valueClass = 'px-2 py-4 text-center align-middle tabular-nums' %}
-{% set presClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-primary-700 dark:text-primary-400 bg-primary-50 dark:bg-primary-700' %}
-{% set distClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-warning-700 dark:text-warning-400 bg-warning-50 dark:bg-warning-700' %}
-{% set totalClass = 'px-4 py-4 text-right align-middle tabular-nums font-black text-text bg-secondary-50 dark:bg-secondary-700' %}
+{% set valueClass = 'px-2 py-4 text-center align-middle tabular-nums text-white' %}
+{% set presClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-primary-700 dark:text-primary-400 bg-primary-50 dark:bg-primary-800' %}
+{% set distClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-warning-700 dark:text-warning-400 bg-warning-50 dark:bg-warning-800' %}
+{% set totalClass = 'px-4 py-4 text-right align-middle tabular-nums font-black text-text bg-secondary-50 dark:bg-secondary-800' %}
 
 <tr class="border-t-2 border-primary-100 bg-primary-50 dark:border-indigo-800 dark:bg-primary-800">
 
@@ -10,7 +10,7 @@
     <th class="{{ labelClass }}"
         colspan="2">
         <span class="inline-flex items-center gap-2">
-            <span class="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-black text-primary-700 dark:bg-primary-900 dark:text-priamry-200">Total</span>
+            <span class="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-black text-primary-700 dark:bg-primary-900 dark:text-primary-200">Total</span>
             <span class="text-secondary-800 dark:text-secondary-100">{{ ue.display }}</span>
             {% if enfant == false and ue.ue.ueEnfants|length > 0 %}
                 <span class="text-[9px] font-medium text-primary-400 dark:text-primary-500 normal-case">(Total max.)</span>
@@ -39,7 +39,7 @@
             <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTpPres|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTpPres|filtreHeures }}</span>
         </th>
-        <th class="{{ presClass }} font-black text-blue-800 bg-blue-50/50">
+        <th class="{{ presClass }} font-black text-primary-800 dark:text-primary-300 bg-primary-50 dark:bg-primary-800">
             <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalPres|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTotalPres|filtreHeures }}</span>
         </th>

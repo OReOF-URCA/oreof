@@ -4,7 +4,7 @@
             <dt class="text-[10px] font-black text-indigo-400 uppercase mt-3">Modalités d'enseignement</dt>
             <dd>
                 {% if parcours.modalitesEnseignement != null %}
-                    <span class="px-2 py-1 bg-indigo-50 rounded-lg text-xs font-bold text-indigo-600 mt-1">
+                    <span class="px-2 py-1 bg-primary-50 dark:bg-primary-800 rounded-lg text-xs font-bold text-primary-600 dark:text-primary-200 mt-1">
                     {{ parcours.modalitesEnseignement.libelle }}
                 </span>
                 {% else %}
@@ -36,7 +36,7 @@
                         }}
                     {% endif %}
                     {% if parcours.hasStage == true %}
-                        <span class="px-2 py-1 bg-indigo-50 rounded-lg text-xs font-bold text-indigo-600 mt-1">Oui ({{ parcours.nbHeuresStages }} heures).</span>
+                        <span class="px-2 py-1 bg-primary-50 dark:bg-primary-800 rounded-lg text-xs font-bold text-primary-600 dark:text-primary-200 mt-1">Oui ({{ parcours.nbHeuresStages }} heures).</span>
                         <br> <p class="mt-1">{{ parcours.stageText|printTexte }}</p>
                         {% if stringDifferencesParcours.stageTextParcours is defined %}
                             {{ include('communs/_comparaison_versioning_no_button.html.twig', {
@@ -81,7 +81,7 @@
                 <dt class="text-[10px] font-black text-indigo-400 uppercase mt-3">Projet(s) tutoré(s)</dt>
                 <dd>
                     {% if parcours.hasProjet == true %}
-                        <span class="px-2 py-1 bg-indigo-50 rounded-lg text-xs font-bold text-indigo-600 mt-1">Oui ({{ parcours.nbHeuresProjet }} heures).</span>
+                        <span class="px-2 py-1 bg-primary-50 dark:bg-primary-800 rounded-lg text-xs font-bold text-primary-600 dark:text-primary-200 mt-1">Oui ({{ parcours.nbHeuresProjet }} heures).</span>
                         <br> <p class="mt-1"> {{ parcours.projetText|printTexte }}</p>
                     {% else %}
                         <span class="px-2 py-1 bg-orange-50 rounded-lg text-xs font-bold text-orange-600 mt-1">Non</span>
@@ -128,7 +128,7 @@
                 <dt class="text-[10px] font-black text-indigo-400 uppercase mt-3">TER/Mémoire</dt>
                 <dd>
                     {% if parcours.hasMemoire == true %}
-                        <span class="px-2 py-1 bg-indigo-50 rounded-lg text-xs font-bold text-indigo-600 mt-1">Oui.</span>
+                        <span class="px-2 py-1 bg-primary-50 dark:bg-primary-800 rounded-lg text-xs font-bold text-primary-600 dark:text-primary-200 mt-1">Oui.</span>
                         <br> <p class="mt-1"> {{ parcours.memoireText|printTexte }}</p>
                         {% if stringDifferencesParcours.memoireTextParcours is defined %}
                             {{ include('communs/_comparaison_versioning_no_button.html.twig', {
@@ -174,7 +174,7 @@
                 <dt class="text-[10px] font-black text-indigo-400 uppercase mt-3">Situation professionnelle</dt>
                 <dd>
                     {% if parcours.hasSituationPro == true %}
-                        <span class="px-2 py-1 bg-indigo-50 rounded-lg text-xs font-bold text-indigo-600 mt-1"> Oui ({{ parcours.nbHeuresSituationPro }} heures).</span>
+                        <span class="px-2 py-1 bg-primary-50 dark:bg-primary-800 rounded-lg text-xs font-bold text-primary-600 dark:text-primary-200 mt-1"> Oui ({{ parcours.nbHeuresSituationPro }} heures).</span>
                     {% else %}
                         <span class="px-2 py-1 bg-orange-50 rounded-lg text-xs font-bold text-orange-600 mt-1">Non</span>
                     {% endif %}
