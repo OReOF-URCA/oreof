@@ -107,7 +107,12 @@ export default class extends Controller {
 
             if (data.success) {
                 this._addMentionOption(data.id, data.libelle)
-                this.mentionSelectTarget.value = data.id
+                const ts = this.mentionSelectTarget.tomselect
+                if (ts) {
+                    ts.setValue(String(data.id))
+                } else {
+                    this.mentionSelectTarget.value = data.id
+                }
                 this.mentionExistanteTarget.value = data.id
                 await this._checkFormation(data.id)
                 this.#mentionModal?.hide()
@@ -153,6 +158,7 @@ export default class extends Controller {
 
         if (!this.hasMentionSelectTarget) return
         const select = this.mentionSelectTarget
+
         select.innerHTML = '<option value="">Choisissez une mention</option>'
         mentions.forEach(({ id, libelle }) => {
             const opt = document.createElement('option')
@@ -160,11 +166,23 @@ export default class extends Controller {
             opt.textContent = libelle
             select.appendChild(opt)
         })
+
+        const ts = select.tomselect
+        if (ts) {
+            ts.sync()
+            ts.setValue('')
+        }
     }
 
     _clearMentions() {
         if (this.hasMentionSelectTarget) {
-            this.mentionSelectTarget.innerHTML = '<option value="">Choisissez d\'abord un type de diplôme</option>'
+            const select = this.mentionSelectTarget
+            select.innerHTML = '<option value="">Choisissez d\'abord un type de diplôme</option>'
+            const ts = select.tomselect
+            if (ts) {
+                ts.sync()
+                ts.setValue('')
+            }
         }
         this.mentionExistanteTarget.value = ''
         this.formationExistanteTarget.value = ''
@@ -177,6 +195,8 @@ export default class extends Controller {
         opt.value = id
         opt.textContent = libelle
         this.mentionSelectTarget.appendChild(opt)
+        const ts = this.mentionSelectTarget.tomselect
+        if (ts) ts.sync()
     }
 
     _enableMentionBtn(enabled) {

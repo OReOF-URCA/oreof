@@ -20,7 +20,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use UnitEnum;
 
-class FormulaireGeneriqueCreationCompletType extends AbstractType
+class FormulaireGeneriqueType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {

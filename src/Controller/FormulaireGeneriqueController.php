@@ -12,7 +12,7 @@ use App\Entity\UserProfil;
 use App\Enums\EtatDpeEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Events\AddCentreParcoursEvent;
-use App\Form\FormulaireGeneriqueCreationCompletType;
+use App\Form\FormulaireGeneriqueType;
 use App\Repository\MentionRepository;
 use App\Repository\ParcoursRepository;
 use App\Repository\ProfilRepository;
@@ -45,7 +45,7 @@ final class FormulaireGeneriqueController extends BaseController
         DomaineRepository        $domaineRepository,
         EventDispatcherInterface $eventDispatcher,
     ): Response {
-        $form = $this->createForm(FormulaireGeneriqueCreationCompletType::class, null, [
+        $form = $this->createForm(FormulaireGeneriqueType::class, null, [
             'action' => $this->generateUrl('app_formulaire_generique_new'),
         ]);
         $form->handleRequest($request);
