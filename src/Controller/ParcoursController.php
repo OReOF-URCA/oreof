@@ -1062,6 +1062,9 @@ class ParcoursController extends BaseController
     #[Route('/{parcours}/set/soft-delete', name: 'app_parcours_set_soft_delete')]
     public function setParcoursAsSoftDeleted(Parcours $parcours, EntityManagerInterface $em) {
         $parcours->setIsSoftDeleted(true);
+        if($parcours->isParcoursDefaut()){
+            $parcours->getFormation()->setIsSoftDeleted(true);
+        }
         $em->flush();
         $this->addFlashBag(Constantes::FLASHBAG_SUCCESS, 'Le parcours a bien été supprimé.');
         return $this->redirectToRoute('app_homepage');

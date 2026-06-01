@@ -206,15 +206,30 @@ class FormationController extends BaseController
         ComposanteRepository  $composanteRepository,
         FormationRepository   $formationRepository,
         Composante            $composante,
-        Request               $request
+        Request               $request,
+        UserRepository        $userRepository
     ): Response {
         $q = $request->query->get('q') ?? null;
+        $responsables = $userRepository->findUserWithResponsabilites();
 
         $formations = $formationRepository->findBySearch(
             $q,
             $this->getCampagneCollecte(),
             $request->query->all(),
             $composante
+        );
+
+        $formations = array_filter($formations, fn($f) => ($f->isSoftDeleted() ?? false) !== true);
+        $nbFormations = count($formations);
+
+        $nbParcours = array_reduce(
+            $formations, 
+            fn($previous, $current) => $previous + count(
+                array_filter(
+                    $current->getParcours()->toArray(), 
+                    fn($p) => ($p->isSoftDeleted() ?? false) !== true)
+                ),
+            0
         );
 
         return $this->render('formation/_liste.html.twig', [
@@ -224,7 +239,10 @@ class FormationController extends BaseController
             'composantes' => $composanteRepository->findPorteuse(),
             'typeDiplomes' => $typeDiplomeRepository->findAll(),
             'mentions' => $mentionRepository->findAll(),
-            'process' => $validationProcess->getProcess()
+            'process' => $validationProcess->getProcess(),
+            'nbFormations' => $nbFormations,
+            'nbParcours' => $nbParcours,
+            'responsables' => $responsables
         ]);
     }
 
