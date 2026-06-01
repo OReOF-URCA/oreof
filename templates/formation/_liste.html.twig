@@ -197,7 +197,12 @@
                     </td>
                     <td>
                         {% if formation.hasParcours %}
-                            <span class="badge bg-info">{{ formation.parcours|length }}</span>
+                            <span class="badge bg-info">
+                            {{ formation.parcours
+                                |filter(p => (p.isSoftDeleted ?? false) != true )
+                                |length 
+                            }}
+                            </span>
                         {% else %}
                             <span class="badge bg-info">N.C.</span>
                         {% endif %}
