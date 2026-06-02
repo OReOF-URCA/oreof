@@ -80,6 +80,12 @@ class ButApprentissageCritiqueRepository extends ServiceEntityRepository
                 )
             )
             ->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->isNull('formation.isSoftDeleted'),
+                    $qb->expr()->eq('formation.isSoftDeleted', 0)
+                )
+            )
+            ->andWhere(
                 $qb->expr()->notIn('dpeP.etatReconduction', ':exclusionEtatDpe')
             )
             ->setParameter(':idCampagne', $idCampagneCollecte)
