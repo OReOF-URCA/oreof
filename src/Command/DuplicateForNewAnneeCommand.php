@@ -764,7 +764,9 @@ class DuplicateForNewAnneeCommand extends Command
             foreach($initialEc->getCompetences() as $ecCompetence) {
                 $linkEcCompetence = $this->entityManager->getRepository(Competence::class)
                     ->findOneBy(['competenceOrigineCopie' => $ecCompetence]);
-                $cloneEc->addCompetence($linkEcCompetence);
+                if($linkEcCompetence !== null){
+                    $cloneEc->addCompetence($linkEcCompetence);
+                }
             }
 
             $cloneEc->setEcParent(null);
