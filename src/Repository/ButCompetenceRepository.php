@@ -85,6 +85,12 @@ class ButCompetenceRepository extends ServiceEntityRepository
                     $qb->expr()->eq('p.isSoftDeleted', 0)
                 )
             )->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->isNull('f.isSoftDeleted'),
+                    $qb->expr()->eq('f.isSoftDeleted', 0)
+                )
+            )
+            ->andWhere(
                 $qb->expr()->notIn('dpe.etatReconduction', ':exclusionEtatDpe')
             );
 
