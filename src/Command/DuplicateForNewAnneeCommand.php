@@ -245,7 +245,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Parcours::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'Parcours'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $parcours) {
@@ -273,7 +273,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(DpeParcours::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'DPE Parcours'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $dpeParcours) {
@@ -307,7 +307,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(BlocCompetence::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'Blocs de Compétences'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $blocCompetence) {
@@ -339,7 +339,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Competence::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'Compétences'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $competence) {
@@ -366,7 +366,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(ButCompetence::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'BUT Compétences'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $butCompetence) {
@@ -394,7 +394,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(ButNiveau::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'BUT Niveaux'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $butNiveau) {
@@ -420,7 +420,7 @@ class DuplicateForNewAnneeCommand extends Command
          */
         $this->entitiesArray = $this->entityManager
             ->getRepository(ButApprentissageCritique::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'BUT Apprentissage Critique'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $butAppCrit) {
@@ -446,7 +446,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(FicheMatiere::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'Fiches Matières'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ficheMatiere) {
@@ -494,7 +494,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(FicheMatiereMutualisable::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'Fiches Matières Mutualisables'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ficheMutu) {
@@ -525,7 +525,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Semestre::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'Semestres'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $semestre) {
@@ -549,7 +549,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(SemestreParcours::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'Semestres Parcours'...");
         $io->progressStart(count($this->entitiesArray));
         $tabAnnee = [];
@@ -595,7 +595,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(SemestreMutualisable::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'Semestres Mutualisables'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $semestreMutualisable) {
@@ -635,7 +635,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Ue::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'UE'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ue) {
@@ -663,7 +663,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Ue::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'UE Parents'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ueToProcess) {
@@ -691,7 +691,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(UeMutualisable::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'UE Mutualisables'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ueMutualisable) {
@@ -734,7 +734,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(ElementConstitutif::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'Éléments Constitutifs'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ec) {
@@ -782,7 +782,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(ElementConstitutif::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'EC Parents'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ecParentToLink) {
@@ -812,7 +812,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Contact::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'Adresses' et des 'Contacts'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $contact) {
@@ -841,7 +841,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Mccc::class) 
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSource, self::EXCLUSION_STATE);
         $io->writeln("Copie des 'MCCC'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $mccc) {
