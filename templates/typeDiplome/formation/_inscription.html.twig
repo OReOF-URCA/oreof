@@ -29,7 +29,7 @@
             <dd>
                 {% if formation.hasParcours %}
                     {% for regime in parcours.regimeInscription %}
-                        <span class="px-2 py-1 bg-indigo-50 rounded-lg text-xs font-bold text-indigo-600 mt-1">{{ regime.value }}</span>
+                        <span class="ppx-2 py-1 bg-primary-50 dark:bg-primary-800 rounded-lg text-xs font-bold text-primary-600 dark:text-primary-200 mt-1">{{ regime.value }}</span>
                     {% endfor %}
                     {{ parcours.displayRegimeInscription|raw }}
                         {% if stringDifferencesParcours.regimeInscriptionParcours is defined %}
@@ -128,8 +128,8 @@
             <dl>
                 <dt class="text-[10px] font-black text-indigo-400 uppercase mt-3">Composante d'inscription</dt>
                 <dd>
-                    <div class="not-prose bg-white border-l-4 border-indigo-500 p-8 rounded-r-sm shadow-sm mb-5 mt-3">
-                        <p class="text-secondary-600 leading-relaxed font-medium">
+                    <div class="not-prose bg-bg border-l-4 border-primary-500 p-8 rounded-r-sm shadow-sm mb-5 mt-3">
+                        <p class="text-secondary-600 dark:text-secondary-300 leading-relaxed font-medium">
                             {{ composante.libelle }}<br>
                             {{ composante.adresse != null ? composante.adresse.display|raw :
                             'Erreur' }}<br>

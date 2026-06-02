@@ -142,8 +142,8 @@
             <div class="row">
                 {% for contact in parcours.contacts %}
                     <div class="col-4">
-                        <div class="not-prose bg-white border-l-4 border-indigo-500 p-8 rounded-r-sm shadow-sm mb-5 mt-3">
-                            <p class="text-secondary-600 leading-relaxed font-medium">
+                        <div class="not-prose bg-bg border-l-4 border-primary-500 p-8 rounded-r-sm shadow-sm mb-5 mt-3">
+                            <p class="text-secondary-600 dark:secondary-300 leading-relaxed font-medium">
                                 <span class="text-[10px] font-black text-black-400 uppercase mt-3">{{ contact.denomination }}</span><br>
                                 {{ contact.display }}<br>
                                 {{ contact.telephone|tel_format }}<br>
