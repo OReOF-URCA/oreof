@@ -146,7 +146,12 @@ class ExportCap
             $this->excelWriter->writeCellXY(14, $this->ligne, $ec->elementConstitutif->getFicheMatiere()?->getTypeApogee() ?? '-');
             $this->excelWriter->writeCellXY(15, $this->ligne, $option ? 'Choix/option' : 'Obligatoire');
             $this->excelWriter->writeCellXY(16, $this->ligne, $this->data[5]);
-            $this->excelWriter->writeCellXY(17, $this->ligne, $this->dpeParcours->getEtatValidation()[0]);
+            if (count($this->dpeParcours->getEtatValidation()) > 0) {
+                //récupérer le premier item du tableau (key en texte et pas 0)
+                $this->excelWriter->writeCellXY(17, $this->ligne, array_key_first($this->dpeParcours->getEtatValidation()));
+            } else {
+                $this->excelWriter->writeCellXY(17, $this->ligne, '-');
+            }
             $this->excelWriter->writeCellXY(18, $this->ligne, $this->historique?->getDate()?->format('d/m/Y') ?? '-');
             $this->ligne++;
         }

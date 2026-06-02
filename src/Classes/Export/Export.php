@@ -10,6 +10,7 @@
 namespace App\Classes\Export;
 
 use App\Entity\CampagneCollecte;
+use App\Entity\Composante;
 use App\Service\ProjectDirProvider;
 use App\TypeDiplome\TypeDiplomeResolver;
 use DateTimeInterface;
@@ -21,6 +22,7 @@ class Export
     private array $formations;
     private ?CampagneCollecte $campagneCollecte;
     private ?DateTimeInterface $date;
+    private ?Composante $composante = null;
     private string $dir;
 
     public function __construct(
@@ -45,9 +47,14 @@ class Export
         $this->dir = $projectDirProvider->getProjectDir() . '/public/temp/';
     }
 
-    public function setDate(?DateTimeInterface $date):void
+    public function setDate(?DateTimeInterface $date): void
     {
         $this->date = $date;
+    }
+
+    public function setComposante(?Composante $composante): void
+    {
+        $this->composante = $composante;
     }
 
     public function setTypeDocument(string $typeDocument): void
