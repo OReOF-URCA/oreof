@@ -46,7 +46,7 @@ class DuplicateForNewAnneeCommand extends Command
 
     private const CODE_APOGEE_CAMPAGNE_COLLECTE = '6';
 
-    private const SLUG_YEAR_SUFFIX = '-2026';
+    private const SLUG_YEAR_SUFFIX = '-2027';
 
     private const EXCLUSION_STATE = [
         TypeModificationDpeEnum::NON_OUVERTURE->value,
