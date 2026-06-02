@@ -10,6 +10,7 @@ use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -77,16 +78,36 @@ class TypeDiplomeType extends AbstractType
                     'maxlength' => 3000
                 ]
             ])
-            ->add('semestreDebut')
-            ->add('semestreFin')
+            ->add('classique', CheckboxType::class, [
+                'label' => 'Structure classique (semestres)',
+                'required' => false,
+                'row_attr' => ['class' => 'mt-3 mb-3 font-weight-bold'],
+                'attr' => ['data-type-diplome-target' => 'classique', 'data-action' => 'change->type-diplome#toggle'],
+            ])
+            ->add('semestreDebut', null, [
+                'row_attr' => ['class' => 'semestre-field'],
+            ])
+            ->add('semestreFin', null, [
+                'row_attr' => ['class' => 'semestre-field'],
+            ])
             ->add('nbUeMin')
             ->add('nbUeMax')
+            ->add('hasEcts', YesNoType::class, [
+                'label' => 'Utilise les ECTS',
+                'empty_data' => true,
+            ])
+            ->add('nbEctsParSemestre', null, [
+                'label' => 'Nombre d\'ECTS par semestre (laisser vide si pas de quota fixe)',
+                'required' => false,
+            ])
             ->add('nbEctsMaxUe')
             ->add('nbEcParUe')
             ->add('ModeleMcc', ChoiceType::class, [
                 'choices' => $choices,
             ])
-            ->add('debutSemestreFlexible')
+            ->add('debutSemestreFlexible', null, [
+                'row_attr' => ['class' => 'semestre-field'],
+            ])
             ->add('hasMemoire', YesNoType::class)
             ->add('hasStage', YesNoType::class)
             ->add('hasSituationPro', YesNoType::class)
@@ -101,7 +122,9 @@ class TypeDiplomeType extends AbstractType
                 'required' => false,
                 'mapped' => false,
                 'attr' => ['accept' => 'image/png, image/jpeg'],
-            ]);
+            ])
+            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
+
     }
 
     public function configureOptions(OptionsResolver $resolver): void

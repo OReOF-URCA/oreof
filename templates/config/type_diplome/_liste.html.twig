@@ -4,6 +4,7 @@
         <th>Libellé</th>
         <th>Libellé Court</th>
         <th>Code Apogée</th>
+        <th>Classique ?</th>
         <th>Sem. Début / Sem. Fin</th>
         <th>Mémoire ?</th>
         <th>Stage ?</th>
@@ -20,6 +21,7 @@
             <td>{{ type_diplome.libelle }}</td>
             <td>{{ type_diplome.libelleCourt }}</td>
             <td>{{ type_diplome.codeApogee|displayOrBadge }}</td>
+            <td>{{ type_diplome.classique|badgeBoolean }}</td>
             <td>S{{ type_diplome.semestreDebut }} / S{{ type_diplome.semestreFin }}</td>
             <td>{{ type_diplome.hasMemoire|badgeBoolean }}</td>
             <td>{{ type_diplome.hasStage|badgeBoolean }}</td>

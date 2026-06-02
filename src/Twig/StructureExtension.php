@@ -48,13 +48,13 @@ class StructureExtension extends AbstractExtension
         return sprintf($badge, $nb);
     }
 
-    public function badgeEctsSemestre(?float $ects, float $max = 30): string
+    public function badgeEctsSemestre(?float $ects, ?int $max = 30): string
     {
         if ($ects === null) {
             return '<span class="badge bg-warning">Erreur ECTS</span>';
         }
 
-        $color = $ects === $max ? 'success' : 'danger';
+        $color = $ects === (float)$max ? 'success' : 'danger';
         $badge = '<span class="badge bg-'.$color.' me-2">%s ECTS</span>';
         return sprintf($badge, $ects);
     }

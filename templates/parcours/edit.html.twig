@@ -42,7 +42,7 @@
             </div>
         {% endif %}
     {% else %}
-        {{ include('parcours/_wizard.html.twig') }}
+        {{ include('parcours/_wizard.html.twig', {hideCompetencesStructure: constant('TEMPLATE_FOLDER', typeD) == 'non_classique'}) }}
     {% endif %}
 {% endblock %}
 
