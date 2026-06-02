@@ -490,11 +490,18 @@ class FormationRepository extends ServiceEntityRepository
     }
 
     public function findFromAnneeUniversitaire(int $idCampagneCollecte) : array {
-        return $this->createQueryBuilder('formation')
+        $qb = $this->createQueryBuilder('formation');
+        return $qb
             ->select('DISTINCT formation.id')
             ->join('formation.dpeParcours', 'dpeP')
             ->join('dpeP.campagneCollecte', 'campagneC')
-            ->where('campagneC.id = :idCampagne')
+            ->andWhere('campagneC.id = :idCampagne')
+            ->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->isNull('formation.isSoftDeleted'),
+                    $qb->expr()->eq('formation.isSoftDeleted', 0)
+                )
+            )
             ->setParameter(':idCampagne', $idCampagneCollecte)
             ->getQuery()
             ->getResult();
