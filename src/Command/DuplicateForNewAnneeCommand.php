@@ -981,7 +981,7 @@ class DuplicateForNewAnneeCommand extends Command
     }
 
     private function getNewSlugForFicheMatiere(string $initialSlug) : string {
-        if(preg_match('/(.*)-2025$/', $initialSlug, $matches)) {
+        if(preg_match('/(.*)-2026$/', $initialSlug, $matches)) {
             return $matches[1] . self::SLUG_YEAR_SUFFIX;
         }
 
