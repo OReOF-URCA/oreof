@@ -12,24 +12,26 @@ namespace App\Classes\Export;
 use App\Classes\Excel\ExcelWriter;
 use App\Classes\GetHistorique;
 use App\Entity\CampagneCollecte;
-use App\Entity\ElementConstitutif;
 use App\Repository\FicheMatiereRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
+use Davidannebicque\HtmlToSpreadsheetBundle\Spreadsheet\SpreadsheetRenderer;
 use DateTime;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class ExportListeFicheMatiere implements ExportInterface
 {
+    private const TEMPLATE = 'exports/liste_fiche_matiere.html.twig';
+
     private string $fileName;
     private string $dir;
 
     public function __construct(
-        protected GetHistorique        $getHistorique,
-        protected ExcelWriter         $excelWriter,
-        ProjectDirProvider $projectDirProvider,
+        protected GetHistorique          $getHistorique,
+        protected ExcelWriter            $excelWriter,
+        ProjectDirProvider               $projectDirProvider,
         protected FicheMatiereRepository $ficheMatiereRepository,
+        protected SpreadsheetRenderer    $spreadsheetRenderer,
     ) {
         $this->dir = $projectDirProvider->getProjectDir() . '/public/temp/';
     }
@@ -42,37 +44,25 @@ class ExportListeFicheMatiere implements ExportInterface
         ], [
             'libelle' => 'ASC'
         ]);
-        $this->excelWriter->nouveauFichier('Export Fiches Matieres');
-        $this->excelWriter->setActiveSheetIndex(0);
 
-        $this->excelWriter->writeCellXY(1, 1, 'Id');
-        $this->excelWriter->writeCellXY(2, 1, 'Fiche EC/matière');
-        $this->excelWriter->writeCellXY(3, 1, 'Référent');
-        $this->excelWriter->writeCellXY(4, 1, 'Complet ?');
-        $this->excelWriter->writeCellXY(5, 1, 'Utilisée ?');
-        $this->excelWriter->writeCellXY(6, 1, 'Parcours porteur');
-        $this->excelWriter->writeCellXY(7, 1, 'Formation');
-
-        $ligne = 2;
-        /** @var ElementConstitutif $ec */
+        $lignes = [];
         foreach ($fiches as $fiche) {
-            $this->excelWriter->writeCellXY(1, $ligne, $fiche->getId());
-            $this->excelWriter->writeCellXY(2, $ligne, $fiche->getLibelle());
-            $this->excelWriter->writeCellXY(3, $ligne, $fiche->getResponsableFicheMatiere() !== null ? $fiche->getResponsableFicheMatiere()->getDisplay() : '');
-            $this->excelWriter->writeCellXY(4, $ligne, $fiche->remplissageBrut()->isFull() ? 'Complet' : 'Incomplet');
-            $this->excelWriter->writeCellXY(5, $ligne, $fiche->getElementConstitutifs()->count());
-            $this->excelWriter->writeCellXY(6, $ligne,
-            $fiche->isHorsDiplome() === true ? 'Hors diplôme' : ($fiche->getParcours() !== null ? $fiche->getParcours()->getLibelle() : ''
-            ));
-            $this->excelWriter->writeCellXY(7, $ligne,
-                $fiche->isHorsDiplome() === true ? 'Hors diplôme' : ($fiche->getParcours() !== null && $fiche->getParcours()->getFormation() !== null ? $fiche->getParcours()->getFormation()->getDisplayLong() : ''
-                ));
-
-            $this->excelWriter->getColumnsAutoSize('A', 'M');
-            $ligne++;
+            $lignes[] = [
+                'id'              => $fiche->getId(),
+                'libelle'         => $fiche->getLibelle(),
+                'referent'        => $fiche->getResponsableFicheMatiere() !== null ? $fiche->getResponsableFicheMatiere()->getDisplay() : '',
+                'complet'         => $fiche->remplissageBrut()->isFull() ? 'Complet' : 'Incomplet',
+                'utilisee'        => $fiche->getElementConstitutifs()->count(),
+                'parcoursPorteur' => $fiche->isHorsDiplome() === true ? 'Hors diplôme' : ($fiche->getParcours() !== null ? $fiche->getParcours()->getLibelle() : ''),
+                'formation'       => $fiche->isHorsDiplome() === true ? 'Hors diplôme' : ($fiche->getParcours() !== null && $fiche->getParcours()->getFormation() !== null ? $fiche->getParcours()->getFormation()->getDisplayLong() : ''),
+            ];
         }
 
-        $this->fileName = Tools::FileName('Export - Fiches Matières - ' . (new DateTime())->format('d-m-Y-H-i'), 30);
+        $this->excelWriter->setSpreadsheet(
+            $this->spreadsheetRenderer->createFromTemplate(self::TEMPLATE, ['lignes' => $lignes])
+        );
+
+        $this->fileName = (string) Tools::FileName('Export - Fiches Matières - ' . (new DateTime())->format('d-m-Y-H-i'), 30);
     }
 
     public function export(CampagneCollecte $anneeUniversitaire): StreamedResponse

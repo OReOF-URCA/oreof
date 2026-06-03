@@ -1,0 +1,43 @@
+{# ExportSeip — fidèle à l'existant. Pas d'autosize (l'ancien code n'en posait pas).
+   Les colonnes "Modalités Stage" (H), "Modalités projet" (K) et "Modalités TER" (M)
+   utilisent le retour à la ligne (wrap), comme l'option ['wrap' => true] d'origine. #}
+<div id="workbook">
+  <table data-xls-sheet="Export SEIP">
+    <thead>
+      <tr>
+        <th>Composante</th>
+        <th>Type Diplôme</th>
+        <th>Mention</th>
+        <th>Parcours</th>
+        <th>Modalités</th>
+        <th>Stage</th>
+        <th>Heures Stage</th>
+        <th>Modalités Stage</th>
+        <th>Projet</th>
+        <th>Heures Projet</th>
+        <th>Modalités projet</th>
+        <th>TER/mémoire</th>
+        <th>Modalités TER</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ligne in lignes %}
+        <tr>
+          <td>{{ ligne.composante }}</td>
+          <td>{{ ligne.typeDiplome }}</td>
+          <td>{{ ligne.mention }}</td>
+          <td>{{ ligne.parcours }}</td>
+          <td>{{ ligne.modalites }}</td>
+          <td>{{ ligne.stage }}</td>
+          <td>{{ ligne.heuresStage }}</td>
+          <td data-xls-wrap="true">{{ ligne.modalitesStage }}</td>
+          <td>{{ ligne.projet }}</td>
+          <td>{{ ligne.heuresProjet }}</td>
+          <td data-xls-wrap="true">{{ ligne.modalitesProjet }}</td>
+          <td>{{ ligne.terMemoire }}</td>
+          <td data-xls-wrap="true">{{ ligne.modalitesTer }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

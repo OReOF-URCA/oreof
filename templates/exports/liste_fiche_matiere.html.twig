@@ -1,0 +1,29 @@
+{# ExportListeFicheMatiere — fidèle à l'existant (en-tête ligne 1, données ligne 2, autosize A:M, sans style). #}
+<div id="workbook">
+  <table data-xls-sheet="Export Fiches Matieres" data-xls-autosize="A:M">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Fiche EC/matière</th>
+        <th>Référent</th>
+        <th>Complet ?</th>
+        <th>Utilisée ?</th>
+        <th>Parcours porteur</th>
+        <th>Formation</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ligne in lignes %}
+        <tr>
+          <td>{{ ligne.id }}</td>
+          <td>{{ ligne.libelle }}</td>
+          <td>{{ ligne.referent }}</td>
+          <td>{{ ligne.complet }}</td>
+          <td>{{ ligne.utilisee }}</td>
+          <td>{{ ligne.parcoursPorteur }}</td>
+          <td>{{ ligne.formation }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

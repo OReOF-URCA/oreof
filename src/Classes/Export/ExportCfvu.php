@@ -16,19 +16,23 @@ use App\Entity\CampagneCollecte;
 use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
+use Davidannebicque\HtmlToSpreadsheetBundle\Spreadsheet\SpreadsheetRenderer;
 use DateTime;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportCfvu implements ExportInterface
 {
+    private const TEMPLATE = 'exports/cfvu.html.twig';
+
     private string $fileName;
     private string $dir;
 
     public function __construct(
-        protected GetHistorique        $getHistorique,
+        protected GetHistorique       $getHistorique,
         protected ExcelWriter         $excelWriter,
-        ProjectDirProvider $projectDirProvider,
+        ProjectDirProvider            $projectDirProvider,
         protected FormationRepository $formationRepository,
+        protected SpreadsheetRenderer $spreadsheetRenderer,
     ) {
         $this->dir = $projectDirProvider->getProjectDir() . '/public/temp/';
     }
@@ -36,58 +40,46 @@ class ExportCfvu implements ExportInterface
     private function prepareExport(
         CampagneCollecte $anneeUniversitaire,
     ): void {
-        /*
-         * Nous aurions besoin d'une extraction des formations (mention et parcours) qui passent en CFVU on peut repartir sur la base : compo / type de formation / mention / parcours / lieu de formation / responsable mention / responsable parcours et peut être ajouter une colonne date validation Conseil compo et date de transmission PV conseil (ou si PV déposé ou non)
-         */
         $formations = $this->formationRepository->findBySearch('', $anneeUniversitaire);
-        $this->excelWriter->nouveauFichier('Export CFVU');
-        $this->excelWriter->setActiveSheetIndex(0);
 
-        $this->excelWriter->writeCellXY(1, 1, 'Composante');
-        $this->excelWriter->writeCellXY(2, 1, 'Type Diplôme');
-        $this->excelWriter->writeCellXY(3, 1, 'Mention');
-        $this->excelWriter->writeCellXY(4, 1, 'Parcours');
-        $this->excelWriter->writeCellXY(5, 1, 'Lieu de formation');
-        $this->excelWriter->writeCellXY(6, 1, 'Resp. Mention');
-        $this->excelWriter->writeCellXY(7, 1, 'Resp. Parcours');
-        $this->excelWriter->writeCellXY(8, 1, 'Validation Composante');
-        $this->excelWriter->writeCellXY(9, 1, 'Présence PV');
-        $this->excelWriter->writeCellXY(10, 1, 'Etat validation');
-
-        $ligne = 2;
+        $lignes = [];
         foreach ($formations as $formation) {
             foreach ($formation->getParcours() as $parcours) {
-                    $this->excelWriter->writeCellXY(1, $ligne, $formation->getComposantePorteuse()?->getLibelle());
-                    $this->excelWriter->writeCellXY(2, $ligne, $formation->getTypeDiplome()?->getLibelle());
-                    $this->excelWriter->writeCellXY(3, $ligne, $formation->getDisplay());
-                    if ($formation->isHasParcours()) {
-                        $this->excelWriter->writeCellXY(4, $ligne, $parcours->getLibelle());
-                        $this->excelWriter->writeCellXY(5, $ligne, $parcours->getLocalisation()?->getLibelle());
-                    } else {
-                        $this->excelWriter->writeCellXY(4, $ligne, 'Pas de parcours');
-                        $texte = '';
-                        foreach ($formation->getLocalisationMention() as $localisation) {
-                            $texte .= $localisation->getLibelle() . ', ';
-                        }
-                        $this->excelWriter->writeCellXY(5, $ligne, substr($texte, 0, -2));
+                if ($formation->isHasParcours()) {
+                    $parcoursLibelle = $parcours->getLibelle();
+                    $lieu = $parcours->getLocalisation()?->getLibelle();
+                } else {
+                    $parcoursLibelle = 'Pas de parcours';
+                    $texte = '';
+                    foreach ($formation->getLocalisationMention() as $localisation) {
+                        $texte .= $localisation->getLibelle() . ', ';
                     }
+                    $lieu = substr($texte, 0, -2);
+                }
 
-                    $this->excelWriter->writeCellXY(6, $ligne, $formation->getResponsableMention()?->getDisplay());
-                    $this->excelWriter->writeCellXY(7, $ligne, $parcours->getRespParcours()?->getDisplay());
-                    $dpeParcours = GetDpeParcours::getFromParcours($parcours);
-                    $this->excelWriter->writeCellXY(8, $ligne, $this->getHistorique->getHistoriqueParcoursLastStep($dpeParcours, 'conseil')?->getDate()?->format('d/m/Y') ?? 'Non validé');
-                    $this->excelWriter->writeCellXY(9, $ligne, $this->getHistorique->getHistoriqueFormationHasPv($formation) === true ? 'Oui' : 'Non');
                 $dpeParcours = GetDpeParcours::getFromParcours($parcours);
                 $etatValidation = array_keys($dpeParcours?->getEtatValidation())[0];
-                $this->excelWriter->writeCellXY(10, $ligne, $etatValidation ?? '-erreur état-');
 
-
-                $this->excelWriter->getColumnsAutoSize('A', 'J');
-                    $ligne++;
+                $lignes[] = [
+                    'composante'           => $formation->getComposantePorteuse()?->getLibelle(),
+                    'typeDiplome'          => $formation->getTypeDiplome()?->getLibelle(),
+                    'mention'              => $formation->getDisplay(),
+                    'parcours'             => $parcoursLibelle,
+                    'lieu'                 => $lieu,
+                    'respMention'          => $formation->getResponsableMention()?->getDisplay(),
+                    'respParcours'         => $parcours->getRespParcours()?->getDisplay(),
+                    'validationComposante' => $this->getHistorique->getHistoriqueParcoursLastStep($dpeParcours, 'conseil')?->getDate()?->format('d/m/Y') ?? 'Non validé',
+                    'presencePv'           => $this->getHistorique->getHistoriqueFormationHasPv($formation) === true ? 'Oui' : 'Non',
+                    'etatValidation'       => $etatValidation ?? '-erreur état-',
+                ];
             }
         }
 
-        $this->fileName = Tools::FileName('EXPORT-CFVU - ' . (new DateTime())->format('d-m-Y-H-i'), 30);
+        $this->excelWriter->setSpreadsheet(
+            $this->spreadsheetRenderer->createFromTemplate(self::TEMPLATE, ['lignes' => $lignes])
+        );
+
+        $this->fileName = (string) Tools::FileName('EXPORT-CFVU - ' . (new DateTime())->format('d-m-Y-H-i'), 30);
     }
 
     public function export(CampagneCollecte $anneeUniversitaire): StreamedResponse

@@ -1,0 +1,35 @@
+{#
+    Export "Tableau des responsables / composante" (ExportResponsable).
+
+    FIDÉLITÉ À L'EXISTANT — ne pas "améliorer" sans accord :
+    - Aucun style : cellules brutes, pas de gras / fond / bordure / centrage
+      (l'ancien code écrivait via writeCellXY sans options).
+    - Nom de feuille : "Export CAP" (tel quel dans l'ancien code).
+    - Autosize sur A:P (et non A:H), comme getColumnsAutoSize('A','P').
+    - PAS d'en-tête visible : l'ancien code écrit les libellés en ligne 1
+      puis la 1re ligne de données ($ligne = 1) les écrase. Le rendu réel
+      ne contient donc QUE les données, à partir de la ligne 1.
+      (Si on veut un vrai en-tête un jour, ajouter un <thead> ici.)
+    - La colonne "Co. Resp. Parcours" reprend volontairement respParcours,
+      à l'identique de l'ancien code (ligne 63-64).
+
+    Variables attendues : lignes = liste d'objets/maps avec les clés ci-dessous.
+#}
+<div id="workbook">
+  <table data-xls-sheet="Export CAP" data-xls-autosize="A:P">
+    <tbody>
+      {% for ligne in lignes %}
+        <tr>
+          <td>{{ ligne.composante }}</td>
+          <td>{{ ligne.typeDiplome }}</td>
+          <td>{{ ligne.mention }}</td>
+          <td>{{ ligne.parcours }}</td>
+          <td>{{ ligne.respFormation }}</td>
+          <td>{{ ligne.coRespFormation }}</td>
+          <td>{{ ligne.respParcours }}</td>
+          <td>{{ ligne.coRespParcours }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

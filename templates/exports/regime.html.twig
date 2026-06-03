@@ -1,0 +1,58 @@
+{# ExportRegime — fidèle à l'existant. Autosize A:Z, sans style.
+   Les colonnes de régimes (après "Validation CFVU") sont dynamiques : une par
+   cas de RegimeInscriptionEnum. Une croix "X" centrée marque les régimes du parcours,
+   exactement comme l'ancien code (option ['style' => 'HORIZONTAL_CENTER']). #}
+<div id="workbook">
+  <table data-xls-sheet="Export Régimes" data-xls-autosize="A:Z">
+    <thead>
+      <tr>
+        <th>Composante</th>
+        <th>Type Diplôme</th>
+        <th>Mention</th>
+        <th>Parcours</th>
+        <th>Lieu de formation</th>
+        <th>Resp. Mention</th>
+        <th>Resp. Mention Mail</th>
+        <th>Resp. Mention Login</th>
+        <th>Co. Resp. Mention</th>
+        <th>Co. Resp. Mention Mail</th>
+        <th>Co. Resp. Mention Login</th>
+        <th>Resp. Parcours</th>
+        <th>Resp. Parcours Mail</th>
+        <th>Resp. Parcours Login</th>
+        <th>Co. Resp. Parcours</th>
+        <th>Co. Resp. Parcours Mail</th>
+        <th>Co. Resp. Parcours Login</th>
+        <th>RNCP</th>
+        <th>Validation CFVU</th>
+        {% for regime in regimes %}<th>{{ regime }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for ligne in lignes %}
+        <tr>
+          <td>{{ ligne.composante }}</td>
+          <td>{{ ligne.typeDiplome }}</td>
+          <td>{{ ligne.mention }}</td>
+          <td>{{ ligne.parcours }}</td>
+          <td>{{ ligne.lieu }}</td>
+          <td>{{ ligne.respMention }}</td>
+          <td>{{ ligne.respMentionMail }}</td>
+          <td>{{ ligne.respMentionLogin }}</td>
+          <td>{{ ligne.coRespMention }}</td>
+          <td>{{ ligne.coRespMentionMail }}</td>
+          <td>{{ ligne.coRespMentionLogin }}</td>
+          <td>{{ ligne.respParcours }}</td>
+          <td>{{ ligne.respParcoursMail }}</td>
+          <td>{{ ligne.respParcoursLogin }}</td>
+          <td>{{ ligne.coRespParcours }}</td>
+          <td>{{ ligne.coRespParcoursMail }}</td>
+          <td>{{ ligne.coRespParcoursLogin }}</td>
+          <td>{{ ligne.rncp }}</td>
+          <td>{{ ligne.validationCfvu }}</td>
+          {% for chk in ligne.regimeChecks %}{% if chk %}<td data-xls-align="center">X</td>{% else %}<td></td>{% endif %}{% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

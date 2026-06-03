@@ -1,0 +1,35 @@
+{# ExportCfvu — fidèle à l'existant (en-tête ligne 1, données ligne 2, autosize A:J, sans style). #}
+<div id="workbook">
+  <table data-xls-sheet="Export CFVU" data-xls-autosize="A:J">
+    <thead>
+      <tr>
+        <th>Composante</th>
+        <th>Type Diplôme</th>
+        <th>Mention</th>
+        <th>Parcours</th>
+        <th>Lieu de formation</th>
+        <th>Resp. Mention</th>
+        <th>Resp. Parcours</th>
+        <th>Validation Composante</th>
+        <th>Présence PV</th>
+        <th>Etat validation</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ligne in lignes %}
+        <tr>
+          <td>{{ ligne.composante }}</td>
+          <td>{{ ligne.typeDiplome }}</td>
+          <td>{{ ligne.mention }}</td>
+          <td>{{ ligne.parcours }}</td>
+          <td>{{ ligne.lieu }}</td>
+          <td>{{ ligne.respMention }}</td>
+          <td>{{ ligne.respParcours }}</td>
+          <td>{{ ligne.validationComposante }}</td>
+          <td>{{ ligne.presencePv }}</td>
+          <td>{{ ligne.etatValidation }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

@@ -15,6 +15,7 @@
     "ext-libxml": "*",
     "ext-zip": "*",
     "apereo/phpcas": "^1.6",
+    "davidannebicque/html-to-spreadsheet-bundle": "*",
     "doctrine/doctrine-bundle": "^3.2",
     "doctrine/doctrine-migrations-bundle": "^4.0.0",
     "doctrine/orm": "^3.6",

@@ -17,12 +17,14 @@ use App\Enums\RegimeInscriptionEnum;
 use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
+use Davidannebicque\HtmlToSpreadsheetBundle\Spreadsheet\SpreadsheetRenderer;
 use DateTime;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class ExportRegime implements ExportInterface
 {
+    private const TEMPLATE = 'exports/regime.html.twig';
+
     private string $fileName;
     private string $dir;
 
@@ -31,6 +33,7 @@ class ExportRegime implements ExportInterface
         protected ExcelWriter         $excelWriter,
         ProjectDirProvider            $projectDirProvider,
         protected FormationRepository $formationRepository,
+        protected SpreadsheetRenderer $spreadsheetRenderer,
     ) {
         $this->dir = $projectDirProvider->getProjectDir() . '/public/temp/';
     }
@@ -39,82 +42,65 @@ class ExportRegime implements ExportInterface
         CampagneCollecte $anneeUniversitaire,
     ): void {
         $formations = $this->formationRepository->findBySearch('', $anneeUniversitaire);
-        $this->excelWriter->nouveauFichier('Export Régimes');
-        $this->excelWriter->setActiveSheetIndex(0);
 
-        $this->excelWriter->writeCellXY(1, 1, 'Composante');
-        $this->excelWriter->writeCellXY(2, 1, 'Type Diplôme');
-        $this->excelWriter->writeCellXY(3, 1, 'Mention');
-        $this->excelWriter->writeCellXY(4, 1, 'Parcours');
-        $this->excelWriter->writeCellXY(5, 1, 'Lieu de formation');
-        $this->excelWriter->writeCellXY(6, 1, 'Resp. Mention');
-        $this->excelWriter->writeCellXY(7, 1, 'Resp. Mention Mail');
-        $this->excelWriter->writeCellXY(8, 1, 'Resp. Mention Login');
-        $this->excelWriter->writeCellXY(9, 1, 'Co. Resp. Mention');
-        $this->excelWriter->writeCellXY(10, 1, 'Co. Resp. Mention Mail');
-        $this->excelWriter->writeCellXY(11, 1, 'Co. Resp. Mention Login');
-        $this->excelWriter->writeCellXY(12, 1, 'Resp. Parcours');
-        $this->excelWriter->writeCellXY(13, 1, 'Resp. Parcours Mail');
-        $this->excelWriter->writeCellXY(14, 1, 'Resp. Parcours Login');
-        $this->excelWriter->writeCellXY(15, 1, 'Co. Resp. Parcours');
-        $this->excelWriter->writeCellXY(16, 1, 'Co. Resp. Parcours Mail');
-        $this->excelWriter->writeCellXY(17, 1, 'Co. Resp. Parcours Login');
-        $this->excelWriter->writeCellXY(18, 1, 'RNCP');
-        $this->excelWriter->writeCellXY(19, 1, 'Validation CFVU');
-        $i = 0;
-        foreach (RegimeInscriptionEnum::cases() as $regime) {
-            $this->excelWriter->writeCellXY(20 + $i, 1, $regime->value);
-            $i++;
-        }
+        $regimeCases = RegimeInscriptionEnum::cases();
+        $regimes = array_map(static fn(RegimeInscriptionEnum $r) => $r->value, $regimeCases);
 
-        $ligne = 2;
+        $lignes = [];
         foreach ($formations as $formation) {
             foreach ($formation->getParcours() as $parcours) {
-                $this->excelWriter->writeCellXY(1, $ligne, $formation->getComposantePorteuse()?->getLibelle());
-                $this->excelWriter->writeCellXY(2, $ligne, $formation->getTypeDiplome()?->getLibelle());
-                $this->excelWriter->writeCellXY(3, $ligne, $formation->getDisplay());
                 if ($formation->isHasParcours()) {
-                    $this->excelWriter->writeCellXY(4, $ligne, $parcours->getLibelle());
-                    $this->excelWriter->writeCellXY(5, $ligne, $parcours->getLocalisation()?->getLibelle());
+                    $parcoursLibelle = $parcours->getLibelle();
+                    $lieu = $parcours->getLocalisation()?->getLibelle();
                 } else {
-                    $this->excelWriter->writeCellXY(4, $ligne, 'Pas de parcours');
+                    $parcoursLibelle = 'Pas de parcours';
                     $texte = '';
                     foreach ($formation->getLocalisationMention() as $localisation) {
                         $texte .= $localisation->getLibelle() . ', ';
                     }
-                    $this->excelWriter->writeCellXY(5, $ligne, substr($texte, 0, -2));
-                }
-                $dpeParcours = GetDpeParcours::getFromParcours($parcours);
-                $this->excelWriter->writeCellXY(6, $ligne, $formation->getResponsableMention()?->getDisplay());
-                $this->excelWriter->writeCellXY(7, $ligne, $formation->getResponsableMention()?->getEmail());
-                $this->excelWriter->writeCellXY(8, $ligne, $formation->getResponsableMention()?->getUsername());
-                $this->excelWriter->writeCellXY(9, $ligne, $formation->getCoResponsable()?->getDisplay());
-                $this->excelWriter->writeCellXY(10, $ligne, $formation->getCoResponsable()?->getEmail());
-                $this->excelWriter->writeCellXY(11, $ligne, $formation->getCoResponsable()?->getUsername());
-                $this->excelWriter->writeCellXY(12, $ligne, $parcours->getRespParcours()?->getDisplay());
-                $this->excelWriter->writeCellXY(13, $ligne, $parcours->getRespParcours()?->getEmail());
-                $this->excelWriter->writeCellXY(14, $ligne, $parcours->getRespParcours()?->getUsername());
-                $this->excelWriter->writeCellXY(15, $ligne, $parcours->getCoResponsable()?->getDisplay());
-                $this->excelWriter->writeCellXY(16, $ligne, $parcours->getCoResponsable()?->getEmail());
-                $this->excelWriter->writeCellXY(17, $ligne, $parcours->getCoResponsable()?->getUsername());
-                $this->excelWriter->writeCellXY(18, $ligne, $formation->getCodeRNCP());
-                $this->excelWriter->writeCellXY(19, $ligne, $this->getHistorique->getHistoriqueParcoursLastStep($dpeParcours, 'cfvu')?->getDate()?->format('d/m/Y') ?? 'Non validé');
-                $i = 0;
-                foreach (RegimeInscriptionEnum::cases() as $regime) {
-                    if (in_array($regime, $parcours->getRegimeInscription())) {
-                        $this->excelWriter->writeCellXY(20 + $i, $ligne, 'X', [
-                            'style' => 'HORIZONTAL_CENTER'
-                        ]);
-                    }
-                    $i++;
+                    $lieu = substr($texte, 0, -2);
                 }
 
-                $this->excelWriter->getColumnsAutoSize('A', 'Z');
-                $ligne++;
+                $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+
+                $regimeChecks = [];
+                foreach ($regimeCases as $regime) {
+                    $regimeChecks[] = in_array($regime, $parcours->getRegimeInscription()) ? 'X' : '';
+                }
+
+                $lignes[] = [
+                    'composante'          => $formation->getComposantePorteuse()?->getLibelle(),
+                    'typeDiplome'         => $formation->getTypeDiplome()?->getLibelle(),
+                    'mention'             => $formation->getDisplay(),
+                    'parcours'            => $parcoursLibelle,
+                    'lieu'                => $lieu,
+                    'respMention'         => $formation->getResponsableMention()?->getDisplay(),
+                    'respMentionMail'     => $formation->getResponsableMention()?->getEmail(),
+                    'respMentionLogin'    => $formation->getResponsableMention()?->getUsername(),
+                    'coRespMention'       => $formation->getCoResponsable()?->getDisplay(),
+                    'coRespMentionMail'   => $formation->getCoResponsable()?->getEmail(),
+                    'coRespMentionLogin'  => $formation->getCoResponsable()?->getUsername(),
+                    'respParcours'        => $parcours->getRespParcours()?->getDisplay(),
+                    'respParcoursMail'    => $parcours->getRespParcours()?->getEmail(),
+                    'respParcoursLogin'   => $parcours->getRespParcours()?->getUsername(),
+                    'coRespParcours'      => $parcours->getCoResponsable()?->getDisplay(),
+                    'coRespParcoursMail'  => $parcours->getCoResponsable()?->getEmail(),
+                    'coRespParcoursLogin' => $parcours->getCoResponsable()?->getUsername(),
+                    'rncp'                => $formation->getCodeRNCP(),
+                    'validationCfvu'      => $this->getHistorique->getHistoriqueParcoursLastStep($dpeParcours, 'cfvu')?->getDate()?->format('d/m/Y') ?? 'Non validé',
+                    'regimeChecks'        => $regimeChecks,
+                ];
             }
         }
 
-        $this->fileName = Tools::FileName('OF - REGIME - ' . (new DateTime())->format('d-m-Y-H-i'), 30);
+        $this->excelWriter->setSpreadsheet(
+            $this->spreadsheetRenderer->createFromTemplate(self::TEMPLATE, [
+                'regimes' => $regimes,
+                'lignes'  => $lignes,
+            ])
+        );
+
+        $this->fileName = (string) Tools::FileName('OF - REGIME - ' . (new DateTime())->format('d-m-Y-H-i'), 30);
     }
 
     public function export(CampagneCollecte $anneeUniversitaire): StreamedResponse

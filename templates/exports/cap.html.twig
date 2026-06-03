@@ -1,0 +1,52 @@
+{# ExportCap — fidèle à l'existant (en-tête ligne 1, données ligne 2, autosize A:P, sans style).
+   CM/TD/TP sont des nombres (détectés automatiquement). #}
+<div id="workbook">
+  <table data-xls-sheet="Export CAP" data-xls-autosize="A:P">
+    <thead>
+      <tr>
+        <th>Composante</th>
+        <th>Type Diplôme</th>
+        <th>Mention</th>
+        <th>Parcours</th>
+        <th>Code Dip.</th>
+        <th>VDI</th>
+        <th>Code étape</th>
+        <th>VET</th>
+        <th>Fiche EC/matière</th>
+        <th>Code élément</th>
+        <th>CM</th>
+        <th>TD</th>
+        <th>TP</th>
+        <th>MATI/MATM</th>
+        <th>Option</th>
+        <th>Semestre</th>
+        <th>Etat DPE</th>
+        <th>Date CFVU</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ligne in lignes %}
+        <tr>
+          <td>{{ ligne.composante }}</td>
+          <td>{{ ligne.typeDiplome }}</td>
+          <td>{{ ligne.mention }}</td>
+          <td>{{ ligne.parcours }}</td>
+          <td>{{ ligne.codeDip }}</td>
+          <td>{{ ligne.vdi }}</td>
+          <td>{{ ligne.codeEtape }}</td>
+          <td>{{ ligne.vet }}</td>
+          <td>{{ ligne.ficheMatiere }}</td>
+          <td>{{ ligne.codeElement }}</td>
+          <td>{{ ligne.cm }}</td>
+          <td>{{ ligne.td }}</td>
+          <td>{{ ligne.tp }}</td>
+          <td>{{ ligne.matiMatm }}</td>
+          <td>{{ ligne.option }}</td>
+          <td>{{ ligne.semestre }}</td>
+          <td>{{ ligne.etatDpe }}</td>
+          <td>{{ ligne.dateCfvu }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

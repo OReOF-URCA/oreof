@@ -1,0 +1,46 @@
+{# ExportSemestresOuverts — fidèle à l'existant. Pas d'autosize (l'ancien code n'en posait pas).
+   Les colonnes Semestre 1..6 restent vides quand le semestre n'existe pas (comme l'origine). #}
+<div id="workbook">
+  <table data-xls-sheet="Export Semestres ouverts">
+    <thead>
+      <tr>
+        <th>Composante</th>
+        <th>Type de diplôme</th>
+        <th>Mention</th>
+        <th>Parcours</th>
+        <th>Responsable mention</th>
+        <th>Responsable parcours</th>
+        <th>Etat parcours/mention</th>
+        <th>Semestre 1</th>
+        <th>Semestre 2</th>
+        <th>Semestre 3</th>
+        <th>Semestre 4</th>
+        <th>Semestre 5</th>
+        <th>Semestre 6</th>
+        <th># Mention</th>
+        <th># parcours</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ligne in lignes %}
+        <tr>
+          <td>{{ ligne.composante }}</td>
+          <td>{{ ligne.typeDiplome }}</td>
+          <td>{{ ligne.mention }}</td>
+          <td>{{ ligne.parcours }}</td>
+          <td>{{ ligne.respMention }}</td>
+          <td>{{ ligne.respParcours }}</td>
+          <td>{{ ligne.etat }}</td>
+          <td>{{ ligne.semestres[0] }}</td>
+          <td>{{ ligne.semestres[1] }}</td>
+          <td>{{ ligne.semestres[2] }}</td>
+          <td>{{ ligne.semestres[3] }}</td>
+          <td>{{ ligne.semestres[4] }}</td>
+          <td>{{ ligne.semestres[5] }}</td>
+          <td>{{ ligne.idMention }}</td>
+          <td>{{ ligne.idParcours }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

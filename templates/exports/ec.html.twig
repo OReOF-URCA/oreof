@@ -1,0 +1,40 @@
+{# ExportEc — fidèle à l'existant. NB : le nom de feuille "Export SEIP" est repris
+   tel quel de l'ancien code (copier-coller d'origine). Autosize A:M, sans style. #}
+<div id="workbook">
+  <table data-xls-sheet="Export SEIP" data-xls-autosize="A:M">
+    <thead>
+      <tr>
+        <th>Composante</th>
+        <th>Type Diplôme</th>
+        <th>Mention</th>
+        <th>Parcours</th>
+        <th>Semestre</th>
+        <th>N° UE</th>
+        <th>Initulé UE</th>
+        <th>N° EC</th>
+        <th>Initulé EC</th>
+        <th>Fiche EC/matière</th>
+        <th>Type EC</th>
+        <th>Référent</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ligne in lignes %}
+        <tr>
+          <td>{{ ligne.composante }}</td>
+          <td>{{ ligne.typeDiplome }}</td>
+          <td>{{ ligne.mention }}</td>
+          <td>{{ ligne.parcours }}</td>
+          <td>{{ ligne.semestre }}</td>
+          <td>{{ ligne.numUe }}</td>
+          <td>{{ ligne.intituleUe }}</td>
+          <td>{{ ligne.numEc }}</td>
+          <td>{{ ligne.intituleEc }}</td>
+          <td>{{ ligne.ficheMatiere }}</td>
+          <td>{{ ligne.typeEc }}</td>
+          <td>{{ ligne.referent }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

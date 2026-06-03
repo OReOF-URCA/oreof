@@ -16,20 +16,23 @@ use App\Entity\ElementConstitutif;
 use App\Repository\ElementConstitutifRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
+use Davidannebicque\HtmlToSpreadsheetBundle\Spreadsheet\SpreadsheetRenderer;
 use DateTime;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class ExportEc implements ExportInterface
 {
+    private const TEMPLATE = 'exports/ec.html.twig';
+
     private string $fileName;
     private string $dir;
 
     public function __construct(
-        protected GetHistorique        $getHistorique,
-        protected ExcelWriter         $excelWriter,
-        ProjectDirProvider $projectDirProvider,
+        protected GetHistorique                $getHistorique,
+        protected ExcelWriter                  $excelWriter,
+        ProjectDirProvider                     $projectDirProvider,
         protected ElementConstitutifRepository $elementConstitutifRepository,
+        protected SpreadsheetRenderer          $spreadsheetRenderer,
     ) {
         $this->dir = $projectDirProvider->getProjectDir() . '/public/temp/';
     }
@@ -38,48 +41,31 @@ class ExportEc implements ExportInterface
         CampagneCollecte $anneeUniversitaire,
     ): void {
         $ecs = $this->elementConstitutifRepository->findWithParcours();
-        $this->excelWriter->nouveauFichier('Export SEIP');
-        $this->excelWriter->setActiveSheetIndex(0);
 
-        $this->excelWriter->writeCellXY(1, 1, 'Composante');
-        $this->excelWriter->writeCellXY(2, 1, 'Type Diplôme');
-        $this->excelWriter->writeCellXY(3, 1, 'Mention');
-        $this->excelWriter->writeCellXY(4, 1, 'Parcours');
-        $this->excelWriter->writeCellXY(5, 1, 'Semestre');
-        $this->excelWriter->writeCellXY(6, 1, 'N° UE');
-        $this->excelWriter->writeCellXY(7, 1, 'Initulé UE');
-        $this->excelWriter->writeCellXY(8, 1, 'N° EC');
-        $this->excelWriter->writeCellXY(9, 1, 'Initulé EC');
-        $this->excelWriter->writeCellXY(10, 1, 'Fiche EC/matière');
-        $this->excelWriter->writeCellXY(11, 1, 'Type EC');
-        $this->excelWriter->writeCellXY(12, 1, 'Référent');
-
-        $ligne = 2;
+        $lignes = [];
         /** @var ElementConstitutif $ec */
         foreach ($ecs as $ec) {
-            $this->excelWriter->writeCellXY(1, $ligne, $ec->getParcours()?->getFormation()?->getComposantePorteuse()?->getLibelle());
-            $this->excelWriter->writeCellXY(2, $ligne, $ec->getParcours()?->getFormation()?->getTypeDiplome()?->getLibelle());
-            $this->excelWriter->writeCellXY(3, $ligne, $ec->getParcours()?->getFormation()?->getDisplay());
-
-            if ($ec->getParcours()?->getFormation()?->isHasParcours()) {
-                $this->excelWriter->writeCellXY(4, $ligne, $ec->getParcours()?->getLibelle());
-            } else {
-                $this->excelWriter->writeCellXY(4, $ligne, 'Pas de parcours');
-            }
-            $this->excelWriter->writeCellXY(5, $ligne, $ec->getUe()?->getSemestre()?->display());
-            $this->excelWriter->writeCellXY(6, $ligne, $ec->getUe()?->display($ec->getParcours()));
-            $this->excelWriter->writeCellXY(7, $ligne, $ec->getUe()?->getLibelle());
-            $this->excelWriter->writeCellXY(8, $ligne, $ec->getCode());
-            $this->excelWriter->writeCellXY(9, $ligne, $ec->getLibelle());
-            $this->excelWriter->writeCellXY(10, $ligne, $ec->getFicheMatiere()?->getLibelle());
-            $this->excelWriter->writeCellXY(11, $ligne, $ec->getTypeEc()?->getType()->value);
-            $this->excelWriter->writeCellXY(12, $ligne, $ec->getFicheMatiere()?->getResponsableFicheMatiere() !== null ? $ec->getFicheMatiere()?->getResponsableFicheMatiere()?->getDisplay() : 'Non défini - RP ou RF');
-
-            $this->excelWriter->getColumnsAutoSize('A', 'M');
-            $ligne++;
+            $lignes[] = [
+                'composante'   => $ec->getParcours()?->getFormation()?->getComposantePorteuse()?->getLibelle(),
+                'typeDiplome'  => $ec->getParcours()?->getFormation()?->getTypeDiplome()?->getLibelle(),
+                'mention'      => $ec->getParcours()?->getFormation()?->getDisplay(),
+                'parcours'     => $ec->getParcours()?->getFormation()?->isHasParcours() ? $ec->getParcours()?->getLibelle() : 'Pas de parcours',
+                'semestre'     => $ec->getUe()?->getSemestre()?->display(),
+                'numUe'        => $ec->getUe()?->display($ec->getParcours()),
+                'intituleUe'   => $ec->getUe()?->getLibelle(),
+                'numEc'        => $ec->getCode(),
+                'intituleEc'   => $ec->getLibelle(),
+                'ficheMatiere' => $ec->getFicheMatiere()?->getLibelle(),
+                'typeEc'       => $ec->getTypeEc()?->getType()->value,
+                'referent'     => $ec->getFicheMatiere()?->getResponsableFicheMatiere() !== null ? $ec->getFicheMatiere()?->getResponsableFicheMatiere()?->getDisplay() : 'Non défini - RP ou RF',
+            ];
         }
 
-        $this->fileName = Tools::FileName('Export - EC - ' . (new DateTime())->format('d-m-Y-H-i'), 30);
+        $this->excelWriter->setSpreadsheet(
+            $this->spreadsheetRenderer->createFromTemplate(self::TEMPLATE, ['lignes' => $lignes])
+        );
+
+        $this->fileName = (string) Tools::FileName('Export - EC - ' . (new DateTime())->format('d-m-Y-H-i'), 30);
     }
 
     public function export(CampagneCollecte $anneeUniversitaire): StreamedResponse

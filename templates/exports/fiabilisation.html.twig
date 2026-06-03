@@ -1,0 +1,52 @@
+{# ExportFiabilisation — fidèle à l'existant (en-tête ligne 1, données ligne 2, autosize A:Q, sans style).
+   ECTS est un nombre (détecté automatiquement). #}
+<div id="workbook">
+  <table data-xls-sheet="Export Fiabilisation" data-xls-autosize="A:Q">
+    <thead>
+      <tr>
+        <th>Composante</th>
+        <th>Type Diplôme</th>
+        <th>Mention</th>
+        <th>Parcours</th>
+        <th>Code Dip.</th>
+        <th>VDI</th>
+        <th>Code étape</th>
+        <th>VET</th>
+        <th>Semestre</th>
+        <th>Code Semestre</th>
+        <th>UE</th>
+        <th>Code UE</th>
+        <th>Id Fiche EC/matière</th>
+        <th>Fiche EC/matière</th>
+        <th>Code élément</th>
+        <th>Type EC</th>
+        <th>MATI/MATM</th>
+        <th>ECTS</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ligne in lignes %}
+        <tr>
+          <td>{{ ligne.composante }}</td>
+          <td>{{ ligne.typeDiplome }}</td>
+          <td>{{ ligne.mention }}</td>
+          <td>{{ ligne.parcours }}</td>
+          <td>{{ ligne.codeDip }}</td>
+          <td>{{ ligne.vdi }}</td>
+          <td>{{ ligne.codeEtape }}</td>
+          <td>{{ ligne.vet }}</td>
+          <td>{{ ligne.semestre }}</td>
+          <td>{{ ligne.codeSemestre }}</td>
+          <td>{{ ligne.ue }}</td>
+          <td>{{ ligne.codeUe }}</td>
+          <td>{{ ligne.idFiche }}</td>
+          <td>{{ ligne.ficheMatiere }}</td>
+          <td>{{ ligne.codeElement }}</td>
+          <td>{{ ligne.typeEc }}</td>
+          <td>{{ ligne.matiMatm }}</td>
+          <td>{{ ligne.ects }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
