@@ -62,6 +62,42 @@
 
 {% block content %}
 
+    {% if comparaisonAnneeDiff is defined and comparaisonAnneeDiff and comparaisonAnneeCibleId
+          and (is_granted('ROLE_ADMIN') or is_granted('EDIT', {route: 'app_formation', subject: formation})) %}
+        <div class="modal fade" tabindex="-1" aria-labelledby="comparaisonAnneeModalLabel" aria-hidden="true"
+             {{ stimulus_controller('formation-comparaison--alerte') }}>
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title text-white" id="comparaisonAnneeModalLabel">
+                            <i class="fas fa-code-compare me-2"></i>
+                            Différences entre années universitaires
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-0">
+                            Cette formation présente des différences entre l'année
+                            <strong>{{ comparaisonAnneeSourceLabel }}</strong> et l'année
+                            <strong>{{ comparaisonAnneeCibleLabel }}</strong>.
+                            Vous pouvez les comparer et récupérer, champ par champ, les valeurs de l'année antérieure.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Plus tard
+                        </button>
+                        <a href="{{ path('app_formation_comparaison_diff', {formation: comparaisonAnneeCibleId, source: comparaisonAnneeSourceId}) }}"
+                           class="btn btn-info btn-icon btn-icon-end">
+                            <i class="fas fa-code-compare"></i>
+                            <span> Comparer / récupérer des éléments</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     {{ include('formation/_synthese_formation.html.twig') }}
 
     {% if is_granted('ROLE_ADMIN') or is_granted('CAN_ETABLISSEMENT_SCOLARITE_ALL') or is_granted('CAN_FORMATION_SCOLARITE_MY', formation) %}

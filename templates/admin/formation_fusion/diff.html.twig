@@ -1,0 +1,267 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}Fusion — {{ formationA.displayLong }} ↔ {{ formationB.displayLong }}{% endset %}
+
+{% set differentFields = fields|filter(f => f.isDifferent) %}
+{% set identicalFields = fields|filter(f => not f.isDifferent) %}
+
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {href: path('app_formation_fusion_index'), title: 'Fusion de formations'},
+        {href: '', title: 'Comparaison'},
+    ]}) }}
+{% endblock %}
+
+{% block content %}
+<form method="post"
+      action="{{ path('app_formation_fusion_execute') }}"
+      {{ stimulus_controller('formation-fusion--diff', { differentKeys: differentKeys }) }}
+      data-action="submit->formation-fusion--diff#confirmSubmit">
+
+    <input type="hidden" name="formation_a" value="{{ formationA.id }}">
+    <input type="hidden" name="formation_b" value="{{ formationB.id }}">
+    <input type="hidden" name="hash_a" value="{{ hashA }}">
+    <input type="hidden" name="hash_b" value="{{ hashB }}">
+    <input type="hidden" name="_token" value="{{ csrf_token('formation_fusion_execute') }}">
+
+    {# ── Formation headers ── #}
+    <div class="row mb-3 g-3">
+        <div class="col-5">
+            <div class="card border-primary h-100">
+                <div class="card-header bg-primary text-white d-flex align-items-center gap-2">
+                    <i class="fas fa-circle-check"></i>
+                    Formation A <span class="badge bg-white text-primary ms-auto">Conservée</span>
+                </div>
+                <div class="card-body">
+                    <div class="fw-semibold">{{ formationA.displayLong }}</div>
+                    <small class="text-muted">{{ formationA.parcours|length }} parcours · ID #{{ formationA.id }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-2 d-flex align-items-center justify-content-center">
+            <div class="text-center">
+                <div class="badge bg-warning text-dark fs-5 px-3 py-2 mb-2">
+                    <i class="fas fa-code-merge" style="margin-left:4px"></i>
+                </div>
+                <div class="small text-muted">
+                    <span class="badge bg-danger">{{ differentFields|length }}</span>
+                    champ{{ differentFields|length > 1 ? 's' : '' }} différent{{ differentFields|length > 1 ? 's' : '' }}
+                </div>
+            </div>
+        </div>
+        <div class="col-5">
+            <div class="card border-danger h-100">
+                <div class="card-header bg-danger text-white d-flex align-items-center gap-2">
+                    <i class="fas fa-circle-xmark"></i>
+                    Formation B <span class="badge bg-white text-danger ms-auto">Supprimée</span>
+                </div>
+                <div class="card-body">
+                    <div class="fw-semibold">{{ formationB.displayLong }}</div>
+                    <small class="text-muted">{{ formationB.parcours|length }} parcours · ID #{{ formationB.id }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ── Quick select bar ── #}
+    {% if differentFields|length > 0 %}
+    <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded border">
+        <button type="button"
+                class="btn btn-outline-primary btn-sm"
+                data-action="click->formation-fusion--diff#selectAll"
+                data-side="A">
+            <i class="fas fa-chevron-left me-1"></i> Tout garder de A
+        </button>
+        <span class="text-muted small flex-grow-1 text-center"
+              data-formation-fusion--diff-target="status"></span>
+        <button type="button"
+                class="btn btn-outline-danger btn-sm"
+                data-action="click->formation-fusion--diff#selectAll"
+                data-side="B">
+            Tout garder de B <i class="fas fa-chevron-right ms-1"></i>
+        </button>
+    </div>
+    {% endif %}
+
+    {# ── Different fields ── #}
+    {% if differentFields|length == 0 %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            Toutes les valeurs sont identiques. La fusion ne modifiera aucune donnée de Formation A.
+        </div>
+    {% else %}
+        <h6 class="text-muted mb-3">
+            <i class="fas fa-not-equal me-1"></i> Champs différents — cliquez sur la valeur à conserver
+        </h6>
+
+        {% for field in differentFields %}
+        <div class="row align-items-stretch mb-2 field-row g-2">
+
+            <div class="col-5">
+                <label class="field-choice h-100 p-3 d-block w-100 mb-0"
+                       tabindex="-1"
+                       data-action="click->formation-fusion--diff#selectCard">
+                    <input type="radio" name="fields[{{ field.key }}]" value="A" class="visually-hidden field-radio">
+                    <div class="field-check text-success mb-1" style="display:none">
+                        <i class="fas fa-circle-check me-1"></i><small>Sélectionné</small>
+                    </div>
+                    {% if field.displayType == 'html' %}
+                        <div class="small">{{ field.displayA|raw }}</div>
+                    {% else %}
+                        <span>{{ field.displayA }}</span>
+                    {% endif %}
+                </label>
+            </div>
+
+            <div class="col-2 d-flex flex-column align-items-center justify-content-center text-center">
+                <small class="text-muted fw-semibold">{{ field.label }}</small>
+                <i class="fas fa-arrows-left-right text-warning mt-1"></i>
+                {% if field.hasCascade and field.isDifferent %}
+                    <small class="text-warning mt-2" style="font-size:.7rem; line-height:1.3">
+                        <i class="fas fa-triangle-exclamation me-1"></i>
+                        {% if field.key == 'composantePorteuse' %}
+                            La valeur choisie mettra à jour le champ <em>composante d'inscription</em> des parcours qui avaient l'ancienne valeur.
+                        {% elseif field.key == 'localisationMention' %}
+                            Les champs <em>ville</em> et <em>localisation</em> des parcours qui ne correspondent plus seront remis à zéro.
+                        {% elseif field.key == 'rythmeFormation' %}
+                            Le champ <em>rythme de formation</em> des parcours qui avaient l'ancienne valeur sera mis à jour.
+                        {% elseif field.key == 'rythmeFormationTexte' %}
+                            Le champ <em>rythme de formation (texte)</em> des parcours qui avaient l'ancienne valeur sera mis à jour.
+                        {% elseif field.key == 'regimeInscription' %}
+                            Le champ <em>régime d'inscription</em> des parcours qui avaient l'ancienne valeur sera mis à jour.
+                        {% endif %}
+                    </small>
+                {% endif %}
+            </div>
+
+            <div class="col-5">
+                <label class="field-choice h-100 p-3 d-block w-100 mb-0"
+                       tabindex="-1"
+                       data-action="click->formation-fusion--diff#selectCard">
+                    <input type="radio" name="fields[{{ field.key }}]" value="B" class="visually-hidden field-radio">
+                    <div class="field-check text-success mb-1" style="display:none">
+                        <i class="fas fa-circle-check me-1"></i><small>Sélectionné</small>
+                    </div>
+                    {% if field.displayType == 'html' %}
+                        <div class="small">{{ field.displayB|raw }}</div>
+                    {% else %}
+                        <span>{{ field.displayB }}</span>
+                    {% endif %}
+                </label>
+            </div>
+
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    {# ── Identical fields (collapsed) ── #}
+    {% if identicalFields|length > 0 %}
+    <details class="mb-4 mt-3">
+        <summary class="text-muted small cursor-pointer">
+            <i class="fas fa-equals me-1"></i>
+            {{ identicalFields|length }} champ{{ identicalFields|length > 1 ? 's' : '' }} identique{{ identicalFields|length > 1 ? 's' : '' }} (aucun choix nécessaire)
+        </summary>
+        <div class="mt-2 ps-3 border-start border-2">
+            {% for field in identicalFields %}
+            <div class="d-flex align-items-baseline gap-3 py-1 border-bottom border-light">
+                <span class="text-muted small" style="min-width:200px">{{ field.label }}</span>
+                <span class="text-success small"><i class="fas fa-check me-1"></i></span>
+                <span class="small">
+                    {% if field.displayType == 'html' %}
+                        {{ field.displayA|striptags|slice(0, 100) }}{% if field.displayA|striptags|length > 100 %}…{% endif %}
+                    {% else %}
+                        {{ field.displayA }}
+                    {% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </details>
+    {% endif %}
+
+    {# ── Parcours section ── #}
+    <div class="card mb-5 border-info">
+        <div class="card-header bg-info bg-opacity-10 border-info">
+            <i class="fas fa-code-branch me-2"></i>
+            Parcours — <strong>tous conservés automatiquement dans Formation A</strong>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-5">
+                    <div class="text-primary fw-semibold mb-2">
+                        Formation A · {{ formationA.parcours|length }} parcours
+                    </div>
+                    {% for parcours in formationA.parcours %}
+                        <a href="{{ path('app_parcours_show', {id: parcours.id}) }}"
+                           target="_blank"
+                           class="d-block badge bg-primary-subtle text-primary border border-primary mb-1 px-2 py-1 text-start text-decoration-none">
+                            {{ parcours.libelle }}
+                            <i class="fas fa-arrow-up-right-from-square ms-1 opacity-50" style="font-size:.65em"></i>
+                        </a>
+                    {% else %}
+                        <em class="text-muted small">Aucun parcours</em>
+                    {% endfor %}
+                </div>
+                <div class="col-2 d-flex align-items-center justify-content-center">
+                    <div class="vr" style="height:100%"></div>
+                </div>
+                <div class="col-5">
+                    <div class="text-danger fw-semibold mb-2">
+                        Formation B · {{ formationB.parcours|length }} parcours
+                    </div>
+                    {% for parcours in formationB.parcours %}
+                        <a href="{{ path('app_parcours_show', {id: parcours.id}) }}"
+                           target="_blank"
+                           class="d-block badge bg-danger-subtle text-danger border border-danger mb-1 px-2 py-1 text-start text-decoration-none">
+                            {{ parcours.libelle }}
+                            <i class="fas fa-arrow-up-right-from-square ms-1 opacity-50" style="font-size:.65em"></i>
+                        </a>
+                    {% else %}
+                        <em class="text-muted small">Aucun parcours</em>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="alert alert-info mb-0 mt-3 small">
+                <i class="fas fa-circle-info me-1"></i>
+                Les <strong>{{ formationA.parcours|length + formationB.parcours|length }} parcours</strong>
+                des deux formations seront tous transférés dans Formation A.
+            </div>
+        </div>
+    </div>
+
+    {# ── Sticky submit bar ── #}
+    <div class="sticky-bottom bg-white border-top shadow-sm py-3 px-4 d-flex justify-content-between align-items-center">
+        <a href="{{ path('app_formation_fusion_index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Annuler
+        </a>
+        <div class="text-center small text-muted"
+             data-formation-fusion--diff-target="status"></div>
+        <button type="submit"
+                class="btn btn-success btn-lg"
+                data-formation-fusion--diff-target="submitBtn">
+            <i class="fas fa-code-merge me-1"></i> Fusionner les formations
+        </button>
+    </div>
+
+</form>
+
+<style>
+.field-choice {
+    cursor: pointer;
+    transition: border-color .15s, background-color .15s;
+    outline: none;
+    border-radius: 1rem;
+    border: 2px solid #dee2e6;
+    background-color: #fff;
+}
+.field-choice:hover {
+    border-color: #adb5bd;
+    background-color: #f8f9fa;
+}
+.field-choice.selected {
+    border-color: #198754;
+    background-color: rgba(25, 135, 84, .07);
+}
+.field-choice.selected .field-check { display: block !important; }
+</style>
+{% endblock %}

@@ -34,6 +34,7 @@ use App\Repository\MentionRepository;
 use App\Repository\ProfilRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Repository\UserRepository;
+use App\Service\FormationDiffBuilder;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
 use App\Service\SecureUploadService;
@@ -404,7 +405,8 @@ class FormationController extends BaseController
     public function show(
         Formation               $formation,
         VersioningParcours $versioningParcours,
-        VersioningFormation $versioningFormation
+        VersioningFormation $versioningFormation,
+        FormationDiffBuilder $formationDiffBuilder
     ): Response {
         $typeDiplome = $formation->getTypeDiplome();
 
@@ -437,6 +439,16 @@ class FormationController extends BaseController
         $request = Request::createFromGlobals();
         $displayComparaison = $request->query->get('optionDisplay', 'false');
 
+        // Alerte de comparaison entre années : on regarde la chaîne ascendante
+        // (versions antérieures ou égales). Une version antérieure modifiée se
+        // signale donc sur toutes les versions postérieures, mais pas en amont.
+        $comparaisonPair = $formationDiffBuilder->firstDifferingPair($formation);
+        $comparaisonAnneeDiff = $comparaisonPair !== null;
+        $comparaisonAnneeSourceId = $comparaisonPair ? $comparaisonPair['source']->getId() : null;
+        $comparaisonAnneeCibleId = $comparaisonPair ? $comparaisonPair['cible']->getId() : null;
+        $comparaisonAnneeSourceLabel = $comparaisonPair ? $formationDiffBuilder->anneeLabel($comparaisonPair['source']) : null;
+        $comparaisonAnneeCibleLabel = $comparaisonPair ? $formationDiffBuilder->anneeLabel($comparaisonPair['cible']) : null;
+
         return $this->render('formation/show.html.twig', [
             'formation' => $formation,
             'typeDiplome' => $typeDiplome,
@@ -449,7 +461,12 @@ class FormationController extends BaseController
             'versioningParcours' => $versioningParcours,
             'hasLastVersion' => $hasLastVersion,
             'displayComparaison' => $displayComparaison,
-            'canSeeDifferences' => $canSeeDifferences
+            'canSeeDifferences' => $canSeeDifferences,
+            'comparaisonAnneeDiff' => $comparaisonAnneeDiff,
+            'comparaisonAnneeSourceId' => $comparaisonAnneeSourceId,
+            'comparaisonAnneeCibleId' => $comparaisonAnneeCibleId,
+            'comparaisonAnneeSourceLabel' => $comparaisonAnneeSourceLabel,
+            'comparaisonAnneeCibleLabel' => $comparaisonAnneeCibleLabel,
         ]);
     }
 

@@ -1,0 +1,98 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}Fusion de formations{% endset %}
+
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {href: '', title: 'Fusion de formations'},
+    ]}) }}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-code-merge me-2"></i>
+                Sélectionner les deux formations à fusionner
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-triangle-exclamation me-2"></i>
+                    <strong>Attention :</strong> La fusion est <strong>irréversible</strong>.
+                    La Formation B sera supprimée et tous ses parcours seront transférés dans la Formation A.
+                </div>
+
+                <form method="post"
+                      action="{{ path('app_formation_fusion_diff') }}"
+                      {{ stimulus_controller('formation-fusion--index') }}
+                      data-action="submit->formation-fusion--index#submit">
+
+                    <div class="row g-4 align-items-end">
+
+                        <div class="col-5">
+                            <label class="form-label fw-semibold text-primary">
+                                <i class="fas fa-circle-check me-1"></i>
+                                Formation A <span class="badge bg-primary ms-1">Conservée</span>
+                            </label>
+                            <select name="formation_a"
+                                    class="form-select"
+                                    data-formation-fusion--index-target="selectA"
+                                    data-action="change->formation-fusion--index#changeA"
+                                    {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                                <option value="">Choisissez une formation…</option>
+                                {% for formation in formations %}
+                                    <option value="{{ formation.id }}"
+                                            data-type-diplome="{{ formation.typeDiplome ? formation.typeDiplome.id : '' }}">
+                                        {{ formation.displayLong }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Les données de cette formation seront conservées par défaut.</div>
+                        </div>
+
+                        <div class="col-2 text-center pb-4">
+                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                                <i class="fas fa-arrows-left-right" style="margin-left:2px"></i>
+                            </span>
+                        </div>
+
+                        <div class="col-5">
+                            <label class="form-label fw-semibold text-danger">
+                                <i class="fas fa-circle-xmark me-1"></i>
+                                Formation B <span class="badge bg-danger ms-1">Supprimée</span>
+                            </label>
+                            <select name="formation_b"
+                                    class="form-select"
+                                    data-formation-fusion--index-target="selectB"
+                                    data-action="change->formation-fusion--index#changeB"
+                                    {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                                <option value="">Choisissez une formation…</option>
+                                {% for formation in formations %}
+                                    <option value="{{ formation.id }}"
+                                            data-type-diplome="{{ formation.typeDiplome ? formation.typeDiplome.id : '' }}">
+                                        {{ formation.displayLong }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Cette formation sera supprimée après fusion.</div>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit"
+                                class="btn btn-primary btn-icon btn-icon-end"
+                                data-formation-fusion--index-target="submitBtn">
+                            <i class="fas fa-magnifying-glass"></i>
+                            <span>Comparer les formations</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
