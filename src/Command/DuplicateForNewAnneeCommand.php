@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Doctrine\McccEntityListener;
 use App\Entity\Annee;
 use App\Entity\AnneeUniversitaire;
 use App\Entity\BlocCompetence;
@@ -26,6 +27,7 @@ use App\Entity\UeMutualisable;
 use App\Enums\TypeModificationDpeEnum;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Events;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -57,18 +59,16 @@ class DuplicateForNewAnneeCommand extends Command
 
     /* ********** */
 
-    private EntityManagerInterface $entityManager;
-
     private array $initialisationErrorValue = [];
 
     private array $entitiesArray = [];
 
     public function __construct(
-        EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private McccEntityListener $mcccListener
     )
     {
         parent::__construct();
-        $this->entityManager = $entityManager;
     }
 
     protected function configure(): void
@@ -88,6 +88,29 @@ class DuplicateForNewAnneeCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $anneeSource = $input->getOption('annee-source');
+
+        /**
+         * 
+         * Désactivation pour ce script du McccCompletionChecker 
+         * et des évènements liés au MCCC
+         *  - Ils ne sont pas requis car les MCCC sont dupliqués
+         * 
+         */
+        $this->entityManager->getEventManager()->removeEventListener(
+            [Events::postFlush], $this->mcccListener
+        );
+
+        $metadataMccc = $this->entityManager->getMetadataFactory()->getMetadataFor(Mccc::class);
+        foreach($metadataMccc->entityListeners as $event => $entityListenerArray){
+            foreach($entityListenerArray as $key => $listener){
+                if($listener['class'] === $this->mcccListener::class){
+                    unset($metadataMccc->entityListeners[$event][$key]);
+                }
+            }
+        }
+        $this->entityManager->getMetadataFactory()->setMetadataFor(Mccc::class, $metadataMccc);
+
+        /* ******************** */
 
         // Sélection de l'année à dupliquer
         if(isset($anneeSource) === false) {
