@@ -428,5 +428,5 @@ class ParcoursRepository extends ServiceEntityRepository
             ->setParameter(':idCampagne', $campagneC->getId())
             ->getQuery()
             ->getResult();
-    } 
+    }
 }

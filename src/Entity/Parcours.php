@@ -18,6 +18,7 @@ use App\Enums\NiveauLangueEnum;
 use App\Enums\RegimeInscriptionEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
+use App\Enums\DureeParcoursUniteEnum;
 use App\Repository\ParcoursRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -301,6 +302,12 @@ class Parcours
     #[Groups('parcours_json_versioning')]
     #[ORM\Column]
     private ?int $capaciteAccueil = 0;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $dureeParcours = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: DureeParcoursUniteEnum::class)]
+    private ?DureeParcoursUniteEnum $dureeParcoursUnite = null;
 
     /**
      * @var Collection<int, ChangeParcours>
@@ -1757,6 +1764,28 @@ class Parcours
     {
         $this->capaciteAccueil = $capaciteAccueil;
 
+        return $this;
+    }
+
+    public function getDureeParcours(): ?float
+    {
+        return $this->dureeParcours;
+    }
+
+    public function setDureeParcours(?float $dureeParcours): static
+    {
+        $this->dureeParcours = $dureeParcours;
+        return $this;
+    }
+
+    public function getDureeParcoursUnite(): ?DureeParcoursUniteEnum
+    {
+        return $this->dureeParcoursUnite;
+    }
+
+    public function setDureeParcoursUnite(?DureeParcoursUniteEnum $dureeParcoursUnite): static
+    {
+        $this->dureeParcoursUnite = $dureeParcoursUnite;
         return $this;
     }
 

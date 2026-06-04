@@ -35,11 +35,20 @@ final class BadgeMcccComponent
 
         $this->isMcccSpecifiques = $this->elementConstitutif->isMcccSpecifiques();
         if ($this->elementConstitutif !== null) {
+            $typeDiplome = $this->parcours->getTypeDiplome();
+            $hasEcts = $typeDiplome?->isHasEcts() ?? true;
+            $ectsObligatoire = $typeDiplome?->isEctsObligatoireSurEc() ?? true;
+
             if ($this->elementConstitutif->getNatureUeEc()?->isLibre()) {
-                $this->etatMcccComplet = $this->elementConstitutif->getEcts() !== 0; // sur un EC libre, juste des ECTS
+                if (!$hasEcts || !$ectsObligatoire) {
+                    // ECTS non utilisés ou non obligatoires : un EC libre est complet par défaut
+                    $this->etatMcccComplet = true;
+                } else {
+                    $this->etatMcccComplet = $this->elementConstitutif->getEcts() !== 0; // sur un EC libre, juste des ECTS
+                }
             } else {
                 $getElement = new GetElementConstitutif($this->elementConstitutif, $this->parcours);
-                $this->etatMcccComplet = $this->elementConstitutif->isControleAssiduite() === true ||  $getElement->getEtatsMccc() === 'Complet';
+                $this->etatMcccComplet = $this->elementConstitutif->isControleAssiduite() === true || $getElement->getEtatsMccc() === 'Complet';
             }
         }
     }

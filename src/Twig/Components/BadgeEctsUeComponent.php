@@ -17,11 +17,15 @@ final class BadgeEctsUeComponent
     public null|float|string $ects = null;
     public ?TypeDiplome $typeDiplome = null;
     public null|float|string $maxEcts = null;
+    public bool $hasEcts = true;
 
     #[PostMount]
     public function mounted(): void
     {
-        $this->maxEcts = $this->typeDiplome->getNbEctsMaxUe();
+        $this->hasEcts = $this->typeDiplome?->isHasEcts() ?? true;
+        $this->maxEcts = $this->typeDiplome?->getNbEctsParSemestre() === null
+            ? 0.0
+            : $this->typeDiplome->getNbEctsMaxUe();
         $this->ects = GetUeEcts::getEcts($this->ue, $this->parcours, $this->typeDiplome);
     }
 }

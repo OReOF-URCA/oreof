@@ -142,6 +142,12 @@ class ParcoursController extends BaseController
         }
 
         $parcour->setModalitesEnseignement(null);
+
+        $typeDiplome = $formation->getTypeDiplome();
+        if ($typeDiplome !== null && $typeDiplome->isClassique() === false) {
+            return $this->redirectToRoute('app_formulaire_generique_new');
+        }
+
         $form = $this->createForm(ParcoursType::class, $parcour, [
             'formation' => $formation,
             'action' => $this->generateUrl('app_parcours_new', [

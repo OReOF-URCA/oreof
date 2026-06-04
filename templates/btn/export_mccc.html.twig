@@ -8,7 +8,7 @@
         <div class="dropdown-menu" style="">
             <a class="dropdown-item"
             href="{{ path('app_parcours_mccc_export_versionning', {parcours:parcours.id, _format:'xlsx'}) }}">
-                Export MCCC Version (xlsx)
+                Export MCCC modification visible (xlsx)
             </a>
             <a class="dropdown-item"
                href="{{ path('app_parcours_mccc_export_cfvu_valid', {parcours:parcours.id, format:'complet'}) }}">
@@ -28,6 +28,10 @@
             <i class="{{ iconDownload }}"></i> MCCC
         </button>
         <div class="dropdown-menu" style="">
+            <a class="dropdown-item"
+            href="{{ path('app_parcours_mccc_export_versionning', {parcours:parcours.id, _format:'xlsx'}) }}">
+                Export MCCC modification visible (xlsx)
+            </a>
             <a class="dropdown-item"
                href="{{ path('app_parcours_mccc_export', {parcours:parcours.id, _format:'xlsx'}) }}">
                 Version complète (xlsx)
