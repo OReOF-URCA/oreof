@@ -170,6 +170,98 @@
         {% endfor %}
     {% endif %}
 
+    {# ── Diff structurel (lecture seule) ── #}
+    <div class="card mt-4 mb-5 border-info">
+        <div class="card-header bg-info bg-opacity-10 border-info d-flex align-items-center gap-2">
+            <i class="fas fa-sitemap"></i>
+            <span>Structure des maquettes (UE / EC / heures / MCCC)</span>
+        </div>
+        <div class="card-body">
+            {% if structureHasAnyDiff %}
+                <div class="alert alert-info d-flex align-items-center gap-2">
+                    <i class="fas fa-circle-info"></i>
+                    <span>
+                        Différences de structure entre <strong>{{ sourceLabel }}</strong>
+                        et <strong>{{ cibleLabel }}</strong>. Dépliez un parcours pour voir le détail.
+                        Cochez une <strong>UE</strong> pour recopier tout son contenu
+                        (EC, heures, ECTS, MCCC) depuis la version source vers <strong>{{ cibleLabel }}</strong>.
+                    </span>
+                </div>
+            {% else %}
+                <div class="alert alert-success mb-0">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Aucune différence de structure entre <strong>{{ sourceLabel }}</strong>
+                    et <strong>{{ cibleLabel }}</strong>.
+                </div>
+            {% endif %}
+
+            {% if structureHasAnyDiff %}
+                <div class="accordion" id="structureAccordion">
+                    {% for row in structureParcours %}
+                        {% set itemId = 'struct' ~ row.parcours.id %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                {% if row.status == 'identique' %}
+                                    <div class="accordion-button collapsed pe-3 no-toggle" style="cursor:default">
+                                        <span class="flex-grow-1">{{ row.parcours.libelle }}</span>
+                                        <span class="badge bg-success-subtle text-success border me-2">Aucune différence</span>
+                                    </div>
+                                {% else %}
+                                    <button class="accordion-button collapsed" type="button"
+                                            data-bs-toggle="collapse" data-bs-target="#{{ itemId }}"
+                                            aria-expanded="false" aria-controls="{{ itemId }}">
+                                        <span class="flex-grow-1">{{ row.parcours.libelle }}</span>
+                                        {% if row.status == 'cible_seul' %}
+                                            <span class="badge bg-primary me-2"><i class="fas fa-plus me-1"></i>Ajouté ({{ cibleLabel }})</span>
+                                        {% elseif row.status == 'source_seul' %}
+                                            <span class="badge bg-danger me-2"><i class="fas fa-minus me-1"></i>Non répercuté ({{ sourceLabel }})</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark me-2">Différences</span>
+                                        {% endif %}
+                                    </button>
+                                {% endif %}
+                            </h2>
+                            {% if row.status != 'identique' %}
+                                <div id="{{ itemId }}" class="accordion-collapse collapse" data-bs-parent="#structureAccordion">
+                                    <div class="accordion-body">
+                                        {% if row.status == 'cible_seul' %}
+                                            <p class="text-muted mb-0">
+                                                <i class="fas fa-circle-info me-1"></i>
+                                                Ce parcours est présent uniquement dans <strong>{{ cibleLabel }}</strong>
+                                                (ajouté). Rien à récupérer depuis la source.
+                                            </p>
+                                        {% elseif row.status == 'source_seul' %}
+                                            <p class="text-muted mb-0">
+                                                <i class="fas fa-circle-info me-1"></i>
+                                                Présent uniquement dans <strong>{{ sourceLabel }}</strong>, non répercuté
+                                                vers <strong>{{ cibleLabel }}</strong>. (Recréation du parcours — à venir.)
+                                            </p>
+                                        {% else %}
+                                            {% for change in row.addRemove %}
+                                                <div class="d-flex align-items-center gap-2 border-bottom py-2">
+                                                    <input class="form-check-input mt-0 flex-shrink-0" type="checkbox">
+                                                    {% if change.kind == 'added' %}
+                                                        <span class="badge bg-primary"><i class="fas fa-plus me-1"></i>{{ change.level }} ajouté{{ change.level == 'UE' ? 'e' : '' }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-danger"><i class="fas fa-minus me-1"></i>{{ change.level }} supprimé{{ change.level == 'UE' ? 'e' : '' }}</span>
+                                                    {% endif %}
+                                                    <span>{{ change.label }}</span>
+                                                </div>
+                                            {% endfor %}
+                                            {% if row.diffStructure %}
+                                                {{ include('admin/formation_comparaison/_diff_structure_parcours.html.twig', {diffStructure: row.diffStructure, parcoursCibleId: row.parcours.id}) }}
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
     {# ── Barre d'action ── #}
     <div class="sticky-bottom bg-white border-top shadow-sm py-3 px-4 d-flex justify-content-between align-items-center mt-4">
         <a href="{{ path('app_formation_show', {slug: cible.slug}) }}" class="btn btn-outline-secondary">
@@ -179,7 +271,7 @@
              data-formation-comparaison--diff-target="status"></div>
         <button type="submit" class="btn btn-success btn-lg"
                 data-formation-comparaison--diff-target="submitBtn" disabled>
-            <i class="fas fa-download me-1"></i> Récupérer les champs sélectionnés
+            <i class="fas fa-download me-1"></i> Récupérer les éléments sélectionnés
         </button>
     </div>
 
@@ -202,6 +294,23 @@
 }
 .target-card-disabled {
     opacity: .55;
+}
+/* La police custom CS-Interface (glyph \e915) ne se charge pas ici : on rend
+   la flèche d'accordéon avec FontAwesome (qui fonctionne sur cette page). */
+#structureAccordion .accordion-button::after {
+    font-family: "Font Awesome 6 Pro", "Font Awesome 6 Free", "FontAwesome" !important;
+    font-weight: 900 !important;
+    content: "\f078" !important; /* fa-chevron-down */
+}
+.accordion-button.no-toggle::after {
+    display: none;
+}
+.accordion-button.no-toggle {
+    background-color: var(--bs-success-bg-subtle, #e8f5e9);
+}
+.structure-detail h5 {
+    font-size: .9rem;
+    font-weight: 600;
 }
 </style>
 {% endblock %}

@@ -46,7 +46,7 @@ export default class extends Controller {
             event.preventDefault()
             return
         }
-        if (!confirm(`Récupérer ${count} champ(s) depuis la version source ?`)) {
+        if (!confirm(`Récupérer ${count} élément(s) depuis la version source ?`)) {
             event.preventDefault()
         }
     }
@@ -74,13 +74,15 @@ export default class extends Controller {
     }
 
     #checkedCount() {
-        return this.element.querySelectorAll('input[type="checkbox"][name^="fields["]:checked').length
+        return this.element.querySelectorAll(
+            'input[type="checkbox"][name^="fields["]:checked, input[type="checkbox"][name^="structure["]:checked'
+        ).length
     }
 
     #updateStatus() {
         const count = this.#checkedCount()
         this.statusTargets.forEach((el) => {
-            el.textContent = count > 0 ? `${count} champ(s) à récupérer` : 'Aucun champ sélectionné'
+            el.textContent = count > 0 ? `${count} élément(s) à récupérer` : 'Aucun élément sélectionné'
         })
         if (this.hasSubmitBtnTarget) {
             this.submitBtnTarget.disabled = count === 0

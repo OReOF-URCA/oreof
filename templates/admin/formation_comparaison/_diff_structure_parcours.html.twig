@@ -1,0 +1,39 @@
+{# Diff structurel d'un parcours : une case à cocher par UE modifiée.
+   Cocher une UE recopie tout son contenu (EC, heures, ECTS, MCCC) depuis la
+   version source. Le détail sous la case est en lecture seule (ancien barré
+   rouge / nouveau en gras, filtre diffStrike). #}
+{% for sem, ues in diffStructure.diffUe %}
+    {% for entry in ues %}
+        {% set ueCibleId = entry.ueCible.ue.id ?? null %}
+        {% if ueCibleId %}
+            <div class="d-flex align-items-start gap-2 border-bottom py-2 field-row"
+                 data-formation-comparaison--diff-target="row">
+                <input class="form-check-input mt-1 flex-shrink-0" type="checkbox"
+                       name="structure[{{ parcoursCibleId }}][{{ ueCibleId }}]" value="1"
+                       id="struct_ue_{{ parcoursCibleId }}_{{ ueCibleId }}"
+                       data-action="change->formation-comparaison--diff#toggle">
+                <div class="flex-grow-1">
+                    <label class="badge bg-light text-dark border mb-1" for="struct_ue_{{ parcoursCibleId }}_{{ ueCibleId }}" style="cursor:pointer">
+                        Semestre {{ sem }} · {{ entry.ueCible.display ?: entry.ue.display }}
+                    </label>
+                    <div class="small structure-detail">
+                        {% if entry.modifications.elementConstitutifs is defined %}
+                            {% for ec in entry.modifications.elementConstitutifs %}
+                                {{ include('admin/formation_comparaison/structure/_ec.html.twig', {ec: ec, ued: entry.ue.display}) }}
+                            {% endfor %}
+                        {% endif %}
+                        {% if entry.modifications.uesEnfants is defined %}
+                            {% for uee in entry.modifications.uesEnfants %}
+                                {% if uee.elementConstitutifs is defined %}
+                                    {% for ec in uee.elementConstitutifs %}
+                                        {{ include('admin/formation_comparaison/structure/_ec.html.twig', {ec: ec, ued: uee.display.new ?? ''}) }}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endfor %}

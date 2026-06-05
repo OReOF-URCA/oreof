@@ -1,0 +1,10 @@
+{# MCCC d'un EC. Le diff MCCC (ec.mcccs) contient des balises de couleur
+   (ancien barré rouge / nouveau vert) : il doit être rendu en |raw. #}
+{% if ec.typeMccc is defined and ec.typeMccc.isDifferent == true %}
+    <p class="mb-1">Type de MCCC : {{ ec.typeMccc|diffStrike }}</p>
+    {% if ec.mcccs is defined and ec.mcccs != '' %}
+        <p class="mb-1"><span class="text-muted">Nouvelles MCCC :</span> {{ ec.mcccs|raw }}</p>
+    {% endif %}
+{% elseif ec.mcccs is defined and ec.mcccs != '' %}
+    <p class="mb-1"><span class="text-muted">MCCC :</span> {{ ec.mcccs|raw }}</p>
+{% endif %}

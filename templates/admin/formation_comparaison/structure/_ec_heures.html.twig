@@ -1,0 +1,30 @@
+{# Heures/ECTS d'un EC : on n'affiche que les valeurs réellement modifiées.
+   La comparaison est numérique (originalFloat/newFloat, où « - » vaut 0) pour
+   que 0 et l'absence de valeur soient considérés égaux et ne génèrent pas de
+   bruit (ex. « 0h → -h »). Ancien barré rouge / nouveau gras via diffStrike. #}
+{% if heuresEctsEc != false %}
+    {% if heuresEctsEc.ects.originalFloat != heuresEctsEc.ects.newFloat %}
+        <p class="mb-1">ECTS : {{ heuresEctsEc.ects|diffStrike }}</p>
+    {% endif %}
+    {% if heuresEctsEc.cmPres.originalFloat != heuresEctsEc.cmPres.newFloat %}
+        <p class="mb-1">CM présentiel : {{ heuresEctsEc.cmPres|diffStrike }} h</p>
+    {% endif %}
+    {% if heuresEctsEc.tdPres.originalFloat != heuresEctsEc.tdPres.newFloat %}
+        <p class="mb-1">TD présentiel : {{ heuresEctsEc.tdPres|diffStrike }} h</p>
+    {% endif %}
+    {% if heuresEctsEc.tpPres.originalFloat != heuresEctsEc.tpPres.newFloat %}
+        <p class="mb-1">TP présentiel : {{ heuresEctsEc.tpPres|diffStrike }} h</p>
+    {% endif %}
+    {% if heuresEctsEc.cmDist.originalFloat != heuresEctsEc.cmDist.newFloat %}
+        <p class="mb-1">CM distanciel : {{ heuresEctsEc.cmDist|diffStrike }} h</p>
+    {% endif %}
+    {% if heuresEctsEc.tdDist.originalFloat != heuresEctsEc.tdDist.newFloat %}
+        <p class="mb-1">TD distanciel : {{ heuresEctsEc.tdDist|diffStrike }} h</p>
+    {% endif %}
+    {% if heuresEctsEc.tpDist.originalFloat != heuresEctsEc.tpDist.newFloat %}
+        <p class="mb-1">TP distanciel : {{ heuresEctsEc.tpDist|diffStrike }} h</p>
+    {% endif %}
+    {% if heuresEctsEc.tePres.originalFloat != heuresEctsEc.tePres.newFloat %}
+        <p class="mb-1">Travail en autonomie : {{ heuresEctsEc.tePres|diffStrike }} h</p>
+    {% endif %}
+{% endif %}

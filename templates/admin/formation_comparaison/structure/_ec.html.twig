@@ -1,0 +1,63 @@
+{# Détail d'un EC modifié, format web : ancien barré rouge / nouveau gras noir.
+   Un EC ajouté (libellé d'origine « - ») ou supprimé (nouveau libellé « - »)
+   est signalé par un badge explicite plutôt que par un barré ambigu.
+   Copie isolée de pdf/synthse_modifications/_ec.html.twig (n'affecte pas le PDF CFVU). #}
+{% if ec != null %}
+    {% set ecAjoute = ec.libelle is defined and ec.libelle.original == '-' %}
+    {% set ecSupprime = ec.libelle is defined and ec.libelle.new == '-' %}
+
+    {% if ec.heuresEctsEc is defined and ec.heuresEctsEc != false and (ec.heuresEctsEc.cmPres.isDifferent == true or
+        ec.heuresEctsEc.tdPres.isDifferent == true or
+        ec.heuresEctsEc.tpPres.isDifferent == true or
+        ec.heuresEctsEc.ects.isDifferent == true or
+        ec.heuresEctsEc.cmDist.isDifferent == true or
+        ec.heuresEctsEc.tdDist.isDifferent == true or
+        ec.heuresEctsEc.tpDist.isDifferent == true or
+        (ec.mcccs is defined and ec.mcccs != '') or
+        ec.libelle.isDifferent == true) %}
+        <div class="fw-semibold">
+            {% if ecAjoute %}
+                <span class="badge bg-success"><i class="fas fa-plus me-1"></i>Nouvel EC</span>
+            {% elseif ecSupprime %}
+                <span class="badge bg-danger"><i class="fas fa-minus me-1"></i>EC supprimé</span>
+            {% else %}
+                <span class="badge bg-warning text-dark"><i class="fas fa-pen me-1"></i>Modifié</span>
+            {% endif %}
+            {{ ued }} |
+            {% if ecSupprime %}{{ ec.code.original }} : {{ ec.libelle.original }}
+            {% else %}{{ ec.code.new }} : {{ ec.libelle.new }}{% endif %}
+        </div>
+    {% endif %}
+
+    {% if ec.libelle.isDifferent == true and not ecAjoute and not ecSupprime %}
+        <p class="mb-1">Libellé : {{ ec.libelle|diffStrike }}</p>
+    {% endif %}
+
+    {{ include('admin/formation_comparaison/structure/_ec_heures.html.twig', { heuresEctsEc: ec.heuresEctsEc }) }}
+    {{ include('admin/formation_comparaison/structure/_ec_mccc.html.twig') }}
+
+    {% if ec.ecEnfants is defined %}
+        {% for enfant in ec.ecEnfants %}
+            {% if enfant != false %}
+                {% set enfantAjoute = enfant.libelle is defined and enfant.libelle.original == '-' %}
+                {% set enfantSupprime = enfant.libelle is defined and enfant.libelle.new == '-' %}
+                <div class="fw-semibold mt-1">
+                    {% if enfantAjoute %}
+                        <span class="badge bg-success"><i class="fas fa-plus me-1"></i>Nouvel EC</span>
+                    {% elseif enfantSupprime %}
+                        <span class="badge bg-danger"><i class="fas fa-minus me-1"></i>EC supprimé</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark"><i class="fas fa-pen me-1"></i>Modifié</span>
+                    {% endif %}
+                    {% if enfantSupprime %}{{ enfant.code.original }} : {{ enfant.libelle.original }}
+                    {% else %}{{ enfant.code.new }} : {{ enfant.libelle.new }}{% endif %}
+                </div>
+                {% if enfant.libelle.isDifferent == true and not enfantAjoute and not enfantSupprime %}
+                    <p class="mb-1">Libellé : {{ enfant.libelle|diffStrike }}</p>
+                {% endif %}
+                {{ include('admin/formation_comparaison/structure/_ec_heures.html.twig', { heuresEctsEc: enfant.heuresEctsEc, ec: enfant }) }}
+                {{ include('admin/formation_comparaison/structure/_ec_mccc.html.twig', { ec: enfant }) }}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endif %}

@@ -207,12 +207,44 @@ class FormationDiffBuilder
     {
         $chain = $this->ancestryChain($formation);
         for ($i = 1, $n = count($chain); $i < $n; $i++) {
-            if ($this->hasDifferences($chain[$i - 1], $chain[$i])) {
-                return ['source' => $chain[$i - 1], 'cible' => $chain[$i]];
+            $older = $chain[$i - 1];
+            $newer = $chain[$i];
+            if ($this->hasDifferences($older, $newer) || $this->parcoursSetDiffers($older, $newer)) {
+                return ['source' => $older, 'cible' => $newer];
             }
         }
 
         return null;
+    }
+
+    /**
+     * Indique si le jeu de parcours diffère entre deux versions adjacentes :
+     * un parcours ajouté (présent dans la plus récente sans origine dans la plus
+     * ancienne) ou non répercuté (présent dans la plus ancienne, sans copie dans
+     * la plus récente).
+     */
+    public function parcoursSetDiffers(Formation $older, Formation $newer): bool
+    {
+        $olderMatched = [];
+        foreach ($older->getParcours() as $p) {
+            $olderMatched[$p->getId()] = false;
+        }
+
+        foreach ($newer->getParcours() as $p) {
+            $origine = $p->getParcoursOrigineCopie();
+            if ($origine === null || !array_key_exists($origine->getId(), $olderMatched)) {
+                return true; // ajouté dans la version récente
+            }
+            $olderMatched[$origine->getId()] = true;
+        }
+
+        foreach ($olderMatched as $matched) {
+            if (!$matched) {
+                return true; // présent dans l'ancienne, non répercuté
+            }
+        }
+
+        return false;
     }
 
     // ── Builders internes ──────────────────────────────────────────────────────

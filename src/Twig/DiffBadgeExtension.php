@@ -22,7 +22,21 @@ class DiffBadgeExtension extends AbstractExtension
             new TwigFilter('diffNew', $this->diffNew(...), ['is_safe' => ['html']]),
             new TwigFilter('diffOriginal', $this->diffOriginal(...), ['is_safe' => ['html']]),
             new TwigFilter('diffNewOriginal', $this->diffNewOriginal(...), ['is_safe' => ['html']]),
+            new TwigFilter('diffStrike', $this->diffStrike(...), ['is_safe' => ['html']]),
         ];
+    }
+
+    /**
+     * Ancienne valeur en rouge barré, nouvelle valeur en gras noir.
+     */
+    public function diffStrike(DiffObject $value): string
+    {
+        if (false === $value->isDifferent()) {
+            return (string) $value->new;
+        }
+
+        return '<span class="text-danger text-decoration-line-through">' . $value->original . '</span> '
+            . '<strong>' . $value->new . '</strong>';
     }
 
     public function displayDiff(DiffObject $value): string

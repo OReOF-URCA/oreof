@@ -74,10 +74,13 @@ class VersioningStructureExtractDiff
     ): void {
         foreach ($semestreOriginal->ues as $ordreUe => $ue) {
             //            $this->hasModification = false;
-            $modifs = $this->compareUe($ue, $semestreNouveau->ues[$ordreUe]);//cas si UE n'existe plus ou si ajouté dans nouveau ?
+            $ueNouvelle = $semestreNouveau->ues[$ordreUe] ?? null;
+            $modifs = $this->compareUe($ue, $ueNouvelle);//cas si UE n'existe plus ou si ajouté dans nouveau ?
             if ($modifs !== false) {
+                // 'ueCible' = StructureUe du côté cible (entités live), utilisée
+                // pour identifier l'UE à recopier dans l'outil de comparaison.
                 $this->diffUe[$ordreSemestre][] =
-                    ['ue' => $ue, 'modifications' => $modifs];
+                    ['ue' => $ue, 'ueCible' => $ueNouvelle, 'modifications' => $modifs];
             }
         }
     }

@@ -2,13 +2,26 @@
 
 namespace App\Controller;
 
+use App\DTO\DiffObject;
+use App\DTO\StructureParcours;
 use App\Entity\Formation;
+use App\Entity\Parcours;
+use App\Entity\Ue;
 use App\Repository\FormationRepository;
+use App\Repository\TypeEpreuveRepository;
+use App\Service\CopyStructureReport;
 use App\Service\FormationDiffBuilder;
+use App\Service\FormationStructureCopier;
+use App\Service\VersioningStructureExtractDiff;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
+use Throwable;
 
 /**
  * Outil de comparaison d'une formation entre versions d'années universitaires
@@ -24,6 +37,9 @@ class FormationComparaisonController extends BaseController
         private readonly FormationRepository $formationRepository,
         private readonly EntityManagerInterface $em,
         private readonly FormationDiffBuilder $diffBuilder,
+        private readonly FormationStructureCopier $structureCopier,
+        private readonly TypeEpreuveRepository $typeEpreuveRepository,
+        private readonly SerializerInterface $serializer,
     ) {}
 
     #[Route('/execute', name: 'execute', methods: ['POST'])]
@@ -79,22 +95,63 @@ class FormationComparaisonController extends BaseController
             $cibles = [$cible];
         }
 
-        foreach ($cibles as $formationCible) {
-            foreach ($keys as $key) {
-                $this->diffBuilder->applyField($formationCible, $source, $key);
+        // UE de structure cochées : ['<parcoursId>' => ['<ueId>' => '1', …]]
+        // La copie structurelle s'applique uniquement à la cible affichée
+        // (l'appariement des UE est propre à cette version).
+        $structureInput = $request->request->all('structure');
+        $report = new CopyStructureReport();
+
+        $this->em->wrapInTransaction(function () use ($cibles, $keys, $source, $structureInput, $cible, $report) {
+            foreach ($cibles as $formationCible) {
+                foreach ($keys as $key) {
+                    $this->diffBuilder->applyField($formationCible, $source, $key);
+                }
             }
-        }
-        $this->em->flush();
+
+            $cibleFormationId = $cible->getId();
+            foreach ($structureInput as $ueIds) {
+                foreach (array_keys($ueIds) as $ueId) {
+                    $ueCible = $this->em->getRepository(Ue::class)->find((int) $ueId);
+                    if ($ueCible === null || $this->ueFormationId($ueCible) !== $cibleFormationId) {
+                        continue;
+                    }
+                    $ueSource = $this->findUeCounterpart($ueCible, $source);
+                    if ($ueSource !== null) {
+                        $this->structureCopier->copyUe($ueSource, $ueCible, $report);
+                        $report->uesCopiees++;
+                    }
+                }
+            }
+        });
 
         $nbYears = count($cibles);
+        $messages = [];
+        if (count($keys) > 0) {
+            $messages[] = sprintf(
+                '%d champ%s récupéré%s%s',
+                count($keys),
+                count($keys) > 1 ? 's' : '',
+                count($keys) > 1 ? 's' : '',
+                $nbYears > 1 ? sprintf(' sur %d années', $nbYears) : ''
+            );
+        }
+        if ($report->uesCopiees > 0) {
+            $messages[] = sprintf('%d UE recopiée%s', $report->uesCopiees, $report->uesCopiees > 1 ? 's' : '');
+        }
+
         $this->toast('success', sprintf(
-            '%d champ%s récupéré%s depuis %s%s.',
-            count($keys),
-            count($keys) > 1 ? 's' : '',
-            count($keys) > 1 ? 's' : '',
-            $this->diffBuilder->anneeLabel($source),
-            $nbYears > 1 ? sprintf(' sur %d années', $nbYears) : ''
+            '%s depuis %s.',
+            $messages ? ucfirst(implode(' et ', $messages)) : 'Aucune modification',
+            $this->diffBuilder->anneeLabel($source)
         ));
+
+        if (!empty($report->fichesPartageesIgnorees)) {
+            $this->toast('warning', sprintf(
+                "%d matière(s) partagée(s) entre plusieurs parcours n'ont pas été modifiées (libellé/heures portés par une fiche mutualisée) : %s. À reporter manuellement.",
+                count($report->fichesPartageesIgnorees),
+                implode(', ', array_unique($report->fichesPartageesIgnorees))
+            ));
+        }
 
         return $this->redirectToRoute('app_formation_show', ['slug' => $cible->getSlug()]);
     }
@@ -171,6 +228,16 @@ class FormationComparaisonController extends BaseController
         $fields = $this->diffBuilder->buildDiffFields($source, $target);
         $differentFields = array_values(array_filter($fields, fn($f) => $f['isDifferent']));
 
+        // Diff structurel (UE/EC/heures/MCCC) par parcours entre source et cible
+        $structureParcours = $this->buildStructureDiff($source, $target);
+        $structureHasAnyDiff = false;
+        foreach ($structureParcours as $row) {
+            if ($row['status'] !== 'identique') {
+                $structureHasAnyDiff = true;
+                break;
+            }
+        }
+
         return $this->render('admin/formation_comparaison/diff.html.twig', [
             'cible'            => $target,
             'source'          => $source,
@@ -180,6 +247,8 @@ class FormationComparaisonController extends BaseController
             'sourceOptions'   => $sourceOptions,
             'broadcastYears'  => $broadcastYears,
             'differentFields' => $differentFields,
+            'structureParcours' => $structureParcours,
+            'structureHasAnyDiff' => $structureHasAnyDiff,
             'hashSource'      => $this->diffBuilder->hashFormation($source),
             'hashCible'       => $this->diffBuilder->hashFormation($target),
         ]);
@@ -196,6 +265,215 @@ class FormationComparaisonController extends BaseController
         }
 
         return $order;
+    }
+
+    /**
+     * Diff structurel par parcours entre la formation source et la cible.
+     * Chaque parcours de la cible est apparié à son homologue de l'année source
+     * via la chaîne parcoursOrigineCopie.
+     *
+     * @return array<int, array{parcours: Parcours, diffStructure: VersioningStructureExtractDiff|null, hasDiff: bool, hasCounterpart: bool}>
+     */
+    private function buildStructureDiff(Formation $source, Formation $cible): array
+    {
+        $typeEpreuves = [];
+        foreach ($this->typeEpreuveRepository->findAll() as $epreuve) {
+            $typeEpreuves[$epreuve->getId()] = $epreuve;
+        }
+
+        $typeD = $this->typeDiplomeResolver->getFromFormation($cible);
+
+        $rows = [];
+        $matchedSourceIds = [];
+
+        // Parcours de la cible : appariés (modifié / identique) ou ajoutés
+        foreach ($cible->getParcours() as $parcours) {
+            $counterpart = $this->findParcoursCounterpart($parcours, $source);
+
+            if ($counterpart === null) {
+                $rows[] = ['parcours' => $parcours, 'status' => 'cible_seul', 'diffStructure' => null];
+                continue;
+            }
+
+            $matchedSourceIds[$counterpart->getId()] = true;
+            $diffStructure = null;
+            $hasDiff = false;
+
+            $addRemove = [];
+            if ($typeD !== null) {
+                try {
+                    $dtoSourceLive = $typeD->calculStructureParcours($counterpart, true, false);
+                    $dtoCibleLive  = $typeD->calculStructureParcours($parcours, true, false);
+
+                    // VersioningStructureExtractDiff attend un côté "origine" au format
+                    // snapshot (MCCC en tableaux) : on fait passer la source par un
+                    // round-trip de sérialisation. La cible reste live (entités MCCC).
+                    $diffStructure = new VersioningStructureExtractDiff(
+                        $this->toVersioningDto($dtoSourceLive),
+                        $dtoCibleLive,
+                        $typeEpreuves
+                    );
+                    $diffStructure->extractDiff();
+
+                    // La détection ajout/suppression utilise les DTO live (accès aux entités)
+                    $addRemove = $this->detectStructuralAddRemove($dtoSourceLive, $dtoCibleLive);
+                    $hasDiff = $this->structureHasDiff($diffStructure) || !empty($addRemove);
+                } catch (Throwable) {
+                    $diffStructure = null;
+                    $addRemove = [];
+                }
+            }
+
+            $rows[] = [
+                'parcours'      => $parcours,
+                'status'        => $hasDiff ? 'modifie' : 'identique',
+                'diffStructure' => $diffStructure,
+                'addRemove'     => $addRemove,
+            ];
+        }
+
+        // Parcours présents dans la source mais sans homologue dans la cible
+        foreach ($source->getParcours() as $parcours) {
+            if (!isset($matchedSourceIds[$parcours->getId()])) {
+                $rows[] = ['parcours' => $parcours, 'status' => 'source_seul', 'diffStructure' => null];
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Convertit une StructureParcours live en sa forme "snapshot" (via le même
+     * round-trip de sérialisation que le versioning), pour que les MCCC soient
+     * des tableaux — format attendu côté origine par VersioningStructureExtractDiff.
+     */
+    private function toVersioningDto(StructureParcours $dto): StructureParcours
+    {
+        $json = $this->serializer->serialize($dto, 'json', [
+            AbstractNormalizer::GROUPS => ['DTO_json_versioning'],
+            'circular_reference_limit' => 2,
+            AbstractObjectNormalizer::SKIP_NULL_VALUES => true,
+            AbstractObjectNormalizer::ENABLE_MAX_DEPTH => true,
+            DateTimeNormalizer::FORMAT_KEY => 'Y-m-d H:i:s',
+        ]);
+
+        return $this->serializer->deserialize($json, StructureParcours::class, 'json');
+    }
+
+    /**
+     * Identifiant de formation auquel appartient une UE, déduit du parcours de
+     * ses EC (l'UE n'a pas de lien direct vers le parcours).
+     */
+    private function ueFormationId(Ue $ue): ?int
+    {
+        foreach ($ue->getElementConstitutifs() as $ec) {
+            $formationId = $ec->getParcours()?->getFormation()?->getId();
+            if ($formationId !== null) {
+                return $formationId;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Remonte la chaîne ueOrigineCopie jusqu'à l'UE appartenant à la formation
+     * source. Sert à apparier une UE cible à son homologue de l'année source.
+     */
+    private function findUeCounterpart(Ue $ueCible, Formation $source): ?Ue
+    {
+        $current = $ueCible->getUeOrigineCopie();
+        $guard = 0;
+        while ($current !== null && $guard < 20) {
+            if ($this->ueFormationId($current) === $source->getId()) {
+                return $current;
+            }
+            $current = $current->getUeOrigineCopie();
+            $guard++;
+        }
+
+        return null;
+    }
+
+    private function findParcoursCounterpart(Parcours $parcours, Formation $source): ?Parcours
+    {
+        $current = $parcours->getParcoursOrigineCopie();
+        $guard = 0;
+        while ($current !== null && $guard < 20) {
+            if ($current->getFormation()?->getId() === $source->getId()) {
+                return $current;
+            }
+            $current = $current->getParcoursOrigineCopie();
+            $guard++;
+        }
+
+        return null;
+    }
+
+    /**
+     * Détecte les UE et semestres ajoutés/supprimés entre deux structures de
+     * parcours. Le service VersioningStructureExtractDiff gère déjà l'ajout/
+     * suppression d'EC dans une UE appariée, mais pas le niveau UE ni semestre.
+     * Les semestres sont indexés par ordre, les UE par ordre — clés stables
+     * d'une année sur l'autre (préservées par la copie).
+     *
+     * @return array<int, array{kind: string, level: string, label: string}>
+     */
+    private function detectStructuralAddRemove(StructureParcours $source, StructureParcours $cible): array
+    {
+        $semLabel = static fn($sem) => 'Semestre ' . ($sem->ordre ?? '?');
+        $ueLabel  = static fn($ue) => $ue->ue?->getLibelle() ?? ($ue->display ?: 'UE');
+
+        $changes = [];
+
+        // Semestres ajoutés / supprimés
+        foreach ($cible->semestres as $ordre => $sem) {
+            if (!array_key_exists($ordre, $source->semestres)) {
+                $changes[] = ['kind' => 'added', 'level' => 'Semestre', 'label' => $semLabel($sem)];
+            }
+        }
+        foreach ($source->semestres as $ordre => $sem) {
+            if (!array_key_exists($ordre, $cible->semestres)) {
+                $changes[] = ['kind' => 'removed', 'level' => 'Semestre', 'label' => $semLabel($sem)];
+            }
+        }
+
+        // UE ajoutées / supprimées dans les semestres communs
+        foreach ($cible->semestres as $ordre => $cibSem) {
+            if (!array_key_exists($ordre, $source->semestres)) {
+                continue;
+            }
+            $srcSem = $source->semestres[$ordre];
+
+            foreach ($cibSem->ues as $key => $ue) {
+                if (!array_key_exists($key, $srcSem->ues)) {
+                    $changes[] = ['kind' => 'added', 'level' => 'UE', 'label' => $semLabel($cibSem) . ' — ' . $ueLabel($ue)];
+                }
+            }
+            foreach ($srcSem->ues as $key => $ue) {
+                if (!array_key_exists($key, $cibSem->ues)) {
+                    $changes[] = ['kind' => 'removed', 'level' => 'UE', 'label' => $semLabel($srcSem) . ' — ' . $ueLabel($ue)];
+                }
+            }
+        }
+
+        return $changes;
+    }
+
+    private function structureHasDiff(VersioningStructureExtractDiff $diff): bool
+    {
+        foreach ($diff->diffUe as $ues) {
+            if (!empty($ues)) {
+                return true;
+            }
+        }
+        foreach (($diff->diff['heuresEctsFormation'] ?? []) as $diffObject) {
+            if ($diffObject instanceof DiffObject && $diffObject->isDifferent()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function canEdit(Formation $formation): bool

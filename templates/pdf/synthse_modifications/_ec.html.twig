@@ -6,7 +6,7 @@
         ec.heuresEctsEc.cmDist.isDifferent == true or
         ec.heuresEctsEc.tdDist.isDifferent == true or
         ec.heuresEctsEc.tpDist.isDifferent == true or
-        ec.mcccs != '' or
+        (ec.mcccs is defined and ec.mcccs != '') or
         ec.libelle.isDifferent == true) %}
         <h5> > {{ ued }} | {{ ec.code.new }} : {{ ec.libelle.new }}</h5>
     {% endif %}

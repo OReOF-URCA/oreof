@@ -1,9 +1,9 @@
-{% if ec.typeMccc.isDifferent == true %}
+{% if ec.typeMccc is defined and ec.typeMccc.isDifferent == true %}
     <h5> > {{  ued }} | {{ ec.code.new }} - {{ ec.libelle.new }} : Modification du type de MCCC :
         {{ ec.typeMccc|diffNewOriginal }}</h5>
     <p>Nouvelles MCCC : {{ ec.mcccs }}</p>
     {% else %}
-    {% if ec.mcccs != '' %}
+    {% if ec.mcccs is defined and ec.mcccs != '' %}
         <p><strong>{{ ec.code.new }} - {{ ec.libelle.new }}</strong> : Modification des MCCC</p>
         <p>{{ ec.mcccs }}</p>
         {% endif %}
