@@ -2,6 +2,7 @@ menu.tableau_de_bord: Tableau de bord
 menu:
   offre_formation: Offre de formation
   detail_mentions: Détail des mentions/spécialités
+  detail_parcours: Détail des parcours
   detail_fiches: Détail des fiches EC/matière
   detail_fiches_hd: Détail fiches EC/matières "hors diplômes"
   detail_elts_mutualises: Détail des éléments mutualisés
