@@ -99,9 +99,14 @@ class FormationComparaisonController extends BaseController
         // La copie structurelle s'applique uniquement à la cible affichée
         // (l'appariement des UE est propre à cette version).
         $structureInput = $request->request->all('structure');
+        // UE non répercutées cochées pour recréation : ['<parcoursCibleId>' => ['<ueSourceId>' => '1']]
+        $recreateInput = $request->request->all('recreateUe');
+        // Parcours non répercutés cochés pour recréation : ['<parcoursSourceId>' => '1']
+        $recreateParcoursInput = array_keys($request->request->all('recreateParcours'));
         $report = new CopyStructureReport();
 
-        $this->em->wrapInTransaction(function () use ($cibles, $keys, $source, $structureInput, $cible, $report) {
+        try {
+        $this->em->wrapInTransaction(function () use ($cibles, $keys, $source, $structureInput, $recreateInput, $recreateParcoursInput, $cible, $report) {
             foreach ($cibles as $formationCible) {
                 foreach ($keys as $key) {
                     $this->diffBuilder->applyField($formationCible, $source, $key);
@@ -109,7 +114,11 @@ class FormationComparaisonController extends BaseController
             }
 
             $cibleFormationId = $cible->getId();
-            foreach ($structureInput as $ueIds) {
+            foreach ($structureInput as $parcoursId => $ueIds) {
+                $parcoursCible = $this->em->getRepository(Parcours::class)->find((int) $parcoursId);
+                if ($parcoursCible === null || $parcoursCible->getFormation()?->getId() !== $cibleFormationId) {
+                    continue;
+                }
                 foreach (array_keys($ueIds) as $ueId) {
                     $ueCible = $this->em->getRepository(Ue::class)->find((int) $ueId);
                     if ($ueCible === null || $this->ueFormationId($ueCible) !== $cibleFormationId) {
@@ -117,12 +126,51 @@ class FormationComparaisonController extends BaseController
                     }
                     $ueSource = $this->findUeCounterpart($ueCible, $source);
                     if ($ueSource !== null) {
-                        $this->structureCopier->copyUe($ueSource, $ueCible, $report);
+                        $this->structureCopier->copyUe($ueSource, $ueCible, $parcoursCible, $report);
                         $report->uesCopiees++;
                     }
                 }
             }
+
+            // UE non répercutées à recréer : ['<parcoursCibleId>' => ['<ueSourceId>' => '1']]
+            foreach ($recreateInput as $parcoursId => $ueIds) {
+                $parcoursCible = $this->em->getRepository(Parcours::class)->find((int) $parcoursId);
+                if ($parcoursCible === null || $parcoursCible->getFormation()?->getId() !== $cibleFormationId) {
+                    continue;
+                }
+                foreach (array_keys($ueIds) as $ueSourceId) {
+                    $ueSource = $this->em->getRepository(Ue::class)->find((int) $ueSourceId);
+                    if ($ueSource === null || $this->ueFormationId($ueSource) !== $source->getId()) {
+                        continue;
+                    }
+                    $this->structureCopier->recreateUe($ueSource, $parcoursCible, $report);
+                }
+            }
+
+            // Parcours non répercutés à recréer dans la formation cible
+            foreach ($recreateParcoursInput as $parcoursSourceId) {
+                $parcoursSource = $this->em->getRepository(Parcours::class)->find((int) $parcoursSourceId);
+                if ($parcoursSource === null || $parcoursSource->getFormation()?->getId() !== $source->getId()) {
+                    continue;
+                }
+                // Garde : ne pas recréer si un homologue existe déjà dans la cible
+                if ($this->parcoursDejaDansCible($parcoursSource, $cible)) {
+                    continue;
+                }
+                $this->structureCopier->recreateParcours($parcoursSource, $cible, $report);
+            }
         });
+        } catch (Throwable $e) {
+            error_log('[FormationComparaison] Échec de la copie structurelle : ' . $e->getMessage());
+            $this->toast('danger', sprintf(
+                "Une erreur est survenue pendant la copie : aucune modification n'a été enregistrée (annulation complète). Détail : %s",
+                $e->getMessage()
+            ));
+            return $this->redirectToRoute('app_formation_comparaison_diff', [
+                'formation' => $cible->getId(),
+                'source'    => $source->getId(),
+            ]);
+        }
 
         $nbYears = count($cibles);
         $messages = [];
@@ -138,6 +186,18 @@ class FormationComparaisonController extends BaseController
         if ($report->uesCopiees > 0) {
             $messages[] = sprintf('%d UE recopiée%s', $report->uesCopiees, $report->uesCopiees > 1 ? 's' : '');
         }
+        if ($report->parcoursCrees > 0) {
+            $messages[] = sprintf('%d parcours recréé%s', $report->parcoursCrees, $report->parcoursCrees > 1 ? 's' : '');
+        }
+        if ($report->uesCreees > 0) {
+            $messages[] = sprintf('%d UE recréée%s', $report->uesCreees, $report->uesCreees > 1 ? 's' : '');
+        }
+        if ($report->ecCrees > 0) {
+            $messages[] = sprintf('%d EC créé%s', $report->ecCrees, $report->ecCrees > 1 ? 's' : '');
+        }
+        if ($report->fichesReutilisees > 0) {
+            $messages[] = sprintf('%d fiche%s mutualisée%s', $report->fichesReutilisees, $report->fichesReutilisees > 1 ? 's' : '', $report->fichesReutilisees > 1 ? 's' : '');
+        }
 
         $this->toast('success', sprintf(
             '%s depuis %s.',
@@ -145,10 +205,19 @@ class FormationComparaisonController extends BaseController
             $this->diffBuilder->anneeLabel($source)
         ));
 
-        if (!empty($report->fichesPartageesIgnorees)) {
+        if (!empty($report->uesNonRecreees)) {
             $this->toast('warning', sprintf(
-                "%d matière(s) partagée(s) entre plusieurs parcours n'ont pas été modifiées (libellé/heures portés par une fiche mutualisée) : %s. À reporter manuellement.",
-                count($report->fichesPartageesIgnorees),
+                "%d UE non répercutée(s) n'ont pas pu être recréées (semestre cible absent) : %s.",
+                count($report->uesNonRecreees),
+                implode(', ', array_unique($report->uesNonRecreees))
+            ));
+        }
+
+        if (!empty($report->fichesPartageesIgnorees)) {
+            $this->toast('info', sprintf(
+                "%d matière(s) mutualisée(s) : les champs propres à l'EC (ECTS, MCCC, volumes spécifiques) ont été appliqués. "
+                . "Le contenu partagé de la fiche (libellé, heures non spécifiques) a été conservé pour ne pas impacter les autres parcours : %s.",
+                count(array_unique($report->fichesPartageesIgnorees)),
                 implode(', ', array_unique($report->fichesPartageesIgnorees))
             ));
         }
@@ -395,6 +464,27 @@ class FormationComparaisonController extends BaseController
         return null;
     }
 
+    /**
+     * Vrai si la formation cible contient déjà un parcours issu (par copie) du
+     * parcours source — pour éviter une recréation en double.
+     */
+    private function parcoursDejaDansCible(Parcours $parcoursSource, Formation $cible): bool
+    {
+        foreach ($cible->getParcours() as $p) {
+            $current = $p->getParcoursOrigineCopie();
+            $guard = 0;
+            while ($current !== null && $guard < 20) {
+                if ($current->getId() === $parcoursSource->getId()) {
+                    return true;
+                }
+                $current = $current->getParcoursOrigineCopie();
+                $guard++;
+            }
+        }
+
+        return false;
+    }
+
     private function findParcoursCounterpart(Parcours $parcours, Formation $source): ?Parcours
     {
         $current = $parcours->getParcoursOrigineCopie();
@@ -452,7 +542,8 @@ class FormationComparaisonController extends BaseController
             }
             foreach ($srcSem->ues as $key => $ue) {
                 if (!array_key_exists($key, $cibSem->ues)) {
-                    $changes[] = ['kind' => 'removed', 'level' => 'UE', 'label' => $semLabel($srcSem) . ' — ' . $ueLabel($ue)];
+                    // 'ueId' = id de l'UE source à recréer dans la cible
+                    $changes[] = ['kind' => 'removed', 'level' => 'UE', 'label' => $semLabel($srcSem) . ' — ' . $ueLabel($ue), 'ueId' => $ue->ue?->getId()];
                 }
             }
         }

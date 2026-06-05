@@ -75,7 +75,7 @@ export default class extends Controller {
 
     #checkedCount() {
         return this.element.querySelectorAll(
-            'input[type="checkbox"][name^="fields["]:checked, input[type="checkbox"][name^="structure["]:checked'
+            'input[type="checkbox"][name^="fields["]:checked, input[type="checkbox"][name^="structure["]:checked, input[type="checkbox"][name^="recreateUe["]:checked, input[type="checkbox"][name^="recreateParcours["]:checked'
         ).length
     }
 

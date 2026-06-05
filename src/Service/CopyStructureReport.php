@@ -9,8 +9,16 @@ namespace App\Service;
 class CopyStructureReport
 {
     public int $ecCopies = 0;
+    public int $ecCrees = 0;
+    public int $fichesCreees = 0;
+    public int $fichesReutilisees = 0;
     public int $uesCopiees = 0;
+    public int $uesCreees = 0;
+    public int $parcoursCrees = 0;
 
     /** @var string[] Libellés des fiches partagées non écrasées */
     public array $fichesPartageesIgnorees = [];
+
+    /** @var string[] UE non répercutées qu'on n'a pas pu recréer (semestre cible absent) */
+    public array $uesNonRecreees = [];
 }

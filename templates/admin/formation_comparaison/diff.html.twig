@@ -231,21 +231,38 @@
                                                 (ajouté). Rien à récupérer depuis la source.
                                             </p>
                                         {% elseif row.status == 'source_seul' %}
-                                            <p class="text-muted mb-0">
-                                                <i class="fas fa-circle-info me-1"></i>
-                                                Présent uniquement dans <strong>{{ sourceLabel }}</strong>, non répercuté
-                                                vers <strong>{{ cibleLabel }}</strong>. (Recréation du parcours — à venir.)
-                                            </p>
+                                            <div class="form-check field-row" data-formation-comparaison--diff-target="row">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="recreateParcours[{{ row.parcours.id }}]" value="1"
+                                                       id="recreateParcours_{{ row.parcours.id }}"
+                                                       data-action="change->formation-comparaison--diff#toggle">
+                                                <label class="form-check-label" for="recreateParcours_{{ row.parcours.id }}">
+                                                    Présent uniquement dans <strong>{{ sourceLabel }}</strong>, non répercuté
+                                                    vers <strong>{{ cibleLabel }}</strong>.
+                                                    <strong>Cocher pour recréer ce parcours complet</strong> (UE, EC, MCCC, fiches) dans {{ cibleLabel }}.
+                                                </label>
+                                            </div>
                                         {% else %}
                                             {% for change in row.addRemove %}
-                                                <div class="d-flex align-items-center gap-2 border-bottom py-2">
-                                                    <input class="form-check-input mt-0 flex-shrink-0" type="checkbox">
+                                                {% set recreable = change.kind == 'removed' and change.level == 'UE' and change.ueId is defined and change.ueId %}
+                                                <div class="d-flex align-items-center gap-2 border-bottom py-2 field-row"
+                                                     data-formation-comparaison--diff-target="row">
+                                                    {% if recreable %}
+                                                        <input class="form-check-input mt-0 flex-shrink-0" type="checkbox"
+                                                               name="recreateUe[{{ row.parcours.id }}][{{ change.ueId }}]" value="1"
+                                                               data-action="change->formation-comparaison--diff#toggle">
+                                                    {% endif %}
                                                     {% if change.kind == 'added' %}
                                                         <span class="badge bg-primary"><i class="fas fa-plus me-1"></i>{{ change.level }} ajouté{{ change.level == 'UE' ? 'e' : '' }}</span>
                                                     {% else %}
-                                                        <span class="badge bg-danger"><i class="fas fa-minus me-1"></i>{{ change.level }} supprimé{{ change.level == 'UE' ? 'e' : '' }}</span>
+                                                        <span class="badge bg-danger"><i class="fas fa-minus me-1"></i>{{ change.level }} non répercuté{{ change.level == 'UE' ? 'e' : '' }}</span>
                                                     {% endif %}
                                                     <span>{{ change.label }}</span>
+                                                    {% if recreable %}
+                                                        <span class="text-muted small ms-auto">Cocher pour recréer dans {{ cibleLabel }}</span>
+                                                    {% elseif change.kind == 'added' %}
+                                                        <span class="text-muted small ms-auto">Ajouté côté {{ cibleLabel }} — rien à récupérer</span>
+                                                    {% endif %}
                                                 </div>
                                             {% endfor %}
                                             {% if row.diffStructure %}

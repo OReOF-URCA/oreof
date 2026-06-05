@@ -733,6 +733,26 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     }
 
     /**
+     * Indique si la fiche matière de cet EC est partagée : mutualisée avec
+     * d'autres parcours (table FicheMatiereMutualisable), portée par plusieurs
+     * EC, marquée mutualisée, ou n'appartenant pas au parcours de l'EC. Dans ce
+     * cas son contenu commun (libellé, heures non spécifiques) ne peut pas être
+     * modifié pour ce seul EC sans impacter les autres parcours.
+     */
+    public function isFichePartagee(): bool
+    {
+        $fiche = $this->ficheMatiere;
+        if ($fiche === null) {
+            return false;
+        }
+
+        return $fiche->getFicheMatiereParcours()->count() > 0
+            || $fiche->getElementConstitutifs()->count() > 1
+            || $fiche->isEnseignementMutualise() === true
+            || !$this->isFicheFromParcours();
+    }
+
+    /**
      * @return Collection<int, Competence>
      */
     public function getCompetences(): Collection

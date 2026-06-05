@@ -18,8 +18,9 @@
                     </label>
                     <div class="small structure-detail">
                         {% if entry.modifications.elementConstitutifs is defined %}
-                            {% for ec in entry.modifications.elementConstitutifs %}
-                                {{ include('admin/formation_comparaison/structure/_ec.html.twig', {ec: ec, ued: entry.ue.display}) }}
+                            {% for key, ec in entry.modifications.elementConstitutifs %}
+                                {% set liveEc = entry.ueCible.elementConstitutifs[key] is defined ? entry.ueCible.elementConstitutifs[key].elementConstitutif : null %}
+                                {{ include('admin/formation_comparaison/structure/_ec.html.twig', {ec: ec, ued: entry.ue.display, mutualise: liveEc ? liveEc.fichePartagee : false}) }}
                             {% endfor %}
                         {% endif %}
                         {% if entry.modifications.uesEnfants is defined %}

@@ -6,15 +6,20 @@
     {% set ecAjoute = ec.libelle is defined and ec.libelle.original == '-' %}
     {% set ecSupprime = ec.libelle is defined and ec.libelle.new == '-' %}
 
-    {% if ec.heuresEctsEc is defined and ec.heuresEctsEc != false and (ec.heuresEctsEc.cmPres.isDifferent == true or
-        ec.heuresEctsEc.tdPres.isDifferent == true or
-        ec.heuresEctsEc.tpPres.isDifferent == true or
-        ec.heuresEctsEc.ects.isDifferent == true or
-        ec.heuresEctsEc.cmDist.isDifferent == true or
-        ec.heuresEctsEc.tdDist.isDifferent == true or
-        ec.heuresEctsEc.tpDist.isDifferent == true or
-        (ec.mcccs is defined and ec.mcccs != '') or
-        ec.libelle.isDifferent == true) %}
+    {% set heuresDiff = ec.heuresEctsEc is defined and ec.heuresEctsEc != false and (
+        ec.heuresEctsEc.cmPres.originalFloat != ec.heuresEctsEc.cmPres.newFloat or
+        ec.heuresEctsEc.tdPres.originalFloat != ec.heuresEctsEc.tdPres.newFloat or
+        ec.heuresEctsEc.tpPres.originalFloat != ec.heuresEctsEc.tpPres.newFloat or
+        ec.heuresEctsEc.ects.originalFloat != ec.heuresEctsEc.ects.newFloat or
+        ec.heuresEctsEc.cmDist.originalFloat != ec.heuresEctsEc.cmDist.newFloat or
+        ec.heuresEctsEc.tdDist.originalFloat != ec.heuresEctsEc.tdDist.newFloat or
+        ec.heuresEctsEc.tpDist.originalFloat != ec.heuresEctsEc.tpDist.newFloat or
+        ec.heuresEctsEc.tePres.originalFloat != ec.heuresEctsEc.tePres.newFloat
+    ) %}
+    {% set mcccDiff = ec.mcccs is defined and ec.mcccs != '' %}
+    {% set libelleDiff = ec.libelle is defined and ec.libelle.isDifferent == true %}
+
+    {% if heuresDiff or mcccDiff or libelleDiff or ecAjoute or ecSupprime %}
         <div class="fw-semibold">
             {% if ecAjoute %}
                 <span class="badge bg-success"><i class="fas fa-plus me-1"></i>Nouvel EC</span>
@@ -22,6 +27,11 @@
                 <span class="badge bg-danger"><i class="fas fa-minus me-1"></i>EC supprimé</span>
             {% else %}
                 <span class="badge bg-warning text-dark"><i class="fas fa-pen me-1"></i>Modifié</span>
+            {% endif %}
+            {% if mutualise|default(false) %}
+                <span class="badge bg-info text-white" title="Fiche mutualisée : le contenu commun (libellé, heures non spécifiques) n'est pas modifié individuellement pour ne pas impacter les autres parcours. Les champs propres à l'EC (ECTS, MCCC) sont copiés.">
+                    <i class="fas fa-link me-1"></i>Mutualisé
+                </span>
             {% endif %}
             {{ ued }} |
             {% if ecSupprime %}{{ ec.code.original }} : {{ ec.libelle.original }}
