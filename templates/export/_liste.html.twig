@@ -1,8 +1,15 @@
 <div class="space-y-4 p-4 sm:p-6">
-    {% set nbExports = dpes|length %}
-    <div class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100">
-        <strong>{{ nbExports }}</strong> export{{ nbExports > 1 ? 's' : '' }} disponible{{ nbExports > 1 ? 's' : '' }}.
-    </div>
+    {% if composante is null %}
+        <div class="rounded-xl border border-secondary-200 bg-secondary-50 px-4 py-3 text-sm text-secondary-700 dark:border-secondary-700 dark:bg-secondary-800/50 dark:text-secondary-200">
+            Selectionnez une composante pour charger la liste des formations exportables.
+        </div>
+    {% else %}
+        {% set nbExports = dpes|length %}
+        <div class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100">
+            <strong>{{ nbExports }}</strong> export{{ nbExports > 1 ? 's' : '' }}
+            disponible{{ nbExports > 1 ? 's' : '' }}.
+        </div>
+    {% endif %}
 
     <div class="overflow-x-auto rounded-xl border border-secondary-200 dark:border-secondary-700" {{ stimulus_controller('check_all') }}>
         <table class="min-w-full text-left text-sm text-secondary-700 dark:text-secondary-200">
@@ -33,7 +40,7 @@
                                     {{ stimulus_action('check_all', 'check') }}
                                     type="checkbox"
                                     class="check-all h-4 w-4 rounded border-secondary-300 text-cyan-600 focus:ring-cyan-500"
-                                    name="dpes[]"
+                                    name="liste[]"
                                     value="{{ dpe.id }}"
                             >
                             <span class="sr-only">Sélectionner l'export {{ dpe.id }}</span>

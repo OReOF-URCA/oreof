@@ -4,6 +4,10 @@
     Gestion des exports de fichier
 {% endset %}
 
+{% set frame_id = 'export_formations_frame' %}
+{% set selectedComposanteId = composante is defined and composante ? composante.id : null %}
+{% set frame_src = selectedComposanteId ? path('app_export_liste', { composante: selectedComposanteId }) : null %}
+
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
         {title: 'Pilotage'},
@@ -11,70 +15,61 @@
     ]}) }}
 {% endblock %}
 
-{# {% block bouton_header %} #}
-{#    <a href="{{ path("app_export_my_exports") }}" #}
-{#       class="btn btn-outline-info" #}
-{#    > #}
-{#        <i class="{{ iconDownload }}"></i> #}
-{#        Voir mes exports</a> #}
-{#    <a href="{{ path("app_export_test_exports") }}">test mes exports</a> #}
-{# {% endblock %} #}
-
 {% block content %}
     <div
-            {% if ses is defined and ses == true %}
-                {{ stimulus_controller('export',
-                    {
-                        url: path('app_export_liste'),
-                        urlValide: path('app_export_valide')
-                    }) }}
-            {% elseif isCfvu is defined and isCfvu == true %}
-                {{ stimulus_controller('export',
-                    {
-                        url: path('app_export_liste', {cfvu:true}),
-                        urlValide: path('app_export_valide')
-                    }) }}
-            {% else %}
-                {{ stimulus_controller('export',
-                    {
-                        url: path('app_export_liste', {composante:composante.id}),
-                        urlValide: path('app_export_valide', {composante:composante.id})
-                    }) }}
-            {% endif %}
+            {{ stimulus_controller('export', {
+                listUrl: path('app_export_liste')
+            }) }}
             class="space-y-4"
     >
-        <section
-                class="rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div class="space-y-1">
-                    <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
-                        Paramètres d'export
-                    </h2>
-                    <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
-                        Sélectionnez la composante et le type de document à générer. Le résultat sera envoyé par email.
-                    </p>
+        <template {{ stimulus_target('export', 'pendingStateTemplate') }}>
+            {{ include('export/_generation_state.html.twig', {
+                state: 'idle',
+                message: 'Generation en attente',
+                details: 'Selectionnez les formations puis lancez une nouvelle generation.'
+            }) }}
+        </template>
+
+        <form method="post"
+              action="{{ path('app_export_valide') }}"
+              class="space-y-4"
+              data-action="turbo:submit-start->export#disableSubmit turbo:submit-end->export#enableSubmit"
+        >
+            <section
+                    class="rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="space-y-1">
+                        <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
+                            Parametres d'export
+                        </h2>
+                        <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
+                            Selectionnez la composante et le type de document a generer. Le resultat sera envoye par
+                            email.
+                        </p>
+                    </div>
+
+                    <div class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-200">
+                        {{ user_data.campagneCollecte.libelle }}
+                    </div>
                 </div>
 
-                <div class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-200">
-                    {{ user_data.campagneCollecte.libelle }}
-                </div>
-            </div>
-
-            <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <div class="space-y-4">
+                <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <div class="space-y-4">
                         {% if ses is defined and ses == true or isCfvu is defined and isCfvu == true %}
                             <div class="space-y-1.5">
                                 <label for="composante"
                                        class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Composante
                                     <span class="text-rose-500">*</span></label>
-                                <select name="composante" id="composante"
+                                <select name="composante"
+                                        id="composante"
+                                        {{ stimulus_target('export', 'composante') }}
+                                        data-action="change->export#refreshFrame"
                                         class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-cyan-400 dark:focus:ring-cyan-900"
-                                        {{ stimulus_action('export', 'changeListe') }}
                                         {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
                                 >
                                     <option value="">Choisir une composante</option>
                                     {% for composante in composantes %}
-                                        <option value="{{ composante.id }}">{{ composante.libelle }}</option>
+                                        <option value="{{ composante.id }}" {{ selectedComposanteId == composante.id ? 'selected' }}>{{ composante.libelle }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -83,22 +78,27 @@
                                 <label for="composante"
                                        class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Composante
                                     <span class="text-rose-500">*</span></label>
-                                <select name="composante" id="composante"
-                                        class="block w-full rounded-lg border border-secondary-300 bg-secondary-100 px-3 py-2 text-sm text-secondary-500 shadow-sm outline-none dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400"
+                                <select id="composante"
                                         disabled
-                                        {{ stimulus_action('export', 'changeListe') }}
+                                        {{ stimulus_target('export', 'composante') }}
+                                        class="block w-full rounded-lg border border-secondary-300 bg-secondary-100 px-3 py-2 text-sm text-secondary-500 shadow-sm outline-none dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400"
                                         {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
                                 >
                                     <option value="{{ composante.id }}">{{ composante.libelle }}</option>
                                 </select>
+                                <input type="hidden" name="composante" value="{{ composante.id }}">
                             </div>
                         {% endif %}
 
-                    <div class="space-y-1.5">
-                        <label for="type_document" class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Type
-                            d'export <span class="text-rose-500">*</span></label>
-                        <select name="type_document" id="type_document"
-                                class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-cyan-400 dark:focus:ring-cyan-900">
+                        <div class="space-y-1.5">
+                            <label for="type_document"
+                                   class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Type
+                                d'export <span class="text-rose-500">*</span></label>
+                            <select name="type_document"
+                                    id="type_document"
+                                    {{ stimulus_target('export', 'typeDocument') }}
+                                    data-action="change->export#onTypeDocumentChange"
+                                    class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-cyan-400 dark:focus:ring-cyan-900">
                                 <option value="">Choisir le format</option>
                                 {% for value, type in types_document %}
                                     <option value="{{ value }}">{{ type }}</option>
@@ -108,21 +108,25 @@
 
                         {% if isCfvu is defined and isCfvu != true %}
                             <div class="space-y-1.5">
-                                <label for="date" class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Préciser,
+                                <label for="date"
+                                       class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Preciser,
                                     si besoin, la date du conseil ou de la commission</label>
                                 <input type="date" name="date" id="date"
                                        class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-cyan-400 dark:focus:ring-cyan-900">
                             </div>
                         {% endif %}
-                </div>
+                    </div>
 
-                <div class="space-y-4">
+                    <div class="space-y-4">
                         {% if types_document_global is defined %}
                             <div class="space-y-1.5">
                                 <label for="type_document_global"
                                        class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Exports
-                                    spécifiques (sans choix de composante)</label>
-                                <select name="type_document_global" id="type_document_global"
+                                    specifiques (sans choix de composante)</label>
+                                <select name="type_document_global"
+                                        id="type_document_global"
+                                        {{ stimulus_target('export', 'typeDocumentGlobal') }}
+                                        data-action="change->export#onTypeGlobalChange"
                                         class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-cyan-400 dark:focus:ring-cyan-900">
                                     <option value="">Choisir le format</option>
                                     {% for value, type in types_document_global %}
@@ -131,31 +135,45 @@
                                 </select>
                             </div>
                         {% endif %}
-                </div>
-
-                <div class="lg:col-span-2 space-y-4">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <twig:Button
-                                label="Générer les documents"
-                                variant="success"
-                                icon="icon:add"
-                                dataAction="click->export#valideExport"
-                        />
                     </div>
 
-                    {{ component('alerte', {
-                        type: 'info',
-                        message: 'Les documents seront générés et un lien de téléchargement sera envoyé par email',
-                        id: 'alerte-success'
-                    }) }}
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button type="submit"
+                                    {{ stimulus_target('export', 'submit') }}
+                                    class="app-btn app-btn-success inline-flex items-center gap-2"
+                            >
+                                <span aria-hidden="true">+</span>
+                                Generer les documents
+                            </button>
+                        </div>
+
+                        {{ component('alerte', {
+                            type: 'info',
+                            message: 'Les documents seront generes et un lien de telechargement sera envoye par email',
+                            id: 'alerte-success'
+                        }) }}
+                    </div>
                 </div>
+            </section>
+
+            <div id="generation_state" {{ stimulus_target('export', 'generationState') }}>
+                {{ include('export/_generation_state.html.twig', {
+                    state: 'idle',
+                    message: 'Aucune generation en cours',
+                    details: 'Lancez un export pour suivre son etat ici.'
+                }) }}
             </div>
-        </section>
-        {# todo: choix formation/parcours, mutliples, filtres, composante, type de diplôme #}
 
-        <section
-                class="rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900" {{ stimulus_target('export', 'liste') }}>
-        </section>
+            <section
+                    class="rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                <turbo-frame id="{{ frame_id }}"
+                        {{ frame_src ? 'src="' ~ frame_src ~ '"' }}
+                        {{ stimulus_target('export', 'frame') }}
+                >
+                    {{ include('export/_liste.html.twig', { dpes: [], composante: null }) }}
+                </turbo-frame>
+            </section>
+        </form>
     </div>
-
 {% endblock %}

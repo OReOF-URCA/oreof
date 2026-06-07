@@ -1,6 +1,6 @@
 <turbo-stream action="append" target="flash_toasts">
     <template>
-        {% set toast_type = type|default('info') %}
+        {% set toast_type = toast_type|default(type|default('info')) %}
 
         {% if toast_type == 'info' %}
             {% set bg = 'bg-white/80 dark:bg-blue-800/80' %}
@@ -120,4 +120,3 @@
 {% if closeModal is defined and closeModal == true %}
     {{ include('_ui/_force_close_modal.html.twig') }}
 {% endif %}
-

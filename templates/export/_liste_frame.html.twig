@@ -1,0 +1,7 @@
+<turbo-frame id="{{ frame_id|default('export_formations_frame') }}">
+    {{ include('export/_liste.html.twig', {
+        dpes: dpes|default([]),
+        composante: composante|default(null)
+    }) }}
+</turbo-frame>
+

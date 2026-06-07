@@ -1,0 +1,18 @@
+{% set state = state|default('idle') %}
+{% if state == 'pending' %}
+    {% set box = 'border-cyan-200 bg-cyan-50 text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100' %}
+{% elseif state == 'error' %}
+    {% set box = 'border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950/30 dark:text-red-100' %}
+{% elseif state == 'success' %}
+    {% set box = 'border-green-200 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-950/30 dark:text-green-100' %}
+{% else %}
+    {% set box = 'border-secondary-200 bg-secondary-50 text-secondary-700 dark:border-secondary-700 dark:bg-secondary-800/50 dark:text-secondary-200' %}
+{% endif %}
+
+<div class="rounded-xl border px-4 py-3 text-sm {{ box }}">
+    <div class="font-semibold">{{ message|default('Aucune generation en cours') }}</div>
+    {% if details is defined and details %}
+        <div class="mt-1 text-xs opacity-80">{{ details }}</div>
+    {% endif %}
+</div>
+
