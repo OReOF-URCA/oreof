@@ -18,7 +18,7 @@
                          data-action="click@window->navbar-dropdown#close">
                         <button data-action="click->navbar-dropdown#toggle"
                                 class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium">
-                            {{ 'menu.offre_formation'|trans({}, 'menu') }}
+                            <a href="{{ path('app_section_offre_formation') }}">{{ 'menu.offre_formation'|trans({}, 'menu') }}</a>
                             <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 9l-7 7-7-7"></path>
                             </svg>
@@ -75,7 +75,7 @@
                              data-action="click@window->navbar-dropdown#close">
                             <button data-action="click->navbar-dropdown#toggle"
                                     class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium">
-                                {{ 'menu.admin.pilotage'|trans({}, 'menu') }}
+                                <a href="{{ path('app_section_pilotage') }}">{{ 'menu.admin.pilotage'|trans({}, 'menu') }}</a>
                                 <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path d="M19 9l-7 7-7-7"></path>
                                 </svg>
