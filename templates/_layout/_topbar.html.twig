@@ -13,311 +13,317 @@
                     <a href="{{ path('app_homepage') }}"
                        class="text-text hover:text-primary px-3 py-2 text-sm font-medium transition">{{ 'menu.tableau_de_bord'|trans({}, 'menu') }}</a>
 
-                    {# Menu offre de formation, accessible à tous #}
-                    <div class="relative" data-controller="navbar-dropdown"
-                         data-action="click@window->navbar-dropdown#close">
-                        <button data-action="click->navbar-dropdown#toggle"
-                                class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium">
-                            <a href="{{ path('app_section_offre_formation') }}">{{ 'menu.offre_formation'|trans({}, 'menu') }}</a>
-                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                        </button>
-                        <div data-navbar-dropdown-target="content"
-                             class="hidden absolute left-0 mt-2 w-48 bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2">
-                            <a href="{{ path('app_formation_index') }}"
-                               class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.detail_mentions'|trans({}, 'menu') }}</a>
-                            <a href="{{ path('structure_fiche_matiere_index') }}"
-                               class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.detail_fiches'|trans({}, 'menu') }}</a>
-                            <a href="{{ path('structure_fiche_matiere_index', {type:'hd'}) }}"
-                               class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.detail_fiches_hd'|trans({}, 'menu') }}</a>
-                            <a href="{{ path('app_export_index') }}"
-                               class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.exports'|trans({}, 'menu') }}</a>
-                        </div>
-                    </div>
-                    {# Fin Menu offre de formation #}
+                    {% for item in main_menu() %}
+                        {% include '_layout/menu/_topbar_item.html.twig' with {
+                            item: item
+                        } only %}
+                    {% endfor %}
 
-                    {% if is_granted('ROLE_ADMIN') %}
-                        {% set menu_admin_pilotage = [
-                            {
-                                'path' : path('structure_composante_index'),
-                                'label' : 'menu.admin.consulter_offre'|trans({}, 'menu')},
-                            {
-                                'path' : path('app_offre'),
-                                'label' : 'menu.admin.gestion_offre'|trans({}, 'menu')},
-                            {
-                                'path' : path('app_demande_dpe'),
-                                'label' : 'menu.admin.dpe_ouverts'|trans({}, 'menu')},
-                            {
-                                'path' : path('app_validation_dpe_index'),
-                                'label' : 'menu.admin.validation_dpe'|trans({}, 'menu')},
-                            {
-                                'path' : path('app_validation_fiche_index'),
-                                'label' : 'menu.admin.validation_fiches_ec'|trans({}, 'menu')},
-                            {
-                                'path' : path('app_validation_change_rf_index'),
-                                'label' : 'menu.admin.validation_rf'|trans({}, 'menu')},
-                            {
-                                'path' : path('app_parcours_lheo_invalid_list'),
-                                'label' : 'menu.admin.controle_lheo'|trans({}, 'menu'),
-                            },
-                            {
-                                'path' : path('app_export_index'),
-                                'label' : 'menu.admin.exports'|trans({}, 'menu'),
-                            },{
-                                'path' : path('app_log_viewer_index'),
-                                'label' : 'menu.admin.logs.applicatifs'|trans({}, 'menu'),
-                            },{
-                                'path' : path('app_impersonation_list'),
-                                'label' : 'menu.admin.impersonation.user'|trans({}, 'menu'),
-                            }] %}
-                        <div class="relative" data-controller="navbar-dropdown"
-                             data-action="click@window->navbar-dropdown#close">
-                            <button data-action="click->navbar-dropdown#toggle"
-                                    class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium">
-                                <a href="{{ path('app_section_pilotage') }}">{{ 'menu.admin.pilotage'|trans({}, 'menu') }}</a>
-                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </button>
-                            <div data-navbar-dropdown-target="content"
-                                 class="hidden absolute left-0 mt-2 w-48 bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2">
-                                {% for item in menu_admin_pilotage %}
-                                    <a href="{{ item.path }}"
-                                       class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ item.label }}</a>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% else %}
-                        {% if is_granted('SHOW', {route: 'app_composante', subject: 'composante'}) %}
+                    {#                    #}{# Menu offre de formation, accessible à tous #}
+                    {#                    <div class="relative" data-controller="navbar-dropdown" #}
+                    {#                         data-action="click@window->navbar-dropdown#close"> #}
+                    {#                        <button data-action="click->navbar-dropdown#toggle" #}
+                    {#                                class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium"> #}
+                    {#                            <a href="{{ path('app_section_offre_formation') }}">{{ 'menu.offre_formation'|trans({}, 'menu') }}</a> #}
+                    {#                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"> #}
+                    {#                                <path d="M19 9l-7 7-7-7"></path> #}
+                    {#                            </svg> #}
+                    {#                        </button> #}
+                    {#                        <div data-navbar-dropdown-target="content" #}
+                    {#                             class="hidden absolute left-0 mt-2 w-48 bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2"> #}
+                    {#                            <a href="{{ path('app_formation_index') }}" #}
+                    {#                               class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.detail_mentions'|trans({}, 'menu') }}</a> #}
+                    {#                            <a href="{{ path('structure_fiche_matiere_index') }}" #}
+                    {#                               class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.detail_fiches'|trans({}, 'menu') }}</a> #}
+                    {#                            <a href="{{ path('structure_fiche_matiere_index', {type:'hd'}) }}" #}
+                    {#                               class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.detail_fiches_hd'|trans({}, 'menu') }}</a> #}
+                    {#                            <a href="{{ path('app_export_index') }}" #}
+                    {#                               class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.exports'|trans({}, 'menu') }}</a> #}
+                    {#                        </div> #}
+                    {#                    </div> #}
+                    {#                    #}{# Fin Menu offre de formation #}
 
-                            <div class="static" data-controller="navbar-dropdown"
-                                 data-action="click@window->navbar-dropdown#close">
-                                <button data-action="click->navbar-dropdown#toggle"
-                                        class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium">
-                                    {{ 'menu.compo.pilotage'|trans({}, 'menu') }}
-                                    <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M19 9l-7 7-7-7"></path>
-                                    </svg>
-                                </button>
-                                <div data-navbar-dropdown-target="content"
-                                     class="hidden absolute inset-x-0 top-16 bg-surface border-b border-secondary-200 dark:border-secondary-700 shadow-2xl overflow-hidden">
-                                    <div class="max-w-7xl mx-auto grid grid-cols-3 gap-8 p-8">
-                                        {% for composante in app.user.composanteResponsableDpe %}
-                                            {% if is_granted('SHOW', {route: 'app_composante', subject: composante}) %}
-                                                <div>
-                                                    <h3 class="text-xs font-semibold text-text uppercase tracking-wider mb-4">{{ composante.libelle }}</h3>
-                                                    <ul class="space-y-3">
-                                                        <li><a href="{{ path('structure_composante_index') }}"
-                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.consulter_offre'|trans({}, 'menu') }}</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="{{ path('app_demande_dpe_composante', {composante:composante.id}) }}"
-                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.dpe_ouvert'|trans({}, 'menu') }}</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="{{ path('app_validation_composante_dpe_index', {composante:composante.id}) }}"
-                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.validation_dpe'|trans({}, 'menu') }}</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="{{ path('app_validation_composante_fiche_index', {composante:composante.id}) }}"
-                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.validation_ec'|trans({}, 'menu') }}</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="{{ path('app_validation_composante_change_rf_index', {composante:composante.id}) }}"
-                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.validation_rf'|trans({}, 'menu') }}</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="{{ path('app_validation_composante_pilotage', {composante:composante.id}) }}"
-                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.pilotage_visuel'|trans({}, 'menu') }}</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="{{ path('app_export_composante_index', {composante:composante.id}) }}"
-                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.exports'|trans({}, 'menu') }}</a>
-                                                        </li>
-                                                        <li>
-                                                            <a href="{{ path('app_plaquette', {composante:composante.id}) }}"
-                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.communication'|trans({}, 'menu') }}</a>
-                                                        </li>
-                                                    </ul>
-                                                </div>
-                                            {% endif %}
-                                        {% endfor %}
+                    {#                    {% if is_granted('ROLE_ADMIN') %} #}
+                    {#                        {% set menu_admin_pilotage = [ #}
+                    {#                            { #}
+                    {#                                'path' : path('structure_composante_index'), #}
+                    {#                                'label' : 'menu.admin.consulter_offre'|trans({}, 'menu')}, #}
+                    {#                            { #}
+                    {#                                'path' : path('app_offre'), #}
+                    {#                                'label' : 'menu.admin.gestion_offre'|trans({}, 'menu')}, #}
+                    {#                            { #}
+                    {#                                'path' : path('app_demande_dpe'), #}
+                    {#                                'label' : 'menu.admin.dpe_ouverts'|trans({}, 'menu')}, #}
+                    {#                            { #}
+                    {#                                'path' : path('app_validation_dpe_index'), #}
+                    {#                                'label' : 'menu.admin.validation_dpe'|trans({}, 'menu')}, #}
+                    {#                            { #}
+                    {#                                'path' : path('app_validation_fiche_index'), #}
+                    {#                                'label' : 'menu.admin.validation_fiches_ec'|trans({}, 'menu')}, #}
+                    {#                            { #}
+                    {#                                'path' : path('app_validation_change_rf_index'), #}
+                    {#                                'label' : 'menu.admin.validation_rf'|trans({}, 'menu')}, #}
+                    {#                            { #}
+                    {#                                'path' : path('app_parcours_lheo_invalid_list'), #}
+                    {#                                'label' : 'menu.admin.controle_lheo'|trans({}, 'menu'), #}
+                    {#                            }, #}
+                    {#                            { #}
+                    {#                                'path' : path('app_export_index'), #}
+                    {#                                'label' : 'menu.admin.exports'|trans({}, 'menu'), #}
+                    {#                            },{ #}
+                    {#                                'path' : path('app_log_viewer_index'), #}
+                    {#                                'label' : 'menu.admin.logs.applicatifs'|trans({}, 'menu'), #}
+                    {#                            },{ #}
+                    {#                                'path' : path('app_impersonation_list'), #}
+                    {#                                'label' : 'menu.admin.impersonation.user'|trans({}, 'menu'), #}
+                    {#                            }] %} #}
+                    {#                        <div class="relative" data-controller="navbar-dropdown" #}
+                    {#                             data-action="click@window->navbar-dropdown#close"> #}
+                    {#                            <button data-action="click->navbar-dropdown#toggle" #}
+                    {#                                    class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium"> #}
+                    {#                                <a href="{{ path('app_section_pilotage') }}">{{ 'menu.admin.pilotage'|trans({}, 'menu') }}</a> #}
+                    {#                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"> #}
+                    {#                                    <path d="M19 9l-7 7-7-7"></path> #}
+                    {#                                </svg> #}
+                    {#                            </button> #}
+                    {#                            <div data-navbar-dropdown-target="content" #}
+                    {#                                 class="hidden absolute left-0 mt-2 w-48 bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2"> #}
+                    {#                                {% for item in menu_admin_pilotage %} #}
+                    {#                                    <a href="{{ item.path }}" #}
+                    {#                                       class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ item.label }}</a> #}
+                    {#                                {% endfor %} #}
+                    {#                            </div> #}
+                    {#                        </div> #}
+                    {#                    {% else %} #}
+                    {#                        {% if is_granted('SHOW', {route: 'app_composante', subject: 'composante'}) %} #}
 
-                                        <div class="bg-bg p-6 rounded-xl">
-                                            <p class="font-bold text-text mb-2 italic text-sm text-primary">
-                                                Aide &
-                                                Support</p>
-                                            <p class="text-xs text-secondary-600 leading-relaxed">Accédez à tous les
-                                                guides
-                                                administratifs et aux contacts de la scolarité centrale.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    {#                            <div class="static" data-controller="navbar-dropdown" #}
+                    {#                                 data-action="click@window->navbar-dropdown#close"> #}
+                    {#                                <button data-action="click->navbar-dropdown#toggle" #}
+                    {#                                        class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium"> #}
+                    {#                                    {{ 'menu.compo.pilotage'|trans({}, 'menu') }} #}
+                    {#                                    <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"> #}
+                    {#                                        <path d="M19 9l-7 7-7-7"></path> #}
+                    {#                                    </svg> #}
+                    {#                                </button> #}
+                    {#                                <div data-navbar-dropdown-target="content" #}
+                    {#                                     class="hidden absolute inset-x-0 top-16 bg-surface border-b border-secondary-200 dark:border-secondary-700 shadow-2xl overflow-hidden"> #}
+                    {#                                    <div class="max-w-7xl mx-auto grid grid-cols-3 gap-8 p-8"> #}
+                    {#                                        {% for composante in app.user.composanteResponsableDpe %} #}
+                    {#                                            {% if is_granted('SHOW', {route: 'app_composante', subject: composante}) %} #}
+                    {#                                                <div> #}
+                    {#                                                    <h3 class="text-xs font-semibold text-text uppercase tracking-wider mb-4">{{ composante.libelle }}</h3> #}
+                    {#                                                    <ul class="space-y-3"> #}
+                    {#                                                        <li><a href="{{ path('structure_composante_index') }}" #}
+                    {#                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.consulter_offre'|trans({}, 'menu') }}</a> #}
+                    {#                                                        </li> #}
+                    {#                                                        <li> #}
+                    {#                                                            <a href="{{ path('app_demande_dpe_composante', {composante:composante.id}) }}" #}
+                    {#                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.dpe_ouvert'|trans({}, 'menu') }}</a> #}
+                    {#                                                        </li> #}
+                    {#                                                        <li> #}
+                    {#                                                            <a href="{{ path('app_validation_composante_dpe_index', {composante:composante.id}) }}" #}
+                    {#                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.validation_dpe'|trans({}, 'menu') }}</a> #}
+                    {#                                                        </li> #}
+                    {#                                                        <li> #}
+                    {#                                                            <a href="{{ path('app_validation_composante_fiche_index', {composante:composante.id}) }}" #}
+                    {#                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.validation_ec'|trans({}, 'menu') }}</a> #}
+                    {#                                                        </li> #}
+                    {#                                                        <li> #}
+                    {#                                                            <a href="{{ path('app_validation_composante_change_rf_index', {composante:composante.id}) }}" #}
+                    {#                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.validation_rf'|trans({}, 'menu') }}</a> #}
+                    {#                                                        </li> #}
+                    {#                                                        <li> #}
+                    {#                                                            <a href="{{ path('app_validation_composante_pilotage', {composante:composante.id}) }}" #}
+                    {#                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.pilotage_visuel'|trans({}, 'menu') }}</a> #}
+                    {#                                                        </li> #}
+                    {#                                                        <li> #}
+                    {#                                                            <a href="{{ path('app_export_composante_index', {composante:composante.id}) }}" #}
+                    {#                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.exports'|trans({}, 'menu') }}</a> #}
+                    {#                                                        </li> #}
+                    {#                                                        <li> #}
+                    {#                                                            <a href="{{ path('app_plaquette', {composante:composante.id}) }}" #}
+                    {#                                                               class="text-sm text-text hover:text-primary">{{ 'menu.compo.communication'|trans({}, 'menu') }}</a> #}
+                    {#                                                        </li> #}
+                    {#                                                    </ul> #}
+                    {#                                                </div> #}
+                    {#                                            {% endif %} #}
+                    {#                                        {% endfor %} #}
+
+                    {#                                        <div class="bg-bg p-6 rounded-xl"> #}
+                    {#                                            <p class="font-bold text-text mb-2 italic text-sm text-primary"> #}
+                    {#                                                Aide & #}
+                    {#                                                Support</p> #}
+                    {#                                            <p class="text-xs text-secondary-600 leading-relaxed">Accédez à tous les #}
+                    {#                                                guides #}
+                    {#                                                administratifs et aux contacts de la scolarité centrale.</p> #}
+                    {#                                        </div> #}
+                    {#                                    </div> #}
+                    {#                                </div> #}
+                    {#                            </div> #}
 
 
-                        {% endif %}
-                    {% endif %}
+                    {#                        {% endif %} #}
+                    {#                    {% endif %} #}
 
-                    {% if is_granted('EDIT', {route: 'app_etablissement', subject: 'etablissement'}) or is_granted('ROLE_ADMIN') %}
-                        <div class="relative" data-controller="navbar-dropdown"
-                             data-action="click@window->navbar-dropdown#close">
-                            <button data-action="click->navbar-dropdown#toggle"
-                                    class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium">
-                                {{ 'menu.menu_conseils'|trans({}, 'menu') }}
-                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </button>
-                            <div data-navbar-dropdown-target="content"
-                                 class="hidden absolute left-0 mt-2 w-48 bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2">
-                                <a href="{{ path('app_formation_responsable_liste') }}"
-                                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.conseils.chgt_rf'|trans({}, 'menu') }}</a>
-                                <a href="{{ path('app_synthese_modification_export_pdf') }}"
-                                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.conseils.synthses_modifs'|trans({}, 'menu') }}</a>
-                                <a href="{{ path('app_conseils_documents_index') }}"
-                                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">Documents
-                                    PV & justificatifs</a>
-                            </div>
-                        </div>
-                    {% endif %}
+                    {#                    {% if is_granted('EDIT', {route: 'app_etablissement', subject: 'etablissement'}) or is_granted('ROLE_ADMIN') %} #}
+                    {#                        <div class="relative" data-controller="navbar-dropdown" #}
+                    {#                             data-action="click@window->navbar-dropdown#close"> #}
+                    {#                            <button data-action="click->navbar-dropdown#toggle" #}
+                    {#                                    class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium"> #}
+                    {#                                {{ 'menu.menu_conseils'|trans({}, 'menu') }} #}
+                    {#                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"> #}
+                    {#                                    <path d="M19 9l-7 7-7-7"></path> #}
+                    {#                                </svg> #}
+                    {#                            </button> #}
+                    {#                            <div data-navbar-dropdown-target="content" #}
+                    {#                                 class="hidden absolute left-0 mt-2 w-48 bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2"> #}
+                    {#                                <a href="{{ path('app_formation_responsable_liste') }}" #}
+                    {#                                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.conseils.chgt_rf'|trans({}, 'menu') }}</a> #}
+                    {#                                <a href="{{ path('app_synthese_modification_export_pdf') }}" #}
+                    {#                                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.conseils.synthses_modifs'|trans({}, 'menu') }}</a> #}
+                    {#                                <a href="{{ path('app_conseils_documents_index') }}" #}
+                    {#                                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">Documents #}
+                    {#                                    PV & justificatifs</a> #}
+                    {#                            </div> #}
+                    {#                        </div> #}
+                    {#                    {% endif %} #}
 
-                    {% if is_granted('EDIT', {route: 'app_composante', subject: 'composante'}) or is_granted('ROLE_ADMIN') %}
-                        <div class="relative" data-controller="navbar-dropdown"
-                             data-action="click@window->navbar-dropdown#close">
-                            <button data-action="click->navbar-dropdown#toggle"
-                                    class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium">
-                                {{ 'menu.menu_droits'|trans({}, 'menu') }}
-                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </button>
-                            <div data-navbar-dropdown-target="content"
-                                 class="hidden absolute left-0 mt-2 w-48 bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2">
-                                <a href="{{ path('app_user_profil_attente') }}"
-                                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.droits.en_attente'|trans({}, 'menu') }}</a>
-                                <a href="{{ path('app_user_profil_index') }}"
-                                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.droits.affectation_profils'|trans({}, 'menu') }}</a>
-                                {% if is_granted('ROLE_ADMIN') %}
-                                    <a href="{{ path('app_user_repertoire') }}"
-                                       class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.droits.repertoire'|trans({}, 'menu') }}</a>
-                                    <a href="{{ path('app_administration_profils_index') }}"
-                                       class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.droits.profils'|trans({}, 'menu') }}</a>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endif %}
+                    {#                    {% if is_granted('EDIT', {route: 'app_composante', subject: 'composante'}) or is_granted('ROLE_ADMIN') %} #}
+                    {#                        <div class="relative" data-controller="navbar-dropdown" #}
+                    {#                             data-action="click@window->navbar-dropdown#close"> #}
+                    {#                            <button data-action="click->navbar-dropdown#toggle" #}
+                    {#                                    class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium"> #}
+                    {#                                {{ 'menu.menu_droits'|trans({}, 'menu') }} #}
+                    {#                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"> #}
+                    {#                                    <path d="M19 9l-7 7-7-7"></path> #}
+                    {#                                </svg> #}
+                    {#                            </button> #}
+                    {#                            <div data-navbar-dropdown-target="content" #}
+                    {#                                 class="hidden absolute left-0 mt-2 w-48 bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2"> #}
+                    {#                                <a href="{{ path('app_user_profil_attente') }}" #}
+                    {#                                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.droits.en_attente'|trans({}, 'menu') }}</a> #}
+                    {#                                <a href="{{ path('app_user_profil_index') }}" #}
+                    {#                                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.droits.affectation_profils'|trans({}, 'menu') }}</a> #}
+                    {#                                {% if is_granted('ROLE_ADMIN') %} #}
+                    {#                                    <a href="{{ path('app_user_repertoire') }}" #}
+                    {#                                       class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.droits.repertoire'|trans({}, 'menu') }}</a> #}
+                    {#                                    <a href="{{ path('app_administration_profils_index') }}" #}
+                    {#                                       class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">{{ 'menu.droits.profils'|trans({}, 'menu') }}</a> #}
+                    {#                                {% endif %} #}
+                    {#                            </div> #}
+                    {#                        </div> #}
+                    {#                    {% endif %} #}
 
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <div class="static" data-controller="navbar-dropdown"
-                             data-action="click@window->navbar-dropdown#close">
-                            <button data-action="click->navbar-dropdown#toggle"
-                                    class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium">
-                                {{ 'menu.menu_administration'|trans({}, 'menu') }}
-                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M19 9l-7 7-7-7"></path>
-                                </svg>
-                            </button>
-                            <div data-navbar-dropdown-target="content"
-                                 class="hidden absolute inset-x-0 top-16 bg-surface border-b border-secondary-200 dark:border-secondary-700 shadow-2xl overflow-hidden">
-                                <div class="max-w-7xl mx-auto grid grid-cols-4 gap-8 p-8">
-                                    <div>
-                                        <h3 class="text-xs font-semibold text-text uppercase tracking-wider mb-4">
-                                            {{ 'menu.config.menu_etablissement'|trans({}, 'menu') }}
-                                        </h3>
-                                        <ul class="space-y-3">
-                                            <li><a href="{{ path('app_etablissement_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.etablissement'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_composante_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.composante'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_ville_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.ville'|trans({}, 'menu') }}</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-xs font-semibold text-text uppercase tracking-wider mb-4">
-                                            {{ 'menu.config.offre_formation'|trans({}, 'menu') }}
-                                        </h3>
-                                        <ul class="space-y-3">
-                                            <li><a href="{{ path('app_domaine_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.domaines'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_mention_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.mentions'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li>
-                                                <a href="{{ path('app_type_diplome_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.type_diplome'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_type_ue_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.type_ue'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_type_ec_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.type_ec'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_nature_ue_ec_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.nature_ue'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_type_epreuve_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.type_epreuve'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_langue_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.langues'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_rythme_formation_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.rythme_formation'|trans({}, 'menu') }}</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <h3 class="text-xs font-semibold text-text uppercase tracking-wider mb-4">
-                                            {{ 'menu.menu_configuration'|trans({}, 'menu') }}
-                                        </h3>
-                                        <ul class="space-y-3">
-                                            <li><a href="{{ path('app_campagne_collecte_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.campagne_collecte'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_annee_universitaire_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.annee_universitaire'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_actualite_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.actualites'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_notication_liste') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.notifications'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('translations_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.traductions'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_config_email') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.config_emails'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_help_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.help'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('app_faq_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.faq'|trans({}, 'menu') }}</a>
-                                            </li>
-                                            <li><a href="{{ path('admin_styleguide_index') }}"
-                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.styleguide'|trans({}, 'menu') }}</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="bg-secondary-50 dark:bg-secondary-800 p-6 rounded-xl">
-                                        <p class="font-bold text-text mb-2 italic text-sm text-primary">Aide
-                                            &
-                                            Support</p>
-                                        <p class="text-xs text-text leading-relaxed">Accédez à tous les guides
-                                            administratifs et aux contacts de la scolarité centrale.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endif %}
+                    {#                    {% if is_granted('ROLE_ADMIN') %} #}
+                    {#                        <div class="static" data-controller="navbar-dropdown" #}
+                    {#                             data-action="click@window->navbar-dropdown#close"> #}
+                    {#                            <button data-action="click->navbar-dropdown#toggle" #}
+                    {#                                    class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium"> #}
+                    {#                                {{ 'menu.menu_administration'|trans({}, 'menu') }} #}
+                    {#                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"> #}
+                    {#                                    <path d="M19 9l-7 7-7-7"></path> #}
+                    {#                                </svg> #}
+                    {#                            </button> #}
+                    {#                            <div data-navbar-dropdown-target="content" #}
+                    {#                                 class="hidden absolute inset-x-0 top-16 bg-surface border-b border-secondary-200 dark:border-secondary-700 shadow-2xl overflow-hidden"> #}
+                    {#                                <div class="max-w-7xl mx-auto grid grid-cols-4 gap-8 p-8"> #}
+                    {#                                    <div> #}
+                    {#                                        <h3 class="text-xs font-semibold text-text uppercase tracking-wider mb-4"> #}
+                    {#                                            {{ 'menu.config.menu_etablissement'|trans({}, 'menu') }} #}
+                    {#                                        </h3> #}
+                    {#                                        <ul class="space-y-3"> #}
+                    {#                                            <li><a href="{{ path('app_etablissement_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.etablissement'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_composante_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.composante'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_ville_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.ville'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                        </ul> #}
+                    {#                                    </div> #}
+                    {#                                    <div> #}
+                    {#                                        <h3 class="text-xs font-semibold text-text uppercase tracking-wider mb-4"> #}
+                    {#                                            {{ 'menu.config.offre_formation'|trans({}, 'menu') }} #}
+                    {#                                        </h3> #}
+                    {#                                        <ul class="space-y-3"> #}
+                    {#                                            <li><a href="{{ path('app_domaine_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.domaines'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_mention_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.mentions'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li> #}
+                    {#                                                <a href="{{ path('app_type_diplome_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.type_diplome'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_type_ue_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.type_ue'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_type_ec_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.type_ec'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_nature_ue_ec_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.nature_ue'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_type_epreuve_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.type_epreuve'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_langue_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.langues'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_rythme_formation_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.rythme_formation'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                        </ul> #}
+                    {#                                    </div> #}
+                    {#                                    <div> #}
+                    {#                                        <h3 class="text-xs font-semibold text-text uppercase tracking-wider mb-4"> #}
+                    {#                                            {{ 'menu.menu_configuration'|trans({}, 'menu') }} #}
+                    {#                                        </h3> #}
+                    {#                                        <ul class="space-y-3"> #}
+                    {#                                            <li><a href="{{ path('app_campagne_collecte_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.campagne_collecte'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_annee_universitaire_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.annee_universitaire'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_actualite_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.actualites'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_notication_liste') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.notifications'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('translations_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.traductions'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_config_email') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.config_emails'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_help_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.help'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('app_faq_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.faq'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                            <li><a href="{{ path('admin_styleguide_index') }}" #}
+                    {#                                                   class="text-sm text-text hover:text-primary">{{ 'menu.config.styleguide'|trans({}, 'menu') }}</a> #}
+                    {#                                            </li> #}
+                    {#                                        </ul> #}
+                    {#                                    </div> #}
+                    {#                                    <div class="bg-secondary-50 dark:bg-secondary-800 p-6 rounded-xl"> #}
+                    {#                                        <p class="font-bold text-text mb-2 italic text-sm text-primary">Aide #}
+                    {#                                            & #}
+                    {#                                            Support</p> #}
+                    {#                                        <p class="text-xs text-text leading-relaxed">Accédez à tous les guides #}
+                    {#                                            administratifs et aux contacts de la scolarité centrale.</p> #}
+                    {#                                    </div> #}
+                    {#                                </div> #}
+                    {#                            </div> #}
+                    {#                        </div> #}
+                    {#                    {% endif %} #}
                 </div>
             </div>
 
@@ -427,3 +433,5 @@
     </div>
 </nav>
 <!-- Nav Content End -->
+
+

@@ -1,8 +1,9 @@
+--deprecated(a remplacer)--
 <nav aria-label="Fil d'Ariane" class="pt-0">
     <ol class="flex flex-wrap items-center gap-1.5 text-sm">
         <li>
             {% if liens is empty %}
-                {# Accueil = page courante #}
+                {#                 Accueil = page courante #}
                 <span aria-current="page"
                       class="inline-flex items-center gap-1 rounded-md bg-secondary-100 px-2 py-1 font-semibold text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
                     <twig:UX:Icon name="icon:home" class="h-4 w-4" aria-hidden="true"/>
@@ -23,19 +24,19 @@
                               aria-hidden="true"/>
 
                 {% if loop.last %}
-                    {# Page courante : pas de lien, aria-current #}
+                    {#                     Page courante : pas de lien, aria-current #}
                     <span aria-current="page"
                           class="rounded-md bg-secondary-100 px-2 py-1 font-semibold text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
                         {{ lien.title }}
                     </span>
                 {% elseif lien.href is defined and lien.href is not empty %}
-                    {# Lien intermédiaire navigable #}
+                    {#                     Lien intermédiaire navigable #}
                     <a href="{{ lien.href }}"
                        class="rounded-md px-2 py-1 text-secondary-500 transition hover:bg-secondary-100 hover:text-secondary-700 dark:text-secondary-400 dark:hover:bg-secondary-800 dark:hover:text-secondary-200">
                         {{ lien.title }}
                     </a>
                 {% else %}
-                    {# Étape intermédiaire sans lien (section non cliquable) #}
+                    {#                     Étape intermédiaire sans lien (section non cliquable) #}
                     <span class="rounded-md px-2 py-1 text-secondary-500 dark:text-secondary-400">
                         {{ lien.title }}
                     </span>

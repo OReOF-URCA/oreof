@@ -124,6 +124,8 @@
 
                     <div class="mt-4 border-t border-secondary-100 pt-3 dark:border-secondary-700/80">
                         <nav class="breadcrumb-container" aria-label="breadcrumb">
+                            {{ include('_layout/_breadcrumb.html.twig') }}
+
                             {% block breadcrumb %}
                             {% endblock %}
                         </nav>
