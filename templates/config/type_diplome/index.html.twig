@@ -8,19 +8,6 @@
     Gestion des types de diplôme
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Administration',
-        },
-        {
-            href:'',
-            title: 'Gestion des types de diplôme',
-        }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <a href="{{ path('app_type_diplome_new') }}"
        class="btn border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"

@@ -6,10 +6,6 @@
     ORéOF est un outil de pilotage et d'aide qui permet de suivre l'activité de votre composante, d'obtenir des statistiques sur vos formations et d'accéder à des actualités personnalisées.
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[]}) }}
-{% endblock %}
-
 {% block content %}
     {{ component('mutualisation_alerts', { user: app.user }) }}
 
@@ -82,45 +78,4 @@
             </turbo-frame>
         </div>
     </div>
-
-{#    <h2 class="small-title mt-3">Vos formations (DPE: {{ user_data.campagneCollecte.libelle }})</h2>#}
-{#    <div class="row gy-2">#}
-{#        <div class="col-12 p-0">#}
-{#            <div class="card"#}
-{#                    {{ stimulus_controller('crud', {#}
-{#                        url: path('app_formation_liste')#}
-{#                    }) }}#}
-{#                 data-action="base:refreshListe@window->crud#refreshListe"#}
-{#            >#}
-{#                <div class="card-body">#}
-{#                    {{ include('communs/_recherche.html.twig') }}#}
-{#                    <div {{ stimulus_target('crud', 'liste') }}>#}
-
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-
-{#    {% if is_granted('CAN_ETABLISSEMENT_CONSEILLER_ALL') %}#}
-{#        <h2 class="small-title mt-3">Vos formations en tant que conseiller CFVU (DPE: {{ user_data.campagneCollecte.libelle }})</h2>#}
-{#        <div class="row gy-2">#}
-{#            <div class="col-12 p-0">#}
-{#                <div class="card"#}
-{#                        {{ stimulus_controller('crud', {#}
-{#                            url: path('app_formation_liste_cfvu')#}
-{#                        }) }}#}
-{#                     data-action="base:refreshListe@window->crud#refreshListe"#}
-{#                >#}
-{#                    <div class="card-body">#}
-{#                        {{ include('communs/_recherche.html.twig') }}#}
-{#                        <div {{ stimulus_target('crud', 'liste') }}>#}
-
-{#                        </div>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
-{#    {% endif %}#}
-
 {% endblock %}

@@ -8,19 +8,6 @@
     {{ 'header.mention.index'|trans({}, 'header') }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Administration',
-        },
-        {
-            href:'',
-            title: 'header.mention.index'|trans({}, 'header'),
-        }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     {% if is_granted('ROLE_ADMIN') %}
         <a

@@ -8,19 +8,6 @@
     Gestion des établissements
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Administration',
-        },
-        {
-            href:'',
-            title: 'Gestion des établissements',
-        }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <a href="{{ path('app_etablissement_new') }}"
        class="btn border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
