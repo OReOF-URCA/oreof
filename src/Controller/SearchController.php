@@ -7,8 +7,11 @@ use App\Entity\FicheMatiere;
 use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Enums\TypeParcoursEnum;
+use App\Navigation\NavigationSearchService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -21,6 +24,19 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class SearchController extends AbstractController
 {
+    #[Route('/navigation/search', name: 'app_navigation_search')]
+    public function search(
+        Request                 $request,
+        NavigationSearchService $service
+    ): JsonResponse
+    {
+        return $this->json(
+            $service->search(
+                $request->query->get('q', '')
+            )
+        );
+    }
+
     #[Route('/recherche/parcours', name: 'app_search')]
     public function index(): Response
     {
@@ -32,7 +48,7 @@ class SearchController extends AbstractController
     #[Route('/recherche/mot_cle', name: 'app_search_action')]
     public function searchWithKeyword(
         EntityManagerInterface $entityManager,
-    ): \Symfony\Component\HttpFoundation\RedirectResponse|Response
+    ): RedirectResponse|Response
     {
         $campagneCollecte = $entityManager->getRepository(CampagneCollecte::class)
             ->findOneBy(['defaut' => true]);
@@ -42,7 +58,7 @@ class SearchController extends AbstractController
         $typeRecherche = $request->query->get('searchType');
 
         $typeRechercheValide = $typeRecherche;
-        if(in_array($typeRecherche, ['parcours', 'ficheMatiere']) === false){
+        if (in_array($typeRecherche, ['parcours', 'ficheMatiere']) === false) {
             $typeRechercheValide = 'parcours';
         }
 
@@ -55,7 +71,7 @@ class SearchController extends AbstractController
             return $this->redirectToRoute('app_search');
         }
 
-        if($typeRechercheValide === 'parcours'){
+        if ($typeRechercheValide === 'parcours') {
 
             $resultArrayBadge = [];
             $isParcoursParDefautArray = [];
@@ -65,18 +81,18 @@ class SearchController extends AbstractController
             $parcoursParDefautArray = $entityManager->getRepository(Parcours::class)
                 ->findWithKeywordForDefaultParcours($keyword_1, $campagneCollecte);
 
-            for($i = 0; $i < count($parcoursArray); $i++){
+            for ($i = 0; $i < count($parcoursArray); $i++) {
                 $textContains = [];
-                if( $this->isStringContainingText($keyword_1, $parcoursArray[$i]['contenuFormation'])) {
+                if ($this->isStringContainingText($keyword_1, $parcoursArray[$i]['contenuFormation'])) {
                     $textContains[] = 'contenuFormation';
                 }
-                if( $this->isStringContainingText($keyword_1, $parcoursArray[$i]['poursuitesEtudes'])) {
+                if ($this->isStringContainingText($keyword_1, $parcoursArray[$i]['poursuitesEtudes'])) {
                     $textContains[] = 'poursuitesEtudes';
                 }
-                if( $this->isStringContainingText($keyword_1, $parcoursArray[$i]['objectifsParcours'])) {
+                if ($this->isStringContainingText($keyword_1, $parcoursArray[$i]['objectifsParcours'])) {
                     $textContains[] = 'objectifsParcours';
                 }
-                if( $this->isStringContainingText($keyword_1, $parcoursArray[$i]['resultatsAttendus'])) {
+                if ($this->isStringContainingText($keyword_1, $parcoursArray[$i]['resultatsAttendus'])) {
                     $textContains[] = 'resultatsAttendus';
                 }
 
@@ -94,7 +110,7 @@ class SearchController extends AbstractController
                     ->getDisplayLong() ?? "";
 
                 $typeParcoursLibelle = "";
-                if($parcoursArray[$i]['type_parcours'] !== null){
+                if ($parcoursArray[$i]['type_parcours'] !== null) {
                     $typeParcoursLibelle = $parcoursArray[$i]['type_parcours']->getLabel();
                 }
 
@@ -109,18 +125,18 @@ class SearchController extends AbstractController
                 $isParcoursParDefautArray[] = $parcoursArray[$i]['parcours_libelle'] === Parcours::PARCOURS_DEFAUT;
             }
 
-            for($j = 0; $j < count($parcoursParDefautArray); $j++){
+            for ($j = 0; $j < count($parcoursParDefautArray); $j++) {
                 $textContainsDefault = [];
-                if($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['contenuFormation'])){
+                if ($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['contenuFormation'])) {
                     $textContainsDefault[] = 'contenuFormation';
                 }
-                if($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['resultatsAttendus'])){
+                if ($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['resultatsAttendus'])) {
                     $textContainsDefault[] = 'resultatsAttendus';
                 }
-                if($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['objectifsFormation'])){
+                if ($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['objectifsFormation'])) {
                     $textContainsDefault[] = 'objectifsFormation';
                 }
-                if($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['poursuitesEtudes'])){
+                if ($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['poursuitesEtudes'])) {
                     $textContainsDefault[] = 'poursuitesEtudes';
                 }
 
@@ -138,7 +154,7 @@ class SearchController extends AbstractController
                     ->getDisplayLong() ?? "";
 
                 $typeParcoursDefautLibelle = "";
-                if($parcoursParDefautArray[$j]['type_parcours'] !== null){
+                if ($parcoursParDefautArray[$j]['type_parcours'] !== null) {
                     $typeParcoursDefautLibelle = $parcoursParDefautArray[$j]['type_parcours']->getLabel();
                 }
 
@@ -161,8 +177,7 @@ class SearchController extends AbstractController
                 'resultArrayBadge' => $resultArrayBadge,
                 'isParcoursDefautArray' => $isParcoursParDefautArray
             ];
-        }
-        elseif($typeRechercheValide === 'ficheMatiere'){
+        } elseif ($typeRechercheValide === 'ficheMatiere') {
             $countFiche = $entityManager
                 ->getRepository(FicheMatiere::class)
                 ->findCountForKeyword($keyword_1, $campagneCollecte)[0]['nombre_total'];
@@ -179,15 +194,15 @@ class SearchController extends AbstractController
         ]);
     }
 
-    private function isStringContainingText(string $needle, string|null $haystack) : bool {
-        if($haystack !== null){
+    private function isStringContainingText(string $needle, string|null $haystack): bool
+    {
+        if ($haystack !== null) {
             return
                 mb_strstr(
                     mb_strtoupper(Tools::removeAccent($haystack)),
                     mb_strtoupper(Tools::removeAccent($needle))
                 );
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -221,7 +236,7 @@ class SearchController extends AbstractController
         $data = $entityManager->getRepository(FicheMatiere::class)
             ->findFicheMatiereWithKeywordAndPagination($mot_cle, 0, false, $campagne);
 
-        $data = array_map(function($ficheMatiere){
+        $data = array_map(function ($ficheMatiere) {
             $libelleMention = $ficheMatiere['type_diplome_libelle'] ? $ficheMatiere['type_diplome_libelle'] . ' - ' : '';
             $libelleMention .= $ficheMatiere['mention_libelle'] . ' - ' . $ficheMatiere['parcours_libelle'];
             $libelleMention .= $ficheMatiere['parcours_sigle'] ? '(' . $ficheMatiere['parcours_sigle'] . ')': '';
@@ -244,10 +259,11 @@ class SearchController extends AbstractController
         $activeWorksheet = $spreadsheet->getActiveSheet();
         $activeWorksheet->fromArray($excelData);
 
-        foreach($activeWorksheet->getRowIterator(2, count($data)) as $row){
-            foreach($row->getCellIterator('D') as $cell){
+        foreach ($activeWorksheet->getRowIterator(2, count($data)) as $row) {
+            foreach ($row->getCellIterator('D') as $cell) {
                 $cell->getHyperlink()->setUrl(
-                    $this->generateUrl('fiche_matiere_v2_voir',
+                    $this->generateUrl(
+                        'fiche_matiere_v2_voir',
                         ['slug' => $cell->getValue()],
                         UrlGeneratorInterface::ABSOLUTE_URL
                     )
@@ -265,7 +281,7 @@ class SearchController extends AbstractController
         $path = __DIR__ . "/../../public/temp/";
         $filename =  "Export-recherche-fiche-matiere.xlsx";
 
-        if($fs->exists($path . $filename)){
+        if ($fs->exists($path . $filename)) {
             $fs->remove($path . $filename);
         }
 

@@ -6,21 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
     <script>
       (function () {
-        const savedTheme = localStorage.getItem('oreof-theme')
-        let accessibility
+          const savedTheme = localStorage.getItem('oreof-theme')
+          let accessibility
 
-        try {
-          accessibility = JSON.parse(localStorage.getItem('oreof-a11y') || 'null')
-        } catch (e) {
-          accessibility = null
-        }
+          try {
+            accessibility = JSON.parse(localStorage.getItem('oreof-a11y') || 'null')
+          } catch (e) {
+            accessibility = null
+          }
 
           const preferredTheme = accessibility && accessibility.theme ? accessibility.theme : null
           const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
           const themeFromPref = preferredTheme === 'system' ? null : preferredTheme
           const theme = (themeFromPref === 'dark' || themeFromPref === 'light')
             ? themeFromPref
-          : ((savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : (prefersDark ? 'dark' : 'light'))
+            : ((savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : (prefersDark ? 'dark' : 'light'))
 
           document.documentElement.setAttribute('data-theme', theme)
         }
@@ -67,7 +67,7 @@
 </head>
 <body
         class="min-h-screen"
-        data-controller="modalturbo frame-loader"
+        data-controller="modalturbo frame-loader navigation-palette"
 >
 <template id="global-loader-stimulus" hidden>
     <div class="flex justify-center py-6">
@@ -312,10 +312,116 @@
 {% include '_layout/_help_drawer.html.twig' %}
 
 <template id="global-spinner-template">
-    <div class="turbo-spinner-overlay absolute top-0 left-0 w-full h-full flex justify-center items-center z-50 pointer-events-none">
+    <div class="turbo-spinner-overlay absolute top-0 left-0 w-full h-full flex justify-center items-center z-40 pointer-events-none">
         <twig:Spinner variant="primary" size="lg"/>
     </div>
 </template>
+
+<div
+        data-navigation-palette-target="modal"
+        class="hidden fixed inset-0 z-[200] mt-20"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Recherche rapide"
+>
+    <div
+            class="absolute inset-0 z-0 bg-black/40 backdrop-blur-[2px]"
+            data-action="click->navigation-palette#close"
+    ></div>
+
+    <div class="relative z-10 mx-auto mt-[10vh] w-[min(44rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-secondary-200 bg-white shadow-2xl dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="flex items-center gap-3 border-b border-secondary-200 px-4 py-3 dark:border-secondary-700">
+            <twig:UX:Icon name="mdi:magnify" class="h-5 w-5 text-secondary-400"/>
+
+            <input
+                    data-navigation-palette-target="input"
+                    data-action="input->navigation-palette#search"
+                    type="text"
+                    placeholder="Rechercher une page, une action..."
+                    class="w-full border-0 bg-transparent text-sm text-secondary-900 outline-none placeholder:text-secondary-400 focus:ring-0 dark:text-secondary-100"
+            >
+
+            <kbd class="hidden rounded border border-secondary-200 bg-secondary-50 px-2 py-1 text-xs text-secondary-500 dark:border-secondary-700 dark:bg-secondary-800 sm:inline">
+                Esc
+            </kbd>
+        </div>
+
+        <div
+                data-navigation-palette-target="results"
+                class="max-h-[28rem] overflow-auto"
+        >
+            <div class="px-4 py-8 text-center text-sm text-secondary-500">
+                Recherchez dans la navigation ORéOF.
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between border-t border-secondary-200 bg-secondary-50 px-4 py-2 text-xs text-secondary-500 dark:border-secondary-700 dark:bg-secondary-950">
+            <div class="flex items-center gap-3">
+                <span><kbd class="rounded border px-1">↑</kbd> <kbd class="rounded border px-1">↓</kbd> naviguer</span>
+                <span><kbd class="rounded border px-1">Entrée</kbd> ouvrir</span>
+                <span><kbd class="rounded border px-1">Esc</kbd> fermer</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{# <div #}
+{#        data-controller="navigation-palette" #}
+{# > #}
+{#    <div #}
+{#            data-navigation-palette-target="modal" #}
+{#            class="hidden fixed inset-0 z-[100]" #}
+{#    > #}
+{#        <div #}
+{#                class="absolute inset-0 bg-black/30" #}
+{#                data-action="click->navigation-palette#close" #}
+{#        ></div> #}
+
+{#        <div #}
+{#                class="max-w-2xl mx-auto mt-20 bg-white rounded-xl shadow-2xl" #}
+{#        > #}
+{#            <input #}
+{#                    data-navigation-palette-target="input" #}
+{#                    data-action="input->navigation-palette#search" #}
+{#                    type="text" #}
+{#                    placeholder="Rechercher une page..." #}
+{#                    class="w-full p-4 border-b" #}
+{#            > #}
+
+{#            <div #}
+{#                    data-navigation-palette-target="results" #}
+{#                    class="max-h-[500px] overflow-auto" #}
+{#            ></div> #}
+{#        </div> #}
+{#    </div> #}
+{#    <div #}
+{#            data-navigation-palette-target="modal" #}
+{#            class="hidden fixed inset-0 z-[200]" #}
+{#    > #}
+{#        <div #}
+{#                class="absolute inset-0 z-0 bg-black/30" #}
+{#                data-action="click->navigation-palette#close" #}
+{#        ></div> #}
+
+{#        <div #}
+{#                class="relative z-10 max-w-2xl mx-auto mt-20 bg-white rounded-xl shadow-2xl dark:bg-secondary-900" #}
+{#        > #}
+{#            <input #}
+{#                    data-navigation-palette-target="input" #}
+{#                    data-action="input->navigation-palette#search" #}
+{#                    type="text" #}
+{#                    placeholder="Rechercher une page..." #}
+{#                    class="w-full p-4 border-b bg-white dark:bg-secondary-900" #}
+{#            > #}
+
+{#            <div #}
+{#                    data-navigation-palette-target="results" #}
+{#                    class="max-h-[500px] overflow-auto" #}
+{#            ></div> #}
+{#        </div> #}
+{#    </div> #}
+{# </div> #}
 
 </body>
 </html>

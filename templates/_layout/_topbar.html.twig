@@ -330,6 +330,19 @@
             {# Menu aligné droite #}
             <div class="flex items-center space-x-6">
 
+                <button
+                        type="button"
+                        data-action="click->navigation-palette#open"
+                        class="hidden lg:flex items-center gap-2 rounded-lg border border-secondary-200 bg-white/80 px-3 py-1.5 text-sm text-secondary-500 shadow-sm hover:border-primary-300 hover:text-primary dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-300"
+                >
+                    <twig:UX:Icon name="mdi:magnify" class="h-4 w-4"/>
+                    <span>Accès rapide</span>
+                    <span class="ml-2 flex items-center gap-1">
+        <kbd class="rounded border border-secondary-200 bg-secondary-50 px-1.5 py-0.5 text-[11px] dark:border-secondary-700 dark:bg-secondary-800">Ctrl/⌘</kbd>
+        <kbd class="rounded border border-secondary-200 bg-secondary-50 px-1.5 py-0.5 text-[11px] dark:border-secondary-700 dark:bg-secondary-800">K</kbd>
+    </span>
+                </button>
+
                 {# Replaced legacy inline search with notifications / action icons component (Tailwind) #}
                 {{ component('notifications', {
                     user: app.user,
