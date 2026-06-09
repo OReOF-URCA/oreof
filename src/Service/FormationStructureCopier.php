@@ -9,6 +9,7 @@ use App\Entity\FicheMatiereMutualisable;
 use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\Semestre;
+use App\Entity\SemestreParcours;
 use App\Entity\Ue;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,29 +41,57 @@ class FormationStructureCopier
         $ctx = $this->buildContext($parcoursCible);
 
         $matchedSourceIds = [];
+        $cibleParEcSource = []; // id EC source apparié → EC cible (pour rattacher les enfants)
         foreach ($ueCible->getElementConstitutifs() as $ecCible) {
             $ecSource = $this->findCounterpartEc($ecCible, $ueSource);
             if ($ecSource !== null) {
                 $matchedSourceIds[$ecSource->getId()] = true;
+                $cibleParEcSource[$ecSource->getId()] = $ecCible;
                 $this->copyEc($ecSource, $ecCible, $report);
             }
         }
 
-        // EC de premier niveau présents uniquement dans la source → recréation
+        // EC présents uniquement dans la source → recréation
         foreach ($ueSource->getElementConstitutifs() as $ecSource) {
-            if ($ecSource->getEcParent() !== null) {
-                continue; // les enfants sont recréés via leur parent
+            if (isset($matchedSourceIds[$ecSource->getId()])) {
+                continue;
             }
-            if (!isset($matchedSourceIds[$ecSource->getId()])) {
+            $parent = $ecSource->getEcParent();
+            if ($parent === null) {
+                // EC de premier niveau (avec ses propres enfants en cascade)
                 $this->recreateEc($ecSource, $ueCible, $ctx, $report);
+            } elseif (isset($cibleParEcSource[$parent->getId()])) {
+                // Option ajoutée à un EC « choix » apparié → recréation sous le parent cible
+                $enfantClone = $this->recreateEc($ecSource, $ueCible, $ctx, $report);
+                $enfantClone->setEcParent($cibleParEcSource[$parent->getId()]);
+                $this->em->persist($enfantClone);
             }
+            // sinon : enfant d'un parent lui-même source-only → déjà recréé via le parent
         }
 
         // UE enfants appariées par ueOrigineCopie
+        $matchedSourceUeIds = [];
         foreach ($ueCible->getUeEnfants() as $enfantCible) {
             $enfantSource = $this->findCounterpartUe($enfantCible, $ueSource->getUeEnfants()->toArray());
             if ($enfantSource !== null) {
+                $matchedSourceUeIds[$enfantSource->getId()] = true;
                 $this->copyUe($enfantSource, $enfantCible, $parcoursCible, $report);
+            }
+        }
+
+        // UE enfants présentes uniquement dans la source (option ajoutée à une UE
+        // « choix » appariée) → recréation sous l'UE cible.
+        $semestreEnfant = $ueCible->getSemestre();
+        if ($semestreEnfant !== null) {
+            foreach ($ueSource->getUeEnfants() as $enfantSource) {
+                if (isset($matchedSourceUeIds[$enfantSource->getId()])) {
+                    continue;
+                }
+                if ($enfantSource->getUeRaccrochee() !== null) {
+                    $report->mutualisationsIgnorees[] = ($enfantSource->getLibelle() ?? 'UE enfant') . ' (mutualisée)';
+                    continue;
+                }
+                $this->cloneUe($enfantSource, $parcoursCible, $semestreEnfant, $ueCible, $ctx, $report);
             }
         }
     }
@@ -143,6 +172,11 @@ class FormationStructureCopier
             if ($srcSem === null) {
                 continue;
             }
+            if ($srcSem->getSemestreRaccroche() !== null) {
+                // Semestre raccroché : contenu chez le propriétaire, non recréable ici.
+                $report->mutualisationsIgnorees[] = 'Semestre ' . ($srcSem->getOrdre() ?? '?') . ' (mutualisé)';
+                continue;
+            }
             if (!isset($semestreMap[$srcSem->getId()])) {
                 $newSem = clone $srcSem;
                 $newSem->setSemestreRaccroche(null);
@@ -164,9 +198,18 @@ class FormationStructureCopier
                 continue;
             }
             $semestresTraites[$srcSem->getId()] = true;
+            // Semestre raccroché ignoré à l'étape 5 → absent de la map.
+            if (!isset($semestreMap[$srcSem->getId()])) {
+                continue;
+            }
             $newSem = $semestreMap[$srcSem->getId()];
             foreach ($srcSem->getUes() as $ue) {
                 if ($ue->getUeParent() !== null) {
+                    continue;
+                }
+                if ($ue->getUeRaccrochee() !== null) {
+                    // UE mutualisée : contenu chez le propriétaire, non recréable ici.
+                    $report->mutualisationsIgnorees[] = ($ue->getLibelle() ?? 'UE') . ' (mutualisée)';
                     continue;
                 }
                 $this->cloneUe($ue, $newParcours, $newSem, null, $ctx, $report);
@@ -195,16 +238,74 @@ class FormationStructureCopier
      */
     public function recreateUe(Ue $ueSource, Parcours $parcoursCible, CopyStructureReport $report): void
     {
-        $semestreCible = $this->findSemestreCible($ueSource->getSemestre(), $parcoursCible);
-        if ($semestreCible === null) {
-            // Le semestre n'existe pas dans la cible : recréation de semestre non
-            // gérée en v1 (nécessiterait SemestreParcours/mutualisations).
+        if ($this->estRaccrochee($ueSource)) {
+            // UE (ou son semestre) mutualisée/raccrochée : le vrai contenu vit chez
+            // le parcours propriétaire. On refuse plutôt que de cloner une coquille.
+            $report->mutualisationsIgnorees[] = ($ueSource->getLibelle() ?? 'UE') . ' (mutualisée)';
+            return;
+        }
+
+        $semestreSource = $ueSource->getSemestre();
+        $parcoursSource = $this->parcoursDeUeSource($ueSource);
+        if ($semestreSource === null || $parcoursSource === null) {
             $report->uesNonRecreees[] = $ueSource->getLibelle() ?? 'UE';
             return;
         }
 
+        // Trouve le semestre cible apparié, ou le recrée s'il n'existe pas (semestre non répercuté).
+        $semestreCible = $this->findOrCreateSemestreCible($semestreSource, $parcoursCible, $parcoursSource);
+
         $ctx = $this->buildContext($parcoursCible);
         $this->cloneUe($ueSource, $parcoursCible, $semestreCible, null, $ctx, $report);
+    }
+
+    /**
+     * Renvoie le semestre cible apparié au semestre source, ou le recrée (clone
+     * Semestre + SemestreParcours) s'il n'existe pas dans le parcours cible.
+     * Le nouveau SemestreParcours est ajouté à la collection du parcours pour que
+     * deux UE d'un même semestre disparu ne recréent pas le semestre deux fois.
+     */
+    private function findOrCreateSemestreCible(Semestre $semestreSource, Parcours $parcoursCible, Parcours $parcoursSource): Semestre
+    {
+        $existant = $this->findSemestreCible($semestreSource, $parcoursCible);
+        if ($existant !== null) {
+            return $existant;
+        }
+
+        $newSem = clone $semestreSource;
+        $newSem->setSemestreRaccroche(null);
+        $newSem->setSemestreOrigineCopie($this->boutDeLignee(Semestre::class, 'semestreOrigineCopie', $semestreSource));
+        $this->em->persist($newSem);
+
+        // SemestreParcours de la source (pour l'ordre / codes Apogée), rattaché à la cible.
+        $spSource = null;
+        foreach ($semestreSource->getSemestreParcours() as $sp) {
+            if ($sp->getParcours()?->getId() === $parcoursSource->getId()) {
+                $spSource = $sp;
+                break;
+            }
+        }
+        $newSp = $spSource !== null ? clone $spSource : new SemestreParcours();
+        $newSp->setSemestre($newSem);
+        $newSp->setSemestreRaccroche(null);
+        $parcoursCible->addSemestreParcour($newSp); // ajoute à la collection (dédup) + set parcours + cascade persist
+        $this->em->persist($newSp);
+
+        return $newSem;
+    }
+
+    private function parcoursDeUeSource(Ue $ue): ?Parcours
+    {
+        foreach ($ue->getElementConstitutifs() as $ec) {
+            if ($ec->getParcours() !== null) {
+                return $ec->getParcours();
+            }
+        }
+
+        // UE vide : retomber sur le parcours propriétaire du semestre.
+        $sp = $ue->getSemestre()?->getSemestreParcours()->first();
+
+        return $sp ? $sp->getParcours() : null;
     }
 
     private function cloneUe(Ue $source, Parcours $parcoursCible, Semestre $semestreCible, ?Ue $ueParent, CloneContext $ctx, CopyStructureReport $report): Ue
@@ -224,14 +325,29 @@ class FormationStructureCopier
             $this->recreateEc($ec, $clone, $ctx, $report);
         }
 
-        // UE enfants en cascade
+        // UE enfants en cascade (hors UE raccrochées : contenu chez le propriétaire)
         foreach ($source->getUeEnfants() as $enfantSource) {
+            if ($enfantSource->getUeRaccrochee() !== null) {
+                $report->mutualisationsIgnorees[] = ($enfantSource->getLibelle() ?? 'UE enfant') . ' (mutualisée)';
+                continue;
+            }
             $this->cloneUe($enfantSource, $parcoursCible, $semestreCible, $clone, $ctx, $report);
         }
 
         $report->uesCreees++;
 
         return $clone;
+    }
+
+    /**
+     * Une UE est « raccrochée » (mutualisée) si elle-même ou son semestre
+     * emprunte son contenu à un autre parcours. Dans ce cas son propre contenu
+     * est vide/partiel : on ne peut pas la recréer fidèlement.
+     */
+    private function estRaccrochee(Ue $ue): bool
+    {
+        return $ue->getUeRaccrochee() !== null
+            || $ue->getSemestre()?->getSemestreRaccroche() !== null;
     }
 
     /**
@@ -397,6 +513,15 @@ class FormationStructureCopier
         }
 
         $this->em->persist($clone);
+
+        // MCCC portées par la fiche (cas mcccImpose / BUT), côté propriétaire = Mccc::ficheMatiere
+        foreach ($source->getMcccs() as $mccc) {
+            $mcccClone = clone $mccc;
+            $mcccClone->setEc(null);
+            $mcccClone->setFicheMatiere($clone);
+            $this->em->persist($mcccClone);
+        }
+
         $report->fichesCreees++;
 
         return $clone;
@@ -522,10 +647,30 @@ class FormationStructureCopier
                 $report->fichesPartageesIgnorees[] = $ficheCible->getLibelle() ?? ($c->getLibelle() ?? 'EC');
             } else {
                 $this->copyFicheScalars($ficheSource, $ficheCible);
+                $this->copyFicheMcccs($ficheSource, $ficheCible);
             }
         }
 
         $report->ecCopies++;
+    }
+
+    /**
+     * Remplace les MCCC portées par la fiche cible (cas mcccImpose) par des
+     * clones de celles de la fiche source. À n'appeler que sur une fiche privée
+     * (non mutualisée), sinon on impacterait les autres parcours.
+     */
+    private function copyFicheMcccs(FicheMatiere $s, FicheMatiere $c): void
+    {
+        foreach ($c->getMcccs()->toArray() as $ancien) {
+            $c->removeMccc($ancien);
+        }
+        foreach ($s->getMcccs() as $mccc) {
+            $clone = clone $mccc;
+            $clone->setEc(null);
+            $clone->setFicheMatiere($c);
+            $c->addMccc($clone);
+            $this->em->persist($clone);
+        }
     }
 
     /**

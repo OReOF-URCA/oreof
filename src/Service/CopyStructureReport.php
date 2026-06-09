@@ -21,4 +21,7 @@ class CopyStructureReport
 
     /** @var string[] UE non répercutées qu'on n'a pas pu recréer (semestre cible absent) */
     public array $uesNonRecreees = [];
+
+    /** @var string[] Éléments mutualisés/raccrochés non recréés (gestion non couverte, à faire manuellement) */
+    public array $mutualisationsIgnorees = [];
 }

@@ -205,9 +205,17 @@ class FormationComparaisonController extends BaseController
             $this->diffBuilder->anneeLabel($source)
         ));
 
+        if (!empty($report->mutualisationsIgnorees)) {
+            $this->toast('warning', sprintf(
+                "%d élément(s) mutualisé(s)/raccroché(s) n'ont pas été recréés (leur contenu appartient à un autre parcours, à mutualiser manuellement) : %s.",
+                count(array_unique($report->mutualisationsIgnorees)),
+                implode(', ', array_unique($report->mutualisationsIgnorees))
+            ));
+        }
+
         if (!empty($report->uesNonRecreees)) {
             $this->toast('warning', sprintf(
-                "%d UE non répercutée(s) n'ont pas pu être recréées (semestre cible absent) : %s.",
+                "%d UE non répercutée(s) n'ont pas pu être recréées (contexte indéterminé : UE sans EC/semestre) : %s.",
                 count($report->uesNonRecreees),
                 implode(', ', array_unique($report->uesNonRecreees))
             ));
@@ -414,7 +422,7 @@ class FormationComparaisonController extends BaseController
     /**
      * Convertit une StructureParcours live en sa forme "snapshot" (via le même
      * round-trip de sérialisation que le versioning), pour que les MCCC soient
-     * des tableaux — format attendu côté origine par VersioningStructureExtractDiff.
+     * des tableaux, format attendu côté origine par VersioningStructureExtractDiff.
      */
     private function toVersioningDto(StructureParcours $dto): StructureParcours
     {
@@ -437,6 +445,22 @@ class FormationComparaisonController extends BaseController
     {
         foreach ($ue->getElementConstitutifs() as $ec) {
             $formationId = $ec->getParcours()?->getFormation()?->getId();
+            if ($formationId !== null) {
+                return $formationId;
+            }
+        }
+
+        // UE « choix » : les EC sont portés par les UE enfants.
+        foreach ($ue->getUeEnfants() as $enfant) {
+            $formationId = $this->ueFormationId($enfant);
+            if ($formationId !== null) {
+                return $formationId;
+            }
+        }
+
+        // Repli : via le semestre → parcours.
+        foreach ($ue->getSemestre()?->getSemestreParcours() ?? [] as $sp) {
+            $formationId = $sp->getParcours()?->getFormation()?->getId();
             if ($formationId !== null) {
                 return $formationId;
             }
@@ -465,8 +489,8 @@ class FormationComparaisonController extends BaseController
     }
 
     /**
-     * Vrai si la formation cible contient déjà un parcours issu (par copie) du
-     * parcours source — pour éviter une recréation en double.
+     * Vrai si la formation cible contient déjà un parcours issu, par copie, du
+     * parcours source, pour éviter une recréation en double.
      */
     private function parcoursDejaDansCible(Parcours $parcoursSource, Formation $cible): bool
     {
@@ -504,7 +528,7 @@ class FormationComparaisonController extends BaseController
      * Détecte les UE et semestres ajoutés/supprimés entre deux structures de
      * parcours. Le service VersioningStructureExtractDiff gère déjà l'ajout/
      * suppression d'EC dans une UE appariée, mais pas le niveau UE ni semestre.
-     * Les semestres sont indexés par ordre, les UE par ordre — clés stables
+     * Les semestres sont indexés par ordre, les UE par ordre. Clés stables
      * d'une année sur l'autre (préservées par la copie).
      *
      * @return array<int, array{kind: string, level: string, label: string}>
@@ -525,6 +549,18 @@ class FormationComparaisonController extends BaseController
         foreach ($source->semestres as $ordre => $sem) {
             if (!array_key_exists($ordre, $cible->semestres)) {
                 $changes[] = ['kind' => 'removed', 'level' => 'Semestre', 'label' => $semLabel($sem)];
+                // Les UE d'un semestre disparu sont recréables : cocher une UE recrée
+                // le semestre cible (findOrCreateSemestreCible) puis l'UE en cascade.
+                foreach ($sem->ues as $ue) {
+                    if ($ue->ue !== null) {
+                        $changes[] = [
+                            'kind'  => 'removed',
+                            'level' => 'UE',
+                            'label' => $semLabel($sem) . ' - ' . $ueLabel($ue),
+                            'ueId'  => $ue->ue->getId(),
+                        ];
+                    }
+                }
             }
         }
 
@@ -537,13 +573,13 @@ class FormationComparaisonController extends BaseController
 
             foreach ($cibSem->ues as $key => $ue) {
                 if (!array_key_exists($key, $srcSem->ues)) {
-                    $changes[] = ['kind' => 'added', 'level' => 'UE', 'label' => $semLabel($cibSem) . ' — ' . $ueLabel($ue)];
+                    $changes[] = ['kind' => 'added', 'level' => 'UE', 'label' => $semLabel($cibSem) . ' - ' . $ueLabel($ue)];
                 }
             }
             foreach ($srcSem->ues as $key => $ue) {
                 if (!array_key_exists($key, $cibSem->ues)) {
                     // 'ueId' = id de l'UE source à recréer dans la cible
-                    $changes[] = ['kind' => 'removed', 'level' => 'UE', 'label' => $semLabel($srcSem) . ' — ' . $ueLabel($ue), 'ueId' => $ue->ue?->getId()];
+                    $changes[] = ['kind' => 'removed', 'level' => 'UE', 'label' => $semLabel($srcSem) . ' - ' . $ueLabel($ue), 'ueId' => $ue->ue?->getId()];
                 }
             }
         }

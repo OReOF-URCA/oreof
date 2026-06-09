@@ -82,23 +82,6 @@
                         <small class="text-muted">Version modifiée · {{ cibleLabel }}</small>
                     {% endif %}
 
-                    {% if broadcastYears|length > 1 %}
-                        <div class="form-check form-switch mt-2 pt-2 border-top">
-                            <input class="form-check-input" type="checkbox" role="switch"
-                                   name="apply_following" value="1" id="applyFollowing"
-                                   data-action="change->formation-comparaison--diff#toggleFollowing"
-                                   data-formation-comparaison--diff-target="followingSwitch">
-                            <label class="form-check-label small" for="applyFollowing">
-                                <i class="fas fa-arrows-turn-right me-1"></i>
-                                Appliquer à <strong>toutes les années plus récentes</strong> que {{ sourceLabel }}
-                            </label>
-                            <div class="small text-muted mt-1">
-                                {% for option in broadcastYears %}
-                                    <span class="badge bg-secondary-subtle text-secondary border">{{ option.label }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
@@ -116,6 +99,23 @@
             ({{ sourceLabel }}). Les champs non cochés conservent leur valeur actuelle.
             La version source n'est jamais modifiée.
         </div>
+
+        {% if broadcastYears|length > 1 %}
+            <div class="form-check form-switch mb-3 p-3 bg-light rounded border">
+                <input class="form-check-input" type="checkbox" role="switch"
+                       name="apply_following" value="1" id="applyFollowing"
+                       data-action="change->formation-comparaison--diff#toggleFollowing"
+                       data-formation-comparaison--diff-target="followingSwitch">
+                <label class="form-check-label small" for="applyFollowing">
+                    <i class="fas fa-arrows-turn-right me-1"></i>
+                    Appliquer ces <strong>champs de formation</strong> à <strong>toutes les années plus récentes</strong> que {{ sourceLabel }}
+                    <span class="text-muted">(ne concerne pas la structure des parcours)</span>
+                    {% for option in broadcastYears %}
+                        <span class="badge bg-secondary-subtle text-secondary border ms-1">{{ option.label }}</span>
+                    {% endfor %}
+                </label>
+            </div>
+        {% endif %}
 
         <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded border">
             <button type="button" class="btn btn-outline-secondary btn-sm"
