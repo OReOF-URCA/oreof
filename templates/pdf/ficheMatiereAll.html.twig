@@ -11,8 +11,20 @@
     {% for semestre in parcours.semestreParcours %}
         <h1 class="text-center mt-3">Fiches EC/matière du semestre {{ semestre.display }}</h1>
         <div class="page_break"></div>
-        {% for ue in semestre.semestre.ues %}
-            {% for ec in ue.elementConstitutifs %}
+
+        {% set semestreData = semestre.semestre %}
+        {% if semestre.semestre.semestreRaccroche != null %}
+            {% set semestreData = semestre.semestre.semestreRaccroche.semestre %}
+        {% endif %}
+
+        {% for ue in semestreData.ues|sort((a, b) => sortUeByOrder(a, b)) %}
+
+            {% set ueData = ue %}
+            {% if ue.ueRaccrochee != null %}
+                {% set ueData = ue.ueRaccrochee.ue %}
+            {% endif %}
+
+            {% for ec in ueData.elementConstitutifs|filter(k => k.ecParent == null )|sort((c, d) => c.ordre <=> d.ordre) %}
                 {% set getElement = getElementFromEc(ec, parcours) %}
                 {{ include('pdf/ficheMatiere.html.twig', {
                         semestre:semestre,
@@ -23,6 +35,19 @@
                         ),
                     }) 
                 }}
+                {% for ecE in ec.ecEnfants|sort((n, m) => n.ordre <=> m.ordre) %}
+                    {% set getElementEnfant = getElementFromEc(ecE, parcours) %}
+                    {{ include('pdf/ficheMatiere.html.twig', {
+                            semestre: semestre,
+                            heures: getElementEnfant.getFicheMatiereHeures,
+                            mcccPdf: typeDiplomeHandler.getDisplayMccc(
+                                getElementEnfant.getMcccsFromFicheMatiere(typeDiplomeHandler) ?? [],
+                                getElementEnfant.getTypeMcccFromFicheMatiere() ?? ''
+                            ),
+                            ec: ecE   
+                        })
+                    }}
+                {% endfor %}
                 <div class="page_break"></div>
             {% endfor %}
         {% endfor %}
