@@ -13,6 +13,7 @@ use App\Classes\GetElementConstitutif;
 use App\Entity\ElementConstitutif;
 use App\Entity\FicheMatiere;
 use App\Entity\Parcours;
+use App\Entity\Ue;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -32,7 +33,8 @@ class FicheMatiereExtension extends AbstractExtension
     public function getFunctions()
     {
         return [
-            new TwigFunction('getElementFromEc', $this->getElementFromEc(...))
+            new TwigFunction('getElementFromEc', $this->getElementFromEc(...)),
+            new TwigFunction('sortUeByOrder', $this->sortUeByOrder(...))
         ];
     }
 
@@ -49,5 +51,15 @@ class FicheMatiereExtension extends AbstractExtension
 
     public function getElementFromEc(ElementConstitutif $ec, Parcours $p) {
         return new GetElementConstitutif($ec, $p);
+    }
+
+    public function sortUeByOrder(Ue $a, Ue $b) {
+        return $this->getNumericOrderForUe($a) <=> $this->getNumericOrderForUe($b);
+    }
+
+    private function getNumericOrderForUe(Ue $ue) {
+        return $ue->getUeParent() !== null 
+            ? ($ue->getUeParent()->getOrdre() * 100) + $ue->getOrdre()
+            : $ue->getOrdre() * 100;
     }
 }
