@@ -86,7 +86,7 @@
                 </td>
             </tr>
 
-            {{ include('parcours_state/_commun.html.twig', {valide:valide.etat.etatParcoursDefaut, parcours: formation.parcours[0]}) }}
+            {{ include('parcours_state/_commun.html.twig', {valide:valide.etat.etatParcoursDefaut, parcours: formation.parcours[0], typeDiplome: formation.typeDiplome}) }}
         {% endif %}
     {% endif %}
 

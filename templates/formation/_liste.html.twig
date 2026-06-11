@@ -24,6 +24,13 @@
                     {{ displaySort('composantePorteuse', sort, direction) }}
                 </a>
             </th>
+
+            <th>
+
+                Accréditation
+
+            </th>
+
             <th>
                 <a href="#"
                         {{ stimulus_action('crud', 'sort', 'click', {
@@ -52,7 +59,7 @@
             <th>Etat</th>
             <th>Remplissage</th>
             <th></th>
-            <th></th>
+
         </tr>
         {% if is_granted('ROLE_ADMIN') %}
             <tr>
@@ -73,6 +80,7 @@
                         {% endfor %}
                     </select>
                 </th>
+                <th></th>
                 <th>
                     <label for="filter-type_formation" class="sr-only">type formation</label>
                     <select
@@ -126,7 +134,6 @@
 
                     </select>
                 </th>
-                <th></th>
                 <th>
                 </th>
 
@@ -150,7 +157,7 @@
                         </select>
                     {% endif %}
                 </th>
-                {#                <th></th> #}
+                <th></th>
                 <th>
                     <button class="btn btn-outline-danger"
                             {{ stimulus_action('crud', 'effaceFiltre', 'click', {
@@ -176,6 +183,15 @@
                             <span class="badge bg-danger">Non définie</span>
                         {% endif %}
                     </td>
+
+                    <td>
+                        {% if formation.typeDiplome.classique == false %}
+                            <span class="badge bg-secondary">Non accréditée</span>
+                        {% else %}
+                            <span class="badge bg-success">Accréditée</span>
+                        {% endif %}
+                    </td>
+
                     <td>
                         {{ formation.typeDiplome|typeDiplome }}
                     </td>

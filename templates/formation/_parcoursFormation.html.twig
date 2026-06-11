@@ -38,6 +38,7 @@
                             <td>
                                 {{ component('historique_pv', {parcours:parcours}) }}
                             </td>
+
                             <td>
                                 {{ parcours.remplissage|remplissage }}
                             </td>
@@ -99,7 +100,7 @@
             {% else %}
                 {% if formation.parcours|length == 0 %}
                     <tr class="bg-warning text-white">
-                        <td colspan="9">Formation non initialisée, pas de parcours ou de parcours par défaut.</td>
+                        <td colspan="10">Formation non initialisée, pas de parcours ou de parcours par défaut.</td>
                     </tr>
                 {% else %}
                     {% set parcours = formation.parcours[0] %}
@@ -120,12 +121,12 @@
                         <td>
                             {{ parcours.etatStep(4)|badgeStep }}
                         </td>
-                        <td>
-                            {{ component('historique_pv', {parcours:parcours}) }}
-                        </td>
-                        <td>
-                            {{ parcours.remplissage|remplissage }}
-                        </td>
+                            <td>
+                                {{ component('historique_pv', {parcours:parcours}) }}
+                            </td>
+                            <td>
+                                {{ parcours.remplissage|remplissage }}
+                            </td>
                         {% endif %}
                         <td class="text-end">
                             <a href="{{ path('app_formation_show',{'slug': formation.slug}) }}"

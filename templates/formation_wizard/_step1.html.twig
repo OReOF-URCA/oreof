@@ -6,23 +6,23 @@
     {{ form_row(form.responsableMention) }}
     {{ form_row(form.coResponsable) }}
     {# todo: mettre bouton pour faire une demande de changer de RF/Co-RF #}
-{#    <a#}
-{#            href="#"#}
-{#            {{ stimulus_controller('modal', {#}
-{#                size: 'lg',#}
-{#                modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),#}
-{#                nomEvenement: 'refreshStep',#}
-{#                modalUrl: path('app_user_missing', {action: 'coResponsableMention', id: formation.id}) }) }}#}
-{#            data-action="click->modal#openModal"#}
-{#            data-size="lg"#}
-{#            class="ms-4"#}
-{#            data-bs-toggle="tooltip"#}
-{#            data-bs-placement="bottom"#}
-{#            title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}"#}
-{#    >#}
-{#        <i class="{{ iconAdd }}"></i>#}
-{#        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>#}
-{#    </a>#}
+    {#    <a#}
+    {#            href="#"#}
+    {#            {{ stimulus_controller('modal', {#}
+    {#                size: 'lg',#}
+    {#                modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),#}
+    {#                nomEvenement: 'refreshStep',#}
+    {#                modalUrl: path('app_user_missing', {action: 'coResponsableMention', id: formation.id}) }) }}#}
+    {#            data-action="click->modal#openModal"#}
+    {#            data-size="lg"#}
+    {#            class="ms-4"#}
+    {#            data-bs-toggle="tooltip"#}
+    {#            data-bs-placement="bottom"#}
+    {#            title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}"#}
+    {#    >#}
+    {#        <i class="{{ iconAdd }}"></i>#}
+    {#        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>#}
+    {#    </a>#}
     {{ form(form) }}
     <div class="alert {% if formation.getEtatStep(1) %}alert-success{% else %}alert-warning{% endif %}"
          id="alertEtatStructure">
@@ -34,4 +34,5 @@
         ><label for="etatStructure">
             Cochez cette case si vous avez terminé ...</label>
     </div>
+
 </div>

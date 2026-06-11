@@ -18,6 +18,7 @@ use App\Enums\NiveauLangueEnum;
 use App\Enums\RegimeInscriptionEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
+use App\Enums\DureeParcoursUniteEnum;
 use App\Repository\ParcoursRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -302,11 +303,20 @@ class Parcours
     #[ORM\Column]
     private ?int $capaciteAccueil = 0;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $dureeParcours = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: DureeParcoursUniteEnum::class)]
+    private ?DureeParcoursUniteEnum $dureeParcoursUnite = null;
+
     /**
      * @var Collection<int, ChangeParcours>
      */
     #[ORM\OneToMany(mappedBy: 'parcours', targetEntity: ChangeParcours::class)]
     private Collection $changeParcours;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $logo = [];
 
     public function __construct(?Formation $formation)
     {
@@ -1757,6 +1767,28 @@ class Parcours
         return $this;
     }
 
+    public function getDureeParcours(): ?float
+    {
+        return $this->dureeParcours;
+    }
+
+    public function setDureeParcours(?float $dureeParcours): static
+    {
+        $this->dureeParcours = $dureeParcours;
+        return $this;
+    }
+
+    public function getDureeParcoursUnite(): ?DureeParcoursUniteEnum
+    {
+        return $this->dureeParcoursUnite;
+    }
+
+    public function setDureeParcoursUnite(?DureeParcoursUniteEnum $dureeParcoursUnite): static
+    {
+        $this->dureeParcoursUnite = $dureeParcoursUnite;
+        return $this;
+    }
+
     /**
      * @return Collection<int, ChangeParcours>
      */
@@ -1784,6 +1816,24 @@ class Parcours
             }
         }
 
+        return $this;
+    }
+
+    public function getLogo(): ?array
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?array $logo): static
+    {
+        $this->logo = $logo;
+
+        return $this;
+    }
+
+    public function addLogo(string $filename): static
+    {
+        $this->logo[] = $filename;
         return $this;
     }
 }

@@ -12,7 +12,7 @@ namespace App\DTO;
 use App\Entity\Parcours;
 
 use Symfony\Component\Serializer\Annotation\Groups;
-
+use App\Enums\DureeParcoursUniteEnum;
 class StructureParcours
 {
     #[Groups(['DTO_json_versioning'])]
@@ -26,6 +26,9 @@ class StructureParcours
     public HeuresEctsFormation $heuresEctsFormation;
 
     public ?StatsFichesMatieresParcours $statsFichesMatieresParcours = null;
+
+    public ?float $dureeParcours = null;
+    public ?DureeParcoursUniteEnum $dureeParcoursUnite = null;
 
     public function __construct(
         private $withEcts = true,

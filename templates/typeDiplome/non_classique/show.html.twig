@@ -1,0 +1,121 @@
+<div class="col">
+    <section class="scroll-section" id="identite_formation">
+        <h3 class="small-title">Identité de la formation</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ include('typeDiplome/formation/_identiteFormation.html.twig') }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="presentation">
+        <h3 class="small-title">Présentation formation {{ parcours.formation.display }}</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ include('typeDiplome/formation/_presentationFormation.html.twig') }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="presentation_{{ parcours.id }}">
+        <h3 class="small-title">Présentation du parcours {{ parcours.libelle }}</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ include('typeDiplome/formation/_presentationParcours.html.twig', {parcours:parcours}) }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="descriptif_{{ parcours.id }}">
+        <h3 class="small-title">Descriptif du parcours</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ include('typeDiplome/formation/_descriptifParcours.html.twig', {parcours:parcours}) }}
+            </div>
+        </div>
+    </section>
+
+    {% if parcours.dureeParcours is not null %}
+        <section class="scroll-section" id="duree_{{ parcours.id }}">
+            <h3 class="small-title">Durée du parcours</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    <p>{{ parcours.dureeParcours }} {{ parcours.dureeParcoursUnite ? parcours.dureeParcoursUnite.libelle() : '' }}</p>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <section class="scroll-section" id="localisation_{{ parcours.id }}">
+        <h3 class="small-title">Localisation du parcours</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ include('typeDiplome/formation/_localisationParcours.html.twig', {parcours:parcours}) }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="competences_{{ parcours.id }}">
+        <h3 class="small-title">Compétences Acquises</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ include('typeDiplome/formation/_competences.html.twig', {parcours:parcours}) }}
+            </div>
+        </div>
+    </section>
+
+    {% if isVersioning is not defined or isVersioning == false %}
+        <section class="scroll-section" id="structure_{{ parcours.id }}">
+            <h3 class="small-title">Structure du parcours</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if constant('TEMPLATE_FOLDER', typeD) != 'non_classique' %}
+                        {{ render(controller('App\\Controller\\StructureShowController::parcoursShow', {
+                            parcours: parcours.id,
+                            hasLastVersion: hasLastVersion ?? false,
+                        })) }}
+                    {% else %}
+                        <p class="text-muted">Structure non disponible pour ce type de parcours.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
+
+    <section class="scroll-section" id="admission_{{ parcours.id }}">
+        <h3 class="small-title">Admission</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ include('typeDiplome/formation/_admission.html.twig', {parcours:parcours}) }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="inscription_{{ parcours.id }}">
+        <h3 class="small-title">Inscription</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ include('typeDiplome/formation/_inscription.html.twig', {parcours:parcours}) }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="et_apres_{{ parcours.id }}">
+        <h3 class="small-title"> Et après...</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ include('typeDiplome/formation/_etApres.html.twig', {parcours:parcours}) }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="contacts_{{ parcours.id }}">
+        <h3 class="small-title">Contacts pédagogiques</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ include('typeDiplome/formation/_contacts.html.twig', {parcours:parcours}) }}
+            </div>
+        </div>
+    </section>
+
+</div>

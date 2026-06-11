@@ -58,3 +58,6 @@ public/api_json/
 ### exclude sql ###
 /*.sql
 /pense-bete.md
+
+### token fontawesome ###
+.npmrc
