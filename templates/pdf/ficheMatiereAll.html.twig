@@ -59,28 +59,32 @@
 
         {% for ue in ueArrayFlat|sort((a, b) => a.ordre <=> b.ordre) %}
             {% for ec in ue.value.elementConstitutifs|filter(k => k.ecParent == null )|sort((c, d) => c.ordre <=> d.ordre) %}
-                {% set getElement = getElementFromEc(ec, parcours) %}
-                {{ include('pdf/ficheMatiere.html.twig', {
-                        semestre:semestre,
-                        heures: getElement.getFicheMatiereHeures,
-                        mcccPdf: typeDiplomeHandler.getDisplayMccc(
-                            getElement.getMcccsFromFicheMatiere(typeDiplomeHandler) ?? [], 
-                            getElement.getTypeMcccFromFicheMatiere() ?? ''
-                        ),
-                    }) 
-                }}
-                {% for ecE in ec.ecEnfants|sort((n, m) => n.ordre <=> m.ordre) %}
-                    {% set getElementEnfant = getElementFromEc(ecE, parcours) %}
+                {% if ec.ficheMatiere != null %}
+                    {% set getElement = getElementFromEc(ec, parcours) %}
                     {{ include('pdf/ficheMatiere.html.twig', {
-                            semestre: semestre,
-                            heures: getElementEnfant.getFicheMatiereHeures,
+                            semestre:semestre,
+                            heures: getElement.getFicheMatiereHeures,
                             mcccPdf: typeDiplomeHandler.getDisplayMccc(
-                                getElementEnfant.getMcccsFromFicheMatiere(typeDiplomeHandler) ?? [],
-                                getElementEnfant.getTypeMcccFromFicheMatiere() ?? ''
+                                getElement.getMcccsFromFicheMatiere(typeDiplomeHandler) ?? [], 
+                                getElement.getTypeMcccFromFicheMatiere() ?? ''
                             ),
-                            ec: ecE   
-                        })
+                        }) 
                     }}
+                {% endif %}
+                {% for ecE in ec.ecEnfants|sort((n, m) => n.ordre <=> m.ordre) %}
+                    {% if ecE.ficheMatiere != null %}
+                        {% set getElementEnfant = getElementFromEc(ecE, parcours) %}
+                        {{ include('pdf/ficheMatiere.html.twig', {
+                                semestre: semestre,
+                                heures: getElementEnfant.getFicheMatiereHeures,
+                                mcccPdf: typeDiplomeHandler.getDisplayMccc(
+                                    getElementEnfant.getMcccsFromFicheMatiere(typeDiplomeHandler) ?? [],
+                                    getElementEnfant.getTypeMcccFromFicheMatiere() ?? ''
+                                ),
+                                ec: ecE   
+                            })
+                        }}
+                    {% endif %}
                 {% endfor %}
                 <div class="page_break"></div>
             {% endfor %}
