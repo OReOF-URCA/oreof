@@ -58,6 +58,14 @@ class FicheMatiereExtension extends AbstractExtension
     }
 
     private function getNumericOrderForUe(Ue $ue) {
+        // Deux niveaux d'UE Parents
+        if($ue->getUeParent()?->getUeParent() !== null) {
+            return ($ue->getUeParent()->getUeParent()->getOrdre() * 100)
+                + ($ue->getUeParent()->getOrdre() * 10)
+                + $ue->getOrdre();
+        }
+
+        // Cas Classique
         return $ue->getUeParent() !== null 
             ? ($ue->getUeParent()->getOrdre() * 100) + $ue->getOrdre()
             : $ue->getOrdre() * 100;
