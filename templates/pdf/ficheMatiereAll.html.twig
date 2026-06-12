@@ -17,14 +17,48 @@
             {% set semestreData = semestre.semestre.semestreRaccroche.semestre %}
         {% endif %}
 
-        {% for ue in semestreData.ues|sort((a, b) => sortUeByOrder(a, b)) %}
+        {% set idxFirst = 0 %}
+        {% set ueArrayFlat = [] %}
+        {% for ueIteration in semestreData.ues|filter(g => g.ueParent == null) %}
+            {% set idxFirst = idxFirst + 1 %}
+            {% set idxSecond = 0 %}
+            {% set ueIterationValue = ueIteration.ueRaccrochee != null ? ueIteration.ueRaccrochee.ue : ueIteration %}
+            {% set ueArrayFlat = ueArrayFlat|merge(
+                    [{'ordre': (semestre.ordre * 1000) + (idxFirst * 100), 'value': ueIterationValue}]
+                ) %}
+            {% for ueNested in ueIterationValue.ueEnfants %}
+                {% set idxSecond = idxSecond + 1 %}
+                {% set idxThird = 0 %}
 
-            {% set ueData = ue %}
-            {% if ue.ueRaccrochee != null %}
-                {% set ueData = ue.ueRaccrochee.ue %}
-            {% endif %}
+                {% set ueNestedValue = ueNested.ueRaccrochee != null ? ueNested.ueRaccrochee.ue : ueNested %}
+                {% set ueArrayFlat = ueArrayFlat|merge(
+                    [{'ordre': (semestre.ordre * 1000) + (idxFirst * 100) + (idxSecond * 10), 'value': ueNestedValue}]
+                ) %}
+                {% for ueNestedSecond in ueNestedValue.ueEnfants %}
+                    {% set idxThird = idxThird + 1 %}
+                    {% set ueNestedSecondValue = ueNestedSecond.ueRaccrochee != null ? ueNestedSecond.ueRaccrochee.ue : ueNestedSecond %}
+                    {% set ueArrayFlat = ueArrayFlat|merge(
+                        [{
+                            'ordre': (semestre.ordre * 1000) + (idxFirst * 100) + (idxSecond * 10) + idxThird, 
+                            'value': ueNestedSecondValue
+                        }]
+                    ) %}
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
 
-            {% for ec in ueData.elementConstitutifs|filter(k => k.ecParent == null )|sort((c, d) => c.ordre <=> d.ordre) %}
+        {# Remove duplicates #}
+        {% set ueArrayFlat = ueArrayFlat|reduce(
+            (previous, current) =>
+                current.value.id not in previous|map(p => p.value.id) 
+                ? previous|merge([current]) 
+                : previous, 
+                []
+            ) 
+        %}
+
+        {% for ue in ueArrayFlat|sort((a, b) => a.ordre <=> b.ordre) %}
+            {% for ec in ue.value.elementConstitutifs|filter(k => k.ecParent == null )|sort((c, d) => c.ordre <=> d.ordre) %}
                 {% set getElement = getElementFromEc(ec, parcours) %}
                 {{ include('pdf/ficheMatiere.html.twig', {
                         semestre:semestre,
