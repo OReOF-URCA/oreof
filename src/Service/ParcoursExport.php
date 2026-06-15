@@ -178,7 +178,9 @@ class ParcoursExport {
                     ];
 
                     if ($ue->ue->getNatureUeEc()?->isLibre()) {
-                        $tUe['ects'] = $ue->ue->getEcts() ?? 0.0;
+                        if(!$isVersioning){
+                            $tUe['ects'] = $ue->ue->getEcts() ?? 0.0;
+                        }
                         $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
                     } elseif ($ue->ue->getNatureUeEc()?->isChoix() || count($ue->uesEnfants()) > 0) {
                         $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
@@ -221,7 +223,9 @@ class ParcoursExport {
                              * UE enfant dans une UE enfant
                              */
                             if($ueEnfant->ue->getNatureUeEc()?->isLibre()){
-                                $tUeEnfant['ects'] = $ueEnfant->ue->getEcts() ?? 0.0;
+                                if(!$isVersioning){
+                                    $tUeEnfant['ects'] = $ueEnfant->ue->getEcts() ?? 0.0;
+                                }
                                 $tUeEnfant['description_libre_choix'] = $ueEnfant->ue->getDescriptionUeLibre();
                             }
                             elseif($ueEnfant->ue->getNatureUeEc()?->isChoix() || count($ueEnfant->uesEnfants()) > 0){
