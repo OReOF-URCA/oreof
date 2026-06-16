@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    {{ form_title }}
+{% endset %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-10 col-md-8 col-lg-6 col-xl-5">
+            <div class="col-12 mb-4 text-start">
+                <a href="{{ path('app_config_type_ramification_show') }}">
+                    <button
+                        class="btn btn-sm btn-icon btn-icon-only btn-primary"
+                        type="button"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="Précédent"
+                    >
+                        <i class="fa-light fa-arrow-left"></i>
+                    </button>
+                <a>
+            </div>
+            {{ include('communs/_form.html.twig', {form: formulaire} ) }}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    Liste des types de ramifications
+{% endset %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .text-overflow-hidden-dots {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+
+    <div class="row justify-content-start mt-4">
+        <div class="col-4 col-md-3 col-lg-2 col-xl-1"></div>
+        <!-- spacer -->
+        <div class="col-4">
+            <a href="{{ path('app_config_type_ramification_new') }}">
+                <button 
+                    class="btn btn-sm btn-icon btn-icon-only btn-outline-primary"
+                    type="button"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-original-title="Ajouter un type de ramification"
+                >
+                    <i class="fa-light fa-plus"></i>
+                </button>
+            </a>
+            <a 
+                href="#" 
+                class="ms-3"
+            >
+                <button
+                    class="btn btn-sm btn-icon btn-icon-only btn-outline-warning"
+                    type="button"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-original-title="Gérer les ramifications des parcours"
+                >
+                    <i class="fa-light fa-wrench"></i>
+                </button>
+            </a>
+        </div>
+    </div>
+    {% for tr in typeRamifications %}
+        <div class="row justify-content-center mt-4">
+            <div class="col-8 bg-white border border-primary rounded">
+                <div class="row p-3">
+                    <div class="col-5">
+                        <p>
+                            <span class="fw-bold text-primary text-wrap">Code</span>
+                        </p> 
+                        <p class="text-overflow-hidden-dots">
+                            {{ tr.code }}
+                        </p>
+                    </div>
+                    <div class="col-5">
+                        <p>
+                            <span class="fw-bold text-primary">Libellé</span>
+                        </p> 
+                        <p>
+                            {{ tr.libelle }}
+                        </p>
+                    </div>
+                    <div class="col-2">
+                        <p class="text-center">
+                            <i class="fa-light fa-eye text-warning me-3"></i>
+                            <a href="{{ path('app_config_type_ramification_edit', {typeRamification: tr.id}) }}">
+                                Modifier
+                            </a>
+                        </p>
+                        <p class="text-center">
+                            <i class="fa-light fa-trash text-danger me-3"></i>
+                            <a  
+                                {{ stimulus_controller('modal', {
+                                        size: 'md',
+                                        modalTitle: "Suppression d'un type de ramification",
+                                        modalUrl: path('app_config_type_ramification_delete_confirm', {
+                                            typeRamification: tr.id
+                                        })
+                                    })
+                                }}
+                                {{ stimulus_action('modal', 'openModal', 'click') }}
+                                href="#"
+                            >
+                                Supprimer
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="row justify-content-center mt-5">
+            <div class="fs-6 alert alert-info col-8">
+                Il n'y a encore aucuns types de ramifications de parcours créés...
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

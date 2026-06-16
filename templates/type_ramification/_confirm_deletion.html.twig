@@ -1,0 +1,24 @@
+<h3 class="text-primary text-center mt-2 mb-5">
+    Êtes-vous sûr de vouloir supprimer ce type de ramification ?
+</h3>
+<p class="text-center fw-bold fs-6 mt-4">
+    Les parcours associés à ce type perdront cette donnée
+</p>
+
+<div class="row justify-content-around mt-5 p-2">
+    <div class="col-4 text-start">
+        <a href="{{ path('app_config_type_ramification_delete', {idType: idTypeRamification}) }}">
+            <button class="btn btn-sm btn-success" type="button">
+                Oui
+            </button>
+        </a>
+    </div>
+    <div class="col-4 text-end">
+        <button 
+            class="btn btn-sm btn-danger"
+            data-bs-dismiss="modal"
+        >
+            Non
+        </button>
+    </div>
+</div>
