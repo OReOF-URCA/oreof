@@ -11,18 +11,81 @@
     {% for semestre in parcours.semestreParcours %}
         <h1 class="text-center mt-3">Fiches EC/matière du semestre {{ semestre.display }}</h1>
         <div class="page_break"></div>
-        {% for ue in semestre.semestre.ues %}
-            {% for ec in ue.elementConstitutifs %}
-                {% set getElement = getElementFromEc(ec, parcours) %}
-                {{ include('pdf/ficheMatiere.html.twig', {
-                        semestre:semestre,
-                        heures: getElement.getFicheMatiereHeures,
-                        mcccPdf: typeDiplomeHandler.getDisplayMccc(
-                            getElement.getMcccsFromFicheMatiere(typeDiplomeHandler) ?? [], 
-                            getElement.getTypeMcccFromFicheMatiere() ?? ''
-                        ),
-                    }) 
-                }}
+
+        {% set semestreData = semestre.semestre %}
+        {% if semestre.semestre.semestreRaccroche != null %}
+            {% set semestreData = semestre.semestre.semestreRaccroche.semestre %}
+        {% endif %}
+
+        {% set idxFirst = 0 %}
+        {% set ueArrayFlat = [] %}
+        {% for ueIteration in semestreData.ues|filter(g => g.ueParent == null) %}
+            {% set idxFirst = idxFirst + 1 %}
+            {% set idxSecond = 0 %}
+            {% set ueIterationValue = ueIteration.ueRaccrochee != null ? ueIteration.ueRaccrochee.ue : ueIteration %}
+            {% set ueArrayFlat = ueArrayFlat|merge(
+                    [{'ordre': (semestre.ordre * 1000) + (idxFirst * 100), 'value': ueIterationValue}]
+                ) %}
+            {% for ueNested in ueIterationValue.ueEnfants %}
+                {% set idxSecond = idxSecond + 1 %}
+                {% set idxThird = 0 %}
+
+                {% set ueNestedValue = ueNested.ueRaccrochee != null ? ueNested.ueRaccrochee.ue : ueNested %}
+                {% set ueArrayFlat = ueArrayFlat|merge(
+                    [{'ordre': (semestre.ordre * 1000) + (idxFirst * 100) + (idxSecond * 10), 'value': ueNestedValue}]
+                ) %}
+                {% for ueNestedSecond in ueNestedValue.ueEnfants %}
+                    {% set idxThird = idxThird + 1 %}
+                    {% set ueNestedSecondValue = ueNestedSecond.ueRaccrochee != null ? ueNestedSecond.ueRaccrochee.ue : ueNestedSecond %}
+                    {% set ueArrayFlat = ueArrayFlat|merge(
+                        [{
+                            'ordre': (semestre.ordre * 1000) + (idxFirst * 100) + (idxSecond * 10) + idxThird, 
+                            'value': ueNestedSecondValue
+                        }]
+                    ) %}
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+
+        {# Remove duplicates #}
+        {% set ueArrayFlat = ueArrayFlat|reduce(
+            (previous, current) =>
+                current.value.id not in previous|map(p => p.value.id) 
+                ? previous|merge([current]) 
+                : previous, 
+                []
+            ) 
+        %}
+
+        {% for ue in ueArrayFlat|sort((a, b) => a.ordre <=> b.ordre) %}
+            {% for ec in ue.value.elementConstitutifs|filter(k => k.ecParent == null )|sort((c, d) => c.ordre <=> d.ordre) %}
+                {% if ec.ficheMatiere != null %}
+                    {% set getElement = getElementFromEc(ec, parcours) %}
+                    {{ include('pdf/ficheMatiere.html.twig', {
+                            semestre:semestre,
+                            heures: getElement.getFicheMatiereHeures,
+                            mcccPdf: typeDiplomeHandler.getDisplayMccc(
+                                getElement.getMcccsFromFicheMatiere(typeDiplomeHandler) ?? [], 
+                                getElement.getTypeMcccFromFicheMatiere() ?? ''
+                            ),
+                        }) 
+                    }}
+                {% endif %}
+                {% for ecE in ec.ecEnfants|sort((n, m) => n.ordre <=> m.ordre) %}
+                    {% if ecE.ficheMatiere != null %}
+                        {% set getElementEnfant = getElementFromEc(ecE, parcours) %}
+                        {{ include('pdf/ficheMatiere.html.twig', {
+                                semestre: semestre,
+                                heures: getElementEnfant.getFicheMatiereHeures,
+                                mcccPdf: typeDiplomeHandler.getDisplayMccc(
+                                    getElementEnfant.getMcccsFromFicheMatiere(typeDiplomeHandler) ?? [],
+                                    getElementEnfant.getTypeMcccFromFicheMatiere() ?? ''
+                                ),
+                                ec: ecE   
+                            })
+                        }}
+                    {% endif %}
+                {% endfor %}
                 <div class="page_break"></div>
             {% endfor %}
         {% endfor %}
