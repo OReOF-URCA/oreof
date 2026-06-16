@@ -16,6 +16,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class TypeDiplomeType extends AbstractType
 {
@@ -129,7 +130,15 @@ class TypeDiplomeType extends AbstractType
             ->add('hasProjet', YesNoType::class)
             ->add('ectsObligatoireSurEc', YesNoType::class, ['empty_data' => true, 'row_attr' => ['class' => 'ects-field']])
             ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true])
-            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
+            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
+
+            ->add('logo', FileType::class, [
+                'label' => 'Logo',
+                'multiple' => false,
+                'required' => false,
+                'mapped' => false,
+                'attr' => ['accept' => 'image/png, image/jpeg'],
+            ]);
 
         // Quand le diplôme n'utilise pas les ECTS, le champ « Nombre maximum d'ECTS
         // par UE » est grisé côté client et sans objet. On lui fournit une valeur

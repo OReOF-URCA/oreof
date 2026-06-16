@@ -23,7 +23,7 @@ class Profil
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $code = null;
 
-    #[ORM\Column(length: 255, enumType: CentreGestionEnum::class)]
+    #[ORM\Column(length: 255, nullable: true, enumType: CentreGestionEnum::class)]
     private ?CentreGestionEnum $centre = null;
 
     /**

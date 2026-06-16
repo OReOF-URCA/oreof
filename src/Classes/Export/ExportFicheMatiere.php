@@ -9,9 +9,11 @@
 
 namespace App\Classes\Export;
 
+use App\Classes\GetElementConstitutif;
 use App\Classes\MyGotenbergPdf;
 use App\Repository\ParcoursRepository;
 use App\Service\ProjectDirProvider;
+use App\Service\TypeDiplomeResolver;
 use App\Utils\Tools;
 use Exception;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -23,7 +25,8 @@ class ExportFicheMatiere
     public function __construct(
         ProjectDirProvider $projectDirProvider,
         protected MyGotenbergPdf     $myPdf,
-        protected ParcoursRepository $parcoursRepository
+        protected ParcoursRepository $parcoursRepository,
+        protected TypeDiplomeResolver $typeDResolver
     )
     {
         $this->dir = $projectDirProvider->getProjectDir() . '/public/';
@@ -35,14 +38,62 @@ class ExportFicheMatiere
         if ($parcours === null) {
             throw new Exception('Parcours non trouvé');
         }
-        $ecs = $parcours->getElementConstitutifs();
+        // $ecs = $parcours->getElementConstitutifs();
         $formation = $parcours->getFormation();
         if ($formation === null) {
             throw new Exception('Formation non trouvée');
         }
         $typeDiplome = $formation?->getTypeDiplome();
+        $typeDHandler = $this->typeDResolver->get($typeDiplome);
+
+        /**
+         * Mise à plat de toutes les UE de tous les semestres, avec :
+         *  - UE Enfants de deuxième niveau
+         *  - UE Raccrochées
+         */
+        $dataFmArray = $typeDHandler->calculStructureParcours($parcours, false, false);
+        $dataFmArray = array_merge(
+            ...array_map(function($sem) {
+            return 
+                [   
+                    ...$sem->ues,
+                    ...array_merge(...array_map(fn($a) => $a->uesEnfants(), $sem->ues)),
+                    ...array_merge(
+                        ...array_map(
+                            fn($b) => array_merge(
+                                ...array_map(
+                                    fn($c) => $c->uesEnfants(), 
+                                    $b->uesEnfants()
+                            )
+                        ), $sem->ues)
+                    )
+                ];
+        }, $dataFmArray->semestres));
+        
+        /**
+         * Mise à plat des EC depuis les UE
+         * 
+         */
+        $dataFmArray = array_merge(
+            ...array_map(
+                function($ue) {
+                    return [
+                        ...$ue->elementConstitutifs, 
+                        ...array_merge(
+                            ...array_map(
+                                fn($ec) => $ec->elementsConstitutifsEnfants, 
+                                $ue->elementConstitutifs
+                        )
+                        )
+                    ];
+                }
+        , $dataFmArray));
+
+        $dataFmArray = array_map(fn($elt) => $elt->elementConstitutif, $dataFmArray);
+
         $fichiers = [];
-        foreach ($ecs as $ec) {
+        foreach ($dataFmArray as $ec) {
+            $getElement = new GetElementConstitutif($ec, $parcours);
             $ficheMatieres = $ec->getFicheMatiere();
             if ($ficheMatieres !== null) {
                 $fichiers[] = $this->myPdf->renderAndSave(
@@ -55,6 +106,14 @@ class ExportFicheMatiere
                         'parcours' => $parcours,
                         'typeDiplome' => $typeDiplome,
                         'titre' => 'Fiche EC/matière ' . $ficheMatieres->getLibelle(),
+                        'heures' => $getElement->getFicheMatiereHeures(),
+                        'templateFormMccc' => $typeDHandler::TEMPLATE_FORM_MCCC,
+                        'mcccPdf' => $typeDHandler->getDisplayMccc(
+                            $getElement->getMcccsFromFicheMatiere($typeDHandler) ?? [],
+                            $getElement->getTypeMcccFromFicheMatiere() ?? ''
+                        ),
+                        'typeEpreuves' => $typeDHandler->getTypeEpreuves()
+
                     ],
                     Tools::FileName($ficheMatieres->getSlug())
                 );

@@ -16,6 +16,7 @@ use App\Form\Type\TextareaAutoSaveType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -102,7 +103,16 @@ class ParcoursStep1Type extends AbstractType
                 'attr' => [
                     'data-action' => 'change->parcours--step1#changeLocalisation',
                 ]
-            ]);
+            ])
+            //->add('logo', FileType::class, [
+            //    'help' => 'Logo du parcours',
+            //    'multiple' => true,
+            //    'required' => false,
+            //    'mapped' => false,
+            //    'attr' => ['accept' => 'image/png, image/jpeg'],
+            //])
+            ;
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void

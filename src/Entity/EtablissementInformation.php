@@ -21,6 +21,9 @@ class EtablissementInformation
     private ?string $calendrier_inscription = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $tarif_inscription = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $informations_pratiques = null;
 
     #[ORM\OneToOne(inversedBy: 'etablissement_information', cascade: ['persist', 'remove'])]
@@ -211,6 +214,17 @@ class EtablissementInformation
     {
         $this->secondeChance = $secondeChance;
 
+        return $this;
+    }
+
+    public function getTarifInscription(): ?string
+    {
+        return $this->tarif_inscription;
+    }
+
+    public function setTarifInscription(?string $tarif_inscription): static
+    {
+        $this->tarif_inscription = $tarif_inscription;
         return $this;
     }
 }

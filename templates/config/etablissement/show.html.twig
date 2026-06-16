@@ -19,21 +19,32 @@
     <tr>
         <th>Calendrier universitaire</th>
         <td>
-            {{ etablissement.getEtablissementInformation.getCalendrierUniversitaire 
-            ? etablissement.getEtablissementInformation.getCalendrierUniversitaire|raw 
-            : 'Non renseigné' 
+            {{ etablissement.getEtablissementInformation.getCalendrierUniversitaire
+            ? etablissement.getEtablissementInformation.getCalendrierUniversitaire|raw
+            : 'Non renseigné'
             }}
         </td>
     </tr>
     <tr>
         <th>Calendrier d'inscription</th>
         <td>
-            {{ etablissement.getEtablissementInformation.getCalendrierInscription 
-            ? etablissement.getEtablissementInformation.getCalendrierInscription|raw         
-            : 'Non renseigné' 
+            {{ etablissement.getEtablissementInformation.getCalendrierInscription
+            ? etablissement.getEtablissementInformation.getCalendrierInscription|raw
+            : 'Non renseigné'
             }}
         </td>
     </tr>
+
+    <tr>
+        <th>Tarif d'inscription</th>
+        <td>
+            {{ etablissement.getEtablissementInformation.tarifInscription
+            ? etablissement.getEtablissementInformation.tarifInscription|raw
+            : 'Non renseigné'
+            }}
+        </td>
+    </tr>
+
     <tr>
         <th>Informations pratiques</th>
         <td>

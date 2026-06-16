@@ -1,7 +1,37 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
+
     {{ include('parcours/_synthese_parcours.html.twig') }}
+
+    <div class="card mt-3">
+        <div class="card-body"
+                {{ stimulus_controller('logos', {
+                    logosUrl: path('app_parcours_logos', {id: parcours.id, editable: true}),
+                    deleteLogoUrl: path('app_parcours_delete_logo', {id: parcours.id}),
+                    uploadLogoUrl: path('app_parcours_upload_logo', {id: parcours.id}),
+                }) }}>
+            <h5 class="card-title">Logos du parcours</h5>
+            <turbo-frame id="logos-container">
+                {% include 'parcours/_logos.html.twig' with {editable: true} %}
+            </turbo-frame>
+            <div class="mt-3">
+                <input type="file"
+                       name="logo[]"
+                       accept="image/png, image/jpeg"
+                       class="form-control"
+                       multiple
+                       data-logos-target="fileInput">
+                <button type="button"
+                        class="btn btn-primary mt-2"
+                        data-action="click->logos#uploadLogo">
+                    Confirmer l'envoi du/des logo(s)
+                </button>
+                <div id="logo-upload-errors" class="mt-2"></div>
+            </div>
+        </div>
+    </div>
+
     {% if constant('SOURCE', typeD) == 'meef' %}
         {% if parcours.parcoursParent != null %}
             {{ include('parcours/_wizard.html.twig') }}

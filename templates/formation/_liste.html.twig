@@ -59,7 +59,7 @@
             <th>Etat</th>
             <th>Remplissage</th>
             <th></th>
-            <th></th>
+
         </tr>
         {% if is_granted('ROLE_ADMIN') %}
             <tr>
@@ -80,6 +80,7 @@
                         {% endfor %}
                     </select>
                 </th>
+                <th></th>
                 <th>
                     <label for="filter-accreditation" class="sr-only">accréditation</label>
                     <select
@@ -151,7 +152,6 @@
 
                     </select>
                 </th>
-                <th></th>
                 <th>
                 </th>
 
@@ -175,7 +175,7 @@
                         </select>
                     {% endif %}
                 </th>
-                {#                <th></th> #}
+                <th></th>
                 <th>
                     <button class="btn btn-outline-danger"
                             {{ stimulus_action('crud', 'effaceFiltre', 'click', {

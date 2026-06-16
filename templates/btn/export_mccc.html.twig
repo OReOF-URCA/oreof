@@ -12,7 +12,7 @@
             {% if mcccClassique %}
             <a class="dropdown-item"
             href="{{ path('app_parcours_mccc_export_versionning', {parcours:parcours.id, _format:'xlsx'}) }}">
-                Export MCCC Version (xlsx)
+                Export MCCC modification visible (xlsx)
             </a>
             {% endif %}
             <a class="dropdown-item"
@@ -34,6 +34,10 @@
         </button>
         <div class="dropdown-menu" style="">
             {% if mcccClassique %}
+            <a class="dropdown-item"
+            href="{{ path('app_parcours_mccc_export_versionning', {parcours:parcours.id, _format:'xlsx'}) }}">
+                Export MCCC modification visible (xlsx)
+            </a>
             <a class="dropdown-item"
                href="{{ path('app_parcours_mccc_export', {parcours:parcours.id, _format:'xlsx'}) }}">
                 Version complète (xlsx)

@@ -23,6 +23,11 @@ class EtablissementInformationType extends AbstractType
                 'required' => true,
                 'attr' => ['maxlength' => 2500]
             ])
+            ->add('tarif_inscription', TextareaAutoSaveType::class, [
+                'label' => "Tarif(s) d'inscription",
+                'required' => true,
+                'attr' => ['maxlength' => 2500]
+            ])
             ->add('informations_pratiques', TextareaAutoSaveType::class, [
                 'label' => 'Informations pratiques',
                 'required' => true,

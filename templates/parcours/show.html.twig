@@ -45,6 +45,21 @@
 
     {{ include('parcours/_synthese_parcours.html.twig') }}
 
+    <div class="card mt-3">
+        <div class="card-body">
+            <h5 class="card-title">Logos du parcours</h5>
+            <div class="d-flex flex-wrap gap-3 p-2">
+                {% for filename in parcours.logo %}
+                    <img src="{{ asset('uploads/logos/' ~ filename) }}"
+                         alt="Logo"
+                         style="max-height: 75px; max-width: 100px; object-fit: contain;">
+                {% else %}
+                    <p>Aucun logo</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
     {% if is_granted('ROLE_ADMIN') %}
         <div class="row mt-5 mb-5">
             <h3 class="small-title">Gestion du parcours</h3>

@@ -11,6 +11,7 @@ namespace App\Controller;
 
 use App\Classes\JsonReponse;
 use App\Classes\MyGotenbergPdf;
+use App\Entity\Constantes;
 use App\Entity\FicheMatiere;
 use App\Entity\Parcours;
 use App\Message\Export;
@@ -94,8 +95,13 @@ class FicheMatiereExportController extends AbstractController
     }
 
     #[Route('/fiche-matiere/export/all/{parcours}', name: 'fiche_matiere_export_all')]
-    public function exportFichesMatieres(Parcours $parcours): Response
+    public function exportFichesMatieres(
+        Parcours $parcours,
+        TypeDiplomeResolver $typeDResolver
+    ): Response
     {
+        $typeDHandler = $typeDResolver->get($parcours->getFormation()?->getTypeDiplome());
+
         return $this->myPdf->render(
             'pdf/ficheMatiereAll.html.twig',
             [
@@ -104,6 +110,9 @@ class FicheMatiereExportController extends AbstractController
                 'fiches' => $parcours->getFicheMatieres(),
                 'typeDiplome' => $parcours->getFormation()?->getTypeDiplome(),
                 'titre' => 'Fiches EC/matières ',
+                'typeEpreuves' => $typeDHandler->getTypeEpreuves(),
+                'typeDiplomeHandler' => $typeDHandler,
+                'templateFormMccc' => $typeDHandler::TEMPLATE_FORM_MCCC,
             ],
             'FichesMatieres' . $parcours->getDisplay()
         );
