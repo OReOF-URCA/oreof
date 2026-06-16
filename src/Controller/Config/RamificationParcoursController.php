@@ -2,10 +2,13 @@
 
 namespace App\Controller\Config;
 
+use App\Entity\CampagneCollecte;
+use App\Entity\Parcours;
 use App\Entity\TypeRamificationParcours;
 use App\Form\TypeRamificationType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -105,5 +108,29 @@ final class RamificationParcoursController extends AbstractController
             'formulaire' => $form,
             'form_title' => "Modification d'un type de ramification"
         ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/administration/parcours/ramification/manage', name: 'app_config_type_ramification_parcours_manage')]
+    public function addParcoursRamificationForm() : Response {
+        return $this->render('type_ramification/manage_parcours.html.twig', []);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/administration/parcours/search_by_name', name: 'app_config_type_ramification_search_parcours_by_name')]
+    public function searchParcoursByName(
+        EntityManagerInterface $em,
+        Request $request
+    ) : Response {
+        $keyword = $request->query->get('keyword', '');
+        if(strlen($keyword) < 4){
+            return new JsonResponse(['error' => 'Keyword length too short. Minimum : 4 characters']);
+        }
+
+        $campagne = $em->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => 1]);
+        return new JsonResponse(
+            $em->getRepository(Parcours::class)
+                ->findByNomComplet($keyword, $campagne->getId())
+        );
     }
 }
