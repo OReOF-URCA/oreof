@@ -428,4 +428,36 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findByNomComplet(string $keyword, int $campagneId) {
+        $qb = $this->createQueryBuilder('p');
+        return $qb
+            ->select(
+                [
+                    'p.id AS id_parcours', 
+                    'p.libelle AS nom_parcours', 
+                    'm.libelle AS nom_formation', 
+                    'td.libelle AS nom_type_diplome'
+                ]
+            )
+            ->join('p.formation', 'f')
+            ->join('f.mention', 'm')
+            ->join('f.typeDiplome', 'td')
+            ->join('p.dpeParcours', 'dpe')
+            ->join('dpe.campagneCollecte', 'camp')
+            ->where(
+                $qb->expr()->andX(
+                    $qb->expr()->orX(
+                        'p.libelle LIKE :keyword',
+                        'm.libelle LIKE :keyword',
+                        'td.libelle LIKE :keyword'
+                    ),
+                    $qb->expr()->eq('camp.id', ':campagneId')
+                )
+            )
+            ->setParameter(':keyword', '%' . $keyword . '%')
+            ->setParameter(':campagneId', $campagneId)
+            ->getQuery()
+            ->getResult();
+    }
 }
