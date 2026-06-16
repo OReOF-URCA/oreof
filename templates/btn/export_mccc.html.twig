@@ -1,3 +1,6 @@
+{# Pour les formations non classiques, il n'y a ni structure ni MCCC (les informations sont dans le PDF de maquette) : on masque entièrement le bouton MCCC. #}
+{% set mcccClassique = parcours.formation.typeDiplome.classique ?? true %}
+{% if mcccClassique %}
 {% if hasLastVersion is defined and hasLastVersion == true %}
     {{ component('dropdown_actions', {
         label: 'MCCC',
@@ -51,4 +54,5 @@
             }
         ]
     }) }}
+{% endif %}
 {% endif %}

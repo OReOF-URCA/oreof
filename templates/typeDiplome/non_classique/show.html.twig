@@ -55,14 +55,17 @@
         </div>
     </section>
 
-    <section class="scroll-section" id="competences_{{ parcours.id }}">
-        <h3 class="small-title">Compétences Acquises</h3>
-        <div class="card mb-5">
-            <div class="card-body">
-                {{ include('typeDiplome/formation/_competences.html.twig', {parcours:parcours}) }}
+    {# Formation non classique : pas de compétences saisies (elles figurent dans le PDF de maquette). #}
+    {% if constant('TEMPLATE_FOLDER', typeD) != 'non_classique' %}
+        <section class="scroll-section" id="competences_{{ parcours.id }}">
+            <h3 class="small-title">Compétences Acquises</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {{ include('typeDiplome/formation/_competences.html.twig', {parcours:parcours}) }}
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+    {% endif %}
 
     {% if isVersioning is not defined or isVersioning == false %}
         <section class="scroll-section" id="structure_{{ parcours.id }}">
@@ -75,7 +78,15 @@
                             hasLastVersion: hasLastVersion ?? false,
                         })) }}
                     {% else %}
-                        <p class="text-muted">Structure non disponible pour ce type de parcours.</p>
+                        {% if parcours.maquettePdf %}
+                            <a href="{{ path('app_upload_download', {context: 'maquettes', filename: parcours.maquettePdf, originalName: parcours.maquettePdfNomOriginal}) }}"
+                               class="btn btn-outline-primary btn-icon btn-icon-start">
+                                <i class="fal fa-file-pdf"></i>
+                                <span> {{ parcours.maquettePdfNomOriginal ?: 'Télécharger la maquette (PDF)' }}</span>
+                            </a>
+                        {% else %}
+                            <p class="text-muted">Aucune maquette PDF n'a été déposée pour ce parcours.</p>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>

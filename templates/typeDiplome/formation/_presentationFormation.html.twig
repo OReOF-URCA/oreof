@@ -154,6 +154,7 @@
                                 {{ include('btn/export_mccc.html.twig') }}
                             </td>
                             <td>
+                                {% if parcours.formation.typeDiplome.classique ?? true %}
                                 <div class="btn-group">
                                     <button type="button"
                                             class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
@@ -179,8 +180,10 @@
                                         </a>
                                     </div>
                                 </div>
+                                {% endif %}
                             </td>
                             <td>
+                                {% if parcours.formation.typeDiplome.classique ?? true %}
                                 <div class="btn-group">
                                     <button type="button"
                                             class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
@@ -200,6 +203,7 @@
                                         </a>
                                     </div>
                                 </div>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
