@@ -31,7 +31,13 @@ export default class extends Controller {
     this._loadStep(event.params.step)
   }
 
+  // Recharge l'onglet actuellement affiché (déclenché par l'évènement base:refreshStep).
+  refreshStep() {
+    this._loadStep(this._currentStep ?? this.stepValue)
+  }
+
   async _loadStep(step) {
+    this._currentStep = step
     const response = await fetch(`${this.urlValue + this.dpeParcoursValue}/${step}`)
     this.contentTarget.innerHTML = await response.text()
   }

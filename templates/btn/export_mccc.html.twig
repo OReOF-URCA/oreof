@@ -1,3 +1,6 @@
+{# Pour les formations non classiques, il n'y a ni structure ni MCCC (les informations sont dans le PDF de maquette) : on masque entièrement le bouton MCCC. #}
+{% set mcccClassique = parcours.formation.typeDiplome.classique ?? true %}
+{% if mcccClassique %}
 {% if hasLastVersion is defined and hasLastVersion == true %}
     <div class="btn-group">
         <button type="button"
@@ -6,10 +9,12 @@
             <i class="{{ iconDownload }}"></i> MCCC
         </button>
         <div class="dropdown-menu" style="">
+            {% if mcccClassique %}
             <a class="dropdown-item"
             href="{{ path('app_parcours_mccc_export_versionning', {parcours:parcours.id, _format:'xlsx'}) }}">
                 Export MCCC Version (xlsx)
             </a>
+            {% endif %}
             <a class="dropdown-item"
                href="{{ path('app_parcours_mccc_export_cfvu_valid', {parcours:parcours.id, format:'complet'}) }}">
                 Version complète (pdf)
@@ -28,6 +33,7 @@
             <i class="{{ iconDownload }}"></i> MCCC
         </button>
         <div class="dropdown-menu" style="">
+            {% if mcccClassique %}
             <a class="dropdown-item"
                href="{{ path('app_parcours_mccc_export', {parcours:parcours.id, _format:'xlsx'}) }}">
                 Version complète (xlsx)
@@ -35,6 +41,7 @@
             <a class="dropdown-item"
                href="{{ path('app_parcours_mccc_export_light', {parcours:parcours.id, _format:'xlsx'}) }}">Version
                 simplifiée (xlsx)</a>
+            {% endif %}
             <a class="dropdown-item"
                href="{{ path('app_parcours_mccc_export_cfvu_valid', {parcours:parcours.id, format:'complet'}) }}">
                 Version complète (pdf)
@@ -44,4 +51,5 @@
                 simplifiée (pdf)</a>
         </div>
     </div>
+{% endif %}
 {% endif %}

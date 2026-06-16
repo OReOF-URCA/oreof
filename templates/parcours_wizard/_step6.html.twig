@@ -8,7 +8,7 @@
     {{ form_row(form.poursuitesEtudes) }}
     {{ form_row(form.debouches) }}
 
-    <label class="col-form-label required">
+    <label class="col-form-label{% if parcours.formation.typeDiplome.classique ?? true %} required{% endif %}">
         {{ 'parcours_step6.labels.codeRome'|trans({}, 'form') }}
         <i class="fal fa-question-circle ms-1"
            data-controller="tooltip"

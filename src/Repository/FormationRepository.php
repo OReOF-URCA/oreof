@@ -121,6 +121,17 @@ class FormationRepository extends ServiceEntityRepository
                 ->setParameter('typeDiplome', $options['typeDiplome']);
         }
 
+        // Filtre par accréditation : « accréditée » = type de diplôme classique (ou non
+        // renseigné), « non accréditée » = type de diplôme non classique.
+        if (array_key_exists('accreditation', $options) && null !== $options['accreditation'] && '' !== $options['accreditation']) {
+            $query->leftJoin('f.typeDiplome', 'td');
+            if ($options['accreditation'] === '0') {
+                $query->andWhere('td.classique = false');
+            } else {
+                $query->andWhere('td.classique = true OR td.classique IS NULL');
+            }
+        }
+
         if (array_key_exists('mention', $options) && null !== $options['mention']) {
             $query->andWhere('f.mention = :mention')
                 ->setParameter('mention', $options['mention']);

@@ -174,6 +174,12 @@ class Parcours
     #[Groups('parcours_json_versioning')]
     private ?string $sigle = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $maquettePdf = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $maquettePdfNomOriginal = null;
+
     #[ORM\Column]
     private ?array $etatSteps = [];
 
@@ -769,6 +775,30 @@ class Parcours
     public function setSigle(?string $sigle): self
     {
         $this->sigle = $sigle;
+
+        return $this;
+    }
+
+    public function getMaquettePdf(): ?string
+    {
+        return $this->maquettePdf;
+    }
+
+    public function setMaquettePdf(?string $maquettePdf): self
+    {
+        $this->maquettePdf = $maquettePdf;
+
+        return $this;
+    }
+
+    public function getMaquettePdfNomOriginal(): ?string
+    {
+        return $this->maquettePdfNomOriginal;
+    }
+
+    public function setMaquettePdfNomOriginal(?string $maquettePdfNomOriginal): self
+    {
+        $this->maquettePdfNomOriginal = $maquettePdfNomOriginal;
 
         return $this;
     }

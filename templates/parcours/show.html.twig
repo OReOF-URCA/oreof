@@ -251,6 +251,7 @@
 
     {{ include('btn/export_mccc.html.twig') }}
 
+    {% if parcours.formation.typeDiplome.classique ?? true %}
     <div class="btn-group">
         <button type="button"
                 class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
@@ -272,6 +273,7 @@
             </a>
         </div>
     </div>
+    {% endif %}
 
     <a href="{{ path('app_parcours_export', {parcours:parcours.id}) }}"
        class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"

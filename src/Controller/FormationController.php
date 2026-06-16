@@ -73,7 +73,16 @@ class FormationController extends BaseController
             $allparcours = $dpeParcoursRepository->findByCampagneAndTypeValidation($this->getCampagneCollecte(), 'soumis_cfvu');
         }
 
+        $nbParcours = count($allparcours);
+        $tFormations = [];
+        foreach ($allparcours as $parcours) {
+            $tFormations[] = $parcours->getParcours()?->getFormation()?->getId();
+        }
+        $nbFormations = count(array_unique($tFormations));
+
         return $this->render('validation/_liste.html.twig', [
+            'nbFormations' => $nbFormations,
+            'nbParcours' => $nbParcours,
             'allparcours' => $allparcours ?? [],
             'etape' => 'cfvu',
             'isCfvu' => true,

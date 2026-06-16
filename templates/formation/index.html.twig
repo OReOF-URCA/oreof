@@ -56,6 +56,15 @@
             <i class="{{ iconAdd }}"></i>
             <span> Ajouter une formation</span>
         </a>
+        <a href="{{ path('app_formulaire_generique_new') }}"
+           class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
+           data-bs-toggle="tooltip"
+           data-bs-placement="bottom"
+           title="Créer une formation non classique"
+        >
+            <i class="{{ iconAdd }}"></i>
+            <span> Créer une formation non classique</span>
+        </a>
     {% endif %}
 
 {% endblock %}

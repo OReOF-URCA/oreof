@@ -86,6 +86,7 @@
                         </div>
 
                         <div class="col-6 d-flex justify-content-center">
+                            {% if this.formation.typeDiplome.classique ?? true %}
                             <a
                                     href="{{ path('fiche_matiere_valide_formation', {formation: this.formation.id}) }}"
                                     class="btn btn-outline-success btn-sm"
@@ -96,6 +97,7 @@
                                 <i class="fas fa-check"></i>
                                 <span> Valider les fiches EC/matières</span>
                             </a>
+                            {% endif %}
                             <button
                                     {{ stimulus_controller('modal', {
                                         size: 'lg',
@@ -242,7 +244,7 @@
                             {% endif %}
                         </div>
                         <div class="col-3 d-grid">
-                            {% if is_granted('ROLE_ADMIN') %}
+                            {% if is_granted('ROLE_ADMIN') and (this.formation.typeDiplome.classique ?? true) %}
                                 <a href="{{ path('app_codification_index', {formation: formation.id}) }}"
                                    class="btn btn-sm btn-outline-info">Gérer la codification</a>
                             {% endif %}

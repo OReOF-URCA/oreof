@@ -28,8 +28,13 @@ export default class extends Controller {
     this._loadStep(event.params.step)
   }
 
+  // Recharge l'onglet actuellement affiché (formation ou parcours), déclenché par base:refreshStep.
   refreshStep() {
-    this._loadStep(1)
+    if (this._current && this._current.type === 'parcours') {
+      this._loadStepParcours(this._current.step, this._current.parcours)
+    } else {
+      this._loadStep(this._current ? this._current.step : this.stepValue)
+    }
   }
 
   changeStepParcours(event) {
@@ -37,11 +42,13 @@ export default class extends Controller {
   }
 
   async _loadStep(step) {
+    this._current = { type: 'formation', step }
     const response = await fetch(`${this.urlValue + this.formationValue}/${step}`)
     this.contentTarget.innerHTML = await response.text()
   }
 
   async _loadStepParcours(step, parcours) {
+    this._current = { type: 'parcours', step, parcours }
     const response = await fetch(`${this.urlParcoursValue + parcours}/${step}`)
     this.contentTarget.innerHTML = await response.text()
   }

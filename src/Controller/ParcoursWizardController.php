@@ -10,9 +10,12 @@
 namespace App\Controller;
 
 use App\Classes\Bcc;
+use App\Classes\GetDpeParcours;
 use App\Classes\JsonReponse;
 use App\Entity\DpeParcours;
 use App\Entity\Parcours;
+use App\Exception\FileUploadException;
+use App\Service\SecureUploadService;
 use App\Form\ParcoursStep1Type;
 use App\Form\ParcoursStep2Type;
 use App\Form\ParcoursStep5Type;
@@ -120,6 +123,93 @@ class ParcoursWizardController extends BaseController
             'semestreAffiche' => $request->getSession()->get('semestreAffiche') ?? null,
             'ueAffichee' => $request->getSession()->get('ueAffichee') ?? null,
         ]);
+    }
+
+    #[Route('/{dpeParcours}/maquette', name: 'app_parcours_wizard_step_maquette', methods: ['GET'])]
+    public function stepMaquette(DpeParcours $dpeParcours): Response
+    {
+        return $this->render('parcours_wizard/_maquette.html.twig', [
+            'parcours' => $dpeParcours->getParcours(),
+            'dpeParcours' => $dpeParcours,
+            'editable' => Access::isAccessible($dpeParcours),
+        ]);
+    }
+
+    #[Route('/{parcours}/maquette/upload', name: 'app_parcours_maquette_upload', methods: ['POST'])]
+    public function maquetteUpload(
+        Parcours               $parcours,
+        Request                $request,
+        SecureUploadService    $secureUploadService,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        if ($dpeParcours === null || !Access::isAccessible($dpeParcours)) {
+            return JsonReponse::error("Ce parcours n'est plus modifiable.");
+        }
+
+        try {
+            $upload = $secureUploadService->uploadFromRequest($request, 'file', 'maquettes');
+        } catch (FileUploadException $exception) {
+            return JsonReponse::error($exception->getPublicMessage());
+        }
+
+        if ($upload === null) {
+            return JsonReponse::error('Aucun fichier reçu.');
+        }
+
+        // On retire l'éventuel fichier précédent avant d'enregistrer le nouveau.
+        $this->supprimerFichierMaquette($parcours, $secureUploadService);
+
+        $parcours->setMaquettePdf($upload->getStoredFilename());
+        $parcours->setMaquettePdfNomOriginal($upload->getOriginalFilename());
+        // Le contenu change : on redemande la validation « j'ai terminé ».
+        $this->resetEtatMaquette($parcours);
+        $entityManager->flush();
+
+        return JsonReponse::success('La maquette a été enregistrée.');
+    }
+
+    #[Route('/{parcours}/maquette/delete', name: 'app_parcours_maquette_delete', methods: ['POST'])]
+    public function maquetteDelete(
+        Parcours               $parcours,
+        SecureUploadService    $secureUploadService,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        if ($dpeParcours === null || !Access::isAccessible($dpeParcours)) {
+            return JsonReponse::error("Ce parcours n'est plus modifiable.");
+        }
+
+        $this->supprimerFichierMaquette($parcours, $secureUploadService);
+        $parcours->setMaquettePdf(null);
+        $parcours->setMaquettePdfNomOriginal(null);
+        $this->resetEtatMaquette($parcours);
+        $entityManager->flush();
+
+        return JsonReponse::success('La maquette a été supprimée.');
+    }
+
+    private function resetEtatMaquette(Parcours $parcours): void
+    {
+        $etatSteps = $parcours->getEtatSteps();
+        $etatSteps['maquette'] = false;
+        $parcours->setEtatSteps($etatSteps);
+    }
+
+    private function supprimerFichierMaquette(Parcours $parcours, SecureUploadService $secureUploadService): void
+    {
+        $stored = $parcours->getMaquettePdf();
+        if ($stored === null) {
+            return;
+        }
+        try {
+            $path = $secureUploadService->resolveStoredFilePath('maquettes', $stored);
+            if (is_file($path)) {
+                @unlink($path);
+            }
+        } catch (FileUploadException) {
+            // Nom de fichier invalide : rien à supprimer physiquement.
+        }
     }
 
     #[Route('/{parcours}/recopie/hors-formation', name: 'app_recopie_bcc_autre_formation', methods: ['GET'])]
@@ -246,7 +336,20 @@ class ParcoursWizardController extends BaseController
 
         switch ($action) {
             case 'ADD':
+                // Format ROME imposé par le LHÉO : une lettre suivie de 4 chiffres (ex. M1805).
+                $code = strtoupper(trim((string) $code));
+                if (!preg_match('/^[A-Z][0-9]{4}$/', $code)) {
+                    return $this->json(['error' => 'Le code ROME doit être composé d\'une lettre suivie de 4 chiffres (ex. : M1805).']);
+                }
                 $codes = $parcours->getCodesRome();
+                if (count($codes) >= 5) {
+                    return $this->json(['error' => 'Vous ne pouvez pas saisir plus de 5 codes ROME (maximum imposé par le format LHÉO).']);
+                }
+                foreach ($codes as $existant) {
+                    if (strtoupper((string) ($existant['code'] ?? '')) === $code) {
+                        return $this->json(['error' => 'Ce code ROME a déjà été ajouté.']);
+                    }
+                }
                 $codes[] = ['code' => $code];
                 $parcours->setCodesRome($codes);
 

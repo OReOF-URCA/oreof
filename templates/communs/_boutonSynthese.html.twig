@@ -1,2 +1,5 @@
-{% set buttonSet = synthese_buttons(parcours, false) %}
-{{ include('communs/_boutonSynthese_renderer.html.twig', { buttonSet: buttonSet, col: col, iconDownload: iconDownload|default('fas fa-download') }) }}
+{# Formations non classiques : pas de MCCC/BCC/structure (tout est dans le PDF de maquette) → on masque ces boutons. #}
+{% if parcours.formation.typeDiplome.classique ?? true %}
+    {% set buttonSet = synthese_buttons(parcours, false) %}
+    {{ include('communs/_boutonSynthese_renderer.html.twig', { buttonSet: buttonSet, col: col, iconDownload: iconDownload|default('fas fa-download') }) }}
+{% endif %}

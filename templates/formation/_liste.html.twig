@@ -81,6 +81,24 @@
                     </select>
                 </th>
                 <th>
+                    <label for="filter-accreditation" class="sr-only">accréditation</label>
+                    <select
+                            {{ stimulus_action('crud', 'filter', 'change', {
+                                'field': 'accreditation'
+                            }) }}
+                            id="filter-accreditation" class="form-select">
+                        <option value="">Toutes</option>
+                        <option value="1"
+                                {% if params['accreditation'] is defined and params['accreditation'] == '1' %}selected{% endif %}>
+                            Accréditée
+                        </option>
+                        <option value="0"
+                                {% if params['accreditation'] is defined and params['accreditation'] == '0' %}selected{% endif %}>
+                            Non accréditée
+                        </option>
+                    </select>
+                </th>
+                <th>
                     <label for="filter-type_formation" class="sr-only">type formation</label>
                     <select
                             {{ stimulus_action('crud', 'filter', 'change', {

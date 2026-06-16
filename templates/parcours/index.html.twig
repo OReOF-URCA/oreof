@@ -2,15 +2,6 @@
 {# todo: deprecated plus utilisé #}
 
 {% block content %}
-    <a href="{{ path('app_formulaire_generique_new') }}"
-       class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2 mb-3"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Créer un parcours non classique"
-    >
-        <i class="{{ iconAdd }}"></i>
-        <span> Nouveau parcours (formation non classique)</span>
-    </a>
     <div class="card"
             {{ stimulus_controller('crud', {
                 url: path('app_parcours_liste'),

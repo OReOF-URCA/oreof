@@ -228,6 +228,7 @@
     {% if formation.isHasParcours == false and formation.parcours|length == 1 %}
         {% set parcours = formation.parcours[0] %}
         {{ include('btn/export_mccc.html.twig') }}
+        {% if formation.typeDiplome.classique ?? true %}
         <div class="btn-group">
             <button type="button"
                     class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
@@ -250,6 +251,7 @@
                 </a>
             </div>
         </div>
+        {% endif %}
         <div class="btn-group">
             <button type="button"
                     class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
@@ -286,6 +288,7 @@
                 <i class="{{ iconShow }}"></i> Voir / Télécharger
             </button>
             <div class="dropdown-menu" style="">
+                {% if formation.typeDiplome.classique ?? true %}
                 <a class="dropdown-item"
                    href="#presentation"
                    data-bs-toggle="tooltip"
@@ -304,6 +307,7 @@
                     <i class="{{ iconShow }}"></i>
                     <span> BCC Parcours</span>
                 </a>
+                {% endif %}
                 <a href="{{ path('app_formation_export', {slug:formation.slug}) }}"
                    class="dropdown-item"
                    data-bs-toggle="tooltip"

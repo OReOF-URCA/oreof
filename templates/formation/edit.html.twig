@@ -32,6 +32,8 @@
             </li>
             {% if formation.parcours[0] is defined and formation.hasParcours == false %}
                 {% set parcours = formation.parcours[0] %}
+                {# Formation non classique : on masque Compétences/Structure et on ajoute l'onglet Maquette (comme dans le wizard parcours). #}
+                {% set hideCompetencesStructure = constant('TEMPLATE_FOLDER', typeD) == 'non_classique' %}
                 <li class="nav-item" role="presentation">
                     <a class="nav-link {% if selectedStep == 2 %}active{% endif %}"
                        data-bs-toggle="tab" href="#"
@@ -50,6 +52,7 @@
                         Descriptif {{ parcoursState.onglets|etatRemplissage(2, 'parcours') }}
                     </a>
                 </li>
+                {% if not hideCompetencesStructure %}
                 <li class="nav-item" role="presentation">
                     <a class="nav-link {% if not isAccessible(dpeParcours, 'cfvu') %}disabled{% endif %}"
                        data-bs-toggle="tab" href="#" role="tab" aria-selected="false"
@@ -66,6 +69,20 @@
                         Structure de la maquette {{ parcoursState.onglets|etatRemplissage(4, 'parcours') }}
                     </a>
                 </li>
+                {% endif %}
+
+                {% if hideCompetencesStructure %}
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link"
+                       data-bs-toggle="tab" href="#" role="tab" aria-selected="false"
+                            {{ stimulus_action('formation_wizard', 'changeStepParcours', 'click', {step: 'maquette', parcours:dpeParcours.id}) }}
+                    >
+                        Maquette
+                        <span class="state state-{{ (parcours.maquettePdf and (parcours.getEtatSteps()['maquette'] ?? false)) ? 'complete' : 'en-cours' }}"
+                              id="parcours_ongletmaquette"></span>
+                    </a>
+                </li>
+                {% endif %}
                 <li class="nav-item" role="presentation">
                     <a class="nav-link" data-bs-toggle="tab" href="#" role="tab" aria-selected="false"
                             {{ stimulus_action('formation_wizard', 'changeStepParcours', 'click', {step: 5,parcours:dpeParcours.id}) }}

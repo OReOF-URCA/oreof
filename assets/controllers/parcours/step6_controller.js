@@ -66,7 +66,7 @@ export default class extends Controller {
         callOut('Code ajouté', 'success')
         this._loadRome()
       } else {
-        callOut('Erreur lors de la sauvegarde', 'danger')
+        callOut(data && data.error ? data.error : 'Erreur lors de la sauvegarde', 'danger')
       }
     })
   }

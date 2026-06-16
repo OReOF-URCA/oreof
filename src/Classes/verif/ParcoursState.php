@@ -274,8 +274,23 @@ class ParcoursState
             $tab['error'][] = 'Vous devez indiquer les débouchés possibles.';
         }
 
-        if (count($this->parcours->getCodesRome()) === 0) {
+        // Le code ROME reste obligatoire pour les formations classiques. Pour les
+        // formations non classiques, le LHÉO fournit une valeur par défaut (R0000),
+        // on ne bloque donc pas la validation.
+        if (($this->typeDiplome?->isClassique() ?? true) && count($this->parcours->getCodesRome()) === 0) {
             $tab['error'][] = 'Vous devez indiquer au moins un code ROME.';
+        }
+
+        return count($tab['error']) > 0 ? $tab : true;
+    }
+
+    // Onglet « Maquette » des parcours non classiques : on vérifie uniquement la présence du PDF.
+    private function etatOngletMaquette(): bool|array
+    {
+        $tab['error'] = [];
+
+        if ($this->parcours->getMaquettePdf() === null) {
+            $tab['error'][] = 'Vous devez déposer le PDF de la maquette.';
         }
 
         return count($tab['error']) > 0 ? $tab : true;

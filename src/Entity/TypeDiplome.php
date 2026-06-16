@@ -121,6 +121,9 @@ class TypeDiplome
     #[ORM\Column(options: ['default' => true])]
     private bool $hasEcts = true;
 
+    #[ORM\Column(options: ['default' => true])]
+    private bool $passageCfvu = true;
+
     #[ORM\Column(nullable: true)]
     private ?int $nbEctsParSemestre = 30;
 
@@ -645,6 +648,18 @@ class TypeDiplome
     public function setHasEcts(bool $hasEcts): static
     {
         $this->hasEcts = $hasEcts;
+
+        return $this;
+    }
+
+    public function isPassageCfvu(): bool
+    {
+        return $this->passageCfvu;
+    }
+
+    public function setPassageCfvu(bool $passageCfvu): static
+    {
+        $this->passageCfvu = $passageCfvu;
 
         return $this;
     }

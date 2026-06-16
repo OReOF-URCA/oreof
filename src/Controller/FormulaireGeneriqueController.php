@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 
+use App\Entity\Constantes;
 use App\Entity\DpeDemande;
 use App\Entity\DpeParcours;
 use App\Entity\Formation;
@@ -45,8 +46,15 @@ final class FormulaireGeneriqueController extends BaseController
         DomaineRepository        $domaineRepository,
         EventDispatcherInterface $eventDispatcher,
     ): Response {
+        // Seuls les utilisateurs disposant de tous les droits (admin) peuvent désigner
+        // une autre personne comme responsable du parcours. Les autres ne peuvent
+        // s'assigner qu'eux-mêmes (sinon ils perdraient l'accès au parcours créé).
+        $canChooseResponsable = $this->isGranted('ROLE_ADMIN');
+
         $form = $this->createForm(FormulaireGeneriqueType::class, null, [
             'action' => $this->generateUrl('app_formulaire_generique_new'),
+            'can_choose_responsable' => $canChooseResponsable,
+            'current_user' => $this->getUser(),
         ]);
         $form->handleRequest($request);
 
@@ -58,7 +66,7 @@ final class FormulaireGeneriqueController extends BaseController
                 return $this->render('formulaire_generique/new.html.twig', [
                     'form'         => $form->createView(),
                     'domaines'     => $domaineRepository->findBy([], ['libelle' => 'ASC']),
-                    'mentionError' => 'Veuillez sélectionner ou créer une mention.',
+                    'mentionError' => 'Veuillez sélectionner ou créer un intitulé de formation.',
                 ]);
             }
 
@@ -66,7 +74,7 @@ final class FormulaireGeneriqueController extends BaseController
             if ($mention === null) {
                 return $this->render('formulaire_generique/new.html.twig', [
                     'form' => $form->createView(),
-                    'mentionError' => 'Mention introuvable.',
+                    'mentionError' => 'Intitulé de formation introuvable.',
                 ]);
             }
 
@@ -78,6 +86,26 @@ final class FormulaireGeneriqueController extends BaseController
                     $formation = $formationRepository->find($formationId);
                 }
 
+                // Filet de sécurité : si le champ caché n'a pas été renseigné (ex. retour
+                // arrière du navigateur sans relance du JS), on vérifie nous-mêmes qu'une
+                // formation n'existe pas déjà pour ce couple mention / type de diplôme,
+                // afin de ne pas en créer un doublon.
+                if ($formation === null) {
+                    $formation = $formationRepository->findOneBy([
+                        'mention' => $mention,
+                        'typeDiplome' => $data['typeDiplome'],
+                        'dpe' => $this->getCampagneCollecte(),
+                    ]);
+                }
+
+                $formationCreee = $formation === null;
+
+                // Case « Cette formation aura plusieurs parcours » (proposée uniquement
+                // pour une formation neuve). Mono = formation neuve sans la case cochée :
+                // la formation EST son parcours unique (champs nommés « … de formation »).
+                $plusieursParcours = (bool) $form->get('plusieursParcours')->getData();
+                $estMono = $formationCreee && !$plusieursParcours;
+
                 if ($formation === null) {
                     $formation = new Formation($this->getCampagneCollecte());
                     $formation->setTypeDiplome($data['typeDiplome']);
@@ -86,8 +114,12 @@ final class FormulaireGeneriqueController extends BaseController
                     if (!empty($data['composantePorteuse'])) {
                         $formation->addComposantesInscription($data['composantePorteuse']);
                     }
-                    $formation->setResponsableMention($this->getUser());
-                    $formation->setHasParcours(true);
+                    // Même garde-fou que pour le responsable du parcours : seul un admin
+                    // peut désigner quelqu'un d'autre, sinon c'est l'utilisateur courant.
+                    $responsableMention = $canChooseResponsable ? ($data['responsableMention'] ?? $this->getUser()) : $this->getUser();
+                    $formation->setResponsableMention($responsableMention);
+                    // Mono (case décochée) → affichage sans parcours ; multi (case cochée) → avec parcours.
+                    $formation->setHasParcours($plusieursParcours);
                     $formation->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_PARCOURS);
                     $formation->setNiveauEntree($data['niveauEntree']);
                     $formation->setNiveauSortie($data['niveauSortie']);
@@ -105,14 +137,27 @@ final class FormulaireGeneriqueController extends BaseController
                         $formation->setRegimeInscription($data['regimeInscription']);
                     }
                     $this->entityManager->persist($formation);
+                } else {
+                    // Ajout d'un parcours à une formation existante → elle devient multiparcours.
+                    $formation->setHasParcours(true);
                 }
 
                 // Create the parcours
                 $parcours = new Parcours($formation);
-                $parcours->setLibelle($data['libelle']);
+                if ($estMono) {
+                    // Mono : le parcours unique reprend l'intitulé et le responsable de la formation.
+                    $libelleParcours = $mention->getLibelle();
+                    $respParcours = $responsableMention;
+                } else {
+                    // Multi / formation existante : libellé saisi (ou intitulé de la formation si vide),
+                    // responsable choisi (garde-fou : un non-admin reste responsable de son parcours).
+                    $libelleParcours = trim((string) ($data['libelle'] ?? '')) ?: $mention->getLibelle();
+                    $respParcours = $canChooseResponsable ? ($data['respParcours'] ?? $this->getUser()) : $this->getUser();
+                }
+                $parcours->setLibelle($libelleParcours);
                 $parcours->setRythmeFormation($data['rythmeFormation'] ?? null);
                 $parcours->setRythmeFormationTexte($data['rythmeFormationTexte'] ?? null);
-                $parcours->setRespParcours($this->getUser());
+                $parcours->setRespParcours($respParcours);
                 $parcours->setModalitesEnseignement(null);
                 $parcours->setDureeParcours($data['dureeParcours'] ?? null);
                 $parcours->setDureeParcoursUnite($data['dureeParcoursUnite'] ?? null);
@@ -127,7 +172,13 @@ final class FormulaireGeneriqueController extends BaseController
                 $dpeParcours->setVersion('0.1');
                 $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE);
                 $this->dpeParcoursWorkflow->apply($dpeParcours, 'initialiser');
-                $this->dpeParcoursWorkflow->apply($dpeParcours, 'autoriser');
+                if ($data['typeDiplome']->isPassageCfvu()) {
+                    $this->dpeParcoursWorkflow->apply($dpeParcours, 'autoriser');
+                } else {
+                    // Type de diplôme sans passage CFVU → initialisation directe dans l'état
+                    // d'édition « sans CFVU » (même mécanisme que ProcessReouvertureController).
+                    $dpeParcours->setEtatValidation(['en_cours_redaction_ss_cfvu' => 1]);
+                }
                 $parcours->addDpeParcour($dpeParcours);
 
                 $this->entityManager->persist($dpeParcours);
@@ -172,13 +223,24 @@ final class FormulaireGeneriqueController extends BaseController
                     $eventDispatcher->dispatch($event, AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
                 }
 
-                $this->addFlashBag('success', 'Le parcours a été créé avec succès.');
+                $this->addFlashBag(
+                    Constantes::FLASHBAG_SUCCESS,
+                    $formationCreee
+                        ? 'La formation et son parcours ont été créés avec succès.'
+                        : 'Le parcours a été créé avec succès.'
+                );
+
+                // Nouvelle formation (elle n'avait aucun parcours) → on affiche la formation ;
+                // ajout d'un parcours à une formation existante → on affiche le parcours.
+                if ($formationCreee) {
+                    return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
+                }
 
                 return $this->redirectToRoute('app_parcours_show', ['id' => $parcours->getId()]);
 
             } catch (\Throwable $e) {
                 $this->entityManager->clear();
-                $this->addFlashBag('danger', 'Une erreur est survenue lors de la création du parcours. Veuillez réessayer.');
+                $this->addFlashBag(Constantes::FLASHBAG_ERROR, 'Une erreur est survenue lors de la création du parcours. Veuillez réessayer.');
             }
         }
 
@@ -217,12 +279,18 @@ final class FormulaireGeneriqueController extends BaseController
         if ($codeApogee !== '') {
             $mention->setCodeApogee($codeApogee);
         }
-        $domaineId = (int) $request->request->get('domaineId', 0);
-        if ($domaineId > 0) {
-            $domaine = $domaineRepository->find($domaineId);
+        // Domaine(s) : au moins un est obligatoire.
+        $domaineIds = $request->request->all('domaineIds');
+        $domainesAjoutes = 0;
+        foreach ($domaineIds as $domaineId) {
+            $domaine = $domaineRepository->find((int) $domaineId);
             if ($domaine !== null) {
                 $mention->addDomaine($domaine);
+                $domainesAjoutes++;
             }
+        }
+        if ($domainesAjoutes === 0) {
+            return $this->json(['success' => false, 'error' => 'Veuillez sélectionner au moins un domaine.'], Response::HTTP_BAD_REQUEST);
         }
 
         $this->entityManager->persist($mention);

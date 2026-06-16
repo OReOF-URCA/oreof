@@ -44,5 +44,16 @@
             {{ valide.etat.localisation|badgeValide }}
         </td>
     </tr>
+    {% if valide.etat.maquette is defined %}
+        <tr>
+            <th colspan="2">Maquette</th>
+        </tr>
+        <tr>
+            <td>Maquette (PDF) de la formation</td>
+            <td>
+                {{ valide.etat.maquette|badgeValide }}
+            </td>
+        </tr>
+    {% endif %}
     {{ include('parcours_state/_commun.html.twig') }}
 </table>

@@ -127,4 +127,9 @@ services:
             allowed_extensions: [ 'pdf' ]
             allowed_mime_types: [ 'application/pdf' ]
             max_size: 10485760
+          maquettes:
+            target_dir: '%kernel.project_dir%/public/uploads/maquettes'
+            allowed_extensions: [ 'pdf' ]
+            allowed_mime_types: [ 'application/pdf' ]
+            max_size: 10485760
 

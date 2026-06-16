@@ -144,6 +144,8 @@ class ParcoursValide extends AbstractValide
         if ($this->typeDiplome->isClassique() === false) {
             $this->etat['competences'] = self::NON_CONCERNE;
             $this->etat['structure'] = self::NON_CONCERNE;
+            // Formation non classique : la structure est portée par le PDF de maquette.
+            $this->etat['maquette'] = $this->parcours->getMaquettePdf() !== null ? self::COMPLET : self::VIDE;
         } elseif ($this->typeDiplome->getLibelleCourt() !== 'BUT') {
             $this->etat['competences'] = $this->parcours->getBlocCompetences()->count() > 0 ? self::COMPLET : self::VIDE;
 
@@ -186,7 +188,13 @@ class ParcoursValide extends AbstractValide
 
         $this->etat['poursuitesEtudes'] = $this->nonVide($this->parcours->getPoursuitesEtudes());
         $this->etat['debouches'] = $this->nonVide($this->parcours->getDebouches());
-        $this->etat['codeRome'] = count($this->parcours->getCodesRome()) > 0 ? self::COMPLET : self::VIDE;
+        // Le code ROME n'est pas obligatoire pour les formations non classiques (le
+        // LHÉO fournit R0000 par défaut) : on ne pénalise donc pas leur complétude.
+        if (($this->typeDiplome->isClassique() ?? true) === false) {
+            $this->etat['codeRome'] = self::NON_CONCERNE;
+        } else {
+            $this->etat['codeRome'] = count($this->parcours->getCodesRome()) > 0 ? self::COMPLET : self::VIDE;
+        }
 
 
         return $this;

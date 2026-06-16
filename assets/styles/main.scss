@@ -194,7 +194,10 @@
   opacity: 0.7;
 }
 
-.required:after {
+// `.required` est destinée aux libellés. Tom Select recopie l'attribut `required`
+// du <select> en classe `required` sur son wrapper `.ts-wrapper`, ce qui injectait
+// l'astérisque DANS le champ : on exclut donc ce wrapper.
+.required:not(.ts-wrapper):after {
   content: " *";
   color: red;
   font-size: large;

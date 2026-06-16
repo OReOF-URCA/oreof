@@ -31,6 +31,11 @@ export default class extends Controller {
   }
 
   update() {
+    // La cible « texte » (compteur de caractères) n'est rendue que lorsque le
+    // champ possède un help. Sans help, on ne fait rien plutôt que de planter.
+    if (!this.hasTexteTarget) {
+      return
+    }
     this.texteTarget.innerHTML = `${this.count.toString()} caractères restants`
   }
 

@@ -17,38 +17,36 @@
             {% endfor %}
 
             {# ── Type de diplôme ── #}
-            <h5 class="mb-3">Type de diplôme</h5>
+            <h5 class="mb-3">Diplôme et formation</h5>
             {{ form_row(form.typeDiplome) }}
 
-            {# ── Mention ── #}
-            <h5 class="mb-3 mt-4">Mention / Spécialité</h5>
+            {# ── Intitulé de la formation (mention) ── #}
+            <label for="{{ form.mentionExistante.vars.id }}" class="form-label mt-4 required">
+                Intitulé de la formation
+            </label>
 
             {% if mentionError is defined %}
                 <div class="alert alert-danger">{{ mentionError }}</div>
             {% endif %}
 
-            <div class="d-flex align-items-start gap-2 mb-1">
-                <div class="flex-grow-1">
-                    <select name="{{ form.mentionExistante.vars.full_name }}"
-                            id="{{ form.mentionExistante.vars.id }}"
-                            class="form-select"
-                            data-formulaire-generique--creation-target="mentionSelect"
-                            data-action="change->formulaire-generique--creation#changeMention"
-                            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
-                    >
-                        <option value="">Choisissez d'abord un type de diplôme</option>
-                    </select>
-                </div>
-                <button type="button"
-                        class="btn btn-outline-primary text-nowrap"
-                        data-formulaire-generique--creation-target="mentionModalBtn"
-                        data-action="click->formulaire-generique--creation#openMentionModal"
-                        disabled>
-                    <i class="fal fa-plus-circle"></i> Créer une mention
-                </button>
-            </div>
+            <select name="{{ form.mentionExistante.vars.full_name }}"
+                    id="{{ form.mentionExistante.vars.id }}"
+                    class="form-select mb-2"
+                    data-formulaire-generique--creation-target="mentionSelect"
+                    data-action="change->formulaire-generique--creation#changeMention"
+                    {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
+            >
+                <option value="">Choisissez d'abord un type de diplôme</option>
+            </select>
+            <button type="button"
+                    class="btn btn-outline-primary mb-1"
+                    data-formulaire-generique--creation-target="mentionModalBtn"
+                    data-action="click->formulaire-generique--creation#openMentionModal"
+                    disabled>
+                <i class="fal fa-plus-circle"></i> Créer un intitulé de formation
+            </button>
             <div class="form-text mb-3">
-                Si la mention n'existe pas encore, utilisez le bouton pour la créer.
+                (Si l'intitulé n'est pas présent dans la liste, utilisez le bouton pour le créer.)
             </div>
 
             <div data-formulaire-generique--creation-target="formationInfo"></div>
@@ -60,7 +58,9 @@
                 {{ form_row(form.localisationMention) }}
                 {{ form_row(form.composantesInscription) }}
                 {{ form_row(form.composantePorteuse) }}
-                
+
+                {{ form_row(form.responsableMention) }}
+
                 {{ form_row(form.niveauEntree) }}
                 {{ form_row(form.niveauSortie) }}
 
@@ -69,23 +69,40 @@
 
             <hr>
 
-            {# ── Parcours ── #}
-            <h5 class="mb-3">Parcours</h5>
-            {{ form_row(form.libelle) }}
-            {{ form_row(form.rythmeFormation) }}
-            {{ form_row(form.rythmeFormationTexte) }}
+            {# Case « Cette formation aura plusieurs parcours » : visible uniquement en
+               formation neuve (gérée en JS). Décochée = mono ; cochée = multi. #}
+            <div data-formulaire-generique--creation-target="multiParcoursCheckBloc" class="mb-3" style="display:none">
+                {{ form_row(form.plusieursParcours) }}
+            </div>
 
-            <div class="row">
-                <div class="col-2">
-                    {{ form_row(form.dureeParcours) }}
+            {# Titre « Parcours » : masqué en mono, affiché en multi / formation existante. #}
+            <h5 class="mb-3" data-formulaire-generique--creation-target="parcoursTitle" style="display:none">Parcours</h5>
+
+            {# Libellé + responsable du parcours : masqués en mono. #}
+            <div data-formulaire-generique--creation-target="parcoursDetailsBloc" style="display:none">
+                {{ form_row(form.libelle) }}
+                {{ form_row(form.respParcours) }}
+            </div>
+
+            {# Rythme + durée : toujours visibles (labels « de formation » ↔ « du parcours » en JS). #}
+            <div data-formulaire-generique--creation-target="parcoursBaseBloc">
+                {{ form_row(form.rythmeFormation) }}
+                <div data-formulaire-generique--creation-target="rythmeTexteBloc" style="display:none">
+                    {{ form_row(form.rythmeFormationTexte) }}
                 </div>
-                <div class="col-2">
-                    {{ form_row(form.dureeParcoursUnite) }}
+
+                <div class="row">
+                    <div class="col-2">
+                        {{ form_row(form.dureeParcours) }}
+                    </div>
+                    <div class="col-2">
+                        {{ form_row(form.dureeParcoursUnite) }}
+                    </div>
                 </div>
             </div>
 
             <button type="submit" class="btn btn-success mt-3">
-                <i class="fal fa-floppy-disk"></i> Créer le parcours
+                <i class="fal fa-floppy-disk"></i> Créer la formation
             </button>
 
             {{ form_widget(form.mentionExistante, {'attr': {'data-formulaire-generique--creation-target': 'mentionExistante'}}) }}
@@ -101,7 +118,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="mentionCreationModalLabel">
-                        <i class="fal fa-plus-circle"></i> Créer une nouvelle mention
+                        <i class="fal fa-plus-circle"></i> Créer un nouvel intitulé de formation
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
                 </div>
@@ -127,10 +144,11 @@
                                maxlength="50">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Domaine</label>
-                        <select class="form-select"
-                                data-formulaire-generique--creation-target="mentionDomaineInput">
-                            <option value="">— aucun —</option>
+                        <label class="form-label">Domaine(s) <span class="text-danger">*</span></label>
+                        <select class="form-select" multiple
+                                data-formulaire-generique--creation-target="mentionDomaineInput"
+                                data-placeholder="Choisissez un ou plusieurs domaines"
+                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                             {% for domaine in domaines %}
                                 <option value="{{ domaine.id }}">{{ domaine.libelle }}</option>
                             {% endfor %}
@@ -152,7 +170,7 @@
                     <button type="button"
                             class="btn btn-success"
                             data-action="click->formulaire-generique--creation#saveMention">
-                        <i class="fal fa-floppy-disk"></i> Créer la mention
+                        <i class="fal fa-floppy-disk"></i> Créer l'intitulé
                     </button>
                 </div>
             </div>
@@ -162,17 +180,17 @@
 </div>
 {% endblock %}
 
-{% set header_title %}Créer un nouveau parcours{% endset %}
+{% set header_title %}Créer une formation{% endset %}
 
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_parcours_index'), title: 'Liste des parcours'},
-        {href: '', title: 'Nouveau parcours'},
+        {href: path('app_formation_index'), title: 'Liste des formations'},
+        {href: '', title: 'Nouvelle formation'},
     ]}) }}
 {% endblock %}
 
 {% block bouton_header %}
-    <a href="{{ path('app_parcours_index') }}"
+    <a href="{{ path('app_formation_index') }}"
        class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
        data-bs-toggle="tooltip"
        data-bs-placement="bottom"
