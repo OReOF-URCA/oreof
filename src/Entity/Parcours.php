@@ -318,6 +318,12 @@ class Parcours
     #[ORM\Column(nullable: true)]
     private ?array $logo = [];
 
+    /**
+     * @var Collection<int, ParcoursRamification>
+     */
+    #[ORM\OneToMany(mappedBy: 'parcoursCible', targetEntity: ParcoursRamification::class)]
+    private Collection $parcoursCibleRamifications;
+
     public function __construct(?Formation $formation)
     {
         $this->formation = $formation;
@@ -343,6 +349,7 @@ class Parcours
         $this->userProfils = new ArrayCollection();
         $this->annees = new ArrayCollection();
         $this->changeParcours = new ArrayCollection();
+        $this->parcoursCibleRamifications = new ArrayCollection();
     }
 
 
@@ -1834,6 +1841,36 @@ class Parcours
     public function addLogo(string $filename): static
     {
         $this->logo[] = $filename;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ParcoursRamification>
+     */
+    public function getParcoursCibleRamifications(): Collection
+    {
+        return $this->parcoursCibleRamifications;
+    }
+
+    public function addParcoursCibleRamification(ParcoursRamification $parcoursCibleRamification): static
+    {
+        if (!$this->parcoursCibleRamifications->contains($parcoursCibleRamification)) {
+            $this->parcoursCibleRamifications->add($parcoursCibleRamification);
+            $parcoursCibleRamification->setParcoursCible($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParcoursCibleRamification(ParcoursRamification $parcoursCibleRamification): static
+    {
+        if ($this->parcoursCibleRamifications->removeElement($parcoursCibleRamification)) {
+            // set the owning side to null (unless already changed)
+            if ($parcoursCibleRamification->getParcoursCible() === $this) {
+                $parcoursCibleRamification->setParcoursCible(null);
+            }
+        }
+
         return $this;
     }
 }
