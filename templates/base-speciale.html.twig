@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Welcome!{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico', 'image_package') }}">
     <link rel="preconnect" href="https://fonts.gstatic.com"/>
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet"/>
@@ -31,7 +32,7 @@
         <aside class="hidden lg:flex lg:flex-col lg:justify-between">
             <div class="max-w-xl space-y-6 text-white">
                 <p class="text-sm font-semibold uppercase tracking-[0.25em] text-primary-200">Plateforme</p>
-                <h1 class="text-5xl font-black leading-tight tracking-tight">{{ product_name }}</h1>
+                <img src="{{ asset('Logo/Logo_white.svg', 'image_package') }}" alt="Logo ORéOF" class="h-18 w-auto block">
                 <h2 class="text-2xl font-semibold leading-relaxed text-primary-100">
                     Outil de Redaction de l'Offre de Formation
                 </h2>

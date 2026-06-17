@@ -88,8 +88,11 @@
         </div>
     </div>
 
-    <!-- Image manager modal (géré en Tailwind) -->
-    {{ component('help_image_manager', { showModal: true, editorTextarea: 'textarea[name="faq[reponse]"]' }) }}
+    <div data-live-ignore>
+        {{ component('help_image_manager', { showModal: true, editorTextarea: 'textarea[name="faq[reponse]"]' }) }}
+    </div>
+
+    <script src="{{ asset('js/editor_helpers.js') }}"></script>
 </div>
 
-<script src="{{ asset('js/editor_helpers.js') }}"></script>
+
