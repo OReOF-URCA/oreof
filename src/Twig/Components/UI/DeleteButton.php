@@ -40,6 +40,10 @@ final class DeleteButton
     /** Style du bouton declencheur */
     public string $variant = 'danger';
 
+
+    /** Classes CSS supplémentaires */
+    public string $extraClass = '';
+
     public string $size = 'sm';
 
     public bool $soft = true;
