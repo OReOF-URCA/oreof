@@ -21,6 +21,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\PseudoTypes\ArrayShapeItem;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -222,7 +223,6 @@ class Formation
      */
     #[ORM\OneToMany(mappedBy: 'formation', targetEntity: ChangeParcours::class)]
     private Collection $changeParcours;
-
     public function __construct(?CampagneCollecte $anneeUniversitaire)
     {
         $this->dpe = $anneeUniversitaire;
@@ -1212,4 +1212,5 @@ class Formation
     {
         return $this->etatReconduction === TypeModificationDpeEnum::FERMETURE_DEFINITIVE;
     }
+
 }

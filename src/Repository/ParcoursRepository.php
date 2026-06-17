@@ -124,8 +124,9 @@ class ParcoursRepository extends ServiceEntityRepository
                     $direction
                 );
             } else {
-                $validSortFields = ['libelle', 'sigle', 'typeParcours']; // Règle un crash quand la recherche de parcours est vide. La requête bug quand même car elle est beaucoup trop grosse.
-                if (in_array($sort, $validSortFields)) {
+                $validSortFields = ['libelle', 'sigle', 'typeParcours']; // Règle un crash qui arrive parfois quand on supprime ce que l'on a écrit dans la recherche de parcours.
+                if (in_array($sort, $validSortFields))
+                {
                     $qb->addOrderBy('p.' . $sort, $direction);
                 }
             }

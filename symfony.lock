@@ -68,6 +68,19 @@
             "config/packages/knp_snappy.yaml"
         ]
     },
+    "liip/imagine-bundle": {
+        "version": "2.15",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.8",
+            "ref": "d1227d002b70d1a1f941d91845fcd7ac7fbfc929"
+        },
+        "files": [
+            "config/packages/liip_imagine.yaml",
+            "config/routes/liip_imagine.yaml"
+        ]
+    },
     "php-http/discovery": {
         "version": "1.19",
         "recipe": {

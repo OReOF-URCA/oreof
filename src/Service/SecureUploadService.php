@@ -17,6 +17,8 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
+use Imagine\Image\Box;
+use Imagine\Image\ImageInterface;
 
 class SecureUploadService
 {
@@ -26,6 +28,10 @@ class SecureUploadService
     public function __construct(
         private readonly Filesystem $filesystem,
         private readonly array      $uploadContexts,
+        private readonly \Imagine\Gd\Imagine $imagine = new \Imagine\Gd\Imagine(),
+        private readonly int        $logoMaxWidth = 200,
+        private readonly int        $logoMaxHeight = 200,
+        private readonly bool       $logoAllowUpscale = false,
     )
     {
     }
@@ -97,6 +103,10 @@ class SecureUploadService
             throw FileUploadException::uploadMoveFailed();
         }
 
+        if (in_array($context, self::RESIZABLE_CONTEXTS, true)) {
+            $this->resizeImage($targetDir . '/' . $storedFilename, $this->logoMaxWidth, $this->logoMaxHeight, $this->logoAllowUpscale);
+        }
+
         return new UploadedFileMetadata(
             $storedFilename,
             $this->sanitizeOriginalFilename((string)$file->getClientOriginalName()),
@@ -114,6 +124,8 @@ class SecureUploadService
     {
         return match ($extension) {
             'pdf' => ['application/pdf'],
+            'png' => ['image/png'],
+            'jpg', 'jpeg' => ['image/jpeg'],
             default => [],
         };
     }
@@ -150,5 +162,48 @@ class SecureUploadService
 
         return $this->sanitizeOriginalFilename($storedFilename);
     }
-}
 
+    //region Section pour les logos
+
+    private const DELETABLE_CONTEXTS = ['logos']; // La méthode ne marche que pour les logos, car je n'ai pas encore regardé si l'upload de PDF en a besoin.
+    private const RESIZABLE_CONTEXTS = ['logos'];
+
+    public function delete(string $context, string $storedFilename): void
+    {
+        if (!in_array($context, self::DELETABLE_CONTEXTS, true)) {
+            throw FileUploadException::contextNotConfigured($context);
+        }
+
+        $filePath = $this->resolveStoredFilePath($context, $storedFilename);
+        if ($this->filesystem->exists($filePath)) {
+            $this->filesystem->remove($filePath);
+        }
+    }
+
+    private function resizeImage(string $filePath, int $maxWidth, int $maxHeight, bool $allowUpscale): void
+    {
+        $image = $this->imagine->open($filePath);
+        $size = $image->getSize();
+
+        $widthRatio = $maxWidth / $size->getWidth();
+        $heightRatio = $maxHeight / $size->getHeight();
+
+        // Prend le ratio le plus contraignant, et plafonne à 1.0 si l'upscale est désactivé
+        $ratio = min($widthRatio, $heightRatio);
+        if (!$allowUpscale) {
+            $ratio = min($ratio, 1.0);
+        }
+
+        // Aucun redimensionnement nécessaire
+        if (abs($ratio - 1.0) < 1e-9) {
+            return;
+        }
+
+        $newWidth = (int)round($size->getWidth() * $ratio);
+        $newHeight = (int)round($size->getHeight() * $ratio);
+        $image->resize(new Box($newWidth, $newHeight))
+            ->save($filePath);
+    }
+
+    //endregion
+}

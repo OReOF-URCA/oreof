@@ -1,5 +1,5 @@
 {% form_theme form 'communs/form_theme.html.twig' %}
-{{ form_start(form) }}
+{{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }} {# Permet au formulaire de gérer les fichiers (pour les logos) #}
     {{ form_row(form.libelle, {label: texte == 'option' ? 'options.labels.libelle'|trans({}, 'form') : ''}) }}
     {{ form_row(form.respParcours, {label: texte == 'option' ? 'options.labels.respParcours'|trans({}, 'form') : ''}) }}
 <small>Si le responsable n'est pas dans la liste, vous pourrez l'ajouter lors de la configuration de votre parcours.</small>
@@ -46,6 +46,7 @@
 
 {{ form_row(form.typeParcours) }}
 {{ form_row(form.parcoursOrigine) }}
+{{ form_row(form.logo) }}
 
 {% if is_granted('ROLE_ADMIN') %}
     {{ form_row(form.codeMentionApogee) }}
@@ -57,6 +58,7 @@
     <i class="fal fa-floppy-disk"></i>
     Enregistrer
 </button>
+<div id="logo-upload-errors" class="mt-2"></div>
 
 {{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont
 obligatoires'}) }}

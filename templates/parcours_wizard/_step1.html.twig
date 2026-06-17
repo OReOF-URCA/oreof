@@ -1,48 +1,48 @@
 <div {{ stimulus_controller('parcours--step1', {
-    url: path('app_parcours_save', {parcours:parcours.id}),
+    url: path('app_parcours_save', {parcours: parcours.id}),
 }) }}>
     {% form_theme form 'communs/form_theme.html.twig' %}
     {% if is_granted('EDIT', {route: 'app_formation', subject: parcours.formation}) or
         is_granted('EDIT', {route: 'app_composante', subject: parcours.formation.composantePorteuse}) or
         is_granted('ROLE_ADMIN') %}
         {{ form_row(form.respParcours) }}
-        <a
-                href="#"
-                {{ stimulus_controller('modal', {
-                    size: 'lg',
-                    modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),
-                    nomEvenement: 'refreshStep',
-                    modalUrl: path('app_user_missing', {action: 'responsableParcours', id: parcours.id}) }) }}
-                data-action="click->modal#openModal"
-                data-size="lg"
-                class="ms-4"
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
-                title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}"
+
+        <a href="#"
+        {{ stimulus_controller('modal', {
+            size: 'lg',
+            modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),
+            nomEvenement: 'refreshStep',
+            modalUrl: path('app_user_missing', {action: 'responsableParcours', id: parcours.id}) }) }}
+        data-action="click->modal#openModal"
+        data-size="lg"
+        class="ms-4"
+        data-bs-toggle="tooltip"
+        data-bs-placement="bottom"
+        title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}"
         >
-            <i class="{{ iconAdd }}"></i>
-            <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>
+        <i class="{{ iconAdd }}"></i>
+        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>
         </a>
     {% else %}
         {{ form_row(form.respParcours, {'disabled' : true}) }}
     {% endif %}
     {{ form_row(form.coResponsable) }}
-    <a
-            href="#"
-            {{ stimulus_controller('modal', {
-                size: 'lg',
-                modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),
-                nomEvenement: 'refreshStep',
-                modalUrl: path('app_user_missing', {action: 'coResponsableParcours', id: parcours.id}) }) }}
-            data-action="click->modal#openModal"
-            data-size="lg"
-            class="ms-4"
-            data-bs-toggle="tooltip"
-            data-bs-placement="bottom"
-            title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}"
+
+    <a href="#"
+    {{ stimulus_controller('modal', {
+        size: 'lg',
+        modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),
+        nomEvenement: 'refreshStep',
+        modalUrl: path('app_user_missing', {action: 'coResponsableParcours', id: parcours.id}) }) }}
+    data-action="click->modal#openModal"
+    data-size="lg"
+    class="ms-4"
+    data-bs-toggle="tooltip"
+    data-bs-placement="bottom"
+    title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}"
     >
-        <i class="{{ iconAdd }}"></i>
-        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>
+    <i class="{{ iconAdd }}"></i>
+    <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>
     </a>
     {{ form(form) }}
 
@@ -52,10 +52,10 @@
                class="form-check-inline"
                {% if parcours.getEtatStep(1) %}checked{% endif %}
                 {{ stimulus_action('parcours--step1', 'etatStep', 'change') }}
-
         >
         <label for="etatStructure">
             Cochez cette case si vous avez terminé ...
         </label>
     </div>
+
 </div>

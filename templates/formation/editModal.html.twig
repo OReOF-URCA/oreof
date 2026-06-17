@@ -56,9 +56,12 @@
                 <div class="col-12" {{ stimulus_target('formation', 'user') }}>
                     <i>.:: Choisir le responsable pour afficher ses informations ::.</i>
                 </div>
+
+                <div class="col-12">{{ form_row(form.coResponsable) }}</div>
+
             </div>
 
-            <button class="btn btn-success">
+            <button class="btn btn-success mt-3">
                 <i class="fal fa-floppy-disk"></i>
                 Modifier
             </button>

@@ -22,7 +22,7 @@ class ButCompetence
     private ?string $libelle = null;
 
     #[Groups('parcours_json_versioning')]
-    #[ORM\Column(length: 40, nullable: true)]
+    #[ORM\Column(length: 50, nullable: true)]
     private ?string $nomCourt = null;
 
     #[Groups('parcours_json_versioning')]
