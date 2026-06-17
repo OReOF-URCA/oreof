@@ -59,6 +59,11 @@ class LheoXML
         // 5 codes ROME max
         $codesRomeLheo = array_slice($codesRome, 0, 5);
 
+        // LHEO exige au moins un code ROME : valeur par défaut au bon format (lettre + 4 chiffres).
+        if (count($codesRomeLheo) === 0) {
+            $codesRomeLheo = ['R0000'];
+        }
+
         // Intitulé de la formation
         $intituleFormation = 'Non renseigné.';
         if ($typeDiplomeLibelle = $parcours->getFormation()?->getTypeDiplome()?->getLibelle()) {

@@ -25,8 +25,42 @@
                 <div class="col-4">{{ form_row(form.codeRNCP) }}</div>
                 <div class="col-4">{{ form_row(form.codeMentionApogee) }}</div>
 
-                <div class="col-6">{{ form_row(form.responsableMention) }}</div>
-                <div class="col-6">{{ form_row(form.coResponsable) }}</div>
+                <div class="col-6">
+                    {{ form_row(form.responsableMention) }}
+                    <a
+                            href="#"
+                            {{ stimulus_controller('modal', {
+                                size: 'lg',
+                                modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),
+                                modalUrl: path('app_user_missing', {action: 'creation'}) }) }}
+                            data-action="click->modal#openModal"
+                            data-size="lg"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}"
+                    >
+                        <i class="{{ iconAdd }}"></i>
+                        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>
+                    </a>
+                </div>
+                <div class="col-6">
+                    {{ form_row(form.coResponsable) }}
+                    <a
+                            href="#"
+                            {{ stimulus_controller('modal', {
+                                size: 'lg',
+                                modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),
+                                modalUrl: path('app_user_missing', {action: 'creation'}) }) }}
+                            data-action="click->modal#openModal"
+                            data-size="lg"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}"
+                    >
+                        <i class="{{ iconAdd }}"></i>
+                        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>
+                    </a>
+                </div>
 
             </div>
 
