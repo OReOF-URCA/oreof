@@ -96,8 +96,11 @@
         </div>
     </div>
 
-    {# Composant de gestion des images (modal) #}
-    {{ component('help_image_manager', { showModal: true, editorTextarea: 'textarea[name="help[content]"]' }) }}
+    <div data-live-ignore>
+        {{ component('help_image_manager', { showModal: true, editorTextarea: 'textarea[name="help[content]"]' }) }}
+    </div>
+
+    <script src="{{ asset('js/editor_helpers.js') }}"></script>
 </div>
 
-<script src="{{ asset('js/editor_helpers.js') }}"></script>
+

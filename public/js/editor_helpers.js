@@ -36,15 +36,28 @@
 
   function getCurrentEditor(selector) {
     if (selector) {
-      return document.querySelector(selector);
+      var target = document.querySelector(selector);
+      if (target) return target;
     }
-    if (lastFocusedEditor && document.contains(lastFocusedEditor)) {
+
+    // Si un éditeur a eu le focus récemment et est toujours vivant dans la page, on le prend
+    if (lastFocusedEditor && document.body.contains(lastFocusedEditor) && lastFocusedEditor.clientHeight > 0) {
       return lastFocusedEditor;
     }
-    return (
-      document.querySelector('textarea[name="faq[reponse]"]') ||
-      document.querySelector('textarea[name="help[content]"]')
-    );
+
+    // Sinon, on cherche de manière intelligente le textarea visible dans la page active
+    var faqTextarea = document.querySelector('textarea[name="faq[reponse]"]');
+    if (faqTextarea && faqTextarea.clientHeight > 0) {
+      return faqTextarea;
+    }
+
+    var helpTextarea = document.querySelector('textarea[name="help[content]"]');
+    if (helpTextarea && helpTextarea.clientHeight > 0) {
+      return helpTextarea;
+    }
+
+    // Fallback ultime si l'élément n'est pas encore affiché/mesurable
+    return faqTextarea || helpTextarea;
   }
 
   function applyEditorValue(textarea, value) {
