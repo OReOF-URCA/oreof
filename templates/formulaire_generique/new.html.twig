@@ -60,6 +60,36 @@
                 {{ form_row(form.composantePorteuse) }}
 
                 {{ form_row(form.responsableMention) }}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="#"
+                       {{ stimulus_controller('modal', {
+                           size: 'lg',
+                           modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),
+                           modalUrl: path('app_user_missing', {action: 'creation'}) }) }}
+                       data-action="click->modal#openModal"
+                       data-size="lg"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom"
+                       title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}">
+                        <i class="{{ iconAdd }}"></i>
+                        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>
+                    </a>
+                {% endif %}
+
+                {{ form_row(form.coResponsableMention) }}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="#"
+                       {{ stimulus_controller('modal', {
+                           size: 'lg',
+                           modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),
+                           modalUrl: path('app_user_missing', {action: 'creation'}) }) }}
+                       data-action="click->modal#openModal"
+                       data-size="lg"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom"
+                       title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}">
+                        <i class="{{ iconAdd }}"></i>
+                        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>
+                    </a>
+                {% endif %}
 
                 {{ form_row(form.niveauEntree) }}
                 {{ form_row(form.niveauSortie) }}
@@ -82,6 +112,36 @@
             <div data-formulaire-generique--creation-target="parcoursDetailsBloc" style="display:none">
                 {{ form_row(form.libelle) }}
                 {{ form_row(form.respParcours) }}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="#"
+                       {{ stimulus_controller('modal', {
+                           size: 'lg',
+                           modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),
+                           modalUrl: path('app_user_missing', {action: 'creation'}) }) }}
+                       data-action="click->modal#openModal"
+                       data-size="lg"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom"
+                       title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}">
+                        <i class="{{ iconAdd }}"></i>
+                        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>
+                    </a>
+                {% endif %}
+
+                {{ form_row(form.coRespParcours) }}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="#"
+                       {{ stimulus_controller('modal', {
+                           size: 'lg',
+                           modalTitle: 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form'),
+                           modalUrl: path('app_user_missing', {action: 'creation'}) }) }}
+                       data-action="click->modal#openModal"
+                       data-size="lg"
+                       data-bs-toggle="tooltip" data-bs-placement="bottom"
+                       title="{{ 'fiche_matiere.step1_collegue_manquant.title'|trans({}, 'form') }}">
+                        <i class="{{ iconAdd }}"></i>
+                        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>
+                    </a>
+                {% endif %}
             </div>
 
             {# Rythme + durée : toujours visibles (labels « de formation » ↔ « du parcours » en JS). #}

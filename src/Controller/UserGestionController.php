@@ -98,6 +98,14 @@ class UserGestionController extends BaseController
             //ajout des droits et du centre
 
             switch ($request->query->get('action')) {
+                case 'creation':
+                    // Formulaires de création (formation/parcours pas encore en base) :
+                    // on crée juste l'utilisateur depuis le LDAP, sans rattachement ni
+                    // événement de droits. Il devient sélectionnable dans les
+                    // autocomplétions responsable/co-responsable.
+                    $entityManager->flush();
+
+                    return $this->json(true);
                 case 'responsableFicheMatiere':
                     $fiche = $ficheMatiereRepository->find($request->query->get('id'));
                     //pas besoin d'envoyer un mail dans ce cas

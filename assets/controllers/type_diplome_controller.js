@@ -9,7 +9,9 @@ export default class extends Controller {
     }
 
     toggle() {
-        const enabled = this.classiqueTarget.checked
+        // choix radio pour l'attribut "classique", accrédité = classique.
+        const checked = this.classiqueTargets.find(radio => radio.checked)
+        const enabled = checked ? checked.value === 'accreditee' : false
         document.querySelectorAll('.semestre-field').forEach(row => {
             row.querySelectorAll('input, select').forEach(input => {
                 input.disabled = !enabled
