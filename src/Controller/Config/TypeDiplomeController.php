@@ -9,12 +9,14 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\BaseController;
 use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Form\TypeDiplomeType;
 use App\Service\DetailBuilder;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\DataTableBuilder;
+use App\Service\TypeDiplomePlateformeService;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
 use JsonException;
@@ -24,7 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/administration/type-diplome')]
-class TypeDiplomeController extends AbstractController
+class TypeDiplomeController extends BaseController
 {
     #[Route('/', name: 'app_type_diplome_index', methods: ['GET'])]
     public function index(
@@ -106,7 +108,8 @@ class TypeDiplomeController extends AbstractController
     #[Route('/new', name: 'app_type_diplome_new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
-        TypeDiplomeRepository $typeDiplomeRepository
+        TypeDiplomeRepository        $typeDiplomeRepository,
+        TypeDiplomePlateformeService $typeDiplomePlateformeService
     ): Response
     {
         $typeDiplome = new TypeDiplome();
@@ -117,6 +120,13 @@ class TypeDiplomeController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $typeDiplomeRepository->save($typeDiplome, true);
+
+            // Gérer les plateformes d'admission avec leurs années
+            $plateformesData = $form->get('plateformesAdmission')->getData();
+            if ($plateformesData) {
+                $typeDiplomePlateformeService->syncPlateformes($typeDiplome, $plateformesData, $this->getCampagneCollecte());
+            }
+
             // Abandon de la fenêtre modale
             // return $this->json(true);
 
@@ -199,6 +209,32 @@ class TypeDiplomeController extends AbstractController
                 'format' => 'html',
                 'empty_text' => 'Non renseigné',
             ])
+            ->addCustomField('plateformes', function ($typeDiplome) {
+                $plateformes = $typeDiplome->getTypeDiplomePlateformeAdmissions();
+                if ($plateformes->isEmpty()) {
+                    return 'Aucune plateforme définie';
+                }
+
+                $html = '<ul class="list-disc pl-5">';
+                foreach ($plateformes as $tpa) {
+                    $plateforme = $tpa->getPlateforme();
+                    $annees = $tpa->getAnnees();
+
+                    $anneesText = '';
+                    if ($annees && count($annees) > 0) {
+                        sort($annees);
+                        $anneesText = ' (Année' . (count($annees) > 1 ? 's' : '') . ' ' . implode(', ', $annees) . ')';
+                    }
+
+                    $html .= '<li>' . $plateforme?->getLibelle() . $anneesText . '</li>';
+                }
+                $html .= '</ul>';
+
+                return $html;
+            }, [
+                'label' => 'Plateformes d\'admission configurées',
+                'format' => 'html',
+            ])
             ->build();
 
 
@@ -219,7 +255,8 @@ class TypeDiplomeController extends AbstractController
     public function edit(
         Request $request,
         TypeDiplome $typeDiplome,
-        TypeDiplomeRepository $typeDiplomeRepository
+        TypeDiplomeRepository        $typeDiplomeRepository,
+        TypeDiplomePlateformeService $typeDiplomePlateformeService
     ): Response
     {
         $form = $this->createForm(TypeDiplomeType::class, $typeDiplome, [
@@ -229,6 +266,11 @@ class TypeDiplomeController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $typeDiplomeRepository->save($typeDiplome, true);
+
+            // Gérer les plateformes d'admission avec leurs années
+            $plateformesData = $form->get('plateformesAdmission')->getData();
+            $typeDiplomePlateformeService->syncPlateformes($typeDiplome, $plateformesData ?? [], $this->getCampagneCollecte());
+
             // Abandon de la fenêtre modale
             // return $this->json(true);
             $this->addFlash('toast', [

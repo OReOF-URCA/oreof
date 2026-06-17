@@ -101,6 +101,8 @@ class ChangeRfProcess extends AbstractProcess
         return $this->dispatchEventChangeRf($changeRf, $user, $place, $request, 'reserve');
     }
 
+    //todo: traitement de la date de prise de fonction du RF et impact sur N+1 ? selon la date ? voir si pas fait en V1 ?
+
     private function dispatchEventChangeRf(
         ChangeRf      $changeRf,
         UserInterface $user,

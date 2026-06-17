@@ -57,9 +57,15 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 ),
 
                 MenuItem::link(
+                    'pilotage.gestion_offre_old',
+                    'menu.admin.gestion_offre_old',
+                    'app_offre',
+                ),
+
+                MenuItem::link(
                     'pilotage.gestion_offre',
                     'menu.admin.gestion_offre',
-                    'app_offre',
+                    'app_offre_index',
                 ),
 
                 MenuItem::link(

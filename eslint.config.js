@@ -41,6 +41,10 @@ export default [
         URLSearchParams: 'readonly',
         CustomEvent: 'readonly',
         length: 'readonly',
+        FormData: 'readonly',
+        console: 'readonly',
+        Turbo: 'readonly',
+        DOMParser: 'readonly',
       },
     },
     rules: {

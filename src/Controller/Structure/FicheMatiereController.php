@@ -20,14 +20,17 @@ use Symfony\UX\Turbo\Helper\TurboStream;
 #[Route('/structure/fiche-matiere', name: 'structure_fiche_matiere_')]
 class FicheMatiereController extends BaseController
 {
-    #[Route('/', name: 'index')]
+    #[Route('/', name: 'index', defaults: ['type' => 'parcours'])]
+    #[Route('/hors-diplome', name: 'index_hd', defaults: ['type' => 'hd'])]
     public function index(
-        Request $request
+        Request $request,
+        string  $type = 'parcours',
     ): Response {
+
         return $this->render(
             'structure/fiche_matiere/index.html.twig',
             [
-                'type' => $request->query->get('type', 'parcours'),
+                'type' => $type,
                 'page' => $request->query->get('page', 1),
             ]
         );

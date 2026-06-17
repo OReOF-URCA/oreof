@@ -121,6 +121,18 @@ class CampagneCollecte
     #[ORM\Column(nullable: true)]
     private ?bool $isFinished = null;
 
+    /**
+     * @var Collection<int, TypeDiplomePlateformeAdmission>
+     */
+    #[ORM\OneToMany(targetEntity: TypeDiplomePlateformeAdmission::class, mappedBy: 'campagne')]
+    private Collection $typeDiplomePlateformeAdmissions;
+
+    /**
+     * @var Collection<int, PlateformeAdmissionParametre>
+     */
+    #[ORM\OneToMany(targetEntity: PlateformeAdmissionParametre::class, mappedBy: 'campagne')]
+    private Collection $admissionPlateformeParametres;
+
     public function __construct()
     {
         $this->dpeParcours = new ArrayCollection();
@@ -130,6 +142,8 @@ class CampagneCollecte
         $this->butCompetences = new ArrayCollection();
         $this->dpeDemandes = new ArrayCollection();
         $this->timelineDates = new ArrayCollection();
+        $this->typeDiplomePlateformeAdmissions = new ArrayCollection();
+        $this->admissionPlateformeParametres = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -560,5 +574,65 @@ class CampagneCollecte
         }
 
         return null;
+    }
+
+    /**
+     * @return Collection<int, TypeDiplomePlateformeAdmission>
+     */
+    public function getTypeDiplomePlateformeAdmissions(): Collection
+    {
+        return $this->typeDiplomePlateformeAdmissions;
+    }
+
+    public function addTypeDiplomePlateformeAdmission(TypeDiplomePlateformeAdmission $typeDiplomePlateformeAdmission): static
+    {
+        if (!$this->typeDiplomePlateformeAdmissions->contains($typeDiplomePlateformeAdmission)) {
+            $this->typeDiplomePlateformeAdmissions->add($typeDiplomePlateformeAdmission);
+            $typeDiplomePlateformeAdmission->setCampagne($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTypeDiplomePlateformeAdmission(TypeDiplomePlateformeAdmission $typeDiplomePlateformeAdmission): static
+    {
+        if ($this->typeDiplomePlateformeAdmissions->removeElement($typeDiplomePlateformeAdmission)) {
+            // set the owning side to null (unless already changed)
+            if ($typeDiplomePlateformeAdmission->getCampagne() === $this) {
+                $typeDiplomePlateformeAdmission->setCampagne(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PlateformeAdmissionParametre>
+     */
+    public function getAdmissionPlateformeParametres(): Collection
+    {
+        return $this->admissionPlateformeParametres;
+    }
+
+    public function addAdmissionPlateformeParametre(PlateformeAdmissionParametre $admissionPlateformeParametre): static
+    {
+        if (!$this->admissionPlateformeParametres->contains($admissionPlateformeParametre)) {
+            $this->admissionPlateformeParametres->add($admissionPlateformeParametre);
+            $admissionPlateformeParametre->setCampagne($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAdmissionPlateformeParametre(PlateformeAdmissionParametre $admissionPlateformeParametre): static
+    {
+        if ($this->admissionPlateformeParametres->removeElement($admissionPlateformeParametre)) {
+            // set the owning side to null (unless already changed)
+            if ($admissionPlateformeParametre->getCampagne() === $this) {
+                $admissionPlateformeParametre->setCampagne(null);
+            }
+        }
+
+        return $this;
     }
 }

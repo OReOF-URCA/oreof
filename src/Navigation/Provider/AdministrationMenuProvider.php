@@ -32,7 +32,13 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                         key: 'administration.ville',
                         label: 'menu.config.ville',
                         route: 'app_ville_index',
-                    )->inColumn('menu.config.menu_etablissement'),
+                    ),
+                    MenuItem::link(
+                        key: 'administration.plateforme_adminission',
+                        label: 'menu.config.plateforme_adminission',
+                        route: 'app_plateforme_adminission_index',
+                    )
+                        ->inColumn('menu.config.menu_etablissement'),
 
                     MenuItem::link(
                         key: 'administration.domaines',

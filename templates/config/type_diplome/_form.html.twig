@@ -1,0 +1,98 @@
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+        {{ form_start(form) }}
+
+        {# Affichage des champs standards #}
+        {{ form_row(form.libelle) }}
+        {{ form_row(form.libelle_court) }}
+        {{ form_row(form.codeApogee) }}
+        {{ form_row(form.codifIntermediaire) }}
+        {{ form_row(form.modalites_admission) }}
+        {{ form_row(form.prerequis_obligatoires) }}
+        {{ form_row(form.presentationFormation) }}
+        {{ form_row(form.insertionProfessionnelle) }}
+        {{ form_row(form.semestreDebut) }}
+        {{ form_row(form.semestreFin) }}
+        {{ form_row(form.nbUeMin) }}
+        {{ form_row(form.nbUeMax) }}
+        {{ form_row(form.nbEctsMaxUe) }}
+        {{ form_row(form.nbEcParUe) }}
+        {{ form_row(form.ModeleMcc) }}
+        {{ form_row(form.debutSemestreFlexible) }}
+        {{ form_row(form.hasMemoire) }}
+        {{ form_row(form.hasStage) }}
+        {{ form_row(form.hasSituationPro) }}
+        {{ form_row(form.hasProjet) }}
+        {{ form_row(form.ectsObligatoireSurEc) }}
+        {{ form_row(form.mcccObligatoireSurEc) }}
+        {{ form_row(form.controleAssiduite) }}
+
+        {# Section Plateformes d'admission avec gestion dynamique #}
+<div class="mt-6 border-t pt-6">
+    <h3 class="mb-4 text-lg font-semibold text-secondary-900 dark:text-secondary-100">
+        Plateformes d'admission
+    </h3>
+
+    {% set prototypeHtml %}
+        <div data-form-collection-target="field"
+             class="mb-4 rounded-lg border border-secondary-200 bg-secondary-50 p-4 dark:border-secondary-700 dark:bg-secondary-800">
+            {{ form_widget(form.plateformesAdmission.vars.prototype) }}
+            <button type="button"
+                    data-action="click->form-collection#removeItem"
+                    class="mt-2 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                <twig:UX:Icon name="icon:delete" class="mr-1 inline h-4 w-4"/>
+                Supprimer cette plateforme
+            </button>
+        </div>
+    {% endset %}
+
+    <div {{ stimulus_controller('form-collection', {
+        'prototype': prototypeHtml|json_encode,
+        'max-items': 0
+    }) }}>
+        <div data-form-collection-target="fields">
+            {% for plateformeForm in form.plateformesAdmission %}
+                <div data-form-collection-target="field"
+                     class="mb-4 rounded-lg border border-secondary-200 bg-secondary-50 p-4 dark:border-secondary-700 dark:bg-secondary-800">
+                    {{ form_row(plateformeForm.plateforme) }}
+                    {{ form_row(plateformeForm.annees) }}
+                    <button type="button"
+                            data-action="click->form-collection#removeItem"
+                            class="mt-2 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                        <twig:UX:Icon name="icon:delete" class="mr-1 inline h-4 w-4"/>
+                        Supprimer cette plateforme
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="button"
+                data-form-collection-target="addButton"
+                data-action="click->form-collection#addItem"
+                class="mt-2 inline-flex items-center rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800">
+            <twig:UX:Icon name="icon:add" class="mr-2 h-4 w-4"/>
+            Ajouter une plateforme
+        </button>
+    </div>
+</div>
+
+<div class="mt-6 flex flex-wrap items-center gap-2 border-t pt-6">
+    <twig:Button
+            type="submit"
+            variant="success"
+            :soft="false"
+            :outline="false"
+            icon="icon:save"
+            label="Enregistrer"
+    />
+    <twig:Button
+            href="{{ path('app_type_diplome_index') }}"
+            variant="secondary"
+            :outline="true"
+            :soft="false"
+            icon="icon:arrow-left"
+            label="Annuler"
+    />
+</div>
+
+{{ form_end(form) }}
+

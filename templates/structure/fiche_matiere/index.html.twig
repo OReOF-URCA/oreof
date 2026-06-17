@@ -38,7 +38,8 @@
         {#        </div> #}
         <turbo-frame
                 id="liste_fiche_matiere"
-                src="{{ type == 'hd' ? path('structure_fiche_matiere_liste_hd') : path('structure_fiche_matiere_liste') }}"></turbo-frame>
+                src="{{ type == 'hd' ? path('structure_fiche_matiere_liste_hd') : path('structure_fiche_matiere_liste') }}">
+        </turbo-frame>
     </section>
 {% endblock %}
 
@@ -58,17 +59,17 @@
     {% endif %}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            title: 'Offre de formation',
-            url: path('structure_formation_index')
-        },
-        {
-            title: type == 'hd' ? 'Fiches EC/matières "hors diplôme"' : 'Fiches EC/matières',
-        }
-    ]}) }}
-{% endblock %}
+{# {% block breadcrumb %} #}
+{#    {{ include('communs/_breadcrumb.html.twig', {liens:[ #}
+{#        { #}
+{#            title: 'Offre de formation', #}
+{#            url: path('structure_formation_index') #}
+{#        }, #}
+{#        { #}
+{#            title: type == 'hd' ? 'Fiches EC/matières "hors diplôme"' : 'Fiches EC/matières', #}
+{#        } #}
+{#    ]}) }} #}
+{# {% endblock %} #}
 
 {% block bouton_header %}
     {% if type == 'hd' %}

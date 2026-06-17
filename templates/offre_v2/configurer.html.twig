@@ -1,0 +1,435 @@
+{% extends 'base.html.twig' %}
+
+{% block bouton_header %}
+    <twig:Button variant="success" href="" icon="icon:add">
+        Ajouter un parcours
+    </twig:Button>
+    <twig:Button variant="primary" href="{{ path('app_offre_index') }}"
+                 icon="icon:arrow-left"
+    >
+        Retour à la liste des offres
+    </twig:Button>
+{% endblock %}
+
+{% set header_title = "Configurer la formation : "~formation.displayLong %}
+{% set header_description = "???" %}
+{% set typeDiplome = formation.typeDiplome %}
+
+{% block content %}
+    <twig:Card extraClass="mb-4"
+               title="Contrôle avant transmission"
+    >
+        <div class="mt-4 grid gap-3 md:grid-cols-4">
+            <div class="rounded-xl bg-green-50 p-3 text-sm text-green-700">
+                <div class="text-lg font-bold">{{ tabStatistiques.nbParcoursOuvert }}
+                    /{{ formation.parcours|length }}</div>
+                parcours ouverts
+            </div>
+
+            <div class="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700">
+                <div class="text-lg font-bold">{{ plateformes|length }}</div>
+                plateforme{{ plateformes|length > 1 ? 's' : '' }} active{{ plateformes|length > 1 ? 's' : '' }}
+            </div>
+
+            <div class="rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
+                <div class="text-lg font-bold">{{ tabStatistiques.capacite }}</div>
+                capacité
+            </div>
+
+            <div class="rounded-xl bg-amber-50 p-3 text-sm text-amber-700">
+                <div class="text-lg font-bold">1</div>
+                anomalie
+            </div>
+        </div>
+        <div class="mt-4 space-y-3 text-sm">
+            <div class="rounded-xl bg-green-50 p-3 text-green-800">
+                ✓ Les informations générales de la formation sont complètes.
+            </div>
+            <div class="rounded-xl bg-amber-50 p-3 text-amber-800">
+                ⚠ Le parcours Développement web a Études en France actif, mais aucune capacité EeF n’est renseignée.
+            </div>
+            <div class="rounded-xl bg-amber-50 p-3 text-amber-800">
+                ⚠ Le niveau de français requis pour Études en France est manquant.
+            </div>
+        </div>
+
+        <div class="mt-5 flex justify-end gap-2">
+            <button class="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50">
+                Sauvegarder en brouillon
+            </button>
+            <button class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+                Transmettre pour validation composante
+            </button>
+        </div>
+
+    </twig:Card>
+
+
+    {% for parcours in formation.parcours %}
+        {% set statParcours = tabStatistiques['parcours'][parcours.id] %}
+        <twig:Card extraClass="mb-4"
+                   :title="'Parcours : '~parcours.libelle"
+        >
+            <twig:block name="actions">
+                {# todo: badge si tronc commun, ... #}
+                <label for="parcours-{{ parcours.id }}" class="cursor-pointer"></label>
+                <select class="rounded-lg border px-3 py-2 text-sm"
+                        id="parcours-{{ parcours.id }}"
+                >
+                    <option>Ouvert</option>
+                    <option>Fermé</option>
+                    <option>À confirmer</option>
+                </select>
+            </twig:block>
+            <!-- Parcours -->
+            <article>
+                <!-- Indicateurs parcours -->
+                <div class="mt-4 grid gap-3 md:grid-cols-4">
+                    <div class="rounded-xl bg-green-50 p-3 text-sm text-green-700">
+                        <div class="text-lg font-bold">{{ statParcours.nbAnneesOuvertes }}
+                            /{{ statParcours.nbAnnees }}</div>
+                        années ouvertes
+                    </div>
+
+                    <div class="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700">
+                        <div class="text-lg font-bold">3</div>
+                        plateformes actives
+                    </div>
+
+                    <div class="rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
+                        <div class="text-lg font-bold">{{ statParcours.capacite }}</div>
+                        capacité totale
+                    </div>
+
+                    <div class="rounded-xl bg-amber-50 p-3 text-sm text-amber-700">
+                        <div class="text-lg font-bold">1</div>
+                        anomalie
+                    </div>
+                </div>
+
+                <!-- Années du parcours -->
+                <div class="mt-5 space-y-4">
+                    {# Fallback vers l'ancien système si pas de comparaison #}
+                    {% for annee in parcours.annees %}
+                        {% if annee.isOuvert %}
+                            {% if comparaison[parcours.id] is defined and comparaison[parcours.id][annee.ordre] is defined %}
+                                {% set anneeCourante = comparaison[parcours.id][annee.ordre].anneeCourante %}
+                                {% set anneeComparaison = comparaison[parcours.id][annee.ordre] %}
+                                <!-- Année {{ anneeComparaison.numeroAnnee }} -->
+                                <details open class="rounded-xl border border-indigo-200 bg-indigo-50/30 p-4">
+                                    <summary class="cursor-pointer">
+                                        <div class="inline-flex items-center gap-2">
+                                            <span class="font-semibold">{{ typeDiplome.libelleCourt }} {{ annee.ordre }}</span>
+                                            <span class="rounded-full bg-indigo-100 px-2 py-1 text-xs text-indigo-700">
+                                                Année commune
+                                            </span>
+                                            <twig:Badge variant="success" label="Ouverte"/>
+                                        </div>
+                                    </summary>
+
+                                    <div class="mt-4 grid gap-4 md:grid-cols-2">
+                                        <div>
+                                            <label class="text-sm font-medium">Ouverture</label>
+                                            <select class="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm">
+                                                <option {% if annee.isOuvert %}selected{% endif %}>Ouverte</option>
+                                                <option {% if not annee.isOuvert %}selected{% endif %}>Fermée</option>
+                                                <option>À confirmer</option>
+                                            </select>
+                                            {% if anneeComparaison.anneePrecedente %}
+                                                <div class="mt-1 text-xs text-slate-500">
+                                                    Année précédente : <span
+                                                            class="font-medium">{{ anneeComparaison.anneePrecedente.isOuvert ? 'Ouverte' : 'Fermée' }}</span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div>
+                                            <label class="text-sm font-medium">Capacité globale</label>
+                                            <input value="{{ annee.capaciteAccueil }}"
+                                                   class="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm">
+                                            {% if anneeComparaison.anneePrecedente %}
+                                                <div class="mt-1 text-xs text-slate-500">
+                                                    Année précédente : <span
+                                                            class="font-medium">{{ anneeComparaison.anneePrecedente.capaciteAccueil }}</span>
+                                                    {% set diff = annee.capaciteAccueil - anneeComparaison.anneePrecedente.capaciteAccueil %}
+                                                    {% if diff != 0 %}
+                                                        <span class="ml-1 {% if diff > 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                                                            ({{ diff > 0 ? '+' : '' }}{{ diff }})
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4 rounded-xl border bg-white p-4">
+                                        <h5 class="font-semibold">Plateformes et capacités</h5>
+
+                                        {% if plateformes is not empty %}
+                                            <div class="mt-3 overflow-hidden rounded-xl border">
+                                                <table class="w-full text-sm">
+                                                    <thead class="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                                                    <tr>
+                                                        <th class="px-4 py-3">Plateforme</th>
+                                                        <th class="px-4 py-3">Active</th>
+                                                        <th class="px-4 py-3">Globale</th>
+                                                        <th class="px-4 py-3">Classique</th>
+                                                        <th class="px-4 py-3">Alternance</th>
+                                                        <th class="px-4 py-3">Spécifique</th>
+                                                        {% if plateformes|filter(p => p.definitionChamps is not empty)|length > 0 %}
+                                                            <th class="px-4 py-3">Champs spécifiques</th>
+                                                        {% endif %}
+                                                        <th class="px-4 py-3">Validité</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y">
+                                                    {% for plateforme in plateformes|filter(plateforme => annee.ordre in plateforme.annees) %}
+                                                        {% set plateformeCourante = anneeCourante.plateformes|filter(p => p.code == plateforme.code)|first %}
+                                                        {% set plateformePrecedente = anneeComparaison.anneePrecedente ? anneeComparaison.anneePrecedente.plateformes|filter(p => p.code == plateforme.code)|first : null %}
+                                                        <tr>
+                                                            <td class="px-4 py-3 font-medium">
+                                                                {% if plateforme.color %}
+                                                                    <span class="inline-flex items-center gap-2">
+                                                                        <span class="h-2 w-2 rounded-full bg-{{ plateforme.color }}-500"></span>
+                                                                        {{ plateforme.libelle }}
+                                                                    </span>
+                                                                {% else %}
+                                                                    {{ plateforme.libelle }}
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <input type="checkbox"
+                                                                       name="plateforme_{{ plateforme.id }}_active_annee_{{ anneeComparaison.numeroAnnee }}"
+                                                                       {% if plateformeCourante %}checked{% endif %}>
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <input value=""
+                                                                       name="plateforme_{{ plateforme.id }}_globale_annee_{{ anneeComparaison.numeroAnnee }}"
+                                                                       class="w-20 rounded border px-2 py-1"
+                                                                       type="number"
+                                                                       min="0">
+                                                                {% if plateformePrecedente %}
+                                                                    <div class="text-xs text-slate-400">Préc: -</div>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <input value=""
+                                                                       name="plateforme_{{ plateforme.id }}_classique_annee_{{ anneeComparaison.numeroAnnee }}"
+                                                                       class="w-20 rounded border px-2 py-1"
+                                                                       type="number"
+                                                                       min="0">
+                                                                {% if plateformePrecedente %}
+                                                                    <div class="text-xs text-slate-400">Préc: -</div>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <input value="0"
+                                                                       name="plateforme_{{ plateforme.id }}_alternance_annee_{{ anneeComparaison.numeroAnnee }}"
+                                                                       class="w-20 rounded border px-2 py-1"
+                                                                       type="number"
+                                                                       min="0">
+                                                                {% if plateformePrecedente %}
+                                                                    <div class="text-xs text-slate-400">Préc: 0</div>
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <input value="0"
+                                                                       name="plateforme_{{ plateforme.id }}_specifique_annee_{{ anneeComparaison.numeroAnnee }}"
+                                                                       class="w-20 rounded border px-2 py-1"
+                                                                       type="number"
+                                                                       min="0">
+                                                                {% if plateformePrecedente %}
+                                                                    <div class="text-xs text-slate-400">Préc: 0</div>
+                                                                {% endif %}
+                                                            </td>
+                                                            {% if plateformes|filter(p => p.definitionChamps is not empty)|length > 0 %}
+                                                                <td class="px-4 py-3">
+                                                                    {% if plateforme.definitionChamps is not empty %}
+                                                                        <button type="button"
+                                                                                class="rounded bg-indigo-100 px-2 py-1 text-xs text-indigo-700 hover:bg-indigo-200"
+                                                                                onclick="alert('Modal champs spécifiques pour {{ plateforme.libelle }}')">
+                                                                            <i class="fas fa-edit"></i> Configurer
+                                                                        </button>
+                                                                    {% else %}
+                                                                        <span class="text-slate-400">-</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                            {% endif %}
+                                                            <td class="px-4 py-3">
+                                                                <span class="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700">À valider</span>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        {% else %}
+                                            <p class="mt-3 text-sm text-slate-500">Aucune plateforme d'admission n'est
+                                                configurée pour ce type de diplôme.</p>
+                                        {% endif %}
+                                    </div>
+                                </details>
+                            {% else %}
+                                <!-- Année ouverte -->
+                                <details open class="rounded-xl border border-indigo-200 bg-indigo-50/30 p-4">
+                                    <summary class="cursor-pointer">
+                                        <div class="inline-flex items-center gap-2">
+                                            <span class="font-semibold">{{ typeDiplome.libelleCourt }} {{ annee.ordre }}</span>
+                                            <span class="rounded-full bg-indigo-100 px-2 py-1 text-xs text-indigo-700">
+                    Année commune
+                  </span>
+                                            <twig:Badge variant="success" label="Ouverte"/>
+                                        </div>
+                                    </summary>
+
+                                    <div class="mt-4 grid gap-4 md:grid-cols-2">
+                                        <div>
+                                            <label class="text-sm font-medium">Ouverture</label>
+                                            <select class="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm">
+                                                <option>Ouverte</option>
+                                                <option>Fermée</option>
+                                                <option>À confirmer</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label class="text-sm font-medium">Capacité globale</label>
+                                            <input value="{{ annee.capaciteAccueil }}"
+                                                   class="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm">
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4 rounded-xl border bg-white p-4">
+                                        <h5 class="font-semibold">Plateformes et capacités</h5>
+
+                                        {% if plateformes is not empty %}
+                                            <div class="mt-3 overflow-hidden rounded-xl border">
+                                                <table class="w-full text-sm">
+                                                    <thead class="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                                                    <tr>
+                                                        <th class="px-4 py-3">Plateforme</th>
+                                                        <th class="px-4 py-3">Active</th>
+                                                        <th class="px-4 py-3">Globale</th>
+                                                        <th class="px-4 py-3">Classique</th>
+                                                        <th class="px-4 py-3">Alternance</th>
+                                                        <th class="px-4 py-3">Spécifique</th>
+                                                        {% if plateformes|filter(p => p.definitionChamps is not empty)|length > 0 %}
+                                                            <th class="px-4 py-3">Champs spécifiques</th>
+                                                        {% endif %}
+                                                        <th class="px-4 py-3">Validité</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody class="divide-y">
+                                                    {% for plateforme in plateformes|filter(plateforme => annee.ordre in plateforme.annees) %}
+                                                        <tr>
+                                                            <td class="px-4 py-3 font-medium">
+                                                                {% if plateforme.color %}
+                                                                    <span class="inline-flex items-center gap-2">
+                                                                <span class="h-2 w-2 rounded-full bg-{{ plateforme.color }}-500"></span>
+                                                                {{ plateforme.libelle }}
+                                                            </span>
+                                                                {% else %}
+                                                                    {{ plateforme.libelle }}
+                                                                {% endif %}
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <input type="checkbox"
+                                                                       name="plateforme_{{ plateforme.id }}_active"
+                                                                       checked>
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <input value=""
+                                                                       name="plateforme_{{ plateforme.id }}_globale"
+                                                                       class="w-20 rounded border px-2 py-1"
+                                                                       type="number"
+                                                                       min="0">
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <input value=""
+                                                                       name="plateforme_{{ plateforme.id }}_classique"
+                                                                       class="w-20 rounded border px-2 py-1"
+                                                                       type="number"
+                                                                       min="0">
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <input value="0"
+                                                                       name="plateforme_{{ plateforme.id }}_alternance"
+                                                                       class="w-20 rounded border px-2 py-1"
+                                                                       type="number"
+                                                                       min="0">
+                                                            </td>
+                                                            <td class="px-4 py-3">
+                                                                <input value="0"
+                                                                       name="plateforme_{{ plateforme.id }}_specifique"
+                                                                       class="w-20 rounded border px-2 py-1"
+                                                                       type="number"
+                                                                       min="0">
+                                                            </td>
+                                                            {% if plateformes|filter(p => p.definitionChamps is not empty)|length > 0 %}
+                                                                <td class="px-4 py-3">
+                                                                    {% if plateforme.definitionChamps is not empty %}
+                                                                        <button type="button"
+                                                                                class="rounded bg-indigo-100 px-2 py-1 text-xs text-indigo-700 hover:bg-indigo-200"
+                                                                                onclick="alert('Modal champs spécifiques pour {{ plateforme.libelle }}')">
+                                                                            <i class="fas fa-edit"></i> Configurer
+                                                                        </button>
+                                                                    {% else %}
+                                                                        <span class="text-slate-400">-</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                            {% endif %}
+                                                            <td class="px-4 py-3">
+                                                                <span class="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700">À valider</span>
+                                                            </td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        {% else %}
+                                            <div class="mt-3 rounded-xl border border-dashed bg-slate-50 p-4 text-center text-sm text-slate-500">
+                                                Aucune plateforme d'admission n'est configurée pour ce type de diplôme.
+                                                <br>
+                                                <a href="{{ path('app_type_diplome_edit', {id: formation.typeDiplome.id}) }}"
+                                                   class="mt-2 inline-block text-indigo-600 hover:text-indigo-800">
+                                                    Configurer les plateformes →
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </details>
+                            {% endif %}
+                        {% else %}
+                            <details class="rounded-xl border bg-slate-50 p-4 opacity-80">
+                                <summary class="cursor-pointer">
+                                    <div class="inline-flex items-center gap-2">
+                                        <span class="font-semibold">{{ typeDiplome.libelleCourt }} {{ annee.ordre }}</span>
+                                        <span class="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700">
+                                                Année propre au parcours
+                                              </span>
+                                        <twig:Badge variant="danger" label="Fermée"/>
+                                    </div>
+                                </summary>
+
+                                <div class="mt-4 rounded-xl border border-dashed bg-white p-4 text-sm text-slate-500">
+                                    Les plateformes et capacités sont désactivées tant que cette année est fermée.
+                                    {% if parcours.isOuvert() %}
+                                        <twig:Button variant="primary"
+                                                     href="#">{# todo: lien pour ouvrir l'année et reload le contenu avec turbo #}
+                                            Ouvrir l'année
+                                        </twig:Button>
+                                    {% else %}
+                                        Le parcours est fermé
+                                    {% endif %}
+                                </div>
+                            </details>
+                        {% endif %}
+                    {% endfor %}
+
+
+                </div>
+            </article>
+        </twig:Card>
+    {% endfor %}
+{% endblock %}
+

@@ -3,7 +3,7 @@
 {% block content %}
     <section
             class="rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
-        {{ include('config/type_diplome/_form.html.twig') }}
+        {{ include('communs/_form.html.twig') }}
     </section>
 {% endblock %}
 
@@ -11,16 +11,9 @@
     {{ titre }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        { title: 'Administration' },
-        { title: 'Types de diplôme' }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <twig:Button
-            href="{{ path('app_type_diplome_index') }}"
+            href="{{ path('app_plateforme_adminission_index') }}"
             variant="success"
             :outline="true"
             :soft="false"

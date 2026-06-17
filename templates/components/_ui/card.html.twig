@@ -14,6 +14,16 @@ Composant Card — exemples :
   >
       <p>Contenu de la carte</p>
   </twig:Card>
+
+  <twig:Card title="Carte avec slot actions personnalisé">
+      <p>Contenu de la carte</p>
+      <twig:block name="actions">
+          <select class="...">
+              <option>Option 1</option>
+              <option>Option 2</option>
+          </select>
+      </twig:block>
+  </twig:Card>
 #}
 
 {% set resolvedTitle = title ?? '' %}
@@ -37,8 +47,12 @@ Composant Card — exemples :
     {% block content %}{% endblock %}
 {% endset %}
 
+{% set slotActions %}
+    {% block actions %}{% endblock %}
+{% endset %}
+
 <div class="{{ wrapperClasses }}" {{- attributes -}}>
-    {% if resolvedTitle != '' or resolvedDescription != '' or resolvedActions is not empty %}
+    {% if resolvedTitle != '' or resolvedDescription != '' or resolvedActions is not empty or slotActions|trim != '' %}
         <div class="p-8 border-b border-secondary-200 dark:border-secondary-700">
             <div class="flex items-start justify-between gap-4">
                 <div class="min-w-0">
@@ -50,7 +64,12 @@ Composant Card — exemples :
                     {% endif %}
                 </div>
 
-                {% if resolvedActions is not empty %}
+                {# Priorité au slot actions, sinon utilise la prop actions #}
+                {% if slotActions|trim != '' %}
+                    <div class="flex items-center gap-2 shrink-0">
+                        {{ slotActions|raw }}
+                    </div>
+                {% elseif resolvedActions is not empty %}
                     <div class="flex items-center gap-2 shrink-0">
                         {% for a in resolvedActions %}
                             {% if a is iterable %}

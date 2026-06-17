@@ -1919,4 +1919,9 @@ class Parcours
 
         return $this;
     }
+
+    public function isOuvert(): bool
+    {
+        return !$this->getDpeParcours()->first()?->isNonOuvert();
+    }
 }
