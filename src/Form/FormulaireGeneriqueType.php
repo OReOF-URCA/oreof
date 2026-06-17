@@ -43,6 +43,15 @@ class FormulaireGeneriqueType extends AbstractType
             'Responsable du parcours',
             'Vous serez le responsable de ce parcours. Seul un administrateur peut désigner une autre personne.'
         );
+        // Co-responsables (formation + parcours) : optionnels et jamais verrouillés
+        // ($lockToSelf = false). Mêmes règles d'héritage que les responsables (gérées
+        // dans le contrôleur : en parcours unique, le co-resp parcours = co-resp formation).
+        [$coRespMentionType, $coRespMentionOptions] = $this->responsableFieldConfig(
+            $canChoose, $currentUser, 'Co-responsable de la formation', '', false
+        );
+        [$coRespParcoursType, $coRespParcoursOptions] = $this->responsableFieldConfig(
+            $canChoose, $currentUser, 'Co-responsable du parcours', '', false
+        );
 
         $builder
             // --- Formation fields ---
@@ -84,6 +93,7 @@ class FormulaireGeneriqueType extends AbstractType
                 'choice_label' => fn(UnitEnum $c) => $c->libelle(),
             ])
             ->add('responsableMention', $respMentionType, $respMentionOptions)
+            ->add('coResponsableMention', $coRespMentionType, $coRespMentionOptions)
 
             // --- Parcours fields ---
             // Case proposée uniquement pour une formation neuve (gérée en JS). Décochée =
@@ -103,6 +113,7 @@ class FormulaireGeneriqueType extends AbstractType
                 'help' => "Laissez vide pour reprendre l'intitulé de la formation.",
             ])
             ->add('respParcours', $respParcoursType, $respParcoursOptions)
+            ->add('coRespParcours', $coRespParcoursType, $coRespParcoursOptions)
             ->add('dureeParcours', NumberType::class, [
                 // Libellé par défaut « de formation » (mode mono) ; basculé en « du parcours » en JS.
                 'label' => 'Durée de formation',
@@ -174,11 +185,12 @@ class FormulaireGeneriqueType extends AbstractType
      *
      * @return array{0: class-string, 1: array<string, mixed>} le type de champ et ses options
      */
-    private function responsableFieldConfig(bool $canChoose, ?User $currentUser, string $label, string $help): array
+    private function responsableFieldConfig(bool $canChoose, ?User $currentUser, string $label, string $help, bool $lockToSelf = true): array
     {
-        if ($canChoose) {
-            // Utilisateur privilégié (admin) : libre choix du responsable.
-            // Champ facultatif : laissé vide, le créateur est désigné par défaut.
+        // Champ choisissable librement : soit l'utilisateur est privilégié (admin),
+        // soit il s'agit d'un co-responsable (jamais verrouillé sur soi-même — un
+        // co-responsable de soi n'aurait pas de sens, et le champ est optionnel).
+        if ($canChoose || !$lockToSelf) {
             return [EntityType::class, [
                 'class' => User::class,
                 'query_builder' => fn($er) => $er->createQueryBuilder('u')
@@ -186,10 +198,10 @@ class FormulaireGeneriqueType extends AbstractType
                     ->addOrderBy('u.prenom', 'ASC'),
                 'choice_label' => fn(User $u) => $u->getDisplay(),
                 'label' => $label,
-                'placeholder' => 'Choisissez un responsable',
+                'placeholder' => $lockToSelf ? 'Choisissez un responsable' : 'Choisissez un co-responsable (optionnel)',
                 'required' => false,
                 'autocomplete' => true,
-                'help' => 'Laissez vide pour vous désigner comme responsable.',
+                'help' => $lockToSelf ? 'Laissez vide pour vous désigner comme responsable.' : 'Optionnel.',
             ]];
         }
 

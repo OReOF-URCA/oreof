@@ -121,6 +121,10 @@ final class FormulaireGeneriqueController extends BaseController
                     // peut désigner quelqu'un d'autre, sinon c'est l'utilisateur courant.
                     $responsableMention = $canChooseResponsable ? ($data['responsableMention'] ?? $this->getUser()) : $this->getUser();
                     $formation->setResponsableMention($responsableMention);
+                    // Co-responsable de formation : optionnel, choix libre pour tous
+                    // (jamais verrouillé), donc indépendant de $canChooseResponsable.
+                    $coResponsableMention = $data['coResponsableMention'] ?? null;
+                    $formation->setCoResponsable($coResponsableMention);
                     // Mono (case décochée) → affichage sans parcours ; multi (case cochée) → avec parcours.
                     $formation->setHasParcours($plusieursParcours);
                     $formation->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_PARCOURS);
@@ -148,19 +152,23 @@ final class FormulaireGeneriqueController extends BaseController
                 // Create the parcours
                 $parcours = new Parcours($formation);
                 if ($estMono) {
-                    // Mono : le parcours unique reprend l'intitulé et le responsable de la formation.
+                    // Mono : le parcours unique reprend l'intitulé, le responsable et le
+                    // co-responsable de la formation.
                     $libelleParcours = $mention->getLibelle();
                     $respParcours = $responsableMention;
+                    $coRespParcours = $coResponsableMention;
                 } else {
                     // Multi / formation existante : libellé saisi (ou intitulé de la formation si vide),
                     // responsable choisi (garde-fou : un non-admin reste responsable de son parcours).
                     $libelleParcours = trim((string)($data['libelle'] ?? '')) ?: $mention->getLibelle();
                     $respParcours = $canChooseResponsable ? ($data['respParcours'] ?? $this->getUser()) : $this->getUser();
+                    $coRespParcours = $data['coRespParcours'] ?? null;
                 }
                 $parcours->setLibelle($libelleParcours);
                 $parcours->setRythmeFormation($data['rythmeFormation'] ?? null);
                 $parcours->setRythmeFormationTexte($data['rythmeFormationTexte'] ?? null);
                 $parcours->setRespParcours($respParcours);
+                $parcours->setCoResponsable($coRespParcours);
                 $parcours->setModalitesEnseignement(null);
                 $parcours->setDureeParcours($data['dureeParcours'] ?? null);
                 $parcours->setDureeParcoursUnite($data['dureeParcoursUnite'] ?? null);
@@ -210,6 +218,19 @@ final class FormulaireGeneriqueController extends BaseController
                     $this->entityManager->persist($uc);
                 }
 
+                // UserProfil for co-responsable formation (optionnel)
+                if ($formationCreee && $coResponsableMention !== null) {
+                    $profilCoRespFormation = $profilRepository->findOneBy(['code' => 'ROLE_CO_RESP_FORMATION']);
+                    if ($profilCoRespFormation !== null) {
+                        $ucCo = new UserProfil();
+                        $ucCo->setUser($coResponsableMention);
+                        $ucCo->setCampagneCollecte($this->getCampagneCollecte());
+                        $ucCo->setFormation($formation);
+                        $ucCo->setProfil($profilCoRespFormation);
+                        $this->entityManager->persist($ucCo);
+                    }
+                }
+
                 $this->entityManager->flush();
 
                 $parcoursRepository->save($parcours, true);
@@ -224,6 +245,20 @@ final class FormulaireGeneriqueController extends BaseController
                         $this->getCampagneCollecte()
                     );
                     $eventDispatcher->dispatch($event, AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
+                }
+
+                // Co-responsable de parcours (optionnel) : droits et centre.
+                if ($coRespParcours !== null) {
+                    $coRespParcoursProfil = $profilRepository->findOneBy(['code' => 'ROLE_CO_RESP_PARCOURS']);
+                    if ($coRespParcoursProfil !== null) {
+                        $event = new AddCentreParcoursEvent(
+                            $parcours,
+                            $coRespParcours,
+                            $coRespParcoursProfil,
+                            $this->getCampagneCollecte()
+                        );
+                        $eventDispatcher->dispatch($event, AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
+                    }
                 }
 
                 $this->addFlashBag(

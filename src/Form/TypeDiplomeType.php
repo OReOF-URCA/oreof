@@ -45,15 +45,23 @@ class TypeDiplomeType extends AbstractType
             ->add('codeApogee', TextType::class, [
                 'label' => 'Code Apogée',
                 'attr' => ['maxlength' => 1],
-                'required' => true,
+                'required' => false,
+                // Colonne NOT NULL + setter non-nullable : un champ vide retombe
+                // sur une chaîne vide plutôt que null.
+                'empty_data' => '',
             ])
+            // Champ déprécié : conservé (entité et colonne intactes) mais masqué et
+            // verrouillé. Les nouveaux types retombent sur le défaut « false » de
+            // l'entité ; un champ désactivé n'est de toute façon pas modifiable.
             ->add('codifIntermediaire', YesNoType::class, [
                 'label' => 'Codification intermédiaire',
-                'required' => true,
+                'required' => false,
+                'disabled' => true,
+                'row_attr' => ['class' => 'd-none'],
             ])
             ->add('modalites_admission', TextareaAutoSaveType::class, [
                 'label' => "Modalités d'admission",
-                'required' => true,
+                'required' => false,
                 'attr' => [
                     'rows' => 6,
                     'maxlength' => 3000
@@ -83,11 +91,25 @@ class TypeDiplomeType extends AbstractType
                     'maxlength' => 3000
                 ]
             ])
-            ->add('classique', CheckboxType::class, [
-                'label' => 'Structure classique (semestres)',
-                'required' => false,
+            ->add('classique', ChoiceType::class, [
+                'label' => 'Type de formation',
+                'choices' => [
+                    'Formation accréditée' => true,
+                    'Formation non-accréditée' => false,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'required' => true,
+                'placeholder' => false,
+                // Valeurs de soumission explicites et non vides : évite qu'un choix
+                // (notamment « non-accréditée ») soit interprété comme « rien de coché »
+                // sur un champ obligatoire.
+                'choice_value' => fn(?bool $choice) => $choice === true ? 'accreditee' : ($choice === false ? 'non_accreditee' : ''),
                 'row_attr' => ['class' => 'mt-3 mb-3 font-weight-bold'],
-                'attr' => ['data-type-diplome-target' => 'classique', 'data-action' => 'change->type-diplome#toggle'],
+                'choice_attr' => fn() => [
+                    'data-type-diplome-target' => 'classique',
+                    'data-action' => 'change->type-diplome#toggle',
+                ],
             ])
             ->add('passageCfvu', CheckboxType::class, [
                 'label' => 'Passage au CFVU',
@@ -218,7 +240,7 @@ class TypeDiplomeType extends AbstractType
             // Structure non classique : le select « Modèle MCCC » est grisé/désactivé
             // côté client et donc absent du POST. La colonne étant NOT NULL, on force
             // le handler non classique (même valeur que celle posée par le JS).
-            $classique = !empty($data['classique']);
+            $classique = ($data['classique'] ?? null) === 'accreditee';
             if (!$classique && empty($data['ModeleMcc'])) {
                 $data['ModeleMcc'] = NonClassiqueHandler::class;
                 $changed = true;
