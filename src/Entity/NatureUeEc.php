@@ -25,11 +25,11 @@ class NatureUeEc
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups('parcours_json_versioning')]
+    #[Groups('parcours_json_versioning', 'DTO_json_versioning')]
     #[ORM\Column(length: 100)]
     private ?string $libelle = null;
 
-    #[Groups('parcours_json_versioning')]
+    #[Groups('parcours_json_versioning', 'DTO_json_versioning')]
     #[ORM\Column]
     private ?bool $choix = false;
 
@@ -37,7 +37,7 @@ class NatureUeEc
     #[ORM\Column]
     private ?bool $libre = false;
 
-    #[Groups('parcours_json_versioning')]
+    #[Groups('parcours_json_versioning', 'DTO_json_versioning')]
     #[ORM\Column(length: 2)]
     private ?string $type = self::Nature_EC;
 
