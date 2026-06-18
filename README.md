@@ -24,3 +24,17 @@ ORéOF est une évolution du produit ORéBUT:
 - https://github.com/dannebicque/RedigeTonBut
 
 Il permet la saisie et la publication des programmes nationaux des spécialités de B.U.T.
+
+## Contributions
+
+### Développeurs principaux
+
+* [@Dannebicque](https://github.com/Dannebicque)
+* [@PMarchal51100](https://github.com/PMarchal51100)
+
+### Contributeurs
+
+* [@loucalm](https://github.com/loucalm)
+* [@Akcadag-Bastien](https://github.com/Akcadag-Bastien)
+
+
