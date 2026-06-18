@@ -78,9 +78,9 @@
 
                     <div class="app-help-markdown text-secondary-700 dark:text-secondary-300 break-words">
                         {% if form.reponse.vars.value %}
-                            <div id="faq-preview">{{ form.reponse.vars.value|markdown_to_html|parse_embeds }}</div>
+                            <div id="faq-preview" data-live-ignore>{{ form.reponse.vars.value|markdown_to_html|parse_embeds }}</div>
                         {% else %}
-                            <div id="faq-preview"><p class="text-secondary-500 dark:text-secondary-400 italic">Commencez à rédiger pour voir l'aperçu...</p></div>
+                            <div id="faq-preview" data-live-ignore><p class="text-secondary-500 dark:text-secondary-400 italic">Commencez à rédiger pour voir l'aperçu...</p></div>
                         {% endif %}
                     </div>
                 </div>

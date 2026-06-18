@@ -26,16 +26,3 @@
 
     <script src="{{ asset('js/editor_helpers.js') }}"></script>
 {% endblock %}
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:path('app_faq_index'),
-            title: 'FAQ',
-        },
-        {
-            href:'',
-            title: faq.id ? 'Modifier' : 'Créer',
-        }
-    ]}) }}
-{% endblock %}

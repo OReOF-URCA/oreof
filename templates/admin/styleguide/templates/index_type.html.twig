@@ -14,10 +14,6 @@
     Insérer une description générale de la page, qui peut être utilisée pour contextualiser les composants présentés et expliquer leur usage dans l'application.
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[{ href:'', title: 'Ici le titre de la page (ex: "Gestion des Entités")' }]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <twig:Button variant="secondary" icon="icon:arrow-left" href="/administration/styleguide">Revenir sur styleguide</twig:Button>
     <twig:Button variant="primary" icon="fa-solid:plus">Ajouter un élément</twig:Button>

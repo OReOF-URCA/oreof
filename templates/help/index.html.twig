@@ -5,13 +5,11 @@
     Aide
 {% endset %}
 
-{% block header %}Centre d'aide{% endblock %}
+{% set header_description %}
+    Liste des aides et tutoriels disponibles pour vous accompagner dans l'utilisation de la plateforme.
+{% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens: [
-        {title: 'Aide'}
-    ]}) }}
-{% endblock %}
+{% block header %}Centre d'aide{% endblock %}
 
 {% block content %}
 <div class="w-full">
