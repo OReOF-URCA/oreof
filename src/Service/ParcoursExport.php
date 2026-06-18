@@ -359,7 +359,7 @@ class ParcoursExport {
             $valide = false;
         }
 
-        if ($ec->elementConstitutif->getNatureUeEc()?->isLibre() && !$isVersioning) {
+        if ($ec->elementConstitutif->getNatureUeEc()?->isLibre()) {
             $libelle = $ec->elementConstitutif->getTexteEcLibre();
             $ecLibre = true;
         } else {
