@@ -1,0 +1,15 @@
+{{ include('_ui/_toast.stream.html.twig', {
+    message: toast_message,
+    toast_type: toast_type|default('info')
+}) }}
+
+<turbo-stream action="replace" target="generation_state">
+    <template>
+        {{ include('export/_generation_state.html.twig', {
+            state: generation_state|default('idle'),
+            message: generation_message|default('Aucune generation en cours'),
+            details: generation_details|default(null)
+        }) }}
+    </template>
+</turbo-stream>
+

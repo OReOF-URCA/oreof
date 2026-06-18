@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    {{ component('DataTable', { config: table }) }}
+{% endblock %}
+
+{% set header_title %}
+    Gestion des plateformes d'admissions
+{% endset %}
+
+{% block bouton_header %}
+    <a href="{{ path('app_plateforme_adminission_new') }}"
+       class="btn border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+            {{ stimulus_controller('tooltip', {
+                placement: 'bottom',
+                customClass: 'app-tooltip',
+                title: "Ajouter une plateforme d'admission"
+            }) }}
+       title="Ajouter une plateforme d'admission">
+        <twig:UX:Icon name="icon:add" class="h-4 w-4"/>
+        <span>Ajouter une plateforme d'admission</span>
+    </a>
+{% endblock %}

@@ -1,0 +1,5 @@
+{% if item.displayMode.value == 'mega_menu' %}
+    {% include '_layout/menu/_mega_menu.html.twig' with { item: item } only %}
+{% else %}
+    {% include '_layout/menu/_dropdown_menu.html.twig' with { item: item } only %}
+{% endif %}

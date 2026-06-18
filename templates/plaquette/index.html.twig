@@ -26,11 +26,8 @@
 
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Formations',
-        },
-
+        {title: 'Offre de formation', href: path('app_section_offre_formation')},
+        {title: header_title},
     ]}) }}
 {% endblock %}
 

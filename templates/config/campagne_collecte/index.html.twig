@@ -8,19 +8,6 @@
     Gestion des campagnes de collecte
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Administration',
-        },
-        {
-            href:'',
-            title: 'Gestion des campagnes de collecte'
-        }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <a
             data-action="click->modalturbo#open"

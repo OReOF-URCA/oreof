@@ -39,19 +39,6 @@
     Gestion des profils
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Gestion des utilisateurs',
-        },
-        {
-            href:'',
-            title: 'Profils',
-        }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <button
             {{ stimulus_controller('modal', {

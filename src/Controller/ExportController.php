@@ -2,14 +2,13 @@
 
 namespace App\Controller;
 
-use App\Classes\JsonReponse;
 use App\Entity\Composante;
 use App\Message\Export;
-use App\Message\RequestGenerationJobMessage;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\GenerationJobRepository;
 use App\Utils\Tools;
+use App\Utils\TurboStreamResponseFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -40,6 +39,8 @@ class ExportController extends BaseController
         "xlsx-responsable" => 'Tableau des responsables (xslx)',
         "xlsx-cfvu" => 'Tableau Synthèse CFVU (xslx)',
     ];
+
+    private const FRAME_ID = 'export_formations_frame';
 
 
     #[Route('/export/', name: 'app_export_index')]
@@ -118,52 +119,112 @@ class ExportController extends BaseController
         ComposanteRepository $composanteRepository,
         Request              $request
     ): Response {
-        $composante = $composanteRepository->find($request->query->get('composante'));
+        $composante = null;
+        $dpes = [];
 
-        if (!$composante) {
-            throw $this->createNotFoundException('La composante n\'existe pas');
+        $composanteId = $request->query->get('composante');
+        if ($composanteId) {
+            $composante = $composanteRepository->find($composanteId);
         }
 
-        if ($this->isGranted('ROLE_ADMIN') ||
-            $this->isGranted('SHOW', [
+        if ($composante instanceof Composante) {
+            if ($this->isGranted('ROLE_ADMIN') ||
+                $this->isGranted('SHOW', [
+                    'route' => 'app_etablissement',
+                    'subject' => 'etablissement'
+                ])) {
+                $dpes = $dpeParcoursRepository->findParcoursByComposante($this->getCampagneCollecte(), $composante);
+            } elseif ($this->isGranted('SHOW', [
                 'route' => 'app_etablissement',
                 'subject' => 'etablissement'
             ])) {
-            $dpes = $dpeParcoursRepository->findParcoursByComposante($this->getCampagneCollecte(), $composante);
-        } elseif ($this->isGranted('SHOW', [
-            'route' => 'app_etablissement',
-            'subject' => 'etablissement'
-        ])) {
-            $dpes = $dpeParcoursRepository->findParcoursByComposanteCfvu($this->getCampagneCollecte(), $composante);
-        } elseif ($this->isGranted('SHOW', [
-            'route' => 'app_composante',
-            'subject' => $composante
-        ])) {
-            $dpes = $dpeParcoursRepository->findParcoursByComposante($this->getCampagneCollecte(), $composante);
-        } else {
-            $dpes = [];
+                $dpes = $dpeParcoursRepository->findParcoursByComposanteCfvu($this->getCampagneCollecte(), $composante);
+            } elseif ($this->isGranted('SHOW', [
+                'route' => 'app_composante',
+                'subject' => $composante
+            ])) {
+                $dpes = $dpeParcoursRepository->findParcoursByComposante($this->getCampagneCollecte(), $composante);
+            }
         }
 
-        return $this->render('export/_liste.html.twig', [
-            'dpes' => $dpes
+        return $this->render('export/_liste_frame.html.twig', [
+            'frame_id' => self::FRAME_ID,
+            'dpes' => $dpes,
+            'composante' => $composante,
         ]);
     }
 
     #[Route('/export/valide', name: 'app_export_valide')]
     public function valide(
+        TurboStreamResponseFactory $turboStream,
+        ComposanteRepository       $composanteRepository,
         MessageBusInterface        $messageBus,
         Request                    $request,
     ): Response {
+        $typeDocument = (string)($request->request->get('type_document_global') ?: $request->request->get('type_document'));
+        $liste = $request->request->all('liste');
+        if (!\is_array($liste) || $liste === []) {
+            $liste = $request->request->all('dpes');
+        }
+        $liste = array_values(array_filter($liste, static fn($id) => null !== $id && '' !== (string)$id));
+        $composanteId = $request->request->get('composante');
+
+        $allDocumentTypes = array_merge(array_keys(self::TYPES_DOCUMENT), array_keys(self::TYPES_DOCUMENT_GLOBAL));
+        if ('' === $typeDocument || !\in_array($typeDocument, $allDocumentTypes, true)) {
+            return $turboStream->stream('export/_valide.stream.html.twig', [
+                'toast_type' => 'danger',
+                'toast_message' => 'Type de document invalide.',
+                'generation_state' => 'error',
+                'generation_message' => 'Generation non lancee',
+            ], Response::HTTP_OK);
+        }
+
+        $isGlobalDocument = array_key_exists($typeDocument, self::TYPES_DOCUMENT_GLOBAL);
+        if (!$isGlobalDocument) {
+            if (null === $composanteId || '' === (string)$composanteId) {
+                return $turboStream->stream('export/_valide.stream.html.twig', [
+                    'toast_type' => 'danger',
+                    'toast_message' => 'Veuillez choisir une composante.',
+                    'generation_state' => 'error',
+                    'generation_message' => 'Generation non lancee',
+                ], Response::HTTP_OK);
+            }
+
+            if ([] === $liste) {
+                return $turboStream->stream('export/_valide.stream.html.twig', [
+                    'toast_type' => 'danger',
+                    'toast_message' => 'Veuillez selectionner au moins une formation.',
+                    'generation_state' => 'error',
+                    'generation_message' => 'Generation non lancee',
+                ], Response::HTTP_OK);
+            }
+        }
+
+        if ($composanteId && null === $composanteRepository->find($composanteId)) {
+            return $turboStream->stream('export/_valide.stream.html.twig', [
+                'toast_type' => 'danger',
+                'toast_message' => 'La composante selectionnee n\'existe pas.',
+                'generation_state' => 'error',
+                'generation_message' => 'Generation non lancee',
+            ], Response::HTTP_OK);
+        }
+
         $messageBus->dispatch(new Export(
             $this->getUser()?->getId(),
-            $request->request->get('type_document'),
-            $request->request->all()['liste'] ?? [],
+            $typeDocument,
+            $liste,
             $this->getCampagneCollecte(),
             Tools::convertDate($request->request->get('date')),
-            $request->request->get('composante'),
+            $composanteId ? (string)$composanteId : null,
         ));
 
-        return JsonReponse::success('Les documents sont en cours de génération, vous recevrez un mail lorsque les documents seront prêts');
+        return $turboStream->stream('export/_valide.stream.html.twig', [
+            'toast_type' => 'success',
+            'toast_message' => 'Les documents sont en cours de generation, vous recevrez un mail lorsqu\'ils seront prets.',
+            'generation_state' => 'pending',
+            'generation_message' => 'Generation en cours',
+            'generation_details' => 'La demande est enregistree dans la file asynchrone.',
+        ]);
     }
 
     #[Route('/export/my-exports', name: 'app_export_my_exports')]

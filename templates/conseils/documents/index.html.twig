@@ -6,8 +6,8 @@
 
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Conseils'},
-        {title: header_title}
+        {title: 'Conseils', href: path('app_section_conseils')},
+        { title: header_title}
     ]}) }}
 {% endblock %}
 

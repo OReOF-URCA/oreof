@@ -1,0 +1,248 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = "Synthèse de l’offre URCA "~user_data.campagneCollecte.libelle %}
+{% set header_description = "Vue consolidée des ouvertures, plateformes, capacités et validations." %}
+
+{% block bouton_header %}
+    <twig:Button href="#" variant="secondary" class="mr-2">
+        Exporter Excel
+    </twig:Button>
+    <twig:Button href="#" variant="primary">
+        Générer les annexes CA
+    </twig:Button>
+{% endblock %}
+
+{% block content %}
+    <section class="space-y-6">
+        <!-- KPI -->
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+            <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <p class="text-sm text-slate-500">Formations</p>
+                <p class="mt-2 text-3xl font-bold">{{ tabStatistiques.nbFormations }}</p>
+            </div>
+
+            <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <p class="text-sm text-slate-500">Parcours</p>
+                <p class="mt-2 text-3xl font-bold">{{ tabStatistiques.nbParcours }}</p>
+            </div>
+
+            <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <p class="text-sm text-slate-500">Ouverts</p>
+                <p class="mt-2 text-3xl font-bold text-green-700">{{ tabStatistiques.nbParcoursOuvert }}</p>
+            </div>
+
+            <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <p class="text-sm text-slate-500">Capacité</p>
+                <p class="mt-2 text-3xl font-bold text-green-700">{{ tabStatistiques.capacite }}</p>
+            </div>
+
+            <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <p class="text-sm text-slate-500">À confirmer</p>
+                <p class="mt-2 text-3xl font-bold text-amber-600">13</p>
+            </div>
+
+            <div class="rounded-xl border bg-white p-4 shadow-sm">
+                <p class="text-sm text-slate-500">Anomalies</p>
+                <p class="mt-2 text-3xl font-bold text-red-600">31</p>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="rounded-xl border bg-white p-4 shadow-sm">
+            <div class="grid gap-4 md:grid-cols-5">
+                <input class="rounded-lg border px-3 py-2 text-sm" placeholder="Rechercher une formation…">
+
+                <select class="rounded-lg border px-3 py-2 text-sm">
+                    <option>Toutes les composantes</option>
+                    <option>IUT Troyes</option>
+                    <option>UFR Sciences</option>
+                    <option>UFR Lettres</option>
+                </select>
+
+                <select class="rounded-lg border px-3 py-2 text-sm">
+                    <option>Tous les diplômes</option>
+                    <option>Licence</option>
+                    <option>Licence professionnelle</option>
+                    <option>BUT</option>
+                    <option>Master</option>
+                </select>
+
+                <select class="rounded-lg border px-3 py-2 text-sm">
+                    <option>Toutes les plateformes</option>
+                    <option>Parcoursup</option>
+                    <option>eCandidat</option>
+                    <option>MonMaster</option>
+                    <option>Études en France</option>
+                </select>
+
+                <select class="rounded-lg border px-3 py-2 text-sm">
+                    <option>Tous les statuts</option>
+                    <option>Brouillon</option>
+                    <option>Validé composante</option>
+                    <option>Validé central</option>
+                    <option>Anomalie</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Alertes -->
+        <div class="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <div class="flex items-start gap-3">
+                <div class="text-xl">⚠️</div>
+                <div>
+                    <h2 class="font-semibold text-amber-900">31 points à vérifier</h2>
+                    <p class="text-sm text-amber-800">
+                        Capacités manquantes, plateformes incohérentes ou validations incomplètes.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="overflow-hidden rounded-xl border bg-white shadow-sm">
+            <table class="w-full text-sm">
+                <thead class="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                <tr>
+                    <th class="px-4 py-3">Formation</th>
+                    <th class="px-4 py-3">Composante</th>
+                    <th class="px-4 py-3">Parcours / année</th>
+                    <th class="px-4 py-3">Ouvert</th>
+                    <th class="px-4 py-3">Plateformes</th>
+                    <th class="px-4 py-3 text-right">Capacité</th>
+                    <th class="px-4 py-3">Statut</th>
+                    <th class="px-4 py-3"></th>
+                </tr>
+                </thead>
+
+                <tbody class="divide-y">
+                <!-- Group -->
+                <tr class="bg-slate-100">
+                    <td colspan="8" class="px-4 py-3 font-semibold text-slate-700">
+                        IUT de Troyes · 54 formations · 89 parcours
+                    </td>
+                </tr>
+
+                {% for forma in tFormations %}
+                    {% set formation = forma.formation %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-3">
+                            <div class="font-medium">{{ formation.display }}</div>
+                            <div class="text-xs text-slate-500">{{ formation.typeDiplome.libelle }}</div>
+                        </td>
+                        <td class="px-4 py-3">
+                            {{ formation.composantePorteuse.libelle }}
+                        </td>
+
+                        <td class="px-4 py-3">??</td>
+                        <td class="px-4 py-3">
+                            {# todo ouvert ? oui si parcours + année ouvert #}
+                            <span class="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">Oui</span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex gap-1">
+                                <span class="rounded bg-indigo-100 px-2 py-1 text-xs text-indigo-700">PS</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-right font-medium">168</td>
+                        <td class="px-4 py-3">
+                            <span class="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">Validé</span>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <twig:Button href="#" variant="primary" class="mr-2"
+                                         :href="path('offre_v2_configurer', { slug: formation.slug })"
+                            >
+                                Configurer
+                            </twig:Button>
+                        </td>
+                    </tr>
+                    {% for parcours in formation.parcours %}
+                        {% for annee in parcours.annees %}
+                            <tr class="hover:bg-slate-50">
+                                <td>&nbsp;</td>
+                                <td class="px-4 py-3">
+                                    {{ parcours.composanteInscription?.libelle }}
+                                </td>
+
+                                <td class="px-4 py-3">{{ parcours.libelle }}
+                                    <br>Année {{ annee.ordre }} {# todo: préciser si tronc commun ? #}</td>
+                                <td class="px-4 py-3">
+                                    {# todo ouvert ? oui si parcours + année ouvert #}
+                                    <span class="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">Oui</span>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-1">
+                                        <span class="rounded bg-indigo-100 px-2 py-1 text-xs text-indigo-700">PS</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-right font-medium">168</td>
+                                <td class="px-4 py-3">
+                                    <span class="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">Validé</span>
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    {#                                    <button class="text-sm font-medium text-indigo-600">Ouvrir</button> #}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                {% endfor %}
+                <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3">IUT Troyes</td>
+                    <td class="px-4 py-3">
+                        <div class="font-medium">BUT MMI</div>
+                        <div class="text-xs text-slate-500">Métiers du Multimédia et de l’Internet</div>
+                    </td>
+                    <td class="px-4 py-3">Développement web</td>
+                    <td class="px-4 py-3">
+                        <span class="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">Oui</span>
+                    </td>
+                    <td class="px-4 py-3">
+                        <div class="flex gap-1">
+                            <span class="rounded bg-slate-100 px-2 py-1 text-xs text-slate-500">EC</span>
+                            <span class="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700">EEF</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-right font-medium">56</td>
+                    <td class="px-4 py-3">
+                        <span class="rounded-full bg-amber-100 px-2 py-1 text-xs text-amber-700">À vérifier</span>
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                        <button class="text-sm font-medium text-indigo-600">Ouvrir</button>
+                    </td>
+                </tr>
+
+                {#                <!-- Group --> #}
+                {#                <tr class="bg-slate-100"> #}
+                {#                    <td colspan="8" class="px-4 py-3 font-semibold text-slate-700"> #}
+                {#                        UFR Sciences Exactes et Naturelles · 72 formations · 103 parcours #}
+                {#                    </td> #}
+                {#                </tr> #}
+
+                {#                <tr class="hover:bg-slate-50"> #}
+                {#                    <td class="px-4 py-3">UFR Sciences</td> #}
+                {#                    <td class="px-4 py-3"> #}
+                {#                        <div class="font-medium">Licence Informatique</div> #}
+                {#                        <div class="text-xs text-slate-500">Mention Informatique</div> #}
+                {#                    </td> #}
+                {#                    <td class="px-4 py-3">L2 année commune</td> #}
+                {#                    <td class="px-4 py-3"> #}
+                {#                        <span class="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">Oui</span> #}
+                {#                    </td> #}
+                {#                    <td class="px-4 py-3"> #}
+                {#                        <div class="flex gap-1"> #}
+                {#                            <span class="rounded bg-slate-100 px-2 py-1 text-xs text-slate-500">EC</span> #}
+                {#                            <span class="rounded bg-blue-100 px-2 py-1 text-xs text-blue-700">EEF</span> #}
+                {#                        </div> #}
+                {#                    </td> #}
+                {#                    <td class="px-4 py-3 text-right font-medium">120</td> #}
+                {#                    <td class="px-4 py-3"> #}
+                {#                        <span class="rounded-full bg-red-100 px-2 py-1 text-xs text-red-700">Anomalie</span> #}
+                {#                    </td> #}
+                {#                    <td class="px-4 py-3 text-right"> #}
+                {#                        <button class="text-sm font-medium text-indigo-600">Ouvrir</button> #}
+                {#                    </td> #}
+                {#                </tr> #}
+                </tbody>
+            </table>
+        </div>
+    </section>
+{% endblock %}

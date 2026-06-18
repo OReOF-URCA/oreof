@@ -2,15 +2,19 @@
 
 namespace App\Form;
 
+use App\Entity\PlateformeAdmission;
 use App\Entity\TypeDiplome;
 use App\Form\Type\TextareaAutoSaveType;
 use App\Form\Type\YesNoType;
-use App\TypeDiplome\TypeDiplomeHandlerInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TypeDiplomeType extends AbstractType
@@ -93,6 +97,47 @@ class TypeDiplomeType extends AbstractType
             ->add('ectsObligatoireSurEc', YesNoType::class, ['empty_data' => true])
             ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true])
             ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
+
+        // Pré-remplir les plateformes déjà associées avec leurs années
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+            /** @var TypeDiplome|null $typeDiplome */
+            $typeDiplome = $event->getData();
+            $form = $event->getForm();
+
+            $nbAnnees = 1;
+            if ($typeDiplome && $typeDiplome->getId()) {
+                $nbAnnees = $typeDiplome->getNbAnnee();
+            }
+
+            // Récupérer les associations plateformes/années existantes
+            $plateformesData = [];
+            if ($typeDiplome && $typeDiplome->getId()) {
+                foreach ($typeDiplome->getTypeDiplomePlateformeAdmissions() as $tpa) {
+                    $plateformesData[] = [
+                        'plateforme' => $tpa->getPlateforme(),
+                        'annees' => $tpa->getAnnees() ?? [],
+                    ];
+                }
+            }
+
+            $form->add('plateformesAdmission', CollectionType::class, [
+                'entry_type' => TypeDiplomePlateformeType::class,
+                'entry_options' => [
+                    'label' => false,
+                    'nb_annees' => $nbAnnees,
+                ],
+                'allow_add' => true,
+                'allow_delete' => true,
+                'by_reference' => false,
+                'mapped' => false,
+                'data' => $plateformesData,
+                'label' => 'Plateformes d\'admission',
+                'prototype' => true,
+                'attr' => [
+                    'class' => 'plateformes-collection',
+                ],
+            ]);
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void

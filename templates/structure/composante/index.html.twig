@@ -17,7 +17,8 @@
 
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
-        { title: 'Consulter l\'offre de formation' }
+        {title:'Pilotage', href: path('app_section_pilotage')},
+        { title: header_title}
     ]}) }}
 {% endblock %}
 
@@ -55,16 +56,5 @@
                 label="Ajouter une formation"
                 tooltip="Ajouter une formation"
         />
-
-        {# todo: a reprendre #}
-{#        <a href="{{ path('app_formation_etat_send_ouverture') }}"#}
-{#           class="btn btn-sm btn-outline-warning btn-icon btn-icon-end w-100 w-sm-auto mx-2"#}
-{#           data-bs-toggle="tooltip"#}
-{#           data-bs-placement="bottom"#}
-{#           title="Ouvrir les formations"#}
-{#        >#}
-{#            <i class="{{ iconAdd }}"></i>#}
-{#            <span> Ouvrir les formations</span>#}
-{#        </a>#}
     {% endif %}
 {% endblock %}

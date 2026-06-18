@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: TypeDiplomeRepository::class)]
 class TypeDiplome
@@ -115,6 +115,12 @@ class TypeDiplome
     #[ORM\Column(nullable: true)]
     private ?bool $controleAssiduite = null;
 
+    /**
+     * @var Collection<int, TypeDiplomePlateformeAdmission>
+     */
+    #[ORM\OneToMany(targetEntity: TypeDiplomePlateformeAdmission::class, mappedBy: 'typeDiplome')]
+    private Collection $typeDiplomePlateformeAdmissions;
+
     public function __construct()
     {
         $this->formations = new ArrayCollection();
@@ -124,6 +130,7 @@ class TypeDiplome
         $this->typeEpreuves = new ArrayCollection();
         $this->formationDemandes = new ArrayCollection();
         $this->ficheMatieres = new ArrayCollection();
+        $this->typeDiplomePlateformeAdmissions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -613,5 +620,60 @@ class TypeDiplome
         return $this;
     }
 
+    /**
+     * @return Collection<int, TypeDiplomePlateformeAdmission>
+     */
+    public function getTypeDiplomePlateformeAdmissions(): Collection
+    {
+        return $this->typeDiplomePlateformeAdmissions;
+    }
 
+    public function addTypeDiplomePlateformeAdmission(TypeDiplomePlateformeAdmission $typeDiplomePlateformeAdmission): static
+    {
+        if (!$this->typeDiplomePlateformeAdmissions->contains($typeDiplomePlateformeAdmission)) {
+            $this->typeDiplomePlateformeAdmissions->add($typeDiplomePlateformeAdmission);
+            $typeDiplomePlateformeAdmission->setTypeDiplome($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTypeDiplomePlateformeAdmission(TypeDiplomePlateformeAdmission $typeDiplomePlateformeAdmission): static
+    {
+        if ($this->typeDiplomePlateformeAdmissions->removeElement($typeDiplomePlateformeAdmission)) {
+            // set the owning side to null (unless already changed)
+            if ($typeDiplomePlateformeAdmission->getTypeDiplome() === $this) {
+                $typeDiplomePlateformeAdmission->setTypeDiplome(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Retourne les plateformes d'admission associées (quelle que soit la campagne)
+     * @return Collection<int, PlateformeAdmission>
+     */
+    public function getPlateformes(): Collection
+    {
+        return $this->typeDiplomePlateformeAdmissions
+            ->map(fn(TypeDiplomePlateformeAdmission $tpa) => $tpa->getPlateforme())
+            ->filter(fn($p) => $p !== null);
+    }
+
+    /**
+     * Retourne les plateformes d'admission pour une campagne donnée
+     * @return Collection<int, PlateformeAdmission>
+     */
+    public function getPlateformesPourCampagne(?CampagneCollecte $campagne): Collection
+    {
+        if ($campagne === null) {
+            return new ArrayCollection();
+        }
+
+        return $this->typeDiplomePlateformeAdmissions
+            ->filter(fn(TypeDiplomePlateformeAdmission $tpa) => $tpa->getCampagne() === $campagne)
+            ->map(fn(TypeDiplomePlateformeAdmission $tpa) => $tpa->getPlateforme())
+            ->filter(fn($p) => $p !== null);
+    }
 }

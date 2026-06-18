@@ -23,17 +23,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 class FicheMatiereStep1Type extends AbstractType
 {
 
-    public function __construct(
-        private AuthorizationCheckerInterface $authorizationChecker)
+    public function __construct()
     {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-//        $access = $this->authorizationChecker->isGranted(
-//            'ROLE_FORMATION_EDIT_MY',
-//            $options['data']->getParcours()->getFormation()
-//        );
         $access = true;
         $builder
 

@@ -60,11 +60,26 @@
     {% endfor %}
 </div>
     <div class="mt-4 flex flex-col gap-2 border-t border-secondary-100 pt-4 sm:flex-row dark:border-secondary-700/80">
-        <button class="app-btn app-btn-warning w-full justify-center sm:w-1/2"
-                {{ stimulus_action('notification', 'toutLu', 'click', {url: path('app_notification_tout_lu')}) }}
-        >Tout marquer comme lu</button>
-        <button class="app-btn app-btn-danger w-full justify-center sm:w-1/2"
-                {{ stimulus_action('notification', 'toutSupprimer', 'click', {url: path('app_notification_tout_suppr')}) }}
-        >Tout supprimer</button>
+        <twig:Button
+                extraClass="w-full sm:flex-1 justify-center"
+                :attr="{
+            'data-action': 'click->notification#toutLu',
+            'data-notification-url-value': path('app_notification_tout_lu')
+        }"
+                label="Tout marquer comme lu"
+                variant="warning"
+        />
+
+        <twig:DeleteButton
+                extraClass="w-full sm:flex-1 justify-center"
+                label="Tout supprimer"
+                variant="danger"
+                :soft="false"
+                :outline="false"
+                :attr="{
+            'data-action': 'click->notification#toutSupprimer',
+            'data-notification-url-value': path('app_notification_tout_suppr')
+        }"
+        />
     </div>
 </div>

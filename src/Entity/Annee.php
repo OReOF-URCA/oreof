@@ -53,9 +53,16 @@ class Annee
     #[ORM\Column]
     private ?bool $isProposeRecrutement = true;
 
+    /**
+     * @var Collection<int, PlateformeAdmissionParametre>
+     */
+    #[ORM\OneToMany(targetEntity: PlateformeAdmissionParametre::class, mappedBy: 'annee')]
+    private Collection $admissionPlateformeParametres;
+
     public function __construct()
     {
         $this->parcoursSemestre = new ArrayCollection();
+        $this->admissionPlateformeParametres = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -226,5 +233,35 @@ class Annee
     public function isValid(): bool
     {
         return $this->getParcours() !== null;
+    }
+
+    /**
+     * @return Collection<int, PlateformeAdmissionParametre>
+     */
+    public function getAdmissionPlateformeParametres(): Collection
+    {
+        return $this->admissionPlateformeParametres;
+    }
+
+    public function addAdmissionPlateformeParametre(PlateformeAdmissionParametre $admissionPlateformeParametre): static
+    {
+        if (!$this->admissionPlateformeParametres->contains($admissionPlateformeParametre)) {
+            $this->admissionPlateformeParametres->add($admissionPlateformeParametre);
+            $admissionPlateformeParametre->setAnnee($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAdmissionPlateformeParametre(PlateformeAdmissionParametre $admissionPlateformeParametre): static
+    {
+        if ($this->admissionPlateformeParametres->removeElement($admissionPlateformeParametre)) {
+            // set the owning side to null (unless already changed)
+            if ($admissionPlateformeParametre->getAnnee() === $this) {
+                $admissionPlateformeParametre->setAnnee(null);
+            }
+        }
+
+        return $this;
     }
 }

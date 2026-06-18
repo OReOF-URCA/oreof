@@ -8,19 +8,6 @@
     Gestion des types d'épreuves
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Administration',
-        },
-        {
-            href:'',
-            title: 'Gestion des types d\'épreuves',
-        }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <a
             data-action="click->modalturbo#open"

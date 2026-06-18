@@ -13,7 +13,7 @@ Le guide d'installation complet (développement Docker/Makefile + production) es
 
 - [`/docs/ops/install.md`](docs/ops/install.md)
 
-## Documentation
+## Documentation technique
 
 - [`/docs`](/docs)
 

@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = menuItem.label|trans({}, 'menu') %}
+{% set header_description = menuItem.description()|trans({}, 'menu') %}
+
+{% block content %}
+    {% set groupedChildren = {} %}
+
+    {% for child in menuItem.children %}
+        {% if child.showInOverview %}
+            {% set column = child.column ?? 'menu.section.default' %}
+            {% set groupedChildren = groupedChildren|merge({
+                (column): (groupedChildren[column]|default([]))|merge([child])
+            }) %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="space-y-10">
+        {% for columnLabel, children in groupedChildren %}
+            <section>
+                {% if columnLabel != 'menu.section.default' %}
+                    <div class="mb-4 mt-4">
+                        <h2 class="text-lg font-bold text-text">
+                            {{ columnLabel|trans({}, 'menu') }}
+                        </h2>
+                    </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for child in children %}
+                        <a href="{{ path(child.route, child.routeParams) }}"
+                           class="block p-6 bg-white rounded-2xl border border-secondary-200 shadow-sm hover:shadow-md transition dark:bg-secondary-900 dark:border-secondary-700">
+                            <div class="flex items-center mb-4">
+                                <div class="p-3 bg-primary-50 rounded-lg dark:bg-primary-900/20">
+                                    {% if child.icon is defined and child.icon != null %}
+                                        <twig:UX:Icon :name="child.icon" class="h-7 w-7"/>
+                                    {% else %}
+                                        <twig:UX:Icon name="mdi:checkbox-blank-off-outline" class="h-7 w-7"/>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-bold mb-2">
+                                {{ child.label|trans({}, 'menu') }}
+                            </h3>
+                            {% if child.description() %}
+                                <p class="text-secondary-600 dark:text-secondary-400">
+                                    {{ (child.description())|trans({}, 'menu') }}
+                                </p>
+                            {% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -2,6 +2,40 @@
 {% use "form_div_layout.html.twig" %}
 {% trans_default_domain 'form' %}
 
+{% block color_variant_widget %}
+    {% set colors = {
+        primary: 'bg-primary',
+        secondary: 'bg-secondary',
+        success: 'bg-success',
+        info: 'bg-info',
+        warning: 'bg-warning',
+        danger: 'bg-danger'
+    } %}
+
+    <div class="flex flex-wrap gap-2">
+        {% for child in form %}
+            <label class="cursor-pointer">
+                {{ form_widget(child, {
+                    attr: {
+                        class: 'peer sr-only'
+                    }
+                }) }}
+
+                <span class="
+                    flex items-center gap-2 rounded-lg border px-3 py-2 text-sm
+                    border-gray-300 bg-white
+                    peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary/30
+                ">
+                    <span class="h-4 w-4 rounded-full {{ colors[child.vars.value]|default('bg-gray-300') }}"></span>
+                    {% if form.vars.show_labels %}
+                        <span>{{ child.vars.label }}</span>
+                    {% endif %}
+                </span>
+            </label>
+        {% endfor %}
+    </div>
+{% endblock %}
+
 {# --- LIGNE DE FORMULAIRE (ROW) --- #}
 {% block form_row %}
     <div class="space-y-2 group mb-4">
@@ -559,4 +593,136 @@
         </label>
     </div>
     {{ form_help(form) }}
+{% endblock %}
+
+{# Widget pour le type JsonConfig #}
+{% block json_config_widget %}
+    <div
+            data-controller="json-config"
+            data-json-config-value="{{ value|json_encode|e('html_attr') }}"
+            class="space-y-3"
+    >
+        {% if help_text %}
+            <div class="text-sm text-gray-600 mb-2">{{ help_text }}</div>
+        {% endif %}
+
+        {# Onglets pour basculer entre les modes #}
+        <div class="flex gap-2 border-b border-gray-200">
+            <button
+                    type="button"
+                    data-action="click->json-config#switchToWizard"
+                    class="px-4 py-2 text-sm font-medium border-b-2 border-transparent hover:border-gray-300 transition-colors"
+            >
+                <i class="fas fa-wand-magic-sparkles mr-1"></i> Mode Assistant
+            </button>
+            <button
+                    type="button"
+                    data-action="click->json-config#switchToJson"
+                    class="px-4 py-2 text-sm font-medium border-b-2 border-primary transition-colors"
+            >
+                <i class="fas fa-code mr-1"></i> Mode JSON
+            </button>
+        </div>
+
+        {# MODE WIZARD #}
+        <div data-json-config-target="wizardMode" class="hidden space-y-3">
+            <div class="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm text-blue-800">
+                <i class="fas fa-info-circle mr-1"></i>
+                Ajoutez vos configurations ligne par ligne. Les modifications sont automatiquement converties en JSON.
+            </div>
+
+            {# En-têtes des colonnes #}
+            <div class="grid grid-cols-12 gap-2 px-3 text-xs font-semibold text-gray-600 uppercase">
+                <div class="col-span-3">Clé</div>
+                <div class="col-span-2">Type</div>
+                <div class="col-span-6">Valeur</div>
+                <div class="col-span-1"></div>
+            </div>
+
+            {# Conteneur pour les lignes du wizard #}
+            <div data-json-config-target="wizardContainer" class="space-y-2"></div>
+
+            {# Bouton pour ajouter une ligne #}
+            <button
+                    type="button"
+                    data-action="click->json-config#addNewWizardRow"
+                    class="w-full px-3 py-2 text-sm bg-green-50 hover:bg-green-100 text-green-700 border border-green-300 rounded-md transition-colors"
+            >
+                <i class="fas fa-plus mr-1"></i> Ajouter une configuration
+            </button>
+
+            {# Bouton pour revenir au JSON #}
+            <div class="flex justify-end">
+                <button
+                        type="button"
+                        data-action="click->json-config#switchToJson"
+                        class="px-4 py-2 text-sm bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+                >
+                    <i class="fas fa-check mr-1"></i> Appliquer et voir le JSON
+                </button>
+            </div>
+        </div>
+
+        {# MODE JSON #}
+        <div data-json-config-target="jsonMode" class="space-y-2">
+            <div class="relative">
+                <textarea
+                    {{ block('widget_attributes') }}
+                    data-json-config-target="textarea"
+                    data-action="blur->json-config#validate"
+                    class="w-full px-3 py-2 border rounded-md font-mono text-sm min-h-[200px] focus:ring-2 focus:ring-primary focus:border-primary"
+                    placeholder='{"clé": "valeur", "autre_clé": "autre_valeur"}'
+                >{{ value|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE')) }}</textarea>
+
+                {# Indicateur de validation #}
+                <div
+                        data-json-config-target="validation"
+                        class="hidden mt-1 text-sm"
+                ></div>
+            </div>
+
+            {% if add_button_text %}
+                <div class="flex gap-2">
+                    <button
+                            type="button"
+                            data-action="click->json-config#format"
+                            class="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                    >
+                        <i class="fas fa-magic mr-1"></i> Formater JSON
+                    </button>
+
+                    <button
+                            type="button"
+                            data-action="click->json-config#clear"
+                            class="px-3 py-1 text-sm bg-red-50 hover:bg-red-100 text-red-600 rounded-md transition-colors"
+                    >
+                        <i class="fas fa-trash mr-1"></i> Vider
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+
+        {# Aide contextuelle (visible dans les deux modes) #}
+        <details class="mt-3">
+            <summary class="cursor-pointer text-sm text-gray-600 hover:text-gray-800">
+                <i class="fas fa-info-circle mr-1"></i> Aide sur le format JSON
+            </summary>
+            <div class="mt-2 p-3 bg-gray-50 rounded-md text-sm space-y-2">
+                <p><strong>Format valide :</strong></p>
+                <pre class="bg-white p-2 rounded border text-xs">{
+  "clé": "valeur",
+  "nombre": 123,
+  "booléen": true,
+  "tableau": ["item1", "item2"]
+}</pre>
+                <p class="text-xs text-gray-600">
+                    <i class="fas fa-lightbulb mr-1"></i>
+                    <strong>Mode Assistant :</strong> Ajoutez vos configurations ligne par ligne avec une interface
+                    simple.
+                    <br>
+                    <strong>Mode JSON :</strong> Éditez directement le JSON si vous êtes à l'aise avec ce format.
+                </p>
+            </div>
+        </details>
+    </div>
 {% endblock %}

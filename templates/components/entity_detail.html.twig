@@ -58,6 +58,20 @@
                         {% elseif field.format == 'badge' %}
                             <span class="badge {{ field.badge_class }}">{{ value }}</span>
 
+                        {% elseif field.format == 'json' %}
+                            {% if value is iterable %}
+                                <details class="mt-1">
+                                    <summary
+                                            class="cursor-pointer text-primary-600 hover:text-primary-800 dark:text-primary-400">
+                                        <i class="fas fa-code mr-1"></i>Voir le JSON ({{ value|length }}
+                                        clé{{ value|length > 1 ? 's' : '' }})
+                                    </summary>
+                                    <pre class="mt-2 rounded-lg bg-secondary-50 p-3 text-xs overflow-x-auto dark:bg-secondary-800"><code>{{ value|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_UNICODE') b-or constant('JSON_UNESCAPED_SLASHES')) }}</code></pre>
+                                </details>
+                            {% else %}
+                                <span class="text-secondary-400 dark:text-secondary-500">{{ field.empty_text }}</span>
+                            {% endif %}
+
                         {% elseif field.type == 'collection' and value is iterable %}
                             {% if field.format == 'badges' %}
                                 {% for item in value %}

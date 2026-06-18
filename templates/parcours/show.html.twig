@@ -236,6 +236,7 @@
 
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {title: 'Pilotage', href: path('app_section_pilotage')},
         {href: path('app_formation_index'), title: 'Liste des formations'},
         {href: path('formation_v2_voir', {slug:formation.slug}), title:'Formation :  ' ~ formation.display},
     ]}) }}

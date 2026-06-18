@@ -95,7 +95,9 @@
 
 {% block breadcrumb %}
     {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {title: 'Offre de formation', href: path('app_section_offre_formation')},
         {href: path('structure_fiche_matiere_index'), title: 'Liste des fiches EC/matières'},
+        {title: 'Modification'}
     ]}) }}
 {% endblock %}
 
