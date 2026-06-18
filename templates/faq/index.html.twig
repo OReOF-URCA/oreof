@@ -7,11 +7,9 @@
 
 {% block header %}Centre des Questions Fréquemment Posées{% endblock %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens: [
-        {title: 'FAQ'}
-    ]}) }}
-{% endblock %}
+{% set header_description %}
+    Liste des questions et réponses fréquemment posées pour vous aider à mieux comprendre et utiliser la plateforme.
+{% endset %}
 
 {% block content %}
     <div class="w-full">
