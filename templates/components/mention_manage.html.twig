@@ -98,6 +98,7 @@
                                 <span> Valider les fiches EC/matières</span>
                             </a>
                             {% endif %}
+                            {% if formation.typeDiplome.classique ?? true %}
                             <button
                                     {{ stimulus_controller('modal', {
                                         size: 'lg',
@@ -113,6 +114,7 @@
                                 <i class="fas fa-check"></i>
                                 <span> Vérifier la saisie</span>
                             </button>
+                            {% endif %}
                             {#                            {% if isPass('dpe', formation, 'soumis_conseil') %} #}
                             {# todo: plus utile ici ? mais permettre le dépôt global #}
                             {#                                {{ component('historique_pv', {formation:formation}) }} #}

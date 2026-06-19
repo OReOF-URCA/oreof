@@ -110,6 +110,10 @@ final class FormulaireGeneriqueController extends BaseController
                     $formation = new Formation($this->getCampagneCollecte());
                     $formation->setTypeDiplome($data['typeDiplome']);
                     $formation->setMention($mention);
+                    // Le sigle est saisi sur la mention (modal de création) ; on le recopie
+                    // sur la formation, qui possède son propre champ sigle (lu par le
+                    // formulaire de modification FormationStep1Type).
+                    $formation->setSigle($mention->getSigle());
                     $formation->setComposantePorteuse($data['composantePorteuse'] ?? null);
                     if (!empty($data['composantePorteuse'])) {
                         $formation->addComposantesInscription($data['composantePorteuse']);

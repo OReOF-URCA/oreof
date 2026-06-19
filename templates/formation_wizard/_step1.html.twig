@@ -24,6 +24,29 @@
     {#        <span> {{ 'fiche_matiere.step1_collegue_manquant.label'|trans({}, 'form') }}</span>#}
     {#    </a>#}
     {{ form(form) }}
+
+    {# Formation mono-parcours non classique : le choix mono/multi (qui vivait dans l'onglet
+       « Structure et organisation », masqué pour ces formations) est proposé ici. Passer à
+       « Oui » transforme la formation en multi-parcours puis recharge la page. #}
+    {% if formation.parcours[0] is defined and formation.hasParcours == false and formation.typeDiplome.isClassique == false %}
+        <fieldset class="mb-3 mt-3">
+            <legend class="col-form-label">Cette formation comporte-t-elle plusieurs parcours ?</legend>
+            <div class="form-check">
+                <input type="radio" id="formation_step1_parcours_1" name="formation_step1_parcours"
+                       class="form-check-input" value="1"
+                        {{ stimulus_action('formation--step1', 'changeHasParcours', 'click') }}>
+                <label class="form-check-label" for="formation_step1_parcours_1">Oui</label>
+            </div>
+            <div class="form-check">
+                <input type="radio" id="formation_step1_parcours_0" name="formation_step1_parcours"
+                       class="form-check-input" value="0" checked
+                        {{ stimulus_action('formation--step1', 'changeHasParcours', 'click') }}>
+                <label class="form-check-label" for="formation_step1_parcours_0">Non</label>
+            </div>
+        </fieldset>
+    {% endif %}
+
+    {% if formation.typeDiplome.classique ?? true %}
     <div class="alert {% if formation.getEtatStep(1) %}alert-success{% else %}alert-warning{% endif %}"
          id="alertEtatStructure">
         <input type="checkbox"
@@ -34,5 +57,6 @@
         ><label for="etatStructure">
             Cochez cette case si vous avez terminé ...</label>
     </div>
+    {% endif %}
 
 </div>
