@@ -28,7 +28,6 @@
             </div>
 
             <div class="p-4 text-secondary-700 dark:text-secondary-200">
-                {# BOUTONS D'ADMINISTRATION ET SLUG (Placés en haut, en ligne) #}
                 {% if is_granted('ROLE_ADMIN') %}
                     <div class="flex flex-wrap items-center gap-2 mb-4 pb-3 border-b border-secondary-200 dark:border-secondary-700">
                         {% if current_help %}
@@ -61,11 +60,11 @@
                     </div>
                 {% endif %}
 
-                {# CONTENU DE L'AIDE POUR TOUS #}
+                {# CONTENU DE L'AIDE #}
                 <div>
                     {% if current_help %}
                         <div class="markdown-body app-help-markdown px-2">
-                            {{ current_help.content|markdown_to_html|parse_embeds }}
+                            {{ current_help.content|help_markdown|parse_embeds }}
                         </div>
                     {% else %}
                         <div class="bg-none border border-secondary-200 p-4 rounded text-center mt-2 dark:bg-secondary-800/70 dark:border-secondary-700">
