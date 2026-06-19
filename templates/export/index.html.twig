@@ -8,13 +8,6 @@
 {% set selectedComposanteId = composante is defined and composante ? composante.id : null %}
 {% set frame_src = selectedComposanteId ? path('app_export_liste', { composante: selectedComposanteId }) : null %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Pilotage'},
-        {title: 'Gestion des exports de fichier'},
-    ]}) }}
-{% endblock %}
-
 {% block content %}
     <div
             {{ stimulus_controller('export', {

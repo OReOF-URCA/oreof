@@ -4,17 +4,6 @@
     Synthèse des modifications CFVU
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            title: 'Conseils'
-        },
-        {
-            title: 'Synthèse des modifications CFVU'
-        }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <twig:Button
             href="{{ path('app_synthese_modification_export_all') }}"
