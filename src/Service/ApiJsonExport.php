@@ -101,7 +101,7 @@ class ApiJsonExport
                         ->findLastCfvuVersion($parcours);
                     if (count($lastVersion) > 0 && $lheoXmlService->isValidLHEO($parcours)) {
                         $lastVersionData = $this->versioningParcours->loadParcoursFromVersion($lastVersion[0]);
-                        $tParcours[] = [
+                        $parcoursData = [
                             'id_old' => $parcours->getParcoursOrigineCopie()?->getId(),
                             'id' => $parcours->getId(),
                             'libelle' => $lastVersionData['parcours']->getDisplay(),
@@ -113,6 +113,11 @@ class ApiJsonExport
                                     ['parcours' => $lastVersion[0]->getParcours()->getId()]
                             )
                         ];
+                        if ($isV2) {
+                            $parcoursData['annee'] = $campagneCourante->getAnnee();
+                        }
+                        $tParcours[] = $parcoursData;
+
                         $dateValideCfvu = $this->getHistorique
                             ->getHistoriqueParcoursLastStep($parcours->getDpeParcours()->last(), 'valide_cfvu')
                             ?->getDate();
@@ -187,7 +192,7 @@ class ApiJsonExport
                         $dpeParcoursToAdd = $parcoursAnneeSuivante->getDpeParcours()?->last();
                         if ($dpeParcoursToAdd instanceof DpeParcours) {
                             if (in_array($dpeParcoursToAdd->getEtatReconduction(), $etatReconductionCampagneSuivante)) {
-                                $addedParcours[] = [
+                                $parcoursDataNext = [
                                     'id_old' => $parcoursAnneeSuivante->getParcoursOrigineCopie()?->getId(),
                                     'id' => $parcoursAnneeSuivante->getId(),
                                     'libelle' => $parcoursAnneeSuivante->getDisplay(),
@@ -199,6 +204,10 @@ class ApiJsonExport
                                             ['parcours' => $parcoursAnneeSuivante->getId()]
                                     )
                                 ];
+                                if ($isV2) {
+                                    $parcoursDataNext['annee'] = $campagneSuivante->getAnnee();
+                                }
+                                $addedParcours[] = $parcoursDataNext;
                             }
                         }
 
