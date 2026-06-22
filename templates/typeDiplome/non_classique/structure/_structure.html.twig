@@ -1,0 +1,19 @@
+{# Formations non classiques : la structure n'est pas saisie via des UE/EC mais déposée dans un PDF de maquette. #}
+<div class="col-sm-12">
+    {% if parcours.maquettePdf %}
+        <p>
+            <i class="fal fa-file-pdf"></i>
+            La structure de ce parcours est détaillée dans la maquette jointe (PDF){% if parcours.maquettePdfNomOriginal %} :
+            <strong>{{ parcours.maquettePdfNomOriginal }}</strong>{% endif %}.
+        </p>
+        {% if print is not defined or print == false %}
+            <a href="{{ path('app_upload_download', {context: 'maquettes', filename: parcours.maquettePdf, originalName: parcours.maquettePdfNomOriginal}) }}"
+               class="btn btn-outline-primary btn-icon btn-icon-start">
+                <i class="fal fa-file-pdf"></i>
+                <span> Télécharger la maquette (PDF)</span>
+            </a>
+        {% endif %}
+    {% else %}
+        <p class="text-muted">Aucune maquette PDF n'a été déposée pour ce parcours.</p>
+    {% endif %}
+</div>

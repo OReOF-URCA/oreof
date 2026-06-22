@@ -1,0 +1,65 @@
+<div {{ stimulus_controller('maquette', {
+    uploadUrl: path('app_parcours_maquette_upload', {parcours: parcours.id}),
+    deleteUrl: path('app_parcours_maquette_delete', {parcours: parcours.id}),
+    saveUrl: path('app_parcours_save', {parcours: parcours.id}),
+}) }}>
+
+    <h5 class="mb-3">Maquette de la formation (PDF)</h5>
+
+    <div class="alert alert-danger d-none" data-maquette-target="error"></div>
+
+    {% if parcours.maquettePdf %}
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <a href="{{ path('app_upload_download', {context: 'maquettes', filename: parcours.maquettePdf, originalName: parcours.maquettePdfNomOriginal}) }}"
+               class="btn btn-outline-primary btn-icon btn-icon-start">
+                <i class="fal fa-file-pdf"></i>
+                <span> {{ parcours.maquettePdfNomOriginal ?: 'Télécharger la maquette' }}</span>
+            </a>
+            {% if editable %}
+                <button type="button" class="btn btn-outline-danger btn-icon btn-icon-start"
+                        data-action="maquette#delete">
+                    <i class="fal fa-trash"></i><span> Supprimer</span>
+                </button>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle"></i> Aucune maquette PDF n'a été déposée pour ce parcours.
+        </div>
+    {% endif %}
+
+    {% if editable %}
+        <div class="mt-3">
+            <label class="form-label">
+                {% if parcours.maquettePdf %}Remplacer la maquette{% else %}Déposer la maquette{% endif %}
+                (PDF, 10&nbsp;Mo max.)
+            </label>
+            <div class="d-flex align-items-start gap-2">
+                <input type="file" accept="application/pdf" class="form-control"
+                       data-maquette-target="fileInput">
+                <button type="button" class="btn btn-success text-nowrap"
+                        data-action="maquette#upload" data-maquette-target="submit">
+                    <i class="fal fa-floppy-disk"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-muted mt-2">
+            <i class="fal fa-lock"></i> Ce parcours n'est plus modifiable : la maquette ne peut pas être changée.
+        </div>
+    {% endif %}
+
+    {% if editable %}
+        {% set maquetteValidee = parcours.getEtatSteps()['maquette'] ?? false %}
+        <div class="alert {% if maquetteValidee %}alert-success{% else %}alert-warning{% endif %} mt-3"
+             id="alertEtatStructure">
+            <input type="checkbox"
+                   id="etatStructure"
+                   class="form-check-inline"
+                   {% if maquetteValidee %}checked{% endif %}
+                   {{ stimulus_action('maquette', 'etatStep', 'change') }}
+            ><label for="etatStructure">
+                Cochez cette case si vous avez terminé la saisie de la maquette de ce parcours.</label>
+        </div>
+    {% endif %}
+</div>

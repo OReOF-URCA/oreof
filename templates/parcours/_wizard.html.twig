@@ -55,6 +55,19 @@
         </li>
         {% endif %}
 
+        {% if hideCompetencesStructure is defined and hideCompetencesStructure %}
+            <li class="nav-item" role="presentation">
+                <a class="nav-link {% if step == 'maquette' %}active{% endif %}"
+                   data-bs-toggle="tab" href="#" role="tab" aria-selected="false"
+                        {{ stimulus_action('parcours_wizard', 'changeStep', 'click', {step: 'maquette'}) }}
+                >
+                    Maquette
+                    <span class="state state-{{ (parcours.maquettePdf and (parcours.getEtatSteps()['maquette'] ?? false)) ? 'complete' : 'en-cours' }}"
+                          id="parcours_ongletmaquette"></span>
+                </a>
+            </li>
+        {% endif %}
+
         <li class="nav-item" role="presentation">
             <a class="nav-link {% if step == 5 %}active{% endif %}"
                data-bs-toggle="tab" href="#" role="tab"

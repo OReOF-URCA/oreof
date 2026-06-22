@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\TypeDiplome;
 use App\Form\Type\TextareaAutoSaveType;
 use App\Form\Type\YesNoType;
+use App\TypeDiplome\NonClassique\NonClassiqueHandler;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 use Symfony\Component\Form\AbstractType;
@@ -12,6 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 
@@ -40,15 +43,23 @@ class TypeDiplomeType extends AbstractType
             ->add('codeApogee', TextType::class, [
                 'label' => 'Code Apogée',
                 'attr' => ['maxlength' => 1],
-                'required' => true,
+                'required' => false,
+                // Colonne NOT NULL + setter non-nullable : un champ vide retombe
+                // sur une chaîne vide plutôt que null.
+                'empty_data' => '',
             ])
+            // Champ déprécié : conservé (entité et colonne intactes) mais masqué et
+            // verrouillé. Les nouveaux types retombent sur le défaut « false » de
+            // l'entité ; un champ désactivé n'est de toute façon pas modifiable.
             ->add('codifIntermediaire', YesNoType::class, [
                 'label' => 'Codification intermédiaire',
-                'required' => true,
+                'required' => false,
+                'disabled' => true,
+                'row_attr' => ['class' => 'd-none'],
             ])
             ->add('modalites_admission', TextareaAutoSaveType::class, [
                 'label' => "Modalités d'admission",
-                'required' => true,
+                'required' => false,
                 'attr' => [
                     'rows' => 6,
                     'maxlength' => 3000
@@ -78,11 +89,31 @@ class TypeDiplomeType extends AbstractType
                     'maxlength' => 3000
                 ]
             ])
-            ->add('classique', CheckboxType::class, [
-                'label' => 'Structure classique (semestres)',
+            ->add('classique', ChoiceType::class, [
+                'label' => 'Type de formation',
+                'choices' => [
+                    'Formation accréditée' => true,
+                    'Formation non-accréditée' => false,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'required' => true,
+                'placeholder' => false,
+                // Valeurs de soumission explicites et non vides : évite qu'un choix
+                // (notamment « non-accréditée ») soit interprété comme « rien de coché »
+                // sur un champ obligatoire.
+                'choice_value' => fn(?bool $choice) => $choice === true ? 'accreditee' : ($choice === false ? 'non_accreditee' : ''),
+                'row_attr' => ['class' => 'mt-3 mb-3 font-weight-bold'],
+                'choice_attr' => fn() => [
+                    'data-type-diplome-target' => 'classique',
+                    'data-action' => 'change->type-diplome#toggle',
+                ],
+            ])
+            ->add('passageCfvu', CheckboxType::class, [
+                'label' => 'Passage au CFVU',
                 'required' => false,
                 'row_attr' => ['class' => 'mt-3 mb-3 font-weight-bold'],
-                'attr' => ['data-type-diplome-target' => 'classique', 'data-action' => 'change->type-diplome#toggle'],
+                'help' => "Décoché : les formations/parcours créés via le formulaire générique sont initialisés sans passage en CFVU.",
             ])
             ->add('semestreDebut', null, [
                 'row_attr' => ['class' => 'semestre-field'],
@@ -95,12 +126,19 @@ class TypeDiplomeType extends AbstractType
             ->add('hasEcts', YesNoType::class, [
                 'label' => 'Utilise les ECTS',
                 'empty_data' => true,
+                'choice_attr' => fn() => [
+                    'data-type-diplome-target' => 'hasEcts',
+                    'data-action' => 'change->type-diplome#toggleEcts',
+                ],
             ])
             ->add('nbEctsParSemestre', null, [
                 'label' => 'Nombre d\'ECTS par semestre (laisser vide si pas de quota fixe)',
                 'required' => false,
+                'row_attr' => ['class' => 'ects-field'],
             ])
-            ->add('nbEctsMaxUe')
+            ->add('nbEctsMaxUe', null, [
+                'row_attr' => ['class' => 'ects-field'],
+            ])
             ->add('nbEcParUe')
             ->add('ModeleMcc', ChoiceType::class, [
                 'choices' => $choices,
@@ -112,7 +150,7 @@ class TypeDiplomeType extends AbstractType
             ->add('hasStage', YesNoType::class)
             ->add('hasSituationPro', YesNoType::class)
             ->add('hasProjet', YesNoType::class)
-            ->add('ectsObligatoireSurEc', YesNoType::class, ['empty_data' => true])
+            ->add('ectsObligatoireSurEc', YesNoType::class, ['empty_data' => true, 'row_attr' => ['class' => 'ects-field']])
             ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true])
             ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
 
@@ -122,9 +160,41 @@ class TypeDiplomeType extends AbstractType
                 'required' => false,
                 'mapped' => false,
                 'attr' => ['accept' => 'image/png, image/jpeg'],
-            ])
-            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
+            ]);
 
+        // Quand le diplôme n'utilise pas les ECTS, le champ « Nombre maximum d'ECTS
+        // par UE » est grisé côté client et sans objet. On lui fournit une valeur
+        // valide côté serveur (la colonne est NOT NULL) pour ne pas dépendre du JS
+        // et éviter l'erreur « Veuillez saisir un entier » sur un champ vide.
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, static function (FormEvent $event): void {
+            $data = $event->getData();
+            if (!is_array($data)) {
+                return;
+            }
+
+            $changed = false;
+
+            // YesNoType : « Oui » est soumis avec la valeur '1' ; tout le reste
+            // (vide, '0', absent) signifie que les ECTS ne sont pas utilisés.
+            $hasEcts = !empty($data['hasEcts']) && $data['hasEcts'] !== '0';
+            if (!$hasEcts && (!isset($data['nbEctsMaxUe']) || $data['nbEctsMaxUe'] === '')) {
+                $data['nbEctsMaxUe'] = '0';
+                $changed = true;
+            }
+
+            // Structure non classique : le select « Modèle MCCC » est grisé/désactivé
+            // côté client et donc absent du POST. La colonne étant NOT NULL, on force
+            // le handler non classique (même valeur que celle posée par le JS).
+            $classique = ($data['classique'] ?? null) === 'accreditee';
+            if (!$classique && empty($data['ModeleMcc'])) {
+                $data['ModeleMcc'] = NonClassiqueHandler::class;
+                $changed = true;
+            }
+
+            if ($changed) {
+                $event->setData($data);
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void
