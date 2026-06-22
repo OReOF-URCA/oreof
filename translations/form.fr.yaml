@@ -134,6 +134,8 @@ parcours_step1.labels.localisation: 'Localisation du parcours'
 'Veuillez choisir la localisation du parcours': '-'
 parcours_step2.labels.modalitesEnseignement: "Précisez les modalités d'enseignement de la formation"
 "Choisissez une modalité d'enseignement": '-'
+parcours_step2.labels.dureeParcours: 'Durée de formation'
+parcours_step2.labels.dureeParcoursUnite: 'Unité de durée'
 parcours_step5.labels.composanteInscription: "Composante d'inscription"
 "Choisissez une composante d'inscription": '-'
 parcours_step7.labels.codeRome: 'Code(s) ROME'

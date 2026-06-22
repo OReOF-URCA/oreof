@@ -2,6 +2,8 @@
         {% if step == 0 %}
             {% if parcours.formation.isHasParcours == true %}{% set step = 1 %}{% else %}{% set step = 2 %}{% endif %}
         {% endif %}
+        {# Pastilles de complétude masquées pour les parcours non classiques (cf. edit formation). #}
+        {% set trackCompletude = parcours.formation.typeDiplome.classique ?? true %}
         {{ stimulus_controller('parcours_wizard', {
             url: path('app_parcours_wizard'),
             step: step,
@@ -18,7 +20,7 @@
                    data-bs-toggle="tab" href="#" role="tab"
                         {{ stimulus_action('parcours_wizard', 'changeStep', 'click', {step: 1}) }}
                 >
-                    Présentation du parcours {{ parcoursState.onglets|etatRemplissage(1, 'parcours') }}
+                    Présentation du parcours {% if trackCompletude %}{{ parcoursState.onglets|etatRemplissage(1, 'parcours') }}{% endif %}
                 </a>
             </li>
         {% endif %}
@@ -29,7 +31,7 @@
                 false %}true{% endif %}"
                     {{ stimulus_action('parcours_wizard', 'changeStep', 'click', {step: 2}) }}
             >
-                Descriptif {{ parcoursState.onglets|etatRemplissage(2, 'parcours') }}
+                Descriptif {% if trackCompletude %}{{ parcoursState.onglets|etatRemplissage(2, 'parcours') }}{% endif %}
             </a>
         </li>
 
@@ -62,8 +64,10 @@
                         {{ stimulus_action('parcours_wizard', 'changeStep', 'click', {step: 'maquette'}) }}
                 >
                     Maquette
+                    {% if trackCompletude %}
                     <span class="state state-{{ (parcours.maquettePdf and (parcours.getEtatSteps()['maquette'] ?? false)) ? 'complete' : 'en-cours' }}"
                           id="parcours_ongletmaquette"></span>
+                    {% endif %}
                 </a>
             </li>
         {% endif %}
@@ -74,7 +78,7 @@
                aria-selected="false"
                     {{ stimulus_action('parcours_wizard', 'changeStep', 'click', {step: 5}) }}
             >
-                Admission & inscription {{ parcoursState.onglets|etatRemplissage(5, 'parcours') }}
+                Admission & inscription {% if trackCompletude %}{{ parcoursState.onglets|etatRemplissage(5, 'parcours') }}{% endif %}
             </a>
         </li>
 
@@ -83,7 +87,7 @@
                aria-selected="false"
                     {{ stimulus_action('parcours_wizard', 'changeStep', 'click', {step: 6}) }}
             >
-                Et après... {{ parcoursState.onglets|etatRemplissage(6, 'parcours') }}
+                Et après... {% if trackCompletude %}{{ parcoursState.onglets|etatRemplissage(6, 'parcours') }}{% endif %}
             </a>
         </li>
         {% if is_granted('ROLE_ADMIN') %}

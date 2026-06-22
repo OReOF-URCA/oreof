@@ -49,7 +49,9 @@
         </div>
     {% endif %}
 
-    {% if editable %}
+    {# Suivi de complétude retiré pour le non classique : on n'affiche la case « terminé »
+       que pour les types classiques (le cas échéant). #}
+    {% if editable and (parcours.formation.typeDiplome.classique ?? true) %}
         {% set maquetteValidee = parcours.getEtatSteps()['maquette'] ?? false %}
         <div class="alert {% if maquetteValidee %}alert-success{% else %}alert-warning{% endif %} mt-3"
              id="alertEtatStructure">

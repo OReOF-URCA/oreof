@@ -22,7 +22,11 @@
                 {{ parcour.coResponsable != null ? parcour.coResponsable.display : 'Non défini' }}
             </td>
             <td style="width:20%">
-                {{ parcour.remplissage|remplissage }}
+                {% if parcour.formation.typeDiplome.classique ?? true %}
+                    {{ parcour.remplissage|remplissage }}
+                {% else %}
+                    <span class="text-muted">—</span>
+                {% endif %}
             </td>
             <td>
                 {{ parcour.etatDpeParcours|badgeDpe }} {{ parcours.withCfvu is defined and parcours.withCfvu == true ? '<span class="badge bg-warning">CFVU</span>' : '' }}
@@ -54,6 +58,7 @@
                             Editer la fiche du parcours
                         </a>
                     {% endif %}
+                    {% if parcour.formation.typeDiplome.classique ?? true %}
                     <a href="#"
                        class="btn btn-sm text-success"
                             {{ stimulus_controller('modal', {
@@ -69,6 +74,7 @@
                         <i class="fal fa-binoculars"></i>
                         <span> vérifier</span>
                     </a><br>
+                    {% endif %}
 
                     {#                    <button #}
                     {#                            {{ stimulus_controller('modal', { #}
@@ -132,7 +138,11 @@
                         {{ parc.coResponsable != null ? parc.coResponsable.display : 'Non défini' }}
                     </td>
                     <td style="width:20%">
-                        {{ parc.remplissage|remplissage }}
+                        {% if parc.formation.typeDiplome.classique ?? true %}
+                            {{ parc.remplissage|remplissage }}
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
                     </td>
                     <td class="text-end">
                         <button
