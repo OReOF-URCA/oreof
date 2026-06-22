@@ -423,51 +423,8 @@ class TypeDiplomeController extends BaseController
 
         if ($form->isSubmitted() && $form->isValid())
         {
-            $logoFiles = $form->get('logo')->getData();
-            if ($logoFiles)
-            {
-                $existingLogos = $typeDiplome->getLogo() ?? [];
-                foreach ($existingLogos as $existing)
-                {
-                    $this->secureUploadService->delete('logos', $existing);
-                }
-                $typeDiplome->setLogo([]);
-
-                $hasFormatError = false;
-                $hasSizeError = false;
-
-                foreach ($logoFiles as $logoFile)
-                {
-                    try
-                    {
-                        $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
-                        $logos = $typeDiplome->getLogo() ?? [];
-                        $logos[] = $uploaded->getStoredFilename();
-                        $typeDiplome->setLogo($logos);
-                    }
-                    catch (\Exception $e)
-                    {
-                        if (str_contains($e->getMessage(), 'volumineux'))
-                        {
-                            $hasSizeError = true;
-                        }
-                        else
-                        {
-                            $hasFormatError = true;
-                        }
-                    }
-                }
-
-                if ($hasSizeError)
-                {
-                    $this->addFlash('toast', ['type' => 'error', 'text' => 'Fichier(s) trop lourd(s) (10 Mo max)', 'title' => 'Erreur']);
-                }
-                if ($hasFormatError)
-                {
-                    $this->addFlash('toast', ['type' => 'error', 'text' => 'Format invalide (PNG/JPEG uniquement)', 'title' => 'Erreur']);
-                }
-            }
-
+            // Le logo n'est pas dans ce formulaire en modification : il est géré par la
+            // carte dédiée (upload/suppression en AJAX). On enregistre simplement le reste.
             $typeDiplomeRepository->save($typeDiplome, true);
 
             // Gérer les plateformes d'admission avec leurs années
