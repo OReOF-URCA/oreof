@@ -45,6 +45,13 @@ export default class extends Controller {
     })
   }
 
+  saveRespFormation (event) {
+    this._save({
+      action: 'respFormation',
+      value: event.target.value,
+    })
+  }
+
   saveCoRespFormation(event) {
     this._save({
       action: 'coRespFormation',
