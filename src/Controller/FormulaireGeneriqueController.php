@@ -144,6 +144,11 @@ final class FormulaireGeneriqueController extends BaseController
                     if (!empty($data['regimeInscription'])) {
                         $formation->setRegimeInscription($data['regimeInscription']);
                     }
+                    // Le rythme est aussi posé sur le parcours (ci-dessous). En mono, l'onglet
+                    // « Présentation de la formation » (FormationStep2Type) le lit au niveau
+                    // de la formation : on le renseigne ici pour qu'il soit bien récupéré.
+                    $formation->setRythmeFormation($data['rythmeFormation'] ?? null);
+                    $formation->setRythmeFormationTexte($data['rythmeFormationTexte'] ?? null);
                     $this->entityManager->persist($formation);
                 } else {
                     // Ajout d'un parcours à une formation existante → elle devient multiparcours.
@@ -173,6 +178,14 @@ final class FormulaireGeneriqueController extends BaseController
                 $parcours->setModalitesEnseignement(null);
                 $parcours->setDureeParcours($data['dureeParcours'] ?? null);
                 $parcours->setDureeParcoursUnite($data['dureeParcoursUnite'] ?? null);
+
+                if ($estMono) {
+                    // Le parcours unique n'est pas un « parcours par défaut » (son libellé
+                    // reprend l'intitulé), donc getComposanteInscription() ne retombe pas
+                    // sur la composante de la formation. On la fixe explicitement pour que
+                    // l'onglet Admission (ParcoursStep5Type) la récupère.
+                    $parcours->setComposanteInscription($formation->getComposantesInscription()->first() ?: null);
+                }
 
                 $this->entityManager->persist($parcours);
 

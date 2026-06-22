@@ -148,6 +148,24 @@ class FormationSaveController extends BaseController
                 $em->flush();
 
                 return $this->json(true);
+            case 'respFormation':
+                $profil = $profilRepository->findOneBy(['code' => 'ROLE_RESP_FORMATION']);
+                if (empty($profil)) {
+                    return $this->json(['error' => 'Profil ROLE_RESP_FORMATION non trouvé']);
+                }
+                // Retrait du centre/droits de l'ancien responsable, le cas échéant.
+                if ($formation->getResponsableMention() !== null) {
+                    $event = new AddCentreFormationEvent($formation, $formation->getResponsableMention(), $profil, $this->getCampagneCollecte());
+                    $eventDispatcher->dispatch($event, AddCentreFormationEvent::REMOVE_CENTRE_FORMATION);
+                }
+                $user = $userRepository->find($data['value']);
+                $rep = $updateEntity->saveField($formation, 'responsableMention', $user);
+
+                if ($user !== null) {
+                    $event = new AddCentreFormationEvent($formation, $user, $profil, $this->getCampagneCollecte());
+                    $eventDispatcher->dispatch($event, AddCentreFormationEvent::ADD_CENTRE_FORMATION);
+                }
+                return $this->json($rep);
             case 'coRespFormation':
                 $profil = $profilRepository->findOneBy(['code' => 'ROLE_CO_RESP_FORMATION']);
                 if (empty($profil)) {
