@@ -23,6 +23,7 @@ use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
 use App\Entity\User;
 use App\Entity\Constantes;
+use App\Entity\TypeDiplome;
 use App\Enums\ConfigurationPublicationEnum;
 use App\Enums\EtatDpeEnum;
 use App\Enums\TypeModificationDpeEnum;
@@ -1335,13 +1336,25 @@ class ParcoursController extends BaseController
     }
 
 
-    // Route directe vers un logo pour alimenter l'API
-    #[Route('/{id}/logo/{filename}', name: 'app_parcours_logo', methods: ['GET'])]
+    // Route directe vers un logo pour alimenter l'API - logos du Parcours
+    #[Route('/{id}/logo/{filename}/export-json-urca', name: 'app_parcours_logo', methods: ['GET'])]
     public function logo(Parcours $parcours, string $filename): Response
     {
         $filePath = $this->secureUploadService->resolveStoredFilePath('logos', $filename);
 
         if (!file_exists($filePath)) {
+            throw $this->createNotFoundException();
+        }
+
+        return new BinaryFileResponse($filePath);
+    }
+
+    // Route directe pour alimenter l'API - logos du TypeDiplome
+    #[Route('/type_diplome/{td}/logo/{filename}/export-json-urca', name: 'app_parcours_type_diplome_logos')]
+    public function typeDiplomeLogos(TypeDiplome $td, string $filename) {
+        $filePath = $this->secureUploadService->resolveStoredFilePath('logos', $filename);
+
+        if(!file_exists($filePath)) {
             throw $this->createNotFoundException();
         }
 
@@ -1438,11 +1451,7 @@ class ParcoursController extends BaseController
             $typeF[] = 'Licence Accès Santé';
         }
 
-        $logoTypeDiplomeArray = $this->generateUrl(
-            'app_type_diplome_logos_api', 
-            ['id' => $parcoursVersion->getParcours()->getFormation()->getTypeDiplome()->getId()],
-            UrlGeneratorInterface::ABSOLUTE_URL
-        );
+        $logoTypeDiplomeArray = $this->getLogoTypeDiplomeParcoursApi($parcoursVersion->getParcours());
         $logosParcours = $this->getLogoArrayParcoursApi($parcoursVersion->getParcours());
 
         $data = [
@@ -1451,7 +1460,7 @@ class ParcoursController extends BaseController
             'metadata' => [
                 'domaine' => $parcoursVersionData->getFormation()?->getDomaine()?->getLibelle() ?? '-',
                 'type-formation' => $typeF,
-                'logo-type-formation' => $logoTypeDiplomeArray,
+                'logos-type-formation' => $logoTypeDiplomeArray,
                 'localisation' => $localisationMetadata,
                 'faculte-ecole-institut' => $faculteEcoleInstitut,
                 'public-concerne' => $parcoursVersionData->getRegimeInscription() ?? [], //Certains sont des tableaux, d'autres en JSON
@@ -1572,11 +1581,7 @@ class ParcoursController extends BaseController
             $typeF[] = 'Licence Accès Santé';
         }
 
-        $logoTypeDiplomeArray = $this->generateUrl(
-                "app_type_diplome_logos_api", 
-                ['id' => $typeDiplome->getId()],
-                UrlGeneratorInterface::ABSOLUTE_URL
-        );
+        $logoTypeDiplomeArray = $this->getLogoTypeDiplomeParcoursApi($parcours);
         $logosParcours = $this->getLogoArrayParcoursApi($parcours);
 
         $data = [
@@ -1611,6 +1616,27 @@ class ParcoursController extends BaseController
                     UrlGeneratorInterface::ABSOLUTE_URL
                 ),
                 'image_type' => mime_content_type($this->secureUploadService->resolveStoredFilePath('logos', $filename)),
+                'id' => pathinfo($filename)['filename']
+            ];
+        }
+
+        return $result;
+    }
+
+    private function getLogoTypeDiplomeParcoursApi(Parcours $parcours) : array {
+        $result = [];
+        foreach($parcours->getFormation()?->getTypeDiplome()?->getLogo() ?? [] as $filename) {
+            $result[] =  [
+                'image_data' => $this->generateUrl(
+                    'app_parcours_type_diplome_logos',
+                    [
+                        'td' => $parcours->getFormation()?->getTypeDiplome()?->getId(), 
+                        'filename' => $filename
+                    ],
+                    UrlGeneratorInterface::ABSOLUTE_URL
+                ),
+                'image_type' => mime_content_type($this->secureUploadService->resolveStoredFilePath('logos', $filename)),
+                'id' => pathinfo($filename)['filename']
             ];
         }
 
