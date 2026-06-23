@@ -3,6 +3,16 @@
 {% block content %}
 
     {% set step = 1 %}
+    {# Formation mono-parcours : la formation EST son parcours (affichage des onglets parcours). #}
+    {% set isMonoParcours = formation.parcours[0] is defined and formation.hasParcours == false %}
+    {# Mono-parcours ET non classique : on masque l'onglet « Structure et organisation »
+       (qui ne servait qu'au choix mono/multi) et on déplace ce choix dans le 1er onglet.
+       Les formations classiques restent inchangées. #}
+    {% set isMonoNonClassique = isMonoParcours and formation.typeDiplome.isClassique == false %}
+    {# Suivi de complétude (pastilles d'état sur les onglets) : désactivé pour les formations
+       non classiques, dont la complétude n'est pas pertinente (seule la maquette PDF et le
+       contrôle LHEO comptent). Les formations classiques le conservent. #}
+    {% set trackCompletude = formation.typeDiplome.isClassique %}
     {{ include('formation/_synthese_formation.html.twig') }}
 
     <div class="mt-3"
@@ -22,19 +32,23 @@
                    data-bs-toggle="tab" href="#" role="tab" {% if step == 1 %}aria-selected="true"{% endif %}
                         {{ stimulus_action('formation_wizard', 'changeStep', 'click', {step: 1}) }}
                 >
-                    Localisation de la formation {{ formationState.onglets|etatRemplissage(1, 'formation') }}
+                    Localisation {% if isMonoNonClassique %}et organisation {% endif %}de la formation {% if trackCompletude %}{{ formationState.onglets|etatRemplissage(1, 'formation') }}{% endif %}
                 </a>
             </li>
+            {% if not isMonoNonClassique %}
             <li class="nav-item" role="presentation">
                 <a class="nav-link {% if selectedStep == 3 %}active{% endif %} {% if not isAccessible(formation, 'cfvu') %}disabled{% endif %}"
                    data-bs-toggle="tab" href="#"
                    role="tab" aria-selected="false"
                         {{ stimulus_action('formation_wizard', 'changeStep', 'click', {step: 3}) }}
                 >Structure et organisation de la
-                    formation {{ formationState.onglets|etatRemplissage(3, 'formation') }}</a>
+                    formation {% if trackCompletude %}{{ formationState.onglets|etatRemplissage(3, 'formation') }}{% endif %}</a>
             </li>
-            {% if formation.parcours[0] is defined and formation.hasParcours == false %}
+            {% endif %}
+            {% if isMonoParcours %}
                 {% set parcours = formation.parcours[0] %}
+                {# Formation non classique : on masque Compétences/Structure et on ajoute l'onglet Maquette (comme dans le wizard parcours). #}
+                {% set hideCompetencesStructure = constant('TEMPLATE_FOLDER', typeD) == 'non_classique' %}
                 <li class="nav-item" role="presentation">
                     <a class="nav-link {% if selectedStep == 2 %}active{% endif %}"
                        data-bs-toggle="tab" href="#"
@@ -42,7 +56,7 @@
 
                             {{ stimulus_action('formation_wizard', 'changeStep', 'click', {step: 2}) }}
                        aria-selected="false">Présentation de la
-                        formation {{ formationState.onglets|etatRemplissage(2, 'formation') }}</a>
+                        formation {% if trackCompletude %}{{ formationState.onglets|etatRemplissage(2, 'formation') }}{% endif %}</a>
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link"
@@ -50,9 +64,10 @@
                             {{ stimulus_action('formation_wizard', 'changeStepParcours', 'click', {step: 2,
                                 parcours:dpeParcours.id}) }}
                     >
-                        Descriptif {{ parcoursState.onglets|etatRemplissage(2, 'parcours') }}
+                        Descriptif {% if trackCompletude %}{{ parcoursState.onglets|etatRemplissage(2, 'parcours') }}{% endif %}
                     </a>
                 </li>
+                {% if not hideCompetencesStructure %}
                 <li class="nav-item" role="presentation">
                     <a class="nav-link {% if not isAccessible(dpeParcours, 'cfvu') %}disabled{% endif %}"
                        data-bs-toggle="tab" href="#" role="tab" aria-selected="false"
@@ -69,11 +84,27 @@
                         Structure de la maquette {{ parcoursState.onglets|etatRemplissage(4, 'parcours') }}
                     </a>
                 </li>
+                {% endif %}
+
+                {% if hideCompetencesStructure %}
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link"
+                       data-bs-toggle="tab" href="#" role="tab" aria-selected="false"
+                            {{ stimulus_action('formation_wizard', 'changeStepParcours', 'click', {step: 'maquette', parcours:dpeParcours.id}) }}
+                    >
+                        Maquette
+                        {% if trackCompletude %}
+                        <span class="state state-{{ (parcours.maquettePdf and (parcours.getEtatSteps()['maquette'] ?? false)) ? 'complete' : 'en-cours' }}"
+                              id="parcours_ongletmaquette"></span>
+                        {% endif %}
+                    </a>
+                </li>
+                {% endif %}
                 <li class="nav-item" role="presentation">
                     <a class="nav-link" data-bs-toggle="tab" href="#" role="tab" aria-selected="false"
                             {{ stimulus_action('formation_wizard', 'changeStepParcours', 'click', {step: 5,parcours:dpeParcours.id}) }}
                     >
-                        Admission & inscription {{ parcoursState.onglets|etatRemplissage(5, 'parcours') }}
+                        Admission & inscription {% if trackCompletude %}{{ parcoursState.onglets|etatRemplissage(5, 'parcours') }}{% endif %}
                     </a>
                 </li>
                 <li class="nav-item" role="presentation">
@@ -82,7 +113,7 @@
                             {{ stimulus_action('formation_wizard', 'changeStepParcours', 'click', {step: 6,
                                 parcours:dpeParcours.id}) }}
                     >
-                        Et après... {{ parcoursState.onglets|etatRemplissage(6, 'parcours') }}
+                        Et après... {% if trackCompletude %}{{ parcoursState.onglets|etatRemplissage(6, 'parcours') }}{% endif %}
                     </a>
                 </li>
                 {% if is_granted('ROLE_ADMIN') %}

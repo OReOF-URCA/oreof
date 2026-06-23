@@ -11,6 +11,7 @@ namespace App\Form;
 
 use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
+use App\Enums\DureeParcoursUniteEnum;
 use App\Enums\ModaliteEnseignementEnum;
 use App\Form\Type\TextareaAutoSaveType;
 use App\Form\Type\YesNoType;
@@ -41,6 +42,33 @@ class ParcoursStep2Type extends AbstractType
                 },
                 'expanded' => false,
             ]);
+
+        // Durée du parcours : saisie à la création (formulaire générique) mais sans écran
+        // de modification. On l'expose ici pour les types de diplôme non classiques, seuls
+        // concernés par cette notion de durée libre (les classiques sont rythmés en semestres).
+        if ($typeDiplome !== null && !$typeDiplome->isClassique()) {
+            $builder
+                ->add('dureeParcours', NumberType::class, [
+                    'required' => false,
+                    'html5' => true,
+                    'scale' => 1,
+                    'help' => '-',
+                    'attr' => [
+                        'placeholder' => 'Ex. : 2',
+                        'data-action' => 'change->parcours--step2#changeDureeParcours',
+                    ],
+                    'row_attr' => ['class' => 'col-sm-3'],
+                ])
+                ->add('dureeParcoursUnite', EnumType::class, [
+                    'class' => DureeParcoursUniteEnum::class,
+                    'required' => false,
+                    'placeholder' => 'Choisissez une unité',
+                    'help' => '-',
+                    'choice_label' => fn (DureeParcoursUniteEnum $c) => $c->libelle(),
+                    'attr' => ['data-action' => 'change->parcours--step2#changeDureeParcoursUnite'],
+                    'row_attr' => ['class' => 'col-sm-3'],
+                ]);
+        }
 
        // if ($typeDiplome->isHasStage() === true) {
             $builder->add('hasStage', YesNoType::class, [

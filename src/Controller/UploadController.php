@@ -22,7 +22,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class UploadController extends BaseController
 {
-    #[Route('/download/{context}/{filename}', name: 'app_upload_download', requirements: ['context' => 'conseils'])]
+    #[Route('/download/{context}/{filename}', name: 'app_upload_download', requirements: ['context' => 'conseils|maquettes'])]
     public function download(
         string              $context,
         string              $filename,
