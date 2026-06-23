@@ -20,10 +20,10 @@ class LheoXML
 {
 
     public function __construct(
-        private EntityManagerInterface       $entityManager,
-        private TypeDiplomeResolver          $typeDiplomeResolver,
-        private UrlGeneratorInterface        $router,
-        private ElementConstitutifRepository $ecRepo,
+        protected EntityManagerInterface       $entityManager,
+        protected TypeDiplomeResolver          $typeDiplomeResolver,
+        protected UrlGeneratorInterface        $router,
+        protected ElementConstitutifRepository $ecRepo,
     ) {
     }
 
