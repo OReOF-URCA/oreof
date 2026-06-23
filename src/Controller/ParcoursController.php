@@ -1467,7 +1467,7 @@ class ParcoursController extends BaseController
                 'public-concerne' => $parcoursVersionData->getRegimeInscription() ?? [], //Certains sont des tableaux, d'autres en JSON
                 'niveau-francais' => $parcoursVersionData->getNiveauFrancais()?->libelle() ?? '-',
             ],
-            'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGenerator::ABSOLUTE_URL),
+            'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGenerator::ABSOLUTE_URL),
             'fiche-pdf' => $this->generateUrl('app_parcours_export_pdf_versioning', ['parcours' => $parcours->getId()], UrlGenerator::ABSOLUTE_URL),
             'maquette-pdf' => $this->generateUrl('app_parcours_mccc_export_cfvu_valid', ['parcours' => $parcoursVersion->getParcours()->getId(), 'format' => 'simplifie'], UrlGenerator::ABSOLUTE_URL),
             'maquette-json' => $this->generateUrl('app_parcours_export_maquette_json_validee_cfvu', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGenerator::ABSOLUTE_URL),
@@ -1597,7 +1597,7 @@ class ParcoursController extends BaseController
                 'public-concerne' => $parcours->getRegimeInscription() ?? [], //Certains sont des tableaux, d'autres en JSON
                 'niveau-francais' => $parcours->getNiveauFrancais()?->libelle() ?? '-',
             ],
-            'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+            'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'fiche-pdf' => $this->generateUrl('app_parcours_export', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'maquette-pdf' => $urlMaquettePdf,
             'maquette-json' => $urlMaquetteJson,
