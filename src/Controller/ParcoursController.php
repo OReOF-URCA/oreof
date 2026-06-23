@@ -33,6 +33,7 @@ use App\Repository\ElementConstitutifRepository;
 use App\Repository\ParcoursRepository;
 use App\Repository\ProfilRepository;
 use App\Service\LheoXML;
+use App\Service\LheoXMLv2;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
 use App\Utils\JsonRequest;
@@ -1496,5 +1497,29 @@ class ParcoursController extends BaseController
         }
 
         return $result;
+    }
+
+    #[Route('/{id}/v2/export-xml-lheo', name: 'app_parcours_export_xml_lheo_v2')]
+    public function getXmlLheoV2(Parcours $parcours, LheoXMLv2 $lheoV2) : Response {
+        $xml = $lheoV2->generateLheoXMLFromParcours($parcours, true);
+        // Validation
+        libxml_use_internal_errors(true);
+        $isValid = $lheoV2->validateLheoSchema($xml);
+        $xml_errors = [];
+        if (!$isValid) {
+            foreach (libxml_get_errors() as $error) {
+                $xml_errors[] = $lheoV2->decodeErrorMessages($error->message);
+            }
+        }
+        libxml_clear_errors();
+        // Si le XML généré est valide, on le renvoie
+        if ($isValid) {
+            return new Response($xml, 200, ['Content-Type' => 'application/xml']);
+        } // Sinon, on avertit le client
+        else {
+            return $this->render('lheo/error.html.twig', [
+                'errors' => $xml_errors
+            ]);
+        }   
     }
 }
