@@ -1499,7 +1499,7 @@ class ParcoursController extends BaseController
         return $result;
     }
 
-    #[Route('/{id}/v2/export-xml-lheo', name: 'app_parcours_export_xml_lheo_v2')]
+    #[Route('/{parcours}/v2/export-xml-lheo', name: 'app_parcours_export_xml_lheo_v2')]
     public function getXmlLheoV2(Parcours $parcours, LheoXMLv2 $lheoV2) : Response {
         $xml = $lheoV2->generateLheoXMLFromParcours($parcours, true);
         // Validation
