@@ -18,10 +18,10 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 class LheoXMLv2 extends LheoXML {
 
     public function __construct(
-        private EntityManagerInterface $em,
-        private TypeDiplomeResolver $tdResolver,
-        private UrlGeneratorInterface $router,
-        private ElementConstitutifRepository $ecRepo,
+        protected EntityManagerInterface $em,
+        protected TypeDiplomeResolver $tdResolver,
+        protected UrlGeneratorInterface $router,
+        protected ElementConstitutifRepository $ecRepo,
     ) {
         parent::__construct($em, $tdResolver, $router, $ecRepo);
     }
