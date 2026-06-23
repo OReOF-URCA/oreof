@@ -568,7 +568,7 @@ HTML;
         ];
 
         // Nouvelle balise extra - organisation pédagogique
-        $extraOrganisationPedagogique =
+        $extraContenuFormation =
             "<h3>Stages</h3>"
             . $stage
             . "<br>"
@@ -582,7 +582,7 @@ HTML;
             . $terMemoire
             . "<br><br>";
 
-        $extraArray['organisation-pedagogique'] = $extraOrganisationPedagogique;
+        $extraArray['contenu-formation'] = $extraContenuFormation;
 
         // Description de la mention
         if($parcours->isParcoursDefaut() === false){
