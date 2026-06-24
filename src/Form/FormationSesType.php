@@ -222,6 +222,10 @@ class FormationSesType extends AbstractType
                 }
             );
 
+        $formation = $builder->getData();
+        if (($formation?->getTypeDiplome()?->isClassique() ?? true) === false) {
+            $builder->remove('composantePorteuse');
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
