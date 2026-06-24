@@ -1,0 +1,75 @@
+<turbo-stream action="replace" target="configurer_global_stats">
+    <template>
+        <div id="configurer_global_stats" class="mt-4 grid gap-3 md:grid-cols-4">
+            <div class="rounded-xl bg-green-50 p-3 text-sm text-green-700">
+                <div class="text-lg font-bold">{{ tabStatistiques.nbParcoursOuvert }}
+                    /{{ formation.parcours|length }}</div>
+                parcours ouverts
+            </div>
+
+            <div class="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700">
+                <div class="text-lg font-bold">{{ plateformes|length }}</div>
+                plateforme{{ plateformes|length > 1 ? 's' : '' }} active{{ plateformes|length > 1 ? 's' : '' }}
+            </div>
+
+            <div class="rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
+                <div class="text-lg font-bold">{{ tabStatistiques.capacite }}</div>
+                capacité
+            </div>
+
+            <div class="rounded-xl bg-amber-50 p-3 text-sm text-amber-700">
+                <div class="text-lg font-bold">{{ anomalies|length }}</div>
+                anomalie{{ anomalies|length > 1 ? 's' : '' }}
+            </div>
+        </div>
+    </template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="configurer_global_warnings">
+    <template>
+        <div id="configurer_global_warnings" class="mt-4 space-y-3 text-sm">
+            {% if anomalies is empty %}
+                <div class="rounded-xl bg-green-50 p-3 text-green-800">
+                    ✓ Les informations et capacités de la formation sont complètes. Aucune anomalie détectée.
+                </div>
+            {% else %}
+                {% for anomaly in anomalies %}
+                    <div class="rounded-xl bg-amber-50 p-3 text-amber-800 flex items-center gap-2">
+                        <span>⚠</span>
+                        <span>{{ anomaly.message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </template>
+</turbo-stream>
+
+{% for parcours in formation.parcours %}
+    {% set statParcours = tabStatistiques['parcours'][parcours.id] %}
+    <turbo-stream action="replace" target="parcours_{{ parcours.id }}_stats">
+        <template>
+            <div id="parcours_{{ parcours.id }}_stats" class="mt-4 grid gap-3 md:grid-cols-4">
+                <div class="rounded-xl bg-green-50 p-3 text-sm text-green-700">
+                    <div class="text-lg font-bold">{{ statParcours.nbAnneesOuvertes }}
+                        /{{ statParcours.nbAnnees }}</div>
+                    années ouvertes
+                </div>
+
+                <div class="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700">
+                    <div class="text-lg font-bold">{{ statParcours.nbPlateformesActives }}</div>
+                    plateforme{{ statParcours.nbPlateformesActives > 1 ? 's' : '' }} active{{ statParcours.nbPlateformesActives > 1 ? 's' : '' }}
+                </div>
+
+                <div class="rounded-xl bg-slate-50 p-3 text-sm text-slate-700">
+                    <div class="text-lg font-bold">{{ statParcours.capacite }}</div>
+                    capacité totale
+                </div>
+
+                <div class="rounded-xl bg-amber-50 p-3 text-sm text-amber-700">
+                    <div class="text-lg font-bold">{{ statParcours.anomalies|length }}</div>
+                    anomalie{{ statParcours.anomalies|length > 1 ? 's' : '' }}
+                </div>
+            </div>
+        </template>
+    </turbo-stream>
+{% endfor %}
