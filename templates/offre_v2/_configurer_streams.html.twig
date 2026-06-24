@@ -1,3 +1,4 @@
+{% set typeDiplome = formation.typeDiplome %}
 <turbo-stream action="replace" target="configurer_global_stats">
     <template>
         <div id="configurer_global_stats" class="mt-4 grid gap-3 md:grid-cols-4">
@@ -71,5 +72,48 @@
                 </div>
             </div>
         </template>
+    <turbo-stream action="replace" target="parcours_{{ parcours.id }}_badge">
+        <template>
+            <span id="parcours_{{ parcours.id }}_badge" class="mr-2">
+                {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
+                {% set currentEtat = dpe ? dpe.getEtatReconduction().value : 'OUVERT' %}
+                {% set isParcoursFerme = currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}
+                {% if isParcoursFerme %}
+                    <twig:Badge variant="danger" label="Fermé" />
+                {% else %}
+                    <twig:Badge variant="success" label="Ouvert" />
+                {% endif %}
+            </span>
+        </template>
     </turbo-stream>
 {% endfor %}
+
+{% if changedYears is defined %}
+    {% for anneeId, _ in changedYears %}
+        {# Trouver l'année correspondante dans la formation/parcours #}
+        {% set matchedAnnee = null %}
+        {% set matchedParcours = null %}
+        {% for p in formation.parcours %}
+            {% for a in p.annees %}
+                {% if a.id == anneeId %}
+                    {% set matchedAnnee = a %}
+                    {% set matchedParcours = p %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+        
+        {% if matchedAnnee and matchedParcours %}
+            <turbo-stream action="replace" target="annee_{{ matchedAnnee.id }}_container">
+                <template>
+                    {{ include('offre_v2/_configurer_annee.html.twig', {
+                        'annee': matchedAnnee,
+                        'parcours': matchedParcours,
+                        'typeDiplome': typeDiplome,
+                        'comparaison': comparaison,
+                        'plateformes': plateformes
+                    }) }}
+                </template>
+            </turbo-stream>
+        {% endif %}
+    {% endfor %}
+{% endif %}

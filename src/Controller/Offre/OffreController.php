@@ -208,19 +208,73 @@ final class OffreController extends BaseController
 
         $campagne = $this->getCampagneCollecte();
 
+        $changedYears = [];
+
         foreach ($formation->getParcours() as $parcours) {
+            $parcoursKey = 'parcours_' . $parcours->getId() . '_reconduction';
+            $isParcoursClosed = false;
+            $trackOpenClosedChanged = false;
+
+            // Find current status in DB
+            $oldEnumVal = null;
+            foreach ($parcours->getDpeParcours() as $d) {
+                if ($d->getCampagneCollecte() === $campagne) {
+                    $oldEnumVal = $d->getEtatReconduction();
+                    break;
+                }
+            }
+            $oldIsClosed = $oldEnumVal ? in_array($oldEnumVal, [
+                TypeModificationDpeEnum::NON_OUVERTURE,
+                TypeModificationDpeEnum::NON_OUVERTURE_SES,
+                TypeModificationDpeEnum::NON_OUVERTURE_CFVU,
+                TypeModificationDpeEnum::FERMETURE_DEFINITIVE
+            ], true) : false;
+
+            if ($request->request->has($parcoursKey)) {
+                $val = $request->request->get($parcoursKey);
+                $enumVal = TypeModificationDpeEnum::from($val);
+                foreach ($parcours->getDpeParcours() as $d) {
+                    if ($d->getCampagneCollecte() === $campagne) {
+                        $d->setEtatReconduction($enumVal);
+                        $em->persist($d);
+                        break;
+                    }
+                }
+                $isParcoursClosed = in_array($enumVal, [
+                    TypeModificationDpeEnum::NON_OUVERTURE,
+                    TypeModificationDpeEnum::NON_OUVERTURE_SES,
+                    TypeModificationDpeEnum::NON_OUVERTURE_CFVU,
+                    TypeModificationDpeEnum::FERMETURE_DEFINITIVE
+                ], true);
+                $trackOpenClosedChanged = ($oldIsClosed !== $isParcoursClosed);
+            } else {
+                $isParcoursClosed = $oldIsClosed;
+            }
+
             foreach ($parcours->getAnnees() as $annee) {
                 $anneeId = $annee->getId();
                 
                 $isOuvertKey = 'annee_' . $anneeId . '_isOuvert';
                 $capaciteAccueilKey = 'annee_' . $anneeId . '_capaciteAccueil';
                 
-                if ($request->request->has($isOuvertKey)) {
+                $oldIsOuvert = $annee->isOuvert();
+                $newIsOuvert = $oldIsOuvert;
+
+                if ($isParcoursClosed) {
+                    $newIsOuvert = false;
+                } elseif ($request->request->has($isOuvertKey)) {
                     $val = $request->request->get($isOuvertKey);
-                    $annee->setIsOuvert($val === 'Ouverte' || $val === '1' || $val === 'true');
+                    $newIsOuvert = ($val === 'Ouverte' || $val === '1' || $val === 'true');
+                }
+
+                if ($oldIsOuvert !== $newIsOuvert || $trackOpenClosedChanged) {
+                    $changedYears[$anneeId] = true;
+                    $annee->setIsOuvert($newIsOuvert);
                 }
                 
-                if ($request->request->has($capaciteAccueilKey)) {
+                if ($isParcoursClosed) {
+                    $annee->setCapaciteAccueil(0);
+                } elseif ($request->request->has($capaciteAccueilKey)) {
                     $annee->setCapaciteAccueil((int)$request->request->get($capaciteAccueilKey));
                 }
                 
@@ -252,30 +306,39 @@ final class OffreController extends BaseController
                                 }
                                 
                                 $isActive = false;
-                                if ($request->request->has($activeKey)) {
-                                    $actVal = $request->request->get($activeKey);
-                                    $isActive = ($actVal === '1' || $actVal === 'on' || $actVal === 'true');
+                                if (!$isParcoursClosed && $newIsOuvert) {
+                                    if ($request->request->has($activeKey)) {
+                                        $actVal = $request->request->get($activeKey);
+                                        $isActive = ($actVal === '1' || $actVal === 'on' || $actVal === 'true');
+                                    }
                                 }
                                 $parametre->setActive($isActive);
                                 
-                                if ($request->request->has($globaleKey)) {
-                                    $val = $request->request->get($globaleKey);
-                                    $parametre->setCapaciteGlobale($val !== '' ? (int)$val : null);
-                                }
-                                
-                                if ($request->request->has($classiqueKey)) {
-                                    $val = $request->request->get($classiqueKey);
-                                    $parametre->setCapaciteFi($val !== '' ? (int)$val : null);
-                                }
-                                
-                                if ($request->request->has($alternanceKey)) {
-                                    $val = $request->request->get($alternanceKey);
-                                    $parametre->setCapaciteAlternance($val !== '' ? (int)$val : null);
-                                }
-                                
-                                if ($request->request->has($specifiqueKey)) {
-                                    $val = $request->request->get($specifiqueKey);
-                                    $parametre->setCapaciteSpecifique($val !== '' ? (int)$val : null);
+                                if ($isParcoursClosed || !$newIsOuvert) {
+                                    $parametre->setCapaciteGlobale(null);
+                                    $parametre->setCapaciteFi(null);
+                                    $parametre->setCapaciteAlternance(0);
+                                    $parametre->setCapaciteSpecifique(0);
+                                } else {
+                                    if ($request->request->has($globaleKey)) {
+                                        $val = $request->request->get($globaleKey);
+                                        $parametre->setCapaciteGlobale($val !== '' ? (int)$val : null);
+                                    }
+                                    
+                                    if ($request->request->has($classiqueKey)) {
+                                        $val = $request->request->get($classiqueKey);
+                                        $parametre->setCapaciteFi($val !== '' ? (int)$val : null);
+                                    }
+                                    
+                                    if ($request->request->has($alternanceKey)) {
+                                        $val = $request->request->get($alternanceKey);
+                                        $parametre->setCapaciteAlternance($val !== '' ? (int)$val : null);
+                                    }
+                                    
+                                    if ($request->request->has($specifiqueKey)) {
+                                        $val = $request->request->get($specifiqueKey);
+                                        $parametre->setCapaciteSpecifique($val !== '' ? (int)$val : null);
+                                    }
                                 }
                                 
                                 $em->persist($parametre);
@@ -317,6 +380,7 @@ final class OffreController extends BaseController
                 'tabStatistiques' => $statsData['tabStatistiques'],
                 'anomalies' => $statsData['anomalies'],
                 'comparaison' => $statsData['comparaison'],
+                'changedYears' => $changedYears,
             ]);
             $response->headers->set('Content-Type', 'text/vnd.turbo-stream.html');
             return $response;

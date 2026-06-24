@@ -12,11 +12,13 @@ export default class extends Controller {
     this.timeout = null
     this.abortController = null
     this.fadeTimeout = null
+    this.previousValues = {}
 
     // Bind events
     this.element.addEventListener('input', this.onInput.bind(this))
     this.element.addEventListener('change', this.onChange.bind(this))
     this.element.addEventListener('submit', this.onSubmit.bind(this))
+    this.element.addEventListener('focusin', this.onFocusIn.bind(this))
 
     // Initial status - hidden
     this.setStatus('saved', 'Modifications enregistrées')
@@ -26,6 +28,12 @@ export default class extends Controller {
     if (this.timeout) clearTimeout(this.timeout)
     if (this.abortController) this.abortController.abort()
     if (this.fadeTimeout) clearTimeout(this.fadeTimeout)
+  }
+
+  onFocusIn(event) {
+    if (event.target.tagName === 'SELECT') {
+      this.previousValues[event.target.name] = event.target.value
+    }
   }
 
   onInput(event) {
@@ -40,10 +48,94 @@ export default class extends Controller {
   }
 
   onChange(event) {
-    // Checkboxes and selects save immediately
+    const name = event.target.name
+    const value = event.target.value
+
+    // 1. If it's a year opening select (annee_{id}_isOuvert)
+    if (name && name.startsWith('annee_') && name.endsWith('_isOuvert')) {
+      if (value === '0') {
+        const confirmClose = confirm("Êtes-vous sûr de vouloir fermer cette année ? Cela réinitialisera ses capacités à 0.")
+        if (confirmClose) {
+          const anneeId = name.split('_')[1]
+          
+          const capInput = this.element.querySelector(`input[name="annee_${anneeId}_capaciteAccueil"]`)
+          if (capInput) capInput.value = '0'
+
+          const activeCheckboxes = this.element.querySelectorAll(`input[type="checkbox"][name^="annee_${anneeId}_plateforme_"][name$="_active"]`)
+          activeCheckboxes.forEach(cb => cb.checked = false)
+
+          const capInputs = this.element.querySelectorAll(`input[type="number"][name^="annee_${anneeId}_plateforme_"]`)
+          capInputs.forEach(input => input.value = '0')
+
+          this.previousValues[name] = value
+
+          clearTimeout(this.timeout)
+          this.save()
+        } else {
+          const prev = this.previousValues[name] || '1'
+          event.target.value = prev
+        }
+        return
+      }
+    }
+
+    // 2. If it's a parcours status select (parcours_{id}_reconduction)
+    if (name && name.startsWith('parcours_') && name.endsWith('_reconduction')) {
+      if (value === 'NON_OUVERTURE') {
+        const confirmClose = confirm("Êtes-vous sûr de vouloir fermer ce parcours ? Cela fermera toutes ses années et réinitialisera leurs capacités à 0.")
+        if (confirmClose) {
+          const parentCard = event.target.closest('[data-parcours-id]')
+          if (parentCard) {
+            const yearSelects = parentCard.querySelectorAll(`select[name^="annee_"][name$="_isOuvert"]`)
+            yearSelects.forEach(select => {
+              select.value = '0'
+              const anneeId = select.name.split('_')[1]
+              
+              const capInput = this.element.querySelector(`input[name="annee_${anneeId}_capaciteAccueil"]`)
+              if (capInput) capInput.value = '0'
+
+              const activeCheckboxes = this.element.querySelectorAll(`input[type="checkbox"][name^="annee_${anneeId}_plateforme_"][name$="_active"]`)
+              activeCheckboxes.forEach(cb => cb.checked = false)
+
+              const capInputs = this.element.querySelectorAll(`input[type="number"][name^="annee_${anneeId}_plateforme_"]`)
+              capInputs.forEach(input => input.value = '0')
+            })
+          }
+
+          this.previousValues[name] = value
+
+          clearTimeout(this.timeout)
+          this.save()
+        } else {
+          const prev = this.previousValues[name] || 'OUVERT'
+          event.target.value = prev
+        }
+        return
+      }
+    }
+
+    // 3. For check boxes and other selects
     if (event.target.type === 'checkbox' || event.target.tagName === 'SELECT') {
+      if (name) {
+        this.previousValues[name] = value
+      }
       clearTimeout(this.timeout)
       this.save()
+    }
+  }
+
+  ouvrirAnnee(event) {
+    const anneeId = event.params.annee || event.currentTarget.dataset.autosaveCapacitesAnneeParam
+    if (!anneeId) return
+
+    const input = this.element.querySelector(`[name="annee_${anneeId}_isOuvert"]`)
+    if (input) {
+      input.value = '1'
+      if (input.tagName === 'SELECT') {
+        input.dispatchEvent(new Event('change', { bubbles: true }))
+      } else {
+        this.save()
+      }
     }
   }
 
