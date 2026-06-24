@@ -100,13 +100,6 @@ export default class extends Controller {
     })
   }
 
-  changeComposantePorteuse(event) {
-    this._save({
-      action: 'composantePorteuse',
-      value: event.target.value,
-    })
-  }
-
   changeHasParcours(event) {
     // Seul le passage en multi-parcours (« Oui ») a un effet : la formation mono devient
     // multi, ce qui change toute la mise en page (onglets) → on recharge après sauvegarde.

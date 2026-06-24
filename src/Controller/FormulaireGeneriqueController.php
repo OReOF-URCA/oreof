@@ -114,10 +114,6 @@ final class FormulaireGeneriqueController extends BaseController
                     // sur la formation, qui possède son propre champ sigle (lu par le
                     // formulaire de modification FormationStep1Type).
                     $formation->setSigle($mention->getSigle());
-                    $formation->setComposantePorteuse($data['composantePorteuse'] ?? null);
-                    if (!empty($data['composantePorteuse'])) {
-                        $formation->addComposantesInscription($data['composantePorteuse']);
-                    }
                     // Même garde-fou que pour le responsable du parcours : seul un admin
                     // peut désigner quelqu'un d'autre, sinon c'est l'utilisateur courant.
                     $responsableMention = $canChooseResponsable ? ($data['responsableMention'] ?? $this->getUser()) : $this->getUser();
@@ -180,7 +176,8 @@ final class FormulaireGeneriqueController extends BaseController
                 $parcours->setDureeParcoursUnite($data['dureeParcoursUnite'] ?? null);
 
                 if ($estMono) {
-                    $parcours->setComposantePorteuse($formation->getComposantePorteuse());
+                    // Pas de composante porteuse pour les formations non classiques
+                    // (Parcours n'a d'ailleurs pas ce concept) : on ne la recopie pas.
                     $parcours->setComposanteInscription($formation->getComposantesInscription()->first() ?: null);
                     $parcours->setLocalisation($formation->getLocalisationMention()->first() ?: null);
                     $parcours->setRegimeInscription($formation->getRegimeInscription());

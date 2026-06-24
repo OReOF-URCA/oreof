@@ -95,11 +95,6 @@ class FormationSaveController extends BaseController
                     $data['isChecked'],
                     $composanteRepository
                 );
-            case 'composantePorteuse':
-                $composante = $composanteRepository->find($data['value']);
-                $rep = $updateEntity->saveField($formation, 'composantePorteuse', $composante);
-
-                return $this->json($rep);
 
             case 'yesNo':
                 $value = (bool)$data['value'];

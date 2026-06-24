@@ -107,18 +107,6 @@ class FormationStep1Type extends AbstractType
                     'data-action' => 'change->formation--step1#saveModalitesAlternance'
                 ],
             ]);
-
-        if (!$verrouille) {
-            $builder->add('composantePorteuse', EntityType::class, [
-                'class' => Composante::class,
-                'choice_label' => 'libelle',
-                'label' => 'Composante porteuse',
-                'required' => false,
-                'placeholder' => 'Choisissez une composante',
-                'query_builder' => fn($er) => $er->createQueryBuilder('c')->orderBy('c.libelle', 'ASC'),
-                'attr' => ['data-action' => 'change->formation--step1#changeComposantePorteuse'],
-            ]);
-        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
