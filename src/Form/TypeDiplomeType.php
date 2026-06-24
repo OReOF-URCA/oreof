@@ -121,8 +121,12 @@ class TypeDiplomeType extends AbstractType
             ->add('semestreFin', null, [
                 'row_attr' => ['class' => 'semestre-field'],
             ])
-            ->add('nbUeMin')
-            ->add('nbUeMax')
+            ->add('nbUeMin', null, [
+                'row_attr' => ['class' => 'semestre-field'],
+            ])
+            ->add('nbUeMax', null, [
+                'row_attr' => ['class' => 'semestre-field'],
+            ])
             ->add('hasEcts', YesNoType::class, [
                 'label' => 'Utilise les ECTS',
                 'empty_data' => true,
@@ -139,7 +143,11 @@ class TypeDiplomeType extends AbstractType
             ->add('nbEctsMaxUe', null, [
                 'row_attr' => ['class' => 'ects-field'],
             ])
-            ->add('nbEcParUe')
+            // « Nombre maximum d'EC par UE » : sans objet à la fois pour une formation
+            // non accréditée ET pour un diplôme sans ECTS → présent dans les deux groupes.
+            ->add('nbEcParUe', null, [
+                'row_attr' => ['class' => 'semestre-field ects-field'],
+            ])
             ->add('ModeleMcc', ChoiceType::class, [
                 'choices' => $choices,
             ])
@@ -151,16 +159,22 @@ class TypeDiplomeType extends AbstractType
             ->add('hasSituationPro', YesNoType::class)
             ->add('hasProjet', YesNoType::class)
             ->add('ectsObligatoireSurEc', YesNoType::class, ['empty_data' => true, 'row_attr' => ['class' => 'ects-field']])
-            ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true])
-            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
+            ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true, 'row_attr' => ['class' => 'semestre-field']])
+            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
 
-            ->add('logo', FileType::class, [
+        // Le logo n'est proposé dans le formulaire qu'à la création. En modification, il
+        // est déjà géré par la carte dédiée (upload/suppression en AJAX, contrôleur
+        // « type-diplome-logos ») : l'inclure ici l'afficherait en double.
+        $typeDiplome = $builder->getData();
+        if ($typeDiplome === null || $typeDiplome->getId() === null) {
+            $builder->add('logo', FileType::class, [
                 'label' => 'Logo',
                 'multiple' => false,
                 'required' => false,
                 'mapped' => false,
                 'attr' => ['accept' => 'image/png, image/jpeg'],
             ]);
+        }
 
         // Quand le diplôme n'utilise pas les ECTS, le champ « Nombre maximum d'ECTS
         // par UE » est grisé côté client et sans objet. On lui fournit une valeur
@@ -177,15 +191,41 @@ class TypeDiplomeType extends AbstractType
             // YesNoType : « Oui » est soumis avec la valeur '1' ; tout le reste
             // (vide, '0', absent) signifie que les ECTS ne sont pas utilisés.
             $hasEcts = !empty($data['hasEcts']) && $data['hasEcts'] !== '0';
-            if (!$hasEcts && (!isset($data['nbEctsMaxUe']) || $data['nbEctsMaxUe'] === '')) {
-                $data['nbEctsMaxUe'] = '0';
+            $classique = ($data['classique'] ?? null) === 'accreditee';
+
+            // Les champs entiers NOT NULL grisés côté client (donc absents du POST)
+            // selon les conditions ci-dessous recevraient null → violation NOT NULL.
+            // On leur fournit une valeur de repli (0) lorsqu'ils sont sans objet.
+            $defaultZeroIfMissing = static function (string $key) use (&$data, &$changed): void {
+                if (!isset($data[$key]) || $data[$key] === '') {
+                    $data[$key] = '0';
+                    $changed = true;
+                }
+            };
+
+            if (!$hasEcts) {
+                // Diplôme sans ECTS : « Nombre maximum d'ECTS par UE » sans objet.
+                $defaultZeroIfMissing('nbEctsMaxUe');
+                // « Les ECTS sont-ils obligatoires sur les EC ? » forcé à « Non » (0).
+                $data['ectsObligatoireSurEc'] = '0';
                 $changed = true;
+            }
+            if (!$classique) {
+                // Formation non accréditée : champs de structure « semestre » sans objet.
+                $defaultZeroIfMissing('nbUeMin');
+                $defaultZeroIfMissing('nbUeMax');
+                // « Les MCCC sont-ils obligatoires sur les EC ? » forcé à « Non » (0).
+                $data['mcccObligatoireSurEc'] = '0';
+                $changed = true;
+            }
+            if (!$classique || !$hasEcts) {
+                // « Nombre maximum d'EC par UE » : sans objet si non accréditée OU sans ECTS.
+                $defaultZeroIfMissing('nbEcParUe');
             }
 
             // Structure non classique : le select « Modèle MCCC » est grisé/désactivé
             // côté client et donc absent du POST. La colonne étant NOT NULL, on force
             // le handler non classique (même valeur que celle posée par le JS).
-            $classique = ($data['classique'] ?? null) === 'accreditee';
             if (!$classique && empty($data['ModeleMcc'])) {
                 $data['ModeleMcc'] = NonClassiqueHandler::class;
                 $changed = true;
@@ -201,7 +241,12 @@ class TypeDiplomeType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => TypeDiplome::class,
-            'translation_domain' => 'form'
+            'translation_domain' => 'form',
+            // Contrôleur Stimulus qui grise/désactive les champs sans objet selon le type
+            // de formation (accréditée ?) et l'usage des ECTS. Sans ce data-controller sur
+            // le <form>, les data-action/target des champs n'étaient jamais connectés et
+            // tous les champs restaient obligatoires.
+            'attr' => ['data-controller' => 'type-diplome'],
         ]);
     }
 }

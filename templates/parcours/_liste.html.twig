@@ -112,7 +112,11 @@
                 {{ component('historique_pv', {parcours:parcour}) }}
             </td>
             <td>
-                {{ parcour.remplissage|remplissage }}
+                {% if parcour.formation.typeDiplome.classique ?? true %}
+                    {{ parcour.remplissage|remplissage }}
+                {% else %}
+                    <span class="text-muted">—</span>
+                {% endif %}
             </td>
             <td>
                 <a href="{{ path('app_parcours_show',{'id': parcour.id}) }}"
@@ -150,6 +154,7 @@
                     <span> voir</span>
                 </a>
 
+                {% if parcour.formation.typeDiplome.classique ?? true %}
                 <a href="#"
                    class="btn btn-sm text-success"
                         {{ stimulus_controller('modal', {
@@ -165,6 +170,7 @@
                     <i class="fal fa-binoculars"></i>
                     <span> vérifier</span>
                 </a>
+                {% endif %}
 
                 {% if is_granted('EDIT', {route: 'app_parcours', subject: parcour}) or is_granted('ROLE_ADMIN') %}
                     <a href="{{ path('app_parcours_edit',{'id': parcour.id}) }}"

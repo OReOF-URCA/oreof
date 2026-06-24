@@ -16,10 +16,16 @@ export const updateEtatOnglet = async (url, onglet, prefix) => {
   }
 
   await fetch(url, body).then((response) => response.json()).then((data) => {
-    document.getElementById(`${prefix}_${onglet}`).classList.remove('state-complete')
-    document.getElementById(`${prefix}_${onglet}`).classList.remove('state-en-cours')
-    document.getElementById(`${prefix}_${onglet}`).classList.remove('state-vide')
-    document.getElementById(`${prefix}_${onglet}`).classList.add(`state-${data}`)
+    // La pastille d'état peut être absente (suivi de complétude désactivé pour les
+    // formations/parcours non classiques) : on ne met à jour le DOM que si elle existe.
+    const pastille = document.getElementById(`${prefix}_${onglet}`)
+    if (pastille === null) {
+      return
+    }
+    pastille.classList.remove('state-complete')
+    pastille.classList.remove('state-en-cours')
+    pastille.classList.remove('state-vide')
+    pastille.classList.add(`state-${data}`)
     if (data === 'en-cours' || data === 'vide') {
       // remise à 0 de l'état
       document.getElementById('etatStructure').checked = false

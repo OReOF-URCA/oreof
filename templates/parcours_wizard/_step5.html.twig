@@ -29,6 +29,7 @@
     </div>
 
 
+    {% if parcours.formation.typeDiplome.classique ?? true %}
     <div class="alert {% if parcours.getEtatStep(5) %}alert-success{% else %}alert-warning{% endif %}" id="alertEtatStructure">
         <input type="checkbox"
                id="etatStructure"
@@ -39,4 +40,5 @@
         ><label for="etatStructure">
             Cochez cette case si vous avez terminé ...</label>
     </div>
+    {% endif %}
 </div>

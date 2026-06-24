@@ -59,7 +59,11 @@
                     {% endif %}
                 </td>
                 <td>
-                    {{ parcours.remplissage|remplissage }}
+                    {% if parcours.formation.typeDiplome.classique ?? true %}
+                        {{ parcours.remplissage|remplissage }}
+                    {% else %}
+                        <span class="text-muted">—</span>
+                    {% endif %}
                 </td>
                 <td>
                     {{ dpe.etatValidation|badgeDpe }}

@@ -4,6 +4,7 @@
     {% form_theme form 'communs/form_theme.html.twig' %}
     {{ form(form) }}
 
+    {% if formation.typeDiplome.classique ?? true %}
     <div class="alert {% if formation.getEtatStep(2) %}alert-success{% else %}alert-warning{% endif %}" id="alertEtatStructure">
         <input type="checkbox"
                id="etatStructure"
@@ -14,4 +15,5 @@
         ><label for="etatStructure">
             Cochez cette case si vous avez terminé ...</label>
     </div>
+    {% endif %}
 </div>

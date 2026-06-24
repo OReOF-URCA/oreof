@@ -42,6 +42,22 @@ export default class extends Controller {
     })
   }
 
+  changeDureeParcours(event) {
+    this._save({
+      field: 'dureeParcours',
+      action: 'float',
+      value: event.target.value,
+    })
+  }
+
+  changeDureeParcoursUnite(event) {
+    this._save({
+      field: 'dureeParcoursUnite',
+      action: 'dureeParcoursUnite',
+      value: event.target.value,
+    })
+  }
+
   changeStage(event) {
     this._save({
       field: 'hasStage',
