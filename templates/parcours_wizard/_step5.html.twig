@@ -4,7 +4,9 @@
     {% form_theme form 'communs/form_theme.html.twig' %}
     {{ form_row(form.niveauFrancais) }}
     {{ form_row(form.prerequis) }}
-    {{ form_row(form.composanteInscription) }}
+    {% if parcours.formation.typeDiplome.classique ?? true %}
+        {{ form_row(form.composanteInscription) }}
+    {% endif %}
 
     {% if parcours.formation.isHasParcours == true %}
         {{ form_row(form.regimeInscription) }}
