@@ -179,11 +179,10 @@ final class FormulaireGeneriqueController extends BaseController
                 $parcours->setDureeParcoursUnite($data['dureeParcoursUnite'] ?? null);
 
                 if ($estMono) {
-                    // Le parcours unique n'est pas un « parcours par défaut » (son libellé
-                    // reprend l'intitulé), donc getComposanteInscription() ne retombe pas
-                    // sur la composante de la formation. On la fixe explicitement pour que
-                    // l'onglet Admission (ParcoursStep5Type) la récupère.
+                    $parcours->setComposantePorteuse($formation->getComposantePorteuse());
                     $parcours->setComposanteInscription($formation->getComposantesInscription()->first() ?: null);
+                    $parcours->setLocalisation($formation->getLocalisationMention()->first() ?: null);
+                    $parcours->setRegimeInscription($formation->getRegimeInscription());
                 }
 
                 $this->entityManager->persist($parcours);
