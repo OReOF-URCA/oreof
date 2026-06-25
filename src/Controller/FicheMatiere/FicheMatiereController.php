@@ -9,40 +9,22 @@
 
 namespace App\Controller\FicheMatiere;
 
-use App\Classes\GetDpeParcours;
-use App\Classes\GetElementConstitutif;
 use App\Controller\BaseController;
-use App\Entity\Annee;
 use App\Entity\FicheMatiere;
-use App\Entity\Formation;
-use App\Entity\Parcours;
-use App\Entity\SemestreParcours;
-use App\Form\FicheMatiereStep1bType;
 use App\Form\FicheMatiereStep1Type;
 use App\Form\FicheMatiereStep2Type;
-use App\Form\FicheMatiereStep3Type;
 use App\Form\FicheMatiereStep4HdType;
-use App\Form\FormationStep1Type;
-use App\Form\FormationStep2Type;
-use App\Form\FormationStep3Type;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereMutualisableRepository;
 use App\Repository\FicheMatiereTabStateRepository;
-use App\Repository\FormationTabStateRepository;
 use App\Repository\TypeDiplomeRepository;
-use App\Repository\TypeEpreuveRepository;
-use App\Repository\ValidationIssueRepository;
-use App\Service\LheoXML;
-use App\Service\Validation\SemesterValidationRefresher;
 use App\Service\VersioningFicheMatiere;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
-use App\TypeDiplome\TypeDiplomeResolver;
 use Jfcherng\Diff\DiffHelper;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/fiche-matiere/v2', name: 'fiche_matiere_v2_')]
 class FicheMatiereController extends BaseController
@@ -53,8 +35,7 @@ class FicheMatiereController extends BaseController
         FicheMatiereTabStateRepository $statesRepo,
         #[MapEntity(mapping: ['slug' => 'slug'])]
         FicheMatiere                   $ficheMatiere
-    ): Response
-    {
+    ): Response {
         $tabStates = $statesRepo->indexByTabKey($ficheMatiere);
         $referer = $request->headers->get('referer');
 
@@ -87,8 +68,7 @@ class FicheMatiereController extends BaseController
             ]);
         }
 
-        return $this->render('fiche_matiere_v2/modifier.html.twig', array_merge($parameters, [
-        ]));
+        return $this->render('fiche_matiere_v2/modifier.html.twig', array_merge($parameters, []));
     }
 
     #[Route('/{slug}', name: 'voir', methods: ['GET'])]
@@ -99,8 +79,7 @@ class FicheMatiereController extends BaseController
         FicheMatiereMutualisableRepository $ficheMatiereMutualisableRepository,
         TypeDiplomeRepository              $typeDiplomeRepository,
         VersioningFicheMatiere             $ficheMatiereVersioningService
-    ): Response
-    {
+    ): Response {
 
 
         $formation = $ficheMatiere->getParcours()?->getFormation();
@@ -141,7 +120,7 @@ class FicheMatiereController extends BaseController
             'typeD' => $typeD,
             'typeDiplome' => $typeDiplome,
             'ects' => $ficheMatiere->getEcts(),
-            'mcccs' => $typeD->getDisplayMccc($typeD->getMcccs($ficheMatiere), $ficheMatiere->getTypeMccc()),
+            'mcccs' => $ficheMatiere->getTypeMccc() != null ? $typeD->getDisplayMccc($typeD->getMcccs($ficheMatiere), $ficheMatiere->getTypeMccc()) : [],
             'bccs' => $bccs,
             'typeMccc' => $ficheMatiere->getTypeMccc(),
             'stringDifferences' => $textDifferences,
@@ -155,8 +134,8 @@ class FicheMatiereController extends BaseController
         FicheMatiereTabStateRepository $statesRepo,
         FicheMatiere                   $ficheMatiere,
         string                         $tab,
-        Request                        $request): Response
-    {
+        Request                        $request
+    ): Response {
         $referer = $request->headers->get('referer');
 
         if ($referer === null || false === str_contains($referer, 'parcours')) {
@@ -198,7 +177,6 @@ class FicheMatiereController extends BaseController
                 $titre = 'MCCC';
                 $texte_help = 'Indiquez les éléments de MCCC de la fiche matière';
                 break;
-
         }
 
         $tabStates = $statesRepo->indexByTabKey($ficheMatiere);

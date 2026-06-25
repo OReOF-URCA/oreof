@@ -6,4 +6,17 @@
         dataAction="click->modalturbo#open"
         tooltip="Voir les détails de l'utilisateur"
 />
+{% if is_granted('ROLE_ADMIN') %}
+    <twig:DeleteButton
+            :soft="true"
+            tooltip="Supprimer la demande"
+            url="{{ path('app_user_profil_delete_demande', {'id': item.id}) }}"
+            csrfTokenId="{{ 'delete' ~ item.id }}"
+            title="Supprimer la demande de {{ item.prenom }} {{ item.nom }}"
+            message="Cette action supprimera définitivement la demande de cet utilisateur."
+            confirmLabel="Supprimer"
+            cancelLabel="Annuler"
+            id="user-demande-{{ item.id }}"
+    />
+{% endif %}
 

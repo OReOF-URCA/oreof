@@ -226,6 +226,7 @@ class UserProfilController extends BaseController
                 'template' => 'config/user_profil/_datatable_attente_actions.html.twig',
             ]);
 
+
         if ($isDpe && $composanteId !== null) {
             $table
                 ->addBaseWhere('IDENTITY(e.composanteDemande) = :composanteId')
@@ -243,6 +244,30 @@ class UserProfilController extends BaseController
             'table' => $table->build(),
             'dpe' => $isDpe,
         ]);
+    }
+
+    #[Route('/delete-demande/{id}', name: 'delete_demande', methods: ['POST', 'DELETE'])]
+    public function deleteDemande(
+        Request $request,
+        User $user,
+        UserRepository $userRepository,
+        UserProfilRepository $userProfilRepository
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $token = $request->request->get('_token') ?? JsonRequest::getValueFromRequest($request, 'csrf');
+        if ($this->isCsrfTokenValid('delete' . $user->getId(), $token)) {
+            foreach ($user->getUserProfils() as $centre) {
+                $userProfilRepository->remove($centre, true);
+            }
+
+            $user->setIsDeleted(true);
+            $userRepository->save($user, true);
+
+            $this->addFlash('success', 'La demande a bien été supprimée.');
+        }
+
+        return $this->redirectToRoute('app_user_profil_attente');
     }
 
     #[Route('/add/profil/{user}', name: 'add')]
