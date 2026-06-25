@@ -295,8 +295,11 @@ HTML;
         );
 
         $organisationPedagogique = '';
-        if (!empty($parcours->getRythmeFormationTexte())) {
+        if ($parcours->isParcoursDefaut() === false && !empty($parcours->getRythmeFormationTexte())) {
             $organisationPedagogique .= $parcours->getRythmeFormationTexte();
+        }
+        elseif ($parcours->isParcoursDefaut() === true && !empty($parcours->getFormation()?->getRythmeFormationTexte())) {
+            $organisationPedagogique .= $parcours->getFormation()?->getRythmeFormationTexte();
         }
 
         $organisationPedagogique 
@@ -332,16 +335,46 @@ HTML;
             . "<a href=\"$maquettePdf\" target=\"_blank\">Maquette et modalités de contrôle de la formation au format PDF</a>";
         }
 
+        /**
+         * 
+         * --- Différence V2 ---
+         *  Modifications des informations pratiques
+         * ---------------------
+         */
 
         // Informations pratiques
-        $informationsPratiques = "";
+        $tdPresentationF = null;    
         if($parcours->getFormation()?->getTypeDiplome()?->getPresentationFormation()){
-            $informationsPratiques .= "<h3>Pour en savoir plus sur ce type de formation :</h3>";
-            $informationsPratiques .= $parcours->getFormation()?->getTypeDiplome()?->getPresentationFormation();
+            $tdPresentationF = "<h3>Pour en savoir plus sur ce type de formation :</h3>"
+            . $parcours->getFormation()?->getTypeDiplome()?->getPresentationFormation();
         }
+
+        $devenirEtudiants = null;
+        if ($parcours->getTypeDiplome()?->getInsertionProfessionnelle()) {
+            $devenirEtudiants .= "<br><h2>Devenir des étudiants</h2>"
+            . $parcours->getTypeDiplome()->getInsertionProfessionnelle() ?? '-';
+        }
+
+        $commonData = $this->getBasicInformationDataV2([
+            'devenir_etudiants' => $devenirEtudiants,
+            'type_diplome_presentation_formation' => $tdPresentationF
+        ]);
+
+        $organisationPedagogique .= $commonData['handicap'];
+
+        /*
         if($etablissementInformation->getInformationsPratiques()){
             $informationsPratiques .= "<br>" . $etablissementInformation->getInformationsPratiques();
         }
+        */
+
+        $informationsPratiques = implode("", [
+            $commonData['devenir_des_etudiants'],
+            $commonData['savoir_plus_sur_ce_type_formation'],
+            $commonData['savoir_plus_sur_orientation_insertion'],
+            $commonData['savoir_plus_relations_internationales'],
+            $commonData['associations_etudiantes']
+        ]);
         $informationsPratiques = preg_replace("/<h1>/m", "<h3>", $informationsPratiques);
         $informationsPratiques = preg_replace("/<\/h1>/m", "</h3>", $informationsPratiques);
 
@@ -350,6 +383,7 @@ HTML;
         $admissionParcours .= $parcours->getTypeDiplome()?->getModalitesAdmission() ?? "";
         $admissionParcours .= "<h3>Calendrier d'inscription</h3>";
         $admissionParcours .= $etablissementInformation->getCalendrierInscription() ?? "";
+        $admissionParcours .= $commonData['tarif_inscription'];
 
         // Poursuite d'études
         $poursuiteEtudes = $parcours->getPoursuitesEtudes() ?? '';
@@ -362,10 +396,7 @@ HTML;
         }
         $poursuiteEtudes .= "</ul>";
         $poursuiteEtudes .= "<br><p>Le ROME est le répertoire des métiers et d'emplois de Pôle Emploi.</p>";
-        if ($parcours->getTypeDiplome()?->getInsertionProfessionnelle()) {
-            $poursuiteEtudes .= "<br><h2>Devenir des étudiants</h2>";
-            $poursuiteEtudes .= $parcours->getTypeDiplome()->getInsertionProfessionnelle() ?? '-';
-        }
+
         // Poursuite d'études L.As (Licence Accès Santé)
         // Si LAS 1
         if ($parcours->getTypeParcours()->name === "TYPE_PARCOURS_LAS1") {
@@ -684,5 +715,34 @@ HTML;
     #[Override]
     public function isValidLHEO(Parcours $parcours) : bool {
         return parent::validateLheoSchema($this->generateLheoXMLFromParcours($parcours));
+    }
+
+    public function getBasicInformationDataV2(array $linkedData) : array {
+        return [
+            // à mettre dans : <extras><extra><organisation-pedagogique>
+            'handicap' =>   "<h3><strong>Pour tout renseignement sur les aménagements proposés par la mission handicap</strong></h3>
+                            <ul><li><a href=\"#\">La mission handicap</a></li></ul>
+                            <div>Vous avez des besoins d'aménagements d'études et d'examens, la Mission Handicap vous accompagne tout 
+                            au long de votre cursus universitaire.<br>Elle vous renseigne sur tous les aspects de la vie universitaire : 
+                            déroulement des études, accessibilité des lieux universitaires, participation à la vie des campus, accès aux ressources 
+                            de la Bibliothèque Universitaire.<br>Pour toute demande ou information : 
+                            <a href=\"mailto:handicap@univ-reims.fr\">handicap@univ-reims.fr</a><br><br></div>",
+            // à mettre dans : <extras><extra><admission>
+            'tarif_inscription' => "<br><div><a href=\"#\">&nbsp;Lien vers la page présentant 
+                                    les tarifs d'inscription&nbsp;</a></div>",
+            // à mettre dans <extras><extra><informations-pratiques>
+            'devenir_des_etudiants' => $linkedData['devenir_etudiants'] ?? "",
+            // à mettre dans <extras><extra><informations-pratiques>
+            'savoir_plus_sur_ce_type_formation' => $linkedData['type_diplome_presentation_formation'] ?? "",
+            // à mettre dans <extras><extra><informations-pratiques>
+            'savoir_plus_sur_orientation_insertion' => "<h3><strong>Pour en savoir plus sur l'orientation et l'insertion professionnelle :</strong></h3>
+                <ul><li><a href=\"#\">La Mission Orientation du Service d'Accompagnement des Etudiants (SAE)</a></li>
+                <li><a href=\"#\">L'insertion professionnelle</a></li></ul>",
+            'savoir_plus_relations_internationales' => "<h3><strong>Pour en savoir plus sur les relations internationales à l'Université :</strong></h3>
+                <ul><li><a href=\"#\">Direction des Relations Extérieures et du Développement International (DREDI)</a></li>
+                <li><a href=\"#\">Partir à l'étranger</a></li></ul>",
+            'associations_etudiantes' => "<h3><strong>Lien vers les associations étudiantes :</strong></h3>
+                <ul><li><a href=\"#\">Associations étudiantes</a></li></ul>",
+        ];
     }
 }
