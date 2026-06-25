@@ -613,7 +613,7 @@ HTML;
             . $terMemoire
             . "<br><br>";
 
-        $extraArray['contenu-formation'] = $extraContenuFormation;
+        $extraArray['extra-contenu-formation'] = $extraContenuFormation;
 
         // Description de la mention
         if($parcours->isParcoursDefaut() === false){
