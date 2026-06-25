@@ -47,7 +47,8 @@ class ApiJsonExport
         string $hostname,
         SymfonyStyle $io = null,
         LheoXML $lheoXmlService,
-        bool         $isV2 = false,
+        LheoXMLv2 $lheoV2,
+        bool      $isV2 = false,
     ): array
     {
         $dataJSON = [];
@@ -99,7 +100,12 @@ class ApiJsonExport
                 foreach ($formation->getParcours() as $parcours) {
                     $lastVersion = $this->entityManager->getRepository(ParcoursVersioning::class)
                         ->findLastCfvuVersion($parcours);
-                    if (count($lastVersion) > 0 && $lheoXmlService->isValidLHEO($parcours)) {
+                    if ($isV2 === false) {
+                        $checkIsValidCurrentYearParcours = count($lastVersion) > 0 && $lheoXmlService->isValidLHEO($parcours);
+                    } elseif ($isV2 === true) {
+                        $checkIsValidCurrentYearParcours = count($lastVersion) > 0 && $lheoV2->isValidLHEO($parcours);
+                    }
+                    if ($checkIsValidCurrentYearParcours) {
                         $lastVersionData = $this->versioningParcours->loadParcoursFromVersion($lastVersion[0]);
                         $parcoursData = [
                             'id_old' => $parcours->getParcoursOrigineCopie()?->getId(),
@@ -152,9 +158,11 @@ class ApiJsonExport
                         'parcours' => $tParcours,
                         'dateValidation' => $dateValidationFormation?->format('Y-m-d H:i:s') ?? null,
                     ];
-                    if ($isV2) {
+                    /*
+                    if($isV2){
                         $forma['logos-formation'] = $this->getFormationLogosArrayApiV2($formation, $urlPrefix);
                     }
+                    */
                     $dataJSON[] = $forma;
                 }
 
@@ -188,7 +196,12 @@ class ApiJsonExport
             foreach ($formationArray as $formationAnneeSuivante) {
                 $addedParcours = [];
                 foreach ($formationAnneeSuivante->getParcours() as $parcoursAnneeSuivante) {
-                    if ($lheoXmlService->isValidLHEO($parcoursAnneeSuivante)) {
+                    if ($isV2 === false) {
+                        $checkIsValidNextYearParcours = $lheoXmlService->isValidLHEO($parcoursAnneeSuivante);
+                    } elseif ($isV2 === true) {
+                        $checkIsValidNextYearParcours = $lheoV2->isValidLHEO($parcoursAnneeSuivante);
+                    }
+                    if ($checkIsValidNextYearParcours) {
                         $dpeParcoursToAdd = $parcoursAnneeSuivante->getDpeParcours()?->last();
                         if ($dpeParcoursToAdd instanceof DpeParcours) {
                             if (in_array($dpeParcoursToAdd->getEtatReconduction(), $etatReconductionCampagneSuivante)) {
@@ -222,9 +235,11 @@ class ApiJsonExport
                         'parcours' => $addedParcours,
                         'dateValidation' => (new DateTime('2025-12-15'))->format('Y-m-d H:i:s'),
                     ];
-                    if ($isV2) {
+                    /*
+                    if($isV2){
                         $formationAppend['logos-formation'] = $this->getFormationLogosArrayApiV2($formationAnneeSuivante, $urlPrefix);
                     }
+                    */
                     $dataJSON[] = $formationAppend;
                 }
 
