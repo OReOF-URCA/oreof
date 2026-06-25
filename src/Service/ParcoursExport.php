@@ -97,7 +97,7 @@ class ParcoursExport {
                 'autonomie'=> $dto->heuresEctsFormation->sommeFormationTePres
             ],
             'ects' => $dto->heuresEctsFormation->sommeFormationEcts,
-            'semestres' => []
+            'niveau1' => []
         ];
 
         if(!$isVersioning){
@@ -131,6 +131,8 @@ class ParcoursExport {
         foreach ($dto->semestres as $ordre => $sem) {
             if ($sem->semestre->isNonDispense() === false) {
                 $semestre = [
+                    'typeNiveau' => 'semestre',
+                    'libelleNiveau' => 'Semestre ' . ($ordre + 1),
                     'ordre' => $ordre,
                     'volumes' => [
                         'CM' => [
@@ -148,10 +150,12 @@ class ParcoursExport {
                         'autonomie' => $sem->heuresEctsSemestre->sommeSemestreTePres
                     ],
                     'ects' => $sem->heuresEctsSemestre->sommeSemestreEcts,
-                    'ues' => []
+                    'niveau2' => []
                 ];
                 foreach ($sem->ues as $ue) {
                     $tUe = [
+                        'typeNiveau' => 'ue',
+                        'libelleNiveau' => $ue->display,
                         'ordre' => $ue->ordre(),
                         'libelleOrdre' => $ue->display,
                         'libelle' => $ue->ue->getLibelle() ?? $ue->display,
@@ -178,10 +182,12 @@ class ParcoursExport {
                         $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
                     } elseif ($ue->ue->getNatureUeEc()?->isChoix() || count($ue->uesEnfants()) > 0) {
                         $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
-                        $tUe['UesEnfants'] = [];
+                        $tUe['niveau3'] = [];
                         $nb = 0;
                         foreach ($ue->uesEnfants() as $ueEnfant) {
                             $tUeEnfant = [
+                                'typeNiveau' => 'ue',
+                                'libelleNiveau' => $ueEnfant->display,
                                 'ordre' => $ueEnfant->ordre(),
                                 'libelleOrdre' => $ueEnfant->display,
                                 'libelle' => $ueEnfant->ue->getLibelle() ?? $ueEnfant->display,
@@ -209,7 +215,7 @@ class ParcoursExport {
 
                             $nb++;
                             $tUe['nbChoix'] = $nb;
-                            $tUeEnfant['ec'] = $this->getEcFromUe($ueEnfant, $isVersioning);
+                            $tUeEnfant['niveau4'] = $this->getEcFromUe($ueEnfant, 3, $isVersioning);
 
                             /**
                              * UE enfant dans une UE enfant
@@ -221,9 +227,11 @@ class ParcoursExport {
                             elseif($ueEnfant->ue->getNatureUeEc()?->isChoix() || count($ueEnfant->uesEnfants()) > 0){
                                 $nbDeuxiemeNiveau = 0;
                                 $tUeEnfant['description_libre_choix'] = $ueEnfant->ue->getDescriptionUeLibre();
-                                $tUeEnfant['UesEnfants'] = [];
+                                $tUeEnfant['niveau4'] = [];
                                 foreach($ueEnfant->uesEnfants() as $ueEnfantDeuxiemeNiveau){
                                     $tUeEnfantDeuxiemeNiveau = [
+                                        'typeNiveau' => 'ue',
+                                        'libelleNiveau' => $ueEnfantDeuxiemeNiveau->display,
                                         'ordre' => $ueEnfantDeuxiemeNiveau->ordre(),
                                         'libelleOrdre' => $ueEnfantDeuxiemeNiveau->display,
                                         'libelle' => $ueEnfantDeuxiemeNiveau->ue->getLibelle() ?? $ueEnfantDeuxiemeNiveau->display,
@@ -251,44 +259,48 @@ class ParcoursExport {
 
                                     $nbDeuxiemeNiveau++;
                                     $tUeEnfant['nbChoix'] = $nbDeuxiemeNiveau;
-                                    $tUeEnfantDeuxiemeNiveau['ec'] = $this->getEcFromUe($ueEnfantDeuxiemeNiveau, $isVersioning);
-                                    $tUeEnfant['UesEnfants'][] = $tUeEnfantDeuxiemeNiveau;
+                                    $tUeEnfantDeuxiemeNiveau['niveau5'] = $this->getEcFromUe($ueEnfantDeuxiemeNiveau, 4, $isVersioning);
+                                    $tUeEnfant['niveau4'][] = $tUeEnfantDeuxiemeNiveau;
                                 }
                             }
 
-                            $tUe['UesEnfants'][] = $tUeEnfant;
+                            $tUe['niveau2'][] = $tUeEnfant;
                         }
                     } else {
                         $tUe['ects'] = $ue->heuresEctsUe->sommeUeEcts;
-                        $tUe['ec'] = $this->getEcFromUe($ue, $isVersioning);
+                        $tUe['niveau3'] = $this->getEcFromUe($ue, 2, $isVersioning);
                     }
-                    $semestre['ues'][] = $tUe;
+                    $semestre['niveau2'][] = $tUe;
                 }
                 if($isVersioning){
-                    usort($semestre['ues'], fn($ueA, $ueB) => $ueA['ordre'] <=> $ueB['ordre']);
+                    usort($semestre['niveau2'], fn($ueA, $ueB) => $ueA['ordre'] <=> $ueB['ordre']);
                 }
-                $data['semestres'][] = $semestre;
+                $data['niveau1'][] = $semestre;
             }
         }
 
         return $data;
     }
 
-    private function getEcFromUe(StructureUe $ue, bool $isVersioning = false): array
+    private function getEcFromUe(StructureUe $ue, int $parentDepth, bool $isVersioning = false): array
     {
         $tEcs = [];
+        $depth = $parentDepth + 1;
         foreach ($ue->elementConstitutifs as $ec) {
             if ($ec->elementConstitutif->getNatureUeEc()?->isLibre()) {
                 $tEcs['description_libre_choix'] =  $ec->elementConstitutif->getTexteEcLibre();
             } elseif ($ec->elementConstitutif->getNatureUeEc()?->isChoix() || count($ec->elementsConstitutifsEnfants) > 0) {
+                $tEc['typeNiveau'] = 'ec';
                 $tEc['ordre'] = $ec->elementConstitutif->getOrdre();
                 $tEc['numero'] = $ec->elementConstitutif->getCode();
                 $tEc['libelle'] = $ec->elementConstitutif?->getFicheMatiere()?->getLibelle() ?? '-';
-                $tEc['ecsEnfants'] =  [];
+                $tEc['libelleNiveau'] = $tEc['numero'] . ' - ' . $tEc['libelle'];
+                $childKey = 'niveau' . ($depth + 1);
+                $tEc[$childKey] =  [];
                 $tEc['description_libre_choix'] =  $ec->elementConstitutif->getTexteEcLibre();
                 $nb = 0;
                 foreach ($ec->elementsConstitutifsEnfants as $ecEnfant) {
-                    $tEc['ecsEnfants'][] = $this->getEc($ecEnfant, $isVersioning);
+                    $tEc[$childKey][] = $this->getEc($ecEnfant, $isVersioning);
                     $nb++;
                 }
                 $tEc['nbChoix'] =  $nb;
@@ -352,15 +364,18 @@ class ParcoursExport {
         }
 
         return [
+            'typeNiveau' => 'ec',
+            'libelleNiveau' => $ec->elementConstitutif->getCode() . ' - ' . $libelle,
             'ordre' => $ec->elementConstitutif->getOrdre(),
             'valide' => $valide,
             'ec_libre' => $ecLibre,
+            'ec_choix' => $ec->elementConstitutif->getNatureUeEc()?->isChoix(),
             'nature_ec' => $isEcFromBD ? $elementConstitutif->getTypeEc()?->getLibelle() : $ec->elementConstitutif->getTypeEc()?->getLibelle(),
             'valide_date' => new DateTime(),
             'numero'=> $ec->elementConstitutif->getCode(),
             'libelle'=> $libelle,
             'libelle_anglais' => $ficheMatiere?->getLibelleAnglais() ?? '-',
-            'sigle'=> $ficheMatiere?->getSigle() ?? '-', "",
+            'sigle'=> $ficheMatiere?->getSigle() ?? '-',
             'fiche_matiere_slug' => $ficheMatiere?->getSlug(),
             'enseignant_referent' => [
                 'nom'=> $ficheMatiere?->getResponsableFicheMatiere()?->getDisplay() ?? '-',

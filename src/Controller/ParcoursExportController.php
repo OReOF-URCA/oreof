@@ -9,6 +9,7 @@
 
 namespace App\Controller;
 
+use App\Classes\GetDpeParcours;
 use App\Classes\MyGotenbergPdf;
 use App\DTO\StructureEc;
 use App\DTO\StructureUe;
@@ -171,10 +172,10 @@ class ParcoursExportController extends AbstractController
             'path' => $this->generateUrl('app_parcours_export_maquette_json', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'id' => $parcours->getId(),
             'formationId' => $parcours->getFormation()?->getId(),
-            'formation' => $parcours->getFormation()?->getDisplay(),
-            'parcours' => $parcours->isParcoursDefaut() ? '' : $parcours->getLibelle(),
+            'formation' => $parcours->getFormation()?->getDisplay() ?? '',
+            'parcours' => $parcours->isParcoursDefaut() ? '' : $parcours->getLibelle() ?? '',
             'typeDiplome' => $typeDiplome->getLibelle(),
-            'composante' => $parcours->getFormation()?->getComposantePorteuse()?->getLibelle(),
+            'composante' => $parcours->getFormation()?->getComposantePorteuse()?->getLibelle() ?? '',
             'volumes'=> [
                 'CM'=> [
                     'presentiel'=> $dto->heuresEctsFormation->sommeFormationCmPres,
@@ -191,12 +192,14 @@ class ParcoursExportController extends AbstractController
                 'autonomie'=> $dto->heuresEctsFormation->sommeFormationTePres
             ],
             'ects' => $dto->heuresEctsFormation->sommeFormationEcts,
-            'semestres' => []
+            'niveau1' => []
         ];
 
         foreach ($dto->semestres as $ordre => $sem) {
             if ($sem->semestre->isNonDispense() === false && $sem->semestreParcours->isOuvert() === true) {
                 $semestre = [
+                    'typeNiveau' => 'semestre',
+                    'libelleNiveau' => 'Semestre ' . ($ordre + 1),
                     'ordre' => $ordre,
                     'volumes' => [
                         'CM' => [
@@ -214,10 +217,12 @@ class ParcoursExportController extends AbstractController
                         'autonomie' => $sem->heuresEctsSemestre->sommeSemestreTePres
                     ],
                     'ects' => $sem->heuresEctsSemestre->sommeSemestreEcts,
-                    'ues' => []
+                    'niveau2' => []
                 ];
                 foreach ($sem->ues as $ue) {
                     $tUe = [
+                        'typeNiveau' => 'ue',
+                        'libelleNiveau' => $ue->display,
                         'ordre' => $ue->ordre(),
                         'libelleOrdre' => $ue->display,
                         'libelle' => $ue->ue->getLibelle() ?? $ue->display,
@@ -244,10 +249,12 @@ class ParcoursExportController extends AbstractController
                         $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
                     } elseif ($ue->ue->getNatureUeEc()?->isChoix()) {
                         $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
-                        $tUe['UesEnfants'] = [];
+                        $tUe['niveau3'] = [];
                         $nb = 0;
                         foreach ($ue->uesEnfants() as $ueEnfant) {
                             $tUeEnfant = [
+                                'typeNiveau' => 'ue',
+                                'libelleNiveau' => $ueEnfant->display,
                                 'ordre' => $ueEnfant->ordre(),
                                 'libelleOrdre' => $ueEnfant->display,
                                 'libelle' => $ueEnfant->ue->getLibelle() ?? $ueEnfant->display,
@@ -275,14 +282,16 @@ class ParcoursExportController extends AbstractController
 
                             $nb++;
                             $tUe['nbChoix'] = $nb;
-                            $tUeEnfant['ec'] = $this->getEcFromUe($ueEnfant);
+                            $tUeEnfant['niveau4'] = $this->getEcFromUe($ueEnfant, 3);
 
                             $nbChoixDeuxiemeNiveau = 0;
                             if(count($ueEnfant->uesEnfants()) > 0){
-                                $tUeEnfant['UesEnfants'] = [];
+                                $tUeEnfant['niveau4'] = [];
                             }
                             foreach($ueEnfant->uesEnfants() as $ueEnfantDeuxieme){
                                 $tUeEnfantDeuxieme = [
+                                    'typeNiveau' => 'ue',
+                                    'libelleNiveau' => $ueEnfantDeuxieme->display,
                                     'ordre' => $ueEnfantDeuxieme->ordre(),
                                     'libelleOrdre' => $ueEnfantDeuxieme->display,
                                     'libelle' => $ueEnfantDeuxieme->ue->getLibelle() ?? $ueEnfantDeuxieme->display,
@@ -310,46 +319,43 @@ class ParcoursExportController extends AbstractController
 
                                 ++$nbChoixDeuxiemeNiveau;
                                 $tUeEnfant['nbChoix'] = $nbChoixDeuxiemeNiveau;
-                                $tUeEnfantDeuxieme['ec'] = $this->getEcFromUe($ueEnfantDeuxieme);
-                                $tUeEnfant['UesEnfants'][] = $tUeEnfantDeuxieme;
+                                $tUeEnfantDeuxieme['niveau5'] = $this->getEcFromUe($ueEnfantDeuxieme, 4);
+                                $tUeEnfant['niveau4'][] = $tUeEnfantDeuxieme;
                             }
 
-                            $tUe['UesEnfants'][] = $tUeEnfant;
+                            $tUe['niveau3'][] = $tUeEnfant;
                         }
                     } else {
                         $tUe['ects'] = $ue->heuresEctsUe->sommeUeEcts;
-                        $tUe['ec'] = $this->getEcFromUe($ue);
+                        $tUe['niveau3'] = $this->getEcFromUe($ue, 2);
                     }
-                    $semestre['ues'][] = $tUe;
+                    $semestre['niveau2'][] = $tUe;
                 }
 
-                $data['semestres'][] = $semestre;
+                $data['niveau1'][] = $semestre;
             }
         }
 
         return $this->json($data);
     }
 
-    private function getEcFromUe(StructureUe $ue): array
+    private function getEcFromUe(StructureUe $ue, int $parentDepth): array
     {
         $tEcs = [];
+        $depth = $parentDepth + 1;
         foreach ($ue->elementConstitutifs as $ec) {
-//            if ($ec->elementConstitutif->getNatureUeEc()?->isLibre()) {
-//                $tEc['ordre'] = $ec->elementConstitutif->getOrdre();
-//                $tEc['numero'] = $ec->elementConstitutif->getCode();
-//                $tEc['libelle'] = $ec->elementConstitutif?->getFicheMatiere()?->getLibelle() ?? '-';
-//                $tEc['description_libre_choix'] =  $ec->elementConstitutif->getTexteEcLibre();
-//                $tEc['ects'] = $ec->heuresEctsEc->ects;
-//                $tEcs[] = $tEc;
             if ($ec->elementConstitutif->getNatureUeEc()?->isChoix()) {
+                $tEc['typeNiveau'] = 'ec';
                 $tEc['ordre'] = $ec->elementConstitutif->getOrdre();
                 $tEc['numero'] = $ec->elementConstitutif->getCode();
                 $tEc['libelle'] = $ec->elementConstitutif?->getFicheMatiere()?->getLibelle() ?? '-';
-                $tEc['ecsEnfants'] =  [];
+                $tEc['libelleNiveau'] = $tEc['numero'] . ' - ' . $tEc['libelle'];
+                $childKey = 'niveau' . ($depth + 1);
+                $tEc[$childKey] =  [];
                 $tEc['description_libre_choix'] =  $ec->elementConstitutif->getTexteEcLibre();
                 $nb = 0;
                 foreach ($ec->elementsConstitutifsEnfants as $ecEnfant) {
-                    $tEc['ecsEnfants'][] = $this->getEc($ecEnfant);
+                    $tEc[$childKey][] = $this->getEc($ecEnfant);
                     $nb++;
                 }
                 $tEc['nbChoix'] =  $nb;
@@ -384,6 +390,8 @@ class ParcoursExportController extends AbstractController
         }
 
         return [
+            'typeNiveau' => 'ec',
+            'libelleNiveau' => $ec->elementConstitutif->getCode() . ' - ' . $libelle,
             'ordre' => $ec->elementConstitutif->getOrdre(),
             'valide' => $valide,
             'ec_libre' => $ecLibre,
@@ -392,7 +400,7 @@ class ParcoursExportController extends AbstractController
             'numero'=> $ec->elementConstitutif->getCode(),
             'libelle'=> $libelle,
             'libelle_anglais' => $ec->elementConstitutif->getFicheMatiere()?->getLibelleAnglais() ?? '-',
-            'sigle'=> $ec->elementConstitutif->getFicheMatiere()?->getSigle() ?? '-', "",
+            'sigle'=> $ec->elementConstitutif->getFicheMatiere()?->getSigle() ?? '-',
             'enseignant_referent' => [
                 'nom'=> $ec->elementConstitutif->getFicheMatiere()?->getResponsableFicheMatiere()?->getDisplay() ?? '-',
                 'email'=> $ec->elementConstitutif->getFicheMatiere()?->getResponsableFicheMatiere()?->getEmail() ?? '-'
