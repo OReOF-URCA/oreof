@@ -15,6 +15,7 @@
                     <div class="inline-flex flex-col gap-2 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200">
                         <span><strong>Impersonation active</strong> - Utilisateur : {{ app.user.display }}</span>
                         <a href="{{ path('app_homepage', {'_switch_user': '_exit'}) }}"
+                           data-turbo="false"
                            class="inline-flex items-center justify-center rounded-md border border-amber-400 bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-200 dark:border-amber-600 dark:bg-amber-900/40 dark:text-amber-100 dark:hover:bg-amber-900/60">
                             Arrêter l'impersonation
                         </a>

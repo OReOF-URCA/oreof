@@ -14,7 +14,6 @@ use App\Classes\Mailer;
 use App\Controller\BaseController;
 use App\DTO\TranslatableKey;
 use App\Entity\User;
-use App\Entity\UserProfil;
 use App\Enums\CentreGestionEnum;
 use App\Form\UserHorsUrcaType;
 use App\Form\UserLdapType;
@@ -102,50 +101,6 @@ class UserController extends BaseController
 
         return $this->render('config/user/repertoire.html.twig', [
             'table' => $table->build(),
-        ]);
-    }
-
-    #[Route('/repertoire/liste', name: 'app_user_repertoire_liste', methods: ['GET'])]
-    public function repertoireListe(
-        Request        $request,
-        UserRepository $userRepository
-    ): Response
-    {
-        $sort = $request->query->get('sort') ?? 'nom';
-        $direction = $request->query->get('direction') ?? 'asc';
-        $q = $request->query->get('q') ?? null;
-
-        if ($this->isGranted('ROLE_ADMIN')) {
-            if ($q) {
-                $users = $userRepository->findEnableBySearch($this->getCampagneCollecte(), $q, $sort, $direction);
-            } else {
-                $users = $userRepository->findEnable($this->getCampagneCollecte(), $sort, $direction);
-            }
-        } elseif (
-            $this->isGranted('MANAGE', ['route' => 'app_composante', 'subject' => 'composante'])
-        ) {
-            /** @var UserProfil $centre */
-            foreach ($this->getUser()?->getUserProfils() as $centre) {
-                if ($centre->getComposante() !== null) {
-                    $composante = $centre->getComposante(); //au moins une composante, todo: si plusieurs ?
-                }
-            }
-            if ($composante !== null) {
-                if ($q) {
-                    $users = $userRepository->findByComposanteEnableBySearch($this->getCampagneCollecte(), $composante, $q, $sort, $direction);
-                } else {
-                    $users = $userRepository->findByComposanteEnable($this->getCampagneCollecte(), $composante, $sort, $direction);
-                }
-            } else {
-                $users = [];
-            }
-        }
-
-        return $this->render('config/user/_repertoireListe.html.twig', [
-            'users' => $users,
-            'sort' => $sort,
-            'direction' => $direction,
-            'campagneCollecte' => $this->getCampagneCollecte()
         ]);
     }
 
@@ -400,40 +355,8 @@ class UserController extends BaseController
             '_ui/_footer_cancel.html.twig',
             []
         );
-
-
-        //        return $this->render('config/user_profil/_show_attente.html.twig', [
-        //            'user' => $user,
-        //            'typeCentres' => CentreGestionEnum::cases(),
-        //            'centresUser' => $user->getUserProfils(),
-        //            'profils' => $profils,
-        //            'dpe' => $dpe
-        //        ]);
     }
-    //
-    //    /**
-    //     * @throws JsonException
-    //     */
-    //    #[Route('/change-role/{id}', name: 'app_user_roles', methods: ['POST'])]
-    //    public function changeRole(
-    //        Request        $request,
-    //        UserRepository $userRepository,
-    //        User           $user
-    //    ): Response {
-    //        $data = JsonRequest::getFromRequest($request);
-    //        $roles = $user->getRoles();
-    //
-    //        if ($data['checked']) {
-    //            $roles[] = $data['role'];
-    //        } else {
-    //            $roles = array_diff($roles, [$data['role']]);
-    //        }
-    //        $user->setRoles($roles);
-    //        $userRepository->save($user, true);
-    //
-    //        return $this->json(true);
-    //    }
-    //
+
     #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function edit(
@@ -480,9 +403,18 @@ class UserController extends BaseController
         UserRepository       $userRepository,
         UserProfilRepository $userProfilRepository
     ): Response {
+        $token = $request->request->get('_token') ?? $request->request->get('csrf_token');
+        if ($token === null) {
+            try {
+                $token = JsonRequest::getValueFromRequest($request, 'csrf');
+            } catch (\JsonException) {
+                $token = null;
+            }
+        }
+
         if ($this->isCsrfTokenValid(
             'delete' . $user->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
+            $token
         )) {
             foreach ($user->getUserProfils() as $centre) {
                 $userProfilRepository->remove($centre, true);

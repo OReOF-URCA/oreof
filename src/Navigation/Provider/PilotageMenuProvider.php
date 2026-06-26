@@ -109,12 +109,6 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                     'menu.admin.logs.applicatifs',
                     'app_log_viewer_index',
                 ),
-
-                MenuItem::link(
-                    'pilotage.impersonation',
-                    'menu.admin.impersonation.user',
-                    'app_impersonation_list',
-                ),
             ],
         )->withPosition(20);
     }

@@ -1503,13 +1503,30 @@ html[data-color-theme="jaune"] {
   /* Wrapper principal */
   .ts-wrapper {
     @apply relative w-full;
+    /* Neutralise les styles de bordure, couleur de fond, padding et ombre copiés depuis le select natif */
+    border: none !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Héritage de la police et du style pour TomSelect */
+  .ts-wrapper,
+  .ts-wrapper * {
+    font-family: inherit !important;
+  }
+  .ts-control,
+  .ts-control * {
+    font-weight: inherit !important;
   }
 
   /* Élément de saisie (le "faux input") */
   .ts-control {
-    @apply flex flex-wrap items-center w-full bg-surface
-    px-2 py-2 text-sm text-secondary-700 shadow-none outline-none
+    @apply flex flex-wrap items-center w-full border border-secondary-200 rounded-sm font-bold
+    px-3 py-2 text-sm text-secondary-800 shadow-none outline-none
     transition duration-150 cursor-text;
+    background-color: var(--color-secondary-50) !important;
     padding-right: max(
       var(--ts-pr-min),
       var(--ts-pr-clear-button) + var(--ts-pr-caret)
@@ -1518,7 +1535,7 @@ html[data-color-theme="jaune"] {
 
   /* Focus du wrapper (classe .focus) */
   .ts-wrapper.focus .ts-control {
-    @apply border-primary-400 ring-2 ring-primary-200;
+    @apply border-indigo-500 ring-4 ring-indigo-50/50;
   }
 
   /* Disabled */
@@ -1554,7 +1571,19 @@ html[data-color-theme="jaune"] {
   }
 
   /* Single — apparence flèche déroulante */
-  .ts-wrapper.single .ts-control,
+  .ts-wrapper.single .ts-control {
+    @apply cursor-pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 9l-7 7-7-7'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 1rem center !important;
+    background-size: 1rem 1rem !important;
+    padding-right: 2.5rem !important;
+  }
+
+  .ts-wrapper.single.open .ts-control {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M19 15l-7-7-7 7'/%3e%3c/svg%3e") !important;
+  }
+
   .ts-wrapper.single .ts-control input {
     @apply cursor-pointer;
   }
@@ -1715,11 +1744,12 @@ html[data-color-theme="jaune"] {
 
   /* ── Dark mode ─────────────────────────── */
   html[data-theme="dark"] .ts-control {
-    @apply border-secondary-600 bg-secondary-800 text-secondary-100;
+    @apply border-secondary-700 text-secondary-100;
+    background-color: var(--color-secondary-900) !important;
   }
 
   html[data-theme="dark"] .ts-wrapper.focus .ts-control {
-    @apply border-primary-500 ring-primary-500/30;
+    @apply border-indigo-500 ring-indigo-500/30;
   }
 
   html[data-theme="dark"] .ts-wrapper.multi .ts-control > div {

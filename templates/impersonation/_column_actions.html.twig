@@ -5,6 +5,8 @@
         icon="icon:lock"
         size="sm"
         tooltip="Impersonner {{ item.display }}"
+        href="{{ path('app_homepage', {'_switch_user': item.username}) }}"
+        data-turbo="false"
     />
 
 

@@ -1,90 +1,24 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-    <section
-            class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6"
-            {#            {{ stimulus_controller('crud', { #}
-            {#                url: type == 'hd' ? path('structure_fiche_matiere_liste_hd') : path('structure_fiche_matiere_liste'), #}
-            {#                storageKey: type == 'hd' ? 'structure_fiche_matiere_liste_hd' : 'structure_fiche_matiere_liste', #}
-            {#                page: page #}
-            {#            }) }} #}
-            {#            data-action="base:refreshListe@window->crud#refreshListe base:modalClose@window->crud#refreshListe" #}
-    >
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div class="space-y-1">
-                <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
-                    {% if type == 'hd' %}
-                        Fiches EC/matières "hors diplôme"
-                    {% else %}
-                        Fiches EC/matières
-                    {% endif %}
-                </h2>
-                <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
-                    Consultez et gérez les fiches d'enseignement ou matières.
-                </p>
-            </div>
-
-            <div class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-200">
-                {% if type == 'hd' %}
-                    Hors diplôme
-                {% else %}
-                    Standard
-                {% endif %}
-            </div>
-        </div>
-
-
-        {#        <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-3 dark:border-secondary-700 dark:bg-secondary-950/30 sm:p-4" {{ stimulus_target('crud', 'liste') }}> #}
-        {#        </div> #}
         <turbo-frame
                 id="liste_fiche_matiere"
                 src="{{ type == 'hd' ? path('structure_fiche_matiere_liste_hd') : path('structure_fiche_matiere_liste') }}">
         </turbo-frame>
-    </section>
 {% endblock %}
-
-{% set header_title %}
-    {% if type == 'hd' %}
-        Détail des fiches EC/matières "hors diplôme"
-    {% else %}
-        Détail des fiches EC/matières
-    {% endif %}
-{% endset %}
-
-{% set header_description %}
-    {% if type == 'hd' %}
-        Gérer ici les Fiches EC/matières "hors diplôme"
-    {% else %}
-        Gérer ici les Fiches EC/matières
-    {% endif %}
-{% endset %}
-
-{# {% block breadcrumb %} #}
-{#    {{ include('communs/_breadcrumb.html.twig', {liens:[ #}
-{#        { #}
-{#            title: 'Offre de formation', #}
-{#            url: path('structure_formation_index') #}
-{#        }, #}
-{#        { #}
-{#            title: type == 'hd' ? 'Fiches EC/matières "hors diplôme"' : 'Fiches EC/matières', #}
-{#        } #}
-{#    ]}) }} #}
-{# {% endblock %} #}
 
 {% block bouton_header %}
     {% if type == 'hd' %}
-        <button
-                {{ stimulus_controller('modal', {
-                    size: 'lg',
-                    modalTitle: 'Ajouter une fiche EC/matière',
-                    modalUrl: path('app_fiche_matiere_new') }) }}
-                data-action="click->modal#openModal"
-                class="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-semibold text-emerald-600 shadow-sm transition hover:border-emerald-400 hover:text-emerald-900 dark:border-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-200 dark:hover:border-emerald-500 mx-2"
-                title="Ajouter une fiche EC/matière"
-        >
-            {{ ux_icon('icon:add', {class: 'h-4 w-4'}) }}
-            <span>Ajouter une fiche EC/matière</span>
-        </button>
+
+    <twig:Button
+        href="{{ path('app_fiche_matiere_new') }}"
+        data-turbo="true"
+        data-action="click->modalturbo#open"
+        title="Ajouter une fiche EC/matière"
+        variant="success"
+        icon="icon:add"
+        label="Ajouter une fiche EC/matière"
+    ></twig:Button>
     {% endif %}
 {% endblock %}
 

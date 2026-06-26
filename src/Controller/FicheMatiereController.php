@@ -23,12 +23,11 @@ use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereMutualisableRepository;
 use App\Repository\FicheMatiereRepository;
 use App\Repository\LangueRepository;
-use App\Repository\TypeDiplomeRepository;
-use App\Repository\TypeEpreuveRepository;
 use App\Repository\UeRepository;
 use App\Service\VersioningFicheMatiere;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\Utils\JsonRequest;
+use App\Utils\TurboStreamResponseFactory;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -40,12 +39,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\DTO\TranslatableKey;
 
 #[Route('/fiche/matiere')]
 class FicheMatiereController extends BaseController
 {
     #[Route('/new', name: 'app_fiche_matiere_new', methods: ['GET', 'POST'])]
     public function new(
+        TurboStreamResponseFactory $turboStream,
         UeRepository $ueRepository,
         EntityManagerInterface $entityManager,
         LangueRepository $langueRepository,
@@ -58,6 +59,7 @@ class FicheMatiereController extends BaseController
             $ue = $ueRepository->find($request->query->get('ue'));
             $ficheMatiere->setParcours($ue->getSemestre()?->getSemestreParcours()->first()->getParcours());
         } else {
+            $ue = null;
             $ficheMatiere->setHorsDiplome(true);
         }
 
@@ -79,13 +81,22 @@ class FicheMatiereController extends BaseController
             $entityManager->persist($ficheMatiere);
             $entityManager->flush();
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess(
+               'fiche_matiere.new.success', true
+            ); //todo: gérer le refresh de la liste
         }
 
-        return $this->render('fiche_matiere/new.html.twig', [
-            'fiche_matiere' => $ficheMatiere,
-            'form' => $form->createView(),
-        ]);
+
+        return $turboStream->streamOpenModalFromTemplates(
+            new TranslatableKey('fiche_matiere.new.title', [], 'modal'),
+            $ficheMatiere->isHorsDiplome() ? 'Fiche matière hors diplôme' : 'Fiche matière de l\'UE ' . $ue?->getLibelle(),
+            '_ui/_modal_new_generic.html.twig',
+            [
+                'form' => $form->createView(),
+            ],
+            '_ui/_footer_submit_cancel.html.twig',
+            []
+        );
     }
 
     #[Route('/{slug}', name: 'app_fiche_matiere_show', methods: ['GET'])]

@@ -3,12 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Composante;
+use App\Form\ExportType;
 use App\Message\Export;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\GenerationJobRepository;
 use App\Utils\Tools;
 use App\Utils\TurboStreamResponseFactory;
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -46,6 +48,7 @@ class ExportController extends BaseController
     #[Route('/export/', name: 'app_export_index')]
     public function index(
         ComposanteRepository       $composanteRepository,
+        FormFactoryInterface       $formFactory,
     ): Response {
         if (!$this->isGranted('ROLE_ADMIN') &&
             !$this->isGranted('SHOW', [
@@ -55,9 +58,16 @@ class ExportController extends BaseController
             throw $this->createAccessDeniedException();
         }
 
+        $form = $formFactory->createNamed('', ExportType::class, null, [
+            'composantes' => $composanteRepository->findAll(),
+            'types_document' => self::TYPES_DOCUMENT,
+            'types_document_global' => self::TYPES_DOCUMENT_GLOBAL,
+            'show_global_documents' => true,
+            'show_date' => true,
+        ]);
 
         return $this->render('export/index.html.twig', [
-            'composantes' => $composanteRepository->findAll(),
+            'form' => $form->createView(),
             'ses' => true,
             'isCfvu' => false,
             'types_document' => self::TYPES_DOCUMENT,
@@ -68,6 +78,7 @@ class ExportController extends BaseController
     #[Route('/export/cfvu', name: 'app_export_cfvu')]
     public function exportCfvu(
         ComposanteRepository       $composanteRepository,
+        FormFactoryInterface       $formFactory,
     ): Response {
         $autorise = $this->isGranted('CAN_ETABLISSEMENT_CONSEILLER_ALL', $this->getUser()) or $this->isGranted('CAN_ETABLISSEMENT_SHOW_ALL', $this->getUser());
 
@@ -75,8 +86,15 @@ class ExportController extends BaseController
             throw $this->createAccessDeniedException();
         }
 
-        return $this->render('export/index.html.twig', [
+        $form = $formFactory->createNamed('', ExportType::class, null, [
             'composantes' => $composanteRepository->findAll(),
+            'types_document' => self::TYPES_DOCUMENT,
+            'show_global_documents' => false,
+            'show_date' => false,
+        ]);
+
+        return $this->render('export/index.html.twig', [
+            'form' => $form->createView(),
             'ses' => false,
             'isCfvu' => true,
             'types_document' => self::TYPES_DOCUMENT,
@@ -86,14 +104,23 @@ class ExportController extends BaseController
     #[Route('/export/consultation', name: 'app_export_show')]
     public function exportShow(
         ComposanteRepository       $composanteRepository,
+        FormFactoryInterface       $formFactory,
     ): Response {
         $this->denyAccessUnlessGranted('SHOW', [
             'route' => 'app_etablissement',
             'subject' => 'etablissement'
         ]);
 
-        return $this->render('export/index.html.twig', [
+        $form = $formFactory->createNamed('', ExportType::class, null, [
             'composantes' => $composanteRepository->findAll(),
+            'types_document' => self::TYPES_DOCUMENT,
+            'types_document_global' => self::TYPES_DOCUMENT_GLOBAL,
+            'show_global_documents' => true,
+            'show_date' => false,
+        ]);
+
+        return $this->render('export/index.html.twig', [
+            'form' => $form->createView(),
             'ses' => false,
             'isCfvu' => true,
             'types_document' => self::TYPES_DOCUMENT,
@@ -104,8 +131,17 @@ class ExportController extends BaseController
     #[Route('/export/composante/{composante}', name: 'app_export_composante_index')]
     public function composante(
         Composante                 $composante,
+        FormFactoryInterface       $formFactory,
     ): Response {
+        $form = $formFactory->createNamed('', ExportType::class, null, [
+            'fixed_composante' => $composante,
+            'types_document' => self::TYPES_DOCUMENT,
+            'show_global_documents' => false,
+            'show_date' => true,
+        ]);
+
         return $this->render('export/index.html.twig', [
+            'form' => $form->createView(),
             'composante' => $composante,
             'isCfvu' => false,
             'ses' => false,

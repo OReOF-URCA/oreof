@@ -1,8 +1,26 @@
+{%- set _route = app.request.attributes.get('_route') -%}
+{%- if _route -%}
+    {%- set _default_title_key = 'page.' ~ _route ~ '.title' -%}
+    {%- set _default_description_key = 'page.' ~ _route ~ '.description' -%}
+
+    {%- set _translated_title = _default_title_key|trans({}, 'menu') -%}
+    {%- set _translated_description = _default_description_key|trans({}, 'menu') -%}
+
+    {# Fallback to formatted route name if no translation exists #}
+    {%- set _fallback_title = _translated_title != _default_title_key ? _translated_title : _route|replace({'_': ' ', 'app_': ''})|title -%}
+    {%- set _fallback_description = _translated_description != _default_description_key ? _translated_description : '' -%}
+{%- else -%}
+    {%- set _fallback_title = 'Titre par défaut' -%}
+    {%- set _fallback_description = '' -%}
+{%- endif -%}
+
+{%- set header_title = header_title|default(null) is not empty ? header_title : _fallback_title -%}
+{%- set header_description = header_description|default(null) is not empty ? header_description : _fallback_description -%}
 <!DOCTYPE html>
 <html lang="fr" data-footer="true" data-placement="horizontal" data-behaviour="pinned" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <title> {{ header_title|default('Titre par défaut') }} - {{ product_name }}</title>
+    <title> {{ header_title }} - {{ product_name }}</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico', 'image_package') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
     <script>
@@ -109,10 +127,10 @@
                             <h1 class="text-xl font-black leading-tight tracking-tight text-secondary-900 sm:text-3xl lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap dark:text-secondary-100"
                                 id="title">
                                 {% block header %}
-                                    {{ header_title|default('Titre par défaut') }}
+                                    {{ header_title }}
                                 {% endblock %}</h1>
                             <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
-                                {{ header_description|default('Description par défaut') }}
+                                {{ header_description }}
                             </p>
                         </div>
 

@@ -1,19 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Gestion des exports de fichier
-{% endset %}
-
 {% set frame_id = 'export_formations_frame' %}
 {% set selectedComposanteId = composante is defined and composante ? composante.id : null %}
 {% set frame_src = selectedComposanteId ? path('app_export_liste', { composante: selectedComposanteId }) : null %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Pilotage'},
-        {title: 'Gestion des exports de fichier'},
-    ]}) }}
-{% endblock %}
+
 
 {% block content %}
     <div
@@ -30,110 +21,33 @@
             }) }}
         </template>
 
-        <form method="post"
-              action="{{ path('app_export_valide') }}"
-              class="space-y-4"
-              data-action="turbo:submit-start->export#disableSubmit turbo:submit-end->export#enableSubmit"
-        >
-            <section
-                    class="rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="space-y-1">
-                        <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
-                            Parametres d'export
-                        </h2>
-                        <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
-                            Selectionnez la composante et le type de document a generer. Le resultat sera envoye par
-                            email.
-                        </p>
-                    </div>
-
-                    <div class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-200">
-                        {{ user_data.campagneCollecte.libelle }}
-                    </div>
-                </div>
+        {% form_theme form 'communs/form_theme_v2.html.twig' %}
+        {{ form_start(form, {
+            action: path('app_export_valide'),
+            attr: {
+                'class': 'space-y-4',
+                'data-action': 'turbo:submit-start->export#disableSubmit turbo:submit-end->export#enableSubmit'
+            }
+        }) }}
+            <twig:Card>
 
                 <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
                     <div class="space-y-4">
-                        {% if ses is defined and ses == true or isCfvu is defined and isCfvu == true %}
-                            <div class="space-y-1.5">
-                                <label for="composante"
-                                       class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Composante
-                                    <span class="text-rose-500">*</span></label>
-                                <select name="composante"
-                                        id="composante"
-                                        {{ stimulus_target('export', 'composante') }}
-                                        data-action="change->export#refreshFrame"
-                                        class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-cyan-400 dark:focus:ring-cyan-900"
-                                        {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
-                                >
-                                    <option value="">Choisir une composante</option>
-                                    {% for composante in composantes %}
-                                        <option value="{{ composante.id }}" {{ selectedComposanteId == composante.id ? 'selected' }}>{{ composante.libelle }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        {% else %}
-                            <div class="space-y-1.5">
-                                <label for="composante"
-                                       class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Composante
-                                    <span class="text-rose-500">*</span></label>
-                                <select id="composante"
-                                        disabled
-                                        {{ stimulus_target('export', 'composante') }}
-                                        class="block w-full rounded-lg border border-secondary-300 bg-secondary-100 px-3 py-2 text-sm text-secondary-500 shadow-sm outline-none dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-400"
-                                        {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
-                                >
-                                    <option value="{{ composante.id }}">{{ composante.libelle }}</option>
-                                </select>
-                                <input type="hidden" name="composante" value="{{ composante.id }}">
-                            </div>
+                        {{ form_row(form.composante) }}
+                        {% if not ses is defined or ses == false and isCfvu is defined and isCfvu == false %}
+                            <input type="hidden" name="composante" value="{{ composante.id }}">
                         {% endif %}
 
-                        <div class="space-y-1.5">
-                            <label for="type_document"
-                                   class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Type
-                                d'export <span class="text-rose-500">*</span></label>
-                            <select name="type_document"
-                                    id="type_document"
-                                    {{ stimulus_target('export', 'typeDocument') }}
-                                    data-action="change->export#onTypeDocumentChange"
-                                    class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-cyan-400 dark:focus:ring-cyan-900">
-                                <option value="">Choisir le format</option>
-                                {% for value, type in types_document %}
-                                    <option value="{{ value }}">{{ type }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
+                        {{ form_row(form.type_document) }}
 
-                        {% if isCfvu is defined and isCfvu != true %}
-                            <div class="space-y-1.5">
-                                <label for="date"
-                                       class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Preciser,
-                                    si besoin, la date du conseil ou de la commission</label>
-                                <input type="date" name="date" id="date"
-                                       class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-cyan-400 dark:focus:ring-cyan-900">
-                            </div>
+                        {% if form.date is defined %}
+                            {{ form_row(form.date) }}
                         {% endif %}
                     </div>
 
                     <div class="space-y-4">
-                        {% if types_document_global is defined %}
-                            <div class="space-y-1.5">
-                                <label for="type_document_global"
-                                       class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">Exports
-                                    specifiques (sans choix de composante)</label>
-                                <select name="type_document_global"
-                                        id="type_document_global"
-                                        {{ stimulus_target('export', 'typeDocumentGlobal') }}
-                                        data-action="change->export#onTypeGlobalChange"
-                                        class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-cyan-400 dark:focus:ring-cyan-900">
-                                    <option value="">Choisir le format</option>
-                                    {% for value, type in types_document_global %}
-                                        <option value="{{ value }}">{{ type }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
+                        {% if form.type_document_global is defined %}
+                            {{ form_row(form.type_document_global) }}
                         {% endif %}
                     </div>
 
@@ -155,7 +69,7 @@
                         }) }}
                     </div>
                 </div>
-            </section>
+            </twig:Card>
 
             <div id="generation_state" {{ stimulus_target('export', 'generationState') }}>
                 {{ include('export/_generation_state.html.twig', {
@@ -174,6 +88,6 @@
                     {{ include('export/_liste.html.twig', { dpes: [], composante: null }) }}
                 </turbo-frame>
             </section>
-        </form>
+        {{ form_end(form) }}
     </div>
 {% endblock %}

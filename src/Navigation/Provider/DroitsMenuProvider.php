@@ -18,9 +18,7 @@ final readonly class DroitsMenuProvider implements MenuProviderInterface
 {
     public function __construct(
         private AuthorizationCheckerInterface $authorizationChecker,
-    )
-    {
-    }
+    ) {}
 
     public function getMenu(): array
     {
@@ -63,6 +61,11 @@ final readonly class DroitsMenuProvider implements MenuProviderInterface
                         key: 'droits.profils',
                         label: 'menu.droits.profils',
                         route: 'app_administration_profils_index',
+                    )->requiresRole('ROLE_ADMIN'),
+                    MenuItem::link(
+                        'pilotage.impersonation',
+                        'menu.admin.impersonation.user',
+                        'app_impersonation_list',
                     )->requiresRole('ROLE_ADMIN'),
                 ],
             )->withPosition(40),

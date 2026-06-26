@@ -11,9 +11,12 @@ namespace App\Navigation;
 
 final readonly class MenuItem
 {
+    public string $label;
+    public ?string $description;
+
     public function __construct(
         public string              $key,
-        public string              $label,
+        ?string                    $label = null,
         public ?string             $route = null,
         public array               $routeParams = [],
         public ?string             $icon = null,
@@ -23,18 +26,20 @@ final readonly class MenuItem
         public array               $children = [],
         public bool                $showInTopbar = true,
         public bool                $showInOverview = true,
-        public ?string             $description = null,
+        ?string                    $description = null,
         public MenuDisplayModeEnum $displayMode = MenuDisplayModeEnum::Dropdown,
         public ?string             $column = null,
         public int                 $position = 100
     )
     {
+        $this->label = $label ?? ($this->route ? 'page.' . $this->route . '.title' : $this->key);
+        $this->description = $description ?? ($this->route ? 'page.' . $this->route . '.description' : $this->label . '.description');
     }
 
     public static function link(
         string  $key,
-        string  $label,
-        string  $route,
+        ?string $label = null,
+        ?string $route = null,
         array   $routeParams = [],
         ?string $icon = null,
     ): self
@@ -44,7 +49,7 @@ final readonly class MenuItem
 
     public static function section(
         string  $key,
-        string  $label,
+        ?string $label = null,
         ?string $route = null,
         ?string $icon = null,
         array   $children = [],
@@ -55,7 +60,7 @@ final readonly class MenuItem
 
     public static function info(
         string  $key,
-        string  $label,
+        ?string $label = null,
         ?string $description = null,
         ?string $icon = null,
     ): self
@@ -178,8 +183,8 @@ final readonly class MenuItem
         );
     }
 
-    public function description(): string
+    public function description(): ?string
     {
-        return $this->label . '.description';
+        return $this->description;
     }
 }

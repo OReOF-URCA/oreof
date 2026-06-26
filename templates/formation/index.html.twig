@@ -20,16 +20,6 @@
     </section>
 {% endblock %}
 
-{% set header_title %}
-    Détails des mentions/spécialités
-{% endset %}
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Offre de formation'},
-        {title: header_title}
-    ]}) }}
-{% endblock %}
 
 {% block bouton_header %}
     {% if is_granted('ROLE_ADMIN') %}

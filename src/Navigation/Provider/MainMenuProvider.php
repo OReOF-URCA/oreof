@@ -25,26 +25,22 @@ final class MainMenuProvider implements MenuProviderInterface
                 children: [
                     MenuItem::link(
                         'offre.detail_mentions',
-                        'menu.detail_mentions',
-                        'app_formation_index',
+                        route: 'app_formation_index',
                         icon: 'mdi:format-list-bulleted'
                     ),
                     MenuItem::link(
                         'offre.detail_fiches',
-                        'menu.detail_fiches',
-                        'structure_fiche_matiere_index',
+                        route:'structure_fiche_matiere_index',
                         icon: 'mdi:file'
                     ),
                     MenuItem::link(
                         'offre.detail_fiches_hd',
-                        'menu.detail_fiches_hd',
-                        'structure_fiche_matiere_index_hd',
+                        route:'structure_fiche_matiere_index_hd',
                         icon: 'mdi:file-lock'
                     ),
                     MenuItem::link(
                         'offre.exports',
-                        'menu.exports',
-                        'app_export_index',
+                        route:'app_export_index',
                         icon: 'icon:download'
                     ),
                 ]

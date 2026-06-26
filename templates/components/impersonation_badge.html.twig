@@ -10,7 +10,9 @@
                     Les droits affichés ne sont pas vos droits Admin.
                 </span>
             </div>
-            <a href="{{ path('app_homepage', {'_switch_user': '_exit'}) }}" class="btn btn-light btn-sm fw-bold"
+            <a href="{{ path('app_homepage', {'_switch_user': '_exit'}) }}"
+               data-turbo="false"
+               class="btn btn-light btn-sm fw-bold"
                title="Revenir à mon rôle Admin">
                 <i class="bi bi-arrow-counterclockwise"></i> Revenir à mon rôle Admin
             </a>

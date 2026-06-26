@@ -69,7 +69,49 @@
                 {% set itemConfirmValue = hasConfirm ? item.confirm|e('html_attr') : '' %}
                 {% set itemTurboFrame = turboFrame != null ? turboFrame : '' %}
 
-                {% if modal %}
+                {% if item.type is defined and item.type == 'delete' %}
+                    {% if disabled and itemHelp != '' %}
+                        <div class="inline-block w-full"
+                              data-controller="tooltip"
+                              data-tooltip-placement-value="bottom"
+                              title="{{ itemHelp }}">
+                            <twig:DeleteButton
+                                    :soft="true"
+                                    :disabled="true"
+                                    url="{{ item.url ?? '#' }}"
+                                    csrfTokenId="{{ item.csrfTokenId ?? '' }}"
+                                    title="{{ item.title ?? 'Confirmer la suppression' }}"
+                                    message="{{ item.message ?? 'Cette action est irréversible. Voulez-vous continuer ?' }}"
+                                    confirmLabel="{{ item.confirmLabel ?? 'Supprimer' }}"
+                                    cancelLabel="{{ item.cancelLabel ?? 'Annuler' }}"
+                                    id="{{ item.id ?? ('delete-btn-' ~ random()) }}"
+                                    extraClass="{{ itemExtraClasses }}"
+                                    icon="{{ item.icon ?? 'icon:delete' }}"
+                                    label="{{ item.label }}"
+                                    variant="{{ semanticColor }}"
+                                    class="w-full"
+                            />
+                        </div>
+                    {% else %}
+                        <twig:DeleteButton
+                                :soft="true"
+                                :disabled="disabled"
+                                url="{{ item.url ?? '#' }}"
+                                csrfTokenId="{{ item.csrfTokenId ?? '' }}"
+                                title="{{ item.title ?? 'Confirmer la suppression' }}"
+                                message="{{ item.message ?? 'Cette action est irréversible. Voulez-vous continuer ?' }}"
+                                confirmLabel="{{ item.confirmLabel ?? 'Supprimer' }}"
+                                cancelLabel="{{ item.cancelLabel ?? 'Annuler' }}"
+                                id="{{ item.id ?? ('delete-btn-' ~ random()) }}"
+                                extraClass="{{ itemExtraClasses }}"
+                                icon="{{ item.icon ?? 'icon:delete' }}"
+                                label="{{ item.label }}"
+                                variant="{{ semanticColor }}"
+                                tooltip="{{ (itemHelp != '' and not disabled) ? itemHelp : '' }}"
+                                class="w-full"
+                        />
+                    {% endif %}
+                {% elseif modal %}
                     {% if disabled and itemHelp != '' %}
                         <div class="inline-block"
                               data-controller="tooltip"
@@ -159,7 +201,7 @@
                                   data-controller="tooltip"
                                   data-tooltip-placement-value="bottom"
                                   title="{{ itemHelp }}">
-                                <form method="post"
+                                <form method="{{ method }}"
                                       action="{{ item.url ?? '#' }}"
                                       class="block"
                                       {% if hasConfirm %}data-action="submit->dropdown#confirm" data-dropdown-confirm-value="{{ item.confirm|e('html_attr') }}"{% endif %}

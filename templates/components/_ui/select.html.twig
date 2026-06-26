@@ -1,0 +1,83 @@
+{# templates/components/_ui/select.html.twig #}
+{% set selectId = id ?? 'select-' ~ random() %}
+{% set isDisabled = disabled or (attr.disabled is defined and attr.disabled) %}
+
+<div class="space-y-2 group mb-4">
+    {% if label is not same as(false) and label is not null %}
+        <div class="flex justify-between items-center mb-1">
+            <label for="{{ selectId }}" class="text-[12px] font-black text-secondary-500 group-focus-within:text-indigo-500 transition-colors uppercase">
+                {{ label|trans({}, translationDomain) }}
+            </label>
+            {% if required %}
+                <span class="text-[10px] font-bold text-red-300 uppercase">Champs Requis</span>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if autocomplete %}
+        {% set selectClass = 'w-full' ~ (extraClass ? ' ' ~ extraClass : '') %}
+    {% else %}
+        {% set baseClass = 'w-full p-2 rounded-sm font-bold focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm appearance-none' %}
+        {% set normalClass = 'border border-secondary-200 text-secondary-800 cursor-pointer dark:bg-secondary-900 dark:border-secondary-700 dark:text-secondary-100' %}
+        {% set disabledClass = ' bg-secondary-200 border border-secondary-200 text-secondary-400 cursor-not-allowed opacity-70 dark:bg-secondary-800 dark:border-secondary-700 dark:text-secondary-500' %}
+        {% set selectClass = baseClass ~ (isDisabled ? disabledClass : normalClass) ~ (extraClass ? ' ' ~ extraClass : '') %}
+    {% endif %}
+
+    {% set extraAttrsRendered %}
+        {% for attrName, attrValue in attr %}
+            {% if attrValue is same as(true) %} {{ attrName|e('html_attr') }}{% elseif attrValue is not same as(false) and attrValue is not null %} {{ attrName|e('html_attr') }}="{{ attrValue|e('html_attr') }}"{% endif %}
+        {% endfor %}
+    {% endset %}
+
+    {% if autocomplete %}
+        <select
+            id="{{ selectId }}"
+            name="{{ name }}{{ multiple ? '[]' : '' }}"
+            class="{{ selectClass }}"
+            {% if multiple %}multiple="multiple"{% endif %}
+            {% if required %}required{% endif %}
+            {% if isDisabled %}disabled{% endif %}
+            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
+            {{ extraAttrsRendered|raw }}
+        >
+            {% if placeholder is not null %}
+                <option value="">{{ placeholder|trans({}, translationDomain) }}</option>
+            {% endif %}
+            {% for opt in this.normalizedOptions %}
+                <option value="{{ opt.value }}" {% if opt.selected %}selected{% endif %}>{{ opt.label|trans({}, translationDomain) }}</option>
+            {% endfor %}
+        </select>
+    {% else %}
+        <div class="relative">
+            <select
+                id="{{ selectId }}"
+                name="{{ name }}{{ multiple ? '[]' : '' }}"
+                class="{{ selectClass }}"
+                {% if multiple %}multiple="multiple"{% endif %}
+                {% if required %}required{% endif %}
+                {% if isDisabled %}disabled{% endif %}
+                {{ extraAttrsRendered|raw }}
+            >
+                {% if placeholder is not null %}
+                    <option value="">{{ placeholder|trans({}, translationDomain) }}</option>
+                {% endif %}
+                {% for opt in this.normalizedOptions %}
+                    <option value="{{ opt.value }}" {% if opt.selected %}selected{% endif %}>{{ opt.label|trans({}, translationDomain) }}</option>
+                {% endfor %}
+            </select>
+            {% if not multiple %}
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-secondary-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if help is not null %}
+        <div class="text-xs text-secondary-500 mt-1">
+            {{ help|trans({}, translationDomain) }}
+        </div>
+    {% endif %}
+</div>

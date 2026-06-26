@@ -1,14 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Liste des LHEO invalides
-{% endset %}
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Pilotage'},
-        {title: 'Liste des LHEO invalides'},
-    ]}) }}
+{% block bouton_header %}
+    <twig:Button
+            href="{{ path('app_parcours_lheo_invalid_export') }}"
+            variant="info"
+            size="sm"
+            icon="icon:download"
+            label="Exporter sous Excel"
+            tooltip="Télécharger les erreurs au format Excel"
+            extraClass="font-semibold"
+    />
 {% endblock %}
 
 {% block content %}
@@ -23,58 +24,60 @@
             {% for e in errorArray %}
                 <article
                         class="rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm transition hover:border-secondary-300 dark:border-secondary-700 dark:bg-secondary-900 dark:hover:border-secondary-600">
-                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div class="space-y-2">
+                    <div class="space-y-4">
+                        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                             <div class="flex flex-wrap items-center gap-2">
                                 <a href="{{ path('parcours_v2_voir', {parcours: e.id}) }}"
                                    class="text-base font-semibold text-secondary-800 hover:text-cyan-700 dark:text-secondary-100 dark:hover:text-cyan-300">
                                     {{ e.type_formation_libelle }} - {{ e.formation_libelle }}
                                     : {{ e.parcours_libelle }}
                                 </a>
-                                <span class="inline-flex rounded-full border border-secondary-200 bg-secondary-50 px-2.5 py-1 text-xs font-semibold text-secondary-600 dark:border-secondary-700 dark:bg-secondary-950/30 dark:text-secondary-300">
-                                    ID {{ e.id }}
-                                </span>
+                                <twig:Badge
+                                variant="secondary"
+                                label="ID {{ e.id }}" />
+                                
                                 {{ include('communs/_badge_collection.html.twig', { badges: e.etatParcours|badgeDpeDto }) }}
                             </div>
 
-                            {% if e.xml_errors|length > 0 %}
-                                <div class="rounded-xl border border-rose-200 bg-rose-50/70 p-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200">
-                                    <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-rose-600 dark:text-rose-300">
-                                        Erreurs XML</p>
-                                    <ul class="list-disc space-y-1 pl-5">
-                                        {% for xmlErrorMessage in e.xml_errors %}
-                                            <li>{{ xmlErrorMessage }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                </div>
-                            {% endif %}
+                            <div class="flex flex-wrap gap-2 lg:justify-end">
+                                <twig:Button
+                                        label="Voir"
+                                        variant="info"
+                                        size="sm"
+                                        icon="icon:info"
+                                        href="{{ path('parcours_v2_voir', {parcours: e.id}) }}"
+                                        tooltip="Voir le parcours"
+                                />
+
+                                <twig:Button
+                                        label="Modifier"
+                                        variant="warning"
+                                        size="sm"
+                                        icon="icon:edit"
+                                        href="{{ path('parcours_v2_modifier', {parcours: e.id}) }}"
+                                        tooltip="Modifier la fiche d'identite du parcours"
+                                />
+                            </div>
                         </div>
 
-                        <div class="flex flex-wrap gap-2 lg:justify-end">
-                            <twig:Button
-                                    label="Voir"
-                                    variant="info"
-                                    size="sm"
-                                    icon="icon:info"
-                                    href="{{ path('parcours_v2_voir', {parcours: e.id}) }}"
-                                    tooltip="Voir le parcours"
-                            />
-
-                            <twig:Button
-                                    label="Modifier"
-                                    variant="warning"
-                                    size="sm"
-                                    icon="icon:edit"
-                                    href="{{ path('parcours_v2_modifier', {parcours: e.id}) }}"
-                                    tooltip="Modifier la fiche d'identite du parcours"
-                            />
-                        </div>
+                        {% if e.xml_errors|length > 0 %}
+                            <div class="rounded-xl border border-rose-200 bg-rose-50/70 p-3 text-sm text-rose-800 dark:border-rose-800 dark:bg-rose-950/30 dark:text-rose-200">
+                                <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-rose-600 dark:text-rose-300">
+                                    Erreurs XML</p>
+                                <ul class="list-disc space-y-1 pl-5">
+                                    {% for xmlErrorMessage in e.xml_errors %}
+                                        <li>{{ xmlErrorMessage }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
                     </div>
                 </article>
             {% else %}
-                <div class="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-200">
-                    Tous les parcours sont valides !
-                </div>
+                <twig:Alert
+                    type="success"
+                    message="Tous les parcours sont valides !"
+                />
             {% endfor %}
         </div>
     </section>

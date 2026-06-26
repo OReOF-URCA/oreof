@@ -8,17 +8,9 @@
     Répertoire des contacts
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Gestion des utilisateurs',
-        },
-        {
-            title: header_title,
-        }
-    ]}) }}
-{% endblock %}
+{% set header_description %}
+    RListe des utilisateurs enregistrés, sans droits spécifiques
+{% endset %}
 
 {% block bouton_header %}
     <div class="flex flex-wrap justify-end gap-2">

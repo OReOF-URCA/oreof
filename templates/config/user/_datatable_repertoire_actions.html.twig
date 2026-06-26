@@ -8,42 +8,55 @@
             tooltip="Voir un utilisateur"
     />
 
-    <twig:Button
-            label="Gestion des accès"
-            variant="warning"
-            icon="icon:edit"
-            href="{{ path('app_user_profils_gestion', {'user': item.id}) }}"
-            dataAction="click->modalturbo#open"
-            tooltip="Gestion des profils de {{ item.display }}"
-    />
+    {% set dropdownItems = [
+        {
+            label: 'Gestion des accès',
+            icon: 'icon:edit',
+            color: 'warning',
+            url: path('app_user_profils_gestion', {'user': item.id}),
+            modal: true,
+            help: 'Gestion des profils de ' ~ item.display
+        }
+    ] %}
 
     {% if is_granted('ROLE_ADMIN') %}
-        <twig:Button
-                label="Modifier"
-                variant="warning"
-                icon="icon:edit"
-                href="{{ path('app_user_edit', {'id': item.id}) }}"
-                dataAction="click->modalturbo#open"
-                tooltip="Modifier l'utilisateur"
-        />
-
-        <twig:Button
-                label="Supprimer"
-                variant="danger"
-                icon="icon:delete"
-                dataAction="click->crud#delete"
-                extraClass="data-url='{{ path('app_user_delete', {'id': item.id}) }}' data-csrf='{{ csrf_token('delete' ~ item.id) }}'"
-                tooltip="Supprimer l'utilisateur"
-        />
-
-
-        <twig:Button
-                label="Désactiver l'accès"
-                variant="danger"
-                icon="icon:delete"
-                extraClass="data-url='{{ path('app_user_gestion_revoque_admin', {'user': item.id}) }}' data-csrf='{{ csrf_token('delete' ~ item.id) }}'"
-                tooltip="Désactiver l'accès"
-        />
+        {% set dropdownItems = dropdownItems|merge([
+            {
+                label: 'Modifier',
+                icon: 'icon:edit',
+                color: 'warning',
+                url: path('app_user_edit', {'id': item.id}),
+                modal: true,
+                help: "Modifier l'utilisateur"
+            },
+            {
+                label: "Désactiver l'accès",
+                icon: 'icon:delete',
+                color: 'danger',
+                url: path('app_user_gestion_revoque_admin', {'user': item.id}),
+                confirm: "Voulez-vous vraiment désactiver l'accès de cet utilisateur ?"
+            },
+            {
+                type: 'delete',
+                label: 'Supprimer',
+                icon: 'icon:delete',
+                color: 'danger',
+                url: path('app_user_delete', {'id': item.id}),
+                csrfTokenId: 'delete' ~ item.id,
+                title: "Supprimer l'utilisateur " ~ item.prenom ~ " " ~ item.nom,
+                message: "Cette action supprimera définitivement l'utilisateur et le retirera de toutes les formations et parcours.",
+                confirmLabel: "Supprimer",
+                cancelLabel: "Annuler",
+                id: "user-" ~ item.id
+            }
+        ]) %}
     {% endif %}
+
+    {{ component('dropdown_actions', {
+        label: 'Actions',
+        help: 'Actions disponibles pour cet utilisateur',
+        icon: 'icon:ellipsis-vertical',
+        items: dropdownItems
+    }) }}
 </div>
 

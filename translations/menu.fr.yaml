@@ -31,6 +31,7 @@ menu:
   conseils:
     chgt_rf: Changement RF/co RF
     synthses_modifs: Synthèse des modifications
+    documents: Documents
   menu_droits: Utilisateurs et droits
   droits:
     en_attente: Utilisateurs en attente
@@ -60,6 +61,30 @@ menu:
     traductions: Traductions et textes
     config_emails: Configurations des emails
     help: Configurations des aides
-    faq: Configurations de la FAQ
+    faq: Configuration FAQ
     styleguide: Consulter le styleguide
+    plateforme_adminission: Plateforme d'admission
   menu_configuration: Configuration générale
+  admin.gestion_offre_old: Gestion de l'offre et capacités
+  column.default: Colonnes
+
+breadcrumb.home: Accueil
+page:
+    app_formation_index:
+      title: Offre de formation
+      description: Détails des mentions/spécialités
+    app_section_offre_formation:
+      title: Offre de formation
+      description: Détails des mentions/spécialités
+    structure_fiche_matiere_index:
+      title: Détails des fiches EC/matière
+      description: Liste des fiches EC/matières associées à une mention / spécialité
+    structure_fiche_matiere_index_hd:
+      title: Détails des fiches EC/matières "hors diplômes"
+      description: Liste des fiches EC/matières non associées à une mention / spécialité et accessibles à toutes les formations
+    app_export_index:
+      title: Gestion des Exports
+      description: Accéder aux exports des données de l'offre de formation
+    app_parcours_lheo_invalid_list:
+      title: Contrôle LHEO de l'offre
+      description: Contrôle de la conformité au format LHEO de l'offre

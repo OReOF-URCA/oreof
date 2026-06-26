@@ -818,6 +818,111 @@ class ParcoursController extends BaseController
         ]);
     }
 
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/check/lheo_invalid_export', name: 'app_parcours_lheo_invalid_export')]
+    public function exportInvalidXmlLheoList(
+        LheoXML            $lheoXML,
+        ParcoursRepository $parcoursRepo
+    ): Response {
+        //todo: a basculer avec HtmlSpreadsheetBundle
+        $parcoursList = $parcoursRepo->findAllByCampagneCollecte($this->getCampagneCollecte());
+
+        $errorArray = [];
+        foreach ($parcoursList as $p) {
+            $erreursChampsParcours = $lheoXML->checkTextValuesAreLongEnough($p);
+            if ($lheoXML->isValidLHEO($p) === false || count($erreursChampsParcours) > 0) {
+                $xmlErrorArray = [];
+                foreach (libxml_get_errors() as $xmlError) {
+                    $xmlErrorArray[] = $lheoXML->decodeErrorMessages($xmlError->message);
+                }
+                $xmlErrorArray = array_merge($xmlErrorArray, $erreursChampsParcours);
+                $errorArray[] = [
+                    'id' => $p->getId(),
+                    'parcours_libelle' => $p->getLibelle(),
+                    'etatParcours' => GetDpeParcours::getFromParcours($p)?->getEtatValidation(),
+                    'formation_libelle' => $p->getFormation()?->getMention()?->getLibelle(),
+                    'type_formation_libelle' => $p->getFormation()?->getTypeDiplome()?->getLibelle(),
+                    'xml_errors' => $xmlErrorArray
+                ];
+                libxml_clear_errors();
+            }
+        }
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Erreurs LHEO');
+
+        // Headers
+        $sheet->setCellValue('A1', 'ID');
+        $sheet->setCellValue('B1', 'Type Formation');
+        $sheet->setCellValue('C1', 'Formation');
+        $sheet->setCellValue('D1', 'Parcours');
+        $sheet->setCellValue('E1', 'Etat');
+        $sheet->setCellValue('F1', 'Erreurs XML / Validation');
+
+        $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+        $sheet->freezePane('A2');
+
+        $row = 2;
+        foreach ($errorArray as $e) {
+            $sheet->setCellValue('A' . $row, $e['id']);
+            $sheet->setCellValue('B' . $row, $e['type_formation_libelle']);
+            $sheet->setCellValue('C' . $row, $e['formation_libelle']);
+            $sheet->setCellValue('D' . $row, $e['parcours_libelle']);
+
+            $etatLabels = [];
+            if (!empty($e['etatParcours'])) {
+                foreach (array_keys($e['etatParcours']) as $stateName) {
+                    try {
+                        $enum = \App\Enums\EtatDpeEnum::tryFrom(strtolower($stateName));
+                        if ($enum !== null) {
+                            $etatLabels[] = $enum->libelle();
+                        } else {
+                            $etatLabels[] = $stateName;
+                        }
+                    } catch (\Exception) {
+                        $etatLabels[] = $stateName;
+                    }
+                }
+            }
+            if (empty($etatLabels)) {
+                $etatLabels[] = 'Initialisé';
+            }
+            $sheet->setCellValue('E' . $row, implode(', ', $etatLabels));
+
+            // Join errors with a newline character
+            $errorsText = implode("\n", $e['xml_errors']);
+            $sheet->setCellValue('F' . $row, $errorsText);
+            
+            // Enable wrap text for errors column
+            $sheet->getStyle('F' . $row)->getAlignment()->setWrapText(true);
+            $row++;
+        }
+
+        // Set dimensions
+        $sheet->getColumnDimension('A')->setAutoSize(true);
+        $sheet->getColumnDimension('B')->setAutoSize(true);
+        $sheet->getColumnDimension('C')->setAutoSize(true);
+        $sheet->getColumnDimension('D')->setAutoSize(true);
+        $sheet->getColumnDimension('E')->setAutoSize(true);
+        $sheet->getColumnDimension('F')->setWidth(100);
+
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+
+        ob_start();
+        $writer->save('php://output');
+        $content = ob_get_clean();
+
+        $date = (new \DateTimeImmutable())->format('Y-m-d_His');
+        $downloadName = "parcours_invalides_lheo_{$date}.xlsx";
+
+        return new Response($content, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="' . $downloadName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
+
     #[IsGranted("ROLE_ADMIN")]
     #[Route('/{idParcours}/mccc/export/pdf', 'app_parcours_valid_mccc_pdf_export')]
     public function getMcccAsPdfForParcours(
