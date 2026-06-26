@@ -4,7 +4,7 @@
  * @file //wsl.localhost/Ubuntu/home/louca/oreof-stack/oreofv2/src/Twig/HelpExtension.php
  * @author louca
  * @project oreofv2
- * @lastUpdate 29/04/2026 15:20
+ * @lastUpdate 19/06/2026 9:00
  */
 
 
@@ -14,7 +14,10 @@ use App\Entity\Help;
 use App\Entity\User;
 use App\Service\HelpGrantService;
 use Doctrine\ORM\EntityManagerInterface;
-use League\CommonMark\CommonMarkConverter;
+use League\CommonMark\Environment\Environment;
+use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\Table\TableExtension; // L'extension magique pour les tableaux
+use League\CommonMark\MarkdownConverter;
 use Symfony\Bundle\SecurityBundle\Security;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -22,7 +25,7 @@ use Twig\TwigFunction;
 
 class HelpExtension extends AbstractExtension
 {
-    private CommonMarkConverter $converter;
+    private MarkdownConverter $converter;
 
     public function __construct(
         private readonly EntityManagerInterface $em,
@@ -30,10 +33,15 @@ class HelpExtension extends AbstractExtension
         private readonly HelpGrantService       $helpGrantService,
     )
     {
-        $this->converter = new CommonMarkConverter([
-            'html_input' => 'strip',
+        $config = [
+            'html_input' => 'allow',
             'allow_unsafe_links' => false,
-        ]);
+        ];
+        $environment = new Environment($config);
+        $environment->addExtension(new CommonMarkCoreExtension());
+        $environment->addExtension(new TableExtension());
+
+        $this->converter = new MarkdownConverter($environment);
     }
 
     public function getFunctions(): array
@@ -46,7 +54,15 @@ class HelpExtension extends AbstractExtension
         return [
             new TwigFilter('parse_embeds', $this->parseEmbeds(...), ['is_safe' => ['html']]),
             new TwigFilter('markdown_to_html', $this->markdownToHtml(...), ['is_safe' => ['html']]),
+            new TwigFilter('help_markdown', $this->helpMarkdown(...), ['is_safe' => ['html']]),
         ];
+    }
+
+    public function helpMarkdown(string $content): string
+    {
+        $cleanContent = str_replace("\r\n", "\n", $content);
+
+        return $this->converter->convert($cleanContent)->getContent();
     }
 
     public function getPageHelp(string $routeSlug = null): ?Help
@@ -70,7 +86,9 @@ class HelpExtension extends AbstractExtension
 
     public function markdownToHtml(string $content): string
     {
-        return $this->converter->convert($content)->getContent();
+        $cleanContent = str_replace("\r\n", "\n", $content);
+
+        return $this->converter->convert($cleanContent)->getContent();
     }
 
     public function parseEmbeds(string $content): string
@@ -81,8 +99,7 @@ class HelpExtension extends AbstractExtension
 
         return preg_replace_callback($pattern, function ($matches) {
             $url = $matches[1];
-
-            // Transformer les urls standards en versions embed
+            
             $url = str_replace(
                 ['watch?v=', 'youtu.be/', 'vimeo.com/'],
                 ['embed/', 'youtube.com/embed/', 'player.vimeo.com/video/'],

@@ -103,13 +103,24 @@
     var content = textarea ? textarea.value : "";
     if (content.trim() === "") {
       preview.innerHTML =
-        '<p class="text-muted fst-italic">Commencez à rédiger pour voir l\'aperçu...</p>';
+          '<p class="text-muted fst-italic">Commencez à rédiger pour voir l\'aperçu...</p>';
       return;
     }
 
     function render() {
       try {
-        var html = window.marked.parse(content);
+        // 1. Configuration stricte pour activer les tableaux GFM
+        window.marked.setOptions({
+          gfm: true,
+          breaks: true
+        });
+
+        // 2. CORRECTIF : Normaliser les retours à la ligne (\r\n -> \n)
+        // et s'assurer qu'un espace accidentel ne casse pas le tableau
+        var cleanContent = content.replace(/\r\n/g, "\n");
+
+        // 3. Parser le contenu nettoyé
+        var html = window.marked.parse(cleanContent);
         preview.innerHTML = renderEmbeds(html);
       } catch (e) {
         preview.textContent = content;
