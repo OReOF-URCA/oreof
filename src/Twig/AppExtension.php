@@ -217,7 +217,7 @@ class AppExtension extends AbstractExtension
             CentreGestionEnum::CENTRE_GESTION_COMPOSANTE => $userProfil->getComposante()?->getLibelle(),
             CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT => $userProfil->getEtablissement()?->getLibelle(),
             CentreGestionEnum::CENTRE_GESTION_FORMATION => $userProfil->getFormation()?->getDisplayLong(),
-            CentreGestionEnum::CENTRE_GESTION_PARCOURS => $userProfil->getParcours()->getFormation()?->getDisplayLong() . '. Parcours : ' . $userProfil->getParcours()?->getDisplay(),
+            CentreGestionEnum::CENTRE_GESTION_PARCOURS => $userProfil->getParcours()?->getFormation()?->getDisplayLong() . '. Parcours : ' . $userProfil->getParcours()?->getDisplay(),
             default => '<span class="badge bg-danger me-1 text-wrap">Inconnu</span>',
         };
     }
