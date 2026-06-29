@@ -136,6 +136,9 @@ final class FormulaireGeneriqueController extends BaseController
                         foreach ($data['composantesInscription'] as $composante) {
                             $formation->addComposantesInscription($composante);
                         }
+                        // On reporte la composante d'inscription en tant que composante porteuse
+                        $formation->setComposantePorteuse($data['composantesInscription'][0] ?? null);
+
                     }
                     if (!empty($data['regimeInscription'])) {
                         $formation->setRegimeInscription($data['regimeInscription']);
