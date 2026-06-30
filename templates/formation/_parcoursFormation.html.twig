@@ -83,7 +83,9 @@
                             {% endif %}
 
                             {% if
-                                is_granted('EDIT', {route: 'app_parcours', subject:  dpesParcours[parcours.id]}) %}
+                                is_granted('EDIT', {route: 'app_parcours', subject:  dpesParcours[parcours.id]}) 
+                                or (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and (formation.typeDiplome.classique ?? true) == false)
+                            %}
                                 <a href="{{ path('app_parcours_edit',{'id': parcours.id}) }}"
                                    class="btn btn-sm text-warning"
                                    data-bs-toggle="tooltip"
@@ -179,7 +181,10 @@
                             </a><br>
                             {% endif %}
 
-                            {% if is_granted('EDIT', {route: 'app_formation', subject: formation}) or is_granted('EDIT', {route: 'app_parcours', subject: formation.parcours[0]}) %}
+                            {% if is_granted('EDIT', {route: 'app_formation', subject: formation}) 
+                                or is_granted('EDIT', {route: 'app_parcours', subject: formation.parcours[0]}) 
+                                or (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and (formation.typeDiplome.classique ?? true) == false)
+                            %}
                                 <a href="{{ path('app_formation_edit',{'slug':  formation.slug}) }}"
                                    class="btn btn-sm text-warning"
                                    data-bs-toggle="tooltip"
