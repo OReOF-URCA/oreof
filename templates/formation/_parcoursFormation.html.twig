@@ -35,10 +35,15 @@
                             <td>
                                 {{ parcours.etatStep(4)|badgeStep }}
                             </td>
-                            <td>
-                                {{ component('historique_pv', {parcours:parcours}) }}
-                            </td>
-
+                            {% if (formation.typeDiplome.classique ?? true) == false %}
+                                <td>
+                                    -
+                                </td>
+                            {% else %}
+                                <td>
+                                    {{ component('historique_pv', {parcours:parcours}) }}
+                                </td>
+                            {% endif %}
                             <td>
                                 {% if parcours.formation.typeDiplome.classique ?? true %}
                                     {{ parcours.remplissage|remplissage }}
@@ -127,9 +132,15 @@
                         <td>
                             {{ parcours.etatStep(4)|badgeStep }}
                         </td>
+                        {% if (formation.typeDiplome.classique ?? true) == false %}
+                            <td>
+                                -
+                            </td>
+                        {% else %}
                             <td>
                                 {{ component('historique_pv', {parcours:parcours}) }}
                             </td>
+                        {% endif %}
                             <td>
                                 {% if parcours.formation.typeDiplome.classique ?? true %}
                                     {{ parcours.remplissage|remplissage }}
