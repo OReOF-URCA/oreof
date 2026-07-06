@@ -42,6 +42,7 @@ class Semestre
     #[ORM\OneToMany(mappedBy: 'semestre', targetEntity: SemestreParcours::class, cascade: ['persist', 'remove'])]
     private Collection $semestreParcours;
 
+    #[Groups('DTO_json_versioning')]
     #[ORM\Column]
     private ?bool $troncCommun = false;
 
