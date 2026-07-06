@@ -25,7 +25,7 @@ class TypeEc
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups('parcours_json_versioning')]
+    #[Groups('parcours_json_versioning', 'DTO_json_versioning')]
     #[ORM\Column(length: 100)]
     private ?string $libelle = null;
 
@@ -38,6 +38,7 @@ class TypeEc
     #[ORM\ManyToOne(inversedBy: 'typeEcs')]
     private ?Formation $formation = null;
 
+    #[Groups('DTO_json_versioning')]
     #[ORM\Column(length: 30, nullable: true, enumType: TypeUeEcEnum::class)]
     private ?TypeUeEcEnum $type = null;
 
