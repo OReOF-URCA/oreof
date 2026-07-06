@@ -250,13 +250,16 @@ class RessourceVoter extends Voter
         );
 
         if ($parcours->getCoResponsable()?->getId() === $userProfil->getUser()?->getId() || $parcours->getRespParcours()?->getId() === $userProfil->getUser()?->getId()) {
-            $canAccess = $this->dpeParcoursWorkflow->can($dpeParcours, 'autoriser') || $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_parcours') ||
+            $canAccess = $this->dpeParcoursWorkflow->can($dpeParcours, 'autoriser') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_parcours') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_reserve_central_cfvu') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_ouverture_sans_cfvu');
         }
 
         if ($parcours->getFormation()?->getCoResponsable()?->getId() === $userProfil->getUser()?->getId() || $parcours->getFormation()?->getResponsableMention()?->getId() === $userProfil->getUser()?->getId()) {
             $canAccess = $this->dpeParcoursWorkflow->can($dpeParcours, 'autoriser') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_parcours') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_reserve_central_cfvu') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_ouverture_sans_cfvu') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_publication') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_rf');
@@ -268,6 +271,7 @@ class RessourceVoter extends Voter
             $canAccess = $this->dpeParcoursWorkflow->can($dpeParcours, 'autoriser') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_parcours') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_ouverture_sans_cfvu') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_reserve_central_cfvu') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_dpe_composante') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_conseil') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_publication') ||
@@ -287,6 +291,7 @@ class RessourceVoter extends Voter
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_parcours') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_rf') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_dpe_composante') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_reserve_central_cfvu') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_conseil') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_publication') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_central');
