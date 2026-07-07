@@ -31,7 +31,7 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
         $dto = $typeD->calculStructureParcours($parcours);
 
         $data = [
-            'path' => $this->generateUrl('app_parcours_export_maquette_json', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+            'path' => $this->generateUrl('app_parcours_export_maquette_json_urca_v2_niveau', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'id' => $parcours->getId(),
             'formationId' => $parcours->getFormation()?->getId(),
             'formation' => $parcours->getFormation()?->getDisplay() ?? '',
