@@ -2,17 +2,24 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
 
+    #no_result_found_text = "Aucun résultat trouvé pour cette recherche";
+
+    #search_not_long_enough_text = "La recherche doit faire au moins 4 caractères";
+
     static values = {
         searchUrl: String
     };
 
-    static targets = ['resultList', 'searchInput', 'loadingSpinner'];
+    static targets = ['resultList', 'searchInput', 'loadingSpinner', 'searchErrorArea'];
 
     connect(){}
 
     async onSearchInputChange() {
         // Au moins 4 caractères pour la recherche
         if(this.searchInputTarget.value.length < 4){
+            this.resultListTarget.classList.add('d-none');
+            this.searchErrorAreaTarget.textContent = this.#search_not_long_enough_text;
+            this.searchErrorAreaTarget.classList.remove('d-none');
             return;
         }
 
@@ -21,6 +28,7 @@ export default class extends Controller {
             this.resultListTarget.removeChild(this.resultListTarget.firstChild);
         }
 
+        this.searchErrorAreaTarget.classList.add('d-none');
         this.loadingSpinnerTarget.classList.remove('d-none');
         this.resultListTarget.classList.add('d-none');
 
@@ -28,12 +36,18 @@ export default class extends Controller {
         await fetch(fetchUrl)
             .then(response => response.json())
             .then(parcoursList => {
-                parcoursList.forEach(p => {
-                    let name = `${p.nom_type_diplome ?? ''} - ${p.nom_formation ?? ''} - ${p.nom_parcours ?? ''}`;
-                    this.resultListTarget.appendChild(this._createResultNode(name));
-                });
                 this.loadingSpinnerTarget.classList.add('d-none');
-                this.resultListTarget.classList.remove('d-none');
+                if(parcoursList.length > 0){
+                    parcoursList.forEach(p => {
+                        let name = `${p.nom_type_diplome ?? ''} - ${p.nom_formation ?? ''} - ${p.nom_parcours ?? ''}`;
+                        this.resultListTarget.appendChild(this._createResultNode(name));
+                    });
+                    this.resultListTarget.classList.remove('d-none');
+                }
+                else {
+                    this.searchErrorAreaTarget.textContent = this.#no_result_found_text;
+                    this.searchErrorAreaTarget.classList.remove('d-none');
+                }
             })
             .catch(error => console.log(error));
     }
