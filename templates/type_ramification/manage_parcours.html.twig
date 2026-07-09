@@ -8,7 +8,7 @@
     {{ parent() }}
     <style>
         .search-result-list {
-            height: 17.5em;
+            max-height: 17.5em;
             overflow-y: scroll;
             scrollbar-width: thin;
             scrollbar-color: var(--primary);
@@ -23,6 +23,19 @@
 
         .search-result-node {
             cursor: pointer;
+        }
+
+        @keyframes spin360 {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-spin-360 {
+            animation-name: spin360;
+            animation-duration: 1.95s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            font-size: 4.25rem;
         }
     </style>
 {% endblock %}
@@ -58,10 +71,23 @@
                             {{ stimulus_target('ramification-parcours-manage', 'searchInput') }}
                             {{ stimulus_action('ramification-parcours-manage', 'onSearchInputChange', 'change') }}
                         >
+                        <button class="btn btn-outline-primary"
+                            data-bs-placement="bottom"
+                            data-bs-toggle="tooltip"
+                            title="Lancer la recherche"
+                            {{ stimulus_action('ramification-parcours-manage', 'onSearchInputChange', 'click') }}
+                        >
+                            <i class="fa-duotone fa-solid fa-magnifying-glass fa-xl"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="row justify-content-center mt-4">
-                    <div class="col-12 col-md-10 col-lg-8 col-xl-7 search-result-list"
+                    <div class="col-12 col-md-10 col-lg-8 col-xl-7 text-center d-none"
+                        {{ stimulus_target('ramification-parcours-manage', 'loadingSpinner') }}
+                    >
+                        <i class="fa-duotone fa-solid fa-spinner loading-spin-360"></i>
+                    </div>
+                    <div class="col-12 col-md-10 col-lg-8 col-xl-7 search-result-list d-none"
                         {{ stimulus_target('ramification-parcours-manage', 'resultList') }}
                     >
 
