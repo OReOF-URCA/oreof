@@ -438,7 +438,8 @@ class ParcoursRepository extends ServiceEntityRepository
                     'p.id AS id_parcours', 
                     'p.libelle AS nom_parcours', 
                     'm.libelle AS nom_formation', 
-                    'td.libelle AS nom_type_diplome'
+                    'td.libelle AS nom_type_diplome',
+                    'p.typeParcours AS type_parcours'
                 ]
             )
             ->join('p.formation', 'f')

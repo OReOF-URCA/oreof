@@ -38,9 +38,10 @@ export default class extends Controller {
             .then(parcoursList => {
                 this.loadingSpinnerTarget.classList.add('d-none');
                 if(parcoursList.length > 0){
-                    parcoursList.forEach(p => {
-                        let name = `${p.nom_type_diplome ?? ''} - ${p.nom_formation ?? ''} - ${p.nom_parcours ?? ''}`;
-                        this.resultListTarget.appendChild(this._createResultNode(name));
+                    parcoursList.forEach(p => { 
+                        this.resultListTarget.appendChild(
+                            this._createResultNode(this._decodeResultName(p))
+                        );
                     });
                     this.resultListTarget.classList.remove('d-none');
                 }
@@ -58,5 +59,23 @@ export default class extends Controller {
         node.textContent = fullName;
 
         return node;
+    }
+
+    _decodeResultName(resultJson) {
+        let name = `${resultJson.nom_type_diplome ?? ''} - ${resultJson.nom_formation ?? ''} - ${resultJson.nom_parcours ?? ''}`;
+        if(typeof resultJson.type_parcours === 'string') {
+            let typeTxt = {
+                'las1': " - LAS1",
+                'las23': " - LAS2/LAS3",
+                'las123': " - LAS 1/2/3",
+                'cpi': ' - CPI',
+                'alternance' : ' - En Alternance',
+                'classique' : ''
+            };
+
+            name += typeTxt[`${resultJson.type_parcours}`];
+        }
+
+        return name;
     }
 }
