@@ -12,7 +12,7 @@
             overflow-y: scroll;
             scrollbar-width: thin;
             scrollbar-color: var(--primary);
-            background-color: lightgrey;
+            background-color: #b3b3b3;
             border-radius: .95em;
             border: 1.5px solid var(--primary);
         }
@@ -79,6 +79,11 @@
                         >
                             <i class="fa-duotone fa-solid fa-magnifying-glass fa-xl"></i>
                         </button>
+                    </div>
+                    <div class="d-none text-center text-danger fs-6 mt-4" 
+                        {{ stimulus_target('ramification-parcours-manage', 'searchErrorArea') }}
+                    >
+                        
                     </div>
                 </div>
                 <div class="row justify-content-center mt-4">
