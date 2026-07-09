@@ -10,7 +10,10 @@ export default class extends Controller {
         searchUrl: String
     };
 
-    static targets = ['resultList', 'searchInput', 'loadingSpinner', 'searchErrorArea'];
+    static targets = [
+        'resultList', 'searchInput', 'loadingSpinner', 
+        'searchErrorArea', 'choiceArea'
+    ];
 
     connect(){}
 
@@ -40,7 +43,7 @@ export default class extends Controller {
                 if(parcoursList.length > 0){
                     parcoursList.forEach(p => { 
                         this.resultListTarget.appendChild(
-                            this._createResultNode(this._decodeResultName(p))
+                            this._createResultNode(p)
                         );
                     });
                     this.resultListTarget.classList.remove('d-none');
@@ -53,10 +56,14 @@ export default class extends Controller {
             .catch(error => console.log(error));
     }
 
-    _createResultNode(fullName) {
+    _createResultNode(p) {
         let node = document.createElement('div');
         node.classList.add('col-12', 'search-result-node', 'p-2');
-        node.textContent = fullName;
+        node.textContent = this._decodeResultName(p);
+        node.dataset.idParcours = p.id_parcours;
+        node.dataset.nomParcours = this._decodeResultName(p);
+
+        this._onResultClick(node);
 
         return node;
     }
@@ -77,5 +84,35 @@ export default class extends Controller {
         }
 
         return name;
+    }
+
+    _onResultClick(resultNode) {
+        resultNode.addEventListener('click', event => {
+            let badge = this._createChoiceBadge(
+                resultNode.dataset.nomParcours, 
+                resultNode.dataset.idParcours
+            );
+            this.choiceAreaTarget.appendChild(badge);
+        });
+    }
+
+    _createChoiceBadge(name, id) {
+        let badgeWrapper = document.createElement('p');
+        badgeWrapper.classList.add('text-center', 'choice-badge');
+        let badge = document.createElement('span');
+        badge.classList.add('badge', 'rounded-pill', 'text-bg-primary');
+        let crossIcon = document.createElement('i');
+        crossIcon.classList.add('fa-light', 'fa-xmark', 'ms-3', 'fa-xl', 'remove-choice-cross');
+
+        badge.dataset.idParcours = id;
+        badge.dataset.nomParcours = name;
+
+        crossIcon.addEventListener('click', e => {badgeWrapper.remove()});
+
+        badge.innerText = name;
+        badge.appendChild(crossIcon);
+        badgeWrapper.appendChild(badge);
+
+        return badgeWrapper;
     }
 }
