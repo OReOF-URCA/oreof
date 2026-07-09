@@ -6,7 +6,7 @@ export default class extends Controller {
         searchUrl: String
     };
 
-    static targets = ['resultList', 'searchInput'];
+    static targets = ['resultList', 'searchInput', 'loadingSpinner'];
 
     connect(){}
 
@@ -21,6 +21,9 @@ export default class extends Controller {
             this.resultListTarget.removeChild(this.resultListTarget.firstChild);
         }
 
+        this.loadingSpinnerTarget.classList.remove('d-none');
+        this.resultListTarget.classList.add('d-none');
+
         let fetchUrl = `${this.searchUrlValue}?keyword=${this.searchInputTarget.value}`;
         await fetch(fetchUrl)
             .then(response => response.json())
@@ -29,6 +32,8 @@ export default class extends Controller {
                     let name = `${p.nom_type_diplome ?? ''} - ${p.nom_formation ?? ''} - ${p.nom_parcours ?? ''}`;
                     this.resultListTarget.appendChild(this._createResultNode(name));
                 });
+                this.loadingSpinnerTarget.classList.add('d-none');
+                this.resultListTarget.classList.remove('d-none');
             })
             .catch(error => console.log(error));
     }
