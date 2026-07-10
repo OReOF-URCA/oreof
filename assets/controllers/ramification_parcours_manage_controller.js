@@ -6,6 +6,8 @@ export default class extends Controller {
 
     #search_not_long_enough_text = "La recherche doit faire au moins 4 caractères";
 
+    #added_parcours = [];
+
     static values = {
         searchUrl: String
     };
@@ -88,12 +90,16 @@ export default class extends Controller {
 
     _onResultClick(resultNode) {
         resultNode.addEventListener('click', event => {
-            let badge = this._createChoiceBadge(
-                resultNode.dataset.nomParcours, 
-                resultNode.dataset.idParcours
-            );
-            this.choiceAreaTarget.appendChild(badge);
+            if(this._isParcoursPresentInData(resultNode.dataset.idParcours) === false) {
+                let badge = this._createChoiceBadge(
+                    resultNode.dataset.nomParcours, 
+                    resultNode.dataset.idParcours
+                );
+                this.choiceAreaTarget.appendChild(badge);
+                this._addParcoursData(resultNode.dataset.idParcours, resultNode.dataset.nomParcours);
+            }
         });
+
     }
 
     _createChoiceBadge(name, id) {
@@ -113,11 +119,37 @@ export default class extends Controller {
         badgeWrapper.dataset.idParcours = id;
         badgeWrapper.dataset.nomParcours = name;
 
-        crossIcon.addEventListener('click', e => {badgeWrapper.remove()});
+        crossIcon.addEventListener('click', e => {
+            if(this._isParcoursPresentInData(id)) {
+                this._removeParcoursData(id);
+            }
+            badgeWrapper.remove()
+        });
 
         badgeWrapper.appendChild(badgeTxt);
         badgeWrapper.appendChild(badgeCrossIcon);
 
         return badgeWrapper;
+    }
+
+    _addParcoursData(id, fullName) {
+        this.#added_parcours.push({id: Number(id), fullName: fullName});
+    }
+
+    _removeParcoursData(searchId) {
+        let foundIndex = undefined;
+        this.#added_parcours.forEach((elt, idx) => {
+            if(Number(searchId) === elt.id){
+                foundIndex = idx;
+            }
+        });
+
+        this.#added_parcours.splice(foundIndex, 1);
+    }
+
+    _isParcoursPresentInData(searchId) {
+        return this.#added_parcours
+            .map(p => p.id)
+            .filter(id => id === Number(searchId)).length > 0;
     }
 }
