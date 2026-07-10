@@ -61,7 +61,7 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
             if ($sem->semestre->isNonDispense() === false && $sem->semestreParcours->isOuvert() === true) {
                 $semestre = [
                     'typeNiveau' => 'semestre',
-                    'libelleNiveau' => 'Semestre ' . ($ordre + 1),
+                    'libelleNiveau' => 'Semestre ' . ($ordre),
                     'ordre' => $ordre,
                     'volumes' => [
                         'CM' => [
