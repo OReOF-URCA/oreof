@@ -54,7 +54,7 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
                 'autonomie'=> $dto->heuresEctsFormation->sommeFormationTePres
             ],
             'ects' => $dto->heuresEctsFormation->sommeFormationEcts,
-            'niveau1' => []
+            'elements' => []
         ];
 
         foreach ($dto->semestres as $ordre => $sem) {
@@ -79,7 +79,7 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
                         'autonomie' => $sem->heuresEctsSemestre->sommeSemestreTePres
                     ],
                     'ects' => $sem->heuresEctsSemestre->sommeSemestreEcts,
-                    'niveau2' => []
+                    'elements' => []
                 ];
                 foreach ($sem->ues as $ue) {
                     $tUe = [
@@ -111,7 +111,7 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
                         $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
                     } elseif ($ue->ue->getNatureUeEc()?->isChoix()) {
                         $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
-                        $tUe['niveau3'] = [];
+                        $tUe['elements'] = [];
                         $nb = 0;
                         foreach ($ue->uesEnfants() as $ueEnfant) {
                             $tUeEnfant = [
@@ -144,11 +144,11 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
 
                             $nb++;
                             $tUe['nbChoix'] = $nb;
-                            $tUeEnfant['niveau4'] = $this->getEcFromUe($ueEnfant, 3);
+                            $tUeEnfant['elements'] = $this->getEcFromUe($ueEnfant, 3);
 
                             $nbChoixDeuxiemeNiveau = 0;
                             if(count($ueEnfant->uesEnfants()) > 0){
-                                $tUeEnfant['niveau4'] = [];
+                                $tUeEnfant['elements'] = [];
                             }
                             foreach($ueEnfant->uesEnfants() as $ueEnfantDeuxieme){
                                 $tUeEnfantDeuxieme = [
@@ -181,20 +181,20 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
 
                                 ++$nbChoixDeuxiemeNiveau;
                                 $tUeEnfant['nbChoix'] = $nbChoixDeuxiemeNiveau;
-                                $tUeEnfantDeuxieme['niveau5'] = $this->getEcFromUe($ueEnfantDeuxieme, 4);
-                                $tUeEnfant['niveau4'][] = $tUeEnfantDeuxieme;
+                                $tUeEnfantDeuxieme['elements'] = $this->getEcFromUe($ueEnfantDeuxieme, 4);
+                                $tUeEnfant['elements'][] = $tUeEnfantDeuxieme;
                             }
 
-                            $tUe['niveau3'][] = $tUeEnfant;
+                            $tUe['elements'][] = $tUeEnfant;
                         }
                     } else {
                         $tUe['ects'] = $ue->heuresEctsUe->sommeUeEcts;
-                        $tUe['niveau3'] = $this->getEcFromUe($ue, 2);
+                        $tUe['elements'] = $this->getEcFromUe($ue, 2);
                     }
-                    $semestre['niveau2'][] = $tUe;
+                    $semestre['elements'][] = $tUe;
                 }
 
-                $data['niveau1'][] = $semestre;
+                $data['elements'][] = $semestre;
             }
         }
 
@@ -212,7 +212,7 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
                 $tEc['numero'] = $ec->elementConstitutif->getCode();
                 $tEc['libelle'] = $ec->elementConstitutif?->getFicheMatiere()?->getLibelle() ?? '-';
                 $tEc['libelleNiveau'] = $tEc['numero'] . ' - ' . $tEc['libelle'];
-                $childKey = 'niveau' . ($depth + 1);
+                $childKey = 'elements';
                 $tEc[$childKey] =  [];
                 $tEc['description_libre_choix'] =  $ec->elementConstitutif->getTexteEcLibre();
                 $nb = 0;
