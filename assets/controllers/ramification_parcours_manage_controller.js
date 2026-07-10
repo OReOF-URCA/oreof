@@ -97,21 +97,26 @@ export default class extends Controller {
     }
 
     _createChoiceBadge(name, id) {
-        let badgeWrapper = document.createElement('p');
-        badgeWrapper.classList.add('text-center', 'choice-badge');
-        let badge = document.createElement('span');
-        badge.classList.add('badge', 'rounded-pill', 'text-bg-primary');
-        let crossIcon = document.createElement('i');
-        crossIcon.classList.add('fa-light', 'fa-xmark', 'ms-3', 'fa-xl', 'remove-choice-cross');
+        let badgeWrapper = document.createElement('div');
+        badgeWrapper.classList.add('row', 'justify-content-center', 'choice-badge');
 
-        badge.dataset.idParcours = id;
-        badge.dataset.nomParcours = name;
+        let badgeTxt = document.createElement('div');
+        badgeTxt.classList.add('choice-badge-txt');
+        badgeTxt.innerText = name;
+
+        let badgeCrossIcon = document.createElement('div');
+        badgeCrossIcon.classList.add('d-flex', 'col-1', 'align-items-center', 'justify-content-center', 'choice-badge-icon');
+        let crossIcon = document.createElement('i');
+        crossIcon.classList.add('fa-light', 'fa-xmark', 'mx-3', 'fa-xl', 'remove-choice-cross');
+        badgeCrossIcon.appendChild(crossIcon);
+
+        badgeWrapper.dataset.idParcours = id;
+        badgeWrapper.dataset.nomParcours = name;
 
         crossIcon.addEventListener('click', e => {badgeWrapper.remove()});
 
-        badge.innerText = name;
-        badge.appendChild(crossIcon);
-        badgeWrapper.appendChild(badge);
+        badgeWrapper.appendChild(badgeTxt);
+        badgeWrapper.appendChild(badgeCrossIcon);
 
         return badgeWrapper;
     }
