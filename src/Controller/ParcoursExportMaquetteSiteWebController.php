@@ -6,10 +6,12 @@ use App\DTO\StructureEc;
 use App\DTO\StructureUe;
 use App\Entity\Parcours;
 use App\Service\TypeDiplomeResolver;
+use App\Service\VersioningParcours;
 use App\Utils\CleanTexte;
 use DateTime;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -20,6 +22,7 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
     public function exportMaquetteJson(
         Parcours                $parcours,
         TypeDiplomeResolver $typeDiplomeResolver,
+        VersioningParcours $versioningP,
     ): Response {
         $typeDiplome = $parcours->getFormation()?->getTypeDiplome();
 
@@ -29,6 +32,16 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
 
         $typeD = $typeDiplomeResolver->get($typeDiplome);
         $dto = $typeD->calculStructureParcours($parcours);
+
+        // Utilisation de la version validée
+        /* 
+        if($versioningP->getLastVersionOrLastYearCfvu($parcours) === null) {
+            return new JsonResponse('No valid version available for this ID.');
+        }
+        $dto = $versioningP->loadParcoursFromVersion(
+            $versioningP->getLastVersionOrLastYearCfvu($parcours)
+        )['dto'];
+        */
 
         $data = [
             'path' => $this->generateUrl('app_parcours_export_maquette_json_urca_v2_niveau', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
