@@ -31,8 +31,29 @@
             cursor: pointer;
         }
 
-        .choice-badge span {
-            font-size: 1rem;
+        .remove-choice-cross {
+            color: red;
+        }
+
+        .choice-badge {
+            font-size: .85rem;
+            margin-top: .75rem;
+            color: white;
+        }
+
+        .choice-badge-txt {
+            background-color: var(--primary);
+            border-top-left-radius: .95rem;
+            border-bottom-left-radius: .95rem;
+            padding: .45rem 0 .45rem .95rem;
+            width: fit-content;
+            max-width: 85%;
+        }
+
+        .choice-badge-icon {
+            background-color: var(--primary);
+            border-top-right-radius: .95rem;
+            border-bottom-right-radius: .95rem;
         }
 
         @keyframes spin360 {
