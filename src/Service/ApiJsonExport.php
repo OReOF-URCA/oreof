@@ -119,6 +119,7 @@ class ApiJsonExport {
                         ];
                         if($isV2){
                             $parcoursData['annee'] = $campagneCourante->getAnnee();
+                            $parcoursData['uuid_parcours'] = $this->getUuidForParcours($parcours);
                         }
                         $tParcours[] = $parcoursData;
 
@@ -217,6 +218,7 @@ class ApiJsonExport {
                                 ];
                                 if($isV2) {
                                     $parcoursDataNext['annee'] = $campagneSuivante->getAnnee();
+                                    $parcoursDataNext['uuid_parcours'] = $this->getUuidForParcours($parcoursAnneeSuivante);
                                 }
                                 $addedParcours[] = $parcoursDataNext;
                             }
@@ -262,6 +264,34 @@ class ApiJsonExport {
         }
 
         return $dataJSON;
+    }
+
+    /**
+     * @param Parcours $p Parcours traité
+     * 
+     * L'UUID d'un parcours dans l'API est l'ID (PK)
+     * le plus ancien pour un parcours.
+     * S'il y a une ou plusieurs versions d'origine
+     * on remonte jusqu'à la première.
+     * S'il n'y a pas de version d'origine, le parcours
+     * est considéré comme nouveau, et est lui-même 
+     * le plus ancien.
+     */
+    private function getUuidForParcours(Parcours $p) : int {
+        $uuid = null;
+        $oldestVersion = null;
+        if ($p->getParcoursOrigineCopie() === null) {
+            $uuid = $p->getId();
+            return $uuid;
+        }
+
+        $oldestVersion = $p->getParcoursOrigineCopie();
+        while($oldestVersion->getParcoursOrigineCopie() !== null) {
+            $oldestVersion = $oldestVersion->getParcoursOrigineCopie();
+        }
+        $uuid = $oldestVersion->getId();
+
+        return $uuid;
     }
 
     /* 
