@@ -14,6 +14,7 @@ use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
 use App\Repository\TypeDiplomeRepository;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
+use App\TypeDiplome\NonClassique\NonClassiqueHandler;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
 use LogicException;
 
@@ -80,7 +81,7 @@ final class TypeDiplomeResolver
 
         if ($type->isClassique() === false) {
             foreach ($this->handlers as $h) {
-                if ($h instanceof \App\TypeDiplome\NonClassique\NonClassiqueHandler) {
+                if ($h instanceof NonClassiqueHandler) {
                     $this->handler = $h;
                     return $h;
                 }

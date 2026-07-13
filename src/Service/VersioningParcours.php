@@ -378,7 +378,7 @@ class VersioningParcours
                         )
                     )
                 ),
-                "niveauFrancaisParcours" => 
+                "niveauFrancaisParcours" =>
                 self::cleanUpComparison(
                     html_entity_decode(
                         DiffHelper::calculate(
@@ -414,7 +414,7 @@ class VersioningParcours
                         )
                     )
                 ),
-                'codesROMEParcours' => 
+                'codesROMEParcours' =>
                 self::cleanUpComparison(
                     html_entity_decode(
                         DiffHelper::calculate(
@@ -438,7 +438,7 @@ class VersioningParcours
                         )
                     )
                 ),
-                'coResponsableMentionParcoursParDefaut' => 
+                'coResponsableMentionParcoursParDefaut' =>
                 self::cleanUpComparison(
                     html_entity_decode(
                         DiffHelper::calculate(
@@ -455,11 +455,11 @@ class VersioningParcours
                     html_entity_decode(
                         DiffHelper::calculate(
                             $this->decodeBooleanWithHours(
-                                $lastVersion->hasStage() ?? false, 
+                                $lastVersion->hasStage() ?? false,
                                 $lastVersion->getNbHeuresStages() ?? 0.0
                             ),
                             $this->decodeBooleanWithHours(
-                                $parcours->hasStage() ?? false, 
+                                $parcours->hasStage() ?? false,
                                 $parcours->getNbHeuresStages() ?? 0.0
                             ),
                             $rendererName,
@@ -468,7 +468,7 @@ class VersioningParcours
                         )
                     )
                 ),
-                'modaliteEnseignementParcours' => 
+                'modaliteEnseignementParcours' =>
                 self::cleanUpComparison(
                     html_entity_decode(
                         DiffHelper::calculate(
@@ -480,7 +480,7 @@ class VersioningParcours
                         )
                     )
                 ),
-                'parcoursHasProjet' => 
+                'parcoursHasProjet' =>
                 self::cleanUpComparison(
                     html_entity_decode(
                         DiffHelper::calculate(
@@ -489,7 +489,7 @@ class VersioningParcours
                                 $lastVersion->getNbHeuresProjet() ?? 0.0,
                             ),
                             $this->decodeBooleanWithHours(
-                                $parcours->hasProjet() ?? false, 
+                                $parcours->hasProjet() ?? false,
                                 $parcours->getNbHeuresProjet() ?? 0.0
                             ),
                             $rendererName,
@@ -531,7 +531,7 @@ class VersioningParcours
                                 $lastVersion->getNbHeuresSituationPro() ?? 0.0
                             ),
                             $this->decodeBooleanWithHours(
-                                $parcours->isHasSituationPro() ?? false, 
+                                $parcours->isHasSituationPro() ?? false,
                                 $parcours->getNbHeuresSituationPro() ?? 0.0
                             ),
                             $rendererName,
@@ -606,6 +606,7 @@ class VersioningParcours
         $lastVersion = count($lastVersion) > 0 ? $lastVersion[0] : null;
 
         if ($lastVersion === null && $parcours->getParcoursOrigineCopie() !== null) {
+
             $lastVersion = $this->entityManager->getRepository(ParcoursVersioning::class)->findLastVersion($parcours->getParcoursOrigineCopie());
             $lastVersion = count($lastVersion) > 0 ? $lastVersion[0] : null;
         }
