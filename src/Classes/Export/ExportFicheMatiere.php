@@ -13,10 +13,9 @@ use App\Classes\GetElementConstitutif;
 use App\Classes\MyGotenbergPdf;
 use App\Repository\ParcoursRepository;
 use App\Service\ProjectDirProvider;
-use App\Service\TypeDiplomeResolver;
+use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\Tools;
 use Exception;
-use Symfony\Component\HttpKernel\KernelInterface;
 use ZipArchive;
 
 class ExportFicheMatiere
@@ -54,34 +53,34 @@ class ExportFicheMatiere
         $dataFmArray = $typeDHandler->calculStructureParcours($parcours, false, false);
         $dataFmArray = array_merge(
             ...array_map(function($sem) {
-            return 
-                [   
+            return
+                [
                     ...$sem->ues,
                     ...array_merge(...array_map(fn($a) => $a->uesEnfants(), $sem->ues)),
                     ...array_merge(
                         ...array_map(
                             fn($b) => array_merge(
                                 ...array_map(
-                                    fn($c) => $c->uesEnfants(), 
+                                    fn($c) => $c->uesEnfants(),
                                     $b->uesEnfants()
                             )
                         ), $sem->ues)
                     )
                 ];
         }, $dataFmArray->semestres));
-        
+
         /**
          * Mise à plat des EC depuis les UE
-         * 
+         *
          */
         $dataFmArray = array_merge(
             ...array_map(
                 function($ue) {
                     return [
-                        ...$ue->elementConstitutifs, 
+                        ...$ue->elementConstitutifs,
                         ...array_merge(
                             ...array_map(
-                                fn($ec) => $ec->elementsConstitutifsEnfants, 
+                                fn($ec) => $ec->elementsConstitutifsEnfants,
                                 $ue->elementConstitutifs
                         )
                         )

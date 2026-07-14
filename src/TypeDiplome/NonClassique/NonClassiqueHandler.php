@@ -3,14 +3,18 @@
 namespace App\TypeDiplome\NonClassique;
 
 use App\DTO\StructureParcours;
+use App\DTO\StructureSemestre;
 use App\Entity\CampagneCollecte;
 use App\Entity\ElementConstitutif;
 use App\Entity\FicheMatiere;
 use App\Entity\Parcours;
+use App\Entity\SemestreParcours;
+use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
-use App\TypeDiplome\StructureInterface;
+use App\TypeDiplome\ValideParcoursInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\InputBag;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -28,8 +32,8 @@ final class NonClassiqueHandler implements TypeDiplomeHandlerInterface
     }
 
     public function showStructure(
-        Parcours                                    $parcours,
-        \App\TypeDiplome\Dto\OptionsCalculStructure $optionsCalculStructure = new \App\TypeDiplome\Dto\OptionsCalculStructure()
+        Parcours               $parcours,
+        OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()
     ): array
     {
         return [
@@ -106,12 +110,14 @@ final class NonClassiqueHandler implements TypeDiplomeHandlerInterface
 
     public function calcul(
         Parcours $parcours,
-        bool     $withEcts = true,
-        bool     $withBcc = true,
-        bool     $dataFromFicheMatiere = false
+        OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()
     ): StructureParcours
     {
-        return $this->calculStructureParcours($parcours, $withEcts, $withBcc);
+        return $this->calculStructureParcours(
+            $parcours,
+            $optionsCalculStructure->withEcts,
+            $optionsCalculStructure->withBcc
+        );
     }
 
     public function calculStructureParcours(
@@ -127,9 +133,40 @@ final class NonClassiqueHandler implements TypeDiplomeHandlerInterface
         return $structure;
     }
 
-    public function calculVersioning(Parcours $parcours): StructureParcours
+    public function calculVersioning(
+        Parcours               $parcours,
+        OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()
+    ): StructureParcours
     {
-        return $this->calculStructureParcours($parcours);
+        return $this->calculStructureParcours(
+            $parcours,
+            $optionsCalculStructure->withEcts,
+            $optionsCalculStructure->withBcc
+        );
+    }
+
+    public function calculStructureSemestre(
+        SemestreParcours       $semestreParcours,
+        Parcours               $parcours,
+        OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()
+    ): StructureSemestre
+    {
+        return new StructureSemestre();
+    }
+
+    public function createFormMccc(ElementConstitutif|FicheMatiere $element): FormInterface
+    {
+        throw new \LogicException('No MCCC form for non-classique parcours.');
+    }
+
+    public function getTemplateFolder(): string
+    {
+        return self::TEMPLATE_FOLDER;
+    }
+
+    public function getValidator(): ValideParcoursInterface
+    {
+        throw new \LogicException('No validator available for non-classique parcours.');
     }
 
 }

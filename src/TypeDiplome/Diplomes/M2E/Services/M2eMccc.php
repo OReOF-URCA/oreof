@@ -7,7 +7,7 @@
  * @lastUpdate 24/05/2023 16:14
  */
 
-namespace App\TypeDiplome\M2E\Services;
+namespace App\TypeDiplome\Diplomes\M2E\Services;
 
 use App\Classes\Excel\ExcelWriter;
 use App\DTO\StructureEc;
@@ -20,6 +20,7 @@ use App\Entity\Mccc;
 use App\Entity\Parcours;
 use App\Enums\RegimeInscriptionEnum;
 use App\Repository\TypeEpreuveRepository;
+use App\TypeDiplome\Diplomes\M2E\Services\AbstractM2eMccc;
 use App\Utils\Tools;
 use DateTimeInterface;
 use PhpOffice\PhpSpreadsheet\Exception;

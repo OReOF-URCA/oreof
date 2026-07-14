@@ -166,7 +166,6 @@ class TypeDiplomeType extends AbstractType
             ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true])
             ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
             ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
-            ->add('logo', FileType::class, [
             ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true, 'row_attr' => ['class' => 'semestre-field']])
             ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
 
@@ -232,9 +231,8 @@ class TypeDiplomeType extends AbstractType
             ->add('nbEctsParSemestre', null, [
                 'label' => 'Nombre d\'ECTS par semestre (laisser vide si pas de quota fixe)',
                 'required' => false,
-            ]);
-        ->
-        add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
+            ])
+            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
 
         // Quand le diplôme n'utilise pas les ECTS, le champ « Nombre maximum d'ECTS
         // par UE » est grisé côté client et sans objet. On lui fournit une valeur

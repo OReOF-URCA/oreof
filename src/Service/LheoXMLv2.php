@@ -10,6 +10,7 @@ use App\Enums\CampagnePublicationTagEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
 use App\Repository\ElementConstitutifRepository;
+use App\TypeDiplome\TypeDiplomeResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use Override;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -302,7 +303,7 @@ HTML;
             $organisationPedagogique .= $parcours->getFormation()?->getRythmeFormationTexte();
         }
 
-        $organisationPedagogique 
+        $organisationPedagogique
             /* ---- Différence V2 --------
                 Déplacé dans une balise extra
                ---------------------------
@@ -317,15 +318,15 @@ HTML;
             . "<br>"
             . "<h3>TER/Mémoire de recherche</h3>"
             . $terMemoire
-            . "<br><br>" 
+            . "<br><br>"
             */
             .= "<h3>Calendrier universitaire</h3>"
             . $calendrierUniversitaire;
 
         $dpeParcours = GetDpeParcours::getFromParcours($parcours);
-        if ($dpeParcours !== null 
-            && ( $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE 
-                && $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE_SES 
+        if ($dpeParcours !== null
+            && ($dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE
+                && $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE_SES
                 && $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE_CFVU
                 )
             // N'afficher le lien que sur l'année valide en cours (N)
@@ -336,14 +337,14 @@ HTML;
         }
 
         /**
-         * 
+         *
          * --- Différence V2 ---
          *  Modifications des informations pratiques
          * ---------------------
          */
 
         // Informations pratiques
-        $tdPresentationF = null;    
+        $tdPresentationF = null;
         if($parcours->getFormation()?->getTypeDiplome()?->getPresentationFormation()){
             $tdPresentationF = "<h3>Pour en savoir plus sur ce type de formation :</h3>"
             . $parcours->getFormation()?->getTypeDiplome()?->getPresentationFormation();
