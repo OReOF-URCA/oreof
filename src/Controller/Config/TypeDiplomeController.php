@@ -13,6 +13,7 @@ use App\Controller\BaseController;
 use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Form\TypeDiplomeType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Service\DetailBuilder;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\DataTableBuilder;
@@ -39,7 +40,9 @@ class TypeDiplomeController extends BaseController
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly SecureUploadService $secureUploadService
-    ) {}
+    )
+    {
+    }
 
     #[Route('/', name: 'app_type_diplome_index', methods: ['GET'])]
     public function index(
@@ -119,6 +122,8 @@ class TypeDiplomeController extends BaseController
     }
 
     #[Route('/new', name: 'app_type_diplome_new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.type_diplome')]
+    #[Breadcrumb(label: 'Création')]
     public function new(
         Request $request,
         TypeDiplomeRepository        $typeDiplomeRepository,
@@ -132,36 +137,17 @@ class TypeDiplomeController extends BaseController
         $form->handleRequest($request);
 
 
-        if ($form->isSubmitted() && $form->isValid())
-        {
-            $logoData = $form->get('logo')->getData();
-            $hasFormatError = false;
-            $hasSizeError = false;
+        if ($form->isSubmitted() && $form->isValid()) {
+            [$hasFormatError, $hasSizeError, $hasLimitError] = $this->handleLogoUploadFromForm($form->get('logo')->getData(), $typeDiplome);
 
-            if ($logoData) {
-                $logoFiles = is_array($logoData) ? $logoData : [$logoData];
-
-                foreach ($logoFiles as $logoFile) {
-                    try {
-                        $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
-                        $logos = $typeDiplome->getLogo() ?? [];
-                        $logos[] = $uploaded->getStoredFilename();
-                        $typeDiplome->setLogo($logos);
-                    } catch (\Exception $e) {
-                        if (str_contains($e->getMessage(), 'volumineux')) {
-                            $hasSizeError = true;
-                        } else {
-                            $hasFormatError = true;
-                        }
-                    }
-                }
-
-                if ($hasSizeError) {
-                    $this->addFlash('toast', ['type' => 'error', 'text' => 'Fichier(s) trop lourd(s) (10 Mo max)', 'title' => 'Erreur']);
-                }
-                if ($hasFormatError) {
-                    $this->addFlash('toast', ['type' => 'error', 'text' => 'Format invalide (PNG/JPEG uniquement)', 'title' => 'Erreur']);
-                }
+            if ($hasSizeError) {
+                $this->addFlash('toast', ['type' => 'error', 'text' => 'Fichier(s) trop lourd(s) (10 Mo max)', 'title' => 'Erreur']);
+            }
+            if ($hasFormatError) {
+                $this->addFlash('toast', ['type' => 'error', 'text' => 'Format invalide (PNG/JPEG uniquement)', 'title' => 'Erreur']);
+            }
+            if ($hasLimitError) {
+                $this->addFlash('toast', ['type' => 'warning', 'text' => 'Maximum 2 logos par type de diplôme', 'title' => 'Attention']);
             }
 
             $typeDiplomeRepository->save($typeDiplome, true);
@@ -176,11 +162,11 @@ class TypeDiplomeController extends BaseController
             // return $this->json(true);
 
             $this->addFlash('toast', [
-                'type' => $hasFormatError || $hasSizeError ? 'warning' : 'success',
-                'text' => $hasFormatError || $hasSizeError
+                'type' => $hasFormatError || $hasSizeError || $hasLimitError ? 'warning' : 'success',
+                'text' => $hasFormatError || $hasSizeError || $hasLimitError
                     ? 'Type de diplôme créé mais le logo n\'a pas pu être ajouté.'
                     : 'Création du type de diplôme réussie',
-                'title' => $hasFormatError || $hasSizeError ? 'Attention' : 'Succès',
+                'title' => $hasFormatError || $hasSizeError || $hasLimitError ? 'Attention' : 'Succès',
             ]);
 
             return $this->redirectToRoute('app_type_diplome_index');
@@ -209,30 +195,27 @@ class TypeDiplomeController extends BaseController
     #[Route('/{id}/upload-logo', name: 'app_type_diplome_upload_logo', methods: ['POST'])]
     public function uploadLogo(Request $request, TypeDiplome $typeDiplome): JsonResponse
     {
-        $files = $request->files->get('logo');
+        $files = $request->files->get('logo') ?? $request->files->get('logo[]');
 
         if (!$files) {
-            return new JsonResponse(['success' => false, 'error' => 'Aucun fichier reçu'], 400);
+            return new JsonResponse(['success' => false, 'errors' => ['Aucun fichier reçu']], 400);
         }
 
-        // Ne prend que le premier logo
         $file = is_array($files) ? $files[0] : $files;
+        $existingLogos = $typeDiplome->getLogo() ?? [];
 
-        try
-        {
-            // Supprime le logo si il y en a déjà un
-            $existingLogos = $typeDiplome->getLogo() ?? [];
-            foreach ($existingLogos as $existing)
-            {
-                $this->secureUploadService->delete('logos', $existing);
-            }
-
-            $uploaded = $this->secureUploadService->upload($file, 'logos');
-            $typeDiplome->setLogo([$uploaded->getStoredFilename()]);
+        if (count($existingLogos) >= 2) {
+            return new JsonResponse([
+                'success' => false,
+                'errors' => ['Le nombre maximum de logos (2) est atteint. Supprimez un logo avant d’en ajouter un autre.'],
+            ], 422);
         }
 
-        catch (\Exception $e)
-        {
+        try {
+            $uploaded = $this->secureUploadService->upload($file, 'logos');
+            $existingLogos[] = $uploaded->getStoredFilename();
+            $typeDiplome->setLogo($existingLogos);
+        } catch (\Exception $e) {
             $error = str_contains($e->getMessage(), 'volumineux')
                 ? 'Fichier trop lourd (10 Mo max)'
                 : 'Format invalide (PNG/JPEG uniquement)';
@@ -409,6 +392,8 @@ class TypeDiplomeController extends BaseController
     }
 
     #[Route('/{id}/edit', name: 'app_type_diplome_edit', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.type_diplome')]
+    #[Breadcrumb(label: 'Modification')]
     public function edit(
         Request $request,
         TypeDiplome $typeDiplome,
@@ -421,10 +406,7 @@ class TypeDiplomeController extends BaseController
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid())
-        {
-            // Le logo n'est pas dans ce formulaire en modification : il est géré par la
-            // carte dédiée (upload/suppression en AJAX). On enregistre simplement le reste.
+        if ($form->isSubmitted() && $form->isValid()) {
             $typeDiplomeRepository->save($typeDiplome, true);
 
             // Gérer les plateformes d'admission avec leurs années
@@ -435,7 +417,7 @@ class TypeDiplomeController extends BaseController
             // return $this->json(true);
             $this->addFlash('toast', [
                 'type' => 'success',
-                'text' => 'Type Diplôme modifié avec succès',
+                'text' => 'Type diplôme modifié avec succès',
                 'title' => 'Succès',
             ]);
             return $this->redirectToRoute('app_type_diplome_index');
@@ -478,5 +460,47 @@ class TypeDiplomeController extends BaseController
         }
 
         return $this->json(false);
+    }
+
+    private function handleLogoUploadFromForm(mixed $logoData, TypeDiplome $typeDiplome): array
+    {
+        $hasFormatError = false;
+        $hasSizeError = false;
+        $hasLimitError = false;
+
+        $logoFiles = [];
+        if (is_array($logoData)) {
+            $logoFiles = array_values(array_filter($logoData));
+        } elseif ($logoData !== null) {
+            $logoFiles = [$logoData];
+        }
+
+        if ($logoFiles === []) {
+            return [$hasFormatError, $hasSizeError, $hasLimitError];
+        }
+
+        $logos = $typeDiplome->getLogo() ?? [];
+        $remainingSlots = max(0, 2 - count($logos));
+        if (count($logoFiles) > $remainingSlots) {
+            $hasLimitError = true;
+            $logoFiles = array_slice($logoFiles, 0, $remainingSlots);
+        }
+
+        foreach ($logoFiles as $logoFile) {
+            try {
+                $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
+                $logos[] = $uploaded->getStoredFilename();
+            } catch (\Exception $e) {
+                if (str_contains($e->getMessage(), 'volumineux')) {
+                    $hasSizeError = true;
+                } else {
+                    $hasFormatError = true;
+                }
+            }
+        }
+
+        $typeDiplome->setLogo($logos);
+
+        return [$hasFormatError, $hasSizeError, $hasLimitError];
     }
 }

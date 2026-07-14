@@ -169,16 +169,16 @@ class TypeDiplomeType extends AbstractType
             ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true, 'row_attr' => ['class' => 'semestre-field']])
             ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
 
-        // Le logo n'est proposé dans le formulaire qu'à la création. En modification, il
-        // est déjà géré par la carte dédiée (upload/suppression en AJAX, contrôleur
-        // « type-diplome-logos ») : l'inclure ici l'afficherait en double.
+        // En création, l'upload est dans le formulaire. En modification, il est géré
+        // par la carte dédiée (ajout/suppression logo par logo).
         $typeDiplome = $builder->getData();
         if ($typeDiplome === null || $typeDiplome->getId() === null) {
             $builder->add('logo', FileType::class, [
-                'label' => 'Logo',
-                'multiple' => false,
+                'label' => 'Logo(s)',
+                'multiple' => true,
                 'required' => false,
                 'mapped' => false,
+                'help' => 'Vous pouvez importer jusqu’à 2 images (PNG/JPEG, 10 Mo max chacune).',
                 'attr' => ['accept' => 'image/png, image/jpeg'],
             ]);
         }

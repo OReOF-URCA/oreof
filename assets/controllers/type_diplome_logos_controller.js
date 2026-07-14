@@ -29,7 +29,7 @@ export default class extends Controller {
         }
 
         const data = new FormData()
-      data.append('logo[]', files[0]) // 2 logos max
+      data.append('logo', files[0])
 
         const fileInput = this.fileInputTarget
         fileInput.value = ''
@@ -47,10 +47,11 @@ export default class extends Controller {
                 const errContainer = this.element.querySelector('#logo-upload-errors')
                 if (errContainer) errContainer.innerHTML = ''
             } else {
-                this._showErrors(json.errors ?? ['Une erreur est survenue lors de l\'upload.'])
+              this._showErrors(json.errors ?? (json.error ? [json.error] : ['Une erreur est survenue lors de l\'upload.']))
             }
         } catch (err) {
             console.error('Upload failed:', err)
+          this._showErrors(['Impossible d’ajouter le logo.'])
         }
     }
 

@@ -133,7 +133,7 @@ class TypeDiplome
     #[ORM\OneToMany(targetEntity: TypeDiplomePlateformeAdmission::class, mappedBy: 'typeDiplome')]
     private Collection $typeDiplomePlateformeAdmissions;
 
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $logo = [];
 
 
