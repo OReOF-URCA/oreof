@@ -14,6 +14,7 @@ use App\Entity\Formation;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeEc;
 use App\Form\TypeEcType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\TypeEcRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;

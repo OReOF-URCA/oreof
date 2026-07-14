@@ -12,6 +12,7 @@ namespace App\Controller\Config;
 use App\DTO\TranslatableKey;
 use App\Entity\Langue;
 use App\Form\LangueType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\LangueRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;

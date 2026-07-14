@@ -12,6 +12,7 @@ namespace App\Controller\Config;
 use App\DTO\TranslatableKey;
 use App\Entity\NatureUeEc;
 use App\Form\NatureUeEcType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\NatureUeEcRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;

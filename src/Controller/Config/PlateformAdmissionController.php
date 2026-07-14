@@ -12,6 +12,7 @@ namespace App\Controller\Config;
 use App\DTO\TranslatableKey;
 use App\Entity\PlateformeAdmission;
 use App\Form\PlateformeAdmissionType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\PlateformeAdmissionRepository;
 use App\Service\DetailBuilder;
 use App\Service\DataTableBuilder;
@@ -72,6 +73,8 @@ class PlateformAdmissionController extends AbstractController
     }
 
     #[Route('/new', name: 'app_plateforme_adminission_new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.plateforme_adminission')]
+    #[Breadcrumb(label: 'Création')]
     public function new(
         Request                       $request,
         EntityManagerInterface        $em,
@@ -158,6 +161,8 @@ class PlateformAdmissionController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_plateforme_adminission_edit', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.plateforme_adminission')]
+    #[Breadcrumb(label: 'Modification')]
     public function edit(
         Request                       $request,
         PlateformeAdmission           $plateformeAdmission,

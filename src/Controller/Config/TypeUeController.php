@@ -13,6 +13,7 @@ use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeUe;
 use App\Form\TypeUeType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\TypeUeRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;

@@ -18,6 +18,7 @@ use App\Enums\CentreGestionEnum;
 use App\Form\UserHorsUrcaType;
 use App\Form\UserLdapType;
 use App\Form\UserType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\ProfilRepository;
 use App\Repository\UserProfilRepository;
 use App\Repository\UserRepository;

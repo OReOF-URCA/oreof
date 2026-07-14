@@ -13,6 +13,7 @@ use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeEpreuve;
 use App\Form\TypeEpreuveType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\TypeEpreuveRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;

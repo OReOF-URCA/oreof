@@ -14,6 +14,7 @@ use App\DTO\TranslatableKey;
 use App\Entity\Mention;
 use App\Entity\TypeDiplome;
 use App\Form\MentionDtoType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\DomaineRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\DataTableBuilder;

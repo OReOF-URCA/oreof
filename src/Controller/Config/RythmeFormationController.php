@@ -12,6 +12,7 @@ namespace App\Controller\Config;
 use App\DTO\TranslatableKey;
 use App\Entity\RythmeFormation;
 use App\Form\RythmeFormationType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\RythmeFormationRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;

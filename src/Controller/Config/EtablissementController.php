@@ -14,6 +14,7 @@ use App\DTO\TranslatableKey;
 use App\Entity\Adresse;
 use App\Entity\Etablissement;
 use App\Form\EtablissementType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\EtablissementRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
@@ -69,6 +70,8 @@ class EtablissementController extends BaseController
     }
 
     #[Route('/new', name: 'app_etablissement_new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.etablissement')]
+    #[Breadcrumb(label: 'Création')]
     public function new(Request $request, EtablissementRepository $etablissementRepository): Response
     {
         $etablissement = new Etablissement();
@@ -155,6 +158,8 @@ class EtablissementController extends BaseController
     }
 
     #[Route('/{id}/edit', name: 'app_etablissement_edit', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.etablissement')]
+    #[Breadcrumb(label: 'Modification')]
     public function edit(
         Request                 $request,
         Etablissement           $etablissement,

@@ -1,51 +1,70 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-
-    <div class="card">
-        <div class="card-body"
-                {{ stimulus_controller('notification_liste', {
-                    url: path('app_notification_liste_mise_a_jour'),
-                }) }}
-        >
-            <div class="table-scroll-wrapper">
-                <table class="table table-striped fixed-table">
-                    <thead>
-                    <tr>
-                        <th>Workflow</th>
-                        {% for profil in profils %}
-                            <th>{{ profil.libelle }}</th>
-                        {% endfor %}
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for key, notification in workflows %}
-                        <tr>
-                            <th colspan="{{ profils|length + 1 }}" class="bg-primary text-white">{{ key }}</th>
-                        </tr>
-                        {% for value in notification %}
-                            <tr>
-                                <td>{{ value|afficheProcess(false) }}</td>
-                                {% for profil in profils %}
-                                    <td>
-                                        <label class="sr-only" for="{{ profil.id }}_{{ value }}">Activer</label>
-                                        <input type="checkbox" id="{{ profil.id }}_{{ value }}" value="true"
-                                               {% if notifications[value] is defined and profil.id in notifications[value] %}checked{% endif %}
-                                                {{ stimulus_action('notification_liste', 'change', 'click',  {
-                                                    profil: profil.id,
-                                                    workflow: value
-                                                }) }}
-                                        >
-                                    </td>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <section
+            class="rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900"
+            {{ stimulus_controller('notification_liste', {
+                url: path('app_notification_liste_mise_a_jour'),
+            }) }}
+    >
+        <div class="border-b border-secondary-200 px-5 py-4 dark:border-secondary-700">
+            <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Paramétrage des
+                notifications</h2>
+            <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-300">
+                Activez les notifications par profil et par étape de workflow.
+            </p>
         </div>
-    </div>
+
+        <div class="max-h-[70vh] overflow-auto">
+            <table class="min-w-full divide-y divide-secondary-200 text-sm dark:divide-secondary-700">
+                <thead class="bg-secondary-50 dark:bg-secondary-800/70">
+                <tr>
+                    <th class="sticky top-0 z-20 bg-secondary-50 px-4 py-3 text-left font-semibold text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
+                        Workflow
+                    </th>
+                    {% for profil in profils %}
+                        <th class="sticky top-0 z-20 bg-secondary-50 px-3 py-3 text-center font-semibold text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
+                            {{ profil.libelle }}
+                        </th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800">
+                {% for key, notification in workflows %}
+                    <tr>
+                        <th colspan="{{ profils|length + 1 }}"
+                            class="bg-primary-600 px-4 py-2 text-left text-sm font-semibold text-white dark:bg-primary-700">
+                            {{ key }}
+                        </th>
+                    </tr>
+                    {% for value in notification %}
+                        <tr class="hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40">
+                            <td class="px-4 py-3 font-medium text-secondary-800 dark:text-secondary-100">
+                                {{ value|afficheProcess(false) }}
+                            </td>
+                            {% for profil in profils %}
+                                <td class="px-3 py-3 text-center">
+                                    <label class="sr-only" for="{{ profil.id }}_{{ value }}">Activer</label>
+                                    <input
+                                            type="checkbox"
+                                            id="{{ profil.id }}_{{ value }}"
+                                            value="true"
+                                            class="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-900"
+                                            {% if notifications[value] is defined and profil.id in notifications[value] %}checked{% endif %}
+                                            {{ stimulus_action('notification_liste', 'change', 'click', {
+                                                profil: profil.id,
+                                                workflow: value
+                                            }) }}
+                                    >
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 {% endblock %}
 
 
@@ -53,11 +72,14 @@
     Gérer les notifications
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
-
+    <twig:Button
+            href="{{ path('app_section_administration') }}"
+            variant="success"
+            :outline="true"
+            :soft="false"
+            icon="icon:arrow-left"
+            label="Retour à l'administration"
+            tooltip="Retour à l'administration"
+    />
 {% endblock %}

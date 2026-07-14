@@ -32,6 +32,7 @@ menu:
   conseils:
     chgt_rf: Changement RF/co RF
     synthses_modifs: Synthèse des modifications
+    documents: Documents
   menu_droits: Utilisateurs et droits
   droits:
     en_attente: Utilisateurs en attente
@@ -91,3 +92,51 @@ page:
     structure_composante_index:
       title: Gestion de l'offre de formation
       description: Détail de l'offre de formation par composante
+    app_etablissement_index:
+      description: Gérer les établissements de référence.
+    app_composante_index:
+      description: Gérer les composantes de l'établissement.
+    app_plateforme_adminission_index:
+      description: Configurer les plateformes d'admission.
+    app_ville_index:
+      description: Gérer les villes utilisées dans l'application.
+    app_domaine_index:
+      description: Gérer les domaines de formation.
+    app_mention_index:
+      description: Gérer les mentions de formation.
+    app_type_diplome_index:
+      description: Gérer les types de diplôme.
+    app_type_ue_index:
+      description: Gérer les types d'UE.
+    app_type_ec_index:
+      description: Gérer les types d'EC.
+    app_nature_ue_ec_index:
+      description: Gérer les natures d'UE et d'EC.
+    app_type_epreuve_index:
+      description: Gérer les types d'épreuve.
+    app_langue_index:
+      description: Gérer les langues proposées.
+    app_rythme_formation_index:
+      description: Gérer les rythmes de formation.
+    app_campagne_collecte_index:
+      description: Configurer les campagnes de collecte.
+    app_annee_universitaire_index:
+      description: Gérer les années universitaires.
+    app_actualite_index:
+      description: Gérer les actualités ORéOF.
+    app_notication_liste:
+      description: Paramétrer les notifications par profil et workflow.
+    translations_index:
+      description: Gérer les traductions et textes de l'application.
+    app_config_email:
+      description: Configurer les modèles d'emails.
+    app_help_index:
+      description: Gérer les contenus d'aide.
+    app_faq_index:
+      description: Gérer la FAQ.
+    admin_styleguide_index:
+      description: Consulter le styleguide d'interface.
+    app_section_administration:
+      description: Administration
+      title: Administration
+

@@ -12,6 +12,7 @@ namespace App\Controller\Config;
 use App\DTO\TranslatableKey;
 use App\Entity\Ville;
 use App\Form\VilleType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\VilleRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
@@ -66,6 +67,8 @@ class VilleController extends AbstractController
     }
 
     #[Route('/new', name: 'app_ville_new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.ville')]
+    #[Breadcrumb(label: 'Création')]
     public function new(
         TurboStreamResponseFactory $turboStream,
         Request                    $request,
@@ -132,6 +135,8 @@ class VilleController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_ville_edit', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.ville')]
+    #[Breadcrumb(label: 'Modification')]
     public function edit(
         TurboStreamResponseFactory $turboStream,
         Request                    $request,

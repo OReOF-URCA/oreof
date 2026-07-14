@@ -1,25 +1,40 @@
-{% form_theme form 'communs/form_theme.html.twig' %}
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
 {{ form_start(form) }}
     {{ form_widget(form) }}
-<button type="submit" class="btn btn-success" {% if isModal is defined and isModal == true %}
-    {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
-{% endif %}>
-    <i class="fal fa-floppy-disk"></i>
-    Enregistrer
-</button>
+{% set submitAttr = (isModal is defined and isModal == true)
+    ? stimulus_action('base', 'sauvegardeFormModal', 'click')
+    : {} %}
+<twig:Button
+        type="submit"
+        variant="success"
+        :soft="false"
+        :outline="false"
+        icon="icon:save"
+        label="Enregistrer"
+        :attr="submitAttr"
+/>
 
 {% if button_add_other is defined and button_add_other == true %}
-    <button class="btn btn-success" value="add_other" name="btn_update">
-        <i class="fal fa-floppy-disk-circle-arrow-right"></i> Enregistrer et continuer
-    </button>
+    <twig:Button
+            type="submit"
+            variant="success"
+            :soft="false"
+            :outline="false"
+            icon="icon:save"
+            label="Enregistrer et continuer"
+            :attr="{ name: 'btn_update', value: 'add_other' }"
+    />
 {% endif %}
 
 {% if button_label is defined and button_label == 'modifier' %}
-    <button class="btn btn-success" value="redirect_to_index" name="btn_update">
-        <i class="fal fa-floppy-disk-circle-arrow-right"></i> modifier
-    </button>
+    <twig:Button
+            type="submit"
+            variant="success"
+            :soft="false"
+            :outline="false"
+            icon="icon:save"
+            label="Modifier"
+            :attr="{ name: 'btn_update', value: 'redirect_to_index' }"
+    />
 {% endif %}
-
-    {{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont
-obligatoires'}) }}
 {{ form_end(form) }}
