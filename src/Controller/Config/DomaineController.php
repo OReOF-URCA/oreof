@@ -9,6 +9,7 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\Domaine;
 use App\Form\DomaineType;
@@ -26,6 +27,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/domaine')]
 class DomaineController extends AbstractController
 {
+    use CsrfDeleteTrait;
+
     #[Route('/', name: 'app_domaine_index', methods: ['GET'])]
     public function index(
         DatatableBuilder $builder
@@ -88,7 +91,7 @@ class DomaineController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $domaineRepository->save($domaine, true);
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Domaine créé avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -153,7 +156,7 @@ class DomaineController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $domaineRepository->save($domaine, true);
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Domaine modifié avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -171,13 +174,14 @@ class DomaineController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_domaine_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         DomaineRepository $domaineRepository,
-        Domaine $domaine
+        Domaine                    $domaine
     ): Response {
         $domaineNew = clone $domaine;
         $domaineNew->setLibelle($domaine->getLibelle() . ' - Copie');
         $domaineRepository->save($domaineNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Domaine dupliqué avec succès', true);
     }
 
     /**
@@ -185,19 +189,17 @@ class DomaineController extends AbstractController
      */
     #[Route('/{id}', name: 'app_domaine_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         Domaine $domaine,
         DomaineRepository $domaineRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $domaine->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($domaine, $this->getCsrfTokenFromRequest($request))) {
             $domaineRepository->remove($domaine, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Domaine supprimé avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

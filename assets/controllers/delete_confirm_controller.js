@@ -41,6 +41,7 @@ export default class extends Controller {
   }
 
   disconnect () {
+    document.documentElement.classList.remove('overflow-hidden')
     document.removeEventListener('keydown', this.boundKeyDown)
   }
 

@@ -9,6 +9,7 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\PlateformeAdmission;
 use App\Form\PlateformeAdmissionType;
@@ -28,6 +29,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/plateforme-admission')]
 class PlateformAdmissionController extends AbstractController
 {
+    use CsrfDeleteTrait;
     #[Route('/', name: 'app_plateforme_adminission_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -195,6 +197,7 @@ class PlateformAdmissionController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_plateforme_adminission_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         PlateformeAdmissionRepository $plateformeAdmissionRepository,
         PlateformeAdmission           $plateformeAdmission
     ): Response
@@ -202,7 +205,7 @@ class PlateformAdmissionController extends AbstractController
         $plateformeAdmissionNew = clone $plateformeAdmission;
         $plateformeAdmissionNew->setLibelle($plateformeAdmission->getLibelle() . ' - Copie');
         $plateformeAdmissionRepository->save($plateformeAdmissionNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Plateforme d\'admission dupliquée avec succès', true);
     }
 
     /**
@@ -210,20 +213,18 @@ class PlateformAdmissionController extends AbstractController
      */
     #[Route('/{id}', name: 'app_plateforme_adminission_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request                       $request,
         PlateformeAdmission           $plateformeAdmission,
         PlateformeAdmissionRepository $plateformeAdmissionRepository
     ): Response
     {
-        if ($this->isCsrfTokenValid(
-            'delete' . $plateformeAdmission->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($plateformeAdmission, $this->getCsrfTokenFromRequest($request))) {
             $plateformeAdmissionRepository->remove($plateformeAdmission, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Plateforme d\'admission supprimée avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

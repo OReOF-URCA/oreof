@@ -32,7 +32,6 @@ class ParcoursStep1Type extends AbstractType
             ->add('respParcours', InlineCreateEntitySelectType::class, [
                 'help' => '',
                 'class' => User::class,
-                'autocomplete' => true,
                 'choice_label' => 'display',
                 'query_builder' => function ($er) {
                     return $er->createQueryBuilder('u')

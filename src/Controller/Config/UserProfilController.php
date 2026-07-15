@@ -10,6 +10,7 @@
 namespace App\Controller\Config;
 
 use App\Controller\BaseController;
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\Entity\Profil;
 use App\Entity\User;
 use App\Entity\UserProfil;
@@ -30,10 +31,13 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Utils\TurboStreamResponseFactory;
 
 #[Route('/utilisateurs/profils', name: 'app_user_profil_')]
 class UserProfilController extends BaseController
 {
+    use CsrfDeleteTrait;
+
     public function __construct(private readonly EntityManagerInterface $entityManager)
     {
     }
@@ -248,6 +252,7 @@ class UserProfilController extends BaseController
 
     #[Route('/delete-demande/{id}', name: 'delete_demande', methods: ['POST', 'DELETE'])]
     public function deleteDemande(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         User $user,
         UserRepository $userRepository,
@@ -255,8 +260,8 @@ class UserProfilController extends BaseController
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        $token = $request->request->get('_token') ?? JsonRequest::getValueFromRequest($request, 'csrf');
-        if ($this->isCsrfTokenValid('delete' . $user->getId(), $token)) {
+        $token = $this->getCsrfTokenFromRequest($request);
+        if ($this->isDeleteTokenValid($user, $token)) {
             foreach ($user->getUserProfils() as $centre) {
                 $userProfilRepository->remove($centre, true);
             }
@@ -264,10 +269,10 @@ class UserProfilController extends BaseController
             $user->setIsDeleted(true);
             $userRepository->save($user, true);
 
-            $this->addFlash('success', 'La demande a bien été supprimée.');
+            return $turboStream->streamToastSuccess('La demande a bien été supprimée.', true);
         }
 
-        return $this->redirectToRoute('app_user_profil_attente');
+        return $turboStream->streamToastError('Erreur lors de la suppression.', true);
     }
 
     #[Route('/add/profil/{user}', name: 'add')]

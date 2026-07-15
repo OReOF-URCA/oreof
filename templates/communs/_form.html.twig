@@ -1,9 +1,15 @@
 {% form_theme form 'communs/form_theme_v2.html.twig' %}
-{{ form_start(form) }}
+{% set formAttr = {} %}
+{% if isModal is defined and isModal == true %}
+    {% set formAttr = { 'id': 'modal_form' } %}
+{% endif %}
+{{ form_start(form, { 'attr': formAttr }) }}
     {{ form_widget(form) }}
 {% set submitAttr = (isModal is defined and isModal == true)
     ? stimulus_action('base', 'sauvegardeFormModal', 'click')
     : {} %}
+
+    {% if isModal is defined and isModal == false %}
 <twig:Button
         type="submit"
         variant="success"
@@ -13,6 +19,7 @@
         label="Enregistrer"
         :attr="submitAttr"
 />
+    {% endif %}
 
 {% if button_add_other is defined and button_add_other == true %}
     <twig:Button

@@ -1,4 +1,4 @@
-<div {{ attributes }} class="datatable-wrapper space-y-4">
+<div {{ attributes.defaults({ id: 'datatable-container' }) }} class="datatable-wrapper space-y-4">
 
     {# ── Compteurs UX (résultats + filtres actifs) ─────────────────────────── #}
     {% set activeFilters = 0 %}
@@ -391,12 +391,13 @@
                                                             :soft="true"
                                                             tooltip="Supprimer"
                                                             url="{{ routeUrl }}"
-                                                            csrfTokenId="{{ 'delete' ~ item.id }}"
+                                                            method="DELETE"
+                                                            csrfTokenId="{{ 'delete-' ~ (this.entityClass|split('\\')|last|lower) ~ '-' ~ item.id }}"
                                                             title="{{ action.label }}"
                                                             message="Cette action supprimera définitivement."
                                                             confirmLabel="Supprimer"
                                                             cancelLabel="Annuler"
-                                                            id="competence-{{ item.id }}"
+                                                            id="{{ (this.entityClass|split('\\')|last|lower) ~ '-' ~ item.id }}"
                                                     />
                                                 {% elseif action.method == 'duplicate' %}
                                                     <twig:Button

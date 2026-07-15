@@ -9,6 +9,7 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeUe;
@@ -28,6 +29,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/type-ue')]
 class TypeUeController extends AbstractController
 {
+    use CsrfDeleteTrait;
+    
     #[Route('/', name: 'app_type_ue_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -92,7 +95,7 @@ class TypeUeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $typeUeRepository->save($typeUe, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type d\'UE créé avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -163,7 +166,7 @@ class TypeUeController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $typeUeRepository->save($typeUe, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type d\'UE modifié avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -181,13 +184,14 @@ class TypeUeController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_type_ue_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         TypeUeRepository $typeUeRepository,
         TypeUe $typeUe
     ): Response {
         $typeUeNew = clone $typeUe;
         $typeUeNew->setLibelle($typeUe->getLibelle() . ' - Copie');
         $typeUeRepository->save($typeUeNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Type d\'UE dupliqué avec succès', true);
     }
 
     /**
@@ -195,19 +199,17 @@ class TypeUeController extends AbstractController
      */
     #[Route('/{id}', name: 'app_type_ue_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         TypeUe $typeUe,
         TypeUeRepository $typeUeRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $typeUe->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($typeUe, $this->getCsrfTokenFromRequest($request))) {
             $typeUeRepository->remove($typeUe, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type d\'UE supprimé avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

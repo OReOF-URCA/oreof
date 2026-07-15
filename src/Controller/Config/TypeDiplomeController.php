@@ -10,6 +10,7 @@
 namespace App\Controller\Config;
 
 use App\Controller\BaseController;
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Form\TypeDiplomeType;
@@ -36,6 +37,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[Route('/administration/type-diplome')]
 class TypeDiplomeController extends BaseController
 {
+    use CsrfDeleteTrait;
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -432,13 +434,14 @@ class TypeDiplomeController extends BaseController
 
     #[Route('/{id}/duplicate', name: 'app_type_diplome_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         TypeDiplomeRepository $typeDiplomeRepository,
         TypeDiplome $typeDiplome
     ): Response {
         $typeDiplomeNew = clone $typeDiplome;
         $typeDiplomeNew->setLibelle($typeDiplome->getLibelle() . ' - Copie');
         $typeDiplomeRepository->save($typeDiplomeNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Type de diplôme dupliqué avec succès', true);
     }
 
     /**
@@ -446,20 +449,18 @@ class TypeDiplomeController extends BaseController
      */
     #[Route('/{id}', name: 'app_type_diplome_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         TypeDiplome $typeDiplome,
         TypeDiplomeRepository $typeDiplomeRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $typeDiplome->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($typeDiplome, $this->getCsrfTokenFromRequest($request))) {
             $typeDiplomeRepository->remove($typeDiplome, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type de diplôme supprimé avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 
     private function handleLogoUploadFromForm(mixed $logoData, TypeDiplome $typeDiplome): array

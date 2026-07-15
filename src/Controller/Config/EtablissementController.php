@@ -10,6 +10,7 @@
 namespace App\Controller\Config;
 
 use App\Controller\BaseController;
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\Adresse;
 use App\Entity\Etablissement;
@@ -26,6 +27,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/etablissement')]
 class EtablissementController extends BaseController
 {
+    use CsrfDeleteTrait;
+
     #[Route('/', name: 'app_etablissement_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -191,14 +194,16 @@ class EtablissementController extends BaseController
 
     #[Route('/{id}', name: 'app_etablissement_delete', methods: ['POST'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request                 $request,
         Etablissement           $etablissement,
         EtablissementRepository $etablissementRepository
     ): Response {
-        if ($this->isCsrfTokenValid('delete' . $etablissement->getId(), $request->request->get('_token'))) {
+        if ($this->isDeleteTokenValid($etablissement, $request->request->get('_token'))) {
             $etablissementRepository->remove($etablissement, true);
+            return $turboStream->streamToastSuccess('Établissement supprimé avec succès', true);
         }
 
-        return $this->redirectToRoute('app_etablissement_index', [], Response::HTTP_SEE_OTHER);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

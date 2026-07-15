@@ -314,7 +314,7 @@ class BlocCompetenceController extends BaseController
     /**
      * @throws JsonException
      */
-    #[Route('/{id}', name: 'app_bloc_competence_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'app_bloc_competence_delete', methods: ['DELETE', 'POST'])]
     public function delete(
         Bcc                      $bcc,
         Request                  $request,
@@ -327,6 +327,8 @@ class BlocCompetenceController extends BaseController
             JsonRequest::getValueFromRequest($request, 'csrf')
         )) {
             $parc = $blocCompetence->getParcours();
+
+
             $blocCompetenceRepository->remove($blocCompetence, true);
             $bcc->renumeroteBlocCompetence($parc);
 

@@ -9,6 +9,7 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\Ville;
 use App\Form\VilleType;
@@ -27,6 +28,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/ville')]
 class VilleController extends AbstractController
 {
+    use CsrfDeleteTrait;
+    
     #[Route('/', name: 'app_ville_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -83,7 +86,7 @@ class VilleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $villeRepository->save($ville, true);
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Ville créée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -151,7 +154,7 @@ class VilleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $villeRepository->save($ville, true);
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Ville modifiée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -169,13 +172,14 @@ class VilleController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_ville_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         VilleRepository $villeRepository,
         Ville $ville
     ): Response {
         $villeNew = clone $ville;
         $villeNew->setLibelle($ville->getLibelle() . ' - Copie');
         $villeRepository->save($villeNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Ville dupliquée avec succès', true);
     }
 
     /**
@@ -183,19 +187,17 @@ class VilleController extends AbstractController
      */
     #[Route('/{id}', name: 'app_ville_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         Ville $ville,
         VilleRepository $villeRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $ville->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($ville, $this->getCsrfTokenFromRequest($request))) {
             $villeRepository->remove($ville, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Ville supprimée avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

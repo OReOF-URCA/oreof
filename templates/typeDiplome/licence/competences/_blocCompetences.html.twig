@@ -42,10 +42,17 @@
                         color: 'success',
                     },
                     {
+                        type: 'delete',
                         label: 'Supprimer',
-                        url: path('app_bloc_competence_delete', {id: blocCompetence.id}),
                         icon: 'icon:delete',
-                        danger: true
+                        color: 'danger',
+                        url: path('app_bloc_competence_delete', {id: blocCompetence.id}),
+                        csrfTokenId: 'delete-blocCompetence' ~ blocCompetence.id,
+                        title: "Supprimer le bloc " ~ blocCompetence.code,
+                        message: "Cette action supprimera définitivement le bloc de competences et toutes les competences qui y sont associées.",
+                        confirmLabel: "Supprimer",
+                        cancelLabel: "Annuler",
+                        id: "blocCompetence-" ~ blocCompetence.id
                     }
                 ],
                 label: 'Actions',

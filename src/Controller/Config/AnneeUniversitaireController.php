@@ -9,6 +9,7 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\AnneeUniversitaire;
 use App\Form\AnneeUniversitaireType;
@@ -26,6 +27,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/annee/universitaire')]
 class AnneeUniversitaireController extends AbstractController
 {
+    use CsrfDeleteTrait;
+
     #[Route('/', name: 'app_annee_universitaire_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -80,7 +83,7 @@ class AnneeUniversitaireController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $anneeUniversitaireRepository->save($anneeUniversitaire, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Année universitaire créée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -145,7 +148,7 @@ class AnneeUniversitaireController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $anneeUniversitaireRepository->save($annee_universitaire, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Année universitaire modifiée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -163,13 +166,14 @@ class AnneeUniversitaireController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_annee_universitaire_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         AnneeUniversitaireRepository $anneeUniversitaireRepository,
         AnneeUniversitaire           $annee_universitaire
     ): Response {
         $annee_universitaireNew = clone $annee_universitaire;
         $annee_universitaireNew->setLibelle($annee_universitaire->getLibelle() . ' - Copie');
         $anneeUniversitaireRepository->save($annee_universitaireNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Année universitaire dupliquée avec succès', true);
     }
 
     /**
@@ -177,19 +181,17 @@ class AnneeUniversitaireController extends AbstractController
      */
     #[Route('/{id}', name: 'app_annee_universitaire_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request                      $request,
         AnneeUniversitaire           $annee_universitaire,
         AnneeUniversitaireRepository $anneeUniversitaireRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $annee_universitaire->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($annee_universitaire, $this->getCsrfTokenFromRequest($request))) {
             $anneeUniversitaireRepository->remove($annee_universitaire, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Année universitaire supprimée avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }
