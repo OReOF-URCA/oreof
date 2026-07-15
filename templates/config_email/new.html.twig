@@ -1,27 +1,32 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-    {% include 'config_email/_form.html.twig' with {form, template, variables} %}
+    <section
+            class="rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="border-b border-secondary-200 px-5 py-4 dark:border-secondary-700">
+            <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Nouveau template d'email</h2>
+            <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-300">
+                Créez un modèle réutilisable pour les notifications et workflows.
+            </p>
+        </div>
+
+        <div class="p-5">
+            {% include 'config_email/_form.html.twig' with {form, template, variables} %}
+        </div>
+    </section>
 {% endblock %}
 
 {% set header_title %}
     Nouveau template
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Administration',
-        },
-        {
-            href:path('app_config_email'),
-            title: 'Configurations des emails',
-        }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
-    <a class="btn btn-outline-primary" href="{{ path('app_config_email') }}">Retour aux templates</a>
+    <twig:Button
+            href="{{ path('app_config_email') }}"
+            variant="success"
+            :outline="true"
+            :soft="false"
+            icon="icon:arrow-left"
+            label="Retour aux templates"
+    />
 {% endblock %}
-

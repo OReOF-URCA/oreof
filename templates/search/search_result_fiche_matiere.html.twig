@@ -1,51 +1,92 @@
-<div
-    id="dataFicheMatiereSearch"
-    data-nb-fiches-total="{{ nombreTotal }}"
-    data-keyword="{{ keyword_1 }}"
-    data-fetch-url="{{ path('app_search_fiche_matiere_pagination', {page: 1234567890, mot_cle: 'µ#+'}) }}"
-    data-parcours-view-url="{{ path('parcours_v2_voir', {parcours: 'µ%$£'}) }}"
-    data-fiche-matiere-view-url="{{ path('fiche_matiere_v2_voir', {slug: 'µ%$£'}) }}"
-    class="d-none">
-</div>
-{% if nombreTotal > 30 %}
-    <div class="row justify-content-center">
-        <div class="d-flex col-3 col-md-2 col-xl-1 justify-content-center">
-            <i class="button-page button-page-left fa-sharp-duotone fa-solid fa-arrow-left fs-2"></i>
-        </div>
-        <div class="col-4 col-md-3 col-lg-2 col-xl-1 numero-page">
-            Page 1 / {{ ((nombreTotal / 30)|round(0, 'floor')) + 1 }}
-        </div>
-        <div class="d-flex col-3 col-md-2 col-xl-1 justify-content-center">
-            <i class="button-page button-page-right fa-sharp-duotone fa-solid fa-arrow-right fs-2"></i>
-        </div>
-    </div>
-    <div class="row justify-content-center mt-4">
-        <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-            <input type="number" class="form-control" placeholder="Numéro de page..." name="inputNumeroPage">
-        </div>
-        <div class="d-flex col-4 col-md-3 col-lg-2 col-xl-1 align-items-end">
-            <button class="btn btn-sm btn-primary button-go-to-page">
-                OK
-            </button>
-        </div>
-    </div>
-{% endif %}
-{% if nombreTotal > 1 %}
-<div class="row justify-content-center">
-    <div class="col-6 col-md-4 col-lg-3 col-xl-2 text-center my-5">
-        <a href="{{ path('app_search_fiche_matiere_export_excel', {mot_cle: keyword_1}) }}">
-            <button class="btn btn-sm btn-primary">
-                Télécharger les résultats
-            </button>
-        </a>
-    </div>
-</div>
-<div class="row justify-content-center">
-    <div class="col-12 text-center loading-icon">
-        <!-- Loading Icon -->
-    </div>
-    <div class="col-10 col-md-8 col-lg-6 rootNodeForFicheMatiereList">
+<div class="space-y-6">
+    <div
+            id="dataFicheMatiereSearch"
+            data-nb-fiches-total="{{ nombreTotal }}"
+            data-keyword="{{ keyword_1 }}"
+            data-fetch-url="{{ path('app_search_fiche_matiere_pagination', {page: 1234567890, mot_cle: 'µ#+'}) }}"
+            data-parcours-view-url="{{ path('parcours_v2_voir', {parcours: 'µ%$£'}) }}"
+            data-fiche-matiere-view-url="{{ path('fiche_matiere_v2_voir', {slug: 'µ%$£'}) }}"
+            class="hidden"
+    ></div>
 
-    </div>
+    {% if nombreTotal > 0 %}
+        <div class="rounded-2xl border border-secondary-200 bg-surface px-5 py-4 shadow-sm dark:border-secondary-700">
+            <div class="flex flex-col gap-3 text-sm text-secondary-600 dark:text-secondary-400 sm:flex-row sm:items-center sm:justify-between">
+                <p>
+                    {{ nombreTotal >= 2
+                    ? nombreTotal ~ ' fiches matières contiennent le mot-clé saisi en description'
+                    : nombreTotal ~ ' fiche matière contient le mot-clé saisi en description' }}
+                </p>
+
+                <twig:Button
+                        :label="'Télécharger les résultats (' ~ nombreTotal ~ ')'"
+                        href="{{ path('app_search_fiche_matiere_export_excel', {mot_cle: keyword_1}) }}"
+                        variant="secondary"
+                        icon="icon:download"
+                />
+            </div>
+        </div>
+    {% endif %}
+
+    {% if nombreTotal > 30 %}
+        <div class="flex flex-col items-center justify-center gap-4 rounded-2xl border border-secondary-200 bg-surface px-5 py-4 shadow-sm dark:border-secondary-700 sm:flex-row">
+            <twig:Button
+                    label=""
+                    variant="secondary"
+                    size="sm"
+                    icon="icon:arrow-left"
+                    extraClass="js-search-page-left"
+                    :attr="{ 'aria-label': 'Page précédente' }"
+            />
+            <div class="numero-page min-w-40 text-center text-sm font-medium text-text dark:text-secondary-100">
+                Page 1 / {{ (nombreTotal / 30)|round(0, 'ceil') }}
+            </div>
+            <twig:Button
+                    label=""
+                    variant="secondary"
+                    size="sm"
+                    icon="icon:arrow-right"
+                    extraClass="js-search-page-right"
+                    :attr="{ 'aria-label': 'Page suivante' }"
+            />
+        </div>
+
+        <div class="flex flex-col items-stretch justify-center gap-3 rounded-2xl border border-secondary-200 bg-surface px-5 py-4 shadow-sm dark:border-secondary-700 sm:flex-row sm:items-end">
+            <div class="w-full sm:max-w-xs">
+                <label for="inputNumeroPage"
+                       class="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+                    Aller a la page
+                </label>
+                <input
+                        id="inputNumeroPage"
+                        type="number"
+                        min="1"
+                        class="block w-full rounded-2xl border border-secondary-200 bg-white px-4 py-3 text-text shadow-sm transition focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-100"
+                        placeholder="Numéro de page..."
+                        name="inputNumeroPage"
+                >
+            </div>
+            <twig:Button
+                    label="Aller"
+                    variant="primary"
+                    :soft="false"
+                    icon="icon:arrow-right"
+                    extraClass="js-search-go-page w-full sm:w-auto"
+            />
+        </div>
+    {% endif %}
+
+    {% if nombreTotal > 0 %}
+        <div class="flex justify-center text-center loading-icon"></div>
+        <div class="rootNodeForFicheMatiereList min-h-[50vh] space-y-4"></div>
+    {% else %}
+        <div class="rounded-2xl border border-dashed border-secondary-300 bg-secondary-50 p-8 text-center text-secondary-600 dark:border-secondary-700 dark:bg-secondary-950/20 dark:text-secondary-400">
+            <p class="text-lg font-semibold text-text dark:text-secondary-100">
+                Aucun résultat trouvé
+            </p>
+            <p class="mt-2 text-sm">
+                Essayez un autre mot-cl&eacute; ou un terme plus g&eacute;n&eacute;ral.
+            </p>
+        </div>
+    {% endif %}
 </div>
-{% endif %}

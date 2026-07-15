@@ -4,62 +4,10 @@
     Outil de recherche
 {% endset %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        input:focus {
-            border-color: black !important;
-        }
-
-        input[name='keyword_1']::placeholder {
-            color: black;
-        }
-    </style>
-{% endblock %}
-
 {% block content %}
-
-    {% set typeRecherche = 'parcours' %}
-
-    <div class="row justify-content-center mt-5">
-        <div class="col-8 mt-5 mb-3">
-            <form action="{{ path('app_search_action') }}">
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-12 col-md-4 text-center mb-3 mb-md-0">
-                            <label for="keyword" class="fs-4 text-center">
-                                Mot-clé
-                            </label>
-                        </div>
-                        <div class="col-12 col-md-8 col-lg-6">
-                            <input
-                                    class="form-control border border-primary rounded ps-2 ms-md-3"
-                                    type="text"
-                                    placeholder="Entrez votre recherche..."
-                                    id="keyword"
-                                    name="keyword_1"
-                            >
-                        </div>
-                    </div>
-                </div>
-                <div class="row justify-content-center">
-                    <div class="col-6 col-md-4 col-lg-3 col-xl-2">
-                        {{ include('search/search_type.html.twig') }}
-                    </div>
-                    <div>
-                        <div class="row justify-content-center">
-                            <div class="col-6 col-md-5 col-lg-4 col-xl-3 text-start">
-                                <button
-                                        type="submit"
-                                        class="btn btn-primary btn-small border border-light rounded mt-5"
-                                >
-                                    Rechercher
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+    <twig:SearchForm
+            action="{{ path('app_search_action') }}"
+            searchType="parcours"
+            :autofocus="true"
+    />
 {% endblock %}

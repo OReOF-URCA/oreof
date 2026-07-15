@@ -57,7 +57,7 @@ class EtablissementController extends BaseController
                 'modal_title' => 'Voir un établissement',
             ])
             ->addEditAction('app_etablissement_edit', [
-                'modal' => true,
+                'modal' => false,
                 'modal_size' => 'lg',
                 'modal_title' => 'Modifier un établissement',
             ])

@@ -14,6 +14,7 @@ use App\Classes\ValidationProcessChangeRf;
 use App\Classes\ValidationProcessFicheMatiere;
 use App\Entity\EmailTemplate;
 use App\Form\EmailTemplateType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\EmailTemplateRepository;
 use App\Service\EmailTemplateRenderer;
 use App\Service\VariableRegistry;
@@ -45,6 +46,8 @@ class ConfigEmailController extends BaseController
     }
 
     #[Route('/new', name: 'admin_email_template_new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.config_emails')]
+    #[Breadcrumb(label: 'Création')]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $tpl = new EmailTemplate();
@@ -70,6 +73,8 @@ class ConfigEmailController extends BaseController
     }
 
     #[Route('/{id}/edit', name: 'admin_email_template_edit', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.config_emails')]
+    #[Breadcrumb(label: 'Modification')]
     public function edit(EmailTemplate $tpl, Request $request, EntityManagerInterface $em): Response
     {
         // Toujours remettre à jour la liste de variables exposées (utile si de nouveaux providers)
