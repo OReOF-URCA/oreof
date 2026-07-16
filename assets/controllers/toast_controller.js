@@ -16,6 +16,11 @@ export default class extends Controller {
   }
 
   connect () {
+    requestAnimationFrame(() => {
+      this.element.classList.remove('translate-x-full', 'opacity-0')
+      this.element.classList.add('translate-x-0', 'opacity-100')
+    })
+
     const t = this.hasTimeoutValue ? this.timeoutValue : 3500
     this._timer = window.setTimeout(() => this.close(), t)
   }
@@ -25,8 +30,9 @@ export default class extends Controller {
   }
 
   close () {
-    this.element.classList.add('opacity-0', 'transition-opacity', 'duration-200')
-    window.setTimeout(() => this.element.remove(), 200)
+    this.element.classList.remove('translate-x-0', 'opacity-100')
+    this.element.classList.add('translate-x-full', 'opacity-0')
+    window.setTimeout(() => this.element.remove(), 300)
   }
 
   async undo (event) {
