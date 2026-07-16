@@ -30,7 +30,7 @@ final class ParcoursExportMaquetteSiteWebController extends AbstractController
         }
 
         $typeD = $typeDiplomeResolver->get($typeDiplome);
-        dump($typeD);
+        // dump($typeD);
         $data = $typeD->exportJsonApi($parcours);
 
         // Utilisation de la version validée
