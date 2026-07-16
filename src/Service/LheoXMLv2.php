@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Classes\GetDpeParcours;
 use App\Entity\Etablissement;
+use App\Entity\EtablissementInformation;
 use App\Entity\Parcours;
 use App\Entity\Ville;
 use App\Enums\CampagnePublicationTagEnum;
@@ -358,7 +359,7 @@ HTML;
         $commonData = $this->getBasicInformationDataV2([
             'devenir_etudiants' => $devenirEtudiants,
             'type_diplome_presentation_formation' => $tdPresentationF
-        ]);
+        ], $etablissementInformation);
 
         $organisationPedagogique .= $commonData['handicap'];
 
@@ -717,16 +718,10 @@ HTML;
         return parent::validateLheoSchema($this->generateLheoXMLFromParcours($parcours));
     }
 
-    public function getBasicInformationDataV2(array $linkedData) : array {
+    public function getBasicInformationDataV2(array $linkedData, EtablissementInformation $infoEtablissementV2) : array {
         return [
             // à mettre dans : <extras><extra><organisation-pedagogique>
-            'handicap' =>   "<h3><strong>Pour tout renseignement sur les aménagements proposés par la mission handicap</strong></h3>
-                            <ul><li><a href=\"#\">La mission handicap</a></li></ul>
-                            <div>Vous avez des besoins d'aménagements d'études et d'examens, la Mission Handicap vous accompagne tout 
-                            au long de votre cursus universitaire.<br>Elle vous renseigne sur tous les aspects de la vie universitaire : 
-                            déroulement des études, accessibilité des lieux universitaires, participation à la vie des campus, accès aux ressources 
-                            de la Bibliothèque Universitaire.<br>Pour toute demande ou information : 
-                            <a href=\"mailto:handicap@univ-reims.fr\">handicap@univ-reims.fr</a><br><br></div>",
+            'handicap' =>   $infoEtablissementV2->getMentionHandicap() ?? "",
             // à mettre dans : <extras><extra><admission>
             'tarif_inscription' => "<br><div><a href=\"#\">&nbsp;Lien vers la page présentant 
                                     les tarifs d'inscription&nbsp;</a></div>",
@@ -735,14 +730,9 @@ HTML;
             // à mettre dans <extras><extra><informations-pratiques>
             'savoir_plus_sur_ce_type_formation' => $linkedData['type_diplome_presentation_formation'] ?? "",
             // à mettre dans <extras><extra><informations-pratiques>
-            'savoir_plus_sur_orientation_insertion' => "<h3><strong>Pour en savoir plus sur l'orientation et l'insertion professionnelle :</strong></h3>
-                <ul><li><a href=\"#\">La Mission Orientation du Service d'Accompagnement des Etudiants (SAE)</a></li>
-                <li><a href=\"#\">L'insertion professionnelle</a></li></ul>",
-            'savoir_plus_relations_internationales' => "<h3><strong>Pour en savoir plus sur les relations internationales à l'Université :</strong></h3>
-                <ul><li><a href=\"#\">Direction des Relations Extérieures et du Développement International (DREDI)</a></li>
-                <li><a href=\"#\">Partir à l'étranger</a></li></ul>",
-            'associations_etudiantes' => "<h3><strong>Lien vers les associations étudiantes :</strong></h3>
-                <ul><li><a href=\"#\">Associations étudiantes</a></li></ul>",
+            'savoir_plus_sur_orientation_insertion' => $infoEtablissementV2->getSavoirPlusOrientationInsertion() ?? "",
+            'savoir_plus_relations_internationales' => $infoEtablissementV2->getRelationsInternationales() ?? "",
+            'associations_etudiantes' => $infoEtablissementV2->getAssociationsEtudiantes() ?? "",
         ];
     }
 }

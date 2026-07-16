@@ -25,3 +25,11 @@ ALTER TABLE parcours_ramification ADD CONSTRAINT FK_60B5422FE1B0C6E9 FOREIGN KEY
 ALTER TABLE parcours_ramification ADD CONSTRAINT FK_60B5422FF31368AE FOREIGN KEY (parcours_origine_id) REFERENCES parcours (id);
 ALTER TABLE parcours_ramification ADD CONSTRAINT FK_60B5422F2BE9C1F6 FOREIGN KEY (parcours_cible_id) REFERENCES parcours (id);
 ```
+
+```mysql
+ALTER TABLE etablissement_information 
+    ADD mention_handicap LONGTEXT DEFAULT NULL, 
+    ADD savoir_plus_orientation_insertion LONGTEXT DEFAULT NULL, 
+    ADD relations_internationales LONGTEXT DEFAULT NULL, 
+    ADD associations_etudiantes LONGTEXT DEFAULT NULL;
+```

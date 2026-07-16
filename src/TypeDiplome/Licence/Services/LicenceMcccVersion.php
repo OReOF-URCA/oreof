@@ -102,7 +102,7 @@ class LicenceMcccVersion extends AbstractLicenceMccc
                     $this->versioningParcours->getLastVersionOrLastYearCfvu($parcours)
                 )['parcours'];
             $diffDescriptifs = VersioningStructure::calculDiffDescriptifs($lastParcoursCfvuDesc, $parcours);
-            
+
         } else {
             return false;
         }
@@ -202,14 +202,14 @@ class LicenceMcccVersion extends AbstractLicenceMccc
             substr(self::CEL_REGIME_FI_APPRENTISSAGE, 0, 1),
             substr(self::CEL_REGIME_FI_APPRENTISSAGE, 1, 2),
             $diffDescriptifs['regimeInscription']['FIA'],
-            ['withLighterGreen' => true]                        
+            ['withLighterGreen' => true]
 
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FC_CONTRAT_PRO, 0, 1),
             substr(self::CEL_REGIME_FC_CONTRAT_PRO, 1, 2),
             $diffDescriptifs['regimeInscription']['FCCP'],
-            ['withLighterGreen' => true]    
+            ['withLighterGreen' => true]
         );
 
         //ajoute les sigles
