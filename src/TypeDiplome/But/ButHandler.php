@@ -11,6 +11,7 @@ use App\Entity\Parcours;
 use App\Repository\ButCompetenceRepository;
 use App\TypeDiplome\But\Services\ButMccc;
 use App\TypeDiplome\But\Services\ButMcccVersion;
+use App\TypeDiplome\But\Services\ExportJsonApi;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
 use App\TypeDiplome\TypeDiplomeMcccInterface;
 use App\Utils\Tools;
@@ -40,12 +41,19 @@ final class ButHandler implements TypeDiplomeHandlerInterface, TypeDiplomeMcccIn
     ];
 
     public function __construct(
-        protected EntityManagerInterface $entityManager,
-        protected ButMccc                 $butMccc,
-        protected ButMcccVersion        $butMcccVersion,
-        private ButCompetenceRepository $butCompetenceRepository,
-        private StructureParcoursBut    $structureParcoursBut)
+        protected EntityManagerInterface         $entityManager,
+        protected ButMccc                        $butMccc,
+        protected ButMcccVersion                 $butMcccVersion,
+        protected ExportJsonApi                  $exportJsonApi,
+        private readonly ButCompetenceRepository $butCompetenceRepository,
+        private readonly StructureParcoursBut    $structureParcoursBut)
     {
+    }
+
+    public function exportJsonApi(Parcours $parcours): array
+    {
+        $dto = $this->calculStructureParcours($parcours);
+        return $this->exportJsonApi->exportJson($dto, $parcours);
     }
 
     public function supports(string $type): bool

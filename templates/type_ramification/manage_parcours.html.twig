@@ -8,21 +8,65 @@
     {{ parent() }}
     <style>
         .search-result-list {
-            height: 17.5em;
+            max-height: 17.5em;
             overflow-y: scroll;
             scrollbar-width: thin;
             scrollbar-color: var(--primary);
-            background-color: lightgrey;
+            background-color: #f3f3f3;
             border-radius: .95em;
             border: 1.5px solid var(--primary);
         }
 
         .search-result-node:hover {
             background-color: var(--primary);
+            color: white;
         }
 
         .search-result-node {
             cursor: pointer;
+            border-radius: .65em;
+        }
+
+        .remove-choice-cross:hover {
+            cursor: pointer;
+        }
+
+        .remove-choice-cross {
+            color: red;
+        }
+
+        .choice-badge {
+            font-size: .85rem;
+            margin-top: .75rem;
+            color: white;
+        }
+
+        .choice-badge-txt {
+            background-color: var(--primary);
+            border-top-left-radius: .95rem;
+            border-bottom-left-radius: .95rem;
+            padding: .45rem 0 .45rem .95rem;
+            width: fit-content;
+            max-width: 85%;
+        }
+
+        .choice-badge-icon {
+            background-color: var(--primary);
+            border-top-right-radius: .95rem;
+            border-bottom-right-radius: .95rem;
+        }
+
+        @keyframes spin360 {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-spin-360 {
+            animation-name: spin360;
+            animation-duration: 1.95s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            font-size: 4.25rem;
         }
     </style>
 {% endblock %}
@@ -58,14 +102,37 @@
                             {{ stimulus_target('ramification-parcours-manage', 'searchInput') }}
                             {{ stimulus_action('ramification-parcours-manage', 'onSearchInputChange', 'change') }}
                         >
+                        <button class="btn btn-outline-primary"
+                            data-bs-placement="bottom"
+                            data-bs-toggle="tooltip"
+                            title="Lancer la recherche"
+                            {{ stimulus_action('ramification-parcours-manage', 'onSearchInputChange', 'click') }}
+                        >
+                            <i class="fa-duotone fa-solid fa-magnifying-glass fa-xl"></i>
+                        </button>
+                    </div>
+                    <div class="d-none text-center text-danger fs-6 mt-4" 
+                        {{ stimulus_target('ramification-parcours-manage', 'searchErrorArea') }}
+                    >
+                        
                     </div>
                 </div>
                 <div class="row justify-content-center mt-4">
-                    <div class="col-12 col-md-10 col-lg-8 col-xl-7 search-result-list"
+                    <div class="col-12 col-md-10 col-lg-8 col-xl-7 text-center d-none"
+                        {{ stimulus_target('ramification-parcours-manage', 'loadingSpinner') }}
+                    >
+                        <i class="fa-duotone fa-solid fa-spinner loading-spin-360"></i>
+                    </div>
+                    <div class="col-12 col-md-10 col-lg-8 col-xl-7 search-result-list d-none"
                         {{ stimulus_target('ramification-parcours-manage', 'resultList') }}
                     >
 
                     </div>
+                </div>
+                <div class="row justify-content-center mt-4"
+                    {{ stimulus_target('ramification-parcours-manage', 'choiceArea') }}
+                >
+                
                 </div>
             </div>
         </div>
