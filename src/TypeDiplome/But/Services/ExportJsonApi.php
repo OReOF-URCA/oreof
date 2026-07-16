@@ -108,7 +108,9 @@ class ExportJsonApi implements ExportJsonInterface
                     ];
                     $semestre['competences'][] = $tUe;
                     $tUe['ects'] = $ue->heuresEctsUe->sommeUeEcts;
-                    $ueLibelle = $ue->ue->getLibelle() ?? $ue->display;
+                    $ueLibelle = [
+                        'libelle' => $ue->ue->getLibelle() ?? $ue->display,
+                    ];
                     $ec = $this->getEcFromUe($ue, 2, $ueLibelle); // les EC du semestre
                     //vérifier si l'EC est déjà dans $tEcs, si oui ne pas l'ajouter
                     foreach ($ec as $ecItem) {
@@ -116,10 +118,10 @@ class ExportJsonApi implements ExportJsonInterface
                         foreach ($tEcs as $index => $existingEc) {
                             if ($existingEc['numero'] === $ecItem['numero']) {
                                 $exists = true;
-                                $tEcs[$index]['ues'] = array_values(array_unique(array_merge(
+                                $tEcs[$index]['ues'] = $this->mergeUes(
                                     $existingEc['ues'] ?? [],
                                     $ecItem['ues'] ?? []
-                                )));
+                                );
                                 break;
                             }
                         }
@@ -143,7 +145,7 @@ class ExportJsonApi implements ExportJsonInterface
         return $data;
     }
 
-    private function getEcFromUe(StructureUe $ue, int $parentDepth, string $ueLibelle): array
+    private function getEcFromUe(StructureUe $ue, int $parentDepth, array $ueLibelle): array
     {
         $tEcs = [];
         $depth = $parentDepth + 1;
@@ -154,7 +156,7 @@ class ExportJsonApi implements ExportJsonInterface
                 $tEc['numero'] = $ec->elementConstitutif->getCode();
                 $tEc['libelle'] = $ec->elementConstitutif?->getFicheMatiere()?->getLibelle() ?? '-';
                 $tEc['libelleNiveau'] = $tEc['numero'] . ' - ' . $tEc['libelle'];
-                $tEc['ues'] = [$ueLibelle];
+                $tEc['ues'] = [$this->formatUeDataForEc($ueLibelle, $ec->heuresEctsEc->ects)];
                 $childKey = 'elements';
                 $tEc[$childKey] = [];
                 $tEc['description_libre_choix'] = $ec->elementConstitutif->getTexteEcLibre();
@@ -173,7 +175,7 @@ class ExportJsonApi implements ExportJsonInterface
         return $tEcs;
     }
 
-    private function getEc(StructureEc $ec, string $ueLibelle): array
+    private function getEc(StructureEc $ec, array $ueLibelle): array
     {
         if ($ec->elementConstitutif->getFicheMatiere() !== null &&
             (array_key_exists('publie', $ec->elementConstitutif->getFicheMatiere()->getEtatFiche()) ||
@@ -204,7 +206,7 @@ class ExportJsonApi implements ExportJsonInterface
             'valide_date' => new DateTime(),
             'numero' => $ec->elementConstitutif->getCode(),
             'libelle' => $libelle,
-            'ues' => [$ueLibelle],
+            'ues' => [$this->formatUeDataForEc($ueLibelle, $ec->heuresEctsEc->ects)],
             'libelle_anglais' => $ec->elementConstitutif->getFicheMatiere()?->getLibelleAnglais() ?? '-',
             'sigle' => $ec->elementConstitutif->getFicheMatiere()?->getSigle() ?? '-',
             'enseignant_referent' => [
@@ -216,7 +218,7 @@ class ExportJsonApi implements ExportJsonInterface
             'modalite_enseignement' => $ec->elementConstitutif->getFicheMatiere()?->getModaliteEnseignement()->value ?? '-',
             'langues_supports' => $ec->elementConstitutif->getFicheMatiere()?->getLanguesSupportsArray() ?? [],
             'langues_dispense_cours' => $ec->elementConstitutif->getFicheMatiere()?->getLanguesDispenseArray() ?? [],
-            'ects' => $ec->heuresEctsEc->ects,
+            // 'ects' => $ec->heuresEctsEc->ects,
             'volumes' => [
                 'CM' => [
                     'presentiel' => $ec->heuresEctsEc->cmPres,
@@ -232,6 +234,27 @@ class ExportJsonApi implements ExportJsonInterface
                 ],
                 'autonomie' => $ec->heuresEctsEc->tePres
             ],
+        ];
+    }
+
+    private function mergeUes(array $existingUes, array $newUes): array
+    {
+        $merged = [];
+
+        foreach (array_merge($existingUes, $newUes) as $ue) {
+            $normalizedUe = $this->formatUeDataForEc($ue, $ue['coeff'] ?? $ue['ects'] ?? 0.0);
+            $key = $normalizedUe['libelle'] . '|' . $normalizedUe['coeff'];
+            $merged[$key] = $normalizedUe;
+        }
+
+        return array_values($merged);
+    }
+
+    private function formatUeDataForEc(array $ueData, ?float $coeff): array
+    {
+        return [
+            'libelle' => $ueData['libelle'] ?? '-',
+            'coeff' => $coeff ?? 0.0,
         ];
     }
 }
