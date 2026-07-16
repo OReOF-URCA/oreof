@@ -1325,7 +1325,7 @@ class ParcoursController extends BaseController
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGenerator::ABSOLUTE_URL),
             'fiche-pdf' => $this->generateUrl('app_parcours_export_pdf_versioning', ['parcours' => $parcours->getId()], UrlGenerator::ABSOLUTE_URL),
             'maquette-pdf' => $this->generateUrl('app_parcours_mccc_export_cfvu_valid', ['parcours' => $parcoursVersion->getParcours()->getId(), 'format' => 'simplifie'], UrlGenerator::ABSOLUTE_URL),
-            'maquette-json' => $this->generateUrl('app_parcours_export_maquette_json_validee_cfvu', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGenerator::ABSOLUTE_URL),
+            'maquette-json' => $this->generateUrl('app_parcours_export_maquette_json_urca_v2_niveau', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGenerator::ABSOLUTE_URL),
             'logos-parcours' => $logosParcours
         ];
 
@@ -1354,7 +1354,7 @@ class ParcoursController extends BaseController
         }
         if($parcours->getParcoursOrigineCopie()?->getId() && count($parcoursOrigineVersion) > 0){
             $urlMaquetteJson = $this->generateUrl(
-                    'app_parcours_export_maquette_json_validee_cfvu',
+                    'app_parcours_export_maquette_json_urca_v2_niveau',
                     ['parcours' => $parcours->getParcoursOrigineCopie()->getId()],
                     UrlGeneratorInterface::ABSOLUTE_URL
             );
