@@ -43,7 +43,7 @@
                                     {% set place = this.getPlace(demande) %}
                                     {% if this.process[place] is defined %}
                                         {% if
-                                            (is_granted('MANAGE', {route: 'app_composante', subject: this.formation}) and place != 'soumis_ses' and place != 'soumis_cfvu')  or
+                                            (is_granted('MANAGE', {route: 'app_composante', subject: this.formation.composantePorteuse}) and place != 'soumis_ses' and place != 'soumis_cfvu')  or
                                             (is_granted('MANAGE', {route: 'app_formation', subject: this.formation}) and place != 'soumis_ses' and place != 'soumis_cfvu') or is_granted('ROLE_ADMIN') %}
                                         {% for key, state in hasTransitions(demande, 'changeRf') %}
                                             {% for keyTrans, transition in state %}
