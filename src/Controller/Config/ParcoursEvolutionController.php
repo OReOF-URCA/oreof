@@ -5,6 +5,12 @@ namespace App\Controller\Config;
 use App\Entity\Parcours;
 use App\Repository\CampagneCollecteRepository;
 use App\Repository\ParcoursRepository;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,6 +24,132 @@ final class ParcoursEvolutionController extends AbstractController
         ParcoursRepository         $parcoursRepository,
         CampagneCollecteRepository $campagneCollecteRepository
     ): Response
+    {
+        $data = $this->buildEvolutionMatrix($parcoursRepository, $campagneCollecteRepository);
+
+        return $this->render('config/campagne_collecte/parcours_evolution.html.twig', [
+            'campagnes' => $data['campagnes'],
+            'matrixRows' => $data['matrixRows'],
+        ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/administration/parcours/evolution-campagnes/export-excel', name: 'app_campagne_collecte_parcours_evolution_export_excel', methods: ['GET'])]
+    public function exportExcel(
+        ParcoursRepository         $parcoursRepository,
+        CampagneCollecteRepository $campagneCollecteRepository
+    ): Response
+    {
+        $data = $this->buildEvolutionMatrix($parcoursRepository, $campagneCollecteRepository);
+        $campagnes = $data['campagnes'];
+        $matrixRows = $data['matrixRows'];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Evolution parcours');
+
+        $sheet->setCellValue('A1', 'Parcours origine');
+        $sheet->setCellValue('B1', 'Formation origine');
+        $sheet->mergeCells('A1:A2');
+        $sheet->mergeCells('B1:B2');
+
+        $campaignWidth = 5;
+        $columnIndex = 3;
+        foreach ($campagnes as $campagne) {
+            $startCol = Coordinate::stringFromColumnIndex($columnIndex);
+            $endCol = Coordinate::stringFromColumnIndex($columnIndex + $campaignWidth - 1);
+            $header = $campagne['libelle'];
+            if (!empty($campagne['anneeUniversitaireLibelle'])) {
+                $header .= ' - ' . $campagne['anneeUniversitaireLibelle'];
+            }
+            $sheet->setCellValue($startCol . '1', $header);
+            $sheet->mergeCells($startCol . '1:' . $endCol . '1');
+            $sheet->setCellValue($startCol . '2', 'Parcours');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex($columnIndex + 1) . '2', 'Formation');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex($columnIndex + 2) . '2', 'Ouvert/Fermé');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex($columnIndex + 3) . '2', 'Alternance');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex($columnIndex + 4) . '2', 'Évolution');
+            $columnIndex += $campaignWidth;
+        }
+
+        $rowIndex = 3;
+        foreach ($matrixRows as $matrixRow) {
+            $sheet->setCellValue('A' . $rowIndex, $matrixRow['referenceParcoursLibelle']);
+            $sheet->setCellValue('B' . $rowIndex, $matrixRow['referenceFormationLibelle']);
+
+            $columnIndex = 3;
+            foreach ($campagnes as $campagne) {
+                $entries = $matrixRow['cells'][$campagne['id']] ?? [];
+                if (count($entries) === 0) {
+                    $sheet->setCellValue(Coordinate::stringFromColumnIndex($columnIndex) . $rowIndex, '—');
+                    $columnIndex += $campaignWidth;
+                    continue;
+                }
+
+                $parcoursValues = [];
+                $formationValues = [];
+                $openValues = [];
+                $alternanceValues = [];
+                $evolutionValues = [];
+
+                foreach ($entries as $entry) {
+                    $parcoursValues[] = (string)($entry['parcoursLibelle'] ?? '—');
+                    $formationValues[] = (string)($entry['formationLibelle'] ?? '—');
+                    $openValues[] = (string)($entry['openLabel'] ?? '—');
+                    $alternanceValues[] = (string)($entry['alternanceLabel'] ?? '—');
+
+                    $changes = $entry['changes'] ?? [];
+                    if (count($changes) === 0) {
+                        $evolutionValues[] = '—';
+                    } else {
+                        $evolutionValues[] = implode(' | ', $changes);
+                    }
+                }
+
+                $sheet->setCellValue(Coordinate::stringFromColumnIndex($columnIndex) . $rowIndex, implode("\n", array_unique($parcoursValues)));
+                $sheet->setCellValue(Coordinate::stringFromColumnIndex($columnIndex + 1) . $rowIndex, implode("\n", array_unique($formationValues)));
+                $sheet->setCellValue(Coordinate::stringFromColumnIndex($columnIndex + 2) . $rowIndex, implode("\n", array_unique($openValues)));
+                $sheet->setCellValue(Coordinate::stringFromColumnIndex($columnIndex + 3) . $rowIndex, implode("\n", array_unique($alternanceValues)));
+                $sheet->setCellValue(Coordinate::stringFromColumnIndex($columnIndex + 4) . $rowIndex, implode("\n", array_unique($evolutionValues)));
+                $columnIndex += $campaignWidth;
+            }
+
+            $rowIndex++;
+        }
+
+        $maxColumn = Coordinate::stringFromColumnIndex(max(2, $columnIndex - 1));
+        $sheet->getStyle('A1:' . $maxColumn . '2')->getFont()->setBold(true);
+        $sheet->getStyle('A1:' . $maxColumn . '2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER)->setWrapText(true);
+        $sheet->getStyle('A1:' . $maxColumn . max(2, $rowIndex - 1))->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle('A1:' . $maxColumn . '2')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FFE9ECEF');
+        if ($rowIndex > 3) {
+            $sheet->getStyle('A3:' . $maxColumn . ($rowIndex - 1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setWrapText(true);
+        }
+
+        for ($i = 1; $i <= Coordinate::columnIndexFromString($maxColumn); $i++) {
+            $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($i))->setAutoSize(true);
+        }
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'oreof-parcours-evolution-');
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($tempFile);
+        $content = file_get_contents($tempFile);
+        @unlink($tempFile);
+
+        return new Response(
+            $content ?: '',
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="parcours-evolution-campagnes.xlsx"',
+            ]
+        );
+    }
+
+    private function buildEvolutionMatrix(
+        ParcoursRepository         $parcoursRepository,
+        CampagneCollecteRepository $campagneCollecteRepository
+    ): array
     {
         $parcoursList = $parcoursRepository->findAllForEvolutionMatrix();
         $originByParcoursId = [];
@@ -189,9 +321,9 @@ final class ParcoursEvolutionController extends AbstractController
             return [$rowA['referenceFormationLibelle'], $rowA['referenceParcoursLibelle']] <=> [$rowB['referenceFormationLibelle'], $rowB['referenceParcoursLibelle']];
         });
 
-        return $this->render('config/campagne_collecte/parcours_evolution.html.twig', [
+        return [
             'campagnes' => array_values($campagnes),
             'matrixRows' => $matrixRows,
-        ]);
+        ];
     }
 }
