@@ -59,7 +59,9 @@
         {# si la formation n'a pas de parcours i.e. parcours par défaut, alors on affiche le menu aussi du parcours pour le processus. #}
         <twig:ParcoursHeader formationId="{{ formation.id }}" parcoursId="{{ formation.parcours[0].id }}"/>
     {% endif %}
-
+    <div id="change_rf_state">
+        <twig:ChangeRfState formation="{{ formation }}"/>
+    </div>
 
     {#    {{ include('formation/_synthese_formation.html.twig') }} #}
 

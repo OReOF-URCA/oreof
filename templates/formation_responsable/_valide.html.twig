@@ -1,54 +1,6 @@
-<form action="{{ path('app_validation_change_rf_valider', {etape:etape, transition:transition, demande:demande.id}) }}" method="post"
-      enctype="multipart/form-data">
-    {% if meta.hasDate is defined and meta.hasDate == true %}
-    <div>
-        <label for="date" class="form-label">{{ ('valide.change_rf.date.'~transition~'.label')|trans({}, 'process') }}
-            <span class="required"></span> <i
-                    class="fal fa-question-circle ms-1"
-                    data-controller="tooltip"
-                    data-tooltip-placement-value="bottom"
-                    aria-label="{{ ('valide.change_rf.helps.date.help')|trans({}, 'process') }}"
-                    data-bs-original-title="{{ ('valide.change_rf.helps.date.help')|trans({}, 'process') }}"></i></label>
-        <input type="date" name="date"
-               class="form-control"
-               id="date"
-        >
-    </div>
-    {% endif %}
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
 
-    {% if meta.hasUpload is defined and meta.hasUpload == true %}
-    <div>
-        <label for="file" class="form-label">{{ ('valide.change_rf.attente.fichier.label')|trans({}, 'process') }}
-            <i class="fal fa-question-circle ms-1"
-               data-controller="tooltip"
-               data-tooltip-placement-value="bottom"
-               aria-label="{{ ('valide.change_rf.attente.helps.fichier.help')|trans({}, 'process') }}"
-               data-bs-original-title="{{ ('valide.change_rf.attente.helps.fichier.help')|trans({}, 'process') }}"></i></label>
-        <input type="file" name="file" id="file" accept="application/pdf" class="form-control">
-    </div>
-        <div class="form-check mt-2">
-            <input class="form-check-input" type="radio" value="laisserPasser" id="laisserPasser"
-                    {% if laisserPasser is defined and laisserPasser != false and laisserPasser.etat == "valide" %} checked {% endif %}
-                   name="laisserPasser">
-            <label class="form-check-label" for="laisserPasser">
-                <strong>{{ (process.label~'.valide.laisserPasser.'~processData.placeTexte)|trans({}, 'process') }}</strong>
-                <i
-                        class="fal fa-question-circle ms-1"
-                        data-controller="tooltip"
-                        data-tooltip-placement-value="bottom"
-                        aria-label="{{ ('valide.'~process.label~'.helps.laisserPasser.help')|trans({}, 'process') }}"
-                        data-bs-original-title="{{ ('valide.'~process.label~'.helps.laisserPasser.help')|trans({}, 'process') }}"></i>
-            </label>
-        </div>
-    {% endif %}
-    <div class="mt-2">
-        <button type="submit" class="btn btn-success"
-                {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
-                data-action="live#emit"
-                data-event="valide"
-        >
-            <i class="fal fa-floppy-disk"></i>
-            {{ ('btn.changeRf.'~process.label~'.valide')|trans({}, 'process') }}
-        </button>
-    </div>
-</form>
+{{ form_start(form) }}
+    {{ form_widget(form) }}
+{{ form_end(form) }}
+

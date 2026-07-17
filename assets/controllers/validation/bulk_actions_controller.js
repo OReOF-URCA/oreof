@@ -30,7 +30,7 @@ export default class extends Controller {
     const selectedCount = selected.length
 
     if (this.hasCounterTarget) {
-      this.counterTarget.innerText = `${selectedCount} element${selectedCount > 1 ? 's' : ''} selectionne${selectedCount > 1 ? 's' : ''}`
+      this.counterTarget.innerText = `${selectedCount} élément${selectedCount > 1 ? 's' : ''} selectionné${selectedCount > 1 ? 's' : ''}`
     }
 
     if (this.hasTriggerTarget) {
@@ -45,7 +45,7 @@ export default class extends Controller {
 
     const selected = this._selectedValues()
     if (selected.length === 0) {
-      callOut('Veuillez selectionner au moins un parcours.', 'danger')
+      callOut('Veuillez sélectionner au moins un parcours.', 'danger')
       window.dispatchEvent(new Event('modal:close'))
       this.refresh()
       return
@@ -114,7 +114,7 @@ export default class extends Controller {
 
   onBulkSuccess (event) {
     const count = Number(event?.detail?.count ?? 0)
-    const message = `${this.currentActionLabel} executee sur ${count} element${count > 1 ? 's' : ''}.`
+    const message = `${this.currentActionLabel} executée sur ${count} élément${count > 1 ? 's' : ''}.`
     this._showRecap(message)
   }
 

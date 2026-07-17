@@ -8,13 +8,6 @@
     Demandes de changement de responsable de formation
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Conseils'},
-        {title: header_title }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <a href="{{ path('app_formation_responsable_liste_export') }}"
        class="inline-flex items-center gap-2 rounded-md border border-cyan-300 bg-cyan-50 px-3 py-2 text-sm font-medium text-cyan-700 transition hover:bg-cyan-100 hover:text-cyan-800"

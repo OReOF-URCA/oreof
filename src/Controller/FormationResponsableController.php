@@ -12,6 +12,7 @@ use App\Enums\EtatChangeRfEnum;
 use App\Enums\TypeRfEnum;
 use App\Exception\FileUploadException;
 use App\Form\ChangeRfFormationType;
+use App\Form\ChangeRfValidationType;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
 use App\Service\DataTableBuilder;
@@ -24,7 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Workflow\WorkflowInterface;
-use Symfony\UX\Turbo\Helper\TurboStream;
+use App\DTO\TranslatableKey;
 
 class FormationResponsableController extends BaseController
 {
@@ -98,8 +99,9 @@ class FormationResponsableController extends BaseController
             // Message de toast
             $toastMessage = 'Le changement de responsable de formation a bien été enregistré.';
 
-            return $turboStream->stream('_ui/_modal_success.stream.html.twig', [
+            return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
                 'toastMessage' => $toastMessage,
+                'formation' => $formation,
             ]);
         }
 
@@ -118,20 +120,28 @@ class FormationResponsableController extends BaseController
         );
     }
 
-    #[Route('/formation/change-responsable/suppression/{demande}', name: 'app_formation_change_rf_suppression')]
+    #[Route('/formation/change-responsable/suppression/{demande}', name: 'app_formation_change_rf_suppression', methods:['POST', 'DELETE'])]
     public function suppressionDemande(
         \App\Entity\ChangeRf $demande,
+        TurboStreamResponseFactory $turboStream,
     ): Response {
+        $formation = $demande->getFormation();
 
         $this->entityManager->remove($demande);
         $this->entityManager->flush();
 
+        if ($this->isTurbo()) {
+            return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
+                'toastMessage' => 'La demande de changement de (co-)responsable de formation a bien été supprimée.',
+                'formation' => $formation,
+            ]);
+        }
+
         $this->addFlashBag('success', 'La demande de changement de (co-)responsable de formation a bien été supprimée.');
 
         return $this->redirectToRoute('app_formation_show', [
-            'slug'=> $demande->getFormation()?->getSlug()
+            'slug'=> $formation?->getSlug()
         ]);
-
     }
 
     #[Route('/formation/change-responsable/liste', name: 'app_formation_responsable_liste')]
@@ -269,6 +279,7 @@ class FormationResponsableController extends BaseController
         string $transition,
         string $etape,
         \App\Entity\ChangeRf $demande,
+        TurboStreamResponseFactory $turboStream,
     ): Response {
 
         if ($demande === null) {
@@ -276,39 +287,71 @@ class FormationResponsableController extends BaseController
         }
 
         $meta = $this->validationProcess->getMetaFromTransition($transition);
-
-        //upload
-        $fileName = '';
-        $originalFileName = null;
-        if ($request->files->has('file') && $request->files->get('file') !== null) {
-            try {
-                $upload = $this->secureUploadService->uploadFromRequest($request, 'file', 'conseils');
-            } catch (FileUploadException $exception) {
-                return JsonReponse::error($exception->getPublicMessage());
-            }
-
-            if ($upload !== null) {
-                $fileName = $upload->getStoredFilename();
-                $originalFileName = $upload->getOriginalFilename();
-            }
-        }
-
         $process = $this->validationProcess->getEtape($etape);
         $processData = $this->changeRfProcess->etatChangeRf($demande, $process);
 
-        if ($request->isMethod('POST')) {
-            //todo: gérer le cas du PV en attente post CFVU => Etat intermédiaire dans l'historique ? ou dans le process ?
-            return $this->changeRfProcess->valideChangeRf($demande, $this->getUser(), $transition, $request, $fileName, $originalFileName);
-        }
-
-        return $this->render('formation_responsable/_valide.html.twig', [
-            'demande' => $demande,
-            'process' => $process,
-            'etape' => $etape,
-            'processData' => $processData ?? null,
+        $form = $this->createForm(ChangeRfValidationType::class, null, [
             'meta' => $meta,
             'transition' => $transition,
+            'process' => $process,
+            'processData' => $processData ?? null,
+            'action' => $this->generateUrl('app_validation_change_rf_valider', [
+                'transition' => $transition,
+                'etape' => $etape,
+                'demande' => $demande->getId(),
+            ]),
+            'method' => 'POST',
         ]);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            //upload
+            $fileName = '';
+            $originalFileName = null;
+            if ($request->files->has('file') && $request->files->get('file') !== null) {
+                try {
+                    $upload = $this->secureUploadService->uploadFromRequest($request, 'file', 'conseils');
+                } catch (FileUploadException $exception) {
+                    return JsonReponse::error($exception->getPublicMessage());
+                }
+
+                if ($upload !== null) {
+                    $fileName = $upload->getStoredFilename();
+                    $originalFileName = $upload->getOriginalFilename();
+                }
+            }
+
+            //todo: gérer le cas du PV en attente post CFVU => Etat intermédiaire dans l'historique ? ou dans le process ?
+            $response = $this->changeRfProcess->valideChangeRf($demande, $this->getUser(), $transition, $request, $fileName, $originalFileName);
+
+            if ($this->isTurbo()) {
+                return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
+                    'toastMessage' => 'La demande a bien été validée.',
+                    'formation' => $demande->getFormation(),
+                ]);
+            }
+
+            return $response;
+        }
+
+        return $turboStream->streamOpenModalFromTemplates(
+            new TranslatableKey('validation.changeRf.valider.title'),
+            new TranslatableKey('validation.changeRf.valider.subtitle'),
+            'formation_responsable/_valide.html.twig',
+            [
+                'demande' => $demande,
+                'process' => $process,
+                'etape' => $etape,
+                'processData' => $processData ?? null,
+                'meta' => $meta,
+                'transition' => $transition,
+                'form' => $form->createView(),
+            ],
+            '_ui/_footer_submit_cancel.html.twig',
+            [
+            ],
+        );
     }
 
     #[Route(
@@ -369,6 +412,7 @@ class FormationResponsableController extends BaseController
         string $transition,
         string $etape,
         \App\Entity\ChangeRf $demande,
+        TurboStreamResponseFactory $turboStream,
     ): Response {
 
         if ($demande === null) {
@@ -381,7 +425,16 @@ class FormationResponsableController extends BaseController
         $processData = $this->changeRfProcess->etatChangeRf($demande, $process);
 
         if ($request->isMethod('POST')) {
-            return $this->changeRfProcess->reserveChangeRf($demande, $this->getUser(), $transition, $request);
+            $response = $this->changeRfProcess->reserveChangeRf($demande, $this->getUser(), $transition, $request);
+
+            if ($this->isTurbo()) {
+                return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
+                    'toastMessage' => 'La demande a bien été réservée.',
+                    'formation' => $demande->getFormation(),
+                ]);
+            }
+
+            return $response;
         }
 
         return $this->render('formation_responsable/_reserve.html.twig', [

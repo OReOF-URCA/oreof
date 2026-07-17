@@ -1,131 +1,48 @@
-<div class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
-    {% set nbDemandes = demandes|length %}
-    <div class="rounded-xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-900 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-100">
-        <strong>{{ nbDemandes }}</strong> demande{{ nbDemandes > 1 ? 's' : '' }} de changement de RF/CoRF
-        trouvée{{ nbDemandes > 1 ? 's' : '' }}.
-    </div>
-
-    <div class="overflow-x-auto rounded-xl border border-secondary-200 dark:border-secondary-700" {{ stimulus_controller('check_all') }}>
-        <table class="min-w-full text-left text-sm text-secondary-700 dark:text-secondary-200">
-            <thead class="bg-secondary-50 text-xs font-semibold uppercase tracking-wide text-secondary-500 dark:bg-secondary-800/70 dark:text-secondary-300">
-            <tr>
-                <th class="w-10 px-4 py-3">
-                    <label class="inline-flex cursor-pointer items-center">
-                        <input type="checkbox" id="check-all"
-                               class="h-4 w-4 rounded border-secondary-300 text-cyan-600 focus:ring-cyan-500" {{ stimulus_action('check_all', 'checkAll') }}>
-                        <span class="sr-only">Tout sélectionner</span>
-                    </label>
-                </th>
-                <th class="px-4 py-3">Formation</th>
-                <th class="px-4 py-3">Co/RF</th>
-                <th class="px-4 py-3">Actuel Co/RF</th>
-                <th class="px-4 py-3">Nouveau Co/RF</th>
-                <th class="px-4 py-3">Date demande</th>
-                <th class="px-4 py-3">Date Validation CFVU</th>
-                <th class="px-4 py-3">Etat</th>
-                <th class="px-4 py-3">PV ?</th>
-                <th class="px-4 py-3 text-right">Actions</th>
-            </tr>
-            </thead>
-            <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
-            {% for demande in demandes %}
-                <tr class="align-top hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40">
-                    <td class="px-4 py-3">
-                        <label class="inline-flex cursor-pointer items-center">
-                            <input
-                                    {{ stimulus_action('check_all', 'check') }}
-                                    type="checkbox"
-                                    class="check-all h-4 w-4 rounded border-secondary-300 text-cyan-600 focus:ring-cyan-500"
-                                    name="demandes[]"
-                                    value="{{ demande.id }}"
-                            >
-                            <span class="sr-only">Selectionner la demande {{ demande.id }}</span>
-                        </label>
-                    </td>
-                    <td class="px-4 py-3 font-medium text-secondary-800 dark:text-secondary-100">
-                        {{ demande.formation.displayLong }}
-                    </td>
-                    <td class="px-4 py-3">{{ demande.typeRf.value }}</td>
-                    <td class="px-4 py-3">{{ demande.ancienResponsable != null ? demande.ancienResponsable.display : 'Non défini' }}</td>
-                    <td class="px-4 py-3">{{ demande.nouveauResponsable != null ? demande.nouveauResponsable.display : 'Non défini' }}</td>
-                    <td class="px-4 py-3 whitespace-nowrap">{{ demande.dateDemande|date('d/m/Y H:i') }}</td>
-                    <td class="px-4 py-3">{{ component('historique_date', {changeRf:demande, type:'change_rf', step:'soumis_cfvu'}) }}</td>
-                    <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: demande.etatDemande|badgeChangeRfDto }) }}</td>
-                    <td class="px-4 py-3">{{ component('historique_pv', {changeRf:demande, type:'change_rf'}) }}</td>
-                    <td class="px-4 py-3">
-                        <div class="flex flex-wrap justify-end gap-2">
-                            <twig:Button
-                                    label="Voir"
-                                    variant="info"
-                                    size="sm"
-                                    icon="icon:info"
-                                    href="{{ path('formation_v2_voir',{'slug': demande.formation.slug}) }}"
-                                    target="_blank"
-                                    tooltip="Voir la formation"
-                            />
-
-                            {% if is_granted('ROLE_ADMIN') %}
+<section
+        class="space-y-4 rounded-xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-5"
+        data-controller="validation--index validation--bulk-actions"
+        data-validation--bulk-actions-selection-class-value=".validation-change-rf-item"
+        data-action="change->validation--bulk-actions#refresh check-all:changed@window->validation--bulk-actions#refresh"
+>
+    {% if table is not null %}
+        {% if oneDemande is defined and oneDemande is not null %}
+            <div class="sticky top-2 z-10 rounded-xl border border-indigo-200 bg-indigo-50/95 p-3 backdrop-blur dark:border-indigo-800 dark:bg-indigo-950/40">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-200">
+                        Actions en lot
+                        <span class="ml-2 text-[11px] font-normal normal-case" {{ stimulus_target('validation--bulk-actions', 'counter') }}>
+                            0 élément sélectionné
+                        </span>
+                    </p>
+                    <div class="flex flex-wrap gap-2" {{ stimulus_target('validation--bulk-actions', 'actions') }}>
+                        {% set prefix = 'changeRf' %}
+                        {% for key, state in hasTransitions(oneDemande, 'changeRf') %}
+                            {% for keyTrans, transition in state %}
+                                {% set hasMetaForm = transition.meta.form is defined and transition.meta.form.fields is defined and transition.meta.form.fields|length > 0 %}
                                 <twig:Button
-                                        label="Supprimer"
-                                        variant="danger"
+                                        variant="{{ transition.meta.btn|default('success') }}"
                                         size="sm"
-                                        icon="icon:delete"
-                                        href="{{ path('app_formation_change_rf_suppression', {demande:demande.id}) }}"
-                                        tooltip="Supprimer la demande"
-                                />
-                            {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                <tr class="border-b border-secondary-200 bg-secondary-50/50 dark:border-secondary-700 dark:bg-secondary-950/20">
-                    <td class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-secondary-400">
-                        Commentaire
-                    </td>
-                    <td class="px-4 py-3 text-secondary-700 dark:text-secondary-200" colspan="9">
-                        {{ demande.commentaire }}
-                    </td>
-                </tr>
-            {% else %}
-                <tr>
-                    <td colspan="10"
-                        class="px-4 py-6 text-center text-sm font-medium text-secondary-500 dark:text-secondary-400">
-                        Aucune demande de changement de Co/RF dans cet etat de demande
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        {% set prefix = 'changeRf' %}
-        {% if demandes|length > 0 %}
-            {% set oneDemande = demandes|first %}
-
-            {% for key, state in hasTransitions(oneDemande, 'changeRf') %}
-                {% for keyTrans, transition in state %}
-                    <twig:Button
-                            label="{{ ('btn.validation.'~prefix~'.'~keyTrans)|trans({}, 'process') }}"
-                            variant="{{ transition.meta.btn }}"
-                            size="sm"
-                            icon="icon:chevron-right"
-                            dataAction="click->validation--index#{{ key }}"
-                            extraClass="data-validation--index-url-param='{{ path('app_validation_change_rf_lot', {etape:etape, transition:keyTrans, key:key}) }}'"
-                            tooltip="{{ ('title.validation.'~prefix~'.'~keyTrans)|trans({}, 'process') }}"
-                    />
-                {% else %}
-                    <div></div>
-                {% endfor %}
-            {% else %}
-                <twig:Button
-                        label="{{ 'validation.formation.indisponible'|trans({}, 'process') }}"
-                        variant="secondary"
-                        size="sm"
-                        disabled="disabled"
-                />
-            {% endfor %}
+                                        tooltip="{{ ('title.validation.' ~ prefix ~ '.' ~ keyTrans)|trans({}, 'process') }}"
+                                        dataAction="click->validation--index#{{ key }}"
+                                        data-validation--index-url-param="{{ path('app_validation_change_rf_lot', {etape: etape, transition: keyTrans, key: key}) }}"
+                                        data-validation--bulk-actions-target="trigger"
+                                >
+                                    <i class="fal {{ transition.meta.icon|default('fa-chevron-right') }}"></i>
+                                    <span>{{ ('btn.validation.' ~ prefix ~ '.' ~ keyTrans)|trans({}, 'process') }}</span>
+                                </twig:Button>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         {% endif %}
-    </div>
 
-    <div class="grid grid-cols-1 gap-2" {{ stimulus_target('validation--index', 'action') }}></div>
-</div>
+        {{ component('DataTable', { config: table }) }}
+
+        <div class="mt-3" {{ stimulus_target('validation--index', 'action') }}></div>
+    {% else %}
+        <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+            Sélectionnez une étape de validation pour afficher la liste.
+        </div>
+    {% endif %}
+</section>
