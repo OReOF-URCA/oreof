@@ -157,11 +157,9 @@ class ApiJsonExport {
                         'parcours' => $tParcours,
                         'dateValidation' => $dateValidationFormation?->format('Y-m-d H:i:s') ?? null,
                     ];
-                    /*
-                    if($isV2){
-                        $forma['logos-formation'] = $this->getFormationLogosArrayApiV2($formation, $urlPrefix);
+                    if ($isV2) {
+                        $forma['uuid_formation'] = $this->getUuidForFormation($formation);
                     }
-                    */
                     $dataJSON[] = $forma;
                 }
 
@@ -235,11 +233,9 @@ class ApiJsonExport {
                         'parcours' => $addedParcours,
                         'dateValidation' => (new DateTime('2025-12-15'))->format('Y-m-d H:i:s'),
                     ];
-                    /*
-                    if($isV2){
-                        $formationAppend['logos-formation'] = $this->getFormationLogosArrayApiV2($formationAnneeSuivante, $urlPrefix);
+                    if ($isV2) {
+                        $formationAppend['uuid_formation'] = $this->getUuidForFormation($formationAnneeSuivante);
                     }
-                    */
                     $dataJSON[] = $formationAppend;
                 }
 
@@ -292,6 +288,19 @@ class ApiJsonExport {
         $uuid = $oldestVersion->getId();
 
         return $uuid;
+    }
+
+    private function getUuidForFormation(Formation $f) : int {
+        if ($f->getFormationOrigineCopie() === null) {
+            return $f->getId();
+        }
+
+        $oldestVersion = $f->getFormationOrigineCopie();
+        while($oldestVersion->getFormationOrigineCopie() !== null) {
+            $oldestVersion = $oldestVersion->getFormationOrigineCopie();
+        }
+
+        return $oldestVersion->getId();
     }
 
     /* 
