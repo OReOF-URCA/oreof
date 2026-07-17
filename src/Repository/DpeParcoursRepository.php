@@ -261,8 +261,6 @@ class DpeParcoursRepository extends ServiceEntityRepository
             ->addSelect('f')
             ->join('dp.campagneCollecte', 'camp')
             ->addSelect('camp')
-            ->andWhere('p.libelle <> :libelleParcoursDefaut')
-            ->setParameter('libelleParcoursDefaut', Parcours::PARCOURS_DEFAUT)
             ->orderBy('camp.annee', 'ASC')
             ->addOrderBy('camp.id', 'ASC')
             ->addOrderBy('p.id', 'ASC')

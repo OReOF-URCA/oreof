@@ -435,9 +435,9 @@ class ParcoursRepository extends ServiceEntityRepository
         return $qb
             ->select(
                 [
-                    'p.id AS id_parcours', 
-                    'p.libelle AS nom_parcours', 
-                    'm.libelle AS nom_formation', 
+                    'p.id AS id_parcours',
+                    'p.libelle AS nom_parcours',
+                    'm.libelle AS nom_formation',
                     'td.libelle AS nom_type_diplome',
                     'p.typeParcours AS type_parcours'
                 ]
@@ -476,8 +476,6 @@ class ParcoursRepository extends ServiceEntityRepository
             ->addSelect('dp')
             ->leftJoin('dp.campagneCollecte', 'camp')
             ->addSelect('camp')
-            ->andWhere('p.libelle <> :libelleParcoursDefaut')
-            ->setParameter('libelleParcoursDefaut', Parcours::PARCOURS_DEFAUT)
             ->orderBy('p.id', 'ASC')
             ->addOrderBy('camp.annee', 'ASC')
             ->addOrderBy('camp.id', 'ASC')
