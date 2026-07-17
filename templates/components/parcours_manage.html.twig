@@ -120,7 +120,6 @@
                                 {% if this.process[this.place] is defined %}
                                     <div class="col-6">
                                         <div class="row gy-1">
-                                            {# todo: vérifier si le RP peut valider niveau RF? #}
                                             {% if
                                                 is_granted('MANAGE', {route: 'app_composante', subject: this.dpeParcours})  or
                                                 is_granted('MANAGE', {route: 'app_formation', subject: this.dpeParcours})  or

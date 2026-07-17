@@ -75,12 +75,8 @@
                                     variant="secondary"
                                     size="sm"
                                     icon="icon:folder"
-                                    :attr="{
-                                    'data-bs-toggle': 'modal',
-                                    'data-bs-target': '#associatedFicheMatiereModal',
-                                    'data-fetch-url': absolute_url(path('app_fiche_matiere_search', { parcours: p.parcours_id, keyword: keyword_1 })),
-                                    'data-number-associated-fiches-matieres': nbFichesMatieres
-                                }"
+                                    dataAction="click->modalturbo#open"
+                                    href="{{ path('app_fiche_matiere_search', { parcours: p.parcours_id, keyword: keyword_1 }) }}"
                             />
                         </div>
                     {% endif %}
@@ -96,28 +92,5 @@
                 </p>
             </div>
         {% endif %}
-    </div>
-</div>
-
-{# todo: utiliser le modal turbo #}
-<div class="modal fade" id="associatedFicheMatiereModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content overflow-hidden rounded-3xl border-0 shadow-2xl">
-            <div class="modal-header border-b border-secondary-200 px-6 py-4 dark:border-secondary-700">
-                <h5 class="modal-title text-lg font-semibold text-text dark:text-secondary-100"
-                    id="titre-modale-recherche"></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-            </div>
-            <div class="modal-body px-6 py-5 text-center" id="associated-fiche-matiere-modal-body"></div>
-            <div class="modal-footer border-t border-secondary-200 px-6 py-4 dark:border-secondary-700">
-                <twig:Button
-                        label="Fermer"
-                        variant="primary"
-                        :soft="false"
-                        type="button"
-                        :attr="{ 'data-bs-dismiss': 'modal' }"
-                />
-            </div>
-        </div>
     </div>
 </div>

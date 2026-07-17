@@ -115,10 +115,7 @@
                                 <i class="fas fa-check"></i>
                                 <span> Vérifier la saisie</span>
                             </button>
-                            {#                            {% if isPass('dpe', formation, 'soumis_conseil') %} #}
-                            {# todo: plus utile ici ? mais permettre le dépôt global #}
-                            {#                                {{ component('historique_pv', {formation:formation}) }} #}
-                            {#                            {% endif %} #}
+                            
                             <button class="btn btn-sm btn-icon btn-icon-only btn-outline-info ms-1" type="button"
                                     {{ stimulus_controller('modal', {
                                         size: 'large',

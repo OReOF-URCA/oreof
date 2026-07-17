@@ -44,9 +44,7 @@
 {% block javascripts %}
 {{ parent() }}
 
-{% if typeRecherche == 'parcours' %}
-    <script src="{{ asset('search/search_parcours.js') }}"></script>
-{% elseif typeRecherche == 'ficheMatiere' %}
+{% if typeRecherche == 'ficheMatiere' %}
     <script src="{{ asset('search/search_fiche_matiere.js') }}"></script>
 {% endif %}
 
