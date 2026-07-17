@@ -462,4 +462,26 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findAllForEvolutionMatrix(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.formation', 'f')
+            ->addSelect('f')
+            ->leftJoin('f.dpe', 'formationCampagne')
+            ->addSelect('formationCampagne')
+            ->leftJoin('p.parcoursOrigineCopie', 'po')
+            ->addSelect('po')
+            ->leftJoin('p.dpeParcours', 'dp')
+            ->addSelect('dp')
+            ->leftJoin('dp.campagneCollecte', 'camp')
+            ->addSelect('camp')
+            ->andWhere('p.libelle <> :libelleParcoursDefaut')
+            ->setParameter('libelleParcoursDefaut', Parcours::PARCOURS_DEFAUT)
+            ->orderBy('p.id', 'ASC')
+            ->addOrderBy('camp.annee', 'ASC')
+            ->addOrderBy('camp.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }
