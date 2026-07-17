@@ -44,6 +44,7 @@ versioning_json/*
 
 ### API JSON Versioning ###
 public/api_json/
+public/api_json_v2/
 
 ###> phpunit/phpunit ###
 /phpunit.xml
@@ -58,3 +59,6 @@ public/api_json/
 ### exclude sql ###
 /*.sql
 /pense-bete.md
+
+### token fontawesome ###
+.npmrc

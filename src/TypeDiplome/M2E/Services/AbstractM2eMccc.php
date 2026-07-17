@@ -38,8 +38,8 @@ class AbstractM2eMccc
     public const CEL_REGIME_FI_APPRENTISSAGE = 'C11';
     public const CEL_REGIME_FC_CONTRAT_PRO = 'C13';
 
-    public const CEL_DATE_CFVU = 'W26';
-    public const CEL_DATE_CONSEIL = 'W25';
+    public const CEL_DATE_CFVU = 'Y26';
+    public const CEL_DATE_CONSEIL = 'Y25';
 
     //Colonnes sur Modèles
 
@@ -71,6 +71,7 @@ class AbstractM2eMccc
     public const COL_MCCC_SECONDE_CHANCE_CC_AVEC_TP = 25;
     public const COL_MCCC_SECONDE_CHANCE_CC_SUP_10 = 26;
     public const COL_MCCC_SECONDE_CHANCE_CT = 27;
+    public const COL_FIRST_UE = 28;
 
     public const COL_DETAIL_TYPE_EPREUVES = "A28";
 

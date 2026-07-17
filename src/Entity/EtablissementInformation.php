@@ -21,6 +21,9 @@ class EtablissementInformation
     private ?string $calendrier_inscription = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $tarif_inscription = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $informations_pratiques = null;
 
     #[ORM\OneToOne(inversedBy: 'etablissement_information', cascade: ['persist', 'remove'])]
@@ -52,6 +55,18 @@ class EtablissementInformation
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $secondeChance = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $mentionHandicap = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $savoirPlusOrientationInsertion = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $relationsInternationales = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $associationsEtudiantes = null;
 
     public function getId(): ?int
     {
@@ -210,6 +225,65 @@ class EtablissementInformation
     public function setSecondeChance(?string $secondeChance): static
     {
         $this->secondeChance = $secondeChance;
+
+        return $this;
+    }
+
+    public function getTarifInscription(): ?string
+    {
+        return $this->tarif_inscription;
+    }
+
+    public function setTarifInscription(?string $tarif_inscription): static
+    {
+        $this->tarif_inscription = $tarif_inscription;
+        return $this;
+    }
+
+    public function getMentionHandicap(): ?string
+    {
+        return $this->mentionHandicap;
+    }
+
+    public function setMentionHandicap(?string $mentionHandicap): static
+    {
+        $this->mentionHandicap = $mentionHandicap;
+
+        return $this;
+    }
+
+    public function getSavoirPlusOrientationInsertion(): ?string
+    {
+        return $this->savoirPlusOrientationInsertion;
+    }
+
+    public function setSavoirPlusOrientationInsertion(?string $savoirPlusOrientationInsertion): static
+    {
+        $this->savoirPlusOrientationInsertion = $savoirPlusOrientationInsertion;
+
+        return $this;
+    }
+
+    public function getRelationsInternationales(): ?string
+    {
+        return $this->relationsInternationales;
+    }
+
+    public function setRelationsInternationales(?string $relationsInternationales): static
+    {
+        $this->relationsInternationales = $relationsInternationales;
+
+        return $this;
+    }
+
+    public function getAssociationsEtudiantes(): ?string
+    {
+        return $this->associationsEtudiantes;
+    }
+
+    public function setAssociationsEtudiantes(?string $associationsEtudiantes): static
+    {
+        $this->associationsEtudiantes = $associationsEtudiantes;
 
         return $this;
     }

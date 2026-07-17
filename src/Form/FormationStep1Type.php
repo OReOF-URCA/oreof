@@ -28,26 +28,34 @@ class FormationStep1Type extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Responsable / co-responsable modifiables directement sur la page d'édition
+        // pour les formations non classiques uniquement ; verrouillés (grisés) pour les
+        // classiques, où le changement passe par un circuit dédié.
+        $formation = $builder->getData();
+        $verrouille = $formation?->getTypeDiplome()?->isClassique() ?? true;
+
         $builder
             ->add('responsableMention', EntityType::class, [
                 'required' => false,
                 'help' => '',
-                'disabled' => true,
+                'disabled' => $verrouille,
                 'class' => User::class,
                 'choice_label' => 'display',
+                'query_builder' => fn($er) => $er->createQueryBuilder('u')
+                    ->orderBy('u.nom', 'ASC')
+                    ->addOrderBy('u.prenom', 'ASC'),
+                'attr' => ['data-action' => 'change->formation--step1#saveRespFormation'],
             ])
             ->add('coResponsable', EntityType::class, [
                 'required' => false,
-                'disabled' => true,
+                'disabled' => $verrouille,
                 'help' => '',
                 'class' => User::class,
-//                'query_builder' => function ($er) {
-//                    return $er->createQueryBuilder('u')
-//                        ->orderBy('u.nom', 'ASC')
-//                        ->addOrderBy('u.prenom', 'ASC');
-//                },
-//                'attr' => ['data-action' => 'change->formation--step1#saveCoRespFormation'],
                 'choice_label' => 'display',
+                'query_builder' => fn($er) => $er->createQueryBuilder('u')
+                    ->orderBy('u.nom', 'ASC')
+                    ->addOrderBy('u.prenom', 'ASC'),
+                'attr' => ['data-action' => 'change->formation--step1#saveCoRespFormation'],
             ])
             ->add('sigle', TextType::class, [
                 'required' => false,

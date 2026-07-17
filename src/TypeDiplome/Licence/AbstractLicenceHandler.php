@@ -19,6 +19,7 @@ use App\Entity\TypeEpreuve;
 use App\Repository\BlocCompetenceRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
+use App\TypeDiplome\Licence\Services\ExportJsonApi;
 use App\TypeDiplome\Licence\Services\LicenceMccc;
 use App\TypeDiplome\Licence\Services\LicenceMcccVersion;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
@@ -48,16 +49,24 @@ abstract class AbstractLicenceHandler implements TypeDiplomeHandlerInterface, Ty
         protected EntityManagerInterface $entityManager,
         protected LicenceMccc            $licenceMccc,
         protected LicenceMcccVersion     $licenceMcccVersion,
+        protected ExportJsonApi $exportJsonApi,
         private BlocCompetenceRepository $blocCompetenceRepository,
         private StructureParcoursLicence $structureParcoursLicence)
     {
-        $typeD = $typeDiplomeRepository->findOneBy(['libelle_court' => $this->getLibelleCourt()]);
+//        todo: a mettre sur les différents type de diplôme ? $this->getLibelleCourt() => retourne toujours cpi ?
+//        $typeD = $typeDiplomeRepository->findOneBy(['libelle_court' => $this->getLibelleCourt()]);
+//
+//        if ($typeD === null) {
+//            throw new TypeDiplomeNotFoundException();
+//        }
+//
+//        $this->typeEpreuves = $this->entityManager->getRepository(TypeEpreuve::class)->findByTypeDiplome($typeD);
+    }
 
-        if ($typeD === null) {
-            throw new TypeDiplomeNotFoundException();
-        }
-
-        $this->typeEpreuves = $this->entityManager->getRepository(TypeEpreuve::class)->findByTypeDiplome($typeD);
+    public function exportJsonApi(Parcours $parcours): array
+    {
+        $dto = $this->calculStructureParcours($parcours);
+        return $this->exportJsonApi->exportJson($dto, $parcours);
     }
 
     public function getTypeEpreuves(): array

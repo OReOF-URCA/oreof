@@ -9,6 +9,10 @@
         <td>{{ type_diplome.libelleCourt }}</td>
     </tr>
     <tr>
+        <th>Structure classique</th>
+        <td>{{ type_diplome.classique|badgeBoolean }}</td>
+    </tr>
+    <tr>
         <th>Modalités d'admission</th>
         <td>
             {{  type_diplome.getModalitesAdmission 

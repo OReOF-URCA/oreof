@@ -127,8 +127,8 @@
                         data-formation-id="{{ formation.formation.id }}"
 
                     >
-                        <td>{{ formation.formation.composantePorteuse.libelle }}</td>
-                        <td>{{ formation.formation.typeDiplome.libelle }}</td>
+                        <td>{{ formation.formation.composantePorteuse ? formation.formation.composantePorteuse.libelle : '-' }}</td>
+                        <td>{{ formation.formation.typeDiplome ? formation.formation.typeDiplome.libelle : '-' }}</td>
                         <td>{{ formation.formation.display }}</td>
                         <td>
                             {% if formation.formation.hasParcours == false %}

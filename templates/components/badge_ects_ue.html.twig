@@ -1,3 +1,7 @@
 <span {{ attributes }} id="ects_ue_{{ this.ue.id }}_{{ this.parcours.id }}">
-    {{ this.ects|badgeEctsUe(this.maxEcts) }}
+    {% if not this.hasEcts %}
+        <span class="badge bg-success">Sans ECTS</span>
+    {% else %}
+        {{ this.ects|badgeEctsUe(this.maxEcts) }}
+    {% endif %}
 </span>

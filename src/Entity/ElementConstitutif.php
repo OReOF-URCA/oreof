@@ -35,7 +35,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups('parcours_json_versioning')]
+    #[Groups('parcours_json_versioning', 'DTO_json_versioning')]
     #[ORM\Column(length: 30, nullable: true, enumType: ModaliteEnseignementEnum::class)]
     private ?ModaliteEnseignementEnum $modaliteEnseignement = null;
 
@@ -105,6 +105,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     #[ORM\ManyToOne(cascade: ['persist'], fetch: 'EAGER', inversedBy: 'elementConstitutifs')]
     private ?Ue $ue = null;
 
+    #[Groups('DTO_json_versioning')]
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $texteEcLibre = null;
 
@@ -112,6 +113,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $libelle = null;
 
+    #[Groups('DTO_json_versioning')]
     #[ORM\ManyToOne(cascade: ['persist'], fetch: 'EAGER', inversedBy: 'elementConstitutifs')]
     private ?TypeEc $typeEc = null;
 
@@ -124,6 +126,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     #[ORM\OrderBy(['ordre' => 'ASC'])]
     private Collection $ecEnfants;
 
+    #[Groups('DTO_json_versioning')]
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $typeMccc = null;
 
@@ -170,6 +173,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     #[ORM\Column(length: 10, nullable: true)]
     private ?string $codeApogee = null;
 
+    #[Groups('DTO_json_versioning')]
     #[ORM\Column(nullable: true)]
     private ?bool $heuresSpecifiques = null;
 
@@ -177,6 +181,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     #[ORM\Column(nullable: true)]
     private ?bool $mccc_specifiques = null;
 
+    #[Groups('DTO_json_versioning')]
     #[ORM\Column(nullable: true)]
     private ?bool $ects_specifiques = null;
 

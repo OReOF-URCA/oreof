@@ -26,10 +26,10 @@ class TypeDiplome
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $libelle_court = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $semestreDebut = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $semestreFin = null;
 
     #[ORM\Column]
@@ -61,7 +61,7 @@ class TypeDiplome
     #[ORM\ManyToMany(targetEntity: TypeEpreuve::class, mappedBy: 'typeDiplomes')]
     private Collection $typeEpreuves;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?bool $debutSemestreFlexible = null;
 
     #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
@@ -114,6 +114,21 @@ class TypeDiplome
 
     #[ORM\Column(nullable: true)]
     private ?bool $controleAssiduite = null;
+
+    #[ORM\Column]
+    private ?bool $classique = true;
+
+    #[ORM\Column(options: ['default' => true])]
+    private bool $hasEcts = true;
+
+    #[ORM\Column(options: ['default' => true])]
+    private bool $passageCfvu = true;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $nbEctsParSemestre = 30;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $logo = [];
 
     public function __construct()
     {
@@ -172,7 +187,7 @@ class TypeDiplome
         return $this->semestreFin;
     }
 
-    public function setSemestreFin(int $semestreFin): self
+    public function setSemestreFin(?int $semestreFin): self
     {
         $this->semestreFin = $semestreFin;
 
@@ -564,6 +579,9 @@ class TypeDiplome
 
     public function getNbAnnee(): int
     {
+        if ($this->semestreFin === null || $this->semestreDebut === null) {
+            return 0;
+        }
         return ($this->semestreFin - $this->semestreDebut + 1) / 2;
     }
 
@@ -613,5 +631,68 @@ class TypeDiplome
         return $this;
     }
 
+    public function getLogo(): ?array
+    {
+        return $this->logo;
+    }
 
+    public function setLogo(?array $logo): static
+    {
+        $this->logo = $logo;
+        return $this;
+    }
+
+    public function addLogo(string $filename): static
+    {
+        $this->logo[] = $filename;
+        return $this;
+    }
+
+    public function isClassique(): ?bool
+    {
+        return $this->classique ?? true;
+    }
+
+    public function setClassique(bool $classique): static
+    {
+        $this->classique = $classique;
+
+        return $this;
+    }
+
+    public function isHasEcts(): bool
+    {
+        return $this->hasEcts;
+    }
+
+    public function setHasEcts(bool $hasEcts): static
+    {
+        $this->hasEcts = $hasEcts;
+
+        return $this;
+    }
+
+    public function isPassageCfvu(): bool
+    {
+        return $this->passageCfvu;
+    }
+
+    public function setPassageCfvu(bool $passageCfvu): static
+    {
+        $this->passageCfvu = $passageCfvu;
+
+        return $this;
+    }
+
+    public function getNbEctsParSemestre(): ?int
+    {
+        return $this->nbEctsParSemestre;
+    }
+
+    public function setNbEctsParSemestre(?int $nbEctsParSemestre): static
+    {
+        $this->nbEctsParSemestre = $nbEctsParSemestre;
+
+        return $this;
+    }
 }

@@ -37,7 +37,7 @@ class UserProfilController extends BaseController
     {
     }
 
-    #[Route('/', name: 'index', methods: ['GET'])]
+    #[Route('/affectations', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
         return $this->render('config/user_profil/index.html.twig');

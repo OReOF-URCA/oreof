@@ -94,8 +94,16 @@ class AppExtension extends AbstractExtension
         return ($value !== null && trim($value) !== '') ? $value : '<span class="badge bg-danger">Non renseigné</span>';
     }
 
-    public function filtreHeures(?float $heures): string
+    public function filtreHeures(float|string|null $heures): string
     {
+        if (null === $heures) {
+            return '';
+        }
+
+        if (is_string($heures)) {
+            return $heures;
+        }
+
         return Tools::filtreHeures($heures);
     }
 

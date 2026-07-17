@@ -18,6 +18,7 @@ use App\Enums\NiveauLangueEnum;
 use App\Enums\RegimeInscriptionEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
+use App\Enums\DureeParcoursUniteEnum;
 use App\Repository\ParcoursRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -173,6 +174,12 @@ class Parcours
     #[Groups('parcours_json_versioning')]
     private ?string $sigle = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $maquettePdf = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $maquettePdfNomOriginal = null;
+
     #[ORM\Column]
     private ?array $etatSteps = [];
 
@@ -302,11 +309,26 @@ class Parcours
     #[ORM\Column]
     private ?int $capaciteAccueil = 0;
 
+    #[ORM\Column(nullable: true)]
+    private ?float $dureeParcours = null;
+
+    #[ORM\Column(length: 20, nullable: true, enumType: DureeParcoursUniteEnum::class)]
+    private ?DureeParcoursUniteEnum $dureeParcoursUnite = null;
+
     /**
      * @var Collection<int, ChangeParcours>
      */
     #[ORM\OneToMany(mappedBy: 'parcours', targetEntity: ChangeParcours::class)]
     private Collection $changeParcours;
+
+    #[ORM\Column(nullable: true)]
+    private ?array $logo = [];
+
+    /**
+     * @var Collection<int, ParcoursRamification>
+     */
+    #[ORM\OneToMany(mappedBy: 'parcoursCible', targetEntity: ParcoursRamification::class)]
+    private Collection $parcoursCibleRamifications;
 
     public function __construct(?Formation $formation)
     {
@@ -333,6 +355,7 @@ class Parcours
         $this->userProfils = new ArrayCollection();
         $this->annees = new ArrayCollection();
         $this->changeParcours = new ArrayCollection();
+        $this->parcoursCibleRamifications = new ArrayCollection();
     }
 
 
@@ -762,6 +785,30 @@ class Parcours
     public function setSigle(?string $sigle): self
     {
         $this->sigle = $sigle;
+
+        return $this;
+    }
+
+    public function getMaquettePdf(): ?string
+    {
+        return $this->maquettePdf;
+    }
+
+    public function setMaquettePdf(?string $maquettePdf): self
+    {
+        $this->maquettePdf = $maquettePdf;
+
+        return $this;
+    }
+
+    public function getMaquettePdfNomOriginal(): ?string
+    {
+        return $this->maquettePdfNomOriginal;
+    }
+
+    public function setMaquettePdfNomOriginal(?string $maquettePdfNomOriginal): self
+    {
+        $this->maquettePdfNomOriginal = $maquettePdfNomOriginal;
 
         return $this;
     }
@@ -1757,6 +1804,28 @@ class Parcours
         return $this;
     }
 
+    public function getDureeParcours(): ?float
+    {
+        return $this->dureeParcours;
+    }
+
+    public function setDureeParcours(?float $dureeParcours): static
+    {
+        $this->dureeParcours = $dureeParcours;
+        return $this;
+    }
+
+    public function getDureeParcoursUnite(): ?DureeParcoursUniteEnum
+    {
+        return $this->dureeParcoursUnite;
+    }
+
+    public function setDureeParcoursUnite(?DureeParcoursUniteEnum $dureeParcoursUnite): static
+    {
+        $this->dureeParcoursUnite = $dureeParcoursUnite;
+        return $this;
+    }
+
     /**
      * @return Collection<int, ChangeParcours>
      */
@@ -1781,6 +1850,54 @@ class Parcours
             // set the owning side to null (unless already changed)
             if ($changeParcour->getParcours() === $this) {
                 $changeParcour->setParcours(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getLogo(): ?array
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?array $logo): static
+    {
+        $this->logo = $logo;
+
+        return $this;
+    }
+
+    public function addLogo(string $filename): static
+    {
+        $this->logo[] = $filename;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ParcoursRamification>
+     */
+    public function getParcoursCibleRamifications(): Collection
+    {
+        return $this->parcoursCibleRamifications;
+    }
+
+    public function addParcoursCibleRamification(ParcoursRamification $parcoursCibleRamification): static
+    {
+        if (!$this->parcoursCibleRamifications->contains($parcoursCibleRamification)) {
+            $this->parcoursCibleRamifications->add($parcoursCibleRamification);
+            $parcoursCibleRamification->setParcoursCible($this);
+        }
+
+        return $this;
+    }
+
+    public function removeParcoursCibleRamification(ParcoursRamification $parcoursCibleRamification): static
+    {
+        if ($this->parcoursCibleRamifications->removeElement($parcoursCibleRamification)) {
+            // set the owning side to null (unless already changed)
+            if ($parcoursCibleRamification->getParcoursCible() === $this) {
+                $parcoursCibleRamification->setParcoursCible(null);
             }
         }
 

@@ -27,6 +27,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use UnitEnum;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class FormationSesType extends AbstractType
 {
@@ -123,6 +124,7 @@ class FormationSesType extends AbstractType
                 'choice_label' => 'display',
                 'autocomplete' => true,
             ])
+
             ->addEventListener(
                 FormEvents::POST_SUBMIT,
                 static function (FormEvent $event) use ($mentionRepository) {
@@ -162,8 +164,12 @@ class FormationSesType extends AbstractType
                         ]);
                     }
                 }
-            )
-;
+            );
+
+        $formation = $builder->getData();
+        if (($formation?->getTypeDiplome()?->isClassique() ?? true) === false) {
+            $builder->remove('composantePorteuse');
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void

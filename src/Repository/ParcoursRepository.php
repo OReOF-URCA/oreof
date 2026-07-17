@@ -124,7 +124,11 @@ class ParcoursRepository extends ServiceEntityRepository
                     $direction
                 );
             } else {
-                $qb->addOrderBy('p.' . $sort, $direction);
+                $validSortFields = ['libelle', 'sigle', 'typeParcours']; // Règle un crash qui arrive parfois quand on supprime ce que l'on a écrit dans la recherche de parcours.
+                if (in_array($sort, $validSortFields))
+                {
+                    $qb->addOrderBy('p.' . $sort, $direction);
+                }
             }
         }
 
@@ -424,5 +428,38 @@ class ParcoursRepository extends ServiceEntityRepository
             ->setParameter(':idCampagne', $campagneC->getId())
             ->getQuery()
             ->getResult();
-    } 
+    }
+
+    public function findByNomComplet(string $keyword, int $campagneId) {
+        $qb = $this->createQueryBuilder('p');
+        return $qb
+            ->select(
+                [
+                    'p.id AS id_parcours', 
+                    'p.libelle AS nom_parcours', 
+                    'm.libelle AS nom_formation', 
+                    'td.libelle AS nom_type_diplome',
+                    'p.typeParcours AS type_parcours'
+                ]
+            )
+            ->join('p.formation', 'f')
+            ->join('f.mention', 'm')
+            ->join('f.typeDiplome', 'td')
+            ->join('p.dpeParcours', 'dpe')
+            ->join('dpe.campagneCollecte', 'camp')
+            ->where(
+                $qb->expr()->andX(
+                    $qb->expr()->orX(
+                        'p.libelle LIKE :keyword',
+                        'm.libelle LIKE :keyword',
+                        'td.libelle LIKE :keyword'
+                    ),
+                    $qb->expr()->eq('camp.id', ':campagneId')
+                )
+            )
+            ->setParameter(':keyword', '%' . $keyword . '%')
+            ->setParameter(':campagneId', $campagneId)
+            ->getQuery()
+            ->getResult();
+    }
 }

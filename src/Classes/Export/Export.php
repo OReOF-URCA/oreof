@@ -108,6 +108,8 @@ class Export
                 return $this->exportVolumeHoraire();
             case 'synthese_modification':
                 return $this->exportSyntheseModifications();
+            case 'zip-fiches_matieres':
+                return $this->exportFicheMatiere();
         }
 
         throw new \InvalidArgumentException('Type de document non géré : ' . $this->typeDocument);

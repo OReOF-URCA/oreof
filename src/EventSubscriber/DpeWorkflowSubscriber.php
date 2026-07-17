@@ -43,7 +43,6 @@ class DpeWorkflowSubscriber implements EventSubscriberInterface
             return;
         }
         $meta = $this->dpeParcoursWorkflow->getMetadataStore()->getTransitionMetadata($transition) ?? [];
-
         $eventKey = sprintf('workflow.dpeParcours.transition.%s', $transition->getName());
         $context = [
             'subject' => '[ORéOF] ' . $data->getTitre($meta),
@@ -53,23 +52,4 @@ class DpeWorkflowSubscriber implements EventSubscriberInterface
         $recipients = $this->recipients->resolveRecipients('dpeParcours', $transition->getName(), $data);
         $this->notifier->notify($recipients['recipients'], $eventKey, $this->dpeParcoursWorkflow->getName(), $context);
     }
-
-//    public function onGuard(GuardEvent $event): void
-//    {
-//        $transition = $event->getTransition();
-//        $wf = $event->getWorkflow();
-//        $meta = $wf->getMetadataStore()->getTransitionMetadata($transition) ?? [];
-//
-//        // Exemple de guard générique : une propriété doit être remplie avant 'valider_*'
-//        if (($meta['type'] ?? null) === 'valider') {
-//            $subject = $event->getSubject();
-//            if (method_exists($subject, 'isReadyForValidation') && !$subject->isReadyForValidation()) {
-//                $event->setBlocked(true);
-//                $event->addTransitionBlocker(new \Symfony\Component\Workflow\TransitionBlocker(
-//                    "Des informations obligatoires manquent avant validation.", 'missing_data'
-//                ));
-//            }
-//        }
-//        // Tu peux aussi appliquer des guard par rôle/meta: $meta['required_role'] etc.
-//    }
 }

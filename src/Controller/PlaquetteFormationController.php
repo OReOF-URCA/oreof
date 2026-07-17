@@ -38,7 +38,7 @@ class PlaquetteFormationController extends AbstractController
             'titre' => 'Plaquette de la formation '.$formation->getDisplay(),
             'tParcours' => $tParcours,
             'rubriques' => $rubriques,
-        ], 'Plaquette_formation_'.$formation->getDisplay().'.pdf', [
+        ], 'Plaquette_formation_'.$formation->getDisplay(), [
             'withTemplate' => true,
         ]);
     }
