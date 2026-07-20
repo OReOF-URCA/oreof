@@ -1,0 +1,375 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = "Synthèse de l'offre de formation" %}
+{% set header_description = "Consultez les données consolidées des plateformes de recrutement pour la campagne active (Parcoursup, MonMaster, eCandidat)." %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Navigation par Plateforme -->
+    <div class="rounded-xl border bg-white p-2 shadow-sm">
+        <nav class="flex flex-wrap gap-1" aria-label="Tabs">
+            {% for plateforme in plateformes %}
+            <button onclick="switchPlatform('{{ plateforme.code }}')" id="btn-{{ plateforme.code }}" 
+                    class="platform-tab flex-1 min-w-[120px] rounded-lg px-4 py-3 text-center text-sm font-semibold transition-all duration-200 {% if loop.first %}bg-primary-50 text-primary shadow-sm hover:bg-primary-100 dark:bg-primary-950 dark:text-primary-400{% else %}text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100{% endif %}">
+                {{ plateforme.libelle }}
+            </button>
+            {% endfor %}
+        </nav>
+    </div>
+
+    <!-- Catégories eCandidat (Affichées seulement si eCandidat est actif) -->
+    <div id="ecandidat-categories-container" class="hidden rounded-xl border bg-slate-50/50 p-2 dark:bg-slate-900/50">
+        <div class="flex flex-wrap gap-1.5 items-center">
+            <span class="text-xs font-bold text-slate-400 dark:text-slate-500 px-3 uppercase tracking-wider">Filtre Diplôme :</span>
+            {% set ec_categories = [
+                "BUT 2 & BUT 3",
+                "Licences L2 & L3",
+                "Licence Professionnelle (LP)",
+                "Diplôme d'Ingénieur (DI)",
+                "Master 2 & Autres"
+            ] %}
+            {% for category in ec_categories %}
+                <button onclick="switchECandidatCategory('{{ category }}', {{ loop.index0 }})" 
+                        id="btn-ec-{{ loop.index0 }}"
+                        data-ec-idx="{{ loop.index0 }}"
+                        class="ecandidat-tab rounded-lg px-3 py-1.5 text-xs font-semibold transition-all duration-150 {% if loop.first %}bg-white border text-slate-800 shadow-sm dark:bg-slate-800 dark:text-slate-200{% else %}text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800{% endif %}">
+                    {{ category }}
+                </button>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Section de Filtres Dynamiques -->
+    <div class="rounded-xl border bg-white p-4 shadow-sm dark:bg-slate-950">
+        <div class="grid gap-4 md:grid-cols-4">
+            <!-- Recherche textuelle -->
+            <div class="relative">
+                <input type="text" id="search-input" oninput="applyFilters()"
+                       class="w-full rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm placeholder-slate-400 focus:border-primary focus:bg-white focus:outline-none dark:border-slate-800 dark:bg-slate-900 dark:focus:border-primary-500" 
+                       placeholder="Rechercher une mention, un parcours...">
+            </div>
+
+            <!-- Filtre Composante -->
+            <div>
+                <select id="filter-composante" onchange="applyFilters()"
+                        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-slate-800 dark:bg-slate-900">
+                    <option value="">Toutes les composantes</option>
+                </select>
+            </div>
+
+            <!-- Filtre Diplôme -->
+            <div>
+                <select id="filter-diplome" onchange="applyFilters()"
+                        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-slate-800 dark:bg-slate-900">
+                    <option value="">Tous les diplômes</option>
+                </select>
+            </div>
+
+            <!-- Filtre Ville -->
+            <div>
+                <select id="filter-ville" onchange="applyFilters()"
+                        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none dark:border-slate-800 dark:bg-slate-900">
+                    <option value="">Toutes les villes</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Compteur de lignes -->
+        <div class="mt-3 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <div>
+                Affichage de <span id="count-visible" class="font-bold text-slate-700 dark:text-slate-300">0</span> parcours/année active(s) sur <span id="count-total" class="font-bold">0</span> au total
+            </div>
+            <div id="source-file-info" class="italic text-slate-400 dark:text-slate-500">
+                Fichier source : -
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteneur Asynchrone Turbo-Frame pour le Tableau Actif -->
+    <div class="overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-slate-950">
+        {% set default_platform = plateformes[0].code|default('PSUP') %}
+        <turbo-frame id="offre_synthese_table" src="{{ path('app_conseils_synthese_offre_table', {platform: default_platform}) }}">
+            <div class="p-8 text-center text-slate-500">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-300 border-t-primary mb-2"></div>
+                <div>Chargement des données...</div>
+            </div>
+        </turbo-frame>
+    </div>
+</div>
+
+<script>
+    let activePlatform = '{{ plateformes[0].code|default("PSUP") }}';
+    let activeECandidatIdx = 0;
+
+    // Initialisation & Branchement sur Turbo-Frame
+    document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('turbo:frame-load', (e) => {
+            if (e.target.id === 'offre_synthese_table') {
+                rebuildFilterDropdowns(e.target);
+            }
+        });
+    });
+
+    function toggleAllComposantes(expand) {
+        document.querySelectorAll('.composante-child-row').forEach(row => {
+            if (expand) {
+                row.classList.remove('comp-collapsed');
+            } else {
+                row.classList.add('comp-collapsed');
+            }
+        });
+        document.querySelectorAll('.comp-chevron').forEach(icon => {
+            if (expand) {
+                icon.classList.add('rotate-90');
+            } else {
+                icon.classList.remove('rotate-90');
+            }
+        });
+    }
+
+    function toggleAllParcours(expand) {
+        document.querySelectorAll('.parcours-child-row').forEach(row => {
+            if (expand) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+        document.querySelectorAll('.chevron-icon').forEach(icon => {
+            if (expand) {
+                icon.classList.add('rotate-90');
+            } else {
+                icon.classList.remove('rotate-90');
+            }
+        });
+    }
+
+    function switchPlatform(platform) {
+        if (activePlatform === platform && platform !== 'EC') return;
+        activePlatform = platform;
+        
+        // Mettre à jour les classes des onglets
+        document.querySelectorAll('.platform-tab').forEach(btn => {
+            btn.classList.remove('bg-primary-50', 'text-primary', 'shadow-sm', 'dark:bg-primary-950', 'dark:text-primary-400');
+            btn.classList.add('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900', 'dark:text-slate-400', 'dark:hover:bg-slate-800', 'dark:hover:text-slate-100');
+        });
+        
+        const activeBtn = document.getElementById('btn-' + platform);
+        if (activeBtn) {
+            activeBtn.classList.add('bg-primary-50', 'text-primary', 'shadow-sm', 'dark:bg-primary-950', 'dark:text-primary-400');
+            activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-50', 'hover:text-slate-900', 'dark:text-slate-400', 'dark:hover:bg-slate-800', 'dark:hover:text-slate-100');
+        }
+
+        // Afficher/masquer les catégories eCandidat
+        const ecCat = document.getElementById('ecandidat-categories-container');
+        if (platform === 'EC') {
+            ecCat.classList.remove('hidden');
+        } else {
+            ecCat.classList.add('hidden');
+        }
+
+        // Réinitialiser le champ recherche
+        document.getElementById('search-input').value = '';
+
+        // Charger l'URL correspondante dans le Turbo Frame
+        const frame = document.getElementById('offre_synthese_table');
+        if (frame) {
+            let url = "{{ path('app_conseils_synthese_offre_table') }}?platform=" + platform;
+            if (platform === 'EC') {
+                url += "&category=" + activeECandidatIdx;
+            }
+            
+            // Afficher le chargement
+            frame.innerHTML = `
+                <div class="p-8 text-center text-slate-500">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-300 border-t-primary mb-2"></div>
+                    <div>Chargement des données...</div>
+                </div>
+            `;
+            frame.src = url;
+        }
+    }
+
+    function switchECandidatCategory(category, idx) {
+        if (activeECandidatIdx === idx) return;
+        activeECandidatIdx = idx;
+        
+        // Mettre à jour les sous-onglets eCandidat
+        document.querySelectorAll('.ecandidat-tab').forEach(btn => {
+            btn.classList.remove('bg-white', 'border', 'text-slate-800', 'shadow-sm', 'dark:bg-slate-800', 'dark:text-slate-200');
+            btn.classList.add('text-slate-500', 'hover:bg-slate-100', 'hover:text-slate-800', 'dark:text-slate-400', 'dark:hover:bg-slate-800');
+        });
+        
+        const activeBtn = document.getElementById('btn-ec-' + idx);
+        if (activeBtn) {
+            activeBtn.classList.add('bg-white', 'border', 'text-slate-800', 'shadow-sm', 'dark:bg-slate-800', 'dark:text-slate-200');
+            activeBtn.classList.remove('text-slate-500', 'hover:bg-slate-100', 'hover:text-slate-800', 'dark:text-slate-400', 'dark:hover:bg-slate-800');
+        }
+
+        // Réinitialiser la recherche
+        document.getElementById('search-input').value = '';
+
+        // Charger l'URL correspondante dans le Turbo Frame
+        const frame = document.getElementById('offre_synthese_table');
+        if (frame) {
+            let url = "{{ path('app_conseils_synthese_offre_table') }}?platform=EC&category=" + idx;
+            frame.innerHTML = `
+                <div class="p-8 text-center text-slate-500">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-300 border-t-primary mb-2"></div>
+                    <div>Chargement des données...</div>
+                </div>
+            `;
+            frame.src = url;
+        }
+    }
+
+    function rebuildFilterDropdowns(container) {
+        if (!container) return;
+
+        // Extract filters from leaf year-row nodes
+        const yearRows = container.querySelectorAll('tbody tr.year-row');
+        
+        // Sets pour stocker les valeurs uniques
+        const composantes = new Set();
+        const diplomes = new Set();
+        const villes = new Set();
+
+        yearRows.forEach(row => {
+            const comp = row.getAttribute('data-composante');
+            const dipl = row.getAttribute('data-diplome');
+            const ville = row.getAttribute('data-ville');
+
+            if (comp && comp.trim() !== '') composantes.add(comp.trim());
+            if (dipl && dipl.trim() !== '') diplomes.add(dipl.trim());
+            if (ville && ville.trim() !== '') villes.add(ville.trim());
+        });
+
+        // 1. Mettre à jour Composante
+        const selComp = document.getElementById('filter-composante');
+        selComp.innerHTML = '<option value="">Toutes les composantes</option>';
+        Array.from(composantes).sort().forEach(c => {
+            selComp.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+
+        // 2. Mettre à jour Diplôme
+        const selDipl = document.getElementById('filter-diplome');
+        selDipl.innerHTML = '<option value="">Tous les diplômes</option>';
+        Array.from(diplomes).sort().forEach(d => {
+            selDipl.innerHTML += `<option value="${d}">${d}</option>`;
+        });
+
+        // 3. Mettre à jour Ville
+        const selVille = document.getElementById('filter-ville');
+        selVille.innerHTML = '<option value="">Toutes les villes</option>';
+        if (villes.size > 0) {
+            selVille.disabled = false;
+            selVille.parentElement.classList.remove('opacity-50');
+            Array.from(villes).sort().forEach(v => {
+                selVille.innerHTML += `<option value="${v}">${v}</option>`;
+            });
+        } else {
+            selVille.disabled = true;
+            selVille.parentElement.classList.add('opacity-50');
+        }
+
+        // Mettre à jour le fichier source / label
+        const fileInfo = document.getElementById('source-file-info');
+        const metaFile = container.querySelector('#meta-filename');
+        const filename = metaFile ? metaFile.getAttribute('data-filename') : '';
+        fileInfo.innerText = filename ? `Source : ${filename}` : '';
+
+        // Appliquer les filtres initiaux (toutes les lignes affichées)
+        applyFilters();
+    }
+
+    function applyFilters() {
+        const container = document.getElementById('offre_synthese_table');
+        if (!container) return;
+
+        const searchVal = document.getElementById('search-input').value.toLowerCase().trim();
+        const compVal = document.getElementById('filter-composante').value;
+        const diplVal = document.getElementById('filter-diplome').value;
+        const villeVal = document.getElementById('filter-ville').value;
+
+        // Hide all rows initially
+        container.querySelectorAll('tbody tr').forEach(row => {
+            row.style.display = 'none';
+        });
+
+        const visibleParcoursIds = new Set();
+        const visibleFormationIds = new Set();
+        const visibleCompIds = new Set();
+
+        const yearRows = container.querySelectorAll('tbody tr.year-row');
+        let visibleCount = 0;
+        let totalCount = yearRows.length;
+
+        yearRows.forEach(row => {
+            const comp = row.getAttribute('data-composante');
+            const dipl = row.getAttribute('data-diplome');
+            const ville = row.getAttribute('data-ville');
+
+            // Find parent names for textual search
+            const parId = row.getAttribute('data-parcours-id');
+            const parRow = container.querySelector('#parcours-' + parId);
+            const formaId = row.getAttribute('data-formation-id');
+            const formaRow = container.querySelector('#formation-' + formaId);
+            
+            const searchText = (
+                row.innerText + ' ' + 
+                (parRow ? parRow.innerText : '') + ' ' + 
+                (formaRow ? formaRow.innerText : '')
+            ).toLowerCase();
+
+            let matches = true;
+
+            // Filtre recherche textuelle
+            if (searchVal !== '' && !searchText.includes(searchVal)) {
+                matches = false;
+            }
+
+            // Filtre composante
+            if (compVal !== '' && comp !== compVal) {
+                matches = false;
+            }
+
+            // Filtre diplome
+            if (diplVal !== '' && dipl !== diplVal) {
+                matches = false;
+            }
+
+            // Filtre ville
+            if (villeVal !== '' && ville !== villeVal) {
+                matches = false;
+            }
+
+            if (matches) {
+                row.style.display = 'table-row';
+                visibleCount++;
+
+                visibleParcoursIds.add(parId);
+                visibleFormationIds.add(formaId);
+                visibleCompIds.add(row.getAttribute('data-comp-id'));
+            }
+        });
+
+        // Show matching parents
+        visibleParcoursIds.forEach(id => {
+            const row = container.querySelector('#parcours-' + id);
+            if (row) row.style.display = 'table-row';
+        });
+        visibleFormationIds.forEach(id => {
+            const row = container.querySelector('#formation-' + id);
+            if (row) row.style.display = 'table-row';
+        });
+        visibleCompIds.forEach(id => {
+            const row = container.querySelector('#comp-' + id);
+            if (row) row.style.display = 'table-row';
+        });
+
+        // Mettre à jour les compteurs
+        document.getElementById('count-visible').innerText = visibleCount;
+        document.getElementById('count-total').innerText = totalCount;
+    }
+</script>
+{% endblock %}

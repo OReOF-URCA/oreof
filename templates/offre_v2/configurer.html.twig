@@ -14,8 +14,32 @@
 {% set header_title = "Configurer la formation : "~formation.displayLong %}
 {% set header_description = "???" %}
 {% set typeDiplome = formation.typeDiplome %}
+{% set can_edit = is_granted('ROLE_ADMIN') or (campagne and campagne.isPeriodActive()) %}
 
 {% block content %}
+    {% if campagne and not campagne.isPeriodActive() %}
+        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-start gap-3 mb-4">
+            <div class="text-xl">⚠️</div>
+            <div>
+                <h3 class="font-semibold text-red-900">La campagne de collecte est fermée</h3>
+                <p class="mt-1">
+                    {% if campagne.dateOuvertureDpe and date() < campagne.dateOuvertureDpe %}
+                        Elle ouvrira le {{ campagne.dateOuvertureDpe|date('d/m/Y à H:i') }}.
+                    {% elseif campagne.dateClotureDpe and date() > campagne.dateClotureDpe %}
+                        Elle a fermé le {{ campagne.dateClotureDpe|date('d/m/Y à H:i') }}.
+                    {% else %}
+                        Elle n'est pas ouverte actuellement.
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        En tant qu'administrateur, vous pouvez exceptionnellement modifier les capacités.
+                    {% else %}
+                        Les modifications sont désactivées.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
     <form action="{{ path('offre_v2_sauvegarder', { slug: formation.slug }) }}" method="POST"
           data-controller="autosave-capacites"
           data-autosave-capacites-url-value="{{ path('offre_v2_sauvegarder', { slug: formation.slug }) }}"
@@ -68,12 +92,18 @@
                 <div data-autosave-capacites-target="status" class="text-sm font-semibold flex items-center gap-2 opacity-0 transition-opacity duration-300">
                 </div>
 
-                <button type="submit" class="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50 cursor-pointer">
-                    Sauvegarder en brouillon
-                </button>
-                <button type="button" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 cursor-pointer">
-                    Transmettre pour validation composante
-                </button>
+                {% if can_edit %}
+                    <button type="submit" class="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50 cursor-pointer">
+                        Sauvegarder en brouillon
+                    </button>
+                    <button type="button" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 cursor-pointer">
+                        Transmettre pour validation composante
+                    </button>
+                {% else %}
+                    <div class="text-sm text-slate-500 italic bg-slate-100 rounded-lg px-3 py-2">
+                        Modifications désactivées (hors période)
+                    </div>
+                {% endif %}
             </div>
 
         </twig:Card>
@@ -98,9 +128,10 @@
                         {% endif %}
                     </span>
                     <label for="parcours-{{ parcours.id }}" class="cursor-pointer"></label>
-                    <select class="rounded-lg border px-3 py-2 text-sm"
+                    <select class="rounded-lg border px-3 py-2 text-sm disabled:bg-slate-100 disabled:text-slate-500"
                             id="parcours-{{ parcours.id }}"
                             name="parcours_{{ parcours.id }}_reconduction"
+                            {{ not can_edit ? 'disabled' : '' }}
                     >
                         <option value="OUVERT" {% if currentEtat == 'OUVERT' or currentEtat == 'CREATION' or currentEtat == 'MODIFICATION' or currentEtat == 'MODIFICATION_TEXTE' or currentEtat == 'MODIFICATION_MCCC' or currentEtat == 'MODIFICATION_MCCC_TEXTE' %}selected{% endif %}>Ouvert</option>
                         <option value="NON_OUVERTURE" {% if currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}selected{% endif %}>Fermé</option>

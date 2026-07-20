@@ -50,6 +50,12 @@ final readonly class ConseilsMenuProvider implements MenuProviderInterface
                         label: 'menu.conseils.documents',
                         route: 'app_conseils_documents_index',
                     ),
+
+                    MenuItem::link(
+                        key: 'conseils.synthese_offre',
+                        label: 'menu.conseils.synthese_offre',
+                        route: 'app_conseils_synthese_offre',
+                    ),
                 ],
             )->withPosition(30),
         ];

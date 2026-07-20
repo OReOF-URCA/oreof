@@ -13,6 +13,14 @@
 {% set header_description = "Vue consolidée des ouvertures, plateformes, capacités et validations." %}
 
 {% block bouton_header %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <twig:Button href="{{ path('offre_v2_configurer_dates') }}"
+                     data-turbo="true"
+                     data-action="click->modalturbo#open"
+                     variant="secondary" class="mr-2">
+            Dates de collecte
+        </twig:Button>
+    {% endif %}
     <twig:Button href="#" variant="secondary" class="mr-2">
         Exporter Excel
     </twig:Button>
@@ -22,6 +30,29 @@
 {% endblock %}
 
 {% block content %}
+    {% if campagne and not campagne.isPeriodActive() %}
+        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-start gap-3 mb-4">
+            <div class="text-xl">⚠️</div>
+            <div>
+                <h3 class="font-semibold text-red-900">La campagne de collecte est fermée</h3>
+                <p class="mt-1">
+                    {% if campagne.dateOuvertureDpe and date() < campagne.dateOuvertureDpe %}
+                        Elle ouvrira le {{ campagne.dateOuvertureDpe|date('d/m/Y à H:i') }}.
+                    {% elseif campagne.dateClotureDpe and date() > campagne.dateClotureDpe %}
+                        Elle a fermé le {{ campagne.dateClotureDpe|date('d/m/Y à H:i') }}.
+                    {% else %}
+                        Elle n'est pas ouverte actuellement.
+                    {% endif %}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        En tant qu'administrateur, vous pouvez exceptionnellement modifier les capacités.
+                    {% else %}
+                        Les modifications sont désactivées.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    {% endif %}
+    
     <section class="space-y-6">
         <!-- KPI -->
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">

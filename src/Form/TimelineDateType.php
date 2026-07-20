@@ -13,6 +13,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use App\Enums\TimelineDateFlagEnum;
 use function Sodium\add;
 
 class TimelineDateType extends AbstractType
@@ -49,6 +51,19 @@ class TimelineDateType extends AbstractType
             ])
             ->add('inTimeline', YesNoType::class, [
                 'label' => 'timeline.inTimeline',
+            ])
+            ->add('flag', EnumType::class, [
+                'class' => TimelineDateFlagEnum::class,
+                'label' => 'Type de date (Flag)',
+                'choice_label' => fn (TimelineDateFlagEnum $choice) => match ($choice) {
+                    TimelineDateFlagEnum::NONE => 'Aucun',
+                    TimelineDateFlagEnum::OUVERTURE_COLLECTE => 'Ouverture de la collecte',
+                    TimelineDateFlagEnum::CLOTURE_COLLECTE => 'Clôture de la collecte',
+                    TimelineDateFlagEnum::CFVU => 'Date de la CFVU',
+                    TimelineDateFlagEnum::TRANSMISSION_SES => 'Transmission SES',
+                    TimelineDateFlagEnum::PUBLICATION => 'Publication',
+                },
+                'required' => true,
             ]);
     }
 

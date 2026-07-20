@@ -33,6 +33,7 @@ menu:
     chgt_rf: Changement RF/co RF
     synthses_modifs: Synthèse des modifications
     documents: Documents
+    synthese_offre: Synthèse offre de formation
   menu_droits: Utilisateurs et droits
   droits:
     en_attente: Utilisateurs en attente

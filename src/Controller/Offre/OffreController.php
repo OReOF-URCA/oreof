@@ -12,7 +12,9 @@ use App\Repository\AnneeRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
+use App\Service\CampagneCollecteService;
 use App\Service\ParcoursComparaisonService;
+use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -142,11 +144,8 @@ final class OffreController extends BaseController
                 'villes' => $villes,
             ],
             'tabStatistiques' => $tabStatistiques,
+            'campagne' => $this->getCampagneCollecte()
         ];
-        //        if ($isFrame) {
-        //            // Répondre avec un markup contenant le <turbo-frame id="offre_table"> attendu
-        //            return $this->render('offre/_table_frame.html.twig', $params);
-        //        }
 
 
         return $this->render('offre_v2/index.html.twig', $params);
@@ -207,6 +206,13 @@ final class OffreController extends BaseController
         }
 
         $campagne = $this->getCampagneCollecte();
+
+        if (!$campagne->isPeriodActive() && !$this->isGranted('ROLE_ADMIN')) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'La campagne de collecte est fermée. Modification impossible.'
+            ], Response::HTTP_FORBIDDEN);
+        }
 
         $changedYears = [];
 
@@ -465,5 +471,210 @@ final class OffreController extends BaseController
             'anomalies' => $anomalies,
             'comparaison' => $tableau
         ];
+    }
+
+    #[Route('/conseils/synthese-offre', name: 'app_conseils_synthese_offre')]
+    public function syntheseOffre(
+        PlateformeAdmissionRepository $plateformeAdmissionRepository
+    ): Response
+    {
+        if (
+            !$this->isGranted('ROLE_ADMIN')
+            && !$this->isGranted('EDIT', [
+                'route' => 'app_etablissement',
+                'subject' => 'etablissement',
+            ])
+        ) {
+            throw $this->createAccessDeniedException('Accès refusé.');
+        }
+
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $jsonPath = $projectDir . '/public/Docs-offre/synthese_offre_data.json';
+        
+        $data = [];
+        if (file_exists($jsonPath)) {
+            $json = file_get_contents($jsonPath);
+            $data = json_decode($json, true);
+        }
+        
+        return $this->render('offre_v2/synthese_offre.html.twig', [
+            'plateformes' => $plateformeAdmissionRepository->findAll()
+        ]);
+    }
+
+    #[Route('/conseils/synthese-offre/table', name: 'app_conseils_synthese_offre_table')]
+    public function syntheseOffreTable(
+        Request $request,
+        DpeParcoursRepository $dpeParcoursRepository,
+        PlateformeAdmissionParametreRepository $plateformeParamRepo,
+        EntityManagerInterface $em
+    ): Response {
+        if (
+            !$this->isGranted('ROLE_ADMIN')
+            && !$this->isGranted('EDIT', [
+                'route' => 'app_etablissement',
+                'subject' => 'etablissement',
+            ])
+        ) {
+            throw $this->createAccessDeniedException('Accès refusé.');
+        }
+
+        $platformCode = $request->query->get('platform', 'PSUP');
+        $categoryIdx = (int)$request->query->get('category', 0);
+        $campagne = $this->getCampagneCollecte();
+
+        // Find platform entity
+        $platformEntity = $em->getRepository(\App\Entity\PlateformeAdmission::class)->findOneBy(['code' => $platformCode]);
+        if (!$platformEntity) {
+            $platformEntity = $em->getRepository(\App\Entity\PlateformeAdmission::class)->findOneBy(['code' => strtolower($platformCode)]);
+        }
+
+        $ecCategories = [
+            "BUT 2 & BUT 3",
+            "Licences L2 & L3",
+            "Licence Professionnelle (LP)",
+            "Diplôme d'Ingénieur (DI)",
+            "Master 2 & Autres"
+        ];
+        $selectedCategory = $ecCategories[$categoryIdx] ?? "Master 2 & Autres";
+
+        // Filter and build tree from Database
+        $tFormations = [];
+        $anneeParams = []; // anneeId => PlateformeAdmissionParametre
+
+        if ($platformEntity) {
+            $allDpeParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne);
+
+            foreach ($allDpeParcours as $dpePar) {
+                $par = $dpePar->getParcours();
+                if (!$par) continue;
+                $formation = $par->getFormation();
+                if (!$formation) continue;
+
+                $keptAnnees = [];
+                foreach ($par->getAnnees() as $annee) {
+                    // Check if this platform is configured/valid for this diploma type and year order in this campaign
+                    $shouldBeActive = false;
+                    $typeDipl = $formation->getTypeDiplome();
+                    if ($typeDipl) {
+                        foreach ($typeDipl->getTypeDiplomePlateformeAdmissions() as $tpa) {
+                            if ($tpa->getCampagne() === $campagne && $tpa->getPlateforme() === $platformEntity) {
+                                if (in_array($annee->getOrdre(), $tpa->getAnnees(), true)) {
+                                    $shouldBeActive = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    // For eCandidat, we group by selected sub-category
+                    if (strtoupper($platformEntity->getCode()) === 'EC') {
+                        $diplCode = $typeDipl ? strtoupper($typeDipl->getLibelleCourt()) : '';
+
+                        $cat = "Master 2 & Autres";
+                        if ($diplCode === 'BUT') {
+                            $cat = "BUT 2 & BUT 3";
+                        } elseif ($diplCode === 'L' || $diplCode === 'LICENCE') {
+                            $cat = "Licences L2 & L3";
+                        } elseif ($diplCode === 'LP') {
+                            $cat = "Licence Professionnelle (LP)";
+                        } elseif ($diplCode === 'DI') {
+                            $cat = "Diplôme d'Ingénieur (DI)";
+                        }
+
+                        if ($cat !== $selectedCategory) {
+                            continue; // Skip because it belongs to another sub-tab
+                        }
+                    } else {
+                        // For other platforms, only show the year if the platform is defined for this year's order
+                        if (!$shouldBeActive) {
+                            continue;
+                        }
+                    }
+
+                    $param = $plateformeParamRepo->findOneBy([
+                        'annee' => $annee,
+                        'plateforme' => $platformEntity,
+                        'campagne' => $campagne
+                    ]);
+
+                    $keptAnnees[] = $annee;
+                    if ($param) {
+                        $anneeParams[$annee->getId()] = $param;
+                    }
+                }
+
+                if (count($keptAnnees) > 0) {
+                    $idFormation = $formation->getId();
+                    if (!isset($tFormations[$idFormation])) {
+                        $tFormations[$idFormation] = [
+                            'formation' => $formation,
+                            'parcoursList' => []
+                        ];
+                    }
+                    
+                    $isParcoursOuvert = ($dpePar->getEtatReconduction() === \App\Enums\TypeModificationDpeEnum::OUVERT);
+
+                    $tFormations[$idFormation]['parcoursList'][] = [
+                        'parcours' => $par,
+                        'isOuvert' => $isParcoursOuvert,
+                        'etatReconductionLibelle' => $dpePar->getEtatReconduction() ? $dpePar->getEtatReconduction()->value : '-',
+                        'annees' => $keptAnnees
+                    ];
+                }
+            }
+        }
+
+        return $this->render('offre_v2/_synthese_offre_table.html.twig', [
+            'tFormations' => $tFormations,
+            'anneeParams' => $anneeParams,
+            'platformCode' => $platformCode,
+            'categoryIdx' => $categoryIdx,
+        ]);
+    }
+
+    #[Route('/offrev2/configurer-dates', name: 'offre_v2_configurer_dates', methods: ['GET'])]
+    public function configurerDates(
+        TurboStreamResponseFactory $turboStream
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $campagne = $this->getCampagneCollecte();
+
+        return $turboStream->streamOpenModalFromTemplates(
+            'Dates de collecte des capacités',
+            'Campagne : ' . $campagne->getLibelle(),
+            'offre_v2/_modal_configurer_dates.html.twig',
+            [
+                'campagne' => $campagne,
+            ],
+            'offre_v2/_modal_configurer_dates_footer.html.twig',
+            [
+                'campagne' => $campagne,
+            ]
+        );
+    }
+
+    #[Route('/offrev2/configurer-dates/sauvegarder', name: 'offre_v2_sauvegarder_dates', methods: ['POST'])]
+    public function sauvegarderDates(
+        Request $request,
+        CampagneCollecteService $campagneService,
+        TurboStreamResponseFactory $turboStream
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $campagne = $this->getCampagneCollecte();
+        $csrfToken = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('configurer_dates_' . $campagne->getId(), $csrfToken)) {
+            return new JsonResponse(['success' => false, 'message' => 'Token CSRF invalide.'], Response::HTTP_BAD_REQUEST);
+        }
+
+        $dateOuvertureStr = $request->request->get('dateOuvertureDpe');
+        $dateClotureStr = $request->request->get('dateClotureDpe');
+
+        $dateOuverture = $dateOuvertureStr ? new \DateTime($dateOuvertureStr) : null;
+        $dateCloture = $dateClotureStr ? new \DateTime($dateClotureStr) : null;
+
+        $campagneService->updateDates($campagne, $dateOuverture, $dateCloture);
+
+        return $turboStream->streamToastSuccess('Dates de la campagne de collecte des capacités enregistrées.', true);
     }
 }
