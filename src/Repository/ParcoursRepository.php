@@ -435,9 +435,9 @@ class ParcoursRepository extends ServiceEntityRepository
         return $qb
             ->select(
                 [
-                    'p.id AS id_parcours', 
-                    'p.libelle AS nom_parcours', 
-                    'm.libelle AS nom_formation', 
+                    'p.id AS id_parcours',
+                    'p.libelle AS nom_parcours',
+                    'm.libelle AS nom_formation',
                     'td.libelle AS nom_type_diplome',
                     'p.typeParcours AS type_parcours'
                 ]
@@ -459,6 +459,26 @@ class ParcoursRepository extends ServiceEntityRepository
             )
             ->setParameter(':keyword', '%' . $keyword . '%')
             ->setParameter(':campagneId', $campagneId)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllForEvolutionMatrix(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.formation', 'f')
+            ->addSelect('f')
+            ->leftJoin('f.dpe', 'formationCampagne')
+            ->addSelect('formationCampagne')
+            ->leftJoin('p.parcoursOrigineCopie', 'po')
+            ->addSelect('po')
+            ->leftJoin('p.dpeParcours', 'dp')
+            ->addSelect('dp')
+            ->leftJoin('dp.campagneCollecte', 'camp')
+            ->addSelect('camp')
+            ->orderBy('p.id', 'ASC')
+            ->addOrderBy('camp.annee', 'ASC')
+            ->addOrderBy('camp.id', 'ASC')
             ->getQuery()
             ->getResult();
     }

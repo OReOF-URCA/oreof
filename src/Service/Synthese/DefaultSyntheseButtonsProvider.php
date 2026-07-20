@@ -47,7 +47,7 @@ final class DefaultSyntheseButtonsProvider implements SyntheseButtonsProviderInt
             ];
         } else {
             $exports = [
-                new SyntheseButton('Export MCCC simplifié (pdf)', 'app_parcours_mccc_export_cfvu_valid', ['parcours' => $id, 'format' => 'simplifie']),
+//                new SyntheseButton('Export MCCC simplifié (pdf)', 'app_parcours_mccc_export_cfvu_valid', ['parcours' => $id, 'format' => 'simplifie']),
                 new SyntheseButton('Export MCCC (xlsx)', 'app_parcours_mccc_export', ['parcours' => $id, '_format' => 'xlsx']),
                 new SyntheseButton('Export MCCC Version (xlsx)', 'app_parcours_mccc_export_versionning', ['parcours' => $id, '_format' => 'xlsx'], 'btn btn-warning d-block mt-1'),];
         }
