@@ -54,13 +54,18 @@ abstract class AbstractLicenceHandler implements TypeDiplomeHandlerInterface, Ty
         private StructureParcoursLicence $structureParcoursLicence)
     {
 //        todo: a mettre sur les différents type de diplôme ? $this->getLibelleCourt() => retourne toujours cpi ?
-//        $typeD = $typeDiplomeRepository->findOneBy(['libelle_court' => $this->getLibelleCourt()]);
-//
-//        if ($typeD === null) {
-//            throw new TypeDiplomeNotFoundException();
-//        }
-//
-//        $this->typeEpreuves = $this->entityManager->getRepository(TypeEpreuve::class)->findByTypeDiplome($typeD);
+        $typeD = $typeDiplomeRepository->findOneBy(['libelle_court' => $this->getLibelleCourt()]);
+
+        if ($typeD === null) {
+            throw new TypeDiplomeNotFoundException();
+        }
+
+        $this->typeEpreuves = $this->entityManager->getRepository(TypeEpreuve::class)->findByTypeDiplome($typeD);
+    }
+
+    public function getLibelleCourt(): string
+    {
+        return 'L';
     }
 
     public function exportJsonApi(Parcours $parcours): array
