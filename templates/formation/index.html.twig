@@ -56,6 +56,8 @@
             <i class="{{ iconAdd }}"></i>
             <span> Ajouter une formation</span>
         </a>
+    {% endif %}
+    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') %}
         <a href="{{ path('app_formulaire_generique_new') }}"
            class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
            data-bs-toggle="tooltip"
@@ -66,5 +68,4 @@
             <span> Créer une formation non classique</span>
         </a>
     {% endif %}
-
 {% endblock %}

@@ -476,7 +476,8 @@ class FormationController extends BaseController
                 $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $formation]) ||
                 $this->isGranted('EDIT', ['route' => 'app_composante', 'subject' => $formation]) ||
                 $this->isGranted('EDIT', ['route' => 'app_etablissement', 'subject' => $formation]) ||
-                $this->isGranted('ROLE_ADMIN')
+                $this->isGranted('ROLE_ADMIN') ||
+                ($this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') && ($formation->getTypeDiplome()?->isClassique() ?? true) === false)
             )
             || !Access::isOuvert($formation)
         ) {

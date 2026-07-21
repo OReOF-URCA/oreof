@@ -59,7 +59,7 @@
                 {{ form_row(form.composantesInscription) }}
 
                 {{ form_row(form.responsableMention) }}
-                {% if is_granted('ROLE_ADMIN') %}
+                {% if is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') %}
                     <a href="#"
                        {{ stimulus_controller('modal', {
                            size: 'lg',
@@ -75,7 +75,7 @@
                 {% endif %}
 
                 {{ form_row(form.coResponsableMention) }}
-                {% if is_granted('ROLE_ADMIN') %}
+                {% if is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') %}
                     <a href="#"
                        {{ stimulus_controller('modal', {
                            size: 'lg',
@@ -111,7 +111,7 @@
             <div data-formulaire-generique--creation-target="parcoursDetailsBloc" style="display:none">
                 {{ form_row(form.libelle) }}
                 {{ form_row(form.respParcours) }}
-                {% if is_granted('ROLE_ADMIN') %}
+                {% if is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') %}
                     <a href="#"
                        {{ stimulus_controller('modal', {
                            size: 'lg',
@@ -127,7 +127,7 @@
                 {% endif %}
 
                 {{ form_row(form.coRespParcours) }}
-                {% if is_granted('ROLE_ADMIN') %}
+                {% if is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') %}
                     <a href="#"
                        {{ stimulus_controller('modal', {
                            size: 'lg',

@@ -57,10 +57,15 @@ class FormationSaveController extends BaseController
     ): Response {
         $updateEntity->setGroups(['formation:read']);
 
+        $canEditGenerique = $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION')
+            && ($formation->getTypeDiplome()->isClassique() ?? true) === false;
+
         if (!$this->isGranted('EDIT', [
                 'route' => 'app_formation',
                 'subject' => $formation,
-            ]) && !$this->isGranted('ROLE_ADMIN')) {
+            ]) && !$this->isGranted('ROLE_ADMIN')
+            && !$canEditGenerique
+        ) {
             throw $this->createAccessDeniedException();
         }
 
@@ -88,6 +93,10 @@ class FormationSaveController extends BaseController
                     $villeRepository
                 );
             case 'composanteInscription':
+                if ( ($formation->getTypeDiplome()?->isClassique() ?? true) === false) {
+                    $composanteGeneriquePorteuse = $composanteRepository->findOneBy(['id' => $data['value']]);
+                    $updateEntity->saveField($formation, 'composantePorteuse', $composanteGeneriquePorteuse);
+                }
                 return $updateEntity->saveCheckbox(
                     $formation,
                     'composantesInscription',
