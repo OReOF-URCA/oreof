@@ -7,7 +7,7 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .search-result-list {
+        .search-result-list, .search-result-list-to-link {
             max-height: 17.5em;
             overflow-y: scroll;
             scrollbar-width: thin;
@@ -20,6 +20,10 @@
         .search-result-node:hover {
             background-color: var(--primary);
             color: white;
+        }
+
+        .search-result-list-to-link .search-result-node:hover {
+            background-color: var(--info);
         }
 
         .search-result-node {
@@ -93,7 +97,7 @@
             <div class="row justify-content-center">
                 <div class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5">
                     <div class="input-group">
-                        <span class="input-group-text">Nom du parcours</span>
+                        <span class="input-group-text bg-primary text-white">Nom du parcours</span>
                         <input
                             type="text"
                             class="form-control"
@@ -147,6 +151,68 @@
                     {{ stimulus_target('ramification-parcours-manage', 'choiceArea') }}
                 >
                 
+                </div>
+            </div>
+            <div class="row justify-content-center mt-4">
+                <div class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5 mt-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-info text-white">Nom du parcours cible</span>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            placeholder="Entrez votre recherche..."
+                            value=""
+                            {{ stimulus_target('ramification-parcours-manage', 'searchToLinkInput') }}
+                            {{ stimulus_action('ramification-parcours-manage', 'onSearchToLinkInput', 'change') }}
+                        >
+                        <button
+                            class="btn btn-outline-info"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="bottom"
+                            data-bs-original-title="Lancer la recherche"
+                            {{ stimulus_action('ramification-parcours-manage', 'onSearchToLinkInput', 'click') }}
+                        >
+                            <i class="fa-duotone fa-solid fa-magnifying-glass fa-xl"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div 
+                        {{ stimulus_target('ramification-parcours-manage', 'searchErrorToLinkArea') }}
+                        class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5 d-none text-center fs-6 mt-4 text-danger"
+                    >
+
+                    </div>
+                </div>
+                <div class="row justify-content-center">
+                    <div
+                        class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5 mt-4 d-none text-center"
+                        {{ stimulus_target('ramification-parcours-manage', 'toLinkLoadingSpinner') }}
+                    >
+                        <i class="fa-duotone fa-solid fa-spinner loading-spin-360"></i>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-4">
+                    <div class="col-10 col-md-9 col-lg-8 col-xl-7 search-result-list-to-link d-none"
+                        {{ stimulus_target('ramification-parcours-manage', 'resultListToLink') }}
+                    >
+                    
+                    </div>
+                    <div
+                        class="col-1 text-center d-none"    
+                        {{ stimulus_target('ramification-parcours-manage', 'hideSearchAreaToLink') }}
+                    >
+                        <button
+                            class="btn btn-sm btn-icon btn-icon-only btn-outline-info"
+                            {{ stimulus_action('ramification-parcours-manage', '_onHideSearchAreaToLinkClick', 'click') }}
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            data-bs-original-title="Cacher la recherche cible"
+                            type="button"
+                        >
+                            <i class="fa-regular fa-xmark"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
