@@ -8,6 +8,8 @@ export default class extends Controller {
 
     #added_parcours = [];
 
+    #target_parcours = undefined;
+
     static values = {
         searchUrl: String
     };
@@ -16,7 +18,7 @@ export default class extends Controller {
         'resultList', 'searchInput', 'loadingSpinner', 
         'searchErrorArea', 'choiceArea', 'hideSearchArea',
         'searchToLinkInput', 'searchErrorToLinkArea', 'toLinkLoadingSpinner',
-        'resultListToLink', 'hideSearchAreaToLink'
+        'resultListToLink', 'hideSearchAreaToLink', 'choiceAreaToLink'
     ];
 
     connect(){}
@@ -79,6 +81,10 @@ export default class extends Controller {
         let node = document.createElement('div');
         node.classList.add('col-12', 'search-result-node', 'p-2');
         node.textContent = this._decodeResultName(parcours);
+        node.dataset.idParcours = parcours.id_parcours;
+        node.dataset.nomParcours = this._decodeResultName(parcours);
+
+        this._onResultToLinkClick(node);
 
         return node;
     }
@@ -115,6 +121,24 @@ export default class extends Controller {
 
     }
 
+    _onResultToLinkClick(nodeToLink) {
+        nodeToLink.addEventListener('click', e => {
+            let targetP = this._createChoiceToLinkBadge(
+                nodeToLink.dataset.nomParcours,
+                nodeToLink.dataset.idParcours
+            );
+
+            if(this.choiceAreaToLinkTarget.firstChild){
+                this.choiceAreaToLinkTarget.removeChild(this.choiceAreaToLinkTarget.firstChild);
+            }
+            this.#target_parcours = {
+                id: Number(nodeToLink.dataset.idParcours), 
+                fullName: nodeToLink.dataset.nomParcours
+            }
+            this.choiceAreaToLinkTarget.appendChild(targetP);
+        });
+    }
+
     _createChoiceBadge(name, id) {
         let badgeWrapper = document.createElement('div');
         badgeWrapper.classList.add('row', 'justify-content-center', 'choice-badge');
@@ -143,6 +167,32 @@ export default class extends Controller {
         badgeWrapper.appendChild(badgeCrossIcon);
 
         return badgeWrapper;
+    }
+
+    _createChoiceToLinkBadge(name, id) {
+        let wrapper = document.createElement('div');
+        wrapper.classList.add('row', 'justify-content-center', 'choice-badge');
+        let badgeText = document.createElement('div');
+        badgeText.classList.add('choice-to-link-badge-txt');
+        badgeText.innerText = name;
+        let badgeCrossIcon = document.createElement('div');
+        badgeCrossIcon.classList.add('d-flex', 'col-1', 'align-items-center', 'justify-content-center', 'choice-to-link-badge-icon');
+        let icon = document.createElement('i');
+        icon.classList.add('fa-light', 'fa-xmark', 'mx-3', 'fa-xl', 'remove-choice-cross');
+        badgeCrossIcon.appendChild(icon);
+
+        wrapper.dataset.idParcours = id;
+        wrapper.dataset.nomParcours = name;
+
+        icon.addEventListener('click', e => {
+            this.#target_parcours = undefined;
+            wrapper.remove();
+        });
+
+        wrapper.appendChild(badgeText);
+        wrapper.appendChild(badgeCrossIcon);
+
+        return wrapper;
     }
 
     _addParcoursData(id, fullName) {
