@@ -14,7 +14,9 @@ export default class extends Controller {
 
     static targets = [
         'resultList', 'searchInput', 'loadingSpinner', 
-        'searchErrorArea', 'choiceArea', 'hideSearchArea'
+        'searchErrorArea', 'choiceArea', 'hideSearchArea',
+        'searchToLinkInput', 'searchErrorToLinkArea', 'toLinkLoadingSpinner',
+        'resultListToLink', 'hideSearchAreaToLink'
     ];
 
     connect(){}
@@ -69,6 +71,14 @@ export default class extends Controller {
         node.dataset.nomParcours = this._decodeResultName(p);
 
         this._onResultClick(node);
+
+        return node;
+    }
+
+    _createResultToLinkNode(parcours) {
+        let node = document.createElement('div');
+        node.classList.add('col-12', 'search-result-node', 'p-2');
+        node.textContent = this._decodeResultName(parcours);
 
         return node;
     }
@@ -159,5 +169,48 @@ export default class extends Controller {
     _onHideSearchAreaClick() {
         [this.resultListTarget, this.hideSearchAreaTarget]
             .forEach(elt => elt.classList.add('d-none'));
+    }
+
+    _onHideSearchAreaToLinkClick() {
+        [this.resultListToLinkTarget, this.hideSearchAreaToLinkTarget]
+            .forEach(a => a.classList.add('d-none'));
+    }
+
+    async onSearchToLinkInput() {
+        if (this.searchToLinkInputTarget.value.length < 4) {
+            this.searchErrorToLinkAreaTarget.textContent = this.#search_not_long_enough_text;
+            this.searchErrorToLinkAreaTarget.classList.remove('d-none');
+            return;
+        }
+
+        this.toLinkLoadingSpinnerTarget.classList.remove('d-none');
+        this.searchErrorToLinkAreaTarget.classList.add('d-none');
+        this.resultListToLinkTarget.classList.add('d-none');
+        this.hideSearchAreaToLinkTarget.classList.add('d-none');
+
+        let fetchUrlToLink = `${this.searchUrlValue}?keyword=${this.searchToLinkInputTarget.value}`;
+        await fetch(fetchUrlToLink)
+            .then(response => response.json())
+            .then(json => {
+                this.toLinkLoadingSpinnerTarget.classList.add('d-none');
+                if(json.length > 0){
+                    while(this.resultListToLinkTarget.firstChild) {
+                        this.resultListToLinkTarget.removeChild(this.resultListToLinkTarget.firstChild);
+                    }
+
+                    this.hideSearchAreaToLinkTarget.classList.remove('d-none');
+                    this.toLinkLoadingSpinnerTarget.classList.add('d-none');
+                    json.forEach(p => {
+                        this.resultListToLinkTarget.appendChild(this._createResultToLinkNode(p));
+                        this.resultListToLinkTarget.classList.remove('d-none');
+                    });
+                }
+                else {
+                    this.searchErrorToLinkAreaTarget.textContent = this.#no_result_found_text;
+                    this.searchErrorToLinkAreaTarget.classList.remove('d-none');
+                }
+            })
+            .catch(err => console.log(err));
+
     }
 }
