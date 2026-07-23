@@ -196,6 +196,13 @@ class ExportJsonApi implements ExportJsonInterface
             $ecLibre = false;
         }
 
+        $competencesAcquises = "<ul>";
+        $competencesData = $ec->elementConstitutif->getFicheMatiere()?->getApprentissagesCritiques() ?? [];
+        foreach($competencesData as $c) {
+            $competencesAcquises .= "<li>" . $c->getLibelle() . "</li>";
+        }
+        $competencesAcquises .= "</ul>";
+
         return [
             'typeNiveau' => 'ec',
             'libelleNiveau' => $ec->elementConstitutif->getCode() . ' - ' . $libelle,
@@ -234,6 +241,7 @@ class ExportJsonApi implements ExportJsonInterface
                 ],
                 'autonomie' => $ec->heuresEctsEc->tePres
             ],
+            'competences_acquises' => $competencesAcquises,
         ];
     }
 
