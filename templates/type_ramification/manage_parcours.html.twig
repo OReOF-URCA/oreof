@@ -45,7 +45,7 @@
             color: white;
         }
 
-        .choice-badge-txt {
+        .choice-badge-txt, .choice-to-link-badge-txt {
             background-color: var(--primary);
             border-top-left-radius: .95rem;
             border-bottom-left-radius: .95rem;
@@ -54,10 +54,18 @@
             max-width: 85%;
         }
 
-        .choice-badge-icon {
+        .choice-to-link-badge-txt {
+            background-color: var(--info);
+        }
+
+        .choice-badge-icon, .choice-to-link-badge-icon {
             background-color: var(--primary);
             border-top-right-radius: .95rem;
             border-bottom-right-radius: .95rem;
+        }
+
+        .choice-to-link-badge-icon {
+            background-color: var(--info);
         }
 
         @keyframes spin360 {
@@ -212,6 +220,13 @@
                         >
                             <i class="fa-regular fa-xmark"></i>
                         </button>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-4">
+                    <div class="col-10 col-md-9 col-lg-8 col-xl-7"
+                        {{ stimulus_target('ramification-parcours-manage', 'choiceAreaToLink') }}
+                    >
+                    
                     </div>
                 </div>
             </div>
