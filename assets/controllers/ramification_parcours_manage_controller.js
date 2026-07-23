@@ -14,12 +14,14 @@ export default class extends Controller {
 
     static targets = [
         'resultList', 'searchInput', 'loadingSpinner', 
-        'searchErrorArea', 'choiceArea'
+        'searchErrorArea', 'choiceArea', 'hideSearchArea'
     ];
 
     connect(){}
 
     async onSearchInputChange() {
+        // Bouton pour cacher la recherche
+        this.hideSearchAreaTarget.classList.add('d-none');
         // Au moins 4 caractères pour la recherche
         if(this.searchInputTarget.value.length < 4){
             this.resultListTarget.classList.add('d-none');
@@ -49,6 +51,7 @@ export default class extends Controller {
                         );
                     });
                     this.resultListTarget.classList.remove('d-none');
+                    this.hideSearchAreaTarget.classList.remove('d-none');
                 }
                 else {
                     this.searchErrorAreaTarget.textContent = this.#no_result_found_text;
@@ -151,5 +154,10 @@ export default class extends Controller {
         return this.#added_parcours
             .map(p => p.id)
             .filter(id => id === Number(searchId)).length > 0;
+    }
+
+    _onHideSearchAreaClick() {
+        [this.resultListTarget, this.hideSearchAreaTarget]
+            .forEach(elt => elt.classList.add('d-none'));
     }
 }
