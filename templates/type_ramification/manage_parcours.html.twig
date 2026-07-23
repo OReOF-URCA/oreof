@@ -91,7 +91,7 @@
                 </a>
             </div>
             <div class="row justify-content-center">
-                <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+                <div class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5">
                     <div class="input-group">
                         <span class="input-group-text">Nom du parcours</span>
                         <input
@@ -123,10 +123,24 @@
                     >
                         <i class="fa-duotone fa-solid fa-spinner loading-spin-360"></i>
                     </div>
-                    <div class="col-12 col-md-10 col-lg-8 col-xl-7 search-result-list d-none"
+                    <div class="col-10 col-md-9 col-lg-8 col-xl-7 search-result-list d-none"
                         {{ stimulus_target('ramification-parcours-manage', 'resultList') }}
                     >
 
+                    </div>
+                    <div class="col-1 d-none text-center"
+                        {{ stimulus_target('ramification-parcours-manage', 'hideSearchArea') }}
+                        {{ stimulus_action('ramification-parcours-manage', '_onHideSearchAreaClick', 'click') }}
+                    >
+                        <button 
+                            type="button"
+                            class="btn btn-sm btn-icon btn-icon-only btn-outline-primary"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            data-bs-original-title="Cacher la recherche"
+                        >
+                            <i class="fa-regular fa-xmark"></i>
+                        </button>
                     </div>
                 </div>
                 <div class="row justify-content-center mt-4"
