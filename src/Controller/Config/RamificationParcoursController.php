@@ -4,6 +4,7 @@ namespace App\Controller\Config;
 
 use App\Entity\CampagneCollecte;
 use App\Entity\Parcours;
+use App\Entity\ParcoursRamification;
 use App\Entity\TypeRamificationParcours;
 use App\Form\TypeRamificationType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -131,6 +132,46 @@ final class RamificationParcoursController extends AbstractController
         return $this->render('type_ramification/manage_parcours.html.twig', [
             'types_ramification' => $typesRamif
         ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/administration/parcours/ramification/manage/add_data', name: 'app_config_type_ramification_add_data')]
+    public function linkParcoursWithRamification(
+        Request $r,
+        EntityManagerInterface $em
+    ) {
+        $data = $r->query->all();
+
+        $targetParcours = $em->getRepository(Parcours::class)->findOneBy(['id' => $data['targetId']]);
+        $typeRamif = $em->getRepository(TypeRamificationParcours::class)->findOneBy(['id' => $data['typeRamifId']]);
+        $sourceParcoursArray = $em->getRepository(Parcours::class)->findBy(['id' => $data['sourceId']]);
+
+        if( ($targetParcours instanceof Parcours === false) 
+            || ($typeRamif instanceof TypeRamificationParcours === false)
+            || count($sourceParcoursArray) !== count($data['sourceId'])
+        ) {
+            $this->addFlash('toast', [
+                'type' => 'danger',
+                'text' => "Une donnée fournie est incorrecte. Veuillez réessayer."
+            ]);
+            return $this->redirectToRoute('app_config_type_ramification_show');
+        }
+
+        foreach($sourceParcoursArray as $sourceP) {
+            $ramification = new ParcoursRamification();
+            $ramification->setParcoursOrigine($sourceP);
+            $ramification->setParcoursCible($targetParcours);
+            $ramification->setTypeRamification($typeRamif);
+            $em->persist($ramification);
+        }
+
+        $em->flush();
+        $this->addFlash('toast', [
+            'type' => 'success',
+            'text' => 'Enregistrement réussi !'
+        ]);
+
+        return $this->redirectToRoute('app_config_type_ramification_show');
     }
 
     #[IsGranted('ROLE_ADMIN')]
