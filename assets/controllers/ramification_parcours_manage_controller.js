@@ -177,7 +177,7 @@ export default class extends Controller {
 
     _createChoiceToLinkBadge(name, id) {
         let wrapper = document.createElement('div');
-        wrapper.classList.add('row', 'justify-content-center', 'choice-badge');
+        wrapper.classList.add('row', 'justify-content-center', 'choice-badge', 'mb-4');
         let badgeText = document.createElement('div');
         badgeText.classList.add('choice-to-link-badge-txt');
         badgeText.innerText = name;
