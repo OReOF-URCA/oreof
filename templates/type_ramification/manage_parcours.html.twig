@@ -81,6 +81,14 @@
             font-size: 4.25rem;
         }
 
+        @media screen and (min-width: 992px) {
+            .split-col-container {
+                min-height: 50vh;
+                display: flex;
+                flex-direction: column;
+            }
+        }
+
         .margin-type-ramif {
             margin-top: 3rem;
         }
@@ -92,20 +100,20 @@
         {{ stimulus_controller('ramification-parcours-manage') }}
         data-ramification-parcours-manage-search-url-value="{{ path('app_config_type_ramification_search_parcours_by_name') }}"
     >
-        <div class="col-12 col-md-11 col-lg-6">
-            <div class="col-12 text-start">
-                <a href="{{ path('app_config_type_ramification_show') }}">
-                    <button
-                        class="btn btn-sm btn-icon btn-icon-only btn-primary"
-                        type="button"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="top"
-                        data-bs-original-title="Précédent"
-                    >
-                        <i class="fa-light fa-arrow-left"></i>
-                    </button>
-                </a>
-            </div>
+        <div class="col-12 text-start ms-5">
+            <a href="{{ path('app_config_type_ramification_show') }}">
+                <button
+                    class="btn btn-sm btn-icon btn-icon-only btn-primary"
+                    type="button"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    data-bs-original-title="Précédent"
+                >
+                    <i class="fa-light fa-arrow-left"></i>
+                </button>
+            </a>
+        </div>
+        <div class="split-col-container justify-content-center col-12 col-md-11 col-lg-6 col-xl-5 mt-4">
             <div class="row justify-content-center">
                 <div class="col-10 col-md-9 col-lg-8">
                     <div class="input-group">
@@ -133,18 +141,18 @@
                         
                     </div>
                 </div>
-                <div class="row justify-content-center mt-4">
-                    <div class="col-12 col-md-10 col-lg-8 text-center d-none"
+                <div class="row justify-content-center">
+                    <div class="col-12 col-md-10 col-lg-8 text-center d-none mt-4"
                         {{ stimulus_target('ramification-parcours-manage', 'loadingSpinner') }}
                     >
                         <i class="fa-duotone fa-solid fa-spinner loading-spin-360"></i>
                     </div>
-                    <div class="col-10 col-md-9 col-lg-8 search-result-list d-none"
+                    <div class="col-10 search-result-list d-none mt-4"
                         {{ stimulus_target('ramification-parcours-manage', 'resultList') }}
                     >
 
                     </div>
-                    <div class="col-1 d-none text-center"
+                    <div class="col-1 d-none text-center mt-4"
                         {{ stimulus_target('ramification-parcours-manage', 'hideSearchArea') }}
                         {{ stimulus_action('ramification-parcours-manage', '_onHideSearchAreaClick', 'click') }}
                     >
@@ -161,7 +169,7 @@
                 </div>
             </div>
             <div class="row justify-content-center mt-4">
-                <div class="col-10 col-md-9 col-lg-8 mt-4">
+                <div class="col-10 col-md-9 col-lg-8">
                     <div class="input-group">
                         <span class="input-group-text bg-info text-white">Nom du parcours cible</span>
                         <input 
@@ -200,7 +208,7 @@
                     </div>
                 </div>
                 <div class="row justify-content-center mt-4">
-                    <div class="col-10 col-md-9 col-lg-8 search-result-list-to-link d-none"
+                    <div class="col-10 search-result-list-to-link d-none"
                         {{ stimulus_target('ramification-parcours-manage', 'resultListToLink') }}
                     >
                     
@@ -223,20 +231,20 @@
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-11 col-lg-6">
-            <div class="row justify-content-center mt-sm-4">
+        <div class="split-col-container justify-content-center col-12 col-md-11 col-lg-6 col-xl-5 mt-sm-4 mt-lg-0">
+            <div class="row justify-content-center">
                 <h1 class="text-center text-primary d-none"
                     {{ stimulus_target('ramification-parcours-manage', 'headingChoice') }}
                 >
                     Parcours d'origine
                 </h1>
-                <div class="row justify-content-center mt-4"
+                <div class="row justify-content-center"
                     {{ stimulus_target('ramification-parcours-manage', 'choiceArea') }}
                 >
 
                 </div>
             </div>
-            <div class="row justify-content-center mt-4">
+            <div class="row justify-content-center mt-3">
                 <h1 class="text-center text-info d-none"
                     {{ stimulus_target('ramification-parcours-manage', 'headingChoiceToLink') }}
                 >
@@ -248,7 +256,7 @@
                 
                 </div>
             </div>
-            <div class="row justify-content-center margin-type-ramif">
+            <div class="row justify-content-center">
                 <div class="col-11 col-lg-10">
                     <div class="input-group">
                         <label class="input-group-text bg-dark text-white" for="typeRamificationChoice">
