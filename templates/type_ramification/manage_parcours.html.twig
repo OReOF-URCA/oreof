@@ -240,6 +240,21 @@
                     </div>
                 </div>
             </div>
+            <div class="row justify-content-center mt-4">
+                <div class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5">
+                    <div class="input-group">
+                        <label class="input-group-text bg-dark text-white" for="typeRamificationChoice">
+                            Type de ramification
+                        </label>
+                        <select class="form-select" id="typeRamificationChoice">
+                            <option selected>Choisir un type...</option>
+                            {% for t in types_ramification %}
+                                <option value="{{ t.id }}">{{ t.libelle }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}
