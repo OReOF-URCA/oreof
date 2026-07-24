@@ -92,6 +92,10 @@
         .margin-type-ramif {
             margin-top: 3rem;
         }
+
+        select:hover {
+            cursor: pointer;
+        }
     </style>
 {% endblock %}
 
@@ -100,22 +104,26 @@
         {{ stimulus_controller('ramification-parcours-manage') }}
         data-ramification-parcours-manage-search-url-value="{{ path('app_config_type_ramification_search_parcours_by_name') }}"
     >
-        <div class="col-12 text-start ms-5">
-            <a href="{{ path('app_config_type_ramification_show') }}">
-                <button
-                    class="btn btn-sm btn-icon btn-icon-only btn-primary"
-                    type="button"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="top"
-                    data-bs-original-title="Précédent"
-                >
-                    <i class="fa-light fa-arrow-left"></i>
-                </button>
-            </a>
+        <div class="row">
+            <div class="d-flex col-12 col-md-11 col-lg-12 col-xl-10 justify-content-center">
+                <div class="col-10 col-md-9 col-lg-8 text-start">
+                    <a href="{{ path('app_config_type_ramification_show') }}">
+                        <button
+                            class="btn btn-sm btn-icon btn-icon-only btn-primary"
+                            type="button"
+                            data-bs-toggle="tooltip"
+                            data-bs-placement="top"
+                            data-bs-original-title="Précédent"
+                        >
+                            <i class="fa-light fa-arrow-left"></i>
+                        </button>
+                    </a>
+                </div>
+            </div>
         </div>
         <div class="split-col-container justify-content-center col-12 col-md-11 col-lg-6 col-xl-5 mt-4">
             <div class="row justify-content-center">
-                <div class="col-10 col-md-9 col-lg-8">
+                <div class="col-10 col-xxl-8">
                     <div class="input-group">
                         <span class="input-group-text bg-primary text-white">Nom du parcours</span>
                         <input
@@ -169,7 +177,7 @@
                 </div>
             </div>
             <div class="row justify-content-center mt-4">
-                <div class="col-10 col-md-9 col-lg-8">
+                <div class="col-10 col-xxl-8">
                     <div class="input-group">
                         <span class="input-group-text bg-info text-white">Nom du parcours cible</span>
                         <input 
