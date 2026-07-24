@@ -18,7 +18,8 @@ export default class extends Controller {
         'resultList', 'searchInput', 'loadingSpinner', 
         'searchErrorArea', 'choiceArea', 'hideSearchArea',
         'searchToLinkInput', 'searchErrorToLinkArea', 'toLinkLoadingSpinner',
-        'resultListToLink', 'hideSearchAreaToLink', 'choiceAreaToLink'
+        'resultListToLink', 'hideSearchAreaToLink', 'choiceAreaToLink',
+        'headingChoice', 'headingChoiceToLink'
     ];
 
     connect(){}
@@ -116,6 +117,7 @@ export default class extends Controller {
                 );
                 this.choiceAreaTarget.appendChild(badge);
                 this._addParcoursData(resultNode.dataset.idParcours, resultNode.dataset.nomParcours);
+                this.headingChoiceTarget.classList.remove('d-none');
             }
         });
 
@@ -136,6 +138,7 @@ export default class extends Controller {
                 fullName: nodeToLink.dataset.nomParcours
             }
             this.choiceAreaToLinkTarget.appendChild(targetP);
+            this.headingChoiceToLinkTarget.classList.remove('d-none');
         });
     }
 
@@ -161,6 +164,9 @@ export default class extends Controller {
                 this._removeParcoursData(id);
             }
             badgeWrapper.remove()
+            if(this.#added_parcours.length === 0) {
+                this.headingChoiceTarget.classList.add('d-none');
+            }
         });
 
         badgeWrapper.appendChild(badgeTxt);
@@ -187,6 +193,7 @@ export default class extends Controller {
         icon.addEventListener('click', e => {
             this.#target_parcours = undefined;
             wrapper.remove();
+            this.headingChoiceToLinkTarget.classList.add('d-none');
         });
 
         wrapper.appendChild(badgeText);
