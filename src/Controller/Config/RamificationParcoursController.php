@@ -9,6 +9,7 @@ use App\Form\TypeRamificationType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -112,8 +113,24 @@ final class RamificationParcoursController extends AbstractController
 
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/administration/parcours/ramification/manage', name: 'app_config_type_ramification_parcours_manage')]
-    public function addParcoursRamificationForm() : Response {
-        return $this->render('type_ramification/manage_parcours.html.twig', []);
+    public function addParcoursRamificationForm(EntityManagerInterface $em) : Response {
+        $typesRamif = $em->getRepository(TypeRamificationParcours::class)->findAll();
+
+        if(count($typesRamif) === 0) {
+            $this->addFlash('toast', [
+                'type' => 'info',
+                'text' => 'Vous devez ajouter des types de ramifications avant de relier les parcours'
+            ]);
+            return $this->redirectToRoute('app_config_type_ramification_show');
+        }
+
+        $typesRamif = array_map(
+            fn($t) => ['id' => $t->getId(), 'libelle' => $t->getLibelle()],
+            $typesRamif
+        );
+        return $this->render('type_ramification/manage_parcours.html.twig', [
+            'types_ramification' => $typesRamif
+        ]);
     }
 
     #[IsGranted('ROLE_ADMIN')]
