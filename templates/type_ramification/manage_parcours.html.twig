@@ -155,6 +155,11 @@
                         </button>
                     </div>
                 </div>
+                <h1 class="text-center text-primary mt-4 d-none"
+                    {{ stimulus_target('ramification-parcours-manage', 'headingChoice') }}
+                >
+                    Parcours d'origine
+                </h1>
                 <div class="row justify-content-center mt-4"
                     {{ stimulus_target('ramification-parcours-manage', 'choiceArea') }}
                 >
@@ -223,6 +228,11 @@
                     </div>
                 </div>
                 <div class="row justify-content-center mt-4">
+                    <h1 class="text-center text-info d-none"
+                        {{ stimulus_target('ramification-parcours-manage', 'headingChoiceToLink') }}
+                    >
+                        Parcours cible
+                    </h1>
                     <div class="col-10 col-md-9 col-lg-8 col-xl-7"
                         {{ stimulus_target('ramification-parcours-manage', 'choiceAreaToLink') }}
                     >
