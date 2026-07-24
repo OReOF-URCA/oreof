@@ -13,7 +13,8 @@ export default class extends Controller {
     #type_ramification_choice = undefined;
 
     static values = {
-        searchUrl: String
+        searchUrl: String,
+        submitFormUrl: String
     };
 
     static targets = [
@@ -310,6 +311,18 @@ export default class extends Controller {
             return;
         }
         // validation
+
+        let sourceParcoursIdArray = this.#added_parcours.map(p => `sourceId[]=${p.id}`);
+        let targetParcoursId = `targetId=${this.#target_parcours.id}`;
+        let typeRamifId = `typeRamifId=${this.#type_ramification_choice}`;
+
+        let urlSubmit = this.submitFormUrlValue 
+            + '?' 
+            + targetParcoursId 
+            + '&' + typeRamifId
+            + '&' + sourceParcoursIdArray.join('&');
+
+        window.location.assign(urlSubmit);
 
     }
 }
