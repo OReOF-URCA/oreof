@@ -97,10 +97,10 @@ class McccPdfCommand extends Command
                 $io->writeln("Récupération du Parcours : [O.K]");
                 $io->writeln("\n" . $parcours->getFormation()->getDisplayLong());
 
-                $anneeDpe = $this->entityManager->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => 2]);
                 $typeDiplomeParcours = $parcours->getFormation()->getTypeDiplome()->getLibelleCourt();
 
                 $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+                $anneeDpe = $dpeParcours->getCampagneCollecte();
                 $dateConseil = $this->getDateConseilComposante->getDateConseilComposante($dpeParcours);
                 $dateCfvu = $this->getHistorique->getHistoriqueParcoursLastStep($dpeParcours, 'soumis_cfvu')?->getDate();
 
@@ -163,8 +163,15 @@ class McccPdfCommand extends Command
         elseif($generateAllParcours){
 
             $io->writeln("\nCommande pour générer les exports 'MCCC' au format PDF, de tous les parcours valides.\n");
+            $anneeDpe = $this->entityManager->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => 1]);
 
-            $anneeDpe = $this->entityManager->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => 2]);
+            if ($io->ask("Année récupérée : [{$anneeDpe->getLibelle()}] - Souhaitez-vous continuer ? [Y/n]", 
+                'n', fn($response) => $response === 'Y') === false
+            ) {
+                $io->warning("Annulation utilisateur. La commande de s'est pas exécutée.");
+                return Command::SUCCESS;
+            }
+
             $parcoursArray = $this->entityManager->getRepository(Parcours::class)->findAllParcoursForDpe($anneeDpe);
 
             $parcoursArray = array_filter(
@@ -186,6 +193,7 @@ class McccPdfCommand extends Command
                     && array_values(
                         $p->getDpeParcours()->last()->getEtatValidation()
                     )[0] === 1)
+                    || ($p->getDpeParcours()->last()->getEtatValidation() === ['valide_cfvu' => 1])
                 )
             );
 
@@ -274,7 +282,7 @@ class McccPdfCommand extends Command
             return Command::SUCCESS;
         } elseif($generateTodayCfvuValid){
             // Récupération des parcours
-            $dpe = $this->entityManager->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => 2]);
+            $dpe = $this->entityManager->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => 1]);
             $parcoursArray = $this->entityManager->getRepository(Parcours::class)->findAllParcoursForDpe($dpe);
             // Filtrage pour ne garder que ceux qui ont été validés aujourd'hui
             $parcoursArray = array_filter(

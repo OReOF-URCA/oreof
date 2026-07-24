@@ -22,11 +22,14 @@ use App\Repository\DomaineRepository;
 use App\Repository\FormationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Workflow\WorkflowInterface;
 
+#[IsGranted(new Expression('is_granted("ROLE_ADMIN") or is_granted("ROLE_SAISIE_FORM_GENERIQUE_DIRECTION")'))]
 #[Route('/formulaire-generique')]
 final class FormulaireGeneriqueController extends BaseController
 {
@@ -49,7 +52,8 @@ final class FormulaireGeneriqueController extends BaseController
         // Seuls les utilisateurs disposant de tous les droits (admin) peuvent désigner
         // une autre personne comme responsable du parcours. Les autres ne peuvent
         // s'assigner qu'eux-mêmes (sinon ils perdraient l'accès au parcours créé).
-        $canChooseResponsable = $this->isGranted('ROLE_ADMIN');
+        $canChooseResponsable = $this->isGranted('ROLE_ADMIN')
+            || $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION');
 
         $form = $this->createForm(FormulaireGeneriqueType::class, null, [
             'action' => $this->generateUrl('app_formulaire_generique_new'),
@@ -136,6 +140,9 @@ final class FormulaireGeneriqueController extends BaseController
                         foreach ($data['composantesInscription'] as $composante) {
                             $formation->addComposantesInscription($composante);
                         }
+                        // On reporte la composante d'inscription en tant que composante porteuse
+                        $formation->setComposantePorteuse($data['composantesInscription'][0] ?? null);
+
                     }
                     if (!empty($data['regimeInscription'])) {
                         $formation->setRegimeInscription($data['regimeInscription']);

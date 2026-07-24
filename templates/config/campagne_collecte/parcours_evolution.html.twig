@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-3 text-end">
+                <a href="{{ path('app_campagne_collecte_parcours_evolution_export_excel') }}"
+                   class="btn btn-sm btn-outline-success">
+                    <i class="fa-light fa-file-excel"></i>
+                    Export Excel
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-sm align-middle">
+                    <thead>
+                    <tr>
+                        <th>Parcours (origine de copie)</th>
+                        {% for campagne in campagnes %}
+                            <th>
+                                <div>{{ campagne.libelle }}</div>
+                                {% if campagne.anneeUniversitaireLibelle is not null %}
+                                    <small class="text-muted d-block">{{ campagne.anneeUniversitaireLibelle }}</small>
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for matrixRow in matrixRows %}
+                        <tr>
+                            <td>
+                                <div><strong>{{ matrixRow.referenceParcoursLibelle }}</strong></div>
+                                <small class="text-muted d-block">{{ matrixRow.referenceFormationLibelle }}</small>
+                                <small class="text-muted d-block">#{{ matrixRow.rootParcoursId }}</small>
+                            </td>
+                            {% for campagne in campagnes %}
+                                {% set entries = matrixRow.cells[campagne.id]|default([]) %}
+                                <td>
+                                    {% if entries|length > 0 %}
+                                        {% for row in entries %}
+                                            <div class="mb-2">
+                                                <div><strong>{{ row.parcoursLibelle }}</strong></div>
+                                                <div class="text-muted small">{{ row.formationLibelle }}</div>
+                                                <div class="mt-1">
+                                                    <span class="badge {{ row.isOpen ? 'bg-success' : 'bg-danger' }}">{{ row.openLabel }}</span>
+                                                    <span class="badge {{ row.isAlternance ? 'bg-info' : 'bg-secondary' }}">Alternance {{ row.alternanceLabel }}</span>
+                                                </div>
+                                                <div class="text-muted small mt-1">{{ row.etatReconduction }}</div>
+                                                {% if row.changes|length > 0 %}
+                                                    <div class="mt-1">
+                                                        {% for change in row.changes %}
+                                                            <span class="badge bg-warning text-dark mb-1">{{ change }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="{{ 1 + campagnes|length }}">Aucune donnée d'évolution trouvée.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% set header_title %}
+    Évolution des parcours (toutes campagnes)
+{% endset %}
+
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {
+            href: path('app_campagne_collecte_index'),
+            title: 'Campagnes de collecte',
+        }
+    ]}) }}
+{% endblock %}
