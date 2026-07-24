@@ -83,7 +83,7 @@
 
         @media screen and (min-width: 992px) {
             .split-col-container {
-                min-height: 50vh;
+                min-height: 35vh;
                 display: flex;
                 flex-direction: column;
             }
@@ -270,12 +270,36 @@
                         <label class="input-group-text bg-dark text-white" for="typeRamificationChoice">
                             Type de ramification
                         </label>
-                        <select class="form-select" id="typeRamificationChoice">
-                            <option selected>Choisir un type...</option>
+                        <select class="form-select" id="typeRamificationChoice"
+                            {{ stimulus_target('ramification-parcours-manage', 'typeRamificationSelect') }}
+                            {{ stimulus_action('ramification-parcours-manage', 'updateTypeChoice', 'change') }}
+                        >
+                            <option value="not_set" selected>Choisir un type...</option>
                             {% for t in types_ramification %}
                                 <option value="{{ t.id }}">{{ t.libelle }}</option>
                             {% endfor %}
                         </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-11 col-lg-6 col-xl-5 mt-sm-4">
+                <div class="col-12 text-center">
+                    <button 
+                        class="btn btn-sm btn-success"
+                        type="button"
+                        {{ stimulus_action('ramification-parcours-manage', 'submitForm') }}
+                    >
+                        Valider
+                    </button>
+                </div>
+                <div class="col-12 mt-4">
+                    <div 
+                        class="alert alert-danger d-none px-1 py-2"
+                        {{ stimulus_target('ramification-parcours-manage', 'submitFormErrors') }}                
+                    >
+                    
                     </div>
                 </div>
             </div>
