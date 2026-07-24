@@ -80,6 +80,10 @@
             animation-iteration-count: infinite;
             font-size: 4.25rem;
         }
+
+        .margin-type-ramif {
+            margin-top: 3rem;
+        }
     </style>
 {% endblock %}
 
@@ -88,7 +92,7 @@
         {{ stimulus_controller('ramification-parcours-manage') }}
         data-ramification-parcours-manage-search-url-value="{{ path('app_config_type_ramification_search_parcours_by_name') }}"
     >
-        <div class="col-12 col-md-11 col-lg-9">
+        <div class="col-12 col-md-11 col-lg-6">
             <div class="col-12 text-start">
                 <a href="{{ path('app_config_type_ramification_show') }}">
                     <button
@@ -103,7 +107,7 @@
                 </a>
             </div>
             <div class="row justify-content-center">
-                <div class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5">
+                <div class="col-10 col-md-9 col-lg-8">
                     <div class="input-group">
                         <span class="input-group-text bg-primary text-white">Nom du parcours</span>
                         <input
@@ -130,12 +134,12 @@
                     </div>
                 </div>
                 <div class="row justify-content-center mt-4">
-                    <div class="col-12 col-md-10 col-lg-8 col-xl-7 text-center d-none"
+                    <div class="col-12 col-md-10 col-lg-8 text-center d-none"
                         {{ stimulus_target('ramification-parcours-manage', 'loadingSpinner') }}
                     >
                         <i class="fa-duotone fa-solid fa-spinner loading-spin-360"></i>
                     </div>
-                    <div class="col-10 col-md-9 col-lg-8 col-xl-7 search-result-list d-none"
+                    <div class="col-10 col-md-9 col-lg-8 search-result-list d-none"
                         {{ stimulus_target('ramification-parcours-manage', 'resultList') }}
                     >
 
@@ -155,19 +159,9 @@
                         </button>
                     </div>
                 </div>
-                <h1 class="text-center text-primary mt-4 d-none"
-                    {{ stimulus_target('ramification-parcours-manage', 'headingChoice') }}
-                >
-                    Parcours d'origine
-                </h1>
-                <div class="row justify-content-center mt-4"
-                    {{ stimulus_target('ramification-parcours-manage', 'choiceArea') }}
-                >
-                
-                </div>
             </div>
             <div class="row justify-content-center mt-4">
-                <div class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5 mt-4">
+                <div class="col-10 col-md-9 col-lg-8 mt-4">
                     <div class="input-group">
                         <span class="input-group-text bg-info text-white">Nom du parcours cible</span>
                         <input 
@@ -192,21 +186,21 @@
                 <div class="row justify-content-center">
                     <div 
                         {{ stimulus_target('ramification-parcours-manage', 'searchErrorToLinkArea') }}
-                        class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5 d-none text-center fs-6 mt-4 text-danger"
+                        class="col-10 col-md-9 col-lg-8 d-none text-center fs-6 mt-4 text-danger"
                     >
 
                     </div>
                 </div>
                 <div class="row justify-content-center">
                     <div
-                        class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5 mt-4 d-none text-center"
+                        class="col-10 col-md-9 col-lg-8 mt-4 d-none text-center"
                         {{ stimulus_target('ramification-parcours-manage', 'toLinkLoadingSpinner') }}
                     >
                         <i class="fa-duotone fa-solid fa-spinner loading-spin-360"></i>
                     </div>
                 </div>
                 <div class="row justify-content-center mt-4">
-                    <div class="col-10 col-md-9 col-lg-8 col-xl-7 search-result-list-to-link d-none"
+                    <div class="col-10 col-md-9 col-lg-8 search-result-list-to-link d-none"
                         {{ stimulus_target('ramification-parcours-manage', 'resultListToLink') }}
                     >
                     
@@ -227,21 +221,35 @@
                         </button>
                     </div>
                 </div>
-                <div class="row justify-content-center mt-4">
-                    <h1 class="text-center text-info d-none"
-                        {{ stimulus_target('ramification-parcours-manage', 'headingChoiceToLink') }}
-                    >
-                        Parcours cible
-                    </h1>
-                    <div class="col-10 col-md-9 col-lg-8 col-xl-7"
-                        {{ stimulus_target('ramification-parcours-manage', 'choiceAreaToLink') }}
-                    >
-                    
-                    </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-11 col-lg-6">
+            <div class="row justify-content-center mt-sm-4">
+                <h1 class="text-center text-primary d-none"
+                    {{ stimulus_target('ramification-parcours-manage', 'headingChoice') }}
+                >
+                    Parcours d'origine
+                </h1>
+                <div class="row justify-content-center mt-4"
+                    {{ stimulus_target('ramification-parcours-manage', 'choiceArea') }}
+                >
+
                 </div>
             </div>
             <div class="row justify-content-center mt-4">
-                <div class="col-10 col-md-9 col-lg-8 col-xl-7 col-xxl-5">
+                <h1 class="text-center text-info d-none"
+                    {{ stimulus_target('ramification-parcours-manage', 'headingChoiceToLink') }}
+                >
+                    Parcours cible
+                </h1>
+                <div class="row justify-content-center"
+                    {{ stimulus_target('ramification-parcours-manage', 'choiceAreaToLink') }}
+                >
+                
+                </div>
+            </div>
+            <div class="row justify-content-center margin-type-ramif">
+                <div class="col-11 col-lg-10">
                     <div class="input-group">
                         <label class="input-group-text bg-dark text-white" for="typeRamificationChoice">
                             Type de ramification
