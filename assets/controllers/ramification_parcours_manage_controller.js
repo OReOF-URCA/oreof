@@ -10,6 +10,8 @@ export default class extends Controller {
 
     #target_parcours = undefined;
 
+    #type_ramification_choice = undefined;
+
     static values = {
         searchUrl: String
     };
@@ -19,7 +21,8 @@ export default class extends Controller {
         'searchErrorArea', 'choiceArea', 'hideSearchArea',
         'searchToLinkInput', 'searchErrorToLinkArea', 'toLinkLoadingSpinner',
         'resultListToLink', 'hideSearchAreaToLink', 'choiceAreaToLink',
-        'headingChoice', 'headingChoiceToLink'
+        'headingChoice', 'headingChoiceToLink', 'submitFormErrors',
+        'typeRamificationSelect'
     ];
 
     connect(){}
@@ -268,6 +271,45 @@ export default class extends Controller {
                 }
             })
             .catch(err => console.log(err));
+
+    }
+
+    updateTypeChoice() {
+        this.#type_ramification_choice = this.typeRamificationSelectTarget.value;
+    }
+
+    submitForm() {
+        let errors = [];
+        if(this.#added_parcours.length === 0) {
+            errors.push("Vous n'avez pas choisi de parcours d'origine");
+        }
+        if(this.#target_parcours === undefined) {
+            errors.push("Vous n'avez pas choisi de parcours cible");
+        }
+        if(this.#type_ramification_choice === undefined || isNaN(this.#type_ramification_choice)) {
+            errors.push("Aucun type de ramification saisi");
+        }
+
+        while(this.submitFormErrorsTarget.firstChild) {
+            this.submitFormErrorsTarget.removeChild(this.submitFormErrorsTarget.firstChild);
+        }
+        this.submitFormErrorsTarget.classList.add('d-none');
+
+        // erreur
+        if(errors.length > 0) {
+            let liste = document.createElement('ul');
+            liste.classList.add('mb-0');
+            errors.forEach(err => {
+                let li = document.createElement('li');
+                li.textContent = err;
+                liste.appendChild(li);
+            });
+
+            this.submitFormErrorsTarget.appendChild(liste);
+            this.submitFormErrorsTarget.classList.remove('d-none');
+            return;
+        }
+        // validation
 
     }
 }
