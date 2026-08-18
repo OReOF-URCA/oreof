@@ -393,7 +393,7 @@ class ButMcccVersion extends AbstractButMccc
         $this->excelWriter->setActiveSheetIndex(0);
         $this->excelWriter->setSelectedCells('A1');
 
-        $this->fileName = Tools::FileName('MCCC - ' . $anneeUniversitaire->getLibelle() . ' - ' . $formation->gettypeDiplome()?->getLibelleCourt() . ' ' . $formation->getSigle(). ' ' . $parcours->getSigle(), 40);
+        $this->fileName = Tools::FileName('MCCC - ' . $anneeUniversitaire->getLibelle() . ' - ' . $formation->getTypeDiplome()?->getLibelleCourt() . ' ' . $formation->getSigle(). ' ' . $parcours->getSigle(), 40);
 
         return true;
     }
