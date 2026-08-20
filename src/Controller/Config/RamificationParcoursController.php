@@ -191,4 +191,33 @@ final class RamificationParcoursController extends AbstractController
                 ->findByNomComplet($keyword, $campagne->getId())
         );
     }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/administration/parcours/ramification/parcours_list', name: 'app_config_type_ramification_parcours_list')]
+    public function showParcoursRamificationList(
+        EntityManagerInterface $em
+    ) {
+        $parcoursRamifications = $em->getRepository(ParcoursRamification::class)->findAllRamificationsGroups();
+        $accumulator = [];
+        $cardResults = [];
+        foreach($parcoursRamifications as $pr) {
+            $hasBeenTreated = false;
+            if(isset($accumulator[$pr['parcours_cible_id']]) && $accumulator[$pr['parcours_cible_id']] === $pr['code_type_ramif']) {
+                $hasBeenTreated = true;
+            }
+
+            if(!$hasBeenTreated) {
+                $cardResults[] = array_values(array_filter($parcoursRamifications, 
+                fn($a) => $a['code_type_ramif'] === $pr['code_type_ramif'] 
+                    && $a['parcours_cible_id'] === $pr['parcours_cible_id']
+                ));
+            }
+
+            $accumulator[$pr['parcours_cible_id']] = $pr['code_type_ramif'];
+        }
+
+        return $this->render('type_ramification/show_list.html.twig', [
+            'parcoursRamifications' => $cardResults
+        ]);
+    }
 }
