@@ -200,6 +200,7 @@ final class RamificationParcoursController extends AbstractController
         $parcoursRamifications = $em->getRepository(ParcoursRamification::class)->findAllRamificationsGroups();
         $accumulator = [];
         $cardResults = [];
+        // Structuration des données
         foreach($parcoursRamifications as $pr) {
             $hasBeenTreated = false;
             if(isset($accumulator[$pr['parcours_cible_id']]) && $accumulator[$pr['parcours_cible_id']] === $pr['code_type_ramif']) {
@@ -214,6 +215,17 @@ final class RamificationParcoursController extends AbstractController
             }
 
             $accumulator[$pr['parcours_cible_id']] = $pr['code_type_ramif'];
+        }
+        // Traitement des libellés de parcours - alternance / LAS
+        foreach($cardResults as $keyCard => $card) {
+            foreach($card as $keyLink => $link) {
+                if($link['parcours_cible_type_parcours'] !== null && $link['parcours_cible_type_parcours']->value !== 'classique') {
+                    $cardResults[$keyCard][$keyLink]['parcours_cible_libelle_complet'] .= ' - ' . $link['parcours_cible_type_parcours']->libelle();
+                }
+                if($link['parcours_origine_type_parcours'] !== null && $link['parcours_origine_type_parcours']->value !== 'classique') {
+                    $cardResults[$keyCard][$keyLink]['parcours_origine_libelle_complet'] .= ' - ' . $link['parcours_origine_type_parcours']->libelle();
+                }
+            }
         }
 
         return $this->render('type_ramification/show_list.html.twig', [
