@@ -11,6 +11,14 @@
             overflow-y: auto;
             scrollbar-width: thin;
         }
+
+        .hover-link-card:hover {
+            color: var(--primary);
+        }
+
+        a.hover-link-card {
+            color: var(--body);
+        }
     </style>
 {% endblock %}
 
@@ -33,16 +41,27 @@
                                     <div class="col-4">
                                         <div class="card min-size-card-ramif">
                                             <div class="card-body">
-                                                <h5 class="card-title">
-                                                    {{ parcoursRamifications[cardIndex][0].parcours_cible_libelle_complet }}
-                                                </h5>
+                                                <a 
+                                                    href="{{ path('app_parcours_show', 
+                                                        {id: parcoursRamifications[cardIndex][0].parcours_cible_id }) 
+                                                    }}"
+                                                >
+                                                    <h5 class="card-title hover-link-card">
+                                                        {{ parcoursRamifications[cardIndex][0].parcours_cible_libelle_complet }}
+                                                    </h5>
+                                                </a>
                                                 <span class="text-center badge rounded-pill text-bg-info card-substitle mt-1 mb-3">
                                                     {{ parcoursRamifications[cardIndex][0].code_type_ramif }}
                                                 </span>
                                                 <ul class="no-padding-list">
                                                 {% for links in parcoursRamifications[cardIndex] %}
                                                     <li>
-                                                        {{ links.parcours_origine_libelle_complet }}
+                                                        <a 
+                                                            class="hover-link-card"
+                                                            href="{{ path('app_parcours_show', {id: links.parcours_origine_id}) }}"
+                                                        >
+                                                            {{ links.parcours_origine_libelle_complet }}
+                                                        </a>
                                                     </li>
                                                 {% endfor %}
                                                 </ul>
