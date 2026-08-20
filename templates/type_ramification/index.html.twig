@@ -45,6 +45,20 @@
                     <i class="fa-light fa-wrench"></i>
                 </button>
             </a>
+            <a
+                href="{{ path('app_config_type_ramification_parcours_list') }}"
+                class="ms-3"
+            >
+                <button
+                    class="btn btn-sm btn-icon btn-icon-only btn-outline-info"
+                    type="button"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-original-title="Voir les ramifications saisies"
+                >
+                    <i class="fa-light fa-eye"></i>
+                </button>
+            </a>
         </div>
     </div>
     {% for tr in typeRamifications %}
