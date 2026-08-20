@@ -51,7 +51,7 @@
             </a>
         </div>
     </div>
-    <div class="row justify-content-center mb-3">
+    <div class="row justify-content-center mb-3 {{ parcoursRamifications|length > 0 ? '' : 'd-none' }}">
         <div class="col-12 col-md-10 col-lg-5 col-xxl-4">
             <div class="input-group">
                 <span class="input-group-text bg-info text-white">
@@ -72,8 +72,10 @@
     <div class="row justify-content-center">
         <div class="col-12 col-md-11 col-lg-10 col-xl-9">
             {% if parcoursRamifications|length == 0 %}
-                <div class="fs-6 alert alert-info col-6">
-                    Aucunes ramifications de parcours enregistrées...
+                <div class="row justify-content-center">
+                    <div class="fs-6 alert alert-info col-6 text-center">
+                        Aucunes ramifications de parcours enregistrées...
+                    </div>
                 </div>
             {% else %}
                 {% set ramifRows = ((parcoursRamifications|length // cardPerRows) + (parcoursRamifications|length % cardPerRows)) %}
