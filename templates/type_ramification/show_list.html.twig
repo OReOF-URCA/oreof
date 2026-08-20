@@ -25,6 +25,23 @@
 {% set cardPerRows = 3 %}
 
 {% block content %}
+    <div class="row">
+        <!-- spacer -->
+        <div class="col-4 col-md-3 col-lg-2 col-xl-1"></div>
+        <div class="col-4">
+            <a href="{{ path('app_config_type_ramification_show') }}">
+                <button
+                    class="btn btn-sm btn-icon btn-icon-only btn-primary"
+                    type="button"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    data-bs-original-title="Précédent"
+                >
+                    <i class="fa-light fa-arrow-left"></i>
+                </button>
+            </a>
+        </div>
+    </div>
     <div class="row justify-content-center">
         <div class="col-12 col-md-11 col-lg-10 col-xl-9">
             {% if parcoursRamifications|length == 0 %}
