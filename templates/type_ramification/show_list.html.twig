@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = 'Liste des ramifications des parcours' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .min-size-card-ramif {
+            min-height: 17.5rem;
+            max-height: 17.5rem;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+    </style>
+{% endblock %}
+
+{% set cardPerRows = 3 %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-11 col-lg-10 col-xl-9">
+            {% if parcoursRamifications|length == 0 %}
+                <div class="fs-6 alert alert-info col-6">
+                    Aucunes ramifications de parcours enregistrées...
+                </div>
+            {% else %}
+                {% set ramifRows = ((parcoursRamifications|length // cardPerRows) + (parcoursRamifications|length % cardPerRows)) %}
+                {% for row in 1..ramifRows %}
+                        <div class="row justify-content-center w-100 my-4">
+                            {% for a in 1..cardPerRows %}
+                                {% set cardIndex = ((row - 1) * cardPerRows) + (a - 1) %}
+                                {% if parcoursRamifications[cardIndex] is defined %}
+                                    <div class="col-4">
+                                        <div class="card min-size-card-ramif">
+                                            <div class="card-body">
+                                                <h5 class="card-title">
+                                                    {{ parcoursRamifications[cardIndex][0].parcours_cible_libelle_complet }}
+                                                </h5>
+                                                <span class="text-center badge rounded-pill text-bg-info card-substitle mt-1 mb-3">
+                                                    {{ parcoursRamifications[cardIndex][0].code_type_ramif }}
+                                                </span>
+                                                <ul class="no-padding-list">
+                                                {% for links in parcoursRamifications[cardIndex] %}
+                                                    <li>
+                                                        {{ links.parcours_origine_libelle_complet }}
+                                                    </li>
+                                                {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
