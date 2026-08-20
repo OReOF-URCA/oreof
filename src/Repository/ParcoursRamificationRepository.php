@@ -48,7 +48,6 @@ class ParcoursRamificationRepository extends ServiceEntityRepository
             ->leftJoin('pCf.mention', 'pCfM')
             ->join('pCf.typeDiplome', 'pCTd')
             ->join('pr.typeRamification', 'typeRamif')
-            ->groupBy('pOrigine.id, typeRamif.id')
             ->getQuery()->getResult();
     }
 }
