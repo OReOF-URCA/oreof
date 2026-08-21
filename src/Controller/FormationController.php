@@ -23,7 +23,6 @@ use App\Entity\FormationVersioning;
 use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
 use App\Entity\UserProfil;
-use App\Entity\Constantes;
 use App\Enums\TypeModificationDpeEnum;
 use App\Events\AddCentreFormationEvent;
 use App\Form\FormationSesType;
@@ -223,7 +222,6 @@ class FormationController extends BaseController
         UserRepository        $userRepository,
         Composante            $composante,
         Request               $request,
-        UserRepository        $userRepository
     ): Response {
         $q = $request->query->get('q') ?? null;
         $responsables = $userRepository->findUserWithResponsabilites();

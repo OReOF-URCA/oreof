@@ -22,7 +22,6 @@ use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
 use App\Entity\User;
-use App\Entity\Constantes;
 use App\Entity\TypeDiplome;
 use App\Enums\ConfigurationPublicationEnum;
 use App\Enums\EtatDpeEnum;
