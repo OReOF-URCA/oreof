@@ -95,6 +95,7 @@
         {% endif %}
     </div>
 
+    {% if formation.typeDiplome.classique ?? true %}
     <div class="alert {% if formation.getEtatStep(3) %}alert-success{% else %}alert-warning{% endif %}" id="alertEtatStructure">
         <input type="checkbox"
                id="etatStructure"
@@ -104,4 +105,5 @@
         ><label for="etatStructure">
             Cochez cette case si vous avez terminé ...</label>
     </div>
+    {% endif %}
 </div>

@@ -24,6 +24,13 @@
                     {{ displaySort('composantePorteuse', sort, direction) }}
                 </a>
             </th>
+
+            <th>
+
+                Accréditation
+
+            </th>
+
             <th>
                 <a href="#"
                         {{ stimulus_action('crud', 'sort', 'click', {
@@ -52,7 +59,7 @@
             <th>Etat</th>
             <th>Remplissage</th>
             <th></th>
-            <th></th>
+
         </tr>
         {% if is_granted('ROLE_ADMIN') %}
             <tr>
@@ -71,6 +78,24 @@
                                     {% if params['composantePorteuse'] is defined and params['composantePorteuse']  == composante.id %}selected{% endif %}
                             >{{ composante.libelle }}</option>
                         {% endfor %}
+                    </select>
+                </th>
+                <th>
+                    <label for="filter-accreditation" class="sr-only">accréditation</label>
+                    <select
+                            {{ stimulus_action('crud', 'filter', 'change', {
+                                'field': 'accreditation'
+                            }) }}
+                            id="filter-accreditation" class="form-select">
+                        <option value="">Toutes</option>
+                        <option value="1"
+                                {% if params['accreditation'] is defined and params['accreditation'] == '1' %}selected{% endif %}>
+                            Accréditée
+                        </option>
+                        <option value="0"
+                                {% if params['accreditation'] is defined and params['accreditation'] == '0' %}selected{% endif %}>
+                            Non accréditée
+                        </option>
                     </select>
                 </th>
                 <th>
@@ -126,7 +151,8 @@
 
                     </select>
                 </th>
-                <th></th>
+                <th>
+                </th>
                 <th>
                 </th>
 
@@ -150,7 +176,6 @@
                         </select>
                     {% endif %}
                 </th>
-                {#                <th></th> #}
                 <th>
                     <button class="btn btn-outline-danger"
                             {{ stimulus_action('crud', 'effaceFiltre', 'click', {
@@ -177,6 +202,15 @@
                             <span class="badge bg-danger">Non définie</span>
                         {% endif %}
                     </td>
+
+                    <td>
+                        {% if formation.typeDiplome.classique == false %}
+                            <span class="badge bg-secondary">Non accréditée</span>
+                        {% else %}
+                            <span class="badge bg-success">Accréditée</span>
+                        {% endif %}
+                    </td>
+
                     <td>
                         {{ formation.typeDiplome|typeDiplome }}
                     </td>
@@ -216,7 +250,11 @@
                         </div>
                     </td>
                     <td>
-                        {{ formation.remplissage|remplissage }}
+                        {% if formation.typeDiplome.classique ?? true %}
+                            {{ formation.remplissage|remplissage }}
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
                     </td>
                     <td class="text-end">
                             <button class="btn btn-sm btn-outline-primary"
@@ -236,6 +274,7 @@
                             <span> Voir</span>
                         </a>
 
+                        {% if formation.typeDiplome.classique ?? true %}
                         <a href="#"
                            class="btn btn-sm text-success"
                                 {{ stimulus_controller('modal', {
@@ -251,8 +290,11 @@
                             <i class="fal fa-binoculars"></i>
                             <span> vérifier</span>
                         </a>
+                        {% endif %}
 
-                        {% if is_granted('EDIT', {route: 'app_formation', subject: formation}) %}
+                        {% if is_granted('EDIT', {route: 'app_formation', subject: formation}) 
+                            or (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and (formation.typeDiplome.classique ?? true) == false)
+                        %}
                             <a href="{{ path('app_formation_edit',{'slug': formation.slug}) }}"
                                class="btn btn-sm text-warning"
                                data-bs-toggle="tooltip"

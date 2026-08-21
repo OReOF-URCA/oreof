@@ -27,8 +27,17 @@
         {{ form_row(form.nbHeuresSituationPro) }}
         {{ form_row(form.situationProText) }}
     {% endif %}
+
+{% if form.dureeParcours is defined %}
+        <div class="row mb-3">
+            {{ form_row(form.dureeParcours) }}
+            {{ form_row(form.dureeParcoursUnite) }}
+        </div>
+    {% endif %}
+
     {{ form_end(form) }}
 
+    {% if parcours.formation.typeDiplome.classique ?? true %}
     <div class="alert {% if parcours.getEtatStep(2) %}alert-success{% else %}alert-warning{% endif %}" id="alertEtatStructure">
         <input type="checkbox"
                id="etatStructure"
@@ -39,4 +48,5 @@
         ><label for="etatStructure">
             Cochez cette case si vous avez terminé ...</label>
     </div>
+    {% endif %}
 </div>

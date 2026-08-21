@@ -23,6 +23,11 @@ class EtablissementInformationType extends AbstractType
                 'required' => true,
                 'attr' => ['maxlength' => 2500]
             ])
+            ->add('tarif_inscription', TextareaAutoSaveType::class, [
+                'label' => "Tarif(s) d'inscription",
+                'required' => true,
+                'attr' => ['maxlength' => 2500]
+            ])
             ->add('informations_pratiques', TextareaAutoSaveType::class, [
                 'label' => 'Informations pratiques',
                 'required' => true,
@@ -75,6 +80,26 @@ class EtablissementInformationType extends AbstractType
                 'label' => 'Droit à la 2nde chance',
                 'required' => true,
                 'attr' => ['maxlength' => 2500]
+            ])
+            ->add('mentionHandicap', TextareaAutoSaveType::class, [
+                'label' => 'Informations concernant le handicap (LHEO v2)',
+                'required' => false,
+                'attr' => ['maxlength' => 1250]
+            ])
+            ->add('savoirPlusOrientationInsertion', TextareaAutoSaveType::class, [
+                'label' => "À propos de l'orientation et de l'insertion (LHEO v2)",
+                'required' => false,
+                'attr' => ['maxlength' => 1250]
+            ])
+            ->add('relationsInternationales', TextareaAutoSaveType::class, [
+                'label' => "Relations internationales (LHEO v2)",
+                'required' => false,
+                'attr' => ['maxlength' => 1250]
+            ])
+            ->add('associationsEtudiantes', TextareaAutoSaveType::class, [
+                'label' => "Informations sur les associations étudiantes (LHEO v2)",
+                'required' => false,
+                'attr' => ['maxlength' => 1250]
             ])
         ;
     }

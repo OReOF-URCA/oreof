@@ -96,4 +96,15 @@ class ApiSiteWebController extends AbstractController
         return new JsonResponse(["error" => "API File does not exist."]);
     }
 
+    #[Route('/api/site/web/export_v2')]
+    public function indexApiJsonV2(Filesystem $fs) {
+        $filename = "api_json_urca_versioning_v2.json";
+        $path = __DIR__ . "/../../public/api_json_v2/";
+
+        if($fs->exists($path . $filename) === true){
+            return new JsonResponse(file_get_contents($path . $filename), json: true);
+        }
+
+        return new JsonResponse(['error' => "API V2 File is not available."]);
+    }
 }

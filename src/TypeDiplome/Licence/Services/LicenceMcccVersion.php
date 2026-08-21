@@ -102,7 +102,7 @@ class LicenceMcccVersion extends AbstractLicenceMccc
                     $this->versioningParcours->getLastVersionOrLastYearCfvu($parcours)
                 )['parcours'];
             $diffDescriptifs = VersioningStructure::calculDiffDescriptifs($lastParcoursCfvuDesc, $parcours);
-            
+
         } else {
             return false;
         }
@@ -202,14 +202,14 @@ class LicenceMcccVersion extends AbstractLicenceMccc
             substr(self::CEL_REGIME_FI_APPRENTISSAGE, 0, 1),
             substr(self::CEL_REGIME_FI_APPRENTISSAGE, 1, 2),
             $diffDescriptifs['regimeInscription']['FIA'],
-            ['withLighterGreen' => true]                        
+            ['withLighterGreen' => true]
 
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FC_CONTRAT_PRO, 0, 1),
             substr(self::CEL_REGIME_FC_CONTRAT_PRO, 1, 2),
             $diffDescriptifs['regimeInscription']['FCCP'],
-            ['withLighterGreen' => true]    
+            ['withLighterGreen' => true]
         );
 
         //ajoute les sigles
@@ -515,9 +515,9 @@ class LicenceMcccVersion extends AbstractLicenceMccc
         $this->excelWriter->removeSheetByIndex(0);
 
         if ($formation->isHasParcours() === true) {
-            $texte = $formation->gettypeDiplome()?->getLibelleCourt() . ' ' . $parcours->getSigle() . ' ' . $parcours->getSigle();
+            $texte = $formation->getTypeDiplome()?->getLibelleCourt() . ' ' . $formation->getSigle() . ' ' . $parcours->getSigle();
         } else {
-            $texte = $formation->gettypeDiplome()?->getLibelleCourt() . ' ' . $formation->getSigle();
+            $texte = $formation->getTypeDiplome()?->getLibelleCourt() . ' ' . $formation->getSigle();
         }
 
         $this->fileName = Tools::FileName('MCCC-version-' . $anneeUniversitaire->getLibelle() . ' - ' . $texte);
@@ -546,6 +546,7 @@ class LicenceMcccVersion extends AbstractLicenceMccc
         $ec = $structureEc->elementConstitutif;
         $this->excelWriter->insertNewRowBefore($ligne);
         $this->excelWriter->writeCellXY(self::COL_NUM_EC, $ligne, $ec->getCode());//todo: gérer les cas
+        $isEcChoix = false;
 
         if ($ec->getNatureUeEc() !== null && $ec->getNatureUeEc()->isLibre() === true) {
             $this->excelWriter->writeCellXY(self::COL_INTITULE_EC, $ligne, $ec->getLibelle() . ' (EC à choix libre) ' . $ec->getTexteEcLibre(), ['wrap' => true]);
@@ -557,6 +558,7 @@ class LicenceMcccVersion extends AbstractLicenceMccc
             $this->excelWriter->writeCellXY(self::COL_INTITULE_EC_EN, $ligne, '', ['wrap' => true]);
             $this->excelWriter->writeCellXY(self::COL_RESP_EC, $ligne, '', ['wrap' => true]);
             $this->lignesEcColorees[] = $ligne;
+            $isEcChoix = true;
         } elseif ($ec->getFicheMatiere() !== null) {
             $this->excelWriter->writeCellXYDiff(self::COL_INTITULE_EC, $ligne, $diffEc['libelle'], ['wrap' => true]);
             $this->excelWriter->writeCellXY(self::COL_INTITULE_EC_EN, $ligne, $ec->getFicheMatiere()->getLibelleAnglais(), ['wrap' => true]);
@@ -622,7 +624,9 @@ class LicenceMcccVersion extends AbstractLicenceMccc
                 }
 
                 foreach ($diffMccc as $key => $value) {
-                    $this->excelWriter->writeCellXYDiff(constant(self::class . '::' . $key), $ligne, $value);
+                    if(!$isEcChoix){
+                        $this->excelWriter->writeCellXYDiff(constant(self::class . '::' . $key), $ligne, $value);
+                    }
                 }
             } elseif (array_key_exists('mcccs', $diffEc) && array_key_exists('new', $diffEc['mcccs'])) {
                 $mcccsNew = $this->getMcccs($diffEc['mcccs']['new'], $diffEc['typeMccc']->new);
@@ -636,27 +640,32 @@ class LicenceMcccVersion extends AbstractLicenceMccc
                 }
 
                 foreach ($diffMccc as $key => $value) {
-                    $this->excelWriter->writeCellXYDiff(constant(self::class . '::' . $key), $ligne, $value);
+                    if(!$isEcChoix) {
+                        $this->excelWriter->writeCellXYDiff(constant(self::class . '::' . $key), $ligne, $value);
+                    }
                 }
             }
 
             $this->excelWriter->writeCellXY(self::COL_TYPE_EC, $ligne, $ec->getTypeEc() ? $ec->getTypeEc()->getLibelle() : '');
         }
         // Heures
-        $this->excelWriter->writeCellXYDiff(self::COL_ECTS, $ligne, $diffEc['heuresEctsEc']['ects']);
-        $this->excelWriter->writeCellXYDiff(self::COL_HEURES_PRES_CM, $ligne, $diffEc['heuresEctsEc']['cmPres']);
-        $this->excelWriter->writeCellXYDiff(self::COL_HEURES_PRES_TD, $ligne, $diffEc['heuresEctsEc']['tdPres']);
-        $this->excelWriter->writeCellXYDiff(self::COL_HEURES_PRES_TP, $ligne, $diffEc['heuresEctsEc']['tpPres']);
-        $this->excelWriter->writeCellXYDiff(self::COL_HEURES_PRES_TOTAL, $ligne, $diffEc['heuresEctsEc']['sommeEcTotalPres']);
+        // Ne pas afficher s'il s'agit d'un EC à choix
+        // Les valeurs peuvent être différentes entre les enfants
+        if(!$isEcChoix) {    
+            $this->excelWriter->writeCellXYDiff(self::COL_ECTS, $ligne, $diffEc['heuresEctsEc']['ects']);
+            $this->excelWriter->writeCellXYDiff(self::COL_HEURES_PRES_CM, $ligne, $diffEc['heuresEctsEc']['cmPres']);
+            $this->excelWriter->writeCellXYDiff(self::COL_HEURES_PRES_TD, $ligne, $diffEc['heuresEctsEc']['tdPres']);
+            $this->excelWriter->writeCellXYDiff(self::COL_HEURES_PRES_TP, $ligne, $diffEc['heuresEctsEc']['tpPres']);
+            $this->excelWriter->writeCellXYDiff(self::COL_HEURES_PRES_TOTAL, $ligne, $diffEc['heuresEctsEc']['sommeEcTotalPres']);
+            //si pas distanciel, griser...
+            $this->excelWriter->writeCellXYDiff(self::COL_HEURES_DIST_CM, $ligne, $diffEc['heuresEctsEc']['cmDist']);
+            $this->excelWriter->writeCellXYDiff(self::COL_HEURES_DIST_TD, $ligne, $diffEc['heuresEctsEc']['tdDist']);
+            $this->excelWriter->writeCellXYDiff(self::COL_HEURES_DIST_TP, $ligne, $diffEc['heuresEctsEc']['tpDist']);
+            $this->excelWriter->writeCellXYDiff(self::COL_HEURES_DIST_TOTAL, $ligne, $diffEc['heuresEctsEc']['sommeEcTotalDist']);
+            $this->excelWriter->writeCellXYDiff(self::COL_HEURES_AUTONOMIE, $ligne, $diffEc['heuresEctsEc']['tePres']);
 
-        //si pas distanciel, griser...
-        $this->excelWriter->writeCellXYDiff(self::COL_HEURES_DIST_CM, $ligne, $diffEc['heuresEctsEc']['cmDist']);
-        $this->excelWriter->writeCellXYDiff(self::COL_HEURES_DIST_TD, $ligne, $diffEc['heuresEctsEc']['tdDist']);
-        $this->excelWriter->writeCellXYDiff(self::COL_HEURES_DIST_TP, $ligne, $diffEc['heuresEctsEc']['tpDist']);
-        $this->excelWriter->writeCellXYDiff(self::COL_HEURES_DIST_TOTAL, $ligne, $diffEc['heuresEctsEc']['sommeEcTotalDist']);
-        $this->excelWriter->writeCellXYDiff(self::COL_HEURES_AUTONOMIE, $ligne, $diffEc['heuresEctsEc']['tePres']);
-
-        $this->excelWriter->writeCellXYDiff(self::COL_HEURES_TOTAL, $ligne, $diffEc['heuresEctsEc']['sommeEcTotalPresDist']);
+            $this->excelWriter->writeCellXYDiff(self::COL_HEURES_TOTAL, $ligne, $diffEc['heuresEctsEc']['sommeEcTotalPresDist']);
+        }
 
         $ligne++;
         return $ligne;

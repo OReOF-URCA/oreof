@@ -1,3 +1,9 @@
 <span {{ attributes }} id="ects_semestre_{{ this.semestre.id }}_{{ this.parcours.id }}">
-    {{ this.ects|badgeEctsSemestre }}
+    {% if not this.hasEcts %}
+        <span class="badge bg-success me-2">Sans ECTS</span>
+    {% elseif this.nbEctsParSemestre is null %}
+        <span class="badge bg-success me-2">{{ this.ects }} ECTS</span>
+    {% else %}
+        {{ this.ects|badgeEctsSemestre(this.nbEctsParSemestre) }}
+    {% endif %}
 </span>

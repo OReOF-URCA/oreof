@@ -250,6 +250,24 @@ class DpeParcoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findAllForParcoursEvolution(): array
+    {
+        return $this->createQueryBuilder('dp')
+            ->join('dp.parcours', 'p')
+            ->addSelect('p')
+            ->leftJoin('p.parcoursOrigineCopie', 'po')
+            ->addSelect('po')
+            ->join('dp.formation', 'f')
+            ->addSelect('f')
+            ->join('dp.campagneCollecte', 'camp')
+            ->addSelect('camp')
+            ->orderBy('camp.annee', 'ASC')
+            ->addOrderBy('camp.id', 'ASC')
+            ->addOrderBy('p.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findFromAnneeUniversitaire(int $idCampagneCollecte, array $exclusionEtatDpe) : array {
         $qb = $this->createQueryBuilder('dpeParcours');
         return $qb

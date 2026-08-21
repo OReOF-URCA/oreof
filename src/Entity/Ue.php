@@ -35,6 +35,7 @@ class Ue
     #[ORM\ManyToOne(inversedBy: 'ues')]
     private ?Semestre $semestre = null;
 
+    #[Groups('DTO_json_versioning')]
     #[ORM\ManyToOne(cascade: ['persist'], fetch: 'EAGER')]
     private ?TypeUe $typeUe = null;
 

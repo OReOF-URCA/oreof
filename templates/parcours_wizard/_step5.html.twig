@@ -4,7 +4,9 @@
     {% form_theme form 'communs/form_theme.html.twig' %}
     {{ form_row(form.niveauFrancais) }}
     {{ form_row(form.prerequis) }}
-    {{ form_row(form.composanteInscription) }}
+    {% if parcours.formation.typeDiplome.classique ?? true %}
+        {{ form_row(form.composanteInscription) }}
+    {% endif %}
 
     {% if parcours.formation.isHasParcours == true %}
         {{ form_row(form.regimeInscription) }}
@@ -29,6 +31,7 @@
     </div>
 
 
+    {% if parcours.formation.typeDiplome.classique ?? true %}
     <div class="alert {% if parcours.getEtatStep(5) %}alert-success{% else %}alert-warning{% endif %}" id="alertEtatStructure">
         <input type="checkbox"
                id="etatStructure"
@@ -39,4 +42,5 @@
         ><label for="etatStructure">
             Cochez cette case si vous avez terminé ...</label>
     </div>
+    {% endif %}
 </div>

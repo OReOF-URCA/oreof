@@ -60,10 +60,15 @@ abstract class ValideStructure extends AbstractValide
                             self::valideUe($ue, $semestreParcour->getOrdre());
                         }
                     }
-                    if (($sem->isNonDispense() === false || $semestreParcour->isOuvert() === true) && self::totalEctsSemestre($sem) !== 30.0) {
+                    $nbEctsAttendus = self::$typeDiplome?->getNbEctsParSemestre();
+                    $ectsActifs = self::$typeDiplome?->isHasEcts() ?? true;
+                    $quotaDepasse = $ectsActifs && $nbEctsAttendus !== null
+                        && ($sem->isNonDispense() === false || $semestreParcour->isOuvert() === true)
+                        && self::totalEctsSemestre($sem) !== (float)$nbEctsAttendus;
+                    if ($quotaDepasse) {
                         self::$structure['semestres'][$semestreParcour->getOrdre()]['global'] = self::ERREUR;
-                        self::$structure['semestres'][$semestreParcour->getOrdre()]['erreur'][] = 'Le semestre doit faire 30 ECTS';
-                        self::$errors[] = 'Le semestre ' . $semestreParcour->getOrdre() . ' doit faire 30 ECTS';
+                        self::$structure['semestres'][$semestreParcour->getOrdre()]['erreur'][] = 'Le semestre doit faire ' . $nbEctsAttendus . ' ECTS';
+                        self::$errors[] = 'Le semestre ' . $semestreParcour->getOrdre() . ' doit faire ' . $nbEctsAttendus . ' ECTS';
                     } else {
                         self::$structure['semestres'][$semestreParcour->getOrdre()]['global'] = $hasUe;
                     }
@@ -148,7 +153,7 @@ abstract class ValideStructure extends AbstractValide
 
             //vérification des ECTS, d'un libellé et d'une description
         } elseif ($ec->getNatureUeEc()?->isChoix() || $ec->getEcEnfants()->count() > 0) {
-            if (self::$typeDiplome !== null) {
+            if (self::$typeDiplome !== null && self::$typeDiplome->isHasEcts()) {
                 //si l'EC est un choix, on vérifie les enfants => todo: utiliser self::analyseEc ?
                 if ($ec->getEcts() !== null && $ec->getEcts() > 0.0 && $ec->getEcts() <= 30.0) {
                     $t['global'] = self::COMPLET;
@@ -192,9 +197,8 @@ abstract class ValideStructure extends AbstractValide
         }
         $getElement = new GetElementConstitutif($ec, self::$parcours);
         if ($ec->getNatureUeEc()?->isLibre() === true) {
-            if (self::$typeDiplome !== null) {
+            if (self::$typeDiplome !== null && self::$typeDiplome->isHasEcts()) {
                 $ects = $getElement->getFicheMatiereEcts();
-                //todo: selon le type de diplôme, vérifier si les ECTS sont obligatoires
                 if (self::$typeDiplome->isEctsObligatoireSurEc() === false && ($ects === null || $ects === 0.0)) {
                     $t['erreur'][] = 'ECTS non renseignés, mais ce type de diplôme l\'autorise';
                     $etatEc = self::INCOMPLET_ECTS;
@@ -226,7 +230,7 @@ abstract class ValideStructure extends AbstractValide
                 $etatEc = self::INCOMPLET;
                 self::$errors[] = 'MCCC non renseignées pour l\'' . $ec->getCode() . ' de l\'' . $ue->display(self::$parcours);
             }
-            if (self::$typeDiplome !== null) {
+            if (self::$typeDiplome !== null && self::$typeDiplome->isHasEcts()) {
                 $ects = $getElement->getFicheMatiereEcts();
                 if (self::$typeDiplome->isEctsObligatoireSurEc() === false && ($ects === null || $ects === 0.0)) {
                     $t['erreur'][] = 'ECTS non renseignés, mais ce type de diplôme l\'autorise';
@@ -359,9 +363,14 @@ abstract class ValideStructure extends AbstractValide
                     }
                 }
 
-                if ($sem->isNonDispense() === false && self::totalEctsSemestre($sem) !== 30.0) {
-                    self::$errors[] = 'Le semestre ' . $semestreParcour->getOrdre() . ' doit faire 30 ECTS';
-                    self::$structure['semestres'][$semestreParcour->getOrdre()]['erreur'][] = 'Le semestre doit faire 30 ECTS';
+                $nbEctsAttendus = self::$parcours->getTypeDiplome()?->getNbEctsParSemestre();
+                $ectsActifs = self::$parcours->getTypeDiplome()?->isHasEcts() ?? true;
+                $quotaDepasse = $ectsActifs && $nbEctsAttendus !== null
+                    && $sem->isNonDispense() === false
+                    && self::totalEctsSemestre($sem) !== (float)$nbEctsAttendus;
+                if ($quotaDepasse) {
+                    self::$errors[] = 'Le semestre ' . $semestreParcour->getOrdre() . ' doit faire ' . $nbEctsAttendus . ' ECTS';
+                    self::$structure['semestres'][$semestreParcour->getOrdre()]['erreur'][] = 'Le semestre doit faire ' . $nbEctsAttendus . ' ECTS';
                     self::$structure['semestres'][$semestreParcour->getOrdre()]['global'] = self::ERREUR;
                     self::$structure['global'] = self::INCOMPLET;
                 } else {

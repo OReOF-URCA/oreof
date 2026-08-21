@@ -35,11 +35,21 @@
                             <td>
                                 {{ parcours.etatStep(4)|badgeStep }}
                             </td>
+                            {% if (formation.typeDiplome.classique ?? true) == false %}
+                                <td>
+                                    -
+                                </td>
+                            {% else %}
+                                <td>
+                                    {{ component('historique_pv', {parcours:parcours}) }}
+                                </td>
+                            {% endif %}
                             <td>
-                                {{ component('historique_pv', {parcours:parcours}) }}
-                            </td>
-                            <td>
-                                {{ parcours.remplissage|remplissage }}
+                                {% if parcours.formation.typeDiplome.classique ?? true %}
+                                    {{ parcours.remplissage|remplissage }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
                             </td>
                         {% endif %}
                         <td class="text-end">
@@ -54,6 +64,7 @@
                                 <span> voir</span>
                             </a>
 
+                            {% if parcours.formation.typeDiplome.classique ?? true %}
                             <a href="#"
                                class="btn btn-sm text-success"
                                     {{ stimulus_controller('modal', {
@@ -69,9 +80,12 @@
                                 <i class="fal fa-binoculars"></i>
                                 <span> vérifier</span>
                             </a><br>
+                            {% endif %}
 
                             {% if
-                                is_granted('EDIT', {route: 'app_parcours', subject:  dpesParcours[parcours.id]}) %}
+                                is_granted('EDIT', {route: 'app_parcours', subject:  dpesParcours[parcours.id]}) 
+                                or (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and (formation.typeDiplome.classique ?? true) == false)
+                            %}
                                 <a href="{{ path('app_parcours_edit',{'id': parcours.id}) }}"
                                    class="btn btn-sm text-warning"
                                    data-bs-toggle="tooltip"
@@ -103,7 +117,7 @@
             {% else %}
                 {% if formation.parcours|length == 0 %}
                     <tr class="bg-warning text-white">
-                        <td colspan="9">Formation non initialisée, pas de parcours ou de parcours par défaut.</td>
+                        <td colspan="10">Formation non initialisée, pas de parcours ou de parcours par défaut.</td>
                     </tr>
                 {% else %}
                     {% set parcours = formation.parcours[0] %}
@@ -125,12 +139,22 @@
                         <td>
                             {{ parcours.etatStep(4)|badgeStep }}
                         </td>
-                        <td>
-                            {{ component('historique_pv', {parcours:parcours}) }}
-                        </td>
-                        <td>
-                            {{ parcours.remplissage|remplissage }}
-                        </td>
+                        {% if (formation.typeDiplome.classique ?? true) == false %}
+                            <td>
+                                -
+                            </td>
+                        {% else %}
+                            <td>
+                                {{ component('historique_pv', {parcours:parcours}) }}
+                            </td>
+                        {% endif %}
+                            <td>
+                                {% if parcours.formation.typeDiplome.classique ?? true %}
+                                    {{ parcours.remplissage|remplissage }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
                         {% endif %}
                         <td class="text-end">
                             <a href="{{ path('app_formation_show',{'slug': formation.slug}) }}"
@@ -144,6 +168,7 @@
                                 <span> voir</span>
                             </a>
 
+                            {% if formation.typeDiplome.classique ?? true %}
                             <a href="#"
                                class="btn btn-sm text-success"
                                     {{ stimulus_controller('modal', {
@@ -159,8 +184,12 @@
                                 <i class="fal fa-binoculars"></i>
                                 <span> vérifier</span>
                             </a><br>
+                            {% endif %}
 
-                            {% if is_granted('EDIT', {route: 'app_formation', subject: formation}) or is_granted('EDIT', {route: 'app_parcours', subject: formation.parcours[0]}) %}
+                            {% if is_granted('EDIT', {route: 'app_formation', subject: formation}) 
+                                or is_granted('EDIT', {route: 'app_parcours', subject: formation.parcours[0]}) 
+                                or (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and (formation.typeDiplome.classique ?? true) == false)
+                            %}
                                 <a href="{{ path('app_formation_edit',{'slug':  formation.slug}) }}"
                                    class="btn btn-sm text-warning"
                                    data-bs-toggle="tooltip"

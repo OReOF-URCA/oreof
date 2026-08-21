@@ -20,7 +20,9 @@
             <div class="row">
                 <div class="col-6">{{ form_row(form.typeDiplome) }}</div>
                 <div class="col-6">{{ form_row(form.domaine) }}</div>
-                <div class="col-12">{{ form_row(form.composantePorteuse) }}</div>
+                {% if form.composantePorteuse is defined %}
+                    <div class="col-12">{{ form_row(form.composantePorteuse) }}</div>
+                {% endif %}
 
                 <div class="col-6">{{ form_row(form.mention) }}</div>
                 <div class="col-6">{{ form_row(form.mentionTexte) }}</div>
@@ -56,9 +58,12 @@
                 <div class="col-12" {{ stimulus_target('formation', 'user') }}>
                     <i>.:: Choisir le responsable pour afficher ses informations ::.</i>
                 </div>
+
+                <div class="col-12">{{ form_row(form.coResponsable) }}</div>
+
             </div>
 
-            <button class="btn btn-success">
+            <button class="btn btn-success mt-3">
                 <i class="fal fa-floppy-disk"></i>
                 Modifier
             </button>

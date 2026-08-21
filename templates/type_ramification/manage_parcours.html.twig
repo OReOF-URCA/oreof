@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    Configuration des ramifications des parcours
+{% endset %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .search-result-list {
+            max-height: 17.5em;
+            overflow-y: scroll;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary);
+            background-color: #f3f3f3;
+            border-radius: .95em;
+            border: 1.5px solid var(--primary);
+        }
+
+        .search-result-node:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .search-result-node {
+            cursor: pointer;
+            border-radius: .65em;
+        }
+
+        .remove-choice-cross:hover {
+            cursor: pointer;
+        }
+
+        .remove-choice-cross {
+            color: red;
+        }
+
+        .choice-badge {
+            font-size: .85rem;
+            margin-top: .75rem;
+            color: white;
+        }
+
+        .choice-badge-txt {
+            background-color: var(--primary);
+            border-top-left-radius: .95rem;
+            border-bottom-left-radius: .95rem;
+            padding: .45rem 0 .45rem .95rem;
+            width: fit-content;
+            max-width: 85%;
+        }
+
+        .choice-badge-icon {
+            background-color: var(--primary);
+            border-top-right-radius: .95rem;
+            border-bottom-right-radius: .95rem;
+        }
+
+        @keyframes spin360 {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-spin-360 {
+            animation-name: spin360;
+            animation-duration: 1.95s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            font-size: 4.25rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center"
+        {{ stimulus_controller('ramification-parcours-manage') }}
+        data-ramification-parcours-manage-search-url-value="{{ path('app_config_type_ramification_search_parcours_by_name') }}"
+    >
+        <div class="col-12 col-md-11 col-lg-9">
+            <div class="col-12 text-start">
+                <a href="{{ path('app_config_type_ramification_show') }}">
+                    <button
+                        class="btn btn-sm btn-icon btn-icon-only btn-primary"
+                        type="button"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        data-bs-original-title="Précédent"
+                    >
+                        <i class="fa-light fa-arrow-left"></i>
+                    </button>
+                </a>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+                    <div class="input-group">
+                        <span class="input-group-text">Nom du parcours</span>
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Entrez votre recherche..."
+                            value=""
+                            {{ stimulus_target('ramification-parcours-manage', 'searchInput') }}
+                            {{ stimulus_action('ramification-parcours-manage', 'onSearchInputChange', 'change') }}
+                        >
+                        <button class="btn btn-outline-primary"
+                            data-bs-placement="bottom"
+                            data-bs-toggle="tooltip"
+                            title="Lancer la recherche"
+                            {{ stimulus_action('ramification-parcours-manage', 'onSearchInputChange', 'click') }}
+                        >
+                            <i class="fa-duotone fa-solid fa-magnifying-glass fa-xl"></i>
+                        </button>
+                    </div>
+                    <div class="d-none text-center text-danger fs-6 mt-4" 
+                        {{ stimulus_target('ramification-parcours-manage', 'searchErrorArea') }}
+                    >
+                        
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-4">
+                    <div class="col-12 col-md-10 col-lg-8 col-xl-7 text-center d-none"
+                        {{ stimulus_target('ramification-parcours-manage', 'loadingSpinner') }}
+                    >
+                        <i class="fa-duotone fa-solid fa-spinner loading-spin-360"></i>
+                    </div>
+                    <div class="col-12 col-md-10 col-lg-8 col-xl-7 search-result-list d-none"
+                        {{ stimulus_target('ramification-parcours-manage', 'resultList') }}
+                    >
+
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-4"
+                    {{ stimulus_target('ramification-parcours-manage', 'choiceArea') }}
+                >
+                
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

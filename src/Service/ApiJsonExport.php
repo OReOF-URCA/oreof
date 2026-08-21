@@ -25,22 +25,28 @@ class ApiJsonExport {
 
     private UrlGeneratorInterface $router;
 
+    private SecureUploadService $secureUploadService;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         GetHistorique $getHistorique,
         VersioningParcours $versioningParcours,
         UrlGeneratorInterface $router,
+        SecureUploadService $secureUploadService,
     ){
         $this->entityManager = $entityManager;
         $this->getHistorique = $getHistorique;
         $this->versioningParcours = $versioningParcours;
         $this->router = $router;
+        $this->secureUploadService = $secureUploadService;
     }
 
     public function generateApiVersioning(
         string $hostname,
         SymfonyStyle $io = null,
-        LheoXML $lheoXmlService
+        LheoXML $lheoXmlService,
+        LheoXMLv2 $lheoV2,
+        bool $isV2 = false,
     ): array
     {
         $dataJSON = [];
@@ -92,17 +98,31 @@ class ApiJsonExport {
                 foreach($formation->getParcours() as $parcours){
                     $lastVersion = $this->entityManager->getRepository(ParcoursVersioning::class)
                         ->findLastCfvuVersion($parcours);
-                    if(count($lastVersion) > 0 && $lheoXmlService->isValidLHEO($parcours)){
+                    if($isV2 === false) {
+                        $checkIsValidCurrentYearParcours = count($lastVersion) > 0 && $lheoXmlService->isValidLHEO($parcours);
+                    } elseif ($isV2 === true){
+                        $checkIsValidCurrentYearParcours = count($lastVersion) > 0 && $lheoV2->isValidLHEO($parcours);
+                    }
+                    if($checkIsValidCurrentYearParcours){
                         $lastVersionData = $this->versioningParcours->loadParcoursFromVersion($lastVersion[0]);
-                        $tParcours[] = [
+                        $parcoursData = [
                             'id_old' => $parcours->getParcoursOrigineCopie()?->getId(),
                             'id' => $parcours->getId(),
                             'libelle' => $lastVersionData['parcours']->getDisplay(),
-                            'url' => $urlPrefix . $this->router->generate(
-                                    'app_parcours_export_json_urca_cfvu_valid',
-                                    ['parcours' => $lastVersion[0]->getParcours()->getId()]
+                            'url' => $isV2 
+                                    ? $urlPrefix . $this->router->generate('app_export_json_urca_v2_cfvu_valid', 
+                                        ['parcours' => $lastVersion[0]->getParcours()->getId()])
+                                    : $urlPrefix . $this->router->generate(
+                                        'app_parcours_export_json_urca_cfvu_valid',
+                                        ['parcours' => $lastVersion[0]->getParcours()->getId()]
                             )
                         ];
+                        if($isV2){
+                            $parcoursData['annee'] = $campagneCourante->getAnnee();
+                            $parcoursData['uuid_parcours'] = $this->getUuidForParcours($parcours);
+                        }
+                        $tParcours[] = $parcoursData;
+
                         $dateValideCfvu = $this->getHistorique
                             ->getHistoriqueParcoursLastStep($parcours->getDpeParcours()->last(), 'valide_cfvu')
                             ?->getDate();
@@ -130,13 +150,17 @@ class ApiJsonExport {
                 }
 
                 if(count($tParcours) > 0){
-                    $dataJSON[] = [
+                    $forma = [
                         'id_old' => $formation->getFormationOrigineCopie()?->getId(),
                         'id' => $formation->getId(),
                         'libelle' => $formation->getDisplayLong(),
                         'parcours' => $tParcours,
-                        'dateValidation' => $dateValidationFormation?->format('Y-m-d H:i:s') ?? null
+                        'dateValidation' => $dateValidationFormation?->format('Y-m-d H:i:s') ?? null,
                     ];
+                    if ($isV2) {
+                        $forma['uuid_formation'] = $this->getUuidForFormation($formation);
+                    }
+                    $dataJSON[] = $forma;
                 }
 
                 $io?->progressAdvance();
@@ -169,19 +193,32 @@ class ApiJsonExport {
             foreach($formationArray as $formationAnneeSuivante){
                 $addedParcours = [];
                 foreach($formationAnneeSuivante->getParcours() as $parcoursAnneeSuivante) {
-                    if($lheoXmlService->isValidLHEO($parcoursAnneeSuivante)){
+                    if($isV2 === false) {
+                        $checkIsValidNextYearParcours = $lheoXmlService->isValidLHEO($parcoursAnneeSuivante);
+                    } elseif ($isV2 === true) {
+                        $checkIsValidNextYearParcours = $lheoV2->isValidLHEO($parcoursAnneeSuivante);
+                    }
+                    if($checkIsValidNextYearParcours) {
                         $dpeParcoursToAdd = $parcoursAnneeSuivante->getDpeParcours()?->last();
                         if($dpeParcoursToAdd instanceof DpeParcours){
                             if(in_array($dpeParcoursToAdd->getEtatReconduction(), $etatReconductionCampagneSuivante)){
-                                $addedParcours[] = [
+                                $parcoursDataNext = [
                                     'id_old' => $parcoursAnneeSuivante->getParcoursOrigineCopie()?->getId(),
                                     'id' => $parcoursAnneeSuivante->getId(),
                                     'libelle' => $parcoursAnneeSuivante->getDisplay(),
-                                    'url' => $urlPrefix . $this->router->generate(
-                                        'app_parcours_export_json_urca_annee_suivante_light',
-                                        ['parcours' => $parcoursAnneeSuivante->getId()]
+                                    'url' => $isV2 
+                                        ? $urlPrefix  . $this->router->generate('app_export_json_urca_v2_annee_suivante_light', 
+                                            ['parcours' => $parcoursAnneeSuivante->getId()])
+                                        : $urlPrefix . $this->router->generate(
+                                            'app_parcours_export_json_urca_annee_suivante_light',
+                                            ['parcours' => $parcoursAnneeSuivante->getId()]
                                     )
                                 ];
+                                if($isV2) {
+                                    $parcoursDataNext['annee'] = $campagneSuivante->getAnnee();
+                                    $parcoursDataNext['uuid_parcours'] = $this->getUuidForParcours($parcoursAnneeSuivante);
+                                }
+                                $addedParcours[] = $parcoursDataNext;
                             }
                         }
 
@@ -189,13 +226,17 @@ class ApiJsonExport {
                     }
                 }
                 if(count($addedParcours) > 0) {
-                    $dataJSON[] = [
+                    $formationAppend = [
                         'id_old' => $formationAnneeSuivante->getFormationOrigineCopie()?->getId(),
                         'id' => $formationAnneeSuivante->getId(),
                         'libelle' => $formationAnneeSuivante->getDisplayLong(),
                         'parcours' => $addedParcours,
-                        'dateValidation' => (new DateTime('2025-12-15'))->format('Y-m-d H:i:s')
+                        'dateValidation' => (new DateTime('2025-12-15'))->format('Y-m-d H:i:s'),
                     ];
+                    if ($isV2) {
+                        $formationAppend['uuid_formation'] = $this->getUuidForFormation($formationAnneeSuivante);
+                    }
+                    $dataJSON[] = $formationAppend;
                 }
 
                 $io?->progressAdvance();
@@ -220,4 +261,66 @@ class ApiJsonExport {
 
         return $dataJSON;
     }
+
+    /**
+     * @param Parcours $p Parcours traité
+     * 
+     * L'UUID d'un parcours dans l'API est l'ID (PK)
+     * le plus ancien pour un parcours.
+     * S'il y a une ou plusieurs versions d'origine
+     * on remonte jusqu'à la première.
+     * S'il n'y a pas de version d'origine, le parcours
+     * est considéré comme nouveau, et est lui-même 
+     * le plus ancien.
+     */
+    private function getUuidForParcours(Parcours $p) : int {
+        $uuid = null;
+        $oldestVersion = null;
+        if ($p->getParcoursOrigineCopie() === null) {
+            $uuid = $p->getId();
+            return $uuid;
+        }
+
+        $oldestVersion = $p->getParcoursOrigineCopie();
+        while($oldestVersion->getParcoursOrigineCopie() !== null) {
+            $oldestVersion = $oldestVersion->getParcoursOrigineCopie();
+        }
+        $uuid = $oldestVersion->getId();
+
+        return $uuid;
+    }
+
+    private function getUuidForFormation(Formation $f) : int {
+        if ($f->getFormationOrigineCopie() === null) {
+            return $f->getId();
+        }
+
+        $oldestVersion = $f->getFormationOrigineCopie();
+        while($oldestVersion->getFormationOrigineCopie() !== null) {
+            $oldestVersion = $oldestVersion->getFormationOrigineCopie();
+        }
+
+        return $oldestVersion->getId();
+    }
+
+    /* 
+    private function getFormationLogosArrayApiV2(Formation $formation, string $urlPrefix) {
+        $result = [];
+        foreach($formation->getLogo() ?? [] as $logoFile) {
+            $result[] = [
+                'image_data' => $urlPrefix . $this->router->generate(
+                    'app_formation_logo', 
+                    [
+                        'slug' => $formation->getSlug(), 'filename' => $logoFile
+                    ],
+                    UrlGeneratorInterface::ABSOLUTE_URL
+                ),
+                'image_type' => mime_content_type(
+                    $this->secureUploadService->resolveStoredFilePath('logos', $logoFile)
+                )
+            ];
+        }
+        return $result;
+    }
+    */
 }

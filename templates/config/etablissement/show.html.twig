@@ -19,21 +19,32 @@
     <tr>
         <th>Calendrier universitaire</th>
         <td>
-            {{ etablissement.getEtablissementInformation.getCalendrierUniversitaire 
-            ? etablissement.getEtablissementInformation.getCalendrierUniversitaire|raw 
-            : 'Non renseigné' 
+            {{ etablissement.getEtablissementInformation.getCalendrierUniversitaire
+            ? etablissement.getEtablissementInformation.getCalendrierUniversitaire|raw
+            : 'Non renseigné'
             }}
         </td>
     </tr>
     <tr>
         <th>Calendrier d'inscription</th>
         <td>
-            {{ etablissement.getEtablissementInformation.getCalendrierInscription 
-            ? etablissement.getEtablissementInformation.getCalendrierInscription|raw         
-            : 'Non renseigné' 
+            {{ etablissement.getEtablissementInformation.getCalendrierInscription
+            ? etablissement.getEtablissementInformation.getCalendrierInscription|raw
+            : 'Non renseigné'
             }}
         </td>
     </tr>
+
+    <tr>
+        <th>Tarif d'inscription</th>
+        <td>
+            {{ etablissement.getEtablissementInformation.tarifInscription
+            ? etablissement.getEtablissementInformation.tarifInscription|raw
+            : 'Non renseigné'
+            }}
+        </td>
+    </tr>
+
     <tr>
         <th>Informations pratiques</th>
         <td>
@@ -71,6 +82,46 @@
                 ? etablissement.getEtablissementInformation.getTransport|raw
                 : 'Non renseigné'
             }}
+        </td>
+    </tr>
+    <tr>
+        <th>Mention sur le handicap <p><span class="badge rounded-pill text-bg-info">LHEO v2</span></p></th>
+        <td>
+            {{
+                etablissement.getEtablissementInformation.mentionHandicap
+                ? etablissement.getEtablissementInformation.mentionHandicap|raw
+                : 'Non renseigné' 
+            }}
+        </td>
+    </tr>
+    <tr>
+        <th>Orientation et Insertion <p><span class="badge rounded-pill text-bg-info">LHEO v2</span></p></th>
+        <td>
+            {{
+                etablissement.getEtablissementInformation.savoirPlusOrientationInsertion
+                ? etablissement.getEtablissementInformation.savoirPlusOrientationInsertion|raw
+                : 'Non renseigné'
+            }}        
+        </td>
+    </tr>
+    <tr>
+        <th>Relations Internationales <p><span class="badge rounded-pill text-bg-info">LHEO v2</span></p></th>
+        <td>
+            {{
+                etablissement.getEtablissementInformation.relationsInternationales
+                ? etablissement.getEtablissementInformation.relationsInternationales|raw
+                : 'Non renseigné'
+            }}        
+        </td>
+    </tr>
+    <tr>
+        <th>Associations Étudiantes <p><span class="badge rounded-pill text-bg-info">LHEO v2</span></p></th>
+        <td>
+            {{
+                etablissement.getEtablissementInformation.associationsEtudiantes
+                ? etablissement.getEtablissementInformation.associationsEtudiantes|raw
+                : 'Non renseigné'
+            }}            
         </td>
     </tr>
     </tbody>

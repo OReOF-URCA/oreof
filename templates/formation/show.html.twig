@@ -228,6 +228,7 @@
     {% if formation.isHasParcours == false and formation.parcours|length == 1 %}
         {% set parcours = formation.parcours[0] %}
         {{ include('btn/export_mccc.html.twig') }}
+        {% if formation.typeDiplome.classique ?? true %}
         <div class="btn-group">
             <button type="button"
                     class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
@@ -250,6 +251,7 @@
                 </a>
             </div>
         </div>
+        {% endif %}
         <div class="btn-group">
             <button type="button"
                     class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
@@ -286,6 +288,7 @@
                 <i class="{{ iconShow }}"></i> Voir / Télécharger
             </button>
             <div class="dropdown-menu" style="">
+                {% if formation.typeDiplome.classique ?? true %}
                 <a class="dropdown-item"
                    href="#presentation"
                    data-bs-toggle="tooltip"
@@ -304,6 +307,7 @@
                     <i class="{{ iconShow }}"></i>
                     <span> BCC Parcours</span>
                 </a>
+                {% endif %}
                 <a href="{{ path('app_formation_export', {slug:formation.slug}) }}"
                    class="dropdown-item"
                    data-bs-toggle="tooltip"
@@ -328,10 +332,13 @@
     {% endif %}
 
     {% if formation.hasParcours == true %}
-        {% if (is_granted('EDIT', {route: 'app_formation', subject: formation})
-            or is_granted('EDIT', {route: 'app_composante', subject: formation})
-            or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
-            or is_granted('ROLE_ADMIN')) and isOuvert(formation) %}
+        {% if ( is_granted('EDIT', {route: 'app_formation', subject: formation})
+                or is_granted('EDIT', {route: 'app_composante', subject: formation})
+                or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
+                or is_granted('ROLE_ADMIN')
+                or (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and (formation.typeDiplome.classique ?? true) == false)
+            ) 
+            and isOuvert(formation) %}
             <a href="{{ path('app_formation_edit', {slug:formation.slug}) }}"
                class="btn btn-sm btn-outline-warning btn-icon btn-icon-end w-100 w-sm-auto mx-2"
                data-bs-toggle="tooltip"
@@ -344,10 +351,14 @@
         {% endif %}
 
     {% else %}
-        {% if (is_granted('EDIT', {route: 'app_formation', subject: formation})
-            or is_granted('EDIT', {route: 'app_composante', subject: formation})
-            or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
-            or is_granted('ROLE_ADMIN')) and isOuvert(formation.parcours[0].dpeParcours[0]) %}
+        {% if ( is_granted('EDIT', {route: 'app_formation', subject: formation})
+                or is_granted('EDIT', {route: 'app_composante', subject: formation})
+                or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
+                or is_granted('ROLE_ADMIN')
+                or (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and (formation.typeDiplome.classique ?? true) == false)
+            ) 
+            and isOuvert(formation.parcours[0].dpeParcours[0]) 
+        %}
             <a href="{{ path('app_formation_edit', {slug:formation.slug}) }}"
                class="btn btn-sm btn-outline-warning btn-icon btn-icon-end w-100 w-sm-auto mx-2"
                data-bs-toggle="tooltip"

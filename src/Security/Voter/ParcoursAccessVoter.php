@@ -4,6 +4,7 @@ namespace App\Security\Voter;
 
 use App\Entity\Formation;
 use App\Entity\Parcours;
+use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -12,10 +13,13 @@ final class ParcoursAccessVoter extends Voter
 {
     public const RELATED_TO_PARCOURS = 'RELATED_TO_PARCOURS';
 
+    public const ROLE_SAISIE_FORM_GENERIQUE_DIRECTION = 'ROLE_SAISIE_FORM_GENERIQUE_DIRECTION';
+
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return in_array($attribute, [self::RELATED_TO_PARCOURS])
-            && ($subject instanceof Parcours || $subject instanceof Formation);
+        return (in_array($attribute, [self::RELATED_TO_PARCOURS])
+            && ($subject instanceof Parcours || $subject instanceof Formation)
+        ) || ($attribute === self::ROLE_SAISIE_FORM_GENERIQUE_DIRECTION);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -33,6 +37,9 @@ final class ParcoursAccessVoter extends Voter
         switch ($attribute) {
             case self::RELATED_TO_PARCOURS:
                 return $this->isUserLinkedToParcours($subject, $user->getId());
+                break;
+            case self::ROLE_SAISIE_FORM_GENERIQUE_DIRECTION:
+                return $this->canUseGenericForm($user);
                 break;
         }
 
@@ -59,5 +66,16 @@ final class ParcoursAccessVoter extends Voter
         }
 
         return in_array($userId, $responsablesId, true);
+    }
+
+    private function canUseGenericForm(User $user) : bool {
+        $result = false;
+        foreach ($user->getUserProfils() as $profil) {
+            if ($profil->getProfil()->getCode() === self::ROLE_SAISIE_FORM_GENERIQUE_DIRECTION) {
+                $result = true;
+            }
+        }
+
+        return $result;
     }
 }

@@ -14,6 +14,7 @@ use App\Classes\GetDpeParcours;
 use App\Classes\UpdateEntity;
 use App\Classes\verif\ParcoursState;
 use App\Entity\Parcours;
+use App\Enums\DureeParcoursUniteEnum;
 use App\Enums\EtatRemplissageEnum;
 use App\Enums\ModaliteEnseignementEnum;
 use App\Enums\NiveauLangueEnum;
@@ -127,6 +128,14 @@ class ParcoursSaveController extends BaseController
                     $parcours,
                     'modalitesEnseignement',
                     ModaliteEnseignementEnum::from($data['value'])
+                );
+
+                return $this->json($rep);
+            case 'dureeParcoursUnite':
+                $rep = $updateEntity->saveField(
+                    $parcours,
+                    'dureeParcoursUnite',
+                    $data['value'] !== '' ? DureeParcoursUniteEnum::from($data['value']) : null
                 );
 
                 return $this->json($rep);

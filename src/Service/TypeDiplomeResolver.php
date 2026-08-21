@@ -14,6 +14,7 @@ use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
 use App\Repository\TypeDiplomeRepository;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
+use App\TypeDiplome\NonClassique\NonClassiqueHandler;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
 use LogicException;
 
@@ -77,6 +78,16 @@ final class TypeDiplomeResolver
                 return $h;
             }
         }
+
+        if ($type->isClassique() === false) {
+            foreach ($this->handlers as $h) {
+                if ($h instanceof NonClassiqueHandler) {
+                    $this->handler = $h;
+                    return $h;
+                }
+            }
+        }
+
         throw new LogicException("No handler for {$type->getLibelle()}");
     }
 

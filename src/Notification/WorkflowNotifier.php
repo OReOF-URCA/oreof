@@ -41,7 +41,6 @@ class WorkflowNotifier
             }
 
             $pref = $this->preferenceResolver->resolveFor($user, $wf, $eventKey);
-
             // EMAIL
             if ($pref->channelAllowed('email')) {
                 $this->myMailer->initEmail();

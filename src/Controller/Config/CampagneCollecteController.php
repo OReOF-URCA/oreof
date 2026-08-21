@@ -34,7 +34,7 @@ class CampagneCollecteController extends AbstractController
         return $this->render('config/campagne_collecte/index.html.twig');
     }
 
-    #[Route('/ouvrir-dpe/{id}', name: 'app_campagne_collecte_open_dpe', methods: ['GET'])]
+    #[Route('/ouvrir-dpe/{id}', name: 'app_campagne_collecte_open_dpe', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function openDpe(
         EntityManagerInterface $entityManager,
         CampagneCollecteRepository $campagneCollecteRepository,
@@ -93,7 +93,7 @@ class CampagneCollecteController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_campagne_collecte_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_campagne_collecte_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(CampagneCollecte $campagne_collecte): Response
     {
         return $this->render('config/campagne_collecte/show.html.twig', [
@@ -101,7 +101,7 @@ class CampagneCollecteController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_campagne_collecte_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_campagne_collecte_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(
         Request          $request,
         CampagneCollecte $campagne_collecte,
@@ -130,7 +130,7 @@ class CampagneCollecteController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/duplicate', name: 'app_campagne_collecte_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_campagne_collecte_duplicate', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function duplicate(
         CampagneCollecteRepository $campagneCollecteRepository,
         CampagneCollecte           $campagne_collecte
@@ -144,7 +144,7 @@ class CampagneCollecteController extends AbstractController
     /**
      * @throws JsonException
      */
-    #[Route('/{id}', name: 'app_campagne_collecte_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'app_campagne_collecte_delete', methods: ['DELETE'], requirements: ['id' => '\d+'])]
     public function delete(
         Request          $request,
         CampagneCollecte $campagne_collecte,
@@ -163,7 +163,7 @@ class CampagneCollecteController extends AbstractController
     }
 
     #[IsGranted('ROLE_ADMIN')]
-    #[Route('/{id}/configure/publication', name: 'app_campagne_collecte_configure_publication', methods: ['GET', 'POST'])]
+    #[Route('/{id}/configure/publication', name: 'app_campagne_collecte_configure_publication', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function configurePublication(
         CampagneCollecte $campagneCollecte,
         Request $request,

@@ -11,20 +11,20 @@
 
     <p>Bonjour {{ user.display }},</p>
 
-    {% if context.acceptationDirecte is defined and context.acceptationDirecte  == true %}
-        <p>La CFVU du {{ context.date|date('d/m/Y')}} a validé {{ texteFormation|raw }}.</p>
+    {% if acceptationDirecte is defined and acceptationDirecte  == true %}
+        <p>La CFVU du {{ date|date('d/m/Y') }} a validé {{ texteFormation|raw }}.</p>
     {% else %}
-        <p>La CFVU du {{ context.date|date('d/m/Y')}} a validé {{ texteFormation|raw }} avec les réserves ci-dessous :
+        <p>La CFVU du {{ date|date('d/m/Y') }} a validé {{ texteFormation|raw }} avec les réserves ci-dessous :
         </p>
         <ul>
             {# todo: géré au parcours ?? A tester #}
-            {% if context.sousReserveConseil is defined and context.sousReserveConseil  == true %}
+            {% if sousReserveConseil is defined and sousReserveConseil  == true %}
                 <p>- Sous réserve du dépôt du PV du conseil de composante. Vous pouvez retourner sur la fiche descriptive de cette formation ou du parcours (<a href="{{ url('app_formation_show', {'slug': formation.slug}) }}">{{ url('app_formation_show', {'slug': formation.slug}) }}</a>) et téléverser le PV dans le menu du processus de validation ou vous pouvez déposer un même PV pour un ensemble de formations/parcours en accédant au menu "mes composantes" puis "Processus validation"</p>
             {% endif %}
-            {% if context.sousReserveModifications is defined and context.sousReserveModifications  == true %}
+            {% if sousReserveModifications is defined and sousReserveModifications  == true %}
                 <p>- Sous réserve des modifications suivantes
-                    : {% if context.argumentaire_sousReserveModifications is defined %}
-                        {{ context.argumentaire_sousReserveModifications }}.
+                    : {% if argumentaire_sousReserveModifications is defined %}
+                        {{ argumentaire_sousReserveModifications }}.
 
                     {% else %}
                         Erreur commentaires modifications

@@ -29,7 +29,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/administration/utilisateurs')]
+#[Route('/utilisateurs')]
 class UserController extends BaseController
 {
     #[Route('/repertoire', name: 'app_user_repertoire', methods: ['GET'])]
