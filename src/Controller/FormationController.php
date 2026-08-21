@@ -471,6 +471,11 @@ class FormationController extends BaseController
         Formation           $formation,
     ): Response {
 
+        $isFormationOuverte = Access::isOuvert($formation);
+        if($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
+            $isFormationOuverte = Access::isOuvert($formation->getParcours()[0]->getDpeParcours()->first());
+        }
+
         if (
             !(
                 $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $formation]) ||
@@ -479,7 +484,7 @@ class FormationController extends BaseController
                 $this->isGranted('ROLE_ADMIN') ||
                 ($this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') && ($formation->getTypeDiplome()?->isClassique() ?? true) === false)
             )
-            || !Access::isOuvert($formation)
+            || !$isFormationOuverte
         ) {
             if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
                 if (!$this->isGranted(
