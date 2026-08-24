@@ -44,7 +44,7 @@ class DuplicateForNewAnneeCommand extends Command
     /**
      * CONFIGURATION
      */
-    private const EXECUTION_MEMORY_LIMIT = '12500M';
+    private const EXECUTION_MEMORY_LIMIT = '3500M';
 
     private const CODE_APOGEE_CAMPAGNE_COLLECTE = '6';
 
