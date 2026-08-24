@@ -48,7 +48,9 @@ class DuplicateForNewAnneeCommand extends Command
 
     private const CODE_APOGEE_CAMPAGNE_COLLECTE = '6';
 
-    private const SLUG_YEAR_SUFFIX = '-2027';
+    private const CURRENT_SLUG_YEAR_SUFFIX = '-2026';
+
+    private const NEW_SLUG_YEAR_SUFFIX = '-2027';
 
     private const EXCLUSION_STATE = [
         TypeModificationDpeEnum::NON_OUVERTURE->value,
@@ -249,7 +251,7 @@ class DuplicateForNewAnneeCommand extends Command
             $initialFormation = $this->entityManager->getRepository(Formation::class)
                 ->findOneById($formation);
             $cloneFormation = clone $initialFormation;
-            $cloneFormation->setSlug($initialFormation->getSlug() . self::SLUG_YEAR_SUFFIX);
+            $cloneFormation->setSlug($this->getNewSlugForNextYear($initialFormation->getSlug()));
             $cloneFormation->setFormationOrigineCopie($initialFormation);
             $cloneFormation->setDpe($newCampagneCollecte);
             $cloneFormation->setCreated($nowDate);
@@ -478,7 +480,7 @@ class DuplicateForNewAnneeCommand extends Command
             $cloneFicheMatiere = clone $initialFicheMatiere;
             $cloneFicheMatiere->prepareCloneForNewAnnee();
             // fiche_matiere
-            $cloneFicheMatiere->setSlug($this->getNewSlugForFicheMatiere($initialFicheMatiere->getSlug()));
+            $cloneFicheMatiere->setSlug($this->getNewSlugForNextYear($initialFicheMatiere->getSlug()));
             if($initialFicheMatiere->getParcours() !== null){
                 $linkFicheMParcours = $this->entityManager->getRepository(Parcours::class)
                     ->findOneBy(['parcoursOrigineCopie' => $initialFicheMatiere->getParcours()]);
@@ -1005,11 +1007,11 @@ class DuplicateForNewAnneeCommand extends Command
         $this->entityManager->flush();
     }
 
-    private function getNewSlugForFicheMatiere(string $initialSlug) : string {
-        if(preg_match('/(.*)-2026$/', $initialSlug, $matches)) {
-            return $matches[1] . self::SLUG_YEAR_SUFFIX;
+    private function getNewSlugForNextYear(string $initialSlug) : string {
+        if(preg_match("/(.*)" . self::CURRENT_SLUG_YEAR_SUFFIX . "$/", $initialSlug, $matches)) {
+            return $matches[1] . self::NEW_SLUG_YEAR_SUFFIX;
         }
 
-        return $initialSlug . self::SLUG_YEAR_SUFFIX;
+        return $initialSlug . self::NEW_SLUG_YEAR_SUFFIX;
     }
 }
