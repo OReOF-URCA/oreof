@@ -185,6 +185,8 @@ class ProcessReouvertureController extends BaseController
                 $demande->setAuteur($this->getUser());
                 $demande->setNiveauDemande('P');
                 $demande->setniveauModification(TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE);
+                $demande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
+                $demande->setArgumentaireDemande($request->request->get('argumentaire_demande_reouverture') ?? '');
                 $this->entityManager->persist($demande);
             }
 

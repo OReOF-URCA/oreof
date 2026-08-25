@@ -499,6 +499,7 @@ class LicenceMccc extends AbstractLicenceMccc
         $ec = $structureEc->elementConstitutif;
         $this->excelWriter->insertNewRowBefore($ligne);
         $this->excelWriter->writeCellXY(self::COL_NUM_EC, $ligne, $ec->getCode());//todo: gérer les cas
+        $isEcChoix = false;
 
         if ($ec->getNatureUeEc() !== null && $ec->getNatureUeEc()->isLibre() === true) {
             $this->excelWriter->writeCellXY(self::COL_INTITULE_EC, $ligne, $ec->getLibelle() . ' (EC à choix libre) ' . $ec->getTexteEcLibre(), ['wrap' => true]);
@@ -510,6 +511,7 @@ class LicenceMccc extends AbstractLicenceMccc
             $this->excelWriter->writeCellXY(self::COL_INTITULE_EC_EN, $ligne, '', ['wrap' => true]);
             $this->excelWriter->writeCellXY(self::COL_RESP_EC, $ligne, '', ['wrap' => true]);
             $this->lignesEcColorees[] = $ligne;
+            $isEcChoix = true;
         } elseif ($ec->getFicheMatiere() !== null) {
             $this->excelWriter->writeCellXY(self::COL_INTITULE_EC, $ligne, $ec->getFicheMatiere()->getLibelle(), ['wrap' => true]);
             $this->excelWriter->writeCellXY(self::COL_INTITULE_EC_EN, $ligne, $ec->getFicheMatiere()->getLibelleAnglais(), ['wrap' => true]);
@@ -559,7 +561,10 @@ class LicenceMccc extends AbstractLicenceMccc
                 $displayMccc->calculDisplayMccc();
                 $mcccArray = $displayMccc->toArray();
                 foreach ($mcccArray as $key => $value) {
-                    $this->excelWriter->writeCellXY(constant(self::class . '::' . $key), $ligne, $value);
+                    // Ne pas afficher si c'est un choix
+                    if(!$isEcChoix) {
+                        $this->excelWriter->writeCellXY(constant(self::class . '::' . $key), $ligne, $value);
+                    }
                 }
             }
         } else {
@@ -568,22 +573,25 @@ class LicenceMccc extends AbstractLicenceMccc
 
         $this->excelWriter->writeCellXY(self::COL_TYPE_EC, $ligne, $ec->getTypeEc() ? $ec->getTypeEc()->getLibelle() : '');
 
-        // Heures
-        $this->excelWriter->writeCellXY(self::COL_ECTS, $ligne, $structureEc->heuresEctsEc->ects === 0.0 ? '' : $structureEc->heuresEctsEc->ects);
-        $this->excelWriter->writeCellXY(self::COL_HEURES_PRES_CM, $ligne, $structureEc->heuresEctsEc->cmPres === 0.0 ? '' : $structureEc->heuresEctsEc->cmPres);
-        $this->excelWriter->writeCellXY(self::COL_HEURES_PRES_TD, $ligne, $structureEc->heuresEctsEc->tdPres === 0.0 ? '' : $structureEc->heuresEctsEc->tdPres);
-        $this->excelWriter->writeCellXY(self::COL_HEURES_PRES_TP, $ligne, $structureEc->heuresEctsEc->tpPres === 0.0 ? '' : $structureEc->heuresEctsEc->tpPres);
-        $this->excelWriter->writeCellXY(self::COL_HEURES_PRES_TOTAL, $ligne, $structureEc->heuresEctsEc->sommeEcTotalPres() === 0.0 ? '' : $structureEc->heuresEctsEc->sommeEcTotalPres());
+        // Ne pas afficher si c'est un choix
+        // Les valeurs peuvent être différentes entre les enfants
+        if(!$isEcChoix) {
+            // Heures
+            $this->excelWriter->writeCellXY(self::COL_ECTS, $ligne, $structureEc->heuresEctsEc->ects === 0.0 ? '' : $structureEc->heuresEctsEc->ects);
+            $this->excelWriter->writeCellXY(self::COL_HEURES_PRES_CM, $ligne, $structureEc->heuresEctsEc->cmPres === 0.0 ? '' : $structureEc->heuresEctsEc->cmPres);
+            $this->excelWriter->writeCellXY(self::COL_HEURES_PRES_TD, $ligne, $structureEc->heuresEctsEc->tdPres === 0.0 ? '' : $structureEc->heuresEctsEc->tdPres);
+            $this->excelWriter->writeCellXY(self::COL_HEURES_PRES_TP, $ligne, $structureEc->heuresEctsEc->tpPres === 0.0 ? '' : $structureEc->heuresEctsEc->tpPres);
+            $this->excelWriter->writeCellXY(self::COL_HEURES_PRES_TOTAL, $ligne, $structureEc->heuresEctsEc->sommeEcTotalPres() === 0.0 ? '' : $structureEc->heuresEctsEc->sommeEcTotalPres());
 
-        //si pas distanciel, griser...
-        $this->excelWriter->writeCellXY(self::COL_HEURES_DIST_CM, $ligne, $structureEc->heuresEctsEc->cmDist === 0.0 ? '' : $structureEc->heuresEctsEc->cmDist);
-        $this->excelWriter->writeCellXY(self::COL_HEURES_DIST_TD, $ligne, $structureEc->heuresEctsEc->tdDist === 0.0 ? '' : $structureEc->heuresEctsEc->tdDist);
-        $this->excelWriter->writeCellXY(self::COL_HEURES_DIST_TP, $ligne, $structureEc->heuresEctsEc->tpDist === 0.0 ? '' : $structureEc->heuresEctsEc->tpDist);
-        $this->excelWriter->writeCellXY(self::COL_HEURES_DIST_TOTAL, $ligne, $structureEc->heuresEctsEc->sommeEcTotalDist() === 0.0 ? '' : $structureEc->heuresEctsEc->sommeEcTotalDist());
-        $this->excelWriter->writeCellXY(self::COL_HEURES_AUTONOMIE, $ligne, $structureEc->heuresEctsEc->tePres === 0.0 ? '' : $structureEc->heuresEctsEc->tePres);
+            //si pas distanciel, griser...
+            $this->excelWriter->writeCellXY(self::COL_HEURES_DIST_CM, $ligne, $structureEc->heuresEctsEc->cmDist === 0.0 ? '' : $structureEc->heuresEctsEc->cmDist);
+            $this->excelWriter->writeCellXY(self::COL_HEURES_DIST_TD, $ligne, $structureEc->heuresEctsEc->tdDist === 0.0 ? '' : $structureEc->heuresEctsEc->tdDist);
+            $this->excelWriter->writeCellXY(self::COL_HEURES_DIST_TP, $ligne, $structureEc->heuresEctsEc->tpDist === 0.0 ? '' : $structureEc->heuresEctsEc->tpDist);
+            $this->excelWriter->writeCellXY(self::COL_HEURES_DIST_TOTAL, $ligne, $structureEc->heuresEctsEc->sommeEcTotalDist() === 0.0 ? '' : $structureEc->heuresEctsEc->sommeEcTotalDist());
+            $this->excelWriter->writeCellXY(self::COL_HEURES_AUTONOMIE, $ligne, $structureEc->heuresEctsEc->tePres === 0.0 ? '' : $structureEc->heuresEctsEc->tePres);
 
-        $this->excelWriter->writeCellXY(self::COL_HEURES_TOTAL, $ligne, $structureEc->heuresEctsEc->sommeEcTotalPresDist() === 0.0 ? '' : $structureEc->heuresEctsEc->sommeEcTotalPresDist());
-
+            $this->excelWriter->writeCellXY(self::COL_HEURES_TOTAL, $ligne, $structureEc->heuresEctsEc->sommeEcTotalPresDist() === 0.0 ? '' : $structureEc->heuresEctsEc->sommeEcTotalPresDist());
+        }
         $ligne++;
         return $ligne;
     }

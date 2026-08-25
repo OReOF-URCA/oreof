@@ -249,7 +249,7 @@
                                     <span> Vérifier la saisie</span>
                                 </button>
                                 {% endif %}
-                                {% if isPass('dpe', parcours, 'soumis_conseil') %}
+                                {% if isPass('dpe', parcours, 'soumis_conseil') and ((formation.typeDiplome.classique ?? true) == true) %}
                                     {{ component('historique_pv', {parcours:parcours}) }}
                                 {% endif %}
                                 <button class="btn btn-sm btn-icon btn-icon-only btn-outline-info ms-1" type="button"
@@ -296,7 +296,7 @@
                                     <span> Vérifier la saisie</span>
                                 </button>
                                 {% endif %}
-                                {% if isPass('dpe', parcours, 'soumis_conseil') %}
+                                {% if isPass('dpe', parcours, 'soumis_conseil') and ((formation.typeDiplome.classique ?? true) == true) %}
                                     {{ component('historique_pv', {parcours:parcours}) }}
                                 {% endif %}
                                 <button class="btn btn-sm btn-icon btn-icon-only btn-outline-info ms-1" type="button"

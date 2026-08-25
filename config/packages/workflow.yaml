@@ -436,6 +436,7 @@ framework:
             type: valider
             btn: success
             icon: fa-check
+            hasValidLheo: true
         valider_transmettre_ouverture_sans_cfvu:
           from: 'soumis_central_sans_cfvu'
           to: 'valide_a_publier'
