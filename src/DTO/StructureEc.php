@@ -109,9 +109,9 @@ class StructureEc
             $this->elementsConstitutifsEnfants[] = $structureEc;
         }
 
-        if ($this->withEcts) {
-            $this->heuresEctsEcEnfants[] = $structureEc->getHeuresEctsEc();
-        }
+        /* if ($this->withEcts) {
+             $this->heuresEctsEcEnfants[] = $structureEc->getHeuresEctsEc();
+         }*/
         //gérer pour prendre le max des heures et ects sur tous les enfants de l'EC
     }
 
