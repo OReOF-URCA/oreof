@@ -118,16 +118,19 @@ class StructureEc
     public function getHeuresEctsEc(): HeuresEctsEc
     {
         if (count($this->heuresEctsEcEnfants) > 0) {
-            //parcourir le tableau, comparer les objets et retourner celui dont la somme des heures est la plus grande
-            foreach ($this->heuresEctsEcEnfants as $heuresEctsEcEnfant) {
-                if ($heuresEctsEcEnfant->sommeEcTotalPres() > $this->heuresEctsEc->sommeEcTotalPres()) {
-                    $this->heuresEctsEc = $heuresEctsEcEnfant;
-                }
+            // Sélection du "coût" max sur le présentiel, avec TE max indépendant.
+            $heuresRetenues = clone $this->heuresEctsEc;
+            $teMax = $heuresRetenues->tePres;
 
-//                if ($heuresEctsEcEnfant->tePres > $this->heuresEctsEc->tePres) {
-//                    $this->heuresEctsEc->tePres = $heuresEctsEcEnfant->tePres;
-//                }
+            foreach ($this->heuresEctsEcEnfants as $heuresEctsEcEnfant) {
+                if ($heuresEctsEcEnfant->sommeEcTotalPres() > $heuresRetenues->sommeEcTotalPres()) {
+                    $heuresRetenues = clone $heuresEctsEcEnfant;
+                }
+                $teMax = max($teMax, $heuresEctsEcEnfant->tePres);
             }
+
+            $heuresRetenues->tePres = $teMax;
+            $this->heuresEctsEc = $heuresRetenues;
         }
 
         return $this->heuresEctsEc;
