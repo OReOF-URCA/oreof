@@ -110,12 +110,12 @@ class StructureEc
         }
 
         if ($this->withEcts) {
-            $this->heuresEctsEcEnfants[] = $structureEc->getHeuresEctsEc(true);
+            $this->heuresEctsEcEnfants[] = $structureEc->getHeuresEctsEc();
         }
         //gérer pour prendre le max des heures et ects sur tous les enfants de l'EC
     }
 
-    public function getHeuresEctsEc(bool $isEnfant = false): HeuresEctsEc
+    public function getHeuresEctsEc(): HeuresEctsEc
     {
         if (count($this->heuresEctsEcEnfants) > 0) {
             //parcourir le tableau, comparer les objets et retourner celui dont la somme des heures est la plus grande
@@ -124,9 +124,9 @@ class StructureEc
                     $this->heuresEctsEc = $heuresEctsEcEnfant;
                 }
 
-                if (!$isEnfant && $heuresEctsEcEnfant->tePres > $this->heuresEctsEc->tePres) {
-                    $this->heuresEctsEc->tePres = $heuresEctsEcEnfant->tePres;
-                }
+//                if ($heuresEctsEcEnfant->tePres > $this->heuresEctsEc->tePres) {
+//                    $this->heuresEctsEc->tePres = $heuresEctsEcEnfant->tePres;
+//                }
             }
         }
 
