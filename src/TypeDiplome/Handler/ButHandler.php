@@ -27,6 +27,7 @@ use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\TypeDiplome\McccInterface;
 use App\TypeDiplome\StructureInterface;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
+use App\TypeDiplome\AbstractTypeDiplomeHandler;
 use App\TypeDiplome\TypeDiplomeMcccInterface;
 use App\TypeDiplome\ValideParcoursInterface;
 use App\Utils\Tools;
@@ -40,7 +41,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'BUT'])]
-final class ButHandler implements TypeDiplomeHandlerInterface
+final class ButHandler extends AbstractTypeDiplomeHandler
 {
 
     public const TEMPLATE_FOLDER = 'but';
@@ -265,4 +266,5 @@ final class ButHandler implements TypeDiplomeHandlerInterface
     {
         return $this->valideParcoursBut;
     }
+
 }

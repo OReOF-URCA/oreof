@@ -24,11 +24,6 @@
     Détails des formations
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     {% if is_granted('ROLE_ADMIN') %}
         <twig:Button
@@ -40,25 +35,6 @@
                 tooltip="Verifier Export LHEO"
                 class="mx-2"
         />
-
-        <twig:Button
-                href="{{ path('app_formation_new') }}"
-                variant="success"
-                size="sm"
-                icon="icon:add"
-                label="Ajouter une formation"
-                tooltip="Ajouter une formation"
-                class="mx-2"
-        />
-        <a href="{{ path('app_formulaire_generique_new') }}"
-           class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-           data-bs-toggle="tooltip"
-           data-bs-placement="bottom"
-           title="Créer une formation non classique"
-        >
-            <i class="{{ iconAdd }}"></i>
-            <span> Créer une formation non classique</span>
-        </a>
     {% endif %}
 
 {% endblock %}

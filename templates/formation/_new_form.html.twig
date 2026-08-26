@@ -1,0 +1,40 @@
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+
+<div {{ stimulus_controller('formation', {
+    url: path('app_formation_api'),
+}) }}>
+    {{ form_start(form, { attr: { id: (is_modal|default(false) ? 'modal_form' : '') } }) }}
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 text-slate-700">
+        <div class="hidden">{{ form_row(form.typeDiplome) }}</div>
+        <div>{{ form_row(form.domaine) }}</div>
+        {% if form.composantePorteuse is defined %}
+            <div class="md:col-span-2">{{ form_row(form.composantePorteuse) }}</div>
+        {% endif %}
+
+        <div>{{ form_row(form.mention) }}</div>
+        <div>{{ form_row(form.mentionTexte) }}</div>
+
+        <div>{{ form_row(form.niveauEntree) }}</div>
+        <div>{{ form_row(form.niveauSortie) }}</div>
+
+        <div>{{ form_row(form.inRncp) }}</div>
+        <div>{{ form_row(form.codeRNCP) }}</div>
+        <div class="md:col-span-2">{{ form_row(form.codeMentionApogee) }}</div>
+
+        <div>{{ form_row(form.responsableMention) }}</div>
+        <div>{{ form_row(form.coResponsable) }}</div>
+    </div>
+
+    {% if is_modal is not defined or not is_modal %}
+        <div class="mt-4">
+            <twig:Button
+                    type="submit"
+                    variant="success"
+                    :soft="false"
+                    icon="icon:save"
+                    label="Enregistrer"
+            />
+        </div>
+    {% endif %}
+    {{ form_end(form) }}
+</div>

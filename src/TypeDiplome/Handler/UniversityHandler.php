@@ -29,6 +29,7 @@ use App\TypeDiplome\Diplomes\Licence\ValideParcoursLicence;
 use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
+use App\TypeDiplome\AbstractTypeDiplomeHandler;
 use App\TypeDiplome\ValideParcoursInterface;
 use App\Utils\Tools;
 use DateTimeInterface;
@@ -53,7 +54,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'M'])]
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'MEEF'])]
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'LP'])]
-class UniversityHandler implements TypeDiplomeHandlerInterface
+class UniversityHandler extends AbstractTypeDiplomeHandler
 {
     public const TEMPLATE_FOLDER = 'licence';
     public const SOURCE = 'licence';
@@ -719,4 +720,5 @@ class UniversityHandler implements TypeDiplomeHandlerInterface
     {
         return $this->valideParcoursLicence;
     }
+
 }

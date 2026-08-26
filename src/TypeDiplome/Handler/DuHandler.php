@@ -18,6 +18,7 @@ use App\Entity\Parcours;
 use App\Entity\SemestreParcours;
 use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
+use App\TypeDiplome\AbstractTypeDiplomeHandler;
 use App\TypeDiplome\ValideParcoursInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
@@ -28,7 +29,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'DU'])]
-final class DuHandler implements TypeDiplomeHandlerInterface
+final class DuHandler extends AbstractTypeDiplomeHandler
 {
 
     public const TEMPLATE_FOLDER = 'licence'; //todo: a remplacer
@@ -148,4 +149,5 @@ final class DuHandler implements TypeDiplomeHandlerInterface
     {
         // TODO: Implement getValidator() method.
     }
+
 }

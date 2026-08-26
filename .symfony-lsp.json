@@ -1,0 +1,8 @@
+{
+    "version": 1,
+    "phpCommand": [
+        "/usr/local/bin/docker", "compose", "exec", "-w", "/var/www/oreofv2", "-T", "web_v2", "php", "-d", "memory_limit=-1"
+    ],
+    "containerProjectRoot": "/var/www/oreofv2",
+    "environment": "dev"
+}

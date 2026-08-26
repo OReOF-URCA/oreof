@@ -33,13 +33,16 @@ use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Repository\MentionRepository;
 use App\Repository\ProfilRepository;
+use App\Repository\ParcoursRepository;
 use App\Repository\TypeDiplomeRepository;
+use App\TypeDiplome\TypeDiplomeResolver;
 use App\Repository\UserRepository;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
 use App\Service\SecureUploadService;
 use App\Utils\Access;
 use App\Utils\JsonRequest;
+use App\Utils\TurboStreamResponseFactory;
 use App\Exception\FileUploadException;
 use DateTime;
 use DateTimeImmutable;
@@ -55,6 +58,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 
 #[Route('/formation')]
 class FormationController extends BaseController
@@ -248,99 +252,88 @@ class FormationController extends BaseController
     }
 
     #[Route('/creer', name: 'app_formation_new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'pilotage.gestion_offre')]
+    #[Breadcrumb(label: 'Créer une formation')]
     public function new(
         WorkflowInterface $dpeParcoursWorkflow,
         ProfilRepository $profilRepository,
         MentionRepository    $mentionRepository,
         Request              $request,
-        FormationRepository  $formationRepository
+        FormationRepository  $formationRepository,
+        TypeDiplomeRepository $typeDiplomeRepository,
+        TypeDiplomeResolver  $typeDiplomeResolver,
+        DomaineRepository    $domaineRepository,
+        ParcoursRepository   $parcoursRepository,
+        EventDispatcherInterface $eventDispatcher,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        $formation = new Formation($this->getCampagneCollecte());
-        $form = $this->createForm(FormationSesType::class, $formation, [
-            'action' => $this->generateUrl('app_formation_new'),
-        ]);
-        $form->handleRequest($request);
+        $typeDiplomeId = $request->query->get('typeDiplome') ?? $request->request->get('typeDiplome');
+        $selectedTypeDiplome = null;
+        $form = null;
+        $formation = null;
+        $formTemplate = null;
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            if (array_key_exists(
-                    'mention',
-                    $request->request->all()['formation_ses']
-                ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre') {
-                $mention = $mentionRepository->find($request->request->all()['formation_ses']['mention']);
-                $formation->setMentionTexte(null);
-                $formation->setMention($mention);
+        if ($typeDiplomeId !== null) {
+            $selectedTypeDiplome = $typeDiplomeRepository->find($typeDiplomeId);
+            if ($selectedTypeDiplome !== null) {
+                $handler = $typeDiplomeResolver->fromTypeDiplome($selectedTypeDiplome);
+                $formTypeClass = $handler->getFormationFormType();
+                $formTemplate = $handler->getFormationFormTemplate();
+
+                $context = [
+                    'user' => $this->getUser(),
+                    'campagne' => $this->getCampagneCollecte(),
+                    'typeDiplome' => $selectedTypeDiplome,
+                    'is_admin' => $this->isGranted('ROLE_ADMIN'),
+                    'action' => $this->generateUrl('app_formation_new', $request->query->all()),
+                    'entityManager' => $this->entityManager,
+                    'mentionRepository' => $mentionRepository,
+                    'formationRepository' => $formationRepository,
+                    'parcoursRepository' => $parcoursRepository,
+                    'profilRepository' => $profilRepository,
+                    'workflow' => $dpeParcoursWorkflow,
+                    'eventDispatcher' => $eventDispatcher,
+                    'controller' => $this,
+                    'router' => $this->container->get('router'),
+                ];
+
+                $formOptions = $handler->getFormationFormOptions($context);
+                $formData = $formOptions['data'] ?? null;
+                unset($formOptions['data']);
+
+                $form = $this->createForm($formTypeClass, $formData, $formOptions);
+                $form->handleRequest($request);
+
+                if ($form->isSubmitted() && $form->isValid()) {
+                    $response = $handler->handleFormationSubmission($form, $request, $context);
+                    if ($response instanceof Response) {
+                        return $response;
+                    }
+                }
+
+                // If form is passed with data bound, we can retrieve the formation entity if mapped
+                if ($formData instanceof Formation) {
+                    $formation = $formData;
+                }
             }
+        }
 
-            $formation->addComposantesInscription($formation->getComposantePorteuse());
-            $formation->setHasParcours(true);
-            $formation->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_PARCOURS);
-            $this->entityManager->persist($formation);
-
-            $parcours = new Parcours($formation);
-            $parcours->setLibelle('[A renommer] Parcours par défaut');
-            $parcours->setRespParcours($formation->getResponsableMention());
-
-            $this->entityManager->persist($parcours);
-
-            //création d'un DPE => Faudrait créer un parcours.
-            $dpeParcours = new DpeParcours();
-            $dpeParcours->setParcours($parcours);
-            $dpeParcours->setFormation($formation);
-            $dpeParcours->setCampagneCollecte($this->getCampagneCollecte());
-            $dpeParcours->setVersion('0.1');
-            $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE);
-
-            $parcours->addDpeParcour($dpeParcours);
-            $this->entityManager->persist($dpeParcours);
-
-            // Historique
-            $histo = new HistoriqueParcours();
-            $histo->setParcours($parcours);
-            $histo->setCreated(new DateTime());
-            $histo->setEtat('valide');
-            $histo->setEtape('en_cours_redaction');
-            $histo->setUser($this->getUser());
-            $this->entityManager->persist($histo);
-
-            $profil = $profilRepository->findOneBy(['code' => 'ROLE_RESP_FORMATION']);
-            $uc = new UserProfil();
-            $uc->setUser($formation->getResponsableMention());
-            $uc->setCampagneCollecte($this->getCampagneCollecte());
-            $uc->setFormation($formation);
-            $uc->setProfil($profil);
-            $this->entityManager->persist($uc);
-
-            $profil = $profilRepository->findOneBy(['code' => 'ROLE_RESP_PARCOURS']);
-            $uc = new UserProfil();
-            $uc->setUser($formation->getResponsableMention());
-            $uc->setCampagneCollecte($this->getCampagneCollecte());
-            $uc->setParcours($parcours);
-            $uc->setProfil($profil);
-            $this->entityManager->persist($uc);
-
-
-            if ($formation->getCoResponsable() !== null) {
-                $profil = $profilRepository->findOneBy(['code' => 'ROLE_CO_RESP_FORMATION']);
-                $ucCo = new UserProfil();
-                $ucCo->setUser($formation->getCoResponsable());
-                $ucCo->setCampagneCollecte($this->getCampagneCollecte());
-                $ucCo->setFormation($formation);
-                $ucCo->setProfil($profil);
-                $this->entityManager->persist($ucCo);
-            }
-
-            $this->entityManager->flush();
-            $dpeParcoursWorkflow->apply($dpeParcours, 'initialiser');
-            $dpeParcoursWorkflow->apply($dpeParcours, 'autoriser');
-
-            return $this->redirectToRoute('app_formation_index');
+        if ($request->headers->has('Turbo-Frame') && $request->headers->get('Turbo-Frame') === 'formation_form_frame') {
+            return $this->render('formation/_new_form_frame.html.twig', [
+                'form' => $form ? $form->createView() : null,
+                'formTemplate' => $formTemplate,
+                'domaines' => $domaineRepository->findAll(),
+            ]);
         }
 
         return $this->render('formation/new.html.twig', [
+            'typeDiplomes' => $typeDiplomeRepository->findAll(),
+            'selectedTypeDiplome' => $selectedTypeDiplome,
             'formation' => $formation,
-            'form' => $form->createView()
+            'form' => $form ? $form->createView() : null,
+            'formTemplate' => $formTemplate,
+            'domaines' => $domaineRepository->findAll(),
         ]);
     }
 

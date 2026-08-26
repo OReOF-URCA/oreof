@@ -260,6 +260,9 @@
       <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/react/child-process" />
       <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/react/socket" />
       <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/fidry/cpu-core-counter" />
+      <path value="$PROJECT_DIR$/vendor/liip/imagine-bundle" />
+      <path value="$PROJECT_DIR$/vendor/sebastian/file-filter" />
+      <path value="$PROJECT_DIR$/vendor/imagine/imagine" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2">

@@ -285,7 +285,8 @@ class CampagneCollecteController extends AbstractController
     public function configurePublication(
         CampagneCollecte $campagneCollecte,
         Request $request,
-        CampagneCollecteRepository $campagneRepository
+        CampagneCollecteRepository $campagneRepository,
+        TurboStreamResponseFactory $turboStream
     ) : Response {
         $form = $this->createForm(
             ConfigurePublicationType::class,
@@ -324,12 +325,19 @@ class CampagneCollecteController extends AbstractController
             $campagneCollecte->setPublicationOptions($configToSave);
             $campagneRepository->save($campagneCollecte, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess(new TranslatableKey('campagne_collecte.configure_publication.success'), true);
         }
 
-        return $this->render('config/campagne_collecte/_configure_publication.html.twig', [
-            'campagneCollecte' => $campagneCollecte,
-            'form' => $form
-        ]);
+        return $turboStream->streamOpenModalFromTemplates(
+            new TranslatableKey('campagne_collecte.configure_publication.title'),
+            new TranslatableKey('campagne_collecte.configure_publication.description'),
+            'config/campagne_collecte/_configure_publication.html.twig',
+            [
+                'campagneCollecte' => $campagneCollecte,
+                'form' => $form->createView()
+            ],
+            '_ui/_footer_submit_cancel.html.twig',
+            []
+        );
     }
 }

@@ -15,6 +15,7 @@
         <server name="SHELL_VERBOSITY" value="-1" />
         <server name="SYMFONY_PHPUNIT_REMOVE" value="" />
         <server name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
+        <server name="KERNEL_CLASS" value="App\Kernel" />
 
         <!-- ###+ symfony/mercure-bundle ### -->
         <!-- See https://symfony.com/doc/current/mercure.html#configuration -->
@@ -29,6 +30,10 @@
         <!-- ###+ sensiolabs/gotenberg-bundle ### -->
         <env name="GOTENBERG_DSN" value="http://gotenberg:3000"/>
         <!-- ###- sensiolabs/gotenberg-bundle ### -->
+
+        <!-- Database connection for integration tests -->
+        <!-- Uses DATABASE_URL from .env.test or fallback to MySQL 8.0 -->
+        <env name="DATABASE_URL" value="mysql://oreof:PASSWORD@oreof-db:3306/oreof_test?serverVersion=8.0&amp;charset=utf8mb4" />
     </php>
 
     <testsuites>
