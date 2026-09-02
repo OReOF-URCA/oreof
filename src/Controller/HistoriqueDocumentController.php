@@ -14,8 +14,9 @@ use App\Repository\CampagneCollecteRepository;
 use App\Repository\HistoriqueParcoursRepository;
 use App\Service\SecureUploadService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use ZipArchive;
 
@@ -60,8 +61,8 @@ class HistoriqueDocumentController extends BaseController
         ]);
     }
 
-    #[Route('/historique/documents/download-zip/{type}', name: 'app_historique_documents_download_zip')]
-    public function downloadZip(string $type, HistoriqueParcoursRepository $historiqueParcoursRepository, CampagneCollecteRepository $campagneCollecteRepository): StreamedResponse
+    #[Route('/administration/historique/documents/download-zip/{type}', name: 'app_historique_documents_download_zip')]
+    public function downloadZip(string $type, HistoriqueParcoursRepository $historiqueParcoursRepository, CampagneCollecteRepository $campagneCollecteRepository): BinaryFileResponse
     {
         $activeCampagne = $campagneCollecteRepository->findOneBy(['defaut' => true]);
         $historiques = $historiqueParcoursRepository->findAll();
@@ -102,13 +103,9 @@ class HistoriqueDocumentController extends BaseController
 
         $zip->close();
 
-        $response = new StreamedResponse(function () use ($tempFile) {
-            readfile($tempFile);
-            unlink($tempFile);
-        });
-
-        $response->headers->set('Content-Type', 'application/zip');
-        $response->headers->set('Content-Disposition', 'attachment; filename="' . $zipName . '"');
+        $response = new BinaryFileResponse($tempFile);
+        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $zipName);
+        $response->deleteFileAfterSend(true);
 
         return $response;
     }
