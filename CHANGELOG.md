@@ -2,6 +2,68 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.54.0](https://github.com/OReOF-URCA/oreof/compare/v1.53.0...v1.54.0) (2026-09-02)
+
+
+### Features
+
+* ajout d'un bouton nouveau RF / co-RF pour les formations non classiques ([eb83262](https://github.com/OReOF-URCA/oreof/commit/eb83262cc60adac503f00884819e649fd743244c))
+* ajout d'un bouton nouveau RF / co-RF pour les formations non classiques ([4e42702](https://github.com/OReOF-URCA/oreof/commit/4e42702e21c733dbb6354bdb077468b2372be992))
+* ajout de la liste des parcours au menu de l'offre de formation ([3cdcf60](https://github.com/OReOF-URCA/oreof/commit/3cdcf609b66586aae5429e621f7876def3f61702))
+* ajout de la liste des parcours au menu de l'offre de formation ([c1e4da0](https://github.com/OReOF-URCA/oreof/commit/c1e4da0c06e769c72cfdca64ac1d9d50cc354321))
+* Evolution de l'offre de formation ([41e6090](https://github.com/OReOF-URCA/oreof/commit/41e6090bc0dbc092eb312248f79356ca15f9d3cb))
+* Evolution de l'offre de formation ([8157eed](https://github.com/OReOF-URCA/oreof/commit/8157eeda1bb622cd78efd59ff5d81e1d4077711c))
+* Evolution de l'offre de formation ([b610977](https://github.com/OReOF-URCA/oreof/commit/b610977eec4c0ecf3001edff8ab1043ae91f8607))
+* Gestion des exports JSON par type de diplôme ([f7bcd2b](https://github.com/OReOF-URCA/oreof/commit/f7bcd2ba08688c20dcccbe08a4934c94b04f5846))
+* Liste des documents ([5009a24](https://github.com/OReOF-URCA/oreof/commit/5009a24f3b25416245f9154b8413bea6bbfa0121))
+* Liste des documents ([d6d47ad](https://github.com/OReOF-URCA/oreof/commit/d6d47adea1d5e0ff5c5da24d7172da81d5364dfe))
+* Liste des documents ([7a2a40d](https://github.com/OReOF-URCA/oreof/commit/7a2a40de0ba77f6b1459b0cc292d3971acd65938))
+* Liste des documents ([098a0aa](https://github.com/OReOF-URCA/oreof/commit/098a0aa1097201dfcbc582a5bf75b468f6da61a6))
+* **logos:** derniers ajouts et modifications du systeme de logos et du champ tarifs ([7ed1f6f](https://github.com/OReOF-URCA/oreof/commit/7ed1f6f657ca34a0109c4912813fecf02cf27d81))
+* modification de la disposition des nouveaux champs lies aux ects dans le formulaire type_diplome et ajustement du formatage du texte pour faciliter la lecture de la pull request ([ba84d0a](https://github.com/OReOF-URCA/oreof/commit/ba84d0a83ca730921bbbedf185f51efcafb4affa))
+* Modification des champs du formulaire générique et changement du système d'ECTS pour permettre aux diplômes de ne pas en avoir, ainsi que pour permettre un nombre modulable d'ECTS ([b0dc6a6](https://github.com/OReOF-URCA/oreof/commit/b0dc6a6bcecfd75206090d0d2f215845844f326a))
+* Modification du formulaire générique et du formulaire de type de diplôme, ajustement des labels et des champs obligatoires, ajout de la possibilité d'initialiser un parcours avec l'état "en_cours_redaction_ss_cfvu" ([12770f1](https://github.com/OReOF-URCA/oreof/commit/12770f17bca6d7c8f552a9ea4926b4b7d0dc33fd))
+
+
+### Bug Fixes
+
+* 'path' value for maquette v2 export ([0764f3f](https://github.com/OReOF-URCA/oreof/commit/0764f3f1e91a99df0660556bbb0e67c7368fca1f))
+* cacher les MCCC si ec à choix ([f705378](https://github.com/OReOF-URCA/oreof/commit/f705378eb0044a035e3f518d4fc3c8a56b57296f))
+* cacher les MCCC si ec à choix ([fb92e3a](https://github.com/OReOF-URCA/oreof/commit/fb92e3ae2d69869907be4414475c1c92215a17a5))
+* controller access control formation /edit (parcours par défaut) ([55055d6](https://github.com/OReOF-URCA/oreof/commit/55055d6f7f35b957fd70f6de4d12c8f9a4173fdc))
+* correction de la gestion des champs de tri dans la recherche de parcours ([69f497e](https://github.com/OReOF-URCA/oreof/commit/69f497e5bb10db05a4980cb96e2f3210a38fe0a6))
+* demande reouverture avec cfvu ([04740a8](https://github.com/OReOF-URCA/oreof/commit/04740a882b73f9eb01411aebb60ab73c1f30f9da))
+* droit si réserves CFVU ([bcfc9fe](https://github.com/OReOF-URCA/oreof/commit/bcfc9fec355a3ccf91bce33a3c0319f2beec6ae7))
+* EC de BUT ([1058a36](https://github.com/OReOF-URCA/oreof/commit/1058a36ef75f8ff0f35b3e4018b11bdc72a0432e))
+* ECTS Ue libre - API ([17287a5](https://github.com/OReOF-URCA/oreof/commit/17287a5c72f1de4ca8ac5f56b20cd4e56604d816))
+* erreur fiche - FM export PDF ([0d5b077](https://github.com/OReOF-URCA/oreof/commit/0d5b0773fd33446bccbc760066ec4f3c80ed275d))
+* export mccc filename ([6007fd8](https://github.com/OReOF-URCA/oreof/commit/6007fd894b5336e70e5b8afd703fa52e91c508ff))
+* export mccc filename ([f0955bd](https://github.com/OReOF-URCA/oreof/commit/f0955bdf1415be0c038de9e647cd5e141a7045e1))
+* Fix de bugs liés au formulaire générique ([09b9225](https://github.com/OReOF-URCA/oreof/commit/09b92254ac17a14c78ef43a6b370f6b4504874c0))
+* Fix de bugs liés au formulaire générique (complétude, affichage pour formations mono-parcours, récuppération de quelques champs) ([d107780](https://github.com/OReOF-URCA/oreof/commit/d1077802a0e3860d05f897e5b710320cda796e93))
+* fix PDF non dispo ([cf922c2](https://github.com/OReOF-URCA/oreof/commit/cf922c25b62a610acc999dd9751f07c99379d9ac))
+* gestion change RF DPE ([71bdbb8](https://github.com/OReOF-URCA/oreof/commit/71bdbb850f0e551e71a90685f980daf494a6ddb2))
+* heures TE sur enfants ([a208f79](https://github.com/OReOF-URCA/oreof/commit/a208f799ef9f7234dd4508c326f9e2c377ab26b9))
+* heures TE sur enfants ([5e43d22](https://github.com/OReOF-URCA/oreof/commit/5e43d22bab443d41d57d3aad7b8b56134818d1d1))
+* heures TE sur enfants ([c17bfc8](https://github.com/OReOF-URCA/oreof/commit/c17bfc826df0a78c09836968830f35709e3f5c98))
+* heures TE sur enfants ([173a246](https://github.com/OReOF-URCA/oreof/commit/173a2461e7194c48edbde95e1c496b93f64715db))
+* LHEO v2 - cannot use same tag name twice even in extra ([e0a9dc0](https://github.com/OReOF-URCA/oreof/commit/e0a9dc0043825516a341faf50b7451650da07cb8))
+* Liste des matières ([e9c6383](https://github.com/OReOF-URCA/oreof/commit/e9c638351791c40c8a44d7b8251cc0d43a96e671))
+* maquette v2 niveau - libelle semestre niveau ([2a5bcf0](https://github.com/OReOF-URCA/oreof/commit/2a5bcf00a13e8d8f31cb07d2937dd86d9992512b))
+* mise à jour des infos modifiables et formations mono-parcours ([1f7bed6](https://github.com/OReOF-URCA/oreof/commit/1f7bed658123e350e51a7d7c763d4561b56c3c1d))
+* mise à jour des infos modifiables et récupérés des formations mono-parcours non classiques. ([f6d1c9c](https://github.com/OReOF-URCA/oreof/commit/f6d1c9ce6ca38a8086923251c0e124b588e90bdd))
+* modification de champs du formulaire générique, ajout de la possibilité d'ajouter un nouvel utilisateur dans les deux formulaire de création de formation. ([199dc3d](https://github.com/OReOF-URCA/oreof/commit/199dc3dfc38c284a8e0a22bfb0cfeaa736b3aa4a))
+* Modifications, tests et bugfix. Ajout du SQL pour mettre à jour la BDD et d’un autocomplete pour le formulaire generique ([f6d9d1f](https://github.com/OReOF-URCA/oreof/commit/f6d9d1fbaaed038e93cbb03eb7ae2c12b50623b3))
+* nullable value - userProfil  - fixes display ([5087de7](https://github.com/OReOF-URCA/oreof/commit/5087de731b9900216c51577a8de5e04d78c14126))
+* pb accès non Admin ([13f3528](https://github.com/OReOF-URCA/oreof/commit/13f352879914ee0da2481a616097c2bc09197d07))
+* Resolution d'un bug lie a l'autocompletion du formulaire generique ([7b20387](https://github.com/OReOF-URCA/oreof/commit/7b2038718df4166aeb9981b97f2647fe66433646))
+* rollback des droits modifiés sur la plupart des fichiers pour rendre la PR plus lisible ([42838ae](https://github.com/OReOF-URCA/oreof/commit/42838ae6d6132612b33a032308f2d285c1b587d9))
+* router parameter xml lheo v2 ([808cb25](https://github.com/OReOF-URCA/oreof/commit/808cb25d36a67cd12cc5c79e9f7a29332e3edd10))
+* suppression de composante porteuse pour formations NC ([dfa0009](https://github.com/OReOF-URCA/oreof/commit/dfa0009de6edc0b45da1bdbf351e0edb775ace44))
+* Suppression temporaire du fix de la recherche de parcours qui cause d'autres erreurs ([6b1b1da](https://github.com/OReOF-URCA/oreof/commit/6b1b1da72076c7e1b5b5f3cbcbb654491202f3e7))
+* type ramification index - template ([e84bfaa](https://github.com/OReOF-URCA/oreof/commit/e84bfaaf76403c563aa0680e6ed02dfee9a2b951))
+* TypeEpreuve ([0282e43](https://github.com/OReOF-URCA/oreof/commit/0282e434504c02ac70a0f699795a50ae9acece04))
+
 ## [1.53.0](https://github.com/OReOF-URCA/oreof/compare/v1.52.0...v1.53.0) (2026-05-29)
 
 
