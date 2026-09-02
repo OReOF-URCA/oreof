@@ -10,7 +10,6 @@
             toutes les notes explicatives (.zip)</a>
     </div>
 
-    {% for annee, items in documents %}
         <table class="table">
             <thead>
             <tr>
@@ -22,7 +21,7 @@
             </tr>
             </thead>
             <tbody>
-            {% for item in items %}
+            {% for item in documents %}
                 {% set complements = item.historique.complements %}
                 <tr>
                     <td>{{ item.composante ? item.composante.libelle : 'N/A' }}</td>
