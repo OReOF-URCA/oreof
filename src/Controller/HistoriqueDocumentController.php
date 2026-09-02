@@ -10,6 +10,7 @@
 namespace App\Controller;
 
 use App\Classes\GetDpeParcours;
+use App\Repository\CampagneCollecteRepository;
 use App\Repository\HistoriqueParcoursRepository;
 use App\Service\SecureUploadService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,7 +19,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use ZipArchive;
 
-class HistoriqueDocumentController extends AbstractController
+class HistoriqueDocumentController extends BaseController
 {
     private SecureUploadService $secureUploadService;
 
@@ -27,9 +28,10 @@ class HistoriqueDocumentController extends AbstractController
         $this->secureUploadService = $secureUploadService;
     }
 
-    #[Route('/historique/documents', name: 'app_historique_documents')]
-    public function index(HistoriqueParcoursRepository $historiqueParcoursRepository): Response
+    #[Route('/administration/historique/documents', name: 'app_historique_documents')]
+    public function index(HistoriqueParcoursRepository $historiqueParcoursRepository, CampagneCollecteRepository $campagneCollecteRepository): Response
     {
+        $activeCampagne = $this->getCampagneCollecte();
         $historiques = $historiqueParcoursRepository->findAll();
         $results = [];
 
@@ -38,14 +40,15 @@ class HistoriqueDocumentController extends AbstractController
             if ($complements && (array_key_exists('fichier', $complements) || array_key_exists('fichier_note', $complements))) {
                 $parcours = $histo->getParcours();
                 $dpe = GetDpeParcours::getFromParcours($parcours);
-                $annee = $dpe?->getCampagneCollecte()?->getAnnee() ?? 'Inconnu';
+                if ($dpe && $dpe->getCampagneCollecte() === $activeCampagne) {
 
-                $results[$annee][] = [
-                    'historique' => $histo,
-                    'parcours' => $parcours,
-                    'formation' => $parcours?->getFormation(),
-                    'composante' => $parcours?->getFormation()?->getComposantePorteuse(),
-                ];
+                    $results[] = [
+                        'historique' => $histo,
+                        'parcours' => $parcours,
+                        'formation' => $parcours?->getFormation(),
+                        'composante' => $parcours?->getFormation()?->getComposantePorteuse(),
+                    ];
+                }
             }
         }
 
@@ -53,13 +56,14 @@ class HistoriqueDocumentController extends AbstractController
         krsort($results);
 
         return $this->render('historique/documents.html.twig', [
-            'documentsParAnnee' => $results,
+            'documents' => $results,
         ]);
     }
 
     #[Route('/historique/documents/download-zip/{type}', name: 'app_historique_documents_download_zip')]
-    public function downloadZip(string $type, HistoriqueParcoursRepository $historiqueParcoursRepository): StreamedResponse
+    public function downloadZip(string $type, HistoriqueParcoursRepository $historiqueParcoursRepository, CampagneCollecteRepository $campagneCollecteRepository): StreamedResponse
     {
+        $activeCampagne = $campagneCollecteRepository->findOneBy(['defaut' => true]);
         $historiques = $historiqueParcoursRepository->findAll();
         $zip = new ZipArchive();
         $zipName = 'documents_' . $type . '_' . date('Y-m-d_H-i-s') . '.zip';
@@ -73,21 +77,25 @@ class HistoriqueDocumentController extends AbstractController
 
             if ($complements && array_key_exists($fileKey, $complements)) {
                 $parcours = $histo->getParcours();
-                $formation = $parcours?->getFormation();
-                $composante = $formation?->getComposantePorteuse();
+                $dpe = GetDpeParcours::getFromParcours($parcours);
 
-                $composanteName = $composante ? $composante->getLibelle() : 'SansComposante';
-                $formationName = $formation ? $formation->getLibelle() : 'SansFormation';
-                $parcoursName = $parcours ? $parcours->getLibelle() : 'SansParcours';
+                if ($dpe && $dpe->getCampagneCollecte() === $activeCampagne) {
+                    $formation = $parcours?->getFormation();
+                    $composante = $formation?->getComposantePorteuse();
 
-                $filename = $complements[$fileKey];
-                $originalName = $complements[$nameKey];
+                    $composanteName = $composante ? $composante->getLibelle() : 'SansComposante';
+                    $formationName = $formation ? $formation->getMention()?->getSigle() : 'SansFormation';
+                    $parcoursName = $parcours ? $parcours->getSigle() : 'SansParcours';
 
-                $filePath = $this->secureUploadService->resolveStoredFilePath('conseils', $filename);
+                    $filename = $complements[$fileKey];
+                    $originalName = $complements[$nameKey];
 
-                if (file_exists($filePath)) {
-                    $zipNameInZip = $composanteName . '/' . $formationName . '/' . $parcoursName . '/' . $originalName;
-                    $zip->addFile($filePath, $zipNameInZip);
+                    $filePath = $this->secureUploadService->resolveStoredFilePath('conseils', $filename);
+
+                    if (file_exists($filePath)) {
+                        $zipNameInZip = $composanteName . '/' . $formationName . '/' . $parcoursName . '/' . $originalName;
+                        $zip->addFile($filePath, $zipNameInZip);
+                    }
                 }
             }
         }

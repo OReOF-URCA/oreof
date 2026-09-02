@@ -10,8 +10,7 @@
             toutes les notes explicatives (.zip)</a>
     </div>
 
-    {% for annee, items in documentsParAnnee %}
-        <h2 class="small-title mt-3">Année universitaire {{ annee }}</h2>
+    {% for annee, items in documents %}
         <table class="table">
             <thead>
             <tr>
@@ -49,7 +48,4 @@
             {% endfor %}
             </tbody>
         </table>
-    {% else %}
-        <p>Aucun document trouvé.</p>
-    {% endfor %}
 {% endblock %}
