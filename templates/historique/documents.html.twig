@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}Historique des documents{% endset %}
+
+{% block content %}
+    <div class="mb-4">
+        <a href="{{ path('app_historique_documents_download_zip', {'type': 'pv'}) }}" class="btn btn-primary">Télécharger
+            tous les PV (.zip)</a>
+        <a href="{{ path('app_historique_documents_download_zip', {'type': 'note'}) }}" class="btn btn-secondary">Télécharger
+            toutes les notes explicatives (.zip)</a>
+    </div>
+
+    {% for annee, items in documentsParAnnee %}
+        <h2 class="small-title mt-3">Année universitaire {{ annee }}</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Composante</th>
+                <th>Formation</th>
+                <th>Parcours</th>
+                <th>PV</th>
+                <th>Note explicative</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+                {% set complements = item.historique.complements %}
+                <tr>
+                    <td>{{ item.composante ? item.composante.libelle : 'N/A' }}</td>
+                    <td>{{ item.formation ? item.formation.libelle : 'N/A' }}</td>
+                    <td>{{ item.parcours ? item.parcours.libelle : 'N/A' }}</td>
+                    <td>
+                        {% if complements.fichier is defined %}
+                            <a href="{{ path('app_upload_download', {'context': 'conseils', 'filename': complements.fichier, 'originalName': complements.fichier_original}) }}"
+                               class="btn btn-sm btn-primary">
+                                {{ complements.fichier_original }}
+                            </a>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if complements.fichier_note is defined %}
+                            <a href="{{ path('app_upload_download', {'context': 'conseils', 'filename': complements.fichier_note, 'originalName': complements.fichier_note_original}) }}"
+                               class="btn btn-sm btn-info">
+                                {{ complements.fichier_note_original }}
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucun document trouvé.</p>
+    {% endfor %}
+{% endblock %}
