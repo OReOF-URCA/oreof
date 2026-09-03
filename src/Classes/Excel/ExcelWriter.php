@@ -3,6 +3,7 @@
 namespace App\Classes\Excel;
 
 use App\DTO\DiffObject;
+use App\Utils\LogValue;
 use App\Utils\Tools;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -507,6 +508,11 @@ class ExcelWriter
             }
 
             if ($diffObject->isDifferent()) {
+                if(($options['withLogs'] ?? false) === true) {
+                    if(!in_array($options['parcours_id'], LogValue::$logArray, true)) {
+                        LogValue::$logArray[] = $options['parcours_id'];
+                    }
+                }
 
                 $richText = new RichText();
                 if ($diffObject->original !== null && $diffObject->original !== '') {
