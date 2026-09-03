@@ -103,6 +103,18 @@ final class ButHandler implements TypeDiplomeHandlerInterface, TypeDiplomeMcccIn
         return $this->butMcccVersion->exportExcelButMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
     }
 
+    public function getExportVersion(
+        CampagneCollecte    $anneeUniversitaire,
+        Parcours            $parcours,
+        ?DateTimeInterface  $dateCfvu = null,
+        ?DateTimeInterface  $dateConseil = null,
+        bool                $versionFull = true,
+        bool                $withLogs = false
+    ) {
+        $this->butMcccVersion->setLogDifferences($withLogs);
+        return $this->butMcccVersion->genereExcelbutMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
+    }
+
     public function exportPdfMccc(
         CampagneCollecte   $anneeUniversitaire,
         Parcours           $parcours,
