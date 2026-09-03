@@ -15,6 +15,7 @@ use App\Classes\Process\FicheMatiereProcess;
 use App\Classes\Process\ParcoursProcess;
 use App\Classes\ValidationProcess;
 use App\Classes\ValidationProcessFicheMatiere;
+use App\DTO\TranslatableKey;
 use App\Enums\TypeModificationDpeEnum;
 use App\Events\HistoriqueFormationEvent;
 use App\Events\HistoriqueParcoursEvent;
@@ -31,6 +32,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
+use App\Utils\TurboStreamResponseFactory;
+
 class ProcessValidationController extends BaseController
 {
     public function __construct(
@@ -41,6 +44,7 @@ class ProcessValidationController extends BaseController
         private readonly ParcoursProcess               $parcoursProcess,
         private readonly FicheMatiereProcess           $ficheMatiereProcess,
         private readonly SecureUploadService $secureUploadService,
+        private readonly \Symfony\Component\Workflow\WorkflowInterface $dpeFormationWorkflow,
     ) {
     }
 
@@ -48,6 +52,8 @@ class ProcessValidationController extends BaseController
     public function valide(
         ParcoursRepository     $parcoursRepository,
         FicheMatiereRepository $ficheMatiereRepository,
+        FormationRepository    $formationRepository,
+        TurboStreamResponseFactory $turboStream,
         LheoXML                $lheoXML,
         string                 $etape,
         Request                $request
@@ -55,8 +61,32 @@ class ProcessValidationController extends BaseController
         $type = $request->query->get('type');
         $transition = $request->query->get('transition');
         $id = $request->query->get('id');
-        $process = $this->validationProcess->getEtape($etape);
-        $meta = $this->validationProcess->getMetaFromTransition($transition);
+
+        if ($type === 'formation') {
+            if ($transition !== 'transmettre') {
+                if (!$this->isGranted('ROLE_SES') && !$this->isGranted('ROLE_ADMIN')) {
+                    throw $this->createAccessDeniedException('Accès interdit aux responsables de formation/parcours.');
+                }
+            } else {
+                $campagne = $this->getCampagneCollecte();
+                if (!$campagne->isPeriodActive() && !$this->isGranted('ROLE_SES') && !$this->isGranted('ROLE_ADMIN')) {
+                    throw $this->createAccessDeniedException('La campagne de collecte est fermée.');
+                }
+            }
+        }
+
+        if ($type === 'formation') {
+            $placeMeta = $this->dpeFormationWorkflow->getMetadataStore()->getPlaceMetadata($etape);
+            $process = [
+                'label' => $placeMeta['label'] ?? $etape,
+                'process' => $placeMeta['process'] ?? true,
+                'color' => $placeMeta['color'] ?? 'info',
+            ];
+        } else {
+            $process = $this->validationProcess->getEtape($etape);
+        }
+
+        $meta = $this->getTransitionMeta($type, $transition);
 
         $validLheo = null;
         $xmlErrorArray = [];
@@ -131,6 +161,57 @@ class ProcessValidationController extends BaseController
                 }
 
                 break;
+            case 'formation':
+                $objet = $formationRepository->find($id);
+
+                if ($objet === null) {
+                    return JsonReponse::error('Formation non trouvée');
+                }
+
+                $campagne = $this->getCampagneCollecte();
+                $dpeFormation = $this->entityManager->getRepository(\App\Entity\DpeFormation::class)->findOneBy([
+                    'formation' => $objet,
+                    'campagneCollecte' => $campagne,
+                ]);
+
+                if ($dpeFormation === null) {
+                    $dpeFormation = new \App\Entity\DpeFormation();
+                    $dpeFormation->setFormation($objet);
+                    $dpeFormation->setCampagneCollecte($campagne);
+                    $dpeFormation->setEtatValidation(['brouillon' => 1]);
+                    $this->entityManager->persist($dpeFormation);
+                    $this->entityManager->flush();
+                }
+
+                if ($request->isMethod('POST')) {
+                    $histoEvent = new \App\Events\HistoriqueFormationEvent($objet, $this->getUser(), $etape, 'valide', $request);
+                    $this->eventDispatcher->dispatch($histoEvent, \App\Events\HistoriqueFormationEvent::ADD_HISTORIQUE_FORMATION);
+
+                    $motifs = [];
+                    if ($request->request->has('laisserPasser')) {
+                        $motifs['laisserPasser'] = $request->request->get('laisserPasser');
+                    }
+                    if ($request->request->has('argumentaire')) {
+                        $motifs['motif'] = $request->request->get('argumentaire');
+                    }
+
+                    $this->dpeFormationWorkflow->apply($dpeFormation, $transition, $motifs);
+                    $this->entityManager->flush();
+
+                    if ($this->isTurboFrameRequest()) {
+                        return $turboStream->stream('offre_v2/turbo/apply_success.stream.html.twig', [
+                            'message' => 'Validation de l\'offre enregistrée',
+                        ]);
+                    }
+
+                    return JsonReponse::success('Validation de l\'offre enregistrée');
+                }
+
+                $processData = new \App\DTO\ProcessData();
+                $processData->place = $this->dpeFormationWorkflow->getMarking($dpeFormation);
+                $processData->transitions = $this->dpeFormationWorkflow->getEnabledTransitions($dpeFormation);
+
+                break;
             case 'ficheMatiere':
                 $process = $this->validationProcessFicheMatiere->getEtape($etape);
 
@@ -147,8 +228,27 @@ class ProcessValidationController extends BaseController
                 }
                 break;
         }
+        $otherFormations = [];
+        $existingPvs = [];
+        $existingNotes = [];
+        if ($type === 'formation' && isset($objet)) {
+            $otherFormations = $this->entityManager->getRepository(\App\Entity\Formation::class)->findBy([
+                'composantePorteuse' => $objet->getComposantePorteuse(),
+            ]);
+            $composante = $objet->getComposantePorteuse();
+            if ($composante !== null) {
+                $existingPvs = $this->entityManager->getRepository(\App\Entity\DocumentConseil::class)->findBy([
+                    'composante' => $composante,
+                    'type' => 'pv',
+                ]);
+                $existingNotes = $this->entityManager->getRepository(\App\Entity\DocumentConseil::class)->findBy([
+                    'composante' => $composante,
+                    'type' => 'note_explicative',
+                ]);
+            }
+        }
 
-        return $this->render('process_validation/_valide.html.twig', [
+        $viewData = [
             'objet' => $objet,
             'process' => $process,
             'type' => $type,
@@ -160,36 +260,112 @@ class ProcessValidationController extends BaseController
             'laisserPasser' => $laisserPasser,
             'meta' => $meta,
             'transition' => $transition,
-        ]);
+            'otherFormations' => $otherFormations,
+            'existingPvs' => $existingPvs,
+            'existingNotes' => $existingNotes,
+            'isTurbo' => $this->isTurboFrameRequest(),
+        ];
+
+        $footer = '_ui/_footer_submit_cancel.html.twig';
+        if (isset($process['check']) && $process['check'] === true) {
+            if (!isset($processData) || $processData->valid !== true) {
+                $footer = '_ui/_footer_cancel.html.twig';
+            }
+        }
+
+        $subtitle = null;
+        if ($objet !== null) {
+            if (method_exists($objet, 'getDisplay')) {
+                $subtitle = ucfirst($type === 'formation' ? 'offre' : $type) . ' : ' . $objet->getDisplay();
+            } elseif (method_exists($objet, 'getLibelle')) {
+                $subtitle = ucfirst($type === 'formation' ? 'offre' : $type) . ' : ' . $objet->getLibelle();
+            }
+        }
+
+        return $turboStream->streamOpenModalFromTemplates(
+            $meta['label'] ?? 'Validation',
+            $subtitle,
+            'process_validation/_valide.html.twig',
+            $viewData,
+            $footer
+        );
     }
 
     #[Route('/validation/refuse/{etape}', name: 'app_validation_refuser')]
     public function refuse(
         ParcoursRepository  $parcoursRepository,
         FormationRepository $formationRepository,
+        TurboStreamResponseFactory $turboStream,
         string              $etape,
         Request             $request
     ): Response {
         $type = $request->query->get('type');
         $transition = $request->query->get('transition');
         $id = $request->query->get('id');
-        $process = $this->validationProcess->getEtape($etape);
-        $meta = $this->validationProcess->getMetaFromTransition($transition);
+
+        if ($type === 'formation') {
+            if (!$this->isGranted('ROLE_SES') && !$this->isGranted('ROLE_ADMIN')) {
+                throw $this->createAccessDeniedException('Accès interdit aux responsables de formation/parcours.');
+            }
+        }
+
+        if ($type === 'formation') {
+            $placeMeta = $this->dpeFormationWorkflow->getMetadataStore()->getPlaceMetadata($etape);
+            $process = [
+                'label' => $placeMeta['label'] ?? $etape,
+                'process' => $placeMeta['process'] ?? true,
+                'color' => $placeMeta['color'] ?? 'info',
+            ];
+        } else {
+            $process = $this->validationProcess->getEtape($etape);
+        }
+
+        $meta = $this->getTransitionMeta($type, $transition);
 
         switch ($type) {
-            //            case 'formation':
-            //                $objet = $formationRepository->find($id);
-            //
-            //                if ($objet === null) {
-            //                    return JsonReponse::error('Formation non trouvée');
-            //                }
-            //
-            //                $processData = $this->formationProcess->etatFormation($objet, $process);
-            //
-            //                if ($request->isMethod('POST')) {
-            //                    return $this->formationProcess->refuseFormation($objet, $this->getUser(), $process, $etape, $request);
-            //                }
-            //                break;
+            case 'formation':
+                $objet = $formationRepository->find($id);
+
+                if ($objet === null) {
+                    return JsonReponse::error('Formation non trouvée');
+                }
+
+                $campagne = $this->getCampagneCollecte();
+                $dpeFormation = $this->entityManager->getRepository(\App\Entity\DpeFormation::class)->findOneBy([
+                    'formation' => $objet,
+                    'campagneCollecte' => $campagne,
+                ]);
+
+                if ($dpeFormation === null) {
+                    return JsonReponse::error('Validation de formation non initialisée');
+                }
+
+                if ($request->isMethod('POST')) {
+                    $histoEvent = new \App\Events\HistoriqueFormationEvent($objet, $this->getUser(), $etape, 'refuse', $request);
+                    $this->eventDispatcher->dispatch($histoEvent, \App\Events\HistoriqueFormationEvent::ADD_HISTORIQUE_FORMATION);
+
+                    $motifs = [];
+                    if ($request->request->has('argumentaire')) {
+                        $motifs['motif'] = $request->request->get('argumentaire');
+                    }
+
+                    $this->dpeFormationWorkflow->apply($dpeFormation, $transition, $motifs);
+                    $this->entityManager->flush();
+
+                    if ($this->isTurboFrameRequest()) {
+                        return $turboStream->stream('offre_v2/turbo/apply_success.stream.html.twig', [
+                            'message' => 'Refus de l\'offre enregistré',
+                        ]);
+                    }
+
+                    return JsonReponse::success('Refus de l\'offre enregistré');
+                }
+
+                $processData = new \App\DTO\ProcessData();
+                $processData->place = $this->dpeFormationWorkflow->getMarking($dpeFormation);
+                $processData->transitions = $this->dpeFormationWorkflow->getEnabledTransitions($dpeFormation);
+
+                break;
             case 'parcours':
                 $objet = $parcoursRepository->find($id);
 
@@ -219,7 +395,7 @@ class ProcessValidationController extends BaseController
                 break;
         }
 
-        return $this->render('process_validation/_refuse.html.twig', [
+        $viewData = [
             'process' => $process,
             'type' => $type,
             'id' => $id,
@@ -227,8 +403,21 @@ class ProcessValidationController extends BaseController
             'objet' => $objet,
             'processData' => $processData ?? null,
             'meta' => $meta,
-            'transition' => $transition
-        ]);
+            'transition' => $transition,
+            'isTurbo' => $this->isTurboFrameRequest(),
+        ];
+
+        if ($this->isTurboFrameRequest()) {
+            return $turboStream->streamOpenModalFromTemplates(
+                $meta['label'] ?? 'Refus / Retour modifications',
+                null,
+                'process_validation/_refuse.html.twig',
+                $viewData,
+                '_ui/_footer_submit_cancel.html.twig'
+            );
+        }
+
+        return $this->render('process_validation/_refuse.html.twig', $viewData);
     }
 
     #[Route('/validation/reserve/{etape}', name: 'app_validation_reserver')]
@@ -236,29 +425,77 @@ class ProcessValidationController extends BaseController
         FicheMatiereRepository $ficheMatiereRepository,
         ParcoursRepository     $parcoursRepository,
         FormationRepository    $formationRepository,
+        TurboStreamResponseFactory $turboStream,
         string                 $etape,
         Request                $request
     ): Response {
         $type = $request->query->get('type');
         $transition = $request->query->get('transition');
         $id = $request->query->get('id');
-        $process = $this->validationProcess->getEtape($etape);
-        $meta = $this->validationProcess->getMetaFromTransition($transition);
+
+        if ($type === 'formation') {
+            if (!$this->isGranted('ROLE_SES') && !$this->isGranted('ROLE_ADMIN')) {
+                throw $this->createAccessDeniedException('Accès interdit aux responsables de formation/parcours.');
+            }
+        }
+
+        if ($type === 'formation') {
+            $placeMeta = $this->dpeFormationWorkflow->getMetadataStore()->getPlaceMetadata($etape);
+            $process = [
+                'label' => $placeMeta['label'] ?? $etape,
+                'process' => $placeMeta['process'] ?? true,
+                'color' => $placeMeta['color'] ?? 'info',
+            ];
+        } else {
+            $process = $this->validationProcess->getEtape($etape);
+        }
+
+        $meta = $this->getTransitionMeta($type, $transition);
 
         switch ($type) {
-            //            case 'formation':
-            //                $objet = $formationRepository->find($id);
-            //
-            //                if ($objet === null) {
-            //                    return JsonReponse::error('Formation non trouvée');
-            //                }
-            //
-            //                $processData = $this->formationProcess->etatFormation($objet, $process);
-            //
-            //                if ($request->isMethod('POST')) {
-            //                    return $this->formationProcess->reserveFormation($objet, $this->getUser(), $process, $etape, $request);
-            //                }
-            //                break;
+            case 'formation':
+                $objet = $formationRepository->find($id);
+
+                if ($objet === null) {
+                    return JsonReponse::error('Formation non trouvée');
+                }
+
+                $campagne = $this->getCampagneCollecte();
+                $dpeFormation = $this->entityManager->getRepository(\App\Entity\DpeFormation::class)->findOneBy([
+                    'formation' => $objet,
+                    'campagneCollecte' => $campagne,
+                ]);
+
+                if ($dpeFormation === null) {
+                    return JsonReponse::error('Validation de formation non initialisée');
+                }
+
+                if ($request->isMethod('POST')) {
+                    $histoEvent = new \App\Events\HistoriqueFormationEvent($objet, $this->getUser(), $etape, 'reserve', $request);
+                    $this->eventDispatcher->dispatch($histoEvent, \App\Events\HistoriqueFormationEvent::ADD_HISTORIQUE_FORMATION);
+
+                    $motifs = [];
+                    if ($request->request->has('argumentaire')) {
+                        $motifs['motif'] = $request->request->get('argumentaire');
+                    }
+
+                    $this->dpeFormationWorkflow->apply($dpeFormation, $transition, $motifs);
+                    $this->entityManager->flush();
+
+                    if ($this->isTurboFrameRequest()) {
+                        return $turboStream->stream('offre_v2/turbo/apply_success.stream.html.twig', [
+                            'message' => 'Réserve de l\'offre enregistrée',
+                        ]);
+                    }
+
+                    return JsonReponse::success('Réserve de l\'offre enregistrée');
+                }
+
+                $processData = new \App\DTO\ProcessData();
+                $processData->place = $this->dpeFormationWorkflow->getMarking($dpeFormation);
+                $processData->transitions = $this->dpeFormationWorkflow->getEnabledTransitions($dpeFormation);
+
+                break;
             case 'parcours':
                 $objet = $parcoursRepository->find($id);
 
@@ -295,7 +532,7 @@ class ProcessValidationController extends BaseController
                 break;
         }
 
-        return $this->render('process_validation/_reserve.html.twig', [
+        $viewData = [
             'process' => $process,
             'objet' => $objet,
             'processData' => $processData ?? null,
@@ -303,8 +540,21 @@ class ProcessValidationController extends BaseController
             'id' => $id,
             'etape' => $etape,
             'transition' => $transition,
-            'meta' => $meta
-        ]);
+            'meta' => $meta,
+            'isTurbo' => $this->isTurboFrameRequest(),
+        ];
+
+        if ($this->isTurboFrameRequest()) {
+            return $turboStream->streamOpenModalFromTemplates(
+                $meta['label'] ?? 'Réserve / Demande de modifications',
+                null,
+                'process_validation/_reserve.html.twig',
+                $viewData,
+                '_ui/_footer_submit_cancel.html.twig'
+            );
+        }
+
+        return $this->render('process_validation/_reserve.html.twig', $viewData);
     }
 
     #[Route('/validation/edit/{type}/{id}', name: 'app_validation_edit')]
@@ -662,4 +912,19 @@ class ProcessValidationController extends BaseController
 //            'etape' => $etape,
 //        ]);
 //    }
+
+    private function getTransitionMeta(string $type, string $transition): array
+    {
+        if ($type === 'formation') {
+            $transitions = $this->dpeFormationWorkflow->getDefinition()->getTransitions();
+            foreach ($transitions as $t) {
+                if ($t->getName() === $transition) {
+                    return $this->dpeFormationWorkflow->getMetadataStore()->getTransitionMetadata($t);
+                }
+            }
+            return [];
+        }
+
+        return $this->validationProcess->getMetaFromTransition($transition);
+    }
 }

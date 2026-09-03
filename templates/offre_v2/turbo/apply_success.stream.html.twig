@@ -1,0 +1,12 @@
+{{ include('_ui/_toast.stream.html.twig', { message: message|default('Action enregistrée avec succès'), undo: null, type: 'success' }) }}
+
+<turbo-stream action="append" target="modal_control">
+    <template>
+        <script data-turbo-eval="true">
+          window.dispatchEvent(new Event('modal:close'));
+          setTimeout(function() {
+              window.location.reload();
+          }, 1000);
+        </script>
+    </template>
+</turbo-stream>

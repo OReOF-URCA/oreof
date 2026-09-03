@@ -912,3 +912,103 @@ framework:
             type: valider
             btn: success
             icon: ph:check
+
+    dpeFormation:
+      type: 'workflow'
+      marking_store:
+        type: 'method'
+        property: 'etatValidation'
+      supports:
+        - App\Entity\DpeFormation
+      initial_marking: 'brouillon'
+      places:
+        brouillon:
+          metadata:
+            process: true
+            label: 'validation.brouillon'
+            color: 'info'
+            icon: 'flowbite:edit-outline'
+        soumis_ses:
+          metadata:
+            process: true
+            label: 'validation.soumis_ses'
+            color: 'warning'
+            icon: 'flowbite:school-check-alt-outline'
+        soumis_cfvu:
+          metadata:
+            process: true
+            label: 'validation.soumis_cfvu'
+            color: 'warning'
+            icon: 'flowbite:shield-check-outline'
+        attente_pv:
+          metadata:
+            process: false
+            label: 'validation.attente_pv'
+            color: 'warning'
+            icon: 'ph:hourglass'
+        publie:
+          metadata:
+            process: false
+            label: 'validation.publie'
+            color: 'success'
+            icon: 'ph:check'
+      transitions:
+        transmettre:
+          from: 'brouillon'
+          to: 'soumis_ses'
+          metadata:
+            type: valider
+            label: 'Transmettre pour validation Scolarité'
+            btn: success
+            icon: ph:check
+            hasUpload: true
+            hasUploadNote: true
+        valider_ses:
+          from: 'soumis_ses'
+          to: 'soumis_cfvu'
+          metadata:
+            type: valider
+            label: 'Valider et transmettre au CFVU'
+            btn: success
+            icon: ph:check
+        reserver_ses:
+          from: 'soumis_ses'
+          to: 'brouillon'
+          metadata:
+            type: reserver
+            label: 'Renvoyer pour modifications'
+            btn: warning
+            icon: material-symbols:fact-check-outline-sharp
+        valider_cfvu_avec_pv:
+          from: 'soumis_cfvu'
+          to: 'publie'
+          metadata:
+            type: valider
+            label: 'Valider (PV ou laissez-passer conforme)'
+            btn: success
+            icon: ph:check
+        valider_cfvu_attente_pv:
+          from: 'soumis_cfvu'
+          to: 'attente_pv'
+          metadata:
+            type: valider
+            label: 'Valider en attente de PV'
+            btn: success
+            icon: ph:check
+        reserver_cfvu:
+          from: 'soumis_cfvu'
+          to: 'brouillon'
+          metadata:
+            type: reserver
+            label: 'Renvoyer pour modifications'
+            btn: warning
+            icon: material-symbols:fact-check-outline-sharp
+        deposer_pv:
+          from: 'attente_pv'
+          to: 'publie'
+          metadata:
+            type: valider
+            label: 'Déposer le PV final'
+            btn: success
+            icon: ph:check
+            hasUpload: true

@@ -263,9 +263,26 @@ final class OffreController extends BaseController
         Formation                  $formation,
         ParcoursComparaisonService $comparaisonService,
         OffreValidationService     $offreValidationService,
+        EntityManagerInterface     $em,
+        \Symfony\Component\Workflow\WorkflowInterface $dpeFormationWorkflow,
     ): Response
     {
         $campagne = $this->getCampagneCollecte();
+
+        $dpeFormation = $em->getRepository(\App\Entity\DpeFormation::class)->findOneBy([
+            'formation' => $formation,
+            'campagneCollecte' => $campagne,
+        ]);
+
+        if ($dpeFormation === null) {
+            $dpeFormation = new \App\Entity\DpeFormation();
+            $dpeFormation->setFormation($formation);
+            $dpeFormation->setCampagneCollecte($campagne);
+            $dpeFormation->setEtatValidation(['brouillon' => 1]);
+            $em->persist($dpeFormation);
+            $em->flush();
+        }
+
         $statsData = $this->calculerStatistiques($formation, $campagne, $comparaisonService, $offreValidationService);
 
         // Récupérer le type de diplôme
@@ -288,6 +305,18 @@ final class OffreController extends BaseController
             }
         }
 
+        $otherFormations = $em->getRepository(Formation::class)->findBy([
+            'composantePorteuse' => $formation->getComposantePorteuse(),
+        ]);
+
+        $transitionsData = [];
+        foreach ($dpeFormationWorkflow->getEnabledTransitions($dpeFormation) as $transition) {
+            $transitionsData[] = [
+                'name' => $transition->getName(),
+                'metadata' => $dpeFormationWorkflow->getMetadataStore()->getTransitionMetadata($transition),
+            ];
+        }
+
         return $this->render('offre_v2/configurer.html.twig', [
             'formation' => $formation,
             'plateformes' => $plateformes,
@@ -295,6 +324,9 @@ final class OffreController extends BaseController
             'tabStatistiques' => $statsData['tabStatistiques'],
             'anomalies' => $statsData['anomalies'],
             'comparaison' => $statsData['comparaison'],
+            'dpeFormation' => $dpeFormation,
+            'transitions' => $transitionsData,
+            'otherFormations' => $otherFormations,
         ]);
     }
 
@@ -315,11 +347,29 @@ final class OffreController extends BaseController
 
         $campagne = $this->getCampagneCollecte();
 
-        if (!$campagne->isPeriodActive() && !$this->isGranted('ROLE_ADMIN')) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'La campagne de collecte est fermée. Modification impossible.'
-            ], Response::HTTP_FORBIDDEN);
+        $isSesOrAdmin = $this->isGranted('ROLE_SES') || $this->isGranted('ROLE_ADMIN');
+
+        if (!$isSesOrAdmin) {
+            if (!$campagne->isPeriodActive()) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'La campagne de collecte est fermée. Modification impossible.'
+                ], Response::HTTP_FORBIDDEN);
+            }
+
+            $dpeFormation = $em->getRepository(\App\Entity\DpeFormation::class)->findOneBy([
+                'formation' => $formation,
+                'campagneCollecte' => $campagne,
+            ]);
+
+            $isBrouillon = $dpeFormation === null || array_key_exists('brouillon', $dpeFormation->getEtatValidation());
+
+            if (!$isBrouillon) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'L\'offre a déjà été transmise pour validation. Modification impossible.'
+                ], Response::HTTP_FORBIDDEN);
+            }
         }
 
         $changedYears = [];
