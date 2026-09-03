@@ -1,0 +1,11 @@
+<div class="space-y-2">
+    <div class="flex flex-wrap items-center gap-1.5">
+        {{ include('communs/_badge_collection.html.twig', { badges: item.etatDemande|badgeChangeRfDto }) }}
+    </div>
+    <div class="flex flex-wrap items-center gap-1.5">
+        {% if etape is defined and etape in ['cfvu', 'publication', 'valide_cfvu', 'soumis_cfvu', 'attente_pv', 'verification_pv', 'effectuee'] %}
+            <div class="inline-flex items-center">{{ component('historique_date', {changeRf: item, type: 'change_rf', step: 'soumis_cfvu'}) }}</div>
+            <div class="inline-flex items-center">{{ component('historique_pv', {changeRf: item, type: 'change_rf'}) }}</div>
+        {% endif %}
+    </div>
+</div>

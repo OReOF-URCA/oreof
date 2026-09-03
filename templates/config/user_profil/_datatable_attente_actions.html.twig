@@ -11,7 +11,7 @@
             :soft="true"
             tooltip="Supprimer la demande"
             url="{{ path('app_user_profil_delete_demande', {'id': item.id}) }}"
-            csrfTokenId="{{ 'delete' ~ item.id }}"
+            csrfTokenId="{{ 'delete-user-' ~ item.id }}"
             title="Supprimer la demande de {{ item.prenom }} {{ item.nom }}"
             message="Cette action supprimera définitivement la demande de cet utilisateur."
             confirmLabel="Supprimer"

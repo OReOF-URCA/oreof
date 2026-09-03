@@ -45,6 +45,13 @@ export default class extends Controller {
     })
   }
 
+  saveRespFormation (event) {
+    this._save({
+      action: 'respFormation',
+      value: event.target.value,
+    })
+  }
+
   saveCoRespFormation(event) {
     this._save({
       action: 'coRespFormation',
@@ -91,6 +98,27 @@ export default class extends Controller {
       value: event.target.value,
       isChecked: event.target.checked,
     })
+  }
+
+  changeHasParcours (event) {
+    // Seul le passage en multi-parcours (« Oui ») a un effet : la formation mono devient
+    // multi, ce qui change toute la mise en page (onglets) → on recharge après sauvegarde.
+    if (parseInt(event.target.value, 10) !== 1) {
+      return
+    }
+    if (confirm('Cette formation va comporter plusieurs parcours. La structure va être modifiée. Voulez-vous continuer ?')) {
+      this._save({
+        field: 'hasParcours',
+        action: 'yesNo',
+        value: event.target.value,
+      }).then(() => {
+        window.location.reload()
+      })
+    } else {
+      // annulation : recocher « Non »
+      document.getElementById('formation_step1_parcours_0').checked = true
+      event.target.checked = false
+    }
   }
 
   saveModalitesAlternance() {

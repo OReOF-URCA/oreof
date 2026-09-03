@@ -1,4 +1,5 @@
 <div id="annee_{{ annee.id }}_container">
+    {% set can_edit = is_granted('ROLE_ADMIN') or (campagne and campagne.isPeriodActive()) %}
     {% if annee.isOuvert %}
         {% if comparaison[parcours.id] is defined and comparaison[parcours.id][annee.ordre] is defined %}
             {% set anneeCourante = comparaison[parcours.id][annee.ordre].anneeCourante %}
@@ -14,6 +15,8 @@
                         <twig:Badge variant="success" label="Ouverte"/>
                     </div>
                 </summary>
+
+                <fieldset {{ not can_edit ? 'disabled' : '' }} class="contents">
 
                 <div class="mt-4 grid gap-4 md:grid-cols-2">
                     <div>
@@ -148,6 +151,7 @@
                             configurée pour ce type de diplôme.</p>
                     {% endif %}
                 </div>
+                </fieldset>
             </details>
         {% else %}
             <!-- Année ouverte -->
@@ -161,6 +165,8 @@
                         <twig:Badge variant="success" label="Ouverte"/>
                     </div>
                 </summary>
+
+                <fieldset {{ not can_edit ? 'disabled' : '' }} class="contents">
 
                 <div class="mt-4 grid gap-4 md:grid-cols-2">
                     <div>
@@ -277,6 +283,7 @@
                         </div>
                     {% endif %}
                 </div>
+                </fieldset>
             </details>
         {% endif %}
     {% else %}
@@ -294,16 +301,18 @@
             <div class="mt-4 rounded-xl border border-dashed bg-white p-4 text-sm text-slate-500">
                 Les plateformes et capacités sont désactivées tant que cette année est fermée.
                 <input type="hidden" name="annee_{{ annee.id }}_isOuvert" value="0">
-                {% if parcours.isOuvert() %}
-                    <button type="button"
-                            class="mt-2 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700 cursor-pointer"
-                            data-action="click->autosave-capacites#ouvrirAnnee"
-                            data-autosave-capacites-annee-param="{{ annee.id }}"
-                    >
-                        Ouvrir l'année
-                    </button>
-                {% else %}
-                    Le parcours est fermé
+                {% if can_edit %}
+                    {% if parcours.isOuvert() %}
+                        <button type="button"
+                                class="mt-2 inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700 cursor-pointer"
+                                data-action="click->autosave-capacites#ouvrirAnnee"
+                                data-autosave-capacites-annee-param="{{ annee.id }}"
+                        >
+                            Ouvrir l'année
+                        </button>
+                    {% else %}
+                        Le parcours est fermé
+                    {% endif %}
                 {% endif %}
             </div>
         </details>

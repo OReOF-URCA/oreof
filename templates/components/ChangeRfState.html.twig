@@ -1,123 +1,125 @@
-<div {{ attributes }}
-        id="change_rf_state"
->
+<div {{ attributes }} data-action="modal:close@window->live#$render">
     {% if this.demandes|length > 0 %}
+        {% set parent = this %}
         <section class="scroll-section" id="identite_formation">
-            <h3 class="small-title">Demandes de changement de (co-) responsable </h3>
-            <div class="card mb-3">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-4 text-muted">
-                            <div class="text-extra-small fw-medium text-muted text-center text-divider mb-2">Liste des
-                                demandes
-                            </div>
-                        </div>
-                        <div class="col-4 text-muted">
-                            <div class="text-extra-small fw-medium text-muted text-center text-divider mb-2">Actions
-                            </div>
-                        </div>
-                        <div class="col-1 text-muted">
-                            <div class="text-extra-small fw-medium text-muted text-center text-divider mb-2">PV ?
-                            </div>
-                        </div>
-                        <div class="col-3 text-muted">
-                            <div class="text-extra-small fw-medium text-muted text-center text-divider mb-2">
-                                Etat des demandes
-                            </div>
-                        </div>
+            <twig:Card title="Demandes de changement de (co-) responsable" variant="default" extraClass="mb-6">
+                <div class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                    {# En-têtes de table pour les grands écrans #}
+                    <div class="hidden md:grid md:grid-cols-12 gap-4 pb-3 text-xs font-semibold text-secondary-500 uppercase tracking-wider items-center">
+                        <div class="col-span-4">Détails de la demande</div>
+                        <div class="col-span-3 text-center">Actions</div>
+                        <div class="col-span-2 text-center">PV ?</div>
+                        <div class="col-span-3 text-center">État des demandes</div>
                     </div>
-                    {% for demande in this.demandes %}
-                        <div class="row mt-2">
 
-                            <div class="col-4">
-                                Remplacement de
-                                <strong>{{ demande.ancienResponsable != null ?  demande.ancienResponsable.display : 'non défini' }}</strong>
-                                par
-                                <strong>{{ demande.nouveauResponsable != null ? demande.nouveauResponsable.display : 'non défini' }}</strong>
-                                ({{ demande.typeRf.value }}) - Prise de fonction
-                                : {{ demande.datePriseFonction ? demande.datePriseFonction|date('d/m/Y') : 'non définie' }}
+                    {% for demande in parent.demandes %}
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 py-4 items-center">
+                            {# Détails du changement de responsable #}
+                            <div class="col-span-1 md:col-span-4 space-y-1">
+                                <div class="text-sm text-text dark:text-secondary-100">
+                                    Remplacement de
+                                    <strong class="font-semibold text-secondary-900 dark:text-white">
+                                        {{ demande.ancienResponsable != null ? demande.ancienResponsable.display : 'non défini' }}
+                                    </strong>
+                                    par
+                                    <strong class="font-semibold text-secondary-900 dark:text-white">
+                                        {{ demande.nouveauResponsable != null ? demande.nouveauResponsable.display : 'non défini' }}
+                                    </strong>
+                                </div>
+                                <div class="flex flex-wrap gap-2 items-center text-xs text-secondary-500">
+                                    <twig:Badge label="{{ demande.typeRf.value }}" variant="primary" size="sm" />
+                                    <span>•</span>
+                                    <span>Prise de fonction : {{ demande.datePriseFonction ? demande.datePriseFonction|date('d/m/Y') : 'non définie' }}</span>
+                                </div>
                             </div>
 
-                            <div class="col-4">
-                                <div class="row gy-1">
-                                    {% set place = this.getPlace(demande) %}
-                                    {% if this.process[place] is defined %}
-                                        {% if
-                                            (is_granted('MANAGE', {route: 'app_composante', subject: this.formation}) and place != 'soumis_ses' and place != 'soumis_cfvu')  or
-                                            (is_granted('MANAGE', {route: 'app_formation', subject: this.formation}) and place != 'soumis_ses' and place != 'soumis_cfvu') or is_granted('ROLE_ADMIN') %}
-                                        {% for key, state in hasTransitions(demande, 'changeRf') %}
-                                            {% for keyTrans, transition in state %}
-                                                <div class="col-{{ 6 / state|length }} d-grid">
-                                                    <button class="btn d-block text-wrap btn-outline-{{ transition.meta.btn }}"
-                                                            type="button"
-                                                            {# todo: on pourrait reload juste le composant #}
-                                                            {{ stimulus_controller('modal', {
-                                                                size: 'lg',
-                                                                updateComponent: {
-                                                                    id: 'change_rf_state',
-                                                                    event: 'change_rf_state:'~key,
-                                                                    event_type: key
-                                                                },
-                                                                nomEvenement: 'refreshPage',
-                                                                modalTitle: ('validation.valider.changeRf.'~keyTrans~'.title')|trans({}, 'process'),
-                                                                modalUrl: path('app_validation_change_rf_'~key, {
-                                                                    transition:keyTrans,
-                                                                    etape:place,
-                                                                    demande:demande.id
-                                                                }) }) }}
-                                                            data-action="click->modal#openModal"
-                                                            data-controller="tooltip"
-                                                            data-tooltip-placement-value="bottom"
-
-                                                            aria-label="{{ ('title.validation.changeRf.'~keyTrans)|trans({}, 'process') }}"
-                                                            data-bs-original-title="{{ ('title.validation.changeRf.'~keyTrans)|trans({}, 'process') }}"
-                                                    >
-                                                        <i class="fal {{ transition.meta.icon }}"></i> {{ ('btn.validation.changeRf.'~keyTrans)|trans({}, 'process') }}
-                                                    </button>
-                                                </div>
-                                            {% else %}
-                                                <div class="col-6 d-grid">
-                                                </div>
+                            {# Actions de transitions de workflow #}
+                            <div class="col-span-1 md:col-span-3">
+                                <div class="flex flex-wrap gap-2 justify-center">
+                                    {% set place = parent.getPlace(demande) %}
+                                    {% if parent.process[place] is defined %}
+                                        {% if (is_granted('MANAGE', {route: 'app_composante', subject: parent.formation}) and place != 'soumis_ses' and place != 'soumis_cfvu') or
+                                              (is_granted('MANAGE', {route: 'app_formation', subject: parent.formation}) and place != 'soumis_ses' and place != 'soumis_cfvu') or
+                                              is_granted('ROLE_ADMIN') %}
+                                            {% for key, state in hasTransitions(demande, 'changeRf') %}
+                                                {% for keyTrans, transition in state %}
+                                                    <twig:Button
+                                                        variant="{{ transition.meta.btn }}"
+                                                        :outline="true"
+                                                        :soft="false"
+                                                        label="{{ ('btn.validation.changeRf.'~keyTrans)|trans({}, 'process') }}"
+                                                        icon="{{ transition.meta.icon|default('') }}"
+                                                        tooltip="{{ ('title.validation.changeRf.'~keyTrans)|trans({}, 'process') }}"
+                                                        data-turbo="true"
+                                                        data-action="click->modalturbo#open"
+                                                        href="{{ path('app_validation_change_rf_'~key, {
+                                                                transition:keyTrans,
+                                                                etape:place,
+                                                                demande:demande.id
+                                                        }) }}"
+                                                    />
+                                                {% endfor %}
                                             {% endfor %}
-                                        {% endfor %}
                                         {% endif %}
                                     {% endif %}
                                 </div>
                             </div>
-                            <div class="col-1">
+
+                            {# Dépôt/Téléchargement PV #}
+                            <div class="col-span-1 md:col-span-2 flex justify-center items-center">
                                 {{ component('historique_pv', {changeRf:demande, type:'change_rf'}) }}
                             </div>
-                            <div class="col-3 d-flex align-items-center justify-content-center">
-                                {% set historique = this.getHistoriques(demande) %}
-                                {% for key, etape in this.process %}
-                                    {% set class = 'btn-muted' %}
-                                    {% if (isPlace('changeRf', demande, key)) %}
-                                        {% set class = 'btn-info' %}
-                                    {% else %}
-                                        {% set class =  hasHistorique(demande, 'changeRf.'~key, historique) %}
-                                    {% endif %}
 
-                                    <button class="btn btn-sm btn-icon btn-icon-only {{ class }} ms-1" type="button"
-                                            data-controller="tooltip" data-tooltip-placement-value="bottom"
-                                            aria-label="{{ ('changeRf.'~etape.label~'.'~class)|trans({}, 'process') }}"
-                                            data-bs-original-title="{{ ('changeRf.'~etape.label~'.'~class)|trans({}, 'process') }}"
-                                    >
-                                        <i class="fal {{ etape.icon }}"></i>
-                                    </button>
-                                {% endfor %}
+                            {# Suivi des étapes de validation & Action de suppression #}
+                            <div class="col-span-1 md:col-span-3 flex items-center justify-center gap-2">
+                                <div class="flex items-center gap-1.5">
+                                    {% set historique = parent.getHistoriques(demande) %}
+                                    {% for key, etape in parent.process %}
+                                        {% set class = 'btn-muted' %}
+                                        {% if (isPlace('changeRf', demande, key)) %}
+                                            {% set class = 'btn-info' %}
+                                        {% else %}
+                                            {% set class = hasHistorique(demande, 'changeRf.'~key, historique) %}
+                                        {% endif %}
+
+                                        {% set bgColors = {
+                                            'btn-muted': 'bg-secondary-100 text-secondary-400 dark:bg-secondary-800 dark:text-secondary-500',
+                                            'btn-info': 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 ring-2 ring-primary-500 ring-offset-2',
+                                            'bg-success-100 text-success-700 dark:bg-success-900/40 dark:text-success-300': 'bg-success-100 text-success-700 dark:bg-success-900/40 dark:text-success-300',
+                                            'btn-success': 'bg-success-100 text-success-700 dark:bg-success-900/40 dark:text-success-300',
+                                            'btn-warning': 'bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-300',
+                                            'btn-danger': 'bg-danger-100 text-danger-700 dark:bg-danger-900/40 dark:text-danger-300'
+                                        } %}
+                                        {% set classBg = bgColors[class] ?? bgColors['btn-muted'] %}
+
+                                        <button class="inline-flex items-center justify-center w-8 h-8 rounded-full {{ classBg }} transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-primary-500"
+                                                type="button"
+                                                data-controller="tooltip"
+                                                data-tooltip-placement-value="bottom"
+                                                aria-label="{{ ('changeRf.'~etape.label~'.'~class)|trans({}, 'process') }}"
+                                                data-bs-original-title="{{ ('changeRf.'~etape.label~'.'~class)|trans({}, 'process') }}"
+                                        >
+                                            <twig:UX:Icon name="{{ etape.icon }}" class="w-4 h-4" />
+                                        </button>
+                                    {% endfor %}
+                                </div>
+
                                 {% if (place != 'soumis_ses' and place != 'soumis_cfvu') or is_granted('ROLE_ADMIN') %}
-                                    <a href="{{ path('app_formation_change_rf_suppression', {demande:demande.id}) }}"
-                                       data-controller="tooltip" data-tooltip-placement-value="bottom"
-                                       data-bs-original-title="Supprimer la demande"
-                                       class="btn btn-sm btn-icon btn-icon-only btn-danger ms-4"><i
-                                                class="{{ iconDelete }}"></i>
-                                    </a>
+                                    <twig:DeleteButton
+                                        :label="'btn.validation.changeRf.suppression'|trans({}, 'process')"
+                                        :variant="'danger'"
+                                        :outline="true"
+                                        :soft="true"
+                                        icon="icon:delete"
+                                        :url="path('app_formation_change_rf_suppression', {demande:demande.id})"
+                                        :tooltip="('btn.validation.changeRf.suppression'|trans({}, 'process'))"
+                                    />
                                 {% endif %}
                             </div>
                         </div>
                     {% endfor %}
                 </div>
-            </div>
+            </twig:Card>
         </section>
     {% endif %}
 </div>

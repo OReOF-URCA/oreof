@@ -26,6 +26,7 @@ use App\TypeDiplome\Diplomes\M2E\StructureParcoursM2e;
 use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
+use App\TypeDiplome\AbstractTypeDiplomeHandler;
 use App\TypeDiplome\ValideParcoursInterface;
 use App\Utils\Tools;
 use DateTimeInterface;
@@ -38,7 +39,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'M2E'])]
-final class M2EHandler implements TypeDiplomeHandlerInterface
+final class M2EHandler extends AbstractTypeDiplomeHandler
 {
 
     public const TEMPLATE_FOLDER = 'm2e';
@@ -688,4 +689,5 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
     {
         // TODO: Implement getValidator() method.
     }
+
 }

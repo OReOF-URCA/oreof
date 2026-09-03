@@ -14,6 +14,8 @@ use App\Classes\ValidationProcess;
 use App\Classes\ValidationProcessChangeRf;
 use App\Classes\ValidationProcessFicheMatiere;
 use App\Entity\DpeParcours;
+use App\Entity\ChangeRf;
+use App\Enums\TypeRfEnum;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeParcoursRepository;
@@ -108,23 +110,6 @@ class ValidationAdminController extends BaseController
             'statistiques' => $statistiques,
         ]);
     }
-
-    //    #[Route('dpe', name: 'dpe_index')]
-    //    public function dpe(
-    //        ComposanteRepository $composanteRepository,
-    //        Request              $request,
-    //        ValidationProcess    $validationProcess,
-    //    ): Response
-    //    {
-    //
-    //        $typeValidation = $request->query->get('typeValidation');
-    //
-    //        return $this->render('dpe_old.html.twig', [
-    //            'types_validation' => $validationProcess->getProcessAll(),
-    //            'typeValidation' => $typeValidation,
-    //            'composantes' => $composanteRepository->findPorteuse(),
-    //        ]);
-    //    }
 
     #[Route('change-rf', name: 'change_rf_index')]
     public function changeRf(
@@ -315,21 +300,137 @@ class ValidationAdminController extends BaseController
 
     #[Route('change-rf/liste', name: 'change_rf_liste')]
     public function changeRfListe(
-        ValidationProcessChangeRf $validationProcess,
+        ComposanteRepository      $composanteRepository,
         ChangeRfRepository        $changeRfRepository,
+        DataTableBuilder          $builder,
         Request                   $request
     ): Response
     {
-        $typeValidation = $request->query->get('typeValidation');
+        $typeValidation = $request->query->get('typeValidation', $request->query->get('value'));
+        if (!is_string($typeValidation) || $typeValidation === '') {
+            return $this->render('validation/_listeChangeRf.html.twig', [
+                'table' => null,
+                'nbDemandes' => 0,
+                'etape' => null,
+                'oneDemande' => null,
+            ]);
+        }
 
-        $demandes = $changeRfRepository->findByTypeValidation(
-            $typeValidation,
-            $this->getCampagneCollecte()
-        );
+        $idComposante = $request->query->get('composante', null);
+        if ($idComposante && $idComposante !== 'all') {
+            $composante = $composanteRepository->find($idComposante);
+        } else {
+            $composante = null;
+        }
+
+        if ($composante) {
+            $demandes = $changeRfRepository->findByComposanteTypeValidation(
+                $composante,
+                $this->getCampagneCollecte(),
+                $typeValidation
+            );
+        } else {
+            $demandes = $changeRfRepository->findByTypeValidation(
+                $typeValidation,
+                $this->getCampagneCollecte()
+            );
+        }
+
+        $campagneCollecte = $this->getCampagneCollecte();
+        if ($campagneCollecte === null) {
+            $builder->addBaseWhere('1 = 0');
+        } else {
+            $builder
+                ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
+                ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId())
+                ->addBaseWhere('JSON_CONTAINS(e.etatDemande, :etatDpe) = 1')
+                ->addBaseParameter('etatDpe', json_encode([$typeValidation => 1]));
+        }
+
+        if ($composante !== null) {
+            $builder
+                ->addBaseWhere('IDENTITY(formation_0.composantePorteuse) = :composanteId')
+                ->addBaseParameter('composanteId', $composante->getId());
+        }
+
+        $table = $builder
+            ->setEntity(ChangeRf::class)
+            ->setPerPage(20)
+            ->setDefaultSort('dateDemande', 'desc')
+            ->enableCheckboxSelection([
+                'name' => 'demandes[]',
+                'valueField' => 'id',
+                'inputClass' => 'validation-change-rf-item',
+                'allId' => 'validation-change-rf-all',
+            ])
+            ->addColumn('formation.composantePorteuse.libelle', [
+                'label' => 'Composante',
+                'sortable' => true,
+                'filterable' => true,
+                'sort_expression' => 'composantePorteuse_1.libelle',
+                'filter_expression' => 'composantePorteuse_1.libelle',
+                'class' => 'min-w-[12rem]',
+            ])
+            ->addColumn('formation.libelle', [
+                'label' => 'Formation',
+                'sortable' => true,
+                'filterable' => true,
+                'searchable' => true,
+                'template' => 'validation/datatable/_formation_change_rf.html.twig',
+                'class' => 'min-w-[18rem]',
+            ])
+            ->addColumn('typeRf', [
+                'label' => 'Co/RF',
+                'sortable' => true,
+                'filterable' => true,
+                'type' => 'select',
+                'choices' => [
+                    TypeRfEnum::RF->value => 'Responsable',
+                    TypeRfEnum::CORF->value => 'Co-responsable',
+                ],
+                'template' => 'validation/datatable/_type_rf_change_rf.html.twig',
+            ])
+            ->addColumn('ancienResponsable.display', [
+                'label' => 'Actuel Co/RF',
+                'sortable' => true,
+                'filterable' => true,
+                'searchable' => true,
+            ])
+            ->addColumn('nouveauResponsable.display', [
+                'label' => 'Nouveau Co/RF',
+                'sortable' => true,
+                'filterable' => true,
+                'searchable' => true,
+            ])
+            ->addColumn('dateDemande', [
+                'label' => 'Date demande',
+                'sortable' => true,
+                'filterable' => true,
+                'type' => 'date',
+                'format' => 'datetime',
+            ])
+            ->addColumn('etatDemande', [
+                'label' => 'Suivi / Etat',
+                'sortable' => false,
+                'filterable' => true,
+                'template' => 'validation/datatable/_suivi_change_rf.html.twig',
+                'class' => 'min-w-[15rem]',
+            ])
+            ->addColumn('id', [
+                'label' => 'Actions',
+                'sortable' => false,
+                'filterable' => false,
+                'searchable' => false,
+                'template' => 'validation/datatable/_actions_change_rf.html.twig',
+                'class' => 'text-right min-w-[11rem]',
+            ])
+            ->build();
 
         return $this->render('validation/_listeChangeRf.html.twig', [
-            'demandes' => $demandes,
+            'table' => $table,
+            'nbDemandes' => count($demandes),
             'etape' => $typeValidation ?? null,
+            'oneDemande' => $demandes[0] ?? null,
         ]);
     }
 

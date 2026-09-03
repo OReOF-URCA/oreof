@@ -9,11 +9,13 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\MentionDto;
 use App\DTO\TranslatableKey;
 use App\Entity\Mention;
 use App\Entity\TypeDiplome;
 use App\Form\MentionDtoType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\DomaineRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\DataTableBuilder;
@@ -35,6 +37,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/mention')]
 class MentionController extends AbstractController
 {
+    use CsrfDeleteTrait;
+
     public function __construct(
         private readonly MentionService        $mentionService,
         private readonly DomaineRepository     $domaineRepository,
@@ -165,13 +169,9 @@ class MentionController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $this->mentionService->createMention($mentionDto);
-                $this->addFlash('success', 'La mention a été créée avec succès.');
-                return $this->json(['success' => true]);
+                return $turboStream->streamToastSuccess('La mention a été créée avec succès.', true);
             } catch (Exception $e) {
-                return $this->json([
-                    'success' => false,
-                    'error' => $e->getMessage()
-                ], Response::HTTP_BAD_REQUEST);
+                return $turboStream->streamToastError('Erreur : ' . $e->getMessage(), true);
             }
         }
 
@@ -268,13 +268,9 @@ class MentionController extends AbstractController
             if ($form->isSubmitted() && $form->isValid()) {
                 try {
                     $this->mentionService->updateMention($mention, $mentionDto);
-                    $this->addFlash('success', 'La mention a été mise à jour avec succès.');
-                    return $this->json(['success' => true]);
+                    return $turboStream->streamToastSuccess('La mention a été mise à jour avec succès.', true);
                 } catch (Exception $e) {
-                    return $this->json([
-                        'success' => false,
-                        'error' => $e->getMessage()
-                    ], Response::HTTP_BAD_REQUEST);
+                    return $turboStream->streamToastError('Erreur : ' . $e->getMessage(), true);
                 }
             }
 
@@ -295,64 +291,40 @@ class MentionController extends AbstractController
         }
     }
 
-    /**
-     * Duplique une mention existante.
-     */
     #[Route('/{id}/duplicate', name: 'app_mention_duplicate', methods: ['GET'])]
-    public function duplicate(int $id): JsonResponse
+    public function duplicate(TurboStreamResponseFactory $turboStream, int $id): Response
     {
         try {
             $mention = $this->mentionService->getMentionById($id);
             $this->mentionService->duplicateMention($mention);
 
-            return $this->json(['success' => true]);
+            return $turboStream->streamToastSuccess('Mention dupliquée avec succès', true);
         } catch (Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], Response::HTTP_BAD_REQUEST);
+            return $turboStream->streamToastError('Erreur lors de la duplication : ' . $e->getMessage(), true);
         }
     }
 
-    /**
-     * Supprime une mention existante.
-     */
     #[Route('/{id}', name: 'app_mention_delete', methods: ['DELETE'])]
-    public function delete(Request $request, int $id): JsonResponse
+    public function delete(TurboStreamResponseFactory $turboStream, Request $request, int $id): Response
     {
         try {
             $mention = $this->mentionService->getMentionById($id);
 
-            if ($this->isCsrfTokenValid(
-                'delete' . $mention->getId(),
-                JsonRequest::getValueFromRequest($request, 'csrf')
-            )) {
+            if ($this->isDeleteTokenValid($mention, $this->getCsrfTokenFromRequest($request))) {
                 $success = $this->mentionService->deleteMention($mention);
 
                 if ($success) {
-                    return $this->json(['success' => true]);
+                    return $turboStream->streamToastSuccess('Mention supprimée avec succès', true);
                 }
 
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Impossible de supprimer cette mention. Elle est peut-être utilisée par des formations.'
-                ], Response::HTTP_BAD_REQUEST);
+                return $turboStream->streamToastError('Impossible de supprimer cette mention. Elle est peut-être utilisée par des formations.', true);
             }
 
-            return $this->json([
-                'success' => false,
-                'error' => 'Token CSRF invalide'
-            ], Response::HTTP_BAD_REQUEST);
+            return $turboStream->streamToastError('Token CSRF invalide', true);
         } catch (NotFoundHttpException $e) {
-            return $this->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], Response::HTTP_NOT_FOUND);
+            return $turboStream->streamToastError($e->getMessage(), true);
         } catch (Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $turboStream->streamToastError('Erreur interne : ' . $e->getMessage(), true);
         }
     }
 }

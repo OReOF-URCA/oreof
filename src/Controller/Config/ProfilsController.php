@@ -18,6 +18,7 @@ use App\Entity\ProfilDroits;
 use App\Enums\PermissionEnum;
 use App\Enums\RessourceEnum;
 use App\Form\ProfilType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\ProfilRepository;
 use App\Utils\JsonRequest;
 use Doctrine\ORM\EntityManagerInterface;
@@ -74,6 +75,8 @@ class ProfilsController extends BaseController
     }
 
     #[Route('/creer', name: 'creer')]
+    #[Breadcrumb(menuKey: 'droits.profils')]
+    #[Breadcrumb(label: 'Création')]
     public function new(
         Request                $request,
         EntityManagerInterface $entityManager
@@ -98,6 +101,8 @@ class ProfilsController extends BaseController
 
 
     #[Route('/modifier/{profil}', name: 'editer')]
+    #[Breadcrumb(menuKey: 'droits.profils')]
+    #[Breadcrumb(label: 'Modification')]
     public function editer(
         Request                $request,
         EntityManagerInterface $entityManager,

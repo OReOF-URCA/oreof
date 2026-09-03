@@ -10,6 +10,7 @@
 namespace App\Controller\Config;
 
 use App\Classes\AddUser;
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\Composante;
 use App\Entity\User;
@@ -27,6 +28,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/composante')]
 class ComposanteController extends AbstractController
 {
+    use CsrfDeleteTrait;
+
     #[Route('/', name: 'app_composante_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -123,7 +126,7 @@ class ComposanteController extends AbstractController
 
             $composanteRepository->save($composante, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Composante créée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -229,7 +232,7 @@ class ComposanteController extends AbstractController
 
             $composanteRepository->save($composante, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Composante modifiée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -246,13 +249,19 @@ class ComposanteController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_composante_delete', methods: ['POST', 'DELETE'])]
-    public function delete(Request $request, Composante $composante, ComposanteRepository $composanteRepository): Response
+    public function delete(
+        TurboStreamResponseFactory $turboStream,
+        Request                    $request,
+        Composante                 $composante,
+        ComposanteRepository       $composanteRepository
+    ): Response
     {
-
-        if ($this->isCsrfTokenValid('delete'.$composante->getId(), JsonRequest::getValueFromRequest($request, 'csrf'))) {
+        if ($this->isDeleteTokenValid($composante, $this->getCsrfTokenFromRequest($request))) {
             $composanteRepository->remove($composante, true);
+
+            return $turboStream->streamToastSuccess('Composante supprimée avec succès', true);
         }
 
-        return $this->redirectToRoute('app_composante_index', [], Response::HTTP_SEE_OTHER);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

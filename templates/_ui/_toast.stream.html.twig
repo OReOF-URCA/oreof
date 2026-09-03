@@ -3,51 +3,59 @@
         {% set toast_type = toast_type|default(type|default('info')) %}
 
         {% if toast_type == 'info' %}
-            {% set bg = 'bg-white/80 dark:bg-blue-800/80' %}
-            {% set icon_color = 'text-primary-700 dark:text-primary-300' %}
-            {% set border = 'border-blue-100 dark:border-blue-700' %}
-            {% set progress = 'bg-primary-500 dark:bg-primary-400' %}
+            {% set bg = 'bg-info-50 dark:bg-info-950' %}
+            {% set icon_color = 'text-info-600 dark:text-info-400' %}
+            {% set border = 'border-info-100 dark:border-info-900/50' %}
+            {% set left_border = 'border-l-info-500 dark:border-l-info-400' %}
+            {% set text_color = 'text-info-900 dark:text-info-100' %}
+            {% set progress = 'bg-info-500 dark:bg-info-400' %}
             {% set icon_svg %}
-                <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round"
                           d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"/>
                 </svg>
             {% endset %}
         {% elseif toast_type == 'warning' %}
-            {% set bg = 'bg-yellow-50/90 dark:bg-yellow-800/60' %}
-            {% set icon_color = 'text-yellow-700 dark:text-yellow-300' %}
-            {% set border = 'border-yellow-100 dark:border-yellow-700' %}
-            {% set progress = 'bg-yellow-400 dark:bg-yellow-300' %}
+            {% set bg = 'bg-warning-50 dark:bg-warning-950' %}
+            {% set icon_color = 'text-warning-600 dark:text-warning-400' %}
+            {% set border = 'border-warning-100 dark:border-warning-900/50' %}
+            {% set left_border = 'border-l-warning-500 dark:border-l-warning-400' %}
+            {% set text_color = 'text-warning-900 dark:text-warning-100' %}
+            {% set progress = 'bg-warning-500 dark:bg-warning-400' %}
             {% set icon_svg %}
-                <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0zM12 9v4m0 4h.01"/>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
             {% endset %}
         {% elseif toast_type == 'danger' %}
-            {% set bg = 'bg-red-50/90 dark:bg-red-800/60' %}
-            {% set icon_color = 'text-red-700 dark:text-red-300' %}
-            {% set border = 'border-red-100 dark:border-red-700' %}
-            {% set progress = 'bg-red-500 dark:bg-red-400' %}
+            {% set bg = 'bg-danger-50 dark:bg-danger-950' %}
+            {% set icon_color = 'text-danger-600 dark:text-danger-400' %}
+            {% set border = 'border-danger-100 dark:border-danger-900/50' %}
+            {% set left_border = 'border-l-danger-500 dark:border-l-danger-400' %}
+            {% set text_color = 'text-danger-900 dark:text-danger-100' %}
+            {% set progress = 'bg-danger-500 dark:bg-danger-400' %}
             {% set icon_svg %}
-                <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M10.29 3.86L1.82 18a1 1 0 00.86 1.5h18.64a1 1 0 00.86-1.5L13.71 3.86a1 1 0 00-1.72 0zM12 9v4m0 4h.01"/>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             {% endset %}
         {% else %}
-            {% set bg = 'bg-white/80 dark:bg-gray-800/80' %}
-            {% set icon_color = 'text-green-700 dark:text-green-300' %}
-            {% set border = 'border-green-100 dark:border-green-700' %}
-            {% set progress = 'bg-green-500 dark:bg-green-400' %}
+            {% set bg = 'bg-success-50 dark:bg-success-950' %}
+            {% set icon_color = 'text-success-600 dark:text-success-400' %}
+            {% set border = 'border-success-100 dark:border-success-900/50' %}
+            {% set left_border = 'border-l-success-500 dark:border-l-success-400' %}
+            {% set text_color = 'text-success-900 dark:text-success-100' %}
+            {% set progress = 'bg-success-500 dark:bg-success-400' %}
             {% set icon_svg %}
-                <svg class="h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                     stroke="currentColor" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"/>
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             {% endset %}
         {% endif %}
@@ -55,7 +63,7 @@
         <div
                 role="status"
                 aria-live="polite"
-                class="max-w-md w-full mx-auto rounded-2xl {{ bg }} {{ border }} shadow-lg p-4 flex items-start gap-4 transform transition-all duration-300 ease-out"
+                class="max-w-md w-full rounded-xl border-y border-r {{ border }} border-l-4 {{ left_border }} {{ bg }} shadow-lg p-4 flex items-start gap-3.5 transform transition-all duration-300 ease-out translate-x-full opacity-0 backdrop-blur-md"
                 data-controller="toast"
                 data-toast-timeout-value="{{ timeout ?? 3500 }}"
         >
@@ -67,7 +75,7 @@
             <!-- Content -->
             <div class="min-w-0 flex-1">
                 <div class="flex items-start justify-between gap-4">
-                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 break-words">
+                    <div class="text-sm font-semibold {{ text_color }} break-words">
                         {{ message }}
                     </div>
 
@@ -80,7 +88,6 @@
                                     data-toast-undo-payload-value="{{ undo.payload|json_encode|e('html_attr') }}"
                                     data-toast-undo-url-value="{{ undo.url }}"
                             >
-                                <!-- undo icon -->
                                 <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                      stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -107,7 +114,7 @@
                 </div>
 
                 <!-- Progress bar (visual timeout indicator) -->
-                <div class="mt-3 h-1 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden"
+                <div class="mt-3 h-1 w-full bg-black/5 dark:bg-white/10 rounded-full overflow-hidden"
                      aria-hidden="true" data-toast-progress-target>
                     <div class="h-full {{ progress }} w-full transform origin-left transition-all"
                          data-toast-progress-bar style="width:100%"></div>

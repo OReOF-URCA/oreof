@@ -1,6 +1,11 @@
+{% if basePdfExtension ?? false == false %}
+    {% extends 'pdf/base-pdf.html.twig' %}
+{% endif %}
+
+{% block content %}
 {% set ficheMatiere = ec.ficheMatiere %}
 <header>
-    <h1>{{ ficheMatiere != null ? ficheMatiere.libelle : 'Erreur fiche' }}</h1>
+    <h1 class="mt-3">{{ ficheMatiere != null ? ficheMatiere.getDisplay() : 'Erreur fiche' }}</h1>
 </header>
 
 
@@ -26,7 +31,7 @@
             <dd>{{ semestre != null ? semestre.display  : 'erreur semestre' }}
                 / {{ ec.ue != null ? ec.ue.display(parcours) : 'erreur UE' }}</dd>
             <dt>Intitulé de l'EC</dt>
-            <dd>{{ ficheMatiere != null ? ficheMatiere.libelle : 'Erreur fiche' }}</dd>
+            <dd>{{ ficheMatiere != null ? ficheMatiere.getDisplay() : 'Erreur fiche' }}</dd>
             <dt>Intitulé de l'EC en anglais</dt>
             <dd>{{ ficheMatiere != null ? ficheMatiere.libelleAnglais : 'Erreur fiche' }}</dd>
             <dt>Enseignement mutualisé ?</dt>
@@ -37,7 +42,7 @@
                     <dd>
                         <ul>
                             {% for parc in ficheMatiere.ficheMatiereParcours %}
-                                <li>{{ parc.parcours.libelle }} ({{ parc.parcours.formation.display }})</li>
+                                <li>{{ parc.parcours.libelle }} ({{ parc.parcours.formation.display ?? "" }})</li>
                             {% endfor %}
                         </ul>
                     </dd>
@@ -59,15 +64,15 @@
             <tbody>
             <tr>
                 <td>Présentiel</td>
-                <td>{{ ec.volumeCmPresentiel }}</td>
-                <td>{{ ec.volumeTdPresentiel }}</td>
-                <td>{{ ec.volumeTpPresentiel }}</td>
+                <td>{{ heures.volumeCmPresentiel }}</td>
+                <td>{{ heures.volumeTdPresentiel }}</td>
+                <td>{{ heures.volumeTpPresentiel }}</td>
             </tr>
             <tr>
                 <td>Distanciel</td>
-                <td>{{ ec.volumeCmDistanciel }}</td>
-                <td>{{ ec.volumeTdDistanciel }}</td>
-                <td>{{ ec.volumeTpDistanciel }}</td>
+                <td>{{ heures.volumeCmDistanciel }}</td>
+                <td>{{ heures.volumeTdDistanciel }}</td>
+                <td>{{ heures.volumeTpDistanciel }}</td>
             </tr>
             </tbody>
         </table>
@@ -121,6 +126,7 @@
     </div>
     <div class="col-12 mt-2">
         <h2>BCC pour le parcours</h2>
+        {% if templateFormMccc matches '/^licence/' %}
         <ul>
             {% if ficheMatiere != null and ficheMatiere.parcours != null and  ficheMatiere.parcours.id == parcours.id %}
                 {% for competence in ec.ficheMatiere.competences %}
@@ -132,8 +138,53 @@
                 {% endfor %}
             {% endif %}
         </ul>
+        {% elseif templateFormMccc matches '/^but/' %}
+            {% set appCritList = ficheMatiere.getApprentissagesCritiques()|sort((a, b) => b.niveau.ordre <=> a.niveau.ordre) %}
+            {% set butNiveaux = [] %}
+
+            {% for niv in appCritList|map(a => a.niveau) %}
+                {% if niv.id not in butNiveaux|map(k => k.id) %}
+                    {% set butNiveaux = butNiveaux|merge([niv]) %}
+                {% endif %}
+            {% endfor %}
+
+            <ul>
+                {% for n in butNiveaux %}
+                    <li> {{ n.annee }} - {{ n.libelle }}
+                        <ul>
+                        {% for crit in appCritList|filter(q => q.niveau.id == n.id) %}
+                            <li>{{ crit.code }} - {{ crit.libelle }}</li>
+                        {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% elseif templateFormMccc matches '/^m2e/' %}
+
+        {% endif %}
     </div>
     <div class="col-12 mt-2">
         <h2>MCCC pour le parcours</h2>
+        {% if templateFormMccc matches '/^licence/' %}
+            {{ include('typeDiplome/licence/mccc-non-editable/_show.html.twig',
+                    {
+                        mcccs: mcccPdf,
+                        hasDisplayComparaison: 'false'
+                    }
+                )
+            }}
+        {% elseif templateFormMccc matches '/^but/' %}
+            {{ include('typeDiplome/but/mccc-non-editable/but.html.twig',
+                    {
+                        mcccs: mcccPdf
+                    }
+                ) 
+            }}
+        {% elseif templateFormMccc matches '/^m2e/' %}
+            
+        {% else %}
+
+        {% endif %}
     </div>
 </div>
+{% endblock %}

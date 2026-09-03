@@ -1,0 +1,17 @@
+<form action="{{ path('offre_v2_sauvegarder_dates') }}" method="POST" id="configurer_dates_form">
+    <input type="hidden" name="_token" value="{{ csrf_token('configurer_dates_' ~ campagne.id) }}">
+    <div class="space-y-4">
+        <div>
+            <label for="dateOuvertureDpe" class="block text-sm font-semibold text-slate-700">Date d'ouverture de la collecte</label>
+            <input type="datetime-local" id="dateOuvertureDpe" name="dateOuvertureDpe"
+                   value="{{ campagne.dateOuvertureDpe ? campagne.dateOuvertureDpe|date('Y-m-d\\TH:i') : '' }}"
+                   class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        </div>
+        <div>
+            <label for="dateClotureDpe" class="block text-sm font-semibold text-slate-700">Date de clôture de la collecte</label>
+            <input type="datetime-local" id="dateClotureDpe" name="dateClotureDpe"
+                   value="{{ campagne.dateClotureDpe ? campagne.dateClotureDpe|date('Y-m-d\\TH:i') : '' }}"
+                   class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        </div>
+    </div>
+</form>

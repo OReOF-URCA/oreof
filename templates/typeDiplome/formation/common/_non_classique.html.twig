@@ -1,0 +1,133 @@
+<div class="col">
+    <section class="scroll-section" id="identite_formation">
+        <h3 class="small-title">Identité de la formation</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {% if (print is not defined or print == false) %}
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'identite_formation',
+                    }) }}
+                {% endif %}
+                {{ include('typeDiplome/formation/_identiteFormation.html.twig') }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="localisation">
+        <h3 class="small-title">Localisation</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {% if (print is not defined or print == false) %}
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'localisation',
+                    }) }}
+                {% endif %}
+                {{ include('typeDiplome/formation/_localisationFormation.html.twig') }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="presentation">
+        <h3 class="small-title">Présentation</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {% if (print is not defined or print == false) %}
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'presentation',
+                    }) }}
+                {% endif %}
+                {{ include('typeDiplome/formation/_presentationFormation.html.twig', {hasParcours: formation.isHasParcours}) }}
+            </div>
+        </div>
+    </section>
+
+    {% for parcours in formation.parcours %}
+        {% if formation.isHasParcours %}
+            <div>
+                <h2>Parcours {{ parcours.libelle }}</h2>
+            </div>
+            <div class="border-left-parcours border-left-parcours-{{ loop.index }}">
+        {% endif %}
+
+        <section class="scroll-section" id="structure{% if formation.isHasParcours %}_{{ parcours.id }}{% endif %}">
+            <h3 class="small-title">Durée du parcours</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if parcours.dureeParcours is not null and parcours.dureeParcoursUnite is not null %}
+                        <p>
+                            <strong>Durée :</strong>
+                            {{ parcours.dureeParcours }}
+                            {{ parcours.dureeParcoursUnite.libelle() }}
+                        </p>
+                    {% else %}
+                        <p class="text-muted">Durée non renseignée.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="scroll-section" id="admission{% if formation.isHasParcours %}_{{ parcours.id }}{% endif %}">
+            <h3 class="small-title">Admission</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if (print is not defined or print == false) %}
+                        {{ component('commentaire', {
+                            commentaires: parcours.commentaires,
+                            id: parcours.id,
+                            type: 'parcours',
+                            zone: 'admission' ~ (formation.isHasParcours ? '_' ~ parcours.id : ''),
+                        }) }}
+                    {% endif %}
+                    {{ include('typeDiplome/formation/_admission.html.twig', {parcours: parcours}) }}
+                </div>
+            </div>
+        </section>
+
+        <section class="scroll-section" id="et_apres{% if formation.isHasParcours %}_{{ parcours.id }}{% endif %}">
+            <h3 class="small-title">Et après ?</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if (print is not defined or print == false) %}
+                        {{ component('commentaire', {
+                            commentaires: parcours.commentaires,
+                            id: parcours.id,
+                            type: 'parcours',
+                            zone: 'et_apres' ~ (formation.isHasParcours ? '_' ~ parcours.id : ''),
+                        }) }}
+                    {% endif %}
+                    {{ include('typeDiplome/formation/_etApres.html.twig', {parcours: parcours}) }}
+                </div>
+            </div>
+        </section>
+
+        <section class="scroll-section" id="contacts{% if formation.isHasParcours %}_{{ parcours.id }}{% endif %}">
+            <h3 class="small-title">Contacts pédagogiques</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if (print is not defined or print == false) %}
+                        {{ component('commentaire', {
+                            commentaires: parcours.commentaires,
+                            id: parcours.id,
+                            type: 'parcours',
+                            zone: 'contacts' ~ (formation.isHasParcours ? '_' ~ parcours.id : ''),
+                        }) }}
+                    {% endif %}
+                    {{ include('typeDiplome/formation/_contacts.html.twig', {parcours: parcours}) }}
+                </div>
+            </div>
+        </section>
+
+        {% if formation.isHasParcours %}
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>

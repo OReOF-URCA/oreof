@@ -9,9 +9,11 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\NatureUeEc;
 use App\Form\NatureUeEcType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\NatureUeEcRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
@@ -26,6 +28,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/nature-ue-ec')]
 class NatureUeEcController extends AbstractController
 {
+    use CsrfDeleteTrait;
     #[Route('/', name: 'app_nature_ue_ec_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -89,7 +92,7 @@ class NatureUeEcController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $natureUeEcRepository->save($natureUeEc, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Nature UE/EC créée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -159,7 +162,7 @@ class NatureUeEcController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $natureUeEcRepository->save($natureUeEc, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Nature UE/EC modifiée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -178,13 +181,14 @@ class NatureUeEcController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_nature_ue_ec_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         NatureUeEcRepository $natureUeEcRepository,
         NatureUeEc $natureUeEc
     ): Response {
         $natureUeEcNew = clone $natureUeEc;
         $natureUeEcNew->setLibelle($natureUeEc->getLibelle() . ' - Copie');
         $natureUeEcRepository->save($natureUeEcNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Nature UE/EC dupliquée avec succès', true);
     }
 
     /**
@@ -192,19 +196,17 @@ class NatureUeEcController extends AbstractController
      */
     #[Route('/{id}', name: 'app_nature_ue_ec_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         NatureUeEc $natureUeEc,
         NatureUeEcRepository $natureUeEcRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $natureUeEc->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($natureUeEc, $this->getCsrfTokenFromRequest($request))) {
             $natureUeEcRepository->remove($natureUeEc, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Nature UE/EC supprimée avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

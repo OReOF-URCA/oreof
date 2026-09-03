@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    {{ include('formulaire_generique/_creation_form.html.twig') }}
+{% endblock %}
+
+{% set header_title %}Créer une formation{% endset %}
+
+{% block breadcrumb %}
+    {{ include('communs/_breadcrumb.html.twig', {liens:[
+        {href: path('app_formation_index'), title: 'Liste des formations'},
+        {href: '', title: 'Nouvelle formation'},
+    ]}) }}
+{% endblock %}
+
+{% block bouton_header %}
+    <a href="{{ path('app_formation_index') }}"
+       class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
+       data-bs-toggle="tooltip"
+       data-bs-placement="bottom"
+       title="Retour à la liste"
+    >
+        <i class="{{ iconBack }}"></i>
+        <span> Retour à la liste</span>
+    </a>
+{% endblock %}

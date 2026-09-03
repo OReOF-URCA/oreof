@@ -1,0 +1,22 @@
+<div class="px-6 py-5">
+    {% if fichesMatieres is not empty %}
+        <ul class="space-y-3 text-left">
+            {% for ficheMatiere in fichesMatieres %}
+                <li>
+                    <a href="{{ path('fiche_matiere_v2_voir', {slug: ficheMatiere.slug}) }}"
+                       class="inline-flex items-center gap-2 text-primary-700 hover:text-primary-800 hover:underline dark:text-primary-300 dark:hover:text-primary-200"
+                       target="_blank"
+                       rel="noreferrer"
+                    >
+                        {{ ux_icon('ph:file', {class: 'h-4 w-4 shrink-0'}) }}
+                        <span>{{ ficheMatiere.libelle }}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-sm text-secondary-600 dark:text-secondary-400">
+            Aucune fiche matière associée trouvée.
+        </p>
+    {% endif %}
+</div>

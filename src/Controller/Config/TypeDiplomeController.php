@@ -10,9 +10,11 @@
 namespace App\Controller\Config;
 
 use App\Controller\BaseController;
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Form\TypeDiplomeType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Service\DetailBuilder;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\DataTableBuilder;
@@ -25,9 +27,25 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+use App\Service\SecureUploadService;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
 #[Route('/administration/type-diplome')]
 class TypeDiplomeController extends BaseController
 {
+    use CsrfDeleteTrait;
+
+    public function __construct(
+        private readonly EntityManagerInterface $entityManager,
+        private readonly SecureUploadService $secureUploadService
+    )
+    {
+    }
+
     #[Route('/', name: 'app_type_diplome_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -106,6 +124,8 @@ class TypeDiplomeController extends BaseController
     }
 
     #[Route('/new', name: 'app_type_diplome_new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.type_diplome')]
+    #[Breadcrumb(label: 'Création')]
     public function new(
         Request $request,
         TypeDiplomeRepository        $typeDiplomeRepository,
@@ -118,7 +138,20 @@ class TypeDiplomeController extends BaseController
         ]);
         $form->handleRequest($request);
 
+
         if ($form->isSubmitted() && $form->isValid()) {
+            [$hasFormatError, $hasSizeError, $hasLimitError] = $this->handleLogoUploadFromForm($form->get('logo')->getData(), $typeDiplome);
+
+            if ($hasSizeError) {
+                $this->addFlash('toast', ['type' => 'error', 'text' => 'Fichier(s) trop lourd(s) (10 Mo max)', 'title' => 'Erreur']);
+            }
+            if ($hasFormatError) {
+                $this->addFlash('toast', ['type' => 'error', 'text' => 'Format invalide (PNG/JPEG uniquement)', 'title' => 'Erreur']);
+            }
+            if ($hasLimitError) {
+                $this->addFlash('toast', ['type' => 'warning', 'text' => 'Maximum 2 logos par type de diplôme', 'title' => 'Attention']);
+            }
+
             $typeDiplomeRepository->save($typeDiplome, true);
 
             // Gérer les plateformes d'admission avec leurs années
@@ -131,10 +164,13 @@ class TypeDiplomeController extends BaseController
             // return $this->json(true);
 
             $this->addFlash('toast', [
-                'type' => 'success',
-                'text' => 'Création du type de diplôme réussie',
-                'title' => 'Succès',
+                'type' => $hasFormatError || $hasSizeError || $hasLimitError ? 'warning' : 'success',
+                'text' => $hasFormatError || $hasSizeError || $hasLimitError
+                    ? 'Type de diplôme créé mais le logo n\'a pas pu être ajouté.'
+                    : 'Création du type de diplôme réussie',
+                'title' => $hasFormatError || $hasSizeError || $hasLimitError ? 'Attention' : 'Succès',
             ]);
+
             return $this->redirectToRoute('app_type_diplome_index');
         }
 
@@ -144,6 +180,112 @@ class TypeDiplomeController extends BaseController
             'titre' => "Création d'un type de diplôme"
         ]);
     }
+
+    //region La section pour les logos
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/{id}/logos', name: 'app_type_diplome_logos', methods: ['GET'])]
+    public function logos(TypeDiplome $typeDiplome, Request $request): Response
+    {
+        return $this->render('config/type_diplome/_logos.html.twig', [
+            'typeDiplome' => $typeDiplome,
+            'editable' => $request->query->getBoolean('editable'),
+        ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/{id}/upload-logo', name: 'app_type_diplome_upload_logo', methods: ['POST'])]
+    public function uploadLogo(Request $request, TypeDiplome $typeDiplome): JsonResponse
+    {
+        $files = $request->files->get('logo') ?? $request->files->get('logo[]');
+
+        if (!$files) {
+            return new JsonResponse(['success' => false, 'errors' => ['Aucun fichier reçu']], 400);
+        }
+
+        $file = is_array($files) ? $files[0] : $files;
+        $existingLogos = $typeDiplome->getLogo() ?? [];
+
+        if (count($existingLogos) >= 2) {
+            return new JsonResponse([
+                'success' => false,
+                'errors' => ['Le nombre maximum de logos (2) est atteint. Supprimez un logo avant d’en ajouter un autre.'],
+            ], 422);
+        }
+
+        try {
+            $uploaded = $this->secureUploadService->upload($file, 'logos');
+            $existingLogos[] = $uploaded->getStoredFilename();
+            $typeDiplome->setLogo($existingLogos);
+        } catch (\Exception $e) {
+            $error = str_contains($e->getMessage(), 'volumineux')
+                ? 'Fichier trop lourd (10 Mo max)'
+                : 'Format invalide (PNG/JPEG uniquement)';
+            return new JsonResponse(['success' => false, 'errors' => [$error]], 422);
+        }
+
+        $this->entityManager->flush();
+        return new JsonResponse(['success' => true]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/{id}/delete-logo', name: 'app_type_diplome_delete_logo', methods: ['DELETE'])]
+    public function deleteLogo(Request $request, TypeDiplome $typeDiplome): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $filename = $data['filename'] ?? null;
+
+        if (!$filename) {
+            return new JsonResponse(['success' => false, 'error' => 'Nom de fichier manquant'], 400);
+        }
+
+        $logos = $typeDiplome->getLogo() ?? [];
+
+        if (!in_array($filename, $logos)) {
+            return new JsonResponse(['success' => false, 'error' => 'Fichier introuvable'], 404);
+        }
+
+        $typeDiplome->setLogo(array_values(array_filter($logos, fn($l) => $l !== $filename)));
+        $this->entityManager->flush();
+        $this->secureUploadService->delete('logos', $filename);
+
+        return new JsonResponse(['success' => true]);
+    }
+
+    //endregion
+
+    //region Les 2 routes pour l'API
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/{id}/logos-api', name: 'app_type_diplome_logos_api', methods: ['GET'])]
+    public function logosApi(TypeDiplome $typeDiplome): JsonResponse
+    {
+        $logos = $typeDiplome->getLogo() ?? [];
+        $result = array_map(fn($filename) => [
+            'image_data' => $this->generateUrl(
+                'app_type_diplome_logo_api',
+                ['id' => $typeDiplome->getId(), 'filename' => $filename],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            ),
+            'image_type' => mime_content_type($this->secureUploadService->resolveStoredFilePath('logos', $filename)) ?: 'image/png',
+        ], $logos);
+
+        return new JsonResponse(['logos' => $result]);
+    }
+
+    #[Route('/{id}/logo/{filename}', name: 'app_type_diplome_logo_api', methods: ['GET'])]
+    public function logoApi(TypeDiplome $typeDiplome, string $filename): Response
+    {
+        $filePath = $this->secureUploadService->resolveStoredFilePath('logos', $filename);
+
+        if (!file_exists($filePath)) {
+            throw $this->createNotFoundException();
+        }
+
+        return new BinaryFileResponse($filePath);
+    }
+
+    //endregion
 
     #[Route('/{id}', name: 'app_type_diplome_show', methods: ['GET'])]
     public function show(
@@ -252,6 +394,8 @@ class TypeDiplomeController extends BaseController
     }
 
     #[Route('/{id}/edit', name: 'app_type_diplome_edit', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.type_diplome')]
+    #[Breadcrumb(label: 'Modification')]
     public function edit(
         Request $request,
         TypeDiplome $typeDiplome,
@@ -275,7 +419,7 @@ class TypeDiplomeController extends BaseController
             // return $this->json(true);
             $this->addFlash('toast', [
                 'type' => 'success',
-                'text' => 'Type Diplôme modifié avec succès',
+                'text' => 'Type diplôme modifié avec succès',
                 'title' => 'Succès',
             ]);
             return $this->redirectToRoute('app_type_diplome_index');
@@ -290,13 +434,14 @@ class TypeDiplomeController extends BaseController
 
     #[Route('/{id}/duplicate', name: 'app_type_diplome_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         TypeDiplomeRepository $typeDiplomeRepository,
         TypeDiplome $typeDiplome
     ): Response {
         $typeDiplomeNew = clone $typeDiplome;
         $typeDiplomeNew->setLibelle($typeDiplome->getLibelle() . ' - Copie');
         $typeDiplomeRepository->save($typeDiplomeNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Type de diplôme dupliqué avec succès', true);
     }
 
     /**
@@ -304,19 +449,59 @@ class TypeDiplomeController extends BaseController
      */
     #[Route('/{id}', name: 'app_type_diplome_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         TypeDiplome $typeDiplome,
         TypeDiplomeRepository $typeDiplomeRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $typeDiplome->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($typeDiplome, $this->getCsrfTokenFromRequest($request))) {
             $typeDiplomeRepository->remove($typeDiplome, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type de diplôme supprimé avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
+    }
+
+    private function handleLogoUploadFromForm(mixed $logoData, TypeDiplome $typeDiplome): array
+    {
+        $hasFormatError = false;
+        $hasSizeError = false;
+        $hasLimitError = false;
+
+        $logoFiles = [];
+        if (is_array($logoData)) {
+            $logoFiles = array_values(array_filter($logoData));
+        } elseif ($logoData !== null) {
+            $logoFiles = [$logoData];
+        }
+
+        if ($logoFiles === []) {
+            return [$hasFormatError, $hasSizeError, $hasLimitError];
+        }
+
+        $logos = $typeDiplome->getLogo() ?? [];
+        $remainingSlots = max(0, 2 - count($logos));
+        if (count($logoFiles) > $remainingSlots) {
+            $hasLimitError = true;
+            $logoFiles = array_slice($logoFiles, 0, $remainingSlots);
+        }
+
+        foreach ($logoFiles as $logoFile) {
+            try {
+                $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
+                $logos[] = $uploaded->getStoredFilename();
+            } catch (\Exception $e) {
+                if (str_contains($e->getMessage(), 'volumineux')) {
+                    $hasSizeError = true;
+                } else {
+                    $hasFormatError = true;
+                }
+            }
+        }
+
+        $typeDiplome->setLogo($logos);
+
+        return [$hasFormatError, $hasSizeError, $hasLimitError];
     }
 }

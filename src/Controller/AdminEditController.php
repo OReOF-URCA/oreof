@@ -37,42 +37,6 @@ class AdminEditController extends BaseController
     {
     }
 
-//    //todo: deprecated
-//    #[Route('/{id}/{type}', name: '_modal')]
-//    public function afficheModal(
-//        ParcoursRepository  $parcoursRepository,
-//        FormationRepository $formationRepository,
-//        int    $id,
-//        string $type,
-//    ): Response
-//    {
-//        switch ($type) {
-//            case 'parcours':
-//                $object = $parcoursRepository->find($id);
-//                if (!$object) {
-//                    throw $this->createNotFoundException('Parcours not found');
-//                }
-//                break;
-//            case 'formation':
-//                $object = $formationRepository->find($id);
-//                if (!$object) {
-//                    throw $this->createNotFoundException('Formation not found');
-//                }
-//                break;
-//            default:
-//                throw $this->createNotFoundException('Invalid type');
-//        }
-//
-//
-//        return $this->render('admin/edit/_modal.html.twig', [
-//            'id' => $id,
-//            'type' => $type,
-//            'object' => $object,
-//            'etats' => $this->validationProcess->getProcess(),
-//            'typesModifs' => TypeModificationDpeEnum::cases()
-//        ]);
-//    }
-
     #[Route('/force-next/{type}/{id}', name: '_force_next', methods: ['POST'])]
     public function forceNext(
         DpeParcoursRepository $dpeParcoursRepository,

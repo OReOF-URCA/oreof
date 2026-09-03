@@ -34,29 +34,16 @@ class WorkflowNotifier
 
     public function notify(array $recipients, string $eventKey, string $wf, array $context): void
     {
-//todo: ici ajotuer un traitement qui va soit prendre le emailTemplate s'il existe, soit le template
+
         foreach ($recipients as $user) {
             if (!$user instanceof User) {
                 continue;
             }
 
             $pref = $this->preferenceResolver->resolveFor($user, $wf, $eventKey);
-            dump($context);
-            dump($pref);
             // EMAIL
             if ($pref->channelAllowed('email')) {
                 $this->myMailer->initEmail();
-                dump(sprintf('%s/templates/mails/workflow/%s/%s.html.twig', $this->baseDir, $wf, $this->extractTransition($eventKey)));
-                dump(array_merge(
-                    [
-                        'user' => $user,
-                        'wf' => $wf,
-                        'eventKey' => $this->extractTransition($eventKey),
-                        'path' => sprintf('%s/templates/mails/workflow/%s/%s.html.twig', $this->baseDir, $wf, $this->extractTransition($eventKey))
-                    ],
-                    $context['data']->toArray(),
-                    $context['context'] ?? []
-                ));
                 $this->myMailer->setTemplate(
                     file_exists(sprintf('%s/templates/mails/workflow/%s/%s.html.twig', $this->baseDir, $wf, $this->extractTransition($eventKey)))
                         ? 'mails/workflow/' . $wf . '/' . $this->extractTransition($eventKey) . '.html.twig'
@@ -74,13 +61,11 @@ class WorkflowNotifier
                 );
 
                 try {
-                    dump('send mail');
                     $this->myMailer->sendMessage(
                         [$user->getEmail()],
                         $context['subject'] ?? '[ORéOF] - ' . $this->extractTransition($eventKey)
                     );
                 } catch (Exception $e) {
-                    dump($e->getMessage());
                     throw new RuntimeException('Erreur lors de l\'envoi de l\'email : ' . $e->getMessage());
                 }
             }

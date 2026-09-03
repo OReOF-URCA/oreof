@@ -1,0 +1,7 @@
+<turbo-frame id="formation_form_frame" target="_top">
+    {% if form and formTemplate %}
+        <div class="rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
+            {{ include(formTemplate) }}
+        </div>
+    {% endif %}
+</turbo-frame>

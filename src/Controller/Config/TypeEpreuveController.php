@@ -9,10 +9,12 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeEpreuve;
 use App\Form\TypeEpreuveType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\TypeEpreuveRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
@@ -27,6 +29,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/type-epreuve')]
 class TypeEpreuveController extends AbstractController
 {
+    use CsrfDeleteTrait;
+    
     #[Route('/', name: 'app_type_epreuve_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -111,7 +115,7 @@ class TypeEpreuveController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $typeEpreuveRepository->save($typeEpreuve, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type d\'épreuve créé avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -186,7 +190,7 @@ class TypeEpreuveController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $typeEpreuveRepository->save($typeEpreuve, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type d\'épreuve modifié avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -204,13 +208,14 @@ class TypeEpreuveController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_type_epreuve_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         TypeEpreuveRepository $typeEpreuveRepository,
         TypeEpreuve $typeEpreuve
     ): Response {
         $typeEpreuveNew = clone $typeEpreuve;
         $typeEpreuveNew->setLibelle($typeEpreuve->getLibelle() . ' - Copie');
         $typeEpreuveRepository->save($typeEpreuveNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Type d\'épreuve dupliqué avec succès', true);
     }
 
     /**
@@ -218,19 +223,17 @@ class TypeEpreuveController extends AbstractController
      */
     #[Route('/{id}', name: 'app_type_epreuve_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         TypeEpreuve $typeEpreuve,
         TypeEpreuveRepository $typeEpreuveRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $typeEpreuve->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($typeEpreuve, $this->getCsrfTokenFromRequest($request))) {
             $typeEpreuveRepository->remove($typeEpreuve, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type d\'épreuve supprimé avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

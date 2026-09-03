@@ -1,0 +1,8 @@
+<div>
+    <span class="font-medium text-secondary-800 dark:text-secondary-100">{{ item.formation.displayLong }}</span>
+    {% if item.commentaire %}
+        <p class="text-xs text-secondary-500 mt-1 italic">
+            <strong>Commentaire :</strong> {{ item.commentaire }}
+        </p>
+    {% endif %}
+</div>

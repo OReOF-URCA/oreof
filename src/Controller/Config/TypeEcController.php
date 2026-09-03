@@ -9,11 +9,13 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\Formation;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeEc;
 use App\Form\TypeEcType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\TypeEcRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
@@ -28,6 +30,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/type-ec')]
 class TypeEcController extends AbstractController
 {
+    use CsrfDeleteTrait;
     #[Route('/', name: 'app_type_ec_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -103,7 +106,7 @@ class TypeEcController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $typeEcRepository->save($typeEc, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type d\'EC créé avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -184,7 +187,7 @@ class TypeEcController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $typeEcRepository->save($typeEc, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type d\'EC modifié avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -202,13 +205,14 @@ class TypeEcController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_type_ec_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         TypeEcRepository $typeEcRepository,
         TypeEc $typeEc
     ): Response {
         $typeEcNew = clone $typeEc;
         $typeEcNew->setLibelle($typeEc->getLibelle() . ' - Copie');
         $typeEcRepository->save($typeEcNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Type d\'EC dupliqué avec succès', true);
     }
 
     /**
@@ -216,19 +220,17 @@ class TypeEcController extends AbstractController
      */
     #[Route('/{id}', name: 'app_type_ec_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         TypeEc $typeEc,
         TypeEcRepository $typeEcRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $typeEc->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($typeEc, $this->getCsrfTokenFromRequest($request))) {
             $typeEcRepository->remove($typeEc, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Type d\'EC supprimé avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

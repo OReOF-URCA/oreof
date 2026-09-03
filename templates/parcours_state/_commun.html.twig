@@ -67,6 +67,7 @@
         <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.memoireModalite|badgeValideDto }) }}</td>
     </tr>
 {% endif %}
+{% if typeDiplome.classique %}
 <tr>
     <th colspan="2" class="{{ sectionTitleClass }}">Compétences</th>
 </tr>
@@ -119,6 +120,7 @@
         {% endif %}
     {% endfor %}
 {% endfor %}
+{% endif %}
 <tr>
     <th colspan="2" class="{{ sectionTitleClass }}">Admission & inscription</th>
 </tr>

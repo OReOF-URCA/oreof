@@ -11,13 +11,6 @@
     {{ titre }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        { title: 'Administration' },
-        { title: 'Types de diplôme' }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <twig:Button
             href="{{ path('app_type_diplome_index') }}"

@@ -1,0 +1,128 @@
+{% set resolvedAction = action ?? '' %}
+{% set resolvedKeyword = keyword ?? '' %}
+{% set resolvedSearchType = searchType ?? 'parcours' %}
+{% set resolvedFieldId = fieldId ?? 'search-keyword' %}
+{% set resolvedPlaceholder = placeholder ?? 'Entrez votre recherche...' %}
+{% set resolvedSubmitLabel = submitLabel ?? 'Rechercher' %}
+{% set resolvedHelperText = helperText ?? 'Saisissez au moins 3 caractères.' %}
+{% set resolvedCompact = compact ?? false %}
+{% set resolvedAutofocus = autofocus ?? false %}
+{% set resolvedResetHref = resetHref ?? null %}
+{% set resolvedExtraClass = extraClass ?? '' %}
+
+{% set wrapperClass = resolvedCompact
+    ? 'space-y-4'
+    : 'rounded-3xl border border-secondary-200 bg-surface p-6 shadow-sm dark:border-secondary-700 sm:p-8' %}
+
+{% if resolvedExtraClass != '' %}
+    {% set wrapperClass = wrapperClass ~ ' ' ~ resolvedExtraClass %}
+{% endif %}
+
+<style>
+    .search-type-card:has(input[type="radio"]:checked) {
+        border-color: #3b82f6;
+        background-color: #eff6ff;
+        box-shadow: 0 0 0 1px #bfdbfe;
+    }
+
+    .dark .search-type-card:has(input[type="radio"]:checked) {
+        border-color: #60a5fa;
+        background-color: rgba(30, 58, 138, 0.35);
+        box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.45);
+    }
+</style>
+
+<form action="{{ resolvedAction }}" method="get" class="{{ wrapperClass }}" {{- attributes -}}>
+    <div class="space-y-5">
+        <div class="space-y-2">
+            <label for="{{ resolvedFieldId }}"
+                   class="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+                Mot-clé
+            </label>
+            <div class="relative">
+                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-secondary-400">
+                    <twig:UX:Icon name="icon:search" class="h-4 w-4"/>
+                </div>
+                <input
+                        id="{{ resolvedFieldId }}"
+                        name="keyword_1"
+                        type="text"
+                        value="{{ resolvedKeyword }}"
+                        placeholder="{{ resolvedPlaceholder }}"
+                        class="block w-full rounded-2xl border border-secondary-200 bg-white py-3 pl-10 pr-4 text-text shadow-sm transition focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-100 dark:placeholder:text-secondary-500"
+                        autocomplete="off"
+                        spellcheck="false"
+                        {% if resolvedAutofocus %}autofocus{% endif %}
+                >
+            </div>
+            <p class="text-sm text-secondary-500 dark:text-secondary-400">
+                {{ resolvedHelperText }}
+            </p>
+        </div>
+
+        <fieldset class="space-y-3">
+            <legend class="text-sm font-medium text-secondary-700 dark:text-secondary-200">
+                Type de recherche
+            </legend>
+
+            <div class="grid gap-4 sm:grid-cols-2">
+                <label class="search-type-option block cursor-pointer">
+                    <span class="search-type-card flex items-start gap-4 rounded-2xl border border-secondary-200 bg-white p-5 transition hover:border-primary-300 dark:border-secondary-700 dark:bg-secondary-900/40">
+                        <input
+                                class="mt-0.5 h-4 w-4 shrink-0 accent-primary-600"
+                                type="radio"
+                                name="searchType"
+                                value="parcours"
+                            {{ resolvedSearchType == 'parcours' ? 'checked' : '' }}
+                        >
+                        <span class="space-y-1">
+                            <span class="block font-semibold text-text dark:text-secondary-100">Parcours</span>
+                            <span class="block text-xs text-secondary-500 dark:text-secondary-400">
+                                Recherche dans les contenus de parcours
+                            </span>
+                        </span>
+                    </span>
+                </label>
+
+                <label class="search-type-option block cursor-pointer">
+                    <span class="search-type-card flex items-start gap-4 rounded-2xl border border-secondary-200 bg-white p-5 transition hover:border-primary-300 dark:border-secondary-700 dark:bg-secondary-900/40">
+                        <input
+                                class="mt-0.5 h-4 w-4 shrink-0 accent-primary-600"
+                                type="radio"
+                                name="searchType"
+                                value="ficheMatiere"
+                            {{ resolvedSearchType == 'ficheMatiere' ? 'checked' : '' }}
+                        >
+                        <span class="space-y-1">
+                            <span class="block font-semibold text-text dark:text-secondary-100">Fiche matière</span>
+                            <span class="block text-xs text-secondary-500 dark:text-secondary-400">
+                                Recherche dans les descriptifs de fiches matières
+                            </span>
+                        </span>
+                    </span>
+                </label>
+            </div>
+        </fieldset>
+
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <twig:Button
+                    :label="resolvedSubmitLabel"
+                    type="submit"
+                    variant="primary"
+                    :soft="false"
+                    icon="icon:search"
+                    extraClass="w-full sm:w-auto"
+            />
+
+            {% if resolvedResetHref is not null %}
+                <twig:Button
+                        label="Réinitialiser"
+                        href="{{ resolvedResetHref }}"
+                        variant="secondary"
+                        icon="mdi:rotate-left"
+                        extraClass="w-full sm:w-auto"
+                />
+            {% endif %}
+        </div>
+    </div>
+</form>

@@ -1,0 +1,31 @@
+<turbo-frame id="type-diplome-logos-container">
+    <div class="d-flex flex-wrap gap-3 p-2">
+        {% for filename in typeDiplome.logo %}
+            <div class="position-relative logo-container" style="display: inline-block;">
+                <img src="{{ path('app_type_diplome_logo_api', {id: typeDiplome.id, filename: filename}) }}"
+                     alt="Logo"
+                     style="max-height: 75px; max-width: 100px; object-fit: contain;"
+                >
+                {% if editable is defined and editable == true %}
+                    <twig:Button
+                            type="button"
+                            variant="danger"
+                            :soft="false"
+                            :outline="false"
+                            icon="icon:delete"
+                            dataAction="click->type-diplome-logos#deleteLogo"
+                            extraClass="position-absolute top-0 end-0 logo-delete-btn"
+                            :attr="{ 'data-filename': filename, style: 'display: none; line-height: 1; width: 24px; height: 24px; padding: 0;' }"
+                    />
+                {% endif %}
+            </div>
+        {% else %}
+            <p>Aucun logo</p>
+        {% endfor %}
+    </div>
+    <style>
+        .logo-container:hover .logo-delete-btn {
+            display: block !important;
+        }
+    </style>
+</turbo-frame>

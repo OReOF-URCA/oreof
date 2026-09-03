@@ -44,6 +44,7 @@ versioning_json/*
 
 ### API JSON Versioning ###
 public/api_json/
+public/api_json_v2/
 
 ###> phpunit/phpunit ###
 /phpunit.xml
@@ -67,7 +68,6 @@ public/api_json/
 *.swo
 *~
 .DS_Store
-.npmrc
 .yarnrc.yaml
 
 ###> Dependency files ###
@@ -96,7 +96,6 @@ migrations/Version*.php
 ###> Uploads & Temporary Files ###
 /public/uploads/help_images/
 /public/uploads/
-.npmrc
 
 ###> symfony/asset-mapper ###
 /public/assets/
@@ -107,3 +106,24 @@ migrations/Version*.php
 assets/icons/symfony.svg
 config/reference.php
 /*.png
+
+
+### exclude logos ###
+/public/uploads/logos/
+
+###> liip/imagine-bundle ###
+/public/media/cache/
+###< liip/imagine-bundle ###
+
+###Le token FontAwesome ###
+.npmrc
+.yarnrc.yml
+
+public/Docs-Offre/Annexe - EeF – formations proposées pour 2026-2027 pour passage CA.xlsx
+public/Docs-Offre/Annexe – eCandidat – capacités d’accueil LP pour 2026-2027 v3 - pour passage CA.xlsx
+public/Docs-Offre/Annexe – eCandidat – DI proposées pour 2026-2027 v2 - pour passage au CA.xlsx
+public/Docs-Offre/Annexe – eCandidat – formations proposées (M2, DNO, DE, DAEU) pour 2026-2027 v2  - pour passage CA.xlsx
+public/Docs-Offre/Annexe – eCandidat Admission – L2 et L3 proposées pour 2026-2027 v2 - pour passage CA.xlsx
+public/Docs-Offre/Annexe 1 - Parcoursup - capacités d’accueil pour 2026-2027 arbitrage rectorat 14012026 v2 -  - pour passage CA.xlsx
+public/Docs-Offre/Annexe 1 – MonMaster – capacités d’accueil M1 pour 2026-2027  pour passage CA.xlsx
+public/Docs-Offre/Annexe eCandidat BUT2 et BUT3 proposées pour 2026 2027  pour passage CA.xlsx

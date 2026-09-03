@@ -20,6 +20,9 @@
     </section>
 {% endblock %}
 
+{% set header_title %}
+    Détails des formations
+{% endset %}
 
 {% block bouton_header %}
     {% if is_granted('ROLE_ADMIN') %}
@@ -30,16 +33,6 @@
                 icon="icon:check"
                 label="Verifier Export LHEO"
                 tooltip="Verifier Export LHEO"
-                class="mx-2"
-        />
-
-        <twig:Button
-                href="{{ path('app_formation_new') }}"
-                variant="success"
-                size="sm"
-                icon="icon:add"
-                label="Ajouter une formation"
-                tooltip="Ajouter une formation"
                 class="mx-2"
         />
     {% endif %}

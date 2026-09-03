@@ -1,7 +1,8 @@
 menu.tableau_de_bord: Tableau de bord
 menu:
   offre_formation: Offre de formation
-  detail_mentions: Détail des mentions/spécialités
+  detail_mentions: Détail des formations
+  detail_parcours: Détail des parcours
   detail_fiches: Détail des fiches EC/matière
   detail_fiches_hd: Détail fiches EC/matières "hors diplômes"
   detail_elts_mutualises: Détail des éléments mutualisés
@@ -32,6 +33,7 @@ menu:
     chgt_rf: Changement RF/co RF
     synthses_modifs: Synthèse des modifications
     documents: Documents
+    synthese_offre: Synthèse offre de formation
   menu_droits: Utilisateurs et droits
   droits:
     en_attente: Utilisateurs en attente
@@ -88,3 +90,75 @@ page:
     app_parcours_lheo_invalid_list:
       title: Contrôle LHEO de l'offre
       description: Contrôle de la conformité au format LHEO de l'offre
+    structure_composante_index:
+      title: Gestion de l'offre de formation
+      description: Détail de l'offre de formation par composante
+    app_etablissement_index:
+      description: Gérer les établissements de référence.
+      title: Etablissements
+    app_composante_index:
+      description: Gérer les composantes de l'établissement.
+      title: Composantes
+    app_plateforme_adminission_index:
+      description: Configurer les plateformes d'admission.
+      title: Plateformes d''admission
+    app_ville_index:
+      description: Gérer les villes utilisées dans l'application.
+      title: Villes
+    app_domaine_index:
+      description: Gérer les domaines de formation.
+      title: Domaines
+    app_mention_index:
+      description: Gérer les mentions de formation.
+      title: Mentions
+    app_type_diplome_index:
+      description: Gérer les types de diplôme.
+      title: Type de diplôme
+    app_type_ue_index:
+      description: Gérer les types d'UE.
+      title: Types d''UE
+    app_type_ec_index:
+      description: Gérer les types d'EC.
+      title: Types d''EC
+    app_nature_ue_ec_index:
+      description: Gérer les natures d'UE et d'EC.
+      title: Natures d''UE et d''EC
+    app_type_epreuve_index:
+      description: Gérer les types d'épreuve.
+      title: Types d''épreuve
+    app_langue_index:
+      description: Gérer les langues proposées.
+      title: Langues
+    app_rythme_formation_index:
+      description: Gérer les rythmes de formation.
+      title: Rythmes de formation
+    app_campagne_collecte_index:
+      description: Configurer les campagnes de collecte.
+      title: Campagnes de collecte
+    app_annee_universitaire_index:
+      description: Gérer les années universitaires.
+      title: Années universitaires
+    app_actualite_index:
+      description: Gérer les actualités ORéOF.
+      title: Actualités
+    app_notication_liste:
+      description: Paramétrer les notifications par profil et workflow.
+      title: Notifications
+    translations_index:
+      description: Gérer les traductions et textes de l'application.
+      title: Traductions
+    app_config_email:
+      description: Configurer les modèles d'emails.
+      title: Emails
+    app_help_index:
+      description: Gérer les contenus d'aide.
+      title: Aides
+    app_faq_index:
+      description: Gérer la FAQ.
+      title: FAS
+    admin_styleguide_index:
+      description: Consulter le styleguide d'interface.
+      title: Styleguide
+    app_section_administration:
+      description: Administration
+      title: Administration

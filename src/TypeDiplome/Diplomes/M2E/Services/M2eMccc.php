@@ -20,6 +20,7 @@ use App\Entity\Mccc;
 use App\Entity\Parcours;
 use App\Enums\RegimeInscriptionEnum;
 use App\Repository\TypeEpreuveRepository;
+use App\TypeDiplome\Diplomes\M2E\Services\AbstractM2eMccc;
 use App\Utils\Tools;
 use DateTimeInterface;
 use PhpOffice\PhpSpreadsheet\Exception;
@@ -148,7 +149,6 @@ class M2eMccc extends AbstractM2eMccc
         $modele->setCellValue(self::COL_DETAIL_TYPE_EPREUVES, $texte);
 
         $index = 1;
-
         foreach ($tabSemestresAnnee as $i => $semestres) {
             $clonedWorksheet = clone $modele;
             $clonedWorksheet->setTitle('Année ' . $i);
@@ -167,8 +167,43 @@ class M2eMccc extends AbstractM2eMccc
                 $this->excelWriter->writeCellName(self::CEL_ANNEE_ETUDE, Tools::adjNumeral($i) . ' année');
                 $this->lignesSemestre = [];
                 $this->lignesEcColorees = [];
+                $tabColUes = [];
+                $colUe = self::COL_FIRST_UE;
+
+                // Duplique la colonne UE du modele pour avoir une colonne par UE.
+                $nbUesAnnee = 0;
+                foreach ($semestres as $semestre) {
+                    $nbUesAnnee += count($semestre->ues);
+                }
+
+                if ($nbUesAnnee > 1) {
+                    $clonedWorksheet->insertNewColumnBefore(
+                        Coordinate::stringFromColumnIndex(self::COL_FIRST_UE + 1),
+                        $nbUesAnnee - 1
+                    );
+                }
                 /** @var StructureSemestre $semestre */
                 foreach ($semestres as $semestre) {
+
+                    foreach ($semestre->ues as $ue) {
+                        //colonnes des BC/UE
+                        $tabColUes[$ue->ue->getId()] = $colUe;
+
+                        $this->excelWriter->writeCellXY($colUe, 17, "BC" . $ue->ue->getOrdre(), ['style' => 'HORIZONTAL_CENTER',
+                            'valign' => 'VERTICAL_CENTER',
+                            'wrap' => true,]);
+                        $colUe++;
+                    }
+
+                    $this->excelWriter->mergeCellsCaR(self::COL_FIRST_UE, 15, $colUe - 1, 16);
+                    $this->excelWriter->writeCellXY($colUe, 15, 'Coefficients sur les BC', [
+                        'style' => 'HORIZONTAL_CENTER',
+                        'valign' => 'VERTICAL_CENTER',
+                        'wrap' => true,
+                    ]);
+
+
+
                     $totalAnnee->addSemestre($semestre->heuresEctsSemestre);
                     $totalEcts += $semestre->heuresEctsSemestre->sommeSemestreEcts;
                     foreach ($semestre->ues as $ue) { //todo: changement ici avec modif du DTO ? un impact ?
@@ -189,6 +224,12 @@ class M2eMccc extends AbstractM2eMccc
                                 if ($debut < $ligne - 1) {
                                     $this->excelWriter->mergeCellsCaR(self::COL_UE, $debut, self::COL_UE, $ligne - 1);
                                     $this->excelWriter->mergeCellsCaR(self::COL_INTITULE_UE, $debut, self::COL_INTITULE_UE, $ligne - 1);
+
+                                    //boucle sur les UE
+                                    foreach ($tabColUes as $col => $ueCol) {
+                                        $this->excelWriter->mergeCellsCaR($ueCol, $debut, $ueCol, $ligne - 1);
+                                    }
+
 
                                     // bordure fine
 
@@ -221,8 +262,9 @@ class M2eMccc extends AbstractM2eMccc
                                     $this->excelWriter->borderOutsiteInside(self::COL_MCCC_SECONDE_CHANCE_CC_SANS_TP, $debut, self::COL_MCCC_SECONDE_CHANCE_CC_AVEC_TP, $ligne - 1);
                                 }
                             }
-                            $this->excelWriter->writeCellXY(self::COL_UE, $debut, $ue->display, ['wrap' => true, 'style' => 'HORIZONTAL_CENTER', 'font-weight' => false]);
+                            $this->excelWriter->writeCellXY(self::COL_UE, $debut, $ue->ue->display(), ['wrap' => true, 'style' => 'HORIZONTAL_CENTER', 'font-weight' => false]);
                             $this->excelWriter->writeCellXY(self::COL_INTITULE_UE, $debut, $ue->ue->getLibelle(), ['wrap' => true]);
+                            $this->excelWriter->writeCellXY($tabColUes[$ue->ue->getId()], $debut, $ue->ue->getEcts(), ['wrap' => true, 'style' => 'HORIZONTAL_CENTER', 'valign' => 'VERTICAL_CENTER']);
                         }
                         foreach ($ue->uesEnfants() as $uee) {
                             $debut = $ligne;

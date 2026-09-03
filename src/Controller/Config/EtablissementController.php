@@ -10,10 +10,12 @@
 namespace App\Controller\Config;
 
 use App\Controller\BaseController;
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\Adresse;
 use App\Entity\Etablissement;
 use App\Form\EtablissementType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\EtablissementRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
@@ -25,6 +27,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/etablissement')]
 class EtablissementController extends BaseController
 {
+    use CsrfDeleteTrait;
+
     #[Route('/', name: 'app_etablissement_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -56,7 +60,7 @@ class EtablissementController extends BaseController
                 'modal_title' => 'Voir un établissement',
             ])
             ->addEditAction('app_etablissement_edit', [
-                'modal' => true,
+                'modal' => false,
                 'modal_size' => 'lg',
                 'modal_title' => 'Modifier un établissement',
             ])
@@ -69,6 +73,8 @@ class EtablissementController extends BaseController
     }
 
     #[Route('/new', name: 'app_etablissement_new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.etablissement')]
+    #[Breadcrumb(label: 'Création')]
     public function new(Request $request, EtablissementRepository $etablissementRepository): Response
     {
         $etablissement = new Etablissement();
@@ -155,6 +161,8 @@ class EtablissementController extends BaseController
     }
 
     #[Route('/{id}/edit', name: 'app_etablissement_edit', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.etablissement')]
+    #[Breadcrumb(label: 'Modification')]
     public function edit(
         Request                 $request,
         Etablissement           $etablissement,
@@ -186,14 +194,16 @@ class EtablissementController extends BaseController
 
     #[Route('/{id}', name: 'app_etablissement_delete', methods: ['POST'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request                 $request,
         Etablissement           $etablissement,
         EtablissementRepository $etablissementRepository
     ): Response {
-        if ($this->isCsrfTokenValid('delete' . $etablissement->getId(), $request->request->get('_token'))) {
+        if ($this->isDeleteTokenValid($etablissement, $request->request->get('_token'))) {
             $etablissementRepository->remove($etablissement, true);
+            return $turboStream->streamToastSuccess('Établissement supprimé avec succès', true);
         }
 
-        return $this->redirectToRoute('app_etablissement_index', [], Response::HTTP_SEE_OTHER);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

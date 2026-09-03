@@ -9,9 +9,11 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\RythmeFormation;
 use App\Form\RythmeFormationType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\RythmeFormationRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
@@ -26,6 +28,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/rythme/formation')]
 class RythmeFormationController extends AbstractController
 {
+    use CsrfDeleteTrait;
     #[Route('/', name: 'app_rythme_formation_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -77,7 +80,7 @@ class RythmeFormationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $rythmeFormationRepository->save($rythmeFormation, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Rythme de formation créé avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -130,7 +133,7 @@ class RythmeFormationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $rythmeFormationRepository->save($rythmeFormation, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Rythme de formation modifié avec succès', true);
         }
 
 
@@ -149,13 +152,14 @@ class RythmeFormationController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_rythme_formation_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         RythmeFormationRepository $rythmeFormationRepository,
         RythmeFormation $rythmeFormation
     ): Response {
         $rythmeFormationNew = clone $rythmeFormation;
         $rythmeFormationNew->setLibelle($rythmeFormation->getLibelle() . ' - Copie');
         $rythmeFormationRepository->save($rythmeFormationNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Rythme de formation dupliqué avec succès', true);
     }
 
     /**
@@ -163,19 +167,17 @@ class RythmeFormationController extends AbstractController
      */
     #[Route('/{id}', name: 'app_rythme_formation_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         RythmeFormation $rythmeFormation,
         RythmeFormationRepository $rythmeFormationRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $rythmeFormation->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($rythmeFormation, $this->getCsrfTokenFromRequest($request))) {
             $rythmeFormationRepository->remove($rythmeFormation, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Rythme de formation supprimé avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

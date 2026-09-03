@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\TimelineDateRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Enums\TimelineDateFlagEnum;
 
 #[ORM\Entity(repositoryClass: TimelineDateRepository::class)]
 class TimelineDate
@@ -38,8 +39,8 @@ class TimelineDate
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $dateDebut = null;
 
-    #[ORM\Column]
-    private ?bool $isCfvu = null;
+    #[ORM\Column(type: 'string', length: 30, enumType: TimelineDateFlagEnum::class)]
+    private TimelineDateFlagEnum $flag = TimelineDateFlagEnum::NONE;
 
     public function getId(): ?int
     {
@@ -142,14 +143,26 @@ class TimelineDate
         return $this;
     }
 
-    public function isCfvu(): ?bool
+    public function getFlag(): TimelineDateFlagEnum
     {
-        return $this->isCfvu;
+        return $this->flag;
+    }
+
+    public function setFlag(TimelineDateFlagEnum $flag): static
+    {
+        $this->flag = $flag;
+
+        return $this;
+    }
+
+    public function isCfvu(): bool
+    {
+        return $this->flag === TimelineDateFlagEnum::CFVU;
     }
 
     public function setIsCfvu(bool $isCfvu): static
     {
-        $this->isCfvu = $isCfvu;
+        $this->flag = $isCfvu ? TimelineDateFlagEnum::CFVU : TimelineDateFlagEnum::NONE;
 
         return $this;
     }

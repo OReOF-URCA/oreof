@@ -9,6 +9,7 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\AnneeUniversitaire;
 use App\Entity\CampagneCollecte;
@@ -34,6 +35,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/administration/campagne-collecte')]
 class CampagneCollecteController extends AbstractController
 {
+    use CsrfDeleteTrait;
+
     #[Route('/', name: 'app_campagne_collecte_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -125,7 +128,7 @@ class CampagneCollecteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $campagneCollecteRepository->save($campagne_collecte, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Campagne de collecte créée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -230,7 +233,7 @@ class CampagneCollecteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $campagneCollecteRepository->save($campagne_collecte, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Campagne de collecte modifiée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -248,13 +251,14 @@ class CampagneCollecteController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_campagne_collecte_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         CampagneCollecteRepository $campagneCollecteRepository,
         CampagneCollecte           $campagne_collecte
     ): Response {
         $campagne_collecteNew = clone $campagne_collecte;
         $campagne_collecteNew->setLibelle($campagne_collecte->getLibelle() . ' - Copie');
         $campagneCollecteRepository->save($campagne_collecteNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Campagne de collecte dupliquée avec succès', true);
     }
 
     /**
@@ -262,20 +266,18 @@ class CampagneCollecteController extends AbstractController
      */
     #[Route('/{id}', name: 'app_campagne_collecte_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request          $request,
         CampagneCollecte $campagne_collecte,
         CampagneCollecteRepository $campagneCollecteRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $campagne_collecte->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($campagne_collecte, $this->getCsrfTokenFromRequest($request))) {
             $campagneCollecteRepository->remove($campagne_collecte, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Campagne de collecte supprimée avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 
     #[IsGranted('ROLE_ADMIN')]
@@ -283,7 +285,8 @@ class CampagneCollecteController extends AbstractController
     public function configurePublication(
         CampagneCollecte $campagneCollecte,
         Request $request,
-        CampagneCollecteRepository $campagneRepository
+        CampagneCollecteRepository $campagneRepository,
+        TurboStreamResponseFactory $turboStream
     ) : Response {
         $form = $this->createForm(
             ConfigurePublicationType::class,
@@ -322,12 +325,19 @@ class CampagneCollecteController extends AbstractController
             $campagneCollecte->setPublicationOptions($configToSave);
             $campagneRepository->save($campagneCollecte, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess(new TranslatableKey('campagne_collecte.configure_publication.success'), true);
         }
 
-        return $this->render('config/campagne_collecte/_configure_publication.html.twig', [
-            'campagneCollecte' => $campagneCollecte,
-            'form' => $form
-        ]);
+        return $turboStream->streamOpenModalFromTemplates(
+            new TranslatableKey('campagne_collecte.configure_publication.title'),
+            new TranslatableKey('campagne_collecte.configure_publication.description'),
+            'config/campagne_collecte/_configure_publication.html.twig',
+            [
+                'campagneCollecte' => $campagneCollecte,
+                'form' => $form->createView()
+            ],
+            '_ui/_footer_submit_cancel.html.twig',
+            []
+        );
     }
 }

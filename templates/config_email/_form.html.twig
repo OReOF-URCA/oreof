@@ -1,80 +1,129 @@
-<div class="row" data-controller="email-template">
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-body">
-                {% form_theme form 'communs/form_theme.html.twig' %}
-                {{ form_start(form) }}
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+{{ form_start(form) }}
 
-                <div class="mb-2">{{ form_row(form.workflow, {attr: {'data-email-template-target':'workflow'}}) }}</div>
-                <div class="mb-2">{{ form_row(form.subject) }}</div>
-                <div class="mb-2">{{ form_row(form.subjects) }}</div>
+<div class="grid gap-6 lg:grid-cols-2">
+    <div class="space-y-6">
+        <div class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <div class="mb-4">
+                <h3 class="text-base font-semibold text-secondary-900 dark:text-secondary-100">Contenu du template</h3>
+                <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-300">
+                    Renseignez l'objet, les variantes et le corps de l'email.
+                </p>
+            </div>
 
-                <div class="mb-2">
-                    <label class="form-label">Variables disponibles</label>
-                    <div class="border rounded p-2 small" style="max-height: 220px; overflow:auto">
-                        {% for k, desc in variables %}
-                            <button
-                                    type="button"
-                                    class="btn btn-sm btn-outline-secondary me-1 mb-1"
-                                    data-action="email-template#insertToken"
-                                    data-token-value="{{ '{{ ' ~ k ~ ' }}' }}"
-                                    title="{{ desc }}"
-                                    data-bs-toggle="tooltip"
-                                    data-bs-placement="bottom"
-                            >{{ k }}</button>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <div class="mb-2">{{ form_row(form.bodyHtml) }}</div>
-                <div class="mb-2">{{ form_row(form.bodyText) }}</div>
-
-                <button class="btn btn-primary">Enregistrer</button>
-                <a class="btn btn-link" href="{{ path('app_config_email') }}">Retour</a>
+            <div class="space-y-4">
+                {{ form_row(form.workflow, {attr: {'data-email-template-target':'workflow'}}) }}
+                {{ form_row(form.subject) }}
+                {{ form_row(form.subjects) }}
+                {{ form_row(form.bodyHtml) }}
+                {{ form_row(form.bodyText) }}
             </div>
         </div>
-    </div>
-    <div class="col-lg-6">
-        <div class="d-flex align-items-center mb-2">
-            <h5 class="mb-0">Aperçu</h5>
-            <span class="ms-2 text-muted small">(les données sont fictives et ne servent que d'illustration)</span>
+
+        <div class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <div class="mb-4 flex items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-base font-semibold text-secondary-900 dark:text-secondary-100">Variables
+                        disponibles</h3>
+                    <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-300">Cliquez sur une variable pour
+                        l’insérer.</p>
+                </div>
+                <span class="rounded-full bg-secondary-100 px-3 py-1 text-xs font-medium text-secondary-600 dark:bg-secondary-800 dark:text-secondary-300">
+                    Aperçu dynamique
+                </span>
+            </div>
+
+            <div class="flex max-h-64 flex-wrap gap-2 overflow-auto rounded-xl border border-dashed border-secondary-200 bg-secondary-50 p-3 dark:border-secondary-700 dark:bg-secondary-800/50">
+                {% for k, desc in variables %}
+                    <twig:Button
+                            type="button"
+                            variant="secondary"
+                            :outline="true"
+                            :soft="false"
+                            size="sm"
+                            icon="icon:add"
+                            label="{{ k }}"
+                            dataAction="email-template#insertToken"
+                            :attr="{
+                                'data-token-value': '{{ ' ~ k ~ ' }}',
+                                title: desc,
+                                'data-bs-toggle': 'tooltip',
+                                'data-bs-placement': 'bottom'
+                            }"
+                    />
+                {% endfor %}
+            </div>
         </div>
 
-        <div class="card mb-2">
-            <div class="card-body">
-                <div class="mb-2">
-                    <label class="form-label" for="variantes">Variante de sujet</label>
+        <div class="flex flex-wrap gap-3 border-t border-secondary-200 pt-6 dark:border-secondary-700">
+            <twig:Button
+                    type="submit"
+                    variant="success"
+                    :soft="false"
+                    :outline="false"
+                    icon="icon:save"
+                    label="Enregistrer"
+            />
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <div class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <div class="mb-4 flex items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-base font-semibold text-secondary-900 dark:text-secondary-100">Aperçu</h3>
+                    <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-300">
+                        Les données affichées ici sont fictives.
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="mb-2 block text-sm font-medium text-secondary-700 dark:text-secondary-200"
+                           for="variantes">
+                        Variante de sujet
+                    </label>
                     <select
                             id="variantes"
-                            class="form-select" data-email-template-target="subjectVariant"
+                            class="w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-900 shadow-sm outline-none transition focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-900 dark:text-secondary-100"
+                            data-email-template-target="subjectVariant"
                             data-action="change->email-template#updatePreview">
                         <option value="">(par défaut)</option>
                         {# Les options seront régénérées côté JS à partir de subjectsJson #}
                     </select>
                 </div>
 
-                <div class="text-muted small">Objet du mail</div>
-                <div id="preview-subject" data-email-template-target="previewSubject" class="fw-bold"></div>
-            </div>
-        </div>
+                <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-4 dark:border-secondary-700 dark:bg-secondary-800/50">
+                    <div class="text-xs font-medium uppercase tracking-wide text-secondary-500 dark:text-secondary-400">
+                        Objet du mail
+                    </div>
+                    <div id="preview-subject" data-email-template-target="previewSubject"
+                         class="mt-2 text-sm font-semibold text-secondary-900 dark:text-secondary-100"></div>
+                </div>
 
-        <div class="card mb-2">
-            <div class="card-body">
-                <div class="text-muted small">Version HTML</div>
-                <div data-email-template-target="previewIframe"
-                     style="width:100%; height:340px; border:1px solid #ddd; border-radius:6px;"></div>
-                {#                <iframe id="preview-iframe" data-email-template-target="previewIframe" #}
-                {#                        style="width:100%; height:340px; border:1px solid #ddd; border-radius:6px;"></iframe> #}
-            </div>
-        </div>
+                <div class="rounded-xl border border-secondary-200 bg-white p-4 dark:border-secondary-700 dark:bg-secondary-900">
+                    <div class="mb-3 text-xs font-medium uppercase tracking-wide text-secondary-500 dark:text-secondary-400">
+                        Version HTML
+                    </div>
+                    <div
+                            data-email-template-target="previewIframe"
+                            class="min-h-[20rem] overflow-auto rounded-lg border border-secondary-200 bg-white p-3 dark:border-secondary-700 dark:bg-secondary-950">
+                    </div>
+                </div>
 
-        <div class="card">
-            <div class="card-body">
-                <div class="text-muted small">Version texte brut (si HTML non supporté)</div>
-                <pre id="preview-text" data-email-template-target="previewText" class="mb-0"
-                     style="white-space:pre-wrap"></pre>
+                <div class="rounded-xl border border-secondary-200 bg-white p-4 dark:border-secondary-700 dark:bg-secondary-900">
+                    <div class="mb-3 text-xs font-medium uppercase tracking-wide text-secondary-500 dark:text-secondary-400">
+                        Version texte brut
+                    </div>
+                    <pre
+                            id="preview-text"
+                            data-email-template-target="previewText"
+                            class="mb-0 min-h-28 whitespace-pre-wrap rounded-lg bg-secondary-50 p-3 text-sm text-secondary-800 dark:bg-secondary-950 dark:text-secondary-100"></pre>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
 {{ form_end(form) }}

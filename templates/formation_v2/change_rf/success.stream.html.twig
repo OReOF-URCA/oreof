@@ -1,0 +1,7 @@
+{{ include('_ui/_modal_success.stream.html.twig', { toastMessage: toastMessage }) }}
+
+<turbo-stream action="replace" target="change_rf_state">
+    <template>
+        {{ component('ChangeRfState', { formation: formation }) }}
+    </template>
+</turbo-stream>

@@ -20,10 +20,10 @@ class LheoXML
 {
 
     public function __construct(
-        private EntityManagerInterface       $entityManager,
-        private TypeDiplomeResolver          $typeDiplomeResolver,
-        private UrlGeneratorInterface        $router,
-        private ElementConstitutifRepository $ecRepo,
+        protected EntityManagerInterface       $entityManager,
+        protected TypeDiplomeResolver          $typeDiplomeResolver,
+        protected UrlGeneratorInterface        $router,
+        protected ElementConstitutifRepository $ecRepo,
     ) {
     }
 
@@ -59,6 +59,11 @@ class LheoXML
 
         // 5 codes ROME max
         $codesRomeLheo = array_slice($codesRome, 0, 5);
+
+        // LHEO exige au moins un code ROME : valeur par défaut au bon format (lettre + 4 chiffres).
+        if (count($codesRomeLheo) === 0) {
+            $codesRomeLheo = ['R0000'];
+        }
 
         // Intitulé de la formation
         $intituleFormation = 'Non renseigné.';
@@ -623,7 +628,8 @@ HTML;
                                 'adresse' => [
                                     $adresseSiegeURCA
                                 ]
-                            ]
+                            ],
+                            'modalites-inscription' => $localisation?->getEtablissement()?->getEtablissementInformation()?->getTarifInscription() ?? "Non renseigné."
                         ],
                         'adresse-information' => ['adresse' => $adresseSiegeURCA],
                         'restauration' => $localisation?->getEtablissement()?->getEtablissementInformation()?->getRestauration() ?? "Non renseigné.",

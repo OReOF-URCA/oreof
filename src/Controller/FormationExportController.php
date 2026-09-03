@@ -60,6 +60,6 @@ class FormationExportController extends AbstractController
             'typeDiplome' => $typeDiplome,
             'titre' => 'Détails de la formation '.$formation->getDisplay(),
             'tParcours' => $tParcours,
-        ], 'Formation_'.$formation->getDisplay().'.pdf');
+        ], 'Formation_' . $formation->getDisplay());
     }
 }

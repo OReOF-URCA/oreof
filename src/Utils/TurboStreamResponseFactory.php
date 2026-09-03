@@ -32,18 +32,18 @@ final class TurboStreamResponseFactory
         );
     }
 
-    public function streamToastError(string $message, bool $closeModal = false): Response
+    public function streamToastError(string|TranslatableKey $message, bool $closeModal = false): Response
     {
         return $this->stream('_ui/_toast.stream.html.twig', [
-            'message' => $message,
+            'message' => $this->translateText($message),
             'closeModal' => $closeModal,
             'toast_type' => 'danger',]);
     }
 
-    public function streamToastSuccess(string $message, bool $closeModal = false): Response
+    public function streamToastSuccess(string|TranslatableKey $message, bool $closeModal = false): Response
     {
         return $this->stream('_ui/_toast.stream.html.twig', [
-            'message' => $message,
+            'message' => $this->translateText($message),
             'closeModal' => $closeModal,
             'toast_type' => 'success',]);
     }

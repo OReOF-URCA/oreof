@@ -477,19 +477,29 @@ class FicheMatiereController extends BaseController
     #[Route('/recherche/parcours/{parcours}/{keyword}', name: 'app_fiche_matiere_search')]
     public function getFicheMatiereForParcoursAndKeyword(
         EntityManagerInterface $entityManager,
+        TurboStreamResponseFactory $turboStream,
         Parcours $parcours,
         string $keyword = ""
-    ): JsonResponse
+    ): Response
     {
         $associatedFicheMatiere = $entityManager
             ->getRepository(FicheMatiere::class)
             ->findForParcoursWithKeyword($parcours, $keyword);
 
-        return new JsonResponse(
-            $associatedFicheMatiere,
-            200,
-            ['Content-Type' => 'application/json'],
-            false
+        $count = count($associatedFicheMatiere);
+        $title = $count > 1
+            ? $count . ' fiches matières associées'
+            : ($count === 1 ? '1 fiche matière associée' : 'Aucune fiche matière associée');
+
+        return $turboStream->streamOpenModalFromTemplates(
+            $title,
+            'Parcours : ' . $parcours->getDisplay(),
+            'search/_associated_fiches.html.twig',
+            [
+                'fichesMatieres' => $associatedFicheMatiere,
+                'keyword' => $keyword,
+            ],
+            '_ui/_footer_cancel.html.twig'
         );
     }
 

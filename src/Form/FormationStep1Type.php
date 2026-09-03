@@ -28,18 +28,34 @@ class FormationStep1Type extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        // Responsable / co-responsable modifiables directement sur la page d'édition
+        // pour les formations non classiques uniquement ; verrouillés (grisés) pour les
+        // classiques, où le changement passe par un circuit dédié.
+        $formation = $builder->getData();
+        $verrouille = $formation?->getTypeDiplome()?->isClassique() ?? true;
+
         $builder
             ->add('responsableMention', EntityType::class, [
                 'required' => false,
-                'disabled' => true,
+                'help' => '',
+                'disabled' => $verrouille,
                 'class' => User::class,
                 'choice_label' => 'display',
+                'query_builder' => fn($er) => $er->createQueryBuilder('u')
+                    ->orderBy('u.nom', 'ASC')
+                    ->addOrderBy('u.prenom', 'ASC'),
+                'attr' => ['data-action' => 'change->formation--step1#saveRespFormation'],
             ])
             ->add('coResponsable', EntityType::class, [
                 'required' => false,
-                'disabled' => true,
+                'disabled' => $verrouille,
+                'help' => '',
                 'class' => User::class,
                 'choice_label' => 'display',
+                'query_builder' => fn($er) => $er->createQueryBuilder('u')
+                    ->orderBy('u.nom', 'ASC')
+                    ->addOrderBy('u.prenom', 'ASC'),
+                'attr' => ['data-action' => 'change->formation--step1#saveCoRespFormation'],
             ])
             ->add('sigle', TextType::class, [
                 'required' => false,
@@ -70,13 +86,10 @@ class FormationStep1Type extends AbstractType
                     return $composanteRepository->createQueryBuilder('comp')
                         ->orderBy('comp.libelle', 'ASC');
                 },
-//                'choice_attr' => function () {
-//                    return ['data-action' => 'change->formation--step1#changeComposanteInscription'];
-//                },
-                'attr' => [
-                    'columns' => 2,
-//                    'data-action' => 'change->formation--step6#changeComposanteInscription'
-                ],
+                'choice_attr' => function () {
+                    return ['data-action' => 'change->formation--step1#changeComposanteInscription'];
+                },
+                'attr' => ['data-action' => 'change->formation--step6#changeComposanteInscription']
             ])
             ->add('regimeInscription', EnumType::class, [
                 'help' => 'Régime d\'inscription',
@@ -84,30 +97,15 @@ class FormationStep1Type extends AbstractType
                 'translation_domain' => 'form',
                 'multiple' => true,
                 'expanded' => true,
-                //'attr' => ['data-action' => 'change->formation--step1#changeRegimeInscription']
-                'choice_attr' => function ($choice) {
-                    // On marque chaque checkbox comme une cible 'trigger'
-                    return [
-                        'data-conditional-field-target' => 'trigger',
-                        'data-action' => 'change->conditional-field#toggle'
-                    ];
-                },
-//                'attr' => [
-//                    'data-controller' => 'conditional-display',
-//                    'data-conditional-display-expected-values-value' => json_encode(['FI_APPRENTISSAGE', 'FC_CONTRAT_PRO'])
-//                ]
+                'attr' => ['data-action' => 'change->formation--step1#changeRegimeInscription']
             ])
             ->add('modalitesAlternance', TextareaAutoSaveType::class, [
                 'help' => 'Indiquez en 3000 caractères maximum les périodes et leurs durées en centre ou en entreprise.',
                 'attr' => [
                     'rows' => 10,
                     'maxlength' => 3000,
-                    //'data-action' => 'change->formation--step1#saveModalitesAlternance'
+                    'data-action' => 'change->formation--step1#saveModalitesAlternance'
                 ],
-                'row_attr' => [
-//                    'data-conditional-display-target' => 'container',
-                    'class' => 'd-none' // Sera retiré par le connect() si déjà coché
-                ]
             ]);
     }
 

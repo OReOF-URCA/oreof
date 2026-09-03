@@ -1,124 +1,50 @@
 {% extends 'base.html.twig' %}
 
 {% set header_title %}
-    Résultats de la recherche
+    Résultats de la recherche{% if keyword_1 is not empty %} — {{ keyword_1 }}{% endif %}
 {% endset %}
 
-{% block stylesheets %}
-{{ parent() }}
-
-{% if typeRecherche == 'ficheMatiere' %}
-    <link rel="stylesheet" href="{{ asset('search/search.css') }}">
-{% endif %}
-
-
-<style>
-a.fiche-matiere-search-link span {
-    text-decoration: underline;
-}
-
-.spinning-icon {
-    font-size: 3.75em;
-    animation-name: spinning;
-    animation-duration: 1.5s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-}
-
-.modal-body ul li {
-    text-align: start;
-}
-
-.rootNodeForFicheMatiereList {
-    min-height: 75vh;
-}
-
-@keyframes spinning {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-#newSearchField::placeholder {
-    color: black;
-}
-
-#newSearchField:focus {
-    border-color: black;
-}
-
-</style>
-{% endblock %}
-
 {% block content %}
+    <div class="space-y-8">
 
-<p class="fs-3 text-dark text-center mt-5">
-    {{ keyword_1 is not empty ? 'Mot-clé : ' ~ keyword_1 : 'Aucun mot-clé renseigné.' }}
-</p>
 
-{% if typeRecherche == 'parcours' and parcoursArray|length > 0 %}
-<p class="fs-3 text-primary text-center mt-5">
-    {{ parcoursArray|length >= 2
-       ? parcoursArray|length ~ ' parcours contiennent le mot-clé saisi en description'
-       : parcoursArray|length ~ ' parcours contient le mot-clé saisi en description' }}
-</p>
-{% endif %}
+        <twig:SearchForm
+                action="{{ path('app_search_action') }}"
+                keyword="{{ keyword_1 }}"
+                :searchType="typeRecherche"
+                fieldId="newSearchField"
+                placeholder="Nouvelle recherche..."
+                :resetHref="path('app_search')"
+        />
 
-{% if typeRecherche == 'ficheMatiere' %}
-<p class="fs-3 text-primary text-center mt-5">
-    {{ nombreTotal >= 2
-       ? nombreTotal ~ ' fiches matières contiennent le mot-clé saisi en description'
-       : nombreTotal ~ ' fiche matière contient le mot-clé saisi en description' }}
-</p>
-{% endif %}
+        <div class="flex flex-wrap gap-2">
+            {% if keyword_1 is not empty %}
+                <twig:Badge :label="'Mot-clé : ' ~ keyword_1" variant="secondary"/>
+            {% endif %}
+            <twig:Badge
+                    :label="typeRecherche == 'parcours' ? 'Type : parcours' : 'Type : fiche matière'"
+                    variant="info"
+            />
+            <twig:Badge
+                    :label="typeRecherche == 'parcours'
+                    ? (parcoursArray|length ~ (parcoursArray|length > 1 ? ' parcours trouvés' : ' parcours trouvé'))
+                    : (nombreTotal ~ (nombreTotal > 1 ? ' fiches matières trouvées' : ' fiche matière trouvée'))"
+                    variant="success"
+            />
+        </div>
 
-<div class="row justify-content-center my-5">
-    <div class="col-8 col-md-6 col-lg-4 justify-content-center">
-        <form action="{{ path('app_search_action') }}">
-            <input
-                    type="text"
-                    placeholder="Nouvelle recherche..."
-                id="newSearchField"
-                class="form-control"
-                name="keyword_1"
-                {% if keyword_1 is defined and keyword_1 != ""%}
-                value="{{ keyword_1 }}"
-                {% endif %}
-            >
-            <div class="row justify-content-center">
-                <div class="d-flex col-10 col-md-8 col-lg-6 col-xl-4 justify-content-center">
-                    {{ include('search/search_type.html.twig') }}
-                </div>
-            </div>
-            <div class="row justify-content-center">
-                <div class="col-10 col-md-8 col-lg-5 text-center">
-                    <button class="btn btn-sm btn-primary border border-white rounded mt-3">
-                        Rechercher
-                    </button>
-                </div>
-            </div>
-        </form>
+        {% if typeRecherche == 'parcours' %}
+            {{ include('search/search_result_parcours.html.twig') }}
+        {% elseif typeRecherche == 'ficheMatiere' %}
+            {{ include('search/search_result_fiche_matiere.html.twig') }}
+        {% endif %}
     </div>
-</div>
-
-{% if typeRecherche == 'parcours' %}
-    {{ include('search/search_result_parcours.html.twig') }}
-{% elseif typeRecherche == 'ficheMatiere' %}
-    {{ include('search/search_result_fiche_matiere.html.twig') }}
-{% endif %}
-
-
 {% endblock %}
 
 {% block javascripts %}
 {{ parent() }}
 
-{% if typeRecherche == 'parcours' %}
-    <script src="{{ asset('search/search_parcours.js') }}"></script>
-{% elseif typeRecherche == 'ficheMatiere' %}
+{% if typeRecherche == 'ficheMatiere' %}
     <script src="{{ asset('search/search_fiche_matiere.js') }}"></script>
 {% endif %}
 

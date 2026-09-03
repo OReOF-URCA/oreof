@@ -9,9 +9,11 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\Langue;
 use App\Form\LangueType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\LangueRepository;
 use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
@@ -26,6 +28,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/langue')]
 class LangueController extends AbstractController
 {
+    use CsrfDeleteTrait;
+    
     #[Route('/', name: 'app_langue_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -79,7 +83,7 @@ class LangueController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $langueRepository->save($langue, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Langue créée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -134,7 +138,7 @@ class LangueController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $langueRepository->save($langue, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Langue modifiée avec succès', true);
         }
 
 
@@ -153,13 +157,14 @@ class LangueController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_langue_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         LangueRepository $langueRepository,
         Langue $langue
     ): Response {
         $langueNew = clone $langue;
         $langueNew->setLibelle($langue->getLibelle() . ' - Copie');
         $langueRepository->save($langueNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Langue dupliquée avec succès', true);
     }
 
     /**
@@ -167,19 +172,17 @@ class LangueController extends AbstractController
      */
     #[Route('/{id}', name: 'app_langue_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         Langue $langue,
         LangueRepository $langueRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $langue->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($langue, $this->getCsrfTokenFromRequest($request))) {
             $langueRepository->remove($langue, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Langue supprimée avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

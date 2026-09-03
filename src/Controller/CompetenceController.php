@@ -176,8 +176,17 @@ class CompetenceController extends AbstractController
             $request->request->get('_token')
         )) {
             $bc = $competence->getBlocCompetence();
+            //supprimer les refs à la compétence
+
+            foreach ($competence->getFicheMatieres() as $fiche) {
+                $fiche->removeCompetence($competence);
+                $competence->removeFicheMatiere($fiche);
+            }
+            $competence->setCompetenceOrigineCopie(null);
             $competenceRepository->remove($competence, true);
             $bcc->renumeroteCompetences($bc);
+
+
             return $turboStreamResponseFactory->stream('bloc_competence/turbo/add_competence_success.stream.html.twig', [
                 'parcours' => $bc->getParcours(),
                 'toastMessage' => 'Compétence modifiée avec succès',

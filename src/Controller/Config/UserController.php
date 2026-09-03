@@ -12,12 +12,14 @@ namespace App\Controller\Config;
 use App\Classes\Ldap;
 use App\Classes\Mailer;
 use App\Controller\BaseController;
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\User;
 use App\Enums\CentreGestionEnum;
 use App\Form\UserHorsUrcaType;
 use App\Form\UserLdapType;
 use App\Form\UserType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\ProfilRepository;
 use App\Repository\UserProfilRepository;
 use App\Repository\UserRepository;
@@ -32,9 +34,10 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-#[Route('/administration/utilisateurs')]
+#[Route('/utilisateurs')]
 class UserController extends BaseController
 {
+    use CsrfDeleteTrait;
     #[Route('/repertoire', name: 'app_user_repertoire', methods: ['GET'])]
     public function repertoire(DataTableBuilder $builder): Response
     {
@@ -376,7 +379,7 @@ class UserController extends BaseController
             $user->setRoles([strtoupper($request->request->all()['user']['role'])]);
             $userRepository->save($user, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Utilisateur modifié avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -398,32 +401,25 @@ class UserController extends BaseController
     #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request              $request,
         User                 $user,
         UserRepository       $userRepository,
         UserProfilRepository $userProfilRepository
     ): Response {
-        $token = $request->request->get('_token') ?? $request->request->get('csrf_token');
-        if ($token === null) {
-            try {
-                $token = JsonRequest::getValueFromRequest($request, 'csrf');
-            } catch (\JsonException) {
-                $token = null;
-            }
-        }
+        $token = $this->getCsrfTokenFromRequest($request);
 
-        if ($this->isCsrfTokenValid(
-            'delete' . $user->getId(),
-            $token
-        )) {
+        if ($this->isDeleteTokenValid($user, $token)) {
             foreach ($user->getUserProfils() as $centre) {
                 $userProfilRepository->remove($centre, true);
             }
 
             $user->setIsDeleted(true);//on met le flag supprimé à true.
             $userRepository->save($user, true);
+
+            return $turboStream->streamToastSuccess('Utilisateur supprimé avec succès', true);
         }
 
-        return $this->redirectToRoute('app_user_repertoire', [], Response::HTTP_SEE_OTHER);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

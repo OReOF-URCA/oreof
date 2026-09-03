@@ -5,7 +5,20 @@
 <turbo-stream action="append" target="modal_control">
     <template>
         <script data-turbo-eval="true">
-          window.dispatchEvent(new Event('modal:close'))
+          window.dispatchEvent(new Event('modal:close'));
+          (function () {
+            // Fermer immédiatement toute modal de confirmation de suppression
+            document.querySelectorAll('[data-delete-confirm-target="modal"]').forEach(function (modal) {
+              modal.classList.add('hidden')
+            })
+            document.documentElement.classList.remove('overflow-hidden')
+
+            // Rafraîchir la datatable
+            const el = document.querySelector('.datatable-wrapper')
+            if (el && el.__component) {
+              el.__component.render()
+            }
+          })()
         </script>
     </template>
 </turbo-stream>

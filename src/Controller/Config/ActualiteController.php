@@ -9,6 +9,7 @@
 
 namespace App\Controller\Config;
 
+use App\Controller\Traits\CsrfDeleteTrait;
 use App\DTO\TranslatableKey;
 use App\Entity\Actualite;
 use App\Form\ActualiteType;
@@ -26,6 +27,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/administration/actualite')]
 class ActualiteController extends AbstractController
 {
+    use CsrfDeleteTrait;
+
     #[Route('/', name: 'app_actualite_index', methods: ['GET'])]
     public function index(
         DataTableBuilder $builder
@@ -86,7 +89,7 @@ class ActualiteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $actualiteRepository->save($actualite, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Actualité créée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -147,7 +150,7 @@ class ActualiteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $actualiteRepository->save($actualite, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Actualité modifiée avec succès', true);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -165,13 +168,14 @@ class ActualiteController extends AbstractController
 
     #[Route('/{id}/duplicate', name: 'app_actualite_duplicate', methods: ['GET'])]
     public function duplicate(
+        TurboStreamResponseFactory $turboStream,
         ActualiteRepository $actualiteRepository,
         Actualite $actualite
     ): Response {
         $actualiteNew = clone $actualite;
         $actualiteNew->setTitre($actualite->getTitre() . ' - Copie');
         $actualiteRepository->save($actualiteNew, true);
-        return $this->json(true);
+        return $turboStream->streamToastSuccess('Actualité dupliquée avec succès', true);
     }
 
     /**
@@ -179,19 +183,17 @@ class ActualiteController extends AbstractController
      */
     #[Route('/{id}', name: 'app_actualite_delete', methods: ['DELETE'])]
     public function delete(
+        TurboStreamResponseFactory $turboStream,
         Request $request,
         Actualite $actualite,
         ActualiteRepository $actualiteRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $actualite->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        if ($this->isDeleteTokenValid($actualite, $this->getCsrfTokenFromRequest($request))) {
             $actualiteRepository->remove($actualite, true);
 
-            return $this->json(true);
+            return $turboStream->streamToastSuccess('Actualité supprimée avec succès', true);
         }
 
-        return $this->json(false);
+        return $turboStream->streamToastError('Erreur lors de la suppression', true);
     }
 }

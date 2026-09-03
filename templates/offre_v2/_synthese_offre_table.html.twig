@@ -1,0 +1,231 @@
+<turbo-frame id="offre_synthese_table">
+    <div class="overflow-x-auto">
+        <!-- Controls to fold/unfold -->
+        <div class="flex items-center justify-end gap-4 bg-slate-50/50 px-4 py-2.5 border-b border-slate-200 text-xs font-semibold dark:bg-slate-900/30 dark:border-slate-800">
+            <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg p-1 shadow-sm dark:bg-slate-900 dark:border-slate-800">
+                <span class="text-slate-400 px-1 font-normal dark:text-slate-500">Composantes :</span>
+                <button onclick="toggleAllComposantes(true)" class="px-1.5 py-0.5 hover:bg-slate-50 text-indigo-600 rounded transition-colors dark:text-indigo-400 dark:hover:bg-slate-800">Déplier</button>
+                <button onclick="toggleAllComposantes(false)" class="px-1.5 py-0.5 hover:bg-slate-50 text-slate-600 rounded transition-colors dark:text-slate-400 dark:hover:bg-slate-800">Replier</button>
+            </div>
+            <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg p-1 shadow-sm dark:bg-slate-900 dark:border-slate-800">
+                <span class="text-slate-400 px-1 font-normal dark:text-slate-500">Parcours :</span>
+                <button onclick="toggleAllParcours(true)" class="px-1.5 py-0.5 hover:bg-slate-50 text-indigo-600 rounded transition-colors dark:text-indigo-400 dark:hover:bg-slate-800">Déplier</button>
+                <button onclick="toggleAllParcours(false)" class="px-1.5 py-0.5 hover:bg-slate-50 text-slate-600 rounded transition-colors dark:text-slate-400 dark:hover:bg-slate-800">Replier</button>
+            </div>
+        </div>
+
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-left text-xs uppercase text-slate-500 border-b border-slate-200 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-400">
+                <tr>
+                    <th class="px-4 py-3">Formation</th>
+                    <th class="px-4 py-3">Composante / Lieu</th>
+                    <th class="px-4 py-3">Parcours / année</th>
+                    <th class="px-4 py-3 text-center">Ouvert / Configuré</th>
+                    <th class="px-4 py-3 text-right">Capacité Globale</th>
+                    <th class="px-4 py-3 text-right">Classique (FI)</th>
+                    <th class="px-4 py-3 text-right">Alternance</th>
+                    {% if platformCode|lower == 'mm' %}
+                        <th class="px-4 py-3 text-right">Autres</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                {% if tFormations|length > 0 %}
+                    {% set groupedFormations = {} %}
+                    {% for forma in tFormations %}
+                        {% set compLibelle = forma.formation.composantePorteuse.libelle|default('Sans composante') %}
+                        {% set compFormations = groupedFormations[compLibelle]|default([])|merge([forma]) %}
+                        {% set groupedFormations = groupedFormations|merge({ (compLibelle): compFormations }) %}
+                    {% endfor %}
+
+                    {% for compName in groupedFormations|keys|sort %}
+                        {% set formations = groupedFormations[compName] %}
+                        {% set compId = loop.index %}
+                        {% set compNbParcours = 0 %}
+                        {% set compCapacite = 0 %}
+                        {% for forma in formations %}
+                            {% set compNbParcours = compNbParcours + forma.parcoursList|length %}
+                            {% for pItem in forma.parcoursList %}
+                                {% for annee in pItem.annees %}
+                                    {% set param = anneeParams[annee.id]|default(null) %}
+                                    {% if param and param.active %}
+                                        {% set compCapacite = compCapacite + param.capaciteGlobale|default(annee.capaciteAccueil)|default(0) %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                        {% endfor %}
+
+                        <!-- Group Composante -->
+                        <tr id="comp-{{ compId }}" class="comp-row bg-slate-100 hover:bg-slate-200/80 cursor-pointer select-none transition-colors border-t border-slate-200 dark:bg-slate-900/30 dark:border-slate-800 dark:hover:bg-slate-900/50"
+                            onclick="document.querySelectorAll('.comp-{{ compId }}-row').forEach(row => row.classList.toggle('comp-collapsed')); this.querySelector('.comp-chevron').classList.toggle('rotate-90');">
+                            <td colspan="4" class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">
+                                <div class="flex items-center gap-2">
+                                    <svg class="comp-chevron h-4 w-4 text-slate-500 transform transition-transform duration-200 rotate-90 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                    <span class="font-bold text-slate-900 dark:text-slate-100">{{ compName }}</span>
+                                    <span class="text-xs font-normal text-slate-500 ml-1 dark:text-slate-400">({{ formations|length }} formation{{ formations|length > 1 ? 's' : '' }} · {{ compNbParcours }} parcours)</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-right font-bold text-slate-800 dark:text-slate-200">{{ compCapacite }}</td>
+                            <td>&nbsp;</td>
+                            <td>&nbsp;</td>
+                            {% if platformCode|lower == 'mm' %}
+                                <td>&nbsp;</td>
+                            {% endif %}
+                        </tr>
+
+                        {% for forma in formations %}
+                            {% set formation = forma.formation %}
+                            {% set loc = formation.localisationMention.first %}
+                            {% set ville = loc ? loc.libelle : '-' %}
+                            <tr id="formation-{{ formation.id }}" class="formation-row hover:bg-slate-50 comp-{{ compId }}-row composante-child-row transition-all duration-150 dark:hover:bg-slate-900/30 border-t border-slate-100 dark:border-slate-800"
+                                data-composante="{{ formation.composantePorteuse.libelle|default('') }}"
+                                data-diplome="{{ formation.typeDiplome.libelle|default('') }}"
+                                data-ville="{{ ville }}">
+                                <td class="px-4 py-3">
+                                    <div class="font-medium text-slate-900 dark:text-slate-100">{{ formation.display }}</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">{{ formation.typeDiplome.libelle }}</div>
+                                </td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
+                                    <div class="font-medium text-slate-900 dark:text-slate-100">{{ formation.composantePorteuse.libelle|default('-') }}</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400">Lieu : {{ ville }}</div>
+                                </td>
+                                <td class="px-4 py-3 text-slate-400 dark:text-slate-500">({{ forma.parcoursList|length }} parcours)</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                <td>&nbsp;</td>
+                                {% if platformCode|lower == 'mm' %}
+                                    <td>&nbsp;</td>
+                                {% endif %}
+                            </tr>
+
+                            {% for pItem in forma.parcoursList %}
+                                {% set parcours = pItem.parcours %}
+                                {% set parcoursCapacite = 0 %}
+                                {% for annee in pItem.annees %}
+                                    {% set param = anneeParams[annee.id]|default(null) %}
+                                    {% if param and param.active %}
+                                        {% set parcoursCapacite = parcoursCapacite + param.capaciteGlobale|default(annee.capaciteAccueil)|default(0) %}
+                                    {% endif %}
+                                {% endfor %}
+
+                                <tr id="parcours-{{ parcours.id }}" class="parcours-row bg-slate-50/50 hover:bg-slate-100/80 transition-colors cursor-pointer select-none border-t border-slate-100 comp-{{ compId }}-row composante-child-row dark:bg-slate-900/10 dark:border-slate-800 dark:hover:bg-slate-900/30"
+                                    onclick="document.querySelectorAll('.parcours-{{ parcours.id }}-row').forEach(row => row.classList.toggle('hidden')); this.querySelector('.chevron-icon').classList.toggle('rotate-90');"
+                                >
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    <td class="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">
+                                        <div class="flex items-center gap-2">
+                                            <svg class="chevron-icon h-4 w-4 text-slate-400 transform transition-transform duration-200 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                            <span>{{ parcours.libelle }}</span>
+                                            <span class="text-xs font-normal text-slate-400 dark:text-slate-500">({{ pItem.annees|length }} année{{ pItem.annees|length > 1 ? 's' : '' }})</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        {% if pItem.isOuvert %}
+                                            <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700 font-medium dark:bg-green-950 dark:text-green-400">
+                                                Ouvert
+                                            </span>
+                                        {% else %}
+                                            <span class="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 font-medium dark:bg-blue-950 dark:text-blue-400" title="Reconduction DPE : {{ pItem.etatReconductionLibelle }}">
+                                                Non ouvert ({{ pItem.etatReconductionLibelle }})
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3 text-right font-semibold text-slate-700 dark:text-slate-300">{{ parcoursCapacite }}</td>
+                                    <td>&nbsp;</td>
+                                    <td>&nbsp;</td>
+                                    {% if platformCode|lower == 'mm' %}
+                                        <td>&nbsp;</td>
+                                    {% endif %}
+                                </tr>
+
+                                {% for annee in pItem.annees %}
+                                    {% set param = anneeParams[annee.id]|default(null) %}
+                                    <tr class="year-row parcours-{{ parcours.id }}-row parcours-child-row hover:bg-slate-50/80 hidden transition-all border-t border-slate-100 comp-{{ compId }}-row composante-child-row dark:border-slate-800 dark:hover:bg-slate-900/40"
+                                        data-composante="{{ formation.composantePorteuse.libelle|default('') }}"
+                                        data-diplome="{{ formation.typeDiplome.libelle|default('') }}"
+                                        data-ville="{{ ville }}"
+                                        data-comp-id="{{ compId }}"
+                                        data-formation-id="{{ formation.id }}"
+                                        data-parcours-id="{{ parcours.id }}">
+                                        <td>&nbsp;</td>
+                                        <td>&nbsp;</td>
+                                        <td class="px-4 py-3 pl-8 text-slate-600 font-medium dark:text-slate-300">
+                                            Année {{ annee.ordre }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <div class="flex flex-col gap-1 items-center justify-center">
+                                                {% if annee.isOuvert %}
+                                                    <span class="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-700 font-medium dark:bg-green-950 dark:text-green-400">
+                                                        Année ouverte
+                                                    </span>
+                                                {% else %}
+                                                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600 font-medium dark:bg-slate-800 dark:text-slate-400">
+                                                        Année non ouverte
+                                                    </span>
+                                                {% endif %}
+
+                                                {% if param and param.active %}
+                                                    <span class="rounded-full bg-indigo-100 px-2 py-0.5 text-xs text-indigo-700 font-medium dark:bg-indigo-950 dark:text-indigo-400">
+                                                        Configuré
+                                                    </span>
+                                                {% else %}
+                                                    <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 font-medium dark:bg-amber-950 dark:text-amber-400" title="Plateforme inactive ou non configurée pour cette année">
+                                                        ⚠️ Manquant
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-right font-semibold text-slate-850 dark:text-slate-200">
+                                            {% if param and param.active %}
+                                                {{ param.capaciteGlobale|default(annee.capaciteAccueil)|default(0) }}
+                                            {% else %}
+                                                <span class="text-amber-600 dark:text-amber-400 font-normal" title="Paramètre non configuré">⚠️</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-4 py-3 text-right text-slate-600 dark:text-slate-400">
+                                            {% if param and param.active %}
+                                                {{ param.capaciteFi|default(0) }}
+                                            {% else %}
+                                                <span class="text-slate-400">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-4 py-3 text-right text-slate-600 dark:text-slate-400">
+                                            {% if param and param.active %}
+                                                {{ param.capaciteAlternance|default(0) }}
+                                            {% else %}
+                                                <span class="text-slate-400">-</span>
+                                            {% endif %}
+                                        </td>
+                                        {% if platformCode|lower == 'mm' %}
+                                            <td class="px-4 py-3 text-right text-slate-600 dark:text-slate-400">
+                                                {% if param and param.active %}
+                                                    {{ param.capaciteSpecifique|default(0) }}
+                                                {% else %}
+                                                    <span class="text-slate-400">-</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="{% if platformCode|lower == 'mm' %}8{% else %}7{% endif %}" class="px-4 py-8 text-center text-slate-400 dark:text-slate-500 font-medium">
+                            Aucun parcours ou année active pour cette plateforme.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="meta-filename" class="hidden" data-filename="Données ORéOF (Base de données)"></div>
+</turbo-frame>

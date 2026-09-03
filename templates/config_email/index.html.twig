@@ -5,54 +5,98 @@
 {% endset %}
 
 {% block bouton_header %}
-    <a class="btn btn-outline-primary" href="{{ path('admin_email_template_new') }}">Ajouter un template</a>
-{% endblock %}
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Administration',
-        }
-    ]}) }}
+    <twig:Button
+            href="{{ path('admin_email_template_new') }}"
+            variant="primary"
+            :outline="true"
+            :soft="false"
+            icon="icon:add"
+            label="Ajouter un template"
+            tooltip="Créer un nouveau template d'email"
+    />
 {% endblock %}
 
 {% block content %}
-    <div class="card">
-        <div class="card-body">
-            <table class="table table-sm table-striped">
-                <thead>
+    <section
+            class="rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="border-b border-secondary-200 px-5 py-4 dark:border-secondary-700">
+            <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">
+                Templates d'emails
+            </h2>
+            <p class="mt-1 text-sm text-secondary-600 dark:text-secondary-300">
+                Gérez les modèles d'emails utilisés par les workflows et les notifications.
+            </p>
+        </div>
+
+        <div class="max-h-[70vh] overflow-auto">
+            <table class="min-w-full divide-y divide-secondary-200 text-sm dark:divide-secondary-700">
+                <thead class="bg-secondary-50 dark:bg-secondary-800/70">
                 <tr>
-                    <th>Clé</th>
-                    <th>Etape du process</th>
-                    <th>MAJ</th>
-                    <th></th>
+                    <th class="sticky top-0 z-20 bg-secondary-50 px-4 py-3 text-left font-semibold text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
+                        Clé
+                    </th>
+                    <th class="sticky top-0 z-20 bg-secondary-50 px-4 py-3 text-left font-semibold text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
+                        Etape du process
+                    </th>
+                    <th class="sticky top-0 z-20 bg-secondary-50 px-4 py-3 text-left font-semibold text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
+                        MAJ
+                    </th>
+                    <th class="sticky top-0 z-20 bg-secondary-50 px-4 py-3 text-right font-semibold text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
+                        Actions
+                    </th>
                 </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800">
                 {% for t in templates %}
-                    <tr>
-                        <td>{{ t.workflow }}</td>
-                        <td>{{ t.workflow|afficheProcess }}</td>
-                        <td>{{ t.updated|date('d/m/Y') }}</td>
-                        <td>
-                            <a class="btn btn-sm btn-secondary"
-                               href="{{ path('admin_email_template_edit', {id: t.id}) }}">Éditer</a>
-                            <form method="post" action="{{ path('admin_email_template_delete', {id: t.id}) }}"
-                                  style="display:inline" onsubmit="return confirm('Supprimer ?');">
-                                <input type="hidden" name="_token"
-                                       value="{{ csrf_token('delete_email_template_' ~ t.id) }}">
-                                <button class="btn btn-sm btn-outline-danger">Supprimer</button>
-                            </form>
+                    <tr class="hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40">
+                        <td class="px-4 py-3 font-medium text-secondary-800 dark:text-secondary-100">
+                            {{ t.workflow }}
+                        </td>
+                        <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">
+                            {{ t.workflow|afficheProcess }}
+                        </td>
+                        <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">
+                            {{ t.updated|date('d/m/Y') }}
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex flex-wrap justify-end gap-2">
+                                <twig:Button
+                                        href="{{ path('admin_email_template_edit', {id: t.id}) }}"
+                                        variant="secondary"
+                                        :outline="true"
+                                        :soft="false"
+                                        size="sm"
+                                        icon="icon:edit"
+                                        label="Éditer"
+                                        tooltip="Modifier ce template"
+                                />
+                                <form method="post"
+                                      action="{{ path('admin_email_template_delete', {id: t.id}) }}"
+                                      onsubmit="return confirm('Supprimer ?');">
+                                    <input type="hidden" name="_token"
+                                           value="{{ csrf_token('delete_email_template_' ~ t.id) }}">
+                                    <twig:Button
+                                            type="submit"
+                                            variant="danger"
+                                            :outline="true"
+                                            :soft="false"
+                                            size="sm"
+                                            icon="icon:delete"
+                                            label="Supprimer"
+                                    />
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="4" class="bg-warning">Aucun template</td>
+                        <td colspan="4" class="px-4 py-8 text-center text-secondary-500 dark:text-secondary-300">
+                            Aucun template
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
         </div>
-    </div>
+    </section>
 {% endblock %}

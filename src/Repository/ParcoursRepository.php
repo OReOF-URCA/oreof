@@ -124,7 +124,10 @@ class ParcoursRepository extends ServiceEntityRepository
                     $direction
                 );
             } else {
-                $qb->addOrderBy('p.' . $sort, $direction);
+                $validSortFields = ['libelle', 'sigle', 'typeParcours']; // Règle un crash qui arrive parfois quand on supprime ce que l'on a écrit dans la recherche de parcours.
+                if (in_array($sort, $validSortFields)) {
+                    $qb->addOrderBy('p.' . $sort, $direction);
+                }
             }
         }
 
@@ -234,7 +237,7 @@ class ParcoursRepository extends ServiceEntityRepository
                     'p.typeParcours AS type_parcours'
                 ]
             )
-            ->join('p.formation', 'f', 'WITH', 'p.formation = f.id')
+            ->join('p.formation', 'f')
             ->join('p.dpeParcours', 'dpe')
             ->where(
                 $qb->expr()->like('UPPER(p.objectifsParcours)', 'UPPER(:keyword)')
@@ -263,7 +266,7 @@ class ParcoursRepository extends ServiceEntityRepository
         $parcoursParDefaut = Parcours::PARCOURS_DEFAUT;
 
         $qb = $qb
-            ->join('p.formation', 'f', 'WITH', 'f.id = p.formation')
+            ->join('p.formation', 'f')
             ->join('p.dpeParcours', 'dpe')
             ->select(
                 [
@@ -426,4 +429,35 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function findByNomComplet(string $keyword, int $campagneId) {
+        $qb = $this->createQueryBuilder('p');
+        return $qb
+            ->select(
+                [
+                    'p.id AS id_parcours', 
+                    'p.libelle AS nom_parcours', 
+                    'm.libelle AS nom_formation', 
+                    'td.libelle AS nom_type_diplome'
+                ]
+            )
+            ->join('p.formation', 'f')
+            ->join('f.mention', 'm')
+            ->join('f.typeDiplome', 'td')
+            ->join('p.dpeParcours', 'dpe')
+            ->join('dpe.campagneCollecte', 'camp')
+            ->where(
+                $qb->expr()->andX(
+                    $qb->expr()->orX(
+                        'p.libelle LIKE :keyword',
+                        'm.libelle LIKE :keyword',
+                        'td.libelle LIKE :keyword'
+                    ),
+                    $qb->expr()->eq('camp.id', ':campagneId')
+                )
+            )
+            ->setParameter(':keyword', '%' . $keyword . '%')
+            ->setParameter(':campagneId', $campagneId)
+            ->getQuery()
+            ->getResult();
+    }
 }

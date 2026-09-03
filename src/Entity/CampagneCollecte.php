@@ -16,6 +16,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+use App\Enums\TimelineDateFlagEnum;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CampagneCollecteRepository::class)]
@@ -40,13 +41,7 @@ class CampagneCollecte
     #[ORM\Column]
     private ?bool $defaut = false;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    /** @deprecated */
-    private ?DateTimeInterface $dateOuvertureDpe = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    /** @deprecated */
-    private ?DateTimeInterface $dateClotureDpe = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     /** @deprecated */
@@ -216,33 +211,46 @@ class CampagneCollecte
     }
 
 
-    /** @deprecated */
     public function getDateOuvertureDpe(): ?DateTimeInterface
     {
-        return $this->dateOuvertureDpe;
-    }
-
-    /** @deprecated */
-    public function setDateOuvertureDpe(?DateTimeInterface $dateOuvertureDpe): self
-    {
-        $this->dateOuvertureDpe = $dateOuvertureDpe;
-
-        return $this;
+        foreach ($this->getTimelineDates() as $time) {
+            if ($time->getFlag() === TimelineDateFlagEnum::OUVERTURE_COLLECTE) {
+                return $time->getDate();
+            }
+        }
+        return null;
     }
 
 
-    /** @deprecated */
     public function getDateClotureDpe(): ?DateTimeInterface
     {
-        return $this->dateClotureDpe;
+        foreach ($this->getTimelineDates() as $time) {
+            if ($time->getFlag() === TimelineDateFlagEnum::CLOTURE_COLLECTE) {
+                return $time->getDate();
+            }
+        }
+        return null;
     }
 
-    /** @deprecated */
-    public function setDateClotureDpe(?DateTimeInterface $dateClotureDpe): self
-    {
-        $this->dateClotureDpe = $dateClotureDpe;
 
-        return $this;
+    public function isPeriodActive(?\DateTimeInterface $now = null): bool
+    {
+        if ($now === null) {
+            $now = new \DateTime();
+        }
+
+        $dateOuverture = $this->getDateOuvertureDpe();
+        $dateCloture = $this->getDateClotureDpe();
+
+        if ($dateOuverture !== null && $now < $dateOuverture) {
+            return false;
+        }
+
+        if ($dateCloture !== null && $now > $dateCloture) {
+            return false;
+        }
+
+        return true;
     }
 
     /** @deprecated */

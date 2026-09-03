@@ -1,10 +1,11 @@
 {% form_theme form 'communs/form_theme_v2.html.twig' %}
 {{ form_start(form, {
     'attr': {
-        'id': 'modal_form'
+        'id': 'modal_form',
+        'enctype': 'multipart/form-data'
     }
 }) }}
-    {{ form_row(form.libelle, {label: texte == 'option' ? 'options.labels.libelle'|trans({}, 'form') : ''}) }}
+ {{ form_row(form.libelle, {label: texte == 'option' ? 'options.labels.libelle'|trans({}, 'form') : ''}) }}
     {{ form_row(form.respParcours, {label: texte == 'option' ? 'options.labels.respParcours'|trans({}, 'form') : ''}) }}
 
 {{ form_row(form.coResponsable, {label: texte == 'option' ? 'options.labels.coResponsable'|trans({}, 'form') : ''}) }}
@@ -13,9 +14,20 @@
 
 {{ form_row(form.typeParcours) }}
 {{ form_row(form.parcoursOrigine) }}
+{{ form_row(form.logo) }}
 
 {% if is_granted('ROLE_ADMIN') %}
     {{ form_row(form.codeMentionApogee) }}
 {% endif %}
+<div id="logo-upload-errors" class="mt-2"></div>
+<button type="submit" class="btn btn-success"
+        {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
+>
+    <i class="fal fa-floppy-disk"></i>
+    Enregistrer
+</button>
+
+{{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont
+obligatoires'}) }}
 {{ form_end(form) }}
 

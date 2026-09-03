@@ -185,22 +185,26 @@ class ButMcccVersion extends AbstractButMccc
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FI, 0, 1),
             substr(self::CEL_REGIME_FI, 1, 1),
-            $diffDescriptifs['regimeInscription']['FI']
+            $diffDescriptifs['regimeInscription']['FI'],
+            ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FC, 0, 1),
             substr(self::CEL_REGIME_FC, 1, 2),
-            $diffDescriptifs['regimeInscription']['FC']
+            $diffDescriptifs['regimeInscription']['FC'],
+            ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FI_APPRENTISSAGE, 0, 1),
             substr(self::CEL_REGIME_FI_APPRENTISSAGE, 1, 2),
-            $diffDescriptifs['regimeInscription']['FIA']
+            $diffDescriptifs['regimeInscription']['FIA'],
+            ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FC_CONTRAT_PRO, 0, 1),
             substr(self::CEL_REGIME_FC_CONTRAT_PRO, 1, 2),
-            $diffDescriptifs['regimeInscription']['FCCP']
+            $diffDescriptifs['regimeInscription']['FCCP'],
+            ['withLighterGreen' => true]
         );
 
         $index = 1;
@@ -327,7 +331,7 @@ class ButMcccVersion extends AbstractButMccc
                     $this->excelWriter->writeCellXY(self::COL_CODE_EC, $ligne, $fiche->getSigle(), ['style' => 'HORIZONTAL_CENTER']);
                     $this->excelWriter->writeCellXYDiff(self::COL_INTITULE, $ligne, $ec['diff']['libelle'], ['style' => 'HORIZONTAL_CENTER']);
                     $this->excelWriter->writeCellXYDiff(self::COL_VOL_ETUDIANT, $ligne, $ec['diff']['heuresEctsEc']['sommeEcTotalPres'], ['style' => 'HORIZONTAL_CENTER']);
-                    $this->excelWriter->writeCellXYDiff(self::COL_CM, $ligne, $ec['diff']['heuresEctsEc']['cmPres'] , ['style' => 'HORIZONTAL_CENTER']);
+                    $this->excelWriter->writeCellXYDiff(self::COL_CM, $ligne, $ec['diff']['heuresEctsEc']['cmPres'], ['style' => 'HORIZONTAL_CENTER']);
                     $this->excelWriter->writeCellXYDiff(self::COL_TD, $ligne, $ec['diff']['heuresEctsEc']['tdPres'], ['style' => 'HORIZONTAL_CENTER']);
                     $this->excelWriter->writeCellXYDiff(self::COL_TP, $ligne, $ec['diff']['heuresEctsEc']['tpPres'], ['style' => 'HORIZONTAL_CENTER']);
                     $this->excelWriter->writeCellXYDiff(self::COL_HEURE_AUTONOMIE, $ligne, $ec['diff']['heuresEctsEc']['tePres']);
@@ -371,8 +375,12 @@ class ButMcccVersion extends AbstractButMccc
                 }
                 // affichage des "totaux"
                 $this->excelWriter->writeCellXYDiff(self::COL_CM, $ligne + 2, new DiffObject($totalHeuresAvant['CM'], $totalHeuresApres['CM']), ['style' => 'HORIZONTAL_CENTER']);
-                $this->excelWriter->writeCellXYDiff(self::COL_TD, $ligne + 2,
-                    new DiffObject($totalHeuresAvant['TD'], $totalHeuresApres['TD']), ['style' => 'HORIZONTAL_CENTER']);
+                $this->excelWriter->writeCellXYDiff(
+                    self::COL_TD,
+                    $ligne + 2,
+                    new DiffObject($totalHeuresAvant['TD'], $totalHeuresApres['TD']),
+                    ['style' => 'HORIZONTAL_CENTER']
+                );
                 $this->excelWriter->writeCellXYDiff(self::COL_TP, $ligne + 2, new DiffObject($totalHeuresAvant['TP'], $totalHeuresApres['TP']), ['style' => 'HORIZONTAL_CENTER']);
                 $this->excelWriter->writeCellXYDiff(self::COL_HEURE_AUTONOMIE, $ligne + 2, new DiffObject($totalHeuresAvant['TE'], $totalHeuresApres['TE']), ['style' => 'HORIZONTAL_CENTER']);
 

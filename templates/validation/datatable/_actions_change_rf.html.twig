@@ -1,0 +1,23 @@
+<div class="flex flex-wrap justify-end gap-2">
+    <twig:Button
+            href="{{ path('formation_v2_voir', {'slug': item.formation.slug}) }}"
+            variant="info"
+            size="sm"
+            icon="icon:eye"
+            label="Voir"
+            tooltip="Voir la formation"
+            target="_blank"
+            rel="noopener noreferrer"
+    />
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <twig:Button
+                href="{{ path('app_formation_change_rf_suppression', {demande: item.id}) }}"
+                variant="danger"
+                size="sm"
+                icon="icon:delete"
+                label="Supprimer"
+                tooltip="Supprimer la demande"
+        />
+    {% endif %}
+</div>

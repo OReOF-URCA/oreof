@@ -1,53 +1,47 @@
-{# todo: déplacer dans _ui ? #}
-
 {% form_theme form 'communs/form_theme_v2.html.twig' %}
-{% if isModal is  defined and isModal == true %}
-    {{ form_start(form, {
-        'attr': {
-            'id': 'modal_form'}
-    }) }}
-{% else %}
-    {{ form_start(form) }}
+{% set formAttr = {} %}
+{% if isModal is defined and isModal == true %}
+    {% set formAttr = { 'id': 'modal_form' } %}
 {% endif %}
+{{ form_start(form, { 'attr': formAttr }) }}
     {{ form_widget(form) }}
+{% set submitAttr = (isModal is defined and isModal == true)
+    ? stimulus_action('base', 'sauvegardeFormModal', 'click')
+    : {} %}
 
-{% if isModal is not defined or isModal == false %}
-    <div class="mt-4 flex flex-wrap items-center gap-2">
-        <twig:Button
-                type="submit"
-                variant="success"
-                :soft="false"
-                :outline="false"
-                icon="icon:save"
-                label="Enregistrer"
-                :dataAction="isModal is defined and isModal == true ? 'click->base#sauvegardeFormModal' : ''"
-        />
+    {% if isModal is defined and isModal == false %}
+<twig:Button
+        type="submit"
+        variant="success"
+        :soft="false"
+        :outline="false"
+        icon="icon:save"
+        label="Enregistrer"
+        :attr="submitAttr"
+/>
+    {% endif %}
 
-        {% if button_add_other is defined and button_add_other == true %}
-            <twig:Button
-                    type="submit"
-                    name="btn_update"
-                    value="add_other"
-                    variant="success"
-                    :soft="true"
-                    :outline="false"
-                    icon="icon:save"
-                    label="Enregistrer et continuer"
-            />
-        {% endif %}
+{% if button_add_other is defined and button_add_other == true %}
+    <twig:Button
+            type="submit"
+            variant="success"
+            :soft="false"
+            :outline="false"
+            icon="icon:save"
+            label="Enregistrer et continuer"
+            :attr="{ name: 'btn_update', value: 'add_other' }"
+    />
+{% endif %}
 
-        {% if button_label is defined and button_label == 'modifier' %}
-            <twig:Button
-                    type="submit"
-                    name="btn_update"
-                    value="redirect_to_index"
-                    variant="success"
-                    :soft="true"
-                    :outline="false"
-                    icon="icon:edit"
-                    label="Modifier"
-            />
-        {% endif %}
-    </div>
+{% if button_label is defined and button_label == 'modifier' %}
+    <twig:Button
+            type="submit"
+            variant="success"
+            :soft="false"
+            :outline="false"
+            icon="icon:save"
+            label="Modifier"
+            :attr="{ name: 'btn_update', value: 'redirect_to_index' }"
+    />
 {% endif %}
 {{ form_end(form) }}
