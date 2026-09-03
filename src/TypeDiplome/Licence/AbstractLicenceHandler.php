@@ -125,6 +125,18 @@ abstract class AbstractLicenceHandler implements TypeDiplomeHandlerInterface, Ty
         return $this->licenceMcccVersion->exportExcelLicenceMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
     }
 
+    public function getExportVersion(
+        CampagneCollecte    $anneeUniversitaire,
+        Parcours            $parcours,
+        ?DateTimeInterface  $dateCfvu = null,
+        ?DateTimeInterface  $dateConseil = null,
+        bool                $versionFull = true,
+        bool                $withLogs = false,
+    ) {
+        $this->licenceMcccVersion->setLogDifferences($withLogs);
+        return $this->licenceMcccVersion->genereExcelLicenceMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
+    }
+
     public function exportExcelAndSaveVersionMccc(
         CampagneCollecte   $anneeUniversitaire,
         Parcours           $parcours,
