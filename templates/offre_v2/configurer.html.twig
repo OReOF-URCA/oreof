@@ -14,30 +14,53 @@
 {% set header_title = "Configurer la formation : "~formation.displayLong %}
 {% set header_description = "???" %}
 {% set typeDiplome = formation.typeDiplome %}
-{% set can_edit = is_granted('ROLE_ADMIN') or (campagne and campagne.isPeriodActive()) %}
+{% set is_ses_or_admin = is_granted('ROLE_SES') or is_granted('ROLE_ADMIN') %}
+{% set is_brouillon = dpeFormation and dpeFormation.etatValidation.brouillon is defined %}
+{% set is_period_active = campagne and campagne.isPeriodActive() %}
+
+{% set can_edit = is_ses_or_admin or (is_brouillon and is_period_active) %}
 
 {% block content %}
-    {% if campagne and not campagne.isPeriodActive() %}
-        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-start gap-3 mb-4">
+    {% if not can_edit %}
+        <div class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 flex items-start gap-3 mb-4 shadow-sm">
             <div class="text-xl">⚠️</div>
             <div>
-                <h3 class="font-semibold text-red-900">La campagne de collecte est fermée</h3>
-                <p class="mt-1">
-                    {% if campagne.dateOuvertureDpe and date() < campagne.dateOuvertureDpe %}
-                        Elle ouvrira le {{ campagne.dateOuvertureDpe|date('d/m/Y à H:i') }}.
-                    {% elseif campagne.dateClotureDpe and date() > campagne.dateClotureDpe %}
-                        Elle a fermé le {{ campagne.dateClotureDpe|date('d/m/Y à H:i') }}.
-                    {% else %}
-                        Elle n'est pas ouverte actuellement.
-                    {% endif %}
-                    {% if is_granted('ROLE_ADMIN') %}
-                        En tant qu'administrateur, vous pouvez exceptionnellement modifier les capacités.
-                    {% else %}
-                        Les modifications sont désactivées.
-                    {% endif %}
-                </p>
+                {% if campagne and not campagne.isPeriodActive() %}
+                    <h3 class="font-semibold text-red-900">La campagne de collecte est fermée</h3>
+                    <p class="mt-1 text-red-700">
+                        {% if campagne.dateOuvertureDpe and date() < campagne.dateOuvertureDpe %}
+                            Elle ouvrira le {{ campagne.dateOuvertureDpe|date('d/m/Y à H:i') }}.
+                        {% elseif campagne.dateClotureDpe and date() > campagne.dateClotureDpe %}
+                            Elle a fermé le {{ campagne.dateClotureDpe|date('d/m/Y à H:i') }}.
+                        {% else %}
+                            Elle n'est pas ouverte actuellement.
+                        {% endif %}
+                        Les modifications sont désactivées pour votre rôle.
+                    </p>
+                {% elseif not is_brouillon %}
+                    <h3 class="font-semibold text-red-900">L'offre a été transmise pour validation</h3>
+                    <p class="mt-1 text-red-700">
+                        Elle est actuellement en cours d'instruction et ne peut plus être modifiée par les responsables de formation ou de parcours.
+                    </p>
+                {% endif %}
             </div>
         </div>
+    {% elseif is_ses_or_admin %}
+        {% if (campagne and not campagne.isPeriodActive()) or not is_brouillon %}
+            <div class="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-800 flex items-start gap-3 mb-4 shadow-sm">
+                <div class="text-xl">ℹ️</div>
+                <div>
+                    <h3 class="font-semibold text-indigo-900">Mode d'édition Scolarité Centrale</h3>
+                    <p class="mt-1 text-indigo-700">
+                        {% if campagne and not campagne.isPeriodActive() %}
+                            La campagne de collecte est fermée, mais en tant que gestionnaire SES/Admin, vous conservez le droit d'éditer les capacités.
+                        {% else %}
+                            L'offre a été transmise pour validation, mais en tant que gestionnaire SES/Admin, vous conservez le droit d'éditer les capacités.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        {% endif %}
     {% endif %}
 
     <form action="{{ path('offre_v2_sauvegarder', { slug: formation.slug }) }}" method="POST"
@@ -87,6 +110,59 @@
                 {% endif %}
             </div>
 
+            <!-- État de validation de l'offre -->
+            {% set activeState = dpeFormation.etatValidation|keys|first %}
+            <div class="mt-4 flex items-center justify-between border-t pt-4">
+                <div class="flex items-center gap-2 text-sm text-slate-600">
+                    <span class="font-semibold text-slate-800">Statut de validation :</span>
+                    {% if activeState == 'brouillon' %}
+                        <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">Brouillon</span>
+                    {% elseif activeState == 'soumis_ses' %}
+                        <span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800 ring-1 ring-inset ring-amber-600/20">Soumis Scolarité (SES)</span>
+                    {% elseif activeState == 'soumis_cfvu' %}
+                        <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">Soumis CFVU</span>
+                    {% elseif activeState == 'attente_pv' %}
+                        <span class="inline-flex items-center rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-800 ring-1 ring-inset ring-orange-600/20">CFVU validé (Attente PV)</span>
+                    {% elseif activeState == 'publie' %}
+                        <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Publié</span>
+                    {% endif %}
+                </div>
+
+                {% if dpeFormation.laissezPasser %}
+                    <div class="text-sm text-amber-700 bg-amber-50 rounded-lg px-3 py-1.5 border border-amber-200 flex items-center gap-1.5">
+                        <span>⚠️</span>
+                        <span>Laissez-passer actif : <strong>{{ dpeFormation.laissezPasser }}</strong></span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Documents de Conseil Actifs -->
+            {% set pvDocs = formation.documentConseils|filter(d => d.type == 'pv') %}
+            {% set noteDocs = formation.documentConseils|filter(d => d.type == 'note_explicative') %}
+            {% if pvDocs is not empty or noteDocs is not empty %}
+                <div class="mt-4 p-3 bg-slate-50 border rounded-lg text-sm space-y-2">
+                    <h4 class="font-semibold text-slate-700">Documents validés en vigueur :</h4>
+                    {% for doc in pvDocs %}
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-500">📄 Procès-Verbal :</span>
+                            <a class="text-indigo-600 hover:underline font-medium" target="_blank" href="{{ path('app_upload_download', {context: 'conseils', filename: doc.filename, originalName: doc.originalFilename}) }}">
+                                {{ doc.originalFilename }}
+                            </a>
+                            <span class="text-xs text-slate-400">(déposé le {{ doc.uploadedAt|date('d/m/Y') }})</span>
+                        </div>
+                    {% endfor %}
+                    {% for doc in noteDocs %}
+                        <div class="flex items-center gap-2">
+                            <span class="text-slate-500">📄 Note Explicative :</span>
+                            <a class="text-indigo-600 hover:underline font-medium" target="_blank" href="{{ path('app_upload_download', {context: 'conseils', filename: doc.filename, originalName: doc.originalFilename}) }}">
+                                {{ doc.originalFilename }}
+                            </a>
+                            <span class="text-xs text-slate-400">(déposée le {{ doc.uploadedAt|date('d/m/Y') }})</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             <div class="mt-5 flex items-center justify-end gap-3 flex-wrap">
                 <!-- Autosave state indicator -->
                 <div data-autosave-capacites-target="status" class="text-sm font-semibold flex items-center gap-2 opacity-0 transition-opacity duration-300">
@@ -96,14 +172,32 @@
                     <button type="submit" class="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-slate-50 cursor-pointer">
                         Sauvegarder en brouillon
                     </button>
-                    <button type="button" class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 cursor-pointer">
-                        Transmettre pour validation composante
-                    </button>
                 {% else %}
                     <div class="text-sm text-slate-500 italic bg-slate-100 rounded-lg px-3 py-2">
-                        Modifications désactivées (hors période)
+                        Modifications de l'offre désactivées
                     </div>
                 {% endif %}
+                
+                {% for transition in transitions %}
+                    {% set can_trigger_transition = is_ses_or_admin or (transition.name == 'transmettre' and can_edit) %}
+                    {% if can_trigger_transition %}
+                        <a href="{{ path('app_validation_' ~ transition.metadata.type, {
+                                 etape: activeState,
+                                 transition: transition.name,
+                                 id: formation.id,
+                                 type: 'formation'
+                             }) }}"
+                           data-turbo="true"
+                           data-action="click->modalturbo#open"
+                           class="rounded-lg bg-{{ transition.metadata.btn|default('indigo') == 'success' ? 'green-600 hover:bg-green-700' : (transition.metadata.btn|default('indigo') == 'warning' ? 'amber-600 hover:bg-amber-700' : 'indigo-600 hover:bg-indigo-700') }} px-4 py-2 text-sm font-medium text-white cursor-pointer inline-flex items-center gap-1.5"
+                        >
+                            {% if transition.metadata.icon is defined %}
+                                <i class="fal {{ transition.metadata.icon }}"></i>
+                            {% endif %}
+                            <span>{{ transition.metadata.label|default(transition.name) }}</span>
+                        </a>
+                    {% endif %}
+                {% endfor %}
             </div>
 
         </twig:Card>
@@ -180,5 +274,69 @@
             </div>
         {% endfor %}
     </form>
+
+    <!-- Historique des validations documentaires (PV & Notes) -->
+    {% if formation.historiqueFormations is not empty %}
+        <twig:Card extraClass="mt-6" title="Historique des validations documentaires (PV & Notes)">
+            <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <table class="w-full text-sm text-left rtl:text-right text-slate-500 dark:text-slate-400">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 dark:bg-slate-700 dark:text-slate-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">Date</th>
+                            <th scope="col" class="px-6 py-3">Étape / Décision</th>
+                            <th scope="col" class="px-6 py-3">Fichiers associés</th>
+                            <th scope="col" class="px-6 py-3">Commentaire</th>
+                            <th scope="col" class="px-6 py-3">Par</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for histo in formation.historiqueFormations|sort((a, b) => b.created <=> a.created) %}
+                            <tr class="bg-white border-b dark:bg-slate-800 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600">
+                                <td class="px-6 py-4 font-medium text-slate-900 whitespace-nowrap dark:text-white">
+                                    {{ histo.created|date('d/m/Y H:i') }}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium 
+                                        {% if histo.etat == 'valide' %}bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20
+                                        {% elseif histo.etat == 'refuse' %}bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20
+                                        {% elseif histo.etat == 'reserve' %}bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-600/20
+                                        {% else %}bg-slate-50 text-slate-700 ring-1 ring-inset ring-slate-600/10{% endif %}">
+                                        {{ (histo.etape)|trans({}, 'process')|default(histo.etape) }} ({{ histo.etat }})
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 space-y-1">
+                                    {% if histo.documentPv %}
+                                        <div class="flex items-center gap-1.5 text-xs">
+                                            <span class="text-slate-500 font-semibold">📄 PV :</span>
+                                            <a class="text-indigo-600 hover:underline font-semibold" target="_blank" href="{{ path('app_upload_download', {context: 'conseils', filename: histo.documentPv.filename, originalName: histo.documentPv.originalFilename}) }}">
+                                                {{ histo.documentPv.originalFilename }}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                    {% if histo.documentNote %}
+                                        <div class="flex items-center gap-1.5 text-xs">
+                                            <span class="text-slate-500 font-semibold">📄 Note :</span>
+                                            <a class="text-indigo-600 hover:underline font-semibold" target="_blank" href="{{ path('app_upload_download', {context: 'conseils', filename: histo.documentNote.filename, originalName: histo.documentNote.originalFilename}) }}">
+                                                {{ histo.documentNote.originalFilename }}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                    {% if not histo.documentPv and not histo.documentNote and histo.complements.laisserPasser is defined %}
+                                        <span class="text-amber-700 italic text-xs">Laissez-passer : {{ histo.complements.laisserPasser }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 max-w-xs truncate" title="{{ histo.commentaire }}">
+                                    {{ histo.commentaire|default('-') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {{ histo.user ? histo.user.display : 'Système' }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </twig:Card>
+    {% endif %}
 {% endblock %}
 

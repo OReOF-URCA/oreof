@@ -10,6 +10,7 @@
 namespace App\EventSubscriber;
 
 use App\Entity\User;
+use App\Entity\Formation;
 use App\Entity\HistoriqueFicheMatiere;
 use App\Entity\HistoriqueFormation;
 use App\Entity\HistoriqueParcours;
@@ -22,6 +23,9 @@ use App\Events\HistoriqueParcoursEvent;
 use App\Repository\ComposanteRepository;
 use App\Repository\FormationRepository;
 use App\Repository\UserRepository;
+use App\Classes\DataUserSession;
+use App\Entity\DocumentConseil;
+use App\Entity\DpeFormation;
 use App\Exception\FileUploadException;
 use App\Service\SecureUploadService;
 use App\Utils\Tools;
@@ -47,6 +51,7 @@ class HistoriqueSubscriber implements EventSubscriberInterface
         protected FormationRepository    $formationRepository,
         protected EntityManagerInterface     $entityManager,
         private readonly SecureUploadService $secureUploadService,
+        private readonly DataUserSession $dataUserSession,
     ) {
     }
 
@@ -154,19 +159,41 @@ class HistoriqueSubscriber implements EventSubscriberInterface
             throw new Exception('Pas de requete');
         }
 
+        $formation = $event->getFormation();
         $histo = new HistoriqueFormation();
-        $histo->setFormation($event->getFormation());
+        $histo->setFormation($formation);
         $histo->setDate($this->getDateTime($request));
         $histo->setUser($this->resolveUser($event->getUser()));
         $histo->setEtape($event->getEtape());
         $histo->setCommentaire($this->getCommentaire($request));
         $histo->setEtat($event->getEtat());
 
+        // Lier DpeFormation
+        $campagne = $this->dataUserSession->getCampagneCollecte();
+        $dpeFormation = null;
+        if ($campagne !== null && $formation !== null) {
+            $dpeFormation = $this->entityManager->getRepository(DpeFormation::class)->findOneBy([
+                'formation' => $formation,
+                'campagneCollecte' => $campagne,
+            ]);
+            if ($dpeFormation === null) {
+                $dpeFormation = new DpeFormation();
+                $dpeFormation->setFormation($formation);
+                $dpeFormation->setCampagneCollecte($campagne);
+                $dpeFormation->setEtatValidation(['brouillon' => 1]);
+                $this->entityManager->persist($dpeFormation);
+            }
+            $histo->setDpeFormation($dpeFormation);
+        }
+
         foreach ($this->cases as $cas) {
             if ($request->request->has($cas)) {
                 $tab[$cas] = $request->request->get($cas);
                 if ($cas === 'laisserPasser') {
                     $histo->setEtat('laisserPasser');
+                    if ($dpeFormation !== null) {
+                        $dpeFormation->setLaissezPasser($request->request->get('laisserPasser'));
+                    }
                 }
             }
 
@@ -175,15 +202,88 @@ class HistoriqueSubscriber implements EventSubscriberInterface
             }
         }
 
-        try {
-            $upload = $this->secureUploadService->uploadFromRequest($request, 'file', 'conseils');
-        } catch (FileUploadException) {
-            throw new Exception('Fichier de validation invalide.');
+        // Dépôt de fichier (PV) ou liaison PV existant
+        $pvId = $request->request->get('pv_id');
+        if ($pvId) {
+            $existingPv = $this->entityManager->getRepository(DocumentConseil::class)->find($pvId);
+            if ($existingPv !== null) {
+                $existingPv->addFormation($formation);
+                $histo->setDocumentPv($existingPv);
+            }
+        } else {
+            try {
+                $upload = $this->secureUploadService->uploadFromRequest($request, 'file', 'conseils');
+            } catch (FileUploadException) {
+                throw new Exception('Fichier de validation invalide.');
+            }
+
+            if ($upload !== null) {
+                $tab['fichier'] = $upload->getStoredFilename();
+                $tab['fichier_original'] = $upload->getOriginalFilename();
+
+                $docPv = new DocumentConseil();
+                $docPv->setType('pv');
+                $docPv->setFilename($upload->getStoredFilename());
+                $docPv->setOriginalFilename($upload->getOriginalFilename());
+                $docPv->setDateConseil($histo->getDate());
+                $docPv->setUploadedBy($histo->getUser());
+                $docPv->setComposante($formation->getComposantePorteuse());
+                $docPv->addFormation($formation);
+
+                // Gérer le partage avec d'autres formations
+                $otherFormations = (array)$request->request->all('formations_pv');
+                foreach ($otherFormations as $fId) {
+                    $f = $this->entityManager->getRepository(Formation::class)->find($fId);
+                    if ($f !== null) {
+                        $docPv->addFormation($f);
+                    }
+                }
+
+                $this->entityManager->persist($docPv);
+                $histo->setDocumentPv($docPv);
+            }
         }
 
-        if ($upload !== null) {
-            $tab['fichier'] = $upload->getStoredFilename();
-            $tab['fichier_original'] = $upload->getOriginalFilename();
+        // Dépôt de note explicative ou liaison note existante
+        $noteId = $request->request->get('note_id');
+        if ($noteId) {
+            $existingNote = $this->entityManager->getRepository(DocumentConseil::class)->find($noteId);
+            if ($existingNote !== null) {
+                $existingNote->addFormation($formation);
+                $histo->setDocumentNote($existingNote);
+            }
+        } else {
+            try {
+                $uploadNote = $this->secureUploadService->uploadFromRequest($request, 'fileNote', 'conseils');
+            } catch (FileUploadException) {
+                throw new Exception('Note explicative invalide.');
+            }
+
+            if ($uploadNote !== null) {
+                $tab['fichier_note'] = $uploadNote->getStoredFilename();
+                $tab['fichier_note_original'] = $uploadNote->getOriginalFilename();
+
+                $docNote = new DocumentConseil();
+                $docNote->setType('note_explicative');
+                $docNote->setFilename($uploadNote->getStoredFilename());
+                $docNote->setOriginalFilename($uploadNote->getOriginalFilename());
+                $docNote->setDateConseil($histo->getDate());
+                $docNote->setUploadedBy($histo->getUser());
+                $docNote->setComposante($formation->getComposantePorteuse());
+                $docNote->addFormation($formation);
+
+                // Gérer le partage avec d'autres formations
+                $otherFormationsNote = (array)$request->request->all('formations_note');
+                foreach ($otherFormationsNote as $fId) {
+                    $f = $this->entityManager->getRepository(Formation::class)->find($fId);
+                    if ($f !== null) {
+                        $docNote->addFormation($f);
+                    }
+                }
+
+                $this->entityManager->persist($docNote);
+                $histo->setDocumentNote($docNote);
+            }
         }
 
         $histo->setComplements($tab ?? []);

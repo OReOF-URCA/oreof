@@ -223,6 +223,13 @@ class Formation
      */
     #[ORM\OneToMany(mappedBy: 'formation', targetEntity: ChangeParcours::class)]
     private Collection $changeParcours;
+
+    #[ORM\OneToMany(mappedBy: 'formation', targetEntity: DpeFormation::class)]
+    private Collection $dpeFormations;
+
+    #[ORM\ManyToMany(targetEntity: DocumentConseil::class, mappedBy: 'formations')]
+    private Collection $documentConseils;
+
     public function __construct(?CampagneCollecte $anneeUniversitaire)
     {
         $this->dpe = $anneeUniversitaire;
@@ -244,6 +251,8 @@ class Formation
         $this->changeRves = new ArrayCollection();
         $this->userProfils = new ArrayCollection();
         $this->changeParcours = new ArrayCollection();
+        $this->dpeFormations = new ArrayCollection();
+        $this->documentConseils = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -1275,4 +1284,59 @@ class Formation
         return $this->etatReconduction === TypeModificationDpeEnum::FERMETURE_DEFINITIVE;
     }
 
+    /**
+     * @return Collection<int, DpeFormation>
+     */
+    public function getDpeFormations(): Collection
+    {
+        return $this->dpeFormations;
+    }
+
+    public function addDpeFormation(DpeFormation $dpeFormation): static
+    {
+        if (!$this->dpeFormations->contains($dpeFormation)) {
+            $this->dpeFormations->add($dpeFormation);
+            $dpeFormation->setFormation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDpeFormation(DpeFormation $dpeFormation): static
+    {
+        if ($this->dpeFormations->removeElement($dpeFormation)) {
+            if ($dpeFormation->getFormation() === $this) {
+                $dpeFormation->setFormation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, DocumentConseil>
+     */
+    public function getDocumentConseils(): Collection
+    {
+        return $this->documentConseils;
+    }
+
+    public function addDocumentConseil(DocumentConseil $documentConseil): static
+    {
+        if (!$this->documentConseils->contains($documentConseil)) {
+            $this->documentConseils->add($documentConseil);
+            $documentConseil->addFormation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDocumentConseil(DocumentConseil $documentConseil): static
+    {
+        if ($this->documentConseils->removeElement($documentConseil)) {
+            $documentConseil->removeFormation($this);
+        }
+
+        return $this;
+    }
 }
