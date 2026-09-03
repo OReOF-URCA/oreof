@@ -89,6 +89,17 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
         return $this->m2eMcccVersion->exportExcelMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
     }
 
+    public function getExportVersion(
+        CampagneCollecte    $anneeUniversitaire,
+        Parcours            $parcours,
+        ?DateTimeInterface  $dateCfvu = null,
+        ?DateTimeInterface  $dateConseil = null,
+        bool                $versionFull = true,
+        bool                $withLogs = false,
+    ) {
+        return $this->m2eMcccVersion->genereExcelMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
+    }
+
     public function exportExcelAndSaveVersionMccc(
         CampagneCollecte   $anneeUniversitaire,
         Parcours           $parcours,

@@ -60,6 +60,17 @@ final class DuHandler implements TypeDiplomeHandlerInterface
         return new StreamedResponse();
     }
 
+    public function getExportVersion(
+        CampagneCollecte        $anneeUniversitaire,
+        Parcours                $parcours,
+        ?DateTimeInterface      $dateCfvu = null,
+        ?DateTimeInterface      $dateConseil = null,
+        bool                    $versionFull = true,
+        bool                    $withLogs = false        
+    ) : bool {
+        return false;
+    }
+
     public function exportExcelAndSaveVersionMccc(CampagneCollecte $anneeUniversitaire, Parcours $parcours, string $dir, string $fichier, ?DateTimeInterface $dateCfvu = null, ?DateTimeInterface $dateConseil = null): string
     {
         // TODO: Implement exportExcelAndSaveVersionMccc() method.
