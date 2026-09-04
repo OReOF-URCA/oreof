@@ -62,6 +62,7 @@ class ExtractionExcelCommand extends Command
 
         if($hasBeenModified) {
             $this->outputArray = [
+                'no_version_available' => [],
                 'errors' => []
             ];
 
@@ -73,6 +74,9 @@ class ExtractionExcelCommand extends Command
                 try {
                     $typeDiplome = $this->typeD->get($p->getFormation()->getTypeDiplome());
                     $v = $typeDiplome->getExportVersion($campagneDefaut, $p, withLogs: true);
+                    if ($v === false) {
+                        $this->outputArray['no_version_available'][] = ['parcours_id' => $p->getId()];
+                    }
                 } catch(\Exception $e) {
                     $this->outputArray['errors'][] = [
                         'parcours_id' => $p->getId(),
