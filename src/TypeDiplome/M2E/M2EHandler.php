@@ -19,6 +19,7 @@ use App\Entity\TypeEpreuve;
 use App\Repository\BlocCompetenceRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
+use App\TypeDiplome\Licence\Services\LicenceMcccVersion;
 use App\TypeDiplome\M2E\Services\M2eMccc;
 use App\TypeDiplome\M2E\Services\M2eMcccVersion;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
@@ -45,7 +46,8 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
         protected M2eMccc                $m2eMccc,
         protected M2eMcccVersion         $m2eMcccVersion,
         private BlocCompetenceRepository $blocCompetenceRepository,
-        private StructureParcoursM2e     $structureParcoursM2e
+        private StructureParcoursM2e     $structureParcoursM2e,
+        private LicenceMcccVersion       $licenceMcccVersion
     )
     {
         $typeD = $typeDiplomeRepository->findOneBy(['libelle_court' => $this->getLibelleCourt()]);
@@ -97,7 +99,8 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
         bool                $versionFull = true,
         bool                $withLogs = false,
     ) {
-        return $this->m2eMcccVersion->genereExcelMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
+        $this->licenceMcccVersion->setLogDifferences($withLogs);
+        return $this->licenceMcccVersion->genereExcelLicenceMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
     }
 
     public function exportExcelAndSaveVersionMccc(
