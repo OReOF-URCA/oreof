@@ -1,16 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Gestion des validations DPE
-{% endset %}
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Pilotage'},
-        {title: 'Gestion des validations DPE'},
-    ]}) }}
-{% endblock %}
-
 {% block content %}
     {% set toneMap = {
         'info': {

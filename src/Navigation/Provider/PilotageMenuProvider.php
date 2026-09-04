@@ -57,12 +57,6 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 ),
 
                 MenuItem::link(
-                    'pilotage.gestion_offre_old',
-                    'menu.admin.gestion_offre_old',
-                    'app_offre',
-                ),
-
-                MenuItem::link(
                     'pilotage.gestion_offre',
                     'menu.admin.gestion_offre',
                     'app_offre_index',
@@ -142,6 +136,13 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 key: sprintf('pilotage_composante.%s.consulter_offre', $composante->getId()),
                 label: 'menu.compo.consulter_offre',
                 route: 'structure_composante_index',
+            )->inColumn($column);
+
+            $children[] = MenuItem::link(
+                key: sprintf('pilotage_composante.%s.gestion_offre', $composante->getId()),
+                label: 'menu.compo.gestion_offre',
+                route: 'app_offre_composante_index',
+                routeParams: ['composante' => $composante->getId()],
             )->inColumn($column);
 
             $children[] = MenuItem::link(

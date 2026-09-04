@@ -1,16 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Mes commentaires
-{% endset %}
-
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        { title: header_title }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <twig:Button
             href="{{ path('app_commentaire_export') }}"

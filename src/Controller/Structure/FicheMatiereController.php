@@ -63,7 +63,7 @@ class FicheMatiereController extends BaseController
             ];
             $baseJoins[] = [
                 'type' => 'inner',
-                'path' => 'dpe_formation.composante',
+                'path' => 'dpe_formation.composantePorteuse',
                 'alias' => 'dpe_composante'
             ];
             $baseWheres[] = 'dpe_composante IN (:dpeComposantes)';

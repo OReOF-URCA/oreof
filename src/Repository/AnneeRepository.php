@@ -15,4 +15,29 @@ class AnneeRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Annee::class);
     }
+
+    /**
+     * @return array<int, list<Annee>>
+     */
+    public function findByCampagneIndexedByParcours(\App\Entity\CampagneCollecte $campagne): array
+    {
+        $annees = $this->createQueryBuilder('a')
+            ->join('a.parcours', 'p')
+            ->join('p.dpeParcours', 'dp')
+            ->where('dp.campagneCollecte = :campagne')
+            ->setParameter('campagne', $campagne)
+            ->orderBy('a.ordre', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        $map = [];
+        foreach ($annees as $annee) {
+            $parcoursId = $annee->getParcours()?->getId();
+            if ($parcoursId !== null) {
+                $map[$parcoursId][] = $annee;
+            }
+        }
+
+        return $map;
+    }
 }

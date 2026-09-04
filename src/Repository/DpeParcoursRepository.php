@@ -230,24 +230,31 @@ class DpeParcoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByCampagneCollecte(CampagneCollecte $campagneCollecte): array
+    public function findByCampagneCollecte(CampagneCollecte $campagneCollecte, ?Composante $composante = null): array
     {
-        $query = $this->createQueryBuilder('dp')
+        $qb = $this->createQueryBuilder('dp')
             ->join('dp.parcours', 'p')
             ->join('p.formation', 'f')
-            ->addSelect('p')
-            ->addSelect('f')
-            ->innerJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id')
+            ->leftJoin('f.composantePorteuse', 'cp')
+            ->leftJoin('f.mention', 'm')
+            ->leftJoin('f.typeDiplome', 'td')
+            ->leftJoin('f.domaine', 'dom')
+            ->leftJoin('f.composantesInscription', 'fci')
+            ->leftJoin('p.composanteInscription', 'pci')
+            ->addSelect('p', 'f', 'cp', 'm', 'td', 'dom', 'fci', 'pci')
             ->where('dp.campagneCollecte = :campagneCollecte')
             ->setParameter('campagneCollecte', $campagneCollecte)
-            ->orderBy('f.typeDiplome', 'ASC')
+            ->orderBy('td.libelle', 'ASC')
             ->addOrderBy('m.libelle', 'ASC')
             ->addOrderBy('f.mentionTexte', 'ASC')
-            ->addOrderBy('p.libelle', 'ASC')
-        ;
+            ->addOrderBy('p.libelle', 'ASC');
 
-        return $query->getQuery()
-            ->getResult();
+        if ($composante !== null) {
+            $qb->andWhere('f.composantePorteuse = :composante')
+                ->setParameter('composante', $composante);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 
     public function findFromAnneeUniversitaire(int $idCampagneCollecte) : array {

@@ -11,17 +11,6 @@
     </div>
 {% endblock %}
 
-{% set header_title %}
-    Consulter l'offre de formation
-{% endset %}
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title:'Pilotage', href: path('app_section_pilotage')},
-        { title: header_title}
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     {% if is_granted('ROLE_ADMIN') %}
 

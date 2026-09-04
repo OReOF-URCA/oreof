@@ -790,3 +790,7 @@ btn.tacite_reconduction.parcours.valide: 'Valider la tacite reconduction du parc
 title.validation.parcours.valider_tacite_composante: 'Valider la tacite reconduction du parcours'
 btn.validation.parcours.valider_tacite_composante: 'Valider la tacite reconduction du parcours'
 btn.validation.parcours_rf.valide: 'Valider les parcours selectionnés'
+validation.demande_initialisee: 'Demande initialisée'
+validation.attente_pv: 'Attente PV'
+validation.effectuee: 'Effectuée'
+validation.verification_pv: 'Vérification PV'

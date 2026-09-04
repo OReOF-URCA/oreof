@@ -9,12 +9,9 @@
     </style>
 {% endblock %}
 
-{% set header_title = "Synthèse de l’offre URCA "~user_data.campagneCollecte.libelle %}
-{% set header_description = "Vue consolidée des ouvertures, plateformes, capacités et validations." %}
-
 {% block bouton_header %}
     {% if is_granted('ROLE_ADMIN') %}
-        <twig:Button href="{{ path('app_formation_new', { redirect: 'app_offre_index' }) }}"
+        <twig:Button href="{{ path('app_formation_new', { redirect: composante ? 'app_offre_composante_index' : 'app_offre_index', composante: composante ? composante.id : null }) }}"
                      variant="success" class="mr-2">
             Créer une formation
         </twig:Button>
@@ -25,12 +22,14 @@
             Dates de collecte
         </twig:Button>
     {% endif %}
-    <twig:Button href="#" variant="secondary" class="mr-2">
-        Exporter Excel
-    </twig:Button>
-    <twig:Button href="#" variant="primary">
-        Générer les annexes CA
-    </twig:Button>
+        <twig:Button href="#" variant="secondary" class="mr-2">
+            Exporter Excel
+        </twig:Button>
+     {% if is_granted('ROLE_ADMIN') %}
+        <twig:Button href="#" variant="primary">
+            Générer les annexes CA
+        </twig:Button>
+     {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -58,7 +57,8 @@
             </div>
         {% endif %}
         
-        <form method="get" action="{{ path('app_offre_index') }}" data-turbo-frame="offre_table" class="space-y-6">
+        {% set formUrl = composante ? path('app_offre_composante_index', {composante: composante.id}) : path('app_offre_index') %}
+        <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" class="space-y-6">
             <!-- KPI -->
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
                 <div class="rounded-xl border bg-white p-4 shadow-sm">
@@ -95,18 +95,20 @@
             <!-- Filters -->
             <div class="rounded-xl border bg-white p-4 shadow-sm">
                 <div class="grid gap-4 md:grid-cols-12">
-                    <div class="md:col-span-3">
+                    <div class="{% if composante %}md:col-span-5{% else %}md:col-span-3{% endif %}">
                         <input name="q" value="{{ filters.q|default('') }}" class="rounded-lg border px-3 py-2 text-sm w-full" placeholder="Rechercher une formation…" oninput="this.form.requestSubmit()">
                     </div>
 
-                    <div class="md:col-span-2">
-                        <select name="comp" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
-                            <option value="">Toutes les composantes</option>
-                            {% for composante in composantes %}
-                                <option value="{{ composante.id }}" {% if filters.comp|default('') == composante.id %}selected{% endif %}>{{ composante.libelle }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
+                    {% if not composante %}
+                        <div class="md:col-span-2">
+                            <select name="comp" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
+                                <option value="">Toutes les composantes</option>
+                                {% for compItem in composantes %}
+                                    <option value="{{ compItem.id }}" {% if filters.comp|default('') == compItem.id %}selected{% endif %}>{{ compItem.libelle }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
 
                     <div class="md:col-span-2">
                         <select name="type" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
@@ -137,7 +139,7 @@
                     </div>
 
                     <div class="md:col-span-1">
-                        <a href="{{ path('app_offre_index') }}" data-turbo-frame="offre_table" class="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 transition-colors w-full text-center">
+                        <a href="{{ formUrl }}" data-turbo-frame="offre_table" class="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 transition-colors w-full text-center">
                             Effacer
                         </a>
                     </div>
@@ -165,13 +167,17 @@
             <div class="overflow-hidden rounded-xl border bg-white shadow-sm">
                 <!-- Table Controls -->
                 <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50/70 px-4 py-3 border-b border-slate-200 text-sm">
-                    <div class="font-semibold text-slate-700">Offre de formation</div>
+                    <div class="font-semibold text-slate-700">
+                        Offre de formation {% if composante %}— <span class="text-primary font-bold">{{ composante.libelle }}</span>{% endif %}
+                    </div>
                     <div class="flex items-center gap-4 text-xs font-medium">
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
-                            <span class="text-slate-400 px-1.5 font-normal">Composantes:</span>
-                            <button type="button" onclick="toggleAllComposantes(true)" class="px-2 py-1 hover:bg-slate-50 text-indigo-600 rounded font-semibold transition-colors">Déplier tout</button>
-                            <button type="button" onclick="toggleAllComposantes(false)" class="px-2 py-1 hover:bg-slate-50 text-slate-600 rounded font-semibold transition-colors">Replier tout</button>
-                        </div>
+                        {% if not composante %}
+                            <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
+                                <span class="text-slate-400 px-1.5 font-normal">Composantes:</span>
+                                <button type="button" onclick="toggleAllComposantes(true)" class="px-2 py-1 hover:bg-slate-50 text-indigo-600 rounded font-semibold transition-colors">Déplier tout</button>
+                                <button type="button" onclick="toggleAllComposantes(false)" class="px-2 py-1 hover:bg-slate-50 text-slate-600 rounded font-semibold transition-colors">Replier tout</button>
+                            </div>
+                        {% endif %}
                         <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
                             <span class="text-slate-400 px-1.5 font-normal">Parcours:</span>
                             <button type="button" onclick="toggleAllParcours(true)" class="px-2 py-1 hover:bg-slate-50 text-indigo-600 rounded font-semibold transition-colors">Déplier tout</button>
@@ -194,28 +200,8 @@
                     </thead>
 
                     <tbody class="divide-y">
-                    {% set groupedFormations = {} %}
-                    {% for forma in tFormations %}
-                        {% set compLibelle = forma.formation.composantePorteuse.libelle|default('Sans composante') %}
-                        {% set compFormations = groupedFormations[compLibelle]|default([])|merge([forma]) %}
-                        {% set groupedFormations = groupedFormations|merge({ (compLibelle): compFormations }) %}
-                    {% endfor %}
-
-                    {% for compName in groupedFormations|keys|sort %}
-                        {% set formations = groupedFormations[compName] %}
+                    {% for compName, compGroup in groupedFormations %}
                         {% set compId = loop.index %}
-                        {% set compNbParcours = 0 %}
-                        {% set compNbParcoursOuvert = 0 %}
-                        {% set compCapacite = 0 %}
-                        {% for forma in formations %}
-                            {% set compNbParcours = compNbParcours + forma.formation.parcours|length %}
-                            {% set compCapacite = compCapacite + forma.formation.capacite|default(0) %}
-                            {% for parcours in forma.formation.parcours %}
-                                {% if parcours.isOuvert %}
-                                    {% set compNbParcoursOuvert = compNbParcoursOuvert + 1 %}
-                                {% endif %}
-                            {% endfor %}
-                        {% endfor %}
 
                         <!-- Group Composante -->
                         <tr class="bg-slate-100 hover:bg-slate-200/80 cursor-pointer select-none transition-colors border-t border-slate-200"
@@ -225,29 +211,24 @@
                                     <svg class="comp-chevron h-4 w-4 text-slate-500 transform transition-transform duration-200 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                                     </svg>
-                                    <span class="font-bold text-slate-900">{{ compName }}</span>
-                                    <span class="text-xs font-normal text-slate-500 ml-1">({{ formations|length }} formation{{ formations|length > 1 ? 's' : '' }} · {{ compNbParcours }} parcours)</span>
+                                    <span class="font-bold text-slate-900">{{ compGroup.libelle }}</span>
+                                    <span class="text-xs font-normal text-slate-500 ml-1">({{ compGroup.nbFormations }} formation{{ compGroup.nbFormations > 1 ? 's' : '' }} · {{ compGroup.nbParcours }} parcours)</span>
                                 </div>
                             </td>
                             <td class="px-4 py-3">
                                 <span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs text-slate-700 font-medium">
-                                    {{ compNbParcoursOuvert }}/{{ compNbParcours }} ouverts
+                                    {{ compGroup.nbParcoursOuvert }}/{{ compGroup.nbParcours }} ouverts
                                 </span>
                             </td>
                             <td class="px-4 py-3">&nbsp;</td>
-                            <td class="px-4 py-3 text-right font-bold text-slate-800">{{ compCapacite }}</td>
+                            <td class="px-4 py-3 text-right font-bold text-slate-800">{{ compGroup.capacite }}</td>
                             <td class="px-4 py-3">&nbsp;</td>
                             <td class="px-4 py-3">&nbsp;</td>
                         </tr>
 
-                        {% for forma in formations %}
+                        {% for forma in compGroup.formations %}
                             {% set formation = forma.formation %}
-                            {% set formationOuverte = false %}
-                            {% for parcours in formation.parcours %}
-                                {% if parcours.isOuvert %}
-                                    {% set formationOuverte = true %}
-                                {% endif %}
-                            {% endfor %}
+                            {% set formationOuverte = forma.isOuverte %}
                             <tr class="hover:bg-slate-50 comp-{{ compId }}-row composante-child-row transition-all duration-150">
                                 <td class="px-4 py-3">
                                     <div class="font-medium text-slate-900">
@@ -256,13 +237,13 @@
                                             <span class="inline-flex items-center text-red-600 ml-1 cursor-help animate-pulse" title="{{ forma.anomalies|join('\n') }}">⚠️</span>
                                         {% endif %}
                                     </div>
-                                    <div class="text-xs text-slate-500">{{ formation.typeDiplome.libelle }}</div>
+                                    <div class="text-xs text-slate-500">{{ formation.typeDiplome ? formation.typeDiplome.libelle : '' }}</div>
                                 </td>
                                 <td class="px-4 py-3 text-slate-600">
-                                    {{ formation.composantePorteuse.libelle }}
+                                    {{ formation.composantePorteuse ? formation.composantePorteuse.libelle : '' }}
                                 </td>
 
-                                <td class="px-4 py-3 text-slate-400">({{ formation.parcours|length }} parcours)</td>
+                                <td class="px-4 py-3 text-slate-400">({{ forma.parcoursData|length }} parcours)</td>
                                 <td class="px-4 py-3">
                                     <span class="rounded-full bg-{{ formationOuverte ? 'green' : 'red' }}-100 px-2 py-1 text-xs text-{{ formationOuverte ? 'green' : 'red' }}-700 font-semibold">
                                         {{ formationOuverte ? 'Oui' : 'Non' }}
@@ -270,14 +251,17 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-1 flex-wrap">
-                                        {% for tpa in formation.typeDiplome.typeDiplomePlateformeAdmissions %}
-                                            {% if tpa.campagne and user_data.campagneCollecte and tpa.campagne.id == user_data.campagneCollecte.id and tpa.plateforme.active %}
-                                               <twig:Badge :variant="tpa.plateforme.color" :label="tpa.plateforme.code" />
-                                            {% endif %}
-                                        {% endfor %}
+                                        {% set typeDiplId = formation.typeDiplome ? formation.typeDiplome.id : null %}
+                                        {% if typeDiplId and tpaByTypeDiplome[typeDiplId] is defined %}
+                                            {% for tpa in tpaByTypeDiplome[typeDiplId] %}
+                                                {% if tpa.plateforme and tpa.plateforme.active %}
+                                                   <twig:Badge :variant="tpa.plateforme.color" :label="tpa.plateforme.code" />
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-right font-semibold text-slate-800">{{ formation.capacite|default(0) }}</td>
+                                <td class="px-4 py-3 text-right font-semibold text-slate-800">{{ forma.capacite }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-1 flex-wrap">
                                         {% set renderedStates = [] %}
@@ -304,29 +288,29 @@
                                     </twig:Button>
                                 </td>
                             </tr>
-                            {% for parcours in formation.parcours %}
-                                {% set parcoursCapacite = 0 %}
-                                {% for annee in parcours.annees %}
-                                    {% set parcoursCapacite = parcoursCapacite + annee.capaciteAccueil|default(0) %}
-                                {% endfor %}
+                            {% for parcoursId, pd in forma.parcoursData %}
+                                {% set parcours = pd.parcours %}
+                                {% set parcoursCapacite = pd.capacite %}
+                                {% set isParcoursOuvert = pd.isOuvert %}
+                                {% set dpeParc = pd.dpeParcours %}
                                 <tr class="bg-slate-50/50 hover:bg-slate-100/80 transition-colors cursor-pointer select-none border-t border-slate-100 comp-{{ compId }}-row composante-child-row"
-                                    {% if parcours.annees|length > 0 %}
+                                    {% if pd.annees|length > 0 %}
                                     onclick="document.querySelectorAll('.parcours-{{ parcours.id }}-row').forEach(row => row.classList.toggle('hidden')); this.querySelector('.chevron-icon').classList.toggle('rotate-90');"
                                     {% endif %}
                                 >
                                     <td>&nbsp;</td>
                                     <td class="px-4 py-3 text-slate-500 font-medium">
-                                        {{ parcours.composanteInscription?.libelle }}
+                                        {{ pd.composanteLibelle }}
                                     </td>
                                     <td class="px-4 py-3 font-semibold text-slate-700">
                                         <div class="flex items-center gap-2">
-                                            {% if parcours.annees|length > 0 %}
+                                            {% if pd.annees|length > 0 %}
                                                 <svg class="chevron-icon h-4 w-4 text-slate-400 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                                                 </svg>
                                             {% endif %}
                                             <span>{{ parcours.libelle }}</span>
-                                            <span class="text-xs font-normal text-slate-400">({{ parcours.annees|length }} année{{ parcours.annees|length > 1 ? 's' : '' }})</span>
+                                            <span class="text-xs font-normal text-slate-400">({{ pd.annees|length }} année{{ pd.annees|length > 1 ? 's' : '' }})</span>
                                             {% set parcAnomalies = forma.parcoursAnomalies[parcours.id]|default([]) %}
                                             {% if parcAnomalies|length > 0 %}
                                                 <span class="inline-flex items-center text-red-600 ml-1 cursor-help animate-pulse" title="{{ parcAnomalies|join('\n') }}">⚠️</span>
@@ -334,19 +318,13 @@
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <span class="rounded-full bg-{{ parcours.isOuvert ? 'green' : 'red' }}-100 px-2 py-1 text-xs text-{{ parcours.isOuvert ? 'green' : 'red' }}-700 font-medium">
-                                            {{ parcours.isOuvert ? 'Oui' : 'Non' }}
+                                        <span class="rounded-full bg-{{ isParcoursOuvert ? 'green' : 'red' }}-100 px-2 py-1 text-xs text-{{ isParcoursOuvert ? 'green' : 'red' }}-700 font-medium">
+                                            {{ isParcoursOuvert ? 'Oui' : 'Non' }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">&nbsp;</td>
                                     <td class="px-4 py-3 text-right font-semibold text-slate-700">{{ parcoursCapacite }}</td>
                                     <td class="px-4 py-3">
-                                        {% set dpeParc = null %}
-                                        {% for dp in forma.dpeParcours %}
-                                            {% if dp.parcours.id == parcours.id %}
-                                                {% set dpeParc = dp %}
-                                            {% endif %}
-                                        {% endfor %}
                                         {% if dpeParc %}
                                             <div class="flex gap-1 flex-wrap">
                                                 {% for badge in dpeParc.etatValidation|badgeDpeDto %}
@@ -359,7 +337,7 @@
                                     </td>
                                     <td class="px-4 py-3">&nbsp;</td>
                                 </tr>
-                                {% for annee in parcours.annees %}
+                                {% for annee in pd.annees %}
                                     <tr class="parcours-{{ parcours.id }}-row parcours-child-row hover:bg-slate-50/80 hidden transition-all border-t border-slate-100 comp-{{ compId }}-row composante-child-row">
                                         <td>&nbsp;</td>
                                         <td>&nbsp;</td>
@@ -373,25 +351,18 @@
                                         </td>
                                         <td class="px-4 py-3">
                                             <div class="flex gap-1 flex-wrap">
-                                                {% for tpa in formation.typeDiplome.typeDiplomePlateformeAdmissions %}
-                                                    {% if tpa.campagne and user_data.campagneCollecte and tpa.campagne.id == user_data.campagneCollecte.id and tpa.plateforme.active %}
-                                                        {% if tpa.annees and annee.ordre in tpa.annees %}
-                                                            
+                                                {% set typeDiplId = formation.typeDiplome ? formation.typeDiplome.id : null %}
+                                                {% if typeDiplId and tpaByTypeDiplome[typeDiplId] is defined %}
+                                                    {% for tpa in tpaByTypeDiplome[typeDiplId] %}
+                                                        {% if tpa.plateforme and tpa.plateforme.active and tpa.annees and annee.ordre in tpa.annees %}
                                                             <twig:Badge :variant="tpa.plateforme.color" :label="tpa.plateforme.code" />
- 
                                                         {% endif %}
-                                                    {% endif %}
-                                                {% endfor %}
+                                                    {% endfor %}
+                                                {% endif %}
                                             </div>
                                         </td>
                                         <td class="px-4 py-3 text-right font-medium text-slate-700">{{ annee.capaciteAccueil|default(0) }}</td>
                                         <td class="px-4 py-3">
-                                            {% set dpeParc = null %}
-                                            {% for dp in forma.dpeParcours %}
-                                                {% if dp.parcours.id == parcours.id %}
-                                                    {% set dpeParc = dp %}
-                                                {% endif %}
-                                            {% endfor %}
                                             {% if dpeParc %}
                                                 <div class="flex gap-1 flex-wrap">
                                                     {% for badge in dpeParc.etatValidation|badgeDpeDto %}
@@ -406,7 +377,7 @@
                                             {#                                    <button class="text-sm font-medium text-indigo-600">Ouvrir</button> #}
                                         </td>
                                     </tr>
-                                    {% endfor %}
+                                {% endfor %}
                             {% endfor %}
                         {% endfor %}
                     {% endfor %}

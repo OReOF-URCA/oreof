@@ -13,11 +13,11 @@ class ParcoursRamification
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'parcoursRamifications')]
+    #[ORM\ManyToOne()]
     #[ORM\JoinColumn(nullable: false)]
     private ?TypeRamificationParcours $typeRamification = null;
 
-    #[ORM\ManyToOne(inversedBy: 'parcoursRamifications')]
+    #[ORM\ManyToOne()]
     #[ORM\JoinColumn(nullable: false)]
     private ?Parcours $parcoursOrigine = null;
 

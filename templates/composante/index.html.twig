@@ -1,5 +1,7 @@
 {% extends 'base.html.twig' %}
 
+{% set header_title = 'page.app_composante.title'|trans({'%composante%':  composante.libelle}, 'menu') %}
+
 {% block content %}
     <div {{ stimulus_controller('composante--gestion') }} class="space-y-6">
 
@@ -280,15 +282,6 @@
 
         </div>{# fin grille principale #}
     </div>
-{% endblock %}
-
-{% set header_title %}Détails de la composante {{ composante.libelle }}{% endset %}
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('structure_composante_index'), title: 'Gestion de l\'offre de formation'},
-        {title: composante.libelle}
-    ]}) }}
 {% endblock %}
 
 {% block bouton_header %}{% endblock %}

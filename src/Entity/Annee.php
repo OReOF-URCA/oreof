@@ -36,12 +36,11 @@ class Annee
     #[ORM\Column]
     private ?bool $isOuvert = true;
 
-    #[ORM\OneToOne(inversedBy: 'anneeCopieAnneeUniversitaire', targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: true)]
     private ?self $anneeOrigineCopie = null;
 
     /** @var Annee $anneeCopieAnneeUniversitaire Référence l'élément copié, depuis l'année d'origine */
-    #[ORM\OneToOne(mappedBy: 'anneeOrigineCopie', targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $anneeCopieAnneeUniversitaire = null;
 
     #[ORM\Column()]

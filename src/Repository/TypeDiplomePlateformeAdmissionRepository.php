@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\CampagneCollecte;
 use App\Entity\TypeDiplomePlateformeAdmission;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,28 +17,27 @@ class TypeDiplomePlateformeAdmissionRepository extends ServiceEntityRepository
         parent::__construct($registry, TypeDiplomePlateformeAdmission::class);
     }
 
-    //    /**
-    //     * @return TypeDiplomePlateformeAdmission[] Returns an array of TypeDiplomePlateformeAdmission objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('t.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * @return array<int, list<TypeDiplomePlateformeAdmission>>
+     */
+    public function findByCampagneIndexedByTypeDiplome(CampagneCollecte $campagne): array
+    {
+        $results = $this->createQueryBuilder('tpa')
+            ->join('tpa.plateforme', 'p')
+            ->join('tpa.typeDiplome', 'td')
+            ->addSelect('p', 'td')
+            ->where('tpa.campagne = :campagne')
+            ->setParameter('campagne', $campagne)
+            ->getQuery()
+            ->getResult();
 
-    //    public function findOneBySomeField($value): ?TypeDiplomePlateformeAdmission
-    //    {
-    //        return $this->createQueryBuilder('t')
-    //            ->andWhere('t.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        $map = [];
+        foreach ($results as $item) {
+            if ($item->getTypeDiplome() !== null) {
+                $map[$item->getTypeDiplome()->getId()][] = $item;
+            }
+        }
+
+        return $map;
+    }
 }

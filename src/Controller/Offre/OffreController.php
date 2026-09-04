@@ -3,6 +3,7 @@
 namespace App\Controller\Offre;
 
 use App\Controller\BaseController;
+use App\Entity\Composante;
 use App\Entity\Constantes;
 use App\Entity\CampagneCollecte;
 use App\Entity\Formation;
@@ -13,6 +14,7 @@ use App\Repository\ComposanteRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
+use App\Repository\TypeDiplomePlateformeAdmissionRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\CampagneCollecteService;
 use App\Service\ParcoursComparaisonService;
@@ -28,15 +30,31 @@ use Symfony\Component\Routing\Attribute\Route;
 final class OffreController extends BaseController
 {
     #[Route('/offrev2', name: 'app_offre_index')]
+    #[Route('/offre/composante/{composante}', name: 'app_offre_composante_index')]
     public function index(
         Request               $request,
         DpeParcoursRepository $dpeParcoursRepository,
         ComposanteRepository $composanteRepository,
         TypeDiplomeRepository $typeDiplomeRepository,
         PlateformeAdmissionRepository $plateformeAdmissionRepository,
-        OffreValidationService $offreValidationService
+        PlateformeAdmissionParametreRepository $plateformeParamRepository,
+        TypeDiplomePlateformeAdmissionRepository $typeDiplomePlateformeAdmissionRepository,
+        AnneeRepository       $anneeRepository,
+        OffreValidationService $offreValidationService,
+        ?Composante           $composante = null,
     ): Response
     {
+        if ($composante !== null) {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->denyAccessUnlessGranted('MANAGE', [
+                    'route' => 'app_composante',
+                    'subject' => $composante,
+                ]);
+            }
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
+
         $tabStatistiques = [
             'nbFormations' => 0,
             'nbParcours' => 0,
@@ -50,67 +68,126 @@ final class OffreController extends BaseController
 
         $campagne = $this->getCampagneCollecte();
 
-        // récupérer l'ensemble des formations et des parcours associés, pour chacun l'état du DPE courant
-        $allParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne);
+        // 1. Récupérer l'ensemble des formations et des parcours associés en 1 seule requête fetch-join (filtré par composante si renseignée)
+        $allParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne, $composante);
+
+        // 2. Batch loading des années (1 requête pour tous les parcours au lieu de 400+)
+        $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne);
+
+        // 3. Batch loading des configurations et paramètres de plateformes (1 requête chacune au lieu de 1000+)
+        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne);
+        $tpaByTypeDiplome = $typeDiplomePlateformeAdmissionRepository->findByCampagneIndexedByTypeDiplome($campagne);
+
         $tFormations = [];
-        foreach ($allParcours as $parcours) {
-            $formation = $parcours->getParcours()?->getFormation();
+        foreach ($allParcours as $dpePar) {
+            $parcours = $dpePar->getParcours();
+            $formation = $parcours?->getFormation();
             $idFormation = $formation?->getId();
-            if ($idFormation === null) {
+            if ($idFormation === null || $parcours === null) {
                 continue;
             }
-            if (!array_key_exists($idFormation, $tFormations)) {
-                $tFormations[$idFormation]['formation'] = $formation;
-                $tFormations[$idFormation]['dpeParcours'] = [];
+            if (!isset($tFormations[$idFormation])) {
+                $tFormations[$idFormation] = [
+                    'formation' => $formation,
+                    'dpeParcours' => [],
+                    'parcoursData' => [],
+                    'anomalies' => [],
+                    'parcoursAnomalies' => [],
+                    'capacite' => 0,
+                    'isOuverte' => false,
+                ];
             }
-            $tFormations[$idFormation]['dpeParcours'][] = $parcours;
+
+            $isParcoursOuvert = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+            if ($isParcoursOuvert) {
+                $tFormations[$idFormation]['isOuverte'] = true;
+            }
+
+            $parcoursAnnees = $anneesByParcours[$parcours->getId()] ?? [];
+
+            // Calcul anomalies pour ce parcours en mémoire (0 requête)
+            $parcAnoms = $offreValidationService->getAnomaliesParcours($parcours, $campagne, $dpePar, $paramsByAnnee, $parcoursAnnees);
+            if (count($parcAnoms) > 0) {
+                $tFormations[$idFormation]['parcoursAnomalies'][$parcours->getId()] = $parcAnoms;
+                $tFormations[$idFormation]['anomalies'] = array_merge($tFormations[$idFormation]['anomalies'], $parcAnoms);
+            }
+
+            // Calcul capacité parcours depuis les années préchargées (0 requête)
+            $parcoursCapacite = 0;
+            foreach ($parcoursAnnees as $annee) {
+                $parcoursCapacite += $annee->getCapaciteAccueil();
+            }
+
+            // Libellé composante inscription sans lazy-load (0 requête)
+            $compInscLibelle = $parcours->getComposanteInscription()?->getLibelle()
+                ?? $formation->getComposantePorteuse()?->getLibelle()
+                ?? '';
+
+            $tFormations[$idFormation]['dpeParcours'][] = $dpePar;
+            $tFormations[$idFormation]['parcoursData'][$parcours->getId()] = [
+                'parcours' => $parcours,
+                'dpeParcours' => $dpePar,
+                'isOuvert' => $isParcoursOuvert,
+                'capacite' => $parcoursCapacite,
+                'annees' => $parcoursAnnees,
+                'composanteLibelle' => $compInscLibelle,
+            ];
         }
 
-        // Pré-calculer les anomalies pour chaque formation
-        foreach ($tFormations as $idFormation => &$row) {
-            $row['anomalies'] = $offreValidationService->getAnomaliesMessagesFormation($row['formation'], $campagne);
-            $row['parcoursAnomalies'] = [];
-            foreach ($row['formation']->getParcours() as $parc) {
-                $parcAnoms = $offreValidationService->getAnomaliesParcours($parc, $campagne);
-                if (count($parcAnoms) > 0) {
-                    $row['parcoursAnomalies'][$parc->getId()] = $parcAnoms;
-                }
+        // Calcul capacité de chaque formation
+        foreach ($tFormations as &$row) {
+            $formationCapacite = $row['formation']->getCapaciteAccueil();
+            if ($formationCapacite <= 0) {
+                $formationCapacite = array_sum(array_map(fn($p) => $p['capacite'], $row['parcoursData']));
             }
+            $row['capacite'] = $formationCapacite;
         }
         unset($row);
 
-        // Construire les listes de filtres disponibles à partir des données
+        // Construire les listes de filtres disponibles à partir des données en mémoire
         $types = [];
         $composantes = [];
-        $villes = [];
+        $typeDiplomeMap = [];
         foreach ($tFormations as $row) {
-            $tabStatistiques['capaciteTotale'] += $row['formation']->getCapacite();
+            $tabStatistiques['capaciteTotale'] += $row['capacite'];
             $f = $row['formation'];
-            $types[$f->getTypeDiplome()?->getLibelle() ?? ''] = true;
-            $composantes[$f->getComposantePorteuse()?->getLibelle() ?? ''] = true;
-            if ($f->isHasParcours() === false) {
-                $loc = $f->getLocalisationMention()->first();
-                $ville = is_object($loc) ? $loc->getLibelle() : null;
-                $villes[$ville ?? ''] = true;
+            $typeDipl = $f->getTypeDiplome();
+            if ($typeDipl) {
+                $typeLib = $typeDipl->getLibelle();
+                if ($typeLib) {
+                    $types[$typeLib] = true;
+                }
+                $typeDiplomeMap[$typeDipl->getId()] = $typeDipl;
+            }
+            $compLib = $f->getComposantePorteuse()?->getLibelle();
+            if ($compLib) {
+                $composantes[$compLib] = true;
             }
         }
         $types = array_values(array_filter(array_keys($types)));
         sort($types);
         $composantes = array_values(array_filter(array_keys($composantes)));
         sort($composantes);
-        $villes = array_values(array_filter(array_keys($villes)));
-        sort($villes);
+
+        if ($composante !== null) {
+            $typesDiplomeList = array_values($typeDiplomeMap);
+            usort($typesDiplomeList, static fn($a, $b) => strcmp($a->getLibelle() ?? '', $b->getLibelle() ?? ''));
+            $composantesList = [$composante];
+        } else {
+            $typesDiplomeList = $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']);
+            $composantesList = $composanteRepository->findBy([], ['libelle' => 'ASC']);
+        }
 
         // Lire les filtres de la requête
         $q = trim((string)$request->query->get('q', ''));
-        $comp = (string)$request->query->get('comp', '');
+        $comp = $composante !== null ? (string)$composante->getId() : (string)$request->query->get('comp', '');
         $type = (string)$request->query->get('type', '');
         $plateforme = (string)$request->query->get('plateforme', '');
         $statut = (string)$request->query->get('statut', '');
 
         // Appliquer les filtres côté PHP sur le tableau tFormations
         if ($q || $comp || $type || $plateforme || $statut) {
-            $tFormations = array_filter($tFormations, function (array $row) use ($q, $comp, $type, $plateforme, $statut, $campagne): bool {
+            $tFormations = array_filter($tFormations, function (array $row) use ($q, $comp, $type, $plateforme, $statut, $tpaByTypeDiplome): bool {
                 $f = $row['formation'];
                 
                 // 1. Libellé
@@ -147,10 +224,10 @@ final class OffreController extends BaseController
                 // 4. Plateforme ID
                 if ($plateforme !== '') {
                     $hasPlatform = false;
-                    $typeDipl = $f->getTypeDiplome();
-                    if ($typeDipl) {
-                        foreach ($typeDipl->getTypeDiplomePlateformeAdmissions() as $tpa) {
-                            if ($tpa->getCampagne() === $campagne && $tpa->getPlateforme()?->getId() === (int)$plateforme && $tpa->getPlateforme()->getActive()) {
+                    $typeDiplId = $f->getTypeDiplome()?->getId();
+                    if ($typeDiplId && isset($tpaByTypeDiplome[$typeDiplId])) {
+                        foreach ($tpaByTypeDiplome[$typeDiplId] as $tpa) {
+                            if ($tpa->getPlateforme()?->getId() === (int)$plateforme && $tpa->getPlateforme()->getActive()) {
                                 $hasPlatform = true;
                                 break;
                             }
@@ -196,11 +273,12 @@ final class OffreController extends BaseController
             });
         }
 
-        // Calculer les statistiques et agréger les anomalies sur la sélection filtrée
+        // Calculer les statistiques et agréger les anomalies et les groupes par composante
         $allAnomalies = [];
         $nbAConfirmer = 0;
         $nbParcoursOuvert = 0;
         $capacite = 0;
+        $groupedFormations = [];
 
         foreach ($tFormations as $row) {
             $tabStatistiques['nbFormations']++;
@@ -220,8 +298,32 @@ final class OffreController extends BaseController
                 }
             }
 
-            $capacite += $row['formation']->getCapacite();
+            $capacite += $row['capacite'];
+
+            // Groupement pré-calculé par composante pour Twig
+            $compLibelle = $row['formation']->getComposantePorteuse()?->getLibelle() ?? 'Sans composante';
+            if (!isset($groupedFormations[$compLibelle])) {
+                $groupedFormations[$compLibelle] = [
+                    'libelle' => $compLibelle,
+                    'nbFormations' => 0,
+                    'nbParcours' => 0,
+                    'nbParcoursOuvert' => 0,
+                    'capacite' => 0,
+                    'formations' => [],
+                ];
+            }
+            $groupedFormations[$compLibelle]['nbFormations']++;
+            $groupedFormations[$compLibelle]['nbParcours'] += count($row['dpeParcours']);
+            $groupedFormations[$compLibelle]['capacite'] += $row['capacite'];
+            foreach ($row['parcoursData'] as $pd) {
+                if ($pd['isOuvert']) {
+                    $groupedFormations[$compLibelle]['nbParcoursOuvert']++;
+                }
+            }
+            $groupedFormations[$compLibelle]['formations'][] = $row;
         }
+
+        ksort($groupedFormations);
 
         $tabStatistiques['nbParcoursOuvert'] = $nbParcoursOuvert;
         $tabStatistiques['capacite'] = $capacite;
@@ -234,7 +336,10 @@ final class OffreController extends BaseController
         $isFrame = $frameId === 'offre_table';
 
         $params = [
+            'composante' => $composante,
             'tFormations' => $tFormations,
+            'groupedFormations' => $groupedFormations,
+            'tpaByTypeDiplome' => $tpaByTypeDiplome,
             'filters' => [
                 'q' => $q,
                 'comp' => $comp,
@@ -245,12 +350,12 @@ final class OffreController extends BaseController
             'choices' => [
                 'types' => $types,
                 'composantes' => $composantes,
-                'villes' => $villes,
+                'villes' => [],
             ],
             'tabStatistiques' => $tabStatistiques,
             'campagne' => $campagne,
-            'composantes' => $composanteRepository->findBy([], ['libelle' => 'ASC']),
-            'typesDiplome' => $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']),
+            'composantes' => $composantesList,
+            'typesDiplome' => $typesDiplomeList,
             'plateformes' => $plateformeAdmissionRepository->findBy([], ['libelle' => 'ASC']),
         ];
 
@@ -649,6 +754,8 @@ final class OffreController extends BaseController
         Request $request,
         DpeParcoursRepository $dpeParcoursRepository,
         PlateformeAdmissionParametreRepository $plateformeParamRepo,
+        TypeDiplomePlateformeAdmissionRepository $typeDiplomePlateformeAdmissionRepository,
+        AnneeRepository $anneeRepository,
         EntityManagerInterface $em
     ): Response {
         if (
@@ -686,6 +793,20 @@ final class OffreController extends BaseController
 
         if ($platformEntity) {
             $allDpeParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne);
+            $tpaByTypeDiplome = $typeDiplomePlateformeAdmissionRepository->findByCampagneIndexedByTypeDiplome($campagne);
+            $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne);
+
+            // Pre-load all parameters for this platform in 1 single query (instead of 1000+ findOneBy)
+            $platformParams = $plateformeParamRepo->findBy([
+                'plateforme' => $platformEntity,
+                'campagne' => $campagne,
+            ]);
+            $platformParamsByAnnee = [];
+            foreach ($platformParams as $pp) {
+                if ($pp->getAnnee() !== null) {
+                    $platformParamsByAnnee[$pp->getAnnee()->getId()] = $pp;
+                }
+            }
 
             foreach ($allDpeParcours as $dpePar) {
                 $par = $dpePar->getParcours();
@@ -694,17 +815,19 @@ final class OffreController extends BaseController
                 if (!$formation) continue;
 
                 $keptAnnees = [];
-                foreach ($par->getAnnees() as $annee) {
+                $typeDipl = $formation->getTypeDiplome();
+                $typeDiplId = $typeDipl?->getId();
+                $tpas = ($typeDiplId && isset($tpaByTypeDiplome[$typeDiplId])) ? $tpaByTypeDiplome[$typeDiplId] : [];
+
+                $parAnnees = $anneesByParcours[$par->getId()] ?? [];
+                foreach ($parAnnees as $annee) {
                     // Check if this platform is configured/valid for this diploma type and year order in this campaign
                     $shouldBeActive = false;
-                    $typeDipl = $formation->getTypeDiplome();
-                    if ($typeDipl) {
-                        foreach ($typeDipl->getTypeDiplomePlateformeAdmissions() as $tpa) {
-                            if ($tpa->getCampagne() === $campagne && $tpa->getPlateforme() === $platformEntity) {
-                                if (in_array($annee->getOrdre(), $tpa->getAnnees(), true)) {
-                                    $shouldBeActive = true;
-                                    break;
-                                }
+                    foreach ($tpas as $tpa) {
+                        if ($tpa->getPlateforme()?->getId() === $platformEntity->getId()) {
+                            if (in_array($annee->getOrdre(), $tpa->getAnnees() ?? [], true)) {
+                                $shouldBeActive = true;
+                                break;
                             }
                         }
                     }
@@ -734,11 +857,7 @@ final class OffreController extends BaseController
                         }
                     }
 
-                    $param = $plateformeParamRepo->findOneBy([
-                        'annee' => $annee,
-                        'plateforme' => $platformEntity,
-                        'campagne' => $campagne
-                    ]);
+                    $param = $platformParamsByAnnee[$annee->getId()] ?? null;
 
                     $keptAnnees[] = $annee;
                     if ($param) {

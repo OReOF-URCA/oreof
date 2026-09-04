@@ -196,11 +196,10 @@ class Formation
     private ?TypeModificationDpeEnum $etatReconduction = null;
 
     /** @var Formation $formationOrigineCopie Référence la formation d'origine, depuis la copie */
-    #[ORM\OneToOne(inversedBy: 'formationCopieAnneeUniversitaire', targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $formationOrigineCopie = null;
 
     /** @var Formation $formationCopieAnneeUniversitaire Référence la formation copiée, depuis celle d'origine */
-    #[ORM\OneToOne(mappedBy: 'formationOrigineCopie', targetEntity: self::class, cascade: ['persist', 'remove'])]
     private ?self $formationCopieAnneeUniversitaire = null;
 
     /**

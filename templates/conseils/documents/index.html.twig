@@ -1,15 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Documents de conseil (PV & justificatifs)
-{% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Conseils', href: path('app_section_conseils')},
-        { title: header_title}
-    ]}) }}
-{% endblock %}
 
 {% block bouton_header %}
     <twig:Button

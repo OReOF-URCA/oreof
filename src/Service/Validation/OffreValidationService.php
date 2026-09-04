@@ -5,55 +5,91 @@ declare(strict_types=1);
 namespace App\Service\Validation;
 
 use App\Entity\CampagneCollecte;
+use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\Parcours;
+use App\Entity\PlateformeAdmissionParametre;
 use App\Enums\TypeModificationDpeEnum;
 
 final class OffreValidationService
 {
     /**
+     * @param array<int, DpeParcours>|null $dpeParcoursList
+     * @param array<int, list<PlateformeAdmissionParametre>>|null $paramsByAnnee
      * @return array<int, array{message: string}>
      */
-    public function getAnomaliesFormation(Formation $formation, CampagneCollecte $campagne): array
-    {
+    public function getAnomaliesFormation(
+        Formation $formation,
+        CampagneCollecte $campagne,
+        ?array $dpeParcoursList = null,
+        ?array $paramsByAnnee = null
+    ): array {
         $anomalies = [];
-        foreach ($this->getAnomaliesMessagesFormation($formation, $campagne) as $msg) {
+        foreach ($this->getAnomaliesMessagesFormation($formation, $campagne, $dpeParcoursList, $paramsByAnnee) as $msg) {
             $anomalies[] = ['message' => $msg];
         }
         return $anomalies;
     }
 
     /**
+     * @param array<int, DpeParcours>|null $dpeParcoursList
+     * @param array<int, list<PlateformeAdmissionParametre>>|null $paramsByAnnee
      * @return array<int, string>
      */
-    public function getAnomaliesMessagesFormation(Formation $formation, CampagneCollecte $campagne): array
-    {
+    public function getAnomaliesMessagesFormation(
+        Formation $formation,
+        CampagneCollecte $campagne,
+        ?array $dpeParcoursList = null,
+        ?array $paramsByAnnee = null
+    ): array {
         $anomalies = [];
+        $dpeMap = [];
+        if ($dpeParcoursList !== null) {
+            foreach ($dpeParcoursList as $dp) {
+                if ($dp->getParcours() !== null) {
+                    $dpeMap[$dp->getParcours()->getId()] = $dp;
+                }
+            }
+        }
+
         foreach ($formation->getParcours() as $parcours) {
-            $anomalies = array_merge($anomalies, $this->getAnomaliesParcours($parcours, $campagne));
+            $dp = $dpeMap[$parcours->getId()] ?? null;
+            $anomalies = array_merge($anomalies, $this->getAnomaliesParcours($parcours, $campagne, $dp, $paramsByAnnee));
         }
         return $anomalies;
     }
 
     /**
+     * @param array<int, list<PlateformeAdmissionParametre>>|null $paramsByAnnee
+     * @param array<int, \App\Entity\Annee>|null $annees
      * @return array<int, string>
      */
-    public function getAnomaliesParcours(Parcours $parcours, CampagneCollecte $campagne): array
-    {
+    public function getAnomaliesParcours(
+        Parcours $parcours,
+        CampagneCollecte $campagne,
+        ?DpeParcours $dpeParcours = null,
+        ?array $paramsByAnnee = null,
+        ?array $annees = null
+    ): array {
         $anomalies = [];
         
         // Check if parcours is open for this campaign
         $isOuvert = false;
-        foreach ($parcours->getDpeParcours() as $d) {
-            if ($d->getCampagneCollecte() === $campagne) {
-                $isOuvert = ($d->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
-                break;
+        if ($dpeParcours !== null) {
+            $isOuvert = ($dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+        } else {
+            foreach ($parcours->getDpeParcours() as $d) {
+                if ($d->getCampagneCollecte() === $campagne) {
+                    $isOuvert = ($d->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+                    break;
+                }
             }
         }
 
         if ($isOuvert) {
             $hasOpenAnnee = false;
-            foreach ($parcours->getAnnees() as $annee) {
+            $anneesList = $annees ?? $parcours->getAnnees();
+            foreach ($anneesList as $annee) {
                 if ($annee->isOuvert() === true) {
                     $hasOpenAnnee = true;
                     
@@ -66,8 +102,12 @@ final class OffreValidationService
                         );
                     }
 
-                    // Parcourir les plateformes actives
-                    foreach ($annee->getAdmissionPlateformeParametres() as $param) {
+                    // Parcourir les plateformes actives (préchargées ou via relation)
+                    $params = $paramsByAnnee !== null
+                        ? ($paramsByAnnee[$annee->getId()] ?? [])
+                        : $annee->getAdmissionPlateformeParametres();
+
+                    foreach ($params as $param) {
                         if ($param->getCampagne() === $campagne && $param->isActive()) {
                             // Anomalie 2: Plateforme active sans aucune capacité renseignée
                             if (($param->getCapaciteGlobale() === null || $param->getCapaciteGlobale() <= 0) &&
@@ -87,7 +127,7 @@ final class OffreValidationService
             }
 
             // Anomalie 3: Parcours ouvert mais aucune année n'est ouverte
-            if (!$hasOpenAnnee) {
+            if (!$hasOpenAnnee && count($anneesList) > 0) {
                 $anomalies[] = sprintf(
                     "Le parcours \"%s\" est ouvert, mais toutes ses années sont fermées.",
                     $parcours->getLibelle()

@@ -9,7 +9,7 @@
 
 namespace App\Navigation;
 
-final readonly class MenuItem
+final class MenuItem
 {
     public string $label;
     public ?string $description;
@@ -125,6 +125,8 @@ final readonly class MenuItem
             routeParams: $this->routeParams,
             icon: $this->icon,
             role: $role,
+            permission: $this->permission,
+            subject: $this->subject,
             children: $this->children,
             showInTopbar: $this->showInTopbar,
             showInOverview: $this->showInOverview,
@@ -143,12 +145,16 @@ final readonly class MenuItem
             route: $this->route,
             routeParams: $this->routeParams,
             icon: $this->icon,
+            role: $this->role,
             permission: $permission,
             subject: $subject,
             children: $this->children,
             showInTopbar: $this->showInTopbar,
             showInOverview: $this->showInOverview,
             description: $this->description,
+            displayMode: $this->displayMode,
+            column: $this->column,
+            position: $this->position,
         );
     }
 
@@ -160,7 +166,12 @@ final readonly class MenuItem
             route: $this->route,
             routeParams: $this->routeParams,
             icon: $this->icon,
+            role: $this->role,
+            permission: $this->permission,
+            subject: $this->subject,
             children: $this->children,
+            showInTopbar: $this->showInTopbar,
+            showInOverview: $this->showInOverview,
             description: $this->description,
             displayMode: MenuDisplayModeEnum::MegaMenu,
             column: $this->column,
@@ -176,10 +187,16 @@ final readonly class MenuItem
             route: $this->route,
             routeParams: $this->routeParams,
             icon: $this->icon,
+            role: $this->role,
+            permission: $this->permission,
+            subject: $this->subject,
             children: $this->children,
+            showInTopbar: $this->showInTopbar,
+            showInOverview: $this->showInOverview,
             description: $this->description,
             displayMode: $this->displayMode,
             column: $column,
+            position: $this->position,
         );
     }
 

@@ -1,6 +1,6 @@
 {# Badge d'impersonation à afficher quand un admin impersonne un user #}
 {% if is_granted('IS_IMPERSONATOR') %}
-    <div class="alert alert-danger mb-0" role="alert" style="border-radius: 0; margin-bottom: 0 !important; border: 0;">
+    <div class="mt-1 mb-0 rounded-none border-0 border-danger bg-danger p-3" role="alert">
         <div class="d-flex align-items-center justify-content-between gap-3">
             <div>
                 <strong>⚠️ Vous êtes en mode IMPERSONATION</strong>
@@ -10,12 +10,14 @@
                     Les droits affichés ne sont pas vos droits Admin.
                 </span>
             </div>
-            <a href="{{ path('app_homepage', {'_switch_user': '_exit'}) }}"
-               data-turbo="false"
-               class="btn btn-light btn-sm fw-bold"
-               title="Revenir à mon rôle Admin">
-                <i class="bi bi-arrow-counterclockwise"></i> Revenir à mon rôle Admin
-            </a>
+            <twig:Button
+                    href="{{ path('app_homepage', {'_switch_user': '_exit'}) }}"
+                    variant="secondary"
+                    size="sm"
+                    icon="icon:question"
+                    label="Revenir à mon rôle Admin"
+            />
+
         </div>
     </div>
 {% endif %}

@@ -6,6 +6,7 @@ use App\Classes\GetCommentaires;
 use App\Classes\JsonReponse;
 use App\Classes\MyGotenbergPdf;
 use App\Entity\Commentaire;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Utils\CleanTexte;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,6 +18,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class CommentaireController extends AbstractController
 {
     #[Route('/commentaire', name: 'app_commentaire')]
+    #[Breadcrumb(menuKey: 'conseils')]
+    #[Breadcrumb(label: 'Gestion des commentaires')]
     public function index(
         GetCommentaires $getCommentaires
     ): Response

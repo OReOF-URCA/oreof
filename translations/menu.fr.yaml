@@ -21,11 +21,13 @@ menu:
     impersonation.user: Impersonation d'un utilisateur
   compo:
     pilotage: Pilotage
+    pilotage_visuel: Pilotage visuel
     consulter_offre: Consulter l'offre de formation
+    gestion_offre: Gestion de l'offre
     dpe_ouvert: DPE ouverts
     validation_dpe: Validation DPE
     validation_ec: Validation Fiches EC/matières
-    validatio,_rf: Validation RF/co-RF
+    validation_rf: Validation RF/co-RF
     exports: Exports
     communication: Communication
   menu_conseils: Conseils
@@ -162,3 +164,28 @@ page:
     app_section_administration:
       description: Administration
       title: Administration
+    app_conseils_documents_index:
+      description: Documents de conseil (PV & justificatifs)
+      title: Documents de conseil
+    app_offre_index:
+      description: Synthèse de l’offre de formation. Ouverture, plateformes, capacités et validations.
+      title: Synthèse de l’offre de formation
+    app_validation_dpe_index:
+      description: Gestion des validations DPE.
+      title: Gestion des validations DPE
+    app_validation_fiches_ec_index:
+      description: Gestion des validations Fiches EC/matières.
+      title: Gestion des validations Fiches EC/matières
+    app_validation_change_rf_index:
+      description: Gestion des validations RF/co-RF.
+      title: Gestion des validations RF/co-RF
+    app_commentaire:
+      description: Gestion des commentaires sur les formations pour les conseillers.
+      title: Gestion des commentaires
+    app_composante:
+      description: Gérer la composante de l'organisation.
+      title: 'Composante : %composante%'
+    app_homepage:
+      description: Accueil
+      title: Accueil
+    
