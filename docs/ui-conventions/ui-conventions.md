@@ -69,6 +69,38 @@ Usage: `<twig:Badge ... />`
 <twig:Badge :label="isPublished ? 'Publie' : 'Brouillon'" :variant="isPublished ? 'success' : 'warning'" />
 ```
 
+## 3 bis) Cartes de telechargement (DownloadCard)
+
+Composant: `src/Twig/Components/UI/DownloadCard.php`
+Template: `templates/components/_ui/download_card.html.twig`
+Usage: `<twig:DownloadCard ... />`
+
+Carte presentant une ressource a telecharger (document, tableur, video, lien). L'icone, sa
+teinte et le libelle du bouton sont deduits de `type` ; le bouton reutilise `<twig:Button>`.
+
+### API recommandee
+
+- `title`: libelle principal (requis)
+- `href`: URL de telechargement / ouverture (requis)
+- `type`: `word | excel | pdf | powerpoint | archive | video | audio | image | link | file` (defaut `file`)
+- `description`: sous-titre (nom de fichier, precision)
+- `meta`: metadonnee discrete (poids, date)
+- `variant`: variante du bouton (defaut `primary`)
+- `cta` / `icon`: forcent le libelle et l'icone deduits
+- `target` (defaut `_blank`), `extraClass`
+
+Les grilles de cartes utilisent `grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3`.
+
+### Exemples
+
+```twig
+<twig:DownloadCard title="Fiche parcours" description="aide-fiche-parcours.docx"
+                   href="{{ asset('docs/aide-fiche-parcours.docx') }}" type="word" />
+<twig:DownloadCard title="Archive 2023-2024" meta="ZIP - 12 Mo"
+                   href="{{ asset('docs/archive.zip') }}" type="archive" variant="secondary" />
+<twig:DownloadCard title="Site officiel" href="https://oreof.univ-reims.fr" type="link" />
+```
+
 ## 4) Conventions CRUD
 
 Pour les actions standard:

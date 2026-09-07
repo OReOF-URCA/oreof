@@ -1,0 +1,37 @@
+{#
+Composant DownloadCard — carte de téléchargement d'une ressource.
+  <twig:DownloadCard title="Fiche parcours"
+                     description="aide-fiche-parcours.docx"
+                     href="{{ asset('docs/aide-fiche-parcours.docx') }}"
+                     type="word" />
+  <twig:DownloadCard title="Statuts de l'association" href="#" type="pdf" meta="240 Ko" />
+  <twig:DownloadCard title="Site officiel" href="https://oreof.univ-reims.fr" type="link" />
+#}
+
+{% set cardClasses = 'flex h-full flex-col rounded-xl border border-secondary-200 bg-surface p-5 shadow-sm transition hover:border-secondary-300 hover:shadow-md dark:border-secondary-700 dark:hover:border-secondary-600' ~ (extraClass ? ' ' ~ extraClass : '') %}
+<article class="{{ cardClasses }}"{{- attributes -}}>
+    <div class="flex items-start gap-3">
+        {{ ux_icon(this.getResolvedIcon(), { class: 'h-9 w-9 shrink-0 ' ~ this.getIconClasses(), 'aria-hidden': 'true' }) }}
+        <div class="min-w-0">
+            <h3 class="font-medium text-secondary-900 dark:text-secondary-100">{{ title }}</h3>
+            {% if description %}
+                <p class="mt-0.5 truncate text-xs text-secondary-500 dark:text-secondary-400" title="{{ description }}">{{ description }}</p>
+            {% endif %}
+            {% if meta %}
+                <p class="mt-1 text-xs text-secondary-400 dark:text-secondary-500">{{ meta }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-4 flex grow items-end border-t border-secondary-100 pt-4 dark:border-secondary-800">
+        <twig:Button
+            :label="this.getResolvedCta()"
+            :variant="variant"
+            size="md"
+            :icon="this.getButtonIcon()"
+            :href="href"
+            :target="target"
+            rel="noopener"
+        />
+    </div>
+</article>

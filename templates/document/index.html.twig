@@ -2,96 +2,54 @@
 
 {% set header_title %}Documents{% endset %}
 
+{% block header %}Documents et ressources{% endblock %}
+
+{% set header_description %}
+    Documents utiles : guides de rédaction, tableaux MCCC et rediffusions des présentations d'ORéOF.
+{% endset %}
+
 {% block content %}
-{#    <h2 class="small-title mt-3">Guide</h2>#}
-{#    <div class="row">#}
-{#        <div class="col-4">#}
+    {% set sections = [
+        {
+            title: 'Guides de rédaction',
+            description: 'Modèles et aides à la rédaction des fiches (2024-2028).',
+            items: [
+                { label: 'Fiche EC / matière',               file: 'Aide à la rédaction v2 - fiche ec matière 2024-2028.docx',              type: 'word' },
+                { label: 'Fiche EC / matière — hors diplôme', file: 'Aide à la rédaction v2 - fiche ec matière Hors diplôme 2024-2028.docx',  type: 'word' },
+                { label: 'Fiche mention',                     file: 'Aide à la rédaction v2 - fiche formation 2024-2028.docx',               type: 'word' },
+                { label: 'Fiche parcours',                    file: 'Aide à la rédaction v2 - fiche parcours 2024-2028.docx',                type: 'word' },
+                { label: 'Tableau MCCC',                      file: 'Aide à la rédaction - MCCC Tableau mccc 2024-2028.xlsx',                type: 'excel' },
+            ],
+        },
+        {
+            title: 'Replay des présentations',
+            description: 'Rediffusions vidéo des sessions de lancement et de questions / réponses.',
+            items: [
+                { label: 'Lancement d\'ORéOF — 27/03/2023',   file: 'OReOF-27032023.mp4',   type: 'video' },
+                { label: 'Questions / réponses — 02/06/2023', file: 'video1870238167.mp4',  type: 'video' },
+            ],
+        },
+    ] %}
 
-{#            <div class="card">#}
-{#                <div class="card-body">#}
-{#                    <a href="{{ asset('docs/guide.pdf') }}">Télécharger le guide (version avril 2023)</a>#}
-{#                    <p>L'interface peut différer des captures de cette version du guide. Une mise à jour est en cours de rédaction.</p>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
+    <div class="space-y-10">
+        {% for section in sections %}
+            <section>
+                <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">{{ section.title }}</h2>
+                {% if section.description is defined and section.description %}
+                    <p class="mt-1 text-sm text-secondary-500 dark:text-secondary-400">{{ section.description }}</p>
+                {% endif %}
 
-{#        <div class="col-4">#}
-
-{#            <div class="card">#}
-{#                <div class="card-body">#}
-{#                    <a href="{{ asset('docs/Guide_validation_fiche_EC.pdf') }}">Télécharger le guide de validation des fiches EC/matière (version février 2024)</a>#}
-{#                    <p>Processus de validation des fiches EC/matière.</p>#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-
-    <h2 class="small-title mt-3">Replay des présentations</h2>
-    <div class="row">
-        <div class="col-4">
-            <div class="card">
-                <div class="card-body">
-                    <a href="{{ asset('docs/OReOF-27032023.mp4') }}">Télécharger la vidéo</a>
-                    <p>Vidéo de lancement d'ORéOF du 27/03/2023</p>
+                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {% for item in section.items %}
+                        <twig:DownloadCard
+                            title="{{ item.label }}"
+                            description="{{ item.file }}"
+                            href="{{ asset('docs/' ~ item.file) }}"
+                            type="{{ item.type }}"
+                        />
+                    {% endfor %}
                 </div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="card">
-                <div class="card-body">
-                    <a href="{{ asset('docs/video1870238167.mp4') }}">Télécharger la vidéo</a>
-                    <p>Vidéo questions/réponses du 02/06/2023</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <h2 class="small-title mt-3">Documents</h2>
-    <div class="row">
-        <div class="col-4">
-            <div class="card">
-                <div class="card-body">
-                    <a href="{{ asset('docs/Aide à la rédaction v2 - fiche ec matière 2024-2028.docx') }}">Télécharger
-                        le document</a>
-                    <p>Aide à la rédaction - fiche ec matière 2024-2028.docx</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="card">
-                <div class="card-body">
-                    <a href="{{ asset('docs/Aide à la rédaction v2 - fiche ec matière Hors diplôme 2024-2028.docx') }}">Télécharger
-                        le document</a>
-                    <p>Aide à la rédaction - fiche ec matière 2024-2028 Hors diplôme</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="card">
-                <div class="card-body">
-                    <a href="{{ asset('docs/Aide à la rédaction v2 - fiche formation 2024-2028.docx') }}">Télécharger
-                        le document</a>
-                    <p>Aide à la rédaction - fiche mention 2024-2028</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-4">
-            <div class="card">
-                <div class="card-body">
-                    <a href="{{ asset('docs/Aide à la rédaction v2 - fiche parcours 2024-2028.docx') }}">Télécharger
-                        le document</a>
-                    <p>Aide à la rédaction - fiche parcours 2024-2028</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-4">
-            <div class="card">
-                <div class="card-body">
-                    <a href="{{ asset('docs/Aide à la rédaction - MCCC Tableau mccc 2024-2028.xlsx') }}">Télécharger le document</a>
-                    <p>Aide à la rédaction - MCCC Tableau mccc 2024-2028.xlsx</p>
-                </div>
-            </div>
-        </div>
+            </section>
+        {% endfor %}
     </div>
 {% endblock %}

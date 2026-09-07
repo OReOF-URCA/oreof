@@ -958,5 +958,50 @@
             </div>
         </twig:Card>
 
+        {# Section Composant : DownloadCard #}
+        <twig:Card title="DownloadCard" description="Carte de téléchargement d'une ressource (document, tableur, vidéo, lien…) avec icône typée et bouton d'action.">
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Types de ressources (type)</h3>
+                    <p class="text-xs text-secondary-500 mb-3">type : word / excel / pdf / powerpoint / archive / video / audio / image / link / file<br>L'icône, sa teinte et le libellé du bouton sont déduits du type.</p>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <twig:DownloadCard title="Fiche parcours" description="aide-fiche-parcours.docx" href="#" type="word"/>
+                        <twig:DownloadCard title="Tableau MCCC" description="tableau-mccc-2024-2028.xlsx" href="#" type="excel"/>
+                        <twig:DownloadCard title="Notice de validation" description="notice-validation.pdf" href="#" type="pdf"/>
+                        <twig:DownloadCard title="Support de présentation" description="presentation-cfvu.pptx" href="#" type="powerpoint"/>
+                        <twig:DownloadCard title="Lancement d'ORéOF" description="oreof-27032023.mp4" href="#" type="video"/>
+                        <twig:DownloadCard title="Site officiel ORéOF" description="oreof.univ-reims.fr" href="#" type="link"/>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Métadonnée et variante de bouton</h3>
+                    <p class="text-xs text-secondary-500 mb-3">meta : texte discret (poids, date…)<br>variant : variante du bouton<br>cta / icon : forcent le libellé et l'icône déduits</p>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <twig:DownloadCard title="Statuts de l'association" description="statuts.pdf" meta="PDF · 240 Ko" href="#" type="pdf"/>
+                        <twig:DownloadCard title="Archive 2023-2024" description="archive-2023-2024.zip" meta="ZIP · 12 Mo" href="#" type="archive" variant="secondary"/>
+                        <twig:DownloadCard title="Guide de rédaction" description="guide.docx" href="#" type="word" cta="Consulter le guide" variant="info"/>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-secondary-900 text-secondary-200 p-4 rounded-md text-xs overflow-x-auto"><code>{% verbatim %}&lt;twig:DownloadCard
+    title="Fiche parcours"
+    description="aide-fiche-parcours.docx"
+    href="{{ asset('docs/aide-fiche-parcours.docx') }}"
+    type="word" />
+
+&lt;twig:DownloadCard
+    title="Archive 2023-2024"
+    meta="ZIP · 12 Mo"
+    href="{{ asset('docs/archive.zip') }}"
+    type="archive"
+    variant="secondary" />{% endverbatim %}</code></pre>
+                </div>
+            </div>
+        </twig:Card>
+
     </div>
 {% endblock %}
