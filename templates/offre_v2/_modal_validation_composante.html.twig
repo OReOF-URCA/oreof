@@ -1,0 +1,269 @@
+{% set hasUpload = meta.hasUpload|default(true) %}
+{% set hasUploadNote = meta.hasUploadNote|default(true) %}
+
+<form id="modal_form"
+      action="{{ path('offre_v2_composante_valider', { composante: composante.id, transition: transition }) }}"
+      method="post"
+      enctype="multipart/form-data"
+      class="space-y-5"
+>
+    <!-- Alerte informative -->
+    <div class="rounded-xl border {{ isRefuse ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-indigo-100 bg-indigo-50/70 text-indigo-900' }} p-4 text-sm flex items-start gap-3">
+        <div class="text-xl shrink-0">{{ isRefuse ? '⚠️' : 'ℹ️' }}</div>
+        <div>
+            <h4 class="font-bold">{{ meta.label|default(transition) }}</h4>
+            <p class="mt-1 text-xs opacity-90">
+                {% if isRefuse %}
+                    Sélectionnez les formations et parcours à renvoyer pour modifications et indiquez le motif ci-dessous.
+                {% else %}
+                    Sélectionnez les formations et parcours de la composante que vous souhaitez valider pour cette campagne, puis déposez ou sélectionnez le PV de conseil et la note explicative associés.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Sélection des Formations & Parcours -->
+    <div class="space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+            <div>
+                <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wide">
+                    Formations & Parcours de la composante
+                </h4>
+                <span class="text-xs text-slate-500">
+                    Cochez les éléments concernés par cette validation
+                </span>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-semibold">
+                <button type="button"
+                        onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = true); document.querySelectorAll('.formation-checkbox').forEach(cb => cb.checked = true);"
+                        class="text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer">
+                    Tout cocher
+                </button>
+                <span class="text-slate-300">|</span>
+                <button type="button"
+                        onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = false); document.querySelectorAll('.formation-checkbox').forEach(cb => cb.checked = false);"
+                        class="text-slate-500 hover:text-slate-700 hover:underline cursor-pointer">
+                    Tout décocher
+                </button>
+                <span class="text-slate-300">|</span>
+                <button type="button"
+                        onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = (cb.dataset.conforme === '1')); syncFormationsCheckboxes();"
+                        class="text-green-700 hover:text-green-800 hover:underline cursor-pointer">
+                    Cocher les conformes
+                </button>
+            </div>
+        </div>
+
+        <div class="max-h-72 overflow-y-auto space-y-3 pr-1 border border-slate-200 rounded-xl p-3 bg-slate-50/50">
+            {% for fId, fData in formationsData %}
+                {% set formation = fData.formation %}
+                <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-xs space-y-2">
+                    <!-- Formation Header -->
+                    <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
+                        <label class="flex items-center gap-2.5 cursor-pointer font-bold text-slate-900 text-sm">
+                            <input type="checkbox"
+                                   name="formations[]"
+                                   value="{{ formation.id }}"
+                                   checked
+                                   data-formation-id="{{ formation.id }}"
+                                   class="formation-checkbox h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                   onchange="document.querySelectorAll('.parcours-of-formation-{{ formation.id }}').forEach(cb => cb.checked = this.checked);"
+                            >
+                            <span>{{ formation.displayLong }}</span>
+                        </label>
+                        <div class="flex items-center gap-2 shrink-0">
+                            {% if fData.hasAnomalies %}
+                                <span class="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200" title="{{ fData.anomaliesCount }} anomalie(s) détectée(s)">
+                                    ⚠️ {{ fData.anomaliesCount }} à vérifier
+                                </span>
+                            {% else %}
+                                <span class="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700 border border-green-200">
+                                    ✓ Conforme
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Parcours List -->
+                    <div class="space-y-1.5 pl-6">
+                        {% for pData in fData.parcoursList %}
+                            {% set parcours = pData.parcours %}
+                            <div class="flex flex-wrap items-center justify-between gap-2 p-1.5 rounded-md hover:bg-slate-50 text-xs">
+                                <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                                    <input type="checkbox"
+                                           name="parcours[]"
+                                           value="{{ parcours.id }}"
+                                           checked
+                                           data-conforme="{{ pData.isConforme ? '1' : '0' }}"
+                                           data-formation-id="{{ formation.id }}"
+                                           class="parcours-checkbox parcours-of-formation-{{ formation.id }} h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                           onchange="syncFormationCheckbox({{ formation.id }});"
+                                    >
+                                    <span>{{ parcours.libelle }}</span>
+                                    <span class="rounded-full bg-{{ pData.isOuvert ? 'green' : 'red' }}-50 px-1.5 py-0.5 text-[10px] font-semibold text-{{ pData.isOuvert ? 'green' : 'red' }}-700 border border-{{ pData.isOuvert ? 'green' : 'red' }}-200">
+                                        {{ pData.isOuvert ? 'Ouvert' : 'Fermé' }}
+                                    </span>
+                                </label>
+
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-500 font-medium">Capacité : <strong>{{ pData.capacite }}</strong></span>
+                                    {% if pData.isConforme %}
+                                        <span class="inline-flex items-center gap-0.5 text-green-700 font-semibold text-[11px]">
+                                            ✓ Données OK
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-0.5 text-amber-700 font-semibold text-[11px] cursor-help" title="{{ pData.anomalies|join('\n') }}">
+                                            ⚠️ {{ pData.anomalies|length }} anomalie{{ pData.anomalies|length > 1 ? 's' : '' }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if not isRefuse %}
+        <!-- Documents de validation (PV & Note) -->
+        <div class="grid gap-4 md:grid-cols-2 border-t border-slate-200 pt-4">
+            <!-- Procès-Verbal (PV) -->
+            <div class="space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                        <span>📄</span>
+                        <span>Procès-Verbal (PV)</span>
+                    </label>
+                </div>
+
+                {% if existingPvs|length > 0 %}
+                    <div>
+                        <label for="pv_id" class="block text-[11px] font-medium text-slate-500 mb-1">
+                            Choisir un PV déjà déposé :
+                        </label>
+                        <select name="pv_id" id="pv_id"
+                                onchange="document.getElementById('pv_file_input_wrapper').style.display = this.value ? 'none' : 'block';"
+                                class="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs font-semibold text-slate-800 shadow-xs focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">-- Téléverser un nouveau PV --</option>
+                            {% for pv in existingPvs %}
+                                <option value="{{ pv.id }}">{{ pv.originalFilename }} (du {{ pv.uploadedAt|date('d/m/Y') }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+
+                <div id="pv_file_input_wrapper" class="space-y-1">
+                    <label for="file" class="block text-[11px] font-medium text-slate-500">
+                        {{ existingPvs|length > 0 ? 'Ou téléverser un nouveau fichier PDF :' : 'Téléverser le fichier PDF :' }}
+                    </label>
+                    <input type="file" name="file" id="file" accept="application/pdf"
+                           class="w-full rounded-lg border border-slate-300 bg-white p-1.5 text-xs text-slate-700 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                </div>
+            </div>
+
+            <!-- Note explicative -->
+            <div class="space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3.5">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                        <span>📝</span>
+                        <span>Note explicative</span>
+                    </label>
+                    <a href="{{ asset('modeles/note_explicative.docx') }}" target="_blank" class="text-[11px] font-semibold text-indigo-600 hover:underline">
+                        Modèle .docx
+                    </a>
+                </div>
+
+                {% if existingNotes|length > 0 %}
+                    <div>
+                        <label for="note_id" class="block text-[11px] font-medium text-slate-500 mb-1">
+                            Choisir une Note déjà déposée :
+                        </label>
+                        <select name="note_id" id="note_id"
+                                onchange="document.getElementById('note_file_input_wrapper').style.display = this.value ? 'none' : 'block';"
+                                class="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs font-semibold text-slate-800 shadow-xs focus:border-indigo-500 focus:ring-indigo-500">
+                            <option value="">-- Téléverser une nouvelle Note --</option>
+                            {% for note in existingNotes %}
+                                <option value="{{ note.id }}">{{ note.originalFilename }} (du {{ note.uploadedAt|date('d/m/Y') }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+
+                <div id="note_file_input_wrapper" class="space-y-1">
+                    <label for="fileNote" class="block text-[11px] font-medium text-slate-500">
+                        {{ existingNotes|length > 0 ? 'Ou téléverser une nouvelle Note PDF :' : 'Téléverser le fichier PDF :' }}
+                    </label>
+                    <input type="file" name="fileNote" id="fileNote" accept="application/pdf"
+                           class="w-full rounded-lg border border-slate-300 bg-white p-1.5 text-xs text-slate-700 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                </div>
+            </div>
+        </div>
+
+        <!-- Laissez-passer optionnel -->
+        <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-3.5 space-y-2">
+            <label class="flex items-center gap-2.5 cursor-pointer font-bold text-amber-900 text-xs uppercase tracking-wide">
+                <input type="checkbox"
+                       name="laisserPasser"
+                       id="laisserPasser"
+                       value="1"
+                       onchange="document.getElementById('laisser_passer_justif_wrapper').style.display = this.checked ? 'block' : 'none';"
+                       class="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500 cursor-pointer">
+                <span>Demander / Activer un laissez-passer exceptionnel</span>
+            </label>
+            <div id="laisser_passer_justif_wrapper" style="display: none;" class="space-y-1 pt-1">
+                <label for="laisserPasserJustif" class="block text-[11px] font-medium text-amber-800">
+                    Justification du laissez-passer (PV différé, décision dérogatoire, etc.) :
+                </label>
+                <input type="text"
+                       name="laisserPasserJustif"
+                       id="laisserPasserJustif"
+                       placeholder="Ex : PV en cours de signature, validation accordée en séance du..."
+                       class="w-full rounded-lg border border-amber-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-amber-500 focus:ring-amber-500">
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Date & Commentaire -->
+    <div class="grid gap-4 md:grid-cols-3 border-t border-slate-200 pt-4">
+        <div>
+            <label for="date" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                Date de validation :
+            </label>
+            <input type="date"
+                   name="date"
+                   id="date"
+                   value="{{ 'now'|date('Y-m-d') }}"
+                   class="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs font-semibold text-slate-800 shadow-xs focus:border-indigo-500 focus:ring-indigo-500">
+        </div>
+        <div class="md:col-span-2">
+            <label for="commentaire" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+                {{ isRefuse ? 'Motif du retour / modifications demandées :' : 'Commentaire / Remarques (optionnel) :' }}
+            </label>
+            <textarea name="commentaire"
+                      id="commentaire"
+                      rows="2"
+                      {{ isRefuse ? 'required' : '' }}
+                      placeholder="{{ isRefuse ? 'Précisez les corrections attendues...' : 'Ajouter une observation...' }}"
+                      class="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+        </div>
+    </div>
+</form>
+
+<script>
+    function syncFormationCheckbox(formationId) {
+        const parcoursCbs = document.querySelectorAll('.parcours-of-formation-' + formationId);
+        const formationCb = document.querySelector('input[data-formation-id="' + formationId + '"].formation-checkbox');
+        if (!formationCb || parcoursCbs.length === 0) return;
+        let anyChecked = false;
+        parcoursCbs.forEach(cb => { if (cb.checked) anyChecked = true; });
+        formationCb.checked = anyChecked;
+    }
+
+    function syncFormationsCheckboxes() {
+        document.querySelectorAll('.formation-checkbox').forEach(fCb => {
+            const fId = fCb.dataset.formationId;
+            syncFormationCheckbox(fId);
+        });
+    }
+</script>

@@ -1,0 +1,45 @@
+<div id="parcours_{{ parcours.id }}_title_area" class="flex items-center gap-2.5 flex-wrap">
+    <h2 class="text-2xl font-bold text-text dark:text-secondary-100">
+        Parcours : <span id="parcours_{{ parcours.id }}_libelle_text">{{ parcours.libelle }}</span>
+    </h2>
+
+    {# Badge type de parcours #}
+    {% set typeParcours = parcours.typeParcours %}
+    {% if typeParcours and typeParcours.value != 'classique' %}
+        <twig:Badge
+            id="parcours_{{ parcours.id }}_type_badge"
+            variant="{{ typeParcours.color }}"
+            size="sm"
+            label="{{ typeParcours.libelle }}"
+        />
+    {% endif %}
+
+    {# Badge modifié par rapport à N-1 #}
+    {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
+    {% set isModifieN1 = dpe and dpe.etatReconduction and dpe.etatReconduction.value == 'MODIFICATION_INTITULE' %}
+    {% if not isModifieN1 and parcours.parcoursOrigine and parcours.parcoursOrigine.libelle != parcours.libelle %}
+        {% set isModifieN1 = true %}
+    {% endif %}
+
+    {% if isModifieN1 %}
+        <twig:Badge
+            id="parcours_{{ parcours.id }}_modifie_badge"
+            variant="warning"
+            size="sm"
+            icon="icon:warning"
+            label="Modifié par rapport à N-1"
+        />
+    {% endif %}
+
+    {# Bouton d'édition du libellé et type de parcours #}
+    {% if can_edit %}
+        <a href="{{ path('offre_v2_parcours_modal_edit', {parcours: parcours.id}) }}"
+           data-turbo="true"
+           data-action="click->modalturbo#open"
+           class="inline-flex items-center justify-center h-7 w-7 rounded-lg text-secondary-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-secondary-800 transition-colors cursor-pointer"
+           title="Modifier l'intitulé et le type de parcours"
+        >
+            <twig:UX:Icon name="icon:edit" class="h-4 w-4" />
+        </a>
+    {% endif %}
+</div>

@@ -1,19 +1,24 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title = menuItem.label|trans({}, 'menu') %}
-{% set header_description = menuItem.description()|trans({}, 'menu') %}
+{% set header_title = (menuItem and menuItem.label is defined) ? menuItem.label|trans({}, 'menu') : '' %}
+{% set header_description = (menuItem and menuItem.description() is defined and menuItem.description()) ? menuItem.description()|trans({}, 'menu') : '' %}
 
 {% block content %}
-    {% set groupedChildren = {} %}
+    {% if menuItem is not defined or menuItem is null %}
+        <div class="rounded-xl border border-secondary-200 bg-white p-6 text-center text-secondary-500 shadow-sm dark:border-secondary-700 dark:bg-secondary-800">
+            Cette section n'est pas accessible.
+        </div>
+    {% else %}
+        {% set groupedChildren = {} %}
 
-    {% for child in menuItem.children %}
-        {% if child.showInOverview %}
-            {% set column = child.column ?? 'menu.section.default' %}
-            {% set groupedChildren = groupedChildren|merge({
-                (column): (groupedChildren[column]|default([]))|merge([child])
-            }) %}
-        {% endif %}
-    {% endfor %}
+        {% for child in menuItem.children %}
+            {% if child.showInOverview %}
+                {% set column = child.column ?? 'menu.section.default' %}
+                {% set groupedChildren = groupedChildren|merge({
+                    (column): (groupedChildren[column]|default([]))|merge([child])
+                }) %}
+            {% endif %}
+        {% endfor %}
 
     <div class="space-y-10">
         {% for columnLabel, children in groupedChildren %}
@@ -54,4 +59,5 @@
             </section>
         {% endfor %}
     </div>
+    {% endif %}
 {% endblock %}

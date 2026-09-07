@@ -24,8 +24,13 @@ class SectionController extends BaseController
         MenuResolver $menuResolver
     ): Response
     {
+        $menuItem = $menuResolver->findByKey('pilotage');
+        if ($menuItem === null) {
+            throw $this->createAccessDeniedException();
+        }
+
         return $this->render('default/section.html.twig', [
-            'menuItem' => $menuResolver->findByKey('pilotage'),
+            'menuItem' => $menuItem,
         ]);
     }
 
@@ -34,8 +39,13 @@ class SectionController extends BaseController
         MenuResolver $menuResolver
     ): Response
     {
+        $menuItem = $menuResolver->findByKey('droits');
+        if ($menuItem === null) {
+            throw $this->createAccessDeniedException();
+        }
+
         return $this->render('default/section.html.twig', [
-            'menuItem' => $menuResolver->findByKey('droits'),
+            'menuItem' => $menuItem,
         ]);
     }
 
@@ -44,8 +54,13 @@ class SectionController extends BaseController
         MenuResolver $menuResolver
     ): Response
     {
+        $menuItem = $menuResolver->findByKey('administration');
+        if ($menuItem === null) {
+            throw $this->createAccessDeniedException();
+        }
+
         return $this->render('default/section.html.twig', [
-            'menuItem' => $menuResolver->findByKey('administration'),
+            'menuItem' => $menuItem,
         ]);
     }
 
@@ -54,8 +69,13 @@ class SectionController extends BaseController
         MenuResolver $menuResolver
     ): Response
     {
+        $menuItem = $menuResolver->findByKey('offre');
+        if ($menuItem === null) {
+            throw $this->createAccessDeniedException();
+        }
+
         return $this->render('default/section.html.twig', [
-            'menuItem' => $menuResolver->findByKey('offre'),
+            'menuItem' => $menuItem,
         ]);
     }
 
@@ -64,8 +84,13 @@ class SectionController extends BaseController
         MenuResolver $menuResolver
     ): Response
     {
+        $menuItem = $menuResolver->findByKey('conseils');
+        if ($menuItem === null) {
+            throw $this->createAccessDeniedException();
+        }
+
         return $this->render('default/section.html.twig', [
-            'menuItem' => $menuResolver->findByKey('conseils'),
+            'menuItem' => $menuItem,
         ]);
     }
 }

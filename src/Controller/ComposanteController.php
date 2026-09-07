@@ -21,7 +21,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ComposanteController extends BaseController
 {
     #[Route('/composante/{composante<\d+>}', name: 'app_composante')]
-    #[Breadcrumb(menuKey: 'pilotage_composante')]
+    #[Breadcrumb(menuKey: 'pilotage')]
     public function index(
         \App\Navigation\Breadcrumb\Breadcrumb $breadcrumb,
         Composante $composante): Response

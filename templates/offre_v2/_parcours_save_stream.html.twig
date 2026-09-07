@@ -1,0 +1,15 @@
+<turbo-stream action="replace" target="parcours_{{ parcours.id }}_title_area">
+    <template>
+        {{ include('offre_v2/_parcours_title_area.html.twig', {
+            parcours: parcours,
+            campagne: campagne,
+            can_edit: can_edit
+        }) }}
+    </template>
+</turbo-stream>
+
+{{ include('_ui/_toast.stream.html.twig', {
+    message: 'Le parcours a été mis à jour avec succès.',
+    closeModal: true,
+    toast_type: 'success'
+}) }}

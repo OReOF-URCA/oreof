@@ -43,6 +43,10 @@ Composant Card — exemples :
     {% set wrapperClasses = wrapperClasses ~ ' ' ~ resolvedExtraClass %}
 {% endif %}
 
+{% set slotTitle %}
+    {% block title %}{% endblock %}
+{% endset %}
+
 {% set slotContent %}
     {% block content %}{% endblock %}
 {% endset %}
@@ -52,11 +56,13 @@ Composant Card — exemples :
 {% endset %}
 
 <div class="{{ wrapperClasses }}" {{- attributes -}}>
-    {% if resolvedTitle != '' or resolvedDescription != '' or resolvedActions is not empty or slotActions|trim != '' %}
+    {% if slotTitle|trim != '' or resolvedTitle != '' or resolvedDescription != '' or resolvedActions is not empty or slotActions|trim != '' %}
         <div class="p-8 border-b border-secondary-200 dark:border-secondary-700">
             <div class="flex items-start justify-between gap-4">
-                <div class="min-w-0">
-                    {% if resolvedTitle != '' %}
+                <div class="min-w-0 flex-1">
+                    {% if slotTitle|trim != '' %}
+                        {{ slotTitle|raw }}
+                    {% elseif resolvedTitle != '' %}
                         <h2 class="text-2xl font-bold text-text dark:text-secondary-100 truncate">{{ resolvedTitle }}</h2>
                     {% endif %}
                     {% if resolvedDescription != '' %}
