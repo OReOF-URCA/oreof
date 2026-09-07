@@ -1,0 +1,18 @@
+# Modèle de configuration Yarn.
+# Copier ce fichier en `.yarnrc.yml` (NON versionné, cf. .gitignore) puis
+# fournir le token FontAwesome Pro via la variable d'environnement
+# FONTAWESOME_NPM_AUTH_TOKEN (compte : https://fontawesome.com/account).
+#
+#   export FONTAWESOME_NPM_AUTH_TOKEN="votre-token"
+#
+# Ne jamais écrire le token en clair dans un fichier suivi par git.
+
+npmScopes:
+  fortawesome:
+    npmAlwaysAuth: true
+    npmRegistryServer: "https://npm.fontawesome.com/"
+    npmAuthToken: "${FONTAWESOME_NPM_AUTH_TOKEN}"
+  awesome.me:
+    npmAlwaysAuth: true
+    npmRegistryServer: "https://npm.fontawesome.com/"
+    npmAuthToken: "${FONTAWESOME_NPM_AUTH_TOKEN}"
