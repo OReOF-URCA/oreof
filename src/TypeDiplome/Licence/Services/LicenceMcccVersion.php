@@ -866,4 +866,8 @@ class LicenceMcccVersion extends AbstractLicenceMccc
     public function setLogDifferences(bool $value) : void {
         $this->hasLogDifferences = $value;
     }
+
+    public function saveExcelDifferences() {
+        return $this->excelWriter->saveFichier($this->fileName, $this->dir . '/temp/extraction-excel/');
+    }
 }

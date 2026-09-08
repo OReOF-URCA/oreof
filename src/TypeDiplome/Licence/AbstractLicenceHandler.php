@@ -24,6 +24,7 @@ use App\TypeDiplome\Licence\Services\LicenceMccc;
 use App\TypeDiplome\Licence\Services\LicenceMcccVersion;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
 use App\TypeDiplome\TypeDiplomeMcccInterface;
+use App\Utils\LogValue;
 use App\Utils\Tools;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
@@ -132,9 +133,17 @@ abstract class AbstractLicenceHandler implements TypeDiplomeHandlerInterface, Ty
         ?DateTimeInterface  $dateConseil = null,
         bool                $versionFull = true,
         bool                $withLogs = false,
+        bool                $saveFile = false,
     ) {
         $this->licenceMcccVersion->setLogDifferences($withLogs);
-        return $this->licenceMcccVersion->genereExcelLicenceMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
+        $result = $this->licenceMcccVersion->genereExcelLicenceMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
+        if($saveFile) {
+            if(in_array($parcours->getId(), LogValue::$logArray, true)){
+                $this->licenceMcccVersion->saveExcelDifferences();
+            }
+        }
+
+        return $result;
     }
 
     public function exportExcelAndSaveVersionMccc(
