@@ -2,6 +2,9 @@
 
 namespace App\Command;
 
+use App\Classes\GetDateConseilComposante;
+use App\Classes\GetDpeParcours;
+use App\Classes\GetHistorique;
 use App\Entity\CampagneCollecte;
 use App\Entity\Parcours;
 use App\Service\TypeDiplomeResolver;
@@ -27,7 +30,9 @@ class ExtractionExcelCommand extends Command
     public function __construct(
         private EntityManagerInterface $em,
         private VersioningParcours $versioningParcours,
-        private TypeDiplomeResolver $typeD
+        private TypeDiplomeResolver $typeD,
+        private GetDateConseilComposante $getDateConseilCompo,
+        private GetHistorique $getHistorique
     )
     {
         parent::__construct();
@@ -45,6 +50,12 @@ class ExtractionExcelCommand extends Command
             shortcut: null, 
             mode: InputOption::VALUE_NONE, 
             description: 'Récupère les parcours qui ont été modifiés depuis la dernière version JSON valide.'
+        )
+        ->addOption(
+            name: 'with-files',
+            shortcut: null,
+            mode: InputOption::VALUE_NONE,
+            description: "Sauvegarde les exports générés sur le disque"
         );     
     }
 
@@ -54,6 +65,8 @@ class ExtractionExcelCommand extends Command
         $output = $input->getOption('output');
 
         $hasBeenModified = $input->getOption('has-been-modified');
+
+        $withFiles = $input->getOption('with-files');
 
         if(!in_array($output, ['raw', 'excel'], true)) {
             $io->warning("Le format du rapport doit être défini. --output=[raw, excel] - Sortie standard ou fichier xlsx");
@@ -66,17 +79,27 @@ class ExtractionExcelCommand extends Command
                 'errors' => []
             ];
 
+            $saveFile = false;
+            if($withFiles) {
+                $saveFile = true;
+            }
+
             $campagneDefaut = $this->em->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => 1]);
             $parcoursArray = $this->em->getRepository(Parcours::class)->findAllParcoursForDpe($campagneDefaut);
 
             $io->progressStart(count($parcoursArray));
             foreach($parcoursArray as $p){
                 try {
-                    $typeDiplome = $this->typeD->get($p->getFormation()->getTypeDiplome());
-                    $v = $typeDiplome->getExportVersion($campagneDefaut, $p, withLogs: true);
-                    if ($v === false) {
-                        $this->outputArray['no_version_available'][] = ['parcours_id' => $p->getId()];
-                    }
+                        $dpeParcours = GetDpeParcours::getFromParcours($p);
+                        $annee = $dpeParcours->getCampagneCollecte();
+                        $dateConseil = $this->getDateConseilCompo->getDateConseilComposante($dpeParcours);
+                        $dateCfvu = $this->getHistorique->getHistoriqueParcoursLastStep($dpeParcours, 'soumis_cfvu')?->getDate();
+
+                        $typeDiplome = $this->typeD->get($p->getFormation()->getTypeDiplome());
+                        $v = $typeDiplome->getExportVersion($campagneDefaut, $p, dateCfvu: $dateCfvu, dateConseil: $dateConseil, withLogs: true, saveFile: $saveFile);
+                        if ($v === false) {
+                            $this->outputArray['no_version_available'][] = ['parcours_id' => $p->getId()];      
+                        }
                 } catch(\Exception $e) {
                     $this->outputArray['errors'][] = [
                         'parcours_id' => $p->getId(),
