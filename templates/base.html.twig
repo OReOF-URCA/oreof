@@ -24,26 +24,41 @@
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico', 'image_package') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
     <script>
+      // Applique les préférences persistées (thème, accessibilité, couleur) AVANT le
+      // premier rendu pour éviter tout flash. Doit rester aligné avec
+      // assets/controllers/accessibility_controller.js et theme_controller.js.
       (function () {
-          const savedTheme = localStorage.getItem('oreof-theme')
-          let accessibility
+        var root = document.documentElement
 
-          try {
-            accessibility = JSON.parse(localStorage.getItem('oreof-a11y') || 'null')
-          } catch (e) {
-            accessibility = null
+        var DEFAULTS = { theme: 'system', font: 'default', size: 'normal', contrast: false, motion: false }
+        var a11y = DEFAULTS
+        try {
+          var raw = localStorage.getItem('oreof-a11y')
+          if (raw) {
+            a11y = Object.assign({}, DEFAULTS, JSON.parse(raw))
           }
+        } catch (e) { /* localStorage indisponible ou JSON invalide */ }
 
-          const preferredTheme = accessibility && accessibility.theme ? accessibility.theme : null
-          const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-          const themeFromPref = preferredTheme === 'system' ? null : preferredTheme
-          const theme = (themeFromPref === 'dark' || themeFromPref === 'light')
-            ? themeFromPref
-            : ((savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : (prefersDark ? 'dark' : 'light'))
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        // Priorité : choix explicite du panneau accessibilité > bascule rapide (oreof-theme) > préférence système
+        var explicitTheme = (a11y.theme === 'dark' || a11y.theme === 'light') ? a11y.theme : null
+        var quickTheme = localStorage.getItem('oreof-theme')
+        var theme = explicitTheme
+          || ((quickTheme === 'dark' || quickTheme === 'light') ? quickTheme : (prefersDark ? 'dark' : 'light'))
 
-          document.documentElement.setAttribute('data-theme', theme)
+        root.setAttribute('data-theme', theme)
+        root.setAttribute('data-a11y-font', a11y.font || 'default')
+        root.setAttribute('data-a11y-size', a11y.size || 'normal')
+        root.setAttribute('data-a11y-contrast', a11y.contrast ? 'high' : 'normal')
+        root.setAttribute('data-a11y-motion', a11y.motion ? 'reduced' : 'normal')
+
+        var colorTheme = localStorage.getItem('oreof-color-theme')
+        if (colorTheme && colorTheme !== 'normal') {
+          root.setAttribute('data-color-theme', colorTheme)
+        } else {
+          root.removeAttribute('data-color-theme')
         }
-      )
+      })()
     </script>
     <link rel="preconnect" href="https://fonts.gstatic.com"/>
     <style>
@@ -71,9 +86,6 @@
           rel="stylesheet"/>
     {% block stylesheets %}
         {{ encore_entry_link_tags('app') }}
-        {% block legacy_stylesheets %}
-            {#                        {{ encore_entry_link_tags('legacy') }} #}
-        {% endblock %}
     {% endblock %}
 
     {% block javascripts %}
