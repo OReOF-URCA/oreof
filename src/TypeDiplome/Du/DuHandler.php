@@ -66,7 +66,8 @@ final class DuHandler implements TypeDiplomeHandlerInterface
         ?DateTimeInterface      $dateCfvu = null,
         ?DateTimeInterface      $dateConseil = null,
         bool                    $versionFull = true,
-        bool                    $withLogs = false        
+        bool                    $withLogs = false,
+        bool                    $saveFile = false    
     ) : bool {
         return false;
     }

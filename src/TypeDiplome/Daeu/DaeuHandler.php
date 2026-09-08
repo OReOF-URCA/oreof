@@ -70,6 +70,7 @@ final class DaeuHandler implements TypeDiplomeHandlerInterface
         ?DateTimeInterface  $dateConseil = null,
         bool                $versionFull = true,
         bool                $withLogs = false,
+        bool                $saveFile = false
     ) : bool {
         return false;
     }
