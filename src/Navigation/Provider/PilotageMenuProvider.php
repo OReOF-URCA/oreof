@@ -113,7 +113,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
 
         if ($user === null || !method_exists($user, 'getComposanteResponsableDpe')) {
             return MenuItem::section(
-                key: 'pilotage_composante',
+                key: 'pilotage',
                 label: 'menu.compo.pilotage',
                 icon: 'chart-bar',
                 children: [],
@@ -202,7 +202,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
         )->inColumn('support');
 
         return MenuItem::section(
-            key: 'pilotage_composante',
+            key: 'pilotage',
             label: 'menu.compo.pilotage',
             route: 'app_section_pilotage',
             icon: 'chart-bar',

@@ -7,11 +7,23 @@
  */
 
 import { Controller } from '@hotwired/stimulus'
+import { renderStreamMessage } from '@hotwired/turbo'
 
 export default class extends Controller {
   static targets = ['wrapper']
 
-  open () {
+  async open (event) {
+    let url = null
+    if (event && event.currentTarget) {
+      const target = event.currentTarget
+      url = target.getAttribute('href') || target.dataset.url || target.dataset.modalUrl
+      if (url && url !== '#' && !url.startsWith('javascript:')) {
+        event.preventDefault()
+      } else {
+        url = null
+      }
+    }
+
     // show a loading state immediately and remove any previous content
     const titleFrame = document.getElementById('modal_title')
     const bodyFrame = document.getElementById('modal_body')
@@ -31,10 +43,33 @@ export default class extends Controller {
 
     this.wrapperTarget.classList.remove('hidden')
     document.documentElement.classList.add('overflow-hidden')
+
+    if (url) {
+      try {
+        const response = await fetch(url, {
+          headers: {
+            'Accept': 'text/vnd.turbo-stream.html, text/html',
+            'X-Requested-With': 'XMLHttpRequest'
+          }
+        })
+        if (response.ok) {
+          const text = await response.text()
+          renderStreamMessage(text)
+        } else {
+          if (bodyFrame) {
+            bodyFrame.innerHTML = `<div class="p-4 text-sm text-red-600">Erreur lors du chargement (${response.status} ${response.statusText})</div>`
+          }
+        }
+      } catch (error) {
+        console.error('Erreur chargement modal turbo:', error)
+        if (bodyFrame) {
+          bodyFrame.innerHTML = '<div class="p-4 text-sm text-red-600">Erreur de connexion au serveur</div>'
+        }
+      }
+    }
   }
 
   close () {
-
     // clear modal frames content when closing to avoid leaking previous data
     const titleFrame = document.getElementById('modal_title')
     const bodyFrame = document.getElementById('modal_body')

@@ -177,27 +177,6 @@
                         Modifications de l'offre désactivées
                     </div>
                 {% endif %}
-                
-                {% for transition in transitions %}
-                    {% set can_trigger_transition = is_ses_or_admin or (transition.name == 'transmettre' and can_edit) %}
-                    {% if can_trigger_transition %}
-                        <a href="{{ path('app_validation_' ~ transition.metadata.type, {
-                                 etape: activeState,
-                                 transition: transition.name,
-                                 id: formation.id,
-                                 type: 'formation'
-                             }) }}"
-                           data-turbo="true"
-                           data-action="click->modalturbo#open"
-                           class="rounded-lg bg-{{ transition.metadata.btn|default('indigo') == 'success' ? 'green-600 hover:bg-green-700' : (transition.metadata.btn|default('indigo') == 'warning' ? 'amber-600 hover:bg-amber-700' : 'indigo-600 hover:bg-indigo-700') }} px-4 py-2 text-sm font-medium text-white cursor-pointer inline-flex items-center gap-1.5"
-                        >
-                            {% if transition.metadata.icon is defined %}
-                                <i class="fal {{ transition.metadata.icon }}"></i>
-                            {% endif %}
-                            <span>{{ transition.metadata.label|default(transition.name) }}</span>
-                        </a>
-                    {% endif %}
-                {% endfor %}
             </div>
 
         </twig:Card>
@@ -206,32 +185,37 @@
         {% for parcours in formation.parcours %}
             <div data-parcours-id="{{ parcours.id }}">
                 {% set statParcours = tabStatistiques['parcours'][parcours.id] %}
-                <twig:Card extraClass="mb-4"
-                           :title="'Parcours : '~parcours.libelle"
-                >
-                <twig:block name="actions">
-                    {# todo: badge si tronc commun, ... #}
-                    {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
-                    {% set currentEtat = dpe ? dpe.getEtatReconduction().value : 'OUVERT' %}
-                    <span id="parcours_{{ parcours.id }}_badge" class="mr-2">
-                        {% set isParcoursFerme = currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}
-                        {% if isParcoursFerme %}
-                            <twig:Badge variant="danger" label="Fermé" />
-                        {% else %}
-                            <twig:Badge variant="success" label="Ouvert" />
-                        {% endif %}
-                    </span>
-                    <label for="parcours-{{ parcours.id }}" class="cursor-pointer"></label>
-                    <select class="rounded-lg border px-3 py-2 text-sm disabled:bg-slate-100 disabled:text-slate-500"
-                            id="parcours-{{ parcours.id }}"
-                            name="parcours_{{ parcours.id }}_reconduction"
-                            {{ not can_edit ? 'disabled' : '' }}
-                    >
-                        <option value="OUVERT" {% if currentEtat == 'OUVERT' or currentEtat == 'CREATION' or currentEtat == 'MODIFICATION' or currentEtat == 'MODIFICATION_TEXTE' or currentEtat == 'MODIFICATION_MCCC' or currentEtat == 'MODIFICATION_MCCC_TEXTE' %}selected{% endif %}>Ouvert</option>
-                        <option value="NON_OUVERTURE" {% if currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}selected{% endif %}>Fermé</option>
-                        <option value="ATTENTE" {% if currentEtat == 'ATTENTE' %}selected{% endif %}>À confirmer</option>
-                    </select>
-                </twig:block>
+                <twig:Card extraClass="mb-4">
+                    <twig:block name="title">
+                        {{ include('offre_v2/_parcours_title_area.html.twig', {
+                            parcours: parcours,
+                            campagne: campagne,
+                            can_edit: can_edit
+                        }) }}
+                    </twig:block>
+                    <twig:block name="actions">
+                        {# todo: badge si tronc commun, ... #}
+                        {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
+                        {% set currentEtat = dpe ? dpe.getEtatReconduction().value : 'OUVERT' %}
+                        <span id="parcours_{{ parcours.id }}_badge" class="mr-2">
+                            {% set isParcoursFerme = currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}
+                            {% if isParcoursFerme %}
+                                <twig:Badge variant="danger" label="Fermé" />
+                            {% else %}
+                                <twig:Badge variant="success" label="Ouvert" />
+                            {% endif %}
+                        </span>
+                        <label for="parcours-{{ parcours.id }}" class="cursor-pointer"></label>
+                        <select class="rounded-lg border px-3 py-2 text-sm disabled:bg-slate-100 disabled:text-slate-500"
+                                id="parcours-{{ parcours.id }}"
+                                name="parcours_{{ parcours.id }}_reconduction"
+                                {{ not can_edit ? 'disabled' : '' }}
+                        >
+                            <option value="OUVERT" {% if currentEtat == 'OUVERT' or currentEtat == 'CREATION' or currentEtat == 'MODIFICATION' or currentEtat == 'MODIFICATION_INTITULE' or currentEtat == 'MODIFICATION_PARCOURS' or currentEtat == 'MODIFICATION_TEXTE' or currentEtat == 'MODIFICATION_MCCC' or currentEtat == 'MODIFICATION_MCCC_TEXTE' %}selected{% endif %}>Ouvert</option>
+                            <option value="NON_OUVERTURE" {% if currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}selected{% endif %}>Fermé</option>
+                            <option value="ATTENTE" {% if currentEtat == 'ATTENTE' %}selected{% endif %}>À confirmer</option>
+                        </select>
+                    </twig:block>
                 <!-- Parcours -->
                 <article>
                     <div id="parcours_{{ parcours.id }}_stats" class="mt-4 grid gap-3 md:grid-cols-4">

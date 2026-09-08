@@ -6,18 +6,29 @@ use App\Controller\BaseController;
 use App\Entity\Composante;
 use App\Entity\Constantes;
 use App\Entity\CampagneCollecte;
+use App\Entity\DpeFormation;
+use App\Entity\DpeParcours;
 use App\Entity\Formation;
+use App\Entity\Parcours;
 use App\Entity\PlateformeAdmissionParametre;
 use App\Enums\TypeModificationDpeEnum;
+use App\Enums\TypeParcoursEnum;
+use App\Entity\DocumentConseil;
+use App\Entity\HistoriqueFormation;
+use App\Exception\FileUploadException;
 use App\Repository\AnneeRepository;
 use App\Repository\ComposanteRepository;
+use App\Repository\DocumentConseilRepository;
+use App\Repository\DpeFormationRepository;
 use App\Repository\DpeParcoursRepository;
+use App\Repository\FormationRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
 use App\Repository\TypeDiplomePlateformeAdmissionRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\CampagneCollecteService;
 use App\Service\ParcoursComparaisonService;
+use App\Service\SecureUploadService;
 use App\Service\Validation\OffreValidationService;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,6 +37,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 final class OffreController extends BaseController
 {
@@ -39,8 +51,11 @@ final class OffreController extends BaseController
         PlateformeAdmissionRepository $plateformeAdmissionRepository,
         PlateformeAdmissionParametreRepository $plateformeParamRepository,
         TypeDiplomePlateformeAdmissionRepository $typeDiplomePlateformeAdmissionRepository,
+        DocumentConseilRepository $documentConseilRepository,
         AnneeRepository       $anneeRepository,
         OffreValidationService $offreValidationService,
+        EntityManagerInterface $em,
+        WorkflowInterface     $dpeFormationWorkflow,
         ?Composante           $composante = null,
     ): Response
     {
@@ -134,13 +149,35 @@ final class OffreController extends BaseController
             ];
         }
 
-        // Calcul capacité de chaque formation
-        foreach ($tFormations as &$row) {
+        // 4. Batch loading des DpeFormation et DocumentConseil pour toutes les formations
+        $formationIds = array_keys($tFormations);
+        $docsByFormation = $documentConseilRepository->findIndexedByFormationIds($formationIds);
+
+        $dpeFormations = $em->getRepository(DpeFormation::class)->findBy(['campagneCollecte' => $campagne]);
+        $dpeFormationMap = [];
+        foreach ($dpeFormations as $df) {
+            if ($df->getFormation() !== null) {
+                $dpeFormationMap[$df->getFormation()->getId()] = $df;
+            }
+        }
+
+        // Calcul capacité de chaque formation et association des statuts documents
+        foreach ($tFormations as $fId => &$row) {
             $formationCapacite = $row['formation']->getCapaciteAccueil();
             if ($formationCapacite <= 0) {
                 $formationCapacite = array_sum(array_map(fn($p) => $p['capacite'], $row['parcoursData']));
             }
             $row['capacite'] = $formationCapacite;
+
+            $docInfo = $docsByFormation[$fId] ?? ['hasPv' => false, 'pv' => null, 'hasNote' => false, 'note' => null];
+            $row['hasPv'] = $docInfo['hasPv'];
+            $row['pvDoc'] = $docInfo['pv'];
+            $row['hasNote'] = $docInfo['hasNote'];
+            $row['noteDoc'] = $docInfo['note'];
+
+            $dpeF = $dpeFormationMap[$fId] ?? null;
+            $row['dpeFormation'] = $dpeF;
+            $row['etatValidation'] = $dpeF?->getEtatValidation() ?? ['brouillon' => 1];
         }
         unset($row);
 
@@ -301,20 +338,30 @@ final class OffreController extends BaseController
             $capacite += $row['capacite'];
 
             // Groupement pré-calculé par composante pour Twig
-            $compLibelle = $row['formation']->getComposantePorteuse()?->getLibelle() ?? 'Sans composante';
+            $composanteObj = $row['formation']->getComposantePorteuse();
+            $compLibelle = $composanteObj?->getLibelle() ?? 'Sans composante';
             if (!isset($groupedFormations[$compLibelle])) {
                 $groupedFormations[$compLibelle] = [
+                    'composante' => $composanteObj,
                     'libelle' => $compLibelle,
                     'nbFormations' => 0,
                     'nbParcours' => 0,
                     'nbParcoursOuvert' => 0,
                     'capacite' => 0,
+                    'nbPv' => 0,
+                    'nbNote' => 0,
                     'formations' => [],
                 ];
             }
             $groupedFormations[$compLibelle]['nbFormations']++;
             $groupedFormations[$compLibelle]['nbParcours'] += count($row['dpeParcours']);
             $groupedFormations[$compLibelle]['capacite'] += $row['capacite'];
+            if ($row['hasPv']) {
+                $groupedFormations[$compLibelle]['nbPv']++;
+            }
+            if ($row['hasNote']) {
+                $groupedFormations[$compLibelle]['nbNote']++;
+            }
             foreach ($row['parcoursData'] as $pd) {
                 if ($pd['isOuvert']) {
                     $groupedFormations[$compLibelle]['nbParcoursOuvert']++;
@@ -324,6 +371,45 @@ final class OffreController extends BaseController
         }
 
         ksort($groupedFormations);
+
+        $isSesOrAdmin = $this->isGranted('ROLE_SES') || $this->isGranted('ROLE_ADMIN');
+        $isPeriodActive = $campagne && $campagne->isPeriodActive();
+
+        foreach ($groupedFormations as &$compGroup) {
+            $enabledTransitionsMap = [];
+            $stateCounts = [];
+
+            foreach ($compGroup['formations'] as $formaRow) {
+                $dpeF = $formaRow['dpeFormation'];
+                if ($dpeF === null) {
+                    $dpeF = new DpeFormation();
+                    $dpeF->setFormation($formaRow['formation']);
+                    $dpeF->setCampagneCollecte($campagne);
+                    $dpeF->setEtatValidation(['brouillon' => 1]);
+                }
+
+                $fActiveState = array_key_first($dpeF->getEtatValidation()) ?? 'brouillon';
+                $stateCounts[$fActiveState] = ($stateCounts[$fActiveState] ?? 0) + 1;
+
+                foreach ($dpeFormationWorkflow->getEnabledTransitions($dpeF) as $trans) {
+                    $tName = $trans->getName();
+                    $canTrigger = $isSesOrAdmin || ($tName === 'transmettre' && $isPeriodActive);
+                    if ($canTrigger && !isset($enabledTransitionsMap[$tName])) {
+                        $enabledTransitionsMap[$tName] = [
+                            'name' => $tName,
+                            'metadata' => $dpeFormationWorkflow->getMetadataStore()->getTransitionMetadata($trans),
+                            'etape' => $fActiveState,
+                        ];
+                    }
+                }
+            }
+
+            arsort($stateCounts);
+            $compGroup['activeState'] = array_key_first($stateCounts) ?? 'brouillon';
+            $compGroup['transitions'] = array_values($enabledTransitionsMap);
+            $compGroup['can_edit'] = $isSesOrAdmin || $isPeriodActive;
+        }
+        unset($compGroup);
 
         $tabStatistiques['nbParcoursOuvert'] = $nbParcoursOuvert;
         $tabStatistiques['capacite'] = $capacite;
@@ -502,6 +588,21 @@ final class OffreController extends BaseController
             if ($request->request->has($parcoursKey)) {
                 $val = $request->request->get($parcoursKey);
                 $enumVal = TypeModificationDpeEnum::from($val);
+                if ($enumVal === TypeModificationDpeEnum::OUVERT && $oldEnumVal !== null) {
+                    $isOpenState = in_array($oldEnumVal, [
+                        TypeModificationDpeEnum::OUVERT,
+                        TypeModificationDpeEnum::CREATION,
+                        TypeModificationDpeEnum::MODIFICATION,
+                        TypeModificationDpeEnum::MODIFICATION_INTITULE,
+                        TypeModificationDpeEnum::MODIFICATION_PARCOURS,
+                        TypeModificationDpeEnum::MODIFICATION_TEXTE,
+                        TypeModificationDpeEnum::MODIFICATION_MCCC,
+                        TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE,
+                    ], true);
+                    if ($isOpenState) {
+                        $enumVal = $oldEnumVal;
+                    }
+                }
                 foreach ($parcours->getDpeParcours() as $d) {
                     if ($d->getCampagneCollecte() === $campagne) {
                         $d->setEtatReconduction($enumVal);
@@ -717,6 +818,132 @@ final class OffreController extends BaseController
             'anomalies' => $anomalies,
             'comparaison' => $tableau
         ];
+    }
+
+    #[Route('/offre/parcours/{parcours}/modal-edit', name: 'offre_v2_parcours_modal_edit', methods: ['GET'])]
+    public function modalEditParcours(
+        Parcours $parcours,
+        TurboStreamResponseFactory $turboStream,
+        EntityManagerInterface $em,
+    ): Response {
+        $campagne = $this->getCampagneCollecte();
+        $formation = $parcours->getFormation();
+
+        $dpeParcours = $em->getRepository(DpeParcours::class)->findOneBy([
+            'parcours' => $parcours,
+            'campagneCollecte' => $campagne,
+        ]);
+
+        $parcoursOrigine = $parcours->getParcoursOrigine() ?? $parcours->getParcoursOrigineCopie();
+
+        $isModifieN1 = ($dpeParcours?->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_INTITULE);
+        if (!$isModifieN1 && $parcoursOrigine && $parcoursOrigine->getLibelle() !== $parcours->getLibelle()) {
+            $isModifieN1 = true;
+        }
+
+        return $turboStream->streamOpenModalFromTemplates(
+            'Modifier le parcours',
+            $parcours->getLibelle(),
+            'offre_v2/_modal_edit_parcours.html.twig',
+            [
+                'parcours' => $parcours,
+                'formation' => $formation,
+                'parcoursOrigine' => $parcoursOrigine,
+                'dpeParcours' => $dpeParcours,
+                'isModifieN1' => $isModifieN1,
+                'typesParcours' => TypeParcoursEnum::cases(),
+            ],
+            '_ui/_footer_submit_cancel.html.twig',
+            [
+                'submitLabel' => 'Enregistrer',
+            ]
+        );
+    }
+
+    #[Route('/offre/parcours/{parcours}/modal-edit/sauvegarder', name: 'offre_v2_parcours_modal_sauvegarder', methods: ['POST'])]
+    public function modalSauvegarderParcours(
+        Parcours $parcours,
+        Request $request,
+        EntityManagerInterface $em,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $csrfToken = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('parcours_edit_' . $parcours->getId(), $csrfToken)) {
+            return $turboStream->streamToastError('Token CSRF invalide.');
+        }
+
+        $campagne = $this->getCampagneCollecte();
+        $formation = $parcours->getFormation();
+
+        $isSesOrAdmin = $this->isGranted('ROLE_SES') || $this->isGranted('ROLE_ADMIN');
+        if (!$isSesOrAdmin) {
+            if (!$campagne->isPeriodActive()) {
+                return $turboStream->streamToastError('La campagne de collecte est fermée. Modification impossible.');
+            }
+
+            $dpeFormation = $em->getRepository(DpeFormation::class)->findOneBy([
+                'formation' => $formation,
+                'campagneCollecte' => $campagne,
+            ]);
+
+            $isBrouillon = $dpeFormation === null || array_key_exists('brouillon', $dpeFormation->getEtatValidation());
+            if (!$isBrouillon) {
+                return $turboStream->streamToastError('L\'offre a déjà été transmise pour validation. Modification impossible.');
+            }
+        }
+
+        $libelle = trim((string)$request->request->get('libelle', ''));
+        if ($libelle === '') {
+            return $turboStream->streamToastError('Le libellé du parcours ne peut pas être vide.');
+        }
+
+        $parcours->setLibelle($libelle);
+
+        $typeParcoursRaw = $request->request->get('typeParcours');
+        if ($typeParcoursRaw) {
+            $typeEnum = TypeParcoursEnum::tryFrom($typeParcoursRaw);
+            if ($typeEnum !== null) {
+                $parcours->setTypeParcours($typeEnum);
+            }
+        }
+
+        $dpeParcours = $em->getRepository(DpeParcours::class)->findOneBy([
+            'parcours' => $parcours,
+            'campagneCollecte' => $campagne,
+        ]);
+
+        if ($dpeParcours === null) {
+            $dpeParcours = new DpeParcours();
+            $dpeParcours->setParcours($parcours);
+            $dpeParcours->setCampagneCollecte($campagne);
+            $dpeParcours->setFormation($formation);
+            $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
+            $em->persist($dpeParcours);
+        }
+
+        $isModifieN1 = $request->request->getBoolean('isModifieN1');
+        if ($isModifieN1) {
+            $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_INTITULE);
+        } else {
+            if ($dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_INTITULE) {
+                $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
+            }
+        }
+
+        $em->flush();
+
+        $dpeFormation = $em->getRepository(DpeFormation::class)->findOneBy([
+            'formation' => $formation,
+            'campagneCollecte' => $campagne,
+        ]);
+        $isBrouillon = $dpeFormation === null || array_key_exists('brouillon', $dpeFormation->getEtatValidation());
+        $canEdit = $isSesOrAdmin || ($isBrouillon && $campagne->isPeriodActive());
+
+        return $turboStream->stream('offre_v2/_parcours_save_stream.html.twig', [
+            'parcours' => $parcours,
+            'campagne' => $campagne,
+            'can_edit' => $canEdit,
+        ]);
     }
 
 
@@ -937,5 +1164,295 @@ final class OffreController extends BaseController
         $campagneService->updateDates($campagne, $dateOuverture, $dateCloture);
 
         return $turboStream->streamToastSuccess('Dates de la campagne de collecte des capacités enregistrées.', true);
+    }
+
+    #[Route('/offre/composante/{composante}/validation/{transition}', name: 'offre_v2_composante_valider', methods: ['GET', 'POST'])]
+    public function composanteValidation(
+        Composante $composante,
+        string $transition,
+        Request $request,
+        FormationRepository $formationRepository,
+        DpeParcoursRepository $dpeParcoursRepository,
+        DpeFormationRepository $dpeFormationRepository,
+        DocumentConseilRepository $documentConseilRepository,
+        AnneeRepository $anneeRepository,
+        PlateformeAdmissionParametreRepository $plateformeParamRepository,
+        OffreValidationService $offreValidationService,
+        SecureUploadService $secureUploadService,
+        EntityManagerInterface $em,
+        WorkflowInterface $dpeFormationWorkflow,
+        TurboStreamResponseFactory $turboStream
+    ): Response {
+        $campagne = $this->getCampagneCollecte();
+
+        // 1. Contrôle des droits d'accès
+        if ($transition === 'transmettre') {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->denyAccessUnlessGranted('MANAGE', [
+                    'route' => 'app_composante',
+                    'subject' => $composante,
+                ]);
+            }
+            if (!$campagne->isPeriodActive() && !$this->isGranted('ROLE_SES') && !$this->isGranted('ROLE_ADMIN')) {
+                throw $this->createAccessDeniedException('La campagne de collecte est fermée.');
+            }
+        } else {
+            if (!$this->isGranted('ROLE_SES') && !$this->isGranted('ROLE_ADMIN')) {
+                throw $this->createAccessDeniedException('Accès interdit aux responsables de composante.');
+            }
+        }
+
+        // 2. Récupérer les métadonnées de la transition du workflow
+        $meta = [];
+        foreach ($dpeFormationWorkflow->getDefinition()->getTransitions() as $t) {
+            if ($t->getName() === $transition) {
+                $meta = $dpeFormationWorkflow->getMetadataStore()->getTransitionMetadata($t);
+                break;
+            }
+        }
+        $isRefuse = ($meta['type'] ?? '') === 'reserver' || str_starts_with($transition, 'reserver');
+
+        // 3. Récupérer toutes les formations de la composante et leurs parcours
+        $allFormations = $formationRepository->findBy([
+            'composantePorteuse' => $composante,
+        ]);
+
+        $allParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne, $composante);
+        $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne);
+        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne);
+
+        $dpeFormations = !empty($allFormations) ? $dpeFormationRepository->findBy([
+            'campagneCollecte' => $campagne,
+            'formation' => $allFormations,
+        ]) : [];
+
+        $dpeFormationByFormationId = [];
+        foreach ($dpeFormations as $df) {
+            if ($df->getFormation() !== null) {
+                $dpeFormationByFormationId[$df->getFormation()->getId()] = $df;
+            }
+        }
+
+        $parcoursByFormationId = [];
+        foreach ($allParcours as $dpePar) {
+            $parcours = $dpePar->getParcours();
+            $formation = $parcours?->getFormation();
+            if ($formation !== null && $parcours !== null) {
+                $parcoursByFormationId[$formation->getId()][] = $dpePar;
+            }
+        }
+
+        $formationsData = [];
+        foreach ($allFormations as $forma) {
+            $fId = $forma->getId();
+            $dpeParList = $parcoursByFormationId[$fId] ?? [];
+            $formaHasAnomalies = false;
+            $formaAnomaliesCount = 0;
+            $parcoursList = [];
+
+            foreach ($dpeParList as $dpePar) {
+                $parcours = $dpePar->getParcours();
+                if ($parcours === null) {
+                    continue;
+                }
+                $parcAnnees = $anneesByParcours[$parcours->getId()] ?? [];
+                $parcAnoms = $offreValidationService->getAnomaliesParcours($parcours, $campagne, $dpePar, $paramsByAnnee, $parcAnnees);
+                $isParcConforme = (count($parcAnoms) === 0);
+                if (!$isParcConforme) {
+                    $formaHasAnomalies = true;
+                    $formaAnomaliesCount += count($parcAnoms);
+                }
+
+                $capParcours = 0;
+                foreach ($parcAnnees as $an) {
+                    $capParcours += $an->getCapaciteAccueil();
+                }
+
+                $parcoursList[] = [
+                    'parcours' => $parcours,
+                    'dpeParcours' => $dpePar,
+                    'isOuvert' => ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT),
+                    'capacite' => $capParcours,
+                    'isConforme' => $isParcConforme,
+                    'anomalies' => $parcAnoms,
+                ];
+            }
+
+            $formationsData[$fId] = [
+                'formation' => $forma,
+                'dpeFormation' => $dpeFormationByFormationId[$fId] ?? null,
+                'hasAnomalies' => $formaHasAnomalies,
+                'anomaliesCount' => $formaAnomaliesCount,
+                'parcoursList' => $parcoursList,
+            ];
+        }
+
+        // 4. Traitement POST
+        if ($request->isMethod('POST')) {
+            $selectedFormationIds = array_map('intval', (array)$request->request->all('formations'));
+            $selectedParcoursIds = array_map('intval', (array)$request->request->all('parcours'));
+
+            $dateStr = (string)$request->request->get('date');
+            $dateConseil = !empty($dateStr) ? new \DateTime($dateStr) : new \DateTime();
+
+            $commentaire = (string)$request->request->get('commentaire');
+            $laisserPasser = (bool)$request->request->get('laisserPasser');
+            $laisserPasserJustif = (string)$request->request->get('laisserPasserJustif');
+
+            // Documents PV
+            $docPv = null;
+            $pvId = $request->request->get('pv_id');
+            if ($pvId) {
+                $docPv = $documentConseilRepository->find($pvId);
+            } elseif ($request->files->has('file') && $request->files->get('file') !== null) {
+                try {
+                    $uploadedPv = $secureUploadService->uploadFromRequest($request, 'file', 'conseils');
+                    if ($uploadedPv !== null) {
+                        $docPv = new DocumentConseil();
+                        $docPv->setType('pv');
+                        $docPv->setFilename($uploadedPv->getStoredFilename());
+                        $docPv->setOriginalFilename($uploadedPv->getOriginalFilename());
+                        $docPv->setDateConseil($dateConseil);
+                        $docPv->setUploadedBy($this->getUser());
+                        $docPv->setComposante($composante);
+                        $em->persist($docPv);
+                    }
+                } catch (FileUploadException $exception) {
+                    return $turboStream->streamToastError($exception->getPublicMessage());
+                }
+            }
+
+            // Document Note
+            $docNote = null;
+            $noteId = $request->request->get('note_id');
+            if ($noteId) {
+                $docNote = $documentConseilRepository->find($noteId);
+            } elseif ($request->files->has('fileNote') && $request->files->get('fileNote') !== null) {
+                try {
+                    $uploadedNote = $secureUploadService->uploadFromRequest($request, 'fileNote', 'conseils');
+                    if ($uploadedNote !== null) {
+                        $docNote = new DocumentConseil();
+                        $docNote->setType('note_explicative');
+                        $docNote->setFilename($uploadedNote->getStoredFilename());
+                        $docNote->setOriginalFilename($uploadedNote->getOriginalFilename());
+                        $docNote->setDateConseil($dateConseil);
+                        $docNote->setUploadedBy($this->getUser());
+                        $docNote->setComposante($composante);
+                        $em->persist($docNote);
+                    }
+                } catch (FileUploadException $exception) {
+                    return $turboStream->streamToastError($exception->getPublicMessage());
+                }
+            }
+
+            $motifs = [];
+            if ($laisserPasser) {
+                $motifs['laisserPasser'] = $laisserPasserJustif ?: '1';
+            }
+            if ($commentaire !== '') {
+                $motifs['motif'] = $commentaire;
+            }
+
+            foreach ($allFormations as $forma) {
+                $fId = $forma->getId();
+                if (!empty($selectedFormationIds) && !in_array($fId, $selectedFormationIds, true)) {
+                    continue;
+                }
+
+                $dpeF = $dpeFormationByFormationId[$fId] ?? null;
+                if ($dpeF === null) {
+                    $dpeF = new DpeFormation();
+                    $dpeF->setFormation($forma);
+                    $dpeF->setCampagneCollecte($campagne);
+                    $dpeF->setEtatValidation(['brouillon' => 1]);
+                    $em->persist($dpeF);
+                    $dpeFormationByFormationId[$fId] = $dpeF;
+                }
+
+                if ($docPv !== null) {
+                    $docPv->addFormation($forma);
+                    $forma->addDocumentConseil($docPv);
+                }
+                if ($docNote !== null) {
+                    $docNote->addFormation($forma);
+                    $forma->addDocumentConseil($docNote);
+                }
+
+                if ($laisserPasser) {
+                    $dpeF->setLaissezPasser($laisserPasserJustif ?: '1');
+                }
+
+                // HistoriqueFormation
+                $histo = new HistoriqueFormation();
+                $histo->setFormation($forma);
+                $histo->setDpeFormation($dpeF);
+                $histo->setDate($dateConseil);
+                $histo->setUser($this->getUser());
+                $histo->setEtape($transition);
+                $histo->setEtat($isRefuse ? 'refuse' : ($laisserPasser ? 'laisserPasser' : 'valide'));
+                $histo->setCommentaire($commentaire);
+
+                if ($docPv !== null) {
+                    $histo->setDocumentPv($docPv);
+                }
+                if ($docNote !== null) {
+                    $histo->setDocumentNote($docNote);
+                }
+
+                $complements = [];
+                if ($docPv !== null) {
+                    $complements['fichier'] = $docPv->getFilename();
+                    $complements['fichier_original'] = $docPv->getOriginalFilename();
+                }
+                if ($docNote !== null) {
+                    $complements['fichier_note'] = $docNote->getFilename();
+                    $complements['fichier_note_original'] = $docNote->getOriginalFilename();
+                }
+                if ($laisserPasser) {
+                    $complements['laisserPasser'] = $laisserPasserJustif ?: '1';
+                }
+                $histo->setComplements($complements);
+                $em->persist($histo);
+
+                if ($dpeFormationWorkflow->can($dpeF, $transition)) {
+                    $dpeFormationWorkflow->apply($dpeF, $transition, $motifs);
+                }
+            }
+
+            $em->flush();
+
+            return $turboStream->stream('offre_v2/turbo/apply_success.stream.html.twig', [
+                'message' => sprintf('Validation de l\'offre enregistrée pour %s', $composante->getLibelle()),
+            ]);
+        }
+
+        // 5. Affichage GET Modal
+        $existingPvs = $documentConseilRepository->findBy([
+            'composante' => $composante,
+            'type' => 'pv',
+        ], ['uploadedAt' => 'DESC']);
+
+        $existingNotes = $documentConseilRepository->findBy([
+            'composante' => $composante,
+            'type' => 'note_explicative',
+        ], ['uploadedAt' => 'DESC']);
+
+        $modalTitle = $meta['label'] ?? sprintf('Validation — %s', $transition);
+
+        return $turboStream->streamOpenModalFromTemplates(
+            $modalTitle,
+            sprintf('Composante : %s', $composante->getLibelle()),
+            'offre_v2/_modal_validation_composante.html.twig',
+            [
+                'composante' => $composante,
+                'transition' => $transition,
+                'meta' => $meta,
+                'isRefuse' => $isRefuse,
+                'formationsData' => $formationsData,
+                'existingPvs' => $existingPvs,
+                'existingNotes' => $existingNotes,
+            ],
+            '_ui/_footer_submit_cancel.html.twig'
+        );
     }
 }

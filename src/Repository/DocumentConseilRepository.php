@@ -20,4 +20,52 @@ class DocumentConseilRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, DocumentConseil::class);
     }
+
+    /**
+     * @param int[] $formationIds
+     * @return array<int, array{hasPv: bool, pv: ?DocumentConseil, hasNote: bool, note: ?DocumentConseil}>
+     */
+    public function findIndexedByFormationIds(array $formationIds): array
+    {
+        if (empty($formationIds)) {
+            return [];
+        }
+
+        /** @var DocumentConseil[] $docs */
+        $docs = $this->createQueryBuilder('d')
+            ->innerJoin('d.formations', 'f')
+            ->addSelect('f')
+            ->where('f.id IN (:ids)')
+            ->setParameter('ids', $formationIds)
+            ->orderBy('d.uploadedAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $result = [];
+        foreach ($docs as $doc) {
+            foreach ($doc->getFormations() as $f) {
+                $fId = $f->getId();
+                if ($fId === null || !in_array($fId, $formationIds, true)) {
+                    continue;
+                }
+                if (!isset($result[$fId])) {
+                    $result[$fId] = [
+                        'hasPv' => false,
+                        'pv' => null,
+                        'hasNote' => false,
+                        'note' => null,
+                    ];
+                }
+                if ($doc->getType() === 'pv' && !$result[$fId]['hasPv']) {
+                    $result[$fId]['hasPv'] = true;
+                    $result[$fId]['pv'] = $doc;
+                } elseif ($doc->getType() === 'note_explicative' && !$result[$fId]['hasNote']) {
+                    $result[$fId]['hasNote'] = true;
+                    $result[$fId]['note'] = $doc;
+                }
+            }
+        }
+
+        return $result;
+    }
 }
