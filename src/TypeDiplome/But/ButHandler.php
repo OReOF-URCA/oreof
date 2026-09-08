@@ -14,6 +14,7 @@ use App\TypeDiplome\But\Services\ButMcccVersion;
 use App\TypeDiplome\But\Services\ExportJsonApi;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
 use App\TypeDiplome\TypeDiplomeMcccInterface;
+use App\Utils\LogValue;
 use App\Utils\Tools;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
@@ -109,10 +110,18 @@ final class ButHandler implements TypeDiplomeHandlerInterface, TypeDiplomeMcccIn
         ?DateTimeInterface  $dateCfvu = null,
         ?DateTimeInterface  $dateConseil = null,
         bool                $versionFull = true,
-        bool                $withLogs = false
+        bool                $withLogs = false,
+        bool                $saveFile = false
     ) {
         $this->butMcccVersion->setLogDifferences($withLogs);
-        return $this->butMcccVersion->genereExcelbutMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
+        $result = $this->butMcccVersion->genereExcelbutMccc($anneeUniversitaire, $parcours, $dateCfvu, $dateConseil, $versionFull);
+        if($saveFile) {
+            if(in_array($parcours->getId(), LogValue::$logArray, true)) {
+                $this->butMcccVersion->saveExcelDifference();
+            }
+        }
+
+        return $result;
     }
 
     public function exportPdfMccc(

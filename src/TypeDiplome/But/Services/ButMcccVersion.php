@@ -496,4 +496,8 @@ class ButMcccVersion extends AbstractButMccc
     public function setLogDifferences(bool $value) : void {
         $this->hasLogDifferences = $value;
     }
+
+    public function saveExcelDifference() {
+        return $this->excelWriter->saveFichier($this->fileName, $this->dir . '/temp/extraction-excel/');
+    }
 }
