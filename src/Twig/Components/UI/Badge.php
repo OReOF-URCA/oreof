@@ -42,6 +42,12 @@ final class Badge
     /** Classes CSS supplementaires */
     public ?string $extraClass = null;
 
+    /** Lien optionnel (si renseigne, rend une balise <a> au lieu de <span>) */
+    public ?string $href = null;
+
+    /** Target du lien (<a>) */
+    public ?string $target = null;
+
     #[PostMount]
     public function mount(): void
     {

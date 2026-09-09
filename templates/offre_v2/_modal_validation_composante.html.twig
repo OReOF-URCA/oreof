@@ -8,19 +8,16 @@
       class="space-y-5"
 >
     <!-- Alerte informative -->
-    <div class="rounded-xl border {{ isRefuse ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-indigo-100 bg-indigo-50/70 text-indigo-900' }} p-4 text-sm flex items-start gap-3">
-        <div class="text-xl shrink-0">{{ isRefuse ? '⚠️' : 'ℹ️' }}</div>
-        <div>
-            <h4 class="font-bold">{{ meta.label|default(transition) }}</h4>
-            <p class="mt-1 text-xs opacity-90">
-                {% if isRefuse %}
-                    Sélectionnez les formations et parcours à renvoyer pour modifications et indiquez le motif ci-dessous.
-                {% else %}
-                    Sélectionnez les formations et parcours de la composante que vous souhaitez valider pour cette campagne, puis déposez ou sélectionnez le PV de conseil et la note explicative associés.
-                {% endif %}
-            </p>
-        </div>
-    </div>
+    <twig:alerte type="{{ isRefuse ? 'warning' : 'info' }}">
+        <h4 class="font-bold text-sm">{{ meta.label|default(transition) }}</h4>
+        <p class="mt-1 text-xs opacity-90">
+            {% if isRefuse %}
+                Sélectionnez les formations et parcours à renvoyer pour modifications et indiquez le motif ci-dessous.
+            {% else %}
+                Sélectionnez les formations et parcours de la composante que vous souhaitez valider pour cette campagne, puis déposez ou sélectionnez le PV de conseil et la note explicative associés.
+            {% endif %}
+        </p>
+    </twig:alerte>
 
     <!-- Sélection des Formations & Parcours -->
     <div class="space-y-3">

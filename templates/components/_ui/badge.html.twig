@@ -13,6 +13,8 @@ Composant Badge — exemples :
 {% set resolvedIcon = icon ?? '' %}
 {% set resolvedIconEnd = iconEnd ?? false %}
 {% set resolvedExtraClass = extraClass ?? '' %}
+{% set resolvedHref = href ?? '' %}
+{% set resolvedTarget = target ?? '' %}
 
 {% set sizeClass = {
     'sm': 'px-2 py-0.5 text-xs gap-1',
@@ -20,38 +22,56 @@ Composant Badge — exemples :
 }[resolvedSize] ?? 'px-2 py-0.5 text-xs gap-1' %}
 
 {% set iconSizeClass = {
-    'sm': 'h-3 w-3',
-    'md': 'h-3.5 w-3.5',
-}[resolvedSize] ?? 'h-3 w-3' %}
+    'sm': 'h-3.5 w-3.5',
+    'md': 'h-4 w-4',
+}[resolvedSize] ?? 'h-3.5 w-3.5' %}
 
 {% set softColors = {
-    'primary':   'border border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300',
-    'success':   'border border-success-300 bg-success-50 text-success-700 dark:border-success-700 dark:bg-success-900/30 dark:text-success-300',
-    'warning':   'border border-warning-300 bg-warning-50 text-warning-700 dark:border-warning-700 dark:bg-warning-900/30 dark:text-warning-300',
-    'danger':    'border border-danger-300 bg-danger-50 text-danger-700 dark:border-danger-700 dark:bg-danger-900/30 dark:text-danger-300',
-    'info':      'border border-info-300 bg-info-50 text-info-700 dark:border-info-700 dark:bg-info-900/30 dark:text-info-300',
-    'secondary': 'border border-secondary-300 bg-secondary-100 text-secondary-700 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-300',
+    'primary':   'border border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300' ~ (resolvedHref != '' ? ' hover:bg-primary-100 hover:text-primary-800' : ''),
+    'success':   'border border-success-300 bg-success-50 text-success-700 dark:border-success-700 dark:bg-success-900/30 dark:text-success-300' ~ (resolvedHref != '' ? ' hover:bg-success-100 hover:text-success-800' : ''),
+    'warning':   'border border-warning-300 bg-warning-50 text-warning-700 dark:border-warning-700 dark:bg-warning-900/30 dark:text-warning-300' ~ (resolvedHref != '' ? ' hover:bg-warning-100 hover:text-warning-800' : ''),
+    'danger':    'border border-danger-300 bg-danger-50 text-danger-700 dark:border-danger-700 dark:bg-danger-900/30 dark:text-danger-300' ~ (resolvedHref != '' ? ' hover:bg-danger-100 hover:text-danger-800' : ''),
+    'info':      'border border-info-300 bg-info-50 text-info-700 dark:border-info-700 dark:bg-info-900/30 dark:text-info-300' ~ (resolvedHref != '' ? ' hover:bg-info-100 hover:text-info-800' : ''),
+    'secondary': 'border border-secondary-300 bg-secondary-100 text-secondary-700 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-300' ~ (resolvedHref != '' ? ' hover:bg-secondary-200 hover:text-secondary-800' : ''),
 } %}
 
 {% set solidColors = {
-    'primary':   'border border-transparent bg-primary-600 text-white',
-    'success':   'border border-transparent bg-success-600 text-white',
-    'warning':   'border border-transparent bg-warning-500 text-secondary-900',
-    'danger':    'border border-transparent bg-danger-600 text-white',
-    'info':      'border border-transparent bg-info-600 text-white',
-    'secondary': 'border border-transparent bg-secondary-500 text-white',
+    'primary':   'border border-transparent bg-primary-600 text-white' ~ (resolvedHref != '' ? ' hover:bg-primary-700' : ''),
+    'success':   'border border-transparent bg-success-600 text-white' ~ (resolvedHref != '' ? ' hover:bg-success-700' : ''),
+    'warning':   'border border-transparent bg-warning-500 text-secondary-900' ~ (resolvedHref != '' ? ' hover:bg-warning-600' : ''),
+    'danger':    'border border-transparent bg-danger-600 text-white' ~ (resolvedHref != '' ? ' hover:bg-danger-700' : ''),
+    'info':      'border border-transparent bg-info-600 text-white' ~ (resolvedHref != '' ? ' hover:bg-info-700' : ''),
+    'secondary': 'border border-transparent bg-secondary-500 text-white' ~ (resolvedHref != '' ? ' hover:bg-secondary-600' : ''),
 } %}
 
 {% set colorClass = resolvedSoft ? (softColors[resolvedVariant] ?? softColors['secondary']) : (solidColors[resolvedVariant] ?? solidColors['secondary']) %}
 {% set radiusClass = resolvedPill ? 'rounded-full' : 'rounded-md' %}
-{% set classes = 'inline-flex items-center font-semibold ' ~ radiusClass ~ ' ' ~ sizeClass ~ ' ' ~ colorClass ~ (resolvedExtraClass ? ' ' ~ resolvedExtraClass : '') %}
+{% set linkClasses = resolvedHref != '' ? ' transition-colors cursor-pointer inline-flex items-center' : ' inline-flex items-center' %}
+{% set classes = linkClasses ~ ' font-semibold ' ~ radiusClass ~ ' ' ~ sizeClass ~ ' ' ~ colorClass ~ (resolvedExtraClass ? ' ' ~ resolvedExtraClass : '') %}
 
-{% if resolvedLabel != '' or resolvedIcon != '' or dto is not null %}
-    <span class="{{ classes }}" {{- attributes -}}>
-        {% if resolvedIcon != '' and not resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
-        {% if resolvedLabel != '' %}<span>{{ resolvedLabel }}</span>{% endif %}
-        {% block content %}{% endblock %}
-        {% if resolvedIcon != '' and resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
-    </span>
+{% set slotContent %}
+    {% block content %}{% endblock %}
+{% endset %}
+
+{% if resolvedLabel != '' or resolvedIcon != '' or dto is not null or slotContent|trim != '' %}
+    {% if resolvedHref != '' %}
+        <a href="{{ resolvedHref }}"
+           {% if resolvedTarget != '' %}target="{{ resolvedTarget }}"{% endif %}
+           class="{{ classes }}"
+           {{- attributes -}}
+        >
+            {% if resolvedIcon != '' and not resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
+            {% if resolvedLabel != '' %}<span>{{ resolvedLabel }}</span>{% endif %}
+            {{ slotContent|raw }}
+            {% if resolvedIcon != '' and resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
+        </a>
+    {% else %}
+        <span class="{{ classes }}" {{- attributes -}}>
+            {% if resolvedIcon != '' and not resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
+            {% if resolvedLabel != '' %}<span>{{ resolvedLabel }}</span>{% endif %}
+            {{ slotContent|raw }}
+            {% if resolvedIcon != '' and resolvedIconEnd %}{{ ux_icon(resolvedIcon, {class: iconSizeClass}) }}{% endif %}
+        </span>
+    {% endif %}
 {% endif %}
 
