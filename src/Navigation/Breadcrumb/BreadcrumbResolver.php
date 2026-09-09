@@ -18,6 +18,7 @@ final readonly class BreadcrumbResolver
     public function __construct(
         private RequestStack $requestStack,
         private MenuResolver $menuResolver,
+        private Breadcrumb $breadcrumb,
     )
     {
     }
@@ -73,6 +74,10 @@ final readonly class BreadcrumbResolver
             );
         }
 
+        foreach ($this->breadcrumb->items() as $dynamicItem) {
+            $items[] = $dynamicItem;
+        }
+
         return $this->deduplicate($items);
     }
 
@@ -98,7 +103,7 @@ final readonly class BreadcrumbResolver
         $seen = [];
 
         foreach ($items as $item) {
-            $key = $item->route . ':' . json_encode($item->routeParams, JSON_THROW_ON_ERROR);
+            $key = ($item->route ?? 'no-route') . ':' . $item->label . ':' . json_encode($item->routeParams, JSON_THROW_ON_ERROR);
 
             if (isset($seen[$key])) {
                 continue;

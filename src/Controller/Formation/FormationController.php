@@ -18,21 +18,14 @@ use App\Entity\SemestreParcours;
 use App\Form\FormationStep1Type;
 use App\Form\FormationStep2Type;
 use App\Form\FormationStep3Type;
-use App\Form\ParcoursStep1Type;
-use App\Form\ParcoursStep2Type;
-use App\Form\ParcoursStep5Type;
-use App\Form\ParcoursStep6Type;
-use App\Form\ParcoursStep7Type;
-use App\Form\Type\TextareaAutoSaveType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\FormationTabStateRepository;
 use App\Repository\ParcoursTabStateRepository;
 use App\Repository\ValidationIssueRepository;
 use App\Service\LheoXML;
 use App\Service\Validation\SemesterValidationRefresher;
-use App\Service\VersioningFormation;
-use App\Service\VersioningParcours;
 use App\TypeDiplome\TypeDiplomeResolver;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,15 +37,24 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class FormationController extends BaseController
 {
     #[Route('/{slug}/modifier', name: 'modifier')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function modifier(
         Request                     $request,
         ParcoursTabStateRepository $parcoursTabStateRepository,
         FormationTabStateRepository $statesRepo,
         TypeDiplomeResolver         $typeDiplomeResolver,
+        BreadcrumbService           $breadcrumb,
         #[MapEntity(mapping: ['slug' => 'slug'])]
         Formation                   $formation
     ): Response
     {
+        $breadcrumb->add(
+            $formation->getDisplay(),
+            'formation_v2_voir',
+            ['slug' => $formation->getSlug()]
+        );
+        $breadcrumb->add('Modifier la formation');
+
         $tabStates = $statesRepo->indexByTabKey($formation);
 
         $parameters = [
@@ -92,12 +94,18 @@ class FormationController extends BaseController
     }
 
     #[Route('/{slug}', name: 'voir', methods: ['GET'])]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function show(
         #[MapEntity(mapping: ['slug' => 'slug'])]
-        Formation $formation,
-        LheoXML   $lheoXML,
+        Formation         $formation,
+        LheoXML           $lheoXML,
+        BreadcrumbService $breadcrumb,
     ): Response
     {
+        $breadcrumb->add(
+            $formation->getDisplay()
+        );
+
         $typeDiplome = $formation->getTypeDiplome();
         if ($typeDiplome === null) {
             throw $this->createNotFoundException();
@@ -105,32 +113,6 @@ class FormationController extends BaseController
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
 
-//        $textDifferencesParcours = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours);
-//        $textDifferencesFormation = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation);
-//        $version = $versioningParcours->hasLastVersion($parcours);
-//
-//        $cssDiff = DiffHelper::getStyleSheet();
-
-
-//        // Ordre des semestres manquants
-//        $missingSemestre = [];
-//
-//        // Si le parcours est en alternance sans les premiers semestres
-//        // on met un lien vers le parcours de base
-//        $parcoursDeBase = null;
-//        if($parcours->getTypeParcours() === TypeParcoursEnum::TYPE_PARCOURS_ALTERNANCE
-//            && $parcours->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT'
-//        ) {
-//            $parcoursDeBase = $entityManager->getRepository(Parcours::class)
-//                ->findParcoursDeBaseAlternance(
-//                    $parcours->getLibelle(),
-//                    GetDpeParcours::getFromParcours($parcours)?->getCampagneCollecte()?->getId()
-//                );
-//            $parcoursDeBase = count($parcoursDeBase) > 0 ? $parcoursDeBase[0] : null;
-//
-//            $missingSemestre = $entityManager->getRepository(Parcours::class)
-//                ->findParcoursAlternanceHasMissingSemestre($parcours);
-//        }
         return $this->render('formation_v2/voir.html.twig', [
             'formation' => $formation,
             'typeDiplome' => $typeDiplome,
@@ -141,8 +123,27 @@ class FormationController extends BaseController
     }
 
     #[Route('/{parcours}/modifier/annee/{annee}', name: 'annee')]
-    public function annee(Parcours $parcours, Annee $annee): Response
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
+    public function annee(
+        Parcours          $parcours,
+        Annee             $annee,
+        BreadcrumbService $breadcrumb
+    ): Response
     {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'formation_v2_modifier',
+            ['slug' => $parcours->getFormation()?->getSlug()]
+        );
+        $breadcrumb->add('Année ' . $annee->getOrdre());
+
         return $this->render('parcours_v2/tabs/_annee.html.twig', [
             'annee' => $annee,
             'parcours' => $parcours
@@ -150,15 +151,31 @@ class FormationController extends BaseController
     }
 
     #[Route('/{parcours}/modifier/semestre/{semestreParcours}', name: 'semestre')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function semestre(
         ValidationIssueRepository   $validationIssueRepository,
         Request                     $request,
         TypeDiplomeResolver         $typeDiplomeResolver,
         Parcours                    $parcours,
         SemestreParcours            $semestreParcours,
-        SemesterValidationRefresher $refresher
+        SemesterValidationRefresher $refresher,
+        BreadcrumbService           $breadcrumb,
     ): Response
     {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'formation_v2_modifier',
+            ['slug' => $parcours->getFormation()?->getSlug()]
+        );
+        $breadcrumb->add('Semestre ' . $semestreParcours->getOrdre());
+
         // refresh du semestre si dirty
         $refresher->refreshIfDirty($semestreParcours, $parcours);
 
@@ -190,7 +207,7 @@ class FormationController extends BaseController
     #[Route('/{parcours}/modifier/semestre/{semestreParcours}/validation', name: 'semestre_validation')]
     public function semestreValidation(
         Request                     $request,
-        TypeDIplomeResolver         $typeDiplomeResolver,
+        TypeDiplomeResolver         $typeDiplomeResolver,
         Parcours                    $parcours,
         SemestreParcours            $semestreParcours,
         SemesterValidationRefresher $refresher
@@ -212,11 +229,23 @@ class FormationController extends BaseController
     }
 
     #[Route('/{formation}/modifier/tabs/{tab}', name: 'tabs')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function tabs(
         TypeDiplomeResolver         $typeDiplomeResolver,
         FormationTabStateRepository $statesRepo,
-        Formation                   $formation, string $tab, Request $request): Response
+        Formation                   $formation,
+        string                      $tab,
+        Request                     $request,
+        BreadcrumbService           $breadcrumb,
+    ): Response
     {
+        $breadcrumb->add(
+            $formation->getDisplay(),
+            'formation_v2_voir',
+            ['slug' => $formation->getSlug()]
+        );
+        $breadcrumb->add('Modifier la formation');
+
         $form = null;
         $tabView = $tab;
         $titre = null;

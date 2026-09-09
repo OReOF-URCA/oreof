@@ -9,14 +9,6 @@
     {% endif %}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_formation_index'), title: 'Liste des formations'},
-        {href: path('formation_v2_voir', {slug:formation.slug}), title:'Formation :  ' ~ formation.display},
-        {title: header_title|raw}
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <div class="flex flex-wrap gap-2 justify-start lg:justify-end">
         {% if (is_granted('EDIT', {route: 'app_parcours', subject: dpeParcours})

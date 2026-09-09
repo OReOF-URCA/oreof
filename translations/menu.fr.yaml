@@ -75,7 +75,7 @@ menu:
 breadcrumb.home: Accueil
 page:
     app_formation_index:
-      title: Offre de formation
+      title: Détail des formations
       description: Détails des mentions/spécialités
     app_section_offre_formation:
       title: Offre de formation

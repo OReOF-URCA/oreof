@@ -21,6 +21,8 @@ use App\Form\ParcoursStep3Type;
 use App\Form\ParcoursStep5Type;
 use App\Form\ParcoursStep6Type;
 use App\Form\ParcoursStep7Type;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\ParcoursTabStateRepository;
 use App\Repository\ValidationIssueRepository;
 use App\Service\LheoXML;
@@ -38,13 +40,29 @@ use Symfony\Component\Routing\Attribute\Route;
 class ParcoursController extends BaseController
 {
     #[Route('/{parcours}/modifier', name: 'modifier')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function modifier(
         Request                    $request,
         ParcoursTabStateRepository $statesRepo,
         TypeDiplomeResolver        $typeDiplomeResolver,
+        BreadcrumbService          $breadcrumb,
         Parcours                   $parcours
     ): Response
     {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Modifier le parcours');
+
         $tabStates = $statesRepo->indexByTabKey($parcours);
 
         $parameters = [
@@ -78,12 +96,14 @@ class ParcoursController extends BaseController
     }
 
     #[Route('/{parcours}', name: 'voir', methods: ['GET'])]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function voir(
         Parcours               $parcours,
         LheoXML                $lheoXML,
         VersioningParcours     $versioningParcours,
         VersioningFormation    $versioningFormation,
         EntityManagerInterface $entityManager,
+        BreadcrumbService      $breadcrumb,
     ): Response
     {
         $formation = $parcours->getFormation();
@@ -94,6 +114,15 @@ class ParcoursController extends BaseController
         if ($typeDiplome === null) {
             throw $this->createNotFoundException();
         }
+
+        $breadcrumb->add(
+            $formation->getDisplay(),
+            'formation_v2_voir',
+            ['slug' => $formation->getSlug()]
+        );
+        $breadcrumb->add(
+            $parcours->getDisplay()
+        );
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
 
@@ -142,8 +171,27 @@ class ParcoursController extends BaseController
     }
 
     #[Route('/{parcours}/modifier/annee/{annee}', name: 'annee')]
-    public function annee(Parcours $parcours, Annee $annee): Response
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
+    public function annee(
+        Parcours          $parcours,
+        Annee             $annee,
+        BreadcrumbService $breadcrumb
+    ): Response
     {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_modifier',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Année ' . $annee->getOrdre());
+
         return $this->render('parcours_v2/tabs/_annee.html.twig', [
             'annee' => $annee,
             'parcours' => $parcours
@@ -151,15 +199,31 @@ class ParcoursController extends BaseController
     }
 
     #[Route('/{parcours}/modifier/semestre/{semestreParcours}', name: 'semestre')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function semestre(
         ValidationIssueRepository   $validationIssueRepository,
-        Request $request,
+        Request                     $request,
         TypeDiplomeResolver         $typeDiplomeResolver,
-        Parcours            $parcours,
+        Parcours                    $parcours,
         SemestreParcours            $semestreParcours,
-        SemesterValidationRefresher $refresher
+        SemesterValidationRefresher $refresher,
+        BreadcrumbService           $breadcrumb
     ): Response
     {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_modifier',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Semestre ' . $semestreParcours->getOrdre());
+
         // refresh du semestre si dirty
         $refresher->refreshIfDirty($semestreParcours, $parcours);
 
@@ -232,11 +296,30 @@ class ParcoursController extends BaseController
     }
 
     #[Route('/{parcours}/modifier/tabs/{tab}', name: 'tabs')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function tabs(
         TypeDiplomeResolver        $typeDiplomeResolver,
         ParcoursTabStateRepository $statesRepo,
-        Parcours                   $parcours, string $tab, Request $request): Response
+        Parcours                   $parcours,
+        string                     $tab,
+        Request                    $request,
+        BreadcrumbService          $breadcrumb
+    ): Response
     {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Modifier le parcours');
+
         $form = null;
         $tabView = $tab;
         $titre = null;

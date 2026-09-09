@@ -24,23 +24,27 @@ final class MainMenuProvider implements MenuProviderInterface
                 icon: 'book-open',
                 children: [
                     MenuItem::link(
-                        'offre.detail_mentions',
+                        key: 'offre.detail_mentions',
+                        label: 'menu.detail_mentions',
                         route: 'app_formation_index',
                         icon: 'mdi:format-list-bulleted'
                     ),
                     MenuItem::link(
-                        'offre.detail_fiches',
-                        route:'structure_fiche_matiere_index',
+                        key: 'offre.detail_fiches',
+                        label: 'menu.detail_fiches',
+                        route: 'structure_fiche_matiere_index',
                         icon: 'mdi:file'
                     ),
                     MenuItem::link(
-                        'offre.detail_fiches_hd',
-                        route:'structure_fiche_matiere_index_hd',
+                        key: 'offre.detail_fiches_hd',
+                        label: 'menu.detail_fiches_hd',
+                        route: 'structure_fiche_matiere_index_hd',
                         icon: 'mdi:file-lock'
                     ),
                     MenuItem::link(
-                        'offre.exports',
-                        route:'app_export_index',
+                        key: 'offre.exports',
+                        label: 'menu.exports',
+                        route: 'app_export_index',
                         icon: 'icon:download'
                     ),
                 ]

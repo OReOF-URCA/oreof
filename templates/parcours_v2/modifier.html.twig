@@ -47,16 +47,6 @@
     />
 {% endblock %}
 
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_formation_index'), title: 'Liste des formations'},
-        {href: path('formation_v2_voir', {slug:formation.slug}), title:'Formation :  ' ~ formation.display},
-        {title: header_title|raw, href: path('parcours_v2_voir', {parcours: parcours.id})},
-        {title: 'Modifier'}
-    ]}) }}
-{% endblock %}
-
 {% block content %}
 
     <div id="parcours_header_component">
