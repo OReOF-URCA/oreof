@@ -32,7 +32,7 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                         key: 'administration.ville',
                         label: 'menu.config.ville',
                         route: 'app_ville_index',
-                    ),
+                    )->inColumn('menu.config.menu_config_globale'),
                     MenuItem::link(
                         key: 'administration.plateforme_adminission',
                         label: 'menu.config.plateforme_adminission',
@@ -86,7 +86,7 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                         key: 'administration.langues',
                         label: 'menu.config.langues',
                         route: 'app_langue_index',
-                    )->inColumn('menu.config.offre_formation'),
+                    )->inColumn('menu.config.menu_config_globale'),
 
                     MenuItem::link(
                         key: 'administration.rythme_formation',
@@ -98,7 +98,7 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                         key: 'administration.campagne_collecte',
                         label: 'menu.config.campagne_collecte',
                         route: 'app_campagne_collecte_index',
-                    )->inColumn('menu.menu_configuration'),
+                    )->inColumn('menu.config.menu_etablissement'),
 
                     MenuItem::link(
                         key: 'administration.annee_universitaire',

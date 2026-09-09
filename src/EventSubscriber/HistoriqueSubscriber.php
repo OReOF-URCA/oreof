@@ -79,11 +79,18 @@ class HistoriqueSubscriber implements EventSubscriberInterface
         $histo->setDate($this->getDateTime($request));
         $histo->setCommentaire($this->getCommentaire($request));
 
+        $tab = $histo->getComplements() ?? [];
+
         foreach ($this->cases as $cas) {
             if ($request->request->has($cas)) {
                 $tab[$cas] = $request->request->get($cas);
                 if ($cas === 'laisserPasser') {
                     $histo->setEtat('laisserPasser');
+                }
+            } else {
+                unset($tab[$cas]);
+                if ($cas === 'laisserPasser' && $histo->getEtat() === 'laisserPasser') {
+                    $histo->setEtat('valide');
                 }
             }
 
@@ -103,7 +110,7 @@ class HistoriqueSubscriber implements EventSubscriberInterface
             $tab['fichier_original'] = $upload->getOriginalFilename();
         }
 
-        $histo->setComplements($tab ?? []);
+        $histo->setComplements($tab);
 
         $this->entityManager->persist($histo);
         $this->entityManager->flush();
@@ -121,11 +128,18 @@ class HistoriqueSubscriber implements EventSubscriberInterface
         $histo->setDate($this->getDateTime($request));
         $histo->setCommentaire($this->getCommentaire($request));
 
+        $tab = $histo->getComplements() ?? [];
+
         foreach ($this->cases as $cas) {
             if ($request->request->has($cas)) {
                 $tab[$cas] = $request->request->get($cas);
                 if ($cas === 'laisserPasser') {
                     $histo->setEtat('laisserPasser');
+                }
+            } else {
+                unset($tab[$cas]);
+                if ($cas === 'laisserPasser' && $histo->getEtat() === 'laisserPasser') {
+                    $histo->setEtat('valide');
                 }
             }
 
@@ -145,7 +159,7 @@ class HistoriqueSubscriber implements EventSubscriberInterface
             $tab['fichier_original'] = $upload->getOriginalFilename();
         }
 
-        $histo->setComplements($tab ?? []);
+        $histo->setComplements($tab);
 
         $this->entityManager->persist($histo);
         $this->entityManager->flush();

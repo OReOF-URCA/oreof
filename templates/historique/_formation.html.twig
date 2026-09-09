@@ -9,19 +9,10 @@
 </h2>
 
 {% for histo in historiques %}
-    {#    {% if #}
-    {#        histo.etape == 'laisserPasser' or #}
-    {#        histo.complements.sousReserveModifications is defined or #}
-    {#        histo.complements.sousReserveConseil is defined %} #}
-    {#        {% set color='amber' %} #}
-    {#        {% set borderColor='border-amber-500' %} #}
-    {#        {% set textColor='text-amber-600' %} #}
-    {#        {% set bgColor='bg-amber-100' %} #}
-    {#    {% endif %} #}
-
-    <div class="flex items-start gap-3 mb-4 p-4 rounded-lg border {{ borderColor|default('border-secondary-200') }}"
-            {{ stimulus_controller('historique') }}
-            {{ stimulus_target('historique', 'entreeHistorique') }}
+    <div id="historique_{{ histo.id }}"
+         class="flex items-start gap-3 mb-4 p-4 rounded-lg border {{ borderColor|default('border-secondary-200') }} transition-all duration-300"
+         {{ stimulus_controller('historique') }}
+         {{ stimulus_target('historique', 'entreeHistorique') }}
     >
         <div class="shrink-0">
             <twig:IconBox
@@ -77,16 +68,17 @@
                                     extraClass="px-2"
                                     dataAction="click->modalturbo#open"
                                     href="{{ path('app_historique_edit', {
-                                        historique: histo.id
+                                        historique: histo.id,
+                                        contextType: type|default('formation'),
+                                        contextId: formation is defined ? formation.id : (parcours is defined ? parcours.id : (ficheMatiere is defined ? ficheMatiere.id : null))
                                     }) }}"
                                     icon="icon:edit"
-                            >
-                            </twig:Button>
+                                    :attr="{
+                                        'data-turbo': 'false',
+                                        'data-turbo-preload': 'false'
+                                    }"
+                            />
                         {% endif %}
-                        {#                        {{ stimulus_action('historique', 'delete', 'click', { #}
-                        {#                            url: path('app_historique_delete', {historique: histo.id}), #}
-                        {#                            csrf: csrf_token('delete' ~ histo.id) #}
-                        {#                        }) }} #}
                         <twig:Button
                                 variant="danger"
                                 href="{{ path('app_historique_delete', {historique: histo.id}) }}"
@@ -95,7 +87,12 @@
                                 extraClass="px-2"
                                 icon="icon:delete"
                                 dataAction="click->historique#delete"
-                        ></twig:Button>
+                                :attr="{
+                                    'data-historique-url-param': path('app_historique_delete', {historique: histo.id}),
+                                    'data-historique-csrf-param': csrf_token('delete' ~ histo.id),
+                                    'data-historique-confirm-param': 'Êtes-vous sûr de vouloir supprimer cet enregistrement de l\'historique ?'
+                                }"
+                        />
                     </div>
                 {% endif %}
 
@@ -115,12 +112,12 @@
                             {% endif %}
                         </p>
                     {% endif %}
-                    {% if histo.commentaire is defined %}
+                    {% if histo.commentaire is defined and histo.commentaire %}
                         <div class="text-sm text-gray-700">
                             {{ histo.commentaire|raw }}
                         </div>
                     {% endif %}
-                    {% if histo.complements.fichier is defined %}
+                    {% if histo.complements.fichier is defined and histo.complements.fichier %}
                         {% if histo.etape == 'change_rf' or histo.etape == 'change_co_rf' %}
                             <p>
                                 <twig:Button
@@ -150,14 +147,19 @@
                         {% endif %}
                     {% endif %}
 
-                    {% if histo.complements.fichier_note is defined %}
-                        {# todo: utiliser Button et reprendre modèle PV au dessus #}
-                        <div class="col-auto">
-                            <p>
-                                <a href="{{ path('app_upload_download', {context: 'conseils', filename: histo.complements.fichier_note, originalName: histo.complements.fichier_note_original|default(histo.complements.fichier_note)}) }}"
-                                   target="_blank">Voir
-                                    la note explicative</a></p>
-                        </div>
+                    {% if histo.complements.fichier_note is defined and histo.complements.fichier_note %}
+                        <p>
+                            <twig:Button
+                                    href="{{ path('app_upload_download', {context: 'conseils', filename: histo.complements.fichier_note, originalName: histo.complements.fichier_note_original|default(histo.complements.fichier_note)}) }}"
+                                    variant="info"
+                                    size="sm"
+                                    icon="icon:download"
+                                    label="Voir la note explicative"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    :centered="false"
+                            />
+                        </p>
                     {% endif %}
                 </div>
             {% endif %}

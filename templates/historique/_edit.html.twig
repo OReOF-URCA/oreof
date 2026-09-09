@@ -1,114 +1,146 @@
-{{ component('alerte', {
-    type: 'info',
-    message: (process.label~'.valide.alerte')|trans({}, 'process')|nl2br|raw
-}) }}
+{% if process.label is defined and process.label %}
+    {{ component('alerte', {
+        type: 'info',
+        message: (process.label~'.valide.alerte')|trans({}, 'process')|nl2br|raw
+    }) }}
+{% endif %}
 
-<form action="{{ path('app_historique_edit', {historique: historique.id}) }}" method="post"
+<form id="form_edit_historique"
+      action="{{ path('app_historique_edit', {
+          historique: historique.id,
+          contextType: contextType|default(''),
+          contextId: contextId|default('')
+      }) }}"
+      method="post"
       enctype="multipart/form-data"
       class="space-y-4">
 
+    <input type="hidden" name="contextType" value="{{ contextType|default('') }}">
+    <input type="hidden" name="contextId" value="{{ contextId|default('') }}">
+
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 
-    {% if process.hasDate is defined and process.hasDate %}
-        <div class="space-y-2">
-            <label for="date"
-                   class="block text-sm font-medium text-secondary-700">{{ ('valide.'~process.label~'.date.label')|trans({}, 'process') }}
-                <span class="required"></span> <i
-                        class="fal fa-question-circle ml-1"
-                        data-controller="tooltip"
-                        data-tooltip-placement-value="bottom"
-                        aria-label="{{ ('valide.'~process.label~'.helps.date.help')|trans({}, 'process') }}"
-                        data-bs-original-title="{{ ('valide.'~process.label~'.helps.date.help')|trans({}, 'process') }}"></i></label>
-            <input type="date" name="date"
-                   class="w-full rounded-md border border-secondary-300 px-3 py-2 text-sm text-secondary-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                   id="date"
-                   value="{{ historique.date|date('Y-m-d') }}"
-            >
-        </div>
-    {% endif %}
-
-    {% if etape == 'soumis_cfvu' or etape == 'cfvu' %}
-        {# regarder si dans l'historique on à un laissez-passer sur le conseil  #}
-        {% if laisserPasser is defined and laisserPasser != false %}
-            <div class="md:col-span-2">
-            {% if laisserPasser.etat == 'laisserPasser' %}
-                {{ component('alerte', {type:'warning', message: 'Un laissez-passer a été demandé le '~laisserPasser.created|date('d/m/Y')~'.'}) }}
-            {% else %}
-                <a
-                        href="{{ path('app_upload_download', {context: 'conseils', filename: laisserPasser.complements.fichier, originalName: laisserPasser.complements.fichier_original|default(laisserPasser.complements.fichier)}) }}"
-                        target="_blank"
-                        class="inline-flex items-center gap-2 rounded-md border border-cyan-300 bg-cyan-50 px-3 py-2 text-sm font-medium text-cyan-700 hover:bg-cyan-100"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        title="{{ 'voir.le.pv.infobulle'|trans({}, 'process') }}"
+        {% if process.hasDate is not defined or process.hasDate or historique.date is not null %}
+            <div class="space-y-2">
+                <label for="date" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                    {% if process.label is defined and process.label %}
+                        {{ ('valide.'~process.label~'.date.label')|trans({}, 'process') }}
+                    {% else %}
+                        Date de validation
+                    {% endif %}
+                    <span class="text-rose-500">*</span>
+                    {% if process.label is defined and process.label %}
+                        <span class="inline-block ml-1"
+                              {{ stimulus_controller('tooltip') }}
+                              aria-label="{{ ('valide.'~process.label~'.helps.date.help')|trans({}, 'process') }}"
+                              data-bs-title="{{ ('valide.'~process.label~'.helps.date.help')|trans({}, 'process') }}">
+                            <twig:UX:Icon name="icon:question" class="h-4 w-4 text-secondary-400 inline" />
+                        </span>
+                    {% endif %}
+                </label>
+                <input type="date" name="date" id="date"
+                       class="w-full rounded-md border border-secondary-300 px-3 py-2 text-sm text-secondary-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100"
+                       value="{{ historique.date ? historique.date|date('Y-m-d') : '' }}"
                 >
-                    <i class="{{ iconDownload }}"></i>
-                    <span> {{ 'voir.le.pv'|trans({}, 'process') }}</span>
-                </a>
-            {% endif %}
             </div>
         {% endif %}
-    {% endif %}
 
-    {% if process.hasUpload is defined and process.hasUpload %}
-        <div class="space-y-2">
-            <label for="file"
-                   class="block text-sm font-medium text-secondary-700">{{ ('valide.'~process.label~'.fichier.label')|trans({}, 'process') }}
-                <i class="fal fa-question-circle ml-1"
-                   data-controller="tooltip"
-                   data-tooltip-placement-value="bottom"
-                   aria-label="{{ ('valide.'~process.label~'.helps.fichier.help')|trans({}, 'process') }}"
-                   data-bs-original-title="{{ ('valide.'~process.label~'.helps.fichier.help')|trans({}, 'process') }}"></i></label>
-            <input type="file" name="file" id="file" accept="application/pdf"
-                   class="w-full rounded-md border border-secondary-300 px-3 py-2 text-sm text-secondary-900 file:mr-3 file:rounded file:border-0 file:bg-secondary-100 file:px-3 file:py-1 file:text-sm file:font-medium hover:file:bg-secondary-200">
-        </div>
-
-        <div class="space-y-2">
-            {% if historique.complements is defined and historique.complements.fichier is defined %}
-                <a
-                        href="{{ path('app_upload_download', {context: 'conseils', filename: historique.complements.fichier, originalName: historique.complements.fichier_original|default(historique.complements.fichier)}) }}"
-                        target="_blank"
-                        class="inline-flex items-center gap-2 rounded-md border border-cyan-300 bg-cyan-50 px-3 py-2 text-sm font-medium text-cyan-700 hover:bg-cyan-100"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        title="{{ 'voir.le.pv.infobulle'|trans({}, 'process') }}"
-                >
-                    <i class="{{ iconDownload }}"></i>
-                    <span> {{ 'voir.le.pv'|trans({}, 'process') }}</span>
-                </a>
-            {% else %}
-                <span class="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">Pas de PV déposé</span>
+        {% if etape == 'soumis_cfvu' or etape == 'cfvu' %}
+            {% if laisserPasser is defined and laisserPasser != false %}
+                <div class="md:col-span-2">
+                    {% if laisserPasser.etat == 'laisserPasser' %}
+                        {{ component('alerte', {type:'warning', message: 'Un laissez-passer a été demandé le '~laisserPasser.created|date('d/m/Y')~'.'}) }}
+                    {% elseif laisserPasser.complements.fichier is defined %}
+                        <a
+                                href="{{ path('app_upload_download', {context: 'conseils', filename: laisserPasser.complements.fichier, originalName: laisserPasser.complements.fichier_original|default(laisserPasser.complements.fichier)}) }}"
+                                target="_blank"
+                                class="inline-flex items-center gap-2 rounded-md border border-cyan-300 bg-cyan-50 px-3 py-2 text-sm font-medium text-cyan-700 hover:bg-cyan-100 dark:border-cyan-800 dark:bg-cyan-950 dark:text-cyan-300"
+                                {{ stimulus_controller('tooltip') }}
+                                title="{{ 'voir.le.pv.infobulle'|trans({}, 'process') }}"
+                        >
+                            <twig:UX:Icon name="icon:download" class="h-4 w-4" />
+                            <span>{{ 'voir.le.pv'|trans({}, 'process') }} (Conseil)</span>
+                        </a>
+                    {% endif %}
+                </div>
             {% endif %}
-        </div>
+        {% endif %}
 
-        <div class="md:col-span-2 flex items-start gap-2 rounded-md border border-secondary-200 bg-secondary-50 p-3">
-            <input class="mt-0.5 h-4 w-4 rounded border-secondary-300 text-amber-600 focus:ring-amber-500" type="checkbox"
-                   value="laisserPasser" id="laisserPasser"
-                   name="laisserPasser">
-            <label class="text-sm text-secondary-700" for="laisserPasser">
-                {{ ('valide.'~process.label~'.helps.laisserPasser.texte')|trans({}, 'process') }}
-                <i
-                        class="fal fa-question-circle ml-1"
-                        data-controller="tooltip"
-                        data-tooltip-placement-value="bottom"
-                        aria-label="{{ ('valide.'~process.label~'.helps.laisserPasser.help')|trans({}, 'process') }}"
-                        data-bs-original-title="{{ ('valide.'~process.label~'.helps.laisserPasser.help')|trans({}, 'process') }}"></i>
+        {% if process.hasUpload is not defined or process.hasUpload or (historique.complements.fichier is defined) %}
+            <div class="space-y-2">
+                <label for="file" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                    {% if process.label is defined and process.label %}
+                        {{ ('valide.'~process.label~'.fichier.label')|trans({}, 'process') }}
+                    {% else %}
+                        Document / PV du conseil (PDF)
+                    {% endif %}
+                    {% if process.label is defined and process.label %}
+                        <span class="inline-block ml-1"
+                              {{ stimulus_controller('tooltip') }}
+                              aria-label="{{ ('valide.'~process.label~'.helps.fichier.help')|trans({}, 'process') }}"
+                              data-bs-title="{{ ('valide.'~process.label~'.helps.fichier.help')|trans({}, 'process') }}">
+                            <twig:UX:Icon name="icon:question" class="h-4 w-4 text-secondary-400 inline" />
+                        </span>
+                    {% endif %}
+                </label>
+                <input type="file" name="file" id="file" accept="application/pdf"
+                       class="w-full rounded-md border border-secondary-300 px-3 py-2 text-sm text-secondary-900 file:mr-3 file:rounded file:border-0 file:bg-secondary-100 file:px-3 file:py-1 file:text-sm file:font-medium hover:file:bg-secondary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:file:bg-secondary-700 dark:file:text-secondary-200">
+            </div>
+
+            <div class="space-y-2 flex flex-col justify-end">
+                {% if historique.complements.fichier is defined and historique.complements.fichier %}
+                    <div>
+                        <span class="block text-xs text-secondary-500 mb-1">Fichier actuellement déposé :</span>
+                        <a
+                                href="{{ path('app_upload_download', {context: 'conseils', filename: historique.complements.fichier, originalName: historique.complements.fichier_original|default(historique.complements.fichier)}) }}"
+                                target="_blank"
+                                class="inline-flex items-center gap-2 rounded-md border border-cyan-300 bg-cyan-50 px-3 py-2 text-sm font-medium text-cyan-700 hover:bg-cyan-100 dark:border-cyan-800 dark:bg-cyan-950 dark:text-cyan-300"
+                                {{ stimulus_controller('tooltip') }}
+                                title="{{ 'voir.le.pv.infobulle'|trans({}, 'process') }}"
+                        >
+                            <twig:UX:Icon name="icon:download" class="h-4 w-4" />
+                            <span>{{ 'voir.le.pv'|trans({}, 'process') }}</span>
+                        </a>
+                    </div>
+                {% else %}
+                    <span class="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                        Pas de PV déposé
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="md:col-span-2 flex items-start gap-2 rounded-md border border-secondary-200 bg-secondary-50 p-3 dark:border-secondary-700 dark:bg-secondary-800/50">
+                <input class="mt-0.5 h-4 w-4 rounded border-secondary-300 text-amber-600 focus:ring-amber-500 dark:border-secondary-600 dark:bg-secondary-700"
+                       type="checkbox"
+                       value="laisserPasser"
+                       id="laisserPasser"
+                       name="laisserPasser"
+                       {{ (historique.etat == 'laisserPasser' or (historique.complements.laisserPasser is defined and historique.complements.laisserPasser)) ? 'checked' : '' }}
+                >
+                <label class="text-sm text-secondary-700 dark:text-secondary-300" for="laisserPasser">
+                    {% if process.label is defined and process.label %}
+                        {{ ('valide.'~process.label~'.helps.laisserPasser.texte')|trans({}, 'process') }}
+                        <span class="inline-block ml-1"
+                              {{ stimulus_controller('tooltip') }}
+                              aria-label="{{ ('valide.'~process.label~'.helps.laisserPasser.help')|trans({}, 'process') }}"
+                              data-bs-title="{{ ('valide.'~process.label~'.helps.laisserPasser.help')|trans({}, 'process') }}">
+                            <twig:UX:Icon name="icon:question" class="h-4 w-4 text-secondary-400 inline" />
+                        </span>
+                    {% else %}
+                        Demander un laisser-passer (en attente du PV définitif)
+                    {% endif %}
+                </label>
+            </div>
+        {% endif %}
+
+        <div class="md:col-span-2 space-y-2">
+            <label for="argumentaire" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                Commentaire / Argumentaire
             </label>
+            <textarea name="argumentaire" id="argumentaire" rows="3"
+                      class="w-full rounded-md border border-secondary-300 px-3 py-2 text-sm text-secondary-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100"
+                      placeholder="Commentaire ou motif facultatif...">{{ historique.commentaire }}</textarea>
         </div>
-    {% endif %}
 
-    </div>
-
-
-    <div class="pt-1">
-        <button type="submit"
-                class="inline-flex items-center gap-2 rounded-md border border-emerald-600 bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700"
-                {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
-{#                data-action="live#emit"#}
-{#                data-event="valide"#}
-        >
-            <i class="fal fa-floppy-disk"></i>
-            {{ ('btn.'~process.label~'.valide')|trans({}, 'process') }}
-        </button>
     </div>
 </form>
