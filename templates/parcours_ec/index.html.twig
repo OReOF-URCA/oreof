@@ -1,57 +1,173 @@
 {% extends 'base.html.twig' %}
 
+{% set header_title %}
+    {% if parcours.parcoursDefaut == true %}
+        Éléments Constitutifs (EC) - Formation {{ parcours.formation.display }}
+    {% else %}
+        Éléments Constitutifs (EC) - Parcours {{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}
+    {% endif %}
+{% endset %}
 
-{% block content %}
-    <div class="space-y-4">
-        {{ component('alerte', {type:'warning', message: 'Actuellement les indicateurs ne sont pas mis à jour en temps réel. Merci d\'actualiser cette page si nécessaire.'}) }}
-
-        <div class="rounded-xl border border-secondary-200 bg-white p-4 md:p-6 shadow-sm">
-            {{ include('typeDiplome/' ~ constant('TEMPLATE_FOLDER', typeD) ~ '/liste-ec.html.twig') }}
-        </div>
+{% block bouton_header %}
+    <div class="flex flex-wrap items-center gap-2">
+        <twig:Button
+                href="{{ path('app_parcours_ec', {parcours: parcours.id}) }}"
+                variant="secondary"
+                :outline="true"
+                size="sm"
+                icon="icon:refresh"
+                label="Actualiser"
+                tooltip="Recharger les données et indicateurs"
+        />
+        {% if parcours.parcoursDefaut == true %}
+            <twig:Button
+                    href="{{ path('formation_v2_modifier', {slug: parcours.formation.slug}) }}"
+                    variant="warning"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:edit"
+                    label="Modifier la formation"
+                    tooltip="Modifier la structure de la formation"
+            />
+            <twig:Button
+                    href="{{ path('formation_v2_voir', {slug: parcours.formation.slug}) }}"
+                    variant="secondary"
+                    size="sm"
+                    icon="icon:arrow-left"
+                    label="Retour à la formation"
+                    tooltip="Retour à la vue formation"
+            />
+        {% else %}
+            <twig:Button
+                    href="{{ path('parcours_v2_modifier', {parcours: parcours.id}) }}"
+                    variant="warning"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:edit"
+                    label="Modifier le parcours"
+                    tooltip="Modifier la structure du parcours"
+            />
+            <twig:Button
+                    href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}"
+                    variant="secondary"
+                    size="sm"
+                    icon="icon:arrow-left"
+                    label="Retour au parcours"
+                    tooltip="Retour à la vue parcours"
+            />
+        {% endif %}
     </div>
 {% endblock %}
 
-{% set header_title %}
-    EC pour le parcours : {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
-{% endset %}
+{% block content %}
+    <div class="space-y-6">
+        {# Entête enrichi du parcours (workflow, métadonnées, état DPE) #}
+        <div id="parcours_header_component">
+            <twig:ParcoursHeader parcoursId="{{ parcours.id }}" formationId="{{ parcours.formation.id }}"/>
+        </div>
 
-{% block breadcrumb %}
-    {% if parcours.parcoursDefaut == true %}
-        {{ include('communs/_breadcrumb.html.twig', {liens:[
-            {href: path('app_parcours_index'), title: 'Liste des parcours'},
-            {href: path('formation_v2_modifier', {slug:parcours.formation.slug}), title: 'Formation : '~parcours.formation
-            .display}
-        ]}) }}
-    {% else %}
-        {{ include('communs/_breadcrumb.html.twig', {liens:[
-            {href: path('app_parcours_index'), title: 'Liste des parcours'},
-            {href: path('formation_v2_modifier', {slug:parcours.formation.slug}), title: 'Formation : '~parcours.formation
-            .display},
-            {href: path('parcours_v2_modifier', {parcours:parcours.id}), title: 'Parcours : '~parcours.libelle},
-        ]}) }}
-    {% endif %}
-{% endblock %}
+        {# Indicateurs synthétiques de la maquette EC #}
+        {% if dto.statsFichesMatieresParcours is defined and dto.statsFichesMatieresParcours is not null %}
+            {% set stats = dto.statsFichesMatieresParcours %}
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="rounded-xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
+                            <twig:UX:icon name="icon:folder" class="h-5 w-5" />
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">Total Fiches EC</div>
+                            <div class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ stats.nbFiches }}</div>
+                        </div>
+                    </div>
+                </div>
 
-{% block bouton_header %}
-    {% if parcours.parcoursDefaut == true %}
-        <twig:Button
-                href="{{ path('formation_v2_modifier', {slug:parcours.formation.slug}) }}"
-                variant="success"
-                :outline="true"
-                :soft="false"
-                icon="icon:arrow-left"
-                label="Retour à la formation"
-                tooltip="Retour à la formation"
-        />
-    {% else %}
-        <twig:Button
-                href="{{ path('parcours_v2_modifier', {parcours:parcours.id}) }}"
-                variant="success"
-                :outline="true"
-                :soft="false"
-                icon="icon:arrow-left"
-                label="Retour à la formation"
-                tooltip="Retour à la formation"
-        />
-    {% endif %}
+                <div class="rounded-xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-success-100 text-success-700 dark:bg-success-900/30 dark:text-success-300">
+                            <twig:UX:icon name="icon:check" class="h-5 w-5" />
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">Fiches complètes</div>
+                            <div class="text-xl font-bold text-success-700 dark:text-success-300">
+                                {{ stats.nbFichesCompletes }} <span class="text-xs font-normal text-secondary-500 dark:text-secondary-400">/ {{ stats.nbFiches }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-warning-100 text-warning-700 dark:bg-warning-900/30 dark:text-warning-300">
+                            <twig:UX:icon name="icon:edit" class="h-5 w-5" />
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">En cours rédaction</div>
+                            <div class="text-xl font-bold text-warning-700 dark:text-warning-300">{{ stats.nbEnCoursRedaction }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-info-100 text-info-700 dark:bg-info-900/30 dark:text-info-300">
+                            <twig:UX:icon name="icon:clock" class="h-5 w-5" />
+                        </div>
+                        <div>
+                            <div class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">Semestres</div>
+                            <div class="text-xl font-bold text-info-700 dark:text-info-300">{{ dto.semestres|length }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {# Alerte / Bannière d'information #}
+        <div class="rounded-xl border border-warning-200 bg-warning-50/80 p-4 shadow-sm dark:border-warning-900/50 dark:bg-warning-950/20">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div class="flex items-start gap-3">
+                    <div class="text-warning-600 dark:text-warning-400 mt-0.5 shrink-0">
+                        <twig:UX:icon name="icon:info" class="h-5 w-5" />
+                    </div>
+                    <div class="text-sm text-warning-900 dark:text-warning-200">
+                        <p class="font-medium">Gestion et configuration des Éléments Constitutifs (EC)</p>
+                        <p class="mt-0.5 text-xs text-warning-800 dark:text-warning-300">
+                            Modifiez les types d'EC, consultez ou éditez les fiches matières, et ajustez les correspondances BCC et MCCC.
+                        </p>
+                    </div>
+                </div>
+                <div class="shrink-0">
+                    <twig:Button
+                            href="{{ path('app_parcours_ec', {parcours: parcours.id}) }}"
+                            variant="warning"
+                            size="sm"
+                            :soft="true"
+                            icon="icon:refresh"
+                            label="Actualiser la liste"
+                    />
+                </div>
+            </div>
+        </div>
+
+        {# Turbo Frame principal pour la liste des EC #}
+        <turbo-frame id="parcours_ec_frame">
+            <div class="rounded-xl border border-secondary-200 bg-white shadow-sm overflow-hidden dark:border-secondary-700 dark:bg-secondary-900">
+                <div class="border-b border-secondary-200 bg-secondary-50/60 px-4 py-3 sm:px-6 dark:border-secondary-700 dark:bg-secondary-800/80 flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <twig:UX:icon name="icon:folder" class="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                        <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100">Liste des EC par semestre</h2>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-100 px-2.5 py-1 text-xs font-medium text-secondary-700 dark:bg-secondary-700 dark:text-secondary-300">
+                            <twig:UX:icon name="icon:link" class="h-3.5 w-3.5 text-secondary-500 dark:text-secondary-400" /> Éléments raccrochés
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    {{ include('typeDiplome/' ~ constant('TEMPLATE_FOLDER', typeD) ~ '/liste-ec.html.twig') }}
+                </div>
+            </div>
+        </turbo-frame>
+    </div>
 {% endblock %}

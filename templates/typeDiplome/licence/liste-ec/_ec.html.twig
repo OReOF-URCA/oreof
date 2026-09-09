@@ -22,7 +22,7 @@
                         data-bs-placement="bottom"
                         title="Modifier la fiche EC/matière"
                 >
-                    <i class="fal fa-file"></i>
+                    <twig:UX:icon name="icon:folder" class="h-3.5 w-3.5" />
                     <span>Modifier la fiche</span>
                     {% if ec.elementConstitutif.ficheMatiere.remplissage.isFull() == true %}
                         <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Complet</span>
@@ -39,7 +39,7 @@
                         target="_blank"
                         title="Voir la fiche EC/matière"
                 >
-                    <i class="fal fa-eye"></i>
+                    <twig:UX:icon name="icon:eye" class="h-3.5 w-3.5" />
                     <span>Voir la fiche</span>
                 </a>
             {% endif %}

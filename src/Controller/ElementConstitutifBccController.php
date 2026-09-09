@@ -19,6 +19,7 @@ use App\Repository\ButApprentissageCritiqueRepository;
 use App\Repository\ButCompetenceRepository;
 use App\Repository\CompetenceRepository;
 use App\Utils\JsonRequest;
+use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,7 +34,9 @@ class ElementConstitutifBccController extends BaseController
     public function bccEcNonEditable(
         BlocCompetenceRepository           $blocCompetenceRepository,
         ElementConstitutif                 $elementConstitutif,
-        Parcours                           $parcours
+        Parcours                           $parcours,
+        Request                            $request,
+        TurboStreamResponseFactory         $turboStream
     ): Response {
 
         $ecBccs = [];
@@ -62,6 +65,24 @@ class ElementConstitutifBccController extends BaseController
             }
         }
 
+        if ($request->headers->get('Accept') && str_contains($request->headers->get('Accept'), 'text/vnd.turbo-stream.html')) {
+            return $turboStream->streamOpenModalFromTemplates(
+                'Blocs de compétences',
+                'EC : ' . $elementConstitutif->display(),
+                'element_constitutif/_bccEcNonEditable.html.twig',
+                [
+                    'ec' => $elementConstitutif,
+                    'bccs' => $bccs,
+                    'editable' => false,
+                    'parcours' => $parcours,
+                    'ecBccs' => array_flip(array_unique($ecBccs)),
+                    'ecComps' => array_flip($ecComps),
+                ],
+                '_ui/_footer_cancel.html.twig',
+                []
+            );
+        }
+
         return $this->render('element_constitutif/_bccEcNonEditable.html.twig', [
             'ec' => $elementConstitutif,
             'bccs' => $bccs,
@@ -82,7 +103,8 @@ class ElementConstitutifBccController extends BaseController
         BlocCompetenceRepository           $blocCompetenceRepository,
         Request                            $request,
         ElementConstitutif                 $elementConstitutif,
-        Parcours                           $parcours
+        Parcours                           $parcours,
+        TurboStreamResponseFactory         $turboStream
     ): Response {
         $dpeParcours = GetDpeParcours::getFromParcours($parcours);
         //todo: quel parcours celui-ci ? ou celui de l'EC
@@ -147,6 +169,22 @@ class ElementConstitutifBccController extends BaseController
                     'route' => 'app_ec',
                     'subject' => $elementConstitutif,
                 ])) {
+                if ($request->headers->get('Accept') && str_contains($request->headers->get('Accept'), 'text/vnd.turbo-stream.html')) {
+                    return $turboStream->streamOpenModalFromTemplates(
+                        'Blocs de compétences (BUT)',
+                        'EC : ' . $elementConstitutif->display(),
+                        'element_constitutif/_bccEcButModal.html.twig',
+                        [
+                            'competence' => $competence,
+                            'ec' => $elementConstitutif,
+                            'apprentissageCritiques' => $apprentissageCritiques,
+                            'ecComps' => array_flip($ecComps),
+                            'parcours' => $parcours
+                        ],
+                        '_ui/_footer_cancel.html.twig',
+                        []
+                    );
+                }
                 return $this->render('element_constitutif/_bccEcButModal.html.twig', [
                     'competence' => $competence,
                     'ec' => $elementConstitutif,
@@ -232,6 +270,25 @@ class ElementConstitutifBccController extends BaseController
                         'route' => 'app_parcours',
                         'subject' => $dpeParcours,
                     ])) { //todo: + accessible CFVU?
+                if ($request->headers->get('Accept') && str_contains($request->headers->get('Accept'), 'text/vnd.turbo-stream.html')) {
+                    return $turboStream->streamOpenModalFromTemplates(
+                        'Blocs de compétences',
+                        'EC : ' . $elementConstitutif->display(),
+                        'element_constitutif/_bccEcModal.html.twig',
+                        [
+                            'ec' => $elementConstitutif,
+                            'bccs' => $bccs,
+                            'wizard' => false,
+                            'ecBccs' => array_flip(array_unique($ecBccs)),
+                            'ecComps' => array_flip($ecComps),
+                            'parcours' => $parcours,
+                            'raccroche' => $raccroche,
+                            'editable' => $editable
+                        ],
+                        '_ui/_footer_cancel.html.twig',
+                        []
+                    );
+                }
                 return $this->render('element_constitutif/_bccEcModal.html.twig', [
                     'ec' => $elementConstitutif,
                     'bccs' => $bccs,
@@ -242,6 +299,24 @@ class ElementConstitutifBccController extends BaseController
                     'raccroche' => $raccroche,
                     'editable' => $editable
                 ]);
+            }
+
+            if ($request->headers->get('Accept') && str_contains($request->headers->get('Accept'), 'text/vnd.turbo-stream.html')) {
+                return $turboStream->streamOpenModalFromTemplates(
+                    'Blocs de compétences',
+                    'EC : ' . $elementConstitutif->display(),
+                    'element_constitutif/_bccEcNonEditable.html.twig',
+                    [
+                        'ec' => $elementConstitutif,
+                        'bccs' => $bccs,
+                        'editable' => false,
+                        'parcours' => $parcours,
+                        'ecBccs' => array_flip(array_unique($ecBccs)),
+                        'ecComps' => array_flip($ecComps),
+                    ],
+                    '_ui/_footer_cancel.html.twig',
+                    []
+                );
             }
 
             return $this->render('element_constitutif/_bccEcNonEditable.html.twig', [

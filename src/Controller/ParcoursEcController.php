@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Classes\GetDpeParcours;
 use App\Classes\JsonReponse;
 use App\Entity\Parcours;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereRepository;
 use App\Repository\TypeEcRepository;
@@ -19,11 +21,27 @@ use Symfony\Component\Routing\Attribute\Route;
 class ParcoursEcController extends AbstractController
 {
     #[Route('/parcours/ec/liste/{parcours}', name: 'app_parcours_ec')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function index(
         TypeDiplomeResolver $typeDiplomeResolver,
-        TypeEcRepository             $typeEcRepository,
-        Parcours                     $parcours
+        TypeEcRepository    $typeEcRepository,
+        Parcours            $parcours,
+        BreadcrumbService   $breadcrumb
     ): Response {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Liste des EC');
+
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
         $dto = $typeD->calculStructureParcours($parcours);
 

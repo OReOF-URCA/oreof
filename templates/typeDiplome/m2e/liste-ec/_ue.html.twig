@@ -7,27 +7,42 @@
 {% set editableCfvu = isAccessible(dpeParcours, 'cfvu') %}
 
 <tr>
-    <th colspan="7" class="font-weight-bold">{{ ue.ue.display(parcours) }} {% if raccrocheUe == true %}<i
-                class="fa fa-link"></i>{% endif %}
+    <th colspan="7"
+        class="px-4 py-2 text-left text-sm font-bold bg-secondary-100 border-y border-secondary-200 text-secondary-800">{{ ue.ue.display(parcours) }} {% if raccrocheUe == true %}
+            <twig:UX:icon name="icon:link" class="inline h-3.5 w-3.5 ml-1"/>{% endif %}
 
         {% if ue.ue.natureUeEc is defined and ue.ue.natureUeEc != null and ue.ue.natureUeEc.libre == true %}
-            <span class="badge bg-secondary">
+            <span class="inline-flex items-center rounded-full bg-secondary-200 px-2 py-0.5 text-xs font-semibold text-secondary-700">
             UE à choix libre</span>
         {% endif %}
         {% if ue.ue.natureUeEc is defined and ue.ue.natureUeEc != null and ue.ue.natureUeEc.choix == true %}<span
-                class="badge bg-primary">
+                class="inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-semibold text-indigo-700">
             UE à choix restreint : {{ ue.uesEnfants|length }} choix possibles</span>
         {% endif %}
     </th>
 </tr>
 <tr>
-    <th class="font-weight-bold">EC</th>
-    <th class="font-weight-bold">Fiche</th>
-    <th class="font-weight-bold">Type EC</th>
-    <th class="font-weight-bold">ECTS</th>
-    <th class="font-weight-bold">BCC</th>
-    <th class="font-weight-bold">Vol. Horaire</th>
-    <th class="font-weight-bold">MCCC</th>
+    <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500 border-b border-secondary-200">
+        EC
+    </th>
+    <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500 border-b border-secondary-200">
+        Fiche
+    </th>
+    <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500 border-b border-secondary-200">
+        Type EC
+    </th>
+    <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500 border-b border-secondary-200">
+        ECTS
+    </th>
+    <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500 border-b border-secondary-200">
+        BCC
+    </th>
+    <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500 border-b border-secondary-200">
+        Vol. Horaire
+    </th>
+    <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-secondary-500 border-b border-secondary-200">
+        MCCC
+    </th>
 </tr>
 {% for ec in ue.elementConstitutifs %}
     {{ include('typeDiplome/licence/liste-ec/_ec.html.twig', {ec:ec, enfant:false}) }}

@@ -1,58 +1,27 @@
-{# badge_heures.html.twig - deprecated #}
 <div {{ attributes }}>
-    {% if this.elementConstitutif.natureUeEc != null and this.elementConstitutif.natureUeEc.isLibre ==  true %}
+    {% if this.elementConstitutif.natureUeEc != null and this.elementConstitutif.natureUeEc.isLibre == true %}
         <span class="inline-flex w-full items-center justify-center rounded-md bg-cyan-100 px-2 py-1 text-xs font-semibold text-cyan-800">EC libre</span>
     {% else %}
-        <button
-                {% if isAccessible(this.dpeParcours, 'cfvu') and this.editable %}{# todo: isGranted #}
-                    {% if deplacer is defined and deplacer == true and this.editable == true %}
-                        {{ stimulus_controller('modal', {
-                            size: 'lg',
-                            modalTitle: 'Volumes Horaires',
-                            nomEvenement: 'refreshListeEc' ,
-                            details: {ue: ue.id, parcours: parcours.id},
-                            modalUrl: path('app_element_constitutif_structure',{
-                                'id': this.elementConstitutif.id,
-                                'editable': this.editable,
-                                parcours: this.parcours.id}) }) }}
-                    {% else %}
-                        {{ stimulus_controller('modal', {
-                            size: 'lg',
-                            modalTitle: 'Volumes Horaires',
-                            modalUrl: path('app_element_constitutif_structure',{
-                                'id': this.elementConstitutif.id,
-                                'editable': this.editable,
-                                parcours: this.parcours.id}) }) }}
-                    {% endif %}
-                {% else %}
-                    {{ stimulus_controller('modal', {
-                        size: 'lg',
-                        modalTitle: 'Volumes Horaires',
-                        modalUrl: path('app_element_constitutif_structure_non_editable',{'id': this.elementConstitutif.id}) }) }}
-                {% endif %}
-                data-action="click->modal#openModal"
-                class="inline-flex w-full items-center justify-center gap-1 rounded-md border border-secondary-300 bg-white px-2 py-1.5 text-xs font-semibold text-secondary-700 hover:bg-secondary-50 transition-colors"
-                data-size="lg"
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
+        <a
+                href="{{ path('parcours_ec_saisir_heures', { parcours: this.parcours.id, id: this.elementConstitutif.id }) }}"
+                data-action="click->modalturbo#open"
+                data-turbo="true"
+                class="inline-flex w-full items-center justify-center gap-1 rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-800 px-2 py-1.5 text-xs font-semibold text-secondary-700 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors"
                 title="Volumes Horaires"
         >
-            {% if this.texte == true %}<i class="fal fa-clock"></i>{% endif %}
-            <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {% if this.ecDesEnfants == true %}bg-primary-100 text-primary-800{% elseif this.etatHeuresComplet == true %}bg-emerald-100 text-emerald-800{% else %}bg-amber-100 text-amber-800{% endif %}">
-
+            {% if this.texte == true %}<twig:UX:icon name="icon:clock" class="h-3.5 w-3.5" />{% endif %}
+            <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold {% if this.ecDesEnfants == true %}bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300{% elseif this.etatHeuresComplet == true %}bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300{% else %}bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300{% endif %}">
                 {% if this.texte == true %}
                     {% if this.ecDesEnfants == true %}
                         EC des enfants
                     {% else %}
-                        {% if this.etatHeuresComplet == true %}Complet{% else %}A saisir{% endif %}
+                        {% if this.etatHeuresComplet == true %}Complet{% else %}À saisir{% endif %}
                     {% endif %}
                 {% else %}Heures{% endif %}
-
-                    {% if this.isParcoursProprietaire == false and this.isHeuresSpecifiques == false %}
-                    <i class="fal fa-link" title="Heures reprises de la fiche matière"></i>
-                    {% endif %}
-
+                {% if this.isParcoursProprietaire == false and this.isHeuresSpecifiques == false %}
+                    <twig:UX:icon name="icon:link" class="h-3 w-3" title="Heures reprises de la fiche matière" />
+                {% endif %}
             </span>
-        </button>
+        </a>
     {% endif %}
 </div>
