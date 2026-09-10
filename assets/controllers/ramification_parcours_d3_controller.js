@@ -7,17 +7,25 @@ export default class extends Controller {
         noResultsFound: 'Aucun résultat trouvé pour cette recherche'
     };
 
+    #stepCount = 0;
+
+    #maxStepCount = 6;
+
     static targets = [
         'searchParcours', 'searchErrorArea', 'loadingSpinner', 
         'resultList', 'stepLinkRow'
     ];
     
     static values = {
-        searchUrl: String
+        searchUrl: String,
+        typesRamificationsJson: String
     };
 
     connect(){
-        this.stepLinkRowTarget.appendChild(this.#createStepButton());
+        if(this.#stepCount > 0){
+            this.stepLinkRowTarget.appendChild(this.#createStepButton('add-step-before'));
+        }
+        this.stepLinkRowTarget.appendChild(this.#createStepButton('add-step-after'));
     }
 
     async onSearchInputClick() {
@@ -85,19 +93,67 @@ export default class extends Controller {
         return name;
     }
 
-    #createStepButton() {
+    #createStepButton(selectorId) {
         let div = document.createElement('div');
-        div.classList.add('col-2');
+        div.classList.add('col-2', selectorId);
 
         let addStepButton = document.createElement('span');
         addStepButton.classList.add('badge', 'rounded-pill', 'text-bg-info', 'p-2', 'addLinkStepButton');
         let addIcon = document.createElement('i');
         addIcon.classList.add('fa-sharp-duotone', 'fa-thin', 'fa-circle-plus', 'mx-2', 'fa-xl');
-
         addStepButton.textContent = 'Ajouter un niveau';
         addStepButton.appendChild(addIcon);
         div.appendChild(addStepButton);
 
+        this.#onStepButtonClick(addStepButton);
+
         return div;
+    }
+
+    #onStepButtonClick(button) {
+        button.addEventListener('click', e => {
+            if(this.#stepCount < this.#maxStepCount) {
+                let stepColumn = this.#addStepColumn(this.#stepCount + 1);
+                ++this.#stepCount;
+                
+                this.stepLinkRowTarget.appendChild(stepColumn);
+                this.stepLinkRowTarget.appendChild(document.querySelector('.add-step-after'));
+            }
+            if (this.#stepCount === this.#maxStepCount){
+                ['.add-step-after'].forEach(s => {
+                    document.querySelector(s).classList.add('d-none');
+                });
+            }
+        });
+    }
+
+    #addStepColumn(columnNumber) {
+        let col = document.createElement('div');
+        col.classList.add('col-2');
+        let selectTypeRamification = document.createElement('select');
+        selectTypeRamification.classList.add('form-select');
+        [{id: "", libelle: "Choisir..."}, ...this.#getListeTypesRamifications()].forEach(typeR =>{
+            let opt = document.createElement('option');
+            opt.textContent = typeR['libelle'];
+            opt.value = typeR['id'];
+            selectTypeRamification.appendChild(opt);
+        });
+
+        let titleWrapper = document.createElement('div');
+        titleWrapper.classList.add('text-center', 'mb-3');
+        let stepTitle = document.createElement('span');
+        stepTitle.classList.add('badge', 'rounded-pill', 'text-bg-dark');
+        stepTitle.textContent = `Niveau ${columnNumber}`;
+        titleWrapper.appendChild(stepTitle);
+
+
+        col.appendChild(titleWrapper);
+        col.appendChild(selectTypeRamification);
+
+        return col;
+    }
+
+    #getListeTypesRamifications() {
+        return JSON.parse(this.typesRamificationsJsonValue);
     }
 }
