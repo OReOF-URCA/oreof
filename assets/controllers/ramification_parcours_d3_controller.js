@@ -1,4 +1,4 @@
-import { Controller } from "@hotwired/stimulus";
+import { add, Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
 
@@ -8,14 +8,17 @@ export default class extends Controller {
     };
 
     static targets = [
-        'searchParcours', 'searchErrorArea', 'loadingSpinner', 'resultList'
+        'searchParcours', 'searchErrorArea', 'loadingSpinner', 
+        'resultList', 'stepLinkRow'
     ];
     
     static values = {
         searchUrl: String
     };
 
-    connect(){}
+    connect(){
+        this.stepLinkRowTarget.appendChild(this.#createStepButton());
+    }
 
     async onSearchInputClick() {
         this.loadingSpinnerTarget.classList.add('d-none');
@@ -80,5 +83,21 @@ export default class extends Controller {
         }
 
         return name;
+    }
+
+    #createStepButton() {
+        let div = document.createElement('div');
+        div.classList.add('col-2');
+
+        let addStepButton = document.createElement('span');
+        addStepButton.classList.add('badge', 'rounded-pill', 'text-bg-info', 'p-2', 'addLinkStepButton');
+        let addIcon = document.createElement('i');
+        addIcon.classList.add('fa-sharp-duotone', 'fa-thin', 'fa-circle-plus', 'mx-2', 'fa-xl');
+
+        addStepButton.textContent = 'Ajouter un niveau';
+        addStepButton.appendChild(addIcon);
+        div.appendChild(addStepButton);
+
+        return div;
     }
 }
