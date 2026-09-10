@@ -129,7 +129,7 @@ export default class extends Controller {
 
     #addStepColumn(columnNumber) {
         let col = document.createElement('div');
-        col.classList.add('col-2');
+        col.classList.add('col-2', 'step-column');
         let selectTypeRamification = document.createElement('select');
         selectTypeRamification.classList.add('form-select');
         [{id: "", libelle: "Choisir..."}, ...this.#getListeTypesRamifications()].forEach(typeR =>{
