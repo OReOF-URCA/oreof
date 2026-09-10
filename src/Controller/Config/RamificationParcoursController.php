@@ -130,7 +130,8 @@ final class RamificationParcoursController extends AbstractController
             $typesRamif
         );
         return $this->render('type_ramification/manage_ramification_parcours.html.twig', [
-            'types_ramification' => $typesRamif
+            'types_ramification' => $typesRamif,
+            'types_ramification_json' => json_encode($typesRamif)
         ]);
     }
 
