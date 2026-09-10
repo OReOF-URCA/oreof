@@ -39,6 +39,12 @@
             animation-iteration-count: infinite;
             font-size: 4.25rem;
         }
+
+        span.addLinkStepButton:hover {
+            cursor: pointer;
+            background-color: var(--primary) !important;
+            color: white !important;
+        }
     </style>
 {% endblock %}
 
@@ -89,6 +95,14 @@
                     {{ stimulus_target('ramification_parcours_d3', 'resultList') }}
                 >
 
+                </div>
+            </div>
+            <div class="col-7">
+                <div 
+                    class="row justify-content-center"
+                    {{ stimulus_target('ramification_parcours_d3', 'stepLinkRow') }}
+                >
+                
                 </div>
             </div>
         </div>
