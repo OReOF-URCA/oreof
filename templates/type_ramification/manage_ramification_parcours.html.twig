@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    Configuration des ramifications de parcours
+{% endset %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        @keyframes spin360 {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .search-result-list {
+            max-height: 17.5em;
+            overflow-y: scroll;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary);
+            background-color: #f3f3f3;
+            border-radius: .95em;
+            border: 1.5px solid var(--primary);
+        }
+
+        .search-result-node:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .search-result-node {
+            cursor: pointer;
+            border-radius: .65em;
+        }
+
+        .loading-spin-360 {
+            animation-name: spin360;
+            animation-duration: 1.95s;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+            font-size: 4.25rem;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">    
+        <div    
+            class="row"
+            {{ stimulus_controller('ramification_parcours_d3', {
+                    'searchUrl': path('app_config_type_ramification_search_parcours_by_name')
+                }) 
+            }}
+        >
+            <div class="col-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-primary text-white">Nom du parcours</span>
+                    <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Entrez votre recherche..."
+                        value=""
+                        {{ stimulus_target('ramification_parcours_d3', 'searchParcours') }}
+                    >
+                    <button 
+                        class="btn btn-outline-primary"
+                        data-bs-placement="bottom"
+                        data-bs-toggle="tooltip"
+                        title="Lancer la recherche"
+                        {{ stimulus_action('ramification_parcours_d3', 'onSearchInputClick', 'click') }}
+                    >
+                        <i class="fa-duotone fa-solid fa-magnifying-glass fa-xl"></i>
+                    </button>
+                </div>
+                <div 
+                    class="d-none text-center text-danger fs-6 mt-4" 
+                    {{ stimulus_target('ramification_parcours_d3', 'searchErrorArea') }}
+                >
+                    <!-- libellé erreur -->
+                </div>
+                <div 
+                    class="col-12 text-center d-none mt-4"
+                    {{ stimulus_target('ramification_parcours_d3', 'loadingSpinner') }}
+                >
+                    <!-- loading spinner -->
+                    <i class="fa-duotone fa-solid fa-spinner loading-spin-360"></i>
+                </div>
+                <div 
+                    class="col-12 mt-3 search-result-list d-none"
+                    {{ stimulus_target('ramification_parcours_d3', 'resultList') }}
+                >
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
