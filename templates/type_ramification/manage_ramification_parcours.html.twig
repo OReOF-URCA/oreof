@@ -53,11 +53,12 @@
         <div    
             class="row"
             {{ stimulus_controller('ramification_parcours_d3', {
-                    'searchUrl': path('app_config_type_ramification_search_parcours_by_name')
+                    'searchUrl': path('app_config_type_ramification_search_parcours_by_name'),
+                    'typesRamificationsJson': types_ramification_json
                 }) 
             }}
         >
-            <div class="col-5">
+            <div class="col-4">
                 <div class="input-group">
                     <span class="input-group-text bg-primary text-white">Nom du parcours</span>
                     <input
@@ -97,7 +98,7 @@
 
                 </div>
             </div>
-            <div class="col-7">
+            <div class="col-8">
                 <div 
                     class="row justify-content-center"
                     {{ stimulus_target('ramification_parcours_d3', 'stepLinkRow') }}
