@@ -11,6 +11,8 @@ export default class extends Controller {
 
     #maxStepCount = 6;
 
+    #selectedColumnIndex = undefined;
+
     static targets = [
         'searchParcours', 'searchErrorArea', 'loadingSpinner', 
         'resultList', 'stepLinkRow'
@@ -71,6 +73,8 @@ export default class extends Controller {
         node.textContent = this.#decodeResultName(p);
         node.dataset.idParcours = p.id_parcours;
         node.dataset.nomParcours = this.#decodeResultName(p);
+        node.dataset.nomParcoursShort = this.#decodeResultNameShort(p);
+        this.#onResultNodeClick(node);
 
         return node;
     }
@@ -129,6 +133,7 @@ export default class extends Controller {
 
     #addStepColumn(columnNumber) {
         let col = document.createElement('div');
+        col.dataset.stepIndex = columnNumber;
         col.classList.add('col-2', 'step-column');
         let selectTypeRamification = document.createElement('select');
         selectTypeRamification.classList.add('form-select');
@@ -139,21 +144,72 @@ export default class extends Controller {
             selectTypeRamification.appendChild(opt);
         });
 
-        let titleWrapper = document.createElement('div');
-        titleWrapper.classList.add('text-center', 'mb-3');
+        let infoWrapper = document.createElement('div');
+        infoWrapper.classList.add('text-center', 'mb-3');
         let stepTitle = document.createElement('span');
         stepTitle.classList.add('badge', 'rounded-pill', 'text-bg-dark');
         stepTitle.textContent = `Niveau ${columnNumber}`;
-        titleWrapper.appendChild(stepTitle);
+        infoWrapper.appendChild(stepTitle);
+        infoWrapper.appendChild(selectTypeRamification);
 
 
-        col.appendChild(titleWrapper);
-        col.appendChild(selectTypeRamification);
+        col.appendChild(infoWrapper);
+        this.#onColumnClick(col);
 
         return col;
     }
 
     #getListeTypesRamifications() {
         return JSON.parse(this.typesRamificationsJsonValue);
+    }
+
+    #onColumnClick(colDiv) {
+        colDiv.addEventListener('click', e => {
+            if(this.#selectedColumnIndex !== undefined){
+                document.querySelector(`.step-column[data-step-index="${this.#selectedColumnIndex}"]`)
+                    .classList.remove('step-column-selected');
+            }
+            this.#selectedColumnIndex = colDiv.dataset.stepIndex;
+            colDiv.classList.add('step-column-selected');
+        });
+    }
+
+    #createParcoursNodeForStep(p) {
+        let node = document.createElement('div');
+        node.classList.add('col-12', 'mx-1', 'bg-primary', 'text-white', 'p-2', 'rounded', 'my-4');
+        node.dataset.bsToggle = 'tooltip';
+        node.dataset.bsPlacement = 'bottom';
+        node.title = p.dataset.nomParcours;
+        node.textContent = p.dataset.nomParcoursShort;
+
+        return node;
+    }
+
+    #decodeResultNameShort(p) {
+        let typeTxt = {
+            'las123': 'LAS',
+            'las23': 'LAS',
+            'las1': 'LAS',
+            'alternance': 'ALT',
+            'cpi': 'CPI',
+            'classique': ''
+        };
+
+        let typeParcoursTxt = "";
+        if(typeof p.type_parcours === 'string' && p.type_parcours !== 'classique') {
+            typeParcoursTxt = ' - ' + typeTxt[p.type_parcours];
+        }
+
+        return `${p.type_diplome_court} - ${p.nom_formation} - ${p.nom_parcours ?? ' - '}${typeParcoursTxt}`;
+    }
+
+    #onResultNodeClick(n) {
+        n.addEventListener('click', e => {
+            if(this.#selectedColumnIndex !== undefined) {
+                document.querySelector('.step-column-selected').appendChild(
+                    this.#createParcoursNodeForStep(n)
+                );
+            }
+        });
     }
 }
