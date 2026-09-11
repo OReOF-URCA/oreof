@@ -37,10 +37,13 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
     public const SOURCE = 'm2e';
     public const TEMPLATE_FORM_MCCC = 'm2e.html.twig';
 
-    private array $typeEpreuves;
+    /**
+     * @var TypeEpreuve[]|array|null
+     */
+    private ?array $typeEpreuves = null;
 
     public function __construct(
-        TypeDiplomeRepository            $typeDiplomeRepository,
+        protected TypeDiplomeRepository  $typeDiplomeRepository,
         protected EntityManagerInterface $entityManager,
         protected M2eMccc                $m2eMccc,
         protected M2eMcccVersion         $m2eMcccVersion,
@@ -48,17 +51,19 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
         private StructureParcoursM2e     $structureParcoursM2e
     )
     {
-        $typeD = $typeDiplomeRepository->findOneBy(['libelle_court' => $this->getLibelleCourt()]);
-
-        if ($typeD === null) {
-            throw new TypeDiplomeNotFoundException();
-        }
-
-        $this->typeEpreuves = $this->entityManager->getRepository(TypeEpreuve::class)->findByTypeDiplome($typeD);
     }
 
     public function getTypeEpreuves(): array
     {
+        if ($this->typeEpreuves === null) {
+            $typeD = $this->typeDiplomeRepository->findOneBy(['libelle_court' => $this->getLibelleCourt()]);
+            if ($typeD !== null) {
+                $this->typeEpreuves = $this->entityManager->getRepository(TypeEpreuve::class)->findByTypeDiplome($typeD);
+            } else {
+                $this->typeEpreuves = [];
+            }
+        }
+
         return $this->typeEpreuves;
     }
 
@@ -280,6 +285,9 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
                     }
                 }
                 break;
+            case 'cc_tp':
+                $mcccs = $this->sauvegardeCcTp($elementConstitutif, $mcccs, $request->all());
+                break;
             case 'cc_ct':
                 $tab = [
                     'pourcentage' => Tools::convertToFloat($request->get('cc_has_tp_pourcentage', 0)),
@@ -436,8 +444,8 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
 
         foreach ($typeEpreuve_s1_ct as $numEp) {
             $justificationText = null;
-            if (array_key_exists((int)$data["typeEpreuve_{$cle}{$numEp}"], $this->typeEpreuves)) {
-                if ($this->typeEpreuves[(int)$data["typeEpreuve_{$cle}{$numEp}"]]->hasJustification()) {
+            if (array_key_exists((int)$data["typeEpreuve_{$cle}{$numEp}"], $this->getTypeEpreuves())) {
+                if ($this->getTypeEpreuves()[(int)$data["typeEpreuve_{$cle}{$numEp}"]]->hasJustification()) {
                     $justificationText = $data["justification_{$cle}{$numEp}"] ?? "";
                 }
             }
@@ -499,6 +507,97 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
         return $mcccs;
     }
 
+    private function sauvegardeCcTp(ElementConstitutif|FicheMatiere $elementConstitutif, array $mcccs, array $data): array
+    {
+        $typeEpreuve_s1_tp = [];
+        foreach ($data as $key => $value) {
+            if (preg_match('/^pourcentage_s1_(?:ct|cc|tp)([0-9]+)$/', $key, $matches)) {
+                $typeEpreuve_s1_tp[] = (int)$matches[1];
+            }
+        }
+        $typeEpreuve_s1_tp = array_unique($typeEpreuve_s1_tp);
+        sort($typeEpreuve_s1_tp);
+
+        if (empty($typeEpreuve_s1_tp) && isset($data['pourcentage_s1_ct'])) {
+            $typeEpreuve_s1_tp = [1];
+        }
+
+        foreach ($typeEpreuve_s1_tp as $numEp) {
+            $val = $data['pourcentage_s1_ct' . $numEp] ?? $data['pourcentage_s1_cc' . $numEp] ?? $data['pourcentage_s1_tp' . $numEp] ?? null;
+
+            if (isset($mcccs[1]['cc'][$numEp])) {
+                $mccc = $mcccs[1]['cc'][$numEp];
+            } else {
+                $mccc = new Mccc();
+                if ($elementConstitutif instanceof FicheMatiere) {
+                    $mccc->setFicheMatiere($elementConstitutif);
+                } else {
+                    $mccc->setEc($elementConstitutif);
+                }
+                $this->entityManager->persist($mccc);
+                $mcccs[1]['cc'][$numEp] = $mccc;
+            }
+
+            $mccc->setLibelle('Contrôle continu (TP)');
+            $mccc->setControleContinu(true);
+            $mccc->setExamenTerminal(false);
+            $mccc->setNumeroSession(1);
+            $mccc->setNumeroEpreuve($numEp);
+            $mccc->setNbEpreuves(1);
+            $mccc->setTypeEpreuve(null);
+            $mccc->setDuree(null);
+            $mccc->setJustificationText(null);
+            $mccc->setOptions(null);
+
+            if (count($typeEpreuve_s1_tp) === 1 && ($val === null || $val === '')) {
+                $mccc->setPourcentage(100.0);
+            } elseif ($val !== null && $val !== '') {
+                $mccc->setPourcentage(Tools::convertToFloat($val));
+            } else {
+                $mccc->setPourcentage(null);
+            }
+        }
+
+        // Suppression des MCCC de session 1 superflus
+        if (isset($mcccs[1]['cc'])) {
+            foreach ($mcccs[1]['cc'] as $num => $mccc) {
+                if (!in_array($mccc->getNumeroEpreuve(), $typeEpreuve_s1_tp, true)) {
+                    $this->entityManager->remove($mccc);
+                    unset($mcccs[1]['cc'][$num]);
+                }
+            }
+        }
+
+        if (isset($mcccs[1]['et'])) {
+            foreach ($mcccs[1]['et'] as $num => $mccc) {
+                $this->entityManager->remove($mccc);
+                unset($mcccs[1]['et'][$num]);
+            }
+        }
+
+        // 2. Session 2 - Deuxième session / Rattrapage
+        $hasSecondeSession = isset($data['ccHasSecondeSession']) && ($data['ccHasSecondeSession'] === 'on' || $data['ccHasSecondeSession'] === 'true' || $data['ccHasSecondeSession'] === '1' || $data['ccHasSecondeSession'] === true);
+
+        if ($hasSecondeSession) {
+            $mcccs = $this->sauvegardeCts($elementConstitutif, $mcccs, $data, 2, 's2_ct');
+        } else {
+            if (isset($mcccs[2]['et'])) {
+                foreach ($mcccs[2]['et'] as $num => $mccc) {
+                    $this->entityManager->remove($mccc);
+                    unset($mcccs[2]['et'][$num]);
+                }
+            }
+            if (isset($mcccs[2]['cc'])) {
+                foreach ($mcccs[2]['cc'] as $num => $mccc) {
+                    $this->entityManager->remove($mccc);
+                    unset($mcccs[2]['cc'][$num]);
+                }
+            }
+        }
+
+        return $mcccs;
+    }
+
     private function verificationEt(array $mcccs): bool
     {
         $totPourcentage = 0.0;
@@ -528,11 +627,11 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
 
     private function typeEpreuveHasDuree(int|string $id): bool
     {
-        if (!array_key_exists($id, $this->typeEpreuves)) {
+        if (!array_key_exists($id, $this->getTypeEpreuves())) {
             return false;
         }
 
-        return $this->typeEpreuves[$id]->isHasDuree() ?? false;
+        return $this->getTypeEpreuves()[$id]->isHasDuree() ?? false;
     }
 
     public function checkIfMcccValide(ElementConstitutif|FicheMatiere $owner): bool
@@ -579,6 +678,25 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
                     $totPourcentage += $mccc->getPourcentage();
                 }
 
+                return $totPourcentage === 100.0;
+            case 'cc_tp':
+                if (isset($mcccs[2]) && isset($mcccs[2]['et']) && is_array($mcccs[2]['et']) && count($mcccs[2]['et']) > 0) {
+                    if (!$this->verificationEt($mcccs[2]['et'])) {
+                        return false;
+                    }
+                }
+
+                if (!isset($mcccs[1]) || !isset($mcccs[1]['cc']) || !is_array($mcccs[1]['cc']) || count($mcccs[1]['cc']) === 0) {
+                    return false;
+                }
+
+                $totPourcentage = 0.0;
+                foreach ($mcccs[1]['cc'] as $mccc) {
+                    if ($mccc->getPourcentage() === null || $mccc->getPourcentage() <= 0.0) {
+                        return false;
+                    }
+                    $totPourcentage += $mccc->getPourcentage() * $mccc->getNbEpreuves();
+                }
                 return $totPourcentage === 100.0;
             case 'cc_ct':
                 if (isset($mcccs[1]) && !isset($mcccs[1]['cc']) && !is_array($mcccs[1]['cc'])) {

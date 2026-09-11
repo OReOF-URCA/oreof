@@ -96,6 +96,32 @@ class Mccc
                 $texte = substr($texte, 0, -2);
                 $this->COL_MCCC_CCI = $this->addQuitus($texte, $this->isQuitus);
                 break;
+            case 'cc_tp':
+                $texte = '';
+                if (array_key_exists(1, $this->mcccs) && array_key_exists('cc', $this->mcccs[1])) {
+                    $nb = 1;
+                    /** @var \App\Entity\Mccc $mccc */
+                    foreach ($this->mcccs[1]['cc'] as $mccc) {
+                        $texte .= 'TP' . $nb . ' (' . $mccc->getPourcentage() . '%); ';
+                        $nb++;
+                    }
+
+                    $texte = substr($texte, 0, -2);
+                    $this->COL_MCCC_CC = $this->addQuitus($texte, $this->isQuitus);
+                }
+
+                if (array_key_exists(2, $this->mcccs) && array_key_exists('et', $this->mcccs[2]) && is_array($this->mcccs[2]['et']) && count($this->mcccs[2]['et']) > 0) {
+                    $texte = 'TP (50%); ';
+                    $facteur = 0.5;
+                    foreach ($this->mcccs[2]['et'] as $mccc) {
+                        $texte .= $this->displayTypeEpreuveWithDureePourcentageTp($mccc, 0.0, $facteur);
+                    }
+
+                    $texte = substr($texte, 0, -2);
+                    $this->COL_MCCC_SECONDE_CHANCE_CC_SANS_TP = $this->addQuitus($texte, $this->isQuitus);
+                }
+
+                break;
             case 'cc_ct':
                 if (array_key_exists(1, $this->mcccs) && array_key_exists('cc', $this->mcccs[1]) && $this->mcccs[1]['cc'] !== null) {
                     $texte = '';

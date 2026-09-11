@@ -86,6 +86,12 @@ class LicenceController extends BaseController
                     'typeEpreuves' => $typeEpreuves,
                     'disabled' => false,
                 ]);
+            case 'cc_tp':
+                return $this->render('typeDiplome/mccc/licence/_cc_tp.html.twig', [
+                    'mcccs' => $this->typeDiplomeHandler->getMcccs($ficheMatiere),
+                    'typeEpreuves' => $typeEpreuves,
+                    'disabled' => false,
+                ]);
             case 'cc_ct':
                 return $this->render('typeDiplome/mccc/licence/_cc_ct.html.twig', [
                     'mcccs' => $this->typeDiplomeHandler->getMcccs($ficheMatiere),
@@ -161,6 +167,12 @@ class LicenceController extends BaseController
                     'typeEpreuves' => $typeEpreuves,
                     'elementConstitutif' => $elementConstitutif,
                 ]);
+                case 'cc_tp':
+                    return $this->render('typeDiplome/'.$folder.'/licence/_cc_tp.html.twig', [
+                        'mcccs' => $getElement->getMcccsFromFicheMatiere($typeDiplomeHandler),
+                        'typeEpreuves' => $typeEpreuves,
+                        'elementConstitutif' => $elementConstitutif,
+                    ]);
 
             case 'cci':
                 return $this->render('typeDiplome/'.$folder.'/licence/_cci.html.twig', [

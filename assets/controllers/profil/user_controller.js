@@ -33,7 +33,6 @@ export default class extends Controller {
   }
 
   delete (event) {
-    console.log('coucou delete')
     event.preventDefault()
     const { url } = event.params
     const { csrf } = event.params

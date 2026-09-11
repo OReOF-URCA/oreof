@@ -330,7 +330,6 @@ class ParcoursController extends BaseController
         }
 
         $typeD = $this->typeDiplomeResolver->get($typeDiplome);
-
         // Entre versions JSON
         $textDifferencesParcours = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours);
         $textDifferencesFormation = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation);
@@ -1467,7 +1466,7 @@ class ParcoursController extends BaseController
         foreach($parcours->getLogo() ?? [] as $filename){
             $result[] = [
                 'image_data' => $this->generateUrl(
-                    'app_parcours_logo', 
+                    'app_parcours_logo',
                     ['id' => $parcours->getId(), 'filename' => $filename],
                     UrlGeneratorInterface::ABSOLUTE_URL
                 ),
@@ -1486,7 +1485,7 @@ class ParcoursController extends BaseController
                 'image_data' => $this->generateUrl(
                     'app_parcours_type_diplome_logos',
                     [
-                        'td' => $parcours->getFormation()?->getTypeDiplome()?->getId(), 
+                        'td' => $parcours->getFormation()?->getTypeDiplome()?->getId(),
                         'filename' => $filename
                     ],
                     UrlGeneratorInterface::ABSOLUTE_URL
@@ -1520,6 +1519,6 @@ class ParcoursController extends BaseController
             return $this->render('lheo/error.html.twig', [
                 'errors' => $xml_errors
             ]);
-        }   
+        }
     }
 }
