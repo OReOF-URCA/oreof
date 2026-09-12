@@ -23,9 +23,7 @@
             Dates de collecte
         </twig:Button>
     {% endif %}
-        <twig:Button href="#" variant="secondary" class="mr-2">
-            Exporter Excel
-        </twig:Button>
+        
      {% if is_granted('ROLE_ADMIN') %}
         <twig:Button href="{{ composante ? path('offre_v2_composante_modal_annexes_ca', { composante: composante.id }) : path('offre_v2_modal_annexes_ca') }}"
                      data-turbo="true"
