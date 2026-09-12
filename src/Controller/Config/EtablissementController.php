@@ -115,6 +115,7 @@ class EtablissementController extends BaseController
             ->addField('numeroSIRET', ['label' => 'Numéro SIRET', 'empty_text' => 'Non renseigné'])
             ->addField('numeroActivite', ['label' => 'Numéro d\'activité', 'empty_text' => 'Non renseigné'])
             ->addField('emailCentral', ['label' => 'Email central', 'empty_text' => 'Non renseigné'])
+            ->addField('emailOreof', ['label' => 'Email contact ORéOF', 'empty_text' => 'Non renseigné'])
             ->addField('etablissementInformation.calendrierUniversitaire', [
                 'label' => 'Calendrier universitaire',
                 'format' => 'html',

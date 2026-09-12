@@ -93,7 +93,7 @@ class DpeComposanteMailSubscriber extends AbstractDpeMailSubscriber implements E
             'La fiche de la formation ' . $this->formation->getDisplay() . ' a été validée par le conseil de la composante';
 
         $this->myMailer->sendMessage(
-            [self::EMAIL_CENTRAL, 'oreof@univ-reims.fr'],
+            [$this->getEmailCentral(), $this->getEmailOreof()],
             '[ORéOF]  '.$titre
         );
     }
@@ -119,7 +119,7 @@ class DpeComposanteMailSubscriber extends AbstractDpeMailSubscriber implements E
             'Formation ' . $this->formation->getDisplay(). ' a été modifiée sans passage en CFVU';
 
         $this->myMailer->sendMessage(
-            [self::EMAIL_CENTRAL, 'oreof@univ-reims.fr'],
+            [$this->getEmailCentral(), $this->getEmailOreof()],
             '[ORéOF]  '.$titre
         );
     }

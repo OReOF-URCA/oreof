@@ -53,7 +53,7 @@ class WorkflowChangeRfMailSubscriber extends AbstractDpeMailSubscriber implement
             $this->getDataChangeRf()
         );
         $this->myMailer->sendMessage(
-            [self::EMAIL_OREOF, self::EMAIL_CENTRAL],
+            [$this->getEmailOreof(), $this->getEmailCentral()],
             '[ORéOF]  Un changement de responsable de formation a été soumis'
         );
     }
@@ -166,7 +166,7 @@ class WorkflowChangeRfMailSubscriber extends AbstractDpeMailSubscriber implement
             $this->getDataChangeRf()
         );
         $this->myMailer->sendMessage(
-            [self::EMAIL_OREOF, self::EMAIL_CENTRAL],
+            [$this->getEmailOreof(), $this->getEmailCentral()],
             '[ORéOF]  Un PV a été déposé pour un changement de responsable de formation'
         );
     }

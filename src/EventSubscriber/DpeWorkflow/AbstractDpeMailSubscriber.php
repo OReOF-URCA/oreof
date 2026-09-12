@@ -11,15 +11,13 @@ namespace App\EventSubscriber\DpeWorkflow;
 
 use App\Entity\ChangeRf;
 use App\Entity\DpeParcours;
+use App\Entity\Etablissement;
 use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\User;
 
 class AbstractDpeMailSubscriber
 {
-    public const EMAIL_CENTRAL = 'cfvu-secretariat@univ-reims.fr'; //todo: a mettre sur établissement ?
-    public const EMAIL_OREOF = 'oreof@univ-reims.fr'; //todo: a mettre sur établissement ?
-
     protected ?DpeParcours $dpeParcours;
     protected ?Parcours $parcours;
     protected ?Formation $formation;
@@ -126,5 +124,20 @@ class AbstractDpeMailSubscriber
         }
 
         return $d;
+    }
+
+    public function getEtablissement(): ?Etablissement
+    {
+        return $this->formation?->getComposantePorteuse()?->getEtablissement();
+    }
+
+    public function getEmailCentral(): string
+    {
+        return $this->getEtablissement()?->getEmailCentral();
+    }
+
+    public function getEmailOreof(): string
+    {
+        return $this->getEtablissement()?->getEmailOreof();
     }
 }
