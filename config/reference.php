@@ -2723,6 +2723,12 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     ...<string, mixed>
  * }
+ * @psalm-type HtmlToSpreadsheetConfig = array{
+ *     temp_dir?: scalar|Param|null, // Répertoire temporaire pour les fichiers // Default: null
+ *     strict?: bool|Param, // Activer le mode strict pour la validation HTML // Default: true
+ *     include_builtins?: bool|Param, // Inclure les styles prédéfinis du bundle // Default: true
+ *     default_styles?: array<string, list<mixed>>,
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -2744,6 +2750,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     ux_icons?: UxIconsConfig,
  *     sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
  *     liip_imagine?: LiipImagineConfig,
+ *     html_to_spreadsheet?: HtmlToSpreadsheetConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -2768,6 +2775,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         ux_icons?: UxIconsConfig,
  *         sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
  *         liip_imagine?: LiipImagineConfig,
+ *         html_to_spreadsheet?: HtmlToSpreadsheetConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -2790,6 +2798,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         ux_icons?: UxIconsConfig,
  *         sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
  *         liip_imagine?: LiipImagineConfig,
+ *         html_to_spreadsheet?: HtmlToSpreadsheetConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -2813,6 +2822,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         ux_icons?: UxIconsConfig,
  *         sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
  *         liip_imagine?: LiipImagineConfig,
+ *         html_to_spreadsheet?: HtmlToSpreadsheetConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

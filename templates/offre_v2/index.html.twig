@@ -27,7 +27,11 @@
             Exporter Excel
         </twig:Button>
      {% if is_granted('ROLE_ADMIN') %}
-        <twig:Button href="#" variant="primary">
+        <twig:Button href="{{ composante ? path('offre_v2_composante_modal_annexes_ca', { composante: composante.id }) : path('offre_v2_modal_annexes_ca') }}"
+                     data-turbo="true"
+                     data-turbo-stream="true"
+                     data-action="click->modalturbo#open"
+                     variant="primary">
             Générer les annexes CA
         </twig:Button>
      {% endif %}

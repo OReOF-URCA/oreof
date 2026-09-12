@@ -6,8 +6,9 @@ parameters:
     #scanDirectories:
     #    - var/cache/dev/Symfony/Config
 
-    checkGenericClassInNonGenericObjectType: false
-    checkMissingIterableValueType: false
+    ignoreErrors:
+        - identifier: missingType.iterableValue
+        - identifier: missingType.generics
 
     paths:
         - src

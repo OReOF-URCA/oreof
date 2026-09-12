@@ -67,10 +67,9 @@
                                     <th class="px-4 py-3">Classique</th>
                                     <th class="px-4 py-3">Alternance</th>
                                     <th class="px-4 py-3">Spécifique</th>
-                                    {% if plateformes|filter(p => p.definitionChamps is not empty)|length > 0 %}
+                                    {% if plateformes|filter(p => p.hasDefinitionChamps ?? false)|length > 0 %}
                                         <th class="px-4 py-3">Champs spécifiques</th>
                                     {% endif %}
-                                    <th class="px-4 py-3">Validité</th>
                                 </tr>
                                 </thead>
                                 <tbody class="divide-y">
@@ -125,9 +124,9 @@
                                                    min="0">
                                             <div class="text-xs text-slate-400">Préc: {{ plateformePrecedente ? (plateformePrecedente.parametre.capaciteSpecifique ?? '0') : '0' }}</div>
                                         </td>
-                                        {% if plateformes|filter(p => p.definitionChamps is not empty)|length > 0 %}
+                                        {% if plateformes|filter(p => p.hasDefinitionChamps ?? false)|length > 0 %}
                                             <td class="px-4 py-3">
-                                                {% if plateforme.definitionChamps is not empty %}
+                                                {% if plateforme.hasDefinitionChamps ?? false %}
                                                     <button type="button"
                                                             class="rounded bg-indigo-100 px-2 py-1 text-xs text-indigo-700 hover:bg-indigo-200"
                                                             onclick="alert('Modal champs spécifiques pour {{ plateforme.libelle }}')">
@@ -138,8 +137,30 @@
                                                 {% endif %}
                                             </td>
                                         {% endif %}
-                                        <td class="px-4 py-3">
-                                            <span class="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700">À valider</span>
+                                       
+                                    </tr>
+                                    <tr class="bg-secondary-50/40">
+                                        <td class="px-4 py-2.5 border-b border-secondary-200/60" colspan="{{ plateformes|filter(p => p.hasDefinitionChamps ?? false)|length > 0 ? 7 : 6 }}">
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <label for="annee_{{ annee.id }}_plateforme_{{ plateforme.id }}_remarques"
+                                                           class="text-[12px] font-black text-secondary-500 uppercase">
+                                                        Remarques / Précisions ({{ plateforme.libelle }})
+                                                    </label>
+                                                </div>
+                                                <input id="annee_{{ annee.id }}_plateforme_{{ plateforme.id }}_remarques"
+                                                       value="{{ plateformeCourante ? (plateformeCourante.parametre.remarques ?? '') : '' }}"
+                                                       name="annee_{{ annee.id }}_plateforme_{{ plateforme.id }}_remarques"
+                                                       placeholder="Ex. : Sous réserve de validation, alternance uniquement, etc."
+                                                       class="w-full p-2 bg-white text-secondary-800 border border-secondary-200 rounded-sm font-medium focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm placeholder:text-secondary-400 text-xs"
+                                                       type="text">
+                                                <p class="text-[11px] text-secondary-400 italic mt-1 pl-1 flex items-start gap-2">
+                                                    <span class="flex-shrink-0 w-4 h-4 bg-secondary-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
+                                                        <twig:UX:Icon name="icon:info"/>
+                                                    </span>
+                                                    <span>Cette remarque sera reprise dans les exports Excel (annexes CA) pour cette plateforme et cette année.</span>
+                                                </p>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -199,7 +220,7 @@
                                     <th class="px-4 py-3">Classique</th>
                                     <th class="px-4 py-3">Alternance</th>
                                     <th class="px-4 py-3">Spécifique</th>
-                                    {% if plateformes|filter(p => p.definitionChamps is not empty)|length > 0 %}
+                                    {% if plateformes|filter(p => p.hasDefinitionChamps ?? false)|length > 0 %}
                                         <th class="px-4 py-3">Champs spécifiques</th>
                                     {% endif %}
                                     <th class="px-4 py-3">Validité</th>
@@ -251,9 +272,9 @@
                                                    type="number"
                                                    min="0">
                                         </td>
-                                        {% if plateformes|filter(p => p.definitionChamps is not empty)|length > 0 %}
+                                        {% if plateformes|filter(p => p.hasDefinitionChamps ?? false)|length > 0 %}
                                             <td class="px-4 py-3">
-                                                {% if plateforme.definitionChamps is not empty %}
+                                                {% if plateforme.hasDefinitionChamps ?? false %}
                                                     <button type="button"
                                                             class="rounded bg-indigo-100 px-2 py-1 text-xs text-indigo-700 hover:bg-indigo-200"
                                                             onclick="alert('Modal champs spécifiques pour {{ plateforme.libelle }}')">
@@ -266,6 +287,30 @@
                                         {% endif %}
                                         <td class="px-4 py-3">
                                             <span class="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-700">À valider</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="bg-secondary-50/40">
+                                        <td class="px-4 py-2.5 border-b border-secondary-200/60" colspan="{{ plateformes|filter(p => p.hasDefinitionChamps ?? false)|length > 0 ? 8 : 7 }}">
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between items-center mb-1">
+                                                    <label for="annee_{{ annee.id }}_plateforme_{{ plateforme.id }}_remarques"
+                                                           class="text-[12px] font-black text-secondary-500 uppercase">
+                                                        Remarques / Précisions ({{ plateforme.libelle }})
+                                                    </label>
+                                                </div>
+                                                <input id="annee_{{ annee.id }}_plateforme_{{ plateforme.id }}_remarques"
+                                                       value=""
+                                                       name="annee_{{ annee.id }}_plateforme_{{ plateforme.id }}_remarques"
+                                                       placeholder="Ex. : Sous réserve de validation, alternance uniquement, etc."
+                                                       class="w-full p-2 bg-white text-secondary-800 border border-secondary-200 rounded-sm font-medium focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm placeholder:text-secondary-400 text-xs"
+                                                       type="text">
+                                                <p class="text-[11px] text-secondary-400 italic mt-1 pl-1 flex items-start gap-2">
+                                                    <span class="flex-shrink-0 w-4 h-4 bg-secondary-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
+                                                        <twig:UX:Icon name="icon:info"/>
+                                                    </span>
+                                                    <span>Cette remarque sera reprise dans les exports Excel (annexes CA) pour cette plateforme et cette année.</span>
+                                                </p>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endfor %}

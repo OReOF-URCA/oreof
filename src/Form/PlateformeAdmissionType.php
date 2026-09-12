@@ -21,6 +21,15 @@ class PlateformeAdmissionType extends AbstractType
                 'label' => 'Couleur',
                 'show_labels' => false,
             ])
+            ->add('modeExport', \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class, [
+                'label' => 'Mode d\'export par défaut',
+                'choices' => [
+                    'Global (1 seul fichier pour tout l\'établissement)' => PlateformeAdmission::MODE_EXPORT_GLOBAL,
+                    'Par type de diplôme (1 fichier par type de diplôme)' => PlateformeAdmission::MODE_EXPORT_PAR_DIPLOME,
+                ],
+                'required' => true,
+                'help' => 'Définit si l\'export dans le ZIP global et l\'export principal se font en un seul fichier ou découpés par type de diplôme',
+            ])
             ->add('active', YesNoType::class, [])
             ->add('configuration', JsonConfigType::class, [
                 'label' => 'Configuration de la plateforme',
