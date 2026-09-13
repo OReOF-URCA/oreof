@@ -189,6 +189,7 @@ class FormationController extends BaseController
 
     #[Route('/fiches/liste', name: 'app_fiches_formation_liste', methods: ['GET'])]
     public function fichesFormation(
+        UserRepository        $userRepository,
         GetFormations         $getFormations,
         MentionRepository     $mentionRepository,
         ComposanteRepository  $composanteRepository,
@@ -198,6 +199,7 @@ class FormationController extends BaseController
         $isEtablissement = $getFormations->isEtablissement();
 
         if ($isEtablissement) {
+            $responsables = $userRepository->findUserWithResponsabilites();
             $mentions = $mentionRepository->findBy([], ['libelle' => 'ASC']);
             $composantes = $composanteRepository->findPorteuse();
             $typeDiplomes = $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']);
@@ -207,6 +209,7 @@ class FormationController extends BaseController
                 $this->getCampagneCollecte()
             );
             $filterOptions = $getFormations->getFilterOptions($baseFormations);
+            $responsables = $filterOptions['responsables'];
             $mentions = $filterOptions['mentions'];
             $composantes = $filterOptions['composantes'];
             $typeDiplomes = $filterOptions['typeDiplomes'];
@@ -226,15 +229,16 @@ class FormationController extends BaseController
             $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
             foreach ($parcourss as $parcours) {
 
-                $stats[$formation->getId()][$parcours->getId()] = $typeD->calculStructureParcours($parcours);
+                $stats[$formation->getId()][$parcours->getId()] = $typeD->calcul($parcours);
                 $stats[$formation->getId()]['stats']->addStatsParcours(
-                    $stats[$formation->getId()][$parcours->getId()]?->statsFichesMatieresParcours
+                    $stats[$formation->getId()][$parcours->getId()]->statsFichesMatieresParcours
                 );
             }
         }
 
         return $this->render('formation/_fichesListe.html.twig', [
             'formations' => $tFormations,
+            'responsables' => $responsables,
             'mentions' => $mentions,
             'composantes' => $composantes,
             'typeDiplomes' => $typeDiplomes,

@@ -37,7 +37,7 @@ class FicheMatiereValideController extends BaseController
         $parcourss = $formation->getParcours();
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
         foreach ($parcourss as $parcours) {
-            $stats[$parcours->getId()] = $typeD->calculStructureParcours($parcours, false);
+            $stats[$parcours->getId()] = $typeD->calcul($parcours);
             //update des stats sur parcours
             $parcours->setEtatsFichesMatieres($stats[$parcours->getId()]->statsFichesMatieresParcours);
         }
@@ -56,7 +56,7 @@ class FicheMatiereValideController extends BaseController
         Parcours                     $parcours
     ): Response {
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getFormation()?->getTypeDiplome());
-        $stats = $typeD->calculStructureParcours($parcours, false, false);
+        $stats = $typeD->calcul($parcours);
         $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
         $this->entityManager->flush();
 
@@ -101,7 +101,7 @@ class FicheMatiereValideController extends BaseController
             if ($formation !== null) {
                 $parcourss = $formation->getParcours();
                 foreach ($parcourss as $parcours) {
-                    $stats = $typeD->calculStructureParcours($parcours, false);
+                    $stats = $typeD->calcul($parcours);
                     $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
                 }
             }
@@ -112,7 +112,7 @@ class FicheMatiereValideController extends BaseController
             }
             $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getFormation()?->getTypeDiplome());
             if ($parcours !== null) {
-                $stats = $typeD->calculStructureParcours($parcours, false, false);
+                $stats = $typeD->calcul($parcours);
                 $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
             }
         }
@@ -140,7 +140,7 @@ class FicheMatiereValideController extends BaseController
                 $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
                 $parcourss = $formation->getParcours();
                 foreach ($parcourss as $parcours) {
-                    $stats = $typeD->calculStructureParcours($parcours, false);
+                    $stats = $typeD->calcul($parcours);
                     $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
                 }
             }
@@ -148,7 +148,7 @@ class FicheMatiereValideController extends BaseController
             $parcours = $parcoursRepository->find($request->query->get('id'));
             if ($parcours !== null) {
                 $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getFormation()?->getTypeDiplome());
-                $stats = $typeD->calculStructureParcours($parcours, false, false);
+                $stats = $typeD->calcul($parcours);
                 $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
             }
         }

@@ -98,10 +98,39 @@ Les grilles de cartes utilisent `grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-c
                    href="{{ asset('docs/aide-fiche-parcours.docx') }}" type="word" />
 <twig:DownloadCard title="Archive 2023-2024" meta="ZIP - 12 Mo"
                    href="{{ asset('docs/archive.zip') }}" type="archive" variant="secondary" />
-<twig:DownloadCard title="Site officiel" href="https://oreof.univ-reims.fr" type="link" />
+## 3 ter) Indicateurs et compteurs statistiques (Kpi)
+
+Composant: `src/Twig/Components/UI/Kpi.php`
+Template: `templates/components/_ui/kpi.html.twig`
+Usage: `<twig:Kpi ... />`
+
+Tuile présentant un indicateur clé de performance (KPI) synthétique, un compteur de statut ou une progression.
+
+### API recommandée
+
+- `title` / `label`: libellé principal du KPI (requis)
+- `value`: valeur principale affichée (requis, nombre ou texte)
+- `total`: valeur totale / dénominateur optionnel (ex: `50` pour `"12 / 50"`)
+- `unit`: unité optionnelle (ex: `h`, `ECTS`, `%`)
+- `percent`: pourcentage affichant automatiquement une jauge de progression
+- `variant`: `default | primary | success | warning | danger | info | secondary`
+- `icon`: icône UX / Phosphor / MDI (`icon:edit`, `mdi:chart-pie`, etc.)
+- `description`: sous-titre contextuel discret (ex: `"En rédaction"`, `"À valider"`)
+- `href`: rend la tuile cliquable (lien avec effet hover)
+- `extraClass`: classes CSS supplémentaires
+
+Les grilles de KPIs utilisent généralement `grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6` ou `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`.
+
+### Exemples
+
+```twig
+<twig:Kpi title="Complétude" :value="45" :total="50" :percent="90" icon="mdi:chart-pie" />
+<twig:Kpi title="En cours" :value="12" description="En rédaction" variant="secondary" icon="icon:edit" />
+<twig:Kpi title="Validées" :value="28" description="Pour publication" variant="success" icon="icon:check-circle" />
 ```
 
 ## 4) Conventions CRUD
+
 
 Pour les actions standard:
 

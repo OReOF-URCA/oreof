@@ -1,36 +1,47 @@
-<tr>
-    <th class="border-left-semestre-{{ semestreOrdre }}">&nbsp;</th>
-    <th colspan="4" {% if enfant %}class="border-left-ue-{{ ue.ordre }}"{% endif %}>
-        {{ ue.display }} | {{ ue.ue.libelle }} {% if ue.raccroche == true %}<i class="fal fa-link"></i>{% endif %}
-        {% if ue.ue.natureUeEc is defined and ue.ue.natureUeEc != null and ue.ue.natureUeEc.libre == true %}
-            <span class="badge bg-secondary">
-            UE à choix libre</span>
-        {% endif %}
-        {% if ue.uesEnfants|length > 0 %}<span class="badge bg-primary">
-            UE à choix restreint : {{ ue.uesEnfants|length }} choix possibles</span>{% endif %}
-    </th>
+<tr class="bg-secondary-50/80 dark:bg-secondary-800/50 text-secondary-800 dark:text-secondary-200">
+    <td class="w-10 px-3 py-2 text-center text-secondary-400">
+        {{ ux_icon('icon:chevron-right', {class: 'h-3.5 w-3.5 inline-block'}) }}
+    </td>
+    <td colspan="4" class="px-3 py-2 font-semibold text-xs uppercase tracking-wider {{ enfant ? 'pl-8' : '' }}">
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="font-bold text-secondary-900 dark:text-white">{{ ue.display }}</span>
+            <span class="text-secondary-400 dark:text-secondary-500">|</span>
+            <span>{{ ue.ue.libelle }}</span>
+            {% if ue.raccroche == true %}
+                <twig:Badge label="Raccroché" variant="info" size="sm" icon="icon:link" />
+            {% endif %}
+            {% if ue.ue.natureUeEc is defined and ue.ue.natureUeEc != null and ue.ue.natureUeEc.libre == true %}
+                <twig:Badge label="UE à choix libre" variant="secondary" size="sm" />
+            {% endif %}
+            {% if ue.uesEnfants|length > 0 %}
+                <twig:Badge :label="'UE à choix restreint : ' ~ ue.uesEnfants|length ~ ' choix'" variant="primary" size="sm" />
+            {% endif %}
+        </div>
+    </td>
+</tr>
 
-</tr>
 {% if ue.ue.natureUeEc is defined and ue.ue.natureUeEc != null and ue.ue.natureUeEc.choix == false and ue.ue.natureUeEc.libre == false %}
-<tr>
-    <th></th>
-    <th class="font-weight-bold">&nbsp;</th>
-    <th class="font-weight-bold">Etat</th>
-    <th class="font-weight-bold">Remplissage</th>
-    <th class="font-weight-bold">Fiche EC/matiere</th>
-</tr>
+    <tr class="bg-secondary-50/40 text-[11px] font-bold uppercase tracking-wider text-secondary-500 dark:bg-secondary-900/60 dark:text-secondary-400">
+        <th class="w-10 px-3 py-1.5 text-center"></th>
+        <th class="w-36 px-3 py-1.5">État</th>
+        <th class="w-36 px-3 py-1.5 text-center">Remplissage</th>
+        <th class="px-3 py-1.5">Fiche EC / Matière</th>
+        <th class="w-32 px-3 py-1.5 text-right">Actions</th>
+    </tr>
 {% endif %}
+
 {% if ue.ue.natureUeEc is defined and ue.ue.natureUeEc != null and ue.ue.natureUeEc.libre == true %}
 
 {% else %}
     {% for ec in ue.elementConstitutifs %}
-        {{ include('fiche_matiere_valide/_ec.html.twig', {ec:ec, semestreOrdre:semestreOrdre, ecEnfant:false, raccrocheUe: ue.raccroche, raccrocheSemestre: semestre.raccroche}) }}
+        {{ include('fiche_matiere_valide/_ec.html.twig', {ec: ec, semestreOrdre: semestreOrdre, ecEnfant: false, raccrocheUe: ue.raccroche, raccrocheSemestre: semestre.raccroche|default(false)}) }}
         {% for ece in ec.elementsConstitutifsEnfants %}
-            {{ include('fiche_matiere_valide/_ec.html.twig', {ec:ece, semestreOrdre:semestreOrdre, ecEnfant:true, raccrocheUe: ue.raccroche,raccrocheSemestre: semestre.raccroche}) }}
+            {{ include('fiche_matiere_valide/_ec.html.twig', {ec: ece, semestreOrdre: semestreOrdre, ecEnfant: true, raccrocheUe: ue.raccroche, raccrocheSemestre: semestre.raccroche|default(false)}) }}
         {% endfor %}
     {% endfor %}
 {% endif %}
 
 {% for ueE in ue.uesEnfants %}
-    {{ include('fiche_matiere_valide/_ue.html.twig', {ue:ueE, enfant: true}) }}
+    {{ include('fiche_matiere_valide/_ue.html.twig', {ue: ueE, enfant: true, semestreOrdre: semestreOrdre, semestre: semestre}) }}
 {% endfor %}
+
