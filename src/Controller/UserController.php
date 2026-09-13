@@ -10,6 +10,7 @@
 namespace App\Controller;
 
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Notification\NotificationSettingsService;
 use App\Repository\NotificationListeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,11 +30,64 @@ class UserController extends AbstractController
     #[Route('/utilisateur/mes-notifications', name: 'app_user_mes_notifications')]
     #[Breadcrumb(label: 'menu.mon_compte.mes_notifications')]
     public function mesNotifications(
-        NotificationListeRepository $notificationListeRepository
-    ): Response
-    {
+        NotificationSettingsService $notificationSettingsService
+    ): Response {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
         return $this->render('user/mes-notifications.html.twig', [
-            'notifications' => $notificationListeRepository->findAll(),
+            'global' => $notificationSettingsService->getGlobalPreference($user),
+            'workflows' => $notificationSettingsService->getWorkflowsData($user, ['dpeParcours']),
         ]);
+    }
+
+    #[Route('/utilisateur/mes-notifications/toggle', name: 'app_user_mes_notifications_toggle', methods: ['POST'])]
+    public function mesNotificationsToggle(
+        \Symfony\Component\HttpFoundation\Request $request,
+        NotificationSettingsService $notificationSettingsService
+    ): \Symfony\Component\HttpFoundation\JsonResponse {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $payload = json_decode($request->getContent(), true) ?? [];
+
+        $workflow = $payload['workflow'] ?? null;
+        $place = $payload['place'] ?? null;
+        $transition = $payload['transition'] ?? null;
+        $channel = (string)($payload['channel'] ?? 'email');
+        $enabled = (bool)($payload['enabled'] ?? true);
+
+        $result = $notificationSettingsService->toggle(
+            $user,
+            $workflow,
+            $place,
+            $transition,
+            $channel,
+            $enabled
+        );
+
+        return $this->json($result);
+    }
+
+    #[Route('/utilisateur/mes-notifications/reset', name: 'app_user_mes_notifications_reset', methods: ['POST'])]
+    public function mesNotificationsReset(
+        \Symfony\Component\HttpFoundation\Request $request,
+        NotificationSettingsService $notificationSettingsService
+    ): \Symfony\Component\HttpFoundation\JsonResponse {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        $payload = json_decode($request->getContent(), true) ?? [];
+
+        $workflow = (string)($payload['workflow'] ?? 'dpeParcours');
+        $place = $payload['place'] ?? null;
+        $transition = $payload['transition'] ?? null;
+
+        $result = $notificationSettingsService->reset(
+            $user,
+            $workflow,
+            $place,
+            $transition
+        );
+
+        return $this->json($result);
     }
 }
