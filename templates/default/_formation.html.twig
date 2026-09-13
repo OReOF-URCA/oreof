@@ -8,24 +8,6 @@
 >
     <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">Formations</h2>
-
-        {#        <div class="flex w-full items-center gap-2 sm:max-w-xl"> #}
-        {#            <label for="filtre_crud" class="sr-only">Rechercher</label> #}
-        {#            <input type="text" #}
-        {#                   id="filtre_crud" #}
-        {#                   class="w-full rounded-xl border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-700 shadow-sm outline-none transition placeholder:text-secondary-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder:text-secondary-400 dark:focus:border-primary-500 dark:focus:ring-primary-500/30" #}
-        {#                   placeholder="Rechercher une formation..." #}
-        {#                   aria-label="Rechercher" #}
-        {#                    {{ stimulus_action('crud', 'rechercher', 'keyup') }}> #}
-        {#            <button type="button" #}
-        {#                    class="app-btn app-btn-secondary shrink-0" #}
-        {#                    {{ stimulus_action('crud', 'effaceFiltre', 'click') }} #}
-        {#                    title="Effacer la recherche"> #}
-        {#                {{ ux_icon('icon:close', {class: 'h-4 w-4'}) }} #}
-        {#                <span>Effacer</span> #}
-        {#            </button> #}
-        {#        </div> #}
     </div>
-
     <div {{ stimulus_target('crud', 'liste') }}></div>
 </section>

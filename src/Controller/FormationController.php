@@ -112,8 +112,24 @@ class FormationController extends BaseController
         MentionProcess                $validationProcess,
         Request               $request,
     ): Response {
+        $isEtablissement = $getFormations->isEtablissement();
 
-        $responsables = $userRepository->findUserWithResponsabilites();
+        if ($isEtablissement) {
+            $responsables = $userRepository->findUserWithResponsabilites();
+            $mentions = $mentionRepository->findBy([], ['libelle' => 'ASC']);
+            $composantes = $composanteRepository->findPorteuse();
+            $typeDiplomes = $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']);
+        } else {
+            $baseFormations = $getFormations->getBaseFormations(
+                $this->getUser(),
+                $this->getCampagneCollecte()
+            );
+            $filterOptions = $getFormations->getFilterOptions($baseFormations);
+            $responsables = $filterOptions['responsables'];
+            $mentions = $filterOptions['mentions'];
+            $composantes = $filterOptions['composantes'];
+            $typeDiplomes = $filterOptions['typeDiplomes'];
+        }
 
         $tFormations = $getFormations->getFormations(
             $this->getUser(),
@@ -133,9 +149,9 @@ class FormationController extends BaseController
             'nbParcours' => $nbParcours,
             'responsables' => $responsables,
             'formations' => $tFormations,
-            'mentions' => $mentionRepository->findBy([], ['libelle' => 'ASC']),
-            'composantes' => $composanteRepository->findPorteuse(),
-            'typeDiplomes' => $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']),
+            'mentions' => $mentions,
+            'composantes' => $composantes,
+            'typeDiplomes' => $typeDiplomes,
             'params' => $request->query->all(),
             'isCfvu' => false,
             'process' => $validationProcess->getProcess()
@@ -179,6 +195,22 @@ class FormationController extends BaseController
         TypeDiplomeRepository $typeDiplomeRepository,
         Request               $request,
     ): Response {
+        $isEtablissement = $getFormations->isEtablissement();
+
+        if ($isEtablissement) {
+            $mentions = $mentionRepository->findBy([], ['libelle' => 'ASC']);
+            $composantes = $composanteRepository->findPorteuse();
+            $typeDiplomes = $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']);
+        } else {
+            $baseFormations = $getFormations->getBaseFormations(
+                $this->getUser(),
+                $this->getCampagneCollecte()
+            );
+            $filterOptions = $getFormations->getFilterOptions($baseFormations);
+            $mentions = $filterOptions['mentions'];
+            $composantes = $filterOptions['composantes'];
+            $typeDiplomes = $filterOptions['typeDiplomes'];
+        }
 
         $tFormations = $getFormations->getFormations(
             $this->getUser(),
@@ -194,7 +226,7 @@ class FormationController extends BaseController
             $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
             foreach ($parcourss as $parcours) {
 
-                $stats[$formation->getId()][$parcours->getId()] = $typeD->calculStructureParcours($parcours, false, false);
+                $stats[$formation->getId()][$parcours->getId()] = $typeD->calculStructureParcours($parcours);
                 $stats[$formation->getId()]['stats']->addStatsParcours(
                     $stats[$formation->getId()][$parcours->getId()]?->statsFichesMatieresParcours
                 );
@@ -203,9 +235,9 @@ class FormationController extends BaseController
 
         return $this->render('formation/_fichesListe.html.twig', [
             'formations' => $tFormations,
-            'mentions' => $mentionRepository->findBy([], ['libelle' => 'ASC']),
-            'composantes' => $composanteRepository->findPorteuse(),
-            'typeDiplomes' => $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']),
+            'mentions' => $mentions,
+            'composantes' => $composantes,
+            'typeDiplomes' => $typeDiplomes,
             'params' => $request->query->all(),
             'isCfvu' => false,
             'stats' => $stats
