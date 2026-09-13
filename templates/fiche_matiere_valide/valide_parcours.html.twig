@@ -109,15 +109,6 @@
     Fiches EC/matières — {{ parcours.libelle }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_parcours_index'), title: 'Liste des parcours'},
-        {href: path('formation_v2_modifier', {slug: parcours.formation.slug}), title: 'Formation : '~parcours.formation.display},
-        {href: path('parcours_v2_modifier', {parcours: parcours.id}), title: 'Parcours : '~parcours.libelle},
-        {title: 'Validation des fiches'}
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <twig:Button
         href="{{ path('parcours_v2_modifier', {parcours: parcours.id}) }}"
@@ -128,4 +119,5 @@
         tooltip="Retour au parcours"
     />
 {% endblock %}
+
 

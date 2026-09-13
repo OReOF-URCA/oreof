@@ -223,14 +223,6 @@
     Fiches EC/matières — {{ formation.displayLong }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_parcours_index'), title: 'Liste des parcours'},
-        {href: path('formation_v2_modifier', {slug: formation.slug}), title: 'Formation : '~formation.display},
-        {title: 'Validation des fiches'}
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <twig:Button
         href="{{ path('formation_v2_modifier', {slug: formation.slug}) }}"
@@ -241,4 +233,5 @@
         tooltip="Retour à la formation"
     />
 {% endblock %}
+
 
