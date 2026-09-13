@@ -102,9 +102,8 @@ class NotificationCenterComponent extends AbstractController
         #[LiveArg] bool    $email,
         #[LiveArg] bool    $inapp): void
     {
-        dump('ok');
         $this->forward(NotificationSettingController::class . '::setSettings', ['workflow' => $workflow, 'step' => $place, 'transition' => $transition], ['email' => $email, 'inapp' => $inapp]);
-        // $this->emit('notif:saved');
+        $this->emit('notif:saved');
     }
 
     #[LiveAction]

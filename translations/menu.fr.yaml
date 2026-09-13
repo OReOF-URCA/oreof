@@ -188,4 +188,12 @@ page:
     app_homepage:
       description: Accueil
       title: Accueil
-    
+    app_user_mes_informations:
+      description: Consulter les informations de mon compte et mes profils d'accès.
+      title: Mes informations
+    app_user_mes_notifications:
+      description: Gérer mes préférences de notification.
+      title: Mes notifications
+    mon_compte:
+      mes_informations: Mes informations
+      mes_notifications: Mes notifications

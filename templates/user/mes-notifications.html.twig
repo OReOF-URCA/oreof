@@ -1,109 +1,15 @@
 {% extends 'base.html.twig' %}
 
-{% block content %}
-    <h2 class="small-title">Vos notifications par email</h2>
-    {{ component('notification_center', { workflow: 'dpeParcours' }) }}
-
-    {#    <div class="card"> #}
-    {#        <div class="card-body"> #}
-    {#            <div class="row"> #}
-    {#                {{ component('alerte', { #}
-    {#                    'type': 'info', #}
-    {#                    'message': 'Vous pouvez gérer les emails que vous recevez.' #}
-    {#                }) }} #}
-
-    {#                <table class="table table-striped"> #}
-    {#                    <thead> #}
-    {#                    <tr> #}
-    {#                        <th rowspan="2">Notification</th> #}
-{#                        <th colspan="2">Central</th>#}
-    {#                        <th colspan="1">Composante</th> #}
-    {#                    </tr> #}
-    {#                    <tr> #}
-{#                        <th>SES</th>#}
-{#                        <th>VP</th>#}
-{#                        <th>Resp. DPE</th>#}
-    {#                        <th>Resp. Formation</th> #}
-{#                        <th>Resp. EC</th>#}
-    {#                    </tr> #}
-    {#                    </thead> #}
-    {#                    <tbody> #}
-    {#                    {% for notification in notifications %} #}
-    {#                        <tr> #}
-    {#                            <td>{{ notification.libelle }}</td> #}
-{#                            {% if notification.isCentral %}#}
-{#                                <td>#}
-{#                                    <input type="checkbox" id="ses_{{ notification.id }}"#}
-    {#                                            {{ stimulus_action('notification_liste', 'change', 'change', #}{# } #}
-{#                                                'id': notification.id,#}
-{#                                                'to': 'toSes'#}
-{#                                            }) }}#}
-{#                                            {{ notification.toSes == true ? 'checked' : '' }}>#}
-{#                                    <label for="ses_{{ notification.id }}" class="sr-only"></label>#}
-
-{#                                </td>#}
-{#                                <td>#}
-{#                                    <input type="checkbox" id="vp_{{ notification.id }}"#}
-    {#                                            {{ stimulus_action('notification_liste', 'change', 'change', #}{# } #}
-{#                                                'id': notification.id,#}
-{#                                                'to': 'toVp'#}
-{#                                            }) }}#}
-{#                                            {{ notification.toVp == true ? 'checked' : '' }}>#}
-{#                                    <label for="vp_{{ notification.id }}" class="sr-only"></label>#}
-{#                                </td>#}
-{#                            {% else %}#}
-{#                                <td colspan="2"></td>#}
-{#                            {% endif %}#}
-    {#                            {% if notification.isComposante %} #}
-{#                                <td>#}
-{#                                    <input type="checkbox" id="toRespDpe_{{ notification.id }}"#}
-    {#                                            {{ stimulus_action('notification_liste', 'change', 'change', #}{# } #}
-{#                                                'id': notification.id,#}
-{#                                                'to': 'toRespDpe'#}
-{#                                            }) }}#}
-{#                                            {{ notification.toRespDpe == true ? 'checked' : '' }}>#}
-{#                                    <label for="toRespDpe_{{ notification.id }}" class="sr-only"></label>#}
-{#                                </td>#}
-{#                                <td>#}
-    {#                                    <input type="checkbox" id="toRespFormation_{{ notification.id }}" #}
-{#                                            {{ stimulus_action('notification_liste', 'change', 'change', {#}
-    {#                                                'id': notification.id, #}
-    {#                                                'to': 'toRespFormation' #}
-    {#                                            }) }} #}
-    {#                                            {{ notification.toRespFormation == true ? 'checked' : '' }}> #}
-    {#                                    <label for="toRespFormation_{{ notification.id }}" class="sr-only"></label> #}
-    {#                                </td> #}
-    {#                                <td> #}
-    {#                                    <input type="checkbox" id="toRespEc_{{ notification.id }}" #}
-    {#                                            {{ stimulus_action('notification_liste', 'change', 'change', #}{# } #}
-{#                                                'id': notification.id,#}
-{#                                                'to': 'toRespEc'#}
-{#                                            }) }}#}
-{#                                            {{ notification.toRespEc == true ? 'checked' : '' }}>#}
-{#                                    <label for="toRespEc_{{ notification.id }}" class="sr-only"></label>#}
-{#                                </td>#}
-    {#                            {% else %} #}
-    {#                                <td colspan="1"></td> #}
-    {#                            {% endif %} #}
-    {#                        </tr> #}
-    {#                    {% endfor %} #}
-    {#                    </tbody> #}
-    {#                </table> #}
-
-    {#            </div> #}
-    {#        </div> #}
-    {#    </div> #}
-{% endblock %}
-
 {% set header_title %}
     Mes notifications
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-    ]}) }}
-{% endblock %}
+{% set header_description %}
+    Gérez vos préférences de réception des notifications (par email et dans l'application) par défaut ou par étape de workflow.
+{% endset %}
 
-{% block bouton_header %}
-
+{% block content %}
+    <div class="space-y-6">
+        {{ component('notification_center', { workflow: 'dpeParcours' }) }}
+    </div>
 {% endblock %}

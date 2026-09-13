@@ -1,107 +1,180 @@
-{# templates/components/NotificationCenter.html.twig #}
-<div class="mb-4 bg-opacity-25" data-action="live#action:notif:saved->live#update">
-    {# 1) Global #}
+{# templates/components/notification_center.html.twig #}
+<div class="space-y-6" data-action="live#action:notif:saved->live#update">
+    {# 1) Paramètres globaux par défaut #}
     {% set global = app.user.notificationPreference %}
-    <div class="p-4 rounded border bg-white">
-        <div class="d-flex align-items-center justify-content-between">
-            <div>
-                <div class="fw-semibold">Notifications globales (par défaut)</div>
-                <div class="text-muted small">S’applique à tout, sauf si vous personnalisez plus bas.</div>
+    <section class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                    <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
+                        Notifications globales (par défaut)
+                    </h2>
+                    <span class="inline-flex items-center rounded-full bg-primary-50 px-2 py-0.5 text-[11px] font-semibold text-primary-700 dark:bg-primary-950/40 dark:text-primary-300">
+                        Général
+                    </span>
+                </div>
+                <p class="text-sm text-secondary-600 dark:text-secondary-300">
+                    S'applique à l'ensemble des événements, sauf si vous définissez une règle spécifique plus bas.
+                </p>
             </div>
-            <div class="d-flex align-items-center gap-3">
-                <label class="d-flex align-items-center gap-1 small mb-0">
+
+            <div class="flex flex-wrap items-center gap-3 pt-2 sm:pt-0">
+                <label class="inline-flex items-center gap-2 cursor-pointer select-none text-sm font-medium text-secondary-700 dark:text-secondary-300">
                     <input type="checkbox"
-                           data-model="emailGlobal" {{ global is not null and global.emailEnabled ? 'checked' }} />
-                    Email
+                           data-model="emailGlobal"
+                           {{ global is not null and global.emailEnabled ? 'checked' }}
+                           class="h-4 w-4 rounded border-secondary-300 text-primary focus:ring-primary dark:border-secondary-600 dark:bg-secondary-800" />
+                    <twig:UX:Icon name="icon:mail" class="w-4 h-4 text-secondary-500" />
+                    <span>Email</span>
                 </label>
-                <label class="d-flex align-items-center gap-1 small mb-0">
+
+                <label class="inline-flex items-center gap-2 cursor-pointer select-none text-sm font-medium text-secondary-700 dark:text-secondary-300">
                     <input type="checkbox"
-                           data-model="inappGlobal" {{ global is not null and global.inAppEnabled ? 'checked' }} />
-                    In-app
+                           data-model="inappGlobal"
+                           {{ global is not null and global.inAppEnabled ? 'checked' }}
+                           class="h-4 w-4 rounded border-secondary-300 text-primary focus:ring-primary dark:border-secondary-600 dark:bg-secondary-800" />
+                    <twig:UX:Icon name="icon:bell" class="w-4 h-4 text-secondary-500" />
+                    <span>In-app</span>
                 </label>
-                <button class="px-3 py-1 btn btn-primary btn-sm"
+
+                <button type="button"
+                        class="inline-flex items-center gap-2 rounded-xl bg-primary px-3.5 py-2 text-xs font-semibold text-white shadow-xs hover:bg-primary-600 transition"
                         data-action="live#action"
                         data-live-action-param="saveGlobal"
                         data-live-args='{
-            "email": document.querySelector("[data-model=emailGlobal]").checked,
-            "inapp": document.querySelector("[data-model=inappGlobal]").checked
-          }'>Enregistrer
+                            "email": document.querySelector("[data-model=emailGlobal]").checked,
+                            "inapp": document.querySelector("[data-model=inappGlobal]").checked
+                        }'>
+                    <twig:UX:Icon name="icon:save" class="w-4 h-4" />
+                    <span>Enregistrer</span>
                 </button>
             </div>
         </div>
-    </div>
+    </section>
 
     {# 2) Par workflow / place / transition #}
     {% for wf in this.getWorkflows() %}
-        <div class="p-4 rounded border mt-3 bg-white mb-4">
-            <div class="fw-semibold">Workflow : {{ wf.name }}</div>
+        <section class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-secondary-100 pb-4 dark:border-secondary-800">
+                <div class="space-y-0.5">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
+                            Workflow : {{ wf.name }}
+                        </h2>
+                        <span class="inline-flex items-center rounded-full border border-secondary-200 bg-secondary-50 px-2.5 py-0.5 text-xs font-semibold text-secondary-700 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-300">
+                            {{ wf.places|length }} étapes
+                        </span>
+                    </div>
+                    <p class="text-xs text-secondary-500 dark:text-secondary-400">
+                        Personnalisez la réception des notifications pour ce workflow, ses étapes et ses transitions.
+                    </p>
+                </div>
+            </div>
 
-            {# Niveau workflow #}
+            {# Niveau workflow global #}
             {% set res = this.resolve(wf.name) %}
-            <div class="d-flex align-items-center justify-content-between border rounded p-3 mb-3">
-                <div>
-                    <div class="fw-medium">Par défaut pour {{ wf.name }}</div>
-                    <div class="text-muted small">
+            <div class="flex flex-col gap-3 rounded-xl border border-secondary-200 bg-secondary-50/70 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-secondary-700 dark:bg-secondary-800/40">
+                <div class="space-y-1">
+                    <div class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">
+                        Par défaut pour {{ wf.name }}
+                    </div>
+                    <div class="flex items-center gap-2">
                         {% if res.source == 'workflow' %}
-                            <span class="px-2 py-1 rounded bg-primary bg-opacity-10 text-primary">Personnalisé</span>
+                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                Personnalisé
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center rounded-full bg-secondary-100 px-2 py-0.5 text-[11px] font-medium text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">
+                                Hérité : {{ res.source }}
+                            </span>
                         {% endif %}
-                        <span class="px-2 py-1 rounded bg-light text-secondary">Hérité : {{ res.source }}</span>
                     </div>
                 </div>
-                <div class="d-flex align-items-center gap-3">
+
+                <div class="shrink-0">
                     {% set ch = res.channels %}
                     {% include 'components/_notif_toggles.html.twig' with {
-                        scope: {workflow:wf.name, place: null, transition: null},
-                        channels: ch, inherited: res.source != 'workflow'
+                        scope: {workflow: wf.name, place: null, transition: null},
+                        channels: ch,
+                        inherited: res.source != 'workflow'
                     } %}
                 </div>
             </div>
 
-            {# Étapes #}
-            {% for p in wf.places %}
-                {% set rp = this.resolve(wf.name, p.name) %}
-                <div class="border rounded p-3 mb-3">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="fw-medium">Étape : {{ p.label|trans }}</div>
-                            <div class="text-muted small">
-                                {% if rp.source == 'step' %}
-                                    <span class="px-2 py-1 rounded bg-primary bg-opacity-10 text-primary">Personnalisé</span>
-                                {% endif %}
-                                <span class="px-2 py-1 rounded bg-light text-secondary">Hérité : {{ rp.source }}</span>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            {% include 'components/_notif_toggles.html.twig' with {
-                                scope: {workflow:wf.name, place: p.name, transition: null},
-                                channels: rp.channels, inherited: rp.source != 'step'
-                            } %}
-                        </div>
-                    </div>
+            {# Étapes du workflow #}
+            <div class="space-y-3 pt-2">
+                <div class="text-xs font-bold uppercase tracking-wider text-secondary-400 dark:text-secondary-500">
+                    Étapes et actions du workflow
+                </div>
 
-                    {# Transitions partant de l’étape #}
-                    {% for t in (wf.transitionsByPlace[p.name] ?? []) %}
-                        {% set rt = this.resolve(wf.name, p.name, t.name) %}
-                        <div class="mt-3 ms-4 d-flex align-items-center justify-content-between border rounded p-3">
-                            <div>
-                                <div class="small fw-medium">Transition : {{ t.label|trans }}</div>
-                                <div class="text-muted small">
-                                    {% if rt.source == 'transition' %}
-                                        <span class="px-2 py-1 rounded bg-primary bg-opacity-10 text-primary">Personnalisé</span>
+                {% for p in wf.places %}
+                    {% set rp = this.resolve(wf.name, p.name) %}
+                    <div class="rounded-xl border border-secondary-200 bg-white p-4 transition dark:border-secondary-700 dark:bg-secondary-900">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div class="space-y-1">
+                                <div class="text-sm font-semibold text-secondary-800 dark:text-secondary-100">
+                                    Étape : {{ p.label|trans }}
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    {% if rp.source == 'step' %}
+                                        <span class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                            Personnalisé
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center rounded-full bg-secondary-100 px-2 py-0.5 text-[11px] font-medium text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">
+                                            Hérité : {{ rp.source }}
+                                        </span>
                                     {% endif %}
-                                    <span class="px-2 py-1 rounded bg-light text-secondary">Hérité : {{ rt.source }}</span>
                                 </div>
                             </div>
-                            <div class="d-flex align-items-center gap-3">
+
+                            <div class="shrink-0">
                                 {% include 'components/_notif_toggles.html.twig' with {
-                                    scope: {workflow:wf.name, place: p.name, transition: t.name},
-                                    channels: rt.channels, inherited: rt.source != 'transition'
+                                    scope: {workflow: wf.name, place: p.name, transition: null},
+                                    channels: rp.channels,
+                                    inherited: rp.source != 'step'
                                 } %}
                             </div>
                         </div>
-                    {% endfor %}
-                </div>
-            {% endfor %}
-        </div>
+
+                        {# Transitions partant de l'étape #}
+                        {% set transitions = (wf.transitionsByPlace[p.name] ?? []) %}
+                        {% if transitions|length > 0 %}
+                            <div class="mt-3 space-y-2 border-l-2 border-primary-200 pl-4 pt-1 dark:border-primary-800">
+                                {% for t in transitions %}
+                                    {% set rt = this.resolve(wf.name, p.name, t.name) %}
+                                    <div class="flex flex-col gap-2 rounded-lg border border-secondary-100 bg-secondary-50/50 p-3 sm:flex-row sm:items-center sm:justify-between dark:border-secondary-800 dark:bg-secondary-800/20">
+                                        <div class="space-y-0.5">
+                                            <div class="text-xs font-semibold text-secondary-700 dark:text-secondary-200">
+                                                Transition : {{ t.label|trans }}
+                                            </div>
+                                            <div class="flex items-center gap-1.5">
+                                                {% if rt.source == 'transition' %}
+                                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                                        Personnalisé
+                                                    </span>
+                                                {% else %}
+                                                    <span class="inline-flex items-center rounded-full bg-secondary-100 px-1.5 py-0.2 text-[10px] font-medium text-secondary-500 dark:bg-secondary-800 dark:text-secondary-400">
+                                                        Hérité : {{ rt.source }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="shrink-0">
+                                            {% include 'components/_notif_toggles.html.twig' with {
+                                                scope: {workflow: wf.name, place: p.name, transition: t.name},
+                                                channels: rt.channels,
+                                                inherited: rt.source != 'transition'
+                                            } %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
     {% endfor %}
 </div>

@@ -15,7 +15,7 @@ final class NotificationPreferenceResolver
     {
     }
 
-    public function resolveFor(User $user, string $workflow, ?string $transition = null): self
+    public function resolveFor(User $user, string $workflow, ?string $step = null, ?string $transition = null): self
     {
         $pref = $user->getNotificationPreference(); // global
         $effective = [
@@ -26,7 +26,19 @@ final class NotificationPreferenceResolver
 
         $repo = $this->em->getRepository(UserWorkflowNotificationSetting::class);
 
-        // transition-level
+        // workflow-level override
+        if ($wf = $repo->findOneBy(['user' => $user, 'workflow' => $workflow, 'step' => null, 'transitionName' => null])) {
+            $effective = ['email' => $wf->isEmailEnabled(), 'inapp' => $wf->isInAppEnabled()];
+            $source = 'workflow';
+        }
+
+        // step-level override
+        if ($step && $st = $repo->findOneBy(['user' => $user, 'workflow' => $workflow, 'step' => $step, 'transitionName' => null])) {
+            $effective = ['email' => $st->isEmailEnabled(), 'inapp' => $st->isInAppEnabled()];
+            $source = 'step';
+        }
+
+        // transition-level override
         if ($transition && $tr = $repo->findOneBy(['user' => $user, 'workflow' => $workflow, 'transitionName' => $transition])) {
             $effective = ['email' => $tr->isEmailEnabled(), 'inapp' => $tr->isInAppEnabled()];
             $source = 'transition';

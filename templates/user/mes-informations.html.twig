@@ -1,8 +1,8 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-    {% set profilsActifs = (user_data is defined and user_data.campagneCollecte is defined)
-        ? profils|filter(userProfil => userProfil.campagneCollecte and userProfil.campagneCollecte.id == user_data.campagneCollecte.id)
+    {% set profilsActifs = (user_data is defined and user_data.campagneCollecte is defined and user_data.campagneCollecte)
+        ? profils|filter(userProfil => userProfil.campagneCollecte is null or userProfil.campagneCollecte.id == user_data.campagneCollecte.id)
         : profils %}
 
     <div class="space-y-5">
@@ -74,7 +74,7 @@
             </div>
 
             {% for centreType in centreTypes %}
-                {% set profilsParType = profilsActifs|filter(userProfil => userProfil.profil and userProfil.profil.centre and userProfil.profil.centre.value == centreType.value) %}
+                {% set profilsParType = profilsActifs|filter(userProfil => userProfil.profil and userProfil.profil.centre and (userProfil.profil.centre.value is defined ? userProfil.profil.centre.value == centreType.value : userProfil.profil.centre == centreType.value)) %}
                 {% if profilsParType|length > 0 %}
                     <section class="overflow-hidden rounded-xl border border-secondary-200 dark:border-secondary-700">
                         <div class="flex items-center justify-between border-b border-secondary-200 bg-secondary-50 px-4 py-2.5 dark:border-secondary-700 dark:bg-secondary-800/60">
@@ -165,16 +165,3 @@
     </div>
 {% endblock %}
 
-{% set header_title %}
-    Mes informations
-{% endset %}
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        { title: 'Mes informations' }
-    ]}) }}
-{% endblock %}
-
-{% block bouton_header %}
-
-{% endblock %}

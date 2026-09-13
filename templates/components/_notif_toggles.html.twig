@@ -1,33 +1,53 @@
 {# templates/components/_notif_toggles.html.twig #}
 {% set ch = channels %}
-<label class="d-flex align-items-center gap-1 small mb-0">
-    <input type="checkbox" {{ ch.email ? 'checked' }} data-model="email">
-    Email
-</label>
-<label class="d-flex align-items-center gap-1 small mb-0 ms-3">
-    <input type="checkbox" {{ ch.inapp ? 'checked' }} data-model="inapp">
-    In-app
-</label>
+<div class="flex flex-wrap items-center gap-3">
+    <label class="inline-flex items-center gap-1.5 cursor-pointer select-none text-xs font-medium text-secondary-700 dark:text-secondary-300">
+        <input type="checkbox"
+               {{ ch.email ? 'checked' }}
+               data-model="email"
+               class="h-4 w-4 rounded border-secondary-300 text-primary focus:ring-primary dark:border-secondary-600 dark:bg-secondary-800">
+        <twig:UX:Icon name="icon:mail" class="w-3.5 h-3.5 text-secondary-400" />
+        <span>Email</span>
+    </label>
 
-<button class="btn btn-primary btn-sm ms-3"
-        data-action="live#action"
-        data-live-action-param="save"
-        data-live-workflow-param="{{ scope.workflow }}"
-        data-live-place-param="{{ scope.place is not null ? scope.place : 'null' }}"
-        data-live-transition-param="{{ scope.transition is not null ? scope.transition : 'null' }}"
-        data-live-email-param="{{ ch.email ? 'true' : 'false' }}"
-        data-live-inapp-param="{{ ch.inapp ? 'true' : 'false' }}"
->Enregistrer
-</button>
+    <label class="inline-flex items-center gap-1.5 cursor-pointer select-none text-xs font-medium text-secondary-700 dark:text-secondary-300">
+        <input type="checkbox"
+               {{ ch.inapp ? 'checked' }}
+               data-model="inapp"
+               class="h-4 w-4 rounded border-secondary-300 text-primary focus:ring-primary dark:border-secondary-600 dark:bg-secondary-800">
+        <twig:UX:Icon name="icon:bell" class="w-3.5 h-3.5 text-secondary-400" />
+        <span>In-app</span>
+    </label>
 
-{% if not inherited %}
-    <button class="btn btn-secondary btn-sm ms-2"
+    <button type="button"
+            class="inline-flex items-center gap-1.5 rounded-lg bg-primary-50 px-2.5 py-1 text-xs font-semibold text-primary-700 hover:bg-primary-100 transition dark:bg-primary-950/40 dark:text-primary-300 dark:hover:bg-primary-900/50"
             data-action="live#action"
-            data-live-action-param="remove"
-            data-live-args='{
-      "workflow":"{{ scope.workflow }}",
-      "place":{{ scope.place is not null ? '"'~scope.place~'"' : 'null' }},
-      "transition":{{ scope.transition is not null ? '"'~scope.transition~'"' : 'null' }}
-    }'>Revenir à l’héritage
+            data-live-action-param="save"
+            data-live-workflow-param="{{ scope.workflow }}"
+            data-live-place-param="{{ scope.place is not null ? scope.place : 'null' }}"
+            data-live-transition-param="{{ scope.transition is not null ? scope.transition : 'null' }}"
+            data-live-email-param="{{ ch.email ? 'true' : 'false' }}"
+            data-live-inapp-param="{{ ch.inapp ? 'true' : 'false' }}"
+            title="Enregistrer cette préférence"
+    >
+        <twig:UX:Icon name="icon:save" class="w-3.5 h-3.5" />
+        <span>Enregistrer</span>
     </button>
-{% endif %}
+
+    {% if not inherited %}
+        <button type="button"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-secondary-200 bg-white px-2.5 py-1 text-xs font-medium text-secondary-600 hover:bg-secondary-50 hover:text-secondary-800 transition dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-300 dark:hover:bg-secondary-700"
+                data-action="live#action"
+                data-live-action-param="remove"
+                data-live-args='{
+                    "workflow":"{{ scope.workflow }}",
+                    "place":{{ scope.place is not null ? '"'~scope.place~'"' : 'null' }},
+                    "transition":{{ scope.transition is not null ? '"'~scope.transition~'"' : 'null' }}
+                }'
+                title="Rétablir l'héritage"
+        >
+            <twig:UX:Icon name="icon:undo" class="w-3.5 h-3.5" />
+            <span>Hériter</span>
+        </button>
+    {% endif %}
+</div>

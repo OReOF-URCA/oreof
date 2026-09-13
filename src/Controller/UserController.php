@@ -9,6 +9,7 @@
 
 namespace App\Controller;
 
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\NotificationListeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,15 +18,16 @@ use Symfony\Component\Routing\Attribute\Route;
 class UserController extends AbstractController
 {
     #[Route('/utilisateur/mes-informations', name: 'app_user_mes_informations')]
+    #[Breadcrumb(label: 'menu.mon_compte.mes_informations')]
     public function mesInformations(): Response
     {
         return $this->render('user/mes-informations.html.twig', [
             'profils' => $this->getUser()->getUserProfils(),
-
         ]);
     }
 
     #[Route('/utilisateur/mes-notifications', name: 'app_user_mes_notifications')]
+    #[Breadcrumb(label: 'menu.mon_compte.mes_notifications')]
     public function mesNotifications(
         NotificationListeRepository $notificationListeRepository
     ): Response
@@ -34,6 +36,4 @@ class UserController extends AbstractController
             'notifications' => $notificationListeRepository->findAll(),
         ]);
     }
-
-
 }
