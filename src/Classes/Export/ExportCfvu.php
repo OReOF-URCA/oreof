@@ -53,6 +53,7 @@ class ExportCfvu implements ExportInterface
         $this->excelWriter->writeCellXY(8, 1, 'Validation Composante');
         $this->excelWriter->writeCellXY(9, 1, 'Présence PV');
         $this->excelWriter->writeCellXY(10, 1, 'Etat validation');
+        $this->excelWriter->writeCellXY(11, 1, 'Identifiant');
 
         $ligne = 2;
         foreach ($formations as $formation) {
@@ -80,9 +81,9 @@ class ExportCfvu implements ExportInterface
                 $dpeParcours = GetDpeParcours::getFromParcours($parcours);
                 $etatValidation = array_keys($dpeParcours?->getEtatValidation())[0];
                 $this->excelWriter->writeCellXY(10, $ligne, $etatValidation ?? '-erreur état-');
+                $this->excelWriter->writeCellXY(11, $ligne, $parcours->getId());
 
-
-                $this->excelWriter->getColumnsAutoSize('A', 'J');
+                $this->excelWriter->getColumnsAutoSize('A', 'K');
                     $ligne++;
             }
         }
