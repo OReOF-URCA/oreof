@@ -54,6 +54,7 @@ class ExportCfvu implements ExportInterface
         $this->excelWriter->writeCellXY(9, 1, 'Présence PV');
         $this->excelWriter->writeCellXY(10, 1, 'Etat validation');
         $this->excelWriter->writeCellXY(11, 1, 'Identifiant');
+        $this->excelWriter->writeCellXY(12, 1, 'Type du Parcours');
 
         $ligne = 2;
         foreach ($formations as $formation) {
@@ -83,7 +84,13 @@ class ExportCfvu implements ExportInterface
                 $this->excelWriter->writeCellXY(10, $ligne, $etatValidation ?? '-erreur état-');
                 $this->excelWriter->writeCellXY(11, $ligne, $parcours->getId());
 
-                $this->excelWriter->getColumnsAutoSize('A', 'K');
+                $typeParcoursTxt = "";
+                if($parcours->getTypeParcours()->value !== 'classique'){
+                    $typeParcoursTxt = $parcours->getTypeParcours()->libelle();
+                }
+                $this->excelWriter->writeCellXY(12, $ligne, $typeParcoursTxt);
+
+                $this->excelWriter->getColumnsAutoSize('A', 'L');
                     $ligne++;
             }
         }
