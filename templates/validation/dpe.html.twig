@@ -1,5 +1,17 @@
 {% extends 'base.html.twig' %}
 
+{% set header_title %}
+    Gestion des validations DPE
+{% endset %}
+
+{% set header_description %}
+    {% if composante is defined and composante is not null %}
+        Consultez les étapes ouvertes pour la composante {{ composante.libelle }} et chargez la liste associée.
+    {% else %}
+        Ouvrez une étape pour charger dynamiquement la liste des parcours concernés.
+    {% endif %}
+{% endset %}
+
 {% block content %}
     {% set toneMap = {
         'info': {
@@ -27,12 +39,20 @@
                     Gestion des validations DPE
                 </h2>
                 <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
-                    Ouvrez une étape pour charger dynamiquement la liste des parcours concernés.
+                    {% if composante is defined and composante is not null %}
+                        Consultez les étapes ouvertes pour la composante {{ composante.libelle }} et chargez la liste associée.
+                    {% else %}
+                        Ouvrez une étape pour charger dynamiquement la liste des parcours concernés.
+                    {% endif %}
                 </p>
             </div>
 
             <div class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-200">
-                {{ steps|length }} étapes
+                {% if composante is defined and composante is not null %}
+                    {{ composante.libelle }}
+                {% else %}
+                    {{ steps|length }} étapes
+                {% endif %}
             </div>
         </div>
 
@@ -41,11 +61,12 @@
                 {% set tone = toneMap[step.color] ?? toneMap['secondary'] %}
                 {% set statistiquesStep = statistiques[value] is defined ? statistiques[value] : null %}
                 {% set hasData = statistiquesStep is not null and (statistiquesStep.formations|length > 0 or statistiquesStep.nbParcours > 0) %}
+                {% set loadUrl = (composante is defined and composante is not null)
+                    ? path('app_validation_composante_dpe_liste', { typeValidation: value, composante: composante.id })
+                    : path('app_validation_dpe_liste', { typeValidation: value, composante: 'all' })
+                %}
 
-                <div {{ stimulus_controller('load_content', {url: path('app_validation_dpe_liste', {
-                    typeValidation: value,
-                    composante: 'all'
-                })}) }} data-action="validation:bulk-success@window->load-content#refresh">
+                <div {{ stimulus_controller('load_content', { url: loadUrl }) }} data-action="validation:bulk-success@window->load-content#refresh">
                     <div class="rounded-xl border border-secondary-200 bg-secondary-50/80 p-4 shadow-sm transition hover:border-secondary-300 dark:border-secondary-700 dark:bg-secondary-950/30 dark:hover:border-secondary-600 sm:p-5">
                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-center">
                             <div class="lg:col-span-4">
@@ -96,6 +117,4 @@
             {% endfor %}
         </div>
     </section>
-
 {% endblock %}
-

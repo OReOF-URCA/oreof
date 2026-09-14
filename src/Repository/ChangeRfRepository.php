@@ -84,6 +84,19 @@ class ChangeRfRepository extends ServiceEntityRepository
             ->groupBy('etat');
 
         return $qb->getQuery()->getArrayResult();
+    }
 
+    public function findByComposanteAndCampagneForStats(Composante $composante, CampagneCollecte $campagne): array
+    {
+        $qb = $this->createQueryBuilder('f')
+            ->select('f.etatDemande AS etat, COUNT(f.id) AS nb')
+            ->innerJoin('f.formation', 'form')
+            ->andWhere('form.composantePorteuse = :composante')
+            ->andWhere('f.campagneCollecte = :campagne')
+            ->setParameter('composante', $composante)
+            ->setParameter('campagne', $campagne)
+            ->groupBy('etat');
+
+        return $qb->getQuery()->getArrayResult();
     }
 }

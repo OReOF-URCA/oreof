@@ -1,21 +1,21 @@
 {{ component('alerte', {
     type: 'info',
-    message: (process.label~'.valide.alerte')|trans({}, 'process')|nl2br|raw
+    message: (process.label|default(etape)~'.valide.alerte')|trans({}, 'process')|nl2br|raw
 }) }}
 
 <form action="{{ path('app_validation_valide_fiche_lot', {etape:etape}) }}" method="post"
       enctype="multipart/form-data">
     <input type="hidden" name="fiches" value="{{ sFiches }}">
 
-    {% if process.hasDate %}
+    {% if process.hasDate is defined and process.hasDate %}
         <div>
-            <label for="date" class="form-label">{{ ('valide.'~process.label~'.date.label')|trans({}, 'process') }}
+            <label for="date" class="form-label">{{ ('valide.'~process.label|default(etape)~'.date.label')|trans({}, 'process') }}
                 <span class="required"></span> <i
                         class="fal fa-question-circle ms-1"
                         data-controller="tooltip"
                         data-tooltip-placement-value="bottom"
-                        aria-label="{{ ('valide.'~process.label~'.helps.date.help')|trans({}, 'process') }}"
-                        data-bs-original-title="{{ ('valide.'~process.label~'.helps.date.help')|trans({}, 'process') }}"></i></label>
+                        aria-label="{{ ('valide.'~process.label|default(etape)~'.helps.date.help')|trans({}, 'process') }}"
+                        data-bs-original-title="{{ ('valide.'~process.label|default(etape)~'.helps.date.help')|trans({}, 'process') }}"></i></label>
             <input type="date" name="date"
                    class="form-control"
                    id="date"
@@ -26,7 +26,7 @@
     <div class="mt-2">
         <button type="submit" class="btn btn-success">
             <i class="fal fa-floppy-disk"></i>
-            {{ ('btn.'~process.label~'.valide')|trans({}, 'process') }}
+            {{ ('btn.'~process.label|default(etape)~'.valide')|trans({}, 'process') }}
         </button>
     </div>
 </form>

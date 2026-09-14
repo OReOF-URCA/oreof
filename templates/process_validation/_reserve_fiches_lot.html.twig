@@ -1,32 +1,32 @@
 {{ component('alerte', {
     type: 'warning',
-    message: (process.label~'.reserve.alerte')|trans({}, 'process')|nl2br|raw
+    message: (process.label|default(etape)~'.reserve.alerte')|trans({}, 'process')|nl2br|raw
 }) }}
 
 <form action="{{ path('app_validation_reserve_fiche_lot', {etape:etape}) }}" method="post">
-    <input type="hidden" name="formations" value="{{ sFiches }}">
+    <input type="hidden" name="fiches" value="{{ sFiches }}">
 
-    {% if process.hasDate %}
+    {% if process.hasDate is defined and process.hasDate %}
     <div>
-        <label for="date" class="form-label">{{ ('reserve.'~process.label~'.date.label')|trans({}, 'process') }} <span class="required"></span> <i class="fal fa-question-circle ms-1"
+        <label for="date" class="form-label">{{ ('reserve.'~process.label|default(etape)~'.date.label')|trans({}, 'process') }} <span class="required"></span> <i class="fal fa-question-circle ms-1"
                                   data-controller="tooltip"
                                   data-tooltip-placement-value="bottom"
-                                  aria-label="{{ ('reserve.'~process.label~'.helps.date.help')|trans({}, 'process') }}"
-                                  data-bs-original-title="{{ ('reserve.'~process.label~'.helps.date.help')|trans({}, 'process') }}"></i></label>
+                                  aria-label="{{ ('reserve.'~process.label|default(etape)~'.helps.date.help')|trans({}, 'process') }}"
+                                  data-bs-original-title="{{ ('reserve.'~process.label|default(etape)~'.helps.date.help')|trans({}, 'process') }}"></i></label>
         <input type="date" name="date"
                class="form-control"
                required
                id="date"
-               value="{{ 'now'|date('Y-m-d') }}"> {# ou date déjà saisie si édition? #}
+               value="{{ 'now'|date('Y-m-d') }}">
     </div>
 {% endif %}
 
 <div>
-    <label for="argumentaire" class="form-label">{{ ('reserve.'~process.label~'.argumentaire.label')|trans({}, 'process') }} <span class="required"></span><i class="fal fa-question-circle ms-1"
+    <label for="argumentaire" class="form-label">{{ ('reserve.'~process.label|default(etape)~'.argumentaire.label')|trans({}, 'process') }} <span class="required"></span><i class="fal fa-question-circle ms-1"
                                               data-controller="tooltip"
                                               data-tooltip-placement-value="bottom"
-                                              aria-label="{{ ('reserve.'~process.label~'.helps.argumentaire.help')|trans({}, 'process') }}"
-                                              data-bs-original-title="{{ ('reserve.'~process.label~'.helps.argumentaire.help')|trans({}, 'process') }}"></i></label>
+                                              aria-label="{{ ('reserve.'~process.label|default(etape)~'.helps.argumentaire.help')|trans({}, 'process') }}"
+                                              data-bs-original-title="{{ ('reserve.'~process.label|default(etape)~'.helps.argumentaire.help')|trans({}, 'process') }}"></i></label>
     <textarea name="argumentaire"
               class="form-control"
               required
@@ -35,26 +35,26 @@
     > </textarea>
 </div>
 
-{% if process.hasReserve is iterable %}
+{% if process.hasReserve is defined and process.hasReserve is iterable %}
     {% for cas in process.hasReserve %}
         <div class="form-check">
             <input class="form-check-input" type="checkbox" value="" id="{{ cas }}">
             <label class="form-check-label" for="{{ cas }}">
-                {{ ('reserve.'~process.label~'.helps.'~cas~'.'~processData.placeTexte~'.label')|trans({}, 'process')}} <i
+                {{ ('reserve.'~process.label|default(etape)~'.helps.'~cas~'.'~processData.placeTexte)|trans({}, 'process')}} <i
                         class="fal fa-question-circle ms-1"
                         data-controller="tooltip"
                         data-tooltip-placement-value="bottom"
-                        aria-label="{{ ('reserve.'~process.label~'.helps.'~cas~'.'~processData.placeTexte~'.help')|trans({}, 'process') }}"
-                        data-bs-original-title="{{ ('reserve.'~process.label~'.helps.'~cas~'.'~processData.placeTexte~'.help')|trans({}, 'process') }}"></i>
+                        aria-label="{{ ('reserve.'~process.label|default(etape)~'.helps.'~cas~'.'~processData.placeTexte~'.help')|trans({}, 'process') }}"
+                        data-bs-original-title="{{ ('reserve.'~process.label|default(etape)~'.helps.'~cas~'.'~processData.placeTexte~'.help')|trans({}, 'process') }}"></i>
             </label>
         </div>
         <div>
-            <label for="argumentaire_{{ cas }}" class="form-label"> {{ (process.label~'.reserve.commentaire.cas.'~cas~'.'~processData.placeTexte)|trans({}, 'process') }} <span class="required"></span>
+            <label for="argumentaire_{{ cas }}" class="form-label"> {{ (process.label|default(etape)~'.reserve.commentaire.cas.'~cas~'.'~processData.placeTexte)|trans({}, 'process') }} <span class="required"></span>
                 <i class="fal fa-question-circle ms-1"
                    data-controller="tooltip"
                    data-tooltip-placement-value="bottom"
-                   aria-label="{{ (process.label~'.reserve.helps.commentaire.cas.'~cas~'.'~processData.placeTexte)|trans({}, 'process') }}"
-                   data-bs-original-title="{{ (process.label~'.reserve.helps.commentaire.cas.'~cas~'.'~processData.placeTexte)|trans({}, 'process') }}"></i>
+                   aria-label="{{ (process.label|default(etape)~'.reserve.helps.commentaire.cas.'~cas~'.'~processData.placeTexte)|trans({}, 'process') }}"
+                   data-bs-original-title="{{ (process.label|default(etape)~'.reserve.helps.commentaire.cas.'~cas~'.'~processData.placeTexte)|trans({}, 'process') }}"></i>
             </label>
             <textarea name="argumentaire_{{ cas }}"
                       class="form-control"
@@ -69,7 +69,7 @@
 <div class="mt-2">
     <button type="submit" class="btn btn-success">
         <i class="fal fa-floppy-disk"></i>
-        {{ ('btn.'~process.label~'.reserve')|trans({}, 'process') }}
+        {{ ('btn.'~process.label|default(etape)~'.reserve')|trans({}, 'process') }}
     </button>
 </div>
 </form>

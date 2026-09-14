@@ -133,9 +133,10 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
             $column = $composante->getLibelle();
 
             $children[] = MenuItem::link(
-                key: sprintf('pilotage_composante.%s.consulter_offre', $composante->getId()),
-                label: 'menu.compo.consulter_offre',
-                route: 'structure_composante_index',
+                key: sprintf('pilotage_composante.%s', $composante->getId()),
+                label: 'menu.compo.gestion_composante',
+                route: 'app_composante',
+                routeParams: ['composante' => $composante->getId()],
             )->inColumn($column);
 
             $children[] = MenuItem::link(

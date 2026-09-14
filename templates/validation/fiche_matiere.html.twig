@@ -1,96 +1,111 @@
 {% extends 'base.html.twig' %}
 
+{% set header_description %}
+    {% if composante is defined and composante is not null %}
+        Consultez les fiches matières pour la composante {{ composante.libelle }} et chargez la liste associée.
+    {% else %}
+        Ouvrez une étape pour charger dynamiquement la liste des fiches matières concernées.
+    {% endif %}
+{% endset %}
 
-{% block content %}
-    {% set toneMap = {
-        'info': {
-            'badge': 'border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-200',
-        },
-        'success': {
-            'badge': 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200',
-        },
-        'warning': {
-            'badge': 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200',
-        },
-        'danger': {
-            'badge': 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-700 dark:bg-rose-950/30 dark:text-rose-200',
-        },
-        'secondary': {
-            'badge': 'border-secondary-200 bg-secondary-50 text-secondary-700 dark:border-secondary-700 dark:bg-secondary-950/30 dark:text-secondary-200',
-        },
-    } %}
-
-    <section
-            class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div class="space-y-1">
-                <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
-                    Gestion des validations fiches matieres
-                </h2>
-                <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
-                    Ouvrez une etape pour charger dynamiquement la liste des fiches matieres concernees.
-                </p>
-            </div>
-
-            <div class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-200">
-                {{ steps|length }} etapes
-            </div>
-        </div>
-
-        <div class="space-y-3">
-            {% for value, step in steps %}
-                {% set tone = toneMap[step.color|default('secondary')] ?? toneMap['secondary'] %}
-                {% set statistiquesStep = statistiques[value] is defined ? statistiques[value] : 0 %}
-                {% set hasData = statistiquesStep > 0 %}
-
-                <div {{ stimulus_controller('load_content', {url: path('app_validation_fiche_liste', {
-                    typeValidation: value,
-                    composante: 'all'
-                })}) }}>
-                    <div class="rounded-xl border border-secondary-200 bg-secondary-50/80 p-4 shadow-sm transition hover:border-secondary-300 dark:border-secondary-700 dark:bg-secondary-950/30 dark:hover:border-secondary-600 sm:p-5">
-                        <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-center">
-                            <div class="lg:col-span-4">
-                                <p class="text-xs font-semibold uppercase tracking-widest text-secondary-400 dark:text-secondary-500">
-                                    Etape</p>
-                                <p class="mt-1 text-base font-semibold text-secondary-800 dark:text-secondary-100">
-                                    {{ step.label|trans({}, 'process') }}
-                                </p>
-                            </div>
-
-                            <div class="lg:col-span-4">
-                                <p class="text-xs font-semibold uppercase tracking-widest text-secondary-400 dark:text-secondary-500">
-                                    Nb fiches matieres</p>
-                                <div class="mt-1">
-                                    {% if hasData %}
-                                        <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ tone.badge }}">
-                                            Fiches matieres : {{ statistiquesStep }}
-                                        </span>
-                                    {% else %}
-                                        <span class="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200">
-                                            Aucun
-                                        </span>
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            <div class="lg:col-span-4 lg:flex lg:justify-end">
-                                <twig:Button
-                                        label="Details"
-                                        variant="primary"
-                                        size="sm"
-                                        icon="icon:chevron-right"
-                                        :disabled="not hasData"
-                                        dataAction="click->load-content#change"
-                                        data-load-content-value-param="{{ value }}"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div {{ stimulus_target('load_content', 'content') }} class="mt-3"></div>
-                </div>
-            {% endfor %}
-        </div>
-    </section>
-
-{% endblock %}
+ {% block content %}
+     {% set toneMap = {
+         'info': {
+             'badge': 'border-cyan-200 bg-cyan-50 text-cyan-700 dark:border-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-200',
+         },
+         'success': {
+             'badge': 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200',
+         },
+         'warning': {
+             'badge': 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200',
+         },
+         'danger': {
+             'badge': 'border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-700 dark:bg-rose-950/30 dark:text-rose-200',
+         },
+         'secondary': {
+             'badge': 'border-secondary-200 bg-secondary-50 text-secondary-700 dark:border-secondary-700 dark:bg-secondary-950/30 dark:text-secondary-200',
+         },
+     } %}
+ 
+     <section
+             class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
+         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+             <div class="space-y-1">
+                 <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
+                     Gestion des validations fiches matières
+                 </h2>
+                 <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
+                     {% if composante is defined and composante is not null %}
+                         Consultez les fiches matières pour la composante {{ composante.libelle }} et chargez la liste associée.
+                     {% else %}
+                         Ouvrez une étape pour charger dynamiquement la liste des fiches matières concernées.
+                     {% endif %}
+                 </p>
+             </div>
+ 
+             <div class="inline-flex items-center rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cyan-800 dark:border-cyan-800 dark:bg-cyan-950/30 dark:text-cyan-200">
+                 {% if composante is defined and composante is not null %}
+                     {{ composante.libelle }}
+                 {% else %}
+                     {{ steps|length }} étapes
+                 {% endif %}
+             </div>
+         </div>
+ 
+         <div class="space-y-3">
+             {% for value, step in steps %}
+                 {% set tone = toneMap[step.color|default('secondary')] ?? toneMap['secondary'] %}
+                 {% set statistiquesStep = statistiques[value] is defined ? statistiques[value] : 0 %}
+                 {% set hasData = statistiquesStep > 0 %}
+                 {% set loadUrl = (composante is defined and composante is not null)
+                     ? path('app_validation_composante_fiche_liste', { typeValidation: value, composante: composante.id })
+                     : path('app_validation_fiche_liste', { typeValidation: value, composante: 'all' })
+                 %}
+ 
+                 <div {{ stimulus_controller('load_content', { url: loadUrl }) }} data-action="validation:bulk-success@window->load-content#refresh">
+                     <div class="rounded-xl border border-secondary-200 bg-secondary-50/80 p-4 shadow-sm transition hover:border-secondary-300 dark:border-secondary-700 dark:bg-secondary-950/30 dark:hover:border-secondary-600 sm:p-5">
+                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:items-center">
+                             <div class="lg:col-span-4">
+                                 <p class="text-xs font-semibold uppercase tracking-widest text-secondary-400 dark:text-secondary-500">
+                                     Étape</p>
+                                 <p class="mt-1 text-base font-semibold text-secondary-800 dark:text-secondary-100">
+                                     {{ step.label|trans({}, 'process') }}
+                                 </p>
+                             </div>
+ 
+                             <div class="lg:col-span-4">
+                                 <p class="text-xs font-semibold uppercase tracking-widest text-secondary-400 dark:text-secondary-500">
+                                     Nb fiches matières</p>
+                                 <div class="mt-1">
+                                     {% if hasData %}
+                                         <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ tone.badge }}">
+                                             Fiches matières : {{ statistiquesStep }}
+                                         </span>
+                                     {% else %}
+                                         <span class="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200">
+                                             Aucune
+                                         </span>
+                                     {% endif %}
+                                 </div>
+                             </div>
+ 
+                             <div class="lg:col-span-4 lg:flex lg:justify-end">
+                                 <twig:Button
+                                         label="Détails"
+                                         variant="primary"
+                                         size="sm"
+                                         icon="icon:chevron-right"
+                                         :disabled="not hasData"
+                                         dataAction="click->load-content#change"
+                                         data-load-content-value-param="{{ value }}"
+                                 />
+                             </div>
+                         </div>
+                     </div>
+                     <div {{ stimulus_target('load_content', 'content') }} class="mt-3"></div>
+                 </div>
+             {% endfor %}
+         </div>
+     </section>
+ {% endblock %}
 

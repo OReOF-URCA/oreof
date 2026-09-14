@@ -478,7 +478,21 @@ class FicheMatiereRepository extends ServiceEntityRepository
             ->groupBy('etat');
 
         return $qb->getQuery()->getArrayResult();
+    }
 
+    public function findByComposanteAndCampagneForStats(Composante $composante, CampagneCollecte $campagne): array
+    {
+        $qb = $this->createQueryBuilder('f')
+            ->select('f.etatFiche AS etat, COUNT(f.id) AS nb')
+            ->join(Parcours::class, 'p', 'WITH', 'f.parcours = p.id')
+            ->join(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
+            ->andWhere('fo.composantePorteuse = :composante')
+            ->andWhere('f.campagneCollecte = :campagne')
+            ->setParameter('composante', $composante)
+            ->setParameter('campagne', $campagne)
+            ->groupBy('etat');
+
+        return $qb->getQuery()->getArrayResult();
     }
 
     public function findFromAnneeUniversitaire(int $idCampagneCollecte) : array {

@@ -46,6 +46,16 @@ class ValidationProcessChangeRf extends AbstractValidationProcess
         $this->process = $data;
     }
 
+    public const ETAPES_COMPOSANTE = [
+        'demande_initialisee',
+        'soumis_conseil',
+    ];
+
+    public function getProcessComposante(): array
+    {
+        return array_intersect_key($this->processAll, array_flip(self::ETAPES_COMPOSANTE));
+    }
+
     public function getMetaFromTransition(string $transition): array
     {
         $transitions = $this->changeRfWorkflow->getDefinition()->getTransitions();

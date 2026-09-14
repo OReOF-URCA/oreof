@@ -16,6 +16,7 @@ use App\Classes\ValidationProcessFicheMatiere;
 use App\Entity\DpeParcours;
 use App\Entity\ChangeRf;
 use App\Enums\TypeRfEnum;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeParcoursRepository;
@@ -79,6 +80,7 @@ class ValidationAdminController extends BaseController
     }
 
     #[Route('dpe', name: 'dpe_index')]
+    #[Breadcrumb(label: 'menu.validation.dpe')]
     public function dpe(
         DpeParcoursRepository $dpeParcoursRepository,
         ComposanteRepository  $composanteRepository,
@@ -112,6 +114,7 @@ class ValidationAdminController extends BaseController
     }
 
     #[Route('change-rf', name: 'change_rf_index')]
+    #[Breadcrumb(label: 'menu.validation.change_rf')]
     public function changeRf(
         ChangeRfRepository $changeRfRepository,
         Request                   $request,
@@ -126,35 +129,31 @@ class ValidationAdminController extends BaseController
         foreach ($fiches as $fiche) {
             $keys = array_keys($fiche['etat'] ?? []);
             $etat = $keys[0] ?? null;
-            $statistiques[$etat] = $fiche['nb'];
+            $statistiques[$etat] = (int)($fiche['nb'] ?? 0);
         }
 
         return $this->render('validation/change_rf.html.twig', [
-            'steps' => $validationProcessChangeRf->getProcessAll(),//faire un getProcesssComposante pour filtrer par niveau composante,
+            'steps' => $validationProcessChangeRf->getProcessAll(),
             'typeValidation' => $typeValidation,
             'statistiques' => $statistiques
         ]);
     }
 
     #[Route('fiche-matiere', name: 'fiche_index')]
+    #[Breadcrumb(label: 'menu.validation.fiche_matiere')]
     public function ficheMatiere(
         FicheMatiereRepository $ficheMatiereRepository,
         Request                       $request,
         ValidationProcessFicheMatiere $validationProcessFicheMatiere,
     ): Response
     {
-
         $statistiques = [];
-        foreach ($validationProcessFicheMatiere->getProcess() as $key => $etape) {
-            $statistiques[$key] = 0;
-        }
 
         $fiches = $ficheMatiereRepository->findByCampagneCollecteForStats($this->getCampagneCollecte());
-        //dump($fiches);
         foreach ($fiches as $fiche) {
             $keys = array_keys($fiche['etat'] ?? []);
             $etat = $keys[0] ?? null;
-            $statistiques[$etat] = $fiche['nb'];
+            $statistiques[$etat] = (int)($fiche['nb'] ?? 0);
         }
 
         return $this->render('validation/fiche_matiere.html.twig', [
@@ -450,6 +449,7 @@ class ValidationAdminController extends BaseController
             'process' => $process,
             'fiches' => $fiches,
             'etape' => $typeValidation ?? null,
+            'oneFiche' => $fiches[0] ?? null,
         ]);
     }
 }
