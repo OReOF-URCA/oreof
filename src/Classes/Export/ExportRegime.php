@@ -64,7 +64,7 @@ class ExportRegime implements ExportInterface
         $this->excelWriter->writeCellXY(18, 1, 'RNCP');
         $this->excelWriter->writeCellXY(19, 1, 'Validation CFVU');
         $this->excelWriter->writeCellXY((20 + $countCol), 1, 'Identifiant');
-        $this->excelWriter->writeCellXY((21 + $countCol), 1, 'Type de Parcours');
+        $this->excelWriter->writeCellXY((21 + $countCol), 1, 'Type du Parcours');
         $i = 0;
         foreach (RegimeInscriptionEnum::cases() as $regime) {
             $this->excelWriter->writeCellXY(20 + $i, 1, $regime->value);
