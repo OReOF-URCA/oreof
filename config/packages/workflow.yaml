@@ -844,7 +844,7 @@ framework:
             color: 'success'
         attente_pv:
           metadata:
-            process: false
+            process: true
             label: 'validation.attente_pv'
             color: 'warning'
             icon: 'ph:hourglass'
@@ -856,7 +856,7 @@ framework:
             icon: 'ph:check'
         verification_pv:
           metadata:
-            process: false
+            process: true
             label: 'validation.verification_pv'
             color: 'warning'
             icon: 'ph:check'
@@ -877,6 +877,8 @@ framework:
               attribute: 'CHANGE_RF_WORKFLOW_TRANSITION'
               subject: 'operation'
               reason: 'workflow.authorization.change_rf.denied'
+            form: &change_rf_operation_form
+              type: 'App\Form\ChangeRfValidationType'
         valider_ses:
           from: 'soumis_ses'
           to: 'soumis_cfvu'
@@ -885,6 +887,7 @@ framework:
             btn: success
             icon: ph:check
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
         reserver_ses:
           from: 'soumis_ses'
           to: 'soumis_conseil'
@@ -894,6 +897,7 @@ framework:
             icon: material-symbols:fact-check-outline-sharp
             hasArgumentaire: true
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
             context: &change_rf_reserve_context
               aliases:
                 argumentaire: motif
@@ -906,6 +910,7 @@ framework:
             icon: ph:check
             hasDate: true
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
         valider_cfvu_attente_pv:
           from: 'soumis_cfvu'
           to: 'attente_pv'
@@ -915,9 +920,10 @@ framework:
             icon: ph:check
             hasDate: true
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
         reserver_cfvu:
           from: 'soumis_cfvu'
-          to: 'soumis_ses'
+          to: 'soumis_conseil'
           metadata:
             type: reserver
             btn: warning
@@ -925,6 +931,7 @@ framework:
             hasArgumentaire: true
             hasDate: true
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
             context: *change_rf_reserve_context
         deposer_pv:
           from: 'attente_pv'
@@ -935,6 +942,7 @@ framework:
             icon: ph:check
             hasUpload: true
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
         valider_pv:
           from: 'verification_pv'
           to: 'effectuee'
@@ -943,6 +951,7 @@ framework:
             btn: success
             icon: ph:check
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
 
     dpeFormation:
       type: 'workflow'

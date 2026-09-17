@@ -85,7 +85,7 @@ class ChangeRfProcess extends AbstractProcess
             $changeRf,
             $user,
             $place,
-            $request,
+            $request instanceof Request ? $request->request->all() : [],
             $fileName,
             $originalFileName,
         );
@@ -95,10 +95,10 @@ class ChangeRfProcess extends AbstractProcess
         ChangeRf $changeRf,
         UserInterface $user,
         string $previousPlace,
-        Request $request,
+        array $input = [],
         ?string $fileName = null,
         ?string $originalFileName = null,
-    ): Response {
+    ): void {
         //vérifier la place pour savoir si on doit envoyer une notification
         $newPlace = array_keys($this->changeRfWorkflow->getMarking($changeRf)->getPlaces())[0];
         if ($newPlace === 'soumis_cfvu') { // on applique les changements dès qu'on est soumis au CFVU
@@ -109,7 +109,7 @@ class ChangeRfProcess extends AbstractProcess
             $changeRf,
             $user,
             $previousPlace,
-            $request,
+            $input,
             'valide',
             $fileName,
             $originalFileName,
@@ -120,9 +120,9 @@ class ChangeRfProcess extends AbstractProcess
         ChangeRf $changeRf,
         UserInterface $user,
         string $previousPlace,
-        Request $request,
-    ): Response {
-        return $this->completeChangeRf($changeRf, $user, $previousPlace, $request, 'reserve');
+        array $input = [],
+    ): void {
+        $this->completeChangeRf($changeRf, $user, $previousPlace, $input, 'reserve');
     }
 
     public function reserveChangeRf(ChangeRf $changeRf, UserInterface $user, string|array $transition, $request): Response
@@ -131,7 +131,13 @@ class ChangeRfProcess extends AbstractProcess
 
         $this->changeRfWorkflow->apply($changeRf, $transition, ['motif' => $request->request->get('argumentaire')]);
         $this->entityManager->flush();
-        return $this->dispatchEventChangeRf($changeRf, $user, $place, $request, 'reserve');
+        return $this->dispatchEventChangeRf(
+            $changeRf,
+            $user,
+            $place,
+            $request instanceof Request ? $request->request->all() : [],
+            'reserve',
+        );
     }
 
     //todo: traitement de la date de prise de fonction du RF et impact sur N+1 ? selon la date ? voir si pas fait en V1 ?
@@ -140,13 +146,13 @@ class ChangeRfProcess extends AbstractProcess
         ChangeRf      $changeRf,
         UserInterface $user,
         string        $place,
-        Request       $request,
+        array         $input,
         string        $etat,
         ?string       $fileName = null,
         ?string       $originalFileName = null,
     ): Response
     {
-        $histoEvent = new HistoriqueChangeRfEvent($changeRf, $user, $place, $etat, $request, $fileName, $originalFileName);
+        $histoEvent = new HistoriqueChangeRfEvent($changeRf, $user, $place, $etat, $input, $fileName, $originalFileName);
         $this->eventDispatcher->dispatch($histoEvent, HistoriqueChangeRfEvent::ADD_HISTORIQUE_CHANGE_RF);
         return JsonReponse::success($this->translator->trans('changeRf.'.$etat.'.' . $place . '.flash.success', [], 'process'));
     }
@@ -155,18 +161,18 @@ class ChangeRfProcess extends AbstractProcess
         ChangeRf $changeRf,
         UserInterface $user,
         string $previousPlace,
-        Request $request,
+        array $input,
         string $historyState,
         ?string $fileName = null,
         ?string $originalFileName = null,
-    ): Response {
+    ): void {
         $this->entityManager->flush();
 
-        return $this->dispatchEventChangeRf(
+        $this->dispatchEventChangeRf(
             $changeRf,
             $user,
             $previousPlace,
-            $request,
+            $input,
             $historyState,
             $fileName,
             $originalFileName,

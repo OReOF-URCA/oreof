@@ -307,48 +307,50 @@ class HistoriqueSubscriber implements EventSubscriberInterface
     }
     public function createHistoriqueFormationChangeRf(HistoriqueChangeRfEvent $event): void
     {
-        $request = $event->getRequest();
-        $fileName = $event->getFileName();
-        $originalFileName = $event->getOriginalFileName();
+        $input = $event->getInput();
         $demande = $event->getChangeRf();
         $formation = $demande->getFormation();
-
-        if ($request === null) {
-            throw new Exception('Pas de requete');
-        }
 
         $histo = new HistoriqueFormation();
         $histo->setFormation($formation);
         $histo->setChangeRf($demande);
-        $histo->setDate($this->getDateTime($request));
+
+        $date = $input['date'] ?? null;
+        if ($date instanceof DateTimeInterface) {
+            $histo->setDate($date);
+        } elseif (is_string($date) && '' !== $date) {
+            $histo->setDate(Tools::convertDate($date));
+        } else {
+            $histo->setDate(null);
+        }
+
         $histo->setUser($this->resolveUser($event->getUser()));
         $histo->setEtape('changeRf.'.$event->getEtape());
-        $histo->setCommentaire($this->getCommentaire($request));
+        $histo->setCommentaire((string) ($input['argumentaire'] ?? $input['motif'] ?? ''));
         $histo->setEtat($event->getEtat());
 
+        $tab = [];
         foreach ($this->cases as $cas) {
-            if ($request->request->has($cas)) {
-                $tab[$cas] = $request->request->get($cas);
-                if ($cas === 'laisserPasser') {
+            if (array_key_exists($cas, $input)) {
+                $tab[$cas] = $input[$cas];
+                if ('laisserPasser' === $cas) {
                     $histo->setEtat('laisserPasser');
                 }
             }
 
-            if ($request->request->has('argumentaire_'.$cas)) {
-                $tab['argumentaire_'.$cas] = $request->request->get('argumentaire_'.$cas);
+            if (array_key_exists('argumentaire_'.$cas, $input)) {
+                $tab['argumentaire_'.$cas] = $input['argumentaire_'.$cas];
             }
         }
 
-        //upload
-        if ($fileName !== null && $fileName !== '') {
-            $tab['fichier'] = $fileName;
-            if ($originalFileName !== null && $originalFileName !== '') {
-                $tab['fichier_original'] = $originalFileName;
+        if (null !== $event->getFileName() && '' !== $event->getFileName()) {
+            $tab['fichier'] = $event->getFileName();
+            if (null !== $event->getOriginalFileName() && '' !== $event->getOriginalFileName()) {
+                $tab['fichier_original'] = $event->getOriginalFileName();
             }
         }
 
-        $histo->setComplements($tab ?? []);
-
+        $histo->setComplements($tab);
         $this->entityManager->persist($histo);
         $this->entityManager->flush();
     }

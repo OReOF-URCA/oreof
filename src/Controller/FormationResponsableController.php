@@ -12,7 +12,6 @@ use App\Enums\EtatChangeRfEnum;
 use App\Enums\TypeRfEnum;
 use App\Exception\FileUploadException;
 use App\Form\ChangeRfFormationType;
-use App\Form\ChangeRfValidationType;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
 use App\Service\DataTableBuilder;
@@ -22,6 +21,7 @@ use App\Utils\Tools;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -309,7 +309,7 @@ class FormationResponsableController extends BaseController
         $process = $this->validationProcess->getEtape($etape);
         $processData = $this->changeRfProcess->etatChangeRf($demande, $process);
 
-        $form = $this->createForm(ChangeRfValidationType::class, null, [
+        $form = $this->createForm($this->resolveOperationFormType($meta), null, [
             'meta' => $meta,
             'transition' => $transition,
             'process' => $process,
@@ -340,18 +340,6 @@ class FormationResponsableController extends BaseController
                 $originalFileName = $upload->getOriginalFilename();
             }
 
-            // Compatibilité temporaire avec les subscribers d'historique qui lisent encore la Request.
-            foreach ($formData as $field => $value) {
-                if ('file' === $field || null === $value) {
-                    continue;
-                }
-
-                $request->request->set(
-                    $field,
-                    $value instanceof \DateTimeInterface ? $value->format('Y-m-d') : $value,
-                );
-            }
-
             $user = $this->getUser();
             if (!$user instanceof UserInterface) {
                 throw new AccessDeniedException('Un utilisateur authentifié est requis.');
@@ -371,7 +359,6 @@ class FormationResponsableController extends BaseController
                         input: $formData,
                     )->withRuntime([
                         'previous_place' => (string) $previousPlace,
-                        'request' => $request,
                         'file_name' => $fileName,
                         'original_file_name' => $originalFileName,
                     ]),
@@ -448,7 +435,7 @@ class FormationResponsableController extends BaseController
         }
 
         $meta = $this->validationProcess->getMetaFromTransition($transition);
-        $form = $this->createForm(ChangeRfValidationType::class, null, [
+        $form = $this->createForm($this->resolveOperationFormType($meta), null, [
             'meta' => $meta,
             'transition' => $transition,
             'bulk' => true,
@@ -476,14 +463,6 @@ class FormationResponsableController extends BaseController
 
         $ids = array_filter(explode(',', (string) ($formData['demandes'] ?? '')));
         unset($formData['demandes'], $formData['file']);
-        foreach ($formData as $field => $value) {
-            if (null !== $value) {
-                $request->request->set(
-                    $field,
-                    $value instanceof \DateTimeInterface ? $value->format('Y-m-d') : $value,
-                );
-            }
-        }
         $processed = 0;
         $rejected = 0;
 
@@ -503,7 +482,6 @@ class FormationResponsableController extends BaseController
                     input: $formData,
                 )->withRuntime([
                     'previous_place' => (string) $previousPlace,
-                    'request' => $request,
                     'file_name' => $fileName,
                     'original_file_name' => $originalFileName,
                 ]);
@@ -541,7 +519,7 @@ class FormationResponsableController extends BaseController
         //on récupère la transition concernée et sa configuration pour construire le formulaire
         $meta = $this->validationProcess->getMetaFromTransition($transition);
         $demandes = (string) $request->query->get('parcours', '');
-        $form = $this->createForm(ChangeRfValidationType::class, null, [
+        $form = $this->createForm($this->resolveOperationFormType($meta), null, [
             'meta' => $meta,
             'transition' => $transition,
             'bulk' => true,
@@ -574,60 +552,45 @@ class FormationResponsableController extends BaseController
         \App\Entity\ChangeRf $demande,
         TurboStreamResponseFactory $turboStream,
     ): Response {
-
-        if ($demande === null) {
-            return JsonReponse::error('Demande non trouvée');
-        }
-
         $inspection = $this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition);
         if (!$inspection->canExecute()) {
-            return $this->operationErrorResponse(
-                $turboStream,
-                'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.',
-            );
+            return $this->operationErrorResponse($turboStream, 'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
         }
 
         $meta = $this->validationProcess->getMetaFromTransition($transition);
-
         $process = $this->validationProcess->getEtape($etape);
         $processData = $this->changeRfProcess->etatChangeRf($demande, $process);
+        $form = $this->createForm($this->resolveOperationFormType($meta), null, [
+            'meta' => $meta,
+            'transition' => $transition,
+            'process' => $process,
+            'processData' => $processData,
+            'action' => $this->generateUrl('app_validation_change_rf_reserver', [
+                'transition' => $transition,
+                'etape' => $etape,
+                'demande' => $demande->getId(),
+            ]),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
 
-        if ($request->isMethod('POST')) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $user = $this->getUser();
             if (!$user instanceof UserInterface) {
                 throw new AccessDeniedException('Un utilisateur authentifié est requis.');
             }
 
+            $formData = (array) $form->getData();
             $previousPlace = array_key_first($this->changeRfWorkflow->getMarking($demande)->getPlaces());
-            $argumentaire = trim((string) $request->request->get('argumentaire', ''));
-            if ('' === $argumentaire) {
-                return JsonReponse::error('L’argumentaire est obligatoire.');
-            }
-
-            $input = ['argumentaire' => $argumentaire];
-            if (($meta['hasDate'] ?? false) && (!$request->request->has('date') || '' === (string) $request->request->get('date'))) {
-                return JsonReponse::error('La date est obligatoire.');
-            }
-
-            if ($request->request->has('date') && '' !== (string) $request->request->get('date')) {
-                $input['date'] = Tools::convertDate((string) $request->request->get('date'));
-            }
 
             try {
-                $this->operationExecutor->execute(
-                    $this->changeRfWorkflow,
-                    $demande,
-                    $transition,
-                    $this->operationContextNormalizer->normalize(
-                        workflow: $this->changeRfWorkflow,
-                        transitionName: $transition,
-                        actor: $user,
-                        input: $input,
-                    )->withRuntime([
-                        'previous_place' => (string) $previousPlace,
-                        'request' => $request,
-                    ]),
-                );
+                $context = $this->operationContextNormalizer->normalize(
+                    workflow: $this->changeRfWorkflow,
+                    transitionName: $transition,
+                    actor: $user,
+                    input: $formData,
+                )->withRuntime(['previous_place' => (string) $previousPlace]);
+                $this->operationExecutor->execute($this->changeRfWorkflow, $demande, $transition, $context);
             } catch (OperationNotExecutableException) {
                 return $this->operationErrorResponse($turboStream, 'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
             } catch (\Throwable $exception) {
@@ -640,31 +603,40 @@ class FormationResponsableController extends BaseController
                 return $this->operationErrorResponse($turboStream, 'La transition n’a pas pu être appliquée : '.$exception->getMessage());
             }
 
-            if ($this->isTurboFrameRequest()) {
-                return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
-                    'toastMessage' => 'La demande a bien été réservée.',
-                    'formation' => $demande->getFormation(),
-                ]);
-            }
-
-            return JsonReponse::success('La demande a bien été réservée.');
+            return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
+                'toastMessage' => 'La demande a bien été réservée.',
+                'formation' => $demande->getFormation(),
+            ]);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
             'Émettre une réserve',
-            $demande->getFormation() !== null
-                ? 'Dans : formation '.$demande->getFormation()->getDisplay()
-                : null,
-            'formation_responsable/_reserve.html.twig',
+            null !== $demande->getFormation() ? 'Dans : formation '.$demande->getFormation()->getDisplay() : null,
+            'formation_responsable/_valide.html.twig',
             [
                 'demande' => $demande,
                 'process' => $process,
                 'etape' => $etape,
-                'processData' => $processData ?? null,
+                'processData' => $processData,
                 'meta' => $meta,
                 'transition' => $transition,
+                'form' => $form->createView(),
             ],
+            '_ui/_footer_submit_cancel.html.twig',
+            [],
+            $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK,
         );
+    }
+
+    /** @param array<string, mixed> $metadata */
+    private function resolveOperationFormType(array $metadata): string
+    {
+        $formType = $metadata['form']['type'] ?? null;
+        if (!is_string($formType) || !is_subclass_of($formType, AbstractType::class)) {
+            throw new \LogicException('A valid form.type metadata entry is required for this workflow operation.');
+        }
+
+        return $formType;
     }
 
     private function operationErrorResponse(TurboStreamResponseFactory $turboStream, string $message): Response

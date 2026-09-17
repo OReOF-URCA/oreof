@@ -7,7 +7,6 @@ use App\Entity\ChangeRf;
 use Dannebicque\WorkflowOperationsBundle\Contract\OperationCompletionHandlerInterface;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationContext;
 use Dannebicque\WorkflowOperationsBundle\Model\WorkflowOperation;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 final readonly class ChangeRfOperationCompletionHandler implements OperationCompletionHandlerInterface
@@ -30,9 +29,8 @@ final readonly class ChangeRfOperationCompletionHandler implements OperationComp
             throw new \LogicException('A ChangeRf operation requires a ChangeRf subject and an authenticated actor.');
         }
 
-        $request = $context->runtime['request'] ?? null;
         $previousPlace = $context->runtime['previous_place'] ?? null;
-        if (!$request instanceof Request || !is_string($previousPlace) || '' === $previousPlace) {
+        if (!is_string($previousPlace) || '' === $previousPlace) {
             throw new \LogicException('The ChangeRf completion context is incomplete.');
         }
 
@@ -41,7 +39,7 @@ final readonly class ChangeRfOperationCompletionHandler implements OperationComp
                 $subject,
                 $context->actor,
                 $previousPlace,
-                $request,
+                $context->input,
             );
 
             return;
@@ -51,7 +49,7 @@ final readonly class ChangeRfOperationCompletionHandler implements OperationComp
             $subject,
             $context->actor,
             $previousPlace,
-            $request,
+            $context->input,
             $context->runtime['file_name'] ?? null,
             $context->runtime['original_file_name'] ?? null,
         );
