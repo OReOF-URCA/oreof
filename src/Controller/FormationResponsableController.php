@@ -99,8 +99,8 @@ class FormationResponsableController extends BaseController
             $newRf->setDatePriseFonction($datas->getDatePriseFonction());
             $newRf->setCommentaire($commentaire);
             $newRf->setDateDemande(new DateTime());
-            //initialiser le marking du workflow
-            $this->changeRfWorkflow->apply($newRf, 'effectuer_demande');
+            // Une nouvelle demande est immédiatement soumise au conseil.
+            $newRf->setEtatDemande(['soumis_conseil' => 1]);
             $newRf->setAncienResponsable($oldResp);
 
             $this->entityManager->persist($newRf);

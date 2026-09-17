@@ -815,11 +815,12 @@ framework:
         property: 'etatDemande'
       supports:
         - App\Entity\ChangeRf
-      initial_marking: 'demande_initialisee'
+      initial_marking: 'soumis_conseil'
       places:
+        # État conservé uniquement pour reprendre les anciennes demandes déjà enregistrées.
         demande_initialisee:
           metadata:
-            process: true
+            process: false
             label: 'validation.demande_initialisee'
             color: 'info'
             icon: 'mdi:people-check'
@@ -886,7 +887,7 @@ framework:
             authorization: *change_rf_authorization
         reserver_ses:
           from: 'soumis_ses'
-          to: 'demande_initialisee'
+          to: 'soumis_conseil'
           metadata:
             type: reserver
             btn: warning
@@ -916,7 +917,7 @@ framework:
             authorization: *change_rf_authorization
         reserver_cfvu:
           from: 'soumis_cfvu'
-          to: 'demande_initialisee'
+          to: 'soumis_ses'
           metadata:
             type: reserver
             btn: warning
