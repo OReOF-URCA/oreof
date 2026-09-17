@@ -45,6 +45,37 @@
     </template>
 </turbo-stream>
 
+<turbo-stream action="replace" target="configurer_tronc_commun_block">
+    <template>
+        <div id="configurer_tronc_commun_block" class="mt-4 p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/50 text-sm shadow-xs">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <div class="flex items-center gap-2 font-semibold text-indigo-950">
+                        <twig:UX:Icon name="ph:users-three-bold" class="h-5 w-5 text-indigo-600" />
+                        <span>Tronc commun de la formation</span>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-0.5">
+                        Cochez les années communes à l'ensemble des parcours de cette mention / formation.
+                    </p>
+                </div>
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    {% for anneeOrdre in formation.anneesOrdres %}
+                        {% set isTc = formation.isAnneeTroncCommun(anneeOrdre) %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border {{ isTc ? 'bg-indigo-600 border-indigo-600 text-white shadow-xs font-semibold' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 font-medium' }} transition-colors cursor-pointer text-xs select-none">
+                            <input type="checkbox"
+                                   name="tronc_commun_annee_{{ anneeOrdre }}"
+                                   value="1"
+                                   {{ isTc ? 'checked' : '' }}
+                                   class="rounded text-indigo-600 focus:ring-indigo-500">
+                            <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ anneeOrdre }} (Tronc commun)</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </template>
+</turbo-stream>
+
 {% for parcours in formation.parcours %}
     {% set statParcours = tabStatistiques['parcours'][parcours.id] %}
     <turbo-stream action="replace" target="parcours_{{ parcours.id }}_stats">
@@ -72,6 +103,7 @@
                 </div>
             </div>
         </template>
+    </turbo-stream>
     <turbo-stream action="replace" target="parcours_{{ parcours.id }}_badge">
         <template>
             <span id="parcours_{{ parcours.id }}_badge" class="mr-2">
@@ -108,6 +140,7 @@
                     {{ include('offre_v2/_configurer_annee.html.twig', {
                         'annee': matchedAnnee,
                         'parcours': matchedParcours,
+                        'formation': formation,
                         'typeDiplome': typeDiplome,
                         'comparaison': comparaison,
                         'plateformes': plateformes

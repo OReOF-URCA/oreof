@@ -588,6 +588,121 @@ class Formation
         return $this;
     }
 
+    public function isAnneeTroncCommun(int $anneeOrdre): bool
+    {
+        $struct = $this->getStructureSemestres();
+        if (isset($struct['annees_tronc_commun']) && is_array($struct['annees_tronc_commun'])) {
+            if (in_array($anneeOrdre, array_map('intval', $struct['annees_tronc_commun']), true)) {
+                return true;
+            }
+        }
+        if (!empty($struct['annee_' . $anneeOrdre])) {
+            return true;
+        }
+        $s1 = ($anneeOrdre * 2) - 1;
+        $s2 = $anneeOrdre * 2;
+        if ((isset($struct[$s1]) && $struct[$s1] === 'tronc_commun') || (isset($struct[$s2]) && $struct[$s2] === 'tronc_commun')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function setAnneeTroncCommun(int $anneeOrdre, bool $isTroncCommun): self
+    {
+        $struct = $this->getStructureSemestres();
+        $annees = $struct['annees_tronc_commun'] ?? [];
+        if (!is_array($annees)) {
+            $annees = [];
+        }
+        $annees = array_map('intval', $annees);
+
+        if ($isTroncCommun) {
+            if (!in_array($anneeOrdre, $annees, true)) {
+                $annees[] = $anneeOrdre;
+            }
+            $struct['annee_' . $anneeOrdre] = true;
+            $struct[($anneeOrdre * 2) - 1] = 'tronc_commun';
+            $struct[$anneeOrdre * 2] = 'tronc_commun';
+        } else {
+            $annees = array_values(array_filter($annees, fn($a) => $a !== $anneeOrdre));
+            unset($struct['annee_' . $anneeOrdre]);
+            unset($struct[($anneeOrdre * 2) - 1]);
+            unset($struct[$anneeOrdre * 2]);
+        }
+
+        $struct['annees_tronc_commun'] = $annees;
+        $this->setStructureSemestres($struct);
+
+        return $this;
+    }
+
+    public function getAnneesTroncCommun(): array
+    {
+        $struct = $this->getStructureSemestres();
+        $res = [];
+        if (isset($struct['annees_tronc_commun']) && is_array($struct['annees_tronc_commun'])) {
+            $res = array_map('intval', $struct['annees_tronc_commun']);
+        }
+        foreach ($this->getAnneesOrdres() as $ordre) {
+            if (!in_array($ordre, $res, true) && $this->isAnneeTroncCommun($ordre)) {
+                $res[] = $ordre;
+            }
+        }
+        sort($res);
+
+        return $res;
+    }
+
+    public function getAnneesOrdres(): array
+    {
+        $ordres = [];
+        foreach ($this->getParcours() as $parcours) {
+            foreach ($parcours->getAnnees() as $annee) {
+                if ($annee->getOrdre() !== null && !in_array($annee->getOrdre(), $ordres, true)) {
+                    $ordres[] = $annee->getOrdre();
+                }
+            }
+        }
+        if (empty($ordres)) {
+            $nbAnnees = (int)ceil(($this->getTypeDiplome()?->getSemestreFin() ?? 6) / 2);
+            for ($i = 1; $i <= max(1, $nbAnnees); $i++) {
+                $ordres[] = $i;
+            }
+        }
+        sort($ordres);
+
+        return $ordres;
+    }
+
+    public function getCapaciteCalculee(): int
+    {
+        $capacite = 0;
+        $tcAnneesCounted = [];
+
+        foreach ($this->getParcours() as $parcours) {
+            if (!$parcours->isOuvert()) {
+                continue;
+            }
+            foreach ($parcours->getAnnees() as $annee) {
+                if (!$annee->isOuvert()) {
+                    continue;
+                }
+                $ordre = $annee->getOrdre();
+                if ($ordre !== null && $this->isAnneeTroncCommun($ordre)) {
+                    if (!isset($tcAnneesCounted[$ordre])) {
+                        $capacite += $annee->getCapaciteAccueil();
+                        $tcAnneesCounted[$ordre] = true;
+                    }
+                } else {
+                    $capacite += $annee->getCapaciteAccueil();
+                }
+            }
+        }
+
+        return $capacite;
+    }
+
     /**
      * @return Collection<int, Parcours>
      */
@@ -1182,13 +1297,12 @@ class Formation
 
     public function getCapacite(): int
     {
-        // si capacite accueil définie sur parcours, on retour cette valeur, sinon somme des capacités des parcours
-
+        // si capacite accueil définie sur parcours, on retour cette valeur, sinon somme des capacités des parcours sans doublon de tronc commun
         if ($this->capaciteAccueil !== null && $this->capaciteAccueil > 0) {
             return $this->capaciteAccueil;
         }
 
-        return array_sum(array_map(fn($parcours) => $parcours->getCapaciteAccueil(), $this->getParcours()->toArray()));
+        return $this->getCapaciteCalculee();
     }
 
     /**
