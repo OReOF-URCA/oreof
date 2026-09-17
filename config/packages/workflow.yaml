@@ -180,6 +180,9 @@ framework:
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
             handler: "reserver_commentaire"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               fields:
                 - name: argumentaire
@@ -214,6 +217,9 @@ framework:
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
             handler: "reserver_commentaire"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               fields:
                 - name: argumentaire
@@ -237,6 +243,9 @@ framework:
             button_class: 'success'
             button_icon: 'ph:check'
             handler: "valider_conseil"
+            context:
+              aliases:
+                dateConseil: date
             form:
               fields:
                 - name: dateConseil
@@ -262,6 +271,10 @@ framework:
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
             handler: "reserver_conseil"
+            context:
+              aliases:
+                argumentaire: motif
+                dateConseil: date
             form:
               fields:
                 - name: argumentaire
@@ -300,6 +313,9 @@ framework:
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
             handler: "reserver_commentaire"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               fields:
                 - name: argumentaire
@@ -334,6 +350,10 @@ framework:
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
             handler: "refuser_commentaire_date"
+            context:
+              aliases:
+                argumentaire: motif
+                dateCfvu: date
             form:
               fields:
                 - name: argumentaire
@@ -357,6 +377,10 @@ framework:
             button_class: 'success'
             button_icon: 'ph:check'
             handler: "valider_reserve_date"
+            context:
+              aliases:
+                argumentaire: motif
+                dateCfvu: date
             form:
               fields:
                 - name: argumentaire
@@ -377,6 +401,9 @@ framework:
             button_class: 'success'
             button_icon: 'ph:check'
             handler: "valider_commentaire"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               fields:
                 - name: argumentaire
@@ -430,6 +457,9 @@ framework:
             button_class: 'success'
             button_icon: 'mdi:stamper'
             handler: "valider_date"
+            context:
+              aliases:
+                dateConseil: date
             form:
               fields:
                 - name: dateConseil
@@ -445,6 +475,9 @@ framework:
             button_class: 'success'
             button_icon: 'flowbite:bullhorn-outline'
             handler: "valider_date"
+            context:
+              aliases:
+                datePublication: date
             form:
               fields:
                 - name: datePublication
@@ -494,6 +527,9 @@ framework:
             button_icon: 'flowbite:undo-outline'
             description: 'Relancer le parcours pour la nouvelle année'
             handler: "valider"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               fields: [ ]
         #        reouvrir_tacite:
@@ -553,6 +589,9 @@ framework:
             button_icon: 'icon:edit'
             type: 'reouvrir'
             handler: "reouvrir_sans_cfvu"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               title: "Réouvrir sans passage en CFVU"
               submit_label: "Valider la demande"
@@ -600,6 +639,9 @@ framework:
             button_icon: 'icon:edit'
             type: 'reouvrir'
             handler: "reouvrir_sans_cfvu"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               title: "Réouvrir sans passage en CFVU"
               submit_label: "Valider la demande"
@@ -622,6 +664,9 @@ framework:
             button_icon: 'flowbite:undo-outline'
             type: 'reouvrir'
             handler: "reouvrir_avant_publie"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               title: "Réouvrir avant publication"
               submit_label: "Valider la demande"
