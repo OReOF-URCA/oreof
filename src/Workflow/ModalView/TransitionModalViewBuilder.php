@@ -14,11 +14,13 @@ use App\Entity\DpeParcours;
 use Dannebicque\WorkflowOperationsBundle\Model\BlockerSeverity;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationStatus;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Workflow\WorkflowInterface;
 
 final class TransitionModalViewBuilder
 {
     public function __construct(
+        #[Target('dpeParcours')]
         private readonly WorkflowInterface $dpeParcoursWorkflow,
         private readonly WorkflowOperationInspector $operationInspector,
     )
