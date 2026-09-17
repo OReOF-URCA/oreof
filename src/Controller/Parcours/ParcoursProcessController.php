@@ -240,7 +240,6 @@ class ParcoursProcessController extends BaseController
                             transitionName: $transition,
                             actor: $user,
                             input: $formData,
-                            metadata: $this->normalizeDpeWorkflowContext($formData),
                         ),
                     );
                     // l'étape c'est la clé du tableau $dpeParcours->getEtatValidation()
@@ -503,31 +502,6 @@ class ParcoursProcessController extends BaseController
         }
 
         return [];
-    }
-
-    /**
-     * Keeps the historical workflow context keys consumed by ORéOF subscribers.
-     *
-     * @param array<string, mixed> $formData
-     *
-     * @return array<string, mixed>
-     */
-    private function normalizeDpeWorkflowContext(array $formData): array
-    {
-        $context = [];
-
-        if (array_key_exists('argumentaire', $formData)) {
-            $context['motif'] = $formData['argumentaire'];
-        }
-
-        foreach (['dateConseil', 'dateCfvu', 'datePublication'] as $dateField) {
-            if (array_key_exists($dateField, $formData)) {
-                $context['date'] = $formData[$dateField];
-                break;
-            }
-        }
-
-        return $context;
     }
 
     private function getCurrentUserOrFail(): User
