@@ -333,8 +333,10 @@ class FormationResponsableController extends BaseController
                 }
             }
 
-            // Première transition changeRf pilotée de bout en bout par le bundle.
-            if ('valider_conseil' === $transition) {
+            // Transitions changeRf pilotées de bout en bout par le bundle.
+            // La finalisation reste dans l'application : historique, notifications
+            // et application effective du changement à l'arrivée en CFVU.
+            if (in_array($transition, ['valider_conseil', 'valider_ses'], true)) {
                 $user = $this->getUser();
                 if (!$user instanceof UserInterface) {
                     throw new AccessDeniedException('Un utilisateur authentifié est requis.');
