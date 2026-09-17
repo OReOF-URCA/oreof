@@ -9,59 +9,27 @@ use PHPUnit\Framework\TestCase;
 
 final class OperationContextTest extends TestCase
 {
-    public function testItExposesInputAtTopLevelAndSupportsAliases(): void
+    public function testRuntimeDataIsNeverExposedToSymfonyWorkflow(): void
     {
-        $date = new \DateTimeImmutable('2026-09-17');
+        $actor = new \stdClass();
         $context = OperationContext::fromInput(
-            actor: new \stdClass(),
-            input: [
-                'date' => $date,
-                'argumentaire' => 'À corriger',
-            ],
+            actor: $actor,
+            input: ['argumentaire' => 'À corriger'],
             aliases: ['argumentaire' => 'motif'],
-        );
+            metadata: ['source' => 'test'],
+        )->withRuntime([
+            'previous_place' => 'soumis_ses',
+            'request' => new \stdClass(),
+        ]);
 
         $workflowContext = $context->workflowContext();
 
-        self::assertSame($date, $workflowContext['date']);
+        self::assertSame('À corriger', $workflowContext['argumentaire']);
         self::assertSame('À corriger', $workflowContext['motif']);
-        self::assertSame($context->input, $workflowContext['input']);
-    }
-
-    public function testMetadataOverridesTopLevelInputWithoutChangingStructuredInput(): void
-    {
-        $context = OperationContext::fromInput(
-            actor: null,
-            input: ['motif' => 'input'],
-            metadata: ['motif' => 'metadata'],
-        );
-
-        self::assertSame('metadata', $context->workflowContext()['motif']);
-        self::assertSame('input', $context->workflowContext()['input']['motif']);
-    }
-
-    public function testExplicitMetadataOverridesAnAlias(): void
-    {
-        $context = OperationContext::fromInput(
-            actor: null,
-            input: ['argumentaire' => 'aliased'],
-            aliases: ['argumentaire' => 'motif'],
-            metadata: ['motif' => 'explicit'],
-        );
-
-        self::assertSame('explicit', $context->workflowContext()['motif']);
-    }
-
-    public function testReservedKeysCannotBeOverriddenByInputOrMetadata(): void
-    {
-        $actor = new \stdClass();
-        $context = new OperationContext(
-            actor: $actor,
-            input: ['actor' => 'input actor', 'input' => 'input payload'],
-            metadata: ['actor' => 'metadata actor', 'input' => 'metadata payload'],
-        );
-
-        self::assertSame($actor, $context->workflowContext()['actor']);
-        self::assertSame($context->input, $context->workflowContext()['input']);
+        self::assertSame('test', $workflowContext['source']);
+        self::assertSame($actor, $workflowContext['actor']);
+        self::assertArrayNotHasKey('runtime', $workflowContext);
+        self::assertArrayNotHasKey('request', $workflowContext);
+        self::assertSame('soumis_ses', $context->runtime['previous_place']);
     }
 }

@@ -20,7 +20,6 @@ use App\Utils\TurboStreamResponseFactory;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Form\AbstractType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -30,6 +29,7 @@ use Symfony\Component\Workflow\WorkflowInterface;
 use App\DTO\TranslatableKey;
 use Dannebicque\WorkflowOperationsBundle\Exception\OperationNotExecutableException;
 use Dannebicque\WorkflowOperationsBundle\Operation\OperationContextNormalizer;
+use Dannebicque\WorkflowOperationsBundle\Operation\OperationFormResolver;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
 
@@ -44,6 +44,7 @@ class FormationResponsableController extends BaseController
         private readonly WorkflowOperationExecutor $operationExecutor,
         private readonly WorkflowOperationInspector $operationInspector,
         private readonly OperationContextNormalizer $operationContextNormalizer,
+        private readonly OperationFormResolver $operationFormResolver,
         private readonly LoggerInterface $logger,
     ) {
     }
@@ -308,7 +309,7 @@ class FormationResponsableController extends BaseController
         $process = $this->validationProcess->getEtape($etape);
         $processData = $this->changeRfProcess->etatChangeRf($demande, $process);
 
-        $form = $this->createForm($this->resolveOperationFormType($meta), null, [
+        $form = $this->createForm($this->operationFormResolver->resolveRequired($meta)->type, null, [
             'meta' => $meta,
             'transition' => $transition,
             'process' => $process,
@@ -435,7 +436,7 @@ class FormationResponsableController extends BaseController
         }
 
         $meta = $this->validationProcess->getMetaFromTransition($transition);
-        $form = $this->createForm($this->resolveOperationFormType($meta), null, [
+        $form = $this->createForm($this->operationFormResolver->resolveRequired($meta)->type, null, [
             'meta' => $meta,
             'transition' => $transition,
             'bulk' => true,
@@ -519,7 +520,7 @@ class FormationResponsableController extends BaseController
         //on récupère la transition concernée et sa configuration pour construire le formulaire
         $meta = $this->validationProcess->getMetaFromTransition($transition);
         $demandes = (string) $request->query->get('parcours', '');
-        $form = $this->createForm($this->resolveOperationFormType($meta), null, [
+        $form = $this->createForm($this->operationFormResolver->resolveRequired($meta)->type, null, [
             'meta' => $meta,
             'transition' => $transition,
             'bulk' => true,
@@ -560,7 +561,7 @@ class FormationResponsableController extends BaseController
         $meta = $this->validationProcess->getMetaFromTransition($transition);
         $process = $this->validationProcess->getEtape($etape);
         $processData = $this->changeRfProcess->etatChangeRf($demande, $process);
-        $form = $this->createForm($this->resolveOperationFormType($meta), null, [
+        $form = $this->createForm($this->operationFormResolver->resolveRequired($meta)->type, null, [
             'meta' => $meta,
             'transition' => $transition,
             'process' => $process,
@@ -626,17 +627,6 @@ class FormationResponsableController extends BaseController
             [],
             $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK,
         );
-    }
-
-    /** @param array<string, mixed> $metadata */
-    private function resolveOperationFormType(array $metadata): string
-    {
-        $formType = $metadata['form']['type'] ?? null;
-        if (!is_string($formType) || !is_subclass_of($formType, AbstractType::class)) {
-            throw new \LogicException('A valid form.type metadata entry is required for this workflow operation.');
-        }
-
-        return $formType;
     }
 
     private function operationErrorResponse(TurboStreamResponseFactory $turboStream, string $message): Response
