@@ -17,7 +17,6 @@ use App\Repository\ComposanteRepository;
 use App\Service\DataTableBuilder;
 use App\Service\SecureUploadService;
 use App\Utils\TurboStreamResponseFactory;
-use App\Utils\Tools;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -339,6 +338,7 @@ class FormationResponsableController extends BaseController
                 $fileName = $upload->getStoredFilename();
                 $originalFileName = $upload->getOriginalFilename();
             }
+            unset($formData['file']);
 
             $user = $this->getUser();
             if (!$user instanceof UserInterface) {
