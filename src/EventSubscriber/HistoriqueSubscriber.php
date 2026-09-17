@@ -367,24 +367,33 @@ class HistoriqueSubscriber implements EventSubscriberInterface
             throw new Exception('Pas de requete');
         }
 
+        $input = $event->getInput();
+
         $histo = new HistoriqueParcours();
         $histo->setParcours($event->getParcours());
-        $histo->setDate($this->getDateTime($request));
+        $histo->setDate($this->getDateTimeFromInput($input) ?? $this->getDateTime($request));
         $histo->setUser($this->resolveUser($event->getUser()));
         $histo->setEtape($event->getEtape());
-        $histo->setCommentaire($this->getCommentaire($request));
+        $histo->setCommentaire(
+            (string) ($input['argumentaire'] ?? $input['motif'] ?? $this->getCommentaire($request))
+        );
         $histo->setEtat($event->getEtat());
 
         foreach ($this->cases as $cas) {
-            if ($request->request->has($cas)) {
-                $tab[$cas] = $request->request->get($cas);
-                if ($cas === 'laisserPasser') {
+            if (array_key_exists($cas, $input)) {
+                $tab[$cas] = $input[$cas];
+                if ('laisserPasser' === $cas && true === (bool) $input[$cas]) {
                     $histo->setEtat('laisserPasser');
                 }
+            } elseif ($request->request->has($cas)) {
+                $tab[$cas] = $request->request->get($cas);
             }
 
-            if ($request->request->has('argumentaire_'.$cas)) {
-                $tab['argumentaire_'.$cas] = $request->request->get('argumentaire_'.$cas);
+            $argumentKey = 'argumentaire_'.$cas;
+            if (array_key_exists($argumentKey, $input)) {
+                $tab[$argumentKey] = $input[$argumentKey];
+            } elseif ($request->request->has($argumentKey)) {
+                $tab[$argumentKey] = $request->request->get($argumentKey);
             }
         }
 
@@ -425,6 +434,23 @@ class HistoriqueSubscriber implements EventSubscriberInterface
         $histo->setEtat($event->getEtat());
         $this->entityManager->persist($histo);
         $this->entityManager->flush();
+    }
+
+    /** @param array<string, mixed> $input */
+    private function getDateTimeFromInput(array $input): ?DateTimeInterface
+    {
+        foreach (['date', 'dateConseil', 'dateCfvu', 'datePublication'] as $key) {
+            $value = $input[$key] ?? null;
+            if ($value instanceof DateTimeInterface) {
+                return $value;
+            }
+
+            if (is_string($value) && '' !== trim($value)) {
+                return Tools::convertDate($value);
+            }
+        }
+
+        return null;
     }
 
     private function getDateTime(Request $request): ?DateTimeInterface
