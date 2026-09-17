@@ -11,36 +11,72 @@
 namespace App\Workflow\ModalView;
 
 use App\Entity\DpeParcours;
+use Dannebicque\WorkflowOperationsBundle\Model\BlockerSeverity;
+use Dannebicque\WorkflowOperationsBundle\Model\OperationStatus;
+use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 final class TransitionModalViewBuilder
 {
     public function __construct(
-        // injecte ton service de validation
-        // private readonly ParcoursValidationService $validationService,
+        #[Target('dpeParcours')]
+        private readonly WorkflowInterface $dpeParcoursWorkflow,
+        private readonly WorkflowOperationInspector $operationInspector,
     )
     {
     }
 
     public function build(string $transition, DpeParcours $dpeParcours, array $rawMeta): ?TransitionModalView
     {
-        // Si on a une entrée view dans les métadata on veut une vue. view contiendra les verifs et éventuellement le template
-        if (isset($rawMeta['view'])) {
+        $inspection = $this->operationInspector->inspect(
+            $this->dpeParcoursWorkflow,
+            $dpeParcours,
+            $transition,
+        );
+        $blockers = $inspection->blockers;
 
-            // TODO: remplace par ton service
-            $messages = [
-                // ['level' => 'error', 'message' => 'UE 3: MCCC manquantes'],
-                // ['level' => 'warning', 'message' => 'Description partielle'],
-            ];
-
-            $canSubmit = !array_filter($messages, fn($m) => $m['level'] === 'error');
-
-            return new TransitionModalView(
-                mode: 'report',
-                canSubmit: $canSubmit,
-                messages: $messages
-            );
+        if (OperationStatus::Ready === $inspection->status && 0 === count($blockers) && !isset($rawMeta['view'])) {
+            return null;
         }
 
-        return null; // => affichage normal du form
+        $messages = [];
+        if (OperationStatus::Forbidden === $inspection->status) {
+            $messages[] = [
+                'level' => 'error',
+                'code' => 'operation.forbidden',
+                'message' => 'Vous n’êtes pas autorisé à effectuer cette action.',
+                'path' => null,
+                'parameters' => [],
+            ];
+        } elseif (OperationStatus::Unavailable === $inspection->status) {
+            $messages[] = [
+                'level' => 'error',
+                'code' => 'operation.unavailable',
+                'message' => 'Cette transition n’est pas disponible dans l’état actuel.',
+                'path' => null,
+                'parameters' => [],
+            ];
+        }
+
+        foreach ($blockers as $blocker) {
+            $messages[] = [
+                'level' => match ($blocker->severity) {
+                    BlockerSeverity::Error => 'error',
+                    BlockerSeverity::Warning => 'warning',
+                    BlockerSeverity::Information => 'information',
+                },
+                'code' => $blocker->code,
+                'message' => $blocker->message,
+                'path' => $blocker->path,
+                'parameters' => $blocker->parameters,
+            ];
+        }
+
+        return new TransitionModalView(
+            mode: 'report',
+            canSubmit: $inspection->canExecute(),
+            messages: $messages,
+        );
     }
 }

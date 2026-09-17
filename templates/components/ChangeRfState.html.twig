@@ -37,31 +37,38 @@
                             <div class="col-span-1 md:col-span-3">
                                 <div class="flex flex-wrap gap-2 justify-center">
                                     {% set place = parent.getPlace(demande) %}
-                                    {% if parent.process[place] is defined %}
-                                        {% if (is_granted('MANAGE', {route: 'app_composante', subject: parent.formation}) and place != 'soumis_ses' and place != 'soumis_cfvu') or
-                                              (is_granted('MANAGE', {route: 'app_formation', subject: parent.formation}) and place != 'soumis_ses' and place != 'soumis_cfvu') or
-                                              is_granted('ROLE_ADMIN') %}
-                                            {% for key, state in hasTransitions(demande, 'changeRf') %}
-                                                {% for keyTrans, transition in state %}
-                                                    <twig:Button
-                                                        variant="{{ transition.meta.btn }}"
-                                                        :outline="true"
-                                                        :soft="false"
-                                                        label="{{ ('btn.validation.changeRf.'~keyTrans)|trans({}, 'process') }}"
-                                                        icon="{{ transition.meta.icon|default('') }}"
-                                                        tooltip="{{ ('title.validation.changeRf.'~keyTrans)|trans({}, 'process') }}"
-                                                        data-turbo="true"
-                                                        data-action="click->modalturbo#open"
-                                                        href="{{ path('app_validation_change_rf_'~key, {
-                                                                transition:keyTrans,
-                                                                etape:place,
-                                                                demande:demande.id
-                                                        }) }}"
-                                                    />
-                                                {% endfor %}
-                                            {% endfor %}
-                                        {% endif %}
-                                    {% endif %}
+                                    {% set operations = parent.getOperations(demande) %}
+                                    {% for key, state in operations %}
+                                        {% for keyTrans, operation in state %}
+                                            {% set transition = operation.meta %}
+                                            <div class="inline-flex flex-col gap-1">
+                                                <twig:Button
+                                                    variant="{{ transition.btn }}"
+                                                    :outline="true"
+                                                    :soft="false"
+                                                    label="{{ ('btn.validation.changeRf.'~keyTrans)|trans({}, 'process') }}"
+                                                    icon="{{ transition.icon|default('') }}"
+                                                    tooltip="{{ ('title.validation.changeRf.'~keyTrans)|trans({}, 'process') }}"
+                                                    data-turbo="true"
+                                                    data-action="click->modalturbo#open"
+                                                    href="{{ operation.can_execute ? path('app_validation_change_rf_'~key, {
+                                                            transition:keyTrans,
+                                                            etape:place,
+                                                            demande:demande.id
+                                                    }) : null }}"
+                                                    :disabled="not operation.can_execute"
+                                                />
+                                                {% if operation.status == 'blocked' %}
+                                                    <span class="text-xs text-warning-700 dark:text-warning-300">
+                                                        {{ operation.blockers|length }} contrôle{{ operation.blockers|length > 1 ? 's' : '' }} à corriger
+                                                    </span>
+                                                    {% for blocker in operation.blockers %}
+                                                        <span class="sr-only">{{ blocker.message|trans(blocker.parameters|default({})) }}</span>
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    {% endfor %}
                                 </div>
                             </div>
 

@@ -81,6 +81,25 @@ class ChangeRfProcess extends AbstractProcess
 
         $this->changeRfWorkflow->apply($changeRf, $valid, $motifs);
 
+        return $this->completeValidatedChangeRf(
+            $changeRf,
+            $user,
+            $place,
+            $request,
+            $fileName,
+            $originalFileName,
+        );
+    }
+
+    public function completeValidatedChangeRf(
+        ChangeRf $changeRf,
+        UserInterface $user,
+        string $previousPlace,
+        Request $request,
+        ?string $fileName = null,
+        ?string $originalFileName = null,
+    ): Response {
+
         //vérifier la place pour savoir si on doit envoyer une notification
         $newPlace = array_keys($this->changeRfWorkflow->getMarking($changeRf)->getPlaces())[0];
         if ($newPlace === 'soumis_cfvu') { // on applique les changements dès qu'on est soumis au CFVU
@@ -89,7 +108,7 @@ class ChangeRfProcess extends AbstractProcess
 
         $this->entityManager->flush();
 
-        return $this->dispatchEventChangeRf($changeRf, $user, $place, $request, 'valide', $fileName, $originalFileName);
+        return $this->dispatchEventChangeRf($changeRf, $user, $previousPlace, $request, 'valide', $fileName, $originalFileName);
     }
 
     public function reserveChangeRf(ChangeRf $changeRf, UserInterface $user, string|array $transition, $request): Response

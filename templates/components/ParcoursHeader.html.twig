@@ -235,6 +235,11 @@
                                     <span class="min-w-0">
                                         <span class="block font-semibold {{ itemStyle.title }}">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>
                                         <span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ ('workflow.'~key~'.menu.description')|trans({}, 'process') }}</span>
+                                        {% if option.operation_status|default('ready') == 'blocked' %}
+                                            <span class="mt-1 inline-flex rounded-full bg-danger-100 px-2 py-0.5 text-[10px] font-bold text-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
+                                                {{ option.blocking_count }} blocage{% if option.blocking_count > 1 %}s{% endif %}
+                                            </span>
+                                        {% endif %}
                                     </span>
                                 </a>
                             </li>
@@ -466,4 +471,3 @@
         {% endif %}
     </div>
 </div>
-

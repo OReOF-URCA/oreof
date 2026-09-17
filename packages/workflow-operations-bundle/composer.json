@@ -1,0 +1,30 @@
+{
+    "name": "dannebicque/workflow-operations-bundle",
+    "description": "Operational orchestration layer for Symfony Workflow transitions.",
+    "type": "symfony-bundle",
+    "license": "MPL-2.0",
+    "version": "0.1.0-dev",
+    "require": {
+        "php": ">=8.4",
+        "symfony/dependency-injection": "^8.0",
+        "symfony/http-kernel": "^8.0",
+        "symfony/security-core": "^8.0",
+        "symfony/workflow": "^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Dannebicque\\WorkflowOperationsBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Dannebicque\\WorkflowOperationsBundle\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

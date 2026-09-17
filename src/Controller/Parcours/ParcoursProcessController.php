@@ -21,12 +21,16 @@ use App\Workflow\Handler\TransitionHandlerRegistry;
 use App\Workflow\Handler\TransitionHandlerInterface;
 use App\Workflow\Metadata\WorkflowMetaMapper;
 use App\Workflow\ModalView\TransitionModalViewBuilder;
+use Dannebicque\WorkflowOperationsBundle\Model\OperationContext;
+use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 #[Route('/parcours/v2/process', name: 'parcours_process')]
 class ParcoursProcessController extends BaseController
@@ -39,6 +43,9 @@ class ParcoursProcessController extends BaseController
         private WorkflowMetaMapper         $workflowMetaMapper,
         private TransitionHandlerRegistry  $transitionHandlers,
         private TransitionModalViewBuilder $transitionModalViewBuilder,
+        private WorkflowOperationExecutor  $operationExecutor,
+        #[Target('dpeParcours')]
+        private WorkflowInterface          $dpeParcoursWorkflow,
         private readonly EventDispatcherInterface      $eventDispatcher,
 //        private readonly EntityManagerInterface        $entityManager,
         private readonly ValidationProcess             $validationProcess,
@@ -222,18 +229,36 @@ class ParcoursProcessController extends BaseController
             if ($form->isValid()) {
                 try {
                     $user = $this->getCurrentUserOrFail();
-                    $handlerCode = $metaDto->handlerCode ?? $transition; // fallback possible
-                    $handler = $this->transitionHandlers->get($handlerCode);
-                    if (!$handler instanceof TransitionHandlerInterface) {
-                        throw new \LogicException(sprintf('Handler DPE attendu pour "%s".', $handlerCode));
-                    }
+                    $formData = (array) $form->getData();
 
-                    $handler->handle(
-                        $dpeParcours,
-                        $user,
-                        $metaDto,
-                        $transition,
-                        (array)$form->getData());
+                    if ('reouvrir_mccc' === $transition) {
+                        $this->operationExecutor->execute(
+                            $this->dpeParcoursWorkflow,
+                            $dpeParcours,
+                            $transition,
+                            new OperationContext(
+                                actor: $user,
+                                input: $formData,
+                                metadata: [
+                                    'motif' => (string) ($formData['argumentaire'] ?? ''),
+                                ],
+                            ),
+                        );
+                    } else {
+                        $handlerCode = $metaDto->handlerCode ?? $transition;
+                        $handler = $this->transitionHandlers->get($handlerCode);
+                        if (!$handler instanceof TransitionHandlerInterface) {
+                            throw new \LogicException(sprintf('Handler DPE attendu pour "%s".', $handlerCode));
+                        }
+
+                        $handler->handle(
+                            $dpeParcours,
+                            $user,
+                            $metaDto,
+                            $transition,
+                            $formData,
+                        );
+                    }
                     // l'étape c'est la clé du tableau $dpeParcours->getEtatValidation()
                     $etape = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
                     $histoEvent = new HistoriqueParcoursEvent($dpeParcours->getParcours(), $user, $etape, $metaDto->type, $request);

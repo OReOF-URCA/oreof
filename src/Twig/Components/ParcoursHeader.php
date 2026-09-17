@@ -11,6 +11,9 @@ use App\Enums\TypeModificationDpeEnum;
 use App\Repository\HistoriqueFormationRepository;
 use App\Repository\HistoriqueParcoursRepository;
 use App\Utils\Access;
+use Dannebicque\WorkflowOperationsBundle\Model\OperationBlocker;
+use Dannebicque\WorkflowOperationsBundle\Model\OperationStatus;
+use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -61,6 +64,7 @@ final class ParcoursHeader
         private readonly HistoriqueFormationRepository $historiqueFormationRepository,
         private readonly HistoriqueParcoursRepository  $historiqueParcoursRepository,
         private readonly ValidationProcess             $validationProcess,
+        private readonly WorkflowOperationInspector    $operationInspector,
         #[Target('dpeParcours')]
         private readonly WorkflowInterface             $dpeParcoursWorkflow,
         private readonly EntityManagerInterface        $em,
@@ -95,7 +99,34 @@ final class ParcoursHeader
         $this->init();
         $this->getHistorique();
         $this->processSteps = $this->validationProcess->getProcess();
-        $this->validationOptions = $this->validationProcess->getOptionsForStep($this->dpeParcours);
+        $this->validationOptions = $this->getVisibleValidationOptions();
+    }
+
+    private function getVisibleValidationOptions(): array
+    {
+        $options = $this->validationProcess->getOptionsForStep($this->dpeParcours);
+
+        foreach ($options as $transition => &$option) {
+            $inspection = $this->operationInspector->inspect(
+                $this->dpeParcoursWorkflow,
+                $this->dpeParcours,
+                $transition,
+            );
+
+            if (in_array($inspection->status, [OperationStatus::Forbidden, OperationStatus::Unavailable], true)) {
+                unset($options[$transition]);
+                continue;
+            }
+
+            $option['operation_status'] = $inspection->status->value;
+            $option['blocking_count'] = count(array_filter(
+                $inspection->blockers->all(),
+                static fn (OperationBlocker $blocker): bool => $blocker->isBlocking(),
+            ));
+        }
+        unset($option);
+
+        return $options;
     }
 
     private function init(): void
