@@ -8,6 +8,7 @@
         "php": ">=8.4",
         "symfony/dependency-injection": "^8.0",
         "symfony/http-kernel": "^8.0",
+        "symfony/security-core": "^8.0",
         "symfony/workflow": "^8.0"
     },
     "require-dev": {

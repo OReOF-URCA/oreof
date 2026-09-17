@@ -23,7 +23,11 @@ final class WorkflowOperationsBundle extends AbstractBundle
                 ->autoconfigure()
             ->set(Operation\OperationBlockerCollector::class)
                 ->args([tagged_iterator('workflow_operations.blocker_provider')])
+            ->set(Operation\OperationAuthorizationChecker::class)
+                ->args([tagged_iterator('workflow_operations.authorizer')])
             ->set(Operation\WorkflowOperationFactory::class)
+            ->set(Operation\WorkflowOperationInspector::class)
+            ->set(Security\SecurityMetadataOperationAuthorizer::class)
         ;
     }
 }

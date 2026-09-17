@@ -527,6 +527,10 @@ framework:
             type: 'reouvrir'
             button_icon: 'flowbite:edit-outline'
             handler: "reouvrir_mccc"
+            authorization:
+              attribute: 'DPE_WORKFLOW_TRANSITION'
+              subject: 'operation'
+              reason: 'workflow.authorization.reouvrir_mccc.denied'
             form:
               fields:
                 - name: argumentaire
@@ -569,6 +573,10 @@ framework:
             type: 'reouvrir'
             button_icon: 'flowbite:edit-outline'
             handler: "reouvrir_mccc"
+            authorization:
+              attribute: 'DPE_WORKFLOW_TRANSITION'
+              subject: 'operation'
+              reason: 'workflow.authorization.reouvrir_mccc.denied'
             form:
               fields:
                 - name: argumentaire
