@@ -98,7 +98,7 @@ class ChangeRfProcess extends AbstractProcess
         array $input = [],
         ?string $fileName = null,
         ?string $originalFileName = null,
-    ): void {
+    ): Response {
         //vérifier la place pour savoir si on doit envoyer une notification
         $newPlace = array_keys($this->changeRfWorkflow->getMarking($changeRf)->getPlaces())[0];
         if ($newPlace === 'soumis_cfvu') { // on applique les changements dès qu'on est soumis au CFVU
@@ -121,8 +121,8 @@ class ChangeRfProcess extends AbstractProcess
         UserInterface $user,
         string $previousPlace,
         array $input = [],
-    ): void {
-        $this->completeChangeRf($changeRf, $user, $previousPlace, $input, 'reserve');
+    ): Response {
+        return $this->completeChangeRf($changeRf, $user, $previousPlace, $input, 'reserve');
     }
 
     public function reserveChangeRf(ChangeRf $changeRf, UserInterface $user, string|array $transition, $request): Response
@@ -165,10 +165,10 @@ class ChangeRfProcess extends AbstractProcess
         string $historyState,
         ?string $fileName = null,
         ?string $originalFileName = null,
-    ): void {
+    ): Response {
         $this->entityManager->flush();
 
-        $this->dispatchEventChangeRf(
+        return $this->dispatchEventChangeRf(
             $changeRf,
             $user,
             $previousPlace,
