@@ -297,8 +297,12 @@ class FormationResponsableController extends BaseController
             return JsonReponse::error('Demande non trouvée');
         }
 
-        if (!$this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition)->canExecute()) {
-            return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
+        $inspection = $this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition);
+        if (!$inspection->canExecute()) {
+            return $this->operationErrorResponse(
+                $turboStream,
+                'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.',
+            );
         }
 
         $meta = $this->validationProcess->getMetaFromTransition($transition);
@@ -575,8 +579,12 @@ class FormationResponsableController extends BaseController
             return JsonReponse::error('Demande non trouvée');
         }
 
-        if (!$this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition)->canExecute()) {
-            return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
+        $inspection = $this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition);
+        if (!$inspection->canExecute()) {
+            return $this->operationErrorResponse(
+                $turboStream,
+                'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.',
+            );
         }
 
         $meta = $this->validationProcess->getMetaFromTransition($transition);
@@ -654,8 +662,14 @@ class FormationResponsableController extends BaseController
 
     private function operationErrorResponse(TurboStreamResponseFactory $turboStream, string $message): Response
     {
-        return $this->isTurboFrameRequest()
-            ? $turboStream->streamToastError($message)
-            : JsonReponse::error($message);
+        return $turboStream->streamOpenModalFromTemplates(
+            'Opération impossible',
+            null,
+            'formation_responsable/_operation_error.html.twig',
+            ['message' => $message],
+            '_ui/_footer_cancel.html.twig',
+            [],
+            Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
     }
 }
