@@ -12,6 +12,7 @@ framework:
         routing:
             # Route your messages to the transports
             'App\Message\Export': async_export
+            'App\Message\ChangeRfWorkflowNotification': async_export
 
 # when@test:
 #    framework:
