@@ -133,7 +133,6 @@ framework:
             button_class: 'success'
             button_icon: 'ph:play'
             type: valider
-            handler: "autoriser"
             form:
               fields: [ ]
         valider_parcours: # Soumettre du resp de parcours vers formation
@@ -149,7 +148,6 @@ framework:
             icon: ph:check
             button_class: 'success'
             button_icon: 'mdi:paper-airplane-outline'
-            handler: "valider"
             form:
               fields: [ ]
         valider_rf:
@@ -164,7 +162,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
             form:
               fields: [ ]
         reserver_rf:
@@ -179,7 +176,6 @@ framework:
             #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
-            handler: "reserver_commentaire"
             context:
               aliases:
                 argumentaire: motif
@@ -201,7 +197,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
             form:
               fields: [ ]
         reserver_dpe_composante:
@@ -216,7 +211,6 @@ framework:
             #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
-            handler: "reserver_commentaire"
             context:
               aliases:
                 argumentaire: motif
@@ -242,7 +236,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider_conseil"
             context:
               aliases:
                 dateConseil: date
@@ -270,7 +263,6 @@ framework:
             #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
-            handler: "reserver_conseil"
             context:
               aliases:
                 argumentaire: motif
@@ -297,7 +289,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
             form:
               fields: [ ]
         reserver_central:
@@ -312,7 +303,6 @@ framework:
             #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
-            handler: "reserver_commentaire"
             context:
               aliases:
                 argumentaire: motif
@@ -333,7 +323,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'flowbite:rocket-outline'
-            handler: "valider"
             form:
               fields: [ ]
         refuser_revoir_cfvu:
@@ -349,7 +338,6 @@ framework:
             #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
-            handler: "refuser_commentaire_date"
             context:
               aliases:
                 argumentaire: motif
@@ -376,7 +364,6 @@ framework:
             display: false
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider_reserve_date"
             context:
               aliases:
                 argumentaire: motif
@@ -400,7 +387,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider_commentaire"
             context:
               aliases:
                 argumentaire: motif
@@ -424,7 +410,6 @@ framework:
             display: false
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
             form:
               fields: [ ]
         valider_reserve_central_cfvu:
@@ -440,7 +425,6 @@ framework:
             button_class: 'success'
             button_icon: 'ph:check'
             description: '--'
-            handler: "valider"
             form:
               fields: [ ]
         valider_cfvu:
@@ -456,7 +440,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'mdi:stamper'
-            handler: "valider_date"
             context:
               aliases:
                 dateConseil: date
@@ -474,7 +457,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'flowbite:bullhorn-outline'
-            handler: "valider_date"
             context:
               aliases:
                 datePublication: date
@@ -492,7 +474,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:globe'
-            handler: "valider"
             form:
               fields: [ ]
         relancer_annee:
@@ -505,7 +486,6 @@ framework:
             #            icon: ph:check
             button_class: 'success' #todo: a voir...
             button_icon: 'ph:globe' #todo: a voir...
-            handler: "valider" #todo: a voir...
             form:
               fields: [ ]
         valider_tacite_composante:
@@ -518,7 +498,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
         reouvrir_tacite:
           from: 'tacite_reconduction'
           metadata:
@@ -526,7 +505,6 @@ framework:
             button_class: 'warning'
             button_icon: 'flowbite:undo-outline'
             description: 'Relancer le parcours pour la nouvelle année'
-            handler: "valider"
             context:
               aliases:
                 argumentaire: motif
@@ -562,7 +540,6 @@ framework:
             button_class: 'info'
             type: 'reouvrir'
             button_icon: 'flowbite:edit-outline'
-            handler: "reouvrir_mccc"
             authorization:
               attribute: 'DPE_WORKFLOW_TRANSITION'
               subject: 'operation'
@@ -588,7 +565,6 @@ framework:
             button_class: 'info'
             button_icon: 'icon:edit'
             type: 'reouvrir'
-            handler: "reouvrir_sans_cfvu"
             context:
               aliases:
                 argumentaire: motif
@@ -614,7 +590,6 @@ framework:
             button_class: 'info'
             type: 'reouvrir'
             button_icon: 'flowbite:edit-outline'
-            handler: "reouvrir_mccc"
             authorization:
               attribute: 'DPE_WORKFLOW_TRANSITION'
               subject: 'operation'
@@ -638,7 +613,6 @@ framework:
             button_class: 'info'
             button_icon: 'icon:edit'
             type: 'reouvrir'
-            handler: "reouvrir_sans_cfvu"
             context:
               aliases:
                 argumentaire: motif
@@ -663,7 +637,6 @@ framework:
             button_class: 'warning'
             button_icon: 'flowbite:undo-outline'
             type: 'reouvrir'
-            handler: "reouvrir_avant_publie"
             context:
               aliases:
                 argumentaire: motif
@@ -707,7 +680,6 @@ framework:
             description: 'Approuver les modifications et republier'
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
             form:
               fields: [ ]
         reserver_transmettre_ouverture_sans_cfvu:
