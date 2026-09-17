@@ -531,6 +531,9 @@ framework:
               attribute: 'DPE_WORKFLOW_TRANSITION'
               subject: 'operation'
               reason: 'workflow.authorization.reouvrir_mccc.denied'
+            context: &dpe_argumentaire_context
+              aliases:
+                argumentaire: motif
             form:
               fields:
                 - name: argumentaire
@@ -577,6 +580,7 @@ framework:
               attribute: 'DPE_WORKFLOW_TRANSITION'
               subject: 'operation'
               reason: 'workflow.authorization.reouvrir_mccc.denied'
+            context: *dpe_argumentaire_context
             form:
               fields:
                 - name: argumentaire
@@ -888,6 +892,9 @@ framework:
             btn: warning
             icon: material-symbols:fact-check-outline-sharp
             authorization: *change_rf_authorization
+            context: &change_rf_reserve_context
+              aliases:
+                argumentaire: motif
         valider_cfvu_avec_pv:
           from: 'soumis_cfvu'
           to: 'effectuee'
@@ -913,7 +920,9 @@ framework:
             type: reserver
             btn: warning
             icon: material-symbols:fact-check-outline-sharp
+            hasDate: true
             authorization: *change_rf_authorization
+            context: *change_rf_reserve_context
         deposer_pv:
           from: 'attente_pv'
           to: 'verification_pv' #etape intermédiaire de contrôle

@@ -18,6 +18,7 @@ use App\Repository\ComposanteRepository;
 use App\Service\DataTableBuilder;
 use App\Service\SecureUploadService;
 use App\Utils\TurboStreamResponseFactory;
+use App\Utils\Tools;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,7 +29,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
 use App\DTO\TranslatableKey;
 use Dannebicque\WorkflowOperationsBundle\Exception\OperationNotExecutableException;
-use Dannebicque\WorkflowOperationsBundle\Model\OperationContext;
+use Dannebicque\WorkflowOperationsBundle\Operation\OperationContextNormalizer;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
 
@@ -42,6 +43,7 @@ class FormationResponsableController extends BaseController
         private readonly SecureUploadService $secureUploadService,
         private readonly WorkflowOperationExecutor $operationExecutor,
         private readonly WorkflowOperationInspector $operationInspector,
+        private readonly OperationContextNormalizer $operationContextNormalizer,
     ) {
     }
 
@@ -333,43 +335,37 @@ class FormationResponsableController extends BaseController
                 }
             }
 
-            // Transitions changeRf pilotées de bout en bout par le bundle.
-            // La finalisation reste dans l'application : historique, notifications
-            // et application effective du changement à l'arrivée en CFVU.
-            if (in_array($transition, ['valider_conseil', 'valider_ses'], true)) {
-                $user = $this->getUser();
-                if (!$user instanceof UserInterface) {
-                    throw new AccessDeniedException('Un utilisateur authentifié est requis.');
-                }
-
-                $previousPlace = array_key_first($this->changeRfWorkflow->getMarking($demande)->getPlaces());
-
-                try {
-                    $this->operationExecutor->execute(
-                        $this->changeRfWorkflow,
-                        $demande,
-                        $transition,
-                        new OperationContext(
-                            actor: $user,
-                            input: (array) $form->getData(),
-                        ),
-                    );
-                } catch (OperationNotExecutableException) {
-                    return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
-                }
-
-                $response = $this->changeRfProcess->completeValidatedChangeRf(
-                    $demande,
-                    $user,
-                    (string) $previousPlace,
-                    $request,
-                    $fileName,
-                    $originalFileName,
-                );
-            } else {
-                //todo: gérer le cas du PV en attente post CFVU => Etat intermédiaire dans l'historique ? ou dans le process ?
-                $response = $this->changeRfProcess->valideChangeRf($demande, $this->getUser(), $transition, $request, $fileName, $originalFileName);
+            $user = $this->getUser();
+            if (!$user instanceof UserInterface) {
+                throw new AccessDeniedException('Un utilisateur authentifié est requis.');
             }
+
+            $previousPlace = array_key_first($this->changeRfWorkflow->getMarking($demande)->getPlaces());
+
+            try {
+                $this->operationExecutor->execute(
+                    $this->changeRfWorkflow,
+                    $demande,
+                    $transition,
+                    $this->operationContextNormalizer->normalize(
+                        workflow: $this->changeRfWorkflow,
+                        transitionName: $transition,
+                        actor: $user,
+                        input: (array) $form->getData(),
+                    ),
+                );
+            } catch (OperationNotExecutableException) {
+                return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
+            }
+
+            $response = $this->changeRfProcess->completeValidatedChangeRf(
+                $demande,
+                $user,
+                (string) $previousPlace,
+                $request,
+                $fileName,
+                $originalFileName,
+            );
 
             if ($this->isTurbo()) {
                 return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
@@ -478,7 +474,48 @@ class FormationResponsableController extends BaseController
         $processData = $this->changeRfProcess->etatChangeRf($demande, $process);
 
         if ($request->isMethod('POST')) {
-            $response = $this->changeRfProcess->reserveChangeRf($demande, $this->getUser(), $transition, $request);
+            $user = $this->getUser();
+            if (!$user instanceof UserInterface) {
+                throw new AccessDeniedException('Un utilisateur authentifié est requis.');
+            }
+
+            $previousPlace = array_key_first($this->changeRfWorkflow->getMarking($demande)->getPlaces());
+            $argumentaire = trim((string) $request->request->get('argumentaire', ''));
+            if ('' === $argumentaire) {
+                return JsonReponse::error('L’argumentaire est obligatoire.');
+            }
+
+            $input = ['argumentaire' => $argumentaire];
+            if (($meta['hasDate'] ?? false) && (!$request->request->has('date') || '' === (string) $request->request->get('date'))) {
+                return JsonReponse::error('La date est obligatoire.');
+            }
+
+            if ($request->request->has('date') && '' !== (string) $request->request->get('date')) {
+                $input['date'] = Tools::convertDate((string) $request->request->get('date'));
+            }
+
+            try {
+                $this->operationExecutor->execute(
+                    $this->changeRfWorkflow,
+                    $demande,
+                    $transition,
+                    $this->operationContextNormalizer->normalize(
+                        workflow: $this->changeRfWorkflow,
+                        transitionName: $transition,
+                        actor: $user,
+                        input: $input,
+                    ),
+                );
+            } catch (OperationNotExecutableException) {
+                return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
+            }
+
+            $response = $this->changeRfProcess->completeReservedChangeRf(
+                $demande,
+                $user,
+                (string) $previousPlace,
+                $request,
+            );
 
             if ($this->isTurbo()) {
                 return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [

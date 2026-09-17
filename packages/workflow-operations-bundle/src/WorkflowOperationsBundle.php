@@ -28,6 +28,7 @@ final class WorkflowOperationsBundle extends AbstractBundle
             ->set(Operation\OperationHandlerRegistry::class)
                 ->args([tagged_iterator('workflow_operations.handler')])
             ->set(Operation\WorkflowOperationFactory::class)
+            ->set(Operation\OperationContextNormalizer::class)
             ->set(Operation\WorkflowOperationInspector::class)
             ->set(Operation\WorkflowOperationExecutor::class)
             ->set(Security\SecurityMetadataOperationAuthorizer::class)

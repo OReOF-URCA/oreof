@@ -21,7 +21,7 @@ use App\Workflow\Handler\TransitionHandlerRegistry;
 use App\Workflow\Handler\TransitionHandlerInterface;
 use App\Workflow\Metadata\WorkflowMetaMapper;
 use App\Workflow\ModalView\TransitionModalViewBuilder;
-use Dannebicque\WorkflowOperationsBundle\Model\OperationContext;
+use Dannebicque\WorkflowOperationsBundle\Operation\OperationContextNormalizer;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -44,6 +44,7 @@ class ParcoursProcessController extends BaseController
         private TransitionHandlerRegistry  $transitionHandlers,
         private TransitionModalViewBuilder $transitionModalViewBuilder,
         private WorkflowOperationExecutor  $operationExecutor,
+        private OperationContextNormalizer $operationContextNormalizer,
         #[Target('dpeParcours')]
         private WorkflowInterface          $dpeParcoursWorkflow,
         private readonly EventDispatcherInterface      $eventDispatcher,
@@ -236,12 +237,11 @@ class ParcoursProcessController extends BaseController
                             $this->dpeParcoursWorkflow,
                             $dpeParcours,
                             $transition,
-                            new OperationContext(
+                            $this->operationContextNormalizer->normalize(
+                                workflow: $this->dpeParcoursWorkflow,
+                                transitionName: $transition,
                                 actor: $user,
                                 input: $formData,
-                                metadata: [
-                                    'motif' => (string) ($formData['argumentaire'] ?? ''),
-                                ],
                             ),
                         );
                     } else {

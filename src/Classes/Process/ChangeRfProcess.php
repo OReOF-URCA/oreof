@@ -99,16 +99,30 @@ class ChangeRfProcess extends AbstractProcess
         ?string $fileName = null,
         ?string $originalFileName = null,
     ): Response {
-
         //vérifier la place pour savoir si on doit envoyer une notification
         $newPlace = array_keys($this->changeRfWorkflow->getMarking($changeRf)->getPlaces())[0];
         if ($newPlace === 'soumis_cfvu') { // on applique les changements dès qu'on est soumis au CFVU
             $this->updateChangeRf($changeRf);
         }
 
-        $this->entityManager->flush();
+        return $this->completeChangeRf(
+            $changeRf,
+            $user,
+            $previousPlace,
+            $request,
+            'valide',
+            $fileName,
+            $originalFileName,
+        );
+    }
 
-        return $this->dispatchEventChangeRf($changeRf, $user, $previousPlace, $request, 'valide', $fileName, $originalFileName);
+    public function completeReservedChangeRf(
+        ChangeRf $changeRf,
+        UserInterface $user,
+        string $previousPlace,
+        Request $request,
+    ): Response {
+        return $this->completeChangeRf($changeRf, $user, $previousPlace, $request, 'reserve');
     }
 
     public function reserveChangeRf(ChangeRf $changeRf, UserInterface $user, string|array $transition, $request): Response
@@ -135,6 +149,28 @@ class ChangeRfProcess extends AbstractProcess
         $histoEvent = new HistoriqueChangeRfEvent($changeRf, $user, $place, $etat, $request, $fileName, $originalFileName);
         $this->eventDispatcher->dispatch($histoEvent, HistoriqueChangeRfEvent::ADD_HISTORIQUE_CHANGE_RF);
         return JsonReponse::success($this->translator->trans('changeRf.'.$etat.'.' . $place . '.flash.success', [], 'process'));
+    }
+
+    private function completeChangeRf(
+        ChangeRf $changeRf,
+        UserInterface $user,
+        string $previousPlace,
+        Request $request,
+        string $historyState,
+        ?string $fileName = null,
+        ?string $originalFileName = null,
+    ): Response {
+        $this->entityManager->flush();
+
+        return $this->dispatchEventChangeRf(
+            $changeRf,
+            $user,
+            $previousPlace,
+            $request,
+            $historyState,
+            $fileName,
+            $originalFileName,
+        );
     }
 
     private function updateChangeRf(ChangeRf $demande): void
