@@ -365,15 +365,12 @@ class FormationResponsableController extends BaseController
                         transitionName: $transition,
                         actor: $user,
                         input: $formData,
-                    ),
-                );
-                $response = $this->changeRfProcess->completeValidatedChangeRf(
-                    $demande,
-                    $user,
-                    (string) $previousPlace,
-                    $request,
-                    $fileName,
-                    $originalFileName,
+                    )->withRuntime([
+                        'previous_place' => (string) $previousPlace,
+                        'request' => $request,
+                        'file_name' => $fileName,
+                        'original_file_name' => $originalFileName,
+                    ]),
                 );
             } catch (OperationNotExecutableException) {
                 return $this->operationErrorResponse($turboStream, 'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
@@ -394,7 +391,7 @@ class FormationResponsableController extends BaseController
                 ]);
             }
 
-            return $response;
+            return JsonReponse::success('La demande a bien été validée.');
         }
 
         $status = $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK;
@@ -500,21 +497,13 @@ class FormationResponsableController extends BaseController
                     transitionName: $transition,
                     actor: $user,
                     input: $formData,
-                );
+                )->withRuntime([
+                    'previous_place' => (string) $previousPlace,
+                    'request' => $request,
+                    'file_name' => $fileName,
+                    'original_file_name' => $originalFileName,
+                ]);
                 $this->operationExecutor->execute($this->changeRfWorkflow, $demande, $transition, $context);
-
-                if ('reserver' === $key) {
-                    $this->changeRfProcess->completeReservedChangeRf($demande, $user, (string) $previousPlace, $request);
-                } else {
-                    $this->changeRfProcess->completeValidatedChangeRf(
-                        $demande,
-                        $user,
-                        (string) $previousPlace,
-                        $request,
-                        $fileName,
-                        $originalFileName,
-                    );
-                }
                 ++$processed;
             } catch (\Throwable $exception) {
                 ++$rejected;
@@ -626,13 +615,10 @@ class FormationResponsableController extends BaseController
                         transitionName: $transition,
                         actor: $user,
                         input: $input,
-                    ),
-                );
-                $response = $this->changeRfProcess->completeReservedChangeRf(
-                    $demande,
-                    $user,
-                    (string) $previousPlace,
-                    $request,
+                    )->withRuntime([
+                        'previous_place' => (string) $previousPlace,
+                        'request' => $request,
+                    ]),
                 );
             } catch (OperationNotExecutableException) {
                 return $this->operationErrorResponse($turboStream, 'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
@@ -653,7 +639,7 @@ class FormationResponsableController extends BaseController
                 ]);
             }
 
-            return $response;
+            return JsonReponse::success('La demande a bien été réservée.');
         }
 
         return $this->render('formation_responsable/_reserve.html.twig', [

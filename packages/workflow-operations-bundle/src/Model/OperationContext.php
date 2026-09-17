@@ -14,6 +14,7 @@ final readonly class OperationContext
         public ?object $actor = null,
         public array $input = [],
         public array $metadata = [],
+        public array $runtime = [],
     ) {
     }
 
@@ -46,6 +47,12 @@ final readonly class OperationContext
         }
 
         return new self($actor, $input, [...$aliasedInput, ...$metadata]);
+    }
+
+    /** @param array<string, mixed> $runtime */
+    public function withRuntime(array $runtime): self
+    {
+        return new self($this->actor, $this->input, $this->metadata, $runtime);
     }
 
     public function workflowContext(): array
