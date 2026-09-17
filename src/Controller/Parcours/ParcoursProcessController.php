@@ -17,8 +17,6 @@ use App\Events\HistoriqueParcoursEvent;
 use App\Repository\DpeParcoursRepository;
 use App\Utils\TurboStreamResponseFactory;
 use App\Workflow\Form\MetaDrivenFormFactory;
-use App\Workflow\Handler\TransitionHandlerRegistry;
-use App\Workflow\Handler\TransitionHandlerInterface;
 use App\Workflow\Metadata\WorkflowMetaMapper;
 use App\Workflow\ModalView\TransitionModalViewBuilder;
 use Dannebicque\WorkflowOperationsBundle\Operation\OperationContextNormalizer;
@@ -41,7 +39,6 @@ class ParcoursProcessController extends BaseController
     public function __construct(
         private MetaDrivenFormFactory      $metaDrivenFormFactory,
         private WorkflowMetaMapper         $workflowMetaMapper,
-        private TransitionHandlerRegistry  $transitionHandlers,
         private TransitionModalViewBuilder $transitionModalViewBuilder,
         private WorkflowOperationExecutor  $operationExecutor,
         private OperationContextNormalizer $operationContextNormalizer,
@@ -232,33 +229,18 @@ class ParcoursProcessController extends BaseController
                     $user = $this->getCurrentUserOrFail();
                     $formData = (array) $form->getData();
 
-                    if ('reouvrir_mccc' === $transition) {
-                        $this->operationExecutor->execute(
-                            $this->dpeParcoursWorkflow,
-                            $dpeParcours,
-                            $transition,
-                            $this->operationContextNormalizer->normalize(
-                                workflow: $this->dpeParcoursWorkflow,
-                                transitionName: $transition,
-                                actor: $user,
-                                input: $formData,
-                            ),
-                        );
-                    } else {
-                        $handlerCode = $metaDto->handlerCode ?? $transition;
-                        $handler = $this->transitionHandlers->get($handlerCode);
-                        if (!$handler instanceof TransitionHandlerInterface) {
-                            throw new \LogicException(sprintf('Handler DPE attendu pour "%s".', $handlerCode));
-                        }
-
-                        $handler->handle(
-                            $dpeParcours,
-                            $user,
-                            $metaDto,
-                            $transition,
-                            $formData,
-                        );
-                    }
+                    $this->operationExecutor->execute(
+                        $this->dpeParcoursWorkflow,
+                        $dpeParcours,
+                        $transition,
+                        $this->operationContextNormalizer->normalize(
+                            workflow: $this->dpeParcoursWorkflow,
+                            transitionName: $transition,
+                            actor: $user,
+                            input: $formData,
+                            metadata: $this->normalizeDpeWorkflowContext($formData),
+                        ),
+                    );
                     // l'étape c'est la clé du tableau $dpeParcours->getEtatValidation()
                     $etape = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
                     $histoEvent = new HistoriqueParcoursEvent($dpeParcours->getParcours(), $user, $etape, $metaDto->type, $request);
@@ -417,7 +399,7 @@ class ParcoursProcessController extends BaseController
             if ($form->isValid()) {
                 try {
                     $user = $this->getCurrentUserOrFail();
-                    $handlerCode = $metaDto->handlerCode ?? $transition;
+                    $formData = (array) $form->getData();
                     $processedCount = 0;
                     $processedParcours = [];
 
@@ -427,17 +409,17 @@ class ParcoursProcessController extends BaseController
                             continue;
                         }
 
-                        $handler = $this->transitionHandlers->get($handlerCode);
-                        if (!$handler instanceof TransitionHandlerInterface) {
-                            throw new \LogicException(sprintf('Handler DPE attendu pour "%s".', $handlerCode));
-                        }
-
-                        $handler->handle(
+                        $this->operationExecutor->execute(
+                            $this->dpeParcoursWorkflow,
                             $dpeParcours,
-                            $user,
-                            $metaDto,
                             $transition,
-                            (array)$form->getData()
+                            $this->operationContextNormalizer->normalize(
+                                workflow: $this->dpeParcoursWorkflow,
+                                transitionName: $transition,
+                                actor: $user,
+                                input: $formData,
+                                metadata: $this->normalizeDpeWorkflowContext($formData),
+                            ),
                         );
 
                         $etape = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
@@ -516,6 +498,31 @@ class ParcoursProcessController extends BaseController
         }
 
         return [];
+    }
+
+    /**
+     * Keeps the historical workflow context keys consumed by ORéOF subscribers.
+     *
+     * @param array<string, mixed> $formData
+     *
+     * @return array<string, mixed>
+     */
+    private function normalizeDpeWorkflowContext(array $formData): array
+    {
+        $context = [];
+
+        if (array_key_exists('argumentaire', $formData)) {
+            $context['motif'] = $formData['argumentaire'];
+        }
+
+        foreach (['dateConseil', 'dateCfvu', 'datePublication'] as $dateField) {
+            if (array_key_exists($dateField, $formData)) {
+                $context['date'] = $formData[$dateField];
+                break;
+            }
+        }
+
+        return $context;
     }
 
     private function getCurrentUserOrFail(): User
