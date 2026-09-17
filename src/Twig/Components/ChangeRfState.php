@@ -9,7 +9,6 @@ use App\Repository\HistoriqueFormationRepository;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationBlocker;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationStatus;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
-use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
 use Symfony\UX\LiveComponent\DefaultActionTrait;
@@ -31,7 +30,6 @@ final class ChangeRfState
         private readonly WorkflowInterface $changeRfWorkflow,
         private readonly ValidationProcessChangeRf $validationProcessChangeRf,
         private readonly WorkflowOperationInspector $operationInspector,
-        private readonly Security $security,
     ) {
         $this->process = $this->validationProcessChangeRf->getProcess();
     }
@@ -59,10 +57,6 @@ final class ChangeRfState
      */
     public function getOperations(ChangeRf $changeRf): array
     {
-        if (!$this->canManage($changeRf)) {
-            return [];
-        }
-
         $operations = [];
         foreach ($this->changeRfWorkflow->getDefinition()->getTransitions() as $transition) {
             $inspection = $this->operationInspector->inspect(
@@ -97,31 +91,6 @@ final class ChangeRfState
         }
 
         return $operations;
-    }
-
-    private function canManage(ChangeRf $changeRf): bool
-    {
-        if ($this->security->isGranted('ROLE_ADMIN')) {
-            return true;
-        }
-
-        $place = $this->getPlace($changeRf);
-        if (in_array($place, ['soumis_ses', 'soumis_cfvu'], true)) {
-            return false;
-        }
-
-        $formation = $changeRf->getFormation();
-        if (null === $formation) {
-            return false;
-        }
-
-        return $this->security->isGranted('MANAGE', [
-            'route' => 'app_composante',
-            'subject' => $formation,
-        ]) || $this->security->isGranted('MANAGE', [
-            'route' => 'app_formation',
-            'subject' => $formation,
-        ]);
     }
 
     public function getHistoriques(ChangeRf $changeRf): array

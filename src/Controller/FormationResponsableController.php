@@ -24,8 +24,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
 use App\DTO\TranslatableKey;
+use Dannebicque\WorkflowOperationsBundle\Exception\OperationNotExecutableException;
+use Dannebicque\WorkflowOperationsBundle\Model\OperationContext;
+use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
+use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
 
 class FormationResponsableController extends BaseController
 {
@@ -35,6 +40,8 @@ class FormationResponsableController extends BaseController
         private readonly ValidationProcessChangeRf $validationProcess,
         private readonly ChangeRfProcess $changeRfProcess,
         private readonly SecureUploadService $secureUploadService,
+        private readonly WorkflowOperationExecutor $operationExecutor,
+        private readonly WorkflowOperationInspector $operationInspector,
     ) {
     }
 
@@ -286,6 +293,10 @@ class FormationResponsableController extends BaseController
             return JsonReponse::error('Demande non trouvée');
         }
 
+        if (!$this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition)->canExecute()) {
+            return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
+        }
+
         $meta = $this->validationProcess->getMetaFromTransition($transition);
         $process = $this->validationProcess->getEtape($etape);
         $processData = $this->changeRfProcess->etatChangeRf($demande, $process);
@@ -322,8 +333,41 @@ class FormationResponsableController extends BaseController
                 }
             }
 
-            //todo: gérer le cas du PV en attente post CFVU => Etat intermédiaire dans l'historique ? ou dans le process ?
-            $response = $this->changeRfProcess->valideChangeRf($demande, $this->getUser(), $transition, $request, $fileName, $originalFileName);
+            // Première transition changeRf pilotée de bout en bout par le bundle.
+            if ('valider_conseil' === $transition) {
+                $user = $this->getUser();
+                if (!$user instanceof UserInterface) {
+                    throw new AccessDeniedException('Un utilisateur authentifié est requis.');
+                }
+
+                $previousPlace = array_key_first($this->changeRfWorkflow->getMarking($demande)->getPlaces());
+
+                try {
+                    $this->operationExecutor->execute(
+                        $this->changeRfWorkflow,
+                        $demande,
+                        $transition,
+                        new OperationContext(
+                            actor: $user,
+                            input: (array) $form->getData(),
+                        ),
+                    );
+                } catch (OperationNotExecutableException) {
+                    return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
+                }
+
+                $response = $this->changeRfProcess->completeValidatedChangeRf(
+                    $demande,
+                    $user,
+                    (string) $previousPlace,
+                    $request,
+                    $fileName,
+                    $originalFileName,
+                );
+            } else {
+                //todo: gérer le cas du PV en attente post CFVU => Etat intermédiaire dans l'historique ? ou dans le process ?
+                $response = $this->changeRfProcess->valideChangeRf($demande, $this->getUser(), $transition, $request, $fileName, $originalFileName);
+            }
 
             if ($this->isTurbo()) {
                 return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
@@ -371,6 +415,9 @@ class FormationResponsableController extends BaseController
             foreach ($demandes as $demandeId) {
                 $demande = $changeRfRepository->find($demandeId);
                 if ($demande !== null) {
+                    if (!$this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition)->canExecute()) {
+                        continue;
+                    }
                     $this->changeRfProcess->valideChangeRf($demande, $this->getUser(), $transition, $request, '');
                 }
             }
@@ -417,6 +464,10 @@ class FormationResponsableController extends BaseController
 
         if ($demande === null) {
             return JsonReponse::error('Demande non trouvée');
+        }
+
+        if (!$this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition)->canExecute()) {
+            return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
         }
 
         $meta = $this->validationProcess->getMetaFromTransition($transition);

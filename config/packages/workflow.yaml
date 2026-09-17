@@ -868,6 +868,10 @@ framework:
             icon: ph:check
             hasDate: true
             hasUpload: true
+            authorization: &change_rf_authorization
+              attribute: 'CHANGE_RF_WORKFLOW_TRANSITION'
+              subject: 'operation'
+              reason: 'workflow.authorization.change_rf.denied'
         valider_ses:
           from: 'soumis_ses'
           to: 'soumis_cfvu'
@@ -875,6 +879,7 @@ framework:
             type: valider
             btn: success
             icon: ph:check
+            authorization: *change_rf_authorization
         reserver_ses:
           from: 'soumis_ses'
           to: 'demande_initialisee'
@@ -882,6 +887,7 @@ framework:
             type: reserver
             btn: warning
             icon: material-symbols:fact-check-outline-sharp
+            authorization: *change_rf_authorization
         valider_cfvu_avec_pv:
           from: 'soumis_cfvu'
           to: 'effectuee'
@@ -890,6 +896,7 @@ framework:
             btn: success
             icon: ph:check
             hasDate: true
+            authorization: *change_rf_authorization
         valider_cfvu_attente_pv:
           from: 'soumis_cfvu'
           to: 'attente_pv'
@@ -898,6 +905,7 @@ framework:
             btn: success
             icon: ph:check
             hasDate: true
+            authorization: *change_rf_authorization
         reserver_cfvu:
           from: 'soumis_cfvu'
           to: 'demande_initialisee'
@@ -905,6 +913,7 @@ framework:
             type: reserver
             btn: warning
             icon: material-symbols:fact-check-outline-sharp
+            authorization: *change_rf_authorization
         deposer_pv:
           from: 'attente_pv'
           to: 'verification_pv' #etape intermédiaire de contrôle
@@ -913,6 +922,7 @@ framework:
             btn: success
             icon: ph:check
             hasUpload: true
+            authorization: *change_rf_authorization
         valider_pv:
           from: 'verification_pv'
           to: 'effectuee'
@@ -920,6 +930,7 @@ framework:
             type: valider
             btn: success
             icon: ph:check
+            authorization: *change_rf_authorization
 
     dpeFormation:
       type: 'workflow'
