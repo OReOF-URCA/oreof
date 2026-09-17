@@ -1,6 +1,7 @@
 {% form_theme form 'communs/form_theme_v2.html.twig' %}
 
 {{ form_start(form) }}
+    {{ form_errors(form) }}
     {{ form_widget(form) }}
 {{ form_end(form) }}
 

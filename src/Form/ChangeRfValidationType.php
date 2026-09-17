@@ -129,8 +129,4 @@ class ChangeRfValidationType extends AbstractType
         $resolver->setAllowedTypes('demandes', 'string');
     }
 
-    public function getBlockPrefix(): string
-    {
-        return '';
-    }
 }

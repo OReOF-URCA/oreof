@@ -321,20 +321,31 @@ class FormationResponsableController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //upload
+            $formData = (array) $form->getData();
             $fileName = '';
             $originalFileName = null;
-            if ($request->files->has('file') && $request->files->get('file') !== null) {
+            $uploadedFile = $form->has('file') ? $form->get('file')->getData() : null;
+            if ($uploadedFile !== null) {
                 try {
-                    $upload = $this->secureUploadService->uploadFromRequest($request, 'file', 'conseils');
+                    $upload = $this->secureUploadService->upload($uploadedFile, 'conseils');
                 } catch (FileUploadException $exception) {
                     return JsonReponse::error($exception->getPublicMessage());
                 }
 
-                if ($upload !== null) {
-                    $fileName = $upload->getStoredFilename();
-                    $originalFileName = $upload->getOriginalFilename();
+                $fileName = $upload->getStoredFilename();
+                $originalFileName = $upload->getOriginalFilename();
+            }
+
+            // Compatibilité temporaire avec les subscribers d'historique qui lisent encore la Request.
+            foreach ($formData as $field => $value) {
+                if ('file' === $field || null === $value) {
+                    continue;
                 }
+
+                $request->request->set(
+                    $field,
+                    $value instanceof \DateTimeInterface ? $value->format('Y-m-d') : $value,
+                );
             }
 
             $user = $this->getUser();
@@ -353,7 +364,7 @@ class FormationResponsableController extends BaseController
                         workflow: $this->changeRfWorkflow,
                         transitionName: $transition,
                         actor: $user,
-                        input: (array) $form->getData(),
+                        input: $formData,
                     ),
                 );
                 $response = $this->changeRfProcess->completeValidatedChangeRf(
@@ -386,6 +397,15 @@ class FormationResponsableController extends BaseController
             return $response;
         }
 
+        $status = $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK;
+        if ($form->isSubmitted()) {
+            $this->logger->warning('Formulaire de validation ChangeRf invalide.', [
+                'transition' => $transition,
+                'demande' => $demande->getId(),
+                'errors' => (string) $form->getErrors(true, false),
+            ]);
+        }
+
         return $turboStream->streamOpenModalFromTemplates(
             new TranslatableKey('validation.changeRf.valider.title'),
             new TranslatableKey('validation.changeRf.valider.subtitle'),
@@ -402,6 +422,7 @@ class FormationResponsableController extends BaseController
             '_ui/_footer_submit_cancel.html.twig',
             [
             ],
+            $status,
         );
     }
 
@@ -438,23 +459,30 @@ class FormationResponsableController extends BaseController
             return $this->json(['success' => false, 'message' => 'Les données du formulaire sont incomplètes ou invalides.'], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
+        $formData = (array) $form->getData();
         $fileName = '';
         $originalFileName = null;
-        if ($request->files->has('file') && null !== $request->files->get('file')) {
+        $uploadedFile = $form->has('file') ? $form->get('file')->getData() : null;
+        if ($uploadedFile !== null) {
             try {
-                $upload = $this->secureUploadService->uploadFromRequest($request, 'file', 'conseils');
-                if (null !== $upload) {
-                    $fileName = $upload->getStoredFilename();
-                    $originalFileName = $upload->getOriginalFilename();
-                }
+                $upload = $this->secureUploadService->upload($uploadedFile, 'conseils');
+                $fileName = $upload->getStoredFilename();
+                $originalFileName = $upload->getOriginalFilename();
             } catch (FileUploadException $exception) {
                 return $this->json(['success' => false, 'message' => $exception->getPublicMessage()], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
         }
 
-        $formData = (array) $form->getData();
         $ids = array_filter(explode(',', (string) ($formData['demandes'] ?? '')));
-        unset($formData['demandes']);
+        unset($formData['demandes'], $formData['file']);
+        foreach ($formData as $field => $value) {
+            if (null !== $value) {
+                $request->request->set(
+                    $field,
+                    $value instanceof \DateTimeInterface ? $value->format('Y-m-d') : $value,
+                );
+            }
+        }
         $processed = 0;
         $rejected = 0;
 
