@@ -33,7 +33,7 @@ class ChangeRfValidationType extends AbstractType
                 'widget' => 'single_text',
                 'required' => true,
                 'constraints' => [
-                    new NotBlank(null, 'La date est obligatoire.'),
+                    new NotBlank(message: 'La date est obligatoire.'),
                 ],
                 'label' => 'valide.change_rf.date.' . $transition . '.label',
                 'help' => 'valide.change_rf.helps.date.help',
@@ -99,7 +99,7 @@ class ChangeRfValidationType extends AbstractType
             $builder->add('argumentaire', TextareaType::class, [
                 'required' => true,
                 'constraints' => [
-                    new NotBlank(['message' => 'L\'argumentaire est obligatoire.']),
+                    new NotBlank(message: 'L\'argumentaire est obligatoire.'),
                 ],
                 'label' => 'reserve.change_rf.argumentaire.label',
                 'help' => 'reserve.change_rf.helps.argumentaire.help',
