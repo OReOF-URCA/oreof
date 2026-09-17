@@ -15,6 +15,7 @@ use App\Entity\DpeParcours;
 use App\Entity\User;
 use App\Events\HistoriqueParcoursEvent;
 use App\Repository\DpeParcoursRepository;
+use App\Service\SecureUploadService;
 use App\Utils\TurboStreamResponseFactory;
 use App\Workflow\Form\MetaDrivenFormFactory;
 use App\Workflow\Metadata\WorkflowMetaMapper;
@@ -26,6 +27,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -44,6 +46,7 @@ class ParcoursProcessController extends BaseController
         private WorkflowOperationExecutor  $operationExecutor,
         private OperationContextNormalizer $operationContextNormalizer,
         private EntityManagerInterface       $entityManager,
+        private SecureUploadService           $secureUploadService,
         #[Target('dpeParcours')]
         private WorkflowInterface          $dpeParcoursWorkflow,
         private readonly EventDispatcherInterface      $eventDispatcher,
@@ -231,6 +234,10 @@ class ParcoursProcessController extends BaseController
                     $user = $this->getCurrentUserOrFail();
                     $formData = (array) $form->getData();
 
+                    $operationInput = $formData;
+                    unset($operationInput['uploadPv'], $operationInput['uploadArgumentaire']);
+                    $previousPlace = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
+
                     $this->operationExecutor->execute(
                         $this->dpeParcoursWorkflow,
                         $dpeParcours,
@@ -239,12 +246,25 @@ class ParcoursProcessController extends BaseController
                             workflow: $this->dpeParcoursWorkflow,
                             transitionName: $transition,
                             actor: $user,
-                            input: $formData,
-                        ),
+                            input: $operationInput,
+                        )->withRuntime(['previous_place' => $previousPlace]),
                     );
-                    // l'étape c'est la clé du tableau $dpeParcours->getEtatValidation()
-                    $etape = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
-                    $histoEvent = new HistoriqueParcoursEvent($dpeParcours->getParcours(), $user, $etape, $metaDto->type, $request);
+
+                    $pv = $this->uploadOperationFile($formData['uploadPv'] ?? null);
+                    $note = $this->uploadOperationFile($formData['uploadArgumentaire'] ?? null);
+
+                    $histoEvent = new HistoriqueParcoursEvent(
+                        $dpeParcours->getParcours(),
+                        $user,
+                        $previousPlace,
+                        $metaDto->type,
+                        $request,
+                        $pv['stored'] ?? null,
+                        $note['stored'] ?? null,
+                        $pv['original'] ?? null,
+                        $note['original'] ?? null,
+                        $operationInput,
+                    );
                     $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
                     $this->entityManager->flush();
 
@@ -270,7 +290,7 @@ class ParcoursProcessController extends BaseController
         return $turboStream->streamOpenModalFromTemplates(
             'modal_title.' . $transition . '.' . $metaDto->type,
             'Parcours : ' . $dpeParcours->getParcours()?->getDisplay(),
-            'parcours_v2/process/_apply.html.twig',
+            $metaDto->viewTemplate ?? 'parcours_v2/process/_apply.html.twig',
             [
                 'dpeParcours' => $dpeParcours,
                 'metaDto' => $metaDto,
@@ -411,6 +431,8 @@ class ParcoursProcessController extends BaseController
                             continue;
                         }
 
+                        $previousPlace = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
+
                         $this->operationExecutor->execute(
                             $this->dpeParcoursWorkflow,
                             $dpeParcours,
@@ -420,12 +442,17 @@ class ParcoursProcessController extends BaseController
                                 transitionName: $transition,
                                 actor: $user,
                                 input: $formData,
-                                metadata: $this->normalizeDpeWorkflowContext($formData),
-                            ),
+                            )->withRuntime(['previous_place' => $previousPlace]),
                         );
 
-                        $etape = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
-                        $histoEvent = new HistoriqueParcoursEvent($dpeParcours->getParcours(), $user, $etape, $metaDto->type, $request);
+                        $histoEvent = new HistoriqueParcoursEvent(
+                            $dpeParcours->getParcours(),
+                            $user,
+                            $previousPlace,
+                            $metaDto->type,
+                            $request,
+                            input: $formData,
+                        );
                         $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
 
                         $parcours = $dpeParcours->getParcours();
@@ -502,6 +529,21 @@ class ParcoursProcessController extends BaseController
         }
 
         return [];
+    }
+
+    /** @return null|array{stored: string, original: string} */
+    private function uploadOperationFile(mixed $file): ?array
+    {
+        if (!$file instanceof UploadedFile) {
+            return null;
+        }
+
+        $uploaded = $this->secureUploadService->upload($file, 'conseils');
+
+        return [
+            'stored' => $uploaded->getStoredFilename(),
+            'original' => $uploaded->getOriginalFilename(),
+        ];
     }
 
     private function getCurrentUserOrFail(): User

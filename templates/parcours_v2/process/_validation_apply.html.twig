@@ -1,0 +1,47 @@
+{{ component('alerte', {
+    type: 'info',
+    message: ('modal_description.'~transition~'.'~metaDto.type)|trans({}, 'process')|nl2br|raw
+}) }}
+
+<div class="space-y-3">
+    <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">
+        Contrôles avant transmission
+    </h3>
+
+    {% if view is null or view.messages is empty %}
+        <div class="rounded-xl border border-success-200 bg-success-50 p-3 text-sm text-success-800 dark:border-success-800/70 dark:bg-success-500/10 dark:text-success-300">
+            Aucun blocage détecté. La demande peut être transmise.
+        </div>
+    {% else %}
+        <ul class="space-y-2" role="list">
+            {% for message in view.messages %}
+                {% set isBlocking = message.level == 'error' %}
+                <li class="rounded-xl border p-3 text-sm {{ isBlocking
+                    ? 'border-danger-200 bg-danger-50 text-danger-800 dark:border-danger-800/70 dark:bg-danger-500/10 dark:text-danger-300'
+                    : 'border-warning-200 bg-warning-50 text-warning-800 dark:border-warning-800/70 dark:bg-warning-500/10 dark:text-warning-300'
+                }}">
+                    <div class="flex items-start gap-2">
+                        {{ ux_icon(isBlocking ? 'icon:danger' : 'icon:warning', {class: 'mt-0.5 h-4 w-4 shrink-0'}) }}
+                        <div>
+                            <p>{{ message.message }}</p>
+                            {% if message.path %}
+                                <p class="mt-1 text-xs opacity-75">{{ message.path }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+{{ form_start(form, {
+    action: path('parcours_process_apply', {
+        dpeParcours: dpeParcours.id,
+        transition: transition,
+        type: metaDto.type
+    })
+}) }}
+{{ form_widget(form) }}
+{{ form_end(form) }}

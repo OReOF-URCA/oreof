@@ -36,7 +36,12 @@ final class TransitionModalViewBuilder
         );
         $blockers = $inspection->blockers;
 
-        if (OperationStatus::Ready === $inspection->status && 0 === count($blockers) && !isset($rawMeta['view'])) {
+        $validation = is_array($rawMeta['validation'] ?? null) ? $rawMeta['validation'] : [];
+        $forceReport = isset($rawMeta['view'])
+            || isset($validation['view'])
+            || true === ($validation['display'] ?? false);
+
+        if (OperationStatus::Ready === $inspection->status && 0 === count($blockers) && !$forceReport) {
             return null;
         }
 

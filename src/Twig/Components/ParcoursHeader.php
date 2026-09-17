@@ -133,7 +133,10 @@ final class ParcoursHeader
     {
         $this->dpeParcours = GetDpeParcours::getFromParcours($this->parcours);
         $this->place = $this->getPlace();
-        $this->hasDemande = Access::isOuvert($this->dpeParcours);
+        $this->hasDemande = in_array($this->place, [
+            'en_cours_redaction',
+            'en_cours_redaction_ss_cfvu',
+        ], true) || Access::isOuvert($this->dpeParcours);
     }
 
     private function getPlace(): string

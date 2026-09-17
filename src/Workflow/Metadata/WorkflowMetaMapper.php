@@ -26,6 +26,10 @@ final class WorkflowMetaMapper
             $form = $this->mapForm($meta['form'], $label);
         }
 
+        $validation = is_array($meta['validation'] ?? null) ? $meta['validation'] : [];
+        $viewTemplate = $validation['view'] ?? $meta['view'] ?? null;
+        $validationStep = $validation['step'] ?? null;
+
         return new WorkflowTransitionMetaDto(
             label: $label,
             description: $description,
@@ -35,6 +39,8 @@ final class WorkflowMetaMapper
             recipients: $recipients,
             handlerCode: $handler,
             form: $form,
+            viewTemplate: is_string($viewTemplate) && '' !== trim($viewTemplate) ? $viewTemplate : null,
+            validationStep: is_string($validationStep) && '' !== trim($validationStep) ? $validationStep : null,
         );
     }
 

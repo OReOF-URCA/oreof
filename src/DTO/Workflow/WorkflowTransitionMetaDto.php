@@ -26,6 +26,8 @@ final class WorkflowTransitionMetaDto
 
         public readonly ?string           $handlerCode,
         public readonly ?ModalFormMetaDto $form,
+        public readonly ?string           $viewTemplate,
+        public readonly ?string           $validationStep,
     )
     {
     }
