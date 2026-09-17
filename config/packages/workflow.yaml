@@ -891,6 +891,7 @@ framework:
             type: reserver
             btn: warning
             icon: material-symbols:fact-check-outline-sharp
+            hasArgumentaire: true
             authorization: *change_rf_authorization
             context: &change_rf_reserve_context
               aliases:
@@ -920,6 +921,7 @@ framework:
             type: reserver
             btn: warning
             icon: material-symbols:fact-check-outline-sharp
+            hasArgumentaire: true
             hasDate: true
             authorization: *change_rf_authorization
             context: *change_rf_reserve_context

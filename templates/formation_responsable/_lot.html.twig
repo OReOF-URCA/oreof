@@ -1,4 +1,26 @@
-pour confirmation...
-{{ key }}
-{{ etape }}
-{{ transition }}
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+
+<div class="rounded-xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+    <p class="mb-4 text-sm text-secondary-700 dark:text-secondary-200">
+        Les données saisies seront appliquées à toutes les demandes sélectionnées.
+    </p>
+
+    {{ form_start(form, {
+        attr: {
+            id: 'change_rf_bulk_form',
+            'data-action': 'submit->validation--index#submitChangeRfLot'
+        }
+    }) }}
+        <input type="hidden" name="demandes" value="{{ demandes }}">
+        {{ form_widget(form) }}
+
+        <div class="mt-4 flex justify-end">
+            <twig:Button
+                type="submit"
+                variant="{{ meta.btn|default(key == 'reserver' ? 'warning' : 'success') }}"
+                label="{{ ('btn.validation.changeRf.'~transition)|trans({}, 'process') }}"
+                icon="{{ meta.icon|default('ph:check') }}"
+            />
+        </div>
+    {{ form_end(form) }}
+</div>
