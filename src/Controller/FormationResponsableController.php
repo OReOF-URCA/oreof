@@ -650,14 +650,21 @@ class FormationResponsableController extends BaseController
             return JsonReponse::success('La demande a bien été réservée.');
         }
 
-        return $this->render('formation_responsable/_reserve.html.twig', [
-            'demande' => $demande,
-            'process' => $process,
-            'etape' => $etape,
-            'processData' => $processData ?? null,
-            'meta' => $meta,
-            'transition' => $transition,
-        ]);
+        return $turboStream->streamOpenModalFromTemplates(
+            'Émettre une réserve',
+            $demande->getFormation() !== null
+                ? 'Dans : formation '.$demande->getFormation()->getDisplay()
+                : null,
+            'formation_responsable/_reserve.html.twig',
+            [
+                'demande' => $demande,
+                'process' => $process,
+                'etape' => $etape,
+                'processData' => $processData ?? null,
+                'meta' => $meta,
+                'transition' => $transition,
+            ],
+        );
     }
 
     private function operationErrorResponse(TurboStreamResponseFactory $turboStream, string $message): Response
