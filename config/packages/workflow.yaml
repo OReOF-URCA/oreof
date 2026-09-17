@@ -140,6 +140,10 @@ framework:
           to: 'soumis_parcours'
           #guard: "service('App\\\\Workflow\\\\Service\\\\ValidationService').canTransition(subject, 'soumis_parcours')"
           metadata:
+            validation:
+              step: soumis_parcours
+              display: true
+              view: 'parcours_v2/process/_validation_apply.html.twig'
             recipients: [ 'RF', 'CoRF' ]
             titre_with_parcours: "Le parcours %%s de votre formation %%s a été soumis à validation"
             titre: 'Un parcours de votre formation %%s a été soumis à validation'
@@ -154,6 +158,10 @@ framework:
           from: 'soumis_parcours'
           to: 'soumis_dpe_composante'
           metadata:
+            validation:
+              step: soumis_parcours
+              display: true
+              view: 'parcours_v2/process/_validation_apply.html.twig'
             recipients: [ 'DPE' ]
             titre_with_parcours: 'Le parcours %%s de la formation %%s a été validé par son responsable'
             titre: 'La formation %%s a été validée par son responsable'
@@ -191,6 +199,10 @@ framework:
           to: 'soumis_conseil'
           #          guard: "service('App\\\\Workflow\\\\Service\\\\ValidationService').canTransition(subject, 'soumis_conseil')"
           metadata:
+            validation:
+              step: soumis_conseil
+              display: true
+              view: 'parcours_v2/process/_validation_apply.html.twig'
             recipients: [ 'RF', 'CoRF', 'RP', 'CoRP' ]
             type: valider
             #            btn: success
@@ -282,6 +294,10 @@ framework:
           to: 'soumis_cfvu'
           #          guard: "service('App\\\\Workflow\\\\Service\\\\ValidationService').canTransition(subject, 'soumis_cfvu')"
           metadata:
+            validation:
+              step: soumis_cfvu
+              display: true
+              view: 'parcours_v2/process/_validation_apply.html.twig'
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a été validée par le SES'
             titre: 'La fiche de la formation %%s a été validée par le SES'
