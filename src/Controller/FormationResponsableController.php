@@ -429,6 +429,7 @@ class FormationResponsableController extends BaseController
         $form = $this->createForm(ChangeRfValidationType::class, null, [
             'meta' => $meta,
             'transition' => $transition,
+            'bulk' => true,
             'method' => 'POST',
         ]);
         $form->handleRequest($request);
@@ -451,7 +452,9 @@ class FormationResponsableController extends BaseController
             }
         }
 
-        $ids = array_filter(explode(',', (string) $request->request->get('demandes', '')));
+        $formData = (array) $form->getData();
+        $ids = array_filter(explode(',', (string) ($formData['demandes'] ?? '')));
+        unset($formData['demandes']);
         $processed = 0;
         $rejected = 0;
 
@@ -468,7 +471,7 @@ class FormationResponsableController extends BaseController
                     workflow: $this->changeRfWorkflow,
                     transitionName: $transition,
                     actor: $user,
-                    input: (array) $form->getData(),
+                    input: $formData,
                 );
                 $this->operationExecutor->execute($this->changeRfWorkflow, $demande, $transition, $context);
 
@@ -516,9 +519,12 @@ class FormationResponsableController extends BaseController
     {
         //on récupère la transition concernée et sa configuration pour construire le formulaire
         $meta = $this->validationProcess->getMetaFromTransition($transition);
+        $demandes = (string) $request->query->get('parcours', '');
         $form = $this->createForm(ChangeRfValidationType::class, null, [
             'meta' => $meta,
             'transition' => $transition,
+            'bulk' => true,
+            'demandes' => $demandes,
             'action' => $this->generateUrl('app_validation_change_rf_confirme_lot', [
                 'key' => $key,
                 'etape' => $etape,
@@ -533,7 +539,6 @@ class FormationResponsableController extends BaseController
             'transition' => $transition,
             'meta' => $meta,
             'form' => $form->createView(),
-            'demandes' => (string) $request->query->get('parcours', ''),
         ]);
     }
 

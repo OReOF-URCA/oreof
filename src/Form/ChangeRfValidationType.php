@@ -5,6 +5,7 @@ namespace App\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -20,6 +21,12 @@ class ChangeRfValidationType extends AbstractType
         $process = $options['process'] ?? null;
         $processData = $options['processData'] ?? null;
         $laisserPasserValue = $options['laisserPasser'] ?? null;
+
+        if ($options['bulk']) {
+            $builder->add('demandes', HiddenType::class, [
+                'data' => $options['demandes'],
+            ]);
+        }
 
         if (!empty($meta['hasDate'])) {
             $builder->add('date', DateType::class, [
@@ -113,8 +120,13 @@ class ChangeRfValidationType extends AbstractType
             'process' => null,
             'processData' => null,
             'laisserPasser' => null,
+            'bulk' => false,
+            'demandes' => '',
             'attr' => ['id' => 'modal_form'],
         ]);
+
+        $resolver->setAllowedTypes('bulk', 'bool');
+        $resolver->setAllowedTypes('demandes', 'string');
     }
 
     public function getBlockPrefix(): string
