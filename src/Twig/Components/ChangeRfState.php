@@ -26,13 +26,6 @@ final class ChangeRfState
     public string $place = '';
     public array $historiques = [];
 
-    public const TAB_PROCESS = [
-        'changeRf.soumis_conseil' => 0,
-        'changeRf.soumis_ses' => 1,
-        'changeRf.soumis_cfvu' => 2,
-        'changeRf.attente_pv' => 2,
-    ];
-
     public function __construct(
         private readonly HistoriqueFormationRepository $historiqueFormationRepository,
         private readonly WorkflowInterface $changeRfWorkflow,
@@ -133,15 +126,23 @@ final class ChangeRfState
 
     public function getHistoriques(ChangeRf $changeRf): array
     {
-        $historiques = $this->historiqueFormationRepository->findBy(['changeRf' => $changeRf], ['created' => 'ASC']);
+        $this->historiques = [];
+        $currentPlace = $this->getPlace($changeRf);
+        $orderedPlaces = array_keys($this->process);
+        $currentIndex = array_search($currentPlace, $orderedPlaces, true);
 
-        foreach ($historiques as $historique) {
-            if (str_starts_with($historique->getEtape(), 'changeRf.')) {
-                if (self::TAB_PROCESS[$historique->getEtape()] < self::TAB_PROCESS['changeRf.'.$this->getPlace($changeRf)]) {
-                    $this->historiques[$historique->getEtape()] = $historique;
-                }
+        foreach ($this->historiqueFormationRepository->findBy(['changeRf' => $changeRf], ['created' => 'ASC']) as $historique) {
+            if (!str_starts_with($historique->getEtape(), 'changeRf.')) {
+                continue;
+            }
+
+            $place = substr($historique->getEtape(), strlen('changeRf.'));
+            $placeIndex = array_search($place, $orderedPlaces, true);
+            if (false !== $placeIndex && (false === $currentIndex || $placeIndex < $currentIndex)) {
+                $this->historiques[$historique->getEtape()] = $historique;
             }
         }
+
         return $this->historiques;
     }
 }
