@@ -53,6 +53,8 @@ class ExportEc implements ExportInterface
         $this->excelWriter->writeCellXY(10, 1, 'Fiche EC/matière');
         $this->excelWriter->writeCellXY(11, 1, 'Type EC');
         $this->excelWriter->writeCellXY(12, 1, 'Référent');
+        $this->excelWriter->writeCellXY(13, 1, 'Identifiant');
+        $this->excelWriter->writeCellXY(14, 1, 'Type du Parcours');
 
         $ligne = 2;
         /** @var ElementConstitutif $ec */
@@ -74,8 +76,17 @@ class ExportEc implements ExportInterface
             $this->excelWriter->writeCellXY(10, $ligne, $ec->getFicheMatiere()?->getLibelle());
             $this->excelWriter->writeCellXY(11, $ligne, $ec->getTypeEc()?->getType()->value);
             $this->excelWriter->writeCellXY(12, $ligne, $ec->getFicheMatiere()?->getResponsableFicheMatiere() !== null ? $ec->getFicheMatiere()?->getResponsableFicheMatiere()?->getDisplay() : 'Non défini - RP ou RF');
+            $this->excelWriter->writeCellXY(13, $ligne, $ec->getParcours()->getId() ?? "");
 
-            $this->excelWriter->getColumnsAutoSize('A', 'M');
+            $typeParcoursTxt = "";
+            if($ec->getParcours() !== null) {
+                if($ec->getParcours()->getTypeParcours()->value !== 'classique') {
+                    $typeParcoursTxt = $ec->getParcours()->getTypeParcours()->libelle();
+                }
+            }
+            $this->excelWriter->writeCellXY(14, $ligne, $typeParcoursTxt);
+
+            $this->excelWriter->getColumnsAutoSize('A', 'R');
             $ligne++;
         }
 
