@@ -236,6 +236,7 @@ class ParcoursProcessController extends BaseController
 
                     $operationInput = $formData;
                     unset($operationInput['uploadPv'], $operationInput['uploadArgumentaire']);
+                    $previousPlace = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
 
                     $this->operationExecutor->execute(
                         $this->dpeParcoursWorkflow,
@@ -246,18 +247,16 @@ class ParcoursProcessController extends BaseController
                             transitionName: $transition,
                             actor: $user,
                             input: $operationInput,
-                        ),
+                        )->withRuntime(['previous_place' => $previousPlace]),
                     );
 
                     $pv = $this->uploadOperationFile($formData['uploadPv'] ?? null);
                     $note = $this->uploadOperationFile($formData['uploadArgumentaire'] ?? null);
 
-                    // l'étape c'est la clé du tableau $dpeParcours->getEtatValidation()
-                    $etape = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
                     $histoEvent = new HistoriqueParcoursEvent(
                         $dpeParcours->getParcours(),
                         $user,
-                        $etape,
+                        $previousPlace,
                         $metaDto->type,
                         $request,
                         $pv['stored'] ?? null,
@@ -432,6 +431,8 @@ class ParcoursProcessController extends BaseController
                             continue;
                         }
 
+                        $previousPlace = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
+
                         $this->operationExecutor->execute(
                             $this->dpeParcoursWorkflow,
                             $dpeParcours,
@@ -441,11 +442,17 @@ class ParcoursProcessController extends BaseController
                                 transitionName: $transition,
                                 actor: $user,
                                 input: $formData,
-                            ),
+                            )->withRuntime(['previous_place' => $previousPlace]),
                         );
 
-                        $etape = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
-                        $histoEvent = new HistoriqueParcoursEvent($dpeParcours->getParcours(), $user, $etape, $metaDto->type, $request);
+                        $histoEvent = new HistoriqueParcoursEvent(
+                            $dpeParcours->getParcours(),
+                            $user,
+                            $previousPlace,
+                            $metaDto->type,
+                            $request,
+                            input: $formData,
+                        );
                         $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
 
                         $parcours = $dpeParcours->getParcours();
