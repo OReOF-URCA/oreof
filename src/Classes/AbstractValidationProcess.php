@@ -15,7 +15,7 @@ abstract class AbstractValidationProcess
 {
     // Minimal metadata contract expected by process controllers.
     public const REQUIRED_PLACE_META_KEYS = ['label', 'process', 'color'];
-    public const REQUIRED_TRANSITION_META_KEYS = ['type', 'button_class', 'button_icon', 'handler', 'form'];
+    public const REQUIRED_TRANSITION_META_KEYS = ['type', 'button_class', 'button_icon', 'form'];
 
     protected array $process = [];
     protected array $processAll = [];
@@ -94,6 +94,8 @@ abstract class AbstractValidationProcess
             'handler',
             'description',
             'recipients',
+            'view',
+            'validation',
             'form',
         ];
     }
@@ -130,6 +132,8 @@ abstract class AbstractValidationProcess
             'handler' => null,
             'description' => null,
             'recipients' => [],
+            'view' => null,
+            'validation' => [],
             'form' => [],
         ]);
 
@@ -146,6 +150,8 @@ abstract class AbstractValidationProcess
         $resolver->setAllowedTypes('handler', ['null', 'string']);
         $resolver->setAllowedTypes('description', ['null', 'string']);
         $resolver->setAllowedTypes('recipients', 'array');
+        $resolver->setAllowedTypes('view', ['null', 'string']);
+        $resolver->setAllowedTypes('validation', 'array');
         $resolver->setAllowedTypes('form', 'array');
 
         return $resolver;
