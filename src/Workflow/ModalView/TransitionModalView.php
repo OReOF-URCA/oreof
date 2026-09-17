@@ -13,7 +13,13 @@ namespace App\Workflow\ModalView;
 final class TransitionModalView
 {
     /**
-     * @param list<array{level:string,message:string}> $messages
+     * @param list<array{
+     *     level: string,
+     *     code: string,
+     *     message: string,
+     *     path: ?string,
+     *     parameters: array<string, mixed>
+     * }> $messages
      */
     public function __construct(
         public readonly string $mode, // 'form' | 'report'

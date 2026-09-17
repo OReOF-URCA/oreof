@@ -11,36 +11,49 @@
 namespace App\Workflow\ModalView;
 
 use App\Entity\DpeParcours;
+use Dannebicque\WorkflowOperationsBundle\Model\BlockerSeverity;
+use Dannebicque\WorkflowOperationsBundle\Operation\OperationBlockerCollector;
+use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationFactory;
+use Symfony\Component\Workflow\WorkflowInterface;
 
 final class TransitionModalViewBuilder
 {
     public function __construct(
-        // injecte ton service de validation
-        // private readonly ParcoursValidationService $validationService,
+        private readonly WorkflowInterface $dpeParcoursWorkflow,
+        private readonly WorkflowOperationFactory $operationFactory,
+        private readonly OperationBlockerCollector $blockerCollector,
     )
     {
     }
 
     public function build(string $transition, DpeParcours $dpeParcours, array $rawMeta): ?TransitionModalView
     {
-        // Si on a une entrée view dans les métadata on veut une vue. view contiendra les verifs et éventuellement le template
-        if (isset($rawMeta['view'])) {
+        $operation = $this->operationFactory->create($this->dpeParcoursWorkflow, $transition);
+        $blockers = $this->blockerCollector->collect($dpeParcours, $operation);
 
-            // TODO: remplace par ton service
-            $messages = [
-                // ['level' => 'error', 'message' => 'UE 3: MCCC manquantes'],
-                // ['level' => 'warning', 'message' => 'Description partielle'],
-            ];
-
-            $canSubmit = !array_filter($messages, fn($m) => $m['level'] === 'error');
-
-            return new TransitionModalView(
-                mode: 'report',
-                canSubmit: $canSubmit,
-                messages: $messages
-            );
+        if (0 === count($blockers) && !isset($rawMeta['view'])) {
+            return null;
         }
 
-        return null; // => affichage normal du form
+        $messages = [];
+        foreach ($blockers as $blocker) {
+            $messages[] = [
+                'level' => match ($blocker->severity) {
+                    BlockerSeverity::Error => 'error',
+                    BlockerSeverity::Warning => 'warning',
+                    BlockerSeverity::Information => 'information',
+                },
+                'code' => $blocker->code,
+                'message' => $blocker->message,
+                'path' => $blocker->path,
+                'parameters' => $blocker->parameters,
+            ];
+        }
+
+        return new TransitionModalView(
+            mode: 'report',
+            canSubmit: !$blockers->hasBlockingItems(),
+            messages: $messages,
+        );
     }
 }
