@@ -1,28 +1,37 @@
-<div class="relative" data-controller="navbar-dropdown"
-     data-action="click@window->navbar-dropdown#close">
+<div class="relative h-full flex items-center" data-controller="navbar-dropdown"
+     data-action="mouseenter->navbar-dropdown#open mouseleave->navbar-dropdown#close click@window->navbar-dropdown#close">
     {% if item.route %}
-        <button data-action="click->navbar-dropdown#toggle"
-                class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium">
-            <a href="{{ path(item.route, item.routeParams) }}">
-                {{ item.label|trans({}, 'menu') }}
-            </a>
-            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M19 9l-7 7-7-7"></path>
-            </svg>
-        </button>
+        <a href="{{ path(item.route, item.routeParams) }}"
+           class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium transition">
+            {{ item.label|trans({}, 'menu') }}
+            {% if item.children is not empty %}
+                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 9l-7 7-7-7"></path>
+                </svg>
+            {% endif %}
+        </a>
     {% else %}
-        <span>{{ item.label|trans({}, 'menu') }}</span>
+        <span class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium cursor-default">
+            {{ item.label|trans({}, 'menu') }}
+            {% if item.children is not empty %}
+                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 9l-7 7-7-7"></path>
+                </svg>
+            {% endif %}
+        </span>
     {% endif %}
 
     {% if item.children is not empty %}
         <div data-navbar-dropdown-target="content"
-             class="hidden absolute left-0 mt-2 w-48 bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2">
-            {% for child in item.children %}
-                <a href="{{ path(child.route, child.routeParams) }}"
-                   class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800">
-                    {{ child.label|trans({}, 'menu') }}
-                </a>
-            {% endfor %}
+             class="hidden absolute left-0 top-full pt-1 w-48 z-50">
+            <div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2">
+                {% for child in item.children %}
+                    <a href="{{ path(child.route, child.routeParams) }}"
+                       class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800 transition">
+                        {{ child.label|trans({}, 'menu') }}
+                    </a>
+                {% endfor %}
+            </div>
         </div>
     {% endif %}
 </div>

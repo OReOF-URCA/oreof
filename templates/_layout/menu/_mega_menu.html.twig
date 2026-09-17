@@ -7,20 +7,31 @@
     }) %}
 {% endfor %}
 
-<div class="static" data-controller="navbar-dropdown"
-     data-action="click@window->navbar-dropdown#close">
-    <button data-action="click->navbar-dropdown#toggle"
-            class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium">
-        <a href="{{ path(item.route, item.routeParams) }}">
+<div class="static h-full flex items-center" data-controller="navbar-dropdown"
+     data-action="mouseenter->navbar-dropdown#open mouseleave->navbar-dropdown#close click@window->navbar-dropdown#close">
+    {% if item.route %}
+        <a href="{{ path(item.route, item.routeParams) }}"
+           class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium transition">
             {{ item.label|trans({}, 'menu') }}
+            {% if item.children is not empty %}
+                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 9l-7 7-7-7"></path>
+                </svg>
+            {% endif %}
         </a>
-        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19 9l-7 7-7-7"></path>
-        </svg>
-    </button>
+    {% else %}
+        <span class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium cursor-default">
+            {{ item.label|trans({}, 'menu') }}
+            {% if item.children is not empty %}
+                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 9l-7 7-7-7"></path>
+                </svg>
+            {% endif %}
+        </span>
+    {% endif %}
 
     <div data-navbar-dropdown-target="content"
-         class="hidden absolute inset-x-0 top-16 bg-surface border-b border-secondary-200 dark:border-secondary-700 shadow-2xl overflow-hidden">
+         class="hidden absolute inset-x-0 top-16 bg-surface border-b border-secondary-200 dark:border-secondary-700 shadow-2xl overflow-hidden z-50">
         <div class="max-w-7xl mx-auto grid grid-cols-{{ columns|length }} gap-8 p-8">
             {% for columnLabel, children in columns %}
                 <div>
