@@ -92,7 +92,7 @@ class FormationResponsableController extends BaseController
 
             $newRf = new \App\Entity\ChangeRf();
             $newRf->setCampagneCollecte($this->getCampagneCollecte());
-            $newRf->setFormation($formation);
+            $formation->addChangeRf($newRf);
             $newRf->setNouveauResponsable($user);
             $newRf->setTypeRf($datas->getTypeRf());
             $newRf->setDatePriseFonction($datas->getDatePriseFonction());
