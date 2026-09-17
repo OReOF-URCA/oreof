@@ -291,7 +291,7 @@ class ParcoursProcessController extends BaseController
         return $turboStream->streamOpenModalFromTemplates(
             'modal_title.' . $transition . '.' . $metaDto->type,
             'Parcours : ' . $dpeParcours->getParcours()?->getDisplay(),
-            'parcours_v2/process/_apply.html.twig',
+            $metaDto->viewTemplate ?? 'parcours_v2/process/_apply.html.twig',
             [
                 'dpeParcours' => $dpeParcours,
                 'metaDto' => $metaDto,
