@@ -39,6 +39,7 @@
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>tests</directory>
+            <directory>packages/workflow-operations-bundle/tests</directory>
         </testsuite>
     </testsuites>
 

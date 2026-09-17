@@ -25,9 +25,9 @@ final readonly class OperationContext
     public function workflowContext(): array
     {
         return [
+            ...$this->metadata,
             'actor' => $this->actor,
             'input' => $this->input,
-            ...$this->metadata,
         ];
     }
 }

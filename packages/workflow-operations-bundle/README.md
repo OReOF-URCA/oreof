@@ -12,3 +12,5 @@ It is developed inside ORéOF while keeping a strict boundary from the applicati
 - progressively centralize authorization, inspection and execution.
 
 Forms, Doctrine persistence, notifications and ORéOF business rules remain outside the initial core.
+
+During its incubation inside ORéOF, the package namespace is exposed by the root Composer autoloader. The package keeps its own `composer.json` so it can be moved to a path repository or extracted without reorganizing its sources.

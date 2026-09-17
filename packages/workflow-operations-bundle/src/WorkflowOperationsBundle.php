@@ -23,6 +23,7 @@ final class WorkflowOperationsBundle extends AbstractBundle
                 ->autoconfigure()
             ->set(Operation\OperationBlockerCollector::class)
                 ->args([tagged_iterator('workflow_operations.blocker_provider')])
+            ->set(Operation\WorkflowOperationFactory::class)
         ;
     }
 }

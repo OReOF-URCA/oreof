@@ -6,7 +6,7 @@ namespace Dannebicque\WorkflowOperationsBundle\Model;
 
 final readonly class OperationBlocker
 {
-    /** @param array<string, scalar|null> $parameters */
+    /** @param array<string, mixed> $parameters */
     public function __construct(
         public string $code,
         public string $message,
