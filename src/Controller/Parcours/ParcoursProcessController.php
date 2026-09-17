@@ -21,6 +21,7 @@ use App\Workflow\Metadata\WorkflowMetaMapper;
 use App\Workflow\ModalView\TransitionModalViewBuilder;
 use Dannebicque\WorkflowOperationsBundle\Operation\OperationContextNormalizer;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -42,6 +43,7 @@ class ParcoursProcessController extends BaseController
         private TransitionModalViewBuilder $transitionModalViewBuilder,
         private WorkflowOperationExecutor  $operationExecutor,
         private OperationContextNormalizer $operationContextNormalizer,
+        private EntityManagerInterface       $entityManager,
         #[Target('dpeParcours')]
         private WorkflowInterface          $dpeParcoursWorkflow,
         private readonly EventDispatcherInterface      $eventDispatcher,
@@ -245,6 +247,7 @@ class ParcoursProcessController extends BaseController
                     $etape = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
                     $histoEvent = new HistoriqueParcoursEvent($dpeParcours->getParcours(), $user, $etape, $metaDto->type, $request);
                     $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
+                    $this->entityManager->flush();
 
                 } catch (\Throwable $e) {
                     return $turboStream->stream('parcours_v2/turbo/apply_error.stream.html.twig', [
@@ -435,6 +438,8 @@ class ParcoursProcessController extends BaseController
                         ];
                         ++$processedCount;
                     }
+
+                    $this->entityManager->flush();
 
                     return $turboStream->stream('parcours_v2/turbo/apply_lot_success.stream.html.twig', [
                         'transition' => $transition,
