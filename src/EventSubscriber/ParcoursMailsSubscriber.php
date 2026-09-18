@@ -11,11 +11,11 @@ namespace App\EventSubscriber;
 
 use App\Classes\Mailer;
 use App\Events\ParcoursEvent;
-use App\EventSubscriber\DpeWorkflow\AbstractDpeMailSubscriber;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class ParcoursMailsSubscriber extends AbstractDpeMailSubscriber implements EventSubscriberInterface
+class ParcoursMailsSubscriber implements EventSubscriberInterface
 {
+    private const EMAIL_CENTRAL = 'cfvu-secretariat@univ-reims.fr';
 
     public function __construct(
         protected Mailer $myMailer
@@ -55,3 +55,4 @@ class ParcoursMailsSubscriber extends AbstractDpeMailSubscriber implements Event
         );
     }
 }
+
