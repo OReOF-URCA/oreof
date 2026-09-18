@@ -75,11 +75,17 @@ final class WorkflowMetaMapper
             );
         }
 
+        $rulesRaw = $form['rules'] ?? [];
+        $rules = is_array($rulesRaw)
+            ? array_values(array_filter($rulesRaw, static fn (mixed $rule): bool => is_array($rule)))
+            : [];
+
         return new ModalFormMetaDto(
             title: $title,
             submitLabel: $submitLabel,
             formId: $formId,
             fields: $fields,
+            rules: $rules,
         );
     }
 }
