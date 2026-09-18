@@ -21,6 +21,7 @@ framework:
 
         routing:
             'App\Message\Export': async_export
+            'App\Message\GenerateDpeMcccBackup': async_export
             'App\Message\ChangeRfWorkflowNotification': async_email
             'App\Message\WorkflowEmailNotification': async_email
 

@@ -7,15 +7,19 @@ namespace App\Workflow\Operation\Handler;
 use App\Entity\DpeParcours;
 use App\Enums\EtatDpeEnum;
 use App\Enums\TypeModificationDpeEnum;
+use App\Message\GenerateDpeMcccBackup;
 use App\Repository\DpeDemandeRepository;
 use Dannebicque\WorkflowOperationsBundle\Contract\OperationCompletionHandlerInterface;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationContext;
 use Dannebicque\WorkflowOperationsBundle\Model\WorkflowOperation;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 final readonly class DpeParcoursOperationCompletionHandler implements OperationCompletionHandlerInterface
 {
-    public function __construct(private DpeDemandeRepository $dpeDemandeRepository)
-    {
+    public function __construct(
+        private DpeDemandeRepository $dpeDemandeRepository,
+        private MessageBusInterface $messageBus,
+    ) {
     }
 
     public function supports(object $subject, WorkflowOperation $operation): bool
@@ -34,6 +38,10 @@ final readonly class DpeParcoursOperationCompletionHandler implements OperationC
                 DpeParcours::class,
                 get_debug_type($subject),
             ));
+        }
+
+        if ('valider_cfvu' === $operation->transitionName && null !== $subject->getId()) {
+            $this->messageBus->dispatch(new GenerateDpeMcccBackup($subject->getId()));
         }
 
         $previousPlace = $context->runtime['previous_place'] ?? null;
