@@ -2,10 +2,8 @@
 
 namespace App\Twig\Components;
 
-use App\Classes\Process\FicheMatiereProcess;
 use App\Classes\ValidationProcessFicheMatiere;
 use App\Entity\FicheMatiere;
-use App\Enums\TypeModificationDpeEnum;
 use App\Repository\HistoriqueFicheMatiereRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -49,8 +47,7 @@ final class FicheMatiereHeader
         #[Target('fiche')]
         protected WorkflowInterface                       $ficheWorkflow
 
-    )
-    {
+    ) {
         $this->process = $this->validationProcess->getProcess();
     }
 
@@ -81,9 +78,8 @@ final class FicheMatiereHeader
 
     private function init(): void
     {
-        $this->hasDemande = $this->ficheMatiere?->getEtatValidation() === null || array_key_exists('en_cours_redaction', $this->ficheMatiere->getEtatValidation());
-
         $this->place = $this->getPlace();
+        $this->hasDemande = 'en_cours_redaction' === $this->place;
     }
 
     private function getPlace(): string
@@ -122,6 +118,29 @@ final class FicheMatiereHeader
         }
 
         $this->historiques = $map;
+
+        $ordered = array_keys($this->process);
+        $currentIndex = array_search($this->place, $ordered, true);
+
+        $this->validationSteps = [];
+        foreach ($ordered as $index => $stepKey) {
+            $metadata = $this->process[$stepKey] ?? [];
+            $status = 'pending';
+
+            if ($currentIndex === false) {
+                $status = isset($this->historiques[$stepKey]) ? 'completed' : 'pending';
+            } elseif ($index < $currentIndex) {
+                $status = isset($this->historiques[$stepKey]) ? 'completed' : 'pending';
+            } elseif ($index === $currentIndex) {
+                $status = 'active';
+            }
+
+            $this->validationSteps[$stepKey] = [
+                'key' => $stepKey,
+                'label' => is_array($metadata) ? ($metadata['label'] ?? $stepKey) : $stepKey,
+                'status' => $status,
+            ];
+        }
     }
 
 }

@@ -172,14 +172,14 @@
 
         {# ── État (verrouillée / en modification) + Avancement process ── #}
         <section class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div class="flex items-center gap-3 rounded-2xl border px-4 py-3 shadow-sm {{ hasDemande ? 'border-success-200 bg-success-50 text-success-800 dark:border-success-800/70 dark:bg-success-500/10 dark:text-success-300' : 'border-warning-200 bg-warning-50 text-warning-800 dark:border-warning-800/70 dark:bg-warning-500/10 dark:text-warning-300' }}">
-                <div class="flex h-10 w-10 items-center justify-center rounded-full {{ hasDemande ? 'bg-success-100 text-success-700 dark:bg-success-500/15 dark:text-success-300' : 'bg-warning-100 text-warning-700 dark:bg-warning-500/15 dark:text-warning-300' }}"
+            <div class="flex items-center gap-3 rounded-2xl border px-4 py-3 shadow-sm {{ this.hasDemande ? 'border-success-200 bg-success-50 text-success-800 dark:border-success-800/70 dark:bg-success-500/10 dark:text-success-300' : 'border-warning-200 bg-warning-50 text-warning-800 dark:border-warning-800/70 dark:bg-warning-500/10 dark:text-warning-300' }}">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full {{ this.hasDemande ? 'bg-success-100 text-success-700 dark:bg-success-500/15 dark:text-success-300' : 'bg-warning-100 text-warning-700 dark:bg-warning-500/15 dark:text-warning-300' }}"
                      data-controller="tooltip" data-tooltip-placement-value="bottom"
-                     data-bs-original-title="{{ hasDemande ? 'Fiche matière en cours de modification.' : 'Fiche matière verrouillée.' }}">
-                    {{ ux_icon(hasDemande ? 'icon:unlock' : 'icon:lock', {class: 'h-4 w-4'}) }}
+                     data-bs-original-title="{{ this.hasDemande ? 'Fiche matière en cours de modification.' : 'Fiche matière verrouillée.' }}">
+                    {{ ux_icon(this.hasDemande ? 'icon:unlock' : 'icon:lock', {class: 'h-4 w-4'}) }}
                 </div>
                 <div>
-                    <p class="text-sm font-semibold">{{ hasDemande ? 'Fiche matière en cours de modification.' : 'Fiche matière verrouillée.' }}</p>
+                    <p class="text-sm font-semibold">{{ this.hasDemande ? 'Fiche matière en cours de modification.' : 'Fiche matière verrouillée.' }}</p>
                     <p class="text-xs opacity-80">Suivez l'avancement et les actions disponibles pour cette fiche.</p>
                 </div>
             </div>
@@ -189,13 +189,13 @@
                     Avancement du process</p>
                 <div class="flex flex-wrap items-center justify-center gap-2">
                     {% for key, step in processSteps %}
-                        {% if validationSteps[key] is defined and validationSteps[key].status == 'completed' %}
+                        {% if this.validationSteps[key] is defined and this.validationSteps[key].status == 'completed' %}
                             {% set state = 'completed' %}
-                        {% elseif validationSteps[key] is defined and validationSteps[key].status == 'active' %}
+                        {% elseif this.validationSteps[key] is defined and this.validationSteps[key].status == 'active' %}
                             {% set state = 'active' %}
-                        {% elseif validationSteps[key] is defined and validationSteps[key].status == 'reserved' %}
+                        {% elseif this.validationSteps[key] is defined and this.validationSteps[key].status == 'reserved' %}
                             {% set state = 'reserved' %}
-                        {% elseif validationSteps[key] is defined and validationSteps[key].status == 'refused' %}
+                        {% elseif this.validationSteps[key] is defined and this.validationSteps[key].status == 'refused' %}
                             {% set state = 'refused' %}
                         {% else %}
                             {% set state = 'pending' %}

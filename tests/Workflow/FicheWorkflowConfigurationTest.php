@@ -63,4 +63,26 @@ final class FicheWorkflowConfigurationTest extends KernelTestCase
             self::assertSame('motif', $metadata['context']['aliases']['argumentaire'] ?? null);
         }
     }
+
+    public function testOnlyForwardValidationTransitionsDisplayTheValidationReport(): void
+    {
+        self::bootKernel();
+        $workflow = self::getContainer()->get('workflow.fiche');
+        self::assertInstanceOf(WorkflowInterface::class, $workflow);
+
+        $metadataByTransition = [];
+        foreach ($workflow->getDefinition()->getTransitions() as $transition) {
+            $metadataByTransition[$transition->getName()] = $workflow
+                ->getMetadataStore()
+                ->getTransitionMetadata($transition);
+        }
+
+        foreach (['valider_fiche_compo', 'valider_fiche_ses', 'publier'] as $transition) {
+            self::assertTrue($metadataByTransition[$transition]['validation']['display'] ?? false);
+        }
+
+        foreach (['rouvrir_fiche_matiere', 'rouvrir_fiche_matiere_b'] as $transition) {
+            self::assertFalse($metadataByTransition[$transition]['validation']['display'] ?? false);
+        }
+    }
 }

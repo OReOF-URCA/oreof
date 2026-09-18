@@ -722,6 +722,8 @@ framework:
           from: 'en_cours_redaction'
           to: 'soumis_central'
           metadata:
+            validation:
+              display: true
             button_class: 'success'
             button_icon: 'ph:list-checks-fill'
             type: valider
@@ -731,6 +733,8 @@ framework:
           from: 'soumis_central'
           to: 'valide_pour_publication'
           metadata:
+            validation:
+              display: true
             button_class: 'success'
             button_icon: 'mdi:stamper'
             type: valider
@@ -752,6 +756,8 @@ framework:
           from: 'valide_pour_publication'
           to: 'publie'
           metadata:
+            validation:
+              display: true
             type: valider
             button_class: 'success'
             button_icon: 'mdi:stamper'
