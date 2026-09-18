@@ -1,0 +1,117 @@
+{# Matrice d'avancement par Composante (1B) #}
+<div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-2xl shadow-sm overflow-hidden space-y-4">
+    <div class="p-5 border-b border-secondary-200 dark:border-secondary-700 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph ph-buildings text-primary"></i>
+                Matrice d'Avancement par Composante
+            </h3>
+            <p class="text-xs text-slate-500">Vue comparative de l'avancement des parcours pour chaque UFR, École et Institut.</p>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 bg-surface px-3 py-1.5 rounded-lg border border-secondary-200 dark:border-secondary-700">
+            {{ matrix|length }} composante(s) avec offre
+        </div>
+    </div>
+
+    <div class="overflow-x-auto px-4 pb-4">
+        <table class="w-full text-left border-collapse text-xs">
+            <thead>
+                <tr class="bg-slate-100/70 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-semibold border-b border-secondary-200 dark:border-secondary-700">
+                    <th class="py-3 px-4">Composante</th>
+                    <th class="py-3 px-4 text-center">Avancement Global</th>
+                    <th class="py-3 px-4 text-center">En Rédaction</th>
+                    <th class="py-3 px-4 text-center">Validation Locale</th>
+                    <th class="py-3 px-4 text-center">Validation Centrale</th>
+                    <th class="py-3 px-4 text-center">CFVU / Publié</th>
+                    <th class="py-3 px-4 text-center">Réserves</th>
+                    <th class="py-3 px-4 text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800 text-slate-700 dark:text-slate-300">
+                {% for row in matrix %}
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                        <td class="py-3.5 px-4">
+                            <div class="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                                {{ row.composante.libelle }}
+                            </div>
+                            <span class="text-[11px] text-slate-500 font-mono">
+                                {{ row.composante.sigle|default(row.composante.code) }}
+                            </span>
+                        </td>
+
+                        <td class="py-3.5 px-4 w-52">
+                            <div class="space-y-1.5">
+                                <div class="flex items-center justify-between text-xs font-bold">
+                                    <span class="{% if row.statusVariant == 'success' %}text-emerald-600 dark:text-emerald-400{% elseif row.statusVariant == 'warning' %}text-amber-600 dark:text-amber-400{% else %}text-rose-600 dark:text-rose-400{% endif %}">
+                                        {{ row.progressPercent }}%
+                                    </span>
+                                    <span class="text-[11px] text-slate-400 font-normal">
+                                        {{ row.validatedCount }} / {{ row.totalParcours }}
+                                    </span>
+                                </div>
+                                <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                    <div class="h-full rounded-full transition-all duration-500 {% if row.statusVariant == 'success' %}bg-emerald-500{% elseif row.statusVariant == 'warning' %}bg-amber-500{% else %}bg-rose-500{% endif %}"
+                                         style="width: {{ row.progressPercent }}%"></div>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td class="py-3.5 px-4 text-center font-semibold text-slate-700 dark:text-slate-300">
+                            {% if row.phaseCounts.redaction > 0 %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                                    {{ row.phaseCounts.redaction }}
+                                </span>
+                            {% else %}
+                                <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4 text-center font-semibold text-slate-700 dark:text-slate-300">
+                            {% if row.phaseCounts.locale > 0 %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300">
+                                    {{ row.phaseCounts.locale }}
+                                </span>
+                            {% else %}
+                                <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4 text-center font-semibold text-slate-700 dark:text-slate-300">
+                            {% if row.phaseCounts.centrale > 0 %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300">
+                                    {{ row.phaseCounts.centrale }}
+                                </span>
+                            {% else %}
+                                <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4 text-center font-semibold text-slate-700 dark:text-slate-300">
+                            {% if row.phaseCounts.cfvu_publie > 0 %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                                    {{ row.phaseCounts.cfvu_publie }}
+                                </span>
+                            {% else %}
+                                <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4 text-center font-semibold">
+                            {% if row.phaseCounts.reserves > 0 %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300">
+                                    {{ row.phaseCounts.reserves }}
+                                </span>
+                            {% else %}
+                                <span class="text-slate-400">-</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4 text-right font-bold text-slate-900 dark:text-slate-100 text-sm">
+                            {{ row.totalParcours }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

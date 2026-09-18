@@ -51,6 +51,12 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
             icon: 'chart-bar',
             children: [
                 MenuItem::link(
+                    'pilotage.tour_de_controle',
+                    'menu.admin.tour_de_controle',
+                    'app_admin_pilotage_campagne_index',
+                ),
+
+                MenuItem::link(
                     'pilotage.consulter_offre',
                     'menu.admin.consulter_offre',
                     'structure_composante_index',

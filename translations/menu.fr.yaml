@@ -9,6 +9,7 @@ menu:
   exports: Exports
   admin:
     pilotage: Pilotage
+    tour_de_controle: Tour de contrôle & SLA
     consulter_offre: Consulter l'offre de formation
     gestion_offre: Gestion de l'offre et capacités
     dpe_ouverts: DPE ouverts
