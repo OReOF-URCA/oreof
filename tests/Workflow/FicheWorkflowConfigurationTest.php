@@ -11,6 +11,23 @@ use Symfony\Component\Workflow\WorkflowInterface;
 
 final class FicheWorkflowConfigurationTest extends KernelTestCase
 {
+    public function testEveryTransitionDeclaresItsDisplayType(): void
+    {
+        self::bootKernel();
+        $workflow = self::getContainer()->get('workflow.fiche');
+        self::assertInstanceOf(WorkflowInterface::class, $workflow);
+
+        foreach ($workflow->getDefinition()->getTransitions() as $transition) {
+            $metadata = $workflow->getMetadataStore()->getTransitionMetadata($transition);
+
+            self::assertContains(
+                $metadata['type'] ?? null,
+                ['valider', 'reserver', 'refuser'],
+                sprintf('La transition %s ne déclare pas son type d\'affichage.', $transition->getName()),
+            );
+        }
+    }
+
     public function testEveryTransitionUsesTheFicheOperationVoter(): void
     {
         self::bootKernel();

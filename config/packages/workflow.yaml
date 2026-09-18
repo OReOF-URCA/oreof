@@ -772,6 +772,7 @@ framework:
           from: 'soumis_central'
           to: 'en_cours_redaction'
           metadata:
+            type: valider
             button_class: 'warning'
             button_icon: 'flowbite:edit-outline'
             form:
