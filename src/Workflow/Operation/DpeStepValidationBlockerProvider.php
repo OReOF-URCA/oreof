@@ -71,17 +71,12 @@ final readonly class DpeStepValidationBlockerProvider implements OperationBlocke
     private function resolveValidationStep(WorkflowOperation $operation): ?string
     {
         $configuration = $operation->metadata['validation'] ?? null;
-        if (is_array($configuration)) {
-            if (false === ($configuration['enabled'] ?? true)) {
-                return null;
-            }
-
-            $step = $configuration['step'] ?? null;
-            if (is_string($step) && '' !== trim($step)) {
-                return $step;
-            }
+        if (!is_array($configuration) || false === ($configuration['enabled'] ?? true)) {
+            return null;
         }
 
-        return $operation->primaryTargetPlace();
+        $step = $configuration['step'] ?? null;
+
+        return is_string($step) && '' !== trim($step) ? $step : null;
     }
 }
