@@ -226,7 +226,16 @@ class ParcoursProcessController extends BaseController
         if ($form->isSubmitted()) {
             // Blocage “report”
             if ($view?->mode === 'report' && $view?->canSubmit === false) {
-                return $turboStream->streamToastError('Le traitement est bloqué par un contrôle.', false);
+                $message = implode(' ', array_column($view->messages, 'message'));
+
+                return $turboStream->stream('parcours_v2/turbo/apply_error.stream.html.twig', [
+                    'dpeParcours' => $dpeParcours,
+                    'transition' => $transition,
+                    'type' => $metaDto->type,
+                    'message' => '' !== trim($message)
+                        ? $message
+                        : 'Le traitement est bloqué par un contrôle.',
+                ]);
             }
 
             if ($form->isValid()) {
