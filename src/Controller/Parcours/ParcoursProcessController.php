@@ -232,7 +232,7 @@ class ParcoursProcessController extends BaseController
             if ($form->isValid()) {
                 try {
                     $user = $this->getCurrentUserOrFail();
-                    $formData = (array) $form->getData();
+                    $formData = $this->extractFormData($form->getData());
 
                     $operationInput = $formData;
                     unset($operationInput['uploadPv'], $operationInput['uploadArgumentaire']);
@@ -421,7 +421,7 @@ class ParcoursProcessController extends BaseController
             if ($form->isValid()) {
                 try {
                     $user = $this->getCurrentUserOrFail();
-                    $formData = (array) $form->getData();
+                    $formData = $this->extractFormData($form->getData());
                     if (($formData['uploadPv'] ?? null) instanceof UploadedFile
                         || ($formData['uploadArgumentaire'] ?? null) instanceof UploadedFile) {
                         return $turboStream->streamToastError(
@@ -534,6 +534,20 @@ class ParcoursProcessController extends BaseController
         if (is_string($raw) && $raw !== '') {
             $parts = array_map('trim', explode(',', $raw));
             return array_values(array_unique(array_filter(array_map('intval', $parts), static fn(int $id) => $id > 0)));
+        }
+
+        return [];
+    }
+
+    /** @return array<string, mixed> */
+    private function extractFormData(mixed $data): array
+    {
+        if (is_array($data)) {
+            return $data;
+        }
+
+        if (is_object($data)) {
+            return get_object_vars($data);
         }
 
         return [];
