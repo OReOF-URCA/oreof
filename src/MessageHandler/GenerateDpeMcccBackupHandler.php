@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler(fromTransport: 'async_export')]
+#[AsMessageHandler(fromTransport: 'async_mccc_backup')]
 final readonly class GenerateDpeMcccBackupHandler
 {
     private string $backupDirectory;
