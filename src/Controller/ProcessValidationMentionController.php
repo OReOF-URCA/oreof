@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Classes\JsonReponse;
 use App\Classes\MentionProcess;
 use App\Classes\Process\FicheMatiereProcess;
-use App\Classes\Process\ParcoursProcess;
 use App\Classes\ValidationProcess;
 use App\Classes\ValidationProcessFicheMatiere;
 use App\Classes\verif\FormationValide;
@@ -29,7 +28,6 @@ class ProcessValidationMentionController extends BaseController
         private readonly EntityManagerInterface        $entityManager,
         private readonly ValidationProcess             $validationProcess,
         private readonly ValidationProcessFicheMatiere $validationProcessFicheMatiere,
-        private readonly ParcoursProcess               $parcoursProcess,
         private readonly MentionProcess $mentionProcess,
         private readonly FicheMatiereProcess           $ficheMatiereProcess,
         KernelInterface                                $kernel

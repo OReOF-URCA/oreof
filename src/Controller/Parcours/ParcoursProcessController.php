@@ -25,8 +25,6 @@ use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -53,7 +51,6 @@ class ParcoursProcessController extends BaseController
 //        private readonly EntityManagerInterface        $entityManager,
         private readonly ValidationProcess             $validationProcess,
 //        private readonly ValidationProcessFicheMatiere $validationProcessFicheMatiere,
-//        private readonly ParcoursProcess               $parcoursProcess,
 //        private readonly FicheMatiereProcess           $ficheMatiereProcess,
 //        KernelInterface                                $kernel
     )
@@ -626,43 +623,4 @@ class ParcoursProcessController extends BaseController
 //        );
 //    }
 
-    #[Route('/reserver/{dpeParcours}/{transition}', name: '_reserver')]
-    public function reserver(
-        TurboStreamResponseFactory $turboStream,
-        DpeParcours                $dpeParcours,
-        string                     $transition,
-    ): Response
-    {
-        $meta = $this->validationProcess->getMetaFromTransition($transition);
-
-
-        $form = $this->createFormBuilder(null, [
-            'attr' => ['id' => 'modal_form'],
-            'translation_domain' => 'form'
-        ]);
-
-        if (array_key_exists('hasDate', $meta) && $meta['hasDate'] === true) {
-            $form->add('date_reserve', DateType::class, []);
-        }
-
-        $form->add('argumentaire_reserve', TextareaType::class, []);
-        $form = $form->getForm();
-
-        return $turboStream->streamOpenModalFromTemplates(
-            'Emettre des réservers sur le parcours',
-            'Parcours : ' . $dpeParcours->getParcours()?->getDisplay(),
-            'parcours_v2/process/_reserver.html.twig',
-            [
-                'parcours' => $dpeParcours->getParcours(),
-                'dpeParcours' => $dpeParcours,
-                'meta' => $meta,
-                'form' => $form->createView(),
-                'transition' => $transition,
-            ],
-            '_ui/_footer_submit_cancel.html.twig',
-            [
-                'submitLabel' => 'Valider le parcours',
-            ]
-        );
-    }
 }
