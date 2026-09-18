@@ -6,6 +6,7 @@ namespace App\Tests\Workflow;
 
 use App\DTO\Workflow\FieldMetaDto;
 use App\DTO\Workflow\ModalFormMetaDto;
+use App\DTO\Workflow\ValiderConseilData;
 use App\Form\Workflow\ValiderConseilType;
 use App\Workflow\Form\MetaDrivenFormFactory;
 use App\Workflow\Form\MetaFormOptionsFilter;
@@ -78,5 +79,22 @@ final class WorkflowMetadataFormTest extends TestCase
         $validForm = $factory->create($meta, 'valider_conseil');
         $validForm->submit(['pvReference' => '', 'laissezPasser' => true]);
         self::assertTrue($validForm->isValid());
+    }
+
+    public function testCouncilDataRequiresPvOrLaissezPasser(): void
+    {
+        $validator = Validation::createValidatorBuilder()
+            ->enableAttributeMapping()
+            ->getValidator();
+
+        $data = new ValiderConseilData();
+        $data->dateConseil = new \DateTimeImmutable('2026-09-18');
+
+        $violations = $validator->validate($data);
+        self::assertCount(1, $violations);
+        self::assertSame('uploadPv', $violations[0]->getPropertyPath());
+
+        $data->laissezPasser = true;
+        self::assertCount(0, $validator->validate($data));
     }
 }
