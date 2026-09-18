@@ -50,6 +50,13 @@ final class WorkflowMetaMapper
         $submitLabel = (string)($form['submit_label'] ?? 'Valider');
         $formId = (string)($form['id'] ?? 'modal_form');
 
+        $formType = $form['type'] ?? null;
+        if (!is_string($formType) || '' === trim($formType)) {
+            $formType = null;
+        }
+
+        $formOptions = is_array($form['options'] ?? null) ? $form['options'] : [];
+
         $fieldsRaw = $form['fields'] ?? [];
         if (!\is_array($fieldsRaw)) {
             $fieldsRaw = [];
@@ -86,6 +93,8 @@ final class WorkflowMetaMapper
             formId: $formId,
             fields: $fields,
             rules: $rules,
+            formType: $formType,
+            options: $formOptions,
         );
     }
 }
