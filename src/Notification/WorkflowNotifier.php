@@ -15,6 +15,7 @@ use App\Entity\Notification;
 use App\Message\WorkflowEmailNotification;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Twig\Environment;
 
@@ -35,6 +36,7 @@ class WorkflowNotifier
 
     public function notify(array $recipients, string $eventKey, string $wf, array $context): void
     {
+        $emailDelay = 0;
 
         foreach ($recipients as $user) {
             if (!$user instanceof User) {
@@ -57,11 +59,15 @@ class WorkflowNotifier
                         'path' => sprintf('%s/templates/mails/workflow/%s/%s.html.twig', $this->baseDir, $wf, $transition),
                     ], $context['data']->toArray(), $context['context'] ?? [])
                 );
-                $this->messageBus->dispatch(new WorkflowEmailNotification(
-                    [$user->getEmail()],
-                    $context['subject'] ?? '[ORéOF] - ' . $transition,
-                    $html,
-                ));
+                $this->messageBus->dispatch(
+                    new WorkflowEmailNotification(
+                        [$user->getEmail()],
+                        $context['subject'] ?? '[ORéOF] - ' . $transition,
+                        $html,
+                    ),
+                    [new DelayStamp($emailDelay)],
+                );
+                $emailDelay += 1500;
             }
 
             // IN-APP
