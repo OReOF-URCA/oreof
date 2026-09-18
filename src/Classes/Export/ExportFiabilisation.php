@@ -29,6 +29,11 @@ class ExportFiabilisation
     private int $ligne = 2;
     private array $data;
 
+    private array $metadataParcours = [
+        'currentParcoursId' => null,
+        'currentParcoursType' => null
+    ];
+
     public function __construct(
         protected TypeDiplomeResolver $typeDiplomeResolver,
         protected ExcelWriter             $excelWriter,
@@ -66,6 +71,8 @@ class ExportFiabilisation
         $this->excelWriter->writeCellXY('P', 1, 'Type EC');
         $this->excelWriter->writeCellXY('Q', 1, 'MATI/MATM');
         $this->excelWriter->writeCellXY('R', 1, 'ECTS');
+        $this->excelWriter->writeCellXY('S', 1, 'Identifiant');
+        $this->excelWriter->writeCellXY('T', 1, 'Type du Parcours');
 
         $this->ligne = 2;
         foreach ($formations as $idFormation) {
@@ -84,9 +91,14 @@ class ExportFiabilisation
                     } else {
                         $this->data[4] = 'Pas de parcours';
                     }
-
+                    $typeParcoursTxt = "";
+                    if($parcours->getTypeParcours()->value !== 'classique') {
+                        $typeParcoursTxt = $parcours->getTypeParcours()->libelle();
+                    }
                     //récuération de la structure et des EC
                     $dto = $typeD->calculStructureParcours($parcours);
+                    $this->metadataParcours['currentParcoursId'] = $parcours->getId();
+                    $this->metadataParcours['currentParcoursType'] = $typeParcoursTxt;
                     foreach ($dto->semestres as $sem) {
                         foreach ($sem->ues as $ue) {
                             if ($ue->ue->getNatureUeEc()?->isChoix()) {
@@ -101,7 +113,7 @@ class ExportFiabilisation
                             }
                         }
 
-                        $this->excelWriter->getColumnsAutoSize('A', 'Q');
+                        $this->excelWriter->getColumnsAutoSize('A', 'T');
                     }
                     //}
                 }
@@ -150,6 +162,8 @@ class ExportFiabilisation
 
             $this->excelWriter->writeCellXY(17, $this->ligne, $ec->elementConstitutif->getFicheMatiere()?->getTypeApogee() ?? '-');
             $this->excelWriter->writeCellXY(18, $this->ligne, $ec->heuresEctsEc->ects);
+            $this->excelWriter->writeCellXY(19, $this->ligne, $this->metadataParcours['currentParcoursId'] ?? "");
+            $this->excelWriter->writeCellXY(20, $this->ligne, $this->metadataParcours['currentParcoursType'] ?? "");
             $this->ligne++;
         }
     }
