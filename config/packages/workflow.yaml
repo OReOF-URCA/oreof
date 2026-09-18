@@ -241,32 +241,13 @@ framework:
             titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a été validée par le conseil de la composante'
             titre: 'La fiche de la formation %%s a été validée par le conseil de la composante'
             type: valider
-            #            btn: success
-            hasDate: true
-            hasUpload: true
-            hasUploadNote: true
-            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
             context:
               aliases:
                 dateConseil: date
             form:
-              fields:
-                - name: dateConseil
-                  type: date
-                  required: true
-                - name: uploadPv
-                  type: file
-                  required: false
-                - name: uploadArgumentaire #todo: vérifier nom, notamment dans le json pour cohérence v1
-                  type: file
-                - name: laissezPasser
-                  type: checkbox
-              rules:
-                - type: at_least_one
-                  fields: [ uploadPv, laissezPasser ]
-                  message: 'Déposez le PV du conseil ou indiquez un laissez-passer.'
+              type: 'App\Form\Workflow\ValiderConseilType'
 
         reserver_conseil:
           from: 'soumis_conseil'
