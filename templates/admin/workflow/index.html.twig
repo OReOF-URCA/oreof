@@ -1,0 +1,215 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    Cartographie des Workflows
+{% endset %}
+
+{% block header %}
+    Supervision & Cartographie des Workflows
+{% endblock %}
+
+{% set header_description %}
+    Visualisation interactive, matrice des transitions et audit des règles de validation de l'application.
+{% endset %}
+
+{% block content %}
+<div class="space-y-6 pb-12"
+     data-controller="workflow-viewer"
+     data-workflow-viewer-data-value="{{ workflowData|json_encode|e('html_attr') }}">
+
+    {# Barre supérieure : Sélecteur de Workflow & Statistiques #}
+    <div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div class="space-y-2">
+            <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-primary-100 text-primary-800 dark:bg-primary-950 dark:text-primary-300">
+                    Workflow actif
+                </span>
+                <span class="text-xs text-slate-400 font-mono">{{ workflowData.key }}</span>
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+                {{ currentWorkflow.label }}
+            </h2>
+            <p class="text-xs text-slate-500 max-w-2xl leading-relaxed">
+                {{ currentWorkflow.description }}
+            </p>
+        </div>
+
+        {# Sélecteur de workflow rapide #}
+        <div class="flex flex-wrap items-center gap-2">
+            {% for wfKey, wf in availableWorkflows %}
+                <a href="{{ path('app_admin_workflow_index', {workflow: wfKey}) }}"
+                   class="inline-flex items-center px-3.5 py-2 rounded-xl text-xs font-semibold transition shadow-sm border {{ wfKey == selectedWorkflow ? 'bg-primary text-white border-primary shadow-primary/20' : 'bg-surface text-slate-700 dark:text-slate-300 border-secondary-200 dark:border-secondary-700 hover:bg-slate-50 dark:hover:bg-slate-800' }}">
+                    <i class="ph {{ wf.icon }} mr-1.5 text-sm"></i>
+                    {{ wf.label }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {# KPI Badges #}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl bg-surface border border-secondary-200 dark:border-secondary-700 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs text-slate-500 font-medium block">États définis (Places)</span>
+                <span class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ workflowData.stats.totalPlaces }}</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950/60 text-sky-600 flex items-center justify-center">
+                <i class="ph ph-circles-three text-xl"></i>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface border border-secondary-200 dark:border-secondary-700 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs text-slate-500 font-medium block">Transitions & Actions</span>
+                <span class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ workflowData.stats.totalTransitions }}</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 flex items-center justify-center">
+                <i class="ph ph-arrows-left-right text-xl"></i>
+            </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-surface border border-secondary-200 dark:border-secondary-700 shadow-sm flex items-center justify-between">
+            <div>
+                <span class="text-xs text-slate-500 font-medium block">Enregistrements en base</span>
+                <span class="text-2xl font-extrabold text-slate-900 dark:text-slate-100">{{ workflowData.stats.totalEntities }}</span>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
+                <i class="ph ph-database text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    {# Navigation par Onglets #}
+    <div class="border-b border-secondary-200 dark:border-secondary-700 flex items-center gap-6 text-sm">
+        <button type="button"
+                data-tab="graph"
+                data-workflow-viewer-target="tabButton"
+                data-action="click->workflow-viewer#switchTab"
+                class="pb-3 border-b-2 border-primary text-primary font-bold flex items-center gap-2 transition">
+            <i class="ph ph-graph"></i>
+            Carte Interactive
+        </button>
+
+        <button type="button"
+                data-tab="matrix"
+                data-workflow-viewer-target="tabButton"
+                data-action="click->workflow-viewer#switchTab"
+                class="pb-3 border-b-2 border-transparent text-secondary-500 hover:text-slate-700 dark:hover:text-slate-300 font-normal flex items-center gap-2 transition">
+            <i class="ph ph-table"></i>
+            Matrice des Droits & Règles
+        </button>
+
+        <button type="button"
+                data-tab="pipeline"
+                data-workflow-viewer-target="tabButton"
+                data-action="click->workflow-viewer#switchTab"
+                class="pb-3 border-b-2 border-transparent text-secondary-500 hover:text-slate-700 dark:hover:text-slate-300 font-normal flex items-center gap-2 transition">
+            <i class="ph ph-lightning"></i>
+            Cycle Nominal (Happy Path)
+        </button>
+    </div>
+
+    {# Onglet 1 : Carte Interactive #}
+    <div data-tab-content="graph" data-workflow-viewer-target="tabContent" class="space-y-4">
+        {# Barre d'outils du graphe #}
+        <div class="p-3 bg-surface border border-secondary-200 dark:border-secondary-700 rounded-xl shadow-sm flex flex-wrap items-center justify-between gap-4">
+            {# Filtres de flux #}
+            <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-xs font-bold text-slate-400 mr-1 uppercase">Flux :</span>
+                <button type="button"
+                        data-filter-type="all"
+                        data-action="click->workflow-viewer#filterFlux"
+                        class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+                    Tout afficher
+                </button>
+                <button type="button"
+                        data-filter-type="nominal"
+                        data-action="click->workflow-viewer#filterFlux"
+                        class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 transition">
+                    🟢 Validations
+                </button>
+                <button type="button"
+                        data-filter-type="exception"
+                        data-action="click->workflow-viewer#filterFlux"
+                        class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 hover:bg-amber-100 transition">
+                    🟠 Réserves & Refus
+                </button>
+                <button type="button"
+                        data-filter-type="reopen"
+                        data-action="click->workflow-viewer#filterFlux"
+                        class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-300 dark:border-sky-800 hover:bg-sky-100 transition">
+                    🔵 Réouvertures
+                </button>
+            </div>
+
+            {# Recherche et Outils de Zoom #}
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <input type="text"
+                           placeholder="Rechercher un état..."
+                           data-workflow-viewer-target="searchInput"
+                           data-action="input->workflow-viewer#searchNode"
+                           class="w-44 sm:w-60 pl-8 pr-3 py-1.5 rounded-lg border border-secondary-200 dark:border-secondary-700 bg-surface text-xs focus:ring-2 focus:ring-primary">
+                    <i class="ph ph-magnifying-glass absolute left-2.5 top-2.5 text-slate-400 text-xs"></i>
+                </div>
+
+                <div class="flex items-center gap-1 border-l border-secondary-200 dark:border-secondary-700 pl-3">
+                    <button type="button"
+                            title="Changer l'orientation (Horizontal / Vertical)"
+                            data-action="click->workflow-viewer#toggleOrientation"
+                            class="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <i class="ph ph-arrows-clockwise text-sm"></i>
+                    </button>
+                    <button type="button"
+                            title="Zoom avant"
+                            data-action="click->workflow-viewer#zoomIn"
+                            class="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <i class="ph ph-plus text-sm"></i>
+                    </button>
+                    <button type="button"
+                            title="Zoom arrière"
+                            data-action="click->workflow-viewer#zoomOut"
+                            class="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <i class="ph ph-minus text-sm"></i>
+                    </button>
+                    <button type="button"
+                            title="Recentrer la carte"
+                            data-action="click->workflow-viewer#fit"
+                            class="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <i class="ph ph-corners-out text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {# Zone du Graph Cytoscape #}
+        <div class="relative bg-surface border border-secondary-200 dark:border-secondary-700 rounded-2xl shadow-sm overflow-hidden h-[680px]">
+            <div data-workflow-viewer-target="cy" class="w-full h-full bg-slate-50/50 dark:bg-slate-900/40"></div>
+
+            {# Légende rapide #}
+            <div class="absolute bottom-4 left-4 p-3 rounded-xl bg-surface/90 dark:bg-slate-900/90 backdrop-blur-md border border-secondary-200 dark:border-secondary-700 text-[11px] shadow-lg space-y-1.5 pointer-events-none">
+                <span class="font-bold text-slate-700 dark:text-slate-300 block">Légende interactive :</span>
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span> Init / Brouillon</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Rédaction / Réserve</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Validé / Publié</span>
+                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Conseil / CFVU</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Onglet 2 : Matrice des Droits & Règles #}
+    <div data-tab-content="matrix" data-workflow-viewer-target="tabContent" class="hidden">
+        {% include 'admin/workflow/_matrix.html.twig' %}
+    </div>
+
+    {# Onglet 3 : Pipeline Nominal (Happy Path) #}
+    <div data-tab-content="pipeline" data-workflow-viewer-target="tabContent" class="hidden">
+        {% include 'admin/workflow/_pipeline.html.twig' %}
+    </div>
+
+    {# Panneau d'inspection latéral (Drawer) #}
+    {% include 'admin/workflow/_drawer.html.twig' %}
+</div>
+{% endblock %}

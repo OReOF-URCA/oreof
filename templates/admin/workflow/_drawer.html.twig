@@ -1,0 +1,46 @@
+{# Panneau latéral d'inspection (Drawer) #}
+<div data-workflow-viewer-target="drawer"
+     class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-surface border-l border-secondary-200 dark:border-secondary-700 shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out overflow-hidden flex flex-col">
+
+    {# Header du Drawer #}
+    <div class="px-6 py-5 border-b border-secondary-200 dark:border-secondary-700 flex items-start justify-between bg-slate-50/50 dark:bg-slate-900/30">
+        <div class="space-y-1">
+            <div class="flex items-center gap-2">
+                <span data-workflow-viewer-target="drawerBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold">
+                    Détail
+                </span>
+            </div>
+            <h3 data-workflow-viewer-target="drawerTitle" class="text-lg font-bold text-slate-900 dark:text-slate-100">
+                Sélectionnez un élément
+            </h3>
+            <p data-workflow-viewer-target="drawerSubtitle" class="text-xs text-slate-500 font-mono">
+                -
+            </p>
+        </div>
+
+        <button type="button"
+                data-action="click->workflow-viewer#closeDrawer"
+                class="p-2 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+
+    {# Contenu scrollable du Drawer #}
+    <div data-workflow-viewer-target="drawerContent" class="flex-1 overflow-y-auto p-6 space-y-6">
+        <div class="text-center py-12 text-slate-400 text-sm">
+            Cliquez sur un état (nœud) ou une transition (flèche) dans la carte pour afficher ses détails, formulaires, acteurs et règles de validation.
+        </div>
+    </div>
+
+    {# Footer du Drawer #}
+    <div class="px-6 py-3 border-t border-secondary-200 dark:border-secondary-700 bg-slate-50 dark:bg-slate-900/50 flex justify-between items-center text-xs text-slate-400">
+        <span>ORéOF Workflow Engine</span>
+        <button type="button"
+                data-action="click->workflow-viewer#closeDrawer"
+                class="text-xs font-medium text-primary hover:underline">
+            Fermer le panneau
+        </button>
+    </div>
+</div>
