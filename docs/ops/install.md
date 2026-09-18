@@ -169,7 +169,7 @@ Le document root doit pointer vers `public/`.
 Si Messenger est utilisé, lancer un worker supervisé (`systemd`/`supervisor`):
 
 ```bash
-php bin/console messenger:consume async --time-limit=3600 --memory-limit=256M --env=prod
+php bin/console messenger:consume async_export --time-limit=3600 --memory-limit=256M --env=prod
 ```
 
 ---
