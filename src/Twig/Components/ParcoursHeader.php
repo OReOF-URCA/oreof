@@ -51,7 +51,6 @@ final class ParcoursHeader
     public int $completedSteps = 0;
     public DpeParcours $dpeParcours;
     public string $place = '';
-    public bool $hasDemande = true;
     #[LiveProp(writable: true)]
     public ?int $parcoursId = null;
     #[LiveProp(writable: true)]
@@ -133,7 +132,11 @@ final class ParcoursHeader
     {
         $this->dpeParcours = GetDpeParcours::getFromParcours($this->parcours);
         $this->place = $this->getPlace();
-        $this->hasDemande = in_array($this->place, [
+    }
+
+    public function isEditable(): bool
+    {
+        return in_array($this->place, [
             'en_cours_redaction',
             'en_cours_redaction_ss_cfvu',
         ], true) || Access::isOuvert($this->dpeParcours);
