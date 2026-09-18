@@ -6,6 +6,7 @@ namespace App\Tests\Workflow;
 
 use App\DTO\Workflow\FieldMetaDto;
 use App\DTO\Workflow\ModalFormMetaDto;
+use App\Form\Workflow\ValiderConseilType;
 use App\Workflow\Form\MetaDrivenFormFactory;
 use App\Workflow\Form\MetaFormOptionsFilter;
 use App\Workflow\Form\MetaFormTypeResolver;
@@ -25,6 +26,7 @@ final class WorkflowMetadataFormTest extends TestCase
                 'view' => 'parcours_v2/process/_validation_apply.html.twig',
             ],
             'form' => [
+                'type' => ValiderConseilType::class,
                 'rules' => [
                     [
                         'type' => 'at_least_one',
@@ -38,6 +40,7 @@ final class WorkflowMetadataFormTest extends TestCase
 
         self::assertSame('soumis_conseil', $meta->validationStep);
         self::assertSame('parcours_v2/process/_validation_apply.html.twig', $meta->viewTemplate);
+        self::assertSame(ValiderConseilType::class, $meta->form?->formType);
         self::assertSame('at_least_one', $meta->form?->rules[0]['type']);
     }
 
