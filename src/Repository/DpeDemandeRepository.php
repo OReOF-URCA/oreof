@@ -51,6 +51,9 @@ class DpeDemandeRepository extends ServiceEntityRepository
             ->where('d.parcours = :parcours')
             ->andWhere('d.dateCloture IS NULL')
             ->setParameter('parcours', $parcours)
+            ->orderBy('d.updated', 'DESC')
+            ->addOrderBy('d.id', 'DESC')
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }
