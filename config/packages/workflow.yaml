@@ -188,12 +188,7 @@ framework:
               aliases:
                 argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_dpe_composante:
           from: 'soumis_dpe_composante'
           to: 'soumis_conseil'
@@ -227,12 +222,7 @@ framework:
               aliases:
                 argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_conseil:
           from: 'soumis_conseil'
           to: 'soumis_central'
@@ -266,14 +256,10 @@ framework:
                 argumentaire: motif
                 dateConseil: date
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
-                - name: dateConseil
-                  type: date
+              type: 'App\Form\Workflow\ArgumentaireDateType'
+              options:
+                date_property: dateConseil
+                date_label: 'Date du conseil'
         valider_central:
           from: 'soumis_central'
           to: 'soumis_cfvu'
@@ -309,12 +295,7 @@ framework:
               aliases:
                 argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_publication_directe:
           from: 'soumis_central'
           to: 'valide_a_publier'
@@ -345,14 +326,10 @@ framework:
                 argumentaire: motif
                 dateCfvu: date
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
-                - name: dateCfvu
-                  type: date
+              type: 'App\Form\Workflow\ArgumentaireDateType'
+              options:
+                date_property: dateCfvu
+                date_label: 'Date de la CFVU'
         valider_reserve_cfvu:
           from: 'soumis_cfvu'
           to: 'soumis_dpe_composante_reserve_cfvu'
@@ -371,14 +348,10 @@ framework:
                 argumentaire: motif
                 dateCfvu: date
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
-                - name: dateCfvu
-                  type: date
+              type: 'App\Form\Workflow\ArgumentaireDateType'
+              options:
+                date_property: dateCfvu
+                date_label: 'Date de la CFVU'
         transmetre_reserve_cfvu:
           from: 'soumis_dpe_composante_reserve_cfvu'
           to: 'soumis_central_reserve_cfvu'
@@ -393,12 +366,7 @@ framework:
               aliases:
                 argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_reserve_conseil_cfvu:
           from: 'soumis_cfvu'
           to: 'soumis_conseil_reserve' #todo mais on court-circuite le retour directement vers valider publicatio
@@ -446,9 +414,10 @@ framework:
               aliases:
                 dateConseil: date
             form:
-              fields:
-                - name: dateConseil
-                  type: date
+              type: 'App\Form\Workflow\WorkflowDateType'
+              options:
+                date_property: dateConseil
+                date_label: 'Date de la CFVU'
         valider_publication:
           from: 'valide_cfvu'
           to: 'valide_a_publier'
@@ -463,9 +432,10 @@ framework:
               aliases:
                 datePublication: date
             form:
-              fields:
-                - name: datePublication
-                  type: date
+              type: 'App\Form\Workflow\WorkflowDateType'
+              options:
+                date_property: datePublication
+                date_label: 'Date de publication'
         publier:
           from: 'valide_a_publier'
           to: 'publie'
@@ -550,13 +520,7 @@ framework:
               aliases:
                 argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         reouvrir_sans_cfvu:
           from: 'publie'
           to: 'en_cours_redaction_ss_cfvu'
@@ -573,13 +537,9 @@ framework:
             form:
               title: "Réouvrir sans passage en CFVU"
               submit_label: "Valider la demande"
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: false
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: false
 
 
         reouvrir_tacite_mccc:
@@ -598,13 +558,7 @@ framework:
               reason: 'workflow.authorization.reouvrir_mccc.denied'
             context: *dpe_argumentaire_context
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         reouvrir_tacite_sans_cfvu:
           from: 'tacite_reconduction'
           to: 'en_cours_redaction_ss_cfvu'
@@ -621,13 +575,9 @@ framework:
             form:
               title: "Réouvrir sans passage en CFVU"
               submit_label: "Valider la demande"
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: false
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: false
 
         reouvrir_avant_publie:
           from: 'valide_a_publier'
@@ -645,13 +595,9 @@ framework:
             form:
               title: "Réouvrir avant publication"
               submit_label: "Valider la demande"
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: false
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: false
 
         valider_ouverture_sans_cfvu:
           from: 'en_cours_redaction_ss_cfvu'
