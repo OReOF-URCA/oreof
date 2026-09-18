@@ -3,6 +3,7 @@
 namespace App\Workflow\Form;
 
 use App\DTO\Workflow\ModalFormMetaDto;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
@@ -21,6 +22,23 @@ final class MetaDrivenFormFactory
 
     public function create(ModalFormMetaDto $meta, string $transition): FormInterface
     {
+        if (null !== $meta->formType) {
+            if (!class_exists($meta->formType) || !is_a($meta->formType, AbstractType::class, true)) {
+                throw new \InvalidArgumentException(sprintf(
+                    'Le FormType "%s" configuré pour la transition "%s" est invalide.',
+                    $meta->formType,
+                    $transition,
+                ));
+            }
+
+            $options = array_replace_recursive(
+                ['attr' => ['id' => $meta->formId]],
+                $meta->options,
+            );
+
+            return $this->formFactory->create($meta->formType, null, $options);
+        }
+
         $builder = $this->formFactory->createBuilder(FormType::class, null, [
             'attr' => ['id' => $meta->formId],
             'translation_domain' => 'process',
