@@ -91,11 +91,18 @@ final class CampagnePilotageService
                 $validatedCount++;
             }
 
+            $matched = false;
             foreach (self::PHASES as $phaseKey => $phaseDef) {
                 if (in_array($state, $phaseDef['states'], true)) {
                     $phaseCounts[$phaseKey]++;
+                    $matched = true;
                     break;
                 }
+            }
+
+            if (!$matched) {
+                // Si état non répertorié, rattacher par défaut à la phase de rédaction/initiale
+                $phaseCounts['redaction']++;
             }
         }
 
@@ -280,13 +287,24 @@ final class CampagnePilotageService
     }
 
     /**
-     * Extrait le code de l'état principal d'un DPE (tableau JSON marking store).
+     * Extrait le code de l'état principal d'un DPE (tableau JSON marking store ou string).
      */
     private function extractPrimaryState(DpeParcours $dpe): string
     {
         $etat = $dpe->getEtatValidation();
+
+        if (is_string($etat)) {
+            $decoded = json_decode($etat, true);
+            if (is_array($decoded) && count($decoded) > 0) {
+                $key = array_key_first($decoded);
+                return is_string($key) && !is_numeric($key) ? (string)$key : (string)$decoded[$key];
+            }
+            return $etat !== '' ? $etat : 'initialisation_dpe';
+        }
+
         if (is_array($etat) && count($etat) > 0) {
-            return (string)array_key_first($etat);
+            $key = array_key_first($etat);
+            return is_string($key) && !is_numeric($key) ? (string)$key : (string)$etat[$key];
         }
 
         return 'initialisation_dpe';

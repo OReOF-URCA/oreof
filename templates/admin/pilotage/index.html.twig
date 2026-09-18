@@ -15,14 +15,14 @@
 {% block content %}
 <div class="space-y-8 pb-12">
 
-    {# Sélecteur de Campagne & Synthèse #}
-    <div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+    {# Synthèse de la Campagne #}
+    <div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="space-y-1">
             <div class="flex items-center gap-2">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-100 text-primary-800 dark:bg-primary-950 dark:text-primary-300">
                     Campagne active
                 </span>
-                <span class="text-xs text-slate-400 font-mono">{{ selectedCampagne.anneeUniversitaire }}</span>
+                <span class="text-xs text-slate-500 font-mono font-semibold">{{ selectedCampagne.anneeUniversitaire }}</span>
             </div>
             <h2 class="text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                 {{ selectedCampagne.libelle }}
@@ -30,24 +30,6 @@
             <p class="text-xs text-slate-500">
                 Suivi de la collecte de l'offre de formation, des validations composantes, des avis de conseil et des votes CFVU.
             </p>
-        </div>
-
-        {# Sélecteur rapide de campagne #}
-        <div class="flex items-center gap-3">
-            <form method="get" action="{{ path('app_admin_pilotage_campagne_index') }}" class="flex items-center gap-2">
-                <label for="campagne_id" class="text-xs font-bold text-slate-500 uppercase">Changer :</label>
-                <select id="campagne_id"
-                        name="campagne_id"
-                        onchange="this.form.submit()"
-                        class="text-xs rounded-xl border-secondary-200 dark:border-secondary-700 bg-surface py-2 pl-3 pr-8 font-semibold focus:ring-2 focus:ring-primary shadow-sm">
-                    {% for c in allCampagnes %}
-                        <option value="{{ c.id }}" {{ c.id == selectedCampagne.id ? 'selected' : '' }}>
-                            {{ c.libelle }} ({{ c.anneeUniversitaire }})
-                        </option>
-                    {% endfor %}
-                </select>
-                <input type="hidden" name="threshold" value="{{ thresholdDays }}">
-            </form>
         </div>
     </div>
 
@@ -91,14 +73,14 @@
                 <i class="ph ph-flow-arrow text-primary"></i>
                 Distribution des Parcours par Phase de Validation
             </h3>
-            <span class="text-xs font-semibold text-slate-500">
+            <span class="text-xs font-bold text-slate-600 dark:text-slate-300">
                 {{ overview.totalParcours }} parcours au total
             </span>
         </div>
 
-        {# Barre composite d'avancement #}
-        <div class="space-y-3">
-            <div class="w-full h-4 rounded-full bg-slate-100 dark:bg-slate-800 flex overflow-hidden shadow-inner">
+        {# Barre composite d'avancement sans trou gris #}
+        <div class="space-y-4">
+            <div class="w-full h-7 rounded-xl bg-slate-100 dark:bg-slate-800 flex overflow-hidden shadow-inner p-0.5 gap-0.5">
                 {% if overview.totalParcours > 0 %}
                     {% set pRedac = (overview.phaseCounts.redaction / overview.totalParcours) * 100 %}
                     {% set pLocal = (overview.phaseCounts.locale / overview.totalParcours) * 100 %}
@@ -106,34 +88,68 @@
                     {% set pCfvu = (overview.phaseCounts.cfvu_publie / overview.totalParcours) * 100 %}
                     {% set pReserves = (overview.phaseCounts.reserves / overview.totalParcours) * 100 %}
 
-                    <div style="width: {{ pRedac }}%" class="bg-amber-400 h-full transition-all" title="Rédaction : {{ overview.phaseCounts.redaction }}"></div>
-                    <div style="width: {{ pLocal }}%" class="bg-sky-400 h-full transition-all" title="Validation Locale : {{ overview.phaseCounts.locale }}"></div>
-                    <div style="width: {{ pCentrale }}%" class="bg-indigo-500 h-full transition-all" title="Validation Centrale : {{ overview.phaseCounts.centrale }}"></div>
-                    <div style="width: {{ pCfvu }}%" class="bg-emerald-500 h-full transition-all" title="CFVU & Publié : {{ overview.phaseCounts.cfvu_publie }}"></div>
-                    <div style="width: {{ pReserves }}%" class="bg-rose-500 h-full transition-all" title="Réserves & Anomalies : {{ overview.phaseCounts.reserves }}"></div>
+                    {% if pRedac > 0 %}
+                        <div style="width: {{ pRedac }}%"
+                             class="bg-amber-400 dark:bg-amber-500 h-full rounded-l-lg transition-all flex items-center justify-center text-[10px] font-bold text-amber-950"
+                             title="Rédaction & Préparation : {{ overview.phaseCounts.redaction }} parcours ({{ pRedac|round(1) }}%)">
+                            {% if pRedac >= 7 %}{{ pRedac|round }}%{% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if pLocal > 0 %}
+                        <div style="width: {{ pLocal }}%"
+                             class="bg-sky-400 dark:bg-sky-500 h-full transition-all flex items-center justify-center text-[10px] font-bold text-sky-950"
+                             title="Validation Locale : {{ overview.phaseCounts.locale }} parcours ({{ pLocal|round(1) }}%)">
+                            {% if pLocal >= 7 %}{{ pLocal|round }}%{% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if pCentrale > 0 %}
+                        <div style="width: {{ pCentrale }}%"
+                             class="bg-indigo-500 dark:bg-indigo-600 h-full transition-all flex items-center justify-center text-[10px] font-bold text-white"
+                             title="Validation Centrale (SES) : {{ overview.phaseCounts.centrale }} parcours ({{ pCentrale|round(1) }}%)">
+                            {% if pCentrale >= 7 %}{{ pCentrale|round }}%{% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if pCfvu > 0 %}
+                        <div style="width: {{ pCfvu }}%"
+                             class="bg-emerald-500 dark:bg-emerald-600 h-full transition-all flex items-center justify-center text-[10px] font-bold text-white"
+                             title="CFVU & Publié : {{ overview.phaseCounts.cfvu_publie }} parcours ({{ pCfvu|round(1) }}%)">
+                            {% if pCfvu >= 7 %}{{ pCfvu|round }}%{% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if pReserves > 0 %}
+                        <div style="width: {{ pReserves }}%"
+                             class="bg-rose-500 dark:bg-rose-600 h-full rounded-r-lg transition-all flex items-center justify-center text-[10px] font-bold text-white"
+                             title="Réserves & Anomalies : {{ overview.phaseCounts.reserves }} parcours ({{ pReserves|round(1) }}%)">
+                            {% if pReserves >= 7 %}{{ pReserves|round }}%{% endif %}
+                        </div>
+                    {% endif %}
                 {% endif %}
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-2">
-                <div class="flex items-center gap-2 text-xs">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                <div class="flex items-center gap-2 text-xs p-2 rounded-lg bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/50 dark:border-amber-900/50">
                     <span class="w-3 h-3 rounded-full bg-amber-400 shrink-0"></span>
-                    <span class="text-slate-600 dark:text-slate-300 font-medium">Rédaction ({{ overview.phaseCounts.redaction }})</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium">Rédaction : <strong class="text-amber-800 dark:text-amber-300">{{ overview.phaseCounts.redaction }}</strong></span>
                 </div>
-                <div class="flex items-center gap-2 text-xs">
+                <div class="flex items-center gap-2 text-xs p-2 rounded-lg bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/50 dark:border-sky-900/50">
                     <span class="w-3 h-3 rounded-full bg-sky-400 shrink-0"></span>
-                    <span class="text-slate-600 dark:text-slate-300 font-medium">Validation Locale ({{ overview.phaseCounts.locale }})</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium">Val. Locale : <strong class="text-sky-800 dark:text-sky-300">{{ overview.phaseCounts.locale }}</strong></span>
                 </div>
-                <div class="flex items-center gap-2 text-xs">
+                <div class="flex items-center gap-2 text-xs p-2 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/50 dark:border-indigo-900/50">
                     <span class="w-3 h-3 rounded-full bg-indigo-500 shrink-0"></span>
-                    <span class="text-slate-600 dark:text-slate-300 font-medium">Validation Centrale ({{ overview.phaseCounts.centrale }})</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium">Val. Centrale : <strong class="text-indigo-800 dark:text-indigo-300">{{ overview.phaseCounts.centrale }}</strong></span>
                 </div>
-                <div class="flex items-center gap-2 text-xs">
+                <div class="flex items-center gap-2 text-xs p-2 rounded-lg bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200/50 dark:border-emerald-900/50">
                     <span class="w-3 h-3 rounded-full bg-emerald-500 shrink-0"></span>
-                    <span class="text-slate-600 dark:text-slate-300 font-medium">CFVU / Publié ({{ overview.phaseCounts.cfvu_publie }})</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium">CFVU / Publié : <strong class="text-emerald-800 dark:text-emerald-300">{{ overview.phaseCounts.cfvu_publie }}</strong></span>
                 </div>
-                <div class="flex items-center gap-2 text-xs">
+                <div class="flex items-center gap-2 text-xs p-2 rounded-lg bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200/50 dark:border-rose-900/50">
                     <span class="w-3 h-3 rounded-full bg-rose-500 shrink-0"></span>
-                    <span class="text-slate-600 dark:text-slate-300 font-medium">Réserves ({{ overview.phaseCounts.reserves }})</span>
+                    <span class="text-slate-700 dark:text-slate-300 font-medium">Réserves : <strong class="text-rose-800 dark:text-rose-300">{{ overview.phaseCounts.reserves }}</strong></span>
                 </div>
             </div>
         </div>
