@@ -644,8 +644,11 @@ framework:
             description: 'Réserves du SES'
             button_class: 'warning'
             button_icon: 'bi:exclamation-triangle'
-            requires_comment: true
-            comment_placeholder: 'Réserves du SES...'
+            context:
+              aliases:
+                argumentaire: motif
+            form:
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_transmettre_reserve_cfvu:
           from: 'soumis_central_reserve_cfvu'
           to: 'valide_cfvu'
@@ -666,6 +669,11 @@ framework:
             button_class: 'warning'
             button_icon: 'bi:exclamation-triangle'
             description: '--'
+            context:
+              aliases:
+                argumentaire: motif
+            form:
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_non_ouverture_ses:
           from: 'non_ouverture_ses'
           to: 'non_ouverture'
