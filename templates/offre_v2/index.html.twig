@@ -23,11 +23,13 @@
             Dates de collecte
         </twig:Button>
     {% endif %}
-        <twig:Button href="#" variant="secondary" class="mr-2">
-            Exporter Excel
-        </twig:Button>
+        
      {% if is_granted('ROLE_ADMIN') %}
-        <twig:Button href="#" variant="primary">
+        <twig:Button href="{{ composante ? path('offre_v2_composante_modal_annexes_ca', { composante: composante.id }) : path('offre_v2_modal_annexes_ca') }}"
+                     data-turbo="true"
+                     data-turbo-stream="true"
+                     data-action="click->modalturbo#open"
+                     variant="primary">
             Générer les annexes CA
         </twig:Button>
      {% endif %}
@@ -262,7 +264,16 @@
                                             <span class="inline-flex items-center text-red-600 ml-1 cursor-help animate-pulse" title="{{ forma.anomalies|join('\n') }}">⚠️</span>
                                         {% endif %}
                                     </div>
-                                    <div class="text-xs text-slate-500">{{ formation.typeDiplome ? formation.typeDiplome.libelle : '' }}</div>
+                                    <div class="text-xs text-slate-500 flex items-center gap-1.5 flex-wrap mt-0.5">
+                                        <span>{{ formation.typeDiplome ? formation.typeDiplome.libelle : '' }}</span>
+                                        {% set tcAnnees = formation.anneesTroncCommun %}
+                                        {% if tcAnnees|length > 0 %}
+                                            <span class="inline-flex items-center gap-1 rounded bg-indigo-50 px-1.5 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-200/80" title="Année(s) en tronc commun à tous les parcours">
+                                                <twig:UX:Icon name="ph:users-three-bold" class="h-3 w-3" />
+                                                Tronc commun : {% for aOrdre in tcAnnees %}{{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ aOrdre }}{% if not loop.last %}, {% endif %}{% endfor %}
+                                            </span>
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td class="px-4 py-3 text-slate-600">
                                     {{ formation.composantePorteuse ? formation.composantePorteuse.libelle : '' }}
@@ -421,11 +432,20 @@
                                     <td class="px-4 py-3">&nbsp;</td>
                                 </tr>
                                 {% for annee in pd.annees %}
-                                    <tr class="parcours-{{ parcours.id }}-row parcours-child-row hover:bg-slate-50/80 hidden transition-all border-t border-slate-100 comp-{{ compId }}-row composante-child-row">
+                                    {% set isAnneeTc = formation.isAnneeTroncCommun(annee.ordre) %}
+                                    <tr class="parcours-{{ parcours.id }}-row parcours-child-row {{ isAnneeTc ? 'bg-indigo-50/40 hover:bg-indigo-50/70 border-l-4 border-l-indigo-500' : 'hover:bg-slate-50/80' }} hidden transition-all border-t border-slate-100 comp-{{ compId }}-row composante-child-row">
                                         <td>&nbsp;</td>
                                         <td>&nbsp;</td>
-                                        <td class="px-4 py-3 pl-8 text-slate-600 font-medium">
-                                            Année {{ annee.ordre }} {# todo: préciser si tronc commun ? #}
+                                        <td class="px-4 py-3 {{ isAnneeTc ? 'pl-6 font-semibold text-indigo-950' : 'pl-8 text-slate-600 font-medium' }}">
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <span>{{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}</span>
+                                                {% if isAnneeTc %}
+                                                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-xs" title="Cette année est commune à tous les parcours de la formation">
+                                                        <twig:UX:Icon name="ph:users-three-bold" class="h-3 w-3" />
+                                                        Tronc commun
+                                                    </span>
+                                                {% endif %}
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3">
                                             <twig:Badge variant="{{ annee.isOuvert ? 'success' : 'danger' }}" label="{{ annee.isOuvert ? 'Oui' : 'Non' }}" />

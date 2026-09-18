@@ -1,0 +1,62 @@
+<table data-xls-sheet="{{ (type_diplome ? (plateforme.libelle|default('Export') ~ ' - ' ~ (type_diplome.libelleCourt|default(type_diplome.libelle))) : (plateforme.libelle|default('Export')))|slice(0, 31) }}">
+    <thead>
+        <tr>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Composante</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Type de Diplôme</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Mention</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Parcours</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Type de Parcours</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Lieu</th>
+
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Ouvert (N-1)</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité FI (N-1)</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité FC (N-1)</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité FP (N-1)</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité Alternance (N-1)</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité Spécifique (N-1)</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité Globale (N-1)</th>
+
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Ouvert</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité FI</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité FC</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité FP</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité Alternance</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité Spécifique</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité Globale</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Remarques</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+            <tr>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.composante }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.diplome }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.mention }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.parcours }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.type_parcours }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.lieu }}</td>
+
+                <td data-xls-border="thin" data-xls-align="center">{{ row.ouvert_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_fi_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_fc_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_fp_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_alt_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_spe_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_globale_n_1 }}</td>
+
+                <td data-xls-border="thin" data-xls-align="center">{{ row.ouvert_n }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_fi_n }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_fc_n }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_fp_n }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_alt_n }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_spe_n }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_globale_n }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.remarques }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="21" data-xls-align="center">Aucune donnée disponible</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

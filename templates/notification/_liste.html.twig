@@ -64,21 +64,20 @@
                 extraClass="w-full sm:flex-1 justify-center"
                 :attr="{
             'data-action': 'click->notification#toutLu',
-            'data-notification-url-value': path('app_notification_tout_lu')
+            'data-notification-url-param': path('app_notification_tout_lu')
         }"
                 label="Tout marquer comme lu"
                 variant="warning"
         />
 
-        <twig:DeleteButton
+        <twig:Button
                 extraClass="w-full sm:flex-1 justify-center"
                 label="Tout supprimer"
                 variant="danger"
-                :soft="false"
-                :outline="false"
+                icon="icon:delete"
                 :attr="{
             'data-action': 'click->notification#toutSupprimer',
-            'data-notification-url-value': path('app_notification_tout_suppr')
+            'data-notification-url-param': path('app_notification_tout_suppr')
         }"
         />
     </div>

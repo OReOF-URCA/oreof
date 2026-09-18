@@ -7,22 +7,20 @@
 
     {# Compter les filtres actifs #}
     {% set activeFilters = 0 %}
-    {% if is_granted('ROLE_ADMIN') %}
-        {% if params['composantePorteuse'] is defined and params['composantePorteuse'] %}
-            {% set activeFilters = activeFilters + 1 %}
-        {% endif %}
-        {% if params['typeDiplome'] is defined and params['typeDiplome'] %}
-            {% set activeFilters = activeFilters + 1 %}
-        {% endif %}
-        {% if params['mention'] is defined and params['mention'] %}
-            {% set activeFilters = activeFilters + 1 %}
-        {% endif %}
-        {% if params['responsable'] is defined and params['responsable'] %}
-            {% set activeFilters = activeFilters + 1 %}
-        {% endif %}
-        {% if params['remplissage'] is defined and params['remplissage'] and params['remplissage'] != 'all' %}
-            {% set activeFilters = activeFilters + 1 %}
-        {% endif %}
+    {% if params['composantePorteuse'] is defined and params['composantePorteuse'] %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+    {% if params['typeDiplome'] is defined and params['typeDiplome'] %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+    {% if params['mention'] is defined and params['mention'] %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+    {% if params['responsable'] is defined and params['responsable'] %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+    {% if params['remplissage'] is defined and params['remplissage'] and params['remplissage'] != 'all' %}
+        {% set activeFilters = activeFilters + 1 %}
     {% endif %}
 
     {# En-tête avec résumé #}
@@ -46,7 +44,6 @@
         </div>
     </div>
 
-    {% if is_granted('ROLE_ADMIN') %}
         {% embed 'components/filter_panel.html.twig' with {
             title: 'Filtres',
             activeFilters: activeFilters,
@@ -187,7 +184,6 @@
                 {% endif %}
             {% endblock %}
         {% endembed %}
-    {% endif %}
 
     <div class="rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
         <div class="overflow-x-auto">

@@ -1,0 +1,181 @@
+<div class="space-y-6">
+    <!-- Header Hero: Download all as ZIP -->
+    <div class="rounded-2xl border border-primary-200 bg-primary-50/60 p-5 dark:border-primary-900/50 dark:bg-primary-950/40">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2.5">
+                    <span class="inline-flex items-center justify-center rounded-xl bg-primary-600 text-white p-2.5 shadow-sm">
+                        <twig:ux:icon name="ph:file-archive-bold" class="h-5 w-5" />
+                    </span>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base dark:text-slate-100">
+                            Export global de toutes les plateformes
+                        </h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-400">
+                            Campagne <strong>{{ campagne.libelle }}</strong>{% if composante %} — Composante : <strong>{{ composante.sigle|default(composante.libelle) }}</strong>{% endif %}
+                        </p>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 pl-11">
+                    L'archive génère chaque plateforme selon sa configuration (fichier global ou fichiers découpés par type de diplôme).
+                </p>
+            </div>
+            <div class="shrink-0">
+                <a href="{{ path(composante ? 'offre_v2_composante_export_all_plateformes_zip' : 'offre_v2_export_all_plateformes_zip', { composante: composante ? composante.id : null }) }}"
+                   data-turbo="false"
+                   class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                    <twig:ux:icon name="ph:download-simple-bold" class="h-4 w-4" />
+                    <span>Télécharger toutes les plateformes (.ZIP)</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="relative">
+        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+            <div class="w-full border-t border-slate-200 dark:border-slate-800"></div>
+        </div>
+        <div class="relative flex justify-center text-xs uppercase tracking-wider">
+            <span class="bg-white px-3 font-semibold text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+                Exports par plateforme d'admission
+            </span>
+        </div>
+    </div>
+
+    <!-- Platforms List -->
+    <div class="space-y-4">
+        {% for item in platforms %}
+            {% set p = item.plateforme %}
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-slate-300 transition-all dark:border-slate-800 dark:bg-slate-900">
+                <!-- Platform Header -->
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 p-2.5 text-slate-700 dark:text-slate-300">
+                            <twig:ux:icon name="ph:table-bold" class="h-5 w-5 text-primary-600" />
+                        </span>
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h4 class="font-bold text-slate-900 text-base dark:text-slate-100">
+                                    {{ item.libelle }}
+                                </h4>
+                                <twig:Badge :variant="item.color" :label="item.code|upper" size="xs" />
+                                {% if item.isExportParDiplome %}
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-950/50 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800/60">
+                                        <twig:ux:icon name="ph:folders-bold" class="h-3 w-3" />
+                                        Export par type de diplôme
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-medium text-sky-700 bg-sky-50 dark:text-sky-300 dark:bg-sky-950/50 px-2 py-0.5 rounded-md border border-sky-200 dark:border-sky-800/60">
+                                        <twig:ux:icon name="ph:file-xls-bold" class="h-3 w-3" />
+                                        Export global unique
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <span class="text-xs text-slate-500 dark:text-slate-400">
+                                {{ item.totalRows }} ligne(s) / formation(s) concernée(s)
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons for this Platform -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        {% if item.isExportParDiplome and item.typesDiplome|length > 1 %}
+                            <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme_zip' : 'offre_v2_export_plateforme_zip', { plateforme: p.id, composante: composante ? composante.id : null, split: 'diplomes' }) }}"
+                               data-turbo="false"
+                               class="inline-flex items-center gap-1.5 rounded-xl bg-primary-600 text-white px-3.5 py-2 text-xs font-semibold shadow-sm hover:bg-primary-700 transition-colors">
+                                <twig:ux:icon name="ph:file-archive-bold" class="h-4 w-4" />
+                                <span>Pack ZIP par diplôme</span>
+                            </a>
+                            <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme' : 'offre_v2_export_plateforme', { plateforme: p.id, composante: composante ? composante.id : null }) }}"
+                               data-turbo="false"
+                               class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                               title="Télécharger toutes les données dans un seul fichier Excel">
+                                <twig:ux:icon name="ph:file-xls" class="h-4 w-4 text-green-600" />
+                                <span>Fichier combiné (.xlsx)</span>
+                            </a>
+                        {% else %}
+                            <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme' : 'offre_v2_export_plateforme', { plateforme: p.id, composante: composante ? composante.id : null }) }}"
+                               data-turbo="false"
+                               class="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3.5 py-2 text-xs font-semibold shadow-sm hover:bg-slate-800 dark:hover:bg-white transition-colors">
+                                <twig:ux:icon name="ph:file-xls" class="h-4 w-4 text-green-400 dark:text-green-600" />
+                                <span>Export complet (.xlsx)</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Sub-options: By Diploma Type & By Composante -->
+                <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                    <!-- By Diploma Type -->
+                    {% if item.typesDiplome|length > 0 %}
+                        <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 dark:border-slate-800/80 dark:bg-slate-950/40 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                    <twig:ux:icon name="ph:graduation-cap-bold" class="h-3.5 w-3.5 text-slate-400" />
+                                    Télécharger par type de diplôme
+                                </span>
+                                {% if item.typesDiplome|length > 1 and not item.isExportParDiplome %}
+                                    <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme_zip' : 'offre_v2_export_plateforme_zip', { plateforme: p.id, composante: composante ? composante.id : null, split: 'diplomes' }) }}"
+                                       data-turbo="false"
+                                       class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                                        <twig:ux:icon name="ph:file-archive" class="h-3.5 w-3.5" />
+                                        <span>Pack ZIP diplômes</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex flex-wrap gap-1.5">
+                                {% for td in item.typesDiplome %}
+                                    <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme' : 'offre_v2_export_plateforme', { plateforme: p.id, composante: composante ? composante.id : null, typeDiplome: td.id }) }}"
+                                       data-turbo="false"
+                                       class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:border-primary-400 hover:text-primary-700 hover:bg-primary-50/30 transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-primary-500"
+                                       title="Télécharger l'annexe {{ item.libelle }} pour {{ td.libelle }}">
+                                        <twig:ux:icon name="ph:file-xls" class="h-3.5 w-3.5 text-green-600 shrink-0" />
+                                        <span>{{ td.libelleCourt|default(td.libelle) }}</span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- By Composante (when viewing establishment-wide) -->
+                    {% if not composante and item.composantes|length > 0 %}
+                        <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 dark:border-slate-800/80 dark:bg-slate-950/40 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                                    <twig:ux:icon name="ph:buildings-bold" class="h-3.5 w-3.5 text-slate-400" />
+                                    Télécharger par composante
+                                </span>
+                                {% if item.composantes|length > 1 %}
+                                    <a href="{{ path('offre_v2_export_plateforme_zip', { plateforme: p.id, split: 'composantes' }) }}"
+                                       data-turbo="false"
+                                       class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                                        <twig:ux:icon name="ph:file-archive" class="h-3.5 w-3.5" />
+                                        <span>Pack ZIP composantes</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
+                                {% for comp in item.composantes %}
+                                    <a href="{{ path('offre_v2_export_plateforme', { plateforme: p.id, targetComposante: comp.id }) }}"
+                                       data-turbo="false"
+                                       class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:border-primary-400 hover:text-primary-700 hover:bg-primary-50/30 transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-primary-500"
+                                       title="{{ comp.libelle }}">
+                                        <twig:ux:icon name="ph:file-xls" class="h-3.5 w-3.5 text-green-600 shrink-0" />
+                                        <span>{{ comp.sigle|default(comp.libelle) }}</span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="text-center py-8 text-slate-500 text-sm">
+                Aucune plateforme d'admission active trouvée.
+            </div>
+        {% endfor %}
+    </div>
+</div>

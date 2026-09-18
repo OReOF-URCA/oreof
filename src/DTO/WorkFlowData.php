@@ -12,6 +12,7 @@ namespace App\DTO;
 use App\Entity\ChangeRf;
 use App\Entity\Composante;
 use App\Entity\DpeParcours;
+use App\Entity\Etablissement;
 use App\Entity\FicheMatiere;
 use App\Entity\Formation;
 use App\Entity\Parcours;
@@ -19,9 +20,6 @@ use App\Entity\User;
 
 class WorkFlowData
 {
-    public const EMAIL_CFVU = 'cfvu-secretariat@univ-reims.fr'; //todo: a mettre sur établissement ?
-    public const EMAIL_OREOF = 'oreof@univ-reims.fr'; //todo: a mettre sur établissement ?
-
     public ?Composante $composante;
     public ?DpeParcours $dpeParcours;
     public ?Parcours $parcours;
@@ -101,5 +99,20 @@ class WorkFlowData
         }
 
         return '';
+    }
+
+    public function getEtablissement(): ?Etablissement
+    {
+        return $this->composante?->getEtablissement();
+    }
+
+    public function getEmailCentral(): string
+    {
+        return $this->getEtablissement()?->getEmailCentral();
+    }
+
+    public function getEmailOreof(): string
+    {
+        return $this->getEtablissement()?->getEmailOreof();
     }
 }

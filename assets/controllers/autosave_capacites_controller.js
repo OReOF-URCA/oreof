@@ -36,7 +36,32 @@ export default class extends Controller {
     }
   }
 
+  syncTroncCommun(target) {
+    if (!target) return
+    const container = target.closest('[data-annee-ordre]')
+    if (!container || container.dataset.isTroncCommun !== '1') return
+
+    const ordre = container.dataset.anneeOrdre
+    const tcField = target.dataset.tcField
+    if (!ordre || !tcField) return
+
+    const otherContainers = this.element.querySelectorAll(`[data-annee-ordre="${ordre}"][data-is-tronc-commun="1"]`)
+    otherContainers.forEach(otherContainer => {
+      if (otherContainer === container) return
+      const otherInput = otherContainer.querySelector(`[data-tc-field="${tcField}"]`)
+      if (otherInput) {
+        if (target.type === 'checkbox') {
+          otherInput.checked = target.checked
+        } else {
+          otherInput.value = target.value
+        }
+      }
+    })
+  }
+
   onInput(event) {
+    this.syncTroncCommun(event.target)
+
     // Only debounce text and number fields
     if (event.target.type === 'number' || event.target.type === 'text') {
       this.setStatus('typing', 'Modifications en cours...')
@@ -48,6 +73,8 @@ export default class extends Controller {
   }
 
   onChange(event) {
+    this.syncTroncCommun(event.target)
+
     const name = event.target.name
     const value = event.target.value
 

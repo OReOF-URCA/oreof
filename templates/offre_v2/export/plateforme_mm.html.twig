@@ -1,0 +1,65 @@
+<table data-xls-sheet="{{ (type_diplome ? 'MonMaster - ' ~ (type_diplome.libelleCourt|default(type_diplome.libelle)) : 'MonMaster')|slice(0, 31) }}">
+    <thead>
+        <tr>
+            <th data-xls-colspan="6" data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Formation</th>
+            <th data-xls-colspan="5" data-xls-bg-color="#2F5597" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Capacités d'accueil {{ annee_n_1 }}</th>
+            <th data-xls-colspan="5" data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Capacités d'accueil {{ annee_n }}</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Mentions conseillées</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Remarques</th>
+        </tr>
+        <tr>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Composante</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Type de Diplôme</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Mention</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Parcours</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Type de Parcours</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Lieu</th>
+
+            <th data-xls-bg-color="#D9E1F2" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Ouverture {{ annee_n_1 }} OUI/NON</th>
+            <th data-xls-bg-color="#D9E1F2" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité globale (T=A+B+C)</th>
+            <th data-xls-bg-color="#D9E1F2" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Classique (A)</th>
+            <th data-xls-bg-color="#D9E1F2" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Alternance (B)</th>
+            <th data-xls-bg-color="#D9E1F2" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Redoublants / EEF (C)</th>
+            
+            <th data-xls-bg-color="#B4C6E7" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Ouverture {{ annee_n }} OUI/NON</th>
+            <th data-xls-bg-color="#B4C6E7" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité globale (T=A+B+C)</th>
+            <th data-xls-bg-color="#B4C6E7" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Classique (A)</th>
+            <th data-xls-bg-color="#B4C6E7" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Alternance (B)</th>
+            <th data-xls-bg-color="#B4C6E7" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Redoublants / EEF (C)</th>
+            
+            <th data-xls-bg-color="#D9E1F2" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Mentions de Licence conseillées</th>
+            <th data-xls-bg-color="#D9E1F2" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Remarques</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+            <tr>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.composante }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.diplome }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.mention }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.parcours }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.type_parcours }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.lieu }}</td>
+                
+                <td data-xls-border="thin" data-xls-align="center">{{ row.ouverture_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_globale_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_fi_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_alt_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_spe_n_1 }}</td>
+                
+                <td data-xls-border="thin" data-xls-align="center">{{ row.ouverture_n }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_globale_n }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_fi_n }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_alt_n }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_spe_n }}</td>
+                
+                <td data-xls-border="thin" data-xls-align="left">{{ row.mentions_conseillees }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.remarques }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="18" data-xls-align="center">Aucune donnée disponible</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

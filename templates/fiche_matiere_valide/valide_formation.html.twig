@@ -1,186 +1,237 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
+    {# Calcul des statistiques globales pour la formation #}
+    {% set totalFiches = 0 %}
+    {% set totalCompletes = 0 %}
+    {% set totalEnCours = 0 %}
+    {% set totalAttenteRp = 0 %}
+    {% set totalAttenteSes = 0 %}
+    {% set totalValidees = 0 %}
+    {% set totalPubliees = 0 %}
 
-    <div class="card"
-            {{ stimulus_controller('validation--fichematiere') }}
-    >
-        <div class="card-body">
+    {% for parcours in parcourss %}
+        {% if statsParcours[parcours.id] is defined and statsParcours[parcours.id].statsFichesMatieresParcours is defined %}
+            {% set st = statsParcours[parcours.id].statsFichesMatieresParcours %}
+            {% set totalFiches = totalFiches + st.nbFiches %}
+            {% set totalCompletes = totalCompletes + st.nbFichesCompletes %}
+            {% set totalEnCours = totalEnCours + st.nbEnCoursRedaction %}
+            {% set totalAttenteRp = totalAttenteRp + st.nbFichesNonValidees %}
+            {% set totalAttenteSes = totalAttenteSes + st.nbFichesNonValideesSes %}
+            {% set totalValidees = totalValidees + st.nbFichesValidees %}
+            {% set totalPubliees = totalPubliees + st.nbFichesPubliees %}
+        {% endif %}
+    {% endfor %}
 
-            {{ component('alerte', {
-                type: 'info',
-                message: 'Cocher les fiches EC/matière à valider puis cliquer sur le bouton "Valider et soumettre les fiches EC/matière.<br>
-Cela entrainera la vérification des informations saisies. Seules les fiches EC/matières complètes peuvent être validées et soumises pour publication.',
-            }) }}
-            <div class="row">
-                <div class="col-3 d-grid">
+    {% set globalPercent = totalFiches > 0 ? ((totalCompletes / totalFiches) * 100)|round : 0 %}
 
+    <section class="space-y-6 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6"
+             {{ stimulus_controller('validation--fichematiere') }}>
 
-                    <button class="btn btn-sm d-block btn-outline-success mb-2 mt-2"
-                            type="button"
-                            data-controller="tooltip"
-                            data-tooltip-placement-value="bottom"
-                            data-action="validation--fichematiere#valide"
-                            data-validation--fichematiere-url-param="{{ path('fiche_matiere_valide_valide', {type:'formation', id: formation.id}) }}"
-                            aria-label="{{ ('validation.valider.fiches_matieres.parcours')|trans({}, 'process') }}"
-                            data-bs-original-title="{{ ('validation.valider.fiches_matieres.parcours')|trans({}, 'process') }}"
-                    >
-                        <i class="fal fa-check"></i> {{ ('validation.valider.fiches_matieres')|trans({}, 'process') }}
-                    </button>
-                </div>
+        {{ include('_layout/_section_shell.html.twig', {
+            title_card: 'Validation des fiches EC / matières',
+            description_card: 'Consultez l\'avancement de rédaction et de validation des fiches par parcours, sélectionnez les fiches complètes à valider et soumettez-les.',
+            badge_card: parcourss|length ~ ' parcours'
+        }) }}
 
-                {% if is_granted('ROLE_ADMIN') %}
-                    <div class="col-3 d-grid">
-                        <a class="btn btn-sm d-block btn-outline-success mb-2 mt-2"
-                           type="button"
-                           data-controller="tooltip"
-                           data-tooltip-placement-value="bottom"
-                           href="{{ path('fiche_matiere_valide_update', {type:'formation', id: formation.id}) }}"
-                        >
-                            <i class="fal fa-percent"></i> Maj état
-                        </a>
-                    </div>
-                {% endif %}
+        {{ component('alerte', {
+            type: 'info',
+            icone: 'icon:info',
+            message: 'Cochez les fiches EC/matière à valider dans les parcours ci-dessous, puis cliquez sur <strong>"Valider les fiches sélectionnées"</strong>.<br>Cela entraînera la vérification des informations saisies. Seules les fiches EC/matière complètes peuvent être validées et soumises pour publication.',
+        }) }}
 
-            </div>
-            <div class="card mb-2 bg-transparent no-shadow d-none d-md-block sh-3">
-                <div class="card-body pt-0 pb-0 h-100">
-                    <div class="row g-0 h-100 align-content-center">
-                        <div class="col-12 col-md-4 d-flex align-items-center mb-2 text-secondary mb-md-0">
-                            Parcours
-                        </div>
-                        <div class="col-6 col-md-1 d-flex align-items-center
-                        text-secondary">
-                            En cours de rédaction
-                        </div>
-                        <div class="col-6 col-md-2 d-flex align-items-center
-                        text-secondary">
-                            Etat de remplissage <br>(nb complet / nb fiches total)
-                        </div>
-                        <div class="col-6 col-md-1 d-flex align-items-center
-                        text-secondary">
-                            En attente<br> validation RP, RF ou DPE
-                        </div>
-                        <div class="col-6 col-md-1 d-flex align-items-center text-medium
-                         text-secondary">
-                            En attente <br>
-                            validation SES
-                        </div>
-                        <div class="col-6 col-md-1 d-flex align-items-center
-                        text-medium text-secondary">
-                            Fiches validées
-                        </div>
-                        <div class="col-6 col-md-1 d-flex align-items-center text-medium
-                         text-secondary">
-                            Publiées
-                        </div>
-                        <div class="col-6 col-md-1 d-flex align-items-center text-medium
-                        justify-content-end text-secondary">
-                            Détails
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% for parcours in parcourss %}
-                {% set stats =  statsParcours[parcours.id].statsFichesMatieresParcours %}
-                {% set dto = statsParcours[parcours.id] %}
-                <div>
-                    <div class="card mb-2 sh-19 sh-md-8">
-                        <div class="card-body pt-0 pb-0 h-100">
-                            <div class="row g-0 h-100 align-content-center">
-                                <div class="col-12 col-md-4 d-flex flex-column justify-content-center mb-1 mb-md-0">
-                                    <div class="text-muted d-md-none">Parcours</div>
-                                    {{ parcours.libelle }}
-                                    <span>{{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}</span>
-                                </div>
-                                <div class="col-6 col-md-1 d-flex flex-column justify-content-center mb-1 mb-md-0">
-                                    <div class="text-muted d-md-none">En Cours rédaction</div>
-                                    {{ stats.nbEnCoursRedaction }}
-                                </div>
-                                <div class="col-6 col-md-2 d-flex flex-column justify-content-center mb-1 mb-md-0">
-                                    <div class="text-muted d-md-none">Etat remplissage</div>
-                                    {{ stats.nbFichesCompletes }} / {{ stats.nbFiches }}
-                                </div>
-                                <div class="col-6 col-md-1 d-flex flex-column justify-content-center mb-1 mb-md-0">
-                                    <div class="text-muted d-md-none">En attente validation RP</div>
-                                    {{ stats.nbFichesNonValidees }}
-                                </div>
-
-                                <div class="col-6 col-md-1 d-flex flex-column justify-content-center mb-1 mb-md-0">
-                                    <div class="text-muted d-md-none">En attente validation DPE</div>
-                                    {{ stats.nbFichesNonValideesSes }}
-                                </div>
-                                <div class="col-6 col-md-1 d-flex flex-column justify-content-center mb-1 mb-md-0">
-                                    <div class="text-muted d-md-none">En attente validation RF</div>
-                                    {{ stats.nbFichesValidees }}
-                                </div>
-                                <div class="col-6 col-md-1 d-flex flex-column justify-content-center mb-1 mb-md-0">
-                                    <div class="text-muted d-md-none">En attente validation DPE</div>
-                                    {{ stats.nbFichesPubliees }}
-                                </div>
-                                <div class="col-6 col-md-1 d-flex flex-column justify-content-center
-                                            mb-1 mb-md-0">
-                                    <div class="text-muted d-md-none">Détails</div>
-
-                                    <button class="ms-2 btn btn-sm btn-outline-primary"
-                                            {{ stimulus_action('validation--fichematiere', 'detail', 'click',
-                                                {parcours:parcours.id}
-                                            ) }}
-                                    >
-                                        <i class="fal fa-caret-right"></i> Détails
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="detail_parcours_{{ parcours.id }}" class="d-none detail_parcours ms-4">
-                        <div class="row">
-                            <div class="col-12 bg-white">
-                                {{ include('fiche_matiere_valide/_parcours.html.twig') }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-
-
-            <button class="btn btn-sm d-block btn-outline-success mb-2"
-                    type="button"
-                    data-controller="tooltip"
-                    data-tooltip-placement-value="bottom"
-                    data-action="validation--fichematiere#valide"
-                    data-validation--fichematiere-url-param="{{ path('fiche_matiere_valide_valide', {type:'formation', id: formation.id}) }}"
-                    aria-label="{{ ('validation.valider.fiches_matieres.parcours')|trans({}, 'process') }}"
-                    data-bs-original-title="{{ ('validation.valider.fiches_matieres.parcours')|trans({}, 'process') }}"
-            >
-                <i class="fal fa-check"></i> {{ ('validation.valider.fiches_matieres')|trans({}, 'process') }}
-            </button>
+        {# Grille des KPIs de synthèse #}
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <twig:Kpi
+                title="Complétude"
+                :value="totalCompletes"
+                :total="totalFiches"
+                :percent="globalPercent"
+                icon="mdi:chart-pie"
+            />
+            <twig:Kpi
+                title="En cours"
+                :value="totalEnCours"
+                description="En rédaction"
+                variant="secondary"
+                icon="icon:edit"
+            />
+            <twig:Kpi
+                title="Attente RP/DPE"
+                :value="totalAttenteRp"
+                description="À valider"
+                variant="warning"
+                icon="icon:clock"
+            />
+            <twig:Kpi
+                title="Attente SES"
+                :value="totalAttenteSes"
+                description="Soumis central"
+                variant="info"
+                icon="icon:clock"
+            />
+            <twig:Kpi
+                title="Validées"
+                :value="totalValidees"
+                description="Pour publication"
+                variant="success"
+                icon="icon:check-circle"
+            />
+            <twig:Kpi
+                title="Publiées"
+                :value="totalPubliees"
+                description="En ligne"
+                variant="primary"
+                icon="icon:share"
+            />
         </div>
-        <div {{ stimulus_target('validation--fichematiere', 'action') }}
-    </div>
 
+
+        {# Barre d'actions globale #}
+        <div class="flex flex-col gap-3 rounded-xl border border-secondary-200 bg-secondary-50/70 p-4 dark:border-secondary-700 dark:bg-secondary-800/40 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-2 text-sm text-secondary-700 dark:text-secondary-200">
+                {{ ux_icon('icon:check', {class: 'h-5 w-5 text-success-600 dark:text-success-400 shrink-0'}) }}
+                <span>Sélectionnez les fiches complètes à valider dans chaque parcours, puis lancez la validation.</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <twig:Button
+                        href="{{ path('fiche_matiere_valide_update', {type:'formation', id: formation.id}) }}"
+                        variant="secondary"
+                        :outline="true"
+                        size="sm"
+                        icon="icon:sync"
+                        label="Maj état"
+                        tooltip="Recalculer les états et pourcentages"
+                    />
+                {% endif %}
+                <twig:Button
+                    variant="success"
+                    size="sm"
+                    :soft="false"
+                    icon="icon:check"
+                    label="Valider les fiches sélectionnées"
+                    tooltip="Valider et soumettre les fiches cochées"
+                    dataAction="click->validation--fichematiere#valide"
+                    data-validation--fichematiere-url-param="{{ path('fiche_matiere_valide_valide', {type:'formation', id: formation.id}) }}"
+                />
+            </div>
+        </div>
+
+        {# Liste des parcours et détails #}
+        <div class="overflow-hidden rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm text-secondary-700 dark:text-secondary-200">
+                    <thead class="bg-secondary-50 text-left text-xs font-black uppercase tracking-wider text-secondary-500 dark:bg-secondary-800/70 dark:text-secondary-300">
+                    <tr>
+                        <th class="px-4 py-3">Parcours</th>
+                        <th class="px-4 py-3 text-center">En cours<br>rédaction</th>
+                        <th class="px-4 py-3 text-center">État de remplissage<br><span class="normal-case tracking-normal text-[11px] text-secondary-400">(complètes / total)</span></th>
+                        <th class="px-4 py-3 text-center">En attente<br>validation RP / DPE</th>
+                        <th class="px-4 py-3 text-center">En attente<br>validation SES</th>
+                        <th class="px-4 py-3 text-center">Fiches<br>validées</th>
+                        <th class="px-4 py-3 text-center">Publiées</th>
+                        <th class="px-4 py-3 text-right">Détails</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                    {% for parcours in parcourss %}
+                        {% set stats = statsParcours[parcours.id].statsFichesMatieresParcours %}
+                        {% set dto = statsParcours[parcours.id] %}
+                        {% set pPercent = stats.nbFiches > 0 ? ((stats.nbFichesCompletes / stats.nbFiches) * 100)|round : 0 %}
+                        <tr class="align-middle hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40 transition-colors">
+                            <td class="px-4 py-3.5">
+                                <div class="font-semibold text-secondary-900 dark:text-white">
+                                    {{ parcours.libelle }}
+                                </div>
+                                {% if parcours.typeParcours is not null %}
+                                    <div class="mt-1">
+                                        {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3.5 text-center">
+                                <twig:Badge :label="stats.nbEnCoursRedaction" variant="secondary" size="sm" extraClass="min-w-10 justify-center" />
+                            </td>
+                            <td class="px-4 py-3.5 text-center">
+                                <div class="inline-flex flex-col items-center gap-1">
+                                    <twig:Badge :label="stats.nbFichesCompletes ~ ' / ' ~ stats.nbFiches" variant="{{ pPercent == 100 ? 'success' : 'info' }}" size="sm" extraClass="min-w-16 justify-center" />
+                                    <div class="w-16 h-1 rounded-full bg-secondary-200 dark:bg-secondary-700 overflow-hidden">
+                                        <div class="h-full {{ pPercent == 100 ? 'bg-success-500' : 'bg-primary-500' }}" style="width: {{ pPercent }}%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3.5 text-center">
+                                <twig:Badge :label="stats.nbFichesNonValidees" variant="{{ stats.nbFichesNonValidees > 0 ? 'warning' : 'secondary' }}" size="sm" extraClass="min-w-10 justify-center" />
+                            </td>
+                            <td class="px-4 py-3.5 text-center">
+                                <twig:Badge :label="stats.nbFichesNonValideesSes" variant="{{ stats.nbFichesNonValideesSes > 0 ? 'warning' : 'secondary' }}" size="sm" extraClass="min-w-10 justify-center" />
+                            </td>
+                            <td class="px-4 py-3.5 text-center">
+                                <twig:Badge :label="stats.nbFichesValidees" variant="{{ stats.nbFichesValidees > 0 ? 'success' : 'secondary' }}" size="sm" extraClass="min-w-10 justify-center" />
+                            </td>
+                            <td class="px-4 py-3.5 text-center">
+                                <twig:Badge :label="stats.nbFichesPubliees" variant="{{ stats.nbFichesPubliees > 0 ? 'primary' : 'secondary' }}" size="sm" extraClass="min-w-10 justify-center" />
+                            </td>
+                            <td class="px-4 py-3.5 text-right">
+                                <twig:Button
+                                    label="Détails"
+                                    variant="primary"
+                                    size="sm"
+                                    icon="icon:chevron-down"
+                                    dataAction="click->validation--fichematiere#detail"
+                                    data-validation--fichematiere-parcours-param="{{ parcours.id }}"
+                                />
+                            </td>
+                        </tr>
+                        <tr id="detail_parcours_{{ parcours.id }}" class="hidden bg-secondary-50/40 dark:bg-secondary-950/40">
+                            <td colspan="8" class="p-3 sm:p-4">
+                                <div class="rounded-xl border border-secondary-200 bg-white p-3 dark:border-secondary-700 dark:bg-secondary-900 shadow-sm sm:p-4">
+                                    {{ include('fiche_matiere_valide/_parcours.html.twig') }}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="px-4 py-12 text-center text-secondary-500 dark:text-secondary-400">
+                                Aucun parcours trouvé pour cette formation.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Bouton de validation inférieur #}
+        <div class="flex justify-end pt-2">
+            <twig:Button
+                variant="success"
+                size="md"
+                :soft="false"
+                icon="icon:check"
+                label="Valider les fiches sélectionnées"
+                tooltip="Valider et soumettre les fiches cochées"
+                dataAction="click->validation--fichematiere#valide"
+                data-validation--fichematiere-url-param="{{ path('fiche_matiere_valide_valide', {type:'formation', id: formation.id}) }}"
+            />
+        </div>
+    </section>
 {% endblock %}
 
 {% set header_title %}
-    Fiches EC/Matières pour la formation {{ formation.displayLong }}
+    Fiches EC/matières — {{ formation.displayLong }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_parcours_index'), title: 'Liste des parcours'},
-        {href: path('formation_v2_modifier', {slug:formation.slug}), title: 'Formation : '~formation
-        .display}
-    ]}) }}
+{% block bouton_header %}
+    <twig:Button
+        href="{{ path('formation_v2_modifier', {slug: formation.slug}) }}"
+        variant="secondary"
+        size="sm"
+        icon="icon:arrow-left"
+        label="Retour à la formation"
+        tooltip="Retour à la formation"
+    />
 {% endblock %}
 
-{% block bouton_header %}
-    <a href="{{ path('formation_v2_modifier', {slug:formation.slug}) }}"
-       class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Retour au parcours"
-    >
-        <i class="{{ iconBack }}"></i>
-        <span> Retour à la formation</span>
-    </a>
-{% endblock %}
+

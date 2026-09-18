@@ -53,6 +53,12 @@ class PlateformeAdmission
     #[ORM\Column(length: 15, nullable: true)]
     private ?string $color = null;
 
+    #[ORM\Column(length: 30, options: ['default' => 'global'])]
+    private string $modeExport = 'global';
+
+    public const string MODE_EXPORT_GLOBAL = 'global';
+    public const string MODE_EXPORT_PAR_DIPLOME = 'par_diplome';
+
     public function __construct()
     {
         $this->admissionPlateformeParametres = new ArrayCollection();
@@ -97,9 +103,9 @@ class PlateformeAdmission
         return $this;
     }
 
-    public function getConfiguration(): ?array
+    public function getConfiguration(): array
     {
-        return $this->configuration ?? [];
+        return $this->configuration;
     }
 
     public function setConfiguration(array $configuration): static
@@ -108,9 +114,28 @@ class PlateformeAdmission
         return $this;
     }
 
-    public function getDefinitionChamps(): ?array
+    public function getDefinitionChamps(): array
     {
-        return $this->definitionChamps ?? [];
+        return $this->definitionChamps;
+    }
+
+    public function hasDefinitionChamps(): bool
+    {
+        if (empty($this->definitionChamps)) {
+            return false;
+        }
+
+        $filtered = array_filter($this->definitionChamps, static function ($item) {
+            if (is_string($item)) {
+                return trim($item) !== '';
+            }
+            if (is_array($item)) {
+                return !empty(array_filter($item));
+            }
+            return !empty($item);
+        });
+
+        return count($filtered) > 0;
     }
 
     public function setDefinitionChamps(array $definitionChamps): static
@@ -196,5 +221,20 @@ class PlateformeAdmission
         return $this;
     }
 
+    public function getModeExport(): string
+    {
+        return $this->modeExport;
+    }
 
+    public function setModeExport(string $modeExport): static
+    {
+        $this->modeExport = $modeExport;
+
+        return $this;
+    }
+
+    public function isExportParDiplome(): bool
+    {
+        return $this->getModeExport() === self::MODE_EXPORT_PAR_DIPLOME;
+    }
 }

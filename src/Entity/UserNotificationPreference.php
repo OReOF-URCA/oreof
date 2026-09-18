@@ -57,9 +57,11 @@ class UserNotificationPreference
         return $this->emailEnabled;
     }
 
-    public function setEmailEnabled(bool $emailEnabled): void
+    public function setEmailEnabled(bool $emailEnabled): static
     {
         $this->emailEnabled = $emailEnabled;
+
+        return $this;
     }
 
     public function isInAppEnabled(): bool
@@ -67,8 +69,10 @@ class UserNotificationPreference
         return $this->inAppEnabled;
     }
 
-    public function setInAppEnabled(bool $inAppEnabled): void
+    public function setInAppEnabled(bool $inAppEnabled): static
     {
         $this->inAppEnabled = $inAppEnabled;
+
+        return $this;
     }
 }

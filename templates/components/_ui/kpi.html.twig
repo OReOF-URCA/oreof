@@ -1,0 +1,63 @@
+{#
+Composant Kpi — indicateur clé de performance / compteur statistique.
+Exemples :
+  <twig:Kpi title="En cours" value="12" description="En rédaction" variant="secondary" icon="icon:edit" />
+  <twig:Kpi title="Complétude" value="45" total="50" :percent="90" icon="mdi:chart-pie" />
+  <twig:Kpi title="Validées" value="38" description="Pour publication" variant="success" icon="icon:check-circle" />
+#}
+
+{% set resolvedTitle = this.resolvedTitle %}
+{% set isLink = this.href is not null and this.href != '' %}
+{% set cardClasses = "rounded-xl border border-secondary-200 bg-secondary-50/60 p-3.5 shadow-sm dark:border-secondary-700 dark:bg-secondary-800/40 transition-all " ~ (isLink ? "hover:border-secondary-300 hover:shadow-md dark:hover:border-secondary-600 cursor-pointer block " : "") ~ this.extraClass %}
+
+{% set slotContent %}
+    {% block content %}{% endblock %}
+{% endset %}
+
+{% if isLink %}
+<a href="{{ this.href }}" class="{{ cardClasses }}" {{- attributes -}}>
+{% else %}
+<div class="{{ cardClasses }}" {{- attributes -}}>
+{% endif %}
+    <div class="flex items-center justify-between gap-2">
+        <span class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400 truncate">
+            {{ resolvedTitle }}
+        </span>
+        {% if this.icon %}
+            {{ ux_icon(this.icon, {class: 'h-4 w-4 shrink-0 ' ~ this.iconColorClass}) }}
+        {% endif %}
+    </div>
+
+    <div class="mt-2 flex items-baseline gap-1.5 flex-wrap">
+        <span class="text-2xl font-bold {{ this.valueColorClass }} leading-tight">
+            {{ this.value }}
+        </span>
+        {% if this.total is not null %}
+            <span class="text-xs text-secondary-500 dark:text-secondary-400">/ {{ this.total }}</span>
+        {% endif %}
+        {% if this.unit %}
+            <span class="text-xs font-medium text-secondary-500 dark:text-secondary-400">{{ this.unit }}</span>
+        {% endif %}
+    </div>
+
+    {% if this.percent is not null and this.showProgress %}
+        <div class="mt-2 flex items-center gap-2">
+            <div class="h-1.5 w-full overflow-hidden rounded-full bg-secondary-200 dark:bg-secondary-700">
+                <div class="h-full rounded-full {{ this.progressBarClass }} transition-all duration-300" style="width: {{ this.percent }}%"></div>
+            </div>
+            <span class="text-[11px] font-semibold text-secondary-600 dark:text-secondary-300 shrink-0">{{ this.percent }}%</span>
+        </div>
+    {% elseif this.description %}
+        <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400 truncate">{{ this.description }}</p>
+    {% endif %}
+
+    {% if slotContent|trim != '' %}
+        <div class="mt-2">
+            {{ slotContent|raw }}
+        </div>
+    {% endif %}
+{% if isLink %}
+</a>
+{% else %}
+</div>
+{% endif %}

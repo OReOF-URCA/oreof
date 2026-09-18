@@ -44,7 +44,8 @@ class RecipientResolver
                     }
                     break;
                 case CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT:
-                    $users = $this->userProfilRepository->findBy(['etablissement' => 1, 'profil' => $profil->getProfil()]);
+                    $etablissement = $workFlowData->getEtablissement() ?? 1;
+                    $users = $this->userProfilRepository->findBy(['etablissement' => $etablissement, 'profil' => $profil->getProfil()]);
                     foreach ($users as $user) {
                         $recipients[] = $user->getUser();
                     }
@@ -89,10 +90,10 @@ class RecipientResolver
         $copies = [];
 //        foreach ($metadata['recipientsCopy'] ?? [] as $copy) {
 //            if ($copy === 'SES') {
-//                $copies[] = WorkFlowData::EMAIL_OREOF;
+//                $copies[] = $workFlowData->getEmailOreof();
 //            }
 //            if ($copy === 'CFVU') {
-//                $copies[] = WorkFlowData::EMAIL_CFVU;
+//                $copies[] = $workFlowData->getEmailCentral();
 //            }
 //        }
 

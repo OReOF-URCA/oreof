@@ -24,5 +24,5 @@ return [
     Symfony\UX\Icons\UXIconsBundle::class => ['all' => true],
     Sensiolabs\GotenbergBundle\SensiolabsGotenbergBundle::class => ['all' => true],
     Liip\ImagineBundle\LiipImagineBundle::class => ['all' => true],
-    Dannebicque\WorkflowOperationsBundle\WorkflowOperationsBundle::class => ['all' => true],
+    Davidannebicque\HtmlToSpreadsheetBundle\HtmlToSpreadsheetBundle::class => ['all' => true],
 ];

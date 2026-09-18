@@ -1003,5 +1003,65 @@
             </div>
         </twig:Card>
 
+        {# Section Composant : Kpi #}
+        <twig:Card title="Kpi" description="Indicateur clé de performance et compteur statistique synthétique avec variantes de couleur, barre de progression et icônes.">
+
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Variantes de couleur (variant)</h3>
+                    <p class="text-xs text-secondary-500 mb-3">variant : default / primary / success / warning / danger / info / secondary</p>
+                    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                        <twig:Kpi title="Total fiches" value="142" description="Toutes matières" variant="default" icon="icon:file-alt"/>
+                        <twig:Kpi title="Publiées" value="98" description="En ligne" variant="primary" icon="icon:share"/>
+                        <twig:Kpi title="Validées" value="28" description="Pour publication" variant="success" icon="icon:check-circle"/>
+                        <twig:Kpi title="Attente RP" value="12" description="À valider" variant="warning" icon="icon:clock"/>
+                        <twig:Kpi title="Attente SES" value="4" description="Soumis central" variant="info" icon="icon:clock"/>
+                        <twig:Kpi title="En cours" value="16" description="En rédaction" variant="secondary" icon="icon:edit"/>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Complétude & Progression (total, percent)</h3>
+                    <p class="text-xs text-secondary-500 mb-3">total : valeur totale affichée en dénominateur<br>percent : pourcentage affichant automatiquement la jauge de progression</p>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <twig:Kpi title="Complétude globale" :value="45" :total="50" :percent="90" icon="mdi:chart-pie"/>
+                        <twig:Kpi title="Heures CM validées" :value="120" total="150" unit="h" :percent="80" variant="info" icon="icon:clock"/>
+                        <twig:Kpi title="Objectif ECTS" :value="60" total="60" :percent="100" variant="success" icon="icon:check"/>
+                        <twig:Kpi title="Revue en retard" :value="8" total="40" :percent="20" variant="danger" icon="icon:warning"/>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-secondary-900 text-secondary-200 p-4 rounded-md text-xs overflow-x-auto"><code>{% verbatim %}{# KPI avec jauge de complétude #}
+&lt;twig:Kpi
+    title="Complétude"
+    :value="45"
+    :total="50"
+    :percent="90"
+    icon="mdi:chart-pie" />
+
+{# KPI statut avec variante et description #}
+&lt;twig:Kpi
+    title="En cours"
+    :value="12"
+    description="En rédaction"
+    variant="secondary"
+    icon="icon:edit" />
+
+{# KPI cliquable vers un filtre #}
+&lt;twig:Kpi
+    title="Validées"
+    :value="28"
+    description="Pour publication"
+    variant="success"
+    icon="icon:check-circle"
+    href="{{ path('fiche_matiere_valide_formation', {formation: 1}) }}" />{% endverbatim %}</code></pre>
+                </div>
+            </div>
+        </twig:Card>
+
     </div>
 {% endblock %}
+

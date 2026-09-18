@@ -15,6 +15,7 @@ use App\Classes\ValidationProcessChangeRf;
 use App\Classes\ValidationProcessFicheMatiere;
 use App\Entity\Composante;
 use App\Entity\CampagneCollecte;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\CampagneCollecteRepository;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
@@ -93,6 +94,7 @@ class ValidationComposanteController extends BaseController
     }
 
     #[Route('{composante}/dpe', name: 'dpe_index')]
+    #[Breadcrumb(label: 'menu.compo.validation_dpe')]
     public function composante(
         DpeParcoursRepository $dpeParcoursRepository,
         Request           $request,
@@ -100,8 +102,7 @@ class ValidationComposanteController extends BaseController
         ValidationProcess $validationProcess,
     ): Response
     {
-
-        $steps = $validationProcess->getProcessAll();
+        $steps = $validationProcess->getProcessComposante();
 
         //statstics
         // parcourir tous les parcours et compter les états
@@ -119,7 +120,7 @@ class ValidationComposanteController extends BaseController
             }
         }
 
-        return $this->render('validation-composante/dpe.html.twig', [
+        return $this->render('validation/dpe.html.twig', [
             'composante' => $composante,
             'steps' => $steps,
             'statistiques' => $statistiques,
@@ -196,36 +197,56 @@ class ValidationComposanteController extends BaseController
     }
 
     #[Route('{composante}/change-rf', name: 'change_rf_index')]
+    #[Breadcrumb(label: 'menu.compo.validation_change_rf')]
     public function changeRf(
         Request                   $request,
         Composante                $composante,
+        ChangeRfRepository        $changeRfRepository,
         ValidationProcessChangeRf $validationProcessChangeRf,
     ): Response
     {
         $typeValidation = $request->query->get('typeValidation');
 
-        return $this->render('validation-composante/change_rf.html.twig', [
-            'composante' => $composante,
-            'types_validation' => $validationProcessChangeRf->getProcess(),//faire un getProcesssComposante pour filtrer par niveau composante,
-            'typeValidation' => $typeValidation,
+        $statistiques = [];
+        $fiches = $changeRfRepository->findByComposanteAndCampagneForStats($composante, $this->getCampagneCollecte());
+        foreach ($fiches as $fiche) {
+            $keys = array_keys($fiche['etat'] ?? []);
+            $etat = $keys[0] ?? null;
+            $statistiques[$etat] = (int)($fiche['nb'] ?? 0);
+        }
 
+        return $this->render('validation/change_rf.html.twig', [
+            'composante' => $composante,
+            'steps' => $validationProcessChangeRf->getProcessComposante(),
+            'typeValidation' => $typeValidation,
+            'statistiques' => $statistiques,
         ]);
     }
 
     #[Route('{composante}/fiche-matiere', name: 'fiche_index')]
+    #[Breadcrumb(label: 'menu.compo.validation_ec')]
     public function ficheMatiere(
         Request                       $request,
         Composante                    $composante,
+        FicheMatiereRepository        $ficheMatiereRepository,
         ValidationProcessFicheMatiere $validationProcessFicheMatiere,
     ): Response
     {
         $typeValidation = $request->query->get('typeValidation');
 
-        return $this->render('validation-composante/fiche_matiere.html.twig', [
-            'composante' => $composante,
-            'types_validation' => $validationProcessFicheMatiere->getProcess(),
-            'typeValidation' => $typeValidation,
+        $statistiques = [];
+        $fiches = $ficheMatiereRepository->findByComposanteAndCampagneForStats($composante, $this->getCampagneCollecte());
+        foreach ($fiches as $fiche) {
+            $keys = array_keys($fiche['etat'] ?? []);
+            $etat = $keys[0] ?? null;
+            $statistiques[$etat] = (int)($fiche['nb'] ?? 0);
+        }
 
+        return $this->render('validation/fiche_matiere.html.twig', [
+            'composante' => $composante,
+            'steps' => $validationProcessFicheMatiere->getProcessComposante(),
+            'typeValidation' => $typeValidation,
+            'statistiques' => $statistiques,
         ]);
     }
 
@@ -315,6 +336,7 @@ class ValidationComposanteController extends BaseController
             'process' => $process,
             'fiches' => $fiches,
             'etape' => $typeValidation ?? null,
+            'oneFiche' => $fiches[0] ?? null,
         ]);
     }
 }

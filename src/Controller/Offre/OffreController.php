@@ -10,7 +10,9 @@ use App\Entity\DpeFormation;
 use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\Parcours;
+use App\Entity\PlateformeAdmission;
 use App\Entity\PlateformeAdmissionParametre;
+use App\Entity\TypeDiplome;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
 use App\Entity\DocumentConseil;
@@ -27,6 +29,7 @@ use App\Repository\PlateformeAdmissionRepository;
 use App\Repository\TypeDiplomePlateformeAdmissionRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\CampagneCollecteService;
+use App\Service\Offre\OffreAnnexesExportService;
 use App\Service\ParcoursComparaisonService;
 use App\Service\SecureUploadService;
 use App\Service\Validation\OffreValidationService;
@@ -165,7 +168,7 @@ final class OffreController extends BaseController
         foreach ($tFormations as $fId => &$row) {
             $formationCapacite = $row['formation']->getCapaciteAccueil();
             if ($formationCapacite <= 0) {
-                $formationCapacite = array_sum(array_map(fn($p) => $p['capacite'], $row['parcoursData']));
+                $formationCapacite = $row['formation']->getCapaciteCalculee();
             }
             $row['capacite'] = $formationCapacite;
 
@@ -490,6 +493,7 @@ final class OffreController extends BaseController
                         'code' => $plateforme->getCode(),
                         'color' => $plateforme->getColor(),
                         'definitionChamps' => $plateforme->getDefinitionChamps(),
+                        'hasDefinitionChamps' => $plateforme->hasDefinitionChamps(),
                         'annees' => array_values($tpa->getAnnees()),
                     ];
                 }
@@ -564,6 +568,27 @@ final class OffreController extends BaseController
         }
 
         $changedYears = [];
+        $modifiedAnneesByOrdre = [];
+
+        // Gestion de la configuration du tronc commun
+        if ($request->request->has('has_tronc_commun_config')) {
+            $troncCommunChanged = false;
+            foreach ($formation->getAnneesOrdres() as $anneeOrdre) {
+                $isTc = $request->request->has('tronc_commun_annee_' . $anneeOrdre);
+                if ($formation->isAnneeTroncCommun($anneeOrdre) !== $isTc) {
+                    $formation->setAnneeTroncCommun($anneeOrdre, $isTc);
+                    $troncCommunChanged = true;
+                }
+            }
+            if ($troncCommunChanged) {
+                $em->persist($formation);
+                foreach ($formation->getParcours() as $p) {
+                    foreach ($p->getAnnees() as $a) {
+                        $changedYears[$a->getId()] = true;
+                    }
+                }
+            }
+        }
 
         foreach ($formation->getParcours() as $parcours) {
             $parcoursKey = 'parcours_' . $parcours->getId() . '_reconduction';
@@ -640,12 +665,21 @@ final class OffreController extends BaseController
                 if ($oldIsOuvert !== $newIsOuvert || $trackOpenClosedChanged) {
                     $changedYears[$anneeId] = true;
                     $annee->setIsOuvert($newIsOuvert);
+                    $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
                 }
                 
+                $oldCapacite = $annee->getCapaciteAccueil();
                 if ($isParcoursClosed) {
                     $annee->setCapaciteAccueil(0);
+                    if ($oldCapacite !== 0) {
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                    }
                 } elseif ($request->request->has($capaciteAccueilKey)) {
-                    $annee->setCapaciteAccueil((int)$request->request->get($capaciteAccueilKey));
+                    $newCap = (int)$request->request->get($capaciteAccueilKey);
+                    $annee->setCapaciteAccueil($newCap);
+                    if ($oldCapacite !== $newCap) {
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                    }
                 }
                 
                 $typeDiplome = $formation->getTypeDiplome();
@@ -661,6 +695,7 @@ final class OffreController extends BaseController
                                 $classiqueKey = 'annee_' . $anneeId . '_plateforme_' . $plateformeId . '_classique';
                                 $alternanceKey = 'annee_' . $anneeId . '_plateforme_' . $plateformeId . '_alternance';
                                 $specifiqueKey = 'annee_' . $anneeId . '_plateforme_' . $plateformeId . '_specifique';
+                                $remarquesKey = 'annee_' . $anneeId . '_plateforme_' . $plateformeId . '_remarques';
                                 
                                 $parametre = $plateformeParamRepo->findOneBy([
                                     'annee' => $annee,
@@ -675,6 +710,13 @@ final class OffreController extends BaseController
                                     $parametre->setCampagne($campagne);
                                 }
                                 
+                                $oldParamActive = $parametre->isActive();
+                                $oldParamGlobale = $parametre->getCapaciteGlobale();
+                                $oldParamFi = $parametre->getCapaciteFi();
+                                $oldParamAlt = $parametre->getCapaciteAlternance();
+                                $oldParamSpe = $parametre->getCapaciteSpecifique();
+                                $oldParamRem = $parametre->getRemarques();
+
                                 $isActive = false;
                                 if (!$isParcoursClosed && $newIsOuvert) {
                                     if ($request->request->has($activeKey)) {
@@ -709,12 +751,126 @@ final class OffreController extends BaseController
                                         $val = $request->request->get($specifiqueKey);
                                         $parametre->setCapaciteSpecifique($val !== '' ? (int)$val : null);
                                     }
+
+                                    if ($request->request->has($remarquesKey)) {
+                                        $val = trim((string)$request->request->get($remarquesKey));
+                                        $parametre->setRemarques($val !== '' ? $val : null);
+                                    }
+                                }
+
+                                if ($oldParamActive !== $parametre->isActive()
+                                    || $oldParamGlobale !== $parametre->getCapaciteGlobale()
+                                    || $oldParamFi !== $parametre->getCapaciteFi()
+                                    || $oldParamAlt !== $parametre->getCapaciteAlternance()
+                                    || $oldParamSpe !== $parametre->getCapaciteSpecifique()
+                                    || $oldParamRem !== $parametre->getRemarques()
+                                ) {
+                                    $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
                                 }
                                 
                                 $em->persist($parametre);
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // Synchronisation des données des années en tronc commun entre tous les parcours
+        foreach ($formation->getAnneesTroncCommun() as $tcOrdre) {
+            $allAnneesWithOrdre = [];
+            foreach ($formation->getParcours() as $p) {
+                foreach ($p->getAnnees() as $a) {
+                    if ($a->getOrdre() === $tcOrdre) {
+                        $allAnneesWithOrdre[] = $a;
+                    }
+                }
+            }
+
+            if (count($allAnneesWithOrdre) <= 1) {
+                continue;
+            }
+
+            // Trouver l'année source : l'année qui a été modifiée, sinon la première
+            $sourceAnnee = $modifiedAnneesByOrdre[$tcOrdre] ?? $allAnneesWithOrdre[0];
+
+            $sourceParams = [];
+            foreach ($sourceAnnee->getAdmissionPlateformeParametres() as $param) {
+                if ($param->getCampagne() === $campagne && $param->getPlateforme() !== null) {
+                    $sourceParams[$param->getPlateforme()->getId()] = $param;
+                }
+            }
+
+            foreach ($allAnneesWithOrdre as $targetAnnee) {
+                if ($targetAnnee->getId() === $sourceAnnee->getId()) {
+                    continue;
+                }
+
+                $changed = false;
+                if ($targetAnnee->isOuvert() !== $sourceAnnee->isOuvert()) {
+                    $targetAnnee->setIsOuvert($sourceAnnee->isOuvert());
+                    $changed = true;
+                }
+                if ($targetAnnee->getCapaciteAccueil() !== $sourceAnnee->getCapaciteAccueil()) {
+                    $targetAnnee->setCapaciteAccueil($sourceAnnee->getCapaciteAccueil());
+                    $changed = true;
+                }
+
+                $typeDiplome = $formation->getTypeDiplome();
+                if ($typeDiplome) {
+                    foreach ($typeDiplome->getTypeDiplomePlateformeAdmissions() as $tpa) {
+                        if ($tpa->getCampagne() === $campagne && $tpa->getPlateforme()?->getActive() && in_array($tcOrdre, $tpa->getAnnees(), true)) {
+                            $plat = $tpa->getPlateforme();
+                            $platId = $plat->getId();
+
+                            $targetParam = $plateformeParamRepo->findOneBy([
+                                'annee' => $targetAnnee,
+                                'plateforme' => $plat,
+                                'campagne' => $campagne
+                            ]);
+                            if (!$targetParam) {
+                                $targetParam = new PlateformeAdmissionParametre();
+                                $targetParam->setAnnee($targetAnnee);
+                                $targetParam->setPlateforme($plat);
+                                $targetParam->setCampagne($campagne);
+                            }
+
+                            $srcParam = $sourceParams[$platId] ?? null;
+                            if ($srcParam) {
+                                if ($targetParam->isActive() !== $srcParam->isActive()
+                                    || $targetParam->getCapaciteGlobale() !== $srcParam->getCapaciteGlobale()
+                                    || $targetParam->getCapaciteFi() !== $srcParam->getCapaciteFi()
+                                    || $targetParam->getCapaciteAlternance() !== $srcParam->getCapaciteAlternance()
+                                    || $targetParam->getCapaciteSpecifique() !== $srcParam->getCapaciteSpecifique()
+                                    || $targetParam->getRemarques() !== $srcParam->getRemarques()
+                                ) {
+                                    $targetParam->setActive($srcParam->isActive());
+                                    $targetParam->setCapaciteGlobale($srcParam->getCapaciteGlobale());
+                                    $targetParam->setCapaciteFi($srcParam->getCapaciteFi());
+                                    $targetParam->setCapaciteAlternance($srcParam->getCapaciteAlternance());
+                                    $targetParam->setCapaciteSpecifique($srcParam->getCapaciteSpecifique());
+                                    $targetParam->setRemarques($srcParam->getRemarques());
+                                    $changed = true;
+                                }
+                            } else {
+                                if ($targetParam->isActive()) {
+                                    $targetParam->setActive(false);
+                                    $targetParam->setCapaciteGlobale(null);
+                                    $targetParam->setCapaciteFi(null);
+                                    $targetParam->setCapaciteAlternance(0);
+                                    $targetParam->setCapaciteSpecifique(0);
+                                    $targetParam->setRemarques(null);
+                                    $changed = true;
+                                }
+                            }
+                            $em->persist($targetParam);
+                        }
+                    }
+                }
+
+                $em->persist($targetAnnee);
+                if ($changed) {
+                    $changedYears[$targetAnnee->getId()] = true;
                 }
             }
         }
@@ -737,6 +893,7 @@ final class OffreController extends BaseController
                             'code' => $plateforme->getCode(),
                             'color' => $plateforme->getColor(),
                             'definitionChamps' => $plateforme->getDefinitionChamps(),
+                            'hasDefinitionChamps' => $plateforme->hasDefinitionChamps(),
                             'annees' => array_values($tpa->getAnnees()),
                         ];
                     }
@@ -799,7 +956,6 @@ final class OffreController extends BaseController
                     if ($annee->isOuvert() === true) {
                         $tabStatistiques['parcours'][$parcours->getId()]['nbAnneesOuvertes']++;
                         $tabStatistiques['parcours'][$parcours->getId()]['capacite'] += $annee->getCapaciteAccueil();
-                        $tabStatistiques['capacite'] += $annee->getCapaciteAccueil();
                         
                         foreach ($annee->getAdmissionPlateformeParametres() as $param) {
                             if ($param->getCampagne() === $campagne && $param->isActive()) {
@@ -812,6 +968,8 @@ final class OffreController extends BaseController
                 $tabStatistiques['parcours'][$parcours->getId()]['nbPlateformesActives'] = count($activePlateformes);
             }
         }
+
+        $tabStatistiques['capacite'] = $formation->getCapacite();
         
         return [
             'tabStatistiques' => $tabStatistiques,
@@ -1454,5 +1612,167 @@ final class OffreController extends BaseController
             ],
             '_ui/_footer_submit_cancel.html.twig'
         );
+    }
+
+    #[Route('/offrev2/modal-annexes-ca', name: 'offre_v2_modal_annexes_ca', methods: ['GET'])]
+    #[Route('/offre/composante/{composante}/modal-annexes-ca', name: 'offre_v2_composante_modal_annexes_ca', methods: ['GET'])]
+    public function modalAnnexesCa(
+        OffreAnnexesExportService $exportService,
+        TurboStreamResponseFactory $turboStream,
+        ?Composante $composante = null,
+    ): Response {
+        if ($composante !== null) {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->denyAccessUnlessGranted('MANAGE', [
+                    'route' => 'app_composante',
+                    'subject' => $composante,
+                ]);
+            }
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
+
+        $campagne = $this->getCampagneCollecte();
+        $platformsData = $exportService->getPlatformsExportData($campagne, $composante);
+
+        return $turboStream->streamOpenModalFromTemplates(
+            'Génération des annexes CA',
+            'Campagne ' . $campagne->getLibelle() . ($composante ? ' — ' . $composante->getLibelle() : ''),
+            'offre_v2/_modal_annexes_ca.html.twig',
+            [
+                'campagne' => $campagne,
+                'composante' => $composante,
+                'platforms' => $platformsData,
+            ],
+            '_ui/_footer_cancel.html.twig',
+        );
+    }
+
+    #[Route('/offrev2/export-plateforme/{plateforme}', name: 'offre_v2_export_plateforme', methods: ['GET'])]
+    #[Route('/offre/composante/{composante}/export-plateforme/{plateforme}', name: 'offre_v2_composante_export_plateforme', methods: ['GET'])]
+    public function exportPlateforme(
+        PlateformeAdmission $plateforme,
+        Request $request,
+        OffreAnnexesExportService $exportService,
+        TypeDiplomeRepository $typeDiplomeRepository,
+        ComposanteRepository $composanteRepository,
+        ?Composante $composante = null,
+    ): Response {
+        if ($composante !== null) {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->denyAccessUnlessGranted('MANAGE', [
+                    'route' => 'app_composante',
+                    'subject' => $composante,
+                ]);
+            }
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
+
+        $campagne = $this->getCampagneCollecte();
+
+        $typeDiplomeId = $request->query->getInt('typeDiplome');
+        $typeDiplome = $typeDiplomeId > 0 ? $typeDiplomeRepository->find($typeDiplomeId) : null;
+
+        $targetComposanteId = $request->query->getInt('targetComposante');
+        $effectiveComposante = $composante ?? ($targetComposanteId > 0 ? $composanteRepository->find($targetComposanteId) : null);
+
+        return $exportService->exportPlatformSingle($plateforme, $campagne, $effectiveComposante, $typeDiplome);
+    }
+
+    #[Route('/offrev2/export-plateforme-zip/{plateforme}', name: 'offre_v2_export_plateforme_zip', methods: ['GET'])]
+    #[Route('/offre/composante/{composante}/export-plateforme-zip/{plateforme}', name: 'offre_v2_composante_export_plateforme_zip', methods: ['GET'])]
+    public function exportPlateformeZip(
+        PlateformeAdmission $plateforme,
+        Request $request,
+        OffreAnnexesExportService $exportService,
+        TypeDiplomeRepository $typeDiplomeRepository,
+        ?Composante $composante = null,
+    ): Response {
+        if ($composante !== null) {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->denyAccessUnlessGranted('MANAGE', [
+                    'route' => 'app_composante',
+                    'subject' => $composante,
+                ]);
+            }
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
+
+        $campagne = $this->getCampagneCollecte();
+        $split = $request->query->getString('split', 'diplomes');
+
+        if ($split === 'composantes') {
+            $typeDiplomeId = $request->query->getInt('typeDiplome');
+            $typeDiplome = $typeDiplomeId > 0 ? $typeDiplomeRepository->find($typeDiplomeId) : null;
+            return $exportService->exportPlatformZipByComposantes($plateforme, $campagne, $typeDiplome);
+        }
+
+        return $exportService->exportPlatformZipByDiplomes($plateforme, $campagne, $composante);
+    }
+
+    #[Route('/offrev2/export-all-plateformes-zip', name: 'offre_v2_export_all_plateformes_zip', methods: ['GET'])]
+    #[Route('/offre/composante/{composante}/export-all-plateformes-zip', name: 'offre_v2_composante_export_all_plateformes_zip', methods: ['GET'])]
+    public function exportAllPlateformesZip(
+        OffreAnnexesExportService $exportService,
+        ?Composante $composante = null,
+    ): Response {
+        if ($composante !== null) {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->denyAccessUnlessGranted('MANAGE', [
+                    'route' => 'app_composante',
+                    'subject' => $composante,
+                ]);
+            }
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
+
+        $campagne = $this->getCampagneCollecte();
+        return $exportService->exportAllPlatformsZip($campagne, $composante);
+    }
+
+    #[Route('/offrev2/export-annexe/{type}', name: 'offre_v2_export_annexe', methods: ['GET'])]
+    #[Route('/offre/composante/{composante}/export-annexe/{type}', name: 'offre_v2_composante_export_annexe', methods: ['GET'])]
+    public function exportAnnexe(
+        string $type,
+        OffreAnnexesExportService $exportService,
+        ?Composante $composante = null,
+    ): Response {
+        if ($composante !== null) {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->denyAccessUnlessGranted('MANAGE', [
+                    'route' => 'app_composante',
+                    'subject' => $composante,
+                ]);
+            }
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
+
+        $campagne = $this->getCampagneCollecte();
+        return $exportService->exportSingleAnnexe($type, $campagne, $composante);
+    }
+
+    #[Route('/offrev2/export-annexes-zip', name: 'offre_v2_export_annexes_zip', methods: ['GET'])]
+    #[Route('/offre/composante/{composante}/export-annexes-zip', name: 'offre_v2_composante_export_annexes_zip', methods: ['GET'])]
+    public function exportAnnexesZip(
+        OffreAnnexesExportService $exportService,
+        ?Composante $composante = null,
+    ): Response {
+        if ($composante !== null) {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->denyAccessUnlessGranted('MANAGE', [
+                    'route' => 'app_composante',
+                    'subject' => $composante,
+                ]);
+            }
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
+
+        $campagne = $this->getCampagneCollecte();
+        return $exportService->exportAllAsZip($campagne, $composante);
     }
 }

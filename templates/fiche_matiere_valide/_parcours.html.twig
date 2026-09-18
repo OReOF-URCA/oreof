@@ -1,61 +1,45 @@
-<table class="table table-bordered table-hover"
-        {{ stimulus_controller('check_all', {
-            idCheckAll: 'check-all'~parcours.id,
-            classCheckAll: '.check-all'~parcours.id,
-        })
-        }}>
-    <thead>
-    <tr>
-        <th>&nbsp;</th>
-        <th colspan="2">
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox"
-                           id="check-all{{ parcours.id }}" {{ stimulus_action('check_all', 'checkAll') }}>
-                    <span class="total"></span>
-                </label>
-            </div>
-        </th>
-        <th colspan="3"></th>
-    </tr>
-    </thead>
-    <tbody>
+<div class="space-y-3"
+     {{ stimulus_controller('check_all', {
+         idCheckAll: 'check-all'~parcours.id,
+         classCheckAll: '.check-all'~parcours.id,
+     }) }}>
+    {# Barre de sélection globale du parcours #}
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-secondary-200 bg-secondary-50/80 px-3 py-2.5 dark:border-secondary-700 dark:bg-secondary-800/60">
+        <label class="inline-flex items-center gap-2 text-xs font-bold text-secondary-800 dark:text-secondary-100 cursor-pointer select-none">
+            <input type="checkbox"
+                   id="check-all{{ parcours.id }}"
+                   class="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800"
+                   {{ stimulus_action('check_all', 'checkAll') }}>
+            <span>Tout sélectionner pour {{ parcours.libelle }}</span>
+        </label>
+        <span class="total inline-flex items-center rounded-full bg-secondary-200/80 px-2.5 py-1 text-xs font-semibold text-secondary-700 dark:bg-secondary-700 dark:text-secondary-300" data-check-all-counter="check-all{{ parcours.id }}">
+            0 / 0 sélectionné(s)
+        </span>
+    </div>
 
-    {% for ordre, semestre in dto.semestres|filter(semestre => (semestre.semestre.nonDispense == false)) %}
-        <tr>
-            <th
-                    class="border-left-semestre-{{ ordre }}"
-                    colspan="8">{{ semestre.semestre.display }} {% if semestre.raccroche == true %}<i class="fal fa-link"></i>{% endif %}
-            </th>
-        </tr>
+    <div class="overflow-hidden rounded-xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-secondary-700 dark:text-secondary-200">
+                <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800">
+                {% for ordre, semestre in dto.semestres|filter(semestre => (semestre.semestre.nonDispense == false)) %}
+                    <tr class="bg-secondary-100/80 dark:bg-secondary-800/90 text-secondary-900 dark:text-white">
+                        <td colspan="5" class="border-l-4 border-primary-500 px-4 py-2.5 font-bold">
+                            <div class="flex items-center gap-2">
+                                <span>{{ semestre.semestre.display }}</span>
+                                {% if semestre.raccroche == true %}
+                                    <twig:Badge label="Raccroché" variant="info" size="sm" icon="icon:link" />
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
 
-        {% for ue in semestre.ues %}
-            {{ include('fiche_matiere_valide/_ue.html.twig', {semestreOrdre:ordre, enfant: false}) }}
-        {% endfor %}
-    {% endfor %}
+                    {% for ue in semestre.ues %}
+                        {{ include('fiche_matiere_valide/_ue.html.twig', {semestreOrdre: ordre, enfant: false, semestre: semestre}) }}
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-
-    {#                                    {% for semParc in parcours.semestreParcours|filter(semestre => semestre.semestre.nonDispense == false) %}#}
-    {#                                        {% if semParc.semestre.semestreRaccroche != null %}#}
-    {#                                            {% set semestre = semParc.semestre.semestreRaccroche %}#}
-    {#                                            {% set raccrocheSem = true %}#}
-    {#                                        {% else %}#}
-    {#                                            {% set semestre = semParc %}#}
-    {#                                            {% set raccrocheSem = false %}#}
-    {#                                        {% endif %}#}
-    {#                                        <tr>#}
-    {#                                            <th colspan="7" class="text-center font-weight-bold">#}
-    {#                                                {{ semParc.display }}</th>#}
-    {#                                        </tr>#}
-
-
-    {#                                        {% for ue in semestre.semestre.ues|filter(ue => ue.ueParent == null) %}#}
-    {#                                            {{ include('fiche_matiere_valide/_ue.html.twig', {tabEcs: tabParcoursEcs[parcours.id]}) }}#}
-    {#                                            {% for uee in ue.ueEnfants %}#}
-    {#                                                {{ include('fiche_matiere_valide/_ue.html.twig', {ue:uee, tabEcs: tabParcoursEcs[parcours.id]}) }}#}
-    {#                                            {% endfor %}#}
-    {#                                        {% endfor %}#}
-
-    {#                                    {% endfor %}#}
-    </tbody>
-</table>

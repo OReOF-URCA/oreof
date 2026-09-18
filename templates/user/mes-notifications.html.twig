@@ -1,109 +1,186 @@
 {% extends 'base.html.twig' %}
 
-{% block content %}
-    <h2 class="small-title">Vos notifications par email</h2>
-    {{ component('notification_center', { workflow: 'dpeParcours' }) }}
-
-    {#    <div class="card"> #}
-    {#        <div class="card-body"> #}
-    {#            <div class="row"> #}
-    {#                {{ component('alerte', { #}
-    {#                    'type': 'info', #}
-    {#                    'message': 'Vous pouvez gérer les emails que vous recevez.' #}
-    {#                }) }} #}
-
-    {#                <table class="table table-striped"> #}
-    {#                    <thead> #}
-    {#                    <tr> #}
-    {#                        <th rowspan="2">Notification</th> #}
-{#                        <th colspan="2">Central</th>#}
-    {#                        <th colspan="1">Composante</th> #}
-    {#                    </tr> #}
-    {#                    <tr> #}
-{#                        <th>SES</th>#}
-{#                        <th>VP</th>#}
-{#                        <th>Resp. DPE</th>#}
-    {#                        <th>Resp. Formation</th> #}
-{#                        <th>Resp. EC</th>#}
-    {#                    </tr> #}
-    {#                    </thead> #}
-    {#                    <tbody> #}
-    {#                    {% for notification in notifications %} #}
-    {#                        <tr> #}
-    {#                            <td>{{ notification.libelle }}</td> #}
-{#                            {% if notification.isCentral %}#}
-{#                                <td>#}
-{#                                    <input type="checkbox" id="ses_{{ notification.id }}"#}
-    {#                                            {{ stimulus_action('notification_liste', 'change', 'change', #}{# } #}
-{#                                                'id': notification.id,#}
-{#                                                'to': 'toSes'#}
-{#                                            }) }}#}
-{#                                            {{ notification.toSes == true ? 'checked' : '' }}>#}
-{#                                    <label for="ses_{{ notification.id }}" class="sr-only"></label>#}
-
-{#                                </td>#}
-{#                                <td>#}
-{#                                    <input type="checkbox" id="vp_{{ notification.id }}"#}
-    {#                                            {{ stimulus_action('notification_liste', 'change', 'change', #}{# } #}
-{#                                                'id': notification.id,#}
-{#                                                'to': 'toVp'#}
-{#                                            }) }}#}
-{#                                            {{ notification.toVp == true ? 'checked' : '' }}>#}
-{#                                    <label for="vp_{{ notification.id }}" class="sr-only"></label>#}
-{#                                </td>#}
-{#                            {% else %}#}
-{#                                <td colspan="2"></td>#}
-{#                            {% endif %}#}
-    {#                            {% if notification.isComposante %} #}
-{#                                <td>#}
-{#                                    <input type="checkbox" id="toRespDpe_{{ notification.id }}"#}
-    {#                                            {{ stimulus_action('notification_liste', 'change', 'change', #}{# } #}
-{#                                                'id': notification.id,#}
-{#                                                'to': 'toRespDpe'#}
-{#                                            }) }}#}
-{#                                            {{ notification.toRespDpe == true ? 'checked' : '' }}>#}
-{#                                    <label for="toRespDpe_{{ notification.id }}" class="sr-only"></label>#}
-{#                                </td>#}
-{#                                <td>#}
-    {#                                    <input type="checkbox" id="toRespFormation_{{ notification.id }}" #}
-{#                                            {{ stimulus_action('notification_liste', 'change', 'change', {#}
-    {#                                                'id': notification.id, #}
-    {#                                                'to': 'toRespFormation' #}
-    {#                                            }) }} #}
-    {#                                            {{ notification.toRespFormation == true ? 'checked' : '' }}> #}
-    {#                                    <label for="toRespFormation_{{ notification.id }}" class="sr-only"></label> #}
-    {#                                </td> #}
-    {#                                <td> #}
-    {#                                    <input type="checkbox" id="toRespEc_{{ notification.id }}" #}
-    {#                                            {{ stimulus_action('notification_liste', 'change', 'change', #}{# } #}
-{#                                                'id': notification.id,#}
-{#                                                'to': 'toRespEc'#}
-{#                                            }) }}#}
-{#                                            {{ notification.toRespEc == true ? 'checked' : '' }}>#}
-{#                                    <label for="toRespEc_{{ notification.id }}" class="sr-only"></label>#}
-{#                                </td>#}
-    {#                            {% else %} #}
-    {#                                <td colspan="1"></td> #}
-    {#                            {% endif %} #}
-    {#                        </tr> #}
-    {#                    {% endfor %} #}
-    {#                    </tbody> #}
-    {#                </table> #}
-
-    {#            </div> #}
-    {#        </div> #}
-    {#    </div> #}
-{% endblock %}
-
 {% set header_title %}
     Mes notifications
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-    ]}) }}
-{% endblock %}
+{% set header_description %}
+    Gérez vos préférences de réception des notifications (par email et dans l'application) par défaut ou par étape de workflow.
+{% endset %}
 
-{% block bouton_header %}
+{% block content %}
+    <div class="space-y-6"
+         {{ stimulus_controller('notification-center', {
+             toggleUrl: path('app_user_mes_notifications_toggle'),
+             resetUrl: path('app_user_mes_notifications_reset')
+         }) }}
+    >
+        {# 1) Paramètres globaux par défaut #}
+        <section class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6" data-setting-row>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
+                            Notifications globales (par défaut)
+                        </h2>
+                        <span class="inline-flex items-center rounded-full bg-primary-50 px-2 py-0.5 text-[11px] font-semibold text-primary-700 dark:bg-primary-950/40 dark:text-primary-300">
+                            Général
+                        </span>
+                    </div>
+                    <p class="text-sm text-secondary-600 dark:text-secondary-300">
+                        S'applique à l'ensemble des événements, sauf si vous définissez une règle spécifique plus bas.
+                    </p>
+                </div>
 
+                <div class="flex flex-wrap items-center gap-4 pt-2 sm:pt-0">
+                    <label class="inline-flex items-center gap-2 cursor-pointer select-none text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                        <input type="checkbox"
+                               {{ global.email ? 'checked' : '' }}
+                               data-action="change->notification-center#toggle"
+                               data-channel="email"
+                               class="h-4 w-4 rounded border-secondary-300 text-primary focus:ring-primary dark:border-secondary-600 dark:bg-secondary-800" />
+                        <twig:UX:Icon name="icon:mail" class="w-4 h-4 text-secondary-500" />
+                        <span>Email</span>
+                    </label>
+
+                    <label class="inline-flex items-center gap-2 cursor-pointer select-none text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                        <input type="checkbox"
+                               {{ global.inapp ? 'checked' : '' }}
+                               data-action="change->notification-center#toggle"
+                               data-channel="inapp"
+                               class="h-4 w-4 rounded border-secondary-300 text-primary focus:ring-primary dark:border-secondary-600 dark:bg-secondary-800" />
+                        <twig:UX:Icon name="icon:bell" class="w-4 h-4 text-secondary-500" />
+                        <span>In-app</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        {# 2) Workflows / étapes / transitions #}
+        {% for wf in workflows %}
+            <section class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between border-b border-secondary-100 pb-4 dark:border-secondary-800">
+                    <div class="space-y-0.5">
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
+                                Workflow : {{ wf.name }}
+                            </h2>
+                            <span class="inline-flex items-center rounded-full border border-secondary-200 bg-secondary-50 px-2.5 py-0.5 text-xs font-semibold text-secondary-700 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-300">
+                                {{ wf.places|length }} étapes
+                            </span>
+                        </div>
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400">
+                            Personnalisez la réception des notifications pour ce workflow, ses étapes et ses transitions.
+                        </p>
+                    </div>
+                </div>
+
+                {# Niveau workflow par défaut #}
+                <div class="flex flex-col gap-3 rounded-xl border border-secondary-200 bg-secondary-50/70 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-secondary-700 dark:bg-secondary-800/40" data-setting-row>
+                    <div class="space-y-1">
+                        <div class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">
+                            Par défaut pour {{ wf.name }}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            {% if wf.resolved.source == 'workflow' %}
+                                <span data-badge class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                    Personnalisé
+                                </span>
+                            {% else %}
+                                <span data-badge class="inline-flex items-center rounded-full bg-secondary-100 px-2 py-0.5 text-[11px] font-medium text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">
+                                    Hérité : {{ wf.resolved.source }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="shrink-0">
+                        {% include 'components/_notif_toggles.html.twig' with {
+                            workflow: wf.name,
+                            place: null,
+                            transition: null,
+                            channels: wf.resolved.channels,
+                            inherited: wf.resolved.source != 'workflow'
+                        } %}
+                    </div>
+                </div>
+
+                {# Étapes du workflow #}
+                <div class="space-y-3 pt-2">
+                    <div class="text-xs font-bold uppercase tracking-wider text-secondary-400 dark:text-secondary-500">
+                        Étapes et actions du workflow
+                    </div>
+
+                    {% for p in wf.places %}
+                        <div class="rounded-xl border border-secondary-200 bg-white p-4 transition dark:border-secondary-700 dark:bg-secondary-900">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" data-setting-row>
+                                <div class="space-y-1">
+                                    <div class="text-sm font-semibold text-secondary-800 dark:text-secondary-100">
+                                        Étape : {{ p.label|trans }}
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        {% if p.resolved.source == 'step' %}
+                                            <span data-badge class="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                                Personnalisé
+                                            </span>
+                                        {% else %}
+                                            <span data-badge class="inline-flex items-center rounded-full bg-secondary-100 px-2 py-0.5 text-[11px] font-medium text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">
+                                                Hérité : {{ p.resolved.source }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="shrink-0">
+                                    {% include 'components/_notif_toggles.html.twig' with {
+                                        workflow: wf.name,
+                                        place: p.name,
+                                        transition: null,
+                                        channels: p.resolved.channels,
+                                        inherited: p.resolved.source != 'step'
+                                    } %}
+                                </div>
+                            </div>
+
+                            {# Transitions partant de l'étape #}
+                            {% if p.transitions|length > 0 %}
+                                <div class="mt-3 space-y-2 border-l-2 border-primary-200 pl-4 pt-1 dark:border-primary-800">
+                                    {% for t in p.transitions %}
+                                        <div class="flex flex-col gap-2 rounded-lg border border-secondary-100 bg-secondary-50/50 p-3 sm:flex-row sm:items-center sm:justify-between dark:border-secondary-800 dark:bg-secondary-800/20" data-setting-row>
+                                            <div class="space-y-0.5">
+                                                <div class="text-xs font-semibold text-secondary-700 dark:text-secondary-200">
+                                                    Transition : {{ t.label|trans }}
+                                                </div>
+                                                <div class="flex items-center gap-1.5">
+                                                    {% if t.resolved.source == 'transition' %}
+                                                        <span data-badge class="inline-flex items-center rounded-full bg-emerald-100 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                                            Personnalisé
+                                                        </span>
+                                                    {% else %}
+                                                        <span data-badge class="inline-flex items-center rounded-full bg-secondary-100 px-1.5 py-0.2 text-[10px] font-medium text-secondary-500 dark:bg-secondary-800 dark:text-secondary-400">
+                                                            Hérité : {{ t.resolved.source }}
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+
+                                            <div class="shrink-0">
+                                                {% include 'components/_notif_toggles.html.twig' with {
+                                                    workflow: wf.name,
+                                                    place: p.name,
+                                                    transition: t.name,
+                                                    channels: t.resolved.channels,
+                                                    inherited: t.resolved.source != 'transition'
+                                                } %}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endfor %}
+    </div>
 {% endblock %}

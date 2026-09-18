@@ -106,11 +106,11 @@ class ProcessValidationFicheController extends BaseController
         Request             $request
     ): Response {
         if ($request->isMethod('POST')) {
-            $sFiches = $request->request->get('formations');
+            $sFiches = $request->request->get('fiches', $request->request->get('formations'));
         } else {
-            $sFiches = $request->query->get('formations');
+            $sFiches = $request->query->get('fiches', $request->query->get('formations'));
         }
-        $fiches = explode(',', $sFiches);
+        $fiches = explode(',', (string)$sFiches);
 
         $process = $this->validationProcessFicheMatiere->getEtape($etape);
         $tFiches = [];
@@ -186,9 +186,9 @@ class ProcessValidationFicheController extends BaseController
         Request             $request
     ): Response {
         if ($request->isMethod('POST')) {
-            $sFiches = $request->request->get('formations');
+            $sFiches = $request->request->get('fiches', $request->request->get('formations'));
         } else {
-            $sFiches = $request->query->get('formations');
+            $sFiches = $request->query->get('fiches', $request->query->get('formations'));
         }
         $fiches = explode(',', $sFiches);
 

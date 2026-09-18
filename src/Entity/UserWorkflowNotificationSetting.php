@@ -49,9 +49,11 @@ class UserWorkflowNotificationSetting
         return $this->workflow;
     }
 
-    public function setWorkflow(string $workflow): void
+    public function setWorkflow(string $workflow): static
     {
         $this->workflow = $workflow;
+
+        return $this;
     }
 
     public function getStep(): ?string
@@ -59,9 +61,11 @@ class UserWorkflowNotificationSetting
         return $this->step;
     }
 
-    public function setStep(?string $step): void
+    public function setStep(?string $step): static
     {
         $this->step = $step;
+
+        return $this;
     }
 
     public function getTransitionName(): ?string
@@ -69,9 +73,11 @@ class UserWorkflowNotificationSetting
         return $this->transitionName;
     }
 
-    public function setTransitionName(?string $transitionName): void
+    public function setTransitionName(?string $transitionName): static
     {
         $this->transitionName = $transitionName;
+
+        return $this;
     }
 
     public function isEmailEnabled(): bool
@@ -79,9 +85,11 @@ class UserWorkflowNotificationSetting
         return $this->emailEnabled;
     }
 
-    public function setEmailEnabled(bool $emailEnabled): void
+    public function setEmailEnabled(bool $emailEnabled): static
     {
         $this->emailEnabled = $emailEnabled;
+
+        return $this;
     }
 
     public function isInAppEnabled(): bool
@@ -89,8 +97,10 @@ class UserWorkflowNotificationSetting
         return $this->inAppEnabled;
     }
 
-    public function setInAppEnabled(bool $inAppEnabled): void
+    public function setInAppEnabled(bool $inAppEnabled): static
     {
         $this->inAppEnabled = $inAppEnabled;
+
+        return $this;
     }
 }

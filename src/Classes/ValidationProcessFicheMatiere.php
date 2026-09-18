@@ -54,6 +54,15 @@ class ValidationProcessFicheMatiere extends AbstractValidationProcess
         $this->process = $data;
     }
 
+    public const ETAPES_COMPOSANTE = [
+        'en_cours_redaction',
+    ];
+
+    public function getProcessComposante(): array
+    {
+        return array_intersect_key($this->processAll, array_flip(self::ETAPES_COMPOSANTE));
+    }
+
     public function getMetaFromTransition(string $transition): array
     {
         $transitions = $this->ficheWorkflow->getDefinition()->getTransitions();

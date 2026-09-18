@@ -37,6 +37,9 @@ class PlateformeAdmissionParametre
     #[ORM\Column(nullable: true)]
     private ?array $donneesSpecifiques = null;
 
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::TEXT, nullable: true)]
+    private ?string $remarques = null;
+
     #[ORM\ManyToOne(inversedBy: 'admissionPlateformeParametres')]
     private ?CampagneCollecte $campagne = null;
 
@@ -137,6 +140,18 @@ class PlateformeAdmissionParametre
     public function setDonneesSpecifiques(?array $donneesSpecifiques): static
     {
         $this->donneesSpecifiques = $donneesSpecifiques;
+
+        return $this;
+    }
+
+    public function getRemarques(): ?string
+    {
+        return $this->remarques;
+    }
+
+    public function setRemarques(?string $remarques): static
+    {
+        $this->remarques = $remarques;
 
         return $this;
     }

@@ -209,6 +209,8 @@ class WorkflowExtension extends AbstractExtension
             $dpeParcours = GetDpeParcours::getFromFormation($entity); //todo: comment gérer depuis Formation?
         } elseif ($type === 'parcours') {
             $dpeParcours = GetDpeParcours::getFromParcours($entity);
+        } else {
+            $dpeParcours = null;
         }
         //passer par le DpeWorkflow
 

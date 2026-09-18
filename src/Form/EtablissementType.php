@@ -37,7 +37,11 @@ class EtablissementType extends AbstractType
             ])
             ->add('emailCentral', EmailType::class, [
                 'label' => "Email central/CFVU",
-                'required' => true,
+                'required' => false,
+            ])
+            ->add('emailOreof', EmailType::class, [
+                'label' => "Email de contact ORéOF",
+                'required' => false,
             ])
             ->add('etablissement_information', EtablissementInformationType::class, [
                 'label' => "Informations diverses"

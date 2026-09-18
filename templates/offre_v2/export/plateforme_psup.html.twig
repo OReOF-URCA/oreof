@@ -1,0 +1,41 @@
+<table data-xls-sheet="{{ (type_diplome ? 'Parcoursup - ' ~ (type_diplome.libelleCourt|default(type_diplome.libelle)) : 'Parcoursup')|slice(0, 31) }}">
+    <thead>
+        <tr>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Composante</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Type de Diplôme</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Mention</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Parcours</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Type de Parcours</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Lieu</th>
+
+
+            
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Statut</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Type recrutement</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité d'accueil {{ annee_n_1 }}</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Capacité d'accueil {{ annee_n }}</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Remarques</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+            <tr>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.composante }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.diplome }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.mention }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.parcours }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.type_parcours }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.lieu }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.statut }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.type_recrutement }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_n_1 }}</td>
+                <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_n }}</td>
+                <td data-xls-border="thin" data-xls-align="left">{{ row.remarques }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="11" data-xls-align="center">Aucune donnée disponible</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

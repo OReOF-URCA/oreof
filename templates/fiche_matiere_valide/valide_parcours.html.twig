@@ -1,70 +1,123 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
+    {% set stats = statsParcours.statsFichesMatieresParcours %}
+    {% set dto = statsParcours %}
+    {% set pPercent = stats.nbFiches > 0 ? ((stats.nbFichesCompletes / stats.nbFiches) * 100)|round : 0 %}
 
-    <div class="card"
-            {{ stimulus_controller('validation--fichematiere') }}
-    >
-        <div class="card-body">
+    <section class="space-y-6 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6"
+             {{ stimulus_controller('validation--fichematiere') }}>
 
-            {{ component('alerte', {
-                type: 'info',
-                message: 'Cocher la ou les fiche-s EC/matières à valider puis cliquer sur le bouton "Valider et soumettre la-les fiche-s EC/matière.<br>
-Cela entrainera la vérification des informations saisies. Seules les fiches EC/matières complètes peuvent être validées et soumises pour publication.',
-            }) }}
+        {{ include('_layout/_section_shell.html.twig', {
+            title_card: 'Validation des fiches EC / matières',
+            description_card: 'Sélectionnez les fiches EC/matière complètes à valider pour le parcours ' ~ parcours.libelle ~ ' puis soumettez-les.',
+            badge_card: 'Parcours'
+        }) }}
 
-            <button class="btn btn-sm d-block btn-outline-success mb-2 mt-2"
-                    type="button"
-                    data-controller="tooltip"
-                    data-tooltip-placement-value="bottom"
-                    data-action="validation--fichematiere#valide"
-                    data-validation--fichematiere-url-param="{{ path('fiche_matiere_valide_valide', {type:'parcours', id: parcours.id}) }}"
-                    aria-label="{{ ('validation.valider.fiches_matieres.parcours')|trans({}, 'process') }}"
-                    data-bs-original-title="{{ ('validation.valider.fiches_matieres.parcours')|trans({}, 'process') }}"
-            >
-                <i class="fal fa-check"></i> {{ ('validation.valider.fiches_matieres')|trans({}, 'process') }}
-            </button>
-            {% set stats =  statsParcours.statsFichesMatieresParcours %}
-            {% set dto = statsParcours %}
-            {{ include('fiche_matiere_valide/_parcours.html.twig') }}
+        {{ component('alerte', {
+            type: 'info',
+            icone: 'icon:info',
+            message: 'Cochez la ou les fiches EC/matière à valider puis cliquez sur <strong>"Valider les fiches sélectionnées"</strong>.<br>Cela entraînera la vérification des informations saisies. Seules les fiches complètes peuvent être validées et soumises pour publication.',
+        }) }}
 
-            <button class="btn btn-sm d-block btn-outline-success mb-2"
-                    type="button"
-                    data-controller="tooltip"
-                    data-tooltip-placement-value="bottom"
-                    data-action="validation--fichematiere#valide"
-                    data-validation--fichematiere-url-param="{{ path('fiche_matiere_valide_valide', {type:'parcours', id: parcours.id}) }}"
-                    aria-label="{{ ('validation.valider.fiches_matieres.parcours')|trans({}, 'process') }}"
-                    data-bs-original-title="{{ ('validation.valider.fiches_matieres.parcours')|trans({}, 'process') }}"
-            >
-                <i class="fal fa-check"></i> {{ ('validation.valider.fiches_matieres')|trans({}, 'process') }}
-            </button>
+        {# KPIs de synthèse du parcours #}
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <twig:Kpi
+                title="Complétude"
+                :value="stats.nbFichesCompletes"
+                :total="stats.nbFiches"
+                :percent="pPercent"
+                icon="mdi:chart-pie"
+            />
+            <twig:Kpi
+                title="En cours"
+                :value="stats.nbEnCoursRedaction"
+                description="En rédaction"
+                variant="secondary"
+                icon="icon:edit"
+            />
+            <twig:Kpi
+                title="Attente RP/DPE"
+                :value="stats.nbFichesNonValidees"
+                description="À valider"
+                variant="warning"
+                icon="icon:clock"
+            />
+            <twig:Kpi
+                title="Attente SES"
+                :value="stats.nbFichesNonValideesSes"
+                description="Soumis central"
+                variant="info"
+                icon="icon:clock"
+            />
+            <twig:Kpi
+                title="Validées"
+                :value="stats.nbFichesValidees"
+                description="Pour publication"
+                variant="success"
+                icon="icon:check-circle"
+            />
+            <twig:Kpi
+                title="Publiées"
+                :value="stats.nbFichesPubliees"
+                description="En ligne"
+                variant="primary"
+                icon="icon:share"
+            />
         </div>
-    </div>
 
+
+        {# Barre d'action #}
+        <div class="flex flex-col gap-3 rounded-xl border border-secondary-200 bg-secondary-50/70 p-4 dark:border-secondary-700 dark:bg-secondary-800/40 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-2 text-sm text-secondary-700 dark:text-secondary-200">
+                {{ ux_icon('icon:check', {class: 'h-5 w-5 text-success-600 dark:text-success-400 shrink-0'}) }}
+                <span>Sélectionnez les fiches complètes à valider ci-dessous, puis lancez la validation.</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <twig:Button
+                    variant="success"
+                    size="sm"
+                    :soft="false"
+                    icon="icon:check"
+                    label="Valider les fiches sélectionnées"
+                    tooltip="Valider et soumettre les fiches cochées"
+                    dataAction="click->validation--fichematiere#valide"
+                    data-validation--fichematiere-url-param="{{ path('fiche_matiere_valide_valide', {type:'parcours', id: parcours.id}) }}"
+                />
+            </div>
+        </div>
+
+        {{ include('fiche_matiere_valide/_parcours.html.twig') }}
+
+        {# Bouton de validation inférieur #}
+        <div class="flex justify-end pt-2">
+            <twig:Button
+                variant="success"
+                size="md"
+                :soft="false"
+                icon="icon:check"
+                label="Valider les fiches sélectionnées"
+                tooltip="Valider et soumettre les fiches cochées"
+                dataAction="click->validation--fichematiere#valide"
+                data-validation--fichematiere-url-param="{{ path('fiche_matiere_valide_valide', {type:'parcours', id: parcours.id}) }}"
+            />
+        </div>
+    </section>
 {% endblock %}
 
 {% set header_title %}
-    Fiches EC/Matières pour le parcours {{ parcours.libelle }}
+    Fiches EC/matières — {{ parcours.libelle }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_parcours_index'), title: 'Liste des parcours'},
-        {href: path('formation_v2_modifier', {slug:parcours.formation.slug}), title: 'Formation : '~parcours.formation
-        .display},
-        {href: path('parcours_v2_modifier', {parcours:parcours.id}), title: 'Parcours : '~parcours.libelle},
-    ]}) }}
+{% block bouton_header %}
+    <twig:Button
+        href="{{ path('parcours_v2_modifier', {parcours: parcours.id}) }}"
+        variant="secondary"
+        size="sm"
+        icon="icon:arrow-left"
+        label="Retour au parcours"
+        tooltip="Retour au parcours"
+    />
 {% endblock %}
 
-{% block bouton_header %}
-    <a href="{{ path('parcours_v2_modifier', {parcours:parcours.id}) }}"
-       class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Retour au parcours"
-    >
-        <i class="{{ iconBack }}"></i>
-        <span> Retour au parcours</span>
-    </a>
-{% endblock %}
+

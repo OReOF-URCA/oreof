@@ -14,6 +14,8 @@ use App\Classes\Process\FicheMatiereProcess;
 use App\Classes\ValidationProcessFicheMatiere;
 use App\Entity\Formation;
 use App\Entity\Parcours;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\FicheMatiereRepository;
 use App\Repository\FormationRepository;
 use App\Repository\ParcoursRepository;
@@ -30,14 +32,23 @@ class FicheMatiereValideController extends BaseController
     }
 
     #[Route('/fiche-matiere/valide/formation/{formation}', name: 'fiche_matiere_valide_formation')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function valideFormation(
-        Formation $formation
+        Formation $formation,
+        BreadcrumbService $breadcrumb,
     ): Response {
+        $breadcrumb->add(
+            $formation->getDisplay(),
+            'formation_v2_modifier',
+            ['slug' => $formation->getSlug()]
+        );
+        $breadcrumb->add('Validation des fiches');
+
         $stats = [];
         $parcourss = $formation->getParcours();
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
         foreach ($parcourss as $parcours) {
-            $stats[$parcours->getId()] = $typeD->calculStructureParcours($parcours, false);
+            $stats[$parcours->getId()] = $typeD->calcul($parcours);
             //update des stats sur parcours
             $parcours->setEtatsFichesMatieres($stats[$parcours->getId()]->statsFichesMatieresParcours);
         }
@@ -52,11 +63,27 @@ class FicheMatiereValideController extends BaseController
     }
 
     #[Route('/fiche-matiere/valide/parcours/{parcours}', name: 'fiche_matiere_valide_parcours')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function valideParcours(
-        Parcours                     $parcours
+        Parcours $parcours,
+        BreadcrumbService $breadcrumb,
     ): Response {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_modifier',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getLibelle(),
+            'parcours_v2_modifier',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Validation des fiches');
+
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getFormation()?->getTypeDiplome());
-        $stats = $typeD->calculStructureParcours($parcours, false, false);
+        $stats = $typeD->calcul($parcours);
         $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
         $this->entityManager->flush();
 
@@ -66,6 +93,7 @@ class FicheMatiereValideController extends BaseController
             'statsParcours' => $stats,
         ]);
     }
+
 
     #[Route('/fiche-matiere/valide/confirmation', name: 'fiche_matiere_valide_valide', methods: ['POST'])]
     public function valideParcoursValide(
@@ -98,12 +126,10 @@ class FicheMatiereValideController extends BaseController
                 return JsonReponse::error('Formation non trouvée');
             }
             $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
-            if ($formation !== null) {
-                $parcourss = $formation->getParcours();
-                foreach ($parcourss as $parcours) {
-                    $stats = $typeD->calculStructureParcours($parcours, false);
-                    $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
-                }
+            $parcourss = $formation->getParcours();
+            foreach ($parcourss as $parcours) {
+                $stats = $typeD->calcul($parcours);
+                $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
             }
         } else {
             $parcours = $parcoursRepository->find($request->query->get('id'));
@@ -111,11 +137,10 @@ class FicheMatiereValideController extends BaseController
                 return JsonReponse::error('Parcours non trouvé');
             }
             $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getFormation()?->getTypeDiplome());
-            if ($parcours !== null) {
-                $stats = $typeD->calculStructureParcours($parcours, false, false);
-                $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
-            }
+            $stats = $typeD->calcul($parcours);
+            $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
         }
+
 
         $this->entityManager->flush();
 
@@ -140,7 +165,7 @@ class FicheMatiereValideController extends BaseController
                 $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
                 $parcourss = $formation->getParcours();
                 foreach ($parcourss as $parcours) {
-                    $stats = $typeD->calculStructureParcours($parcours, false);
+                    $stats = $typeD->calcul($parcours);
                     $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
                 }
             }
@@ -148,7 +173,7 @@ class FicheMatiereValideController extends BaseController
             $parcours = $parcoursRepository->find($request->query->get('id'));
             if ($parcours !== null) {
                 $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getFormation()?->getTypeDiplome());
-                $stats = $typeD->calculStructureParcours($parcours, false, false);
+                $stats = $typeD->calcul($parcours);
                 $parcours->setEtatsFichesMatieres($stats->statsFichesMatieresParcours);
             }
         }

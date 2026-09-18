@@ -1,4 +1,7 @@
 {
+    "davidannebicque/html-to-spreadsheet-bundle": {
+        "version": "v0.2.0"
+    },
     "doctrine/annotations": {
         "version": "1.14",
         "recipe": {

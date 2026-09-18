@@ -1,145 +1,136 @@
-<tr class="ec">
-    <th class="border-left-semestre-{{ semestreOrdre }}" style="width:5px;">&nbsp;</th>
-    {% if ec.elementConstitutif != null and ec.elementConstitutif.ficheMatiere != null %}
-        {% if ec.elementConstitutif.ficheMatiere.parcours != null %}
+<tr class="hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40 transition-colors {{ ecEnfant ? 'bg-secondary-50/20 dark:bg-secondary-900/30' : '' }}">
+    {# Colonne 1 : Checkbox #}
+    <td class="w-10 px-3 py-2.5 text-center">
+        {% if ec.elementConstitutif != null and ec.elementConstitutif.ficheMatiere != null and ec.elementConstitutif.ficheMatiere.parcours != null %}
             {% if ec.elementConstitutif.ficheMatiere.parcours.id == parcours.id and ec.raccroche == false and raccrocheUe == false and raccrocheSemestre == false %}
-                <th {% if enfant %}class="border-left-ue-{{ ue.ordre }}"{% endif %}>
-                    <div class="checkbox">
-                        <label>
-                            <input
-                                    {{ stimulus_action('check_all', 'check') }}
-                                    type="checkbox"
-                                    class="check-all check-all{{ parcours.id }}"
-                                    {% if
-
-                                        is_granted('CAN_PARCOURS_VALIDATE_MY', ec.elementConstitutif.ficheMatiere) %}
-                                        {{ ec.elementConstitutif.ficheMatiere|isFicheValidable('parcours') }}
-                                    {% elseif is_granted('CAN_FORMATION_VALIDATE_MY', ec.elementConstitutif.ficheMatiere) %}
-                                        {{ ec.elementConstitutif.ficheMatiere|isFicheValidable('formation') }}
-                                    {% elseif is_granted('CAN_COMPOSANTE_VALIDATE_MY', ec.elementConstitutif.ficheMatiere) %}
-                                        {{ ec.elementConstitutif.ficheMatiere|isFicheValidable('dpe') }}
-                                    {% else %}
-                                        disabled
-                                    {% endif %}
-                                    name="formations[]"
-                                    value="{{ ec.elementConstitutif.ficheMatiere.id }}"
-                            >
-                        </label>
-                    </div>
-                </th>
-                <td>
-                    {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
-                </td>
-            {% else %}
-                <td>
-                    <span class="badge bg-info"> Raccroché</span>
-                </td>
-                <td>
-                    {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
-                </td>
-            {% endif %}
-        {% else %}
-            <td>
-                <span class="badge bg-info"> Hors Diplôme</span>
-            </td>
-            <td>
-                {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
-            </td>
-        {% endif %}
-    {% else %}
-        {% if ec.elementConstitutif.natureUeEc != null and ec.elementConstitutif.natureUeEc.isLibre %}
-            <td></td>
-            <td>
-                <span class="badge bg-info"> EC Libre</span>
-            </td>
-
-        {% elseif ec.elementConstitutif.natureUeEc != null and ec.elementConstitutif.natureUeEc.isChoix %}
-            <td></td>
-            <td>
-                <span class="badge bg-info"> EC à choix</span>
-            </td>
-        {% else %}
-            <td></td>
-            <td>
-                {% if ec.elementsConstitutifsEnfants|length > 0 %}
-                    <span class="badge bg-info">
-            EC à choix </span>
-                {% else %}
-                <span class="badge bg-danger"> Erreur</span>
-                    {% endif %}
-            </td>
-        {% endif %}
-    {% endif %}
-
-    <td>
-        {% if ec.elementConstitutif.natureUeEc != null and ec.elementConstitutif.natureUeEc.isLibre %}
-            <span class="badge bg-info">EC Libre</span>
-        {% elseif ec.elementConstitutif.natureUeEc != null and ec.elementConstitutif.natureUeEc.isChoix and ecEnfant == false %}
-            <span class="badge bg-info">EC à choix</span>
-        {% elseif ec.elementConstitutif.ficheMatiere != null and ec.elementConstitutif.ficheMatiere.parcours != null %}
-            {% if ec.elementConstitutif.ficheMatiere.parcours.id == parcours.id and ec.raccroche == false and raccrocheUe == false and raccrocheSemestre == false %}
-                <a
-                        href="{{ path('fiche_matiere_v2_modifier',{slug:  ec.elementConstitutif.ficheMatiere.slug}) }}"
-                        class="btn btn-sm btn-outline-info"
-                        data-bs-toggle="tooltip"
-                        target="_blank"
-                        data-bs-placement="bottom"
-                        title="Modifier la fiche EC/matière"
-                >
-                    <i class="fal fa-file"></i>
-                    {% if  ec.elementConstitutif.ficheMatiere.remplissage.isFull() == true %}
-                        <span class="badge bg-success"> Complet</span>
-                    {% else %}
-                        <span class="badge bg-warning"> À compléter</span>
-                    {% endif %}
-                </a>
-            {% else %}
-                <a
-                        href="{{ path('fiche_matiere_v2_voir',{slug:  ec.elementConstitutif.ficheMatiere.slug}) }}"
-                        class="btn btn-sm btn-outline-info"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        title="Voir la fiche EC/matière"
-                        target="_blank"
-                >
-                    <span class="badge bg-info"> Voir la fiche</span>
-                </a>
-            {% endif %}
-        {% else %}
-            {% if ec.elementConstitutif.ficheMatiere != null %}
-                {% if  ec.elementConstitutif.ficheMatiere.remplissage.isFull() == true %}
-                    <span class="badge bg-success"> Complet</span>
-                {% else %}
-                    <span class="badge bg-warning"> À compléter</span>
-                {% endif %}
+                <label class="inline-flex items-center justify-center cursor-pointer">
+                    <input
+                        {{ stimulus_action('check_all', 'check') }}
+                        type="checkbox"
+                        class="check-all check-all{{ parcours.id }} h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800"
+                        {% if is_granted('CAN_PARCOURS_VALIDATE_MY', ec.elementConstitutif.ficheMatiere) %}
+                            {{ ec.elementConstitutif.ficheMatiere|isFicheValidable('parcours') }}
+                        {% elseif is_granted('CAN_FORMATION_VALIDATE_MY', ec.elementConstitutif.ficheMatiere) %}
+                            {{ ec.elementConstitutif.ficheMatiere|isFicheValidable('formation') }}
+                        {% elseif is_granted('CAN_COMPOSANTE_VALIDATE_MY', ec.elementConstitutif.ficheMatiere) %}
+                            {{ ec.elementConstitutif.ficheMatiere|isFicheValidable('dpe') }}
+                        {% else %}
+                            disabled
+                        {% endif %}
+                        name="formations[]"
+                        value="{{ ec.elementConstitutif.ficheMatiere.id }}"
+                    >
+                </label>
             {% endif %}
         {% endif %}
-
     </td>
 
-    <td>{% if ecEnfant %}<span class="badge bg-ec-{{ ec.elementConstitutif.ordre }}">&nbsp;</span>{% endif %}
-        {% if (isBut is defined and isBut == false) or isBut is not defined %}
-            <strong>{{ ec.elementConstitutif.code }}</strong>{% endif %}
-        {% if ec.elementConstitutif.ficheMatiere != null %}
-            <a href="{{ url('fiche_matiere_v2_voir', {slug: ec.elementConstitutif.ficheMatiere.slug}) }}"
-               target="_blank">
-                {% if isBut is defined and isBut == true %}
-                    <strong>{{ ec.elementConstitutif.ficheMatiere.sigle }}</strong> {{ ec.elementConstitutif.ficheMatiere.libelle }}
+    {# Colonne 2 : État de la fiche #}
+    <td class="w-36 px-3 py-2.5">
+        {% if ec.elementConstitutif != null and ec.elementConstitutif.ficheMatiere != null %}
+            {% if ec.elementConstitutif.ficheMatiere.parcours != null %}
+                {% if ec.elementConstitutif.ficheMatiere.parcours.id == parcours.id and ec.raccroche == false and raccrocheUe == false and raccrocheSemestre == false %}
+                    {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
                 {% else %}
-                    {{ ec.elementConstitutif.ficheMatiere.display }}
+                    <div class="flex flex-wrap items-center gap-1">
+                        <twig:Badge label="Raccroché" variant="info" size="sm" />
+                        {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
+                    </div>
                 {% endif %}
-            </a>
+            {% else %}
+                <div class="flex flex-wrap items-center gap-1">
+                    <twig:Badge label="Hors diplôme" variant="secondary" size="sm" />
+                    {{ include('communs/_badge_collection.html.twig', { badges: ec.elementConstitutif.ficheMatiere.etatFiche|badgeFicheDto }) }}
+                </div>
+            {% endif %}
         {% else %}
-            {{ ec.elementConstitutif.libelle }}
+            {% if ec.elementConstitutif.natureUeEc != null and ec.elementConstitutif.natureUeEc.isLibre %}
+                <twig:Badge label="EC Libre" variant="info" size="sm" />
+            {% elseif ec.elementConstitutif.natureUeEc != null and ec.elementConstitutif.natureUeEc.isChoix %}
+                <twig:Badge label="EC à choix" variant="info" size="sm" />
+            {% else %}
+                {% if ec.elementsConstitutifsEnfants|length > 0 %}
+                    <twig:Badge label="EC à choix" variant="info" size="sm" />
+                {% else %}
+                    <twig:Badge label="Erreur" variant="danger" size="sm" />
+                {% endif %}
+            {% endif %}
         {% endif %}
-        {% if ec.elementConstitutif.natureEcUe is defined and ec.elementConstitutif.natureEcUe.isLibre == true %}
-            <span class="badge bg-success">EC à choix libre</span>
+    </td>
+
+    {# Colonne 3 : Remplissage #}
+    <td class="w-36 px-3 py-2.5 text-center">
+        {% if ec.elementConstitutif != null and ec.elementConstitutif.ficheMatiere != null %}
+            {% if ec.elementConstitutif.ficheMatiere.remplissage.isFull() == true %}
+                <twig:Badge label="Complet" variant="success" size="sm" icon="icon:check" />
+            {% else %}
+                <twig:Badge label="À compléter" variant="warning" size="sm" icon="icon:warning" />
+            {% endif %}
         {% endif %}
-        {% if ec.elementsConstitutifsEnfants|length > 0 %}
-            <span class="badge bg-info">
-            EC à choix restreint : {{ ec.elementsConstitutifsEnfants|length }} choix possibles</span>
+    </td>
+
+    {# Colonne 4 : Code & Intitulé #}
+    <td class="px-3 py-2.5 {{ ecEnfant ? 'pl-8' : '' }}">
+        <div class="flex flex-wrap items-center gap-1.5">
+            {% if ecEnfant %}
+                <span class="inline-block h-2 w-2 rounded-full bg-secondary-400"></span>
+            {% endif %}
+            {% if (isBut is defined and isBut == false) or isBut is not defined %}
+                <span class="font-bold text-secondary-800 dark:text-secondary-200">{{ ec.elementConstitutif.code }}</span>
+            {% endif %}
+
+            {% if ec.elementConstitutif.ficheMatiere != null %}
+                <a href="{{ url('fiche_matiere_v2_voir', {slug: ec.elementConstitutif.ficheMatiere.slug}) }}"
+                   target="_blank"
+                   class="font-medium text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 hover:underline">
+                    {% if isBut is defined and isBut == true %}
+                        <strong>{{ ec.elementConstitutif.ficheMatiere.sigle }}</strong> {{ ec.elementConstitutif.ficheMatiere.libelle }}
+                    {% else %}
+                        {{ ec.elementConstitutif.ficheMatiere.display }}
+                    {% endif %}
+                </a>
+            {% else %}
+                <span class="text-secondary-700 dark:text-secondary-300">{{ ec.elementConstitutif.libelle }}</span>
+            {% endif %}
+
+            {% if ec.elementConstitutif.natureEcUe is defined and ec.elementConstitutif.natureEcUe != null and ec.elementConstitutif.natureEcUe.isLibre == true %}
+                <twig:Badge label="EC à choix libre" variant="success" size="sm" />
+            {% endif %}
+            {% if ec.elementsConstitutifsEnfants|length > 0 %}
+                <twig:Badge :label="'EC à choix restreint : ' ~ ec.elementsConstitutifsEnfants|length ~ ' choix'" variant="info" size="sm" />
+            {% endif %}
+        </div>
+    </td>
+
+    {# Colonne 5 : Actions #}
+    <td class="w-32 px-3 py-2.5 text-right">
+        {% if ec.elementConstitutif != null and ec.elementConstitutif.ficheMatiere != null %}
+            {% if ec.elementConstitutif.ficheMatiere.parcours != null and ec.elementConstitutif.ficheMatiere.parcours.id == parcours.id and ec.raccroche == false and raccrocheUe == false and raccrocheSemestre == false %}
+                <twig:Button
+                    href="{{ path('fiche_matiere_v2_modifier', {slug: ec.elementConstitutif.ficheMatiere.slug}) }}"
+                    variant="warning"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:edit"
+                    label="Modifier"
+                    tooltip="Modifier la fiche EC/matière"
+                    target="_blank"
+                />
+            {% else %}
+                <twig:Button
+                    href="{{ path('fiche_matiere_v2_voir', {slug: ec.elementConstitutif.ficheMatiere.slug}) }}"
+                    variant="secondary"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:eye"
+                    label="Voir"
+                    tooltip="Voir la fiche EC/matière"
+                    target="_blank"
+                />
+            {% endif %}
         {% endif %}
     </td>
 </tr>
+
 
 

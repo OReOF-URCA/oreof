@@ -1,33 +1,44 @@
 {# templates/components/_notif_toggles.html.twig #}
 {% set ch = channels %}
-<label class="d-flex align-items-center gap-1 small mb-0">
-    <input type="checkbox" {{ ch.email ? 'checked' }} data-model="email">
-    Email
-</label>
-<label class="d-flex align-items-center gap-1 small mb-0 ms-3">
-    <input type="checkbox" {{ ch.inapp ? 'checked' }} data-model="inapp">
-    In-app
-</label>
+<div class="flex flex-wrap items-center gap-4">
+    <label class="inline-flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-secondary-700 dark:text-secondary-300">
+        <input type="checkbox"
+               {{ ch.email ? 'checked' : '' }}
+               data-action="change->notification-center#toggle"
+               data-channel="email"
+               {% if workflow is defined and workflow %}data-workflow="{{ workflow }}"{% endif %}
+               {% if place is defined and place %}data-place="{{ place }}"{% endif %}
+               {% if transition is defined and transition %}data-transition="{{ transition }}"{% endif %}
+               class="h-4 w-4 rounded border-secondary-300 text-primary focus:ring-primary dark:border-secondary-600 dark:bg-secondary-800">
+        <twig:UX:Icon name="icon:mail" class="w-3.5 h-3.5 text-secondary-400" />
+        <span>Email</span>
+    </label>
 
-<button class="btn btn-primary btn-sm ms-3"
-        data-action="live#action"
-        data-live-action-param="save"
-        data-live-workflow-param="{{ scope.workflow }}"
-        data-live-place-param="{{ scope.place is not null ? scope.place : 'null' }}"
-        data-live-transition-param="{{ scope.transition is not null ? scope.transition : 'null' }}"
-        data-live-email-param="{{ ch.email ? 'true' : 'false' }}"
-        data-live-inapp-param="{{ ch.inapp ? 'true' : 'false' }}"
->Enregistrer
-</button>
+    <label class="inline-flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-secondary-700 dark:text-secondary-300">
+        <input type="checkbox"
+               {{ ch.inapp ? 'checked' : '' }}
+               data-action="change->notification-center#toggle"
+               data-channel="inapp"
+               {% if workflow is defined and workflow %}data-workflow="{{ workflow }}"{% endif %}
+               {% if place is defined and place %}data-place="{{ place }}"{% endif %}
+               {% if transition is defined and transition %}data-transition="{{ transition }}"{% endif %}
+               class="h-4 w-4 rounded border-secondary-300 text-primary focus:ring-primary dark:border-secondary-600 dark:bg-secondary-800">
+        <twig:UX:Icon name="icon:bell" class="w-3.5 h-3.5 text-secondary-400" />
+        <span>In-app</span>
+    </label>
 
-{% if not inherited %}
-    <button class="btn btn-secondary btn-sm ms-2"
-            data-action="live#action"
-            data-live-action-param="remove"
-            data-live-args='{
-      "workflow":"{{ scope.workflow }}",
-      "place":{{ scope.place is not null ? '"'~scope.place~'"' : 'null' }},
-      "transition":{{ scope.transition is not null ? '"'~scope.transition~'"' : 'null' }}
-    }'>Revenir à l’héritage
-    </button>
-{% endif %}
+    {% if workflow is defined and workflow %}
+        <button type="button"
+                data-reset-btn
+                data-action="click->notification-center#reset"
+                data-workflow="{{ workflow }}"
+                {% if place is defined and place %}data-place="{{ place }}"{% endif %}
+                {% if transition is defined and transition %}data-transition="{{ transition }}"{% endif %}
+                class="inline-flex items-center gap-1.5 rounded-lg border border-secondary-200 bg-white px-2 py-0.5 text-[11px] font-medium text-secondary-600 hover:bg-secondary-50 hover:text-secondary-800 transition dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-300 dark:hover:bg-secondary-700 {{ inherited ? 'hidden' : '' }}"
+                title="Rétablir la valeur héritée"
+        >
+            <twig:UX:Icon name="mdi:undo" class="w-3 h-3 text-secondary-400" />
+            <span>Rétablir l'héritage</span>
+        </button>
+    {% endif %}
+</div>

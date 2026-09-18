@@ -54,8 +54,11 @@ class Etablissement
     #[ORM\OneToMany(mappedBy: 'etablissement', targetEntity: Composante::class)]
     private Collection $composantes;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $emailCentral = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $emailOreof = null;
 
     /**
      * @var Collection<int, UserProfil>
@@ -262,9 +265,21 @@ class Etablissement
         return $this->emailCentral ?? 'cfvu-secretariat@univ-reims.fr';
     }
 
-    public function setEmailCentral(string $emailCentral): static
+    public function setEmailCentral(?string $emailCentral): static
     {
         $this->emailCentral = $emailCentral;
+
+        return $this;
+    }
+
+    public function getEmailOreof(): ?string
+    {
+        return $this->emailOreof ?? 'oreof@univ-reims.fr';
+    }
+
+    public function setEmailOreof(?string $emailOreof): static
+    {
+        $this->emailOreof = $emailOreof;
 
         return $this;
     }
