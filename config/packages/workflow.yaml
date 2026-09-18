@@ -689,6 +689,12 @@ framework:
         property: 'etatFiche'
       supports:
         - App\Entity\FicheMatiere
+      metadata:
+        operation_defaults:
+          authorization:
+            attribute: 'FICHE_WORKFLOW_TRANSITION'
+            subject: 'operation'
+            reason: 'workflow.authorization.fiche_transition.denied'
       initial_marking: 'en_cours_redaction'
       places:
         'en_cours_redaction':
@@ -719,7 +725,6 @@ framework:
             button_class: 'success'
             button_icon: 'ph:list-checks-fill'
             type: valider
-            handler: "autoriser_fiche"
             form:
               fields: [ ]
         valider_fiche_ses:
@@ -729,7 +734,6 @@ framework:
             button_class: 'success'
             button_icon: 'mdi:stamper'
             type: valider
-            handler: "autoriser_fiche"
             form:
               fields: [ ]
         reserver_fiche_ses:
@@ -739,15 +743,11 @@ framework:
             type: reserver
             button_class: 'warning'
             button_icon: 'ph:check'
-            handler: "reserver_argumentaire_fiche"
+            context:
+              aliases:
+                argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         publier:
           from: 'valide_pour_publication'
           to: 'publie'
@@ -755,7 +755,6 @@ framework:
             type: valider
             button_class: 'success'
             button_icon: 'mdi:stamper'
-            handler: "valider" #todo : un handler ici ?
             form:
               fields: [ ]
 
@@ -767,7 +766,6 @@ framework:
             button_icon: 'flowbite:edit-outline'
             type: valider
             description: 'Rouvrir la fiche pour modification'
-            handler: "rouvrir_fiche"
             form:
               fields: [ ]
         rouvrir_fiche_matiere_b:
@@ -776,7 +774,6 @@ framework:
           metadata:
             button_class: 'warning'
             button_icon: 'flowbite:edit-outline'
-            handler: "valider" #todo : un handler ici ?
             form:
               fields: [ ]
     changeRf:

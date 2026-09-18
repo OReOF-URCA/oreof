@@ -158,10 +158,6 @@ services:
     App\Twig\TurboExtension:
       tags: [ 'twig.extension' ]
 
-    App\Workflow\Handler\Handlers\:
-      resource: '../src/Workflow/Handler/Handlers/'
-      tags: [ 'app.workflow_transition_handler' ]
-
     App\Navigation\Provider\:
       resource: '../src/Navigation/Provider/'
       tags: [ 'app.menu_provider' ]
