@@ -21,6 +21,8 @@ use Twig\TwigFilter;
 
 class HistoriqueExtension extends AbstractExtension
 {
+    private const DEFAULT_ICON = 'icon:info';
+
     public const TRADUCTIONS = [
         'conseil' => 'soumis_conseil',
         'publication' => 'valide_cfvu',
@@ -74,12 +76,14 @@ class HistoriqueExtension extends AbstractExtension
             if (array_key_exists($etape, self::TRADUCTIONS)) {
                 $etape = self::TRADUCTIONS[$etape];
             }
-            return $this->validationProcess->getEtapeCle($etape, 'label');
+            $label = $this->validationProcess->getEtapeCle($etape, 'label');
+
+            return '' !== $label ? $label : 'validation.'.$etape;
         }
 
+        $label = $this->validationProcessFicheMatiere->getEtapeCle($etape, 'label');
 
-
-        return $this->validationProcessFicheMatiere->getEtapeCle($etape, 'label');
+        return '' !== $label ? $label : 'validation.'.$etape;
     }
 
     public function etapeParams(HistoriqueParcours|HistoriqueFormation|HistoriqueFicheMatiere $historique): array
@@ -139,8 +143,13 @@ class HistoriqueExtension extends AbstractExtension
             if (array_key_exists($etape, self::TRADUCTIONS)) {
                 $etape = self::TRADUCTIONS[$etape];
             }
-            return $this->validationProcess->getEtapeCle($etape, 'icon');
+            $icon = $this->validationProcess->getEtapeCle($etape, 'icon');
+
+            return '' !== $icon ? $icon : self::DEFAULT_ICON;
         }
-        return $this->validationProcessFicheMatiere->getEtapeCle($etape, 'icon');
+
+        $icon = $this->validationProcessFicheMatiere->getEtapeCle($etape, 'icon');
+
+        return '' !== $icon ? $icon : self::DEFAULT_ICON;
     }
 }
