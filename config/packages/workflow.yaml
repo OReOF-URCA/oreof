@@ -258,11 +258,15 @@ framework:
                   required: true
                 - name: uploadPv
                   type: file
-                  required: true
+                  required: false
                 - name: uploadArgumentaire #todo: vérifier nom, notamment dans le json pour cohérence v1
                   type: file
                 - name: laissezPasser
                   type: checkbox
+              rules:
+                - type: at_least_one
+                  fields: [ uploadPv, laissezPasser ]
+                  message: 'Déposez le PV du conseil ou indiquez un laissez-passer.'
 
         reserver_conseil:
           from: 'soumis_conseil'
