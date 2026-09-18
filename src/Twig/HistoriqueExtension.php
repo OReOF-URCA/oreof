@@ -112,7 +112,8 @@ class HistoriqueExtension extends AbstractExtension
             'valide' => 'success',
             'refuse' => 'danger',
             'info' => 'info',
-            'default' => 'warning', // dont laisser passer
+            'reserver', 'reserve', 'laisserPasser', 'force_admin' => 'warning',
+            default => 'secondary',
         };
     }
 
