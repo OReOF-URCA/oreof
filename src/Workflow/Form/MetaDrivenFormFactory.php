@@ -20,7 +20,8 @@ final class MetaDrivenFormFactory
     {
     }
 
-    public function create(ModalFormMetaDto $meta, string $transition): FormInterface
+    /** @param array<string, mixed> $additionalOptions */
+    public function create(ModalFormMetaDto $meta, string $transition, array $additionalOptions = []): FormInterface
     {
         if (null !== $meta->formType) {
             if (!class_exists($meta->formType) || !is_a($meta->formType, AbstractType::class, true)) {
@@ -34,6 +35,7 @@ final class MetaDrivenFormFactory
             $options = array_replace_recursive(
                 ['attr' => ['id' => $meta->formId]],
                 $meta->options,
+                $additionalOptions,
             );
 
             return $this->formFactory->create($meta->formType, null, $options);

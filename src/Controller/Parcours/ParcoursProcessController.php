@@ -14,7 +14,6 @@ use App\Controller\BaseController;
 use App\Entity\DpeParcours;
 use App\Entity\User;
 use App\Events\HistoriqueParcoursEvent;
-use App\Repository\DpeParcoursRepository;
 use App\Service\SecureUploadService;
 use App\Utils\TurboStreamResponseFactory;
 use App\Workflow\Form\MetaDrivenFormFactory;
@@ -34,8 +33,6 @@ use Symfony\Component\Workflow\WorkflowInterface;
 #[Route('/parcours/v2/process', name: 'parcours_process')]
 class ParcoursProcessController extends BaseController
 {
-
-    private string $dir;
 
     public function __construct(
         private MetaDrivenFormFactory      $metaDrivenFormFactory,
@@ -380,169 +377,6 @@ class ParcoursProcessController extends BaseController
 //                'submitLabel' => 'Valider la demande',
 //            ]
 //        );
-    }
-
-    #[Route('/lot/{transition}', name: '_apply_lot')]
-    public function applyLotProcess(
-        Request                    $request,
-        TurboStreamResponseFactory $turboStream,
-        DpeParcoursRepository      $dpeParcoursRepository,
-        string                     $transition,
-    ): Response
-    {
-        $selectedIds = $this->parseSelectedParcoursIds($request);
-
-        if ($selectedIds === []) {
-            return $turboStream->streamToastError('Aucun parcours sélectionné.', true);
-        }
-
-        $firstDpeParcours = null;
-        foreach ($selectedIds as $id) {
-            $candidate = $dpeParcoursRepository->find($id);
-            if ($candidate instanceof DpeParcours) {
-                $firstDpeParcours = $candidate;
-                break;
-            }
-        }
-
-        if (!$firstDpeParcours instanceof DpeParcours) {
-            return $turboStream->streamToastError('Aucun parcours valide trouvé.', true);
-        }
-
-        $rawMeta = $this->validationProcess->getMetaFromTransition($transition);
-        $metaDto = $this->workflowMetaMapper->fromArray($rawMeta);
-        $view = $this->transitionModalViewBuilder->build($transition, $firstDpeParcours, $rawMeta);
-
-        $form = $metaDto->form === null
-            ? $this->metaDrivenFormFactory->createEmpty()
-            : $this->metaDrivenFormFactory->create($metaDto->form, $transition);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted()) {
-            if ($view?->mode === 'report' && $view?->canSubmit === false) {
-                return $turboStream->streamToastError('Le traitement est bloqué par un contrôle de cohérence.', false);
-            }
-
-            if ($form->isValid()) {
-                try {
-                    $user = $this->getCurrentUserOrFail();
-                    $formData = $this->extractFormData($form->getData());
-                    if (($formData['uploadPv'] ?? null) instanceof UploadedFile
-                        || ($formData['uploadArgumentaire'] ?? null) instanceof UploadedFile) {
-                        return $turboStream->streamToastError(
-                            'Le dépôt de documents doit être effectué individuellement pour chaque parcours.',
-                            false,
-                        );
-                    }
-
-                    $processedCount = 0;
-                    $processedParcours = [];
-
-                    foreach ($selectedIds as $id) {
-                        $dpeParcours = $dpeParcoursRepository->find($id);
-                        if (!$dpeParcours instanceof DpeParcours) {
-                            continue;
-                        }
-
-                        $previousPlace = array_keys($dpeParcours->getEtatValidation())[0] ?? 'inconnue';
-
-                        $this->operationExecutor->execute(
-                            $this->dpeParcoursWorkflow,
-                            $dpeParcours,
-                            $transition,
-                            $this->operationContextNormalizer->normalize(
-                                workflow: $this->dpeParcoursWorkflow,
-                                transitionName: $transition,
-                                actor: $user,
-                                input: $formData,
-                            )->withRuntime(['previous_place' => $previousPlace]),
-                        );
-
-                        $histoEvent = new HistoriqueParcoursEvent(
-                            $dpeParcours->getParcours(),
-                            $user,
-                            $previousPlace,
-                            $metaDto->type,
-                            $request,
-                            input: $formData,
-                        );
-                        $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
-
-                        $parcours = $dpeParcours->getParcours();
-                        $formation = $parcours?->getFormation();
-                        $processedParcours[] = [
-                            'id' => $dpeParcours->getId(),
-                            'parcours' => $parcours?->getDisplay() ?? 'Parcours inconnu',
-                            'formation' => $formation?->getDisplay() ?? 'Formation inconnue',
-                        ];
-                        ++$processedCount;
-                    }
-
-                    $this->entityManager->flush();
-
-                    return $turboStream->stream('parcours_v2/turbo/apply_lot_success.stream.html.twig', [
-                        'transition' => $transition,
-                        'type' => $metaDto->type,
-                        'count' => $processedCount,
-                        'processedParcours' => $processedParcours,
-                    ]);
-                } catch (\Throwable $e) {
-                    return $turboStream->stream('parcours_v2/turbo/apply_lot_error.stream.html.twig', [
-                        'transition' => $transition,
-                        'type' => $metaDto->type,
-                        'message' => $e->getMessage(),
-                    ]);
-                }
-            }
-        }
-
-        return $turboStream->streamOpenModalFromTemplates(
-            'modal_title.' . $transition . '.' . $metaDto->type,
-            $selectedIds === []
-                ? 'Aucun parcours sélectionné'
-                : sprintf('%d parcours sélectionné%s', count($selectedIds), count($selectedIds) > 1 ? 's' : ''),
-            'parcours_v2/process/_apply_lot.html.twig',
-            [
-                'metaDto' => $metaDto,
-                'transition' => $transition,
-                'view' => $view,
-                'form' => $form->createView(),
-                'selectedParcours' => implode(',', $selectedIds),
-            ],
-            '_ui/_footer_submit_cancel.html.twig',
-            [
-                'submitLabel' => 'modal_submit.' . $transition . '.' . $metaDto->type,
-                'submitDisabled' => ($view?->mode === 'report' && $view->canSubmit === false),
-            ]
-        );
-    }
-
-    /**
-     * @return list<int>
-     */
-    private function parseSelectedParcoursIds(Request $request): array
-    {
-        $bag = $request->isMethod('POST') ? $request->request : $request->query;
-
-        // Tente la lecture en tant que tableau (parcours[]=1&parcours[]=2)
-        try {
-            $raw = $bag->all('parcours');
-            if ($raw !== []) {
-                return array_values(array_unique(array_filter(array_map('intval', $raw), static fn(int $id) => $id > 0)));
-            }
-        } catch (\UnexpectedValueException) {
-            // La valeur est une chaîne, on la traite ci-dessous
-        }
-
-        // Lecture en tant que chaîne scalaire (valeur séparée par des virgules)
-        $raw = $bag->get('parcours');
-        if (is_string($raw) && $raw !== '') {
-            $parts = array_map('trim', explode(',', $raw));
-            return array_values(array_unique(array_filter(array_map('intval', $parts), static fn(int $id) => $id > 0)));
-        }
-
-        return [];
     }
 
     /** @return array<string, mixed> */
