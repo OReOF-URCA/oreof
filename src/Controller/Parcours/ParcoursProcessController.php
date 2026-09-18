@@ -422,6 +422,14 @@ class ParcoursProcessController extends BaseController
                 try {
                     $user = $this->getCurrentUserOrFail();
                     $formData = (array) $form->getData();
+                    if (($formData['uploadPv'] ?? null) instanceof UploadedFile
+                        || ($formData['uploadArgumentaire'] ?? null) instanceof UploadedFile) {
+                        return $turboStream->streamToastError(
+                            'Le dépôt de documents doit être effectué individuellement pour chaque parcours.',
+                            false,
+                        );
+                    }
+
                     $processedCount = 0;
                     $processedParcours = [];
 
