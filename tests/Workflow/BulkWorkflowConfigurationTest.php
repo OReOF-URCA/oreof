@@ -9,6 +9,7 @@ use App\Workflow\Bulk\BulkWorkflowManager;
 use App\Workflow\Form\MetaDrivenFormFactory;
 use App\Workflow\Metadata\WorkflowMetaMapper;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
 final class BulkWorkflowConfigurationTest extends KernelTestCase
@@ -80,5 +81,21 @@ final class BulkWorkflowConfigurationTest extends KernelTestCase
         self::assertTrue($form->has('file'));
         self::assertTrue($form->has('laisserPasser'));
         self::assertFalse($form->has('demandes'));
+    }
+
+    public function testTheBulkControllerAcceptsCurrentAndLegacySelectionParameters(): void
+    {
+        $controller = new \ReflectionClass(\App\Controller\WorkflowBulkController::class);
+        $method = $controller->getMethod('selectedIds');
+        $instance = $controller->newInstanceWithoutConstructor();
+
+        foreach (['ids', 'parcours', 'fiches', 'demandes'] as $parameter) {
+            $request = new Request([$parameter => ['12', '24', '12']]);
+            self::assertSame([12, 24], $method->invoke($instance, $request), $parameter);
+
+            $postRequest = new Request([], [$parameter => '12,24,12']);
+            $postRequest->setMethod('POST');
+            self::assertSame([12, 24], $method->invoke($instance, $postRequest), $parameter.' POST');
+        }
     }
 }

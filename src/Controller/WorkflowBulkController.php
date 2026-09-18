@@ -112,15 +112,20 @@ final class WorkflowBulkController extends BaseController
     private function selectedIds(Request $request): array
     {
         $bag = $request->isMethod('POST') ? $request->request : $request->query;
+        $ids = [];
+        $parameters = $bag->all();
 
-        try {
-            $raw = $bag->all('ids');
-        } catch (\UnexpectedValueException) {
-            $raw = explode(',', (string) $bag->get('ids', ''));
+        // Les alias maintiennent la compatibilité avec les contrôleurs Stimulus
+        // déjà compilés et avec les anciens écrans de validation.
+        foreach (['ids', 'parcours', 'fiches', 'demandes'] as $parameter) {
+            $value = $parameters[$parameter] ?? [];
+            $raw = is_array($value) ? $value : explode(',', (string) $value);
+
+            $ids = array_merge($ids, $raw);
         }
 
         return array_values(array_unique(array_filter(
-            array_map('intval', $raw),
+            array_map('intval', $ids),
             static fn (int $id): bool => $id > 0,
         )));
     }
