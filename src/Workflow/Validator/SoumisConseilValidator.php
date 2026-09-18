@@ -43,42 +43,48 @@ final class SoumisConseilValidator extends AbstractStepValidator
     {
         $errors = [];
         $warnings = [];
+        $checks = [];
 
         // Validation des données communes
         $commonValidation = $this->validateCommonRequirements($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('common', 'Données générales du parcours et de la formation', $commonValidation);
         $errors = array_merge($errors, $commonValidation['errors']);
         $warnings = array_merge($warnings, $commonValidation['warnings']);
 
         // Si erreurs critiques, arrêter la validation
         if (count($errors) > 0) {
-            return ValidationResult::failure($errors, $warnings);
+            return ValidationResult::failure($errors, $warnings, $checks);
         }
 
         // Vérification que le parcours a bien été validé par le RF
         $rfValidation = $this->validatePreviousSteps($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('previous_steps', 'Validation des étapes précédentes', $rfValidation);
         $errors = array_merge($errors, $rfValidation['errors']);
         $warnings = array_merge($warnings, $rfValidation['warnings']);
 
         // Validation de la complétude documentaire
         $docValidation = $this->validateDocumentation($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('documentation', 'Complétude documentaire', $docValidation);
         $errors = array_merge($errors, $docValidation['errors']);
         $warnings = array_merge($warnings, $docValidation['warnings']);
 
         // Validation des MCCC
         $mcccValidation = $this->validateMccc($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('mccc', 'Présence et complétude des MCCC', $mcccValidation);
         $errors = array_merge($errors, $mcccValidation['errors']);
         $warnings = array_merge($warnings, $mcccValidation['warnings']);
 
         // Validation des fiches matières
         $fichesValidation = $this->validateFicheMatieres($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('fiche_matieres', 'Validation et complétude des fiches matières', $fichesValidation);
         $errors = array_merge($errors, $fichesValidation['errors']);
         $warnings = array_merge($warnings, $fichesValidation['warnings']);
 
         if (count($errors) > 0) {
-            return ValidationResult::failure($errors, $warnings);
+            return ValidationResult::failure($errors, $warnings, $checks);
         }
 
-        return ValidationResult::success($warnings);
+        return ValidationResult::success($warnings, $checks);
     }
 
     /**

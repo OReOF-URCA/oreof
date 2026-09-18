@@ -25,6 +25,8 @@ final class TransitionModalView
         public readonly string $mode, // 'form' | 'report'
         public readonly bool   $canSubmit,
         public readonly array  $messages = [],
+        /** @var list<array{code: string, label: string, status: string, errorCount: int, warningCount: int}> */
+        public readonly array  $checks = [],
     )
     {
     }

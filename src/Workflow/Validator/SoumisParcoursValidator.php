@@ -44,43 +44,49 @@ final class SoumisParcoursValidator extends AbstractStepValidator
     {
         $errors = [];
         $warnings = [];
+        $checks = [];
 
         // Validation des données communes
         $commonValidation = $this->validateCommonRequirements($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('common', 'Données générales du parcours et de la formation', $commonValidation);
         $errors = array_merge($errors, $commonValidation['errors']);
         $warnings = array_merge($warnings, $commonValidation['warnings']);
 
         // Si erreurs critiques, arrêter la validation
         if (count($errors) > 0) {
-            return ValidationResult::failure($errors, $warnings);
+            return ValidationResult::failure($errors, $warnings, $checks);
         }
 
         // Validation du taux de remplissage
         $remplissageValidation = $this->validateRemplissage($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('completion', 'Taux de remplissage minimal (80 %)', $remplissageValidation);
         $errors = array_merge($errors, $remplissageValidation['errors']);
         $warnings = array_merge($warnings, $remplissageValidation['warnings']);
 
         // Validation des informations du parcours
         $parcoursValidation = $this->validateParcoursInfo($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('parcours', 'Informations obligatoires du parcours', $parcoursValidation);
         $errors = array_merge($errors, $parcoursValidation['errors']);
         $warnings = array_merge($warnings, $parcoursValidation['warnings']);
 
         // Validation spécifique au type de diplôme
         // Note: Les règles détaillées seront appelées via le TypeDiplomeRegistry
         $typeValidation = $this->validateByTypeDiplome($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('diploma_type', 'Règles génériques du type de diplôme', $typeValidation);
         $errors = array_merge($errors, $typeValidation['errors']);
         $warnings = array_merge($warnings, $typeValidation['warnings']);
 
         // Validation de la structure des semestres
         $structureValidation = $this->validateStructure($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('structure', 'Structure des semestres et des UE', $structureValidation);
         $errors = array_merge($errors, $structureValidation['errors']);
         $warnings = array_merge($warnings, $structureValidation['warnings']);
 
         if (count($errors) > 0) {
-            return ValidationResult::failure($errors, $warnings);
+            return ValidationResult::failure($errors, $warnings, $checks);
         }
 
-        return ValidationResult::success($warnings);
+        return ValidationResult::success($warnings, $checks);
     }
 
     /**
