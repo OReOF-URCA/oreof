@@ -49,3 +49,19 @@ metadata:
 ```
 
 With `subject: operation`, the voter receives an `OperationAuthorizationSubject` containing the domain subject, operation definition and execution context.
+
+Metadata shared by every operation of a workflow can be declared once with
+`operation_defaults`. Transition metadata is merged recursively on top of
+these defaults, so a transition can override only the values it needs:
+
+```yaml
+framework:
+    workflows:
+        document:
+            metadata:
+                operation_defaults:
+                    authorization:
+                        attribute: 'DOCUMENT_TRANSITION'
+                        subject: 'operation'
+                        reason: 'document.transition.denied'
+```

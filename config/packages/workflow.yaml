@@ -8,6 +8,12 @@ framework:
         property: 'etatValidation'
       supports:
         - App\Entity\DpeParcours
+      metadata:
+        operation_defaults:
+          authorization:
+            attribute: 'DPE_WORKFLOW_TRANSITION'
+            subject: 'operation'
+            reason: 'workflow.authorization.dpe_transition.denied'
       initial_marking: 'initialisation_dpe'
       places:
         initialisation_dpe:
@@ -512,10 +518,6 @@ framework:
             button_class: 'info'
             type: 'reouvrir'
             button_icon: 'flowbite:edit-outline'
-            authorization:
-              attribute: 'DPE_WORKFLOW_TRANSITION'
-              subject: 'operation'
-              reason: 'workflow.authorization.reouvrir_mccc.denied'
             context: &dpe_argumentaire_context
               aliases:
                 argumentaire: motif
@@ -552,10 +554,6 @@ framework:
             button_class: 'info'
             type: 'reouvrir'
             button_icon: 'flowbite:edit-outline'
-            authorization:
-              attribute: 'DPE_WORKFLOW_TRANSITION'
-              subject: 'operation'
-              reason: 'workflow.authorization.reouvrir_mccc.denied'
             context: *dpe_argumentaire_context
             form:
               type: 'App\Form\Workflow\ArgumentaireType'
