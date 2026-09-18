@@ -9,7 +9,7 @@ use DateTimeImmutable;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use UnexpectedValueException;
 
-#[AsMessageHandler(fromTransport: 'async_export')]
+#[AsMessageHandler(fromTransport: 'async_email')]
 readonly class ChangeRfWorkflowNotificationHandler
 {
     private const EMAIL_CENTRAL = 'cfvu-secretariat@univ-reims.fr';

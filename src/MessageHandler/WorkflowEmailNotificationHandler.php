@@ -8,7 +8,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Mime\Email;
 
-#[AsMessageHandler(fromTransport: 'async_export')]
+#[AsMessageHandler(fromTransport: 'async_email')]
 readonly class WorkflowEmailNotificationHandler
 {
     public function __construct(private MailerInterface $mailer)
