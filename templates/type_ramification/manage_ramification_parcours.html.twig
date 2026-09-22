@@ -69,15 +69,15 @@
             background-color: grey;
         }
 
-        @media screen and (max-height: 1250px) and (orientation: portrait) {
+        @media screen and ((max-width: 1250px) or (max-width: 992px)) {
             .container-ramification {
                 margin-top: 25em;
             }
         }
 
-        @media screen and (max-height: 992px) {
+        @media screen and (min-width: 1250px) {
             .container-ramification {
-                margin-top: 25em;
+                margin-top: 0em;
             }
         }
     </style>
