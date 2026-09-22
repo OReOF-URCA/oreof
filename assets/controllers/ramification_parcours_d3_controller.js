@@ -133,8 +133,13 @@ export default class extends Controller {
 
     #addStepColumn(columnNumber) {
         let col = document.createElement('div');
-        col.dataset.stepIndex = columnNumber;
         col.classList.add('col-2', 'step-column');
+        let choiceDiv = document.createElement('div');
+        choiceDiv.classList.add('col-12', 'step-column-info');
+        let linksDiv = document.createElement('div');
+        linksDiv.classList.add('d-flex', 'h-100', 'col-12', 'step-column-links', 'justify-content-around');
+        linksDiv.dataset.stepIndex = columnNumber;
+
         let selectTypeRamification = document.createElement('select');
         selectTypeRamification.classList.add('form-select');
         [{id: "", libelle: "Choisir..."}, ...this.#getListeTypesRamifications()].forEach(typeR =>{
@@ -151,10 +156,11 @@ export default class extends Controller {
         stepTitle.textContent = `Niveau ${columnNumber}`;
         infoWrapper.appendChild(stepTitle);
         infoWrapper.appendChild(selectTypeRamification);
+        choiceDiv.appendChild(infoWrapper);
 
-
-        col.appendChild(infoWrapper);
-        this.#onColumnClick(col);
+        col.appendChild(choiceDiv);
+        col.appendChild(linksDiv);
+        this.#onColumnClick(linksDiv);
 
         return col;
     }
@@ -166,7 +172,7 @@ export default class extends Controller {
     #onColumnClick(colDiv) {
         colDiv.addEventListener('click', e => {
             if(this.#selectedColumnIndex !== undefined){
-                document.querySelector(`.step-column[data-step-index="${this.#selectedColumnIndex}"]`)
+                document.querySelector(`.step-column-links[data-step-index="${this.#selectedColumnIndex}"]`)
                     .classList.remove('step-column-selected');
             }
             this.#selectedColumnIndex = colDiv.dataset.stepIndex;
