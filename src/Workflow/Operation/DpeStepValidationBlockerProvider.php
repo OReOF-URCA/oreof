@@ -23,12 +23,12 @@ final readonly class DpeStepValidationBlockerProvider implements OperationBlocke
 
     public function supports(object $subject, WorkflowOperation $operation): bool
     {
-        $targetPlace = $operation->primaryTargetPlace();
+        $validationStep = $this->resolveValidationStep($operation);
 
         return $subject instanceof DpeParcours
             && 'dpeParcours' === $operation->workflowName
-            && null !== $targetPlace
-            && $this->validationService->hasValidatorForStep($targetPlace);
+            && null !== $validationStep
+            && $this->validationService->hasValidatorForStep($validationStep);
     }
 
     public function getBlockers(
@@ -40,12 +40,12 @@ final readonly class DpeStepValidationBlockerProvider implements OperationBlocke
             throw new \InvalidArgumentException(sprintf('Expected %s, got %s.', DpeParcours::class, get_debug_type($subject)));
         }
 
-        $targetPlace = $operation->primaryTargetPlace();
-        if (null === $targetPlace) {
+        $validationStep = $this->resolveValidationStep($operation);
+        if (null === $validationStep) {
             return;
         }
 
-        $result = $this->validationService->validateForStep($subject, $targetPlace);
+        $result = $this->validationService->validateForStep($subject, $validationStep);
 
         foreach ($result->getErrors() as $error) {
             yield new OperationBlocker(
@@ -66,5 +66,17 @@ final readonly class DpeStepValidationBlockerProvider implements OperationBlocke
                 parameters: $warning->getParameters(),
             );
         }
+    }
+
+    private function resolveValidationStep(WorkflowOperation $operation): ?string
+    {
+        $configuration = $operation->metadata['validation'] ?? null;
+        if (!is_array($configuration) || false === ($configuration['enabled'] ?? true)) {
+            return null;
+        }
+
+        $step = $configuration['step'] ?? null;
+
+        return is_string($step) && '' !== trim($step) ? $step : null;
     }
 }

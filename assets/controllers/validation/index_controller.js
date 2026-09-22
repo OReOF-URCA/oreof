@@ -117,6 +117,28 @@ export default class extends Controller {
     }
   }
 
+  async submitChangeRfLot(event) {
+    event.preventDefault()
+
+    const form = event.currentTarget
+    const response = await fetch(form.action, {
+      method: form.method,
+      body: new FormData(form),
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+    const data = await response.json()
+
+    if (data.success) {
+      callOut(data.message || 'Demandes traitées', 'success')
+      window.location.reload()
+      return
+    }
+
+    callOut(data.message || 'Aucune demande n’a été traitée', 'danger')
+  }
+
   async valide_fiche(event) {
     const liste = document.querySelectorAll('.check-all:checked')
     if (liste.length === 0) {

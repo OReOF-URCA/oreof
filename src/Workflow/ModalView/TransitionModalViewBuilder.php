@@ -11,6 +11,8 @@
 namespace App\Workflow\ModalView;
 
 use App\Entity\DpeParcours;
+use App\Workflow\Service\ValidationService;
+use App\Workflow\Validator\ValidationCheck;
 use Dannebicque\WorkflowOperationsBundle\Model\BlockerSeverity;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationStatus;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
@@ -23,6 +25,7 @@ final class TransitionModalViewBuilder
         #[Target('dpeParcours')]
         private readonly WorkflowInterface $dpeParcoursWorkflow,
         private readonly WorkflowOperationInspector $operationInspector,
+        private readonly ValidationService $validationService,
     )
     {
     }
@@ -36,7 +39,12 @@ final class TransitionModalViewBuilder
         );
         $blockers = $inspection->blockers;
 
-        if (OperationStatus::Ready === $inspection->status && 0 === count($blockers) && !isset($rawMeta['view'])) {
+        $validation = is_array($rawMeta['validation'] ?? null) ? $rawMeta['validation'] : [];
+        $forceReport = isset($rawMeta['view'])
+            || isset($validation['view'])
+            || true === ($validation['display'] ?? false);
+
+        if (OperationStatus::Ready === $inspection->status && 0 === count($blockers) && !$forceReport) {
             return null;
         }
 
@@ -73,10 +81,20 @@ final class TransitionModalViewBuilder
             ];
         }
 
+        $checks = [];
+        $validationStep = $validation['step'] ?? null;
+        if (is_string($validationStep) && $this->validationService->hasValidatorForStep($validationStep)) {
+            $checks = array_map(
+                static fn(ValidationCheck $check): array => $check->toArray(),
+                $this->validationService->validateForStep($dpeParcours, $validationStep)->getChecks(),
+            );
+        }
+
         return new TransitionModalView(
             mode: 'report',
             canSubmit: $inspection->canExecute(),
             messages: $messages,
+            checks: $checks,
         );
     }
 }

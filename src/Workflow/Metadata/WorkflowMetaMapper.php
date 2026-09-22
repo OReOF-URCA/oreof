@@ -26,6 +26,10 @@ final class WorkflowMetaMapper
             $form = $this->mapForm($meta['form'], $label);
         }
 
+        $validation = is_array($meta['validation'] ?? null) ? $meta['validation'] : [];
+        $viewTemplate = $validation['view'] ?? $meta['view'] ?? null;
+        $validationStep = $validation['step'] ?? null;
+
         return new WorkflowTransitionMetaDto(
             label: $label,
             description: $description,
@@ -35,6 +39,8 @@ final class WorkflowMetaMapper
             recipients: $recipients,
             handlerCode: $handler,
             form: $form,
+            viewTemplate: is_string($viewTemplate) && '' !== trim($viewTemplate) ? $viewTemplate : null,
+            validationStep: is_string($validationStep) && '' !== trim($validationStep) ? $validationStep : null,
         );
     }
 
@@ -43,6 +49,13 @@ final class WorkflowMetaMapper
         $title = (string)($form['title'] ?? $fallbackTitle);
         $submitLabel = (string)($form['submit_label'] ?? 'Valider');
         $formId = (string)($form['id'] ?? 'modal_form');
+
+        $formType = $form['type'] ?? null;
+        if (!is_string($formType) || '' === trim($formType)) {
+            $formType = null;
+        }
+
+        $formOptions = is_array($form['options'] ?? null) ? $form['options'] : [];
 
         $fieldsRaw = $form['fields'] ?? [];
         if (!\is_array($fieldsRaw)) {
@@ -69,11 +82,19 @@ final class WorkflowMetaMapper
             );
         }
 
+        $rulesRaw = $form['rules'] ?? [];
+        $rules = is_array($rulesRaw)
+            ? array_values(array_filter($rulesRaw, static fn (mixed $rule): bool => is_array($rule)))
+            : [];
+
         return new ModalFormMetaDto(
             title: $title,
             submitLabel: $submitLabel,
             formId: $formId,
             fields: $fields,
+            rules: $rules,
+            formType: $formType,
+            options: $formOptions,
         );
     }
 }

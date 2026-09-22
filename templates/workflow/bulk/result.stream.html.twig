@@ -1,0 +1,66 @@
+{% set processedCount = result.processedCount() %}
+{% set rejectedCount = result.rejectedCount() %}
+
+{{ include('_ui/_toast.stream.html.twig', {
+    message: rejectedCount == 0
+        ? processedCount ~ ' élément(s) traité(s).'
+        : processedCount ~ ' élément(s) traité(s), ' ~ rejectedCount ~ ' rejeté(s).',
+    undo: null,
+    type: rejectedCount == 0 ? 'success' : (processedCount > 0 ? 'warning' : 'danger')
+}) }}
+
+<turbo-stream action="update" target="modal_title">
+    <template>
+        <div class="app-modal-title">Traitement en lot terminé</div>
+        <div class="app-modal-subtitle">{{ processedCount }} traité{{ processedCount > 1 ? 's' : '' }}, {{ rejectedCount }} rejeté{{ rejectedCount > 1 ? 's' : '' }}</div>
+    </template>
+</turbo-stream>
+
+<turbo-stream action="update" target="modal_body">
+    <template>
+        <div class="space-y-4">
+            {% if result.processed is not empty %}
+                <section>
+                    <h3 class="mb-2 font-semibold text-success-700 dark:text-success-300">Éléments traités</h3>
+                    <ul class="max-h-52 divide-y divide-secondary-200 overflow-auto rounded-xl border border-secondary-200 text-sm dark:divide-secondary-700 dark:border-secondary-700">
+                        {% for item in result.processed %}
+                            <li class="px-3 py-2">{{ item.label }}</li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
+
+            {% if result.rejected is not empty %}
+                <section>
+                    <h3 class="mb-2 font-semibold text-danger-700 dark:text-danger-300">Éléments non traités</h3>
+                    <ul class="max-h-64 divide-y divide-danger-200 overflow-auto rounded-xl border border-danger-200 text-sm dark:divide-danger-800 dark:border-danger-800">
+                        {% for item in result.rejected %}
+                            <li class="px-3 py-2">
+                                <p class="font-medium">{{ item.label }}</p>
+                                <p class="mt-1 text-xs text-danger-700 dark:text-danger-300">{{ item.message }}</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
+        </div>
+    </template>
+</turbo-stream>
+
+<turbo-stream action="update" target="modal_footer">
+    <template>
+        <div class="app-modal-footer-actions">
+            <button type="button" class="app-modal-footer-btn app-modal-footer-btn--secondary" data-action="modalturbo#close">Fermer</button>
+        </div>
+    </template>
+</turbo-stream>
+
+<turbo-stream action="append" target="modal_control">
+    <template>
+        <script data-turbo-eval="true">
+          window.dispatchEvent(new CustomEvent('validation:bulk-success', {
+            detail: { count: {{ processedCount }}, rejected: {{ rejectedCount }} }
+          }))
+        </script>
+    </template>
+</turbo-stream>

@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Classes\GetDpeParcours;
 use App\Classes\GetHistorique;
 use App\Classes\JsonReponse;
-use App\Classes\Process\ParcoursProcess;
 use App\Classes\ValidationProcess;
+use App\Classes\verif\ParcoursValide;
+use App\DTO\ProcessData;
 use App\DTO\TranslatableKey;
+use App\Entity\DpeParcours;
 use App\Entity\FicheMatiere;
 use App\Entity\Formation;
 use App\Entity\Historique;
@@ -16,22 +18,26 @@ use App\Entity\HistoriqueFormation;
 use App\Entity\HistoriqueParcours;
 use App\Entity\Parcours;
 use App\Events\HistoriqueFormationEditEvent;
+use App\Events\HistoriqueParcoursEditEvent;
 use App\Twig\HistoriqueExtension;
 use App\Utils\Tools;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Workflow\WorkflowInterface;
 use Symfony\UX\Turbo\TurboStreamResponse;
 
 class HistoriqueController extends BaseController
 {
     public function __construct(
         private readonly ValidationProcess $validationProcess,
-        private readonly ParcoursProcess $parcoursProcess,
+        #[Target('dpeParcours')]
+        private readonly WorkflowInterface $dpeParcoursWorkflow,
     ) {
     }
 
@@ -143,7 +149,7 @@ class HistoriqueController extends BaseController
             if ($parcours !== null) {
                 $objet = GetDpeParcours::getFromParcours($parcours);
                 if ($objet !== null) {
-                    $processData = $this->parcoursProcess->etatParcours($objet, $process);
+                    $processData = $this->buildProcessData($objet, $process);
 
                     if ($etape === 'cfvu') {
                         $laisserPasser = $getHistorique->getHistoriqueParcoursLastStep($objet, 'conseil');
@@ -154,7 +160,10 @@ class HistoriqueController extends BaseController
 
         if ($request->isMethod('POST')) {
             if ($historique instanceof HistoriqueParcours) {
-                $this->parcoursProcess->editParcours($historique, $this->getUser(), $etape, $request);
+                $eventDispatcher->dispatch(
+                    new HistoriqueParcoursEditEvent($historique, $this->getUser(), $etape, 'valide', $request),
+                    HistoriqueParcoursEditEvent::EDIT_HISTORIQUE_PARCOURS,
+                );
             } elseif ($historique instanceof HistoriqueFormation) {
                 $histoEvent = new HistoriqueFormationEditEvent($historique, $this->getUser(), $etape, 'valide', $request);
                 $eventDispatcher->dispatch($histoEvent, HistoriqueFormationEditEvent::EDIT_HISTORIQUE_FORMATION);
@@ -301,6 +310,25 @@ class HistoriqueController extends BaseController
         krsort($historiques);
 
         return $historiques;
+    }
+
+    private function buildProcessData(DpeParcours $dpeParcours, array $process): ProcessData
+    {
+        $processData = new ProcessData();
+        $processData->definition = $this->dpeParcoursWorkflow->getDefinition();
+        $processData->place = $this->dpeParcoursWorkflow->getMarking($dpeParcours);
+        $processData->transitions = $this->dpeParcoursWorkflow->getEnabledTransitions($dpeParcours);
+
+        $parcours = $dpeParcours->getParcours();
+        $formation = $parcours?->getFormation();
+        if (array_key_exists('check', $process) && null !== $parcours && null !== $formation) {
+            $parcoursValide = new ParcoursValide($parcours, $formation->getTypeDiplome());
+            $processData->validation['parcours'] = $parcoursValide->valideParcours();
+            $processData->validation['fiches'] = $parcoursValide->valideFichesParcours($process);
+            $processData->valid = $parcoursValide->isParcoursValide();
+        }
+
+        return $processData;
     }
 
     private function getHistoriquesParcours(Parcours $parcours): array

@@ -1,0 +1,13 @@
+{{ component('alerte', {
+    type: 'info',
+    message: 'Les données saisies seront appliquées individuellement à tous les éléments sélectionnés. Les contrôles et autorisations du workflow restent exécutés pour chaque élément.'
+}) }}
+
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+{{ form_start(form, {
+    action: path('workflow_bulk_apply', {workflowName: workflowName, transition: transition}),
+    attr: {'data-bulk-action': 'true'}
+}) }}
+    <input type="hidden" name="ids" value="{{ selectedIds }}">
+    {{ form_widget(form) }}
+{{ form_end(form) }}

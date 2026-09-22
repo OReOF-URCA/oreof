@@ -25,7 +25,7 @@
                                         size="sm"
                                         tooltip="{{ ('title.validation.' ~ prefix ~ '.' ~ keyTrans)|trans({}, 'process') }}"
                                         dataAction="click->modalturbo#open click->validation--bulk-actions#open"
-                                        data-validation--bulk-actions-url-param="{{ path('parcours_process_apply_lot', {transition: keyTrans}) }}"
+                                        data-validation--bulk-actions-url-param="{{ path('workflow_bulk_apply', {workflowName: 'dpeParcours', transition: keyTrans}) }}"
                                         data-validation--bulk-actions-label-param="{{ ('btn.validation.' ~ prefix ~ '.' ~ keyTrans)|trans({}, 'process') }}"
                                         data-validation--bulk-actions-form-param="{{ hasMetaForm ? 'true' : 'false' }}"
                                         data-validation--bulk-actions-target="trigger"
@@ -49,4 +49,3 @@
         </div>
     {% endif %}
 </section>
-

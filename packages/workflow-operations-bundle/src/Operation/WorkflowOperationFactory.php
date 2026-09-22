@@ -16,12 +16,21 @@ final class WorkflowOperationFactory
                 continue;
             }
 
+            $workflowMetadata = $workflow->getMetadataStore()->getWorkflowMetadata();
+            $defaultMetadata = $workflowMetadata['operation_defaults'] ?? [];
+            if (!is_array($defaultMetadata)) {
+                $defaultMetadata = [];
+            }
+
             return new WorkflowOperation(
                 workflowName: $workflow->getName(),
                 transitionName: $transition->getName(),
                 fromPlaces: $transition->getFroms(),
                 toPlaces: $transition->getTos(),
-                metadata: $workflow->getMetadataStore()->getTransitionMetadata($transition),
+                metadata: array_replace_recursive(
+                    $defaultMetadata,
+                    $workflow->getMetadataStore()->getTransitionMetadata($transition),
+                ),
             );
         }
 

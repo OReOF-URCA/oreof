@@ -16,11 +16,13 @@ final class ValidationResult
      * @param bool $isValid Indique si la validation est réussie
      * @param array<ValidationError> $errors Liste des erreurs bloquantes
      * @param array<ValidationWarning> $warnings Liste des avertissements non-bloquants
+     * @param array<ValidationCheck> $checks Groupes de contrôles exécutés
      */
     public function __construct(
         private readonly bool  $isValid,
         private readonly array $errors = [],
-        private readonly array $warnings = []
+        private readonly array $warnings = [],
+        private readonly array $checks = [],
     )
     {
     }
@@ -30,9 +32,9 @@ final class ValidationResult
      *
      * @param array<ValidationWarning> $warnings Avertissements optionnels
      */
-    public static function success(array $warnings = []): self
+    public static function success(array $warnings = [], array $checks = []): self
     {
-        return new self(true, [], $warnings);
+        return new self(true, [], $warnings, $checks);
     }
 
     /**
@@ -41,9 +43,9 @@ final class ValidationResult
      * @param array<ValidationError> $errors Liste des erreurs
      * @param array<ValidationWarning> $warnings Avertissements optionnels
      */
-    public static function failure(array $errors, array $warnings = []): self
+    public static function failure(array $errors, array $warnings = [], array $checks = []): self
     {
-        return new self(false, $errors, $warnings);
+        return new self(false, $errors, $warnings, $checks);
     }
 
     /**
@@ -88,7 +90,8 @@ final class ValidationResult
         return new self(
             $this->isValid && $other->isValid(),
             array_merge($this->errors, $other->getErrors()),
-            array_merge($this->warnings, $other->getWarnings())
+            array_merge($this->warnings, $other->getWarnings()),
+            array_merge($this->checks, $other->getChecks()),
         );
     }
 
@@ -120,10 +123,16 @@ final class ValidationResult
         return $this->warnings;
     }
 
+    /** @return array<ValidationCheck> */
+    public function getChecks(): array
+    {
+        return $this->checks;
+    }
+
     /**
      * Convertit le résultat en tableau pour sérialisation.
      *
-     * @return array{isValid: bool, errors: array, warnings: array}
+     * @return array{isValid: bool, errors: array, warnings: array, checks: array}
      */
     public function toArray(): array
     {
@@ -131,6 +140,7 @@ final class ValidationResult
             'isValid' => $this->isValid,
             'errors' => array_map(fn(ValidationError $e) => $e->toArray(), $this->errors),
             'warnings' => array_map(fn(ValidationWarning $w) => $w->toArray(), $this->warnings),
+            'checks' => array_map(fn(ValidationCheck $check) => $check->toArray(), $this->checks),
         ];
     }
 }

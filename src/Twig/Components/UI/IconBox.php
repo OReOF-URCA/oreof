@@ -23,7 +23,7 @@ class IconBox
 
     public function getResolvedIcon(): string
     {
-        if ($this->icon !== null) {
+        if ($this->icon !== null && trim($this->icon) !== '') {
             return $this->icon;
         }
 

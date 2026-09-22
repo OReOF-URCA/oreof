@@ -1,0 +1,107 @@
+{# Détection des dossiers stagnants (1A) #}
+<div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-2xl shadow-sm overflow-hidden space-y-4">
+    <div class="p-5 border-b border-secondary-200 dark:border-secondary-700 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph ph-warning-octagon text-rose-500"></i>
+                Dossiers Stagnants & Alertes de Délais (SLA)
+            </h3>
+            <p class="text-xs text-slate-500">Parcours bloqués à une étape intermédiaire depuis plus de <span class="font-bold text-slate-700 dark:text-slate-300">{{ thresholdDays }} jours</span> sans évolution.</p>
+        </div>
+
+        {# Sélecteur de seuil de jours #}
+        <div class="flex items-center gap-2 text-xs">
+            <span class="text-slate-500">Seuil :</span>
+            <div class="inline-flex rounded-lg border border-secondary-200 dark:border-secondary-700 bg-surface p-0.5">
+                {% for days in [7, 15, 30, 45] %}
+                    <a href="{{ path('app_admin_pilotage_campagne_index', {campagne_id: selectedCampagne.id, threshold: days}) }}"
+                       class="px-2.5 py-1 rounded-md text-xs font-semibold transition {{ thresholdDays == days ? 'bg-primary text-white' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900' }}">
+                        {{ days }}j
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% if slaData.stagnantDossiers|length > 0 %}
+        <div class="overflow-x-auto px-4 pb-4">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-100/70 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-semibold border-b border-secondary-200 dark:border-secondary-700">
+                        <th class="py-3 px-4">Parcours & Formation</th>
+                        <th class="py-3 px-4">Composante</th>
+                        <th class="py-3 px-4">État Actuel</th>
+                        <th class="py-3 px-4 text-center">Durée Stagnation</th>
+                        <th class="py-3 px-4">Dernier Mouvement</th>
+                        <th class="py-3 px-4">Contact / Responsable</th>
+                        <th class="py-3 px-4 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800 text-slate-700 dark:text-slate-300">
+                    {% for item in slaData.stagnantDossiers %}
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                            <td class="py-3.5 px-4">
+                                <div class="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                                    {{ item.parcours.libelle }}
+                                </div>
+                                <span class="text-[11px] text-slate-500">
+                                    {{ item.formation.libelle|default('-') }}
+                                </span>
+                            </td>
+
+                            <td class="py-3.5 px-4">
+                                <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-semibold">
+                                    {{ item.composante.sigle|default(item.composante.libelle|default('-')) }}
+                                </span>
+                            </td>
+
+                            <td class="py-3.5 px-4">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-50 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                                    {{ item.stateLabel }}
+                                </span>
+                            </td>
+
+                            <td class="py-3.5 px-4 text-center">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold {% if item.severity == 'critical' %}bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-800 animate-pulse{% else %}bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800{% endif %}">
+                                    <i class="ph ph-clock mr-1"></i>
+                                    {{ item.daysInState }} jours
+                                </span>
+                            </td>
+
+                            <td class="py-3.5 px-4 text-slate-500 text-[11px]">
+                                {{ item.lastUpdate|date('d/m/Y') }}
+                            </td>
+
+                            <td class="py-3.5 px-4">
+                                {% if item.responsable %}
+                                    <div class="font-medium text-slate-900 dark:text-slate-100">
+                                        {{ item.responsable.prenom }} {{ item.responsable.nom }}
+                                    </div>
+                                    <a href="mailto:{{ item.responsable.email }}" class="text-[11px] text-primary hover:underline flex items-center gap-1">
+                                        <i class="ph ph-envelope-simple"></i> {{ item.responsable.email }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-slate-400 italic">Non assigné</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="py-3.5 px-4 text-right">
+                                <a href="{{ path('app_parcours_show', {id: item.parcours.id}) }}"
+                                   target="_blank"
+                                   class="inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-primary hover:text-white transition">
+                                    Voir <i class="ph ph-arrow-square-out ml-1"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="p-12 text-center text-slate-400 space-y-2">
+            <i class="ph ph-check-circle text-4xl text-emerald-500"></i>
+            <h4 class="font-bold text-slate-700 dark:text-slate-300 text-sm">Aucun dossier stagnant détecté !</h4>
+            <p class="text-xs">Tous les parcours de la campagne ont évolué il y a moins de {{ thresholdDays }} jours.</p>
+        </div>
+    {% endif %}
+</div>

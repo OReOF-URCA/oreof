@@ -14,13 +14,49 @@ import { Controller } from '@hotwired/stimulus'
 export default class extends Controller {
   static targets = ['content']
 
-  toggle () {
-    this.contentTarget.classList.toggle('hidden')
+  connect () {
+    this.timeout = null
+  }
+
+  disconnect () {
+    if (this.timeout) {
+      clearTimeout(this.timeout)
+    }
+  }
+
+  open () {
+    if (this.timeout) {
+      clearTimeout(this.timeout)
+      this.timeout = null
+    }
+    if (this.hasContentTarget) {
+      this.contentTarget.classList.remove('hidden')
+    }
   }
 
   close (event) {
-    if (!this.element.contains(event.target)) {
-      this.contentTarget.classList.add('hidden')
+    if (event && event.type === 'mouseleave') {
+      this.timeout = setTimeout(() => {
+        if (this.hasContentTarget) {
+          this.contentTarget.classList.add('hidden')
+        }
+      }, 150)
+      return
+    }
+
+    if (!event || !this.element.contains(event.target)) {
+      if (this.timeout) {
+        clearTimeout(this.timeout)
+      }
+      if (this.hasContentTarget) {
+        this.contentTarget.classList.add('hidden')
+      }
+    }
+  }
+
+  toggle () {
+    if (this.hasContentTarget) {
+      this.contentTarget.classList.toggle('hidden')
     }
   }
 

@@ -5,6 +5,7 @@ namespace App\Twig\Components;
 use App\Classes\ValidationProcessChangeRf;
 use App\Entity\ChangeRf;
 use App\Entity\Formation;
+use App\Repository\ChangeRfRepository;
 use App\Repository\HistoriqueFormationRepository;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationBlocker;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationStatus;
@@ -27,6 +28,7 @@ final class ChangeRfState
 
     public function __construct(
         private readonly HistoriqueFormationRepository $historiqueFormationRepository,
+        private readonly ChangeRfRepository $changeRfRepository,
         private readonly WorkflowInterface $changeRfWorkflow,
         private readonly ValidationProcessChangeRf $validationProcessChangeRf,
         private readonly WorkflowOperationInspector $operationInspector,
@@ -37,8 +39,10 @@ final class ChangeRfState
     #[PostMount]
     public function getDemandes(): void
     {
-        foreach ($this->formation->getChangeRves() as $changeRf) {
-            if (!$this->changeRfWorkflow->getMarkingStore()->getMarking($changeRf)->has('effectuee')) {
+        $this->demandes = [];
+
+        foreach ($this->changeRfRepository->findBy(['formation' => $this->formation], ['dateDemande' => 'DESC']) as $changeRf) {
+            if (!$this->changeRfWorkflow->getMarking($changeRf)->has('effectuee')) {
                 $this->demandes[] = $changeRf;
             }
         }

@@ -12,7 +12,6 @@ use App\Enums\EtatChangeRfEnum;
 use App\Enums\TypeRfEnum;
 use App\Exception\FileUploadException;
 use App\Form\ChangeRfFormationType;
-use App\Form\ChangeRfValidationType;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
 use App\Service\DataTableBuilder;
@@ -20,6 +19,7 @@ use App\Service\SecureUploadService;
 use App\Utils\TurboStreamResponseFactory;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -28,7 +28,8 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
 use App\DTO\TranslatableKey;
 use Dannebicque\WorkflowOperationsBundle\Exception\OperationNotExecutableException;
-use Dannebicque\WorkflowOperationsBundle\Model\OperationContext;
+use Dannebicque\WorkflowOperationsBundle\Operation\OperationContextNormalizer;
+use Dannebicque\WorkflowOperationsBundle\Operation\OperationFormResolver;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
 
@@ -42,6 +43,9 @@ class FormationResponsableController extends BaseController
         private readonly SecureUploadService $secureUploadService,
         private readonly WorkflowOperationExecutor $operationExecutor,
         private readonly WorkflowOperationInspector $operationInspector,
+        private readonly OperationContextNormalizer $operationContextNormalizer,
+        private readonly OperationFormResolver $operationFormResolver,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
@@ -89,14 +93,14 @@ class FormationResponsableController extends BaseController
 
             $newRf = new \App\Entity\ChangeRf();
             $newRf->setCampagneCollecte($this->getCampagneCollecte());
-            $newRf->setFormation($formation);
+            $formation->addChangeRf($newRf);
             $newRf->setNouveauResponsable($user);
             $newRf->setTypeRf($datas->getTypeRf());
             $newRf->setDatePriseFonction($datas->getDatePriseFonction());
             $newRf->setCommentaire($commentaire);
             $newRf->setDateDemande(new DateTime());
-            //initialiser le marking du workflow
-            $this->changeRfWorkflow->apply($newRf, 'effectuer_demande');
+            // Une nouvelle demande est immédiatement soumise au conseil.
+            $newRf->setEtatDemande(['soumis_conseil' => 1]);
             $newRf->setAncienResponsable($oldResp);
 
             $this->entityManager->persist($newRf);
@@ -137,7 +141,7 @@ class FormationResponsableController extends BaseController
         $this->entityManager->remove($demande);
         $this->entityManager->flush();
 
-        if ($this->isTurbo()) {
+        if ($this->isTurboFrameRequest()) {
             return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
                 'toastMessage' => 'La demande de changement de (co-)responsable de formation a bien été supprimée.',
                 'formation' => $formation,
@@ -278,7 +282,7 @@ class FormationResponsableController extends BaseController
         ], 'synthese_changement_rf_'.(new DateTime())->format('d-m-Y_H-i-s'));
     }
 
-    #[Route('/formation/change-responsable/validation-demande/{transition}/{etape}/{demande}',
+    #[Route('/formation/change-responsable/validation-demande/valider/{transition}/{etape}/{demande}',
         name: 'app_validation_change_rf_valider'
     )]
     public function validationChangeRf(
@@ -293,15 +297,19 @@ class FormationResponsableController extends BaseController
             return JsonReponse::error('Demande non trouvée');
         }
 
-        if (!$this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition)->canExecute()) {
-            return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
+        $inspection = $this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition);
+        if (!$inspection->canExecute()) {
+            return $this->operationErrorResponse(
+                $turboStream,
+                'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.',
+            );
         }
 
         $meta = $this->validationProcess->getMetaFromTransition($transition);
         $process = $this->validationProcess->getEtape($etape);
         $processData = $this->changeRfProcess->etatChangeRf($demande, $process);
 
-        $form = $this->createForm(ChangeRfValidationType::class, null, [
+        $form = $this->createForm($this->operationFormResolver->resolveRequired($meta)->type, null, [
             'meta' => $meta,
             'transition' => $transition,
             'process' => $process,
@@ -317,66 +325,74 @@ class FormationResponsableController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //upload
+            $formData = (array) $form->getData();
             $fileName = '';
             $originalFileName = null;
-            if ($request->files->has('file') && $request->files->get('file') !== null) {
+            $uploadedFile = $form->has('file') ? $form->get('file')->getData() : null;
+            if ($uploadedFile !== null) {
                 try {
-                    $upload = $this->secureUploadService->uploadFromRequest($request, 'file', 'conseils');
+                    $upload = $this->secureUploadService->upload($uploadedFile, 'conseils');
                 } catch (FileUploadException $exception) {
                     return JsonReponse::error($exception->getPublicMessage());
                 }
 
-                if ($upload !== null) {
-                    $fileName = $upload->getStoredFilename();
-                    $originalFileName = $upload->getOriginalFilename();
-                }
+                $fileName = $upload->getStoredFilename();
+                $originalFileName = $upload->getOriginalFilename();
+            }
+            unset($formData['file']);
+
+            $user = $this->getUser();
+            if (!$user instanceof UserInterface) {
+                throw new AccessDeniedException('Un utilisateur authentifié est requis.');
             }
 
-            // Première transition changeRf pilotée de bout en bout par le bundle.
-            if ('valider_conseil' === $transition) {
-                $user = $this->getUser();
-                if (!$user instanceof UserInterface) {
-                    throw new AccessDeniedException('Un utilisateur authentifié est requis.');
-                }
+            $previousPlace = array_key_first($this->changeRfWorkflow->getMarking($demande)->getPlaces());
 
-                $previousPlace = array_key_first($this->changeRfWorkflow->getMarking($demande)->getPlaces());
-
-                try {
-                    $this->operationExecutor->execute(
-                        $this->changeRfWorkflow,
-                        $demande,
-                        $transition,
-                        new OperationContext(
-                            actor: $user,
-                            input: (array) $form->getData(),
-                        ),
-                    );
-                } catch (OperationNotExecutableException) {
-                    return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
-                }
-
-                $response = $this->changeRfProcess->completeValidatedChangeRf(
+            try {
+                $this->operationExecutor->execute(
+                    $this->changeRfWorkflow,
                     $demande,
-                    $user,
-                    (string) $previousPlace,
-                    $request,
-                    $fileName,
-                    $originalFileName,
+                    $transition,
+                    $this->operationContextNormalizer->normalize(
+                        workflow: $this->changeRfWorkflow,
+                        transitionName: $transition,
+                        actor: $user,
+                        input: $formData,
+                    )->withRuntime([
+                        'previous_place' => (string) $previousPlace,
+                        'file_name' => $fileName,
+                        'original_file_name' => $originalFileName,
+                    ]),
                 );
-            } else {
-                //todo: gérer le cas du PV en attente post CFVU => Etat intermédiaire dans l'historique ? ou dans le process ?
-                $response = $this->changeRfProcess->valideChangeRf($demande, $this->getUser(), $transition, $request, $fileName, $originalFileName);
+            } catch (OperationNotExecutableException) {
+                return $this->operationErrorResponse($turboStream, 'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
+            } catch (\Throwable $exception) {
+                $this->logger->error('Échec de l’opération changeRf.', [
+                    'transition' => $transition,
+                    'demande' => $demande->getId(),
+                    'exception' => $exception,
+                ]);
+
+                return $this->operationErrorResponse($turboStream, 'La transition n’a pas pu être appliquée : '.$exception->getMessage());
             }
 
-            if ($this->isTurbo()) {
+            if ($this->isTurboFrameRequest()) {
                 return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
                     'toastMessage' => 'La demande a bien été validée.',
                     'formation' => $demande->getFormation(),
                 ]);
             }
 
-            return $response;
+            return JsonReponse::success('La demande a bien été validée.');
+        }
+
+        $status = $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK;
+        if ($form->isSubmitted()) {
+            $this->logger->warning('Formulaire de validation ChangeRf invalide.', [
+                'transition' => $transition,
+                'demande' => $demande->getId(),
+                'errors' => (string) $form->getErrors(true, false),
+            ]);
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -395,63 +411,12 @@ class FormationResponsableController extends BaseController
             '_ui/_footer_submit_cancel.html.twig',
             [
             ],
+            $status,
         );
     }
 
     #[Route(
-        '/formation/change-responsable/{key}-lot-confirme/{etape}/{transition}',
-        name: 'app_validation_change_rf_confirme_lot'
-    )]
-    public function validationLotChangeRf(
-        ChangeRfRepository $changeRfRepository,
-        Request $request,
-        string $etape,
-        string $key,
-        string $transition
-    ): Response {
-        if ($request->isMethod('POST')) {
-            $demandes = $request->request->get('demandes');
-            $demandes = explode(',', $demandes);
-            foreach ($demandes as $demandeId) {
-                $demande = $changeRfRepository->find($demandeId);
-                if ($demande !== null) {
-                    if (!$this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition)->canExecute()) {
-                        continue;
-                    }
-                    $this->changeRfProcess->valideChangeRf($demande, $this->getUser(), $transition, $request, '');
-                }
-            }
-
-            //todo: gérer le cas du PV en attente post CFVU => Etat intermédiaire dans l'historique ? ou dans le process ?
-        }
-
-        return $this->json([
-            'success' => true
-        ]);
-    }
-
-    #[Route('/formation/change-responsable/{key}-lot/{etape}/{transition}',
-        name: 'app_validation_change_rf_lot')]
-    public function transitionLotChangeRf(
-        ValidationProcessChangeRf $validationProcessChangeRf,
-        string                    $key,
-        string                    $etape,
-        string                    $transition
-    ): Response
-    {
-        //on récupère la transition concernée et sa configuration pour construire le formulaire
-        $metas = $this->validationProcess->getMetaFromTransition($transition);
-
-        return $this->render('formation_responsable/_lot.html.twig', [
-            'key' => $key,
-            'etape' => $etape,
-            'transition' => $transition,
-            'metas' => $metas,
-        ]);
-    }
-
-    #[Route(
-        '/formation/change-responsable/validation-demande/{transition}/{etape}/{demande}',
+        '/formation/change-responsable/validation-demande/reserver/{transition}/{etape}/{demande}',
         name: 'app_validation_change_rf_reserver'
     )]
     public function reserverChangeRf(
@@ -461,40 +426,92 @@ class FormationResponsableController extends BaseController
         \App\Entity\ChangeRf $demande,
         TurboStreamResponseFactory $turboStream,
     ): Response {
-
-        if ($demande === null) {
-            return JsonReponse::error('Demande non trouvée');
-        }
-
-        if (!$this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition)->canExecute()) {
-            return JsonReponse::error('Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
+        $inspection = $this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition);
+        if (!$inspection->canExecute()) {
+            return $this->operationErrorResponse($turboStream, 'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
         }
 
         $meta = $this->validationProcess->getMetaFromTransition($transition);
-
         $process = $this->validationProcess->getEtape($etape);
         $processData = $this->changeRfProcess->etatChangeRf($demande, $process);
-
-        if ($request->isMethod('POST')) {
-            $response = $this->changeRfProcess->reserveChangeRf($demande, $this->getUser(), $transition, $request);
-
-            if ($this->isTurbo()) {
-                return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
-                    'toastMessage' => 'La demande a bien été réservée.',
-                    'formation' => $demande->getFormation(),
-                ]);
-            }
-
-            return $response;
-        }
-
-        return $this->render('formation_responsable/_reserve.html.twig', [
-            'demande' => $demande,
-            'process' => $process,
-            'etape' => $etape,
-            'processData' => $processData ?? null,
+        $form = $this->createForm($this->operationFormResolver->resolveRequired($meta)->type, null, [
             'meta' => $meta,
             'transition' => $transition,
+            'process' => $process,
+            'processData' => $processData,
+            'action' => $this->generateUrl('app_validation_change_rf_reserver', [
+                'transition' => $transition,
+                'etape' => $etape,
+                'demande' => $demande->getId(),
+            ]),
+            'method' => 'POST',
         ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user = $this->getUser();
+            if (!$user instanceof UserInterface) {
+                throw new AccessDeniedException('Un utilisateur authentifié est requis.');
+            }
+
+            $formData = (array) $form->getData();
+            $previousPlace = array_key_first($this->changeRfWorkflow->getMarking($demande)->getPlaces());
+
+            try {
+                $context = $this->operationContextNormalizer->normalize(
+                    workflow: $this->changeRfWorkflow,
+                    transitionName: $transition,
+                    actor: $user,
+                    input: $formData,
+                )->withRuntime(['previous_place' => (string) $previousPlace]);
+                $this->operationExecutor->execute($this->changeRfWorkflow, $demande, $transition, $context);
+            } catch (OperationNotExecutableException) {
+                return $this->operationErrorResponse($turboStream, 'Cette opération n’est plus disponible ou vous n’êtes pas autorisé à l’exécuter.');
+            } catch (\Throwable $exception) {
+                $this->logger->error('Échec de l’opération changeRf.', [
+                    'transition' => $transition,
+                    'demande' => $demande->getId(),
+                    'exception' => $exception,
+                ]);
+
+                return $this->operationErrorResponse($turboStream, 'La transition n’a pas pu être appliquée : '.$exception->getMessage());
+            }
+
+            return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
+                'toastMessage' => 'La demande a bien été réservée.',
+                'formation' => $demande->getFormation(),
+            ]);
+        }
+
+        return $turboStream->streamOpenModalFromTemplates(
+            'Émettre une réserve',
+            null !== $demande->getFormation() ? 'Dans : formation '.$demande->getFormation()->getDisplay() : null,
+            'formation_responsable/_valide.html.twig',
+            [
+                'demande' => $demande,
+                'process' => $process,
+                'etape' => $etape,
+                'processData' => $processData,
+                'meta' => $meta,
+                'transition' => $transition,
+                'form' => $form->createView(),
+            ],
+            '_ui/_footer_submit_cancel.html.twig',
+            [],
+            $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK,
+        );
+    }
+
+    private function operationErrorResponse(TurboStreamResponseFactory $turboStream, string $message): Response
+    {
+        return $turboStream->streamOpenModalFromTemplates(
+            'Opération impossible',
+            null,
+            'formation_responsable/_operation_error.html.twig',
+            ['message' => $message],
+            '_ui/_footer_cancel.html.twig',
+            [],
+            Response::HTTP_UNPROCESSABLE_ENTITY,
+        );
     }
 }

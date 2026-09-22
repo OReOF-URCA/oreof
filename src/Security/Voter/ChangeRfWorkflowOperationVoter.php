@@ -36,7 +36,10 @@ final class ChangeRfWorkflowOperationVoter extends Voter
         \assert($subject instanceof OperationAuthorizationSubject);
         \assert($subject->subject instanceof ChangeRf);
 
-        if ($this->security->isGranted('ROLE_ADMIN')) {
+        if (
+            in_array('ROLE_ADMIN', $token->getRoleNames(), true)
+            || $this->security->isGranted('ROLE_ADMIN')
+        ) {
             return true;
         }
 

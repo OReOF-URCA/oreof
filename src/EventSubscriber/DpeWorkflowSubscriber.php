@@ -50,10 +50,7 @@ class DpeWorkflowSubscriber implements EventSubscriberInterface
             'data' => $data,
             'context' => $event->getContext() ?? [],
         ];
-        dump($event);
-        dump($context);
         $recipients = $this->recipients->resolveRecipients('dpeParcours', $transition->getName(), $data);
-        dump($recipients);
         $this->notifier->notify($recipients['recipients'], $eventKey, $this->dpeParcoursWorkflow->getName(), $context);
     }
 }

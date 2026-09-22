@@ -1,17 +1,36 @@
 framework:
     messenger:
-        # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
-        # failure_transport: failed
+        failure_transport: failed
 
         transports:
-            # https://symfony.com/doc/current/messenger.html#transport-configuration
-            async_export: '%env(MESSENGER_TRANSPORT_DSN)%'
-            # failed: 'doctrine://default?queue_name=failed'
-            # sync: 'sync://'
+            async_export:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 60000
+                    multiplier: 2
+                    max_delay: 900000
+            async_email:
+                dsn: 'doctrine://default?queue_name=emails'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 60000
+                    multiplier: 2
+                    max_delay: 900000
+            async_mccc_backup:
+                dsn: 'doctrine://default?queue_name=mccc_backup'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 60000
+                    multiplier: 2
+                    max_delay: 900000
+            failed: 'doctrine://default?queue_name=failed'
 
         routing:
-            # Route your messages to the transports
             'App\Message\Export': async_export
+            'App\Message\GenerateDpeMcccBackup': async_mccc_backup
+            'App\Message\ChangeRfWorkflowNotification': async_email
+            'App\Message\WorkflowEmailNotification': async_email
 
 # when@test:
 #    framework:

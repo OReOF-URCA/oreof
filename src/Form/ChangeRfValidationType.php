@@ -5,6 +5,7 @@ namespace App\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -21,12 +22,18 @@ class ChangeRfValidationType extends AbstractType
         $processData = $options['processData'] ?? null;
         $laisserPasserValue = $options['laisserPasser'] ?? null;
 
+        if ($options['bulk']) {
+            $builder->add('demandes', HiddenType::class, [
+                'data' => $options['demandes'],
+            ]);
+        }
+
         if (!empty($meta['hasDate'])) {
             $builder->add('date', DateType::class, [
                 'widget' => 'single_text',
                 'required' => true,
                 'constraints' => [
-                    new NotBlank(null, 'La date est obligatoire.'),
+                    new NotBlank(message: 'La date est obligatoire.'),
                 ],
                 'label' => 'valide.change_rf.date.' . $transition . '.label',
                 'help' => 'valide.change_rf.helps.date.help',
@@ -92,7 +99,7 @@ class ChangeRfValidationType extends AbstractType
             $builder->add('argumentaire', TextareaType::class, [
                 'required' => true,
                 'constraints' => [
-                    new NotBlank(['message' => 'L\'argumentaire est obligatoire.']),
+                    new NotBlank(message: 'L\'argumentaire est obligatoire.'),
                 ],
                 'label' => 'reserve.change_rf.argumentaire.label',
                 'help' => 'reserve.change_rf.helps.argumentaire.help',
@@ -113,12 +120,13 @@ class ChangeRfValidationType extends AbstractType
             'process' => null,
             'processData' => null,
             'laisserPasser' => null,
+            'bulk' => false,
+            'demandes' => '',
             'attr' => ['id' => 'modal_form'],
         ]);
+
+        $resolver->setAllowedTypes('bulk', 'bool');
+        $resolver->setAllowedTypes('demandes', 'string');
     }
 
-    public function getBlockPrefix(): string
-    {
-        return '';
-    }
 }

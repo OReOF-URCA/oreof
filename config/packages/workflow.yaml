@@ -8,6 +8,12 @@ framework:
         property: 'etatValidation'
       supports:
         - App\Entity\DpeParcours
+      metadata:
+        operation_defaults:
+          authorization:
+            attribute: 'DPE_WORKFLOW_TRANSITION'
+            subject: 'operation'
+            reason: 'workflow.authorization.dpe_transition.denied'
       initial_marking: 'initialisation_dpe'
       places:
         initialisation_dpe:
@@ -133,7 +139,6 @@ framework:
             button_class: 'success'
             button_icon: 'ph:play'
             type: valider
-            handler: "autoriser"
             form:
               fields: [ ]
         valider_parcours: # Soumettre du resp de parcours vers formation
@@ -141,6 +146,10 @@ framework:
           to: 'soumis_parcours'
           #guard: "service('App\\\\Workflow\\\\Service\\\\ValidationService').canTransition(subject, 'soumis_parcours')"
           metadata:
+            validation:
+              step: soumis_parcours
+              display: true
+              view: 'parcours_v2/process/_validation_apply.html.twig'
             recipients: [ 'RF', 'CoRF' ]
             titre_with_parcours: "Le parcours %%s de votre formation %%s a été soumis à validation"
             titre: 'Un parcours de votre formation %%s a été soumis à validation'
@@ -149,13 +158,16 @@ framework:
             icon: ph:check
             button_class: 'success'
             button_icon: 'mdi:paper-airplane-outline'
-            handler: "valider"
             form:
               fields: [ ]
         valider_rf:
           from: 'soumis_parcours'
           to: 'soumis_dpe_composante'
           metadata:
+            validation:
+              step: soumis_parcours
+              display: true
+              view: 'parcours_v2/process/_validation_apply.html.twig'
             recipients: [ 'DPE' ]
             titre_with_parcours: 'Le parcours %%s de la formation %%s a été validé par son responsable'
             titre: 'La formation %%s a été validée par son responsable'
@@ -164,7 +176,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
             form:
               fields: [ ]
         reserver_rf:
@@ -179,26 +190,26 @@ framework:
             #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
-            handler: "reserver_commentaire"
+            context:
+              aliases:
+                argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_dpe_composante:
           from: 'soumis_dpe_composante'
           to: 'soumis_conseil'
           #          guard: "service('App\\\\Workflow\\\\Service\\\\ValidationService').canTransition(subject, 'soumis_conseil')"
           metadata:
+            validation:
+              step: soumis_conseil
+              display: true
+              view: 'parcours_v2/process/_validation_apply.html.twig'
             recipients: [ 'RF', 'CoRF', 'RP', 'CoRP' ]
             type: valider
             #            btn: success
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
             form:
               fields: [ ]
         reserver_dpe_composante:
@@ -213,14 +224,11 @@ framework:
             #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
-            handler: "reserver_commentaire"
+            context:
+              aliases:
+                argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_conseil:
           from: 'soumis_conseil'
           to: 'soumis_central'
@@ -229,25 +237,13 @@ framework:
             titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a été validée par le conseil de la composante'
             titre: 'La fiche de la formation %%s a été validée par le conseil de la composante'
             type: valider
-            #            btn: success
-            hasDate: true
-            hasUpload: true
-            hasUploadNote: true
-            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider_conseil"
+            context:
+              aliases:
+                dateConseil: date
             form:
-              fields:
-                - name: dateConseil
-                  type: date
-                  required: true
-                - name: uploadPv #todo: vérifier nom, notamment dans le json pour cohérence v1
-                  type: file
-                - name: uploadArgumentaire #todo: vérifier nom, notamment dans le json pour cohérence v1
-                  type: file
-                - name: laissezPasser
-                  type: checkbox
+              type: 'App\Form\Workflow\ValiderConseilType'
 
         reserver_conseil:
           from: 'soumis_conseil'
@@ -261,21 +257,24 @@ framework:
             #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
-            handler: "reserver_conseil"
+            context:
+              aliases:
+                argumentaire: motif
+                dateConseil: date
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
-                - name: dateConseil
-                  type: date
+              type: 'App\Form\Workflow\ArgumentaireDateType'
+              options:
+                date_property: dateConseil
+                date_label: 'Date du conseil'
         valider_central:
           from: 'soumis_central'
           to: 'soumis_cfvu'
           #          guard: "service('App\\\\Workflow\\\\Service\\\\ValidationService').canTransition(subject, 'soumis_cfvu')"
           metadata:
+            validation:
+              step: soumis_cfvu
+              display: true
+              view: 'parcours_v2/process/_validation_apply.html.twig'
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a été validée par le SES'
             titre: 'La fiche de la formation %%s a été validée par le SES'
@@ -284,7 +283,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
             form:
               fields: [ ]
         reserver_central:
@@ -299,14 +297,11 @@ framework:
             #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
-            handler: "reserver_commentaire"
+            context:
+              aliases:
+                argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_publication_directe:
           from: 'soumis_central'
           to: 'valide_a_publier'
@@ -317,7 +312,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'flowbite:rocket-outline'
-            handler: "valider"
             form:
               fields: [ ]
         refuser_revoir_cfvu:
@@ -333,16 +327,15 @@ framework:
             #            icon: material-symbols:fact-check-outline-sharp
             button_class: 'warning'
             button_icon: 'material-symbols:fact-check-outline-sharp'
-            handler: "refuser_commentaire_date"
+            context:
+              aliases:
+                argumentaire: motif
+                dateCfvu: date
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
-                - name: dateCfvu
-                  type: date
+              type: 'App\Form\Workflow\ArgumentaireDateType'
+              options:
+                date_property: dateCfvu
+                date_label: 'Date de la CFVU'
         valider_reserve_cfvu:
           from: 'soumis_cfvu'
           to: 'soumis_dpe_composante_reserve_cfvu'
@@ -356,16 +349,15 @@ framework:
             display: false
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider_reserve_date"
+            context:
+              aliases:
+                argumentaire: motif
+                dateCfvu: date
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
-                - name: dateCfvu
-                  type: date
+              type: 'App\Form\Workflow\ArgumentaireDateType'
+              options:
+                date_property: dateCfvu
+                date_label: 'Date de la CFVU'
         transmetre_reserve_cfvu:
           from: 'soumis_dpe_composante_reserve_cfvu'
           to: 'soumis_central_reserve_cfvu'
@@ -376,14 +368,11 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider_commentaire"
+            context:
+              aliases:
+                argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_reserve_conseil_cfvu:
           from: 'soumis_cfvu'
           to: 'soumis_conseil_reserve' #todo mais on court-circuite le retour directement vers valider publicatio
@@ -397,7 +386,6 @@ framework:
             display: false
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
             form:
               fields: [ ]
         valider_reserve_central_cfvu:
@@ -413,7 +401,6 @@ framework:
             button_class: 'success'
             button_icon: 'ph:check'
             description: '--'
-            handler: "valider"
             form:
               fields: [ ]
         valider_cfvu:
@@ -429,11 +416,14 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'mdi:stamper'
-            handler: "valider_date"
+            context:
+              aliases:
+                dateConseil: date
             form:
-              fields:
-                - name: dateConseil
-                  type: date
+              type: 'App\Form\Workflow\WorkflowDateType'
+              options:
+                date_property: dateConseil
+                date_label: 'Date de la CFVU'
         valider_publication:
           from: 'valide_cfvu'
           to: 'valide_a_publier'
@@ -444,11 +434,14 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'flowbite:bullhorn-outline'
-            handler: "valider_date"
+            context:
+              aliases:
+                datePublication: date
             form:
-              fields:
-                - name: datePublication
-                  type: date
+              type: 'App\Form\Workflow\WorkflowDateType'
+              options:
+                date_property: datePublication
+                date_label: 'Date de publication'
         publier:
           from: 'valide_a_publier'
           to: 'publie'
@@ -459,7 +452,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:globe'
-            handler: "valider"
             form:
               fields: [ ]
         relancer_annee:
@@ -472,7 +464,6 @@ framework:
             #            icon: ph:check
             button_class: 'success' #todo: a voir...
             button_icon: 'ph:globe' #todo: a voir...
-            handler: "valider" #todo: a voir...
             form:
               fields: [ ]
         valider_tacite_composante:
@@ -485,7 +476,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
         reouvrir_tacite:
           from: 'tacite_reconduction'
           metadata:
@@ -493,7 +483,9 @@ framework:
             button_class: 'warning'
             button_icon: 'flowbite:undo-outline'
             description: 'Relancer le parcours pour la nouvelle année'
-            handler: "valider"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               fields: [ ]
         #        reouvrir_tacite:
@@ -526,19 +518,11 @@ framework:
             button_class: 'info'
             type: 'reouvrir'
             button_icon: 'flowbite:edit-outline'
-            handler: "reouvrir_mccc"
-            authorization:
-              attribute: 'DPE_WORKFLOW_TRANSITION'
-              subject: 'operation'
-              reason: 'workflow.authorization.reouvrir_mccc.denied'
+            context: &dpe_argumentaire_context
+              aliases:
+                argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         reouvrir_sans_cfvu:
           from: 'publie'
           to: 'en_cours_redaction_ss_cfvu'
@@ -549,17 +533,15 @@ framework:
             button_class: 'info'
             button_icon: 'icon:edit'
             type: 'reouvrir'
-            handler: "reouvrir_sans_cfvu"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               title: "Réouvrir sans passage en CFVU"
               submit_label: "Valider la demande"
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: false
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: false
 
 
         reouvrir_tacite_mccc:
@@ -572,19 +554,9 @@ framework:
             button_class: 'info'
             type: 'reouvrir'
             button_icon: 'flowbite:edit-outline'
-            handler: "reouvrir_mccc"
-            authorization:
-              attribute: 'DPE_WORKFLOW_TRANSITION'
-              subject: 'operation'
-              reason: 'workflow.authorization.reouvrir_mccc.denied'
+            context: *dpe_argumentaire_context
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         reouvrir_tacite_sans_cfvu:
           from: 'tacite_reconduction'
           to: 'en_cours_redaction_ss_cfvu'
@@ -595,17 +567,15 @@ framework:
             button_class: 'info'
             button_icon: 'icon:edit'
             type: 'reouvrir'
-            handler: "reouvrir_sans_cfvu"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               title: "Réouvrir sans passage en CFVU"
               submit_label: "Valider la demande"
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: false
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: false
 
         reouvrir_avant_publie:
           from: 'valide_a_publier'
@@ -617,17 +587,15 @@ framework:
             button_class: 'warning'
             button_icon: 'flowbite:undo-outline'
             type: 'reouvrir'
-            handler: "reouvrir_avant_publie"
+            context:
+              aliases:
+                argumentaire: motif
             form:
               title: "Réouvrir avant publication"
               submit_label: "Valider la demande"
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: false
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: false
 
         valider_ouverture_sans_cfvu:
           from: 'en_cours_redaction_ss_cfvu'
@@ -658,7 +626,6 @@ framework:
             description: 'Approuver les modifications et republier'
             button_class: 'success'
             button_icon: 'ph:check'
-            handler: "valider"
             form:
               fields: [ ]
         reserver_transmettre_ouverture_sans_cfvu:
@@ -675,8 +642,11 @@ framework:
             description: 'Réserves du SES'
             button_class: 'warning'
             button_icon: 'bi:exclamation-triangle'
-            requires_comment: true
-            comment_placeholder: 'Réserves du SES...'
+            context:
+              aliases:
+                argumentaire: motif
+            form:
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_transmettre_reserve_cfvu:
           from: 'soumis_central_reserve_cfvu'
           to: 'valide_cfvu'
@@ -697,6 +667,11 @@ framework:
             button_class: 'warning'
             button_icon: 'bi:exclamation-triangle'
             description: '--'
+            context:
+              aliases:
+                argumentaire: motif
+            form:
+              type: 'App\Form\Workflow\ArgumentaireType'
         valider_non_ouverture_ses:
           from: 'non_ouverture_ses'
           to: 'non_ouverture'
@@ -714,6 +689,12 @@ framework:
         property: 'etatFiche'
       supports:
         - App\Entity\FicheMatiere
+      metadata:
+        operation_defaults:
+          authorization:
+            attribute: 'FICHE_WORKFLOW_TRANSITION'
+            subject: 'operation'
+            reason: 'workflow.authorization.fiche_transition.denied'
       initial_marking: 'en_cours_redaction'
       places:
         'en_cours_redaction':
@@ -741,20 +722,22 @@ framework:
           from: 'en_cours_redaction'
           to: 'soumis_central'
           metadata:
+            validation:
+              display: true
             button_class: 'success'
             button_icon: 'ph:list-checks-fill'
             type: valider
-            handler: "autoriser_fiche"
             form:
               fields: [ ]
         valider_fiche_ses:
           from: 'soumis_central'
           to: 'valide_pour_publication'
           metadata:
+            validation:
+              display: true
             button_class: 'success'
             button_icon: 'mdi:stamper'
             type: valider
-            handler: "autoriser_fiche"
             form:
               fields: [ ]
         reserver_fiche_ses:
@@ -764,23 +747,20 @@ framework:
             type: reserver
             button_class: 'warning'
             button_icon: 'ph:check'
-            handler: "reserver_argumentaire_fiche"
+            context:
+              aliases:
+                argumentaire: motif
             form:
-              fields:
-                - name: argumentaire
-                  type: textarea
-                  required: true
-                  label: "Argumentaire"
-                  options:
-                    attr: { rows: 6 }
+              type: 'App\Form\Workflow\ArgumentaireType'
         publier:
           from: 'valide_pour_publication'
           to: 'publie'
           metadata:
+            validation:
+              display: true
             type: valider
             button_class: 'success'
             button_icon: 'mdi:stamper'
-            handler: "valider" #todo : un handler ici ?
             form:
               fields: [ ]
 
@@ -792,16 +772,15 @@ framework:
             button_icon: 'flowbite:edit-outline'
             type: valider
             description: 'Rouvrir la fiche pour modification'
-            handler: "rouvrir_fiche"
             form:
               fields: [ ]
         rouvrir_fiche_matiere_b:
           from: 'soumis_central'
           to: 'en_cours_redaction'
           metadata:
+            type: valider
             button_class: 'warning'
             button_icon: 'flowbite:edit-outline'
-            handler: "valider" #todo : un handler ici ?
             form:
               fields: [ ]
     changeRf:
@@ -811,11 +790,12 @@ framework:
         property: 'etatDemande'
       supports:
         - App\Entity\ChangeRf
-      initial_marking: 'demande_initialisee'
+      initial_marking: 'soumis_conseil'
       places:
+        # État conservé uniquement pour reprendre les anciennes demandes déjà enregistrées.
         demande_initialisee:
           metadata:
-            process: true
+            process: false
             label: 'validation.demande_initialisee'
             color: 'info'
             icon: 'mdi:people-check'
@@ -839,7 +819,7 @@ framework:
             color: 'success'
         attente_pv:
           metadata:
-            process: false
+            process: true
             label: 'validation.attente_pv'
             color: 'warning'
             icon: 'ph:hourglass'
@@ -851,7 +831,7 @@ framework:
             icon: 'ph:check'
         verification_pv:
           metadata:
-            process: false
+            process: true
             label: 'validation.verification_pv'
             color: 'warning'
             icon: 'ph:check'
@@ -872,6 +852,8 @@ framework:
               attribute: 'CHANGE_RF_WORKFLOW_TRANSITION'
               subject: 'operation'
               reason: 'workflow.authorization.change_rf.denied'
+            form: &change_rf_operation_form
+              type: 'App\Form\ChangeRfValidationType'
         valider_ses:
           from: 'soumis_ses'
           to: 'soumis_cfvu'
@@ -880,14 +862,20 @@ framework:
             btn: success
             icon: ph:check
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
         reserver_ses:
           from: 'soumis_ses'
-          to: 'demande_initialisee'
+          to: 'soumis_conseil'
           metadata:
             type: reserver
             btn: warning
             icon: material-symbols:fact-check-outline-sharp
+            hasArgumentaire: true
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
+            context: &change_rf_reserve_context
+              aliases:
+                argumentaire: motif
         valider_cfvu_avec_pv:
           from: 'soumis_cfvu'
           to: 'effectuee'
@@ -897,6 +885,7 @@ framework:
             icon: ph:check
             hasDate: true
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
         valider_cfvu_attente_pv:
           from: 'soumis_cfvu'
           to: 'attente_pv'
@@ -906,14 +895,19 @@ framework:
             icon: ph:check
             hasDate: true
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
         reserver_cfvu:
           from: 'soumis_cfvu'
-          to: 'demande_initialisee'
+          to: 'soumis_conseil'
           metadata:
             type: reserver
             btn: warning
             icon: material-symbols:fact-check-outline-sharp
+            hasArgumentaire: true
+            hasDate: true
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
+            context: *change_rf_reserve_context
         deposer_pv:
           from: 'attente_pv'
           to: 'verification_pv' #etape intermédiaire de contrôle
@@ -923,6 +917,7 @@ framework:
             icon: ph:check
             hasUpload: true
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
         valider_pv:
           from: 'verification_pv'
           to: 'effectuee'
@@ -931,6 +926,7 @@ framework:
             btn: success
             icon: ph:check
             authorization: *change_rf_authorization
+            form: *change_rf_operation_form
 
     dpeFormation:
       type: 'workflow'

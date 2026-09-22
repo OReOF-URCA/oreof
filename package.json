@@ -56,6 +56,8 @@
         "@popperjs/core": "^2.11.8",
         "@tailwindcss/postcss": "^4.2.4",
         "bootstrap": "^5.3.8",
+        "cytoscape": "^3.34.3",
+        "cytoscape-dagre": "^4.0.1",
         "postcss": "^8.5.13",
         "stimulus-use": "^0.52.3",
         "tailwindcss": "^4.2.4",

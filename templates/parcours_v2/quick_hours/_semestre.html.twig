@@ -1,0 +1,83 @@
+{% set refSem = referenceData.semestres[semestre.ordre] ?? null %}
+{% set refSemGlobal = refSem ? refSem.totalGlobal : 0 %}
+{% set curSemGlobal = semestre.heuresEctsSemestre ? semestre.heuresEctsSemestre.sommeSemestreTotalPresDist() : 0 %}
+{% set deltaSemGlobal = curSemGlobal - refSemGlobal %}
+
+<div class="mb-10" id="semestre-section-{{ semestre.ordre }}">
+    {# Barre de titre et totaux Sticky du Semestre #}
+    <div class="sticky top-[86px] z-20 bg-slate-100/95 backdrop-blur border border-slate-300/80 px-4 py-3 rounded-xl shadow-md mb-4 flex flex-wrap items-center justify-between gap-3 transition-all">
+        <div class="flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-sm">
+                S{{ semestre.ordre }}
+            </span>
+            <div>
+                <h2 class="text-sm font-black text-secondary-900 leading-tight">
+                    Semestre {{ semestre.ordre }}
+                </h2>
+                <div class="text-[11px] text-secondary-500 font-medium">
+                    {% if semestre.semestreParcours and not semestre.semestreParcours.isOuvert %}
+                        <span class="text-rose-600 font-bold"><i class="fal fa-do-not-enter"></i> Semestre fermé</span>
+                    {% else %}
+                        <span class="text-emerald-700 font-semibold"><i class="fal fa-check-circle"></i> Semestre ouvert</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 text-xs font-semibold text-secondary-700">
+            {% set semEcts = semestre.heuresEctsSemestre.sommeSemestreEcts %}
+            <span data-parcours--quick-hours-grid-target="semestreEcts"
+                  data-semestre-id="{{ semestre.semestre.id }}"
+                  class="{% if semEcts == 30 %}px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-md font-bold shadow-xs flex items-center gap-1.5{% elseif semEcts < 30 %}px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-300 rounded-md font-bold shadow-xs flex items-center gap-1.5{% else %}px-2.5 py-1 bg-blue-50 text-blue-800 border border-blue-300 rounded-md font-bold shadow-xs flex items-center gap-1.5{% endif %}">
+                {% if semEcts == 30 %}
+                    <i class="fal fa-check text-emerald-600"></i> {{ semEcts }} / 30 ECTS
+                {% elseif semEcts < 30 %}
+                    <i class="fal fa-exclamation-triangle text-amber-600"></i> {{ semEcts }} / 30 ECTS <span class="text-[10px] font-medium opacity-80">(-{{ 30 - semEcts }})</span>
+                {% else %}
+                    <i class="fal fa-exclamation-circle text-blue-600"></i> {{ semEcts }} / 30 ECTS <span class="text-[10px] font-medium opacity-80">(+{{ semEcts - 30 }})</span>
+                {% endif %}
+            </span>
+
+            <div class="flex items-center gap-1.5">
+                <span class="text-secondary-500 font-medium">Total Semestre :</span>
+                <span data-parcours--quick-hours-grid-target="semestreTotal"
+                      data-semestre-id="{{ semestre.semestre.id }}"
+                      class="font-black text-secondary-900 text-sm">
+                    {{ curSemGlobal|number_format(1, ',', '') }}h
+                </span>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <span class="text-secondary-500 font-medium">Écart S{{ semestre.ordre }} :</span>
+                <span data-parcours--quick-hours-grid-target="semestreDelta"
+                      data-semestre-id="{{ semestre.semestre.id }}">
+                    {% if deltaSemGlobal == 0 %}
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-secondary-100 text-secondary-600">0h</span>
+                    {% elseif deltaSemGlobal > 0 %}
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">+{{ deltaSemGlobal|number_format(1, ',', '') }}h</span>
+                    {% else %}
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">{{ deltaSemGlobal|number_format(1, ',', '') }}h</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {# Liste des UEs du Semestre #}
+    <div class="space-y-4">
+        {% for ue in semestre.ues %}
+            {{ include('parcours_v2/quick_hours/_ue_table.html.twig', {
+                annee: annee,
+                ue: ue,
+                semestre: semestre,
+                referenceData: referenceData,
+                modalite: modalite,
+                parcours: parcours
+            }) }}
+        {% else %}
+            <div class="p-4 bg-white rounded-lg border border-secondary-200 text-center text-xs text-secondary-500">
+                Aucune UE configurée pour ce semestre.
+            </div>
+        {% endfor %}
+    </div>
+</div>

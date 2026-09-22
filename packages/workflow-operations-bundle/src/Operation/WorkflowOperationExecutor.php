@@ -14,6 +14,7 @@ final readonly class WorkflowOperationExecutor
     public function __construct(
         private WorkflowOperationInspector $inspector,
         private OperationHandlerRegistry $handlerRegistry,
+        private OperationCompletionHandlerRegistry $completionHandlerRegistry,
     ) {
     }
 
@@ -37,6 +38,12 @@ final readonly class WorkflowOperationExecutor
         );
 
         $workflow->apply($subject, $transitionName, $context->workflowContext());
+
+        $this->completionHandlerRegistry->find($subject, $inspection->operation)?->complete(
+            $subject,
+            $inspection->operation,
+            $context,
+        );
 
         return $inspection->operation;
     }

@@ -97,7 +97,7 @@ class FicheMatiereValide extends AbstractValide
 
     private function tailleMinimum(?string $getDescription, int $int): bool
     {
-        return strlen($getDescription) > $int;
+        return strlen($getDescription ?? '') > $int;
     }
 
     private function nonVideEtTailleMinimale(?string $getObjectifs, int $tailleMinimale = 12): string

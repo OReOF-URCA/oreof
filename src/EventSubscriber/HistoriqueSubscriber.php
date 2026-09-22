@@ -307,48 +307,50 @@ class HistoriqueSubscriber implements EventSubscriberInterface
     }
     public function createHistoriqueFormationChangeRf(HistoriqueChangeRfEvent $event): void
     {
-        $request = $event->getRequest();
-        $fileName = $event->getFileName();
-        $originalFileName = $event->getOriginalFileName();
+        $input = $event->getInput();
         $demande = $event->getChangeRf();
         $formation = $demande->getFormation();
-
-        if ($request === null) {
-            throw new Exception('Pas de requete');
-        }
 
         $histo = new HistoriqueFormation();
         $histo->setFormation($formation);
         $histo->setChangeRf($demande);
-        $histo->setDate($this->getDateTime($request));
+
+        $date = $input['date'] ?? null;
+        if ($date instanceof DateTimeInterface) {
+            $histo->setDate($date);
+        } elseif (is_string($date) && '' !== $date) {
+            $histo->setDate(Tools::convertDate($date));
+        } else {
+            $histo->setDate(null);
+        }
+
         $histo->setUser($this->resolveUser($event->getUser()));
         $histo->setEtape('changeRf.'.$event->getEtape());
-        $histo->setCommentaire($this->getCommentaire($request));
+        $histo->setCommentaire((string) ($input['argumentaire'] ?? $input['motif'] ?? ''));
         $histo->setEtat($event->getEtat());
 
+        $tab = [];
         foreach ($this->cases as $cas) {
-            if ($request->request->has($cas)) {
-                $tab[$cas] = $request->request->get($cas);
-                if ($cas === 'laisserPasser') {
+            if (array_key_exists($cas, $input)) {
+                $tab[$cas] = $input[$cas];
+                if ('laisserPasser' === $cas) {
                     $histo->setEtat('laisserPasser');
                 }
             }
 
-            if ($request->request->has('argumentaire_'.$cas)) {
-                $tab['argumentaire_'.$cas] = $request->request->get('argumentaire_'.$cas);
+            if (array_key_exists('argumentaire_'.$cas, $input)) {
+                $tab['argumentaire_'.$cas] = $input['argumentaire_'.$cas];
             }
         }
 
-        //upload
-        if ($fileName !== null && $fileName !== '') {
-            $tab['fichier'] = $fileName;
-            if ($originalFileName !== null && $originalFileName !== '') {
-                $tab['fichier_original'] = $originalFileName;
+        if (null !== $event->getFileName() && '' !== $event->getFileName()) {
+            $tab['fichier'] = $event->getFileName();
+            if (null !== $event->getOriginalFileName() && '' !== $event->getOriginalFileName()) {
+                $tab['fichier_original'] = $event->getOriginalFileName();
             }
         }
 
-        $histo->setComplements($tab ?? []);
-
+        $histo->setComplements($tab);
         $this->entityManager->persist($histo);
         $this->entityManager->flush();
     }
@@ -365,24 +367,33 @@ class HistoriqueSubscriber implements EventSubscriberInterface
             throw new Exception('Pas de requete');
         }
 
+        $input = $event->getInput();
+
         $histo = new HistoriqueParcours();
         $histo->setParcours($event->getParcours());
-        $histo->setDate($this->getDateTime($request));
+        $histo->setDate($this->getDateTimeFromInput($input) ?? $this->getDateTime($request));
         $histo->setUser($this->resolveUser($event->getUser()));
         $histo->setEtape($event->getEtape());
-        $histo->setCommentaire($this->getCommentaire($request));
+        $histo->setCommentaire(
+            (string) ($input['argumentaire'] ?? $input['motif'] ?? $this->getCommentaire($request))
+        );
         $histo->setEtat($event->getEtat());
 
         foreach ($this->cases as $cas) {
-            if ($request->request->has($cas)) {
-                $tab[$cas] = $request->request->get($cas);
-                if ($cas === 'laisserPasser') {
+            if (array_key_exists($cas, $input)) {
+                $tab[$cas] = $input[$cas];
+                if ('laisserPasser' === $cas && true === (bool) $input[$cas]) {
                     $histo->setEtat('laisserPasser');
                 }
+            } elseif ($request->request->has($cas)) {
+                $tab[$cas] = $request->request->get($cas);
             }
 
-            if ($request->request->has('argumentaire_'.$cas)) {
-                $tab['argumentaire_'.$cas] = $request->request->get('argumentaire_'.$cas);
+            $argumentKey = 'argumentaire_'.$cas;
+            if (array_key_exists($argumentKey, $input)) {
+                $tab[$argumentKey] = $input[$argumentKey];
+            } elseif ($request->request->has($argumentKey)) {
+                $tab[$argumentKey] = $request->request->get($argumentKey);
             }
         }
 
@@ -423,6 +434,23 @@ class HistoriqueSubscriber implements EventSubscriberInterface
         $histo->setEtat($event->getEtat());
         $this->entityManager->persist($histo);
         $this->entityManager->flush();
+    }
+
+    /** @param array<string, mixed> $input */
+    private function getDateTimeFromInput(array $input): ?DateTimeInterface
+    {
+        foreach (['date', 'dateConseil', 'dateCfvu', 'datePublication'] as $key) {
+            $value = $input[$key] ?? null;
+            if ($value instanceof DateTimeInterface) {
+                return $value;
+            }
+
+            if (is_string($value) && '' !== trim($value)) {
+                return Tools::convertDate($value);
+            }
+        }
+
+        return null;
     }
 
     private function getDateTime(Request $request): ?DateTimeInterface

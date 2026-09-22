@@ -22,7 +22,6 @@ class RecipientResolver
 
         // je récupère les profils associés au workflow
         $profils = $this->notificationListeRepository->findBy(['workflow' => $workflowName, 'step' => $transitionName]);
-        dump($profils);
         // en fonction du centre des profils, on récupère les destinataires sur le bon parcours, formation, composante, ...
         foreach ($profils as $profil) {
             switch ($profil->getProfil()?->getCentre()) {

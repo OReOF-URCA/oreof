@@ -4,11 +4,11 @@ namespace App\Controller;
 
 use App\Classes\GetDpeParcours;
 use App\Classes\JsonReponse;
-use App\Classes\Process\ParcoursProcess;
 use App\Classes\ValidationProcess;
 use App\Entity\DpeDemande;
 use App\Entity\Formation;
 use App\Entity\Parcours;
+use App\Entity\User;
 use App\Enums\EtatDpeEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Events\DpeDemandeEvent;
@@ -22,9 +22,12 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
+use Symfony\Component\Workflow\WorkflowInterface;
+use Dannebicque\WorkflowOperationsBundle\Operation\OperationContextNormalizer;
+use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
 
 class ProcessReouvertureController extends BaseController
 {
@@ -33,8 +36,10 @@ class ProcessReouvertureController extends BaseController
         private readonly EventDispatcherInterface      $eventDispatcher,
         private readonly EntityManagerInterface        $entityManager,
         private readonly ValidationProcess             $validationProcess,
-        private readonly ParcoursProcess               $parcoursProcess,
-        KernelInterface                                $kernel
+        private readonly WorkflowOperationExecutor     $operationExecutor,
+        private readonly OperationContextNormalizer    $operationContextNormalizer,
+        #[Target('dpeParcours')]
+        private readonly WorkflowInterface             $dpeParcoursWorkflow,
     ) {
     }
 
@@ -345,10 +350,33 @@ class ProcessReouvertureController extends BaseController
 
                 $this->entityManager->flush();
             } elseif ($dpe->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC || $dpe->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE) {
-                $process = $this->validationProcess->getEtape('ses');
-                $this->parcoursProcess->etatParcours($dpe, $process);
+                $currentPlace = array_key_first($dpe->getEtatValidation()) ?? 'inconnue';
+                $nextStep = $this->validationProcess->getNextStepFromPlace($currentPlace);
+                if (null === $nextStep) {
+                    return JsonReponse::error('Aucune transition de validation disponible pour clôturer ce DPE');
+                }
+
                 $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-                $this->parcoursProcess->valideParcours($dpe, $this->getUser(), $process, $request);
+                $this->operationExecutor->execute(
+                    $this->dpeParcoursWorkflow,
+                    $dpe,
+                    $nextStep['transition'],
+                    $this->operationContextNormalizer->normalize(
+                        workflow: $this->dpeParcoursWorkflow,
+                        transitionName: $nextStep['transition'],
+                        actor: $this->getCurrentUserOrFail(),
+                        input: [],
+                    )->withRuntime(['previous_place' => $currentPlace]),
+                );
+
+                $histoEvent = new HistoriqueParcoursEvent(
+                    $parcours,
+                    $this->getCurrentUserOrFail(),
+                    $currentPlace,
+                    'valide',
+                    $request,
+                );
+                $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
 
                 //                    $parcours->getDpeParcours()?->first()->setEtatValidation(['central' => 1]); //un état de processus différent pour connaitre le branchement ensuite
                 //                    $formation->getDpe()?->getDpeParcours()->first()->setEtatValidation(['soumis_central' => 1]);
@@ -447,54 +475,6 @@ class ProcessReouvertureController extends BaseController
         ]);
     }
 
-    #[Route('/validation/ouverture/reserve-lot/{etape}', name: 'app_validation_reserve_ouverture_lot')]
-    public function reserveLot(
-        DpeParcoursRepository $dpeParcoursRepository,
-        string                $etape,
-        Request               $request
-    ): Response {
-        if ($request->isMethod('POST')) {
-            $sParcours = $request->request->get('parcours');
-        } else {
-            $sParcours = $request->query->get('parcours');
-        }
-        $allParcours = explode(',', $sParcours);
-
-        $process = $this->validationProcess->getEtape($etape);
-        $meta = $this->validationProcess->getMetaFromTransition($transition);
-        $tParcours = [];
-        foreach ($allParcours as $id) {
-            $dpe = $dpeParcoursRepository->find($id);
-            if ($dpe === null) {
-                return JsonReponse::error('Parcours non trouvé');
-            }
-            $tParcours[] = $dpe;
-            $processData = $this->parcoursProcess->etatParcours($dpe, $process);
-
-            if ($request->isMethod('POST')) {
-                $this->parcoursProcess->reserveParcours($dpe, $this->getUser(), $transition, $request);
-            }
-        }
-
-        if ($request->isMethod('POST')) {
-            $this->toast('success', 'Formations marquées avec des réserves');
-            return $this->redirectToRoute('app_validation_dpe_index', ['etape' => $etape]);
-        }
-
-        return $this->render('process_validation/_reserve_lot.html.twig', [
-            'formations' => $tParcours,
-            'sParcours' => $sParcours,
-            'process' => $process,
-            'meta' => $meta,
-            'transition' => $transition,
-            'objet' => $dpe,
-            'processData' => $processData ?? null,
-            'type' => 'lot',
-            'id' => $id,
-            'etape' => $etape,
-        ]);
-    }
-
     #[Route('/validation/ouverture/valide-lot/{etape}', name: 'app_validation_valide_ouverture_lot')]
     public function valideLot(
         EntityManagerInterface $entityManager,
@@ -559,5 +539,15 @@ class ProcessReouvertureController extends BaseController
             'type' => 'lot',
             'etape' => $etape,
         ]);
+    }
+
+    private function getCurrentUserOrFail(): User
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('Utilisateur ORéOF requis.');
+        }
+
+        return $user;
     }
 }

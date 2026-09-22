@@ -45,52 +45,60 @@ final class SoumisCfvuValidator extends AbstractStepValidator
     {
         $errors = [];
         $warnings = [];
+        $checks = [];
 
         // Validation des données communes
         $commonValidation = $this->validateCommonRequirements($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('common', 'Données générales du parcours et de la formation', $commonValidation);
         $errors = array_merge($errors, $commonValidation['errors']);
         $warnings = array_merge($warnings, $commonValidation['warnings']);
 
         // Si erreurs critiques, arrêter la validation
         if (count($errors) > 0) {
-            return ValidationResult::failure($errors, $warnings);
+            return ValidationResult::failure($errors, $warnings, $checks);
         }
 
         // Validation du taux de remplissage (plus strict pour CFVU)
         $remplissageValidation = $this->validateRemplissage($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('completion', 'Taux de remplissage minimal (95 %)', $remplissageValidation);
         $errors = array_merge($errors, $remplissageValidation['errors']);
         $warnings = array_merge($warnings, $remplissageValidation['warnings']);
 
         // Validation des informations réglementaires
         $reglementaireValidation = $this->validateReglementaire($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('regulatory', 'Informations réglementaires', $reglementaireValidation);
         $errors = array_merge($errors, $reglementaireValidation['errors']);
         $warnings = array_merge($warnings, $reglementaireValidation['warnings']);
 
         // Validation des MCCC complètes
         $mcccValidation = $this->validateMcccComplete($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('mccc', 'Complétude de toutes les MCCC', $mcccValidation);
         $errors = array_merge($errors, $mcccValidation['errors']);
         $warnings = array_merge($warnings, $mcccValidation['warnings']);
 
         // Validation des fiches matières (toutes validées)
         $fichesValidation = $this->validateFichesComplete($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('fiche_matieres', 'Validation de toutes les fiches matières', $fichesValidation);
         $errors = array_merge($errors, $fichesValidation['errors']);
         $warnings = array_merge($warnings, $fichesValidation['warnings']);
 
         // Validation de la cohérence ECTS
         $ectsValidation = $this->validateEcts($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('ects', 'Cohérence des ECTS', $ectsValidation);
         $errors = array_merge($errors, $ectsValidation['errors']);
         $warnings = array_merge($warnings, $ectsValidation['warnings']);
 
         // Validation du passage en conseil (PV requis)
         $conseilValidation = $this->validateConseilPassed($dpeParcours);
+        $checks[] = ValidationCheck::fromResult('council', 'Passage en conseil et validation SES', $conseilValidation);
         $errors = array_merge($errors, $conseilValidation['errors']);
         $warnings = array_merge($warnings, $conseilValidation['warnings']);
 
         if (count($errors) > 0) {
-            return ValidationResult::failure($errors, $warnings);
+            return ValidationResult::failure($errors, $warnings, $checks);
         }
 
-        return ValidationResult::success($warnings);
+        return ValidationResult::success($warnings, $checks);
     }
 
     /**

@@ -264,6 +264,7 @@
       <path value="$PROJECT_DIR$/vendor/imagine/imagine" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php82" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-deepclone" />
+      <path value="$PROJECT_DIR$/vendor/davidannebicque/html-to-spreadsheet-bundle" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration">

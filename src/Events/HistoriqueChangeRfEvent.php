@@ -1,38 +1,51 @@
 <?php
-/*
- * Copyright (c) 2023. | David Annebicque | ORéOF  - All Rights Reserved
- * @file /Users/davidannebicque/Sites/oreof/src/Events/HistoriqueFormationEvent.php
- * @author davidannebicque
- * @project oreof
- * @lastUpdate 16/08/2023 08:41
- */
 
 namespace App\Events;
 
 use App\Entity\ChangeRf;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class HistoriqueChangeRfEvent extends AbstractHistoriqueEvent
+final class HistoriqueChangeRfEvent extends Event
 {
     public const ADD_HISTORIQUE_CHANGE_RF = 'add.historique.formation.change_rf';
 
-    private ChangeRf $changeRf;
-    private ?string $fileName;
-    private ?string $originalFileName;
-
-    public function __construct(ChangeRf $changeRf, UserInterface $user, string $etape, string $etat, Request $request, ?string $fileName = null, ?string $originalFileName = null)
-    {
-        parent::__construct($user, $etape, $etat, $request);
-
-        $this->changeRf = $changeRf;
-        $this->fileName = $fileName;
-        $this->originalFileName = $originalFileName;
+    /** @param array<string, mixed> $input */
+    public function __construct(
+        private readonly ChangeRf $changeRf,
+        private readonly UserInterface $user,
+        private readonly string $etape,
+        private readonly string $etat,
+        private readonly array $input = [],
+        private readonly ?string $fileName = null,
+        private readonly ?string $originalFileName = null,
+    ) {
     }
 
     public function getChangeRf(): ChangeRf
     {
         return $this->changeRf;
+    }
+
+    public function getUser(): UserInterface
+    {
+        return $this->user;
+    }
+
+    public function getEtape(): string
+    {
+        return $this->etape;
+    }
+
+    public function getEtat(): string
+    {
+        return $this->etat;
+    }
+
+    /** @return array<string, mixed> */
+    public function getInput(): array
+    {
+        return $this->input;
     }
 
     public function getFileName(): ?string

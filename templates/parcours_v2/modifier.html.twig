@@ -31,6 +31,14 @@
 
 {% block bouton_header %}
     <twig:Button
+            href="{{ path('parcours_v2_saisie_rapide_heures', {parcours: parcours.id}) }}"
+            variant="warning"
+            icon="icon:edit"
+            label="Saisie rapide des heures"
+            tooltip="Ouvrir le mode tableur de saisie rapide des heures"
+    />
+
+    <twig:Button
             href="{{ path('parcours_v2_voir', {parcours:parcours.id}) }}"
             variant="info"
             icon="icon:info"

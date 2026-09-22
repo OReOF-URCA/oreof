@@ -45,7 +45,7 @@ export default class extends Controller {
 
     const selected = this._selectedValues()
     if (selected.length === 0) {
-      callOut('Veuillez sélectionner au moins un parcours.', 'danger')
+      callOut('Veuillez sélectionner au moins un élément.', 'danger')
       window.dispatchEvent(new Event('modal:close'))
       this.refresh()
       return
@@ -59,7 +59,7 @@ export default class extends Controller {
 
     this.currentActionLabel = event.params.label || 'Action en lot'
     const body = new URLSearchParams()
-    selected.forEach((id) => body.append('parcours[]', id))
+    selected.forEach((id) => body.append('ids[]', id))
 
     this._clearRecap()
 
@@ -101,21 +101,24 @@ export default class extends Controller {
       },
     })
 
-    if (!response.ok) {
+    const stream = await response.text()
+    if (!response.ok && stream.trim() === '') {
       callOut('Une erreur est survenue lors du traitement en lot.', 'danger')
       return
     }
 
-    const stream = await response.text()
     this._renderTurboStream(stream)
-    this._clearSelection()
-    this.refresh()
   }
 
   onBulkSuccess (event) {
     const count = Number(event?.detail?.count ?? 0)
-    const message = `${this.currentActionLabel} executée sur ${count} élément${count > 1 ? 's' : ''}.`
+    const rejected = Number(event?.detail?.rejected ?? 0)
+    const message = rejected > 0
+      ? `${this.currentActionLabel} : ${count} traité${count > 1 ? 's' : ''}, ${rejected} rejeté${rejected > 1 ? 's' : ''}.`
+      : `${this.currentActionLabel} exécutée sur ${count} élément${count > 1 ? 's' : ''}.`
     this._showRecap(message)
+    this._clearSelection()
+    this.refresh()
   }
 
   _selectedValues () {
@@ -171,6 +174,4 @@ export default class extends Controller {
     }
   }
 }
-
-
 

@@ -51,7 +51,6 @@ final class ParcoursHeader
     public int $completedSteps = 0;
     public DpeParcours $dpeParcours;
     public string $place = '';
-    public bool $hasDemande = true;
     #[LiveProp(writable: true)]
     public ?int $parcoursId = null;
     #[LiveProp(writable: true)]
@@ -133,7 +132,14 @@ final class ParcoursHeader
     {
         $this->dpeParcours = GetDpeParcours::getFromParcours($this->parcours);
         $this->place = $this->getPlace();
-        $this->hasDemande = Access::isOuvert($this->dpeParcours);
+    }
+
+    public function isEditable(): bool
+    {
+        return in_array($this->place, [
+            'en_cours_redaction',
+            'en_cours_redaction_ss_cfvu',
+        ], true) || Access::isOuvert($this->dpeParcours);
     }
 
     private function getPlace(): string
@@ -258,8 +264,20 @@ final class ParcoursHeader
     public function dateHistorique(string $transition): string
     {
         if (array_key_exists($transition, $this->historiques)) {
-            if ($this->historiques[$transition]->getEtape() === 'soumis_conseil' && ($this->dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC || $this->dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE)) {
-                if (!array_key_exists('fichier', $this->historiques[$transition]->getComplements())) {
+            if ($this->historiques[$transition]->getEtape() === 'soumis_conseil'
+                && in_array($this->dpeParcours->getEtatReconduction(), [
+                    TypeModificationDpeEnum::MODIFICATION_MCCC,
+                    TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE,
+                ], true)
+            ) {
+                $complements = $this->historiques[$transition]->getComplements() ?? [];
+                $hasPv = isset($complements['fichier']) && '' !== trim((string) $complements['fichier']);
+                $hasLaissezPasser = filter_var(
+                    $complements['laisserPasser'] ?? false,
+                    FILTER_VALIDATE_BOOL,
+                );
+
+                if (!$hasPv && !$hasLaissezPasser) {
                     return '- à venir -';
                 }
             }

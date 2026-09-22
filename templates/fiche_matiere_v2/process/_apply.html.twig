@@ -4,19 +4,78 @@
 }) }}
 
 {% if view and view.mode == 'report' %}
-    {% if view.messages is empty %}
-        <div class="p-3 rounded bg-green-50 text-green-800">
-            Aucun blocage détecté.
-        </div>
-    {% else %}
-        <ul class="space-y-2">
-            {% for m in view.messages %}
-                <li class="p-3 rounded border">
-                    <strong class="mr-2">{{ m.level|upper }}</strong>{{ m.message }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+    <div class="space-y-3">
+        {% if view.checks is not empty %}
+            {% set passedCount = view.checks|filter(check => check.status == 'passed')|length %}
+            {% set warningCount = view.checks|filter(check => check.status == 'warning')|length %}
+            {% set failedCount = view.checks|filter(check => check.status == 'failed')|length %}
+
+            <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-3 text-sm dark:border-secondary-700 dark:bg-secondary-800/50">
+                <p class="font-medium text-secondary-900 dark:text-secondary-100">
+                    {{ view.checks|length }} groupes de contrôles exécutés
+                </p>
+                <p class="mt-1 text-xs text-secondary-600 dark:text-secondary-300">
+                    <span class="text-success-700 dark:text-success-300">{{ passedCount }} réussi{{ passedCount > 1 ? 's' : '' }}</span>
+                    {% if warningCount > 0 %}
+                        · <span class="text-warning-700 dark:text-warning-300">{{ warningCount }} avec avertissement{{ warningCount > 1 ? 's' : '' }}</span>
+                    {% endif %}
+                    {% if failedCount > 0 %}
+                        · <span class="text-danger-700 dark:text-danger-300">{{ failedCount }} bloquant{{ failedCount > 1 ? 's' : '' }}</span>
+                    {% endif %}
+                </p>
+
+                <details class="mt-3">
+                    <summary class="cursor-pointer select-none font-medium text-secondary-700 dark:text-secondary-200">
+                        Voir le détail des contrôles
+                    </summary>
+                    <ul class="mt-2 space-y-1.5" role="list">
+                        {% for check in view.checks %}
+                            {% set isFailed = check.status == 'failed' %}
+                            {% set hasWarning = check.status == 'warning' %}
+                            <li class="flex items-start gap-2 rounded-lg px-2 py-1.5 {{ isFailed
+                                ? 'bg-danger-50 text-danger-800 dark:bg-danger-500/10 dark:text-danger-300'
+                                : (hasWarning
+                                    ? 'bg-warning-50 text-warning-800 dark:bg-warning-500/10 dark:text-warning-300'
+                                    : 'bg-success-50 text-success-800 dark:bg-success-500/10 dark:text-success-300') }}">
+                                {{ ux_icon(isFailed ? 'icon:danger' : (hasWarning ? 'icon:warning' : 'ph:check-circle'), {class: 'mt-0.5 h-4 w-4 shrink-0'}) }}
+                                <span>
+                                    {{ check.label }}
+                                    {% if isFailed %}
+                                        <span class="text-xs opacity-75">({{ check.errorCount }} erreur{{ check.errorCount > 1 ? 's' : '' }})</span>
+                                    {% endif %}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </details>
+            </div>
+        {% endif %}
+
+        {% if view.messages is empty %}
+            <div class="rounded-xl border border-success-200 bg-success-50 p-3 text-sm text-success-800 dark:border-success-800/70 dark:bg-success-500/10 dark:text-success-300">
+                Aucun blocage détecté. La fiche matière peut poursuivre son circuit de validation.
+            </div>
+        {% else %}
+            <ul class="space-y-2" role="list">
+                {% for message in view.messages %}
+                    {% set isBlocking = message.level == 'error' %}
+                    <li class="rounded-xl border p-3 text-sm {{ isBlocking
+                        ? 'border-danger-200 bg-danger-50 text-danger-800 dark:border-danger-800/70 dark:bg-danger-500/10 dark:text-danger-300'
+                        : 'border-warning-200 bg-warning-50 text-warning-800 dark:border-warning-800/70 dark:bg-warning-500/10 dark:text-warning-300' }}">
+                        <div class="flex items-start gap-2">
+                            {{ ux_icon(isBlocking ? 'icon:danger' : 'icon:warning', {class: 'mt-0.5 h-4 w-4 shrink-0'}) }}
+                            <div>
+                                <p>{{ message.message }}</p>
+                                {% if message.path %}
+                                    <p class="mt-1 text-xs opacity-75">Champ : {{ message.path }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
 {% endif %}
 
 {% form_theme form 'communs/form_theme_v2.html.twig' %}

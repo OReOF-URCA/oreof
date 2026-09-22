@@ -13,12 +13,17 @@ class ModalFormMetaDto
 {
     /**
      * @param list<FieldMetaDto> $fields
+     * @param list<array<string, mixed>> $rules
+     * @param array<string, mixed> $options
      */
     public function __construct(
         public readonly string $title,
         public readonly string $submitLabel,
         public readonly string $formId,
         public readonly array  $fields,
+        public readonly array  $rules = [],
+        public readonly ?string $formType = null,
+        public readonly array  $options = [],
     )
     {
     }

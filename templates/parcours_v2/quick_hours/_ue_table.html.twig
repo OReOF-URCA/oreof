@@ -1,0 +1,87 @@
+{% set refUe = referenceData.ues[ue.ue.id] ?? referenceData.ues['code_' ~ ue.ue.codeApogee|trim|upper] ?? null %}
+{% set refUeGlobal = refUe ? refUe.totalGlobal : 0 %}
+{% set curUeGlobal = ue.heuresEctsUe ? ue.heuresEctsUe.sommeUeTotalPresDist() : 0 %}
+{% set deltaUeGlobal = curUeGlobal - refUeGlobal %}
+
+<div class="mb-6 bg-white rounded-xl border border-secondary-200 shadow-sm overflow-hidden">
+    {# Header UE #}
+    <div class="px-4 py-3 bg-secondary-50/70 border-b border-secondary-200 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+            <span class="px-2.5 py-1 bg-secondary-800 text-white font-black text-xs rounded-md">
+                {{ ue.ue.codeApogee ?: 'UE' }}
+            </span>
+            <h3 class="text-sm font-bold text-secondary-900">
+                {{ ue.ue.display }}
+            </h3>
+        </div>
+
+        <div class="flex items-center gap-3 text-xs font-semibold text-secondary-600">
+            <span data-parcours--quick-hours-grid-target="ueEcts"
+                  data-ue-id="{{ ue.ue.id }}"
+                  class="px-2 py-0.5 bg-secondary-100 rounded text-secondary-700 font-bold">
+                {{ ue.heuresEctsUe.sommeUeEcts }} ECTS
+            </span>
+
+            <span>Total UE :</span>
+            <span data-parcours--quick-hours-grid-target="ueTotal"
+                  data-ue-id="{{ ue.ue.id }}"
+                  class="font-black text-secondary-900 text-xs">
+                {{ curUeGlobal|number_format(1, ',', '') }}h
+            </span>
+
+            <span data-parcours--quick-hours-grid-target="ueDelta"
+                  data-ue-id="{{ ue.ue.id }}">
+                {% if deltaUeGlobal == 0 %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-secondary-100 text-secondary-600">0h</span>
+                {% elseif deltaUeGlobal > 0 %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">+{{ deltaUeGlobal|number_format(1, ',', '') }}h</span>
+                {% else %}
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">{{ deltaUeGlobal|number_format(1, ',', '') }}h</span>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    {# Table des EC #}
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-secondary-50/40 text-[11px] font-bold text-secondary-600 uppercase tracking-wider border-b border-secondary-200">
+                    <th class="py-2 px-3">Élément Constitutif (EC)</th>
+                    <th class="py-2 px-1.5 text-center w-16">ECTS</th>
+                    <th class="py-2 px-1.5 text-center w-16">CM Prés</th>
+                    <th class="py-2 px-1.5 text-center w-16">TD Prés</th>
+                    <th class="py-2 px-1.5 text-center w-16">TP Prés</th>
+                    <th class="py-2 px-1.5 text-center w-16">TE</th>
+                    {% if modalite != null and modalite.value != 0 %}
+                        <th class="py-2 px-1.5 text-center w-16 bg-primary-50/40 text-primary-800">CM Dist</th>
+                        <th class="py-2 px-1.5 text-center w-16 bg-primary-50/40 text-primary-800">TD Dist</th>
+                        <th class="py-2 px-1.5 text-center w-16 bg-primary-50/40 text-primary-800">TP Dist</th>
+                    {% endif %}
+                    <th class="py-2 px-2 text-center w-16">Total</th>
+                    <th class="py-2 px-2 text-center w-20">Écart</th>
+                    <th class="py-2 px-2 text-center w-10"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ec in ue.elementConstitutifs %}
+                    {{ include('parcours_v2/quick_hours/_ec_row.html.twig', {
+                        annee: annee,
+                        ec: ec,
+                        ue: ue,
+                        semestre: semestre,
+                        referenceData: referenceData,
+                        modalite: modalite,
+                        parcours: parcours
+                    }) }}
+                {% else %}
+                    <tr>
+                        <td colspan="12" class="py-4 text-center text-xs text-secondary-400 italic">
+                            Aucun élément constitutif dans cette UE.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

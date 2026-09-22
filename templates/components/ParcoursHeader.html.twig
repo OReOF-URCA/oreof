@@ -154,14 +154,14 @@
         </section>
 
         <section class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-            <div class="flex items-center gap-3 rounded-2xl border px-4 py-3 shadow-sm {{ hasDemande ? 'border-success-200 bg-success-50 text-success-800 dark:border-success-800/70 dark:bg-success-500/10 dark:text-success-300' : 'border-warning-200 bg-warning-50 text-warning-800 dark:border-warning-800/70 dark:bg-warning-500/10 dark:text-warning-300' }}">
-                <div class="flex h-10 w-10 items-center justify-center rounded-full {{ hasDemande ? 'bg-success-100 text-success-700 dark:bg-success-500/15 dark:text-success-300' : 'bg-warning-100 text-warning-700 dark:bg-warning-500/15 dark:text-warning-300' }}"
+            <div class="flex items-center gap-3 rounded-2xl border px-4 py-3 shadow-sm {{ this.editable ? 'border-success-200 bg-success-50 text-success-800 dark:border-success-800/70 dark:bg-success-500/10 dark:text-success-300' : 'border-warning-200 bg-warning-50 text-warning-800 dark:border-warning-800/70 dark:bg-warning-500/10 dark:text-warning-300' }}">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full {{ this.editable ? 'bg-success-100 text-success-700 dark:bg-success-500/15 dark:text-success-300' : 'bg-warning-100 text-warning-700 dark:bg-warning-500/15 dark:text-warning-300' }}"
                         {{ stimulus_controller('tooltip') }}
-                     data-bs-title="{{ hasDemande ? 'Parcours en cours de modification.' : 'Parcours verrouillé.' }}">
-                    {{ ux_icon(hasDemande ? 'icon:unlock' : 'icon:lock', {class: 'h-4 w-4'}) }}
+                     data-bs-title="{{ this.editable ? 'Parcours en cours de modification.' : 'Parcours verrouillé.' }}">
+                    {{ ux_icon(this.editable ? 'icon:unlock' : 'icon:lock', {class: 'h-4 w-4'}) }}
                 </div>
                 <div>
-                    <p class="text-sm font-semibold">{{ hasDemande ? 'Parcours en cours de modification.' : 'Parcours verrouillé.' }}</p>
+                    <p class="text-sm font-semibold">{{ this.editable ? 'Parcours en cours de modification.' : 'Parcours verrouillé.' }}</p>
                     <p class="text-xs opacity-80">Suivez l'avancement et les actions disponibles pour ce DPE.</p>
                 </div>
             </div>

@@ -1,0 +1,43 @@
+{# Temps moyen de séjour par étape du workflow (1A) #}
+<div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-2xl p-6 shadow-sm space-y-4">
+    <div class="border-b border-secondary-200 dark:border-secondary-700 pb-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <i class="ph ph-hourglass-high text-amber-500"></i>
+                Temps Moyen de Séjour par Étape (Goulets d'étranglement)
+            </h3>
+            <p class="text-xs text-slate-500">Durée moyenne passée par un parcours à chaque étape avant validation.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+        {% for sla in slaData.avgDurationsByState %}
+            <div class="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-800/40 border border-secondary-200 dark:border-secondary-700 space-y-2">
+                <div class="flex items-start justify-between">
+                    <span class="text-xs font-bold text-slate-900 dark:text-slate-100">
+                        {{ sla.label }}
+                    </span>
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                        {{ sla.count }} parcours
+                    </span>
+                </div>
+
+                <div class="flex items-baseline gap-1.5">
+                    <span class="text-2xl font-black {% if sla.avgDays > 30 %}text-rose-600 dark:text-rose-400{% elseif sla.avgDays > 15 %}text-amber-600 dark:text-amber-400{% else %}text-emerald-600 dark:text-emerald-400{% endif %}">
+                        {{ sla.avgDays }}
+                    </span>
+                    <span class="text-xs font-medium text-slate-500">jours en moyenne</span>
+                </div>
+
+                <div class="text-[11px] text-slate-400 flex items-center justify-between pt-1 border-t border-secondary-200/50 dark:border-secondary-700/50">
+                    <span>Max observé :</span>
+                    <span class="font-bold text-slate-600 dark:text-slate-300">{{ sla.maxDays }} jours</span>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-span-4 text-center py-6 text-slate-400 text-xs">
+                Aucune donnée de durée disponible pour cette campagne.
+            </div>
+        {% endfor %}
+    </div>
+</div>

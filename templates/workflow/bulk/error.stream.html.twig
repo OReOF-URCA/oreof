@@ -1,0 +1,5 @@
+{{ include('_ui/_toast.stream.html.twig', {
+    message: message|default('Le traitement par lot a échoué.'),
+    undo: null,
+    type: 'danger'
+}) }}

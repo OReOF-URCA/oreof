@@ -53,6 +53,8 @@ services:
     _instanceof:
       App\Workflow\Validator\StepValidatorInterface:
         tags: [ 'workflow.validator' ]
+      Dannebicque\WorkflowOperationsBundle\Contract\OperationCompletionHandlerInterface:
+        tags: [ 'workflow_operations.completion_handler' ]
       App\TypeDiplome\TypeDiplomeHandlerInterface:
         tags: [ 'app.type_diplome_handler' ]
       App\Service\Synthese\SyntheseButtonsProviderInterface:
@@ -155,10 +157,6 @@ services:
 
     App\Twig\TurboExtension:
       tags: [ 'twig.extension' ]
-
-    App\Workflow\Handler\Handlers\:
-      resource: '../src/Workflow/Handler/Handlers/'
-      tags: [ 'app.workflow_transition_handler' ]
 
     App\Navigation\Provider\:
       resource: '../src/Navigation/Provider/'
