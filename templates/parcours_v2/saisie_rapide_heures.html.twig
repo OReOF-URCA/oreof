@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Saisie rapide des heures - {{ parcours.libelle }}{% endblock %}
+
+{% block content %}
+<div data-controller="parcours--quick-hours-grid"
+     data-parcours--quick-hours-grid-save-url-template-value="{{ path('parcours_v2_quick_save_ec_heures', { parcours: parcours.id, elementConstitutif: '__EC_ID__' }) }}"
+     data-parcours--quick-hours-grid-parcours-id-value="{{ parcours.id }}"
+     class="min-h-screen bg-slate-50/50 pb-20">
+
+    {# Sticky Header avec sélection de version et barre de delta cumulé #}
+    {{ include('parcours_v2/quick_hours/_sticky_header.html.twig') }}
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {% for anneeOrdre, anneeData in dto.annees %}
+            {% set annee = anneeData.annee %}
+            {% set refAnnee = null %}
+
+            <div class="mb-12 bg-white rounded-2xl border border-secondary-200/80 shadow-sm p-6">
+                {# Header Année #}
+                <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-secondary-200">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-black text-base flex items-center justify-center shadow-xs">
+                            A{{ annee.ordre }}
+                        </div>
+                        <div>
+                            <h2 class="text-base font-black text-secondary-900">
+                                Année {{ annee.ordre }}
+                            </h2>
+                            <div class="text-xs text-secondary-500 font-medium">
+                                {% if not annee.isOuvert %}
+                                    <span class="text-rose-600 font-bold"><i class="fal fa-do-not-enter"></i> Année fermée</span>
+                                {% else %}
+                                    <span class="text-emerald-700 font-semibold"><i class="fal fa-check-circle"></i> Année ouverte</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-4 text-xs font-bold text-secondary-700">
+                        {% set anneeEcts = anneeData.heuresEctsAnnee.sommeAnneeEcts %}
+                        <span data-parcours--quick-hours-grid-target="anneeEcts"
+                              data-annee-id="{{ annee.id }}"
+                              class="{% if anneeEcts == 60 %}px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-md font-bold shadow-xs flex items-center gap-1.5{% elseif anneeEcts < 60 %}px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-300 rounded-md font-bold shadow-xs flex items-center gap-1.5{% else %}px-2.5 py-1 bg-blue-50 text-blue-800 border border-blue-300 rounded-md font-bold shadow-xs flex items-center gap-1.5{% endif %}">
+                            {% if anneeEcts == 60 %}
+                                <i class="fal fa-check text-emerald-600"></i> {{ anneeEcts }} / 60 ECTS
+                            {% elseif anneeEcts < 60 %}
+                                <i class="fal fa-exclamation-triangle text-amber-600"></i> {{ anneeEcts }} / 60 ECTS <span class="text-[10px] font-medium opacity-80">(-{{ 60 - anneeEcts }})</span>
+                            {% else %}
+                                <i class="fal fa-exclamation-circle text-blue-600"></i> {{ anneeEcts }} / 60 ECTS <span class="text-[10px] font-medium opacity-80">(+{{ anneeEcts - 60 }})</span>
+                            {% endif %}
+                        </span>
+
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-secondary-500 font-normal">Total Année :</span>
+                            <span data-parcours--quick-hours-grid-target="anneeTotal"
+                                  data-annee-id="{{ annee.id }}"
+                                  class="font-black text-secondary-900 text-sm">
+                                {{ anneeData.heuresEctsAnnee.sommeAnneeTotalPresDist()|number_format(1, ',', '') }}h
+                            </span>
+                        </div>
+
+                        <span data-parcours--quick-hours-grid-target="anneeDelta"
+                              data-annee-id="{{ annee.id }}"></span>
+                    </div>
+                </div>
+
+                {# Semestres de l'année #}
+                <div class="space-y-6">
+                    {% for semestreOrdre, semestre in anneeData.semestres %}
+                        {{ include('parcours_v2/quick_hours/_semestre.html.twig', {
+                            annee: annee,
+                            semestre: semestre,
+                            referenceData: referenceData,
+                            modalite: modalite,
+                            parcours: parcours
+                        }) }}
+                    {% else %}
+                        <div class="text-center py-6 text-xs text-secondary-400 italic">
+                            Aucun semestre dans cette année.
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="bg-white rounded-xl p-8 text-center text-secondary-500 border border-secondary-200">
+                Aucune structure définie pour ce parcours.
+            </div>
+        {% endfor %}
+    </main>
+</div>
+{% endblock %}

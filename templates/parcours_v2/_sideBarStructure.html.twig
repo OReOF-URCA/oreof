@@ -51,4 +51,12 @@
             {% endfor %}
         </div>
     {% endfor %}
+
+    <div class="pt-2">
+        <a href="{{ path('parcours_v2_saisie_rapide_heures', { parcours: parcours.id }) }}"
+           class="flex items-center gap-2 p-2 rounded-lg text-xs font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition">
+            <i class="fal fa-table-cells text-amber-600"></i>
+            <span>Grille de saisie rapide</span>
+        </a>
+    </div>
 </div>
