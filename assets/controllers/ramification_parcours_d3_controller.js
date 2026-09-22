@@ -133,7 +133,7 @@ export default class extends Controller {
 
     #addStepColumn(columnNumber) {
         let col = document.createElement('div');
-        col.classList.add('col-2', 'step-column');
+        col.classList.add('col-2', 'step-column', 'px-0');
         let choiceDiv = document.createElement('div');
         choiceDiv.classList.add('col-12', 'step-column-info');
         let linksDiv = document.createElement('div');
@@ -150,7 +150,7 @@ export default class extends Controller {
         });
 
         let infoWrapper = document.createElement('div');
-        infoWrapper.classList.add('text-center', 'mb-3');
+        infoWrapper.classList.add('text-center', 'mb-3', 'p-1');
         let stepTitle = document.createElement('span');
         stepTitle.classList.add('badge', 'rounded-pill', 'text-bg-dark');
         stepTitle.textContent = `Niveau ${columnNumber}`;
