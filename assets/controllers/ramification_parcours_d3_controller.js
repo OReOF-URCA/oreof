@@ -137,7 +137,7 @@ export default class extends Controller {
         let choiceDiv = document.createElement('div');
         choiceDiv.classList.add('col-12', 'step-column-info');
         let linksDiv = document.createElement('div');
-        linksDiv.classList.add('d-flex', 'h-100', 'col-12', 'step-column-links', 'justify-content-around');
+        linksDiv.classList.add('h-100', 'col-12', 'step-column-links', 'justify-content-around');
         linksDiv.dataset.stepIndex = columnNumber;
 
         let selectTypeRamification = document.createElement('select');
@@ -182,7 +182,7 @@ export default class extends Controller {
 
     #createParcoursNodeForStep(p) {
         let node = document.createElement('div');
-        node.classList.add('col-12', 'mx-1', 'bg-primary', 'text-white', 'p-2', 'rounded', 'my-4');
+        node.classList.add('col-12', 'mx-1', 'bg-primary', 'text-white', 'rounded', 'my-4', 'text-center', 'py-2');
         node.dataset.bsToggle = 'tooltip';
         node.dataset.bsPlacement = 'bottom';
         node.title = p.dataset.nomParcours;
