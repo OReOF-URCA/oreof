@@ -53,7 +53,11 @@
             border-color: var(--primary);
         }
 
-        .step-column:hover {
+        .step-column-links {
+            max-height: 30em;
+        }
+
+        .step-column-links:hover {
             cursor: pointer;
             background-color: lightgrey;
         }
@@ -61,11 +65,23 @@
         .step-column-selected {
             background-color: grey;
         }
+
+        @media screen and (max-height: 1250px) and (orientation: portrait) {
+            .container-ramification {
+                margin-top: 25em;
+            }
+        }
+
+        @media screen and (max-height: 992px) {
+            .container-ramification {
+                margin-top: 25em;
+            }
+        }
     </style>
 {% endblock %}
 
 {% block content %}
-    <div class="container">    
+    <div class="container container-ramification">    
         <div    
             class="row"
             {{ stimulus_controller('ramification_parcours_d3', {
@@ -74,7 +90,7 @@
                 }) 
             }}
         >
-            <div class="col-4">
+            <div class="col-12 col-lg-4 my-5 my-lg-0">
                 <div class="input-group">
                     <span class="input-group-text bg-primary text-white">Nom du parcours</span>
                     <input
@@ -114,7 +130,7 @@
 
                 </div>
             </div>
-            <div class="col-8">
+            <div class="col-12 col-lg-8 my-5 my-lg-0">
                 <div 
                     class="row justify-content-center"
                     {{ stimulus_target('ramification_parcours_d3', 'stepLinkRow') }}
