@@ -13,6 +13,7 @@ use App\Classes\Bcc;
 use App\Classes\GetDpeParcours;
 use App\Classes\UpdateEntity;
 use App\Classes\verif\ParcoursState;
+use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Enums\DureeParcoursUniteEnum;
 use App\Enums\EtatRemplissageEnum;
@@ -66,14 +67,13 @@ class ParcoursSaveController extends BaseController
             return $this->json(['error' => 'DPE non trouvé']);
         }
 
-        if (!$this->isGranted('EDIT', [
+        if ($parcours->getFormation()->getTypeDiplome()->isClassique() && (!$this->isGranted('EDIT', [
                 'route' => 'app_parcours',
                 'subject' => $dpeParcours,
-            ]) && !$this->isGranted('ROLE_ADMIN')) {
+                ]) && !$this->isGranted('ROLE_ADMIN'))) {
             throw $this->createAccessDeniedException();
         }
 
-        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
         //        if (!($this->parcoursWorkflow->can($parcours, 'valider_parcours') || $this->parcoursWorkflow->can(
         //            $parcours, 'autoriser')) && !$this->isGranted('ROLE_SES')) {
         //            //si on est pas dans un état qui permet de modifier la formation
