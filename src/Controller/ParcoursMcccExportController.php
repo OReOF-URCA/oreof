@@ -178,21 +178,20 @@ class ParcoursMcccExportController extends BaseController
 
         // On essaie la première année
         try {
-            $pdf = file_get_contents(
-                getFileName($parcours, 2, $format, $dpeArray)
-            );
-        } catch (Exception $e) {
-            // Sinon, on essaie avec la deuxième
-            try{
                 $pdf = file_get_contents(
-                    getFileName($parcours, 2, $format, $dpeArray)
+                    getFileName($parcours, 3, $format, $dpeArray)
                 );
-            }
-            // S'il n'y a pas de correspondance, on émet un message d'erreur
-            catch(Exception $error){
+                // Sinon, on essaie avec la deuxième
+                if($pdf === false) {
+                    $pdf = file_get_contents(
+                        getFileName($parcours, 2, $format, $dpeArray)
+                    );
+                }
+            } catch(Exception $error){
+                // S'il n'y a pas de correspondance, on émet un message d'erreur
                 throw $this->createNotFoundException("Le fichier demandé n'a pas été trouvé");
             }
-        }
+        
 
         return new Response($pdf, 200, [
             'Content-Type' => 'application/pdf',

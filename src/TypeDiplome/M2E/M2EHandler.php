@@ -19,6 +19,7 @@ use App\Entity\TypeEpreuve;
 use App\Repository\BlocCompetenceRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
+use App\TypeDiplome\Licence\StructureParcoursLicence;
 use App\TypeDiplome\M2E\Services\M2eMccc;
 use App\TypeDiplome\M2E\Services\M2eMcccVersion;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
@@ -48,7 +49,8 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
         protected M2eMccc                $m2eMccc,
         protected M2eMcccVersion         $m2eMcccVersion,
         private BlocCompetenceRepository $blocCompetenceRepository,
-        private StructureParcoursM2e     $structureParcoursM2e
+        private StructureParcoursM2e     $structureParcoursM2e,
+        private StructureParcoursLicence $structureParcoursLicence
     )
     {
     }
@@ -143,7 +145,7 @@ final class M2EHandler implements TypeDiplomeHandlerInterface
 
     public function calculStructureParcours(Parcours $parcours, bool $withEcts = true, bool $withBcc = true): StructureParcours
     {
-        return new StructureParcours();
+        return $this->structureParcoursLicence->calcul($parcours, $withEcts, $withBcc, true);
     }
 
     public function showStructure(Parcours $parcours): array

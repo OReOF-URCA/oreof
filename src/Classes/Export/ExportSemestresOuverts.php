@@ -64,6 +64,7 @@ class ExportSemestresOuverts implements ExportInterface
         $this->excelWriter->writeCellXY('M', 1, 'Semestre 6');
         $this->excelWriter->writeCellXY('N', 1, '# Mention');
         $this->excelWriter->writeCellXY('O', 1, '# parcours');
+        $this->excelWriter->writeCellXY('P', 1, 'Type du Parcours');
 
 
         $ligne = 2;
@@ -99,6 +100,12 @@ class ExportSemestresOuverts implements ExportInterface
                 $this->excelWriter->writeCellXY('N', $ligne, $formation->getId());
                 $this->excelWriter->writeCellXY('O', $ligne, $parcours->getId());
 
+                $typeParcoursTxt = "";
+                if($parcours->getTypeParcours()->value !== 'classique') {
+                    $typeParcoursTxt = $parcours->getTypeParcours()->libelle();
+                }
+                $this->excelWriter->writeCellXY('P', $ligne, $typeParcoursTxt);
+                $this->excelWriter->getColumnsAutoSize('A', 'P');
                 $ligne++;
 
             }
