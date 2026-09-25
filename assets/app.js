@@ -32,13 +32,17 @@ Object.defineProperty(window.da, 'loaderStimulus', {
 })
 
 import * as bootstrap from 'bootstrap'
+
 import 'trix'
 import 'trix/dist/trix.css'
 
 import callOut from './js/callOut'
-// import './styles/legacy.scss';
 import './styles/app.css'
 import './styles/_timeline.scss'
+
+import 'datatables.net-dt/css/dataTables.dataTables.min.css'
+import '@pentiminax/ux-datatables/dist/styles/datatables-base-style.css'
+import '@pentiminax/ux-datatables/dist/styles/datatables-tailwind-theme.css'
 
 import './bootstrap'
 
