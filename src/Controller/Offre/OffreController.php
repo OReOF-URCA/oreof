@@ -12,7 +12,6 @@ use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\PlateformeAdmission;
 use App\Entity\PlateformeAdmissionParametre;
-use App\Entity\TypeDiplome;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
 use App\Entity\DocumentConseil;

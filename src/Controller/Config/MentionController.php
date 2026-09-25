@@ -10,6 +10,7 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\MentionDataTable;
 use App\DTO\MentionDto;
 use App\DTO\TranslatableKey;
 use App\Entity\Mention;
@@ -18,7 +19,6 @@ use App\Form\MentionDtoType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\DomaineRepository;
 use App\Repository\TypeDiplomeRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Service\MentionService;
 use App\Utils\JsonRequest;
@@ -50,74 +50,11 @@ class MentionController extends AbstractController
     /**
      * Affiche la page d'index des mentions.
      */
-    #[Route('/', name: 'app_mention_index', methods: ['GET'])]
+    #[Route('/', name: 'app_mention_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
+        MentionDataTable $table
     ): Response
     {
-        $table = $builder
-            ->setEntity(Mention::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé de la mention',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('sigle', [
-                'label' => 'Sigle',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('codeApogee', [
-                'label' => 'Code Apogée',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-
-            // Colonne avec relation
-            ->addColumn('typeDiplome.libelle', [
-                'label' => 'Type de diplôme',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'entity',
-                'entity' => TypeDiplome::class,
-                'entity_label' => 'libelle',
-            ])
-            ->addColumn('domaines', [
-                'label' => 'Domaine(s)',
-                'type' => 'collection',
-                'format' => 'badges',
-                'collection_property' => 'libelle',
-                'badge_class' => 'bg-primary',
-                'searchable' => false,
-            ])
-            ->addColumn('utilise', [
-                'label' => 'Utilisé ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-                'searchable' => false,
-                'sort_expression' => 'SIZE(e.formations)',
-                'filter_expression' => 'CASE WHEN SIZE(e.formations) > 0 THEN 1 ELSE 0 END',
-            ])
-            ->addShowAction('app_mention_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir une mention',
-            ])
-            ->addEditAction('app_mention_edit', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Modifier une mention',
-            ])
-            ->addDuplicateAction('app_mention_duplicate')
-            ->addDeleteAction('app_mention_delete')
-            ->build();
-
         return $this->render(
             'config/mention/index.html.twig',
             ['table' => $table]

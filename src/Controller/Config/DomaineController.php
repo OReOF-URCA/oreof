@@ -10,11 +10,11 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\DomaineDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\Domaine;
 use App\Form\DomaineType;
 use App\Repository\DomaineRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -29,51 +29,11 @@ class DomaineController extends AbstractController
 {
     use CsrfDeleteTrait;
 
-    #[Route('/', name: 'app_domaine_index', methods: ['GET'])]
+    #[Route('/', name: 'app_domaine_index', methods: ['GET', 'POST'])]
     public function index(
-        DatatableBuilder $builder
-    ): Response
-    {
-        $table = $builder
-            ->setEntity(Domaine::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé de la mention',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('sigle', [
-                'label' => 'Sigle',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('nbMentions', [
-                'label' => 'Nombre de mentions',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('codeApogee', [
-                'label' => 'Code Apogée',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addShowAction('app_domaine_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir un domaine',
-            ])
-            ->addEditAction('app_domaine_edit', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Modifier un domaine',
-            ])
-            ->addDuplicateAction('app_domaine_duplicate')
-            ->addDeleteAction('app_domaine_delete')
-            ->build();
-
+        DomaineDataTable $table,
+        Request $request
+    ): Response {
         return $this->render('config/domaine/index.html.twig', [
             'table' => $table,
         ]);

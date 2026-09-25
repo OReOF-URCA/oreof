@@ -46,8 +46,16 @@ class EntityDetailComponent
         return sprintf('%s #%s', $entity::class, (string)($this->getEntityIdentifier($entity) ?? '?'));
     }
 
-    public function getFieldValue(object $entity, string $field): mixed
+    public function getFieldValue(object $entity, string|array $field): mixed
     {
+        if (is_array($field)) {
+            if (isset($field['callback']) && is_callable($field['callback'])) {
+                return ($field['callback'])($entity);
+            }
+
+            $field = (string)($field['field'] ?? '');
+        }
+
         $parts = explode('.', $field);
         $value = $entity;
 

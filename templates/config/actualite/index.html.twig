@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-    {{ component('DataTable', { config: table }) }}
+    {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
 {% endblock %}
 
 

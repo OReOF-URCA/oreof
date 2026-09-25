@@ -10,13 +10,13 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\TypeUeDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeUe;
 use App\Form\TypeUeType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\TypeUeRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -31,49 +31,11 @@ class TypeUeController extends AbstractController
 {
     use CsrfDeleteTrait;
     
-    #[Route('/', name: 'app_type_ue_index', methods: ['GET'])]
+    #[Route('/', name: 'app_type_ue_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
+        TypeUeDataTable $table
     ): Response
     {
-        $table = $builder
-            ->setEntity(TypeUe::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé du type d\'UE',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-
-            // Colonne avec collection de relations
-            ->addColumn('typeDiplomes', [
-                'label' => 'Type(s) de diplôme',
-                'filterable' => true,
-                'type' => 'collection',
-                'format' => 'badges',
-                'collection_property' => 'libelle',
-                'badge_class' => 'bg-primary',
-                'entity' => TypeDiplome::class,
-                'entity_label' => 'libelle',
-                'searchable' => false,
-            ])
-            ->addShowAction('app_type_ue_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir un type d\'UE',
-            ])
-            ->addEditAction('app_type_ue_edit', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Modifier un type d\'UE',
-            ])
-            ->addDuplicateAction('app_type_ue_duplicate')
-            ->addDeleteAction('app_type_ue_delete')
-            ->build();
-
         return $this->render('config/type_ue/index.html.twig', [
             'table' => $table,
         ]);

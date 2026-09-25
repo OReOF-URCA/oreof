@@ -1,11 +1,11 @@
 {# Template partiel pour la colonne des dates de la timeline #}
-{% if value is not null and value|length > 0 %}
-    <ul class="list-unstyled mb-0 ps-0">
-        {% for event in value %}
-            <li class="text-nowrap">{{ event.libelle }} : {{ event.date|dateFr }}</li>
+{% set dates = data ?? value ?? (row.timelineDates ?? null) %}
+{% if dates is not null and dates|length > 0 %}
+    <ul class="list-unstyled mb-0 ps-0 text-xs">
+        {% for event in dates %}
+            <li class="whitespace-nowrap">{{ event.libelle }} : {{ event.date|dateFr }}</li>
         {% endfor %}
     </ul>
 {% else %}
-    <span class="text-secondary-300">–</span>
+    <span class="text-slate-400">–</span>
 {% endif %}
-

@@ -10,12 +10,12 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\LangueDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\Langue;
 use App\Form\LangueType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\LangueRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -30,40 +30,10 @@ class LangueController extends AbstractController
 {
     use CsrfDeleteTrait;
     
-    #[Route('/', name: 'app_langue_index', methods: ['GET'])]
+    #[Route('/', name: 'app_langue_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
-    ): Response
-    {
-        $table = $builder
-            ->setEntity(Langue::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé de la langue',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('codeIso', [
-                'label' => 'Code ISO',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addShowAction('app_langue_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir une langue',
-            ])
-            ->addEditAction('app_langue_edit', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Modifier une langue',
-            ])
-            ->addDuplicateAction('app_langue_duplicate')
-            ->addDeleteAction('app_langue_delete')
-            ->build();
+        LangueDataTable $table,
+    ): Response {
         return $this->render('config/langue/index.html.twig', [
             'table' => $table,
         ]);

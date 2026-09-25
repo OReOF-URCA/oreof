@@ -1,0 +1,20 @@
+data_tables:
+    options:
+        language: 'fr-FR'
+        stateSave: true
+        showHeaderResetButton: true
+        layout:
+            topStart: [info]
+            topEnd: [pageLength, search]
+            bottomStart: info
+            bottomEnd: paging
+        pageLength: 20
+        lengthMenu: [10, 20, 50, 100]
+        paging:
+            boundaryNumbers: true
+            buttons: 7
+            firstLast: true
+            numbers: true
+            previousNext: true
+    table_attributes:
+        class: 'w-full text-left text-sm text-secondary-700 dark:text-secondary-200'

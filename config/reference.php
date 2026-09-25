@@ -687,10 +687,10 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         signing_algorithm?: scalar|Param|null, // Default: "sha256"
  *         routing?: array<string, array{ // Default: []
  *             service?: scalar|Param|null,
- *             secret?: scalar|Param|null, // Default: ""
+ *             secret?: scalar|Param|null, // The secret used to verify incoming request signatures. It must be set in production: with an empty value, requests from any sender are accepted. // Default: ""
  *         }>,
  *     },
- *     remote-event?: bool|array{ // RemoteEvent configuration
+ *     remote_event?: bool|array{ // RemoteEvent configuration
  *         enabled?: bool|Param, // Default: false
  *     },
  *     json_streamer?: bool|array{ // JSON streamer configuration
@@ -1262,7 +1262,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         enabled?: bool|Param, // Default: false
  *     },
  *     html?: bool|array{
- *         enabled?: bool|Param, // Default: false
+ *         enabled?: bool|Param, // Default: true
  *     },
  *     markdown?: bool|array{
  *         enabled?: bool|Param, // Default: true
@@ -1348,6 +1348,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  * }
  * @psalm-type MonologConfig = array{
  *     use_microseconds?: scalar|Param|null, // Default: true
+ *     timezone?: string|Param, // The timezone used for the timestamp of every log record (e.g. "UTC" or "Europe/Paris"). Defaults to the PHP default timezone. // Default: null
  *     channels?: list<scalar|Param|null>,
  *     handlers?: array<string, array{ // Default: []
  *         type?: scalar|Param|null,
@@ -1359,6 +1360,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         interactive_only?: bool|Param, // Default: false
  *         app_name?: scalar|Param|null, // Default: null
  *         include_stacktraces?: bool|Param, // Default: false
+ *         base_path?: scalar|Param|null, // Default: null
  *         process_psr_3_messages?: array{
  *             enabled?: bool|Param|null, // Default: null
  *             date_format?: scalar|Param|null,
@@ -1370,7 +1372,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         use_locking?: bool|Param, // Default: false
  *         filename_format?: scalar|Param|null, // Default: "{filename}-{date}"
  *         date_format?: scalar|Param|null, // Default: "Y-m-d"
- *         ident?: scalar|Param|null, // Default: false
+ *         ident?: scalar|Param|null, // Default: "php"
  *         logopts?: scalar|Param|null, // Default: 1
  *         facility?: scalar|Param|null, // Default: "user"
  *         max_files?: scalar|Param|null, // Default: 0
@@ -1407,6 +1409,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         title?: scalar|Param|null, // Default: null
  *         host?: scalar|Param|null, // Default: null
  *         port?: scalar|Param|null, // Default: 514
+ *         rfc?: scalar|Param|null, // Default: 1
  *         config?: list<scalar|Param|null>,
  *         members?: list<scalar|Param|null>,
  *         connection_string?: scalar|Param|null,
@@ -1417,6 +1420,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         connection_timeout?: scalar|Param|null,
  *         persistent?: bool|Param,
  *         message_type?: scalar|Param|null, // Default: 0
+ *         expand_newlines?: bool|Param, // Default: false
  *         parse_mode?: scalar|Param|null, // Default: null
  *         disable_webpage_preview?: bool|Param|null, // Default: null
  *         disable_notification?: bool|Param|null, // Default: null
@@ -1463,7 +1467,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *             database?: scalar|Param|null, // Default: 0
  *             key_name?: scalar|Param|null, // Default: "monolog_redis"
  *         },
- *         predis?: Param|string|array{
+ *         predis?: Param|string|array{ // Deprecated: The "predis" option is deprecated and ignored, use the "redis" option to configure the Predis client.
  *             id?: scalar|Param|null,
  *             host?: scalar|Param|null,
  *         },
@@ -1472,6 +1476,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         subject?: scalar|Param|null,
  *         content_type?: scalar|Param|null, // Default: null
  *         headers?: list<scalar|Param|null>,
+ *         parameters?: list<scalar|Param|null>,
  *         mailer?: scalar|Param|null, // Default: null
  *         email_prototype?: Param|string|array{
  *             id?: scalar|Param|null,
@@ -2729,6 +2734,38 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     include_builtins?: bool|Param, // Inclure les styles prédéfinis du bundle // Default: true
  *     default_styles?: array<string, list<mixed>>,
  * }
+ * @psalm-type DataTablesConfig = array{
+ *     max_page_length?: int|Param, // Upper bound applied to the DataTables "length" parameter on Ajax requests. "length=-1" (show all) is honored only when the table declares -1 in lengthMenu(); otherwise it is capped to this value. // Default: 1000
+ *     options?: array{
+ *         language?: scalar|Param|null, // Default: "en-GB"
+ *         stateSave?: bool|Param, // Default: false
+ *         showHeaderResetButton?: bool|Param, // Default: false
+ *         layout?: mixed, // Default: {"topStart":"pageLength","topEnd":"search","bottomStart":"info","bottomEnd":"paging"}
+ *         lengthMenu?: list<scalar|Param|null>,
+ *         pageLength?: int|Param,
+ *         paging?: array{
+ *             boundaryNumbers?: bool|Param, // Default: true
+ *             buttons?: int|Param, // Default: 7
+ *             firstLast?: bool|Param, // Default: true
+ *             numbers?: bool|Param, // Default: true
+ *             previousNext?: bool|Param, // Default: true
+ *         },
+ *     },
+ *     table_attributes?: array{
+ *         class?: scalar|Param|null, // Default: "table"
+ *     },
+ *     extensions?: array{
+ *         buttons?: list<scalar|Param|null>,
+ *         select?: array{
+ *             style?: scalar|Param|null, // Default: "single"
+ *         },
+ *     },
+ *     edit_modal?: array{
+ *         template?: scalar|Param|null, // Default: "@PentiminaxDataTables/modal/datatables/edit_modal.html.twig"
+ *         body_template?: scalar|Param|null, // Default: "@PentiminaxDataTables/modal/datatables/_form_body.html.twig"
+ *         default_title?: scalar|Param|null, // Default: "Edit"
+ *     },
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -2751,6 +2788,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
  *     liip_imagine?: LiipImagineConfig,
  *     html_to_spreadsheet?: HtmlToSpreadsheetConfig,
+ *     data_tables?: DataTablesConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -2776,6 +2814,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
  *         liip_imagine?: LiipImagineConfig,
  *         html_to_spreadsheet?: HtmlToSpreadsheetConfig,
+ *         data_tables?: DataTablesConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -2799,6 +2838,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
  *         liip_imagine?: LiipImagineConfig,
  *         html_to_spreadsheet?: HtmlToSpreadsheetConfig,
+ *         data_tables?: DataTablesConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -2823,6 +2863,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         sensiolabs_gotenberg?: SensiolabsGotenbergConfig,
  *         liip_imagine?: LiipImagineConfig,
  *         html_to_spreadsheet?: HtmlToSpreadsheetConfig,
+ *         data_tables?: DataTablesConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

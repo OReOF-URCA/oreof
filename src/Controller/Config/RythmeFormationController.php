@@ -10,12 +10,12 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\RythmeFormationDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\RythmeFormation;
 use App\Form\RythmeFormationType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\RythmeFormationRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -29,36 +29,10 @@ use Symfony\Component\Routing\Attribute\Route;
 class RythmeFormationController extends AbstractController
 {
     use CsrfDeleteTrait;
-    #[Route('/', name: 'app_rythme_formation_index', methods: ['GET'])]
+    #[Route('/', name: 'app_rythme_formation_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
-    ): Response
-    {
-
-        $table = $builder
-            ->setEntity(RythmeFormation::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé du rythme de formation',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addShowAction('app_rythme_formation_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir un rythme de formation',
-            ])
-            ->addEditAction('app_rythme_formation_edit', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Modifier un rythme de formation',
-            ])
-            ->addDuplicateAction('app_rythme_formation_duplicate')
-            ->addDeleteAction('app_rythme_formation_delete')
-            ->build();
+        RythmeFormationDataTable $table,
+    ): Response {
         return $this->render('config/rythme_formation/index.html.twig', [
             'table' => $table,
         ]);

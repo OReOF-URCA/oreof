@@ -10,11 +10,11 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\AnneeUniversitaireDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\AnneeUniversitaire;
 use App\Form\AnneeUniversitaireType;
 use App\Repository\AnneeUniversitaireRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -29,37 +29,10 @@ class AnneeUniversitaireController extends AbstractController
 {
     use CsrfDeleteTrait;
 
-    #[Route('/', name: 'app_annee_universitaire_index', methods: ['GET'])]
+    #[Route('/', name: 'app_annee_universitaire_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
-    ): Response
-    {
-        $table = $builder
-            ->setEntity(AnneeUniversitaire::class)
-            ->setPerPage(20)
-            ->setDefaultSort('annee', 'desc')
-            ->addColumn('libelle', [
-                'label' => 'Libellé',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('annee', [
-                'label' => 'Année',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addShowAction('app_annee_universitaire_show', [
-                'modal' => true,
-                'modal_title' => 'Voir une année universitaire',
-            ])
-            ->addEditAction('app_annee_universitaire_edit', [
-                'modal' => true,
-                'modal_title' => 'Modifier une année universitaire',
-            ])
-            ->addDuplicateAction('app_annee_universitaire_duplicate')
-            ->addDeleteAction('app_annee_universitaire_delete')
-            ->build();
-
+        AnneeUniversitaireDataTable $table,
+    ): Response {
         return $this->render('config/annee_universitaire/index.html.twig', [
             'table' => $table,
         ]);

@@ -2,7 +2,7 @@
     <div class="divide-y divide-secondary-100 dark:divide-secondary-700">
         {% for field in config.fields %}
             {% if not field.hidden %}
-                {% set value = this.getFieldValue(entity, field.field) %}
+                {% set value = this.getFieldValue(entity, field) %}
                 <div class="grid gap-2 px-4 py-3 sm:grid-cols-[minmax(0,30%)_1fr] sm:gap-4 sm:px-5">
                     <div class="text-sm font-semibold text-secondary-700 dark:text-secondary-200">{{ field.label }}</div>
                     <div class="text-sm text-secondary-700 dark:text-secondary-300 {{ field.class }}">

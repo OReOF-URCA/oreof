@@ -10,13 +10,13 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\TypeEpreuveDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeEpreuve;
 use App\Form\TypeEpreuveType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\TypeEpreuveRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -31,72 +31,13 @@ class TypeEpreuveController extends AbstractController
 {
     use CsrfDeleteTrait;
     
-    #[Route('/', name: 'app_type_epreuve_index', methods: ['GET'])]
+    #[Route('/', name: 'app_type_epreuve_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
-    ): Response
-    {
-        $table = $builder
-            ->setEntity(TypeEpreuve::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé du type d\'épreuve',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('sigle', [
-                'label' => 'Code',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('typeDiplomes', [
-                'label' => 'Type(s) de diplôme',
-                'filterable' => true,
-                'type' => 'collection',
-                'format' => 'badges',
-                'collection_property' => 'libelle',
-                'badge_class' => 'bg-primary',
-                'entity' => TypeDiplome::class,
-                'entity_label' => 'libelle',
-                'searchable' => false,
-            ])
-            ->addColumn('hasDuree', [
-                'label' => 'Avec durée ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addColumn('hasJustification', [
-                'label' => 'Avec justification ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addShowAction('app_type_epreuve_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir un type d\'épreuve',
-            ])
-            ->addEditAction('app_type_epreuve_edit', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Modifier un type d\épreuve',
-            ])
-            ->addDuplicateAction('app_type_epreuve_duplicate')
-            ->addDeleteAction('app_type_epreuve_delete')
-            ->build();
-
-        return $this->render(
-            'config/type_epreuve/index.html.twig',
-            [
-                'table' => $table,
-            ]
-        );
+        TypeEpreuveDataTable $table,
+    ): Response {
+        return $this->render('config/type_epreuve/index.html.twig', [
+            'table' => $table,
+        ]);
     }
 
     #[Route('/new', name: 'app_type_epreuve_new', methods: ['GET', 'POST'])]

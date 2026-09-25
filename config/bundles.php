@@ -26,4 +26,5 @@ return [
     Liip\ImagineBundle\LiipImagineBundle::class => ['all' => true],
     Davidannebicque\HtmlToSpreadsheetBundle\HtmlToSpreadsheetBundle::class => ['all' => true],
     Dannebicque\WorkflowOperationsBundle\WorkflowOperationsBundle::class => ['all' => true],
+    Pentiminax\UX\DataTables\PentiminaxDataTablesBundle::class => ['all' => true]
 ];

@@ -22,7 +22,9 @@ trait CsrfDeleteTrait
             try {
                 $content = $request->getContent();
                 if ($content !== '' && (str_starts_with(trim($content), '{') || str_starts_with(trim($content), '['))) {
-                    $token = JsonRequest::getValueFromRequest($request, 'csrf');
+                    $token = JsonRequest::getValueFromRequest($request, '_token')
+                        ?? JsonRequest::getValueFromRequest($request, 'csrf')
+                        ?? JsonRequest::getValueFromRequest($request, 'csrf_token');
                 }
             } catch (\JsonException) {
                 $token = null;

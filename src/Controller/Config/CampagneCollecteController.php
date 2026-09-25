@@ -10,6 +10,7 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\CampagneCollecteDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\AnneeUniversitaire;
 use App\Entity\CampagneCollecte;
@@ -20,7 +21,6 @@ use App\Form\CampagneCollecteType;
 use App\Form\ConfigurePublicationType;
 use App\Repository\CampagneCollecteRepository;
 use App\Repository\DpeParcoursRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -37,62 +37,11 @@ class CampagneCollecteController extends AbstractController
 {
     use CsrfDeleteTrait;
 
-    #[Route('/', name: 'app_campagne_collecte_index', methods: ['GET'])]
+    #[Route('/', name: 'app_campagne_collecte_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
+        CampagneCollecteDataTable $table
     ): Response
     {
-        $table = $builder->setEntity(CampagneCollecte::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-            ->addColumn('libelle', [
-                'label' => 'Libellé de la campagne de collecte',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('anneeUniversitaire', [
-                'label' => 'Année Universitaire',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'entity',
-                'entity' => AnneeUniversitaire::class,
-            ])
-            ->addColumn('timelineDates', [
-                'label' => 'Dates',
-                'searchable' => false,
-                'template' => 'config/campagne_collecte/_datatable_timeline.html.twig',
-            ])
-            ->addColumn('defaut', [
-                'label' => 'Collecte DPE active ?',
-                'searchable' => false,
-                'template' => 'config/campagne_collecte/_datatable_defaut.html.twig',
-            ])
-            ->addColumn('enablePublication', [
-                'label' => 'Configuration de la publication',
-                'searchable' => false,
-                'template' => 'config/campagne_collecte/_datatable_publication.html.twig',
-            ])
-            ->addShowAction('app_campagne_collecte_show', [
-                'modal' => true,
-                'modal_title' => 'Voir une campagne de collecte',
-            ])
-            ->addEditAction('app_campagne_collecte_edit', [
-                'modal' => true,
-                'modal_title' => 'Modifier une campagne de collecte',
-            ])
-            ->addDuplicateAction('app_campagne_collecte_duplicate')
-            ->addDeleteAction('app_campagne_collecte_delete')
-            ->addAction('configure_publication', [
-                'label' => 'Paramétrer',
-                'route' => 'app_campagne_collecte_configure_publication',
-                'icon' => 'fa-light fa-wrench',
-                'class' => 'inline-flex items-center gap-1 rounded-md border border-blue-300 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 transition hover:bg-blue-100',
-                'modal' => true,
-                'modal_title' => 'Paramétrer les options de publication',
-            ])
-            ->build();
-
-
         return $this->render('config/campagne_collecte/index.html.twig', [
             'table' => $table,
         ]);

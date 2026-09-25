@@ -49,6 +49,7 @@ class DetailBuilder
      *   - label: string - Label affiché (défaut: field en titlecase)
      *   - type: string - Type de donnée: 'text', 'email', 'url', 'textarea', 'rich_text', 'boolean', 'date', 'datetime', 'entity', 'collection' (défaut: 'text')
      *   - format: string - Format d'affichage: 'date', 'datetime', 'currency', 'boolean', 'badge', 'badges', 'entity_badge', 'html', 'markdown' (défaut: null)
+     *   - callback: callable - Fonction personnalisée recevant l'entité et retournant la valeur
      *   - hidden: bool - Masquer ce champ (défaut: false)
      *   - entity: string - Classe d'entité pour type 'entity'
      *   - entity_label: string - Propriété à afficher pour type 'entity' ou 'collection' (défaut: '__toString')
@@ -70,6 +71,7 @@ class DetailBuilder
             'label' => $this->generateLabel($field),
             'type' => 'text',
             'format' => null,
+            'callback' => null,
             'hidden' => false,
             'entity' => null,
             'entity_label' => '__toString',
@@ -86,6 +88,20 @@ class DetailBuilder
         ], $options);
 
         return $this;
+    }
+
+    /**
+     * Ajoute un champ personnalisé calculé via un callback
+     *
+     * @param string $field Identifiant du champ
+     * @param callable $callback Fonction recevant l'entité et retournant la valeur
+     * @param array $options Options d'affichage (label, format, class, empty_text...)
+     */
+    public function addCustomField(string $field, callable $callback, array $options = []): self
+    {
+        $options['callback'] = $callback;
+
+        return $this->addField($field, $options);
     }
 
     private function generateLabel(string $field): string

@@ -11,13 +11,13 @@ namespace App\Controller\Config;
 
 use App\Controller\BaseController;
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\TypeDiplomeDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\TypeDiplome;
 use App\Form\TypeDiplomeType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Service\DetailBuilder;
 use App\Repository\TypeDiplomeRepository;
-use App\Service\DataTableBuilder;
 use App\Service\TypeDiplomePlateformeService;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -46,78 +46,11 @@ class TypeDiplomeController extends BaseController
     {
     }
 
-    #[Route('/', name: 'app_type_diplome_index', methods: ['GET'])]
+    #[Route('/', name: 'app_type_diplome_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
+        TypeDiplomeDataTable $table
     ): Response
     {
-        $table = $builder
-            ->setEntity(TypeDiplome::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé du type de diplôme',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('libelleCourt', [
-                'label' => 'Sigle',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('codeApogee', [
-                'label' => 'Code Apogée',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('hasMemoire', [
-                'label' => 'Mémoire ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addColumn('hasStage', [
-                'label' => 'Stage ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addColumn('hasProjet', [
-                'label' => 'Projet ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addColumn('hasSituationPro', [
-                'label' => 'Situation Pro. ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addColumn('ectsObligatoireSurEc', [
-                'label' => 'ECTS Obli. ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addShowAction('app_type_diplome_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir un type de diplôme',
-            ])
-            ->addEditAction('app_type_diplome_edit', [
-                'modal' => false,
-            ])
-            ->addDuplicateAction('app_type_diplome_duplicate')
-            ->addDeleteAction('app_type_diplome_delete')
-            ->build();
         return $this->render('config/type_diplome/index.html.twig', [
             'table' => $table,
         ]);

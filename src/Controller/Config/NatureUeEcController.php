@@ -10,12 +10,12 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\NatureUeEcDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\NatureUeEc;
 use App\Form\NatureUeEcType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\NatureUeEcRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -29,50 +29,10 @@ use Symfony\Component\Routing\Attribute\Route;
 class NatureUeEcController extends AbstractController
 {
     use CsrfDeleteTrait;
-    #[Route('/', name: 'app_nature_ue_ec_index', methods: ['GET'])]
+    #[Route('/', name: 'app_nature_ue_ec_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
-    ): Response
-    {
-        $table = $builder
-            ->setEntity(NatureUeEc::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('choix', [
-                'label' => 'Choix ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addColumn('libre', [
-                'label' => 'Libre ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addShowAction('app_nature_ue_ec_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir une nature d\'UE ou d\'EC',
-            ])
-            ->addEditAction('app_nature_ue_ec_edit', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Modifier une nature d\'UE ou d\'EC',
-            ])
-            ->addDuplicateAction('app_nature_ue_ec_duplicate')
-            ->addDeleteAction('app_nature_ue_ec_delete')
-            ->build();
-
+        NatureUeEcDataTable $table,
+    ): Response {
         return $this->render('config/nature_ue_ec/index.html.twig', [
             'table' => $table,
         ]);

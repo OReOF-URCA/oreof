@@ -10,13 +10,13 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\PlateformeAdmissionDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\PlateformeAdmission;
 use App\Form\PlateformeAdmissionType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\PlateformeAdmissionRepository;
 use App\Service\DetailBuilder;
-use App\Service\DataTableBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,45 +30,10 @@ use Symfony\Component\Routing\Attribute\Route;
 class PlateformAdmissionController extends AbstractController
 {
     use CsrfDeleteTrait;
-    #[Route('/', name: 'app_plateforme_adminission_index', methods: ['GET'])]
+    #[Route('/', name: 'app_plateforme_adminission_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
-    ): Response
-    {
-        $table = $builder
-            ->setEntity(PlateformeAdmission::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé de la plateforme d\'admission',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('code', [
-                'label' => 'Code/Sigle',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('active', [
-                'label' => 'Active ?',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addShowAction('app_plateforme_adminission_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir un type de diplôme',
-            ])
-            ->addEditAction('app_plateforme_adminission_edit', [
-                'modal' => false,
-            ])
-            ->addDuplicateAction('app_plateforme_adminission_duplicate')
-            ->addDeleteAction('app_plateforme_adminission_delete')
-            ->build();
+        PlateformeAdmissionDataTable $table,
+    ): Response {
         return $this->render('config/plateforme_adminission/index.html.twig', [
             'table' => $table,
         ]);

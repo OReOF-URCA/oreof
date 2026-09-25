@@ -11,12 +11,12 @@ namespace App\Controller\Config;
 
 use App\Classes\AddUser;
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\ComposanteDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\Composante;
 use App\Entity\User;
 use App\Form\ComposanteType;
 use App\Repository\ComposanteRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -30,62 +30,11 @@ class ComposanteController extends AbstractController
 {
     use CsrfDeleteTrait;
 
-    #[Route('/', name: 'app_composante_index', methods: ['GET'])]
+    #[Route('/', name: 'app_composante_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
+        ComposanteDataTable $table
     ): Response
     {
-        $table = $builder
-            ->setEntity(Composante::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Nom de la composante',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('sigle', [
-                'label' => 'Sigle',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('codeComposante', [
-                'label' => 'Code compo.',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('codeApogee', [
-                'label' => 'Code CIP (Apogée)',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('directeur', [
-                'label' => 'Directeur',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'entity',
-                'entity' => User::class,
-            ])
-            ->addColumn('responsableDpe', [
-                'label' => 'Responsable DPE',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'entity',
-                'entity' => User::class,
-            ])
-            ->addShowAction('app_composante_show', [
-                'modal' => true,
-                'modal_title' => 'Voir une composante',
-            ])
-            ->addEditAction('app_composante_edit', [
-                'modal' => true,
-                'modal_title' => 'Modifier une composante',
-            ])
-//            ->addDuplicateAction('app_composante_duplicate')
-            ->addDeleteAction('app_composante_delete')
-            ->build();
         return $this->render('config/composante/index.html.twig', [
             'table' => $table,
         ]);

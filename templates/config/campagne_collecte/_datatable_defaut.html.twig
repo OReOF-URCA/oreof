@@ -1,5 +1,5 @@
 {# Template partiel pour la colonne "Collecte DPE active ?" #}
-<span class="badge {% if item.defaut %}bg-success{% else %}bg-warning{% endif %}">
-    {{ item.defaut ? 'Active' : 'Non' }}
+{% set obj = row ?? item ?? entity %}
+<span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium {% if obj.defaut %}bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20{% else %}bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20{% endif %}">
+    {{ obj.defaut ? 'Active' : 'Non' }}
 </span>
-

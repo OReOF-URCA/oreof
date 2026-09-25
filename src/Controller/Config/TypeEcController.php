@@ -8,8 +8,8 @@
  */
 
 namespace App\Controller\Config;
-
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\TypeEcDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\Formation;
 use App\Entity\TypeDiplome;
@@ -17,7 +17,6 @@ use App\Entity\TypeEc;
 use App\Form\TypeEcType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\TypeEcRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -31,60 +30,10 @@ use Symfony\Component\Routing\Attribute\Route;
 class TypeEcController extends AbstractController
 {
     use CsrfDeleteTrait;
-    #[Route('/', name: 'app_type_ec_index', methods: ['GET'])]
+    #[Route('/', name: 'app_type_ec_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
-    ): Response
-    {
-        $table = $builder
-            ->setEntity(TypeEc::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé du type d\'EC',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-
-            // Colonne avec collection de relations
-            ->addColumn('typeDiplomes', [
-                'label' => 'Type(s) de diplôme',
-                'filterable' => true,
-                'type' => 'collection',
-                'format' => 'badges',
-                'collection_property' => 'libelle',
-                'badge_class' => 'bg-primary',
-                'entity' => TypeDiplome::class,
-                'entity_label' => 'libelle',
-                'searchable' => false,
-            ])
-            ->addColumn('formation', [
-                'label' => 'Formation',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'entity',
-                'entity' => Formation::class,
-                'format' => 'entity_badge',
-                'badge_class' => 'bg-info',
-                'null_label' => 'Commune',
-                'null_badge_class' => 'bg-success',
-            ])
-            ->addShowAction('app_type_ec_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir un type d\'EC',
-            ])
-            ->addEditAction('app_type_ec_edit', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Modifier un type d\'EC',
-            ])
-            ->addDuplicateAction('app_type_ec_duplicate')
-            ->addDeleteAction('app_type_ec_delete')
-            ->build();
-
+        TypeEcDataTable $table,
+    ): Response {
         return $this->render('config/type_ec/index.html.twig', [
             'table' => $table,
         ]);

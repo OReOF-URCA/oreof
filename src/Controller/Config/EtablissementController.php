@@ -11,13 +11,13 @@ namespace App\Controller\Config;
 
 use App\Controller\BaseController;
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\EtablissementDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\Adresse;
 use App\Entity\Etablissement;
 use App\Form\EtablissementType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\EtablissementRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\TurboStreamResponseFactory;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,44 +29,10 @@ class EtablissementController extends BaseController
 {
     use CsrfDeleteTrait;
 
-    #[Route('/', name: 'app_etablissement_index', methods: ['GET'])]
+    #[Route('/', name: 'app_etablissement_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
-    ): Response
-    {
-        $table = $builder
-            ->setEntity(Etablissement::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé de l\'établissement',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('adresse', [
-                'label' => 'Adresse',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'entity',
-                'entity' => Adresse::class,
-                'entity_label' => 'display',
-                'is_html' => true,
-            ])
-            ->addShowAction('app_etablissement_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir un établissement',
-            ])
-            ->addEditAction('app_etablissement_edit', [
-                'modal' => false,
-                'modal_size' => 'lg',
-                'modal_title' => 'Modifier un établissement',
-            ])
-            ->addDeleteAction('app_etablissement_delete')
-            ->build();
-
+        EtablissementDataTable $table,
+    ): Response {
         return $this->render('config/etablissement/index.html.twig', [
             'table' => $table,
         ]);
@@ -193,14 +159,14 @@ class EtablissementController extends BaseController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_etablissement_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_etablissement_delete', methods: ['DELETE', 'POST'])]
     public function delete(
         TurboStreamResponseFactory $turboStream,
         Request                 $request,
         Etablissement           $etablissement,
         EtablissementRepository $etablissementRepository
     ): Response {
-        if ($this->isDeleteTokenValid($etablissement, $request->request->get('_token'))) {
+        if ($this->isDeleteTokenValid($etablissement, $this->getCsrfTokenFromRequest($request))) {
             $etablissementRepository->remove($etablissement, true);
             return $turboStream->streamToastSuccess('Établissement supprimé avec succès', true);
         }

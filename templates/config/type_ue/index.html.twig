@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-    {{ component('DataTable', { config: table }) }}
+    {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
 {% endblock %}
 
 {% set header_title %}
@@ -21,6 +21,6 @@
             }) }}
     >
         <twig:UX:Icon name="icon:add" class="h-4 w-4"/>
-        <span> Ajouter un type d\'unité d\'enseignement (UE)</span>
+        <span> Ajouter un type d'unité d'enseignement (UE)</span>
     </a>
 {% endblock %}

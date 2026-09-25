@@ -136,6 +136,10 @@ class TypeDiplome
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $logo = [];
 
+    public function __toString()
+    {
+        return $this->libelle;
+    }
 
     public function __construct()
     {

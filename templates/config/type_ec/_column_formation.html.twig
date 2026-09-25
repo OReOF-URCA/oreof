@@ -1,0 +1,5 @@
+{% if row.formation %}
+    <span class="inline-flex items-center rounded-md bg-cyan-50 px-2 py-0.5 text-xs font-medium text-cyan-700 ring-1 ring-inset ring-cyan-700/10">{{ row.formation.display }}</span>
+{% else %}
+    <span class="inline-flex items-center rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">Commune</span>
+{% endif %}

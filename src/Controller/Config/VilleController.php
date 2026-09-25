@@ -10,12 +10,12 @@
 namespace App\Controller\Config;
 
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\VilleDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\Ville;
 use App\Form\VilleType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\VilleRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -30,40 +30,10 @@ class VilleController extends AbstractController
 {
     use CsrfDeleteTrait;
     
-    #[Route('/', name: 'app_ville_index', methods: ['GET'])]
+    #[Route('/', name: 'app_ville_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
-    ): Response
-    {
-        $table = $builder
-            ->setEntity(Ville::class)
-            ->setPerPage(20)
-            ->setDefaultSort('libelle')
-
-            // Colonne simple avec tri et recherche
-            ->addColumn('libelle', [
-                'label' => 'Libellé de la ville',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('codeApogee', [
-                'label' => 'Code Apogée',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addShowAction('app_ville_show', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Voir une ville',
-            ])
-            ->addEditAction('app_ville_edit', [
-                'modal' => true,
-                'modal_size' => 'lg',
-                'modal_title' => 'Modifier une ville',
-            ])
-            ->addDuplicateAction('app_ville_duplicate')
-            ->addDeleteAction('app_ville_delete')
-            ->build();
+        VilleDataTable $table,
+    ): Response {
         return $this->render('config/ville/index.html.twig', [
             'table' => $table,
         ]);

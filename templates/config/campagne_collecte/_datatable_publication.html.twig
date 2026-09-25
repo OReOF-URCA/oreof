@@ -1,17 +1,18 @@
 {# Template partiel pour la colonne "Configuration de la publication" #}
-{% set isPublished = item.enablePublication == true %}
+{% set obj = row ?? item ?? entity %}
+{% set isPublished = obj.enablePublication == true %}
 {% set publicationTagStyle = {
     'annee_archivee': {
         label: 'Année archivée',
-        badgeColor: 'bg-warning'
+        badgeColor: 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20'
     },
     'annee_courante': {
         label: 'Année courante (N)',
-        badgeColor: 'bg-primary'
+        badgeColor: 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10'
     },
     'annee_suivante': {
         label: 'Année suivante (N+1)',
-        badgeColor: 'bg-info'
+        badgeColor: 'bg-cyan-50 text-cyan-700 ring-1 ring-inset ring-cyan-700/10'
     }
 } %}
 {% set libelleConfigurationPublication = {
@@ -19,39 +20,38 @@
     'publication_mccc': 'MCCC (PDF)'
 } %}
 
-{% if item.publicationTag is not null and item.publicationTag not in ['none', ''] and item.publicationTag in publicationTagStyle|keys %}
-    <p class="my-0">
-        <span class="badge {{ publicationTagStyle[item.publicationTag].badgeColor }}">
-            {{ publicationTagStyle[item.publicationTag].label }}
+<div class="flex flex-col gap-1">
+{% if obj.publicationTag is not null and obj.publicationTag not in ['none', ''] and obj.publicationTag in publicationTagStyle|keys %}
+    <div>
+        <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium {{ publicationTagStyle[obj.publicationTag].badgeColor }}">
+            {{ publicationTagStyle[obj.publicationTag].label }}
         </span>
-    </p>
+    </div>
 {% endif %}
 
-<p class="my-0">
-    <span class="badge {{ isPublished ? 'bg-success' : 'bg-danger' }}">
+<div>
+    <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium {{ isPublished ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/10' }}">
         {{ isPublished ? 'Publié' : 'Non publié' }}
     </span>
-</p>
+</div>
 
-{% if item.publicationOptions is not null and item.publicationOptions|length > 0 %}
-    <ul class="list-unstyled my-0">
-        {% for optionKey, optionValue in item.publicationOptions %}
+{% if obj.publicationOptions is not null and obj.publicationOptions|length > 0 %}
+    <div class="flex flex-wrap gap-1">
+        {% for optionKey, optionValue in obj.publicationOptions %}
             {% if optionKey in libelleConfigurationPublication|keys %}
-                <li>
-                    <span class="badge {{ optionValue == true ? 'bg-success' : 'bg-danger' }}">
-                        {{ libelleConfigurationPublication[optionKey] }}
-                    </span>
-                </li>
+                <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium {{ optionValue == true ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/10' }}">
+                    {{ libelleConfigurationPublication[optionKey] }}
+                </span>
             {% endif %}
         {% endfor %}
-    </ul>
+    </div>
 {% endif %}
 
-{% if item.isFinished %}
-    <p class="my-0">
-        <span class="badge bg-dark">
+{% if obj.isFinished %}
+    <div>
+        <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-600/20">
             Campagne consolidation terminée
         </span>
-    </p>
+    </div>
 {% endif %}
-
+</div>

@@ -9,12 +9,11 @@
 
 namespace App\Controller\Config;
 
-use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\ActualiteDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\Actualite;
 use App\Form\ActualiteType;
 use App\Repository\ActualiteRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -23,51 +22,17 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Controller\Traits\CsrfDeleteTrait;
 
 #[Route('/administration/actualite')]
 class ActualiteController extends AbstractController
 {
     use CsrfDeleteTrait;
 
-    #[Route('/', name: 'app_actualite_index', methods: ['GET'])]
+    #[Route('/', name: 'app_actualite_index', methods: ['GET', 'POST'])]
     public function index(
-        DataTableBuilder $builder
-    ): Response
-    {
-        $table = $builder
-            ->setEntity(Actualite::class)
-            ->setPerPage(20)
-            ->setDefaultSort('datePublication', 'desc')
-            ->addColumn('titre', [
-                'label' => 'Titre',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('datePublication', [
-                'label' => 'Date',
-                'sortable' => true,
-                'filterable' => true,
-                'format' => 'datetime',
-            ])
-            ->addColumn('affiche', [
-                'label' => 'Publié ?',
-                'sortable' => true,
-                'filterable' => true,
-                'format' => 'boolean',
-                'type' => 'boolean',
-            ])
-            ->addShowAction('app_actualite_show', [
-                'modal' => true,
-                'modal_title' => 'Voir une actualité',
-            ])
-            ->addEditAction('app_actualite_edit', [
-                'modal' => true,
-                'modal_title' => 'Modifier une actualité',
-            ])
-            ->addDuplicateAction('app_actualite_duplicate')
-            ->addDeleteAction('app_actualite_delete')
-            ->build();
-
+        ActualiteDataTable $table,
+    ): Response {
         return $this->render('config/actualite/index.html.twig', [
             'table' => $table,
         ]);
