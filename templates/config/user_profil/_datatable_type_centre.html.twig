@@ -1,4 +1,4 @@
-{% set centre = item.profil.centre ?? null %}
+{% set centre = row.profil.centre ?? null %}
 
 {% if centre is null or centre.value == '' %}
     <twig:Badge label="Non défini" variant="secondary"/>
@@ -13,4 +13,3 @@
 {% else %}
     <twig:Badge label="Inconnu" variant="danger"/>
 {% endif %}
-

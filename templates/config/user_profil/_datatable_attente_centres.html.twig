@@ -1,8 +1,8 @@
+{% set obj = row ?? item ?? entity %}
 <div class="flex flex-wrap gap-1.5">
-    {% for centre in item.userProfils %}
-            {{ component('Badge', { dto: centre|badgeTypeCentreDto }) }}
+    {% for centre in obj.userProfils %}
+        {{ component('Badge', { dto: centre|badgeTypeCentreDto }) }}
     {% else %}
         <twig:Badge label="Aucun profil" variant="secondary"/>
     {% endfor %}
 </div>
-

@@ -11,7 +11,6 @@ namespace App\Controller;
 
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Notification\NotificationSettingsService;
-use App\Repository\NotificationListeRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;

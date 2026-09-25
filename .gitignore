@@ -69,6 +69,9 @@ public/api_json_v2/
 *~
 .DS_Store
 .yarnrc.yaml
+/packages/ux-datatables/
+/packages/html-to-spreadsheet-bundle/
+
 
 ###> Dependency files ###
 composer.lock

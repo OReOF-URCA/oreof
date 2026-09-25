@@ -1,24 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-    {{ component('DataTable', { config: table }) }}
-{% endblock %}
-
-{% set header_title %}
-    Affectation des profils
-{% endset %}
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Gestion des utilisateurs',
-        },
-        {
-            href:'',
-            title: 'Affectation des profils',
-        }
-    ]}) }}
+    {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
 {% endblock %}
 
 {% block bouton_header %}

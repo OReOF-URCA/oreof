@@ -13,6 +13,7 @@ use App\Classes\Ldap;
 use App\Classes\Mailer;
 use App\Controller\BaseController;
 use App\Controller\Traits\CsrfDeleteTrait;
+use App\DataTable\UserRepertoireDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\User;
 use App\Enums\CentreGestionEnum;
@@ -23,7 +24,6 @@ use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\ProfilRepository;
 use App\Repository\UserProfilRepository;
 use App\Repository\UserRepository;
-use App\Service\DataTableBuilder;
 use App\Service\DetailBuilder;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -38,72 +38,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class UserController extends BaseController
 {
     use CsrfDeleteTrait;
-    #[Route('/repertoire', name: 'app_user_repertoire', methods: ['GET'])]
-    public function repertoire(DataTableBuilder $builder): Response
+    
+    #[Route('/repertoire', name: 'app_user_repertoire', methods: ['GET', 'POST'])]
+    public function repertoire(UserRepertoireDataTable $table): Response
     {
-        $composanteId = null;
-        if ($this->isGranted('MANAGE', ['route' => 'app_composante', 'subject' => 'composante'])) {
-            foreach ($this->getUser()?->getUserProfils() as $centre) {
-                if ($centre->getComposante() !== null) {
-                    $composanteId = $centre->getComposante()->getId();
-                    break;
-                }
-            }
-        }
-
-        $table = $builder
-            ->setEntity(User::class)
-            ->setPerPage(20)
-            ->setDefaultSort('nom')
-            ->addBaseWhere('e.isEnable = :isEnable')
-            ->addBaseWhere('e.isDeleted = :isDeleted')
-            ->addBaseWhere('e.userProfils IS EMPTY')
-            ->addBaseParameter('isEnable', true)
-            ->addBaseParameter('isDeleted', false)
-            ->addColumn('nom', [
-                'label' => 'Nom',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('prenom', [
-                'label' => 'Prénom',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('email', [
-                'label' => 'Email',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('username', [
-                'label' => 'Login URCA',
-                'sortable' => true,
-                'filterable' => true,
-            ])
-            ->addColumn('id', [
-                'label' => 'Actions',
-                'sortable' => false,
-                'filterable' => false,
-                'searchable' => false,
-                'template' => 'config/user/_datatable_repertoire_actions.html.twig',
-            ]);
-
-        if ($composanteId !== null) {
-            $table
-                ->addBaseJoin('left', 'e.userProfils', 'up_filter')
-                ->addBaseJoin('left', 'up_filter.formation', 'uf_f')
-                ->addBaseJoin('left', 'up_filter.parcours', 'uf_pa')
-                ->addBaseJoin('left', 'uf_pa.formation', 'uf_pf')
-                ->addBaseWhere('(
-                    IDENTITY(up_filter.composante) = :composanteId
-                    OR IDENTITY(uf_f.composantePorteuse) = :composanteId
-                    OR IDENTITY(uf_pf.composantePorteuse) = :composanteId
-                )')
-                ->addBaseParameter('composanteId', $composanteId);
-        }
-
         return $this->render('config/user/repertoire.html.twig', [
-            'table' => $table->build(),
+            'table' => $table,
         ]);
     }
 
@@ -297,7 +237,7 @@ class UserController extends BaseController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_user_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_user_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(
         TurboStreamResponseFactory $turboStream,
         DetailBuilder              $builder,
@@ -330,7 +270,7 @@ class UserController extends BaseController
 
     }
 
-    #[Route('/show-attente/{id}', name: 'app_user_show_attente', methods: ['GET'])]
+    #[Route('/show-attente/{id}', name: 'app_user_show_attente', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function showAttente(
         TurboStreamResponseFactory $turboStream,
         Request        $request,
@@ -360,7 +300,7 @@ class UserController extends BaseController
         );
     }
 
-    #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_user_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function edit(
         TurboStreamResponseFactory $turboStream,
@@ -398,7 +338,7 @@ class UserController extends BaseController
     /**
      * @throws JsonException
      */
-    #[Route('/{id}', name: 'app_user_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'app_user_delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(
         TurboStreamResponseFactory $turboStream,

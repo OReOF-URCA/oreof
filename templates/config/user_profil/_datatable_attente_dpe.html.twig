@@ -1,10 +1,10 @@
-{% if item.composanteDemande is not null %}
-    {% if item.isValidDpe %}
-        <twig:Badge label="Oui ({{ item.dateValideDpe|dateTimeFr }})" variant="success"/>
+{% set obj = row ?? item ?? entity %}
+{% if obj.composanteDemande is not null %}
+    {% if obj.isValidDpe %}
+        <twig:Badge label="Oui ({{ obj.dateValideDpe|dateTimeFr }})" variant="success"/>
     {% else %}
-        <twig:Badge label="Non ({{ item.composanteDemande.libelle }})" variant="warning"/>
+        <twig:Badge label="Non ({{ obj.composanteDemande.libelle }})" variant="warning"/>
     {% endif %}
 {% else %}
     <twig:Badge label="Etablissement" variant="success"/>
 {% endif %}
-
