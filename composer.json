@@ -15,7 +15,7 @@
     "ext-libxml": "*",
     "ext-zip": "*",
     "apereo/phpcas": "^1.6",
-    "davidannebicque/html-to-spreadsheet-bundle": "*",
+    "davidannebicque/html-to-spreadsheet-bundle": "^0.3.0",
     "doctrine/doctrine-bundle": "^3.2",
     "doctrine/doctrine-migrations-bundle": "^4.0.0",
     "doctrine/orm": "^3.6",
@@ -25,6 +25,7 @@
     "league/commonmark": "^2.8",
     "liip/imagine-bundle": "^2.15",
     "mpdf/mpdf": "^8.1",
+    "pentiminax/ux-datatables": "dev-main",
     "phpdocumentor/reflection-docblock": "^6.0.3",
     "phpoffice/phpspreadsheet": "^5.1",
     "psr/http-client": "*",
@@ -76,6 +77,12 @@
     },
     "sort-packages": true
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/Dannebicque/ux-datatables.git"
+    }
+  ],
   "autoload": {
     "psr-4": {
       "App\\": "src/",

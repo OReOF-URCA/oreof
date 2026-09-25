@@ -72,6 +72,18 @@
             "config/routes/liip_imagine.yaml"
         ]
     },
+    "pentiminax/ux-datatables": {
+        "version": "1.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "0.43",
+            "ref": "5aab256ed30f8daa80b87aa5fef2ca7f74670f27"
+        },
+        "files": [
+            "config/routes/data_tables.yaml"
+        ]
+    },
     "php-http/discovery": {
         "version": "1.20",
         "recipe": {
