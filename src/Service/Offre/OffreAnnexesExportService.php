@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Service\Offre;
 
+use App\DTO\DiffObject;
 use App\Entity\Annee;
 use App\Entity\CampagneCollecte;
 use App\Entity\Composante;
@@ -313,7 +314,7 @@ final class OffreAnnexesExportService
             'psup', 'parcoursup' => $this->buildParcoursupRows($allDpeParcours, $anneesByParcours, $tpaByTypeDiplome, $paramsByAnnee, $plateforme, $campagne, $typeDiplome, $hasAnyTpasForPlatform, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee),
             'mm', 'monmaster' => $this->buildMonMasterRows($allDpeParcours, $anneesByParcours, $tpaByTypeDiplome, $paramsByAnnee, $plateforme, $campagne, $typeDiplome, $hasAnyTpasForPlatform, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee),
             'ec', 'ecandidat' => $this->buildECandidatRows($allDpeParcours, $anneesByParcours, $tpaByTypeDiplome, $paramsByAnnee, $plateforme, $campagne, $typeDiplome, $hasAnyTpasForPlatform, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee),
-            'eef' => $this->buildEefRows($allDpeParcours, $anneesByParcours, $campagne, $typeDiplome),
+            'eef' => $this->buildEefRows($allDpeParcours, $anneesByParcours, $campagne, $typeDiplome, $dpeN1ByParcours),
             default => $this->buildDefaultPlatformRows($allDpeParcours, $anneesByParcours, $tpaByTypeDiplome, $paramsByAnnee, $plateforme, $campagne, $typeDiplome, $hasAnyTpasForPlatform, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee),
         };
 
@@ -745,6 +746,29 @@ final class OffreAnnexesExportService
     }
 
     /**
+     * Helper to compute diff for mention and parcours between N-1 and N.
+     *
+     * @return array{mention: DiffObject, parcours: DiffObject}
+     */
+    private function resolveEntityDiff(Parcours $parcours, ?DpeParcours $dpeN1): array
+    {
+        $parcoursN1 = $dpeN1?->getParcours() ?? $parcours->getParcoursOrigine() ?? $parcours->getParcoursOrigineCopie();
+        $formation = $parcours->getFormation();
+        $formationN1 = $parcoursN1?->getFormation() ?? $formation?->getFormationOrigineCopie();
+
+        $parcoursN = $parcours->getLibelle() ?: '-';
+        $parcoursN1Libelle = $parcoursN1?->getLibelle() ?: null;
+
+        $mentionN = $formation?->getDisplay() ?: '-';
+        $mentionN1Display = $formationN1?->getDisplay() ?: null;
+
+        return [
+            'parcours' => new DiffObject($parcoursN1Libelle, $parcoursN),
+            'mention' => new DiffObject($mentionN1Display, $mentionN),
+        ];
+    }
+
+    /**
      * Unified row builder for eCandidat.
      *
      * @param array<int, DpeParcours> $allDpeParcours
@@ -817,13 +841,13 @@ final class OffreAnnexesExportService
                 $ouvertureN1 = $n1['hasN1'] ? ($n1['isOuvertN1'] ? 'OUI' : 'NON') : '';
                 $integrationEcN1 = $n1['hasN1'] ? ($n1['isOuvertN1'] ? 'OUI' : 'NON') : '';
                 $capaciteN1 = $n1['hasN1'] ? ($n1['paramN1']?->getCapaciteGlobale() ?? $n1['anneeN1']?->getCapaciteAccueil() ?? '') : '';
-                
+                $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
                 $rows[] = [
                     'composante' => $compLibelle,
                     'diplome' => $diplCode ?: $typeDiplome->getLibelle(),
-                    'mention' => $formation->getDisplay(),
-                    'parcours' => $parcours->getLibelle() ?: '-',
+                    'mention' => $diffs['mention'],
+                    'parcours' => $diffs['parcours'],
                     'type_parcours' => $typeParcours,
                     'lieu' => $ville,
                     'niveau' => 1,
@@ -878,12 +902,13 @@ final class OffreAnnexesExportService
                     $integrationEcN1 = ($n1['paramN1'] && $n1['paramN1']->isActive()) ? 'OUI' : ($n1['isOuvertN1'] ? 'OUI' : 'NON');
                     $capaciteN1 = $n1['paramN1']?->getCapaciteGlobale() ?? $n1['anneeN1']?->getCapaciteAccueil() ?? '';
                 }
+                $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
                 $rows[] = [
                     'composante' => $compLibelle,
                     'diplome' => $diplCode ?: $typeDiplome->getLibelle(),
-                    'mention' => $formation->getDisplay(),
-                    'parcours' => $parcours->getLibelle() ?: '-',
+                    'mention' => $diffs['mention'],
+                    'parcours' => $diffs['parcours'],
                     'type_parcours' => $typeParcours,
                     'lieu' => $ville,
                     'niveau' => $ordre,
@@ -996,12 +1021,13 @@ final class OffreAnnexesExportService
                         ? $n1['paramN1']->getCapaciteGlobale()
                         : ($n1['anneeN1']?->getCapaciteAccueil() ?? '');
                 }
+                $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
                 $rows[] = [
                     'composante' => $compLibelle,
                     'diplome' => $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle(),
-                    'mention' => $formation->getDisplay(),
-                    'parcours' => $parcours->getLibelle() ?: '-',
+                    'mention' => $diffs['mention'],
+                    'parcours' => $diffs['parcours'],
                     'type_parcours' => $typeParcours,
                     'lieu' => $ville,
                     'statut' => 'Public',
@@ -1119,14 +1145,13 @@ final class OffreAnnexesExportService
                     $capSpeN1 = $n1['paramN1']?->getCapaciteSpecifique() ?? 0;
                 }
 
-                $mentionName = $formation->getDisplay();
-                $parcoursName = $parcours->getLibelle() ?: '-';
+                $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
                 $rows[] = [
                     'composante' => $compLibelle,
                     'diplome' => $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle(),
-                    'mention' => $mentionName,
-                    'parcours' => $parcoursName,
+                    'mention' => $diffs['mention'],
+                    'parcours' => $diffs['parcours'],
                     'type_parcours' => $typeParcours,
                     'lieu' => $ville,
                     'ouverture_n_1' => $ouvertureN1,
@@ -1155,12 +1180,14 @@ final class OffreAnnexesExportService
     /**
      * @param array<int, DpeParcours> $allDpeParcours
      * @param array<int, list<Annee>> $anneesByParcours
+     * @param array<int, DpeParcours> $dpeN1ByParcours
      */
     private function buildEefRows(
         array $allDpeParcours,
         array $anneesByParcours,
         CampagneCollecte $campagne,
         ?TypeDiplome $filterTypeDiplome = null,
+        array $dpeN1ByParcours = [],
     ): array {
         $rows = [];
         $index = 1;
@@ -1200,11 +1227,20 @@ final class OffreAnnexesExportService
             }
             $niveauxStr = !empty($niveauxOuverts) ? implode('/', $niveauxOuverts) : '-';
 
+            $parcoursN1 = $parcours->getParcoursOrigine() ?? $parcours->getParcoursOrigineCopie();
+            $dpeN1 = null;
+            if ($parcoursN1 !== null && isset($dpeN1ByParcours[$parcoursN1->getId()])) {
+                $dpeN1 = $dpeN1ByParcours[$parcoursN1->getId()];
+            } elseif (isset($dpeN1ByParcours[$parcours->getId()])) {
+                $dpeN1 = $dpeN1ByParcours[$parcours->getId()];
+            }
+            $diffs = $this->resolveEntityDiff($parcours, $dpeN1);
+
             $rows[] = [
                 'composante' => $compLibelle,
                 'diplome' => $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle(),
-                'mention' => $formation->getDisplay(),
-                'parcours' => $parcours->getLibelle() ?: '-',
+                'mention' => $diffs['mention'],
+                'parcours' => $diffs['parcours'],
                 'type_parcours' => $typeParcours,
                 'lieu' => $ville,
                 'saisie' => '',
@@ -1290,11 +1326,13 @@ final class OffreAnnexesExportService
                 $capAltN1 = $n1['hasN1'] ? ($n1['paramN1']?->getCapaciteAlternance() ?? 0) : '';
                 $capSpeN1 = $n1['hasN1'] ? ($n1['paramN1']?->getCapaciteSpecifique() ?? 0) : '';
 
+                $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
+
                 $rows[] = [
                     'composante' => $compLibelle,
                     'diplome' => $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle(),
-                    'mention' => $formation->getDisplay(),
-                    'parcours' => $parcours->getLibelle() ?: '-',
+                    'mention' => $diffs['mention'],
+                    'parcours' => $diffs['parcours'],
                     'type_parcours' => $typeParcours,
                     'lieu' => $ville,
                     'ouvert_n_1' => $ouvertN1,
@@ -1338,12 +1376,13 @@ final class OffreAnnexesExportService
                 $capFpN1 = $n1['hasN1'] ? 0 : '';
                 $capAltN1 = $n1['hasN1'] ? ($n1['paramN1']?->getCapaciteAlternance() ?? 0) : '';
                 $capSpeN1 = $n1['hasN1'] ? ($n1['paramN1']?->getCapaciteSpecifique() ?? 0) : '';
+                $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
                 $rows[] = [
                     'composante' => $compLibelle,
                     'diplome' => $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle(),
-                    'mention' => $formation->getDisplay(),
-                    'parcours' => $parcours->getLibelle() ?: '-',
+                    'mention' => $diffs['mention'],
+                    'parcours' => $diffs['parcours'],
                     'type_parcours' => $typeParcours,
                     'lieu' => $ville,
                     'ouvert_n_1' => $ouvertN1,
@@ -1365,7 +1404,10 @@ final class OffreAnnexesExportService
             }
         }
 
-        usort($rows, static fn($a, $b) => strcmp($a['composante'] . $a['diplome'] . $a['mention'], $b['composante'] . $b['diplome'] . $b['mention']));
+        usort($rows, static fn($a, $b) => strcmp(
+            ($a['composante']) . ($a['diplome']) . ($a['mention']),
+            ($b['composante']) . ($b['diplome']) . ($b['mention'])
+        ));
         return $rows;
     }
 }

@@ -23,8 +23,20 @@
             <tr>
                 <td data-xls-border="thin" data-xls-align="left">{{ row.composante }}</td>
                 <td data-xls-border="thin" data-xls-align="center">{{ row.diplome }}</td>
-                <td data-xls-border="thin" data-xls-align="left">{{ row.mention }}</td>
-                <td data-xls-border="thin" data-xls-align="left">{{ row.parcours }}</td>
+                <td data-xls-border="thin" data-xls-align="left">
+                    {% if row.mention.isDifferent is defined and row.mention.isDifferent() and row.mention.original is not empty %}
+                        <s data-xls-font-color="#DC2626">{{ row.mention.original }}</s><br/><b data-xls-font-color="#16A34A">{{ row.mention.new }}</b>
+                    {% else %}
+                        {{ row.mention }}
+                    {% endif %}
+                </td>
+                <td data-xls-border="thin" data-xls-align="left">
+                    {% if row.parcours.isDifferent is defined and row.parcours.isDifferent() and row.parcours.original is not empty %}
+                        <s data-xls-font-color="#DC2626">{{ row.parcours.original }}</s><br/><b data-xls-font-color="#16A34A">{{ row.parcours.new }}</b>
+                    {% else %}
+                        {{ row.parcours }}
+                    {% endif %}
+                </td>
                 <td data-xls-border="thin" data-xls-align="left">{{ row.type_parcours }}</td>
                 <td data-xls-border="thin" data-xls-align="left">{{ row.lieu }}</td>
                 <td data-xls-border="thin" data-xls-align="center" data-xls-type="number">{{ row.niveau }}</td>

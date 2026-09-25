@@ -9,7 +9,7 @@
 
 namespace App\DTO;
 
-class DiffObject {
+class DiffObject implements \Stringable {
 
     public function __construct(
         public string|float|int|null $original,
@@ -40,5 +40,10 @@ class DiffObject {
     public function getNewFloat(): float
     {
         return $this->new !== '-' ? (float)$this->new : 0.0;
+    }
+
+    public function __toString(): string
+    {
+        return (string)($this->new ?? '');
     }
 }
