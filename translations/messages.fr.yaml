@@ -92,3 +92,6 @@ bug_report.titre: 'Signaler un bug'
 bug_report.description: 'Vous avez rencontré un bug sur l’application ? Merci de nous aider à l’améliorer en nous le signalant !'
 notification.liste.description: 'Accèdez aux dernières notifications que vous avez reçu.'
 notification.liste.titre: 'Vos notification'
+campagne_collecte.configure_publication.description: 'Paramétrer la publication des maquettes et MCCC'
+campagne_collecte.configure_publication.title: 'Configuration de la publication'
+

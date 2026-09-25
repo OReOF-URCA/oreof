@@ -45,9 +45,9 @@ composante.helps.composanteInformation.hebergement: composante.helps.composanteI
 composante.helps.composanteInformation.help: composante.helps.composanteInformation.help
 composante.helps.composanteInformation.restauration: composante.helps.composanteInformation.restauration
 composante.helps.composanteInformation.transport: composante.helps.composanteInformation.transport
-composante.helps.composanteParent: composante.helps.composanteParent
+composante.helps.composanteParent: 'Composante parente de rattachement.'
 composante.helps.directeur: ''
-composante.helps.inscriptionUniquement.help: composante.helps.inscriptionUniquement.help
+composante.helps.inscriptionUniquement.help: "Indiquer si la composante est uniquement une composante d'inscription ou si des cours y sont dispensés."
 composante.helps.libelle: 'Indiquez le libellé exact de la composante.'
 composante.helps.mailContact: "Indiquez l'adresse mail générique de l'accueil de la composante."
 composante.helps.responsableDpe: "Indiquez le nom de la personne en charge de l'administration de ORéOF dans la composante."
@@ -474,4 +474,13 @@ workflow.valider_cfvu.dateConseil.help: workflow.valider_cfvu.dateConseil.help
 workflow.valider_publication.datePublication.help: workflow.valider_publication.datePublication.help
 workflow.valider_reserve_cfvu.argumentaire.help: workflow.valider_reserve_cfvu.argumentaire.help
 workflow.valider_reserve_cfvu.dateCfvu.help: workflow.valider_reserve_cfvu.dateCfvu.help
+'Boîte postale, bâtiment, ...': 'Boîte postale, bâtiment, ...'
+"Le sigle est la dénomination courte de la composante, s'il existe.": "Le sigle est la dénomination courte de la composante, s'il existe."
+'Numéro, rue, ...': 'Numéro, rue, ...'
+'Personne responsable de la validation des DPE des formations de la composante': 'Personne responsable de la validation des DPE des formations de la composante'
+configure_publication.helps.campagneTag: 'Tag ou étiquette associée à la campagne de publication.'
+configure_publication.helps.enablePublication: 'Activer ou désactiver la publication pour cette campagne.'
+configure_publication.helps.isFinished: 'Indiquer si la consolidation de la collecte est terminée.'
+configure_publication.helps.publication_maquette: 'Publier la maquette pédagogique.'
+configure_publication.helps.publication_mccc: 'Publier le document MCCC en PDF.'
 
