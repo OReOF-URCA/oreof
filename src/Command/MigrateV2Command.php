@@ -59,6 +59,16 @@ final class MigrateV2Command extends Command
         $force = (bool) $input->getOption('force');
         $errors = 0;
 
+        if ($apply && $selected !== []) {
+            $dependencyErrors = $this->validateSelectedStepDependencies($selected);
+            if ($dependencyErrors !== []) {
+                foreach ($dependencyErrors as $message) {
+                    $io->error($message);
+                }
+                return Command::FAILURE;
+            }
+        }
+
         foreach ($this->steps() as $key => $step) {
             if ($selected !== [] && !in_array($key, $selected, true)) {
                 continue;
@@ -125,6 +135,36 @@ final class MigrateV2Command extends Command
             '100_safe_defaults' => ['label' => 'Valeurs V2 déterministes', 'plan' => fn () => $this->safeDefaults()],
             '110_finalize_constraints' => ['label' => 'Contraintes NOT NULL après reprise', 'plan' => fn () => $this->finalizeConstraints()],
         ];
+    }
+
+    private function validateSelectedStepDependencies(array $selected): array
+    {
+        $dependencies = [
+            '050_history_documents' => ['040_new_v2_tables'],
+            '090_reconcile_schema' => ['010_documented_schema', '020_validation_schema'],
+            '100_safe_defaults' => ['010_documented_schema', '020_validation_schema'],
+            '110_finalize_constraints' => ['100_safe_defaults'],
+        ];
+
+        $errors = [];
+        $stepOrder = array_keys($this->steps());
+        foreach ($selected as $step) {
+            if (!in_array($step, $stepOrder, true)) {
+                $errors[] = "Étape inconnue : {$step}.";
+                continue;
+            }
+
+            foreach ($dependencies[$step] ?? [] as $dependency) {
+                $selectedBefore = in_array($dependency, $selected, true)
+                    && array_search($dependency, $stepOrder, true) < array_search($step, $stepOrder, true);
+
+                if (!$this->isApplied($dependency) && !$selectedBefore) {
+                    $errors[] = "L'étape {$step} nécessite {$dependency}, qui n'est ni déjà appliquée ni sélectionnée avant elle.";
+                }
+            }
+        }
+
+        return $errors;
     }
 
     private function documentedSchema(): array
