@@ -56,6 +56,8 @@ final class RouteSmokeTest extends WebTestCase
                 if (404 === $status || $status >= 500) {
                     $failures[] = sprintf('%s (%s) returned HTTP %d', $name, $url, $status);
                 }
+            } catch (\Symfony\Component\Routing\Exception\InvalidParameterException $exception) {
+                $skipped[$name] = 'cannot be generated without fixture parameters: '.$exception->getMessage();
             } catch (\Throwable $exception) {
                 $failures[] = sprintf(
                     '%s failed with %s: %s',
