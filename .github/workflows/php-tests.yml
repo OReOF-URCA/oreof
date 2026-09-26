@@ -40,7 +40,7 @@ jobs:
     env:
       APP_ENV: test
       APP_SECRET: oreof-test-secret
-      DATABASE_URL: "mysql://oreof:oreof@127.0.0.1:3306/oreof?serverVersion=8.0&charset=utf8mb4"
+      DATABASE_URL: "mysql://root:root@127.0.0.1:3306/oreof?serverVersion=8.4&charset=utf8mb4"
       MAILER_DSN: "null://null"
       MESSENGER_TRANSPORT_DSN: "sync://"
 
