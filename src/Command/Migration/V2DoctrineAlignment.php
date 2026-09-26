@@ -39,6 +39,32 @@ final class V2DoctrineAlignment
             }
         }
 
+        // DpeFormation est un nouveau concept V2 : la V1 ne possède pas cette table.
+        if (!$this->tableExists('dpe_formation')) {
+            $sql['Création dpe_formation'] = <<<'SQL'
+CREATE TABLE dpe_formation (
+    id INT AUTO_INCREMENT NOT NULL,
+    campagne_collecte_id INT DEFAULT NULL,
+    formation_id INT DEFAULT NULL,
+    etat_validation JSON NOT NULL,
+    version VARCHAR(10) NOT NULL,
+    created DATETIME NOT NULL,
+    laissez_passer LONGTEXT DEFAULT NULL,
+    INDEX IDX_DPE_FORMATION_CAMPAGNE (campagne_collecte_id),
+    INDEX IDX_DPE_FORMATION_FORMATION (formation_id),
+    PRIMARY KEY(id)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB
+SQL;
+            $sql['FK dpe_formation.campagne_collecte'] = 'ALTER TABLE dpe_formation ADD CONSTRAINT FK_DPE_FORMATION_CAMPAGNE FOREIGN KEY (campagne_collecte_id) REFERENCES campagne_collecte (id)';
+            $sql['FK dpe_formation.formation'] = 'ALTER TABLE dpe_formation ADD CONSTRAINT FK_DPE_FORMATION_FORMATION FOREIGN KEY (formation_id) REFERENCES formation (id)';
+        }
+
+        if ($this->tableExists('historique') && !$this->columnExists('historique', 'dpe_formation_id')) {
+            $sql['Ajout historique.dpe_formation_id'] = 'ALTER TABLE historique ADD dpe_formation_id INT DEFAULT NULL';
+            $sql['Index historique.dpe_formation_id'] = 'CREATE INDEX IDX_HISTORIQUE_DPE_FORMATION ON historique (dpe_formation_id)';
+            $sql['FK historique.dpe_formation'] = 'ALTER TABLE historique ADD CONSTRAINT FK_HISTORIQUE_DPE_FORMATION FOREIGN KEY (dpe_formation_id) REFERENCES dpe_formation (id)';
+        }
+
         // Colonnes V2 historiquement ajoutées hors des migrations Doctrine.
         // Elles doivent être présentes sur toute base V1 migrée.
         if ($this->tableExists('type_diplome')) {
