@@ -25,14 +25,14 @@ jobs:
       mariadb:
         image: mariadb:11.4
         env:
-          MYSQL_DATABASE: oreof
-          MYSQL_USER: oreof
-          MYSQL_PASSWORD: oreof
-          MYSQL_ROOT_PASSWORD: root
+          MARIADB_DATABASE: oreof
+          MARIADB_USER: oreof
+          MARIADB_PASSWORD: oreof
+          MARIADB_ROOT_PASSWORD: root
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -u root -proot"
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
