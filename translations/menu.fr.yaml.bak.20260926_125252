@@ -76,8 +76,7 @@ menu:
     menu_droits: 'Utilisateurs et droits'
     offre_formation: 'Offre de formation'
 menu.config.menu_config_globale: menu.config.menu_config_globale
-menu.mon_compte.mes_informations: 'Mes informations'
-menu.mon_compte.mes_notifications: "Mes notifications"
+menu.mon_compte.mes_informations: "Mes informations"
 menu.tableau_de_bord: 'Tableau de bord'
 page:
     admin_styleguide_index:

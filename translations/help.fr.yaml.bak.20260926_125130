@@ -1,7 +1,5 @@
 '-': '-'
 'Boîte postale, bâtiment, ...': 'Boîte postale, bâtiment, ...'
-"Cochez les années où la saisie d'une capacité est obligatoire (si décoché, la capacité reste optionnelle)": "Cochez les années où la saisie d'une capacité est obligatoire (si décoché, la capacité reste optionnelle)"
-'Décoché : les formations/parcours créés via le formulaire générique sont initialisés sans passage en CFVU.': 'Décoché : les formations/parcours créés via le formulaire générique sont initialisés sans passage en CFVU.'
 'Indiquer la composante porteuse du projet, qui aura en charge le dépôt de la demande de création de la formation': 'Indiquer la composante porteuse du projet, qui aura en charge le dépôt de la demande de création de la formation'
 'Indiquez en 3000 caractères maximum les périodes et leurs durées en centre ou en entreprise.': 'Indiquez en 3000 caractères maximum les périodes et leurs durées en centre ou en entreprise.'
 "Le sigle est la dénomination courte de la composante, s'il existe.": "Le sigle est la dénomination courte de la composante, s'il existe."
@@ -12,7 +10,6 @@
 "Régime d'inscription": "Régime d'inscription"
 'Si la mention existe, veuillez la sélectionner dans la liste déroulante': ''
 'Si la mention n''existe pas, veuillez la créer dans la section "Autre mention"': ''
-'Sélectionnez les années pour lesquelles cette plateforme est utilisée': 'Sélectionnez les années pour lesquelles cette plateforme est utilisée'
 actualite.helps.affiche.help: actualite.helps.affiche.help
 actualite.helps.datePublication.help: actualite.helps.datePublication.help
 actualite.helps.texte: actualite.helps.texte
@@ -416,32 +413,16 @@ semestre.raccrocher.helps: 'Sélectionnez le semestre mutualisé que vous souhai
 semestre.reutilise.helps: semestre.reutilise.helps
 semestre.type_semestre.helps: semestre.type_semestre.helps
 type_diplome.helps.ModeleMcc: 'Indiquez si le diplôme est cadré par un modèle prédéfini de MCC (ex. BUT).'
-type_diplome.helps.classique.help: type_diplome.helps.classique.help
 type_diplome.helps.codeApogee: 'Code Apogée du type de diplôme.'
 type_diplome.helps.codifIntermediaire.help: type_diplome.helps.codifIntermediaire.help
-type_diplome.helps.controleAssiduite.help: type_diplome.helps.controleAssiduite.help
-type_diplome.helps.debutSemestreFlexible: type_diplome.helps.debutSemestreFlexible
-type_diplome.helps.ectsObligatoireSurEc.help: type_diplome.helps.ectsObligatoireSurEc.help
-type_diplome.helps.hasEcts.help: type_diplome.helps.hasEcts.help
-type_diplome.helps.hasMemoire.help: type_diplome.helps.hasMemoire.help
-type_diplome.helps.hasProjet.help: type_diplome.helps.hasProjet.help
-type_diplome.helps.hasSituationPro.help: type_diplome.helps.hasSituationPro.help
-type_diplome.helps.hasStage.help: type_diplome.helps.hasStage.help
 type_diplome.helps.insertionProfessionnelle: type_diplome.helps.insertionProfessionnelle
 type_diplome.helps.libelle: 'Indiquez le libellé exact du type de diplôme.'
 type_diplome.helps.libelle_court: 'Le cas échéant, indiquez le libellé court du type de diplôme.'
-type_diplome.helps.mcccObligatoireSurEc.help: type_diplome.helps.mcccObligatoireSurEc.help
 type_diplome.helps.modalites_admission: type_diplome.helps.modalites_admission
 type_diplome.helps.nbEcParUe: 'Précisez la contrainte. Si pas de contrainte, mettre "0".'
 type_diplome.helps.nbEctsMaxUe: 'Précisez la contrainte. Si pas de contrainte, mettre "0".'
-type_diplome.helps.nbEctsParSemestre: type_diplome.helps.nbEctsParSemestre
 type_diplome.helps.nbUeMax: 'Précisez la contrainte. Si pas de contrainte, mettre "0".'
 type_diplome.helps.nbUeMin: 'Précisez la contrainte. Si pas de contrainte, mettre "0".'
-type_diplome.helps.plateformesAdmission.0.plateforme: type_diplome.helps.plateformesAdmission.0.plateforme
-type_diplome.helps.plateformesAdmission.1.plateforme: type_diplome.helps.plateformesAdmission.1.plateforme
-type_diplome.helps.plateformesAdmission.2.plateforme: type_diplome.helps.plateformesAdmission.2.plateforme
-type_diplome.helps.plateformesAdmission.3.plateforme: type_diplome.helps.plateformesAdmission.3.plateforme
-type_diplome.helps.plateformesAdmission.__name__.plateforme: type_diplome.helps.plateformesAdmission.__name__.plateforme
 type_diplome.helps.prerequis_obligatoires: type_diplome.helps.prerequis_obligatoires
 type_diplome.helps.presentationFormation: type_diplome.helps.presentationFormation
 type_diplome.helps.semestreDebut: "Le semestre de début d'un diplôme est toujours 1 sauf dans le cas des LP."

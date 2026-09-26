@@ -9,10 +9,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Traits\LifeCycleTrait;
 
 #[ORM\Entity(repositoryClass: DpeFormationRepository::class)]
 class DpeFormation
 {
+
+    use LifeCycleTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -29,9 +33,6 @@ class DpeFormation
 
     #[ORM\Column(length: 10)]
     private ?string $version = '0.1';
-
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?DateTimeInterface $created = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $laissezPasser = null; // store laissez-passer justification details if active

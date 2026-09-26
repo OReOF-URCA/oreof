@@ -108,13 +108,6 @@ V2 retire du mapping `EtablissementInformation` les colonnes `mention_handicap`,
 
 Ces colonnes ne doivent pas être supprimées automatiquement tant que l'on n'a pas confirmé que les éventuelles personnalisations présentes en production peuvent être abandonnées ou archivées.
 
-### DpeFormation
-
-`DpeFormation` est destiné à disparaître, mais reste actuellement référencé dans la branche V2 par l'entité, son repository, le workflow `dpeFormation`, `Formation.dpeFormations` et `HistoriqueFormation.dpeFormation`.
-
-La migration additive ne crée donc pas de table `dpe_formation`. Le cleanup ne devra la supprimer qu'après retrait de ces références applicatives et vérification de la reprise éventuelle des historiques.
-
-
 ## Niveau des migrations Doctrine existantes
 
 Les migrations Doctrine racine d'avril/mai 2026 sont présentes dans `main` comme dans `v2`. Elles contiennent déjà plusieurs modifications structurelles, y compris des suppressions historiques (`role`, `user_centre`, `fiche_matiere_parcours`, `formation.version_parent_id`, `mention.domaine_id`).

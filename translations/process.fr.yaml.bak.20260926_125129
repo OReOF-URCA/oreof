@@ -1,5 +1,4 @@
 autorisation_saisie: 'Autorisation de saisie'
-brouillon: brouillon
 btn:
     fiche_matiere:
         demande:
@@ -118,10 +117,6 @@ changeRf:
         soumis_conseil:
             flash:
                 success: 'Demande de changement de responsable de formation validée par le conseil de composante'
-changeRf.attente_pv: changeRf.attente_pv
-changeRf.soumis_cfvu: changeRf.soumis_cfvu
-changeRf.soumis_conseil: changeRf.soumis_conseil
-changeRf.soumis_ses: changeRf.soumis_ses
 changeRf.validation.soumis_cfvu.btn-danger: 'Demande de changement de responsable de formation refusée par la CFVU'
 changeRf.validation.soumis_cfvu.btn-info: 'Demande de changement de responsable de formation en attente de validation par la CFVU'
 changeRf.validation.soumis_cfvu.btn-muted: 'Validation CFVU indisponible'
@@ -140,7 +135,6 @@ changeRf.validation.soumis_ses.btn-warning: 'Demande de changement de responsabl
 changeRf.valide.soumis_cfvu.flash.success: 'Demande de changement de responsable de formation validée par la CFVU'
 changeRf.valide.soumis_conseil.flash.success: 'Demande de changement de responsable de formation validée par le conseil de composante'
 changeRf.valide.soumis_ses.flash.success: 'Demande de changement de responsable de formation validée par le SES'
-changeRf.verification_pv: changeRf.verification_pv
 demande.non.ouverture.alerte: 'Vous pouvez demander la non ouverture du parcours. Cette demande sera transmise au SES puis en CFVU avec votre argumentaire.'
 demande.non.ouverture.argumentaire.label: 'Argumentaire de la demande de non ouverture du parcours'
 demande.non.ouverture.confirmation.label: 'Je confirme la demande de non ouverture du parcours %parcours%'
@@ -443,7 +437,6 @@ soumis_conseil_reserve: 'Soumis Conseil avec réserves (PV ou modifications)'
 soumis_dpe_composante: 'Soumis DPE'
 soumis_dpe_composante_reserve_cfvu: 'Retour DPE composante, suite réserves CFVU'
 soumis_parcours: 'Soumis au RF'
-soumis_ses: soumis_ses
 supprimer.historique: "Supprimer de l'historique"
 tacite_reconduction: 'Tacite reconduction'
 tacite_reconduction.parcours: 'Tacite reconduction du parcours'
@@ -463,7 +456,6 @@ toast.valider_cfvu.valider.danger: toast.valider_cfvu.valider.danger
 toast.valider_publication.valider.danger: toast.valider_publication.valider.danger
 toast.valider_reserve_central_cfvu.valider.success: toast.valider_reserve_central_cfvu.valider.success
 toast.valider_reserve_conseil_cfvu.valider.success: toast.valider_reserve_conseil_cfvu.valider.success
-transmettre: transmettre
 transmis.parcours.formation: 'Parcours transmis'
 transmis_pour_publication: 'Validé pour publication'
 transmis_ses: 'Soumis central'

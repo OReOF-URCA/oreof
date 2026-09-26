@@ -1,4 +1,3 @@
-Modification: Modification
 breadcrumb.home: Accueil
 menu:
     admin:
@@ -76,8 +75,6 @@ menu:
     menu_droits: 'Utilisateurs et droits'
     offre_formation: 'Offre de formation'
 menu.config.menu_config_globale: menu.config.menu_config_globale
-menu.mon_compte.mes_informations: 'Mes informations'
-menu.mon_compte.mes_notifications: "Mes notifications"
 menu.tableau_de_bord: 'Tableau de bord'
 page:
     admin_styleguide_index:
@@ -229,22 +226,12 @@ page:
     translations_index:
         description: "Gérer les traductions et textes de l'application."
         title: Traductions
-page.app_admin_pilotage_campagne_index.description: page.app_admin_pilotage_campagne_index.description
 page.app_admin_workflow_index.description: page.app_admin_workflow_index.description
 page.app_administration_profils_index.description: page.app_administration_profils_index.description
-page.app_demande_dpe.description: page.app_demande_dpe.description
 page.app_impersonation_list.description: page.app_impersonation_list.description
-page.app_log_viewer_index.description: page.app_log_viewer_index.description
 page.app_section_droits.description: page.app_section_droits.description
 page.app_section_droits.title: page.app_section_droits.title
-page.app_section_pilotage.description: page.app_section_pilotage.description
-page.app_section_pilotage.title: page.app_section_pilotage.title
-page.app_type_diplome_edit.description: page.app_type_diplome_edit.description
-page.app_type_diplome_edit.title: page.app_type_diplome_edit.title
 page.app_user_profil_attente.description: page.app_user_profil_attente.description
 page.app_user_profil_index.description: page.app_user_profil_index.description
 page.app_user_repertoire.description: page.app_user_repertoire.description
-page.app_validation_fiche_index.description: page.app_validation_fiche_index.description
-page.offre_v2_configurer.description: page.offre_v2_configurer.description
-page.offre_v2_configurer.title: page.offre_v2_configurer.title
 

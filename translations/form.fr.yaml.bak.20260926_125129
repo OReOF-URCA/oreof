@@ -25,17 +25,7 @@ Adresse: Adresse
 'Adresse email': 'Adresse email'
 'Adresse mail de contact de la composante': 'Adresse mail de contact de la composante'
 Année: 'Année de collecte'
-'Année 1': 'Année 1'
-'Année 2': 'Année 2'
-'Année 3': 'Année 3'
 'Année Universitaire': 'Année Universitaire'
-'Années concernées': 'Années concernées'
-App\\TypeDiplome\\Handler\\ButHandler: App\\TypeDiplome\\Handler\\ButHandler
-App\\TypeDiplome\\Handler\\DaeuHandler: App\\TypeDiplome\\Handler\\DaeuHandler
-App\\TypeDiplome\\Handler\\DuHandler: App\\TypeDiplome\\Handler\\DuHandler
-App\\TypeDiplome\\Handler\\M2EHandler: App\\TypeDiplome\\Handler\\M2EHandler
-App\\TypeDiplome\\Handler\\UniversityHandler: App\\TypeDiplome\\Handler\\UniversityHandler
-App\\TypeDiplome\\NonClassique\\NonClassiqueHandler: App\\TypeDiplome\\NonClassique\\NonClassiqueHandler
 'Après la 1ère année de licence "Sciences pour la Santé" - Accès santé': 'Après la 1ère année de licence "Sciences pour la Santé" - Accès santé'
 Autre: Autre
 'Autre mention': Autre
@@ -51,7 +41,6 @@ CT: CT
 "Calendrier d'inscription": "Calendrier d'inscription"
 'Calendrier universitaire': 'Calendrier universitaire'
 'Campagne de collecte DPE active ?': 'La campagne de collecte des projets de DPE est-elle active ?'
-'Capacité obligatoire pour les années': 'Capacité obligatoire pour les années'
 Charleville-Mézières: Charleville-Mézières
 Chaumont: Chaumont
 'Choisir dans la liste ou choisir "+" pour ajouter un nouveau directeur': 'Choisir dans la liste ou choisir "+" pour ajouter un nouveau directeur'
@@ -119,8 +108,6 @@ FI: 'Formation initiale'
 FI_APPRENTISSAGE: 'Formation initiale en apprentissage'
 'Fiche matière obligatoire': 'Fiche matière obligatoire'
 Formation: Formation
-'Formation accréditée': 'Formation accréditée'
-'Formation non-accréditée': 'Formation non-accréditée'
 Hybride: Hybride
 Hébergement: Hébergement
 'Indiquez les droits accordés': 'Indiquez le rôle accordé'
@@ -151,7 +138,6 @@ NORMAL: NORMAL
 "Nature de l'élément": "Nature de l'élément"
 Nom: Nom
 'Nom du nouveau type…': 'Nom du nouveau type…'
-"Nombre d'ECTS par semestre (laisser vide si pas de quota fixe)": "Nombre d'ECTS par semestre (laisser vide si pas de quota fixe)"
 Non: Non
 None: Aucun
 'Numéro SIRET': 'Numéro SIRET'
@@ -160,8 +146,6 @@ Oui: Oui
 'Outils et Langages (transversale)': 'Outils et Langages (transversale)'
 Ouverture: Ouverture
 PROJET: PROJET
-'Passage au CFVU': 'Passage au CFVU'
-Plateforme: Plateforme
 'Pour en savoir plus sur ce type de formation': 'Pour en savoir plus sur ce type de formation'
 Prénom: Prénom
 'Prérequis obligatoires': 'Prérequis obligatoires'
@@ -185,7 +169,6 @@ STAGE: STAGE
 'Semestre 6': 'Semestre 6'
 Sigle: Sigle
 Stage: Stage
-'Sélectionnez une plateforme': 'Sélectionnez une plateforme'
 'TER – travail d’étude et de recherche': 'TER (travail d’étude et de recherche)'
 TYPE_PARCOURS_ALTERNANCE: 'Parcours en alternance uniquement'
 TYPE_PARCOURS_CLASSIQUE: 'Parcours Classique'
@@ -203,7 +186,6 @@ Troyes: Troyes
 "Type d'EC": "Type d'EC"
 'Type de MCCC': 'Type de MCCC'
 'Type de diplôme': 'Type de diplôme'
-'Type de formation': 'Type de formation'
 "Type(s) de diplôme proposant ce type d'EC": "Type(s) de diplôme proposant ce type d'EC"
 "Type(s) de diplôme proposant ce type d'UE": "Type(s) de diplôme proposant ce type d'UE"
 "Type(s) de diplôme proposant ce type d'épreuve": "Type(s) de diplôme proposant ce type d'épreuve"
@@ -228,7 +210,6 @@ Téléphone: Téléphone
 'Utilisateur élémentaire débutant (A1)': 'Utilisateur élémentaire débutant (A1)'
 'Utilisateur élémentaire intermédiaire': 'Utilisateur élémentaire intermédiaire'
 'Utilisateur élémentaire intermédiaire (A2)': 'Utilisateur élémentaire intermédiaire (A2)'
-'Utilise les ECTS': 'Utilise les ECTS'
 'Veuillez choisir la localisation du parcours': '-'
 Ville: Ville
 actualite.labels.affiche: 'Actualité publiée ?'

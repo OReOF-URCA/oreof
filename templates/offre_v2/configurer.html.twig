@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% set header_title = "Configurer la formation : "~formation.displayLong %}
-{% set header_description = "???" %}
+{% set header_description = "Paramètrer les plateformes d'admissions, les capacités et les ouvertures." %}
 {% set typeDiplome = formation.typeDiplome %}
 {% set is_ses_or_admin = is_granted('ROLE_SES') or is_granted('ROLE_ADMIN') %}
 {% set is_brouillon = dpeFormation and dpeFormation.etatValidation.brouillon is defined %}
