@@ -154,7 +154,7 @@ final class MigrateV2Command extends Command
         $sql = [];
         foreach (['element_constitutif', 'semestre', 'ue'] as $table) {
             $this->addColumn($sql, $table, 'validation_status', 'VARCHAR(16) DEFAULT NULL');
-            $this->addColumn($sql, $table, 'validation_dirty', 'TINYINT(1) NOT NULL DEFAULT 0');
+            $this->addColumn($sql, $table, 'validation_dirty', 'TINYINT(1) NOT NULL DEFAULT 1');
             $this->addColumn($sql, $table, 'validation_updated_at', 'DATETIME DEFAULT NULL');
         }
         $this->addColumn($sql, 'nature_ue_ec', 'description_courte', 'VARCHAR(255) DEFAULT NULL');
@@ -279,6 +279,13 @@ final class MigrateV2Command extends Command
         }
         if ($this->columnExists('mention', 'domaine_id')) {
             $warnings[] = 'Colonne legacy mention.domaine_id encore présente : vérifier le niveau des migrations Doctrine.';
+        }
+
+        foreach (['element_constitutif', 'semestre', 'ue'] as $table) {
+            if ($this->columnExists($table, 'validation_dirty')) {
+                $sql["{$table}.validation_dirty → dirty"] = "UPDATE {$table} SET validation_dirty = 1";
+                $sql["{$table}.validation_dirty default"] = "ALTER TABLE {$table} MODIFY validation_dirty TINYINT(1) NOT NULL DEFAULT 1";
+            }
         }
 
         if ($this->columnExists('plateforme_admission', 'mode_export')) {
