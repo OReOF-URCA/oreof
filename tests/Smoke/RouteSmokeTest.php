@@ -29,6 +29,7 @@ final class RouteSmokeTest extends WebTestCase
         $admin = $entityManager->getRepository(User::class)->findOneBy(['username' => 'admin-test']);
         self::assertNotNull($admin, 'Functional fixtures are not loaded.');
         $client->loginUser($admin);
+        $client->request('GET', '/');
 
         $campaign = $entityManager->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => true]);
         self::assertNotNull($campaign, 'Default test campaign is not loaded.');
