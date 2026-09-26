@@ -248,7 +248,7 @@ final class MigrateV2Command extends Command
                 mode_export VARCHAR(30) NOT NULL DEFAULT 'global',
                 UNIQUE INDEX UNIQ_PLATEFORME_ADMISSION_CODE (code),
                 PRIMARY KEY(id)
-            ) DEFAULT CHARACTER SET utf8mb4 COLLATE \`utf8mb4_unicode_ci\` ENGINE = InnoDB";
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB";
         }
 
         if (!$this->tableExists('plateforme_admission_parametre')) {
@@ -271,7 +271,7 @@ final class MigrateV2Command extends Command
                 CONSTRAINT FK_PAP_ANNEE FOREIGN KEY (annee_id) REFERENCES annee (id),
                 CONSTRAINT FK_PAP_PLATEFORME FOREIGN KEY (plateforme_id) REFERENCES plateforme_admission (id),
                 CONSTRAINT FK_PAP_CAMPAGNE FOREIGN KEY (campagne_id) REFERENCES campagne_collecte (id)
-            ) DEFAULT CHARACTER SET utf8mb4 COLLATE \`utf8mb4_unicode_ci\` ENGINE = InnoDB";
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB";
         }
 
         if (!$this->tableExists('type_diplome_plateforme_admission')) {
@@ -289,7 +289,7 @@ final class MigrateV2Command extends Command
                 CONSTRAINT FK_TDPA_TYPE_DIPLOME FOREIGN KEY (type_diplome_id) REFERENCES type_diplome (id),
                 CONSTRAINT FK_TDPA_PLATEFORME FOREIGN KEY (plateforme_id) REFERENCES plateforme_admission (id),
                 CONSTRAINT FK_TDPA_CAMPAGNE FOREIGN KEY (campagne_id) REFERENCES campagne_collecte (id)
-            ) DEFAULT CHARACTER SET utf8mb4 COLLATE \`utf8mb4_unicode_ci\` ENGINE = InnoDB";
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB";
         } else {
             $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees', "JSON NULL COMMENT 'Années concernées par la plateforme (ex: [1, 2, 3])'");
             $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees_capacite_requise', "JSON DEFAULT NULL COMMENT 'Années pour lesquelles une capacité est requise'");
