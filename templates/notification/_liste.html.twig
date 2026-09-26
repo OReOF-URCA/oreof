@@ -7,14 +7,14 @@
                 'border': 'border-warning-200',
                 'bg': 'bg-warning-100',
                 'text': 'text-warning-700',
-                'icon': 'fa-exclamation'
+                'icon': 'icon:warning'
             } %}
         {% else %}
             {% set status = {
                 'border': 'border-emerald-200',
                 'bg': 'bg-emerald-100',
                 'text': 'text-emerald-700',
-                'icon': 'fa-check'
+                'icon': 'icon:check'
             } %}
         {% endif %}
         <button type="button"
@@ -22,7 +22,7 @@
                 {{ stimulus_action('notification', 'lu', 'click', {id: notif.id}) }}>
             <div class="flex items-start gap-4">
                 <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border {{ status.border }} {{ status.bg }} {{ status.text }}">
-                    <i class="fas {{ status.icon }} text-lg"></i>
+                    <twig:UX:Icon :name="status.icon" class="h-5 w-5" />
                 </div>
 
                 <div class="min-w-0 flex-1">
@@ -37,7 +37,7 @@
                     </div>
 
                     {% if notif.body %}
-                        <div class="mt-1 text-sm text-secondary-600 dark:text-secondary-300">{{ notif.body }}</div>
+                        <div class="mt-1 text-sm text-secondary-600 dark:text-secondary-300">{{ notif.body|trans({},'notif') }}</div>
                     {% endif %}
 
                     {% if payload.changedFields is defined and payload.changedFields|length > 0 %}
@@ -67,6 +67,7 @@
             'data-notification-url-param': path('app_notification_tout_lu')
         }"
                 label="Tout marquer comme lu"
+                icon="icon:check"
                 variant="warning"
         />
 

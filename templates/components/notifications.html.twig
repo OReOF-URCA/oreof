@@ -1,7 +1,8 @@
-<ul class="flex items-center space-x-2">
+<ul class="flex items-center space-x-2" data-turbo-prefetch="false">
     <li>
         <a href="{{ path('app_search') }}"
            title="Effectuer une recherche"
+           data-turbo-prefetch="false"
                 {{ stimulus_controller('tooltip') }}
            aria-label="Rechercher"
            class="p-2 rounded-full text-secondary dark:text-secondary-300 hover:bg-bg transition inline-flex items-center justify-center"
@@ -13,6 +14,7 @@
     <li>
         <a href="{{ path('app_commentaire') }}"
            title="Mes commentaires"
+           data-turbo-prefetch="false"
                 {{ stimulus_controller('tooltip') }}
            aria-label="Mes commentaires"
            class="p-2 rounded-full text-secondary dark:text-secondary-300 hover:bg-bg transition inline-flex items-center justify-center"
@@ -21,10 +23,6 @@
         </a>
     </li>
 
-    {% if is_granted('ROLE_ADMIN') %}
-        {# bouton contacter supprimé #}
-    {% endif %}
-
     <li>
         <a href="{{ path('app_bug_report_modal', {
                     formation: formation is defined and formation != null ? formation.id : '',
@@ -32,6 +30,7 @@
                     page: app.request.uri
         }) }}"
            data-action="click->modalturbo#open"
+           data-turbo-prefetch="false"
            title="Signaler un bug"
                 {{ stimulus_controller('tooltip') }}
            aria-label="Signaler un bug"
@@ -45,6 +44,7 @@
         <a href="{{ path('app_notification_liste_user') }}"
            class="relative p-2 rounded-full text-secondary dark:text-secondary-300 hover:bg-bg transition inline-flex items-center justify-center"
            data-action="click->modalturbo#open"
+           data-turbo-prefetch="false"
            aria-label="Notifications"
            title="Notifications"
                 {{ stimulus_controller('tooltip') }}

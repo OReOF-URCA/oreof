@@ -56,6 +56,33 @@ export default class extends Controller {
         const originalFetch = window.fetch;
 
         window.fetch = (...args) => {
+            const input = args[0];
+            const init = args[1] || {};
+            let isPrefetch = false;
+
+            if (input instanceof Request) {
+                isPrefetch = input.headers.get('Sec-Purpose') === 'prefetch' ||
+                             input.headers.get('Purpose') === 'prefetch' ||
+                             input.headers.get('sec-purpose') === 'prefetch';
+            }
+
+            if (!isPrefetch && init.headers) {
+                if (init.headers instanceof Headers) {
+                    isPrefetch = init.headers.get('Sec-Purpose') === 'prefetch' ||
+                                 init.headers.get('Purpose') === 'prefetch' ||
+                                 init.headers.get('sec-purpose') === 'prefetch';
+                } else if (typeof init.headers === 'object') {
+                    isPrefetch = init.headers['Sec-Purpose'] === 'prefetch' ||
+                                 init.headers['Purpose'] === 'prefetch' ||
+                                 init.headers['sec-purpose'] === 'prefetch' ||
+                                 init.headers['Sec-Fetch-Purpose'] === 'prefetch';
+                }
+            }
+
+            if (isPrefetch) {
+                return originalFetch(...args);
+            }
+
             // Trouver le conteneur cible intelligemment
             const container = this.findSmartContainer();
 
@@ -120,6 +147,18 @@ export default class extends Controller {
     }
 
     showFrame(event) {
+        // Ignorer les requêtes de prefetch
+        const fetchOptions = event?.detail?.fetchOptions;
+        if (fetchOptions?.headers) {
+            const h = fetchOptions.headers;
+            const isPrefetch = (h instanceof Headers)
+                ? (h.get('Sec-Purpose') === 'prefetch' || h.get('Purpose') === 'prefetch' || h.get('sec-purpose') === 'prefetch')
+                : (h['Sec-Purpose'] === 'prefetch' || h['Purpose'] === 'prefetch' || h['sec-purpose'] === 'prefetch' || h['Sec-Fetch-Purpose'] === 'prefetch');
+            if (isPrefetch) {
+                return;
+            }
+        }
+
         const element = event.target;
         if (element && element.tagName === 'TURBO-FRAME') {
             // Nettoyer les anciens spinners avant d'en ajouter un nouveau
