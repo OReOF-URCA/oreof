@@ -1,17 +1,21 @@
 <!-- Stats Start -->
-<section class="space-y-4">
-    <h2 class="text-xl font-black tracking-tight text-text">
-        Processus de la campagne de collecte des projets de DPE
-        <span class="text-base font-semibold text-secondary">({{ user_data.campagneCollecte.libelle }})</span>
-    </h2>
+{% set currentCampagne = campagne|default(user_data.campagneCollecte) %}
 
-    <div class="overflow-hidden">
+{% if currentCampagne is not null and currentCampagne.timelineDates is not empty %}
+<section class="space-y-4 timeline-container">
+    <div class="flex items-center justify-between">
+        <h2 class="text-xl font-black tracking-tight text-text">
+            Processus de la campagne de collecte des projets de DPE
+            <span class="text-base font-semibold text-secondary">({{ currentCampagne.libelle }})</span>
+        </h2>
+    </div>
 
-        <div class="timeline">
-            <div class="progress-line" id="progressLine"></div>
-            <div class="today-marker" id="todayMarker"></div>
+    <div class="overflow-x-auto pb-4">
+        <div class="timeline min-w-[700px]">
+            <div class="progress-line"></div>
+            <div class="today-marker"></div>
             {% set hasCurrent = false %}
-            {% for event in user_data.campagneCollecte.timelineDates|filter(event => event.inTimeline == true) %}
+            {% for event in currentCampagne.timelineDates|filter(event => event.inTimeline == true) %}
                 <div class="timeline-step
                 {% if 'now'|date('U') > event.date|date('U') %}completed
                 {% else %}
@@ -19,16 +23,15 @@
                     {% set hasCurrent = true %}
                     {% endif %}
                 {% endif %}" data-end-date="{{ event.date|date('Y-m-d') }}">
-                    <div class="step-icon"
-                         tabindex="0"
-                    >
-                        <twig:UX:Icon :name="event.icone" class="w-7 h-7"/>
+                    <div class="step-icon" tabindex="0">
+                        <twig:UX:Icon :name="event.icone|default('icon:clock')" class="w-7 h-7"/>
                     </div>
                     <div class="step-content">
                         <div class="step-label">{{ event.libelle }}</div>
                         <div class="step-dates">
-                            {% if event.dateDebut != null %}<span class="step-date">
-                                Début: {{ event.dateDebut|date('d/m/Y') }}</span>{% endif %}
+                            {% if event.dateDebut != null %}
+                                <span class="step-date">Début: {{ event.dateDebut|date('d/m/Y') }}</span>
+                            {% endif %}
                             <span class="step-date">Fin: {{ event.date|date('d/m/Y') }} {{ event.heure != null ? event.heure|date('H:i'): '' }}</span>
                         </div>
                     </div>
@@ -36,98 +39,111 @@
             {% endfor %}
         </div>
 
-        <script defer>
-          function updateProgress () {
-            const steps = document.querySelectorAll('.timeline-step')
-            const currentIndex = Array.from(steps).findIndex(step => step.classList.contains('current'))
+        <script>
+          (function () {
+            function updateTimelineElements(container) {
+              if (!container) return
+              const timeline = container.querySelector('.timeline')
+              if (!timeline) return
+              const progressLine = timeline.querySelector('.progress-line')
+              const todayMarker = timeline.querySelector('.today-marker')
+              const steps = timeline.querySelectorAll('.timeline-step')
 
-            if (currentIndex >= 0 && steps.length > 1) {
-              const progressPercent = (currentIndex / (steps.length - 1)) * 100
-              const progressLine = document.getElementById('progressLine')
-              progressLine.style.width = progressPercent + '%'
-            }
-          }
+              if (steps.length === 0) return
 
-          // Positionnement du marqueur "Aujourd'hui"
-          function updateTodayMarker () {
-            const steps = document.querySelectorAll('.timeline-step')
-            const timeline = document.querySelector('.timeline')
-            const todayMarker = document.getElementById('todayMarker')
+              const currentIndex = Array.from(steps).findIndex(step => step.classList.contains('current'))
 
-            if (steps.length === 0) return
-
-            const today = new Date()
-            today.setHours(0, 0, 0, 0)
-
-            // Récupérer les dates et positions de toutes les étapes
-            const stepsData = Array.from(steps).map((step, index) => {
-              const endDate = step.getAttribute('data-end-date')
-              const rect = step.getBoundingClientRect()
-              const timelineRect = timeline.getBoundingClientRect()
-              const positionPercent = ((rect.left + rect.width / 2 - timelineRect.left) / timelineRect.width) * 100
-
-              return {
-                endDate: endDate ? new Date(endDate) : null,
-                positionPercent: positionPercent,
-                index: index
+              if (currentIndex >= 0 && steps.length > 1 && progressLine) {
+                const progressPercent = (currentIndex / (steps.length - 1)) * 100
+                progressLine.style.width = progressPercent + '%'
+              } else if (currentIndex < 0 && progressLine) {
+                const allCompleted = Array.from(steps).every(step => step.classList.contains('completed'))
+                if (allCompleted) {
+                  progressLine.style.width = '100%'
+                }
               }
-            }).filter(data => data.endDate !== null)
 
-            if (stepsData.length === 0) return
+              if (!todayMarker) return
 
-            const firstDate = stepsData[0].endDate
-            const lastDate = stepsData[stepsData.length - 1].endDate
+              const today = new Date()
+              today.setHours(0, 0, 0, 0)
 
-            // Si aujourd'hui est avant la première date ou après la dernière, cacher le marqueur
-            if (today < firstDate || today > lastDate) {
-              todayMarker.style.display = 'none'
-              return
-            }
+              const stepsData = Array.from(steps).map((step, index) => {
+                const endDate = step.getAttribute('data-end-date')
+                const rect = step.getBoundingClientRect()
+                const timelineRect = timeline.getBoundingClientRect()
+                const positionPercent = timelineRect.width > 0
+                  ? ((rect.left + rect.width / 2 - timelineRect.left) / timelineRect.width) * 100
+                  : 0
 
-            todayMarker.style.display = 'block'
+                return {
+                  endDate: endDate ? new Date(endDate) : null,
+                  positionPercent: positionPercent,
+                  index: index
+                }
+              }).filter(data => data.endDate !== null)
 
-            // Trouver les deux étapes entre lesquelles se trouve aujourd'hui
-            let beforeStep = null
-            let afterStep = null
+              if (stepsData.length === 0) return
 
-            for (let i = 0; i < stepsData.length - 1; i++) {
-              if (today >= stepsData[i].endDate && today <= stepsData[i + 1].endDate) {
-                beforeStep = stepsData[i]
-                afterStep = stepsData[i + 1]
-                break
+              const firstDate = stepsData[0].endDate
+              const lastDate = stepsData[stepsData.length - 1].endDate
+
+              if (today < firstDate || today > lastDate) {
+                todayMarker.style.display = 'none'
+                return
+              }
+
+              todayMarker.style.display = 'block'
+
+              let beforeStep = null
+              let afterStep = null
+
+              for (let i = 0; i < stepsData.length - 1; i++) {
+                if (today >= stepsData[i].endDate && today <= stepsData[i + 1].endDate) {
+                  beforeStep = stepsData[i]
+                  afterStep = stepsData[i + 1]
+                  break
+                }
+              }
+
+              if (!beforeStep && today <= stepsData[0].endDate) {
+                const firstStepDate = stepsData[0].endDate
+                const daysDiff = (today - firstDate) / (1000 * 60 * 60 * 24)
+                const totalDays = (firstStepDate - firstDate) / (1000 * 60 * 60 * 24) || 1
+                const ratio = daysDiff / totalDays
+                todayMarker.style.left = (stepsData[0].positionPercent * ratio) + '%'
+                return
+              }
+
+              if (beforeStep && afterStep) {
+                const totalDuration = afterStep.endDate - beforeStep.endDate || 1
+                const elapsedDuration = today - beforeStep.endDate
+                const ratio = elapsedDuration / totalDuration
+
+                const startPos = beforeStep.positionPercent
+                const endPos = afterStep.positionPercent
+                const markerPosition = startPos + (endPos - startPos) * ratio
+
+                todayMarker.style.left = markerPosition + '%'
               }
             }
 
-            // Si on est avant la première étape
-            if (!beforeStep && today <= stepsData[0].endDate) {
-              const firstStepDate = stepsData[0].endDate
-              const daysDiff = (today - firstDate) / (1000 * 60 * 60 * 24)
-              const totalDays = (firstStepDate - firstDate) / (1000 * 60 * 60 * 24)
-              const ratio = daysDiff / totalDays
-              todayMarker.style.left = (stepsData[0].positionPercent * ratio) + '%'
-              return
+            function initAll() {
+              document.querySelectorAll('.timeline-container').forEach(updateTimelineElements)
             }
 
-            // Calculer la position proportionnelle entre les deux étapes
-            if (beforeStep && afterStep) {
-              const totalDuration = afterStep.endDate - beforeStep.endDate
-              const elapsedDuration = today - beforeStep.endDate
-              const ratio = elapsedDuration / totalDuration
-
-              const startPos = beforeStep.positionPercent
-              const endPos = afterStep.positionPercent
-              const markerPosition = startPos + (endPos - startPos) * ratio
-
-              todayMarker.style.left = markerPosition + '%'
+            if (document.readyState === 'loading') {
+              document.addEventListener('DOMContentLoaded', initAll)
+            } else {
+              initAll()
             }
-          }
 
-          updateProgress()
-          updateTodayMarker()
-
-          // Recalculer la position au redimensionnement de la fenêtre
-          window.addEventListener('resize', updateTodayMarker)
+            document.addEventListener('turbo:load', initAll)
+            document.addEventListener('turbo:render', initAll)
+            window.addEventListener('resize', initAll)
+          })()
         </script>
     </div>
 </section>
+{% endif %}
 <!-- Stats Start -->

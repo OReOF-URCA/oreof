@@ -94,78 +94,17 @@ class CampagneCollecteController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_campagne_collecte_show', methods: ['GET'])]
-    public function show(
-        TurboStreamResponseFactory $turboStream,
-        DetailBuilder              $builder,
-        CampagneCollecte           $campagne_collecte): Response
+    public function show(CampagneCollecte $campagne_collecte): Response
     {
-        $detail = $builder
-            ->setEntity(CampagneCollecte::class)
-            ->addField('id', ['label' => 'ID'])
-            ->addField('libelle', ['label' => 'Libellé'])
-            ->addField('anneeUniversitaire', [
-                'label' => 'Année universitaire',
-                'type' => 'entity',
-                'entity' => AnneeUniversitaire::class,
-                'entity_label' => 'libelle',
-                'empty_text' => 'Non renseignée',
-            ])
-            ->addField('annee', ['label' => 'Année'])
-            ->addField('couleur', ['label' => 'Couleur'])
-            ->addField('codeApogee', ['label' => 'Code Apogée', 'empty_text' => 'Non renseigné'])
-            ->addField('defaut', ['label' => 'Collecte DPE active ?', 'format' => 'boolean'])
-            ->addField('mailDpeEnvoye', ['label' => 'Mail DPE envoyé ?', 'format' => 'boolean'])
-            ->addField('dateOuvertureDpe', ['label' => 'Date ouverture DPE', 'format' => 'datetime'])
-            ->addField('dateClotureDpe', ['label' => 'Date clôture DPE', 'format' => 'datetime'])
-            ->addField('dateTransmissionSes', ['label' => 'Date transmission SES', 'format' => 'datetime'])
-            ->addField('dateCfvu', ['label' => 'Date CFVU', 'format' => 'datetime'])
-            ->addField('datePublication', ['label' => 'Date publication', 'format' => 'datetime'])
-            ->addField('timelineDates.count()', ['label' => 'Nombre d\'évènements timeline'])
-            ->addField('timelineDates', [
-                'label' => 'Évènements timeline',
-                'type' => 'collection',
-                'collection_property' => 'libelle',
-                'separator' => ' | ',
-                'empty_text' => 'Aucun évènement',
-            ])
-            ->addField('enablePublication', ['label' => 'Publication activée ?', 'format' => 'boolean'])
-            ->addField('publicationTag', [
-                'label' => 'Tag de publication',
-                'empty_text' => 'Non défini',
-            ])
-            ->addField('publicationOptions', [
-                'label' => 'Options de publication (valeurs)',
-                'type' => 'collection',
-                'separator' => ' / ',
-                'empty_text' => 'Aucune option',
-            ])
-            ->addField('isFinished', ['label' => 'Campagne consolidée ?', 'format' => 'boolean'])
-            ->addField('dpeParcours.count()', ['label' => 'Nombre de DPE parcours'])
-            ->addField('changeRves.count()', ['label' => 'Nombre de changements RF'])
-            ->addField('blocCompetences.count()', ['label' => 'Nombre de blocs compétences'])
-            ->addField('userProfils.count()', ['label' => 'Nombre de profils utilisateurs'])
-            ->addField('butCompetences.count()', ['label' => 'Nombre de compétences BUT'])
-            ->addField('dpeDemandes.count()', ['label' => 'Nombre de demandes DPE'])
-            ->build();
-
-        return $turboStream->streamOpenModalFromTemplates(
-            new TranslatableKey('campagne_collecte.show.title', [], 'modal'),
-            'Campagne de collecte : ' . $campagne_collecte->getLibelle(),
-            '_ui/_modal_show_generic.html.twig',
-            [
-                'entity' => $campagne_collecte,
-                'detail' => $detail,
-            ],
-            '_ui/_footer_cancel.html.twig',
-            []
-        );
+        return $this->render('config/campagne_collecte/show.html.twig', [
+            'campagne_collecte' => $campagne_collecte,
+        ]);
     }
 
     #[Route('/{id}/edit', name: 'app_campagne_collecte_edit', methods: ['GET', 'POST'])]
     public function edit(
-        TurboStreamResponseFactory $turboStream,
-        Request          $request,
-        CampagneCollecte $campagne_collecte,
+        Request                    $request,
+        CampagneCollecte           $campagne_collecte,
         CampagneCollecteRepository $campagneCollecteRepository
     ): Response {
         $form = $this->createForm(
@@ -182,20 +121,20 @@ class CampagneCollecteController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $campagneCollecteRepository->save($campagne_collecte, true);
 
-            return $turboStream->streamToastSuccess('Campagne de collecte modifiée avec succès', true);
+            $this->addFlash('toast', [
+                'type' => 'success',
+                'text' => 'Campagne de collecte modifiée avec succès'
+            ]);
+
+            return $this->redirectToRoute('app_campagne_collecte_show', [
+                'id' => $campagne_collecte->getId()
+            ]);
         }
 
-        return $turboStream->streamOpenModalFromTemplates(
-            new TranslatableKey('campagne_collecte.edit.title', [], 'modal'),
-            'Campagne de collecte : ' . $campagne_collecte->getLibelle(),
-            '_ui/_modal_new_generic.html.twig',
-            [
-                'campagne_collecte' => $campagne_collecte,
-                'form' => $form->createView(),
-            ],
-            '_ui/_footer_submit_cancel.html.twig',
-            []
-        );
+        return $this->render('config/campagne_collecte/edit.html.twig', [
+            'campagne_collecte' => $campagne_collecte,
+            'form' => $form->createView(),
+        ]);
     }
 
     #[Route('/{id}/duplicate', name: 'app_campagne_collecte_duplicate', methods: ['GET'])]

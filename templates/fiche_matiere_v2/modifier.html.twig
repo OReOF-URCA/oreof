@@ -64,14 +64,6 @@
     </div>
 {% endblock %}
 
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('structure_fiche_matiere_index'), title: 'Liste des fiches EC/matières'},
-        {title: header_title}
-    ]}) }}
-{% endblock %}
-
 {% block content %}
     <div id="fiche_matiere_header_component">
         <twig:FicheMatiereHeader ficheMatiereId="{{ fiche_matiere.id }}"/>

@@ -1,0 +1,137 @@
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+
+{{ form_start(form) }}
+<div class="space-y-6">
+    {# 1. Informations générales #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+            <twig:UX:Icon name="mdi:wrench" class="w-5 h-5 text-primary"/>
+            <span>Informations générales</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>{{ form_row(form.libelle) }}</div>
+            <div>{{ form_row(form.anneeUniversitaire) }}</div>
+            <div>{{ form_row(form.codeApogee) }}</div>
+            <div>{{ form_row(form.couleur) }}</div>
+            <div class="md:col-span-2">{{ form_row(form.defaut) }}</div>
+        </div>
+    </div>
+
+    {# 2. Timeline et étapes de la campagne #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="mb-4">
+            <h3 class="text-base font-bold text-text flex items-center gap-2">
+                <twig:UX:Icon name="mdi:calendar" class="w-5 h-5 text-primary"/>
+                <span>Étapes de la timeline & Droits d'accès</span>
+            </h3>
+            <p class="text-xs text-secondary-500 mt-1">
+                Configurez les étapes temporelles de la campagne. Pour chaque étape, vous pouvez sélectionner quels modules applicatifs (Offre, Maquettes, Descriptifs, etc.) sont ouverts à la saisie et modification.
+            </p>
+        </div>
+
+        {% set prototypeHtml %}
+            <div data-form-collection-target="field"
+                 class="rounded-xl border border-secondary-200 bg-secondary-50 p-5 dark:border-secondary-700 dark:bg-secondary-800/60 shadow-sm relative">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-secondary-200 dark:border-secondary-700">
+                    <span class="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                        <twig:UX:Icon name="icon:clock" class="w-4 h-4"/>
+                        Nouvelle étape
+                    </span>
+
+                    <button type="button"
+                            data-action="click->form-collection#removeItem"
+                            class="inline-flex items-center gap-1 text-xs font-semibold text-danger-600 hover:text-danger-700 hover:underline">
+                        <twig:UX:Icon name="icon:delete" class="w-4 h-4"/>
+                        Supprimer cette étape
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">{{ form_row(form.timelineDates.vars.prototype.libelle) }}</div>
+                    <div>{{ form_row(form.timelineDates.vars.prototype.flag) }}</div>
+                    <div class="md:col-span-3">{{ form_row(form.timelineDates.vars.prototype.description) }}</div>
+                    <div>{{ form_row(form.timelineDates.vars.prototype.icone) }}</div>
+                    <div>{{ form_row(form.timelineDates.vars.prototype.dateDebut) }}</div>
+                    <div>{{ form_row(form.timelineDates.vars.prototype.date) }}</div>
+                    <div>{{ form_row(form.timelineDates.vars.prototype.heure) }}</div>
+                    <div class="md:col-span-2">{{ form_row(form.timelineDates.vars.prototype.inTimeline) }}</div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-secondary-200/80 dark:border-secondary-700/80 bg-white/70 dark:bg-secondary-900/50 p-4 rounded-lg">
+                    {{ form_row(form.timelineDates.vars.prototype.modulesActifs) }}
+                </div>
+            </div>
+        {% endset %}
+
+        <div {{ stimulus_controller('form-collection', {
+            'prototype': prototypeHtml|json_encode,
+            'max-items': 0
+        }) }}>
+            <div data-form-collection-target="fields" class="space-y-4">
+                {% for timelineForm in form.timelineDates %}
+                    <div data-form-collection-target="field"
+                         class="rounded-xl border border-secondary-200 bg-secondary-50 p-5 dark:border-secondary-700 dark:bg-secondary-800/60 shadow-sm relative">
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-secondary-200 dark:border-secondary-700">
+                            <span class="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                                <twig:UX:Icon name="icon:clock" class="w-4 h-4"/>
+                                Étape #{{ loop.index }} : {{ timelineForm.vars.data.libelle|default('Nouvelle étape') }}
+                            </span>
+
+                            <button type="button"
+                                    data-action="click->form-collection#removeItem"
+                                    class="inline-flex items-center gap-1 text-xs font-semibold text-danger-600 hover:text-danger-700 hover:underline">
+                                <twig:UX:Icon name="icon:delete" class="w-4 h-4"/>
+                                Supprimer cette étape
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">{{ form_row(timelineForm.libelle) }}</div>
+                            <div>{{ form_row(timelineForm.flag) }}</div>
+                            <div class="md:col-span-3">{{ form_row(timelineForm.description) }}</div>
+                            <div>{{ form_row(timelineForm.icone) }}</div>
+                            <div>{{ form_row(timelineForm.dateDebut) }}</div>
+                            <div>{{ form_row(timelineForm.date) }}</div>
+                            <div>{{ form_row(timelineForm.heure) }}</div>
+                            <div class="md:col-span-2">{{ form_row(timelineForm.inTimeline) }}</div>
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-secondary-200/80 dark:border-secondary-700/80 bg-white/70 dark:bg-secondary-900/50 p-4 rounded-lg">
+                            {{ form_row(timelineForm.modulesActifs) }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="button"
+                    data-form-collection-target="addButton"
+                    data-action="click->form-collection#addItem"
+                    class="mt-4 inline-flex items-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary-50/50 px-4 py-3 text-sm font-semibold text-primary hover:bg-primary-50 transition w-full justify-center">
+                <twig:UX:Icon name="icon:add" class="w-4 h-4"/>
+                Ajouter une nouvelle étape à la timeline
+            </button>
+        </div>
+    </div>
+
+    {# 3. Actions #}
+    <div class="flex flex-wrap items-center gap-3">
+        <twig:Button
+                type="submit"
+                variant="success"
+                :soft="false"
+                :outline="false"
+                icon="icon:save"
+                label="Enregistrer la campagne"
+        />
+        <twig:Button
+                href="{{ campagne_collecte.id ? path('app_campagne_collecte_show', {id: campagne_collecte.id}) : path('app_campagne_collecte_index') }}"
+                variant="secondary"
+                :outline="true"
+                :soft="false"
+                icon="icon:arrow-left"
+                label="Annuler"
+        />
+    </div>
+</div>
+{{ form_end(form) }}

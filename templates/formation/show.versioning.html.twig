@@ -156,12 +156,6 @@
     Détail de la formation : {{ formation.display }} <h2 class="text-primary">Version du : {{ dateHeureVersion }}</h2>
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_formation_index'), title: 'Liste des formations'},
-    ]}) }}
-{% endblock %}
-
 {# {% block bouton_header %}
     {% if formation.isHasParcours == false and formation.parcours|length == 1 %}
         {% set parcours = formation.parcours[0] %}

@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Entity\Parcours;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\SemestreRepository;
 use App\Repository\TypeDiplomeRepository;
@@ -18,6 +20,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class CodificationParcoursController extends AbstractController
 {
     #[Route('/codification/parcours/modifier/{parcours}', name: 'app_codification_parcours_modifier')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function modifier(
         TypeDiplomeResolver $typeDiplomeResolver,
         EntityManagerInterface $em,
@@ -25,8 +28,22 @@ class CodificationParcoursController extends AbstractController
         UeRepository $ueRepository,
         SemestreRepository $semestreRepository,
         Parcours $parcours,
-        Request $request
+        Request $request,
+        BreadcrumbService $breadcrumb
     ): Response {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Codification');
 
         if ($request->isMethod('POST')) {
             //on parcours toutes les requests pour récupérer les données

@@ -4,15 +4,6 @@
     Pilotage de l'offre : {{ composante.libelle }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href: path('app_validation_composante_dpe_index', {composante: composante.id}),
-            title: 'Validation DPE'
-        }
-    ]}) }}
-{% endblock %}
-
 {% block content %}
     <div class="card mt-2">
         <div class="card-body">

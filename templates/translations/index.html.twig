@@ -63,10 +63,6 @@
     </section>
 {% endblock %}
 
-{% set header_title %}
-    Gestion des Traductions
-{% endset %}
-
 {% block bouton_header %}
     <div class="flex flex-wrap justify-end gap-2">
         {% if is_granted('ROLE_ADMIN') %}
@@ -85,15 +81,3 @@
     </div>
 {% endblock %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href:'',
-            title: 'Administration',
-        },
-        {
-            href:'',
-            title: 'Traductions',
-        }
-    ]}) }}
-{% endblock %}

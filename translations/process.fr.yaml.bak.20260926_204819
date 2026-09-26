@@ -566,7 +566,6 @@ validation.formation.info: 'Formation en attente de validation'
 validation.formation.muted: validation.formation.muted
 validation.formation.reserve.autorisation_saisie: validation.formation.reserve.autorisation_saisie
 validation.formation.reserve.en_cours_redaction: validation.formation.reserve.en_cours_redaction
-validation.formation.success: validation.formation.success
 validation.formation.valide.alerte: 'La validation de la formation permet la transmission du projet DPE "formation" au responsable DPE de la composante pour visa. Après validation, le projet DPE "formation" ne sera plus modifiable.'
 validation.formation.valide.autorisation_saisie: validation.formation.valide.autorisation_saisie
 validation.formation.valide.en_cours_redaction: 'La validation de la formation permet la transmission du projet DPE "formation" au responsable DPE de votre composante pour visa en vue du passage en conseil de composante.  Après validation, la fiche "formation" ne sera plus modifiable.'

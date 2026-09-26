@@ -79,12 +79,6 @@ obligatoires'}) }}
     Modifier une fiche d'identité de la formation
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_formation_index'), title: 'Liste des formations'},
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     {% if is_granted('ROLE_ADMIN') %}
         <a href="{{ path('formation_v2_modifier', {slug:formation.slug}) }}"

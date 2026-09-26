@@ -155,11 +155,4 @@
     />
 {% endblock %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href:'', title: 'Administration'},
-        {href:path('translations_index'), title: 'Traductions'},
-        {href:'', title: 'fichier : ' ~ filename},
-    ]}) }}
-{% endblock %}
 

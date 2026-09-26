@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <div class="space-y-6">
+        {{ include('config/campagne_collecte/_form.html.twig') }}
+    </div>
+{% endblock %}
+
+{% set header_title %}
+    Modifier la campagne : {{ campagne_collecte.libelle }}
+{% endset %}
+
+{% block bouton_header %}
+    <div class="flex items-center gap-2">
+        <twig:Button
+                href="{{ path('app_campagne_collecte_show', { id: campagne_collecte.id }) }}"
+                variant="secondary"
+                :outline="true"
+                :soft="false"
+                icon="icon:eye"
+                label="Voir la campagne"
+                tooltip="Consulter la fiche de la campagne"
+        />
+        <twig:Button
+                href="{{ path('app_campagne_collecte_index') }}"
+                variant="secondary"
+                :outline="true"
+                :soft="false"
+                icon="icon:arrow-left"
+                label="Retour à la liste"
+                tooltip="Retour à la liste des campagnes"
+        />
+    </div>
+{% endblock %}

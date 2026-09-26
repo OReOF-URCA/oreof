@@ -55,10 +55,26 @@ class ParcoursEcController extends AbstractController
     }
 
     #[Route('/parcours/ressources-sae/{parcours}', name: 'app_parcours_ressources_sae_but')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function ressourcesSae(
         FicheMatiereRepository $ficheMatiereRepository,
-        Parcours               $parcours
+        Parcours               $parcours,
+        BreadcrumbService      $breadcrumb
     ): Response {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Ressources et SAE');
+
         $fichesMatieres = [];
         foreach ($parcours->getSemestreParcours() as $semP) {
             if ($semP->getSemestre()?->getSemestreRaccroche() !== null) {
@@ -109,10 +125,26 @@ class ParcoursEcController extends AbstractController
 
     //todo: devrait être dans type diplôme
     #[Route('/parcours/ressources-sae/{parcours}/coeff', name: 'app_parcours_ressources_sae_but_coeff')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function ressourcesSaeCoeff(
-        Parcours $parcours
+        Parcours          $parcours,
+        BreadcrumbService $breadcrumb
     ): Response
     {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Coefficients');
+
         $tabEcs = [];
         $tabEcUes = [];
         $tabUes = [];
@@ -153,10 +185,25 @@ class ParcoursEcController extends AbstractController
     }
 
     #[Route('/parcours/m2e-ec/{parcours}/coeff', name: 'app_parcours_ec_m2e_coeff')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function m2eEcCoeff(
-        Parcours $parcours
+        Parcours          $parcours,
+        BreadcrumbService $breadcrumb
     ): Response
     {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Coefficients M2E');
         $tabEcs = [];
         $tabEcUes = [];
         $tabUes = [];

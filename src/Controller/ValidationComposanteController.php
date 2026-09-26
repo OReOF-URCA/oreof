@@ -129,6 +129,7 @@ class ValidationComposanteController extends BaseController
 
     #[Route('{composante}/pilotage', name: 'pilotage')]
     #[Route('{composante}/pilotage/{campagneCollecte}', name: 'pilotage_campagne')]
+    #[Breadcrumb(label: 'menu.compo.pilotage_visuel')]
     public function pilotage(
         Composante                 $composante,
         DpeParcoursRepository      $dpeParcoursRepository,

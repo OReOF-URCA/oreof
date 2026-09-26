@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\FicheMatiereMutualisableRepository;
 use App\Repository\SemestreMutualisableRepository;
 use App\Repository\UeMutualisableRepository;
@@ -14,6 +15,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class MutualiseController extends AbstractController
 {
     #[Route('/', name: 'index')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
+    #[Breadcrumb(label: 'menu.detail_elts_mutualises')]
     public function index(): Response
     {
         return $this->render('mutualise/index.html.twig');

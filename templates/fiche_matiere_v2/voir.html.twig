@@ -91,13 +91,6 @@
     <span class="badge bg-info">Mutualisée</span>{% endif %}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('structure_fiche_matiere_index'), title: 'Liste des fiches EC/matières'},
-        {title: header_title}
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <div class="flex flex-wrap gap-3">
         {% if

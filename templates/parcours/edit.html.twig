@@ -56,14 +56,6 @@
     {% endif %}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Pilotage', href: path('app_section_pilotage')},
-        {href: path('app_formation_index'), title: 'Liste des formations'},
-        {href: path('formation_v2_modifier', {slug:formation.slug}), title: 'Formation : '~formation.display},
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <a href="{{ path('parcours_v2_voir', {parcours:parcours.id}) }}"
        class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"

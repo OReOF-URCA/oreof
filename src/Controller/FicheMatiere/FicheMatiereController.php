@@ -14,6 +14,8 @@ use App\Entity\FicheMatiere;
 use App\Form\FicheMatiereStep1Type;
 use App\Form\FicheMatiereStep2Type;
 use App\Form\FicheMatiereStep4HdType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereMutualisableRepository;
 use App\Repository\FicheMatiereTabStateRepository;
@@ -30,12 +32,16 @@ use Symfony\Component\Routing\Attribute\Route;
 class FicheMatiereController extends BaseController
 {
     #[Route('/{slug}/modifier', name: 'modifier')]
+    #[Breadcrumb(menuKey: 'offre.detail_fiches')]
     public function modifier(
         Request                        $request,
         FicheMatiereTabStateRepository $statesRepo,
         #[MapEntity(mapping: ['slug' => 'slug'])]
-        FicheMatiere                   $ficheMatiere
+        FicheMatiere                   $ficheMatiere,
+        BreadcrumbService              $breadcrumb
     ): Response {
+        $breadcrumb->add($ficheMatiere->getLibelle());
+        $breadcrumb->add('Modifier');
         $tabStates = $statesRepo->indexByTabKey($ficheMatiere);
         $referer = $request->headers->get('referer');
 
@@ -72,14 +78,17 @@ class FicheMatiereController extends BaseController
     }
 
     #[Route('/{slug}', name: 'voir', methods: ['GET'])]
+    #[Breadcrumb(menuKey: 'offre.detail_fiches')]
     public function show(
         #[MapEntity(mapping: ['slug' => 'slug'])]
         FicheMatiere                       $ficheMatiere,
         ElementConstitutifRepository       $elementConstitutifRepository,
         FicheMatiereMutualisableRepository $ficheMatiereMutualisableRepository,
         TypeDiplomeRepository              $typeDiplomeRepository,
-        VersioningFicheMatiere             $ficheMatiereVersioningService
+        VersioningFicheMatiere             $ficheMatiereVersioningService,
+        BreadcrumbService                  $breadcrumb
     ): Response {
+        $breadcrumb->add($ficheMatiere->getLibelle());
 
 
         $formation = $ficheMatiere->getParcours()?->getFormation();

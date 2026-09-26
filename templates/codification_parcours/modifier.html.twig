@@ -72,23 +72,6 @@
     Modifier Codification : {{ parcours.display }}
 {% endset %}
 
-        {% block breadcrumb %}
-            {{ include('communs/_breadcrumb.html.twig', {liens:[
-                {
-                    href:'',
-                    title: 'Formations',
-                },
-                {
-                    href:path('app_codification_liste'),
-                    title: 'Codification des formations',
-                },
-                {
-                    href: path('app_codification', {formation:formation.id}),
-                    title: 'Formation ' ~formation.displayLong,
-                }
-            ]}) }}
-        {% endblock %}
-
         {% block bouton_header %}
             <a
                     class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"

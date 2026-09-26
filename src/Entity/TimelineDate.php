@@ -42,6 +42,12 @@ class TimelineDate
     #[ORM\Column(type: 'string', length: 30, enumType: TimelineDateFlagEnum::class)]
     private TimelineDateFlagEnum $flag = TimelineDateFlagEnum::NONE;
 
+    /**
+     * @var array<string>
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private array $modulesActifs = [];
+
     public function getId(): ?int
     {
         return $this->id;
@@ -165,5 +171,39 @@ class TimelineDate
         $this->flag = $isCfvu ? TimelineDateFlagEnum::CFVU : TimelineDateFlagEnum::NONE;
 
         return $this;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getModulesActifs(): array
+    {
+        return $this->modulesActifs ?? [];
+    }
+
+    /**
+     * @param array<string|\App\Enums\CampagneModuleEnum>|null $modulesActifs
+     */
+    public function setModulesActifs(?array $modulesActifs): static
+    {
+        if ($modulesActifs === null) {
+            $this->modulesActifs = [];
+
+            return $this;
+        }
+
+        $this->modulesActifs = array_values(array_unique(array_map(
+            static fn(string|\App\Enums\CampagneModuleEnum $m) => $m instanceof \App\Enums\CampagneModuleEnum ? $m->value : $m,
+            $modulesActifs
+        )));
+
+        return $this;
+    }
+
+    public function hasModule(\App\Enums\CampagneModuleEnum|string $module): bool
+    {
+        $value = $module instanceof \App\Enums\CampagneModuleEnum ? $module->value : $module;
+
+        return in_array($value, $this->getModulesActifs(), true);
     }
 }

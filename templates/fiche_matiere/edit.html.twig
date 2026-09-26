@@ -93,14 +93,6 @@
     <span class="badge bg-info">Mutualisée</span>{% endif %}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Offre de formation', href: path('app_section_offre_formation')},
-        {href: path('structure_fiche_matiere_index'), title: 'Liste des fiches EC/matières'},
-        {title: 'Modification'}
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <a href="{{ path('fiche_matiere_v2_voir', {slug:fiche_matiere.slug}) }}"
        class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"

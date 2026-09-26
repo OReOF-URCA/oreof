@@ -4,15 +4,6 @@
     Ressources/SAE ECTS : {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_parcours_index'), title: 'Liste des parcours'},
-        {href: path('formation_v2_modifier', {slug:parcours.formation.slug}), title: 'Formation : '~parcours.formation
-        .display},
-        {href: path('parcours_v2_modifier', {parcours:parcours.id}), title: 'Parcours : '~parcours.libelle},
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <a href="{{ path('parcours_v2_modifier', {parcours:parcours.id}) }}"
        class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"

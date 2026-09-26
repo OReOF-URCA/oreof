@@ -37,14 +37,11 @@ App\\TypeDiplome\\Handler\\M2EHandler: App\\TypeDiplome\\Handler\\M2EHandler
 App\\TypeDiplome\\Handler\\UniversityHandler: App\\TypeDiplome\\Handler\\UniversityHandler
 App\\TypeDiplome\\NonClassique\\NonClassiqueHandler: App\\TypeDiplome\\NonClassique\\NonClassiqueHandler
 'Après la 1ère année de licence "Sciences pour la Santé" - Accès santé': 'Après la 1ère année de licence "Sciences pour la Santé" - Accès santé'
-Aucun: Aucun
 Autre: Autre
 'Autre mention': Autre
 'Autre téléphone de la composante': 'Autre téléphone de la composante'
 'B1 (Utilisateur indépendant)': 'B1 (Utilisateur indépendant)'
 'B2 (Utilisateur indépendant avancé)': 'B2 (Utilisateur indépendant avancé)'
-Blanc: Blanc
-Bleu: Bleu
 'C1 (Utilisateur expérimenté autonome)': 'C1 (Utilisateur expérimenté autonome)'
 'C2 (Utilisateur expérimenté maîtrise)': 'C2 (Utilisateur expérimenté maîtrise)'
 CC: CC
@@ -71,7 +68,6 @@ Chaumont: Chaumont
 'Choisissez une ville': '-'
 'Châlons en Champagne': 'Châlons en Champagne'
 Civilité: Civilité
-'Clôture de la collecte': 'Clôture de la collecte'
 'Co-Responsable du parcours': 'Co-Responsable du parcours'
 'Co-responsable du parcours': 'Co-responsable du parcours'
 'Code Apogée': 'Code Apogée'
@@ -86,13 +82,10 @@ Composante: Composante
 "Composante d'inscription": "Composante d'inscription"
 "Composante d'inscription et où se déroulent les cours": "Composante d'inscription et où se déroulent les cours"
 "Composante d'inscription uniquement": "Composante d'inscription uniquement"
-'Configuration de la plateforme': 'Configuration de la plateforme'
 'Contrôle continu': 'Contrôle continu'
 'Contrôle continu & contrôle terminal': 'Contrôle continu & contrôle terminal'
 'Contrôle continu intégral': 'Contrôle continu intégral'
 'Contrôle terminal': 'Contrôle terminal'
-Couleur: Couleur
-'Couleur de la campagne': 'Couleur de la campagne'
 "Date d'ouverture de la campagne de collecte DPE": "Date d'ouverture de la campagne de collecte DPE"
 "Date d'ouverture du DPE": "Date d'ouverture de la campagne de collecte des projets de DPE"
 'Date de clôture de la campagne de collecte DPE': 'Date de clôture de la campagne de collecte DPE'
@@ -100,15 +93,11 @@ Couleur: Couleur
 'Date de la CFVU': 'Date prévue de passage des projets de DPE en CFVU'
 'Date de publication': 'Date de publication des DPE'
 'Date limite de transmission des dossiers': 'Date limite de transmission des projets de DPE'
-'Dates de la campagne de collecte': 'Dates de la campagne de collecte'
-'Demandes de modification / DPE (création, réouverture)': 'Demandes de modification / DPE (création, réouverture)'
-'Descriptifs & Fiches matières (objectifs, contenus, compétences)': 'Descriptifs & Fiches matières (objectifs, contenus, compétences)'
 'Devenir des diplômés': 'Devenir des diplômés'
 'Directeur de composante': 'Directeur de composante'
 Disciplinaire: Disciplinaire
 'Droit à la 2nde chance': 'Droit à la 2nde chance'
 Droits: Rôle
-'Définition des champs': 'Définition des champs'
 'Dénomination du contact': 'Dénomination du contact'
 'EC obligatoire': 'EC obligatoire'
 'EC à choix libre': 'EC à choix libre'
@@ -132,8 +121,6 @@ FI_APPRENTISSAGE: 'Formation initiale en apprentissage'
 Formation: Formation
 'Formation accréditée': 'Formation accréditée'
 'Formation non-accréditée': 'Formation non-accréditée'
-"Global (1 seul fichier pour tout l'établissement)": "Global (1 seul fichier pour tout l'établissement)"
-Gris: Gris
 Hybride: Hybride
 Hébergement: Hébergement
 'Indiquez les droits accordés': 'Indiquez le rôle accordé'
@@ -143,7 +130,6 @@ Hébergement: Hébergement
 'Informations diverses': 'Informations diverses'
 'Informations pratiques': 'Informations pratiques'
 'Insertion professionnelle': 'Insertion professionnelle'
-Jaune: Jaune
 'Libelle de la fiche matière': 'Libelle de la fiche matière'
 Libellé: Libellé
 'Libellé Année Universitaire': 'Année universitaire concernée par les projets de DPE'
@@ -155,18 +141,14 @@ Libellé: Libellé
 'Licence - Accès santé 3ème année (L.As 3)': 'Licence - Accès santé 3ème année (L.As 3)'
 Login: Login
 Madame: Madame
-'Maquettes & Structures (semestres, UE, EC, volumes horaires)': 'Maquettes & Structures (semestres, UE, EC, volumes horaires)'
 Mention: Mention
 'Mise en situation professionnelle': 'Mise en situation professionnelle'
 "Modalités d'admission": "Modalités d'admission"
-'Modalités de Contrôle des Connaissances (MCCC)': 'Modalités de Contrôle des Connaissances (MCCC)'
 "Modalités de l'alternance": "Modalités de l'alternance"
-"Mode d'export par défaut": "Mode d'export par défaut"
 Monsieur: Monsieur
 Mémoire: Mémoire
 NORMAL: NORMAL
 "Nature de l'élément": "Nature de l'élément"
-Noir: Noir
 Nom: Nom
 'Nom du nouveau type…': 'Nom du nouveau type…'
 "Nombre d'ECTS par semestre (laisser vide si pas de quota fixe)": "Nombre d'ECTS par semestre (laisser vide si pas de quota fixe)"
@@ -174,20 +156,16 @@ Non: Non
 None: Aucun
 'Numéro SIRET': 'Numéro SIRET'
 "Numéro d'activité": "Numéro d'activité"
-'Offre de formation (saisie, modification, validation)': 'Offre de formation (saisie, modification, validation)'
 Oui: Oui
 'Outils et Langages (transversale)': 'Outils et Langages (transversale)'
 Ouverture: Ouverture
-'Ouverture de la collecte': 'Ouverture de la collecte'
 PROJET: PROJET
-'Par type de diplôme (1 fichier par type de diplôme)': 'Par type de diplôme (1 fichier par type de diplôme)'
 'Passage au CFVU': 'Passage au CFVU'
 Plateforme: Plateforme
 'Pour en savoir plus sur ce type de formation': 'Pour en savoir plus sur ce type de formation'
 Prénom: Prénom
 'Prérequis obligatoires': 'Prérequis obligatoires'
 'Présentation des formations': 'Présentation des formations'
-Publication: Publication
 ROLE_ADMIN: ROLE_ADMIN
 ROLE_SES: ROLE_SES
 ROLE_VP: ROLE_VP
@@ -196,7 +174,6 @@ Renforcement: Renforcement
 'Responsable "DPE" de la composante': 'Responsable DPE de la composante'
 'Responsable du parcours': 'Responsable du parcours'
 Restauration: Restauration
-Rouge: Rouge
 SES: SES
 STAGE: STAGE
 'Sans niveau spécifique': 'Sans niveau spécifique'
@@ -221,12 +198,10 @@ TYPE_PARCOURS_LAS23: 'Parcours LAS2 ou 3'
 'Texte affiché si le parcours est une LAS1-2 ou 3, avec les règles pour accéder à la LAS3': 'Texte affiché si le parcours est une LAS1-2 ou 3, avec les règles pour accéder à la LAS3'
 'Texte affiché si le parcours est une LAS2 ou 3, avec les règles pour accéder à la LAS2': 'Texte affiché si le parcours est une LAS2 ou 3, avec les règles pour accéder à la LAS2'
 'Tous les éléments': 'Tous les éléments'
-'Transmission SES': 'Transmission SES'
 Transport: Transport
 Troyes: Troyes
 "Type d'EC": "Type d'EC"
 'Type de MCCC': 'Type de MCCC'
-'Type de date (Flag)': 'Type de date (Flag)'
 'Type de diplôme': 'Type de diplôme'
 'Type de formation': 'Type de formation'
 "Type(s) de diplôme proposant ce type d'EC": "Type(s) de diplôme proposant ce type d'EC"
@@ -254,7 +229,6 @@ Téléphone: Téléphone
 'Utilisateur élémentaire intermédiaire': 'Utilisateur élémentaire intermédiaire'
 'Utilisateur élémentaire intermédiaire (A2)': 'Utilisateur élémentaire intermédiaire (A2)'
 'Utilise les ECTS': 'Utilise les ECTS'
-Vert: Vert
 'Veuillez choisir la localisation du parcours': '-'
 Ville: Ville
 actualite.labels.affiche: 'Actualité publiée ?'
@@ -515,9 +489,6 @@ parcours_step7.labels.descriptifHautPageAutomatique: parcours_step7.labels.descr
 parcours_step7.labels.poursuitesEtudes: "Poursuites d'études envisageables"
 parcours_step8.labels.coordSecretariat: 'Coordonnées du secrétariat'
 parcours_step8.labels.respParcours: 'Responsable du parcours'
-plateforme_admission.labels.active.label: plateforme_admission.labels.active.label
-plateforme_admission.labels.code: plateforme_admission.labels.code
-plateforme_admission.labels.libelle: plateforme_admission.labels.libelle
 profil.labels.centre.label: 'Centre(s) pour ce profil'
 profil.labels.code: 'Code du profil'
 profil.labels.libelle: 'Libellé du profil'
@@ -552,17 +523,6 @@ semestre.raccrocher.label: 'Précisez le semestre à raccrocher'
 semestre.reutilise.label: 'Précisez le semestre à raccrocher'
 semestre.type_semestre.label: 'Le semestre est-il mutualisé ?'
 test: test
-timeline.date: 'Date de fin / Échéance'
-timeline.date.help: "Date marquant la fin de cette étape ou l'échéance"
-timeline.dateDebut: 'Date de début'
-timeline.dateDebut.help: "Date marquant le début de cette période (optionnel, sinon l'étape précédente sert de repère)"
-timeline.description: "Description de l'étape"
-timeline.heure: 'Heure limite'
-timeline.icone: Icône
-timeline.inTimeline: 'Afficher dans la timeline'
-timeline.libelle: "Libellé de l'étape"
-timeline.modulesActifs.help: "Cochez les parties de l'application ouvertes à la modification durant cette étape. Hors de cette période, ces modules passeront automatiquement en consultation seule pour les utilisateurs non-administrateurs."
-timeline.modulesActifs.label: 'Modules / Fonctionnalités ouvertes à la saisie'
 type_diplome:
     labels:
         ectsObligatoireSurEc:
@@ -619,4 +579,15 @@ ue.raccrocher.label: "Précisez l'UE à raccrocher"
 ue.semestre.dupliquer.label: "Choisir le semestre dans lequel dupliquer le'UE"
 user.add_missing.email.label: "Indiquer l'email URCA de l'utilisateur à ajouter"
 user_ldap.labels.centreDemande: 'Centre de gestion'
+timeline.libelle: "Libellé de l'étape"
+timeline.description: "Description de l'étape"
+timeline.icone: "Icône"
+timeline.dateDebut: "Date de début"
+timeline.dateDebut.help: "Date marquant le début de cette période (optionnel, sinon l'étape précédente sert de repère)"
+timeline.date: "Date de fin / Échéance"
+timeline.date.help: "Date marquant la fin de cette étape ou l'échéance"
+timeline.heure: "Heure limite"
+timeline.inTimeline: "Afficher dans la timeline"
+timeline.modulesActifs.label: "Modules / Fonctionnalités ouvertes à la saisie"
+timeline.modulesActifs.help: "Cochez les parties de l'application ouvertes à la modification durant cette étape. Hors de cette période, ces modules passeront automatiquement en consultation seule pour les utilisateurs non-administrateurs."
 

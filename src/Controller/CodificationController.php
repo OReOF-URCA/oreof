@@ -9,6 +9,8 @@ use App\Classes\JsonReponse;
 use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\ComposanteRepository;
 use App\Repository\DomaineRepository;
 use App\Repository\FormationRepository;
@@ -26,6 +28,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class CodificationController extends BaseController
 {
     #[Route('/codification/liste', name: 'app_codification_liste')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
+    #[Breadcrumb(label: 'Codification des formations')]
     public function liste(
         TypeDiplomeRepository $typeDiplomeRepository,
     ): Response {
@@ -196,10 +200,18 @@ class CodificationController extends BaseController
     }
 
     #[Route('/codification/{formation}', name: 'app_codification_index')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function index(
-        Formation $formation,
-        Request $request
+        Formation         $formation,
+        Request           $request,
+        BreadcrumbService $breadcrumb
     ): Response {
+        $breadcrumb->add(
+            $formation->getDisplay(),
+            'formation_v2_voir',
+            ['slug' => $formation->getSlug()]
+        );
+        $breadcrumb->add('Codification');
 
         $selectedParcours = $request->query->get('parcours');
 

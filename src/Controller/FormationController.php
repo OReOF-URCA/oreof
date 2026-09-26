@@ -59,6 +59,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 
 #[Route('/formation')]
 class FormationController extends BaseController
@@ -461,12 +462,15 @@ class FormationController extends BaseController
     }
 
     #[Route('/{slug}', name: 'app_formation_show', methods: ['GET'])]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function show(
         #[MapEntity(mapping: ['slug' => 'slug'])]
-        Formation               $formation,
-        VersioningParcours $versioningParcours,
-        VersioningFormation $versioningFormation
+        Formation           $formation,
+        VersioningParcours  $versioningParcours,
+        VersioningFormation $versioningFormation,
+        BreadcrumbService   $breadcrumb
     ): Response {
+        $breadcrumb->add($formation->getDisplay());
         $typeDiplome = $formation->getTypeDiplome();
 
         if ($typeDiplome === null) {

@@ -1,8 +1,4 @@
-'Composante : UFR Sciences Economiques, Sociales et de Gestion': 'Composante : UFR Sciences Economiques, Sociales et de Gestion'
-Création: Création
-'Gestion des commentaires': 'Gestion des commentaires'
 Modification: Modification
-'UFR Sciences Economiques, Sociales et de Gestion': 'UFR Sciences Economiques, Sociales et de Gestion'
 breadcrumb.home: Accueil
 menu.admin.consulter_offre: "Consulter l'offre de formation"
 menu.admin.controle_lheo: 'Controle LHEO'
@@ -69,7 +65,6 @@ menu.droits.en_attente: 'Utilisateurs en attente'
 menu.droits.profils: 'Gestion des profils'
 menu.droits.repertoire: 'Répertoire des contacts'
 menu.exports: Exports
-menu.fr.yaml: menu.fr.yaml
 menu.menu_administration: Administration
 menu.menu_configuration: 'Configuration générale'
 menu.menu_conseils: Conseils
@@ -89,12 +84,8 @@ page.app_administration_profils_index.description: page.app_administration_profi
 page.app_administration_profils_index.title: 'Gestion des profils'
 page.app_annee_universitaire_index.description: 'Gérer les années universitaires.'
 page.app_annee_universitaire_index.title: 'Années universitaires'
-page.app_campagne_collecte_edit.description: page.app_campagne_collecte_edit.description
-page.app_campagne_collecte_edit.title: page.app_campagne_collecte_edit.title
 page.app_campagne_collecte_index.description: 'Configurer les campagnes de collecte.'
 page.app_campagne_collecte_index.title: 'Campagnes de collecte'
-page.app_campagne_collecte_show.description: page.app_campagne_collecte_show.description
-page.app_campagne_collecte_show.title: page.app_campagne_collecte_show.title
 page.app_commentaire.description: 'Gestion des commentaires sur les formations pour les conseillers.'
 page.app_commentaire.title: 'Gestion des commentaires'
 page.app_composante.description: "Gérer la composante de l'organisation."
@@ -105,30 +96,17 @@ page.app_config_email.description: "Configurer les modèles d'emails."
 page.app_config_email.title: Emails
 page.app_conseils_documents_index.description: 'Documents de conseil (PV & justificatifs)'
 page.app_conseils_documents_index.title: 'Documents de conseil'
-page.app_conseils_synthese_offre.description: page.app_conseils_synthese_offre.description
-page.app_demande_dpe.description: Consultez les demandes de modifications ouvertes, filtrez rapidement par contexte et suivez leur état de validation.
-page.app_demande_dpe.title: Liste des demandes de DPE ouverts
-page.app_demande_dpe_composante.description: page.app_demande_dpe_composante.description
-page.app_demande_dpe_composante.title: page.app_demande_dpe_composante.title
-page.app_document.description: page.app_document.description
-page.app_document.title: page.app_document.title
+page.app_demande_dpe.description: page.app_demande_dpe.description
 page.app_domaine_index.description: 'Gérer les domaines de formation.'
 page.app_domaine_index.title: Domaines
 page.app_etablissement_index.description: 'Gérer les établissements de référence.'
 page.app_etablissement_index.title: Etablissements
-page.app_export_composante_index.description: page.app_export_composante_index.description
 page.app_export_index.description: "Accéder aux exports des données de l'offre de formation"
 page.app_export_index.title: 'Gestion des Exports'
-page.app_faq.description: page.app_faq.description
-page.app_faq.title: page.app_faq.title
 page.app_faq_index.description: 'Gérer la FAQ.'
 page.app_faq_index.title: FAS
 page.app_formation_index.description: 'Détails des mentions/spécialités'
 page.app_formation_index.title: 'Détail des formations'
-page.app_formation_responsable_liste.description: page.app_formation_responsable_liste.description
-page.app_formation_responsable_liste.title: page.app_formation_responsable_liste.title
-page.app_help.description: page.app_help.description
-page.app_help.title: page.app_help.title
 page.app_help_index.description: "Gérer les contenus d'aide."
 page.app_help_index.title: Aides
 page.app_homepage.description: Accueil
@@ -150,26 +128,18 @@ page.app_offre_index.description: 'Synthèse de l’offre de formation. Ouvertur
 page.app_offre_index.title: 'Synthèse de l’offre de formation'
 page.app_parcours_lheo_invalid_list.description: "Contrôle de la conformité au format LHEO de l'offre"
 page.app_parcours_lheo_invalid_list.title: "Contrôle LHEO de l'offre"
-page.app_plaquette.description: page.app_plaquette.description
 page.app_plateforme_adminission_index.description: "Configurer les plateformes d'admission."
 page.app_plateforme_adminission_index.title: "Plateformes d''admission"
-page.app_plateforme_adminission_new.description: page.app_plateforme_adminission_new.description
-page.app_plateforme_adminission_new.title: page.app_plateforme_adminission_new.title
 page.app_rythme_formation_index.description: 'Gérer les rythmes de formation.'
 page.app_rythme_formation_index.title: 'Rythmes de formation'
-page.app_search.description: page.app_search.description
-page.app_search.title: page.app_search.title
 page.app_section_administration.description: Administration
 page.app_section_administration.title: Administration
-page.app_section_conseils.description: page.app_section_conseils.description
-page.app_section_conseils.title: page.app_section_conseils.title
 page.app_section_droits.description: page.app_section_droits.description
 page.app_section_droits.title: page.app_section_droits.title
 page.app_section_offre_formation.description: 'Détails des mentions/spécialités'
 page.app_section_offre_formation.title: 'Offre de formation'
 page.app_section_pilotage.description: page.app_section_pilotage.description
 page.app_section_pilotage.title: page.app_section_pilotage.title
-page.app_synthese_modification_export_pdf.description: page.app_synthese_modification_export_pdf.description
 page.app_type_diplome_edit.description: page.app_type_diplome_edit.description
 page.app_type_diplome_edit.title: page.app_type_diplome_edit.title
 page.app_type_diplome_index.description: 'Gérer les types de diplôme.'
@@ -192,12 +162,7 @@ page.app_user_repertoire.description: page.app_user_repertoire.description
 page.app_user_repertoire.title: 'Répertoire des contacts'
 page.app_validation_change_rf_index.description: 'Gestion des validations RF/co-RF.'
 page.app_validation_change_rf_index.title: 'Gestion des validations RF/co-RF'
-page.app_validation_composante_change_rf_index.description: page.app_validation_composante_change_rf_index.description
-page.app_validation_composante_dpe_index.description: page.app_validation_composante_dpe_index.description
-page.app_validation_composante_dpe_index.title: page.app_validation_composante_dpe_index.title
-page.app_validation_composante_fiche_index.description: page.app_validation_composante_fiche_index.description
 page.app_validation_composante_fiche_index.title: 'Gestion des validations fiches matières'
-page.app_validation_composante_pilotage.description: page.app_validation_composante_pilotage.description
 page.app_validation_dpe_index.description: 'Gestion des validations DPE.'
 page.app_validation_dpe_index.title: 'Gestion des validations DPE'
 page.app_validation_fiche_index.description: page.app_validation_fiche_index.description
@@ -217,8 +182,5 @@ page.structure_fiche_matiere_index.description: 'Liste des fiches EC/matières a
 page.structure_fiche_matiere_index.title: 'Détails des fiches EC/matière'
 page.structure_fiche_matiere_index_hd.description: 'Liste des fiches EC/matières non associées à une mention / spécialité et accessibles à toutes les formations'
 page.structure_fiche_matiere_index_hd.title: 'Détails des fiches EC/matières "hors diplômes"'
-page.translations_edit.description: page.translations_edit.description
-page.translations_edit.title: page.translations_edit.title
 page.translations_index.description: "Gérer les traductions et textes de l'application."
 page.translations_index.title: Traductions
-

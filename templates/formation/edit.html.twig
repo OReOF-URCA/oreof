@@ -145,12 +145,6 @@
     <strong>{{ typeDiplome|typeDiplome }} <span id="synthese_formation_libelle">{{ formation.display }}</span></strong>
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_formation_index'), title: 'Liste des formations'},
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <a href="{{ path('formation_v2_voir', {slug:formation.slug}) }}"
        class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"

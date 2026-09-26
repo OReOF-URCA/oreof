@@ -51,13 +51,6 @@
     Codification des formations
 {% endset %}
 
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_formation_index'), title: 'Liste des formations'},
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
 
     <a

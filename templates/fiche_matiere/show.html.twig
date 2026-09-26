@@ -94,14 +94,6 @@
     Fiche EC/matière <strong id="fiche_matiere_libelle">{{ ficheMatiere.libelle }}</strong> {% if ficheMatiere.ficheMatiereParcours|length > 0 %}<span class="badge bg-info">Mutualisée</span>{% endif %}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Offre de formation', href: path('app_section_offre_formation')},
-        {href: path('structure_fiche_matiere_index'), title: 'Liste des fiches EC/matières'},
-        {title: 'Fiche EC/matière'}
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     {% if
         is_granted('EDIT', {route: 'app_fiche_matiere', subject: ficheMatiere})

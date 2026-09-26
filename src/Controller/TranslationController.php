@@ -2,6 +2,8 @@
 // src/Controller/TranslationController.php
 namespace App\Controller;
 
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Service\TranslationFileManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Finder\SplFileInfo;
@@ -51,8 +53,11 @@ class TranslationController extends AbstractController
     }
 
     #[Route('/edit/{filename}', name: 'translations_edit')]
-    public function edit(string $filename, Request $request): Response
+    #[Breadcrumb(menuKey: 'administration.traductions')]
+    public function edit(string $filename, Request $request, BreadcrumbService $breadcrumb): Response
     {
+        $breadcrumb->add($filename);
+
         if ($request->isMethod('POST')) {
             /** @var array<string,string> $data */
             $data = $request->request->all('translations');

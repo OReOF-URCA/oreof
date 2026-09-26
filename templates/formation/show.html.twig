@@ -213,12 +213,6 @@
     Détail de la formation : {{ formation.display }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('app_formation_index'), title: 'Liste des formations'},
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
 
     {% if versioningParcours is defined

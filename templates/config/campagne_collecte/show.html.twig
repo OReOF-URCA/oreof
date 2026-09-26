@@ -1,0 +1,219 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<div class="space-y-6">
+    {# 1. Résumé en cartes / Statistiques clés #}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <span class="text-xs font-semibold text-secondary-500 uppercase">Statut DPE</span>
+            <div class="mt-2 flex items-center gap-2">
+                {% if campagne_collecte.defaut %}
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Campagne Active
+                    </span>
+                {% else %}
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-100 px-3 py-1 text-xs font-semibold text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">
+                        Inactive
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <span class="text-xs font-semibold text-secondary-500 uppercase">Année Universitaire</span>
+            <div class="mt-2 text-lg font-bold text-text">
+                {{ campagne_collecte.anneeUniversitaire ? campagne_collecte.anneeUniversitaire.libelle : 'Non renseignée' }}
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <span class="text-xs font-semibold text-secondary-500 uppercase">Code Apogée</span>
+            <div class="mt-2 text-lg font-bold text-text">
+                {{ campagne_collecte.codeApogee|default('-') }}
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <span class="text-xs font-semibold text-secondary-500 uppercase">Étapes Timeline</span>
+            <div class="mt-2 text-lg font-bold text-primary">
+                {{ campagne_collecte.timelineDates|length }} étape(s)
+            </div>
+        </div>
+    </div>
+
+    {# Affichage graphique de la timeline #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        {{ include('default/_timeLine.html.twig', { campagne: campagne_collecte }) }}
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {# 2. Timeline & Étapes (2 colonnes) #}
+        <div class="lg:col-span-2 space-y-4">
+            <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                <div class="flex items-center justify-between pb-4 border-b border-secondary-200 dark:border-secondary-700 mb-6">
+                    <div>
+                        <h3 class="text-base font-bold text-text flex items-center gap-2">
+                            <twig:UX:Icon name="mdi:calendar" class="w-5 h-5 text-primary"/>
+                            <span>Processus & Étapes temporelles</span>
+                        </h3>
+                        <p class="text-xs text-secondary-500 mt-0.5">
+                            Modules applicatifs ouverts pour chaque phase de la campagne.
+                        </p>
+                    </div>
+
+                    <a href="{{ path('app_campagne_collecte_edit', { id: campagne_collecte.id }) }}"
+                       class="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
+                        <twig:UX:Icon name="icon:edit" class="w-3.5 h-3.5"/>
+                        Modifier les étapes
+                    </a>
+                </div>
+
+                {% if campagne_collecte.timelineDates is empty %}
+                    <div class="p-8 text-center text-sm text-secondary-500 bg-secondary-50 rounded-xl dark:bg-secondary-800/40">
+                        Aucune étape de timeline n'est configurée pour cette campagne.
+                    </div>
+                {% else %}
+                    <div class="space-y-4">
+                        {% for step in campagne_collecte.timelineDates %}
+                            {% set isPast = step.date and 'now'|date('U') > step.date|date('U') %}
+                            {% set isCurrent = not isPast and (step.dateDebut == null or 'now'|date('U') >= step.dateDebut|date('U')) %}
+
+                            <div class="rounded-xl border p-4 transition-all {{ isCurrent ? 'border-primary-300 bg-primary-50/20 dark:border-primary-800 dark:bg-primary-900/10' : 'border-secondary-200 bg-surface dark:border-secondary-700' }}">
+                                <div class="flex items-start justify-between gap-4">
+                                    <div class="flex items-start gap-3">
+                                        <div class="h-10 w-10 shrink-0 rounded-xl flex items-center justify-center {{ isCurrent ? 'bg-primary text-white shadow-md' : 'bg-secondary-100 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-300' }}">
+                                            <twig:UX:Icon :name="step.icone|default('icon:clock')" class="w-5 h-5"/>
+                                        </div>
+
+                                        <div>
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <h4 class="text-sm font-bold text-text">{{ step.libelle }}</h4>
+                                                {% if isCurrent %}
+                                                    <span class="rounded-full bg-primary-100 px-2 py-0.5 text-[10px] font-bold text-primary dark:bg-primary-900/40">
+                                                        En cours
+                                                    </span>
+                                                {% elseif isPast %}
+                                                    <span class="rounded-full bg-secondary-100 px-2 py-0.5 text-[10px] font-medium text-secondary-500 dark:bg-secondary-800">
+                                                        Terminée
+                                                    </span>
+                                                {% else %}
+                                                    <span class="rounded-full bg-secondary-100 px-2 py-0.5 text-[10px] font-medium text-secondary-500 dark:bg-secondary-800">
+                                                        À venir
+                                                    </span>
+                                                {% endif %}
+
+                                                {% if step.flag.value != 'none' %}
+                                                    <span class="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400">
+                                                        {{ step.flag.name }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+
+                                            {% if step.description %}
+                                                <p class="text-xs text-secondary-600 dark:text-secondary-400 mt-1">
+                                                    {{ step.description }}
+                                                </p>
+                                            {% endif %}
+
+                                            <div class="flex items-center gap-4 text-xs text-secondary-500 mt-2">
+                                                {% if step.dateDebut %}
+                                                    <span>Du : <strong>{{ step.dateDebut|date('d/m/Y') }}</strong></span>
+                                                {% endif %}
+                                                <span>Au : <strong>{{ step.date|date('d/m/Y') }}</strong> {{ step.heure ? step.heure|date('H:i') : '' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {# Modules ouverts pendant cette étape #}
+                                <div class="mt-3 pt-3 border-t border-secondary-200/60 dark:border-secondary-700/60">
+                                    <span class="text-[11px] font-bold text-secondary-400 uppercase tracking-wider block mb-1.5">
+                                        Modules ouverts à la saisie :
+                                    </span>
+                                    {% if step.modulesActifs is empty %}
+                                        <span class="text-xs italic text-secondary-400">Aucun module ouvert (consultation seule)</span>
+                                    {% else %}
+                                        <div class="flex flex-wrap gap-1.5">
+                                            {% for mod in step.modulesActifs %}
+                                                <span class="inline-flex items-center gap-1 rounded-md border border-primary-200 bg-primary-50/80 px-2 py-0.5 text-xs font-medium text-primary dark:border-primary-800 dark:bg-primary-900/30 dark:text-primary-300">
+                                                    <twig:UX:Icon name="icon:check" class="w-3 h-3 text-success-600"/>
+                                                    {{ mod|replace({'_': ' '})|title }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# 3. Informations générales & Publication (1 colonne) #}
+        <div class="space-y-6">
+            <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+                    <twig:UX:Icon name="icon:info" class="w-5 h-5 text-primary"/>
+                    <span>Paramétrage & Publication</span>
+                </h3>
+
+                <dl class="space-y-3 text-sm">
+                    <div class="flex justify-between border-b border-secondary-100 pb-2 dark:border-secondary-800">
+                        <dt class="text-secondary-500">Campagne consolidée</dt>
+                        <dd class="font-semibold text-text">{{ campagne_collecte.isFinished ? 'Oui' : 'Non' }}</dd>
+                    </div>
+                    <div class="flex justify-between border-b border-secondary-100 pb-2 dark:border-secondary-800">
+                        <dt class="text-secondary-500">Publication activée</dt>
+                        <dd class="font-semibold text-text">{{ campagne_collecte.enablePublication ? 'Oui' : 'Non' }}</dd>
+                    </div>
+                    <div class="flex justify-between border-b border-secondary-100 pb-2 dark:border-secondary-800">
+                        <dt class="text-secondary-500">Tag de publication</dt>
+                        <dd class="font-semibold text-text">{{ campagne_collecte.publicationTag|default('Non défini') }}</dd>
+                    </div>
+                    <div class="flex justify-between border-b border-secondary-100 pb-2 dark:border-secondary-800">
+                        <dt class="text-secondary-500">DPE Parcours</dt>
+                        <dd class="font-semibold text-text">{{ campagne_collecte.dpeParcours|length }}</dd>
+                    </div>
+                    <div class="flex justify-between border-b border-secondary-100 pb-2 dark:border-secondary-800">
+                        <dt class="text-secondary-500">Demandes DPE</dt>
+                        <dd class="font-semibold text-text">{{ campagne_collecte.dpeDemandes|length }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-secondary-500">Changements RF</dt>
+                        <dd class="font-semibold text-text">{{ campagne_collecte.changeRves|length }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% set header_title %}
+    Campagne de collecte : {{ campagne_collecte.libelle }}
+{% endset %}
+
+{% block bouton_header %}
+    <div class="flex items-center gap-2">
+        <twig:Button
+                href="{{ path('app_campagne_collecte_edit', { id: campagne_collecte.id }) }}"
+                variant="primary"
+                :soft="false"
+                :outline="false"
+                icon="icon:edit"
+                label="Modifier la campagne"
+                tooltip="Modifier les paramètres et la timeline"
+        />
+        <twig:Button
+                href="{{ path('app_campagne_collecte_index') }}"
+                variant="secondary"
+                :outline="true"
+                :soft="false"
+                icon="icon:arrow-left"
+                label="Retour à la liste"
+                tooltip="Retour à la liste des campagnes"
+        />
+    </div>
+{% endblock %}

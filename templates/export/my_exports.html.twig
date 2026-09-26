@@ -1,5 +1,5 @@
 {% extends 'base.html.twig' %}
-
+{# deprecated ? #}
 {% block bouton_header %}
 
 {% endblock %}
@@ -7,18 +7,6 @@
 {% set header_title %}
     Liste des exports demandés
 {% endset %}
-
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            'href': path('app_export_my_exports'),
-            'title': 'Mes exports'
-        },
-        {
-            'href': path('app_export_index'),
-            'title': 'Gestion des exports'
-        }]}) }}
-{% endblock %}
 
 {% block content %}
     <h2>Mes exports</h2>

@@ -12,6 +12,7 @@ ALTER TABLE plateforme_admission_parametre ADD remarques LONGTEXT DEFAULT NULL;
 ALTER TABLE etablissement ADD email_oreof VARCHAR(255) DEFAULT NULL;
 ALTER TABLE etablissement CHANGE email_central email_central VARCHAR(255) DEFAULT NULL;
 ALTER TABLE type_diplome_plateforme_admission ADD annees_capacite_requise JSON DEFAULT NULL;
+ALTER TABLE timeline_date ADD modules_actifs JSON DEFAULT NULL;
 ```
 
 

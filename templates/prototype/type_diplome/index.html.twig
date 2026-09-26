@@ -77,18 +77,6 @@
     Prototype CRUD moderne - TypeDiplome
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {
-            href: '',
-            title: 'Administration'
-        }, {
-            href: '',
-            title: 'Prototype CRUD'
-        }
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
     <a href="{{ path('app_prototype_type_diplome_new') }}"
        class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2 text-dark"

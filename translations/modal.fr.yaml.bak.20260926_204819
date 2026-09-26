@@ -1,11 +1,7 @@
 Enregistrer: Enregistrer
-annee_universitaire.edit.title: annee_universitaire.edit.title
-annee_universitaire.show.title: annee_universitaire.show.title
 campagne_collecte:
     show:
         title: 'Détails de la campagne de collecte'
-campagne_collecte.edit.title: campagne_collecte.edit.title
-campagne_collecte.new.title: campagne_collecte.new.title
 campagne_collecte.show.title: campagne_collecte.show.title
 composante:
     edit:

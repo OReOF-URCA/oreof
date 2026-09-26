@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Composante;
 use App\Form\ExportType;
 use App\Message\Export;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\GenerationJobRepository;
@@ -264,6 +265,8 @@ class ExportController extends BaseController
     }
 
     #[Route('/export/my-exports', name: 'app_export_my_exports')]
+    #[Breadcrumb(menuKey: 'pilotage.exports')]
+    #[Breadcrumb(label: 'Mes exports')]
     public function exports(GenerationJobRepository $repo): Response
     {
         $user = $this->getUser();

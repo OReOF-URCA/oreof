@@ -16,11 +16,6 @@
     Gestion des formations
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
         {% if is_granted('CAN_FORMATION_ADD_ALL', app.user) %}
 {#   todo: a reprendre         <a href="{{ path('app_formation_etat_send_ouverture') }}"#}

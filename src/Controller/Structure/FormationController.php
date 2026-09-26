@@ -12,6 +12,7 @@ namespace App\Controller\Structure;
 use App\Controller\BaseController;
 use App\Entity\Composante;
 use App\Entity\Formation;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\FormationRepository;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,6 +21,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class FormationController extends BaseController
 {
     #[Route('/', name: 'index')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function index(): Response
     {
         return $this->render('structure/formation/index.html.twig');

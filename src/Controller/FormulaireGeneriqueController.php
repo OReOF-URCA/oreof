@@ -14,6 +14,7 @@ use App\Enums\EtatDpeEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Events\AddCentreParcoursEvent;
 use App\Form\FormulaireGeneriqueType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\MentionRepository;
 use App\Repository\ParcoursRepository;
 use App\Repository\ProfilRepository;
@@ -38,6 +39,8 @@ final class FormulaireGeneriqueController extends BaseController
     }
 
     #[Route('/new', name: 'app_formulaire_generique_new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
+    #[Breadcrumb(label: 'Nouvelle formation')]
     public function new(
         Request                  $request,
         ParcoursRepository       $parcoursRepository,

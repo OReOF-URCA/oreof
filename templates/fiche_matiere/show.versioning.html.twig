@@ -52,12 +52,6 @@
     Détail de la fiche EC/matière : {{ ficheMatiere.libelle }} - <span class="text-primary">Version du {{ dateHeure }}</span>
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {href: path('structure_fiche_matiere_index'), title: 'Liste des fiches EC/matières'},
-    ]}) }}
-{% endblock %}
-
 {# {% block bouton_header %}
     <a href="{{ path('app_fiche_matiere_export', {id:ficheMatiere.id})  }}"
        class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"

@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Classes\JsonReponse;
 use App\Entity\Parcours;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\ButApprentissageCritiqueRepository;
 use App\Repository\CompetenceRepository;
 use App\Repository\ElementConstitutifRepository;
@@ -17,9 +19,26 @@ use Symfony\Component\Routing\Attribute\Route;
 class ParcoursBccController extends BaseController
 {
     #[Route('/parcours/bcc/{parcours}', name: 'app_parcours_bcc')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function index(
-        Parcours $parcours): Response
+        Parcours          $parcours,
+        BreadcrumbService $breadcrumb
+    ): Response
     {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('BCC');
+
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getFormation()?->getTypeDiplome());
         $dto = $typeD->calculStructureParcours($parcours, new OptionsCalculStructure(false, true, false));
         return $this->render('parcours_bcc/index.html.twig', [
@@ -30,10 +49,25 @@ class ParcoursBccController extends BaseController
     }
 
     #[Route('/parcours/bcc-but/{parcours}', name: 'app_parcours_bcc_but')]
+    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function bccBut(
-        Parcours $parcours
+        Parcours          $parcours,
+        BreadcrumbService $breadcrumb
     ): Response
     {
+        if ($parcours->getFormation() !== null) {
+            $breadcrumb->add(
+                $parcours->getFormation()->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $parcours->getFormation()->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('BCC BUT');
         $competences = $parcours->getFormation()?->getButCompetences();
         $niveaux = [];
 

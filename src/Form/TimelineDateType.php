@@ -64,6 +64,17 @@ class TimelineDateType extends AbstractType
                     TimelineDateFlagEnum::PUBLICATION => 'Publication',
                 },
                 'required' => true,
+            ])
+            ->add('modulesActifs', \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class, [
+                'label' => 'timeline.modulesActifs.label',
+                'help' => 'timeline.modulesActifs.help',
+                'choices' => \App\Enums\CampagneModuleEnum::getChoices(),
+                'expanded' => true,
+                'multiple' => true,
+                'required' => false,
+                'attr' => [
+                    'columns' => 2,
+                ],
             ]);
     }
 

@@ -13,6 +13,7 @@ namespace App\Controller\Prototype;
 
 use App\Entity\TypeDiplome;
 use App\Form\TypeDiplomeType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\Prototype\TypeDiplomeImpactEstimator;
 use App\Service\Prototype\TypeDiplomePrototypeDuplicator;
@@ -38,6 +39,8 @@ final class TypeDiplomePrototypeController extends AbstractController
     }
 
     #[Route('/', name: 'index', methods: ['GET'])]
+    #[Breadcrumb(menuKey: 'administration.type_diplome')]
+    #[Breadcrumb(label: 'Prototype CRUD')]
     public function index(): Response
     {
         return $this->render('prototype/type_diplome/index.html.twig');
@@ -55,6 +58,8 @@ final class TypeDiplomePrototypeController extends AbstractController
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.type_diplome')]
+    #[Breadcrumb(label: 'Création')]
     public function new(Request $request): Response
     {
         $typeDiplome = new TypeDiplome();
@@ -82,6 +87,8 @@ final class TypeDiplomePrototypeController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.type_diplome')]
+    #[Breadcrumb(label: 'Modification')]
     public function edit(Request $request, TypeDiplome $typeDiplome): Response
     {
         $form = $this->createForm(TypeDiplomeType::class, $typeDiplome, [

@@ -24,13 +24,6 @@
     Configuration plaquette : {{ composante.libelle }}
 {% endset %}
 
-{% block breadcrumb %}
-    {{ include('communs/_breadcrumb.html.twig', {liens:[
-        {title: 'Offre de formation', href: path('app_section_offre_formation')},
-        {title: header_title},
-    ]}) }}
-{% endblock %}
-
 {% block bouton_header %}
 
 {% endblock %}
