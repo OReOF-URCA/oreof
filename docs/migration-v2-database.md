@@ -132,3 +132,10 @@ La migration marque donc explicitement les lignes préexistantes comme `validati
 Pour la bascule V2, les semestres historiques qui n'ont pas de `last_modification` sont initialisés à `NOW()`. Cette date représente le nouveau point de départ du suivi de modification/validation V2 ; il n'est pas nécessaire de reconstruire une date historique antérieure.
 
 Après cette reprise, `semestre.last_modification` est finalisé en `NOT NULL`.
+
+
+## Réconciliation des contraintes uniques
+
+Les premiers scripts SQL V2 pouvaient créer `fiche_matiere_tab_state`, `formation_tab_state`, `parcours_tab_state` et `volume_horaire_parcours` sans toutes les contraintes uniques attendues par le modèle courant.
+
+L'étape `090_reconcile_schema` ajoute les index UNIQUE uniquement lorsqu'aucun doublon de clé métier n'existe. Aucun doublon n'est supprimé ou fusionné automatiquement. `--check` signale comme erreur toute duplication et toute contrainte UNIQUE encore absente.
