@@ -54,16 +54,18 @@ Les étapes appliquées sont enregistrées dans \`app_v2_migration\`. \`--force\
 
 ## Étapes actuelles
 
-- \`010_documented_schema\` : reprend \`docs/architecture/Update_BDD.md\` et \`Update_BDD_Formulaire_Generique.md\`.
-- \`020_validation_schema\` : reprend les structures de \`migrations/app/v2/20260325_153000__create_validation_and_tab_state_structures.sql\`.
-- \`030_admission_years\` : ajoute \`type_diplome_plateforme_admission.annees\`.
-- \`100_safe_defaults\` : initialise uniquement les valeurs dont la règle est déterministe.
+- `010_documented_schema` : reprend les modifications documentées dans `Update_BDD*.md`.
+- `020_validation_schema` : crée le socle de validation, les états d'onglets et `volume_horaire_parcours`.
+- `030_admission_years` : ajoute `annees` et `annees_capacite_requise` aux associations diplôme/plateforme.
+- `040_new_v2_tables` : crée FAQ, aide et documents de conseil.
+- `050_history_documents` : ajoute les relations de l'historique des formations vers les documents de conseil.
+- `090_reconcile_schema` : répare les anciennes structures V2 partielles (FK, index, contraintes uniques, `validation_issue`).
+- `100_safe_defaults` : reprend uniquement les valeurs déterministes, notamment les états de validation et `semestre.lastModification = NOW()`.
+- `110_finalize_constraints` : pose les contraintes `NOT NULL` après la reprise des données.
 
-Les données ambiguës ne sont pas inventées. Le contrôle signale notamment :
-- les \`dpe_demande\` sans \`auteur_id\` ;
-- les associations type diplôme / plateforme dont \`annees\` est NULL.
+Les exécutions ciblées avec `--apply --step=...` vérifient leurs dépendances avant toute écriture. Après une migration complète, `--check` contrôle les tables/colonnes attendues, les FK, les contraintes uniques, les `NOT NULL` finaux et le défaut `validation_dirty = 1`.
 
-Ces cas doivent recevoir une règle métier explicite avant la migration de production.
+Les données ambiguës ne sont jamais inventées. Le contrôle signale notamment les `dpe_demande` sans auteur, les associations diplôme/plateforme sans années et les éventuelles anciennes lignes `validation_issue` incomplètes.
 
 ## Cleanup destructif
 
