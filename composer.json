@@ -129,6 +129,15 @@
       "php bin/console app:update-codification DFA basse",
       "php bin/console app:update-codification DE basse",
       "php bin/console app:update-codification DEUST basse"
+    ],
+    "test": "php vendor/bin/phpunit",
+    "test:smoke": "php vendor/bin/phpunit --testsuite Smoke",
+    "analyse": "php vendor/bin/phpstan analyse --memory-limit=1G",
+    "lint:container": "php bin/console lint:container --env=test",
+    "check": [
+      "@lint:container",
+      "@analyse",
+      "@test"
     ]
   },
   "conflict": {

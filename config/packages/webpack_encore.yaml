@@ -43,3 +43,10 @@ framework:
 #when@test:
 #    webpack_encore:
 #        strict_mode: false
+
+when@test:
+    webpack_encore:
+        strict_mode: false
+    framework:
+        assets:
+            json_manifest_path: null
