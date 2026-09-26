@@ -12,6 +12,7 @@ use App\Entity\Parcours;
 use App\Entity\Profil;
 use App\Entity\User;
 use App\Entity\UserProfil;
+use App\Entity\TypeDiplome;
 use App\Enums\CentreGestionEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
@@ -71,8 +72,19 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
             ->setDefaut(true)
             ->setCodeApogee('T');
 
+        $typeDiplome = (new TypeDiplome())
+            ->setLibelle('Diplôme de test')
+            ->setLibelleCourt('TEST')
+            ->setNbUeMin(1)
+            ->setNbUeMax(10)
+            ->setNbEctsMaxUe(30)
+            ->setNbEcParUe(10)
+            ->setModeleMcc('test')
+            ->setCodeApogee('T');
+
         $formation = (new Formation($campagne))
             ->setSigle('TEST-FORM')
+            ->setTypeDiplome($typeDiplome)
             ->setMentionTexte('Formation de test')
             ->setComposantePorteuse($composante);
 
@@ -93,7 +105,7 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
             ->setParcours($parcours)
             ->setCampagneCollecte($campagne);
 
-        foreach ([$admin, $profil, $composante, $campagne, $formation, $parcours, $fiche, $userProfil] as $entity) {
+        foreach ([$admin, $profil, $composante, $campagne, $typeDiplome, $formation, $parcours, $fiche, $userProfil] as $entity) {
             $manager->persist($entity);
         }
 
