@@ -262,25 +262,6 @@ final class MigrateV2Command extends Command
     private function safeDefaults(): array
     {
         $sql = [];
-        // Repères du socle Doctrine commun à main/v2. Ils permettent de détecter une base
-        // dont les migrations racine n'ont pas été exécutées jusqu'au même niveau que le code.
-        foreach ([['formation', 'logo'], ['parcours', 'logo'], ['type_diplome', 'logo']] as [$table, $column]) {
-            if (!$this->columnExists($table, $column)) {
-                $warnings[] = "Socle Doctrine incomplet : {$table}.{$column} absent. Vérifier doctrine:migrations:status avant la bascule V2.";
-            }
-        }
-        foreach ([['role', null], ['user_centre', null], ['fiche_matiere_parcours', null]] as [$legacy]) {
-            if ($this->tableExists($legacy)) {
-                $warnings[] = "Table legacy {$legacy} encore présente : le niveau réel des migrations Doctrine diffère du socle attendu.";
-            }
-        }
-        if ($this->columnExists('formation', 'version_parent_id')) {
-            $warnings[] = 'Colonne legacy formation.version_parent_id encore présente : vérifier le niveau des migrations Doctrine.';
-        }
-        if ($this->columnExists('mention', 'domaine_id')) {
-            $warnings[] = 'Colonne legacy mention.domaine_id encore présente : vérifier le niveau des migrations Doctrine.';
-        }
-
         foreach (['element_constitutif', 'semestre', 'ue'] as $table) {
             if ($this->columnExists($table, 'validation_dirty')) {
                 $sql["{$table}.validation_dirty → dirty"] = "UPDATE {$table} SET validation_dirty = 1";
@@ -343,6 +324,25 @@ final class MigrateV2Command extends Command
             if (!$this->tableExists($table)) {
                 $errors[] = 'Table manquante : '.$table;
             }
+        }
+
+        // Repères du socle Doctrine commun à main/v2. Ils permettent de détecter une base
+        // dont les migrations racine n'ont pas été exécutées jusqu'au même niveau que le code.
+        foreach ([['formation', 'logo'], ['parcours', 'logo'], ['type_diplome', 'logo']] as [$table, $column]) {
+            if (!$this->columnExists($table, $column)) {
+                $warnings[] = "Socle Doctrine incomplet : {$table}.{$column} absent. Vérifier doctrine:migrations:status avant la bascule V2.";
+            }
+        }
+        foreach ([['role', null], ['user_centre', null], ['fiche_matiere_parcours', null]] as [$legacy]) {
+            if ($this->tableExists($legacy)) {
+                $warnings[] = "Table legacy {$legacy} encore présente : le niveau réel des migrations Doctrine diffère du socle attendu.";
+            }
+        }
+        if ($this->columnExists('formation', 'version_parent_id')) {
+            $warnings[] = 'Colonne legacy formation.version_parent_id encore présente : vérifier le niveau des migrations Doctrine.';
+        }
+        if ($this->columnExists('mention', 'domaine_id')) {
+            $warnings[] = 'Colonne legacy mention.domaine_id encore présente : vérifier le niveau des migrations Doctrine.';
         }
 
         if ($this->columnExists('plateforme_admission', 'mode_export')) {
