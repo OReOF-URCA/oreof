@@ -40,6 +40,25 @@ final class V2DoctrineAlignment
         }
 
         if ($this->tableExists('timeline_date')) {
+            if ($this->columnExists('timeline_date', 'icone')) {
+                $iconMapping = [
+                    'fa-bullhorn' => 'mdi:bullhorn-outline',
+                    'fa-lock-open' => 'mdi:lock-open-outline',
+                    'fa-shield-check' => 'mdi:shield-check-outline',
+                    'fa-paper-plane' => 'mdi:paper-airplane-outline',
+                    'fa-pencil' => 'mdi:pencil-outline',
+                    'fa-hand' => 'mdi:hand-tap',
+                ];
+
+                foreach ($iconMapping as $legacyIcon => $uxIcon) {
+                    $sql["Migration icône timeline {$legacyIcon}"] = sprintf(
+                        "UPDATE timeline_date SET icone = '%s' WHERE icone = '%s'",
+                        $uxIcon,
+                        $legacyIcon
+                    );
+                }
+            }
+
             if (!$this->columnExists('timeline_date', 'flag')) {
                 $sql['Ajout timeline_date.flag'] = "ALTER TABLE timeline_date ADD flag VARCHAR(30) DEFAULT NULL";
             }
