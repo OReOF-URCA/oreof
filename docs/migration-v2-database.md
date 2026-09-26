@@ -89,3 +89,10 @@ L'audit des mappings `main` / `v2` a identifié des colonnes qui n'existent plus
 - plusieurs champs historiques de `etablissement_information` (handicap, orientation/insertion, relations internationales, associations étudiantes).
 
 Ils ne sont **pas supprimés pendant la phase additive**. Leur usage applicatif et la nécessité éventuelle d'une reprise doivent être validés avant ajout au plan `app:migrate:v2:cleanup`.
+
+
+## Workflow
+
+L'audit des états `ChangeRf` entre `main` et `v2` ne nécessite pas de transformation de données : les états historiques restent reconnus par le workflow V2. En particulier, `demande_initialisee` est conservé explicitement pour permettre la reprise des demandes existantes.
+
+Les marquages `DpeParcours.etatValidation` et `FicheMatiere.etatFiche` restent stockés dans les mêmes colonnes ; aucune réécriture globale n'est donc appliquée sans nécessité démontrée.
