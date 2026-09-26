@@ -96,3 +96,18 @@ Ils ne sont **pas supprimés pendant la phase additive**. Leur usage applicatif 
 L'audit des états `ChangeRf` entre `main` et `v2` ne nécessite pas de transformation de données : les états historiques restent reconnus par le workflow V2. En particulier, `demande_initialisee` est conservé explicitement pour permettre la reprise des demandes existantes.
 
 Les marquages `DpeParcours.etatValidation` et `FicheMatiere.etatFiche` restent stockés dans les mêmes colonnes ; aucune réécriture globale n'est donc appliquée sans nécessité démontrée.
+
+
+## Décisions métier à confirmer avant cleanup
+
+### Informations établissement / LHEO
+
+V2 retire du mapping `EtablissementInformation` les colonnes `mention_handicap`, `savoir_plus_orientation_insertion`, `relations_internationales` et `associations_etudiantes`. Le générateur LHEO V2 utilise désormais des contenus génériques à leur place.
+
+Ces colonnes ne doivent pas être supprimées automatiquement tant que l'on n'a pas confirmé que les éventuelles personnalisations présentes en production peuvent être abandonnées ou archivées.
+
+### DpeFormation
+
+`DpeFormation` est destiné à disparaître, mais reste actuellement référencé dans la branche V2 par l'entité, son repository, le workflow `dpeFormation`, `Formation.dpeFormations` et `HistoriqueFormation.dpeFormation`.
+
+La migration additive ne crée donc pas de table `dpe_formation`. Le cleanup ne devra la supprimer qu'après retrait de ces références applicatives et vérification de la reprise éventuelle des historiques.
