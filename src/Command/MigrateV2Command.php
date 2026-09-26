@@ -180,6 +180,7 @@ final class MigrateV2Command extends Command
     {
         $sql = [];
         $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees', "JSON NULL COMMENT 'Années concernées par la plateforme (ex: [1, 2, 3])'");
+        $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees_capacite_requise', "JSON DEFAULT NULL COMMENT 'Années pour lesquelles une capacité est requise'");
         return $sql;
     }
 
@@ -212,7 +213,7 @@ final class MigrateV2Command extends Command
         $errors = [];
         $warnings = [];
 
-        foreach ([['plateforme_admission','mode_export'], ['parcours','duree_parcours'], ['type_diplome','has_ects'], ['type_diplome_plateforme_admission','annees'], ['semestre','validation_status'], ['ue','validation_status'], ['element_constitutif','validation_status']] as [$table, $column]) {
+        foreach ([['plateforme_admission','mode_export'], ['parcours','duree_parcours'], ['type_diplome','has_ects'], ['type_diplome_plateforme_admission','annees'], ['type_diplome_plateforme_admission','annees_capacite_requise'], ['semestre','validation_status'], ['ue','validation_status'], ['element_constitutif','validation_status']] as [$table, $column]) {
             if (!$this->columnExists($table, $column)) {
                 $errors[] = "Colonne manquante : {$table}.{$column}";
             }
