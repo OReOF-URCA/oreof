@@ -57,6 +57,9 @@ final class V2DoctrineAlignment
             if (!$this->columnExists('parcours', 'maquette_pdf_nom_original')) {
                 $sql['Ajout parcours.maquette_pdf_nom_original'] = 'ALTER TABLE parcours ADD maquette_pdf_nom_original VARCHAR(255) DEFAULT NULL';
             }
+            if (!$this->columnExists('parcours', 'logo')) {
+                $sql['Ajout parcours.logo'] = 'ALTER TABLE parcours ADD logo JSON DEFAULT NULL';
+            }
         }
 
         if ($this->tableExists('timeline_date')) {
