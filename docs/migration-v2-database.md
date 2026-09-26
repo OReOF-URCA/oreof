@@ -80,3 +80,12 @@ php bin/console app:migrate:v2:cleanup --apply --confirm-backup
 \`\`\`
 
 Le plan de DROP est intentionnellement explicite et n'est jamais généré automatiquement depuis le diff Doctrine.
+
+
+## Éléments legacy identifiés pour la phase 2
+
+L'audit des mappings `main` / `v2` a identifié des colonnes qui n'existent plus dans le mapping V2, notamment :
+- `campagne_collecte.date_ouverture_dpe` et `date_cloture_dpe` ;
+- plusieurs champs historiques de `etablissement_information` (handicap, orientation/insertion, relations internationales, associations étudiantes).
+
+Ils ne sont **pas supprimés pendant la phase additive**. Leur usage applicatif et la nécessité éventuelle d'une reprise doivent être validés avant ajout au plan `app:migrate:v2:cleanup`.
