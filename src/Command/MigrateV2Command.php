@@ -105,6 +105,11 @@ final class MigrateV2Command extends Command
             return Command::SUCCESS;
         }
 
+        if ($selected !== []) {
+            $io->success('Étape(s) sélectionnée(s) appliquée(s). Exécuter app:migrate:v2 --check après la migration complète.');
+            return Command::SUCCESS;
+        }
+
         return $this->check($io);
     }
 
@@ -293,16 +298,13 @@ final class MigrateV2Command extends Command
     {
         $sql = [];
 
-        if ($this->columnExists('dpe_demande', 'created')
-            && 0 === (int) $this->connection->fetchOne('SELECT COUNT(*) FROM dpe_demande WHERE created IS NULL')) {
+        if ($this->columnExists('dpe_demande', 'created')) {
             $sql['dpe_demande.created → NOT NULL'] = 'ALTER TABLE dpe_demande MODIFY created DATETIME NOT NULL';
         }
-        if ($this->columnExists('dpe_demande', 'updated')
-            && 0 === (int) $this->connection->fetchOne('SELECT COUNT(*) FROM dpe_demande WHERE updated IS NULL')) {
+        if ($this->columnExists('dpe_demande', 'updated')) {
             $sql['dpe_demande.updated → NOT NULL'] = 'ALTER TABLE dpe_demande MODIFY updated DATETIME NOT NULL';
         }
-        if ($this->columnExists('semestre', 'last_modification')
-            && 0 === (int) $this->connection->fetchOne('SELECT COUNT(*) FROM semestre WHERE last_modification IS NULL')) {
+        if ($this->columnExists('semestre', 'last_modification')) {
             $sql['semestre.last_modification → NOT NULL'] = 'ALTER TABLE semestre MODIFY last_modification DATETIME NOT NULL';
         }
 
