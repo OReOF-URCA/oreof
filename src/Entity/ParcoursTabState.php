@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ParcoursTabStateRepository::class)]
+#[ORM\Table(name: 'parcours_tab_state', uniqueConstraints: [new ORM\UniqueConstraint(name: 'UNIQ_PTAB', columns: ['parcours_id', 'tab_key'])])]
 class ParcoursTabState
 {
     #[ORM\Id]

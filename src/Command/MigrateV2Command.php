@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Command\Migration\V2DoctrineAlignment;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,7 +22,7 @@ final class MigrateV2Command extends Command
 
     private bool $force = false;
 
-    public function __construct(private readonly Connection $connection)
+    public function __construct(private readonly Connection $connection, private readonly V2DoctrineAlignment $doctrineAlignment)
     {
         parent::__construct();
     }
@@ -137,6 +138,7 @@ final class MigrateV2Command extends Command
             '030_admission_years' => ['label' => 'Années des plateformes d’admission', 'plan' => fn () => $this->admissionYears()],
             '040_new_v2_tables' => ['label' => 'Nouvelles structures fonctionnelles V2', 'plan' => fn () => $this->newV2Tables()],
             '050_history_documents' => ['label' => 'Liaisons historiques vers les documents de conseil', 'plan' => fn () => $this->historyDocuments()],
+            '060_doctrine_alignment' => ['label' => 'Alignement non destructif avec Doctrine V2', 'plan' => fn () => $this->doctrineAlignment->plan()],
             '090_reconcile_schema' => ['label' => 'Réconciliation des contraintes V2', 'plan' => fn () => $this->reconcileSchema()],
             '100_safe_defaults' => ['label' => 'Valeurs V2 déterministes', 'plan' => fn () => $this->safeDefaults()],
             '110_finalize_constraints' => ['label' => 'Contraintes NOT NULL après reprise', 'plan' => fn () => $this->finalizeConstraints()],
@@ -147,7 +149,8 @@ final class MigrateV2Command extends Command
     {
         $dependencies = [
             '050_history_documents' => ['040_new_v2_tables'],
-            '090_reconcile_schema' => ['010_documented_schema', '020_validation_schema'],
+            '060_doctrine_alignment' => ['010_documented_schema', '020_validation_schema', '030_admission_years', '040_new_v2_tables', '050_history_documents'],
+            '090_reconcile_schema' => ['010_documented_schema', '020_validation_schema', '060_doctrine_alignment'],
             '100_safe_defaults' => ['010_documented_schema', '020_validation_schema'],
             '110_finalize_constraints' => ['100_safe_defaults'],
         ];
@@ -501,9 +504,9 @@ final class MigrateV2Command extends Command
 
         // Repères du socle Doctrine commun à main/v2. Ils permettent de détecter une base
         // dont les migrations racine n'ont pas été exécutées jusqu'au même niveau que le code.
-        foreach ([['formation', 'logo'], ['parcours', 'logo'], ['type_diplome', 'logo']] as [$table, $column]) {
+        foreach ([['parcours', 'logo'], ['type_diplome', 'logo']] as [$table, $column]) {
             if (!$this->columnExists($table, $column)) {
-                $warnings[] = "Socle Doctrine incomplet : {$table}.{$column} absent. Vérifier doctrine:migrations:status avant la bascule V2.";
+                $warnings[] = "Socle Doctrine incomplet : {$table}.{$column} absent. Le script V2 doit encore aligner ce point.";
             }
         }
         foreach ([['role', null], ['user_centre', null], ['fiche_matiere_parcours', null]] as [$legacy]) {
