@@ -20,8 +20,22 @@ final class V2DoctrineAlignment
     {
         $sql = [];
         foreach ($this->changes() as $table => $definition) {
-            if ($this->tableExists($table)) {
-                $sql["Alignement Doctrine {$table}"] = "ALTER TABLE `{$table}` {$definition}";
+            if (!$this->tableExists($table)) {
+                continue;
+            }
+
+            // Un dump Doctrine reflète une base précise. Les bases V1 réelles peuvent
+            // ne pas avoir toutes les colonnes historiques : ne jamais faire échouer
+            // tout un ALTER TABLE à cause d'une colonne absente.
+            foreach ($this->splitChanges($definition) as $change) {
+                if (!preg_match('/^CHANGE\\s+`?([a-zA-Z0-9_]+)`?\\s+/i', $change, $matches)) {
+                    continue;
+                }
+
+                $column = $matches[1];
+                if ($this->columnExists($table, $column)) {
+                    $sql["Alignement Doctrine {$table}.{$column}"] = "ALTER TABLE `{$table}` {$change}";
+                }
             }
         }
 
@@ -94,6 +108,18 @@ final class V2DoctrineAlignment
             'change_rf' => "CHANGE etat_demande etat_demande JSON DEFAULT NULL, CHANGE date_validation_cfvu date_validation_cfvu DATETIME DEFAULT NULL, CHANGE fichier_pv fichier_pv VARCHAR(50) DEFAULT NULL, CHANGE date_prise_fonction date_prise_fonction DATETIME DEFAULT NULL",
             'messenger_messages' => "CHANGE created_at created_at DATETIME NOT NULL, CHANGE available_at available_at DATETIME NOT NULL, CHANGE delivered_at delivered_at DATETIME DEFAULT NULL",
         ];
+    }
+
+    private function splitChanges(string $definition): array
+    {
+        // Les définitions actuelles ne contiennent pas de virgules dans les types.
+        // Garder ce parsing local au format contrôlé de changes().
+        $parts = explode(', CHANGE ', $definition);
+        foreach ($parts as $index => $part) {
+            $parts[$index] = 0 === $index ? trim($part) : 'CHANGE '.trim($part);
+        }
+
+        return array_values(array_filter($parts, static fn (string $change): bool => $change !== ''));
     }
 
     private function tableExists(string $table): bool
