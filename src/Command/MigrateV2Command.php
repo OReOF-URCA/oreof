@@ -415,6 +415,33 @@ final class MigrateV2Command extends Command
             }
         }
 
+        foreach ([
+            ['fiche_matiere_tab_state', 'fiche_matiere_id', 'fiche_matiere'],
+            ['formation_tab_state', 'formation_id', 'formation'],
+            ['parcours_tab_state', 'parcours_id', 'parcours'],
+            ['validation_issue', 'semestre_id', 'semestre'],
+            ['volume_horaire_parcours', 'parcours_id', 'parcours'],
+            ['volume_horaire_parcours', 'campagne_collecte_id', 'campagne_collecte'],
+            ['dpe_demande', 'auteur_id', 'user'],
+        ] as [$table, $column, $referencedTable]) {
+            if ($this->columnExists($table, $column) && !$this->foreignKeyExists($table, $column, $referencedTable)) {
+                $errors[] = "Clé étrangère manquante : {$table}.{$column} → {$referencedTable}.id";
+            }
+        }
+
+        if ($this->tableExists('validation_issue')) {
+            foreach (['scope_type', 'scope_id', 'rule_code', 'severity', 'type_diplome', 'created_at'] as $column) {
+                if (!$this->columnExists('validation_issue', $column)) {
+                    $errors[] = "Colonne manquante : validation_issue.{$column}";
+                    continue;
+                }
+                $count = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM validation_issue WHERE {$column} IS NULL");
+                if ($count > 0) {
+                    $errors[] = "{$count} validation_issue sans {$column} : donnée legacy à compléter avant finalisation.";
+                }
+            }
+        }
+
         if ($this->columnExists('plateforme_admission', 'mode_export')) {
             $count = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM plateforme_admission WHERE mode_export IS NULL OR mode_export NOT IN ('global','par_diplome')");
             if ($count > 0) {
