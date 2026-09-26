@@ -96,6 +96,10 @@ SQL;
         }
 
         if ($this->tableExists('timeline_date')) {
+            if (!$this->columnExists('timeline_date', 'modules_actifs')) {
+                $sql['Ajout timeline_date.modules_actifs'] = 'ALTER TABLE timeline_date ADD modules_actifs JSON DEFAULT NULL';
+            }
+
             if ($this->columnExists('timeline_date', 'icone')) {
                 $iconMapping = [
                     'fa-bullhorn' => 'mdi:bullhorn-outline',
