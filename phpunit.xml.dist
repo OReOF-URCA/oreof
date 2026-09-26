@@ -1,58 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<!-- https://phpunit.readthedocs.io/en/latest/configuration.html -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         backupGlobals="false"
-         colors="true"
          bootstrap="tests/bootstrap.php"
-         convertDeprecationsToExceptions="false"
->
+         colors="true"
+         cacheDirectory=".phpunit.cache">
     <php>
-        <ini name="display_errors" value="1" />
-        <ini name="error_reporting" value="-1" />
-        <server name="APP_ENV" value="test" force="true" />
-        <server name="SHELL_VERBOSITY" value="-1" />
-        <server name="SYMFONY_PHPUNIT_REMOVE" value="" />
-        <server name="SYMFONY_PHPUNIT_VERSION" value="9.5" />
-        <server name="KERNEL_CLASS" value="App\Kernel" />
-
-        <!-- ###+ symfony/mercure-bundle ### -->
-        <!-- See https://symfony.com/doc/current/mercure.html#configuration -->
-        <!-- The URL of the Mercure hub, used by the app to publish updates (can be a local URL) -->
-        <env name="MERCURE_URL" value="https://example.com/.well-known/mercure"/>
-        <!-- The public URL of the Mercure hub, used by the browser to connect -->
-        <env name="MERCURE_PUBLIC_URL" value="https://example.com/.well-known/mercure"/>
-        <!-- The secret used to sign the JWTs -->
-        <env name="MERCURE_JWT_SECRET" value="!ChangeThisMercureHubJWTSecretKey!"/>
-        <!-- ###- symfony/mercure-bundle ### -->
-
-        <!-- ###+ sensiolabs/gotenberg-bundle ### -->
-        <env name="GOTENBERG_DSN" value="http://gotenberg:3000"/>
-        <!-- ###- sensiolabs/gotenberg-bundle ### -->
-
-        <!-- Database connection for integration tests -->
-        <!-- Uses DATABASE_URL from .env.test or fallback to MySQL 8.0 -->
-        <env name="DATABASE_URL" value="mysql://oreof:PASSWORD@oreof-db:3306/oreof_test?serverVersion=8.0&amp;charset=utf8mb4" />
+        <ini name="display_errors" value="1"/>
+        <ini name="error_reporting" value="-1"/>
+        <server name="APP_ENV" value="test" force="true"/>
+        <server name="SHELL_VERBOSITY" value="-1"/>
+        <server name="KERNEL_CLASS" value="App\Kernel"/>
     </php>
 
     <testsuites>
-        <testsuite name="Project Test Suite">
+        <testsuite name="Smoke">
+            <directory>tests/Smoke</directory>
+        </testsuite>
+        <testsuite name="Project">
             <directory>tests</directory>
+            <exclude>tests/Smoke</exclude>
             <directory>packages/workflow-operations-bundle/tests</directory>
         </testsuite>
     </testsuites>
 
-    <coverage processUncoveredFiles="true">
+    <source>
         <include>
             <directory suffix=".php">src</directory>
+            <directory suffix=".php">packages/workflow-operations-bundle/src</directory>
         </include>
-    </coverage>
-
-    <listeners>
-        <listener class="Symfony\Bridge\PhpUnit\SymfonyTestsListener" />
-    </listeners>
-
-    <extensions>
-    </extensions>
+    </source>
 </phpunit>
