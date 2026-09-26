@@ -234,8 +234,67 @@ final class MigrateV2Command extends Command
     private function admissionYears(): array
     {
         $sql = [];
-        $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees', "JSON NULL COMMENT 'Années concernées par la plateforme (ex: [1, 2, 3])'");
-        $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees_capacite_requise', "JSON DEFAULT NULL COMMENT 'Années pour lesquelles une capacité est requise'");
+
+        // Ces structures n'existent pas dans certaines bases V1 historiques.
+        if (!$this->tableExists('plateforme_admission')) {
+            $sql['Création plateforme_admission'] = "CREATE TABLE plateforme_admission (
+                id INT AUTO_INCREMENT NOT NULL,
+                libelle VARCHAR(80) NOT NULL,
+                code VARCHAR(30) NOT NULL,
+                active TINYINT(1) NOT NULL,
+                configuration JSON NOT NULL COMMENT '(DC2Type:json)',
+                definition_champs JSON NOT NULL COMMENT '(DC2Type:json)',
+                color VARCHAR(15) DEFAULT NULL,
+                mode_export VARCHAR(30) NOT NULL DEFAULT 'global',
+                UNIQUE INDEX UNIQ_PLATEFORME_ADMISSION_CODE (code),
+                PRIMARY KEY(id)
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE \`utf8mb4_unicode_ci\` ENGINE = InnoDB";
+        }
+
+        if (!$this->tableExists('plateforme_admission_parametre')) {
+            $sql['Création plateforme_admission_parametre'] = "CREATE TABLE plateforme_admission_parametre (
+                id INT AUTO_INCREMENT NOT NULL,
+                annee_id INT DEFAULT NULL,
+                plateforme_id INT DEFAULT NULL,
+                campagne_id INT DEFAULT NULL,
+                active TINYINT(1) NOT NULL,
+                capacite_globale INT DEFAULT NULL,
+                capacite_fi INT DEFAULT NULL,
+                capacite_alternance INT DEFAULT NULL,
+                capacite_specifique INT DEFAULT NULL,
+                donnees_specifiques JSON DEFAULT NULL COMMENT '(DC2Type:json)',
+                remarques LONGTEXT DEFAULT NULL,
+                INDEX IDX_PAP_ANNEE (annee_id),
+                INDEX IDX_PAP_PLATEFORME (plateforme_id),
+                INDEX IDX_PAP_CAMPAGNE (campagne_id),
+                PRIMARY KEY(id),
+                CONSTRAINT FK_PAP_ANNEE FOREIGN KEY (annee_id) REFERENCES annee (id),
+                CONSTRAINT FK_PAP_PLATEFORME FOREIGN KEY (plateforme_id) REFERENCES plateforme_admission (id),
+                CONSTRAINT FK_PAP_CAMPAGNE FOREIGN KEY (campagne_id) REFERENCES campagne_collecte (id)
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE \`utf8mb4_unicode_ci\` ENGINE = InnoDB";
+        }
+
+        if (!$this->tableExists('type_diplome_plateforme_admission')) {
+            $sql['Création type_diplome_plateforme_admission'] = "CREATE TABLE type_diplome_plateforme_admission (
+                id INT AUTO_INCREMENT NOT NULL,
+                type_diplome_id INT DEFAULT NULL,
+                plateforme_id INT DEFAULT NULL,
+                campagne_id INT DEFAULT NULL,
+                annees JSON DEFAULT NULL COMMENT '(DC2Type:json)',
+                annees_capacite_requise JSON DEFAULT NULL COMMENT '(DC2Type:json)',
+                INDEX IDX_TDPA_TYPE_DIPLOME (type_diplome_id),
+                INDEX IDX_TDPA_PLATEFORME (plateforme_id),
+                INDEX IDX_TDPA_CAMPAGNE (campagne_id),
+                PRIMARY KEY(id),
+                CONSTRAINT FK_TDPA_TYPE_DIPLOME FOREIGN KEY (type_diplome_id) REFERENCES type_diplome (id),
+                CONSTRAINT FK_TDPA_PLATEFORME FOREIGN KEY (plateforme_id) REFERENCES plateforme_admission (id),
+                CONSTRAINT FK_TDPA_CAMPAGNE FOREIGN KEY (campagne_id) REFERENCES campagne_collecte (id)
+            ) DEFAULT CHARACTER SET utf8mb4 COLLATE \`utf8mb4_unicode_ci\` ENGINE = InnoDB";
+        } else {
+            $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees', "JSON NULL COMMENT 'Années concernées par la plateforme (ex: [1, 2, 3])'");
+            $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees_capacite_requise', "JSON DEFAULT NULL COMMENT 'Années pour lesquelles une capacité est requise'");
+        }
+
         return $sql;
     }
 
@@ -264,23 +323,23 @@ final class MigrateV2Command extends Command
     private function historyDocuments(): array
     {
         $sql = [];
-        $this->addColumn($sql, 'historique_formation', 'document_pv_id', 'INT DEFAULT NULL');
-        $this->addColumn($sql, 'historique_formation', 'document_note_id', 'INT DEFAULT NULL');
+        $this->addColumn($sql, 'historique', 'document_pv_id', 'INT DEFAULT NULL');
+        $this->addColumn($sql, 'historique', 'document_note_id', 'INT DEFAULT NULL');
 
-        if ($this->tableExists('historique_formation')) {
-            if ($this->fullDryRun || !$this->indexExists('historique_formation', 'document_pv_id')) {
-                $sql['Index historique_formation.document_pv_id'] = 'CREATE INDEX IDX_HISTORIQUE_DOCUMENT_PV ON historique_formation (document_pv_id)';
+        if ($this->tableExists('historique')) {
+            if ($this->fullDryRun || !$this->indexExists('historique', 'document_pv_id')) {
+                $sql['Index historique.document_pv_id'] = 'CREATE INDEX IDX_HISTORIQUE_DOCUMENT_PV ON historique (document_pv_id)';
             }
-            if ($this->fullDryRun || !$this->foreignKeyExists('historique_formation', 'document_pv_id', 'document_conseil')) {
-                $sql['FK historique_formation.document_pv_id'] = 'ALTER TABLE historique_formation ADD CONSTRAINT FK_HISTORIQUE_DOCUMENT_PV FOREIGN KEY (document_pv_id) REFERENCES document_conseil (id)';
+            if ($this->fullDryRun || !$this->foreignKeyExists('historique', 'document_pv_id', 'document_conseil')) {
+                $sql['FK historique.document_pv_id'] = 'ALTER TABLE historique ADD CONSTRAINT FK_HISTORIQUE_DOCUMENT_PV FOREIGN KEY (document_pv_id) REFERENCES document_conseil (id)';
             }
         }
-        if ($this->tableExists('historique_formation')) {
-            if ($this->fullDryRun || !$this->indexExists('historique_formation', 'document_note_id')) {
-                $sql['Index historique_formation.document_note_id'] = 'CREATE INDEX IDX_HISTORIQUE_DOCUMENT_NOTE ON historique_formation (document_note_id)';
+        if ($this->tableExists('historique')) {
+            if ($this->fullDryRun || !$this->indexExists('historique', 'document_note_id')) {
+                $sql['Index historique.document_note_id'] = 'CREATE INDEX IDX_HISTORIQUE_DOCUMENT_NOTE ON historique (document_note_id)';
             }
-            if ($this->fullDryRun || !$this->foreignKeyExists('historique_formation', 'document_note_id', 'document_conseil')) {
-                $sql['FK historique_formation.document_note_id'] = 'ALTER TABLE historique_formation ADD CONSTRAINT FK_HISTORIQUE_DOCUMENT_NOTE FOREIGN KEY (document_note_id) REFERENCES document_conseil (id)';
+            if ($this->fullDryRun || !$this->foreignKeyExists('historique', 'document_note_id', 'document_conseil')) {
+                $sql['FK historique.document_note_id'] = 'ALTER TABLE historique ADD CONSTRAINT FK_HISTORIQUE_DOCUMENT_NOTE FOREIGN KEY (document_note_id) REFERENCES document_conseil (id)';
             }
         }
 
@@ -526,8 +585,8 @@ final class MigrateV2Command extends Command
         }
 
         foreach ([
-            ['historique_formation', 'document_pv_id', 'document_conseil'],
-            ['historique_formation', 'document_note_id', 'document_conseil'],
+            ['historique', 'document_pv_id', 'document_conseil'],
+            ['historique', 'document_note_id', 'document_conseil'],
         ] as [$table, $column, $referencedTable]) {
             if (!$this->columnExists($table, $column)) {
                 $errors[] = "Colonne manquante : {$table}.{$column}";

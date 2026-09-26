@@ -229,6 +229,12 @@ class Formation
     #[ORM\ManyToMany(targetEntity: DocumentConseil::class, mappedBy: 'formations')]
     private Collection $documentConseils;
 
+    /**
+     * @var Collection<int, FormationTabState>
+     */
+    #[ORM\OneToMany(mappedBy: 'formation', targetEntity: FormationTabState::class, orphanRemoval: true)]
+    private Collection $formationTabStates;
+
     public function __construct(?CampagneCollecte $anneeUniversitaire)
     {
         $this->dpe = $anneeUniversitaire;
@@ -252,6 +258,7 @@ class Formation
         $this->changeParcours = new ArrayCollection();
         $this->dpeFormations = new ArrayCollection();
         $this->documentConseils = new ArrayCollection();
+        $this->formationTabStates = new ArrayCollection();
     }
 
     public function __toString(): string
