@@ -76,7 +76,7 @@ final class MigrateV2CleanupCommand extends Command
             return false;
         }
 
-        $required = ['010_documented_schema', '020_validation_schema', '030_admission_years', '100_safe_defaults'];
+        $required = ['010_documented_schema', '020_validation_schema', '030_admission_years', '040_new_v2_tables', '100_safe_defaults'];
         $done = $this->connection->fetchFirstColumn(
             "SELECT migration_key FROM app_v2_migration WHERE status = 'applied'"
         );
