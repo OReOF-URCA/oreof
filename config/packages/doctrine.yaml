@@ -3,6 +3,7 @@ doctrine:
         connections:
             default:
                 url: '%env(resolve:DATABASE_URL)%'
+                schema_filter: '~^(?!app_v2_migration$)~'
             # parcours_copy:
                 # url: '%env(resolve:PARCOURS_COPY_DATABASE_URL)%'
         default_connection: default
