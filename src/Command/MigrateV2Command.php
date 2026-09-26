@@ -17,6 +17,8 @@ final class MigrateV2Command extends Command
 {
     private const TRACKING_TABLE = 'app_v2_migration';
 
+    private bool $fullDryRun = false;
+
     public function __construct(private readonly Connection $connection)
     {
         parent::__construct();
@@ -56,6 +58,7 @@ final class MigrateV2Command extends Command
         }
 
         $selected = array_map('strval', (array) $input->getOption('step'));
+        $this->fullDryRun = !$apply && [] === $selected;
         $force = (bool) $input->getOption('force');
         $errors = 0;
 
@@ -262,18 +265,18 @@ final class MigrateV2Command extends Command
         $this->addColumn($sql, 'historique_formation', 'document_note_id', 'INT DEFAULT NULL');
 
         if ($this->tableExists('historique_formation')) {
-            if (!$this->indexExists('historique_formation', 'document_pv_id')) {
+            if ($this->fullDryRun || !$this->indexExists('historique_formation', 'document_pv_id')) {
                 $sql['Index historique_formation.document_pv_id'] = 'CREATE INDEX IDX_HISTORIQUE_DOCUMENT_PV ON historique_formation (document_pv_id)';
             }
-            if (!$this->foreignKeyExists('historique_formation', 'document_pv_id', 'document_conseil')) {
+            if ($this->fullDryRun || !$this->foreignKeyExists('historique_formation', 'document_pv_id', 'document_conseil')) {
                 $sql['FK historique_formation.document_pv_id'] = 'ALTER TABLE historique_formation ADD CONSTRAINT FK_HISTORIQUE_DOCUMENT_PV FOREIGN KEY (document_pv_id) REFERENCES document_conseil (id)';
             }
         }
         if ($this->tableExists('historique_formation')) {
-            if (!$this->indexExists('historique_formation', 'document_note_id')) {
+            if ($this->fullDryRun || !$this->indexExists('historique_formation', 'document_note_id')) {
                 $sql['Index historique_formation.document_note_id'] = 'CREATE INDEX IDX_HISTORIQUE_DOCUMENT_NOTE ON historique_formation (document_note_id)';
             }
-            if (!$this->foreignKeyExists('historique_formation', 'document_note_id', 'document_conseil')) {
+            if ($this->fullDryRun || !$this->foreignKeyExists('historique_formation', 'document_note_id', 'document_conseil')) {
                 $sql['FK historique_formation.document_note_id'] = 'ALTER TABLE historique_formation ADD CONSTRAINT FK_HISTORIQUE_DOCUMENT_NOTE FOREIGN KEY (document_note_id) REFERENCES document_conseil (id)';
             }
         }
@@ -287,10 +290,10 @@ final class MigrateV2Command extends Command
 
         // Update_BDD.md prévoit cette relation ; elle est nullable dans le mapping Doctrine.
         if ($this->tableExists('dpe_demande')) {
-            if (!$this->indexExists('dpe_demande', 'auteur_id')) {
+            if ($this->fullDryRun || !$this->indexExists('dpe_demande', 'auteur_id')) {
                 $sql['Index dpe_demande.auteur_id'] = 'CREATE INDEX IDX_DPE_DEMANDE_AUTEUR ON dpe_demande (auteur_id)';
             }
-            if (!$this->foreignKeyExists('dpe_demande', 'auteur_id', 'user')) {
+            if ($this->fullDryRun || !$this->foreignKeyExists('dpe_demande', 'auteur_id', 'user')) {
                 $sql['FK dpe_demande.auteur_id → user.id'] = 'ALTER TABLE dpe_demande ADD CONSTRAINT FK_DPE_DEMANDE_AUTEUR FOREIGN KEY (auteur_id) REFERENCES `user` (id)';
             }
         }
@@ -384,13 +387,13 @@ final class MigrateV2Command extends Command
                 $sql[$table.'.validation_status NULL → incomplete'] = "UPDATE {$table} SET validation_status = 'incomplete' WHERE validation_status IS NULL";
             }
         }
-        if ($this->columnExists('semestre', 'last_modification')) {
+        if ($this->fullDryRun || $this->columnExists('semestre', 'last_modification')) {
             $sql['semestre.last_modification NULL → NOW()'] = 'UPDATE semestre SET last_modification = NOW() WHERE last_modification IS NULL';
         }
-        if ($this->columnExists('dpe_demande', 'created')) {
+        if ($this->fullDryRun || $this->columnExists('dpe_demande', 'created')) {
             $sql['dpe_demande.created → date_demande'] = 'UPDATE dpe_demande SET created = COALESCE(date_demande, NOW()) WHERE created IS NULL';
         }
-        if ($this->columnExists('dpe_demande', 'updated')) {
+        if ($this->fullDryRun || $this->columnExists('dpe_demande', 'updated')) {
             $sql['dpe_demande.updated → created/date_demande'] = 'UPDATE dpe_demande SET updated = COALESCE(created, date_demande, NOW()) WHERE updated IS NULL';
         }
         return $sql;
@@ -400,13 +403,13 @@ final class MigrateV2Command extends Command
     {
         $sql = [];
 
-        if ($this->columnExists('dpe_demande', 'created')) {
+        if ($this->fullDryRun || $this->columnExists('dpe_demande', 'created')) {
             $sql['dpe_demande.created → NOT NULL'] = 'ALTER TABLE dpe_demande MODIFY created DATETIME NOT NULL';
         }
-        if ($this->columnExists('dpe_demande', 'updated')) {
+        if ($this->fullDryRun || $this->columnExists('dpe_demande', 'updated')) {
             $sql['dpe_demande.updated → NOT NULL'] = 'ALTER TABLE dpe_demande MODIFY updated DATETIME NOT NULL';
         }
-        if ($this->columnExists('semestre', 'last_modification')) {
+        if ($this->fullDryRun || $this->columnExists('semestre', 'last_modification')) {
             $sql['semestre.last_modification → NOT NULL'] = 'ALTER TABLE semestre MODIFY last_modification DATETIME NOT NULL';
         }
 
