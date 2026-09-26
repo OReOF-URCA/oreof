@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Smoke;
 
 use App\Entity\User;
+use App\Entity\CampagneCollecte;
 use App\Tests\Support\RouteParameterResolver;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -28,6 +29,10 @@ final class RouteSmokeTest extends WebTestCase
         $admin = $entityManager->getRepository(User::class)->findOneBy(['username' => 'admin-test']);
         self::assertNotNull($admin, 'Functional fixtures are not loaded.');
         $client->loginUser($admin);
+
+        $campaign = $entityManager->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => true]);
+        self::assertNotNull($campaign, 'Default test campaign is not loaded.');
+        $client->getRequest()->getSession()->set('campagneCollecte', $campaign->getId());
 
         $tested = 0;
         $skipped = [];
