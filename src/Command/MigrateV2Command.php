@@ -19,6 +19,8 @@ final class MigrateV2Command extends Command
 
     private bool $fullDryRun = false;
 
+    private bool $force = false;
+
     public function __construct(private readonly Connection $connection)
     {
         parent::__construct();
@@ -60,6 +62,7 @@ final class MigrateV2Command extends Command
         $selected = array_map('strval', (array) $input->getOption('step'));
         $this->fullDryRun = !$apply && [] === $selected;
         $force = (bool) $input->getOption('force');
+        $this->force = $force;
         $errors = 0;
 
         if ($apply && $selected !== []) {
@@ -373,17 +376,21 @@ final class MigrateV2Command extends Command
     {
         $sql = [];
         foreach (['element_constitutif', 'semestre', 'ue'] as $table) {
-            if ($this->columnExists($table, 'validation_dirty')) {
-                $sql["{$table}.validation_dirty → dirty"] = "UPDATE {$table} SET validation_dirty = 1";
+            if ($this->fullDryRun || $this->columnExists($table, 'validation_dirty')) {
+                // Le marquage global dirty est une opération de reprise initiale. En --force,
+                // on réaligne seulement le schéma pour ne pas invalider une V2 déjà recalculée.
+                if (!$this->force) {
+                    $sql["{$table}.validation_dirty → dirty"] = "UPDATE {$table} SET validation_dirty = 1";
+                }
                 $sql["{$table}.validation_dirty default"] = "ALTER TABLE {$table} MODIFY validation_dirty TINYINT(1) NOT NULL DEFAULT 1";
             }
         }
 
-        if ($this->columnExists('plateforme_admission', 'mode_export')) {
+        if ($this->fullDryRun || $this->columnExists('plateforme_admission', 'mode_export')) {
             $sql['plateforme_admission.mode_export vide → global'] = "UPDATE plateforme_admission SET mode_export = 'global' WHERE mode_export IS NULL OR mode_export = ''";
         }
         foreach (['semestre', 'ue', 'element_constitutif'] as $table) {
-            if ($this->columnExists($table, 'validation_status')) {
+            if ($this->fullDryRun || $this->columnExists($table, 'validation_status')) {
                 $sql[$table.'.validation_status NULL → incomplete'] = "UPDATE {$table} SET validation_status = 'incomplete' WHERE validation_status IS NULL";
             }
         }
