@@ -117,6 +117,7 @@ final class MigrateV2Command extends Command
             '040_new_v2_tables' => ['label' => 'Nouvelles structures fonctionnelles V2', 'plan' => fn () => $this->newV2Tables()],
             '090_reconcile_schema' => ['label' => 'Réconciliation des contraintes V2', 'plan' => fn () => $this->reconcileSchema()],
             '100_safe_defaults' => ['label' => 'Valeurs V2 déterministes', 'plan' => fn () => $this->safeDefaults()],
+            '110_finalize_constraints' => ['label' => 'Contraintes NOT NULL après reprise', 'plan' => fn () => $this->finalizeConstraints()],
         ];
     }
 
@@ -251,6 +252,26 @@ final class MigrateV2Command extends Command
         if ($this->columnExists('dpe_demande', 'updated')) {
             $sql['dpe_demande.updated → created/date_demande'] = 'UPDATE dpe_demande SET updated = COALESCE(created, date_demande, NOW()) WHERE updated IS NULL';
         }
+        return $sql;
+    }
+
+    private function finalizeConstraints(): array
+    {
+        $sql = [];
+
+        if ($this->columnExists('dpe_demande', 'created')
+            && 0 === (int) $this->connection->fetchOne('SELECT COUNT(*) FROM dpe_demande WHERE created IS NULL')) {
+            $sql['dpe_demande.created → NOT NULL'] = 'ALTER TABLE dpe_demande MODIFY created DATETIME NOT NULL';
+        }
+        if ($this->columnExists('dpe_demande', 'updated')
+            && 0 === (int) $this->connection->fetchOne('SELECT COUNT(*) FROM dpe_demande WHERE updated IS NULL')) {
+            $sql['dpe_demande.updated → NOT NULL'] = 'ALTER TABLE dpe_demande MODIFY updated DATETIME NOT NULL';
+        }
+        if ($this->columnExists('semestre', 'last_modification')
+            && 0 === (int) $this->connection->fetchOne('SELECT COUNT(*) FROM semestre WHERE last_modification IS NULL')) {
+            $sql['semestre.last_modification → NOT NULL'] = 'ALTER TABLE semestre MODIFY last_modification DATETIME NOT NULL';
+        }
+
         return $sql;
     }
 
