@@ -115,6 +115,7 @@ final class MigrateV2Command extends Command
             '020_validation_schema' => ['label' => 'Validation et états des onglets', 'plan' => fn () => $this->validationSchema()],
             '030_admission_years' => ['label' => 'Années des plateformes d’admission', 'plan' => fn () => $this->admissionYears()],
             '040_new_v2_tables' => ['label' => 'Nouvelles structures fonctionnelles V2', 'plan' => fn () => $this->newV2Tables()],
+            '090_reconcile_schema' => ['label' => 'Réconciliation des contraintes V2', 'plan' => fn () => $this->reconcileSchema()],
             '100_safe_defaults' => ['label' => 'Valeurs V2 déterministes', 'plan' => fn () => $this->safeDefaults()],
         ];
     }
@@ -202,6 +203,29 @@ final class MigrateV2Command extends Command
 
         if (!$this->tableExists('document_conseil_formation')) {
             $sql['Création document_conseil_formation'] = "CREATE TABLE document_conseil_formation (document_conseil_id INT NOT NULL, formation_id INT NOT NULL, INDEX IDX_DCF_DOCUMENT (document_conseil_id), INDEX IDX_DCF_FORMATION (formation_id), PRIMARY KEY(document_conseil_id, formation_id), CONSTRAINT FK_DCF_DOCUMENT FOREIGN KEY (document_conseil_id) REFERENCES document_conseil (id) ON DELETE CASCADE, CONSTRAINT FK_DCF_FORMATION FOREIGN KEY (formation_id) REFERENCES formation (id) ON DELETE CASCADE) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB";
+        }
+
+        return $sql;
+    }
+
+    private function reconcileSchema(): array
+    {
+        $sql = [];
+
+        // Update_BDD.md prévoit cette relation ; elle est nullable dans le mapping Doctrine.
+        if ($this->columnExists('dpe_demande', 'auteur_id')) {
+            if (!$this->indexExists('dpe_demande', 'auteur_id')) {
+                $sql['Index dpe_demande.auteur_id'] = 'CREATE INDEX IDX_DPE_DEMANDE_AUTEUR ON dpe_demande (auteur_id)';
+            }
+            if (!$this->foreignKeyExists('dpe_demande', 'auteur_id', 'user')) {
+                $sql['FK dpe_demande.auteur_id → user.id'] = 'ALTER TABLE dpe_demande ADD CONSTRAINT FK_DPE_DEMANDE_AUTEUR FOREIGN KEY (auteur_id) REFERENCES user (id)';
+            }
+        }
+
+        // Une ancienne version du SQL V2 créait validation_issue avec un schéma légèrement différent.
+        // On réconcilie les types sûrs sans toucher aux colonnes NOT NULL qui pourraient contenir des NULL.
+        if ($this->columnExists('validation_issue', 'message')) {
+            $sql['Réconciliation validation_issue.message'] = 'ALTER TABLE validation_issue MODIFY message VARCHAR(255) DEFAULT NULL';
         }
 
         return $sql;
@@ -303,6 +327,22 @@ final class MigrateV2Command extends Command
     private function columnExists(string $table, string $column): bool
     {
         return (bool) $this->connection->fetchOne('SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?', [$table, $column]);
+    }
+
+    private function indexExists(string $table, string $column): bool
+    {
+        return (bool) $this->connection->fetchOne(
+            'SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?',
+            [$table, $column]
+        );
+    }
+
+    private function foreignKeyExists(string $table, string $column, string $referencedTable): bool
+    {
+        return (bool) $this->connection->fetchOne(
+            'SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? AND REFERENCED_TABLE_NAME = ?',
+            [$table, $column, $referencedTable]
+        );
     }
 
     private function ensureTrackingTable(): void
