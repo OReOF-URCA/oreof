@@ -42,7 +42,7 @@ final class MigrateV2Command extends Command
         $io->title('ORéOF — migration BDD main → V2');
 
         try {
-            $this->connection->connect();
+            $this->connection->executeQuery('SELECT 1');
             $io->writeln('<info>✓</info> Connexion BDD');
         } catch (\Throwable $e) {
             $io->error($e->getMessage());
