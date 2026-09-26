@@ -221,7 +221,7 @@ final class MigrateV2Command extends Command
         $this->addColumn($sql, 'historique_formation', 'document_pv_id', 'INT DEFAULT NULL');
         $this->addColumn($sql, 'historique_formation', 'document_note_id', 'INT DEFAULT NULL');
 
-        if ($this->columnExists('historique_formation', 'document_pv_id')) {
+        if ($this->tableExists('historique_formation')) {
             if (!$this->indexExists('historique_formation', 'document_pv_id')) {
                 $sql['Index historique_formation.document_pv_id'] = 'CREATE INDEX IDX_HISTORIQUE_DOCUMENT_PV ON historique_formation (document_pv_id)';
             }
@@ -229,7 +229,7 @@ final class MigrateV2Command extends Command
                 $sql['FK historique_formation.document_pv_id'] = 'ALTER TABLE historique_formation ADD CONSTRAINT FK_HISTORIQUE_DOCUMENT_PV FOREIGN KEY (document_pv_id) REFERENCES document_conseil (id)';
             }
         }
-        if ($this->columnExists('historique_formation', 'document_note_id')) {
+        if ($this->tableExists('historique_formation')) {
             if (!$this->indexExists('historique_formation', 'document_note_id')) {
                 $sql['Index historique_formation.document_note_id'] = 'CREATE INDEX IDX_HISTORIQUE_DOCUMENT_NOTE ON historique_formation (document_note_id)';
             }
@@ -246,7 +246,7 @@ final class MigrateV2Command extends Command
         $sql = [];
 
         // Update_BDD.md prévoit cette relation ; elle est nullable dans le mapping Doctrine.
-        if ($this->columnExists('dpe_demande', 'auteur_id')) {
+        if ($this->tableExists('dpe_demande')) {
             if (!$this->indexExists('dpe_demande', 'auteur_id')) {
                 $sql['Index dpe_demande.auteur_id'] = 'CREATE INDEX IDX_DPE_DEMANDE_AUTEUR ON dpe_demande (auteur_id)';
             }
