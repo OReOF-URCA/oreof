@@ -273,6 +273,38 @@ final class MigrateV2Command extends Command
             }
         }
 
+        // Répare les relations absentes lorsque les anciennes tables V2 existent déjà.
+        foreach ([
+            ['fiche_matiere_tab_state', 'fiche_matiere_id', 'fiche_matiere', 'FK_FMTAB_FM', true],
+            ['formation_tab_state', 'formation_id', 'formation', 'FK_FTAB_FORMATION', true],
+            ['parcours_tab_state', 'parcours_id', 'parcours', 'FK_PTAB_PARCOURS', true],
+            ['validation_issue', 'semestre_id', 'semestre', 'FK_VALIDATION_SEMESTRE', false],
+            ['volume_horaire_parcours', 'parcours_id', 'parcours', 'FK_VHP_PARCOURS', false],
+            ['volume_horaire_parcours', 'campagne_collecte_id', 'campagne_collecte', 'FK_VHP_CAMPAGNE', false],
+        ] as [$table, $column, $referencedTable, $constraint, $cascade]) {
+            if ($this->columnExists($table, $column) && !$this->indexExists($table, $column)) {
+                $sql["Index {$table}.{$column}"] = "CREATE INDEX IDX_V2_{$constraint} ON {$table} ({$column})";
+            }
+            if ($this->columnExists($table, $column) && !$this->foreignKeyExists($table, $column, $referencedTable)) {
+                $onDelete = $cascade ? ' ON DELETE CASCADE' : '';
+                $sql["FK {$table}.{$column} → {$referencedTable}.id"] =
+                    "ALTER TABLE {$table} ADD CONSTRAINT {$constraint} FOREIGN KEY ({$column}) REFERENCES {$referencedTable} (id){$onDelete}";
+            }
+        }
+
+        // Une ancienne version du SQL V2 créait validation_issue avec un schéma légèrement différent.
+        if ($this->tableExists('validation_issue')) {
+            $this->addColumn($sql, 'validation_issue', 'semestre_id', 'INT DEFAULT NULL');
+            $this->addColumn($sql, 'validation_issue', 'scope_type', 'VARCHAR(255) DEFAULT NULL');
+            $this->addColumn($sql, 'validation_issue', 'scope_id', 'INT DEFAULT NULL');
+            $this->addColumn($sql, 'validation_issue', 'rule_code', 'VARCHAR(255) DEFAULT NULL');
+            $this->addColumn($sql, 'validation_issue', 'severity', 'VARCHAR(15) DEFAULT NULL');
+            $this->addColumn($sql, 'validation_issue', 'message', 'VARCHAR(255) DEFAULT NULL');
+            $this->addColumn($sql, 'validation_issue', 'payload', 'JSON DEFAULT NULL');
+            $this->addColumn($sql, 'validation_issue', 'type_diplome', 'VARCHAR(255) DEFAULT NULL');
+            $this->addColumn($sql, 'validation_issue', 'created_at', 'DATETIME DEFAULT NULL');
+        }
+
         // Une ancienne version du SQL V2 créait validation_issue avec un schéma légèrement différent.
         if ($this->columnExists('validation_issue', 'message')) {
             $sql['Réconciliation validation_issue.message'] = 'ALTER TABLE validation_issue MODIFY message VARCHAR(255) DEFAULT NULL';
