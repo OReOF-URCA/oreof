@@ -1,19 +1,20 @@
-TEMPS_PLEIN: 'Temps plein'
-TEMPS_PARTIEL: 'Temps partiel'
-TEMPS_MIXTE: 'Temps plein et partiel'
-but: 'Bachelor Universitaire de Technologie'
-licence_professionnelle: 'Licence professionnelle'
-licence: Licence
-master_meef: 'Master MEEF'
-master: Master
-FI: 'Formation initiale'
-FI_APPRENTISSAGE: 'Formation initiale en apprentissage'
 FC: 'Formation continue'
 FC_CONTRAT_PRO: 'Formation continue en contrat de professionnalisation'
+FI: 'Formation initiale'
+FI_APPRENTISSAGE: 'Formation initiale en apprentissage'
 "Régime d'inscription": "Régime d'inscription"
-formation_step1.labels.regimeInscription.label: "Régime(s) d'inscription"
-parcours_step5.labels.regimeInscription.label: "Régime(s) d'inscription"
+TEMPS_MIXTE: 'Temps plein et partiel'
+TEMPS_PARTIEL: 'Temps partiel'
+TEMPS_PLEIN: 'Temps plein'
 'Type de diplôme': 'Type de diplôme'
-deust: DEUST
-parcours_step5.labels.regimeInscription: parcours_step5.labels.regimeInscription
 "Type(s) de diplôme proposant ce type d'UE": "Type(s) de diplôme proposant ce type d'UE"
+but: 'Bachelor Universitaire de Technologie'
+deust: DEUST
+formation_step1.labels.regimeInscription.label: "Régime(s) d'inscription"
+licence: Licence
+licence_professionnelle: 'Licence professionnelle'
+master: Master
+master_meef: 'Master MEEF'
+parcours_step5.labels.regimeInscription: parcours_step5.labels.regimeInscription
+parcours_step5.labels.regimeInscription.label: "Régime(s) d'inscription"
+

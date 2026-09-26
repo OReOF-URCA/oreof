@@ -1,23 +1,24 @@
-oral: Oral
-mccc_but.helps.pourcentage.help: mccc_but.helps.pourcentage.help
-mccc_but.helps.nombre.help: mccc_but.helps.nombre.help
-ecrit: Ecrit
-rapport: Rapport
 autre: Autre
-portfolio: Portfolio
-livrable: Livrable
-soutenance: Soutenance
+cm_ecrit: 'Epreuve promotion entière Écrit'
+cm_rapport: 'Epreuve promotion entière Rapport'
+ecrit: Ecrit
 entreprise: Entreprise
-td_tp_oral: TD/TP Oral
-td_tp_ecrit: TD/TP Écrit
-td_tp_rapport: TD/TP Rapport
-td_tp_autre: TD/TP Autre évaluation
-cm_ecrit: Epreuve promotion entière Écrit
-cm_rapport: Epreuve promotion entière Rapport
-iut_portfolio: Portfolio
+hors_iut_entreprise: 'Stage / Entreprise'
+hors_iut_rapport: 'Stage / Rapport'
+hors_iut_soutenance: 'Stage / Soutenance'
 iut_livrable: Livrable
+iut_portfolio: Portfolio
 iut_rapport: Rapport
 iut_soutenance: Soutenance
-hors_iut_entreprise: Stage / Entreprise
-hors_iut_rapport: Stage / Rapport
-hors_iut_soutenance: Stage / Soutenance
+livrable: Livrable
+mccc_but.helps.nombre.help: mccc_but.helps.nombre.help
+mccc_but.helps.pourcentage.help: mccc_but.helps.pourcentage.help
+oral: Oral
+portfolio: Portfolio
+rapport: Rapport
+soutenance: Soutenance
+td_tp_autre: 'TD/TP Autre évaluation'
+td_tp_ecrit: 'TD/TP Écrit'
+td_tp_oral: 'TD/TP Oral'
+td_tp_rapport: 'TD/TP Rapport'
+

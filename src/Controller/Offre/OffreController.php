@@ -16,6 +16,7 @@ use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
 use App\Entity\DocumentConseil;
 use App\Entity\HistoriqueFormation;
+use App\Entity\RythmeFormation;
 use App\Exception\FileUploadException;
 use App\Repository\AnneeRepository;
 use App\Repository\ComposanteRepository;
@@ -25,6 +26,7 @@ use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
+use App\Repository\RythmeFormationRepository;
 use App\Repository\TypeDiplomePlateformeAdmissionRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\CampagneCollecteService;
@@ -493,7 +495,8 @@ final class OffreController extends BaseController
                         'color' => $plateforme->getColor(),
                         'definitionChamps' => $plateforme->getDefinitionChamps(),
                         'hasDefinitionChamps' => $plateforme->hasDefinitionChamps(),
-                        'annees' => array_values($tpa->getAnnees()),
+                        'annees' => array_values($tpa->getAnnees() ?? []),
+                        'anneesCapaciteRequise' => array_values($tpa->getAnneesCapaciteRequise() ?? []),
                     ];
                 }
             }
@@ -893,7 +896,8 @@ final class OffreController extends BaseController
                             'color' => $plateforme->getColor(),
                             'definitionChamps' => $plateforme->getDefinitionChamps(),
                             'hasDefinitionChamps' => $plateforme->hasDefinitionChamps(),
-                            'annees' => array_values($tpa->getAnnees()),
+                            'annees' => array_values($tpa->getAnnees() ?? []),
+                            'anneesCapaciteRequise' => array_values($tpa->getAnneesCapaciteRequise() ?? []),
                         ];
                     }
                 }
@@ -979,6 +983,7 @@ final class OffreController extends BaseController
 
     #[Route('/offre/parcours/{parcours}/modal-edit', name: 'offre_v2_parcours_modal_edit', methods: ['GET'])]
     public function modalEditParcours(
+        RythmeFormationRepository $rythmeFormationRepository,
         Parcours $parcours,
         TurboStreamResponseFactory $turboStream,
         EntityManagerInterface $em,
@@ -1008,6 +1013,7 @@ final class OffreController extends BaseController
                 'parcoursOrigine' => $parcoursOrigine,
                 'dpeParcours' => $dpeParcours,
                 'isModifieN1' => $isModifieN1,
+                'rythmesFormation' => $rythmeFormationRepository->findBy([], ['libelle' => 'ASC']),
                 'typesParcours' => TypeParcoursEnum::cases(),
             ],
             '_ui/_footer_submit_cancel.html.twig',
@@ -1062,6 +1068,15 @@ final class OffreController extends BaseController
             if ($typeEnum !== null) {
                 $parcours->setTypeParcours($typeEnum);
             }
+        }
+
+        $rythmeRaw = $request->request->all('rythmeFormation');
+        $rythmeId = !empty($rythmeRaw) ? (int)reset($rythmeRaw) : (int)$request->request->get('rythmeFormation');
+        if ($rythmeId > 0) {
+            $rythme = $em->getRepository(RythmeFormation::class)->find($rythmeId);
+            $parcours->setRythmeFormation($rythme);
+        } else {
+            $parcours->setRythmeFormation(null);
         }
 
         $dpeParcours = $em->getRepository(DpeParcours::class)->findOneBy([

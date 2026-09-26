@@ -1,3 +1,4 @@
+header.mention.index: 'Gestion des formations'
 texte_help.parcours.admission.header: texte_help.parcours.admission.header
 texte_help.parcours.configuration.header: texte_help.parcours.configuration.header
 texte_help.parcours.descriptif.header: texte_help.parcours.descriptif.header
@@ -13,4 +14,3 @@ titre.parcours.maquette.header: titre.parcours.maquette.header
 titre.parcours.presentation.header: titre.parcours.presentation.header
 titre.parcours.presentation_formation.header: titre.parcours.presentation_formation.header
 
-header.mention.index: Gestion des formations

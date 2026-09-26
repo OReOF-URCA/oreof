@@ -63,6 +63,32 @@
             </p>
         </div>
 
+        {# Rythme de parcours #}
+        <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-2">
+                Rythme de formation
+            </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {% for type in rythmesFormation %}
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border border-secondary-200 bg-white hover:bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-900 dark:hover:bg-secondary-800/60 transition cursor-pointer">
+                        <input type="checkbox"
+                               name="rythmeFormation[]"
+                               value="{{ type.id }}"
+                               id="parcours_rythme_formation_{{ type.id }}"
+                               {% if parcours.rythmeFormation and parcours.rythmeFormation.id == type.id %}checked{% endif %}
+                               class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500 dark:border-secondary-600 dark:bg-secondary-900 dark:checked:bg-indigo-600 cursor-pointer"
+                        >
+                        <span class="text-sm font-medium text-secondary-900 dark:text-secondary-100">
+                            {{ type.libelle }}
+                        </span>
+                    </label>
+                {% endfor %}
+            </div>
+            <p class="mt-1.5 text-xs text-secondary-500 dark:text-secondary-400">
+                Indique le rythme de formation (FI, FC, alternance ou apprentissage)
+            </p>
+        </div>
+
         {# Marquer comme modifié par rapport à N-1 #}
         <div class="pt-2">
             <label class="flex items-start gap-3.5 p-4 rounded-xl border border-secondary-200 bg-secondary-50/50 hover:bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-800/40 dark:hover:bg-secondary-800/60 transition cursor-pointer">

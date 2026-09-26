@@ -68,11 +68,13 @@ readonly class TypeDiplomePlateformeService
 
             $plateforme = $data['plateforme'];
             $annees = $data['annees'] ?? [];
+            $anneesCapaciteRequise = $data['anneesCapaciteRequise'] ?? [];
             $plateformeId = $plateforme->getId();
 
             if (isset($existingMap[$plateformeId])) {
                 // Mettre à jour l'association existante
                 $existingMap[$plateformeId]->setAnnees($annees);
+                $existingMap[$plateformeId]->setAnneesCapaciteRequise($anneesCapaciteRequise);
             } else {
                 // Créer une nouvelle association
                 $association = new TypeDiplomePlateformeAdmission();
@@ -80,6 +82,7 @@ readonly class TypeDiplomePlateformeService
                 $association->setPlateforme($plateforme);
                 $association->setCampagne($campagne);
                 $association->setAnnees($annees);
+                $association->setAnneesCapaciteRequise($anneesCapaciteRequise);
                 $this->entityManager->persist($association);
             }
         }

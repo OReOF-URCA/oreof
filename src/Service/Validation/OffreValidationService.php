@@ -102,23 +102,58 @@ final class OffreValidationService
                         );
                     }
 
-                    // Parcourir les plateformes actives (préchargées ou via relation)
+                    // Récupérer la configuration des plateformes pour le type de diplôme
+                    $formation = $parcours->getFormation();
+                    $typeDiplome = $formation?->getTypeDiplome();
+                    $tpaMap = [];
+                    if ($typeDiplome !== null) {
+                        foreach ($typeDiplome->getTypeDiplomePlateformeAdmissions() as $tpa) {
+                            if ($tpa->getCampagne() === $campagne && $tpa->getPlateforme() !== null) {
+                                $tpaMap[$tpa->getPlateforme()->getId()] = $tpa;
+                            }
+                        }
+                    }
+
+                    // Parcourir les plateformes (préchargées ou via relation)
                     $params = $paramsByAnnee !== null
                         ? ($paramsByAnnee[$annee->getId()] ?? [])
                         : $annee->getAdmissionPlateformeParametres();
 
                     foreach ($params as $param) {
-                        if ($param->getCampagne() === $campagne && $param->isActive()) {
-                            // Anomalie 2: Plateforme active sans aucune capacité renseignée
-                            if (($param->getCapaciteGlobale() === null || $param->getCapaciteGlobale() <= 0) &&
-                                ($param->getCapaciteFi() === null || $param->getCapaciteFi() <= 0) &&
-                                ($param->getCapaciteAlternance() === null || $param->getCapaciteAlternance() <= 0)) {
-                                
+                        if ($param->getCampagne() !== $campagne) {
+                            continue;
+                        }
+
+                        $plateforme = $param->getPlateforme();
+                        $platId = $plateforme?->getId();
+                        $platLibelle = $plateforme?->getLibelle() ?? 'Inconnue';
+                        $tpa = $platId ? ($tpaMap[$platId] ?? null) : null;
+                        $anneeOrdre = $annee->getOrdre();
+                        $isCapaciteRequise = $tpa !== null && $tpa->isCapaciteRequise($anneeOrdre);
+
+                        $hasCapacite = ($param->getCapaciteGlobale() !== null && $param->getCapaciteGlobale() > 0)
+                            || ($param->getCapaciteFi() !== null && $param->getCapaciteFi() > 0)
+                            || ($param->getCapaciteAlternance() !== null && $param->getCapaciteAlternance() > 0)
+                            || ($param->getCapaciteSpecifique() !== null && $param->getCapaciteSpecifique() > 0);
+
+                        if ($param->isActive()) {
+                            // Contrôle 1 : Plateforme active sans capacité alors que la capacité est obligatoire
+                            if ($isCapaciteRequise && !$hasCapacite) {
                                 $anomalies[] = sprintf(
-                                    "Le parcours \"%s\" (Année %d) a la plateforme %s active, mais aucune capacité n'est renseignée.",
+                                    "Le parcours \"%s\" (Année %d) a la plateforme %s active, mais sa capacité (obligatoire) n'est pas renseignée.",
                                     $parcours->getLibelle(),
-                                    $annee->getOrdre(),
-                                    $param->getPlateforme()?->getLibelle()
+                                    $anneeOrdre,
+                                    $platLibelle
+                                );
+                            }
+                        } else {
+                            // Contrôle 2 : Plateforme inactive mais avec capacité renseignée
+                            if ($hasCapacite) {
+                                $anomalies[] = sprintf(
+                                    "Le parcours \"%s\" (Année %d) a une capacité renseignée sur la plateforme %s, alors que celle-ci est inactive.",
+                                    $parcours->getLibelle(),
+                                    $anneeOrdre,
+                                    $platLibelle
                                 );
                             }
                         }

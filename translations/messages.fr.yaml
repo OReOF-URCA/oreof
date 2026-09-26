@@ -1,97 +1,97 @@
-'Localisation(s) de la formation': 'Localisation(s) de la formation'
-"Composante d'inscription": "Composante(s) d'inscription"
-"Modalités de l'alternance": "Modalités de l'alternance"
-'Contenu de la formation': 'Contenu de la formation'
-'Résultats attendus de la formation': 'Résultats attendus de la formation'
-'Rythme de la formation': 'Rythme de la formation'
+'Adresse email': 'Adresse email'
+'Choisir dans la liste ou choisir "+" pour ajouter un utilisateur': 'Choisir dans la liste ou choisir "+" pour ajouter un utilisateur'
 'Choisissez un rythme de formation ou complétez le champ ci-dessous': 'Choisissez un rythme de formation ou complétez le champ ci-dessous'
-'Compléments sur le rythme de formation': 'Compléments sur le rythme de formation'
-"Modalités d'enseignement du parcours": "Modalités d'enseignement du parcours"
-'En présentiel': 'En présentiel'
-'En distanciel': 'En distanciel'
-Hybride: Hybride
-'Stage ?': 'Stage ?'
-Oui: Oui
-Non: Non
-"Nombre d'heures de stage prévu": "Nombre d'heures de stage prévu"
-'Description du stage': 'Description du stage'
-'Projets tuteurés ?': 'Projets tuteurés ?'
-"Nombre d'heures de projets tutorés prévu": "Nombre d'heures de projets tutorés prévu"
-'Description du projet': 'Description du projet'
-'TER/Mémoire ?': 'TER/Mémoire ?'
-bloc_competence.labels.libelle: bloc_competence.labels.libelle
-competence.labels.libelle: competence.labels.libelle
-Libellé: Libellé
-"Responsable de l'EC": "Responsable de l'EC"
-'Prérequis recommandés': 'Prérequis recommandés'
-"Poursuites d'études envisageables": "Poursuites d'études envisageables"
-Débouchés: Débouchés
+Civilité: Civilité
 'Code ROME': 'Code ROME'
-'Libellé du code ROME': 'Libellé du code ROME'
-'Responsable du parcours (si existant)': 'Responsable du parcours (si existant)'
+'Code diplôme': 'Code diplôme'
+'Code étape': 'Code étape'
+Commentaire: Commentaire
+'Commentaire sur le changement de responsable de formation': 'Commentaire sur le changement de responsable de formation'
+'Compléments sur le rythme de formation': 'Compléments sur le rythme de formation'
+Composante: Composante
+"Composante d'inscription": "Composante(s) d'inscription"
+'Contenu de la formation': 'Contenu de la formation'
 'Coordonnées du secrétariat': 'Coordonnées du secrétariat'
-"Modalité d'enseignement": "Modalité d'enseignement"
-PRESENTIELLE: PRESENTIELLE
 DISTANCIELLE: Distancielle
-HYBRIDE: HYBRIDE
+'Description du projet': 'Description du projet'
+'Description du stage': 'Description du stage'
+'Directeur de composante': 'Directeur de composante'
+Disciplinaire: Disciplinaire
+Droits: Droits
+Débouchés: Débouchés
+'Dénomination du contact': 'Dénomination du contact'
 ECTS: ECTS
+Email: Email
+'Email URCA': 'Email URCA'
+'En distanciel': 'En distanciel'
+'En présentiel': 'En présentiel'
+Etablissement: Etablissement
+Formation: Formation
+HYBRIDE: HYBRIDE
+Hybride: Hybride
+'Indiquez les droits accordés': 'Indiquez les droits accordés'
+'Indiquez un centre de gestion': 'Indiquez un centre de gestion'
+'Indiquez votre civilité': 'Indiquez votre civilité'
+'Lettre Mention': 'Lettre Mention'
+Libellé: Libellé
+"Libellé de l'EC": "Libellé de l'EC"
+'Libellé du code ROME': 'Libellé du code ROME'
+'Libellé du parcours': 'Libellé du parcours'
+'Localisation(s) de la formation': 'Localisation(s) de la formation'
+Login: Login
+Madame: Madame
+"Modalité d'enseignement": "Modalité d'enseignement"
+"Modalités d'enseignement du parcours": "Modalités d'enseignement du parcours"
+"Modalités de l'alternance": "Modalités de l'alternance"
+Monsieur: Monsieur
+Nom: Nom
+"Nombre d'heures de projets tutorés prévu": "Nombre d'heures de projets tutorés prévu"
+"Nombre d'heures de stage prévu": "Nombre d'heures de stage prévu"
+Non: Non
+'Nouveau responsable de formation': 'Nouveau responsable de formation'
+"Numéro de l'UE": "Numéro de l'UE"
+Oui: Oui
+Ouverture: Ouverture
+PRESENTIELLE: PRESENTIELLE
+"Poursuites d'études envisageables": "Poursuites d'études envisageables"
+'Projets tuteurés ?': 'Projets tuteurés ?'
+Prénom: Prénom
+'Prérequis recommandés': 'Prérequis recommandés'
+ROLE_ADMIN: ROLE_ADMIN
+ROLE_VP: ROLE_VP
+"Responsable de l'EC": "Responsable de l'EC"
+'Responsable du parcours': 'Responsable du parcours'
+'Responsable du parcours (si existant)': 'Responsable du parcours (si existant)'
+'Rythme de la formation': 'Rythme de la formation'
+'Résultats attendus de la formation': 'Résultats attendus de la formation'
+Sigle: Sigle
+'Stage ?': 'Stage ?'
+'TER – travail d’étude et de recherche': 'TER – travail d’étude et de recherche'
+'TER/Mémoire ?': 'TER/Mémoire ?'
+"Type d'UE si non présent dans la liste": "Type d'UE si non présent dans la liste"
+Téléphone: Téléphone
+'Téléphone fixe': 'Téléphone fixe'
+'Téléphone portable': 'Téléphone portable'
+'Version diplôme': 'Version diplôme'
+'Version étape': 'Version étape'
 'Volume CM': 'Volume CM'
 'Volume TD': 'Volume TD'
 'Volume TP': 'Volume TP'
-Sigle: Sigle
-Prénom: Prénom
-Nom: Nom
-'Email URCA': 'Email URCA'
-register.labels.centreDemande: register.labels.centreDemande
-'Indiquez un centre de gestion': 'Indiquez un centre de gestion'
-Etablissement: Etablissement
-Composante: Composante
-Formation: Formation
-Login: Login
-Civilité: Civilité
-'Indiquez votre civilité': 'Indiquez votre civilité'
-Monsieur: Monsieur
-Madame: Madame
-'Adresse email': 'Adresse email'
-'Téléphone fixe': 'Téléphone fixe'
-'Téléphone portable': 'Téléphone portable'
-Droits: Droits
-'Indiquez les droits accordés': 'Indiquez les droits accordés'
-ROLE_ADMIN: ROLE_ADMIN
-ROLE_VP: ROLE_VP
-'Responsable du parcours': 'Responsable du parcours'
-"Numéro de l'UE": "Numéro de l'UE"
-ue.labels.typeUe: ue.labels.typeUe
-ue.labels.ueObligatoire: ue.labels.ueObligatoire
-"Type d'UE si non présent dans la liste": "Type d'UE si non présent dans la liste"
-'Libellé du parcours': 'Libellé du parcours'
-Disciplinaire: Disciplinaire
-Ouverture: Ouverture
-'TER – travail d’étude et de recherche': 'TER – travail d’étude et de recherche'
-"Libellé de l'EC": "Libellé de l'EC"
-form.labels.email: form.labels.email
-form.labels.objectifsFormation: 'Description générale de la formation'
-user_add.labels.email: "Indiquer l'email URCA du collègue à ajouter"
-'Dénomination du contact': 'Dénomination du contact'
-Téléphone: Téléphone
-Email: Email
-'Code diplôme': 'Code diplôme'
-'Version diplôme': 'Version diplôme'
-'Code étape': 'Code étape'
-'Version étape': 'Version étape'
-'Lettre Mention': 'Lettre Mention'
-gestion.admin.title: 'Gestion des administrateurs'
 admin.edit.modal.help: "Ces actions doivent être réalisées avec précaution. Elles permettent de court-circuiter ou modifier le processus de validation intialement établi ou d'agir directement sur certaines informations."
-'Directeur de composante': 'Directeur de composante'
-'Choisir dans la liste ou choisir "+" pour ajouter un utilisateur': 'Choisir dans la liste ou choisir "+" pour ajouter un utilisateur'
-Commentaire: Commentaire
-'Nouveau responsable de formation': 'Nouveau responsable de formation'
-'Commentaire sur le changement de responsable de formation': 'Commentaire sur le changement de responsable de formation'
-fiche_matiere.step1_change_rf.title: 'Changement de responsable ou de co-responsable de formation'
-bug_report.titre: 'Signaler un bug'
+bloc_competence.labels.libelle: bloc_competence.labels.libelle
 bug_report.description: 'Vous avez rencontré un bug sur l’application ? Merci de nous aider à l’améliorer en nous le signalant !'
-notification.liste.description: 'Accèdez aux dernières notifications que vous avez reçu.'
-notification.liste.titre: 'Vos notification'
+bug_report.titre: 'Signaler un bug'
 campagne_collecte.configure_publication.description: 'Paramétrer la publication des maquettes et MCCC'
 campagne_collecte.configure_publication.title: 'Configuration de la publication'
+competence.labels.libelle: competence.labels.libelle
+fiche_matiere.step1_change_rf.title: 'Changement de responsable ou de co-responsable de formation'
+form.labels.email: form.labels.email
+form.labels.objectifsFormation: 'Description générale de la formation'
+gestion.admin.title: 'Gestion des administrateurs'
+notification.liste.description: 'Accèdez aux dernières notifications que vous avez reçu.'
+notification.liste.titre: 'Vos notification'
+register.labels.centreDemande: register.labels.centreDemande
+ue.labels.typeUe: ue.labels.typeUe
+ue.labels.ueObligatoire: ue.labels.ueObligatoire
+user_add.labels.email: "Indiquer l'email URCA du collègue à ajouter"
 

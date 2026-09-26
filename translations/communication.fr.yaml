@@ -1,12 +1,13 @@
+admission: "Conditions d'admission"
+competences: 'Compétences visées'
+contacts: Contacts
+descriptifParcours: 'Descriptif du parcours'
+etApres: 'Et après ?'
 identiteFormation: 'Identité de la formation'
+inscription: Inscription
 localisationFormation: 'Localisation de la formation'
+localisationParcours: 'Localisation du parcours'
 presentationFormation: 'Présentation de la formation'
 presentationParcours: 'Présentation du parcours'
-descriptifParcours: 'Descriptif du parcours'
-localisationParcours: 'Localisation du parcours'
-competences: 'Compétences visées'
 structure: 'Structure de la formation'
-admission: 'Conditions d''admission'
-inscription: 'Inscription'
-etApres: 'Et après ?'
-contacts: 'Contacts'
+

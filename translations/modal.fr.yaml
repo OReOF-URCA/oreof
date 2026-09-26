@@ -1,15 +1,20 @@
 campagne_collecte:
-    show: { title: 'Détails de la campagne de collecte' }
+    show:
+        title: 'Détails de la campagne de collecte'
 campagne_collecte.show.title: campagne_collecte.show.title
 composante:
-    edit: { title: 'Modifier une composante' }
-    show: { title: 'Détails de la composante' }
+    edit:
+        title: 'Modifier une composante'
+    show:
+        title: 'Détails de la composante'
 composante.edit.title: composante.edit.title
 composante.show.title: composante.show.title
 langue:
-    show: { title: 'Détails de la langue' }
+    show:
+        title: 'Détails de la langue'
 langue.show.title: langue.show.title
 plateforme_adminission:
-    show: { title: "Détails de la plateforme d'admission" }
+    show:
+        title: "Détails de la plateforme d'admission"
 plateforme_adminission.show.title: plateforme_adminission.show.title
 

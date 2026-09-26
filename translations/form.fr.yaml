@@ -69,6 +69,7 @@ Civilité: Civilité
 'Compléments sur le rythme de formation': 'Si besoin, précisez le rythme de formation'
 Composante: Composante
 "Composante d'inscription": "Composante d'inscription"
+"Composante d'inscription et où se déroulent les cours": "Composante d'inscription et où se déroulent les cours"
 "Composante d'inscription uniquement": "Composante d'inscription uniquement"
 'Contrôle continu': 'Contrôle continu'
 'Contrôle continu & contrôle terminal': 'Contrôle continu & contrôle terminal'
@@ -218,9 +219,9 @@ actualite.labels.titre: "Titre de l'actualité"
 bloc_competence.labels.libelle: 'Libellé du bloc de compétences'
 but: 'Bachelor Universitaire de Technologie'
 change_rf_formation:
-  labels:
-    typeRf:
-      label: 'la demande concerne le responsable ou Co-Responsale de la formation'
+    labels:
+        typeRf:
+            label: 'la demande concerne le responsable ou Co-Responsale de la formation'
 competence.labels.libelle: 'Libellé de la compétence'
 composante.labels.composanteParent: 'Composante parente'
 contact.labels.adresse.label: 'Adresse du contact'
@@ -345,9 +346,9 @@ formation_step2.labels.resultatsAttendus: 'Résultats attendus de la formation'
 formation_step2.labels.rythmeFormation: 'Rythme de la formation'
 formation_step2.labels.rythmeFormationTexte: 'Si besoin, précisez le rythme de formation'
 formation_step3:
-  labels:
-    hasParcours:
-      warning: "Cette formation comporte plusieurs parcours. Vous devez en supprimer et n'en garder qu'un seul qui sera transformé en parcours par défaut si vous souhaitez l'utiliser et définir cette formation comme étant \"sans parcours\"."
+    labels:
+        hasParcours:
+            warning: "Cette formation comporte plusieurs parcours. Vous devez en supprimer et n'en garder qu'un seul qui sera transformé en parcours par défaut si vous souhaitez l'utiliser et définir cette formation comme étant \"sans parcours\"."
 formation_step3.labels.hasParcours: 'La formation propose-t-elle un(des) parcours ?'
 formation_step3.labels.libelleParcours: 'Précisez le libellé de chaque parcours'
 formation_step3.labels.semestreDebut: 'Semestre de début de la formation'
@@ -504,17 +505,17 @@ semestre.reutilise.label: 'Précisez le semestre à raccrocher'
 semestre.type_semestre.label: 'Le semestre est-il mutualisé ?'
 test: test
 type_diplome:
-  labels:
-    hasMemoire:
-      label: 'La formation prévoit-elle un TER/Mémoire de recherche ?'
-    hasStage:
-      label: 'La formation prévoit-elle un stage ?'
-    hasSituationPro:
-      label: 'La formation prévoit-elle de la mise en situation professionnelle ?'
-    hasProjet:
-      label: 'La formation prévoit-elle un projet tutoré ?'
-    ectsObligatoireSurEc:
-      label: 'Les ECTS sont-ils obligatoires sur les EC ?'
+    labels:
+        ectsObligatoireSurEc:
+            label: 'Les ECTS sont-ils obligatoires sur les EC ?'
+        hasMemoire:
+            label: 'La formation prévoit-elle un TER/Mémoire de recherche ?'
+        hasProjet:
+            label: 'La formation prévoit-elle un projet tutoré ?'
+        hasSituationPro:
+            label: 'La formation prévoit-elle de la mise en situation professionnelle ?'
+        hasStage:
+            label: 'La formation prévoit-elle un stage ?'
 type_diplome.labels.ModeleMcc: 'Modèle de MCC prédéfini'
 type_diplome.labels.codeApogee: 'Code Apogée'
 type_diplome.labels.controleAssiduite.label: "Le contrôle d'assiduité est-il la modalité d'évaluation ?"
@@ -559,5 +560,4 @@ ue.raccrocher.label: "Précisez l'UE à raccrocher"
 ue.semestre.dupliquer.label: "Choisir le semestre dans lequel dupliquer le'UE"
 user.add_missing.email.label: "Indiquer l'email URCA de l'utilisateur à ajouter"
 user_ldap.labels.centreDemande: 'Centre de gestion'
-"Composante d'inscription et où se déroulent les cours": "Composante d'inscription et où se déroulent les cours"
 

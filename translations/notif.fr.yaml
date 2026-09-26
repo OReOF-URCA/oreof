@@ -1,3 +1,4 @@
-workflow.dpe.transition.initialiser: 'Nouvelle formation initialisée'
 notif.dpeParcours.valider_parcours: 'Le parcours a été validé'
 notif.dpeParcours.valider_rf: 'Le parcours a été validé par le référent formation'
+workflow.dpe.transition.initialiser: 'Nouvelle formation initialisée'
+

@@ -294,14 +294,20 @@ class TypeDiplomeController extends BaseController
                 foreach ($plateformes as $tpa) {
                     $plateforme = $tpa->getPlateforme();
                     $annees = $tpa->getAnnees();
+                    $anneesCapacite = $tpa->getAnneesCapaciteRequise() ?? [];
 
                     $anneesText = '';
                     if ($annees && count($annees) > 0) {
                         sort($annees);
-                        $anneesText = ' (Année' . (count($annees) > 1 ? 's' : '') . ' ' . implode(', ', $annees) . ')';
+                        $details = [];
+                        foreach ($annees as $an) {
+                            $isReq = in_array($an, $anneesCapacite, true);
+                            $details[] = 'Année ' . $an . ($isReq ? ' (capacité requise)' : ' (optionnelle)');
+                        }
+                        $anneesText = ' (' . implode(', ', $details) . ')';
                     }
 
-                    $html .= '<li>' . $plateforme?->getLibelle() . $anneesText . '</li>';
+                    $html .= '<li><strong>' . htmlspecialchars($plateforme?->getLibelle() ?? '') . '</strong>' . $anneesText . '</li>';
                 }
                 $html .= '</ul>';
 

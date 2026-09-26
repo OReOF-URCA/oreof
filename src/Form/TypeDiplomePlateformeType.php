@@ -42,6 +42,15 @@ class TypeDiplomePlateformeType extends AbstractType
                 'required' => true,
                 'help' => 'Sélectionnez les années pour lesquelles cette plateforme est utilisée',
             ]);
+
+            $builder->add('anneesCapaciteRequise', ChoiceType::class, [
+                'choices' => $anneesChoices,
+                'multiple' => true,
+                'expanded' => true,
+                'label' => 'Capacité obligatoire pour les années',
+                'required' => false,
+                'help' => 'Cochez les années où la saisie d\'une capacité est obligatoire (si décoché, la capacité reste optionnelle)',
+            ]);
         }
     }
 

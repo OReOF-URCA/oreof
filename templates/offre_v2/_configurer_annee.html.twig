@@ -88,16 +88,28 @@
                                 {% for plateforme in plateformes|filter(plateforme => annee.ordre in plateforme.annees) %}
                                     {% set plateformeCourante = anneeCourante.plateformes|filter(p => p.code == plateforme.code)|first %}
                                     {% set plateformePrecedente = anneeComparaison.anneePrecedente ? anneeComparaison.anneePrecedente.plateformes|filter(p => p.code == plateforme.code)|first : null %}
+                                    {% set isCapaciteRequise = annee.ordre in (plateforme.anneesCapaciteRequise ?? []) %}
                                     <tr>
                                         <td class="px-4 py-3 font-medium">
-                                            {% if plateforme.color %}
-                                                <span class="inline-flex items-center gap-2">
-                                                    <span class="h-2.5 w-2.5 rounded-full bg-{{ plateforme.color }}-500"></span>
-                                                    {{ plateforme.libelle }}
-                                                </span>
-                                            {% else %}
-                                                {{ plateforme.libelle }}
-                                            {% endif %}
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                {% if plateforme.color %}
+                                                    <span class="inline-flex items-center gap-2">
+                                                        <span class="h-2.5 w-2.5 rounded-full bg-{{ plateforme.color }}-500"></span>
+                                                        {{ plateforme.libelle }}
+                                                    </span>
+                                                {% else %}
+                                                    <span>{{ plateforme.libelle }}</span>
+                                                {% endif %}
+                                                {% if isCapaciteRequise %}
+                                                    <span class="inline-flex items-center rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 ring-1 ring-inset ring-amber-600/20" title="Capacité obligatoire pour cette année">
+                                                        Capacité requise
+                                                    </span>
+                                                {% else %}
+                                                    <span class="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 ring-1 ring-inset ring-slate-500/10" title="Capacité optionnelle pour cette année">
+                                                        Optionnelle
+                                                    </span>
+                                                {% endif %}
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3">
                                             <input type="checkbox"
@@ -246,16 +258,28 @@
                                 </thead>
                                 <tbody class="divide-y">
                                 {% for plateforme in plateformes|filter(plateforme => annee.ordre in plateforme.annees) %}
+                                    {% set isCapaciteRequise = annee.ordre in (plateforme.anneesCapaciteRequise ?? []) %}
                                     <tr>
                                         <td class="px-4 py-3 font-medium">
-                                            {% if plateforme.color %}
-                                                <span class="inline-flex items-center gap-2">
-                                                    <span class="h-2.5 w-2.5 rounded-full bg-{{ plateforme.color }}-500"></span>
-                                                    {{ plateforme.libelle }}
-                                                </span>
-                                            {% else %}
-                                                {{ plateforme.libelle }}
-                                            {% endif %}
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                {% if plateforme.color %}
+                                                    <span class="inline-flex items-center gap-2">
+                                                        <span class="h-2.5 w-2.5 rounded-full bg-{{ plateforme.color }}-500"></span>
+                                                        {{ plateforme.libelle }}
+                                                    </span>
+                                                {% else %}
+                                                    <span>{{ plateforme.libelle }}</span>
+                                                {% endif %}
+                                                {% if isCapaciteRequise %}
+                                                    <span class="inline-flex items-center rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800 ring-1 ring-inset ring-amber-600/20" title="Capacité obligatoire pour cette année">
+                                                        Capacité requise
+                                                    </span>
+                                                {% else %}
+                                                    <span class="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500 ring-1 ring-inset ring-slate-500/10" title="Capacité optionnelle pour cette année">
+                                                        Optionnelle
+                                                    </span>
+                                                {% endif %}
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3">
                                             <input type="checkbox"
