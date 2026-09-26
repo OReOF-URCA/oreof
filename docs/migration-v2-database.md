@@ -125,3 +125,10 @@ La commande V2 ne les rejoue pas. Le mode `--check` vérifie désormais quelques
 Les entités `ElementConstitutif`, `Semestre` et `Ue` utilisent en V2 `ValidatableTrait`. Son état initial est `validationStatus=incomplete` et `validationDirty=true`.
 
 La migration marque donc explicitement les lignes préexistantes comme `validation_dirty = 1` et aligne le défaut SQL à `1`. Une base issue de `main` ne doit pas être considérée comme déjà recalculée par le nouveau moteur de validation.
+
+
+## Décision de reprise — Semestre.lastModification
+
+Pour la bascule V2, les semestres historiques qui n'ont pas de `last_modification` sont initialisés à `NOW()`. Cette date représente le nouveau point de départ du suivi de modification/validation V2 ; il n'est pas nécessaire de reconstruire une date historique antérieure.
+
+Après cette reprise, `semestre.last_modification` est finalisé en `NOT NULL`.
