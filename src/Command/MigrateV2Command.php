@@ -114,6 +114,7 @@ final class MigrateV2Command extends Command
             '010_documented_schema' => ['label' => 'Update_BDD*.md', 'plan' => fn () => $this->documentedSchema()],
             '020_validation_schema' => ['label' => 'Validation et états des onglets', 'plan' => fn () => $this->validationSchema()],
             '030_admission_years' => ['label' => 'Années des plateformes d’admission', 'plan' => fn () => $this->admissionYears()],
+            '040_new_v2_tables' => ['label' => 'Nouvelles structures fonctionnelles V2', 'plan' => fn () => $this->newV2Tables()],
             '100_safe_defaults' => ['label' => 'Valeurs V2 déterministes', 'plan' => fn () => $this->safeDefaults()],
         ];
     }
@@ -184,6 +185,28 @@ final class MigrateV2Command extends Command
         return $sql;
     }
 
+    private function newV2Tables(): array
+    {
+        $sql = [];
+        $tables = [
+            'faq' => "CREATE TABLE faq (id INT AUTO_INCREMENT NOT NULL, question VARCHAR(500) NOT NULL, reponse LONGTEXT NOT NULL, is_active TINYINT(1) NOT NULL, centres_show JSON NOT NULL, created_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', updated_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', ordre INT NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
+            'help' => "CREATE TABLE help (id INT AUTO_INCREMENT NOT NULL, title VARCHAR(255) DEFAULT NULL, content LONGTEXT DEFAULT NULL, route_slug VARCHAR(255) NOT NULL, is_active TINYINT(1) NOT NULL, centres_show JSON NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
+            'help_image' => "CREATE TABLE help_image (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, fichier VARCHAR(255) NOT NULL, date_creation DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
+            'document_conseil' => "CREATE TABLE document_conseil (id INT AUTO_INCREMENT NOT NULL, uploaded_by_id INT DEFAULT NULL, composante_id INT DEFAULT NULL, type VARCHAR(30) NOT NULL, filename VARCHAR(255) NOT NULL, original_filename VARCHAR(255) NOT NULL, date_conseil DATETIME DEFAULT NULL, uploaded_at DATETIME NOT NULL, commentaire LONGTEXT DEFAULT NULL, INDEX IDX_DOCUMENT_CONSEIL_USER (uploaded_by_id), INDEX IDX_DOCUMENT_CONSEIL_COMPOSANTE (composante_id), PRIMARY KEY(id), CONSTRAINT FK_DOCUMENT_CONSEIL_USER FOREIGN KEY (uploaded_by_id) REFERENCES user (id), CONSTRAINT FK_DOCUMENT_CONSEIL_COMPOSANTE FOREIGN KEY (composante_id) REFERENCES composante (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
+        ];
+        foreach ($tables as $table => $statement) {
+            if (!$this->tableExists($table)) {
+                $sql['Création '.$table] = $statement;
+            }
+        }
+
+        if (!$this->tableExists('document_conseil_formation')) {
+            $sql['Création document_conseil_formation'] = "CREATE TABLE document_conseil_formation (document_conseil_id INT NOT NULL, formation_id INT NOT NULL, INDEX IDX_DCF_DOCUMENT (document_conseil_id), INDEX IDX_DCF_FORMATION (formation_id), PRIMARY KEY(document_conseil_id, formation_id), CONSTRAINT FK_DCF_DOCUMENT FOREIGN KEY (document_conseil_id) REFERENCES document_conseil (id) ON DELETE CASCADE, CONSTRAINT FK_DCF_FORMATION FOREIGN KEY (formation_id) REFERENCES formation (id) ON DELETE CASCADE) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB";
+        }
+
+        return $sql;
+    }
+
     private function safeDefaults(): array
     {
         $sql = [];
@@ -218,7 +241,7 @@ final class MigrateV2Command extends Command
                 $errors[] = "Colonne manquante : {$table}.{$column}";
             }
         }
-        foreach (['fiche_matiere_tab_state', 'formation_tab_state', 'parcours_tab_state', 'validation_issue', 'volume_horaire_parcours'] as $table) {
+        foreach (['fiche_matiere_tab_state', 'formation_tab_state', 'parcours_tab_state', 'validation_issue', 'volume_horaire_parcours', 'faq', 'help', 'help_image', 'document_conseil', 'document_conseil_formation'] as $table) {
             if (!$this->tableExists($table)) {
                 $errors[] = 'Table manquante : '.$table;
             }
