@@ -41,8 +41,13 @@ final class V2DoctrineAlignment
 
         // Colonnes V2 historiquement ajoutées hors des migrations Doctrine.
         // Elles doivent être présentes sur toute base V1 migrée.
-        if ($this->tableExists('type_diplome') && !$this->columnExists('type_diplome', 'passage_cfvu')) {
-            $sql['Ajout type_diplome.passage_cfvu'] = 'ALTER TABLE type_diplome ADD passage_cfvu BOOLEAN DEFAULT TRUE NOT NULL';
+        if ($this->tableExists('type_diplome')) {
+            if (!$this->columnExists('type_diplome', 'passage_cfvu')) {
+                $sql['Ajout type_diplome.passage_cfvu'] = 'ALTER TABLE type_diplome ADD passage_cfvu BOOLEAN DEFAULT TRUE NOT NULL';
+            }
+            if (!$this->columnExists('type_diplome', 'logo')) {
+                $sql['Ajout type_diplome.logo'] = 'ALTER TABLE type_diplome ADD logo JSON DEFAULT NULL';
+            }
         }
 
         if ($this->tableExists('parcours')) {
