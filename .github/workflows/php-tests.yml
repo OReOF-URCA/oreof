@@ -1,0 +1,46 @@
+name: PHP tests
+
+on:
+  push:
+    branches:
+      - v2
+      - 'test/**'
+  pull_request:
+    branches:
+      - v2
+
+permissions:
+  contents: read
+
+concurrency:
+  group: php-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Smoke tests (PHP 8.4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate Composer
+        run: composer validate --no-check-publish
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Lint Symfony container
+        run: composer lint:container
+
+      - name: Run smoke tests
+        run: composer test:smoke
