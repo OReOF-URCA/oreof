@@ -39,6 +39,21 @@ final class V2DoctrineAlignment
             }
         }
 
+        // Colonnes V2 historiquement ajoutées hors des migrations Doctrine.
+        // Elles doivent être présentes sur toute base V1 migrée.
+        if ($this->tableExists('type_diplome') && !$this->columnExists('type_diplome', 'passage_cfvu')) {
+            $sql['Ajout type_diplome.passage_cfvu'] = 'ALTER TABLE type_diplome ADD passage_cfvu BOOLEAN DEFAULT TRUE NOT NULL';
+        }
+
+        if ($this->tableExists('parcours')) {
+            if (!$this->columnExists('parcours', 'maquette_pdf')) {
+                $sql['Ajout parcours.maquette_pdf'] = 'ALTER TABLE parcours ADD maquette_pdf VARCHAR(255) DEFAULT NULL';
+            }
+            if (!$this->columnExists('parcours', 'maquette_pdf_nom_original')) {
+                $sql['Ajout parcours.maquette_pdf_nom_original'] = 'ALTER TABLE parcours ADD maquette_pdf_nom_original VARCHAR(255) DEFAULT NULL';
+            }
+        }
+
         if ($this->tableExists('timeline_date')) {
             if ($this->columnExists('timeline_date', 'icone')) {
                 $iconMapping = [
