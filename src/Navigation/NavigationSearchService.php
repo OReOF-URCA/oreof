@@ -10,18 +10,26 @@
 namespace App\Navigation;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class NavigationSearchService
 {
     public function __construct(
         private MenuResolver          $menuResolver,
         private UrlGeneratorInterface $urlGenerator,
+        private TranslatorInterface   $translator,
     )
     {
     }
 
     public function search(string $query): array
     {
+        $normalizedQuery = $this->normalize($query);
+
+        if ($normalizedQuery === '') {
+            return [];
+        }
+
         $items = $this->flatten(
             $this->menuResolver->mainMenu()
         );
@@ -30,8 +38,8 @@ final class NavigationSearchService
             array_filter(
                 $items,
                 fn(array $item) => str_contains(
-                    mb_strtolower($item['search']),
-                    mb_strtolower($query)
+                    $item['search'],
+                    $normalizedQuery
                 )
             )
         );
@@ -45,16 +53,26 @@ final class NavigationSearchService
         $result = [];
 
         foreach ($items as $item) {
-            $path = [...$parents, $item->label];
+            $translatedLabel = $this->translator->trans($item->label, [], 'menu');
+            $path = [...$parents, $translatedLabel];
 
             if ($item->route) {
+                $translatedDescription = $item->description ? $this->translator->trans($item->description, [], 'menu') : '';
+
+                $searchTokens = [
+                    ...$path,
+                    $translatedDescription,
+                    $item->key,
+                    $item->route,
+                ];
+
                 $result[] = [
                     'key' => $item->key,
-                    'label' => $item->label,
+                    'label' => $translatedLabel,
                     'route' => $item->route,
                     'routeParams' => $item->routeParams,
                     'path' => implode(' > ', $path),
-                    'search' => implode(' ', $path),
+                    'search' => $this->normalize(implode(' ', array_filter($searchTokens))),
                     'icon' => $item->icon,
                     'url' => $this->urlGenerator->generate(
                         $item->route,
@@ -73,5 +91,12 @@ final class NavigationSearchService
         }
 
         return $result;
+    }
+
+    private function normalize(string $text): string
+    {
+        $normalized = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $text);
+
+        return $normalized !== false ? trim($normalized) : trim(mb_strtolower($text));
     }
 }
