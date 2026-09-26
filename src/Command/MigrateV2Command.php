@@ -115,6 +115,7 @@ final class MigrateV2Command extends Command
             '020_validation_schema' => ['label' => 'Validation et états des onglets', 'plan' => fn () => $this->validationSchema()],
             '030_admission_years' => ['label' => 'Années des plateformes d’admission', 'plan' => fn () => $this->admissionYears()],
             '040_new_v2_tables' => ['label' => 'Nouvelles structures fonctionnelles V2', 'plan' => fn () => $this->newV2Tables()],
+            '050_history_documents' => ['label' => 'Liaisons historiques vers les documents de conseil', 'plan' => fn () => $this->historyDocuments()],
             '090_reconcile_schema' => ['label' => 'Réconciliation des contraintes V2', 'plan' => fn () => $this->reconcileSchema()],
             '100_safe_defaults' => ['label' => 'Valeurs V2 déterministes', 'plan' => fn () => $this->safeDefaults()],
             '110_finalize_constraints' => ['label' => 'Contraintes NOT NULL après reprise', 'plan' => fn () => $this->finalizeConstraints()],
@@ -204,6 +205,32 @@ final class MigrateV2Command extends Command
 
         if (!$this->tableExists('document_conseil_formation')) {
             $sql['Création document_conseil_formation'] = "CREATE TABLE document_conseil_formation (document_conseil_id INT NOT NULL, formation_id INT NOT NULL, INDEX IDX_DCF_DOCUMENT (document_conseil_id), INDEX IDX_DCF_FORMATION (formation_id), PRIMARY KEY(document_conseil_id, formation_id), CONSTRAINT FK_DCF_DOCUMENT FOREIGN KEY (document_conseil_id) REFERENCES document_conseil (id) ON DELETE CASCADE, CONSTRAINT FK_DCF_FORMATION FOREIGN KEY (formation_id) REFERENCES formation (id) ON DELETE CASCADE) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB";
+        }
+
+        return $sql;
+    }
+
+    private function historyDocuments(): array
+    {
+        $sql = [];
+        $this->addColumn($sql, 'historique_formation', 'document_pv_id', 'INT DEFAULT NULL');
+        $this->addColumn($sql, 'historique_formation', 'document_note_id', 'INT DEFAULT NULL');
+
+        if ($this->columnExists('historique_formation', 'document_pv_id')) {
+            if (!$this->indexExists('historique_formation', 'document_pv_id')) {
+                $sql['Index historique_formation.document_pv_id'] = 'CREATE INDEX IDX_HISTORIQUE_DOCUMENT_PV ON historique_formation (document_pv_id)';
+            }
+            if (!$this->foreignKeyExists('historique_formation', 'document_pv_id', 'document_conseil')) {
+                $sql['FK historique_formation.document_pv_id'] = 'ALTER TABLE historique_formation ADD CONSTRAINT FK_HISTORIQUE_DOCUMENT_PV FOREIGN KEY (document_pv_id) REFERENCES document_conseil (id)';
+            }
+        }
+        if ($this->columnExists('historique_formation', 'document_note_id')) {
+            if (!$this->indexExists('historique_formation', 'document_note_id')) {
+                $sql['Index historique_formation.document_note_id'] = 'CREATE INDEX IDX_HISTORIQUE_DOCUMENT_NOTE ON historique_formation (document_note_id)';
+            }
+            if (!$this->foreignKeyExists('historique_formation', 'document_note_id', 'document_conseil')) {
+                $sql['FK historique_formation.document_note_id'] = 'ALTER TABLE historique_formation ADD CONSTRAINT FK_HISTORIQUE_DOCUMENT_NOTE FOREIGN KEY (document_note_id) REFERENCES document_conseil (id)';
+            }
         }
 
         return $sql;
