@@ -49,6 +49,7 @@ CREATE TABLE dpe_formation (
     etat_validation JSON NOT NULL,
     version VARCHAR(10) NOT NULL,
     created DATETIME NOT NULL,
+    updated DATETIME NOT NULL,
     laissez_passer LONGTEXT DEFAULT NULL,
     INDEX IDX_DPE_FORMATION_CAMPAGNE (campagne_collecte_id),
     INDEX IDX_DPE_FORMATION_FORMATION (formation_id),
@@ -57,6 +58,12 @@ CREATE TABLE dpe_formation (
 SQL;
             $sql['FK dpe_formation.campagne_collecte'] = 'ALTER TABLE dpe_formation ADD CONSTRAINT FK_DPE_FORMATION_CAMPAGNE FOREIGN KEY (campagne_collecte_id) REFERENCES campagne_collecte (id)';
             $sql['FK dpe_formation.formation'] = 'ALTER TABLE dpe_formation ADD CONSTRAINT FK_DPE_FORMATION_FORMATION FOREIGN KEY (formation_id) REFERENCES formation (id)';
+        } elseif (!$this->columnExists('dpe_formation', 'updated')) {
+            // Compatibilité avec une base déjà passée par une première version
+            // de la migration DpeFormation ne contenant que created.
+            $sql['Ajout dpe_formation.updated'] = 'ALTER TABLE dpe_formation ADD updated DATETIME DEFAULT NULL';
+            $sql['Initialisation dpe_formation.updated'] = 'UPDATE dpe_formation SET updated = COALESCE(created, NOW()) WHERE updated IS NULL';
+            $sql['Finalisation dpe_formation.updated'] = 'ALTER TABLE dpe_formation CHANGE updated updated DATETIME NOT NULL';
         }
 
         if ($this->tableExists('historique') && !$this->columnExists('historique', 'dpe_formation_id')) {
