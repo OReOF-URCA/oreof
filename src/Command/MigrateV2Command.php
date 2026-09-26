@@ -255,8 +255,25 @@ final class MigrateV2Command extends Command
             }
         }
 
+        // Les premiers scripts V2 créaient les tab states sans leurs contraintes d'unicité.
+        foreach ([
+            ['fiche_matiere_tab_state', 'fiche_matiere_id', 'tab_key', 'UNIQ_FMTAB'],
+            ['formation_tab_state', 'formation_id', 'tab_key', 'formation_tab_unique'],
+            ['parcours_tab_state', 'parcours_id', 'tab_key', 'UNIQ_PTAB'],
+            ['volume_horaire_parcours', 'parcours_id', 'campagne_collecte_id', 'UNIQ_VOLUME_HORAIRE_PARCOURS_CAMPAGNE'],
+        ] as [$table, $firstColumn, $secondColumn, $indexName]) {
+            if ($this->tableExists($table) && !$this->uniqueIndexExists($table, [$firstColumn, $secondColumn])) {
+                $duplicates = (int) $this->connection->fetchOne(
+                    "SELECT COUNT(*) FROM (SELECT 1 FROM {$table} GROUP BY {$firstColumn}, {$secondColumn} HAVING COUNT(*) > 1) duplicates"
+                );
+                if (0 === $duplicates) {
+                    $sql["Unicité {$table}({$firstColumn},{$secondColumn})"] =
+                        "CREATE UNIQUE INDEX {$indexName} ON {$table} ({$firstColumn}, {$secondColumn})";
+                }
+            }
+        }
+
         // Une ancienne version du SQL V2 créait validation_issue avec un schéma légèrement différent.
-        // On réconcilie les types sûrs sans toucher aux colonnes NOT NULL qui pourraient contenir des NULL.
         if ($this->columnExists('validation_issue', 'message')) {
             $sql['Réconciliation validation_issue.message'] = 'ALTER TABLE validation_issue MODIFY message VARCHAR(255) DEFAULT NULL';
         }
@@ -411,6 +428,27 @@ final class MigrateV2Command extends Command
             'SELECT COUNT(*) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?',
             [$table, $column]
         );
+    }
+
+    private function uniqueIndexExists(string $table, array $columns): bool
+    {
+        $indexes = $this->connection->fetchAllAssociative(
+            'SELECT INDEX_NAME, COLUMN_NAME, SEQ_IN_INDEX FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND NON_UNIQUE = 0 ORDER BY INDEX_NAME, SEQ_IN_INDEX',
+            [$table]
+        );
+
+        $grouped = [];
+        foreach ($indexes as $index) {
+            $grouped[$index['INDEX_NAME']][] = $index['COLUMN_NAME'];
+        }
+
+        foreach ($grouped as $indexColumns) {
+            if ($indexColumns === $columns) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function foreignKeyExists(string $table, string $column, string $referencedTable): bool
