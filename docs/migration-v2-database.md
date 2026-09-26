@@ -118,3 +118,10 @@ La migration additive ne crée donc pas de table `dpe_formation`. Le cleanup ne 
 Les migrations Doctrine racine d'avril/mai 2026 sont présentes dans `main` comme dans `v2`. Elles contiennent déjà plusieurs modifications structurelles, y compris des suppressions historiques (`role`, `user_centre`, `fiche_matiere_parcours`, `formation.version_parent_id`, `mention.domaine_id`).
 
 La commande V2 ne les rejoue pas. Le mode `--check` vérifie désormais quelques marqueurs de ce socle et signale une base qui semble ne pas être au même niveau. Avant une migration de test ou de production, comparer impérativement le résultat de `doctrine:migrations:status` avec la structure réelle de la base.
+
+
+## Validation des données existantes
+
+Les entités `ElementConstitutif`, `Semestre` et `Ue` utilisent en V2 `ValidatableTrait`. Son état initial est `validationStatus=incomplete` et `validationDirty=true`.
+
+La migration marque donc explicitement les lignes préexistantes comme `validation_dirty = 1` et aligne le défaut SQL à `1`. Une base issue de `main` ne doit pas être considérée comme déjà recalculée par le nouveau moteur de validation.
