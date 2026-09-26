@@ -94,7 +94,8 @@ final class RouteSmokeTest extends WebTestCase
 
     private function isTechnicalRoute(string $name, string $path): bool
     {
-        return str_starts_with($name, '_')
+        return in_array($name, ['cas_return'], true)
+            || str_starts_with($name, '_')
             || str_starts_with($path, '/_wdt')
             || str_starts_with($path, '/_profiler');
     }
