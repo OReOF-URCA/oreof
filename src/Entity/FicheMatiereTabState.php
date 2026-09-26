@@ -6,6 +6,7 @@ use App\Repository\FicheMatiereTabStateRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: FicheMatiereTabStateRepository::class)]
+#[ORM\Table(name: 'fiche_matiere_tab_state', uniqueConstraints: [new ORM\UniqueConstraint(name: 'UNIQ_FMTAB', columns: ['fiche_matiere_id', 'tab_key'])])]
 class FicheMatiereTabState
 {
     #[ORM\Id]
