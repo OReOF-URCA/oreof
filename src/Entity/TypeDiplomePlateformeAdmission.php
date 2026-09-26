@@ -26,7 +26,7 @@ class TypeDiplomePlateformeAdmission
     private ?array $annees = null;
 
     #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $anneesCapaciteRequise = [];
+    private ?array $anneesCapaciteRequise = null;
 
     public function getId(): ?int
     {
