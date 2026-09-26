@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Smoke;
 
+use App\Entity\User;
+use App\Tests\Support\RouteParameterResolver;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -20,6 +22,12 @@ final class RouteSmokeTest extends WebTestCase
     {
         $client = static::createClient();
         $router = static::getContainer()->get(RouterInterface::class);
+        $entityManager = static::getContainer()->get('doctrine.orm.entity_manager');
+        $resolver = new RouteParameterResolver($entityManager);
+
+        $admin = $entityManager->getRepository(User::class)->findOneBy(['username' => 'admin-test']);
+        self::assertNotNull($admin, 'Functional fixtures are not loaded.');
+        $client->loginUser($admin);
 
         $tested = 0;
         $skipped = [];
@@ -36,19 +44,14 @@ final class RouteSmokeTest extends WebTestCase
                 continue;
             }
 
-            $variables = $route->compile()->getVariables();
-            $missingVariables = array_values(array_filter(
-                $variables,
-                static fn (string $variable): bool => !$route->hasDefault($variable)
-            ));
-
-            if ([] !== $missingVariables) {
-                $skipped[$name] = 'requires parameters: '.implode(', ', $missingVariables);
+            $resolution = $resolver->resolve($route);
+            if ([] !== $resolution['unresolved']) {
+                $skipped[$name] = 'unresolved parameters: '.implode(', ', $resolution['unresolved']);
                 continue;
             }
 
             try {
-                $url = $router->generate($name, [], UrlGeneratorInterface::ABSOLUTE_PATH);
+                $url = $router->generate($name, $resolution['parameters'], UrlGeneratorInterface::ABSOLUTE_PATH);
                 $this->request($client, $url);
                 ++$tested;
 
