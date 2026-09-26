@@ -364,6 +364,25 @@ final class MigrateV2Command extends Command
             $warnings[] = 'Colonne legacy mention.domaine_id encore présente : vérifier le niveau des migrations Doctrine.';
         }
 
+        foreach ([
+            ['fiche_matiere_tab_state', 'fiche_matiere_id', 'tab_key'],
+            ['formation_tab_state', 'formation_id', 'tab_key'],
+            ['parcours_tab_state', 'parcours_id', 'tab_key'],
+            ['volume_horaire_parcours', 'parcours_id', 'campagne_collecte_id'],
+        ] as [$table, $firstColumn, $secondColumn]) {
+            if ($this->tableExists($table)) {
+                $duplicates = (int) $this->connection->fetchOne(
+                    "SELECT COUNT(*) FROM (SELECT 1 FROM {$table} GROUP BY {$firstColumn}, {$secondColumn} HAVING COUNT(*) > 1) duplicates"
+                );
+                if ($duplicates > 0) {
+                    $errors[] = "{$duplicates} doublon(s) de clé métier dans {$table} ({$firstColumn}, {$secondColumn}) : résolution manuelle requise avant création de l'index UNIQUE.";
+                }
+                if (!$this->uniqueIndexExists($table, [$firstColumn, $secondColumn])) {
+                    $errors[] = "Contrainte UNIQUE manquante sur {$table} ({$firstColumn}, {$secondColumn}).";
+                }
+            }
+        }
+
         if ($this->columnExists('plateforme_admission', 'mode_export')) {
             $count = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM plateforme_admission WHERE mode_export IS NULL OR mode_export NOT IN ('global','par_diplome')");
             if ($count > 0) {
