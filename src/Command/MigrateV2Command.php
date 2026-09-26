@@ -195,7 +195,7 @@ final class MigrateV2Command extends Command
             'faq' => "CREATE TABLE faq (id INT AUTO_INCREMENT NOT NULL, question VARCHAR(500) NOT NULL, reponse LONGTEXT NOT NULL, is_active TINYINT(1) NOT NULL, centres_show JSON NOT NULL, created_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', updated_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', ordre INT NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
             'help' => "CREATE TABLE help (id INT AUTO_INCREMENT NOT NULL, title VARCHAR(255) DEFAULT NULL, content LONGTEXT DEFAULT NULL, route_slug VARCHAR(255) NOT NULL, is_active TINYINT(1) NOT NULL, centres_show JSON NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
             'help_image' => "CREATE TABLE help_image (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, fichier VARCHAR(255) NOT NULL, date_creation DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
-            'document_conseil' => "CREATE TABLE document_conseil (id INT AUTO_INCREMENT NOT NULL, uploaded_by_id INT DEFAULT NULL, composante_id INT DEFAULT NULL, type VARCHAR(30) NOT NULL, filename VARCHAR(255) NOT NULL, original_filename VARCHAR(255) NOT NULL, date_conseil DATETIME DEFAULT NULL, uploaded_at DATETIME NOT NULL, commentaire LONGTEXT DEFAULT NULL, INDEX IDX_DOCUMENT_CONSEIL_USER (uploaded_by_id), INDEX IDX_DOCUMENT_CONSEIL_COMPOSANTE (composante_id), PRIMARY KEY(id), CONSTRAINT FK_DOCUMENT_CONSEIL_USER FOREIGN KEY (uploaded_by_id) REFERENCES user (id), CONSTRAINT FK_DOCUMENT_CONSEIL_COMPOSANTE FOREIGN KEY (composante_id) REFERENCES composante (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
+            'document_conseil' => "CREATE TABLE document_conseil (id INT AUTO_INCREMENT NOT NULL, uploaded_by_id INT DEFAULT NULL, composante_id INT DEFAULT NULL, type VARCHAR(30) NOT NULL, filename VARCHAR(255) NOT NULL, original_filename VARCHAR(255) NOT NULL, date_conseil DATETIME DEFAULT NULL, uploaded_at DATETIME NOT NULL, commentaire LONGTEXT DEFAULT NULL, INDEX IDX_DOCUMENT_CONSEIL_USER (uploaded_by_id), INDEX IDX_DOCUMENT_CONSEIL_COMPOSANTE (composante_id), PRIMARY KEY(id), CONSTRAINT FK_DOCUMENT_CONSEIL_USER FOREIGN KEY (uploaded_by_id) REFERENCES `user` (id), CONSTRAINT FK_DOCUMENT_CONSEIL_COMPOSANTE FOREIGN KEY (composante_id) REFERENCES composante (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
         ];
         foreach ($tables as $table => $statement) {
             if (!$this->tableExists($table)) {
@@ -246,7 +246,7 @@ final class MigrateV2Command extends Command
                 $sql['Index dpe_demande.auteur_id'] = 'CREATE INDEX IDX_DPE_DEMANDE_AUTEUR ON dpe_demande (auteur_id)';
             }
             if (!$this->foreignKeyExists('dpe_demande', 'auteur_id', 'user')) {
-                $sql['FK dpe_demande.auteur_id → user.id'] = 'ALTER TABLE dpe_demande ADD CONSTRAINT FK_DPE_DEMANDE_AUTEUR FOREIGN KEY (auteur_id) REFERENCES user (id)';
+                $sql['FK dpe_demande.auteur_id → user.id'] = 'ALTER TABLE dpe_demande ADD CONSTRAINT FK_DPE_DEMANDE_AUTEUR FOREIGN KEY (auteur_id) REFERENCES `user` (id)';
             }
         }
 
