@@ -7,10 +7,11 @@
     }) %}
 {% endfor %}
 
-<div class="static h-full flex items-center" data-controller="navbar-dropdown"
+<div class="static h-full flex items-center" data-controller="navbar-dropdown" data-turbo-prefetch="false"
      data-action="mouseenter->navbar-dropdown#open mouseleave->navbar-dropdown#close click@window->navbar-dropdown#close">
     {% if item.route %}
         <a href="{{ path(item.route, item.routeParams) }}"
+           data-turbo-prefetch="false"
            class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium transition">
             {{ item.label|trans({}, 'menu') }}
             {% if item.children is not empty %}
@@ -43,6 +44,7 @@
                         {% for child in children %}
                             <li>
                                 <a href="{{ path(child.route, child.routeParams) }}"
+                                   data-turbo-prefetch="false"
                                    class="text-sm text-text hover:text-primary">
                                     {{ child.label|trans({}, 'menu') }}
                                 </a>

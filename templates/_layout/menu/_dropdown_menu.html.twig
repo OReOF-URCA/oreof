@@ -1,7 +1,8 @@
-<div class="relative h-full flex items-center" data-controller="navbar-dropdown"
+<div class="relative h-full flex items-center" data-controller="navbar-dropdown" data-turbo-prefetch="false"
      data-action="mouseenter->navbar-dropdown#open mouseleave->navbar-dropdown#close click@window->navbar-dropdown#close">
     {% if item.route %}
         <a href="{{ path(item.route, item.routeParams) }}"
+           data-turbo-prefetch="false"
            class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium transition">
             {{ item.label|trans({}, 'menu') }}
             {% if item.children is not empty %}
@@ -27,6 +28,7 @@
             <div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2">
                 {% for child in item.children %}
                     <a href="{{ path(child.route, child.routeParams) }}"
+                       data-turbo-prefetch="false"
                        class="block px-4 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-800 transition">
                         {{ child.label|trans({}, 'menu') }}
                     </a>

@@ -1,5 +1,44 @@
 import { Controller } from '@hotwired/stimulus';
 
+function isPrefetchRequest(input, init) {
+    const urlStr = typeof input === 'string' ? input : (input?.url || '');
+    if (urlStr.includes('purpose=prefetch') || urlStr.includes('turbo-prefetch')) {
+        return true;
+    }
+
+    if (input instanceof Request && input.headers) {
+        for (const [key, value] of input.headers.entries()) {
+            if (key.toLowerCase().includes('purpose') && String(value).toLowerCase().includes('prefetch')) {
+                return true;
+            }
+        }
+    }
+
+    if (init && init.headers) {
+        if (init.headers instanceof Headers) {
+            for (const [key, value] of init.headers.entries()) {
+                if (key.toLowerCase().includes('purpose') && String(value).toLowerCase().includes('prefetch')) {
+                    return true;
+                }
+            }
+        } else if (Array.isArray(init.headers)) {
+            for (const [key, value] of init.headers) {
+                if (String(key).toLowerCase().includes('purpose') && String(value).toLowerCase().includes('prefetch')) {
+                    return true;
+                }
+            }
+        } else if (typeof init.headers === 'object') {
+            for (const key of Object.keys(init.headers)) {
+                if (key.toLowerCase().includes('purpose') && String(init.headers[key]).toLowerCase().includes('prefetch')) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 export default class extends Controller {
     connect() {
         this.showGlobal = this.showGlobal.bind(this);
@@ -58,28 +97,8 @@ export default class extends Controller {
         window.fetch = (...args) => {
             const input = args[0];
             const init = args[1] || {};
-            let isPrefetch = false;
 
-            if (input instanceof Request) {
-                isPrefetch = input.headers.get('Sec-Purpose') === 'prefetch' ||
-                             input.headers.get('Purpose') === 'prefetch' ||
-                             input.headers.get('sec-purpose') === 'prefetch';
-            }
-
-            if (!isPrefetch && init.headers) {
-                if (init.headers instanceof Headers) {
-                    isPrefetch = init.headers.get('Sec-Purpose') === 'prefetch' ||
-                                 init.headers.get('Purpose') === 'prefetch' ||
-                                 init.headers.get('sec-purpose') === 'prefetch';
-                } else if (typeof init.headers === 'object') {
-                    isPrefetch = init.headers['Sec-Purpose'] === 'prefetch' ||
-                                 init.headers['Purpose'] === 'prefetch' ||
-                                 init.headers['sec-purpose'] === 'prefetch' ||
-                                 init.headers['Sec-Fetch-Purpose'] === 'prefetch';
-                }
-            }
-
-            if (isPrefetch) {
+            if (isPrefetchRequest(input, init)) {
                 return originalFetch(...args);
             }
 
@@ -148,13 +167,9 @@ export default class extends Controller {
 
     showFrame(event) {
         // Ignorer les requêtes de prefetch
-        const fetchOptions = event?.detail?.fetchOptions;
-        if (fetchOptions?.headers) {
-            const h = fetchOptions.headers;
-            const isPrefetch = (h instanceof Headers)
-                ? (h.get('Sec-Purpose') === 'prefetch' || h.get('Purpose') === 'prefetch' || h.get('sec-purpose') === 'prefetch')
-                : (h['Sec-Purpose'] === 'prefetch' || h['Purpose'] === 'prefetch' || h['sec-purpose'] === 'prefetch' || h['Sec-Fetch-Purpose'] === 'prefetch');
-            if (isPrefetch) {
+        if (event?.detail) {
+            const { url, fetchOptions, request } = event.detail;
+            if (isPrefetchRequest(url || request, fetchOptions)) {
                 return;
             }
         }

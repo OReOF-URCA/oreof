@@ -78,6 +78,7 @@ menu:
 menu.config.menu_config_globale: menu.config.menu_config_globale
 menu.mon_compte.mes_informations: 'Mes informations'
 menu.mon_compte.mes_notifications: "Mes notifications"
+menu.compo.gestion_composante: 'Gérer ma composante'
 menu.tableau_de_bord: 'Tableau de bord'
 page:
     admin_styleguide_index:
