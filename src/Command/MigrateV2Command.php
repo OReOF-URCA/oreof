@@ -213,7 +213,7 @@ final class MigrateV2Command extends Command
             'fiche_matiere_tab_state' => "CREATE TABLE fiche_matiere_tab_state (id INT AUTO_INCREMENT NOT NULL, fiche_matiere_id INT NOT NULL, tab_key VARCHAR(30) NOT NULL, done TINYINT(1) NOT NULL DEFAULT 0, status VARCHAR(10) NOT NULL DEFAULT 'red', updated_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', issues JSON DEFAULT NULL, INDEX IDX_FMTAB_FM (fiche_matiere_id), UNIQUE INDEX UNIQ_FMTAB (fiche_matiere_id, tab_key), PRIMARY KEY(id), CONSTRAINT FK_FMTAB_FM FOREIGN KEY (fiche_matiere_id) REFERENCES fiche_matiere (id) ON DELETE CASCADE) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
             'formation_tab_state' => "CREATE TABLE formation_tab_state (id INT AUTO_INCREMENT NOT NULL, formation_id INT NOT NULL, tab_key VARCHAR(30) NOT NULL, done TINYINT(1) NOT NULL DEFAULT 0, status VARCHAR(10) NOT NULL DEFAULT 'red', updated_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', issues JSON DEFAULT NULL, INDEX IDX_FTAB_FORMATION (formation_id), UNIQUE INDEX UNIQ_FTAB (formation_id, tab_key), PRIMARY KEY(id), CONSTRAINT FK_FTAB_FORMATION FOREIGN KEY (formation_id) REFERENCES formation (id) ON DELETE CASCADE) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
             'parcours_tab_state' => "CREATE TABLE parcours_tab_state (id INT AUTO_INCREMENT NOT NULL, parcours_id INT NOT NULL, tab_key VARCHAR(30) NOT NULL, done TINYINT(1) NOT NULL DEFAULT 0, status VARCHAR(10) NOT NULL DEFAULT 'red', updated_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', issues JSON DEFAULT NULL, INDEX IDX_PTAB_PARCOURS (parcours_id), UNIQUE INDEX UNIQ_PTAB (parcours_id, tab_key), PRIMARY KEY(id), CONSTRAINT FK_PTAB_PARCOURS FOREIGN KEY (parcours_id) REFERENCES parcours (id) ON DELETE CASCADE) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
-            'validation_issue' => "CREATE TABLE validation_issue (id INT AUTO_INCREMENT NOT NULL, semestre_id INT DEFAULT NULL, scope_type VARCHAR(255) NOT NULL, scope_id INT NOT NULL, rule_code VARCHAR(255) NOT NULL, severity VARCHAR(15) NOT NULL, message VARCHAR(255) DEFAULT NULL, payload JSON DEFAULT NULL, type_diplome VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', INDEX IDX_VALIDATION_SEMESTRE (semestre_id), PRIMARY KEY(id), CONSTRAINT FK_VALIDATION_SEMESTRE FOREIGN KEY (semestre_id) REFERENCES semestre (id) ON DELETE CASCADE) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
+            'validation_issue' => "CREATE TABLE validation_issue (id INT AUTO_INCREMENT NOT NULL, semestre_id INT DEFAULT NULL, scope_type VARCHAR(255) NOT NULL, scope_id INT NOT NULL, rule_code VARCHAR(255) NOT NULL, severity VARCHAR(15) NOT NULL, message VARCHAR(255) DEFAULT NULL, payload JSON DEFAULT NULL, type_diplome VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', INDEX IDX_VALIDATION_SEMESTRE (semestre_id), PRIMARY KEY(id), CONSTRAINT FK_VALIDATION_SEMESTRE FOREIGN KEY (semestre_id) REFERENCES semestre (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
             'volume_horaire_parcours' => "CREATE TABLE volume_horaire_parcours (id INT AUTO_INCREMENT NOT NULL, parcours_id INT NOT NULL, campagne_collecte_id INT NOT NULL, heures_cm_pres DOUBLE PRECISION NOT NULL, heures_td_pres DOUBLE PRECISION NOT NULL, heures_tp_pres DOUBLE PRECISION NOT NULL, heures_te_pres DOUBLE PRECISION NOT NULL, heures_cm_dist DOUBLE PRECISION NOT NULL, heures_td_dist DOUBLE PRECISION NOT NULL, heures_tp_dist DOUBLE PRECISION NOT NULL, volumes_annee JSON DEFAULT NULL, volumes_semestre JSON DEFAULT NULL, date_calcul DATETIME NOT NULL, INDEX IDX_VHP_PARCOURS (parcours_id), INDEX IDX_VHP_CAMPAGNE (campagne_collecte_id), UNIQUE INDEX UNIQ_VOLUME_HORAIRE_PARCOURS_CAMPAGNE (parcours_id, campagne_collecte_id), PRIMARY KEY(id), CONSTRAINT FK_VHP_PARCOURS FOREIGN KEY (parcours_id) REFERENCES parcours (id), CONSTRAINT FK_VHP_CAMPAGNE FOREIGN KEY (campagne_collecte_id) REFERENCES campagne_collecte (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
         ];
         foreach ($tables as $table => $statement) {
@@ -482,6 +482,37 @@ final class MigrateV2Command extends Command
             }
         }
 
+        foreach ([
+            ['dpe_demande', 'created'],
+            ['dpe_demande', 'updated'],
+            ['semestre', 'last_modification'],
+        ] as [$table, $column]) {
+            if (!$this->columnExists($table, $column)) {
+                $errors[] = "Colonne finale manquante : {$table}.{$column}";
+            } elseif ($this->columnIsNullable($table, $column)) {
+                $errors[] = "Contrainte NOT NULL manquante : {$table}.{$column}";
+            }
+        }
+
+        foreach (['element_constitutif', 'semestre', 'ue'] as $table) {
+            if (!$this->columnExists($table, 'validation_dirty')) {
+                $errors[] = "Colonne manquante : {$table}.validation_dirty";
+            } elseif ($this->columnIsNullable($table, 'validation_dirty') || '1' !== $this->columnDefault($table, 'validation_dirty')) {
+                $errors[] = "{$table}.validation_dirty doit être NOT NULL DEFAULT 1.";
+            }
+        }
+
+        foreach ([
+            ['historique_formation', 'document_pv_id', 'document_conseil'],
+            ['historique_formation', 'document_note_id', 'document_conseil'],
+        ] as [$table, $column, $referencedTable]) {
+            if (!$this->columnExists($table, $column)) {
+                $errors[] = "Colonne manquante : {$table}.{$column}";
+            } elseif (!$this->foreignKeyExists($table, $column, $referencedTable)) {
+                $errors[] = "Clé étrangère manquante : {$table}.{$column} → {$referencedTable}.id";
+            }
+        }
+
         if ($this->columnExists('plateforme_admission', 'mode_export')) {
             $count = (int) $this->connection->fetchOne("SELECT COUNT(*) FROM plateforme_admission WHERE mode_export IS NULL OR mode_export NOT IN ('global','par_diplome')");
             if ($count > 0) {
@@ -538,6 +569,24 @@ final class MigrateV2Command extends Command
     private function columnExists(string $table, string $column): bool
     {
         return (bool) $this->connection->fetchOne('SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?', [$table, $column]);
+    }
+
+    private function columnIsNullable(string $table, string $column): bool
+    {
+        return 'YES' === $this->connection->fetchOne(
+            'SELECT IS_NULLABLE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?',
+            [$table, $column]
+        );
+    }
+
+    private function columnDefault(string $table, string $column): ?string
+    {
+        $default = $this->connection->fetchOne(
+            'SELECT COLUMN_DEFAULT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?',
+            [$table, $column]
+        );
+
+        return false === $default || null === $default ? null : (string) $default;
     }
 
     private function indexExists(string $table, string $column): bool
