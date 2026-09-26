@@ -332,7 +332,8 @@ final class MigrateV2Command extends Command
             }
         }
 
-        // Une ancienne version du SQL V2 créait validation_issue avec un schéma légèrement différent.
+        // Une ancienne version du SQL V2 peut être incomplète. Les champs métier
+        // inconnus sont d'abord ajoutés nullable : aucune valeur n'est inventée.
         if ($this->tableExists('validation_issue')) {
             $this->addColumn($sql, 'validation_issue', 'semestre_id', 'INT DEFAULT NULL');
             $this->addColumn($sql, 'validation_issue', 'scope_type', 'VARCHAR(255) DEFAULT NULL');
@@ -343,6 +344,18 @@ final class MigrateV2Command extends Command
             $this->addColumn($sql, 'validation_issue', 'payload', 'JSON DEFAULT NULL');
             $this->addColumn($sql, 'validation_issue', 'type_diplome', 'VARCHAR(255) DEFAULT NULL');
             $this->addColumn($sql, 'validation_issue', 'created_at', 'DATETIME DEFAULT NULL');
+
+            // Si la table legacy est vide, on peut immédiatement retrouver le mapping
+            // Doctrine final sans ambiguïté de données.
+            $rows = (int) $this->connection->fetchOne('SELECT COUNT(*) FROM validation_issue');
+            if (0 === $rows) {
+                $sql['Finalisation validation_issue.scope_type'] = 'ALTER TABLE validation_issue MODIFY scope_type VARCHAR(255) NOT NULL';
+                $sql['Finalisation validation_issue.scope_id'] = 'ALTER TABLE validation_issue MODIFY scope_id INT NOT NULL';
+                $sql['Finalisation validation_issue.rule_code'] = 'ALTER TABLE validation_issue MODIFY rule_code VARCHAR(255) NOT NULL';
+                $sql['Finalisation validation_issue.severity'] = 'ALTER TABLE validation_issue MODIFY severity VARCHAR(15) NOT NULL';
+                $sql['Finalisation validation_issue.type_diplome'] = 'ALTER TABLE validation_issue MODIFY type_diplome VARCHAR(255) NOT NULL';
+                $sql['Finalisation validation_issue.created_at'] = "ALTER TABLE validation_issue MODIFY created_at DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)'";
+            }
         }
 
         // Une ancienne version du SQL V2 créait validation_issue avec un schéma légèrement différent.
