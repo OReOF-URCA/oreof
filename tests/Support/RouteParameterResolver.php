@@ -14,6 +14,11 @@ use App\Entity\Ue;
 use App\Entity\ElementConstitutif;
 use App\Entity\DpeParcours;
 use App\Entity\ChangeRf;
+use App\Entity\TypeDiplome;
+use App\Entity\Profil;
+use App\Entity\CampagneCollecte;
+use App\Entity\AnneeUniversitaire;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Route;
 
@@ -37,6 +42,12 @@ final class RouteParameterResolver
         'dpeParcours' => DpeParcours::class,
         'changeRf' => ChangeRf::class,
         'changeRF' => ChangeRf::class,
+        'typeDiplome' => TypeDiplome::class,
+        'profil' => Profil::class,
+        'campagneCollecte' => CampagneCollecte::class,
+        'campagne' => CampagneCollecte::class,
+        'anneeUniversitaire' => AnneeUniversitaire::class,
+        'user' => User::class,
     ];
 
     public function __construct(
