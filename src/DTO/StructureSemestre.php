@@ -13,7 +13,7 @@ use App\Entity\Parcours;
 use App\Entity\Semestre;
 use App\Entity\SemestreParcours;
 
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 class StructureSemestre
 {

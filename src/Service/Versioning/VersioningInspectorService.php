@@ -11,6 +11,9 @@ use App\Entity\Formation;
 use App\Entity\FormationVersioning;
 use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
+use App\Service\VersioningFicheMatiere;
+use App\Service\VersioningFormation;
+use App\Service\VersioningParcours;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -23,10 +26,49 @@ final class VersioningInspectorService
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
+        private readonly VersioningFormation $versioningFormation,
+        private readonly VersioningParcours $versioningParcours,
+        private readonly VersioningFicheMatiere $versioningFicheMatiere,
         #[Autowire('%kernel.project_dir%')]
         private readonly string $projectDir,
     ) {
         $this->versioningDir = rtrim($this->projectDir, '/') . '/versioning_json';
+    }
+
+    public function generateFormationVersion(int $formationId, bool $isCfvu = false): string
+    {
+        $formation = $this->entityManager->getRepository(Formation::class)->find($formationId);
+        if (!$formation instanceof Formation) {
+            throw new \InvalidArgumentException(sprintf('Formation #%d introuvable.', $formationId));
+        }
+
+        $this->versioningFormation->saveVersionOfFormation($formation, new DateTimeImmutable(), withFlush: true, isCfvu: $isCfvu);
+
+        return $formation->getDisplayLong() ?: $formation->getDisplay();
+    }
+
+    public function generateParcoursVersion(int $parcoursId, bool $isCfvu = false): string
+    {
+        $parcours = $this->entityManager->getRepository(Parcours::class)->find($parcoursId);
+        if (!$parcours instanceof Parcours) {
+            throw new \InvalidArgumentException(sprintf('Parcours #%d introuvable.', $parcoursId));
+        }
+
+        $this->versioningParcours->saveVersionOfParcours($parcours, new DateTimeImmutable(), withFlush: true, isCfvu: $isCfvu);
+
+        return $parcours->getDisplay();
+    }
+
+    public function generateFicheMatiereVersion(int $ficheId, bool $isValide = false): string
+    {
+        $fiche = $this->entityManager->getRepository(FicheMatiere::class)->find($ficheId);
+        if (!$fiche instanceof FicheMatiere) {
+            throw new \InvalidArgumentException(sprintf('Fiche matière #%d introuvable.', $ficheId));
+        }
+
+        $this->versioningFicheMatiere->saveFicheMatiereVersion($fiche, new DateTimeImmutable(), withFlush: true, isVersionValide: $isValide);
+
+        return $fiche->getLibelle() ?? (string) $fiche->getId();
     }
 
     public function getVersioningDir(): string

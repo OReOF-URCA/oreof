@@ -39,7 +39,14 @@ class VersioningFicheMatiere {
         $this->filesystem = $filesystem;
         // Serializer
         $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
-        $extractors = new PropertyInfoExtractor([], [new PhpDocExtractor(), new ReflectionExtractor()]);
+        $phpDocExtractor = new PhpDocExtractor();
+        $reflectionExtractor = new ReflectionExtractor();
+        $extractors = new PropertyInfoExtractor(
+            [$reflectionExtractor],
+            [$phpDocExtractor, $reflectionExtractor],
+            [$phpDocExtractor],
+            [$reflectionExtractor]
+        );
         $this->serializer = new Serializer(
             [
                 new DateTimeNormalizer(),
@@ -51,6 +58,7 @@ class VersioningFicheMatiere {
             [new JsonEncoder()]
         );
     }
+
 
     public function saveFicheMatiereVersion(
         FicheMatiere      $ficheMatiere,

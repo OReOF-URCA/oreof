@@ -12,8 +12,12 @@ use Doctrine\ORM\QueryBuilder;
 use Pentiminax\UX\DataTables\Attribute\AsDataTable;
 use Pentiminax\UX\DataTables\Column\TemplateColumn;
 use Pentiminax\UX\DataTables\Column\TextColumn;
+use Pentiminax\UX\DataTables\Enum\ActionsAlignment;
+use Pentiminax\UX\DataTables\Enum\Icon;
 use Pentiminax\UX\DataTables\Filter\ChoiceFilter;
 use Pentiminax\UX\DataTables\Filter\TextFilter;
+use Pentiminax\UX\DataTables\Model\Action;
+use Pentiminax\UX\DataTables\Model\Actions;
 use Pentiminax\UX\DataTables\Model\DataTable;
 use Pentiminax\UX\DataTables\Model\Filters;
 
@@ -96,4 +100,20 @@ final class VersioningParcoursDataTable extends AbstractAppDataTable
                 ->setTemplate('admin/versioning/column/_parcours_files.html.twig'),
         ];
     }
+
+    public function configureActions(Actions $actions): Actions
+    {
+        $generateAction = Action::new('generate', 'Générer version')
+            ->linkToRoute('app_admin_versioning_generate_version', static fn(Parcours $p): array => ['type' => 'parcours', 'id' => $p->getId()])
+            ->asAjaxRequest(method: 'POST')
+            ->icon(Icon::RefreshCw)
+            ->askConfirmation('Générer une nouvelle version JSON pour ce parcours ?')
+            ->setClassName('inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300');
+
+        return $actions
+            ->add($generateAction)
+            ->alignment(ActionsAlignment::Right);
+    }
 }
+
+

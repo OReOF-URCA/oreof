@@ -11,7 +11,7 @@ namespace App\DTO;
 
 use App\Entity\Ue;
 
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 class StructureUe
 {

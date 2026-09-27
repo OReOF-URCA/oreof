@@ -37,4 +37,18 @@
     {% else %}
         <span class="text-xs text-secondary-400 italic">Aucun fichier</span>
     {% endfor %}
+
+    <button type="button"
+            data-controller="versioning-generate"
+            data-versioning-generate-url-value="{{ path('app_admin_versioning_generate_version', {type: 'parcours', id: row.id}) }}"
+            data-versioning-generate-confirm-value="Générer une nouvelle version JSON pour ce parcours ?"
+            data-action="click->versioning-generate#generate"
+            class="inline-flex items-center gap-1 rounded bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 text-xs font-medium transition border border-emerald-200 dark:border-emerald-800"
+            title="Générer une nouvelle version JSON (Parcours + DTO)">
+        <twig:UX:Icon name="ph:arrows-clockwise-light" class="h-3 w-3" />
+        <span class="text-[11px]">+ Version</span>
+    </button>
 </div>
+
+
+

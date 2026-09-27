@@ -99,4 +99,48 @@ class VersioningAdminController extends BaseController
 
         return $response;
     }
+
+    #[Route('/generate/{type}/{id}', name: 'generate_version', methods: ['GET', 'POST'])]
+    public function generateVersion(string $type, int $id, Request $request): Response
+    {
+        $tab = match ($type) {
+            'parcours' => 'parcours',
+            'fiche', 'fiche_matiere', 'fiches_matiere' => 'fiches_matiere',
+            default => 'formations',
+        };
+
+        $isAjaxOrTurbo = $request->isXmlHttpRequest()
+            || str_contains((string) $request->headers->get('Accept'), 'turbo-stream')
+            || str_contains((string) $request->headers->get('Accept'), 'application/json')
+            || $request->headers->has('X-Requested-With');
+
+        try {
+            $label = match ($type) {
+                'formation' => $this->inspectorService->generateFormationVersion($id),
+                'parcours' => $this->inspectorService->generateParcoursVersion($id),
+                'fiche', 'fiche_matiere', 'fiches_matiere' => $this->inspectorService->generateFicheMatiereVersion($id),
+                default => throw new \InvalidArgumentException('Type d\'entité invalide.'),
+            };
+
+            $successMsg = sprintf('Nouvelle version JSON générée avec succès pour « %s ».', $label);
+
+            if ($isAjaxOrTurbo) {
+                return $this->turboStream->streamToastSuccess($successMsg);
+            }
+
+            $this->addFlash('success', $successMsg);
+        } catch (\Throwable $e) {
+            $errorMsg = sprintf('Erreur lors de la génération de la version : %s', $e->getMessage());
+
+            if ($isAjaxOrTurbo) {
+                return $this->turboStream->streamToastError($errorMsg);
+            }
+
+            $this->addFlash('danger', $errorMsg);
+        }
+
+        return $this->redirectToRoute('app_admin_versioning_index', ['tab' => $tab]);
+    }
 }
+
+

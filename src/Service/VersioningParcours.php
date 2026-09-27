@@ -45,18 +45,26 @@ class VersioningParcours
         $this->fileSystem = $fileSystem;
         // Définition du serializer
         $classMetadataFactory = new ClassMetadataFactory(new AttributeLoader());
-        $extractors = new PropertyInfoExtractor([], [new PhpDocExtractor(), new ReflectionExtractor()]);
+        $phpDocExtractor = new PhpDocExtractor();
+        $reflectionExtractor = new ReflectionExtractor();
+        $extractors = new PropertyInfoExtractor(
+            [$reflectionExtractor],
+            [$phpDocExtractor, $reflectionExtractor],
+            [$phpDocExtractor],
+            [$reflectionExtractor]
+        );
         $this->serializer = new Serializer(
-        [
-            new IdEntityDenormalizer(),
-            new DateTimeNormalizer(),
-            new BackedEnumNormalizer(),
-            new ArrayDenormalizer(),
-            new ObjectNormalizer($classMetadataFactory, propertyTypeExtractor: $extractors)
-        ],
+            [
+                new IdEntityDenormalizer(),
+                new DateTimeNormalizer(),
+                new BackedEnumNormalizer(),
+                new ArrayDenormalizer(),
+                new ObjectNormalizer($classMetadataFactory, propertyTypeExtractor: $extractors)
+            ],
             [new JsonEncoder()]
         );
     }
+
 
     public function saveVersionOfParcours(Parcours $parcours, DateTimeImmutable $now, bool $withFlush = false, bool $isCfvu = false): void
     {
