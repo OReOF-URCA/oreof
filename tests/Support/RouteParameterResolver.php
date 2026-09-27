@@ -12,6 +12,8 @@ use App\Entity\Semestre;
 use App\Entity\SemestreParcours;
 use App\Entity\Ue;
 use App\Entity\ElementConstitutif;
+use App\Entity\DpeParcours;
+use App\Entity\ChangeRf;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Route;
 
@@ -32,6 +34,9 @@ final class RouteParameterResolver
         'ue' => Ue::class,
         'ec' => ElementConstitutif::class,
         'elementConstitutif' => ElementConstitutif::class,
+        'dpeParcours' => DpeParcours::class,
+        'changeRf' => ChangeRf::class,
+        'changeRF' => ChangeRf::class,
     ];
 
     public function __construct(
