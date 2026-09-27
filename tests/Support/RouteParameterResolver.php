@@ -55,9 +55,18 @@ final class RouteParameterResolver
         'typeEc' => TypeEc::class,
     ];
 
-    public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-    ) {
+    /** @var array<class-string, int|string|null> */
+    private array $fixtureIdentifiers = [];
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        foreach (array_unique(self::ENTITY_PARAMETERS) as $entityClass) {
+            $entity = $entityManager->getRepository($entityClass)->findOneBy([]);
+            $this->fixtureIdentifiers[$entityClass] =
+                null !== $entity && method_exists($entity, 'getId')
+                    ? $entity->getId()
+                    : null;
+        }
     }
 
     /**
@@ -81,13 +90,13 @@ final class RouteParameterResolver
                 continue;
             }
 
-            $entity = $this->entityManager->getRepository($entityClass)->findOneBy([]);
-            if (null === $entity || !method_exists($entity, 'getId') || null === $entity->getId()) {
+            $identifier = $this->fixtureIdentifiers[$entityClass] ?? null;
+            if (null === $identifier) {
                 $unresolved[] = $variable;
                 continue;
             }
 
-            $parameters[$variable] = $entity->getId();
+            $parameters[$variable] = $identifier;
         }
 
         return [
