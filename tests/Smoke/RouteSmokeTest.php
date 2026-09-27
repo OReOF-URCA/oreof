@@ -19,7 +19,7 @@ final class RouteSmokeTest extends WebTestCase
      * parameters. Redirects and authorization responses are valid here:
      * this test is intended to catch broken routes and server errors.
      */
-    public function testParameterlessGetRoutesDoNotBreak(): void
+    public function testResolvableGetRoutesDoNotBreak(): void
     {
         $client = static::createClient();
         $router = static::getContainer()->get(RouterInterface::class);
@@ -82,6 +82,26 @@ final class RouteSmokeTest extends WebTestCase
                 );
             }
         }
+
+        $skipReasons = [];
+        foreach ($skipped as $reason) {
+            $category = str_starts_with($reason, 'unresolved parameters:')
+                ? $reason
+                : explode(':', $reason, 2)[0];
+            $skipReasons[$category] = ($skipReasons[$category] ?? 0) + 1;
+        }
+        arsort($skipReasons);
+
+        fwrite(STDOUT, sprintf(
+            "\nRoute smoke coverage: %d tested / %d skipped.\nSkipped: %s\n",
+            $tested,
+            count($skipped),
+            implode(', ', array_map(
+                static fn (string $reason, int $count): string => sprintf('%s (%d)', $reason, $count),
+                array_keys($skipReasons),
+                array_values($skipReasons)
+            ))
+        ));
 
         self::assertGreaterThan(0, $tested, 'No application route was smoke-tested.');
         self::assertSame(
