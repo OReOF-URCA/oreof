@@ -1,0 +1,335 @@
+{% extends 'base.html.twig' %}
+
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+
+{% set header_title %}
+    Bascule & Duplication de Campagne
+{% endset %}
+
+{% block header %}
+    Assistant de Bascule & Duplication de Campagne
+{% endblock %}
+
+{% set header_description %}
+    Création guidée d'une nouvelle année universitaire et duplication de la maquette de formation (Formations, Parcours, DPE, Compétences, Fiches Matières, UEs et MCCC) avec reconduction tacite et gestion des collisions d'URLs.
+{% endset %}
+
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ path('app_section_administration') }}">
+        Administration
+    </twig:Button>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-8 pb-12" data-controller="campagne-duplication">
+
+    {# SOURCE CAMPAGNE & AUDIT PRÉ-BASCULE #}
+    <div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-2xl p-6 shadow-sm">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                    <twig:Badge variant="primary" size="sm">Campagne Source Actuelle</twig:Badge>
+                    <span class="text-xs text-slate-500 font-mono font-semibold">{{ sourceCampagne.anneeUniversitaire }}</span>
+                </div>
+                <h2 class="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                    {{ sourceCampagne.libelle }}
+                </h2>
+                <p class="text-xs text-slate-500">
+                    L'ensemble des données de cette campagne sera cloné pour initialiser la nouvelle offre de formation.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <form method="get" action="{{ path('app_admin_duplication_campagne_index') }}" class="flex items-center gap-2">
+                    <label for="source_select" class="text-xs font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">Changer la source :</label>
+                    <select id="source_select" name="source_id" onchange="this.form.submit()" class="text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                        {% for c in allCampagnes %}
+                            <option value="{{ c.id }}" {% if c.id == sourceCampagne.id %}selected{% endif %}>
+                                {{ c.libelle }} ({{ c.anneeUniversitaire ? c.anneeUniversitaire.libelle : c.annee }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {# KPI AUDIT DE LA CAMPAGNE SOURCE #}
+    <div>
+        <h3 class="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <twig:UX:Icon name="ph:chart-donut-light" class="w-4 h-4 text-primary-500" />
+            Périmètre disponible dans la Campagne Source
+        </h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+            <twig:Kpi
+                title="Formations"
+                value="{{ audit.nbFormations }}"
+                variant="primary"
+                icon="ph:graduation-cap-light"
+            />
+            <twig:Kpi
+                title="Parcours"
+                value="{{ audit.nbParcours }}"
+                variant="primary"
+                icon="ph:path-light"
+            />
+            <twig:Kpi
+                title="DPE Parcours"
+                value="{{ audit.nbDpeParcours }}"
+                variant="info"
+                icon="ph:folder-user-light"
+            />
+            <twig:Kpi
+                title="Fiches Matières"
+                value="{{ audit.nbFichesMatieres }}"
+                variant="warning"
+                icon="ph:file-text-light"
+            />
+            <twig:Kpi
+                title="UEs & Éléments"
+                value="{{ audit.nbUes + audit.nbElementsConstitutifs }}"
+                variant="secondary"
+                icon="ph:tree-structure-light"
+            />
+            <twig:Kpi
+                title="Droits & Profils"
+                value="{{ audit.nbDroits }}"
+                description="RF, co-RF, RP..."
+                variant="info"
+                icon="ph:shield-check-light"
+            />
+            <twig:Kpi
+                title="Total Entités"
+                value="{{ audit.totalEntitiesEstimate }}"
+                description="Estimation totale"
+                variant="success"
+                icon="ph:copy-light"
+            />
+        </div>
+    </div>
+
+    {# AVERTISSEMENTS PRÉ-BASCULE #}
+    {% if audit.warnings|length > 0 %}
+        <div class="p-4 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-sm space-y-1">
+            <div class="flex items-center gap-2 font-bold">
+                <twig:UX:Icon name="ph:warning-circle-light" class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                Points de vigilance détectés :
+            </div>
+            <ul class="list-disc list-inside space-y-0.5 text-xs text-amber-800 dark:text-amber-300 pl-2">
+                {% for warn in audit.warnings %}
+                    <li>{{ warn }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {# RAPPORT DE SIMULATION (SI DEMANDÉ) #}
+    {% if simulationResult %}
+        <div class="p-6 sm:p-8 rounded-2xl border-2 border-primary-500 bg-primary-50/40 dark:bg-primary-950/30 space-y-6 shadow-md animate-fade-in">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-primary-200 dark:border-primary-800">
+                <div class="flex items-center gap-3">
+                    <div class="p-3 rounded-2xl bg-primary-600 text-white shadow-sm">
+                        <twig:UX:Icon name="ph:flask-bold" class="w-7 h-7" />
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black uppercase tracking-wider text-primary-700 dark:text-primary-300">Rapport de Simulation (Dry Run)</span>
+                            <twig:Badge variant="success" size="sm">Prêt pour Bascule</twig:Badge>
+                        </div>
+                        <h3 class="text-xl font-black text-slate-900 dark:text-slate-100 tracking-tight">
+                            Bascule vers la Campagne : {{ simulationResult.dto.libelleCampagne }}
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="text-right text-xs text-slate-500">
+                    Source : <strong class="text-slate-800 dark:text-slate-200">{{ simulationResult.sourceCampagne.libelle }}</strong>
+                </div>
+            </div>
+
+            {# ALERTE SI CAMPAGNE DÉJÀ EXISTANTE #}
+            {% if simulationResult.existingCampagne %}
+                <div class="p-4 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2">
+                    <twig:UX:Icon name="ph:warning-circle-bold" class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span><strong>Attention :</strong> Une campagne de collecte avec le libellé <code>{{ simulationResult.dto.libelleCampagne }}</code> existe déjà en base (ID: {{ simulationResult.existingCampagne.id }}). Une nouvelle campagne sera créée avec les paramètres saisis.</span>
+                </div>
+            {% endif %}
+
+            {# TABLEAU COMPARATIF ET DÉCOMPTE #}
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+                <div class="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Formations</span>
+                    <strong class="text-xl font-black text-slate-900 dark:text-slate-100 font-mono">{{ simulationResult.audit.nbFormations }}</strong>
+                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 block mt-0.5">à dupliquer</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Parcours & DPE</span>
+                    <strong class="text-xl font-black text-slate-900 dark:text-slate-100 font-mono">{{ simulationResult.audit.nbParcours }}</strong>
+                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 block mt-0.5">avec reconduction</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Fiches Matières</span>
+                    <strong class="text-xl font-black text-slate-900 dark:text-slate-100 font-mono">{{ simulationResult.audit.nbFichesMatieres }}</strong>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">suffixe {{ simulationResult.dto.slugSuffix }}</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">UEs & Éléments</span>
+                    <strong class="text-xl font-black text-slate-900 dark:text-slate-100 font-mono">{{ simulationResult.audit.nbUes + simulationResult.audit.nbElementsConstitutifs }}</strong>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">arborescence conservée</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Droits & Profils</span>
+                    <strong class="text-xl font-black text-slate-900 dark:text-slate-100 font-mono">{{ simulationResult.dto.duplicateDroits ? simulationResult.audit.nbDroits : '0 (désactivé)' }}</strong>
+                    <span class="text-[10px] text-indigo-600 dark:text-indigo-400 block mt-0.5">RF, co-RF, RP...</span>
+                </div>
+                <div class="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">MCCC</span>
+                    <strong class="text-xl font-black text-slate-900 dark:text-slate-100 font-mono">{{ simulationResult.dto.duplicateMccc ? simulationResult.audit.nbMccc : '0 (désactivé)' }}</strong>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">modalités clonées</span>
+                </div>
+            </div>
+
+            <div class="text-xs text-slate-600 dark:text-slate-400 bg-white/70 dark:bg-slate-900/70 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    Estimation totale du volume : <strong class="text-slate-900 dark:text-slate-100">{{ simulationResult.audit.totalEntitiesEstimate }} entités</strong> | Année Univ : <strong class="text-slate-900 dark:text-slate-100">{{ simulationResult.dto.libelleAnneeUniversitaire }}</strong> | Code Apogée : <strong class="text-slate-900 dark:text-slate-100">{{ simulationResult.dto.codeApogeeCampagne }}</strong>
+                </div>
+                <span class="inline-flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+                    <twig:UX:Icon name="ph:check-bold" class="w-4 h-4" /> Aucun conflit détecté
+                </span>
+            </div>
+        </div>
+    {% endif %}
+
+    {# FORMULAIRE DE CONFIGURATION DE LA BASCULE #}
+    {{ form_start(form, {'attr': {'class': 'space-y-6', 'data-turbo': 'false'}}) }}
+
+        {{ form_errors(form) }}
+
+        {# SECTION 1: IDENTIFICATION & ANNÉE #}
+        <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <div class="mb-4">
+                <h3 class="text-base font-bold text-text flex items-center gap-2">
+                    <twig:UX:Icon name="ph:sliders-horizontal" class="w-5 h-5 text-primary"/>
+                    <span>1. Identification de l'Année & de la Campagne</span>
+                </h3>
+                <p class="text-xs text-secondary-500 mt-1">
+                    Définissez la campagne source ainsi que les paramètres de la nouvelle campagne universitaire.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div class="md:col-span-2 lg:col-span-3">
+                    {{ form_row(form.sourceCampagne) }}
+                </div>
+                <div>
+                    {{ form_row(form.libelleAnneeUniversitaire) }}
+                </div>
+                <div>
+                    {{ form_row(form.anneeUniversitaire) }}
+                </div>
+                <div>
+                    {{ form_row(form.codeApogeeCampagne) }}
+                </div>
+                <div>
+                    {{ form_row(form.libelleCampagne) }}
+                </div>
+                <div>
+                    {{ form_row(form.anneeCampagne) }}
+                </div>
+                <div>
+                    {{ form_row(form.slugSuffix) }}
+                </div>
+                <div>
+                    {{ form_row(form.couleur) }}
+                </div>
+                <div class="md:col-span-2">
+                    {{ form_row(form.setCampagneDefaut) }}
+                </div>
+            </div>
+        </div>
+
+        {# SECTION 2: CALENDRIER CLÉ #}
+        <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <div class="mb-4">
+                <h3 class="text-base font-bold text-text flex items-center gap-2">
+                    <twig:UX:Icon name="ph:calendar" class="w-5 h-5 text-primary"/>
+                    <span>2. Calendrier & Dates Clés de Collecte</span>
+                </h3>
+                <p class="text-xs text-secondary-500 mt-1">
+                    Dates de référence pour la timeline et les échéances administratives (DPE, SES, CFVU, Publication).
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div>
+                    {{ form_row(form.dateOuvertureDpe) }}
+                </div>
+                <div>
+                    {{ form_row(form.dateClotureDpe) }}
+                </div>
+                <div>
+                    {{ form_row(form.dateTransmissionSes) }}
+                </div>
+                <div>
+                    {{ form_row(form.dateCfvu) }}
+                </div>
+                <div>
+                    {{ form_row(form.datePublication) }}
+                </div>
+            </div>
+        </div>
+
+        {# SECTION 3: PÉRIMÈTRE & OPTIONS #}
+        <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <div class="mb-4">
+                <h3 class="text-base font-bold text-text flex items-center gap-2">
+                    <twig:UX:Icon name="ph:check-square-offset" class="w-5 h-5 text-primary"/>
+                    <span>3. Périmètre & Modules à Reconduire</span>
+                </h3>
+                <p class="text-xs text-secondary-500 mt-1">
+                    Sélectionnez les sous-ensembles de données complémentaires à cloner vers la nouvelle campagne.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    {{ form_row(form.duplicateCompetences) }}
+                </div>
+                <div>
+                    {{ form_row(form.duplicateMutualisations) }}
+                </div>
+                <div>
+                    {{ form_row(form.duplicateContacts) }}
+                </div>
+                <div>
+                    {{ form_row(form.duplicateMccc) }}
+                </div>
+                <div class="md:col-span-2">
+                    {{ form_row(form.duplicateDroits) }}
+                </div>
+            </div>
+        </div>
+
+        {# ACTIONS #}
+        <div class="flex flex-col sm:flex-row items-center justify-end gap-4 pt-2">
+            <button type="submit" name="simulate" value="1" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 transition">
+                <twig:UX:Icon name="ph:flask-light" class="w-4 h-4 text-primary-500" />
+                Simuler la Duplication (Dry Run)
+            </button>
+
+            <button type="submit" name="execute" value="1" data-action="click->campagne-duplication#startExecution" data-campagne-duplication-target="submitButton" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold bg-primary-600 hover:bg-primary-700 text-white shadow-sm hover:shadow transition">
+                <twig:UX:Icon name="ph:copy-bold" class="w-4 h-4" />
+                Lancer la Bascule de Campagne
+            </button>
+        </div>
+
+        {# SPINNER EN COURS D'EXÉCUTION #}
+        <div data-campagne-duplication-target="spinner" class="hidden p-4 rounded-xl bg-primary-50 dark:bg-primary-950/50 border border-primary-300 text-primary-900 dark:text-primary-200 text-center space-y-2">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            <p class="text-sm font-semibold">Duplication en cours... Veuillez patienter, ce traitement peut durer quelques instants.</p>
+        </div>
+
+    {{ form_end(form) }}
+
+</div>
+{% endblock %}

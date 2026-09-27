@@ -160,6 +160,12 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                         route: 'app_admin_versioning_index',
                     )->inColumn('menu.menu_configuration'),
 
+                    MenuItem::link(
+                        key: 'administration.duplication_campagne',
+                        label: 'menu.config.duplication_campagne',
+                        route: 'app_admin_duplication_campagne_index',
+                    )->inColumn('menu.menu_configuration'),
+
                     MenuItem::info(
                         key: 'administration.support',
                         label: 'Aide & Support',
