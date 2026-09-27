@@ -19,6 +19,8 @@ use App\Entity\Profil;
 use App\Entity\CampagneCollecte;
 use App\Entity\AnneeUniversitaire;
 use App\Entity\User;
+use App\Entity\NatureUeEc;
+use App\Entity\TypeEc;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Route;
 
@@ -48,6 +50,9 @@ final class RouteParameterResolver
         'campagne' => CampagneCollecte::class,
         'anneeUniversitaire' => AnneeUniversitaire::class,
         'user' => User::class,
+        'natureUeEc' => NatureUeEc::class,
+        'nature' => NatureUeEc::class,
+        'typeEc' => TypeEc::class,
     ];
 
     public function __construct(
