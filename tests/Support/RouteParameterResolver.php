@@ -8,6 +8,10 @@ use App\Entity\Composante;
 use App\Entity\FicheMatiere;
 use App\Entity\Formation;
 use App\Entity\Parcours;
+use App\Entity\Semestre;
+use App\Entity\SemestreParcours;
+use App\Entity\Ue;
+use App\Entity\ElementConstitutif;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Route;
 
@@ -23,6 +27,11 @@ final class RouteParameterResolver
         'parcours' => Parcours::class,
         'ficheMatiere' => FicheMatiere::class,
         'fiche_matiere' => FicheMatiere::class,
+        'semestre' => Semestre::class,
+        'semestreParcours' => SemestreParcours::class,
+        'ue' => Ue::class,
+        'ec' => ElementConstitutif::class,
+        'elementConstitutif' => ElementConstitutif::class,
     ];
 
     public function __construct(
