@@ -23,6 +23,7 @@ use App\Entity\NatureUeEc;
 use App\Entity\TypeEc;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Route;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * Resolves only parameters for which the test dataset has an unambiguous value.
@@ -58,8 +59,15 @@ final class RouteParameterResolver
     /** @var array<class-string, int|string|null> */
     private array $fixtureIdentifiers = [];
 
+    /** @var array<class-string, true> */
+    private array $managedEntityClasses = [];
+
     public function __construct(EntityManagerInterface $entityManager)
     {
+        foreach ($entityManager->getMetadataFactory()->getAllMetadata() as $metadata) {
+            $this->managedEntityClasses[$metadata->getName()] = true;
+        }
+
         foreach (array_unique(self::ENTITY_PARAMETERS) as $entityClass) {
             $entity = $entityManager->getRepository($entityClass)->findOneBy([]);
             $this->fixtureIdentifiers[$entityClass] =
@@ -85,6 +93,9 @@ final class RouteParameterResolver
             }
 
             $entityClass = self::ENTITY_PARAMETERS[$variable] ?? null;
+            if (null === $entityClass && 'id' === $variable) {
+                $entityClass = $this->resolveEntityClassFromController($route);
+            }
             if (null === $entityClass) {
                 $unresolved[] = $variable;
                 continue;
@@ -103,5 +114,34 @@ final class RouteParameterResolver
             'parameters' => $parameters,
             'unresolved' => $unresolved,
         ];
+    }
+
+    /** @return class-string|null */
+    private function resolveEntityClassFromController(Route $route): ?string
+    {
+        $controller = $route->getDefault('_controller');
+        if (!is_string($controller) || !str_contains($controller, '::')) {
+            return null;
+        }
+
+        [$class, $method] = explode('::', $controller, 2);
+        if (!class_exists($class) || !method_exists($class, $method)) {
+            return null;
+        }
+
+        $candidates = [];
+        foreach ((new \ReflectionMethod($class, $method))->getParameters() as $parameter) {
+            $type = $parameter->getType();
+            if (!$type instanceof \ReflectionNamedType || $type->isBuiltin()) {
+                continue;
+            }
+
+            $typeName = $type->getName();
+            if (isset($this->managedEntityClasses[$typeName])) {
+                $candidates[$typeName] = true;
+            }
+        }
+
+        return 1 === count($candidates) ? array_key_first($candidates) : null;
     }
 }
