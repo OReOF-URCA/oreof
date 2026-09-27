@@ -95,6 +95,10 @@ SQL;
             }
         }
 
+        if ($this->tableExists('etablissement_information') && !$this->columnExists('etablissement_information', 'tarif_inscription')) {
+            $sql['Ajout etablissement_information.tarif_inscription'] = 'ALTER TABLE etablissement_information ADD tarif_inscription LONGTEXT DEFAULT NULL';
+        }
+
         if ($this->tableExists('timeline_date')) {
             if ($this->columnExists('timeline_date', 'icone')) {
                 $iconMapping = [
