@@ -23,6 +23,7 @@ use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereMutualisableRepository;
 use App\Repository\FicheMatiereRepository;
 use App\Repository\LangueRepository;
+use App\Repository\TypeDiplomeRepository;
 use App\Repository\UeRepository;
 use App\Service\VersioningFicheMatiere;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
@@ -32,6 +33,7 @@ use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Jfcherng\Diff\DiffHelper;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -103,8 +105,10 @@ class FicheMatiereController extends BaseController
     public function show(
         ElementConstitutifRepository $elementConstitutifRepository,
         FicheMatiereMutualisableRepository $ficheMatiereMutualisableRepository,
+        #[MapEntity(mapping: ['slug' => 'slug'])]
         FicheMatiere                 $ficheMatiere,
-        VersioningFicheMatiere       $ficheMatiereVersioningService
+        VersioningFicheMatiere       $ficheMatiereVersioningService,
+        TypeDiplomeRepository        $typeDiplomeRepository,
     ): Response {
 
         $bccs = [];
@@ -184,6 +188,7 @@ class FicheMatiereController extends BaseController
     #[Route('/{slug}/edit', name: 'app_fiche_matiere_edit', methods: ['GET', 'POST'])]
     public function edit(
         Request $request,
+        #[MapEntity(mapping: ['slug' => 'slug'])]
         FicheMatiere $ficheMatiere,
         FicheMatiereState $ficheMatiereState,
     ): Response {
@@ -238,6 +243,7 @@ class FicheMatiereController extends BaseController
 
     #[Route('/{slug}/dupliquer', name: 'app_fiche_matiere_dupliquer', methods: ['GET'])]
     public function dupliquer(
+        #[MapEntity(mapping: ['slug' => 'slug'])]
         FicheMatiere $ficheMatiere,
         EntityManagerInterface $entityManager,
     ): Response {
@@ -259,24 +265,35 @@ class FicheMatiereController extends BaseController
         return $this->json(true);
     }
 
-    #[Route('/{slug}', name: 'app_fiche_matiere_delete', methods: ['DELETE'])]
+    #[Route('/{slug}', name: 'app_fiche_matiere_delete', methods: ['POST', 'DELETE'])]
     public function delete(
         EntityManagerInterface $entityManager,
         Request $request,
+        #[MapEntity(mapping: ['slug' => 'slug'])]
         FicheMatiere $ficheMatiere,
         FicheMatiereRepository $ficheMatiereRepository
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $ficheMatiere->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
+        $token = $request->request->get('_token')
+            ?? $request->request->get('csrf_token')
+            ?? JsonRequest::getValueFromRequest($request, 'csrf')
+            ?? JsonRequest::getValueFromRequest($request, '_token');
+
+        if ($this->isCsrfTokenValid('delete' . $ficheMatiere->getId(), $token)) {
 
             if ($ficheMatiere->getElementConstitutifs()->count() > 0) {
-                return JsonReponse::error('Impossible de supprimer la fiche matière car elle est utilisée par au moins un élément constitutif.');
+                if ($request->isXmlHttpRequest() || str_contains((string)$request->headers->get('Accept'), 'application/json')) {
+                    return JsonReponse::error('Impossible de supprimer la fiche matière car elle est utilisée par au moins un élément constitutif.');
+                }
+                $this->addFlashBag('error', 'Impossible de supprimer la fiche matière car elle est utilisée par au moins un élément constitutif.');
+                return $this->redirectToRoute('structure_fiche_matiere_index');
             }
 
             if ($ficheMatiere->getFicheMatiereParcours()->count() > 0) {
-                return JsonReponse::error('Impossible de supprimer la fiche matière car elle est potentiellement mutualisée avec d\'autres parcours.');
+                if ($request->isXmlHttpRequest() || str_contains((string)$request->headers->get('Accept'), 'application/json')) {
+                    return JsonReponse::error('Impossible de supprimer la fiche matière car elle est potentiellement mutualisée avec d\'autres parcours.');
+                }
+                $this->addFlashBag('error', 'Impossible de supprimer la fiche matière car elle est potentiellement mutualisée avec d\'autres parcours.');
+                return $this->redirectToRoute('structure_fiche_matiere_index');
             }
 
             foreach ($ficheMatiere->getMcccs() as $mccc) {
@@ -291,10 +308,20 @@ class FicheMatiereController extends BaseController
             //todo: gérer si champs dans fiche matière copie ?
             $ficheMatiereRepository->remove($ficheMatiere, true);
 
-            return JsonReponse::success('La fiche matière a bien été supprimée.');
+            if ($request->isXmlHttpRequest() || str_contains((string)$request->headers->get('Accept'), 'application/json')) {
+                return JsonReponse::success('La fiche matière a bien été supprimée.');
+            }
+
+            $this->addFlashBag('success', 'La fiche matière a bien été supprimée.');
+            return $this->redirectToRoute('structure_fiche_matiere_index');
         }
 
-        return $this->json(false);
+        if ($request->isXmlHttpRequest() || str_contains((string)$request->headers->get('Accept'), 'application/json')) {
+            return $this->json(false, 400);
+        }
+
+        $this->addFlashBag('error', 'Token CSRF invalide.');
+        return $this->redirectToRoute('structure_fiche_matiere_index');
     }
 
     #[Route('/{ec}/{parcours}/{ects}/maquette_iframe', name: 'app_fiche_matiere_maquette_iframe')]
@@ -360,6 +387,7 @@ class FicheMatiereController extends BaseController
     #[IsGranted('ROLE_ADMIN')]
     #[Route('/{slug}/versioning/save', name: 'app_fiche_matiere_versioning_save', methods: ['GET'])]
     public function saveFicheMatiereIntoJson(
+        #[MapEntity(mapping: ['slug' => 'slug'])]
         FicheMatiere $ficheMatiere,
         EntityManagerInterface $entityManager,
         Filesystem $fileSystem,

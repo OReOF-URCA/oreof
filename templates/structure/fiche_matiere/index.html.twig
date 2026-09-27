@@ -1,26 +1,19 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-        <turbo-frame
-                id="liste_fiche_matiere"
-                src="{{ type == 'hd' ? path('structure_fiche_matiere_liste_hd') : path('structure_fiche_matiere_liste') }}">
-        </turbo-frame>
+    {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
 {% endblock %}
 
 {% block bouton_header %}
     {% if type == 'hd' %}
-
-    <twig:Button
-        href="{{ path('app_fiche_matiere_new') }}"
-        data-turbo="true"
-        data-action="click->modalturbo#open"
-        title="Ajouter une fiche EC/matière"
-        variant="success"
-        icon="icon:add"
-        label="Ajouter une fiche EC/matière"
-    ></twig:Button>
+        <twig:Button
+            href="{{ path('app_fiche_matiere_new') }}"
+            data-turbo="true"
+            data-action="click->modalturbo#open"
+            title="Ajouter une fiche EC/matière"
+            variant="success"
+            icon="icon:add"
+            label="Ajouter une fiche EC/matière"
+        ></twig:Button>
     {% endif %}
 {% endblock %}
-
-
-

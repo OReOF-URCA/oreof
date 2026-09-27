@@ -206,7 +206,7 @@
                                  data-controller="tooltip" data-tooltip-placement-value="bottom"
                                  aria-label="{{ (prefix~'.'~step.label~'.btn-'~state)|trans({}, 'process') }}"
                                  data-bs-original-title="{{ (prefix~'.'~step.label~'.btn-'~state)|trans({}, 'process') }}">
-                                <i class="fas {{ step.icon }} text-xs"></i>
+                                {{ ux_icon(step.icon, {class: 'h-4 w-4'}) }}
                             </div>
                             {% if not loop.last %}
                                 <div class="mx-1 h-0.5 w-5 rounded-full {{ stateConfig.line }}"></div>

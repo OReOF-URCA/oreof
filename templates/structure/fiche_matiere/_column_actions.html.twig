@@ -28,11 +28,18 @@
                     url: path('app_fiche_matiere_dupliquer', {slug: item.slug})
                 },
                 {
+                    type: 'delete',
                     label: 'Supprimer',
                     icon: 'icon:delete',
                     color: 'danger',
                     url: path('app_fiche_matiere_delete', {slug: item.slug}),
-                    csrf: csrf_token('delete' ~ item.id)
+                    method: 'DELETE',
+                    csrfTokenId: 'delete' ~ item.id,
+                    title: "Supprimer la fiche EC/matière " ~ item.libelle,
+                    message: "Cette action supprimera définitivement la fiche matière si elle n'est pas rattachée à un parcours.",
+                    confirmLabel: "Supprimer",
+                    cancelLabel: "Annuler",
+                    id: "fiche-matiere-" ~ item.id
                 }
             ]
         }) }}

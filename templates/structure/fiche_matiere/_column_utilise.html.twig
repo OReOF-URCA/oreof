@@ -1,10 +1,6 @@
 {# Colonne : Utilisé #}
-{% if item.elementConstitutifs|length > 0 %}
-
+{% if row.elementConstitutifs|length > 0 %}
     <twig:Badge label="Oui" variant="success" icon="icon:check"/>
 {% else %}
-    <twig:Badge label="Non" variant="danger"
-                icon="icon:close"
-    />
+    <twig:Badge label="Non" variant="danger" icon="icon:close"/>
 {% endif %}
-
