@@ -13,6 +13,10 @@ use App\Entity\Profil;
 use App\Entity\User;
 use App\Entity\UserProfil;
 use App\Entity\TypeDiplome;
+use App\Entity\Semestre;
+use App\Entity\SemestreParcours;
+use App\Entity\Ue;
+use App\Entity\ElementConstitutif;
 use App\Enums\CentreGestionEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
@@ -32,6 +36,9 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
     public const FORMATION = 'test.formation';
     public const PARCOURS = 'test.parcours';
     public const FICHE_MATIERE = 'test.fiche_matiere';
+    public const SEMESTRE = 'test.semestre';
+    public const UE = 'test.ue';
+    public const EC = 'test.ec';
 
     public function __construct(
         private readonly UserPasswordHasherInterface $passwordHasher,
@@ -97,6 +104,31 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
             ->setSigle('TEST-FM')
             ->setParcours($parcours);
 
+        $semestre = (new Semestre())
+            ->setOrdre(1)
+            ->setTroncCommun(false)
+            ->setNonDispense(false);
+
+        $semestreParcours = (new SemestreParcours($semestre, $parcours))
+            ->setOrdre(1)
+            ->setPorteur(true)
+            ->setOuvert(true);
+
+        $ue = (new Ue())
+            ->setOrdre(1)
+            ->setLibelle('UE de test')
+            ->setEcts(6.0)
+            ->setSemestre($semestre);
+
+        $ec = (new ElementConstitutif())
+            ->setCode('TEST-EC')
+            ->setOrdre(1)
+            ->setLibelle('EC de test')
+            ->setEcts(3.0)
+            ->setParcours($parcours)
+            ->setUe($ue)
+            ->setFicheMatiere($fiche);
+
         $userProfil = (new UserProfil())
             ->setUser($admin)
             ->setProfil($profil)
@@ -105,7 +137,7 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
             ->setParcours($parcours)
             ->setCampagneCollecte($campagne);
 
-        foreach ([$admin, $profil, $composante, $campagne, $typeDiplome, $formation, $parcours, $fiche, $userProfil] as $entity) {
+        foreach ([$admin, $profil, $composante, $campagne, $typeDiplome, $formation, $parcours, $fiche, $semestre, $semestreParcours, $ue, $ec, $userProfil] as $entity) {
             $manager->persist($entity);
         }
 
@@ -116,5 +148,8 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
         $this->addReference(self::FORMATION, $formation);
         $this->addReference(self::PARCOURS, $parcours);
         $this->addReference(self::FICHE_MATIERE, $fiche);
+        $this->addReference(self::SEMESTRE, $semestre);
+        $this->addReference(self::UE, $ue);
+        $this->addReference(self::EC, $ec);
     }
 }
