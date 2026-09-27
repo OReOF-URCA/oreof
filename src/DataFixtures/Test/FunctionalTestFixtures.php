@@ -17,6 +17,7 @@ use App\Entity\Semestre;
 use App\Entity\SemestreParcours;
 use App\Entity\Ue;
 use App\Entity\ElementConstitutif;
+use App\Entity\AnneeUniversitaire;
 use App\Enums\CentreGestionEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
@@ -73,11 +74,16 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
             ->setDirecteur($admin)
             ->setResponsableDpe($admin);
 
+        $anneeUniversitaire = (new AnneeUniversitaire())
+            ->setLibelle('2026-2027')
+            ->setAnnee(2026);
+
         $campagne = (new CampagneCollecte())
             ->setLibelle('Campagne de test')
             ->setAnnee(2026)
             ->setDefaut(true)
-            ->setCodeApogee('T');
+            ->setCodeApogee('T')
+            ->setAnneeUniversitaire($anneeUniversitaire);
 
         $typeDiplome = (new TypeDiplome())
             ->setLibelle('Diplôme de test')
@@ -137,7 +143,7 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
             ->setParcours($parcours)
             ->setCampagneCollecte($campagne);
 
-        foreach ([$admin, $profil, $composante, $campagne, $typeDiplome, $formation, $parcours, $fiche, $semestre, $semestreParcours, $ue, $ec, $userProfil] as $entity) {
+        foreach ([$admin, $profil, $composante, $anneeUniversitaire, $campagne, $typeDiplome, $formation, $parcours, $fiche, $semestre, $semestreParcours, $ue, $ec, $userProfil] as $entity) {
             $manager->persist($entity);
         }
 
