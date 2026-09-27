@@ -23,7 +23,6 @@ use App\Entity\NatureUeEc;
 use App\Entity\TypeEc;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Route;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * Resolves only parameters for which the test dataset has an unambiguous value.
@@ -65,7 +64,14 @@ final class RouteParameterResolver
     public function __construct(EntityManagerInterface $entityManager)
     {
         foreach ($entityManager->getMetadataFactory()->getAllMetadata() as $metadata) {
-            $this->managedEntityClasses[$metadata->getName()] = true;
+            $entityClass = $metadata->getName();
+            $this->managedEntityClasses[$entityClass] = true;
+
+            $entity = $entityManager->getRepository($entityClass)->findOneBy([]);
+            $this->fixtureIdentifiers[$entityClass] =
+                null !== $entity && method_exists($entity, 'getId')
+                    ? $entity->getId()
+                    : null;
         }
 
         foreach (array_unique(self::ENTITY_PARAMETERS) as $entityClass) {
