@@ -87,12 +87,12 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
 
         $typeDiplome = (new TypeDiplome())
             ->setLibelle('Diplôme de test')
-            ->setLibelleCourt('TEST')
+            ->setLibelleCourt('DU')
             ->setNbUeMin(1)
             ->setNbUeMax(10)
             ->setNbEctsMaxUe(30)
             ->setNbEcParUe(10)
-            ->setModeleMcc('test')
+            ->setModeleMcc('App\\TypeDiplome\\Du\\DuHandler')
             ->setCodeApogee('T');
 
         $formation = (new Formation($campagne))
