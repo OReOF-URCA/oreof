@@ -1,0 +1,38 @@
+<div class="space-y-4 text-sm">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-secondary-50 dark:bg-secondary-900/50 p-3 rounded-lg border border-secondary-200 dark:border-secondary-700">
+        <div>
+            <span class="block text-xs text-secondary-500 font-medium">Taille</span>
+            <span class="font-semibold text-text">{{ file.size_formatted }}</span>
+        </div>
+        <div>
+            <span class="block text-xs text-secondary-500 font-medium">Dernière modification</span>
+            <span class="font-semibold text-text">{{ file.mtime ? file.mtime|date('d/m/Y H:i:s') : 'N/A' }}</span>
+        </div>
+        <div>
+            <span class="block text-xs text-secondary-500 font-medium">Format JSON</span>
+            {% if file.is_valid_json %}
+                <twig:Badge label="JSON Valide" variant="success" size="sm" icon="icon:check" />
+            {% else %}
+                <twig:Badge label="JSON Invalide" variant="danger" size="sm" icon="icon:close" />
+            {% endif %}
+        </div>
+        <div>
+            <span class="block text-xs text-secondary-500 font-medium">Sections principales</span>
+            <span class="font-semibold text-text">{{ file.json_keys_count }}</span>
+        </div>
+    </div>
+
+    <div>
+        <span class="block text-xs text-secondary-500 font-medium mb-1">Chemin d'accès</span>
+        <code class="block bg-secondary-100 dark:bg-secondary-800 text-xs px-2.5 py-1.5 rounded border border-secondary-200 dark:border-secondary-700 text-secondary-800 dark:text-secondary-200 break-all font-mono">
+            {{ file.relative_path }}
+        </code>
+    </div>
+
+    <div>
+        <span class="block text-xs text-secondary-500 font-medium mb-1">Contenu JSON</span>
+        <div class="relative rounded-lg border border-secondary-700 overflow-hidden shadow-inner" style="background-color: #090d16;">
+            <pre class="p-4 overflow-x-auto text-xs font-mono max-h-96 leading-relaxed select-all m-0" style="background-color: #090d16; color: #f8fafc;"><code class="font-mono text-xs block whitespace-pre" style="color: #f8fafc !important; background-color: transparent !important;">{{ file.content }}</code></pre>
+        </div>
+    </div>
+</div>

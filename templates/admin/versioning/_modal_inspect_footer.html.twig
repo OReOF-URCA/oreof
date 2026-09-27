@@ -1,0 +1,8 @@
+<div class="flex items-center justify-between w-full">
+    <twig:Button variant="secondary" size="sm" :outline="true" dataAction="modalturbo#close">
+        Fermer
+    </twig:Button>
+    <twig:Button variant="primary" size="sm" icon="icon:download" href="{{ path('app_admin_versioning_download_file', {path: file.relative_path}) }}">
+        Télécharger le JSON
+    </twig:Button>
+</div>

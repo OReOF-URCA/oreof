@@ -1,0 +1,4 @@
+{% set info = versioning_fiche_info(row) %}
+<div class="text-xs text-secondary-600 dark:text-secondary-300">
+    {{ info.composante ? info.composante : '—' }}
+</div>

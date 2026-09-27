@@ -1,0 +1,6 @@
+{% set info = versioning_fiche_info(row) %}
+{% if info.campagne %}
+    <twig:Badge label="{{ info.campagne }}" variant="info" size="sm" icon="ph:calendar-blank-light" />
+{% else %}
+    <span class="text-secondary-400 text-xs">—</span>
+{% endif %}

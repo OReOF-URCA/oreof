@@ -1,0 +1,40 @@
+{% set info = versioning_parcours_info(row) %}
+<div class="flex items-center gap-1.5 flex-wrap">
+    {% for v in info.versions %}
+        {# Parcours #}
+        {% if v.parcours_exists %}
+            <a href="{{ path('app_admin_versioning_inspect_file', {path: v.parcours_relative}) }}"
+               data-action="click->modalturbo#open"
+               data-turbo="true"
+               class="inline-flex items-center gap-1 rounded bg-secondary-100 dark:bg-secondary-800 hover:bg-primary-50 dark:hover:bg-primary-900/50 text-text px-2 py-1 text-xs font-mono transition border border-secondary-200 dark:border-secondary-700"
+               title="Parcours JSON: {{ v.parcours_size_formatted }} ({{ v.timestamp ? v.timestamp|date('d/m/Y H:i') : '' }})">
+                <twig:UX:Icon name="ph:file-code-light" class="h-3.5 w-3.5 text-primary" />
+                Parcours
+            </a>
+        {% else %}
+            <span class="inline-flex items-center gap-1 rounded bg-rose-50 text-rose-700 px-1.5 py-0.5 text-xs font-mono" title="Fichier parcours manquant sur disque">
+                P. 404
+            </span>
+        {% endif %}
+
+        {# DTO #}
+        {% if v.dto_file %}
+            {% if v.dto_exists %}
+                <a href="{{ path('app_admin_versioning_inspect_file', {path: v.dto_relative}) }}"
+                   data-action="click->modalturbo#open"
+                   data-turbo="true"
+                   class="inline-flex items-center gap-1 rounded bg-secondary-100 dark:bg-secondary-800 hover:bg-primary-50 dark:hover:bg-primary-900/50 text-text px-2 py-1 text-xs font-mono transition border border-secondary-200 dark:border-secondary-700"
+                   title="DTO JSON: {{ v.dto_size_formatted }}">
+                    <twig:UX:Icon name="ph:tree-structure-light" class="h-3.5 w-3.5 text-info" />
+                    DTO
+                </a>
+            {% else %}
+                <span class="inline-flex items-center gap-1 rounded bg-rose-50 text-rose-700 px-1.5 py-0.5 text-xs font-mono" title="Fichier DTO manquant sur disque">
+                    DTO 404
+                </span>
+            {% endif %}
+        {% endif %}
+    {% else %}
+        <span class="text-xs text-secondary-400 italic">Aucun fichier</span>
+    {% endfor %}
+</div>

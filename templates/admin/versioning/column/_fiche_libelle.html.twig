@@ -1,0 +1,10 @@
+{# Libellé Fiche Matière #}
+<div>
+    <div class="font-medium text-text">{{ row.libelle }}</div>
+    <div class="text-xs text-secondary-400 font-mono mt-0.5">
+        {% if row.sigle or row.codeApogee %}
+            <span class="font-semibold text-secondary-600 dark:text-secondary-300">[{{ row.sigle ?: row.codeApogee }}]</span>
+        {% endif %}
+        {{ row.slug }}
+    </div>
+</div>

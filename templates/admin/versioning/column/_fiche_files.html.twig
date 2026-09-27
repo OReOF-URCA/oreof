@@ -1,0 +1,23 @@
+{% set info = versioning_fiche_info(row) %}
+<div class="flex items-center gap-1.5 flex-wrap">
+    {% for v in info.versions %}
+        {% if v.exists %}
+            <a href="{{ path('app_admin_versioning_inspect_file', {path: v.relative_path}) }}"
+               data-action="click->modalturbo#open"
+               data-turbo="true"
+               class="inline-flex items-center gap-1 rounded bg-secondary-100 dark:bg-secondary-800 hover:bg-primary-50 dark:hover:bg-primary-900/50 text-text px-2 py-1 text-xs font-mono transition border border-secondary-200 dark:border-secondary-700"
+               title="Généré le {{ v.timestamp ? v.timestamp|date('d/m/Y H:i') : 'N/A' }} ({{ v.size_formatted }})">
+                <twig:UX:Icon name="ph:file-code-light" class="h-3.5 w-3.5 text-primary" />
+                {{ v.size_formatted }}
+            </a>
+        {% else %}
+            <span class="inline-flex items-center gap-1 rounded bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 px-2 py-1 text-xs font-mono border border-rose-200 dark:border-rose-800"
+                  title="Fichier introuvable sur le disque : {{ v.relative_path }}">
+                <twig:UX:Icon name="icon:close" class="h-3 w-3" />
+                404
+            </span>
+        {% endif %}
+    {% else %}
+        <span class="text-xs text-secondary-400 italic">Aucun fichier</span>
+    {% endfor %}
+</div>

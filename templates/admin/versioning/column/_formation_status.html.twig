@@ -1,0 +1,8 @@
+{% set info = versioning_formation_info(row) %}
+{% if info.status == 'ok' %}
+    <twig:Badge label="{{ info.versions_count }} version(s) OK" variant="success" size="sm" icon="icon:check" />
+{% elseif info.status == 'missing_file' %}
+    <twig:Badge label="Fichier manquant" variant="danger" size="sm" icon="icon:close" />
+{% else %}
+    <twig:Badge label="Aucune version" variant="warning" size="sm" icon="icon:warning" />
+{% endif %}

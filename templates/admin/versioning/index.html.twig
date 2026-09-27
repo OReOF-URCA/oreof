@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    Contrôle du Versioning JSON
+{% endset %}
+
+{% block header %}
+    Contrôle & Inspection des Fichiers de Versioning JSON
+{% endblock %}
+
+{% set header_description %}
+    Vérification de la présence des fichiers JSON générés à la racine du projet (répertoire <code class="px-1.5 py-0.5 rounded bg-secondary-100 dark:bg-secondary-800 text-secondary-800 dark:text-secondary-200 text-xs font-mono font-semibold">versioning_json/</code>), suivi des dates de génération et détection des éléments manquants par campagne de collecte.
+{% endset %}
+
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ path('app_section_administration') }}">
+        Administration
+    </twig:Button>
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-6">
+        {# SECTION KPI SYNTHÈSE #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <twig:Kpi
+                title="Formations"
+                value="{{ stats.formation.with_versions_db }} / {{ stats.formation.total_db }}"
+                description="{{ stats.formation.without_versions_db }} sans version générée"
+                variant="{{ stats.formation.without_versions_db > 0 ? 'warning' : 'success' }}"
+                icon="ph:graduation-cap-light"
+                href="{{ path('app_admin_versioning_index', {tab: 'formations'}) }}"
+            />
+
+            <twig:Kpi
+                title="Parcours"
+                value="{{ stats.parcours.with_versions_db }} / {{ stats.parcours.total_db }}"
+                description="{{ stats.parcours.without_versions_db }} sans version générée"
+                variant="{{ stats.parcours.without_versions_db > 0 ? 'warning' : 'success' }}"
+                icon="ph:path-light"
+                href="{{ path('app_admin_versioning_index', {tab: 'parcours'}) }}"
+            />
+
+            <twig:Kpi
+                title="Fiches Matière"
+                value="{{ stats.fiche_matiere.with_versions_db }} / {{ stats.fiche_matiere.total_db }}"
+                description="{{ stats.fiche_matiere.without_versions_db }} sans version générée"
+                variant="{{ stats.fiche_matiere.without_versions_db > 0 ? 'warning' : 'success' }}"
+                icon="ph:file-text-light"
+                href="{{ path('app_admin_versioning_index', {tab: 'fiches_matiere'}) }}"
+            />
+
+            <twig:Kpi
+                title="Stockage JSON"
+                value="{{ stats.disk.total_formatted }}"
+                description="{{ stats.disk.total_files }} fichiers sur disque"
+                variant="info"
+                icon="ph:hard-drive-light"
+                href="{{ path('app_admin_versioning_index', {tab: 'logs'}) }}"
+            />
+        </div>
+
+        {# ONGLET NAVIGATION #}
+        <div class="border-b border-secondary-200 dark:border-secondary-700">
+            <nav class="-mb-px flex space-x-6" aria-label="Onglets">
+                <a href="{{ path('app_admin_versioning_index', {tab: 'formations'}) }}"
+                   class="inline-flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition {{ tab == 'formations' ? 'border-primary text-primary' : 'border-transparent text-secondary-500 hover:text-text hover:border-secondary-300' }}">
+                    <twig:UX:Icon name="ph:graduation-cap-light" class="h-4 w-4" />
+                    Formations
+                    <span class="ml-1 rounded-full px-2 py-0.5 text-xs {{ tab == 'formations' ? 'bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200' : 'bg-secondary-100 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-300' }}">
+                        {{ stats.formation.total_db }}
+                    </span>
+                </a>
+
+                <a href="{{ path('app_admin_versioning_index', {tab: 'parcours'}) }}"
+                   class="inline-flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition {{ tab == 'parcours' ? 'border-primary text-primary' : 'border-transparent text-secondary-500 hover:text-text hover:border-secondary-300' }}">
+                    <twig:UX:Icon name="ph:path-light" class="h-4 w-4" />
+                    Parcours
+                    <span class="ml-1 rounded-full px-2 py-0.5 text-xs {{ tab == 'parcours' ? 'bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200' : 'bg-secondary-100 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-300' }}">
+                        {{ stats.parcours.total_db }}
+                    </span>
+                </a>
+
+                <a href="{{ path('app_admin_versioning_index', {tab: 'fiches_matiere'}) }}"
+                   class="inline-flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition {{ tab == 'fiches_matiere' ? 'border-primary text-primary' : 'border-transparent text-secondary-500 hover:text-text hover:border-secondary-300' }}">
+                    <twig:UX:Icon name="ph:file-text-light" class="h-4 w-4" />
+                    Fiches Matière
+                    <span class="ml-1 rounded-full px-2 py-0.5 text-xs {{ tab == 'fiches_matiere' ? 'bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200' : 'bg-secondary-100 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-300' }}">
+                        {{ stats.fiche_matiere.total_db }}
+                    </span>
+                </a>
+
+                <a href="{{ path('app_admin_versioning_index', {tab: 'logs'}) }}"
+                   class="inline-flex items-center gap-2 py-3 px-1 border-b-2 font-medium text-sm transition {{ tab == 'logs' ? 'border-primary text-primary' : 'border-transparent text-secondary-500 hover:text-text hover:border-secondary-300' }}">
+                    <twig:UX:Icon name="ph:scroll-light" class="h-4 w-4" />
+                    Logs & Système
+                </a>
+            </nav>
+        </div>
+
+        {% if tab != 'logs' %}
+            {# AFFICHAGE DU UX-DATATABLE #}
+            {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
+        {% else %}
+            {# ================= ONGLET LOGS & SYSTÈME ================= #}
+            <div class="space-y-6">
+                <section class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface shadow-sm p-4">
+                    <h3 class="text-lg font-semibold text-text mb-2 flex items-center gap-2">
+                        <twig:UX:Icon name="ph:folder-notch-light" class="h-5 w-5 text-primary" />
+                        Structure du Répertoire de Stockage
+                    </h3>
+                    <p class="text-secondary-500 text-sm mb-4">
+                        Les fichiers sont stockés directement dans le répertoire <code class="px-1.5 py-0.5 rounded bg-secondary-100 dark:bg-secondary-800 text-secondary-800 dark:text-secondary-200 text-xs font-mono font-semibold">versioning_json/</code> à la racine du projet.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="p-3 rounded-lg bg-secondary-50 dark:bg-secondary-900/40 border border-secondary-200 dark:border-secondary-700">
+                            <span class="text-xs text-secondary-500 block font-medium">Répertoire Formations</span>
+                            <code class="text-xs font-mono font-semibold text-text">versioning_json/formation/</code>
+                            <div class="mt-2 text-xs text-secondary-600 dark:text-secondary-400">
+                                {{ stats.formation.disk_files_count }} fichiers JSON détectés
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-secondary-50 dark:bg-secondary-900/40 border border-secondary-200 dark:border-secondary-700">
+                            <span class="text-xs text-secondary-500 block font-medium">Répertoire Parcours</span>
+                            <code class="text-xs font-mono font-semibold text-text">versioning_json/parcours/</code>
+                            <div class="mt-2 text-xs text-secondary-600 dark:text-secondary-400">
+                                {{ stats.parcours.disk_files_count }} fichiers JSON détectés
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-secondary-50 dark:bg-secondary-900/40 border border-secondary-200 dark:border-secondary-700">
+                            <span class="text-xs text-secondary-500 block font-medium">Répertoire Fiches Matière</span>
+                            <code class="text-xs font-mono font-semibold text-text">versioning_json/fiche-matiere/</code>
+                            <div class="mt-2 text-xs text-secondary-600 dark:text-secondary-400">
+                                {{ stats.fiche_matiere.disk_files_count }} fichiers JSON détectés
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {# Fichiers Logs #}
+                <section class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface shadow-sm p-4">
+                    <h3 class="text-lg font-semibold text-text mb-4 flex items-center gap-2">
+                        <twig:UX:Icon name="ph:scroll-light" class="h-5 w-5 text-primary" />
+                        Fichiers de Journaux (Logs de Versioning)
+                    </h3>
+
+                    {% if logsData and logsData.logs is not empty %}
+                        <div class="space-y-4">
+                            {% for log in logsData.logs %}
+                                <div class="rounded-lg border border-secondary-200 dark:border-secondary-700 overflow-hidden bg-white dark:bg-surface">
+                                    <div class="p-3 bg-secondary-50 dark:bg-secondary-900/50 flex items-center justify-between border-b border-secondary-200 dark:border-secondary-700">
+                                        <div class="flex items-center gap-2">
+                                            {% if log.type == 'error' %}
+                                                <twig:Badge label="Erreur" variant="danger" size="sm" icon="icon:close" />
+                                            {% else %}
+                                                <twig:Badge label="Succès" variant="success" size="sm" icon="icon:check" />
+                                            {% endif %}
+                                            <span class="font-mono text-xs font-semibold text-text">{{ log.relative_path }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 text-xs text-secondary-500">
+                                            <span>{{ log.size_formatted }}</span>
+                                            <span>{{ log.mtime|date('d/m/Y H:i:s') }}</span>
+                                            <span class="font-medium text-text">{{ log.total_lines }} lignes</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-4 font-mono text-xs overflow-x-auto max-h-56 leading-relaxed select-all" style="background-color: #090d16; color: #f8fafc;">
+                                        {% for line in log.last_lines %}
+                                            <div class="leading-relaxed" style="color: #f1f5f9 !important;">{{ line }}</div>
+                                        {% else %}
+                                            <span class="text-secondary-400 italic">Journal vide</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-sm text-secondary-400 italic">Aucun fichier de journal de versioning détecté dans <code>versioning_json/success_log</code> ou <code>versioning_json/error_log</code>.</p>
+                    {% endif %}
+                </section>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% set info = versioning_fiche_info(row) %}
+<div class="text-xs">
+    {% if info.last_version_date %}
+        <div class="font-medium text-text">{{ info.last_version_date|date('d/m/Y') }}</div>
+        <div class="text-secondary-400">{{ info.last_version_date|date('H:i:s') }}</div>
+    {% else %}
+        <span class="text-secondary-400 italic">Jamais</span>
+    {% endif %}
+</div>

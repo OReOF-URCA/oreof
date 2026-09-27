@@ -1,0 +1,10 @@
+{% set formation = row.formation %}
+<div>
+    <div class="text-text font-medium text-xs">{{ formation ? (formation.displayLong ?: formation.display) : '—' }}</div>
+    <div class="text-xs text-secondary-500 mt-0.5">
+        {{ formation and formation.composantePorteuse ? formation.composantePorteuse.libelle : '' }}
+        {% if formation and formation.typeDiplome %}
+            ({{ formation.typeDiplome.libelleCourt }})
+        {% endif %}
+    </div>
+</div>

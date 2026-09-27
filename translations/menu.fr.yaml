@@ -55,6 +55,7 @@ menu.config.type_epreuve: "Type d'épreuve"
 menu.config.type_ue: "Type d'UE"
 menu.config.ville: Villes
 menu.config.workflows: 'Cartographie des workflows'
+menu.config.versioning_json: 'Fichiers de versioning JSON'
 menu.conseils.chgt_rf: 'Changement RF/co RF'
 menu.conseils.documents: Documents
 menu.conseils.synthese_offre: 'Synthèse offre de formation'
