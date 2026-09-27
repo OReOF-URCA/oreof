@@ -18,6 +18,9 @@ use App\Entity\SemestreParcours;
 use App\Entity\Ue;
 use App\Entity\ElementConstitutif;
 use App\Entity\AnneeUniversitaire;
+use App\Entity\DpeParcours;
+use App\Entity\ChangeRf;
+use DateTime;
 use App\Enums\CentreGestionEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
@@ -40,6 +43,8 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
     public const SEMESTRE = 'test.semestre';
     public const UE = 'test.ue';
     public const EC = 'test.ec';
+    public const DPE_PARCOURS = 'test.dpe_parcours';
+    public const CHANGE_RF = 'test.change_rf';
 
     public function __construct(
         private readonly UserPasswordHasherInterface $passwordHasher,
@@ -135,6 +140,20 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
             ->setUe($ue)
             ->setFicheMatiere($fiche);
 
+        $dpeParcours = (new DpeParcours())
+            ->setCampagneCollecte($campagne)
+            ->setFormation($formation)
+            ->setParcours($parcours)
+            ->setEtatValidation([]);
+
+        $changeRf = (new ChangeRf())
+            ->setFormation($formation)
+            ->setCampagneCollecte($campagne)
+            ->setAncienResponsable($admin)
+            ->setNouveauResponsable($admin)
+            ->setDateDemande(new DateTime())
+            ->setEtatDemande([]);
+
         $userProfil = (new UserProfil())
             ->setUser($admin)
             ->setProfil($profil)
@@ -143,7 +162,7 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
             ->setParcours($parcours)
             ->setCampagneCollecte($campagne);
 
-        foreach ([$admin, $profil, $composante, $anneeUniversitaire, $campagne, $typeDiplome, $formation, $parcours, $fiche, $semestre, $semestreParcours, $ue, $ec, $userProfil] as $entity) {
+        foreach ([$admin, $profil, $composante, $anneeUniversitaire, $campagne, $typeDiplome, $formation, $parcours, $fiche, $semestre, $semestreParcours, $ue, $ec, $dpeParcours, $changeRf, $userProfil] as $entity) {
             $manager->persist($entity);
         }
 
@@ -157,5 +176,7 @@ final class FunctionalTestFixtures extends Fixture implements FixtureGroupInterf
         $this->addReference(self::SEMESTRE, $semestre);
         $this->addReference(self::UE, $ue);
         $this->addReference(self::EC, $ec);
+        $this->addReference(self::DPE_PARCOURS, $dpeParcours);
+        $this->addReference(self::CHANGE_RF, $changeRf);
     }
 }
