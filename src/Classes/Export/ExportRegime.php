@@ -42,6 +42,8 @@ class ExportRegime implements ExportInterface
         $this->excelWriter->nouveauFichier('Export Régimes');
         $this->excelWriter->setActiveSheetIndex(0);
 
+        $countCol = count(RegimeInscriptionEnum::cases());
+
         $this->excelWriter->writeCellXY(1, 1, 'Composante');
         $this->excelWriter->writeCellXY(2, 1, 'Type Diplôme');
         $this->excelWriter->writeCellXY(3, 1, 'Mention');
@@ -61,6 +63,8 @@ class ExportRegime implements ExportInterface
         $this->excelWriter->writeCellXY(17, 1, 'Co. Resp. Parcours Login');
         $this->excelWriter->writeCellXY(18, 1, 'RNCP');
         $this->excelWriter->writeCellXY(19, 1, 'Validation CFVU');
+        $this->excelWriter->writeCellXY((20 + $countCol), 1, 'Identifiant');
+        $this->excelWriter->writeCellXY((21 + $countCol), 1, 'Type du Parcours');
         $i = 0;
         foreach (RegimeInscriptionEnum::cases() as $regime) {
             $this->excelWriter->writeCellXY(20 + $i, 1, $regime->value);
@@ -108,6 +112,14 @@ class ExportRegime implements ExportInterface
                     }
                     $i++;
                 }
+
+                $this->excelWriter->writeCellXY((20 + $i), $ligne, $parcours->getId());
+
+                $typeParcoursTxt = "";
+                if($parcours->getTypeParcours()->value !== 'classique') {
+                    $typeParcoursTxt = $parcours->getTypeParcours()->libelle();
+                }
+                $this->excelWriter->writeCellXY((21 + $i), $ligne, $typeParcoursTxt);
 
                 $this->excelWriter->getColumnsAutoSize('A', 'Z');
                 $ligne++;

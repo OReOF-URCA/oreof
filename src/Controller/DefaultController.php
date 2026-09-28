@@ -76,7 +76,6 @@ class DefaultController extends BaseController
     public function fichesComposante(
         ComposanteRepository   $composanteRepository,
         FormationRepository $formationRepository,
-        CalculStructureParcours $calculStructureParcours,
         Request               $request,
     ): Response {
         $composante = $composanteRepository->find($request->query->get('value'));
@@ -89,12 +88,12 @@ class DefaultController extends BaseController
 
         $stats = [];
         foreach ($tFormations as $formation) {
-
+            $typeD = $this->typeDiplomeResolver->get($formation->getTypeDiplome());
             $parcourss = $formation->getParcours();
             $stats[$formation->getId()]['stats'] = new StatsFichesMatieres();
 
             foreach ($parcourss as $parcours) {
-                $stats[$formation->getId()][$parcours->getId()] = $calculStructureParcours->calcul($parcours, false, false);
+                $stats[$formation->getId()][$parcours->getId()] = $typeD->calculStructureParcours($parcours, false, false);
                 $stats[$formation->getId()]['stats']->addStatsParcours(
                     $stats[$formation->getId()][$parcours->getId()]->statsFichesMatieresParcours
                 );

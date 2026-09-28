@@ -16,6 +16,7 @@ use App\Service\ProjectDirProvider;
 use App\Utils\CleanTexte;
 use App\Utils\Tools;
 use DateTime;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportCarif implements ExportInterface
@@ -69,6 +70,30 @@ class ExportCarif implements ExportInterface
 //                    $this->excelWriter->writeCellXY('O', $ligne, $dureeFormation);
                     $this->excelWriter->writeCellXY('R', $ligne, $parcours->getLocalisation()?->getLibelle());
 
+                    $optionsCellHeader = [
+                        'style' => 'HORIZONTAL_CENTER',
+                        'valign' => 'VERTICAL_CENTER',
+                        'wrap' => true
+                    ];
+                    $borderHeader = [
+                        'borders' => [
+                            'outline' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => ['rgb' => '000000']
+                            ]
+                        ],
+                        'font' => ['size' => 16]
+                    ];
+                    $this->excelWriter->writeCellXY('U', 1, 'Identifiant', $optionsCellHeader);
+                    $this->excelWriter->writeCellXY('V', 1, 'Type du Parcours', $optionsCellHeader);
+                    $this->excelWriter->cellStyle('U1', $borderHeader);
+                    $this->excelWriter->cellStyle('V1', $borderHeader);
+                    $this->excelWriter->writeCellXY('U', $ligne, $parcours->getId() ?? "");
+                    $typeParcoursTxt = "";
+                    if($parcours->getTypeParcours()->value !== 'classique') {
+                        $typeParcoursTxt = $parcours->getTypeParcours()->libelle();
+                    }
+                    $this->excelWriter->writeCellXY('V', $ligne, $typeParcoursTxt);
 //                    $this->excelWriter->getColumnsAutoSize('A', 'R');
                     $ligne++;
                 }

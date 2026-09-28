@@ -72,6 +72,8 @@ class ExportVolumeHoraireParcours implements ExportInterface
         $this->excelWriter->writeCellXYHeader(10, 1, 'Heures EqTd maj.' . $libelleCampagneCourante);
         $this->excelWriter->writeCellXYHeader(11, 1, 'Ecart EqTd maj');
         $this->excelWriter->writeCellXYHeader(12, 1, 'Commentaire');
+        $this->excelWriter->writeCellXYHeader(13, 1, 'Identifiant');
+        $this->excelWriter->writeCellXYHeader(14, 1, 'Type du Parcours');
 
         $ligne = 2;
         /** @var DpeParcours $dpeParcours */
@@ -129,10 +131,17 @@ class ExportVolumeHoraireParcours implements ExportInterface
             $this->excelWriter->writeCellXY(10, $ligne, $heuresCourantesMaj);
             $this->excelWriter->writeCellXY(11, $ligne, $ecartMaj);
             $this->excelWriter->writeCellXY(12, $ligne, $commentaire);
+            $this->excelWriter->writeCellXY(13, $ligne, $parcours->getId() ?? "");
+
+            $typeParcoursTxt = "";
+            if($parcours->getTypeParcours()->value !== 'classique') {
+                $typeParcoursTxt = $parcours->getTypeParcours()->libelle();
+            }
+            $this->excelWriter->writeCellXY(14, $ligne, $typeParcoursTxt);
             $ligne++;
         }
 
-        $this->excelWriter->getColumnsAutoSize('A', 'H');
+        $this->excelWriter->getColumnsAutoSize('A', 'N');
         $this->fileName = Tools::FileName('Volumes-horaires-parcours-' . $libelleCampagneCourante . '-' . (new DateTime())->format('d-m-Y-H-i'), 60);
     }
 

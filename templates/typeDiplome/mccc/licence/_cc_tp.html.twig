@@ -1,0 +1,58 @@
+<h3>1ᵉ Session</h3>
+<input type="hidden" value="cc_tp" name="type_cc">
+<div>
+    <div class="row gy-2">
+        <div class="col-4">
+            <strong>Contrôle continu (TP exclusivement)</strong>
+        </div>
+        <div id="epreuves_ct">
+            {% if mcccs[1]['cc'] is defined %}
+                {% for i in 1..mcccs[1]['cc']|length %}
+                    {{ include('typeDiplome/mccc/licence/_epreuveTp.html.twig', {index:i}) }}
+                {% endfor %}
+            {% else %}
+                {{ include('typeDiplome/mccc/licence/_epreuveTp.html.twig', {index:1}) }}
+            {% endif %}
+        </div>
+        <button class="btn btn-primary mb-2 synchro-mccc"
+                {{ stimulus_action('mccc--licence', 'addEpreuveCCTp', 'click') }}
+        >Ajouter une épreuve de TP
+        </button>
+        </div>
+    </div>
+    <div>
+        <div class="form-check mb-2">
+            <input class="form-check-input synchro-mccc" type="checkbox" id="ccHasSecondeSession" name="ccHasSecondeSession"
+                   {% if mcccs[2]['et'] is defined and mcccs[2]['et']|length > 0 %}checked{% endif %}
+                    {{ stimulus_action('mccc--licence', "ccHasSecondeSession", 'change') }}
+            >
+            <label class="form-check-label" for="ccHasSecondeSession"> Seconde session proposée ?
+                <i
+                        class="fal fa-question-circle ms-1" data-controller="tooltip"
+                        data-tooltip-placement-value="bottom"
+                        title="{{ 'mccc.licence.helps.ccHasSecondeSession'|trans({}, 'help') }}"></i></label>
+        </div>
+</div>
+<div id="epreuves_s2_cc_tp" class="{% if mcccs[2]['et'] is defined and mcccs[2]['et']|length > 0 %}d-block{% else %}d-none{% endif %}"> {# Uniquement si seconde session coché #}
+    <h3>2ᵉ Session</h3>
+    <div id="epreuves_s2_ct">
+        {% if mcccs[2]['et'] is defined %}
+            {% for i in 1..mcccs[2]['et']|length %}
+                {{ include('typeDiplome/mccc/licence/_secondeChance.html.twig', {index:i}) }}
+            {% else %}
+                {{ include('typeDiplome/mccc/licence/_secondeChance.html.twig',{index:1}) }}
+            {% endfor %}
+        {% else %}
+            {{ include('typeDiplome/mccc/licence/_secondeChance.html.twig',{index:1}) }}
+        {% endif %}
+    </div>
+
+    <button class="btn btn-primary mb-2 synchro-mccc"
+            {{ stimulus_action('mccc--licence', 'addEpreuveSecondeSession', 'click') }}
+    >Ajouter une épreuve pour la 2e session
+    </button>
+</div>
+
+<div class="alert alert-danger d-none mt-2" {{ stimulus_target('mccc--licence', 'zoneErreur') }}>
+
+</div>

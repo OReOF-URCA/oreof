@@ -41,11 +41,16 @@ class GetFormations
         } else {
 
             $formations = [];
+            $canListNonClassique = false;
             //gérer le cas ou l'utilisateur dispose des droits pour lire la composante
             $centres = $user?->getUserProfils();
             $tempFormation = [];
             /** @var UserProfil $centre */
             foreach ($centres as $centre) {
+                if ($centre->getProfil()?->getId() === 20) {
+                    $canListNonClassique = true;
+                }
+
                 if (
                     $centre->getComposante() !== null &&
                     $this->authorizationChecker->isGranted('SHOW', ['route' => 'app_composante', 'subject' => $centre->getComposante()])) {
@@ -65,6 +70,13 @@ class GetFormations
             }
 
             $formations[] = $tempFormation;
+
+            if ($canListNonClassique) {
+                $formations[] = array_filter(
+                    $this->formationRepository->findBySearch($q, $campagneCollecte, $options),
+                    static fn($formation) => $formation->getTypeDiplome()?->isClassique() === false
+                );
+            }
 
             $formations[] = $this->formationRepository->findByComposanteDpe(
                 $user,

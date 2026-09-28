@@ -198,6 +198,7 @@ abstract class ExtractTextFromJsonPatch
             return match ($value) {
                 'ct' => 'Contrôle Terminal',
                 'cc' => 'Contrôle Continu',
+                'cc_tp' => 'Contrôle Continu (EC TP)',
                 'cci' => 'Contrôle Continu Intégral',
                 'cc_ct' => 'Contrôle Continu + Contrôle Terminal',
                 default => 'Erreur'

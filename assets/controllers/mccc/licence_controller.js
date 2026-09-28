@@ -17,7 +17,7 @@ export default class extends Controller {
     afficheMccc: Boolean,
   }
 
-  connect() {
+  connect () {
     if (this.typeMcccValue !== null && this.afficheMcccValue === true) {
       this._loadTypeMccc(this.typeMcccValue).then(() => {
         this._verifyTypeEpreuveCt()
@@ -26,38 +26,38 @@ export default class extends Controller {
     }
   }
 
-  updateForm() {
+  updateForm () {
     if (this.typeMcccValue !== null && this.afficheMcccValue === true) {
       this._loadTypeMccc(this.typeMcccValue)
     }
   }
 
-  _verifyTypeEpreuveEt() {
+  _verifyTypeEpreuveEt () {
     document.querySelectorAll('.typeEpreuveSelectEt').forEach((element) => {
       const name = element.getAttribute('name')
       this._changeTypeEpreuveEt(name)
     })
   }
 
-  _verifyTypeEpreuveCt() {
+  _verifyTypeEpreuveCt () {
     document.querySelectorAll('.typeEpreuveSelectCt').forEach((element) => {
       const name = element.getAttribute('name')
       this._changeTypeEpreuveCt(name)
     })
   }
 
-  changeType(event) {
+  changeType (event) {
     if (confirm('Attention, vous allez perdre les données saisies. Êtes-vous sûr ?')) {
       this._loadTypeMccc(event.target.value)
     }
   }
 
-  changeTypeEpreuveCt(event) {
+  changeTypeEpreuveCt (event) {
     const name = event.target.getAttribute('name')
     this._changeTypeEpreuveCt(name)
   }
 
-  _changeTypeEpreuveCt(name) {
+  _changeTypeEpreuveCt (name) {
     const numEpreuve = name.substr(name.lastIndexOf('_') + 1)
     const option1 = document.querySelector(`#typeEpreuve_s1_${numEpreuve} option:checked`)
     document.getElementById(`duree_s1_${numEpreuve}`).disabled = !(parseInt(option1.dataset.hasduree, 10) === 1)
@@ -67,12 +67,12 @@ export default class extends Controller {
     }
   }
 
-  changeTypeEpreuveEt(event) {
+  changeTypeEpreuveEt (event) {
     const name = event.target.getAttribute('name')
     this._changeTypeEpreuveEt(name)
   }
 
-  _changeTypeEpreuveEt(name) {
+  _changeTypeEpreuveEt (name) {
     const numEpreuve = name.substr(name.lastIndexOf('_') + 1)
     const option1 = document.querySelector(`#typeEpreuve_s2_${numEpreuve} option:checked`)
     document.getElementById(`duree_s2_${numEpreuve}`).disabled = !(parseInt(option1.dataset.hasduree, 10) === 1)
@@ -82,15 +82,22 @@ export default class extends Controller {
     }
   }
 
-  async _loadTypeMccc(typeMccc) {
+  async _loadTypeMccc (typeMccc) {
     const params = new URLSearchParams()
     params.append('type', typeMccc)
 
     const response = await fetch(`${this.urlValue}?${params.toString()}`)
     this.zoneTarget.innerHTML = await response.text()
+    // une fois chargé vérifier ccHasSecondeSession
+    const ccHasSecondeSession = document.getElementById('ccHasSecondeSession')
+    //configurer selon la valeur du checkbox, afficher ou masquer la zone des épreuves de seconde session
+    if (ccHasSecondeSession !== null) {
+      this.ccHasSecondeSession({ target: ccHasSecondeSession })
+    }
+
   }
 
-  saveDataCcCt() {
+  saveDataCcCt () {
     // todo: gérer les cas multiples sur les secondes session... Revoir affichage/masquage
     // on vérifie que le pourcentage est bien de 100
     const total = parseFloat(document.getElementById('pourcentage_s1_cc').value) + parseFloat(document.getElementById('pourcentage_s1_et').value)
@@ -133,7 +140,7 @@ export default class extends Controller {
   //   }
   // }
 
-  saveDataCci() {
+  saveDataCci () {
     let total = 0
     const erreurs = []
     document.querySelectorAll('.pourcentage').forEach((element) => {
@@ -156,7 +163,7 @@ export default class extends Controller {
     }
   }
 
-  addEpreuveCci(event) {
+  addEpreuveCci (event) {
     event.preventDefault()
     // ajouter un nouveau champs pour une nouvelle épreuve
     const div = document.createElement('div')
@@ -197,7 +204,7 @@ export default class extends Controller {
     document.getElementById('epreuve_cci').appendChild(div)
   }
 
-  addEpreuveSecondeSession(event) {
+  addEpreuveSecondeSession (event) {
     event.preventDefault()
     // ajouter un nouveau champs pour une nouvelle épreuve
     const div = document.createElement('div')
@@ -210,8 +217,8 @@ export default class extends Controller {
     // const epreuve1 = document.querySelector('.epreuve_s2_ct')
     // let html = epreuve1.innerHTML
     // html = html.replace(/ct1/g, `ct${numEp}`)
-    const html = document.querySelector('.epreuve_s2_ct').cloneNode(true);
-    this._renumberMcccFormFields(html, /_ct1/, `_ct${numEp}`, true);
+    const html = document.querySelector('.epreuve_s2_ct').cloneNode(true)
+    this._renumberMcccFormFields(html, /_ct1/, `_ct${numEp}`, true)
 
     // ajouter le numéro de l'epreuve dans le texte
     // parcours tous les éléments da epreuve_et et numéroter le texte
@@ -231,14 +238,14 @@ export default class extends Controller {
     document.querySelectorAll('.epreuve_s2_ct').forEach((element, indexLoop) => {
       // const htmlTitre = element.innerHTML
       // element.innerHTML = htmlTitre.replace(/Session N°[0-9]/g, `Session N°${index}`)
-      this._renameEpreuveTitle(element, /Session N°[0-9]/, `Session N°${index}`);
+      this._renameEpreuveTitle(element, /Session N°[0-9]/, `Session N°${index}`)
 
       // On remet à zéro la nouvelle épreuve (dernière de la liste)
       if (indexLoop === nbEpreuves) {
         element.querySelector('input[id^="pourcentage"]').value = ''
-        element.querySelector('select[id^="typeEpreuve"]').selectedIndex = 0;
+        element.querySelector('select[id^="typeEpreuve"]').selectedIndex = 0
         element.querySelector('input[id^="duree"]').value = ''
-        element.querySelector('textarea[id^="justification"]').required = false;
+        element.querySelector('textarea[id^="justification"]').required = false
         element.querySelector('textarea[id^="justification"]').value = ''
       }
 
@@ -253,7 +260,7 @@ export default class extends Controller {
     this._verifyTypeEpreuveEt()
   }
 
-  addEpreuveCt(event) {
+  addEpreuveCt (event) {
     event.preventDefault()
     // ajouter un nouveau champs pour une nouvelle épreuve
 
@@ -273,7 +280,7 @@ export default class extends Controller {
     // récupérer le contenu de la première épreuve, et le dupliquer
     const html = document.querySelector('.epreuve_ct').cloneNode(true)
     // html.innerHTML = html.innerHTML.replace(/ct1/g, `ct${numEp}`)
-    this._renumberMcccFormFields(html, /_ct1/, `_ct${numEp}`, true);
+    this._renumberMcccFormFields(html, /_ct1/, `_ct${numEp}`, true)
 
     // Initialisation de la nouvelle épreuve
     // À ce moment là, l'index 'idx' a la bonne valeur
@@ -282,7 +289,7 @@ export default class extends Controller {
     newEpreuve[`pourcentage_s1_ct${idx}`] = ''
     newEpreuve[`typeEpreuve_s1_ct${idx}`] = ''
     newEpreuve[`duree_s1_ct${idx}`] = ''
-    tab[idx] = newEpreuve;
+    tab[idx] = newEpreuve
 
     // ajouter le numéro de l'epreuve dans le texte
     // parcours tous les éléments da epreuve_et et numéroter le texte
@@ -306,7 +313,7 @@ export default class extends Controller {
     document.querySelectorAll('.epreuve_ct').forEach((element) => {
       // const htmlTitre = element.innerHTML
       // element.innerHTML = htmlTitre.replace(/Contrôle terminal N°[0-9]/g, `Contrôle terminal N°${index}`)
-      this._renameEpreuveTitle(element, /Contrôle terminal N°[0-9]/, `Contrôle terminal N°${index}`);
+      this._renameEpreuveTitle(element, /Contrôle terminal N°[0-9]/, `Contrôle terminal N°${index}`)
       document.getElementById(`pourcentage_s1_ct${index}`).value = tab[index][`pourcentage_s1_ct${index}`]
       document.getElementById(`typeEpreuve_s1_ct${index}`).value = tab[index][`typeEpreuve_s1_ct${index}`]
       document.getElementById(`duree_s1_ct${index}`).value = tab[index][`duree_s1_ct${index}`]
@@ -322,7 +329,63 @@ export default class extends Controller {
     this._verifyTypeEpreuveCt()
   }
 
-  addEpreuveCcAutresDiplomes(event) {
+  addEpreuveCCTp (event) {
+    event.preventDefault()
+    // ajouter un nouveau champs pour une nouvelle épreuve
+
+    const nbEpreuves = document.querySelectorAll('.epreuve_ct')
+    const numEp = nbEpreuves.length + 1
+    const tab = []
+    let idx = 1
+    // sauvegarde des données des champs
+    nbEpreuves.forEach(() => {
+      tab[idx] = []
+      tab[idx][`pourcentage_s1_ct${idx}`] = document.getElementById(`pourcentage_s1_ct${idx}`).value
+      idx++
+    })
+
+    // récupérer le contenu de la première épreuve, et le dupliquer
+    const html = document.querySelector('.epreuve_ct').cloneNode(true)
+    // html.innerHTML = html.innerHTML.replace(/ct1/g, `ct${numEp}`)
+    this._renumberMcccTPFormFields(html, /_ct1/, `_ct${numEp}`, true)
+
+    // Initialisation de la nouvelle épreuve
+    // À ce moment là, l'index 'idx' a la bonne valeur
+    // car incrémenté en fin de boucle précédente
+    const newEpreuve = []
+    newEpreuve[`pourcentage_s1_ct${idx}`] = ''
+    tab[idx] = newEpreuve
+
+    // ajouter le numéro de l'epreuve dans le texte
+    // parcours tous les éléments da epreuve_et et numéroter le texte
+
+    html.innerHTML += `
+        <div class="col-8">&nbsp;</div>
+        <div class="col-4 d-grid mt-2">
+        <button type="button" class="btn btn-danger btn-sm d-block" data-action="click->mccc--licence#removeEpreuveCCTPS1">
+            <i class="fas fa-trash"></i>
+        </button>
+        </div>`
+
+    const div = document.createElement('div')
+    div.classList.add('row')
+    div.classList.add('epreuve_ct')
+    div.innerHTML = html.innerHTML
+    document.getElementById('epreuves_ct').appendChild(div)
+
+    let index = 1
+    document.querySelectorAll('.epreuve_ct').forEach((element) => {
+      // const htmlTitre = element.innerHTML
+      // element.innerHTML = htmlTitre.replace(/Contrôle terminal N°[0-9]/g, `Contrôle terminal N°${index}`)
+      this._renameEpreuveTitle(element, /Contrôle TP N°[0-9]/, `Contrôle TP N°${index}`)
+      document.getElementById(`pourcentage_s1_ct${index}`).value = tab[index][`pourcentage_s1_ct${index}`]
+      index++
+    })
+
+    this._verifyTypeEpreuveCt()
+  }
+
+  addEpreuveCcAutresDiplomes (event) {
     event.preventDefault()
     // ajouter un nouveau champs pour une nouvelle épreuve
 
@@ -366,7 +429,7 @@ export default class extends Controller {
     })
   }
 
-  removeEpreuveCtS1(event) {
+  removeEpreuveCtS1 (event) {
     event.preventDefault()
     const div = event.target.closest('.epreuve_ct')
     div.remove()
@@ -379,13 +442,28 @@ export default class extends Controller {
       // html = html.replace(/ct[0-9]/g, `ct${numEp}`)
       // element.innerHTML = html
 
-      this._renameEpreuveTitle(element, /Contrôle terminal N°[0-9]/, `Contrôle terminal N°${numEp}`);
-      this._renumberMcccFormFields(element, /_ct[0-9]/, `_ct${numEp}`);
+      this._renameEpreuveTitle(element, /Contrôle terminal N°[0-9]/, `Contrôle terminal N°${numEp}`)
+      this._renumberMcccFormFields(element, /_ct[0-9]/, `_ct${numEp}`)
       numEp++
     })
   }
 
-  removeEpreuveCt(event) {
+  removeEpreuveCCTPS1 (event) {
+    event.preventDefault()
+    const div = event.target.closest('.epreuve_ct')
+    div.remove()
+
+    // renuméroter les épreuves
+    let numEp = 1
+    document.querySelectorAll('.epreuve_ct').forEach((element) => {
+
+      this._renameEpreuveTitle(element, /Contrôle TP N°[0-9]/, `Contrôle TP N°${numEp}`)
+      this._renumberMcccTPFormFields(element, /_ct[0-9]/, `_ct${numEp}`)
+      numEp++
+    })
+  }
+
+  removeEpreuveCt (event) {
     event.preventDefault()
     const div = event.target.closest('.epreuve_s2_ct')
     div.remove()
@@ -398,13 +476,13 @@ export default class extends Controller {
       // html = html.replace(/et[0-9]/g, `et${numEp}`)
       // element.innerHTML = html
 
-      this._renameEpreuveTitle(element, /Examen 2ᵉ Session N°[0-9]/, `Examen 2ᵉ Session N°${numEp}`);
-      this._renumberMcccFormFields(element, /_ct[0-9]/, `_ct${numEp}`);
+      this._renameEpreuveTitle(element, /Examen 2ᵉ Session N°[0-9]/, `Examen 2ᵉ Session N°${numEp}`)
+      this._renumberMcccFormFields(element, /_ct[0-9]/, `_ct${numEp}`)
       numEp++
     })
   }
 
-  removeEpreuveCcAutre(event) {
+  removeEpreuveCcAutre (event) {
     event.preventDefault()
     const div = event.target.closest('.epreuve_cc_autre')
     div.remove()
@@ -420,7 +498,7 @@ export default class extends Controller {
     })
   }
 
-  removeEpreuveCci(event) {
+  removeEpreuveCci (event) {
     event.preventDefault()
     const div = event.target.closest('.epreuve')
     div.remove()
@@ -435,10 +513,15 @@ export default class extends Controller {
     })
   }
 
-  ccHasTp(event) {
+  ccHasTp (event) {
     document.getElementById('cc_has_tp_pourcentage').disabled = !event.target.checked
     document.getElementById('ccHasTpBlock').classList.remove(event.target.checked ? 'd-none' : 'd-block')
     document.getElementById('ccHasTpBlock').classList.add(event.target.checked ? 'd-block' : 'd-none')
+  }
+
+  ccHasSecondeSession (event) {
+    document.getElementById('epreuves_s2_cc_tp').classList.remove(event.target.checked ? 'd-none' : 'd-block')
+    document.getElementById('epreuves_s2_cc_tp').classList.add(event.target.checked ? 'd-block' : 'd-none')
   }
 
   /**
@@ -446,7 +529,7 @@ export default class extends Controller {
    * en modifiant leurs attributs HTML
    * id, name, for
    */
-  _renumberMcccFormFields(epreuveElement, selector, newValue, withReset = false) {
+  _renumberMcccFormFields (epreuveElement, selector, newValue, withReset = false) {
     // Pourcentage
     const labelPourcentage = epreuveElement.querySelector('label[for^="pourcentage"]')
     const pourcentage = epreuveElement.querySelector('input[id^="pourcentage"]')
@@ -469,15 +552,15 @@ export default class extends Controller {
       justificationController.dataset[nameJustifController],
       selector,
       newValue,
-    );
+    )
 
     if (withReset) {
       justificationController.dataset[hasJustificationController] = 'false'
       justificationController.dataset[justificationTextController] = ''
-      epreuveElement.querySelector('div[data-mccc-with-justification-target="displayDiv"]').classList.add('d-none');
+      epreuveElement.querySelector('div[data-mccc-with-justification-target="displayDiv"]').classList.add('d-none')
     }
 
-    [
+    const elements = [
       labelPourcentage,
       pourcentage,
       labelTypeEpreuve,
@@ -485,21 +568,44 @@ export default class extends Controller {
       labelDuree,
       duree,
       textJustification,
-    ].forEach((attr) => {
-      ['htmlFor', 'id', 'name'].forEach((property) => {
-        if (attr[property] !== undefined) {
-          attr[property] = this._replaceHTMLAttributeValue(attr[property], selector, newValue)
-        }
-      })
-    });
+    ]
+    elements.forEach((attr) => {
+      if (attr) {
+        ['htmlFor', 'id', 'name'].forEach((property) => {
+          if (attr[property] !== undefined) {
+            attr[property] = this._replaceHTMLAttributeValue(attr[property], selector, newValue)
+          }
+        })
+      }
+    })
   }
 
-  _renameEpreuveTitle(epreuveElement, selector, newValue) {
+  _renumberMcccTPFormFields (epreuveElement, selector, newValue, withReset = false) {
+    // Pourcentage
+    const labelPourcentage = epreuveElement.querySelector('label[for^="pourcentage"]')
+    const pourcentage = epreuveElement.querySelector('input[id^="pourcentage"]')
+
+    const elements = [
+      labelPourcentage,
+      pourcentage,
+    ]
+    elements.forEach((attr) => {
+      if (attr) {
+        ['htmlFor', 'id', 'name'].forEach((property) => {
+          if (attr[property] !== undefined) {
+            attr[property] = this._replaceHTMLAttributeValue(attr[property], selector, newValue)
+          }
+        })
+      }
+    })
+  }
+
+  _renameEpreuveTitle (epreuveElement, selector, newValue) {
     epreuveElement.querySelector(':first-child strong').innerHTML = epreuveElement.querySelector(':first-child strong')
-      .innerHTML.replace(selector, newValue);
+      .innerHTML.replace(selector, newValue)
   }
 
-  _replaceHTMLAttributeValue(attribute, selector, newValue) {
-    return attribute.replace(selector, newValue);
+  _replaceHTMLAttributeValue (attribute, selector, newValue) {
+    return attribute.replace(selector, newValue)
   }
 }

@@ -53,6 +53,8 @@ class ExportSeip implements ExportInterface
         $this->excelWriter->writeCellXY('K', 1, 'Modalités projet');
         $this->excelWriter->writeCellXY('L', 1, 'TER/mémoire');
         $this->excelWriter->writeCellXY('M', 1, 'Modalités TER');
+        $this->excelWriter->writeCellXY('N', 1, 'Identifiant');
+        $this->excelWriter->writeCellXY('O', 1, 'Type du Parcours');
 
         $ligne = 2;
         foreach ($formations as $formation) {
@@ -74,6 +76,13 @@ class ExportSeip implements ExportInterface
                 $this->excelWriter->writeCellXY('K', $ligne, CleanTexte::cleanTextArea($parcours->getProjetText()), ['wrap' => true]);
                 $this->excelWriter->writeCellXY('L', $ligne, $parcours->isHasMemoire()? 'Oui' : 'Non');
                 $this->excelWriter->writeCellXY('M', $ligne, CleanTexte::cleanTextArea($parcours->getMemoireText()), ['wrap' => true]);
+                $this->excelWriter->writeCellXY('N', $ligne, $parcours->getId());
+
+                $typeParcoursTxt = "";
+                if($parcours->getTypeParcours()->value !== 'classique') {
+                    $typeParcoursTxt = $parcours->getTypeParcours()->libelle();
+                }
+                $this->excelWriter->writeCellXY('O', $ligne, $typeParcoursTxt);
                 $ligne++;
             }
         }

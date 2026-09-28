@@ -1,0 +1,40 @@
+<div class="row epreuve_ct">
+    <div class="col-4">
+        <strong>Contrôle TP N°{{ index }}</strong>
+    </div>
+    <div class="col-4">
+        <label for="pourcentage_s1_ct{{ index }}">
+            Pourcentage
+            <i class="fal fa-question-circle ms-1"
+               data-controller="tooltip"
+               data-tooltip-placement-value="bottom"
+               aria-label="{{ 'mccc_licence.helps.cc_ct.pourcentage_s1_et.help'|trans({}, 'help') }}"
+               data-bs-original-title="{{ 'mccc_licence.helps.cc_ct.pourcentage_s1_et.help'|trans({}, 'help') }}"></i>
+        </label>
+        <div class="input-group">
+            <input type="text" class="form-control synchro-mccc" id="pourcentage_s1_ct{{ index }}"
+                   name="pourcentage_s1_ct{{ index }}"
+                    {% if mcccs[1]['cc'][index] is defined %}
+                        value="{{ mcccs[1]['cc'][index].pourcentage }}"
+                    {% elseif mcccs[1]['cc'] is not defined and index == 1 %}
+                        value="100"
+                    {% endif %}
+            >
+            <span class="input-group-text">%</span>
+        </div>
+    </div>
+
+    <div class="col-4">
+        &nbsp;
+    </div>
+    {% if index > 1 %}
+        <div class="col-8">&nbsp;</div>
+        <div class="col-4 d-grid mt-2">
+            <button type="button" class="btn btn-danger btn-sm d-block synchro-mccc"
+                    data-action="click->mccc--licence#removeEpreuveCCTPS1">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    {% endif %}
+</div>
+

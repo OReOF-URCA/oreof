@@ -295,6 +295,7 @@ formation_step1.labels.sigle: 'Sigle de la formation'
 form.labels.objectifsFormation: "Décrivez l'organisation de la formation"
 mccc_licence.labels.choix_type_mccc.label: 'Modalités de contrôle de connaissance'
 mccc_licence.ct.label: 'Contrôle terminal (CT)'
+mccc_licence.cc_tp.label: 'Contrôle continu (CC) - Travaux pratiques'
 mccc_licence.cc_ct.label: 'Contrôle continu + Contrôle terminal (CC+CT)'
 mccc_licence.cc.label: 'Contrôle continu (CC)'
 mccc_licence.cci.label: 'Contrôle continu intégral (CCi)'

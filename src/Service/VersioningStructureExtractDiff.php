@@ -444,6 +444,29 @@ class VersioningStructureExtractDiff
                 }
                 $texte = substr($texte, 0, -2);
                 break;
+            case 'cc_tp':
+                $texte = '';
+                if (array_key_exists(1, $mcccs) && array_key_exists('cc', $mcccs[1])) {
+                    $nb = 1;
+                    foreach ($mcccs[1]['cc'] as $mccc) {
+                        $texte .= 'TP' . $nb . ' (' . $mccc->getPourcentage() . '%) + ';
+                        $nb++;
+                    }
+
+                    $texte = substr($texte, 0, -3);
+                }
+
+                if (array_key_exists(2, $mcccs) && array_key_exists('et', $mcccs[2]) && is_array($mcccs[2]['et']) && count($mcccs[2]['et']) > 0) {
+                    $texte2 = '';
+                    foreach ($mcccs[2]['et'] as $mccc) {
+                        $texte2 .= $this->displayTypeEpreuveWithDureePourcentage($mccc);
+                    }
+
+                    $texte2 = substr($texte2, 0, -2);
+                    $texte .= " Session 2 : " . $texte2;
+                }
+
+                break;
             case 'cc_ct':
                 if (array_key_exists(1, $mcccs) && array_key_exists('cc', $mcccs[1]) && $mcccs[1]['cc'] !== null) {
                     $texte = '';
@@ -722,6 +745,31 @@ class VersioningStructureExtractDiff
                 }
                 $texte = substr($texte, 0, -2);
                 $tDisplay['COL_MCCC_CCI'] = $texte;
+
+                break;
+            case 'cc_tp':
+                $texte = '';
+                if (array_key_exists(1, $mcccs) && array_key_exists('cc', $mcccs[1])) {
+                    $nb = 1;
+                    /** @var Mccc $mccc */
+                    foreach ($mcccs[1]['cc'] as $mccc) {
+                        $texte .= 'TP' . $nb . ' (' . $mccc->getPourcentage() . '%); ';
+                        $nb++;
+                    }
+
+                    $texte = substr($texte, 0, -2);
+                    $tDisplay['COL_MCCC_CC'] = $texte;
+                }
+
+                if (array_key_exists(2, $mcccs) && array_key_exists('et', $mcccs[2]) && is_array($mcccs[2]['et']) && count($mcccs[2]['et']) > 0) {
+                    $texte = '';
+                    foreach ($mcccs[2]['et'] as $mccc) {
+                        $texte .= $this->displayTypeEpreuveWithDureePourcentage($mccc);
+                    }
+
+                    $texte = substr($texte, 0, -2);
+                    $tDisplay['COL_MCCC_SECONDE_CHANCE_CC_SANS_TP'] = $texte;
+                }
 
                 break;
             case 'cc_ct':
