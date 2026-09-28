@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Traits\LifeCycleTrait;
 
 #[ORM\Entity(repositoryClass: DpeFormationRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class DpeFormation
 {
 

@@ -65,8 +65,13 @@
                 </div>
                 <div>
                     <p class="text-sm font-semibold">Formation verrouillée</p>
-                    <p class="text-xs text-amber-700/80 dark:text-amber-300/80">Réouverture nécessaire pour permettre
-                        des modifications.</p>
+                    <p class="text-xs text-amber-700/80 dark:text-amber-300/80">
+                        {% if can_edit_module('offre_formation') %}
+                            Réouverture nécessaire pour permettre des modifications.
+                        {% else %}
+                            {{ module_status('offre_formation').message }}
+                        {% endif %}
+                    </p>
                 </div>
             </div>
 
@@ -88,17 +93,28 @@
 
             <div class="flex flex-wrap items-center gap-2">
                 {% if is_granted('MANAGE', {route: 'app_formation', subject: this.formation}) or is_granted('ROLE_ADMIN') %}
-                    <a
-                            class="{{ quickBtnWarning }}"
-                            {{ stimulus_controller('tooltip') }}
-                            href="{{ path('app_formation_change_rf', {formation: formation.id}) }}"
-                            data-turbo="true"
-                            data-action="click->modalturbo#open"
-                            title="{{ 'formation.change_rf.title'|trans({}, 'form') }}"
-                    >
-                        {{ ux_icon('icon:sync', {class: 'h-4 w-4'}) }}
-                        <span>{{ 'formation.change_rf.label'|trans({}, 'form') }}</span>
-                    </a>
+                    {% if can_edit_module('offre_formation') %}
+                        <a
+                                class="{{ quickBtnWarning }}"
+                                {{ stimulus_controller('tooltip') }}
+                                href="{{ path('app_formation_change_rf', {formation: formation.id}) }}"
+                                data-turbo="true"
+                                data-action="click->modalturbo#open"
+                                title="{{ 'formation.change_rf.title'|trans({}, 'form') }}"
+                        >
+                            {{ ux_icon('icon:sync', {class: 'h-4 w-4'}) }}
+                            <span>{{ 'formation.change_rf.label'|trans({}, 'form') }}</span>
+                        </a>
+                    {% else %}
+                        <span
+                                class="{{ quickBtnSecondary }} opacity-60 cursor-not-allowed select-none"
+                                {{ stimulus_controller('tooltip') }}
+                                title="{{ module_status('offre_formation').message }}"
+                        >
+                            {{ ux_icon('icon:lock', {class: 'h-4 w-4'}) }}
+                            <span>{{ 'formation.change_rf.label'|trans({}, 'form') }}</span>
+                        </span>
+                    {% endif %}
                 {% endif %}
 
                 <button class="{{ quickBtnSecondary }}"

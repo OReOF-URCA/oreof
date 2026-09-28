@@ -162,7 +162,15 @@
                 </div>
                 <div>
                     <p class="text-sm font-semibold">{{ this.editable ? 'Parcours en cours de modification.' : 'Parcours verrouillé.' }}</p>
-                    <p class="text-xs opacity-80">Suivez l'avancement et les actions disponibles pour ce DPE.</p>
+                    <p class="text-xs opacity-80">
+                        {% if this.editable %}
+                            Suivez l'avancement et les actions disponibles pour ce DPE.
+                        {% elseif not can_edit_module('dpe') %}
+                            {{ module_status('dpe').message }}
+                        {% else %}
+                            Suivez l'avancement et les actions disponibles pour ce DPE.
+                        {% endif %}
+                    </p>
                 </div>
             </div>
 
@@ -210,42 +218,69 @@
                     <span>Voir PV</span>
                 </button>
 
-                <div class="relative" data-controller="navbar-dropdown"
-                     data-action="click@window->navbar-dropdown#close">
-                    <button class="{{ quickBtnSuccess }}"
+                {% set canEditDpe = can_edit_module('dpe') %}
+                {% if canEditDpe and validationOptions|length > 0 %}
+                    <div class="relative" data-controller="navbar-dropdown"
+                         data-action="click@window->navbar-dropdown#close">
+                        <button class="{{ quickBtnSuccess }}"
+                                type="button"
+                                data-action="click->navbar-dropdown#toggle"
+                                aria-expanded="false">
+                            {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
+                            <span>Gestion du DPE</span>
+                            {{ ux_icon('icon:chevron-down', {class: 'h-4 w-4'}) }}
+                        </button>
+                        <ul data-navbar-dropdown-target="content"
+                            class="hidden absolute right-0 top-full z-30 mt-2 min-w-[22rem] rounded-2xl border border-secondary-200 bg-white p-2 shadow-2xl dark:border-secondary-700 dark:bg-secondary-900">
+                            {% for key, option in validationOptions %}
+                                {% set isReouverture = option.metadata.type == 'reouvrir' or key starts with 'reouvrir' %}
+                                {% set itemStyle = dpeItemStyles[option.metadata.button_class]|default(dpeItemStyles['secondary']) %}
+                                <li>
+                                    {% if isReouverture and not canEditDpe %}
+                                        <div class="flex items-start gap-3 rounded-xl px-3 py-3 text-sm text-secondary-400 opacity-60 cursor-not-allowed select-none dark:text-secondary-500"
+                                             {{ stimulus_controller('tooltip') }}
+                                             title="{{ module_status('dpe').message }}">
+                                            <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary-100 text-secondary-400 dark:bg-secondary-800">
+                                                <i class="fas {{ option.metadata.button_icon }} text-xs"></i>
+                                            </span>
+                                            <span class="min-w-0">
+                                                <span class="block font-semibold text-secondary-500 dark:text-secondary-400">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>
+                                                <span class="block text-xs text-secondary-400 dark:text-secondary-500">{{ module_status('dpe').message }}</span>
+                                            </span>
+                                        </div>
+                                    {% else %}
+                                        <a class="flex items-start gap-3 rounded-xl px-3 py-3 text-sm text-secondary-700 transition {{ itemStyle.hover }} dark:text-secondary-200"
+                                           data-action="click->modalturbo#open"
+                                           data-turbo="true"
+                                           href="{{ path('parcours_process_apply', {type: option.metadata.type, dpeParcours: dpeParcours.id, transition: key }) }}">
+                                            <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ itemStyle.badge }}">
+                                                <i class="fas {{ option.metadata.button_icon }} text-xs"></i>
+                                            </span>
+                                            <span class="min-w-0">
+                                                <span class="block font-semibold {{ itemStyle.title }}">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>
+                                                <span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ ('workflow.'~key~'.menu.description')|trans({}, 'process') }}</span>
+                                                {% if option.operation_status|default('ready') == 'blocked' %}
+                                                    <span class="mt-1 inline-flex rounded-full bg-danger-100 px-2 py-0.5 text-[10px] font-bold text-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
+                                                        {{ option.blocking_count }} blocage{% if option.blocking_count > 1 %}s{% endif %}
+                                                    </span>
+                                                {% endif %}
+                                            </span>
+                                        </a>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <button class="{{ quickBtnSecondary }} opacity-60 cursor-not-allowed"
                             type="button"
-                            data-action="click->navbar-dropdown#toggle"
-                            aria-expanded="false">
+                            disabled
+                            {{ stimulus_controller('tooltip') }}
+                            title="{{ not canEditDpe ? module_status('dpe').message : 'Aucune action disponible pour le statut actuel.' }}">
                         {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
                         <span>Gestion du DPE</span>
-                        {{ ux_icon('icon:chevron-down', {class: 'h-4 w-4'}) }}
                     </button>
-                    <ul data-navbar-dropdown-target="content"
-                        class="hidden absolute right-0 top-full z-30 mt-2 min-w-[22rem] rounded-2xl border border-secondary-200 bg-white p-2 shadow-2xl dark:border-secondary-700 dark:bg-secondary-900">
-                        {% for key, option in validationOptions %}
-                            {% set itemStyle = dpeItemStyles[option.metadata.button_class]|default(dpeItemStyles['secondary']) %}
-                            <li>
-                                <a class="flex items-start gap-3 rounded-xl px-3 py-3 text-sm text-secondary-700 transition {{ itemStyle.hover }} dark:text-secondary-200"
-                                   data-action="click->modalturbo#open"
-                                   data-turbo="true"
-                                   href="{{ path('parcours_process_apply', {type: option.metadata.type, dpeParcours: dpeParcours.id, transition: key }) }}">
-                                    <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ itemStyle.badge }}">
-                                        <i class="fas {{ option.metadata.button_icon }} text-xs"></i>
-                                    </span>
-                                    <span class="min-w-0">
-                                        <span class="block font-semibold {{ itemStyle.title }}">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>
-                                        <span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ ('workflow.'~key~'.menu.description')|trans({}, 'process') }}</span>
-                                        {% if option.operation_status|default('ready') == 'blocked' %}
-                                            <span class="mt-1 inline-flex rounded-full bg-danger-100 px-2 py-0.5 text-[10px] font-bold text-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
-                                                {{ option.blocking_count }} blocage{% if option.blocking_count > 1 %}s{% endif %}
-                                            </span>
-                                        {% endif %}
-                                    </span>
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+                {% endif %}
 
                 <button class="{{ quickBtnSecondary }}"
                         data-toggle-group="accordion-1"

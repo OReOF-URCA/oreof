@@ -49,6 +49,14 @@ class ParcoursController extends BaseController
         Parcours                   $parcours
     ): Response
     {
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        if (!(
+            $this->isGranted('EDIT', ['route' => 'app_parcours', 'subject' => $dpeParcours->getParcours()]) ||
+            $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $dpeParcours])
+        )) {
+            return $this->redirectToRoute('app_parcours_show', ['id' => $parcours->getId()]);
+        }
+
         if ($parcours->getFormation() !== null) {
             $breadcrumb->add(
                 $parcours->getFormation()->getDisplay(),

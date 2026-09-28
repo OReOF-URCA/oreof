@@ -174,13 +174,21 @@
         <section class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
             <div class="flex items-center gap-3 rounded-2xl border px-4 py-3 shadow-sm {{ this.hasDemande ? 'border-success-200 bg-success-50 text-success-800 dark:border-success-800/70 dark:bg-success-500/10 dark:text-success-300' : 'border-warning-200 bg-warning-50 text-warning-800 dark:border-warning-800/70 dark:bg-warning-500/10 dark:text-warning-300' }}">
                 <div class="flex h-10 w-10 items-center justify-center rounded-full {{ this.hasDemande ? 'bg-success-100 text-success-700 dark:bg-success-500/15 dark:text-success-300' : 'bg-warning-100 text-warning-700 dark:bg-warning-500/15 dark:text-warning-300' }}"
-                     data-controller="tooltip" data-tooltip-placement-value="bottom"
-                     data-bs-original-title="{{ this.hasDemande ? 'Fiche matière en cours de modification.' : 'Fiche matière verrouillée.' }}">
+                     {{ stimulus_controller('tooltip') }}
+                     data-bs-title="{{ this.hasDemande ? 'Fiche matière en cours de modification.' : 'Fiche matière verrouillée.' }}">
                     {{ ux_icon(this.hasDemande ? 'icon:unlock' : 'icon:lock', {class: 'h-4 w-4'}) }}
                 </div>
                 <div>
                     <p class="text-sm font-semibold">{{ this.hasDemande ? 'Fiche matière en cours de modification.' : 'Fiche matière verrouillée.' }}</p>
-                    <p class="text-xs opacity-80">Suivez l'avancement et les actions disponibles pour cette fiche.</p>
+                    <p class="text-xs opacity-80">
+                        {% if this.hasDemande %}
+                            Suivez l'avancement et les actions disponibles pour cette fiche.
+                        {% elseif not can_edit_module('descriptifs') %}
+                            {{ module_status('descriptifs').message }}
+                        {% else %}
+                            Suivez l'avancement et les actions disponibles pour cette fiche.
+                        {% endif %}
+                    </p>
                 </div>
             </div>
 
@@ -203,9 +211,9 @@
                         {% set stateConfig = statusBadgeMap[state] %}
                         <div class="flex items-center">
                             <div class="flex h-10 w-10 items-center justify-center rounded-full ring-2 ring-white {{ stateConfig.bubble }} dark:ring-secondary-900"
-                                 data-controller="tooltip" data-tooltip-placement-value="bottom"
+                                 {{ stimulus_controller('tooltip') }}
                                  aria-label="{{ (prefix~'.'~step.label~'.btn-'~state)|trans({}, 'process') }}"
-                                 data-bs-original-title="{{ (prefix~'.'~step.label~'.btn-'~state)|trans({}, 'process') }}">
+                                 data-bs-title="{{ (prefix~'.'~step.label~'.btn-'~state)|trans({}, 'process') }}">
                                 {{ ux_icon(step.icon, {class: 'h-4 w-4'}) }}
                             </div>
                             {% if not loop.last %}
@@ -224,44 +232,75 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
+                {% set canEditDescriptifs = can_edit_module('descriptifs') %}
                 {# Dropdown Gestion fiche matière #}
-                <div class="relative" data-controller="navbar-dropdown"
-                     data-action="click@window->navbar-dropdown#close">
+                {% if canEditDescriptifs and validationOptions|length > 0 %}
+                    <div class="relative" data-controller="navbar-dropdown"
+                         data-action="click@window->navbar-dropdown#close">
+                        <twig:Button
+                                type="button"
+                                variant="success"
+                                :soft="false"
+                                :outline="true"
+                                size="sm"
+                                icon="icon:check"
+                                label="Gestion fiche matière"
+                                dataAction="click->navbar-dropdown#toggle"
+                                aria-expanded="false"
+                                extraClass="{{ quickBtnSuccess }}"
+                        >
+                            {{ ux_icon('icon:chevron-down', {class: 'h-4 w-4'}) }}
+                        </twig:Button>
+                        <ul data-navbar-dropdown-target="content"
+                            class="hidden absolute right-0 top-full z-30 mt-2 min-w-[22rem] rounded-2xl border border-secondary-200 bg-white p-2 shadow-2xl dark:border-secondary-700 dark:bg-secondary-900">
+                            {% for key, option in validationOptions %}
+                                {% set isReouverture = option.metadata.type == 'reouvrir' or key starts with 'rouvrir' or key starts with 'reouvrir' %}
+                                {% set itemStyle = dpeItemStyles[option.metadata.button_class]|default(dpeItemStyles['secondary']) %}
+                                <li>
+                                    {% if isReouverture and not canEditDescriptifs %}
+                                        <div class="flex items-start gap-3 rounded-xl px-3 py-3 text-sm text-secondary-400 opacity-60 cursor-not-allowed select-none dark:text-secondary-500"
+                                             {{ stimulus_controller('tooltip') }}
+                                             title="{{ module_status('descriptifs').message }}">
+                                            <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary-100 text-secondary-400 dark:bg-secondary-800">
+                                                <i class="fas {{ option.metadata.button_icon }} text-xs"></i>
+                                            </span>
+                                            <span class="min-w-0">
+                                                <span class="block font-semibold text-secondary-500 dark:text-secondary-400">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>
+                                                <span class="block text-xs text-secondary-400 dark:text-secondary-500">{{ module_status('descriptifs').message }}</span>
+                                            </span>
+                                        </div>
+                                    {% else %}
+                                        <a class="flex items-start gap-3 rounded-xl px-3 py-3 text-sm text-secondary-700 transition {{ itemStyle.hover }} dark:text-secondary-200"
+                                           data-action="click->modalturbo#open"
+                                           data-turbo="true"
+                                           href="{{ path('fiche_matiere_process_apply', {type: option.metadata.type, ficheMatiere: ficheMatiere.id, transition: key }) }}">
+                                            <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ itemStyle.badge }}">
+                                                <i class="fas {{ option.metadata.button_icon }} text-xs"></i>
+                                            </span>
+                                            <span class="min-w-0">
+                                                <span class="block font-semibold {{ itemStyle.title }}">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>
+                                                <span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ ('workflow.'~key~'.menu.description')|trans({}, 'process') }}</span>
+                                            </span>
+                                        </a>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
                     <twig:Button
                             type="button"
-                            variant="success"
+                            variant="secondary"
                             :soft="false"
                             :outline="true"
                             size="sm"
                             icon="icon:check"
                             label="Gestion fiche matière"
-                            dataAction="click->navbar-dropdown#toggle"
-                            aria-expanded="false"
-                            extraClass="{{ quickBtnSuccess }}"
-                    >
-                        {{ ux_icon('icon:chevron-down', {class: 'h-4 w-4'}) }}
-                    </twig:Button>
-                    <ul data-navbar-dropdown-target="content"
-                        class="hidden absolute right-0 top-full z-30 mt-2 min-w-[22rem] rounded-2xl border border-secondary-200 bg-white p-2 shadow-2xl dark:border-secondary-700 dark:bg-secondary-900">
-                        {% for key, option in validationOptions %}
-                            {% set itemStyle = dpeItemStyles[option.metadata.button_class]|default(dpeItemStyles['secondary']) %}
-                            <li>
-                                <a class="flex items-start gap-3 rounded-xl px-3 py-3 text-sm text-secondary-700 transition {{ itemStyle.hover }} dark:text-secondary-200"
-                                   data-action="click->modalturbo#open"
-                                   data-turbo="true"
-                                   href="{{ path('fiche_matiere_process_apply', {type: option.metadata.type, ficheMatiere: ficheMatiere.id, transition: key }) }}">
-                                    <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ itemStyle.badge }}">
-                                        <i class="fas {{ option.metadata.button_icon }} text-xs"></i>
-                                    </span>
-                                    <span class="min-w-0">
-                                        <span class="block font-semibold {{ itemStyle.title }}">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>
-                                        <span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ ('workflow.'~key~'.menu.description')|trans({}, 'process') }}</span>
-                                    </span>
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
+                            :disabled="true"
+                            extraClass="{{ quickBtnSecondary }} opacity-60 cursor-not-allowed"
+                            tooltip="{{ not canEditDescriptifs ? module_status('descriptifs').message : 'Aucune action disponible pour le statut actuel.' }}"
+                    />
+                {% endif %}
 
                 <twig:Button
                         type="button"

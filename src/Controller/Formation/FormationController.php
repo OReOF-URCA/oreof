@@ -31,9 +31,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Utils\Access;
 
 #[Route('/formation/v2', name: 'formation_v2_')]
-#[IsGranted('ROLE_ADMIN')]
 class FormationController extends BaseController
 {
     #[Route('/{slug}/modifier', name: 'modifier')]
@@ -48,6 +48,31 @@ class FormationController extends BaseController
         Formation                   $formation
     ): Response
     {
+        if (
+            !(
+                $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $formation]) ||
+                $this->isGranted('EDIT', ['route' => 'app_composante', 'subject' => $formation]) ||
+                $this->isGranted('EDIT', ['route' => 'app_etablissement', 'subject' => $formation]) ||
+                $this->isGranted('ROLE_ADMIN')
+            )
+            || !Access::isOuvert($formation)
+        ) {
+            if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
+                if (!$this->isGranted(
+                    'EDIT',
+                    [
+                        'route' => 'app_parcours',
+                        'subject' => $formation->getParcours()->first(),
+                    ]
+                )) {
+                    return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
+                }
+            } else {
+                return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
+            }
+        }
+        
+
         $breadcrumb->add(
             $formation->getDisplay(),
             'formation_v2_voir',
