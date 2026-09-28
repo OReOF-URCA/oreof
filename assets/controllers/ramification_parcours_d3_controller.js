@@ -54,6 +54,9 @@ export default class extends Controller {
                     return;
                 }
                 else {
+                    while(this.resultListTarget.firstChild) {
+                        this.resultListTarget.removeChild(this.resultListTarget.firstChild);
+                    }
                     jsonParcoursArray.forEach(p => {
                         this.resultListTarget.appendChild(
                             this.#createResultNode(p)
