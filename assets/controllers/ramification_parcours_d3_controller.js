@@ -151,14 +151,26 @@ export default class extends Controller {
             opt.value = typeR['id'];
             selectTypeRamification.appendChild(opt);
         });
+        this.#onSelectTypeRamificationChange(selectTypeRamification, columnNumber);
 
         let infoWrapper = document.createElement('div');
-        infoWrapper.classList.add('text-center', 'mb-3', 'p-1');
+        infoWrapper.classList.add('text-center', 'p-1');
         let stepTitle = document.createElement('span');
         stepTitle.classList.add('badge', 'rounded-pill', 'text-bg-dark');
         stepTitle.textContent = `Niveau ${columnNumber}`;
-        infoWrapper.appendChild(stepTitle);
+        let titlePill = document.createElement('span');
+        titlePill.dataset.columnIndex = columnNumber;
+        titlePill.textContent = '';
+        let libellePill = document.createElement('p');
+        let libelleNiveau = document.createElement('p');
+        libellePill.classList.add('text-center', 'p-1', 'my-1', 'border', 'rounded', 'bg-primary', 'text-white', 'd-none');
+        libelleNiveau.classList.add('text-center', 'p-0', 'my-1');
+
+        libellePill.appendChild(titlePill);
+        libelleNiveau.appendChild(stepTitle);
         infoWrapper.appendChild(selectTypeRamification);
+        infoWrapper.appendChild(libelleNiveau);
+        infoWrapper.appendChild(libellePill);
         choiceDiv.appendChild(infoWrapper);
 
         col.appendChild(choiceDiv);
@@ -218,6 +230,22 @@ export default class extends Controller {
                 document.querySelector('.step-column-selected').appendChild(
                     this.#createParcoursNodeForStep(n)
                 );
+            }
+        });
+    }
+
+    #onSelectTypeRamificationChange(selectNode, columnNumber) {
+        selectNode.addEventListener('change', e => {
+            let pill = document.querySelector(`span[data-column-index="${columnNumber}"]`);
+            if(pill) {
+                if(e.target.options[e.target.selectedIndex].value === "") {
+                    pill.textContent = "";
+                    pill.parentNode.classList.add('d-none');
+                }
+                else {
+                    pill.textContent = e.target.options[e.target.selectedIndex].textContent;
+                    pill.parentNode.classList.remove('d-none');
+                }
             }
         });
     }
