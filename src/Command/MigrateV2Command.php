@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Command\Migration\V2DoctrineAlignment;
+use App\Command\Migration\V2HelpSeedData;
 use Doctrine\DBAL\Connection;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -22,7 +23,7 @@ final class MigrateV2Command extends Command
 
     private bool $force = false;
 
-    public function __construct(private readonly Connection $connection, private readonly V2DoctrineAlignment $doctrineAlignment)
+    public function __construct(private readonly Connection $connection, private readonly V2DoctrineAlignment $doctrineAlignment, private readonly V2HelpSeedData $helpSeedData)
     {
         parent::__construct();
     }
@@ -137,6 +138,7 @@ final class MigrateV2Command extends Command
             '020_validation_schema' => ['label' => 'Validation et états des onglets', 'plan' => fn () => $this->validationSchema()],
             '030_admission_years' => ['label' => 'Années des plateformes d’admission', 'plan' => fn () => $this->admissionYears()],
             '040_new_v2_tables' => ['label' => 'Nouvelles structures fonctionnelles V2', 'plan' => fn () => $this->newV2Tables()],
+            '045_help_seed_data' => ['label' => 'Données initiales des aides V2', 'plan' => fn () => $this->helpSeedData->plan()],
             '050_history_documents' => ['label' => 'Liaisons historiques vers les documents de conseil', 'plan' => fn () => $this->historyDocuments()],
             '060_doctrine_alignment' => ['label' => 'Alignement non destructif avec Doctrine V2', 'plan' => fn () => $this->doctrineAlignment->plan()],
             '090_reconcile_schema' => ['label' => 'Réconciliation des contraintes V2', 'plan' => fn () => $this->reconcileSchema()],
@@ -148,6 +150,7 @@ final class MigrateV2Command extends Command
     private function validateSelectedStepDependencies(array $selected): array
     {
         $dependencies = [
+            '045_help_seed_data' => ['040_new_v2_tables'],
             '050_history_documents' => ['040_new_v2_tables'],
             '060_doctrine_alignment' => ['010_documented_schema', '020_validation_schema', '030_admission_years', '040_new_v2_tables', '050_history_documents'],
             '090_reconcile_schema' => ['010_documented_schema', '020_validation_schema', '060_doctrine_alignment'],
