@@ -140,7 +140,7 @@ export default class extends Controller {
         let choiceDiv = document.createElement('div');
         choiceDiv.classList.add('col-12', 'step-column-info');
         let linksDiv = document.createElement('div');
-        linksDiv.classList.add('h-100', 'col-12', 'step-column-links', 'justify-content-around', 'p-1');
+        linksDiv.classList.add('col-12', 'step-column-links', 'p-1');
         linksDiv.dataset.stepIndex = columnNumber;
 
         let selectTypeRamification = document.createElement('select');
