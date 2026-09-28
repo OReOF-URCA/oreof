@@ -101,6 +101,15 @@
                                 {% endif %}
 
                                 <twig:Button
+                                        icon="material-symbols:open-in-new"
+                                        variant="secondary"
+                                        size="md"
+                                        href="{{ path('app_help_view', {'id': help.id}) }}"
+                                        target="_blank"
+                                        tooltip="Ouvrir le contenu de l'aide dans un nouvel onglet (fonctionne toujours, même si la page cible a des paramètres obligatoires)"
+                                />
+
+                                <twig:Button
                                         icon="icon:edit"
                                         variant="warning"
                                         size="md"

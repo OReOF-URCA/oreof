@@ -1,0 +1,12 @@
+{# Rendu partagé du contenu d'une aide : utilisé par le panneau d'aide (_help_drawer.html.twig)
+   et par la page autonome (help/view.html.twig), pour ne pas dupliquer le rendu Markdown. #}
+{% if help %}
+    <div class="markdown-body app-help-markdown px-2">
+        {{ help.content|help_markdown|parse_embeds }}
+    </div>
+{% else %}
+    <div class="bg-none border border-secondary-200 p-4 rounded text-center mt-2 dark:bg-secondary-800/70 dark:border-secondary-700">
+        <twig:UX:Icon name="ph:smiley-sad-light" class="w-10 h-10 mb-3 text-secondary dark:text-secondary-300 mx-auto" />
+        <p class="mb-0 text-secondary dark:text-secondary-300">Aucune aide n'est actuellement disponible pour cette page.</p>
+    </div>
+{% endif %}

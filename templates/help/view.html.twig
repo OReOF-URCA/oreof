@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    {{ help.title }}
+{% endset %}
+
+{% set header_description %}
+    Aide — {{ help.routeSlug }}
+{% endset %}
+
+{% block header %}
+    {{ help.title }}
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-3xl mx-auto rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-900 p-6">
+        {% include 'help/_content.html.twig' with { help: help } %}
+    </div>
+{% endblock %}

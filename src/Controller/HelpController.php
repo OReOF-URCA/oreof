@@ -18,6 +18,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class HelpController extends AbstractController
 {
@@ -56,6 +58,31 @@ class HelpController extends AbstractController
         return $this->render('help/index.html.twig', [
             'helps' => $helps,
             'previewUrls' => $previewUrls,
+        ]);
+    }
+
+    /**
+     * Page autonome affichant uniquement le contenu d'une aide, sans dépendre des paramètres
+     * de la page cible (contrairement au "preview" direct, indisponible pour les routes avec
+     * paramètres obligatoires). Pensée pour être ouverte dans un nouvel onglet — ex. pour garder
+     * l'application sur un écran et l'aide sur un autre.
+     */
+    #[Route('/aide/{id}/voir', name: 'app_help_view', methods: ['GET'])]
+    public function view(Help $help, HelpGrantService $helpGrantService): Response
+    {
+        $user = $this->getUser();
+        $isAdmin = $user instanceof User && in_array('ROLE_ADMIN', $user->getRoles(), true);
+
+        if (!$help->isActive() && !$isAdmin) {
+            throw new NotFoundHttpException();
+        }
+
+        if (!$helpGrantService->isAllowed($help, $user instanceof User ? $user : null)) {
+            throw new AccessDeniedHttpException();
+        }
+
+        return $this->render('help/view.html.twig', [
+            'help' => $help,
         ]);
     }
 }
