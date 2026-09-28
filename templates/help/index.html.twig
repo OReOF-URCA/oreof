@@ -52,6 +52,7 @@
                                             <twig:Button onclick="event.stopPropagation();" title="Route avec paramètres obligatoires : aperçu direct indisponible" :disabled="true" size="md" variant="secondary" :outline="true" :soft="false" icon="wordpress:external"/>
 
                                         {% endif %}
+                                        <twig:Button onclick="event.stopPropagation();" title="Ouvrir cette aide dans un nouvel onglet (pratique sur un second écran)" size="md" variant="secondary" :outline="true" :soft="false" icon="icon:eye" href="{{ path('app_help_view', {'id': help.id}) }}" target="_blank"/>
                                     </span>
                                 </span>
                                 {{ ux_icon('icon:chevron-down', {class: 'chevron-icon h-7 w-7 text-secondary-400 transition group-open:rotate-180 dark:text-secondary-500'}) }}

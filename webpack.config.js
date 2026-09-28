@@ -1,4 +1,5 @@
 const Encore = require('@symfony/webpack-encore')
+const webpack = require('webpack')
 
 require('dotenv').config() // line to add
 
@@ -62,6 +63,15 @@ Encore
 
   // enables Sass/SCSS support
   .enableSassLoader()
+
+  // @pentiminax/ux-datatables (vendor/pentiminax/ux-datatables) importe dynamiquement, pour
+  // chaque extension DataTables, les 4 variantes possibles (dt/bs/bs4/bs5) même si une seule est
+  // réellement utilisée à l'exécution. Le projet est passé full Tailwind (plus de Bootstrap) et
+  // n'installe que les paquets `-dt` et `-bs5` : sans cet IgnorePlugin, webpack échoue sur les
+  // imports `datatables.net(-*)?-bs` / `-bs4` manquants et n'émet plus aucun asset.
+  .addPlugin(new webpack.IgnorePlugin({
+    resourceRegExp: /^datatables\.net(-[a-z]+)?-bs4?(\/|$)/,
+  }))
 
 // uncomment if you use TypeScript
 // .enableTypeScriptLoader()
