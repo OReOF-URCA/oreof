@@ -57,24 +57,24 @@ export default class extends Controller {
   addProfil(event) {
     event.preventDefault()
 
-    const centreType = document.getElementById('typeCentre').value
-    const centreId = document.getElementById('selectListe').value
-    const role = document.getElementById('droits').value
+    const centreType = document.getElementById('typeCentre')?.value
+    const selectListe = document.getElementById('selectListe')
+    const centreId = selectListe ? selectListe.value : ''
 
-    if (role === '' || (centreType !== 'cg_etablissement' && centreId === '')) {
-      callOut('Veuillez sélectionner un centre et un rôle', 'error')
-    } else {
-      this._updateCentre(centreType, centreId, role, false)
+    if (!centreType || !centreId) {
+      callOut('Veuillez sélectionner un profil et un centre', 'error')
+      return
     }
+
+    this._updateCentre(centreType, centreId, false)
   }
 
-  _updateCentre(centreType, centreId, role, force = false) {
+  _updateCentre(centreType, centreId, force = false) {
     fetch(this.urlAddValue, {
       method: 'POST',
       body: JSON.stringify({
         centreType,
         centreId,
-        role,
         force,
       }),
     })
@@ -85,7 +85,7 @@ export default class extends Controller {
           this._updateListe()
         } else if (json.error === 'already_exist') {
           if (confirm('Le centre est déjà associé à un autre utilisateur, voulez-vous le remplacer ?')) {
-            this._updateCentre(centreType, centreId, role, true)
+            this._updateCentre(centreType, centreId, true)
           }
         } else {
           callOut(json.error, 'error')
