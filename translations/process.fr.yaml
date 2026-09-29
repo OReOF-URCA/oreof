@@ -826,19 +826,34 @@ workflow.validation.warning.parcours.modalites_enseignement.empty: "Les modalit�
 workflow.validation.warning.parcours.prerequis.empty: 'Les prérequis du parcours ne sont pas renseignés.'
 workflow.validation.warning.remplissage.incomplete: "Le parcours n'est pas complètement rempli (%current%%). Il est recommandé de compléter toutes les informations."
 workflow.validation.warning.structure.semestre.ues.empty: 'Le semestre %semestre% ne contient aucune UE.'
-workflow.valider_cfvu.dateConseil.label: workflow.valider_cfvu.dateConseil.label
-workflow.valider_cfvu.menu.description: workflow.valider_cfvu.menu.description
-workflow.valider_cfvu.menu.label: workflow.valider_cfvu.menu.label
-workflow.valider_parcours.menu.description: workflow.valider_parcours.menu.description
-workflow.valider_parcours.menu.label: workflow.valider_parcours.menu.label
-workflow.valider_publication.datePublication.label: workflow.valider_publication.datePublication.label
-workflow.valider_publication.menu.description: workflow.valider_publication.menu.description
-workflow.valider_publication.menu.label: workflow.valider_publication.menu.label
-workflow.valider_reserve_central_cfvu.menu.description: workflow.valider_reserve_central_cfvu.menu.description
-workflow.valider_reserve_central_cfvu.menu.label: workflow.valider_reserve_central_cfvu.menu.label
-workflow.valider_reserve_cfvu.argumentaire.label: workflow.valider_reserve_cfvu.argumentaire.label
-workflow.valider_reserve_cfvu.dateCfvu.label: workflow.valider_reserve_cfvu.dateCfvu.label
-workflow.valider_reserve_cfvu.menu.description: workflow.valider_reserve_cfvu.menu.description
-workflow.valider_reserve_cfvu.menu.label: workflow.valider_reserve_cfvu.menu.label
-workflow.valider_reserve_conseil_cfvu.menu.description: workflow.valider_reserve_conseil_cfvu.menu.description
-workflow.valider_reserve_conseil_cfvu.menu.label: workflow.valider_reserve_conseil_cfvu.menu.label
+workflow.valider_cfvu.dateConseil.label: 'Date du conseil / CFVU'
+workflow.valider_cfvu.menu.description: 'Valider le dossier en CFVU'
+workflow.valider_cfvu.menu.label: 'Validation CFVU'
+workflow.valider_parcours.menu.description: 'Valider le parcours'
+workflow.valider_parcours.menu.label: 'Validation du parcours'
+workflow.valider_publication.datePublication.label: 'Date de publication'
+workflow.valider_publication.menu.description: 'Publier le dossier'
+workflow.valider_publication.menu.label: 'Publication'
+workflow.valider_reserve_central_cfvu.menu.description: 'Valider avec réserve en commission centrale'
+workflow.valider_reserve_central_cfvu.menu.label: 'Validation sous réserve (Centrale)'
+workflow.valider_reserve_cfvu.argumentaire.label: 'Argumentaire de la réserve'
+workflow.valider_reserve_cfvu.dateCfvu.label: 'Date de la CFVU'
+workflow.valider_reserve_cfvu.menu.description: 'Valider avec réserve en CFVU'
+workflow.valider_reserve_cfvu.menu.label: 'Validation sous réserve (CFVU)'
+workflow.valider_reserve_conseil_cfvu.menu.description: 'Valider avec réserve en conseil'
+workflow.valider_reserve_conseil_cfvu.menu.label: 'Validation sous réserve (Conseil)'
+
+fiche_matiere.demande.clotureu.help: "Indiquez le motif de la demande de clôture de la fiche matière."
+ses.commentaires.alerte: "Attention : un commentaire SES a été émis sur ce dossier."
+ses.change_etat.alerte: "La modification de l'état aura un impact direct sur la visibilité du dossier."
+ses.change_ouverture.alerte: "La modification de l'ouverture impactera la saisie des maquettes."
+btn.validation.changeRf.suppression: "Supprimer la demande de changement de responsable"
+demande.reouverture.mention.help: "Précisez la raison pour laquelle vous demandez la réouverture de la mention."
+demande.non.ouverture.help: "Précisez la raison pour laquelle vous demandez la non-ouverture."
+demande.non.ouverture.confirmation.help: "Confirmez votre demande de non-ouverture."
+demande.non.ouverture.argumentaire.help: "Détaillez l'argumentaire justifiant la non-ouverture."
+valide.change_rf.attente.date.label: "Date de prise d'effet"
+valide.change_rf.attente.helps.date.help: "Indiquez la date à laquelle le changement de responsable prend effet."
+valide.change_rf.attente.helps.fichier.help: "Joindre un document justificatif (ex: arrêté, décision du conseil)."
+btn.change_rf.valide: "Valider le changement de responsable"
+

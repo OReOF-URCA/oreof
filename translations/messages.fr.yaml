@@ -77,21 +77,30 @@ Téléphone: Téléphone
 'Volume CM': 'Volume CM'
 'Volume TD': 'Volume TD'
 'Volume TP': 'Volume TP'
-admin.edit.modal.help: "Ces actions doivent être réalisées avec précaution. Elles permettent de court-circuiter ou modifier le processus de validation intialement établi ou d'agir directement sur certaines informations."
-bloc_competence.labels.libelle: bloc_competence.labels.libelle
+admin.edit.modal.help: "Ces actions doivent être réalisées avec précaution. Elles permettent de court-circuiter ou modifier le processus de validation initialement établi ou d'agir directement sur certaines informations."
+bloc_competence.labels.libelle: "Libellé du bloc de compétences"
 bug_report.description: 'Vous avez rencontré un bug sur l’application ? Merci de nous aider à l’améliorer en nous le signalant !'
 bug_report.titre: 'Signaler un bug'
 campagne_collecte.configure_publication.description: 'Paramétrer la publication des maquettes et MCCC'
 campagne_collecte.configure_publication.title: 'Configuration de la publication'
-competence.labels.libelle: competence.labels.libelle
+competence.labels.libelle: "Libellé de la compétence"
 fiche_matiere.step1_change_rf.title: 'Changement de responsable ou de co-responsable de formation'
-form.labels.email: form.labels.email
+form.labels.email: "Adresse email"
 form.labels.objectifsFormation: 'Description générale de la formation'
 gestion.admin.title: 'Gestion des administrateurs'
-notification.liste.description: 'Accèdez aux dernières notifications que vous avez reçu.'
-notification.liste.titre: 'Vos notification'
-register.labels.centreDemande: register.labels.centreDemande
-ue.labels.typeUe: ue.labels.typeUe
-ue.labels.ueObligatoire: ue.labels.ueObligatoire
+notification.liste.description: 'Accédez aux dernières notifications que vous avez reçues.'
+notification.liste.titre: 'Vos notifications'
+register.labels.centreDemande: "Centre / Composante demandée"
+ue.labels.typeUe: "Type d'UE"
+ue.labels.ueObligatoire: "UE obligatoire"
 user_add.labels.email: "Indiquer l'email URCA du collègue à ajouter"
+
+parcours.historique.title: "Historique du parcours"
+parcours.historique.description: "Consultez l'historique des modifications et des versions du parcours."
+fiche_matiere.historique.title: "Historique de la fiche matière"
+fiche_matiere.historique.description: "Consultez l'historique des modifications de la fiche matière."
+formation.historique.title: "Historique de la formation"
+formation.historique.description: "Consultez l'historique des modifications et des versions de la formation."
+ses.edit.commentaire.parcours: "Commentaire SES sur le parcours"
+Impersonner: "Prendre l'identité"
 
