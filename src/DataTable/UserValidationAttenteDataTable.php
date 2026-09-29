@@ -110,7 +110,7 @@ final class UserValidationAttenteDataTable extends AbstractAppDataTable
                 'title' => 'Voir les détails de l\'utilisateur',
             ])
             ->icon(Icon::Eye)
-            ->setClassName('inline-flex items-center gap-1 rounded-md border border-cyan-300 bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-100');
+            ->setClassName('inline-flex items-center gap-1 rounded-md border border-info-300 bg-info-50 px-2.5 py-1 text-xs font-semibold text-info-700 transition hover:bg-info-100 dark:bg-info-900 dark:text-info-300 dark:border-info-500 dark:hover:border-info-300 dark:hover:text-info-100');
 
         return $actions
             ->add($showAttenteAction)

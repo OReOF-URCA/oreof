@@ -307,12 +307,12 @@ class AppExtension extends AbstractExtension
     {
         $label = htmlspecialchars($badge->label, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
         $colors = [
-            'primary' => 'border border-blue-300 bg-blue-50 text-blue-700',
-            'success' => 'border border-emerald-300 bg-emerald-50 text-emerald-700',
-            'warning' => 'border border-amber-300 bg-amber-50 text-amber-700',
-            'danger' => 'border border-rose-300 bg-rose-50 text-rose-700',
-            'info' => 'border border-cyan-300 bg-cyan-50 text-cyan-700',
-            'secondary' => 'border border-secondary-300 bg-secondary-100 text-secondary-700',
+            'primary' => 'border border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300',
+            'success' => 'border border-success-300 bg-success-50 text-success-700 dark:border-success-700 dark:bg-success-900/30 dark:text-success-300',
+            'warning' => 'border border-warning-300 bg-warning-50 text-warning-700 dark:border-warning-700 dark:bg-warning-900/30 dark:text-warning-300',
+            'danger' => 'border border-danger-300 bg-danger-50 text-danger-700 dark:border-danger-700 dark:bg-danger-900/30 dark:text-danger-300',
+            'info' => 'border border-info-300 bg-info-50 text-info-700 dark:border-info-700 dark:bg-info-900/30 dark:text-info-300',
+            'secondary' => 'border border-secondary-300 bg-secondary-100 text-secondary-700 dark:border-secondary-700 dark:bg-secondary-900/30 dark:text-secondary-300',
         ];
 
         $classes = trim('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ' . ($colors[$badge->variant] ?? $colors['secondary']));

@@ -49,7 +49,7 @@
                                             type="checkbox"
                                             id="{{ profil.id }}_{{ value }}"
                                             value="true"
-                                            class="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-900"
+                                            class="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-900 dark:text-primary-400"
                                             {% if notifications[value] is defined and profil.id in notifications[value] %}checked{% endif %}
                                             {{ stimulus_action('notification_liste', 'change', 'click', {
                                                 profil: profil.id,

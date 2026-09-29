@@ -6,7 +6,7 @@
     <style>
         @layer components {
             .is-chosen {
-                @apply ring-2 ring-indigo-400;
+                @apply ring-2 ring-primary-400;
             }
 
             .is-ghost {
@@ -62,12 +62,12 @@
     </div>
 
     <div class="flex">
-        <aside class="w-72 bg-white rounded-md shadow-md border-secondary-200 flex flex-col p-3 space-y-8">
+        <aside class="w-72 bg-surface rounded-md shadow-md border-secondary-200 dark:border-secondary-700 flex flex-col p-3 space-y-8">
             <nav class="flex-1 space-y-1">
                 <p class="text-[10px] font-black text-secondary-400 uppercase mb-4 tracking-widest px-3">Configuration
                     Parcours</p>
 
-                <div class="p-6 bg-gray-200" id="pecent_completude">{# a mettre à jour avec turbo #}
+                <div class="p-6 bg-secondary-200 dark:bg-secondary-800" id="pecent_completude">{# a mettre à jour avec turbo #}
                     {% set percent = parcours.remplissage.calcul() %}
                     {% set percentColor = parcours.remplissage.isFull() == true ? 'green' : 'orange' %}
                     <div class="flex justify-between items-end mb-2">
@@ -95,7 +95,7 @@
                     {% endif %}
                 </div>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
                    href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'presentation_formation' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -105,7 +105,7 @@
                     </span>
                 </a>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
                    href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'presentation' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -119,7 +119,7 @@
                 </a>
 
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
                    href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'descriptif' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -132,7 +132,7 @@
                     </span>
                 </a>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
                    href="{{ path('parcours_v2_competences_index', { parcours: parcours.id }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -162,7 +162,7 @@
                     {{ include('parcours_v2/_sideBarStructure.html.twig') }}
                 </turbo-frame>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
                    href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'admission' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -176,7 +176,7 @@
                     </span>
                 </a>
 
-                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-white transition group"
+                <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
                    href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'et_apres' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
@@ -204,7 +204,7 @@
             </nav>
         </aside>
 
-        <div class="p-3 flex-1 overflow-y-auto bg-white ms-2 rounded-md shadow-md border-secondary-200 flex flex-col">
+        <div class="p-3 flex-1 overflow-y-auto bg-surface ms-2 rounded-md shadow-md border-secondary-200 dark:border-secondary-700 flex flex-col">
             <turbo-frame
                     id="tab-content"
             >

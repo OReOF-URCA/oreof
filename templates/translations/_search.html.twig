@@ -36,9 +36,9 @@
                                     type="text"
                                 value="{{ v|e('html_attr') }}"
                                 aria-label="Valeur de traduction pour {{ k }}"
-                                    class="hidden w-full rounded-md border border-indigo-400 bg-white px-2.5 py-1.5 text-sm text-secondary-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                                    class="hidden w-full rounded-md border border-primary-400 bg-white px-2.5 py-1.5 text-sm text-secondary-800 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-400 dark:focus:ring-primary-900"
                             />
-                            <p data-role="error" class="hidden text-xs text-red-600"></p>
+                            <p data-role="error" class="hidden text-xs text-danger-600 dark:text-danger-400"></p>
                         </div>
                     </td>
                     <td class="px-4 py-2 align-top text-right">
@@ -46,7 +46,7 @@
                              class="flex gap-1 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                             <button type="button"
                                     data-action="translations#edit"
-                                    class="inline-flex items-center gap-1 rounded-md border border-indigo-300 bg-indigo-50 px-2.5 py-1.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100 transition-colors"
+                                    class="inline-flex items-center gap-1 rounded-md border border-primary-300 bg-primary-50 px-2.5 py-1.5 text-xs font-medium text-primary-700 hover:bg-primary-100 transition-colors dark:bg-primary-900 dark:text-primary-300 dark:border-primary-500 dark:hover:border-primary-300 dark:hover:text-primary-100"
                                     title="Modifier cette traduction">
                                 Modifier
                             </button>
@@ -55,12 +55,12 @@
                             <button type="button"
                                     data-role="save-btn"
                                     data-action="translations#save"
-                                    class="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-2.5 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                    class="inline-flex items-center gap-1 rounded-md border border-success-300 bg-success-50 px-2.5 py-1.5 text-xs font-medium text-success-700 hover:bg-success-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-success-900 dark:text-success-300 dark:border-success-500 dark:hover:border-success-300 dark:hover:text-success-100">
                                 Enregistrer
                             </button>
                             <button type="button"
                                     data-action="translations#cancel"
-                                    class="inline-flex items-center gap-1 rounded-md border border-secondary-300 bg-white px-2.5 py-1.5 text-xs font-medium text-secondary-600 hover:bg-secondary-50 transition-colors">
+                                    class="inline-flex items-center gap-1 rounded-md border border-secondary-300 bg-white px-2.5 py-1.5 text-xs font-medium text-secondary-600 hover:bg-secondary-50 transition-colors dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-200 dark:hover:bg-secondary-600">
                                 Annuler
                             </button>
                         </div>

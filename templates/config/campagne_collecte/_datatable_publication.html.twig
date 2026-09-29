@@ -4,15 +4,15 @@
 {% set publicationTagStyle = {
     'annee_archivee': {
         label: 'Année archivée',
-        badgeColor: 'bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20'
+        badgeColor: 'bg-warning-50 text-warning-700 ring-1 ring-inset ring-warning-600/20 dark:bg-warning-900/30 dark:text-warning-300 dark:ring-warning-700'
     },
     'annee_courante': {
         label: 'Année courante (N)',
-        badgeColor: 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10'
+        badgeColor: 'bg-primary-50 text-primary-700 ring-1 ring-inset ring-primary-700/10 dark:bg-primary-900/30 dark:text-primary-300 dark:ring-primary-700'
     },
     'annee_suivante': {
         label: 'Année suivante (N+1)',
-        badgeColor: 'bg-cyan-50 text-cyan-700 ring-1 ring-inset ring-cyan-700/10'
+        badgeColor: 'bg-info-50 text-info-700 ring-1 ring-inset ring-info-700/10 dark:bg-info-900/30 dark:text-info-300 dark:ring-info-700'
     }
 } %}
 {% set libelleConfigurationPublication = {
@@ -30,7 +30,7 @@
 {% endif %}
 
 <div>
-    <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium {{ isPublished ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/10' }}">
+    <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium {{ isPublished ? 'bg-success-50 text-success-700 ring-1 ring-inset ring-success-600/20 dark:bg-success-900/30 dark:text-success-300 dark:ring-success-700' : 'bg-danger-50 text-danger-700 ring-1 ring-inset ring-danger-600/10 dark:bg-danger-900/30 dark:text-danger-300 dark:ring-danger-700' }}">
         {{ isPublished ? 'Publié' : 'Non publié' }}
     </span>
 </div>
@@ -39,7 +39,7 @@
     <div class="flex flex-wrap gap-1">
         {% for optionKey, optionValue in obj.publicationOptions %}
             {% if optionKey in libelleConfigurationPublication|keys %}
-                <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium {{ optionValue == true ? 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20' : 'bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/10' }}">
+                <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium {{ optionValue == true ? 'bg-success-50 text-success-700 ring-1 ring-inset ring-success-600/20 dark:bg-success-900/30 dark:text-success-300 dark:ring-success-700' : 'bg-danger-50 text-danger-700 ring-1 ring-inset ring-danger-600/10 dark:bg-danger-900/30 dark:text-danger-300 dark:ring-danger-700' }}">
                     {{ libelleConfigurationPublication[optionKey] }}
                 </span>
             {% endif %}
@@ -49,7 +49,7 @@
 
 {% if obj.isFinished %}
     <div>
-        <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 ring-1 ring-inset ring-slate-600/20">
+        <span class="inline-flex items-center rounded-md bg-secondary-100 px-2 py-0.5 text-xs font-medium text-secondary-700 ring-1 ring-inset ring-secondary-600/20 dark:bg-secondary-900/30 dark:text-secondary-300 dark:ring-secondary-700">
             Campagne consolidation terminée
         </span>
     </div>

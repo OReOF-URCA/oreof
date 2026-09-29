@@ -21,13 +21,13 @@
                             name="search"
                             data-translation--recherche-target="search"
                             data-action="keydown.enter->translation--recherche#recherche"
-                            class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-800 placeholder:text-secondary-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-blue-400 dark:focus:ring-blue-900"
+                            class="block w-full rounded-lg border border-secondary-300 bg-white px-3 py-2 text-sm text-secondary-800 placeholder:text-secondary-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-400 dark:focus:ring-primary-900"
                             placeholder="Ex: menu.admin, campagne, publier..."
                     />
                 </div>
                 <button
                         type="button"
-                        class="inline-flex items-center justify-center rounded-lg border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                        class="inline-flex items-center justify-center rounded-lg border border-primary-300 bg-primary-50 px-4 py-2 text-sm font-semibold text-primary-700 transition hover:bg-primary-100 dark:bg-primary-900 dark:text-primary-300 dark:border-primary-500 dark:hover:border-primary-300 dark:hover:text-primary-100"
                         {{ stimulus_action('translation--recherche', 'recherche') }}
                 >
                     Rechercher
@@ -48,7 +48,7 @@
                     <li>
                         <a
                                 href="{{ path('translations_edit', {filename: file|basename}) }}"
-                                class="block rounded-lg border border-secondary-200 px-3 py-2 text-sm font-medium text-secondary-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 dark:border-secondary-700 dark:text-secondary-200 dark:hover:border-blue-500 dark:hover:bg-secondary-800"
+                                class="block rounded-lg border border-secondary-200 px-3 py-2 text-sm font-medium text-secondary-700 transition hover:border-primary-300 hover:bg-primary-50 hover:text-primary-700 dark:border-secondary-500 dark:text-secondary-200 dark:hover:border-primary-500 dark:hover:bg-secondary-800 dark:bg-primary-900 dark:text-primary-300 dark:hover:text-primary-100"
                         >
                             {{ file|basename }}
                         </a>
@@ -67,7 +67,7 @@
     <div class="flex flex-wrap justify-end gap-2">
         {% if is_granted('ROLE_ADMIN') %}
             <a href="{{ path('admin_export_translations_xlsx') }}"
-               class="inline-flex items-center gap-2 rounded-lg border border-cyan-300 bg-cyan-50 px-3 py-2 text-sm font-semibold text-cyan-700 transition hover:bg-cyan-100"
+               class="inline-flex items-center gap-2 rounded-lg border border-info-300 bg-info-50 px-3 py-2 text-sm font-semibold text-info-700 transition hover:bg-info-100 dark:bg-info-900 dark:text-info-300 dark:border-info-500 dark:hover:border-info-300 dark:hover:text-info-100"
                     {{ stimulus_controller('tooltip', {
                         placement: 'bottom',
                         customClass: 'app-tooltip',

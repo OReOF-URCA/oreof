@@ -7,7 +7,7 @@
                     <input
                         {{ stimulus_action('check_all', 'check') }}
                         type="checkbox"
-                        class="check-all check-all{{ parcours.id }} h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800"
+                        class="check-all check-all{{ parcours.id }} h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-primary-400"
                         {% if is_granted('CAN_PARCOURS_VALIDATE_MY', ec.elementConstitutif.ficheMatiere) %}
                             {{ ec.elementConstitutif.ficheMatiere|isFicheValidable('parcours') }}
                         {% elseif is_granted('CAN_FORMATION_VALIDATE_MY', ec.elementConstitutif.ficheMatiere) %}

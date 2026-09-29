@@ -98,7 +98,7 @@ final class UserRepertoireDataTable extends AbstractAppDataTable
                 'title' => 'Gestion des accès',
             ])
             ->icon(Icon::Key)
-            ->setClassName('inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 transition hover:bg-amber-100');
+            ->setClassName('inline-flex items-center gap-1 rounded-md border border-warning-300 bg-warning-50 px-2.5 py-1 text-xs font-semibold text-warning-700 transition hover:bg-warning-100 dark:bg-warning-900 dark:text-warning-300 dark:border-warning-500 dark:hover:border-warning-300 dark:hover:text-warning-100');
 
         return $actions
             ->add($this->createShowAction('app_user_show', static fn(User $u): array => ['id' => $u->getId()]))

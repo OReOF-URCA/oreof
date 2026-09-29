@@ -12,10 +12,10 @@ use Pentiminax\UX\DataTables\Model\DataTable;
 
 abstract class AbstractAppDataTable extends AbstractDataTable
 {
-    public const BTN_SHOW_CLASS = 'inline-flex items-center gap-1 rounded-md border border-cyan-300 bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-100';
-    public const BTN_EDIT_CLASS = 'inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 transition hover:bg-amber-100';
-    public const BTN_DUPLICATE_CLASS = 'inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100';
-    public const BTN_DELETE_CLASS = 'inline-flex items-center gap-1 rounded-md border border-rose-300 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100';
+    public const BTN_SHOW_CLASS = 'inline-flex items-center gap-1 rounded-md border border-info-300 bg-info-50 px-2.5 py-1 text-xs font-semibold text-info-700 transition hover:bg-info-100 dark:border-info-500 dark:bg-info-900 dark:text-info-300 dark:hover:border-info-300 dark:hover:text-info-100';
+    public const BTN_EDIT_CLASS = 'inline-flex items-center gap-1 rounded-md border border-warning-300 bg-warning-50 px-2.5 py-1 text-xs font-semibold text-warning-700 transition hover:bg-warning-100 dark:border-warning-500 dark:bg-warning-900 dark:text-warning-300 dark:hover:border-warning-300 dark:hover:text-warning-100';
+    public const BTN_DUPLICATE_CLASS = 'inline-flex items-center gap-1 rounded-md border border-success-300 bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-700 transition hover:bg-success-100 dark:border-success-500 dark:bg-success-900 dark:text-success-300 dark:hover:border-success-300 dark:hover:text-success-100';
+    public const BTN_DELETE_CLASS = 'inline-flex items-center gap-1 rounded-md border border-danger-300 bg-danger-50 px-2.5 py-1 text-xs font-semibold text-danger-700 transition hover:bg-danger-100 dark:border-danger-500 dark:bg-danger-900 dark:text-danger-300 dark:hover:border-danger-300 dark:hover:text-danger-100';
 
     public function configureDataTable(DataTable $table): DataTable
     {

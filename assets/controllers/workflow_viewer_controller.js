@@ -45,7 +45,7 @@ export default class extends Controller {
     initCytoscape() {
         if (!this.hasCyTarget || !this.dataValue) return;
 
-        const isDark = document.documentElement.classList.contains('dark');
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const elements = this.dataValue.cytoscapeElements || { nodes: [], edges: [] };
 
         const nodeLabelColor = isDark ? '#f8fafc' : '#0f172a';
@@ -195,7 +195,7 @@ export default class extends Controller {
         // Écouteur pour adapter le thème clair/sombre si togglé dynamiquement
         const observer = new MutationObserver(() => {
             if (this.cy) {
-                const isDark = document.documentElement.classList.contains('dark');
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
                 this.cy.style()
                     .selector('node')
                     .style({
