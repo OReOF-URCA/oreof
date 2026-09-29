@@ -47,6 +47,7 @@ ux_icons:
 
     # Statut / feedback
     icon:check: 'ph:check-bold'
+    icon:check:bold: 'ph:check-bold'
     icon:check-circle: 'ph:check-circle-bold'
     icon:close: 'ph:x-light'
     icon:bug: 'ph:bug-light'
@@ -90,9 +91,24 @@ ux_icons:
     icon:folder: 'ph:folder-light'
 
     # tris
-    icon:sort: 'ph:arrows-up-down-bold'
+    icon:sort: 'ph:arrows-down-up-bold'
     icon:sort-up: 'ph:arrow-up-bold'
     icon:sort-down: 'ph:arrow-down-bold'
+
+    # divers
+    icon:arrow-right: 'ph:arrow-right-light'
+    icon:award: 'ph:medal-light'
+    icon:book-open: 'ph:book-open-light'
+    icon:document: 'ph:file-text-light'
+    icon:document-copy: 'ph:copy-light'
+    icon:face-sad: 'ph:smiley-sad-light'
+    icon:file-text: 'ph:file-text-light'
+    icon:git-pull-request: 'ph:git-pull-request-light'
+    icon:inbox: 'ph:tray-light'
+    icon:info-circle: 'ph:info-light'
+    icon:layers: 'ph:stack-light'
+    icon:login: 'ph:sign-in-light'
+    icon:pencil: 'ph:pencil-light'
 
 when@prod:
   ux_icons:
