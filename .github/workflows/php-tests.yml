@@ -1,0 +1,74 @@
+name: PHP tests
+
+on:
+  push:
+    branches:
+      - v2
+      - 'test/**'
+  pull_request:
+    branches:
+      - v2
+
+permissions:
+  contents: read
+
+concurrency:
+  group: php-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Smoke tests (PHP 8.4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_DATABASE: oreof
+          MARIADB_USER: oreof
+          MARIADB_PASSWORD: oreof
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      APP_ENV: test
+      APP_SECRET: oreof-test-secret
+      DATABASE_URL: "mysql://root:root@127.0.0.1:3306/oreof?serverVersion=mariadb-11.4.0&charset=utf8mb4"
+      MAILER_DSN: "null://null"
+      MESSENGER_TRANSPORT_DSN: "sync://"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Validate Composer
+        run: composer validate --no-check-publish
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Lint Symfony container
+        run: composer lint:container
+
+      - name: Create test database
+        run: |
+          php bin/console doctrine:database:create --env=test --if-not-exists
+          php bin/console doctrine:schema:create --env=test
+          php bin/console doctrine:fixtures:load --env=test --group=test --no-interaction
+
+      - name: Run smoke tests
+        run: composer test:smoke
