@@ -1,11 +1,6 @@
-import { startStimulusApp } from '@symfony/stimulus-bridge';
+import { startStimulusApp } from '@symfony/reprise/stimulus'
 
-// Registers Stimulus controllers from controllers.json and in the controllers/ directory
-export const app = startStimulusApp(require.context(
-  '@symfony/stimulus-bridge/lazy-controller-loader!./controllers',
-  true,
-  /\.[jt]sx?$/,
-));
+// Reprise registers controllers from controllers.json and assets/controllers/.
+export const app = startStimulusApp()
 
-window.Stimulus = app;
-
+window.Stimulus = app

@@ -1,0 +1,11 @@
+reprise:
+    output_path: '%kernel.project_dir%/public/build'
+    script_attributes:
+        defer: true
+        'data-turbo-track': reload
+    link_attributes:
+        'data-turbo-track': reload
+
+framework:
+    assets:
+        json_manifest_path: '%kernel.project_dir%/public/build/manifest.json'

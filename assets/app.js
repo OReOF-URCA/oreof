@@ -37,7 +37,6 @@ import 'trix'
 import 'trix/dist/trix.css'
 
 import callOut from './js/callOut'
-import './styles/app.css'
 import './styles/_timeline.scss'
 
 import 'datatables.net-dt/css/dataTables.dataTables.min.css'
