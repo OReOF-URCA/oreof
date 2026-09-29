@@ -15,7 +15,7 @@ export default defineConfig({
       // ORéOF only ships the DT and BS5 variants, as with the former Webpack IgnorePlugin.
       name: 'ignore-unused-datatables-bootstrap-themes',
       resolveId(id) {
-        if (/^datatables\\.net(?:-[a-z]+)?-bs4?(?:\\/|$)/.test(id)) {
+        if (/^datatables\.net(?:-[a-z]+)?-bs4?(?:\/|$)/.test(id)) {
           return ignoredDataTablesTheme
         }
       },
