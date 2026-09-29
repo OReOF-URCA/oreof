@@ -1,67 +1,85 @@
-# AGENTS.md — ORéOF
+# AGENTS.md — ORéOF v2
 
-## À lire en premier
+Point d'entrée unique pour les agents IA (Claude, Copilot, Codex…). Lire ce fichier, puis **uniquement** la doc
+correspondant à la tâche (table « Routage »). Ne jamais s'appuyer sur `docs/archives/` (obsolète). Ne pas lire
+`CHANGELOG.md` (≈ 420 Ko, généré par release-please) ; utiliser `git log` si besoin d'historique.
 
-- `docs/README.md` : index de la documentation interne.
-- `docs/ops/command.md` : commandes utiles pour le développement et l’exploitation.
-- `docs/index_ia.md` : **DÉPRÉCIÉ** — consulter directement `docs/ui-conventions/ui-conventions.md`,
-  `docs/ui-conventions/icons-migration.md`, `docs/architecture/Update_BDD.md` et `docs/ops/command.md`.
-- `docs/ui-conventions/README.md` : conventions d’interface utilisateur et migration Tailwind (sous-fichiers :
-  `ui-conventions.md`, `icons-migration.md`, `bootstrap-to-tailwind-style-guide.md`).
-- `docs/archives/` : documents **obsolètes** — ne jamais s'en servir pour générer du nouveau code.
+## Projet
 
-## Vue d’ensemble
+Symfony 8 / PHP 8.4+, Doctrine, Twig + Twig Components, Symfony UX (Turbo, Stimulus, Live, Autocomplete/Tom Select,
+Icons, Chart.js). Métier universitaire : offre de formation, maquettes, parcours, MCCC, workflows de validation, exports.
 
-- Application Symfony 8/PHP 8.4+ orientée métier universitaire (maquettes, parcours, MCCC, validation, export).
-- Les routes sont principalement en attributs dans `src/Controller/` (ex. `DefaultController` avec `#[Route]`).
-- Les règles métier structurantes sont souvent dans des services/handlers dédiés plutôt que dans les contrôleurs.
-- Frontend : trois entrées Webpack Encore — `assets/app.js` (principal), `assets/legacy.js` (Bootstrap/JS historique),
-  `assets/print.js` (impression).
+- Front : Webpack Encore (pas Vite), entrées `assets/app.js` (charge aussi Bootstrap JS pour le legacy, Trix,
+  DataTables) et `assets/print.js`. Tailwind v4 dans `assets/styles/app.css`. Migration Bootstrap → Tailwind
+  **en cours** : l'UI est mixte.
+- Routes en attributs dans `src/Controller/`. Logique métier dans services/handlers, pas dans les contrôleurs.
+- Vocabulaire métier en français, réutiliser les noms existants (`Parcours`, `FicheMatiere`, `DpeParcours`, `Ue`,
+  `ElementConstitutif`…).
 
-## Conventions d’architecture à respecter
+## Points d'architecture (vérifier avant de modifier)
 
-- Les services sont autowirés/autoconfigurés depuis `src/` via `config/services.yaml` ; ajoutez des tags explicites quand un registre les consomme.
-- Les handlers de type diplôme sont résolus par `App\TypeDiplome\TypeDiplomeResolver` via une clé dérivée de
-  `TypeDiplome::libelleCourt` (code en majuscules). Les implémentations par diplôme sont dans
-  `src/TypeDiplome/Diplomes/` (sous-dossiers : `But/`, `Daeu/`, `Licence/`, `M2E/`).
-- Les workflows Symfony sont déclarés dans `config/packages/workflow.yaml` et pilotent aussi la UI via leurs `metadata` (boutons, icônes, formulaires, destinataires).
-- Les uploads sensibles passent par `App\Service\SecureUploadService` ; ne contournez pas ses contrôles extension/MIME/taille.
-- Gardez le vocabulaire métier en français et suivez les noms déjà présents (`Parcours`, `FicheMatiere`, `DpeParcours`, etc.).
-- Les objets de transfert de données entre couches sont dans `src/DTO/` (ex. `StructureParcours`, `HeuresEctsFormation`,
-  `WorkFlowData`).
-- Le versioning des entités métier passe par les services dédiés `src/Service/Versioning*.php` (ex.
-  `VersioningParcours`, `VersioningFicheMatiere`) ; ne dupliquez pas cette logique.
-- Les traitements longs (génération PDF, exports) s'appuient sur Messenger ; des jobs Python sont lancés via
-  `App\Service\PythonJobLauncher` et traités dans `python_worker/`.
+| Sujet | Où regarder | Règle |
+|---|---|---|
+| Services | `config/services.yaml` | autowire/autoconfigure depuis `src/` ; tag explicite si un registre les consomme |
+| Type de diplôme | `src/TypeDiplome/TypeDiplomeResolver.php`, `src/TypeDiplome/Diplomes/{But,Daeu,Licence,M2E}/` | clé = `TypeDiplome::libelleCourt` en majuscules |
+| Workflows | `config/packages/workflow.yaml`, `src/Workflow/StepHandlerRegistry.php` | les `metadata` pilotent aussi l'UI (boutons, icônes, formulaires, destinataires) |
+| Versioning | `src/Service/Versioning*.php` | ne jamais dupliquer cette logique |
+| Uploads | `src/Service/SecureUploadService.php` | ne pas contourner les contrôles extension/MIME/taille |
+| DTO | `src/DTO/` | `StructureParcours`, `HeuresEctsFormation`, `WorkFlowData`… |
+| Async | `config/packages/messenger.yaml`, `App\Service\PythonJobLauncher`, `python_worker/` | transports `async_export`, `async_email`, `async_mccc_backup` (+ jobs `ProcessGenerationJobMessage`/`RequestGenerationJobMessage`) ; attention aux effets de bord |
+| Sécurité | `config/packages/security.yaml` | attention aux routes d'export publiques |
+| Navigation | `src/Navigation/` | le menu est la source unique (topbar, pages de section, breadcrumbs) |
+| Schéma BDD | `migrations/`, `src/Command/MigrateV2Command.php` | voir `docs/architecture/migration-v2.md` |
 
-## Fichiers repères à consulter avant de modifier
+## Routage : quelle doc lire
 
-- `src/Command/McccPdfCommand.php` pour les exports PDF et les traitements par type de diplôme.
-- `src/Service/SecureUploadService.php` pour la politique d’upload sécurisé.
-- `src/Workflow/StepHandlerRegistry.php` et `config/packages/workflow.yaml` pour la mécanique de workflow.
-- `src/TypeDiplome/TypeDiplomeResolver.php` et `config/services.yaml` pour l’ajout de nouveaux handlers.
-- `src/Service/VersioningParcours.php` (et variantes) pour comprendre le système de versioning avant toute modification
-  d’entité versionnable.
-- `docs/architecture/maquette-modulaire.md` avant toute refonte de structure/validation/rendu.
-- `docs/architecture/Update_BDD.md` avant toute modification de schéma de base de données ou d’entités Doctrine.
+| Tâche | Lire |
+|---|---|
+| Template Twig, CSS, composant UI, migration Bootstrap | `docs/ui-conventions/ui-conventions.md` |
+| Icônes (`fa-*` → `icon:*`) | `docs/ui-conventions/icones.md` |
+| Menu, section, breadcrumb | `docs/composants/navigation.md` |
+| Champs JSON configurables (`JsonConfigType`, `DynamicFieldsType`) | `docs/formulaires/README.md` |
+| Entité, colonne, migration, bascule V2 | `docs/architecture/migration-v2.md` |
+| Refonte structure/validation/rendu de maquette | `docs/architecture/maquette-modulaire.md` |
+| Écrire/lancer des tests | `docs/testing/README.md` |
+| Commande `app:*` | `docs/ops/command.md` |
+| Installation, déploiement | `docs/ops/install.md` |
 
-## Commandes utiles
+Index complet : `docs/README.md`.
 
-- Développement Docker: `make up`, `make start`, `make open`, `make logs`, `make ps`, `make cli`.
-- QA PHP: `make test`, `make test-coverage`, `make phpstan`.
-- Frontend: `npm run dev`, `npm run watch`, `npm run build`, `npm run lint`.
-- Base de données: `make import-db FILE=dump.sql DB=oreof_2026`, `make drop-db DB=nom_base`.
-- Réinitialisation des mots de passe (dev) : `make reset-passwords` (positionne tous les mots de passe à `test`).
-- Symfony dans le conteneur web: `php bin/console about`, `php bin/console doctrine:migrations:migrate -n`.
+## Règles de contribution
 
-## Points d’attention
+- Diffs minimaux ; pas de reformatage massif ni de refactor global non demandé.
+- Préserver les hooks : `id`, `data-*`, `stimulus_controller/action/target()`, `aria-*`.
+- Réutiliser un composant existant plutôt que dupliquer du markup ; nouveau composant = classe dans
+  `src/Twig/Components/` + template dans `templates/components/`.
+- Nouveau HTML : préférer un Twig Component à un filtre Twig qui renvoie du HTML.
+- Turbo : une vue partielle peut être rendue en page, `turbo-frame` ou `turbo-stream` → renvoyer le bon wrapper
+  (éviter `content-missing`), fragments autonomes.
+- Pas de nouvelle pile JS si Stimulus suffit. Pas de logique métier côté front.
+- Ne pas supprimer une classe legacy sans vérifier ses usages JS/Twig/CSS.
 
-- `Makefile` expose `make cypress-open` / `make cypress-run` (appels `npm run cypress:open` / `cypress:run`), mais ces
-  scripts ne sont **pas définis dans `package.json`** ; vérifiez avant de les utiliser.
-- Les accès publics et la sécurité sont pilotés par `config/packages/security.yaml` ; attention aux routes d’export publiques.
-- Messenger route `App\Message\Export` vers `async_export` (`config/packages/messenger.yaml`) : d’autres messages
-  asynchrones existent (`ProcessGenerationJobMessage`, `RequestGenerationJobMessage`) ; surveillez les effets de bord
-  asynchrones.
-- Les assets sont gérés par Encore (`webpack.config.js`) avec `assets/app.js`, `assets/legacy.js` et `assets/print.js`;
-  l’interface mélange encore Tailwind/Turbo et des fragments legacy Bootstrap, donc ne supposez pas une migration front
-  100% uniforme.
+## Maintenance de la documentation (obligatoire)
+
+Chaque doc indique en tête « À mettre à jour si : … » (code dont elle dépend). Si ton changement touche ce code
+(ajout/renommage/suppression de composant, prop, commande, option, alias d'icône, étape de migration, helper de test,
+cible Makefile, chemin cité…), **mets à jour la doc concernée dans le même commit/PR**. Idem pour ce fichier si la stack,
+l'architecture ou une règle change. Nouveau sujet → nouveau fichier + entrée dans `docs/README.md` et dans la table
+« Routage » ci-dessus. Doc devenue fausse ou sans objet → corriger ou déplacer dans `docs/archives/`. Signaler en fin de
+tâche les docs mises à jour (ou pourquoi aucune ne l'a été).
+
+## Commandes
+
+Makefile dans le dossier parent (`../Makefile`). **`APP` vaut `v1` par défaut → toujours passer `APP=v2`** pour ce
+dépôt (conteneur `oreof-web-v2`, base `oreof_v2`, http://localhost:8821). Docker requis.
+
+- Docker : `make up|start|stop|restart|logs|ps|cli|open APP=v2`
+- QA : `make test|test-coverage|phpstan APP=v2` ; front : `npm run dev|watch|build|lint`
+- BDD : `make import-db FILE=dump.sql APP=v2 [DB=nom]`, `make drop-db APP=v2 [DB=nom]`, `make reset-passwords APP=v2`
+  (mdp = `test`)
+- Dans le conteneur (`make cli APP=v2`) : `php bin/console about`, `php bin/console doctrine:migrations:migrate -n`
+
+## Validation avant de conclure
+
+`npm run dev` (+ `npm run lint`) si front touché ; `make phpstan` et `make test` si PHP touché. Si Docker est
+indisponible, le dire explicitement. `make cypress-*` appelle des scripts npm **absents** de `package.json`.
