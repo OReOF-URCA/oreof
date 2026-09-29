@@ -5,7 +5,8 @@
 
             <div class="flex items-center space-x-8 h-full">
                 <div class="flex items-center font-bold text-primary text-xl tracking-tight gap-2">
-                    <img src="{{ asset('Logo/Logo.svg', 'image_package') }}" alt="Logo ORéOF" class="h-8 w-auto block">
+                    <img src="{{ asset('Logo/Logo.svg', 'image_package') }}" alt="Logo ORéOF" class="h-8 w-auto block dark:hidden">
+                    <img src="{{ asset('Logo/Logo_white.svg', 'image_package') }}" alt="Logo ORéOF" class="h-8 w-auto hidden dark:block">
 
                     {% if is_granted('ROLE_ADMIN') %}
                         <span class="text-danger whitespace-nowrap">/ Adm.</span>

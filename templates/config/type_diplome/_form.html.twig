@@ -20,7 +20,7 @@
                             deleteLogoUrl: path('app_type_diplome_delete_logo', {id: type_diplome.id}),
                             uploadLogoUrl: path('app_type_diplome_upload_logo', {id: type_diplome.id}),
                         }) }}>
-                    <label class="text-[12px] font-black text-secondary-500 group-focus-within:text-indigo-500 transition-colors uppercase">Logos
+                    <label class="text-[12px] font-black text-secondary-500 group-focus-within:text-primary-500 transition-colors uppercase">Logos
                         du type de diplôme</label>
                     <p class="text-[11px] text-secondary-400 italic mt-1 pl-1 flex items-start gap-2">
             <span class="flex-shrink-0 w-5 h-5 bg-secondary-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
@@ -78,7 +78,7 @@
             {{ form_widget(form.plateformesAdmission.vars.prototype) }}
             <button type="button"
                     data-action="click->form-collection#removeItem"
-                    class="mt-2 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                    class="mt-2 text-sm text-danger-600 hover:text-danger-800 dark:text-danger-400 dark:hover:text-danger-300">
                 <twig:UX:Icon name="icon:delete" class="mr-1 inline h-4 w-4"/>
                 Supprimer cette plateforme
             </button>
@@ -98,7 +98,7 @@
                     {{ form_row(plateformeForm.anneesCapaciteRequise) }}
                     <button type="button"
                             data-action="click->form-collection#removeItem"
-                            class="mt-2 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300">
+                            class="mt-2 text-sm text-danger-600 hover:text-danger-800 dark:text-danger-400 dark:hover:text-danger-300">
                         <twig:UX:Icon name="icon:delete" class="mr-1 inline h-4 w-4"/>
                         Supprimer cette plateforme
                     </button>
@@ -109,7 +109,7 @@
         <button type="button"
                 data-form-collection-target="addButton"
                 data-action="click->form-collection#addItem"
-                class="mt-2 inline-flex items-center rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800">
+                class="mt-2 inline-flex items-center rounded-lg border border-success-300 bg-success-50 px-4 py-2 text-sm font-medium text-success-700 hover:bg-success-100 hover:text-success-800 dark:bg-success-900 dark:text-success-300 dark:border-success-500 dark:hover:border-success-300 dark:hover:text-success-100">
             <twig:UX:Icon name="icon:add" class="mr-2 h-4 w-4"/>
             Ajouter une plateforme
         </button>

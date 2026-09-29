@@ -4,7 +4,7 @@
 {% set distClass = 'px-1 py-4 text-center align-middle tabular-nums font-semibold text-warning-700 dark:text-warning-400 bg-warning-50 dark:bg-warning-800' %}
 {% set totalClass = 'px-4 py-4 text-right align-middle tabular-nums font-black text-text bg-secondary-50 dark:bg-secondary-800' %}
 
-<tr class="border-t-2 border-primary-100 bg-primary-50 dark:border-indigo-800 dark:bg-primary-800">
+<tr class="border-t-2 border-primary-100 bg-primary-50 dark:border-primary-800 dark:bg-primary-800">
 
     {# Label "Total UE" — aligné à gauche, lisible #}
     <th class="{{ labelClass }}"
@@ -43,7 +43,7 @@
             <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalPres|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTotalPres|filtreHeures }}</span>
         </th>
-        <th class="{{ presClass }} border-r border-secondary-200">
+        <th class="{{ presClass }} border-r border-secondary-200 dark:border-secondary-700">
             <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTePres|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTePres|filtreHeures }}</span>
         </th>
@@ -62,7 +62,7 @@
             <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTpDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTpDist|filtreHeures }}</span>
         </th>
-        <th class="{{ distClass }} font-black text-orange-700 bg-orange-50/50 border-r border-secondary-200">
+        <th class="{{ distClass }} font-black text-warning-700 dark:text-warning-300 bg-warning-50/50 dark:bg-warning-900/30 border-r border-secondary-200 dark:border-secondary-700">
             <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTotalDist|filtreHeures }}</span>
         </th>
@@ -75,7 +75,7 @@
                     <span class="show_versioning d-none d-print-none block text-[10px] font-semibold text-secondary-500">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalPresDist|displayDiff : '' }}</span>
                     <span class="show_current block text-2xl font-black">{{ ue.heuresEctsUe.sommeUeTotalPresDist|filtreHeures }}</span>
                     {% if ue.heuresEctsUe.sommeUeTePres > 0 %}
-                        <span class="mt-1 block text-[11px] font-medium text-emerald-600 dark:text-emerald-300">+ {{ ue.heuresEctsUe.sommeUeTePres|filtreHeures }} h autonomie</span>
+                        <span class="mt-1 block text-[11px] font-medium text-success-600 dark:text-success-300">+ {{ ue.heuresEctsUe.sommeUeTePres|filtreHeures }} h autonomie</span>
                     {% endif %}
                 </span>
             </div>

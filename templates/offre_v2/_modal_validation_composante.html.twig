@@ -21,60 +21,60 @@
 
     <!-- Sélection des Formations & Parcours -->
     <div class="space-y-3">
-        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-secondary-200 dark:border-secondary-700 pb-2">
             <div>
-                <h4 class="text-sm font-bold text-slate-800 uppercase tracking-wide">
+                <h4 class="text-sm font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide">
                     Formations & Parcours de la composante
                 </h4>
-                <span class="text-xs text-slate-500">
+                <span class="text-xs text-secondary-500">
                     Cochez les éléments concernés par cette validation
                 </span>
             </div>
             <div class="flex items-center gap-2 text-xs font-semibold">
                 <button type="button"
                         onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = true); document.querySelectorAll('.formation-checkbox').forEach(cb => cb.checked = true);"
-                        class="text-indigo-600 hover:text-indigo-800 hover:underline cursor-pointer">
+                        class="text-primary-600 hover:text-primary-800 hover:underline cursor-pointer dark:text-primary-400 dark:hover:text-primary-300">
                     Tout cocher
                 </button>
-                <span class="text-slate-300">|</span>
+                <span class="text-secondary-300">|</span>
                 <button type="button"
                         onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = false); document.querySelectorAll('.formation-checkbox').forEach(cb => cb.checked = false);"
-                        class="text-slate-500 hover:text-slate-700 hover:underline cursor-pointer">
+                        class="text-secondary-500 hover:text-secondary-700 hover:underline cursor-pointer">
                     Tout décocher
                 </button>
-                <span class="text-slate-300">|</span>
+                <span class="text-secondary-300">|</span>
                 <button type="button"
                         onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = (cb.dataset.conforme === '1')); syncFormationsCheckboxes();"
-                        class="text-green-700 hover:text-green-800 hover:underline cursor-pointer">
+                        class="text-success-700 dark:text-success-100 hover:text-success-800 hover:underline cursor-pointer dark:hover:text-success-300">
                     Cocher les conformes
                 </button>
             </div>
         </div>
 
-        <div class="max-h-72 overflow-y-auto space-y-3 pr-1 border border-slate-200 rounded-xl p-3 bg-slate-50/50">
+        <div class="max-h-72 overflow-y-auto space-y-3 pr-1 border border-secondary-200 dark:border-secondary-700 rounded-xl p-3 bg-secondary-50/50 dark:bg-secondary-900/30">
             {% for fId, fData in formationsData %}
                 {% set formation = fData.formation %}
-                <div class="rounded-lg border border-slate-200 bg-white p-3 shadow-xs space-y-2">
+                <div class="rounded-lg border border-secondary-200 dark:border-secondary-700 bg-surface p-3 shadow-xs space-y-2">
                     <!-- Formation Header -->
-                    <div class="flex items-start justify-between gap-2 border-b border-slate-100 pb-2">
-                        <label class="flex items-center gap-2.5 cursor-pointer font-bold text-slate-900 text-sm">
+                    <div class="flex items-start justify-between gap-2 border-b border-secondary-100 dark:border-secondary-700 pb-2">
+                        <label class="flex items-center gap-2.5 cursor-pointer font-bold text-secondary-900 dark:text-secondary-100 text-sm">
                             <input type="checkbox"
                                    name="formations[]"
                                    value="{{ formation.id }}"
                                    checked
                                    data-formation-id="{{ formation.id }}"
-                                   class="formation-checkbox h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                   class="formation-checkbox h-4 w-4 rounded border-secondary-300 dark:border-secondary-700 text-primary-600 focus:ring-primary-500 cursor-pointer dark:text-primary-400"
                                    onchange="document.querySelectorAll('.parcours-of-formation-{{ formation.id }}').forEach(cb => cb.checked = this.checked);"
                             >
                             <span>{{ formation.displayLong }}</span>
                         </label>
                         <div class="flex items-center gap-2 shrink-0">
                             {% if fData.hasAnomalies %}
-                                <span class="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200" title="{{ fData.anomaliesCount }} anomalie(s) détectée(s)">
+                                <span class="inline-flex items-center gap-1 rounded-md bg-warning-50 dark:bg-warning-900/30 px-2 py-0.5 text-xs font-semibold text-warning-800 dark:text-warning-300 border border-warning-200 dark:border-warning-700" title="{{ fData.anomaliesCount }} anomalie(s) détectée(s)">
                                     ⚠️ {{ fData.anomaliesCount }} à vérifier
                                 </span>
                             {% else %}
-                                <span class="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700 border border-green-200">
+                                <span class="inline-flex items-center gap-1 rounded-md bg-success-50 dark:bg-success-900/30 px-2 py-0.5 text-xs font-semibold text-success-700 dark:text-success-300 border border-success-200 dark:border-success-700">
                                     ✓ Conforme
                                 </span>
                             {% endif %}
@@ -85,31 +85,31 @@
                     <div class="space-y-1.5 pl-6">
                         {% for pData in fData.parcoursList %}
                             {% set parcours = pData.parcours %}
-                            <div class="flex flex-wrap items-center justify-between gap-2 p-1.5 rounded-md hover:bg-slate-50 text-xs">
-                                <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-700">
+                            <div class="flex flex-wrap items-center justify-between gap-2 p-1.5 rounded-md hover:bg-secondary-50 text-xs">
+                                <label class="flex items-center gap-2 cursor-pointer font-medium text-secondary-700 dark:text-secondary-100">
                                     <input type="checkbox"
                                            name="parcours[]"
                                            value="{{ parcours.id }}"
                                            checked
                                            data-conforme="{{ pData.isConforme ? '1' : '0' }}"
                                            data-formation-id="{{ formation.id }}"
-                                           class="parcours-checkbox parcours-of-formation-{{ formation.id }} h-3.5 w-3.5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                                           class="parcours-checkbox parcours-of-formation-{{ formation.id }} h-3.5 w-3.5 rounded border-secondary-300 dark:border-secondary-700 text-primary-600 focus:ring-primary-500 cursor-pointer dark:text-primary-400"
                                            onchange="syncFormationCheckbox({{ formation.id }});"
                                     >
                                     <span>{{ parcours.libelle }}</span>
-                                    <span class="rounded-full bg-{{ pData.isOuvert ? 'green' : 'red' }}-50 px-1.5 py-0.5 text-[10px] font-semibold text-{{ pData.isOuvert ? 'green' : 'red' }}-700 border border-{{ pData.isOuvert ? 'green' : 'red' }}-200">
+                                    <span class="rounded-full bg-{{ pData.isOuvert ? 'success' : 'danger' }}-50 dark:bg-{{ pData.isOuvert ? 'success' : 'danger' }}-900/30 px-1.5 py-0.5 text-[10px] font-semibold text-{{ pData.isOuvert ? 'success' : 'danger' }}-700 dark:text-{{ pData.isOuvert ? 'success' : 'danger' }}-300 border border-{{ pData.isOuvert ? 'success' : 'danger' }}-200 dark:border-{{ pData.isOuvert ? 'success' : 'danger' }}-700">
                                         {{ pData.isOuvert ? 'Ouvert' : 'Fermé' }}
                                     </span>
                                 </label>
 
                                 <div class="flex items-center gap-2">
-                                    <span class="text-slate-500 font-medium">Capacité : <strong>{{ pData.capacite }}</strong></span>
+                                    <span class="text-secondary-500 font-medium">Capacité : <strong>{{ pData.capacite }}</strong></span>
                                     {% if pData.isConforme %}
-                                        <span class="inline-flex items-center gap-0.5 text-green-700 font-semibold text-[11px]">
+                                        <span class="inline-flex items-center gap-0.5 text-success-700 dark:text-success-100 font-semibold text-[11px]">
                                             ✓ Données OK
                                         </span>
                                     {% else %}
-                                        <span class="inline-flex items-center gap-0.5 text-amber-700 font-semibold text-[11px] cursor-help" title="{{ pData.anomalies|join('\n') }}">
+                                        <span class="inline-flex items-center gap-0.5 text-warning-700 dark:text-warning-100 font-semibold text-[11px] cursor-help" title="{{ pData.anomalies|join('\n') }}">
                                             ⚠️ {{ pData.anomalies|length }} anomalie{{ pData.anomalies|length > 1 ? 's' : '' }}
                                         </span>
                                     {% endif %}
@@ -124,12 +124,12 @@
 
     {% if not isRefuse %}
         <!-- Ligne 1 : PV & Date de validation côte à côte -->
-        <div class="grid gap-4 md:grid-cols-2 border-t border-slate-200 pt-4">
+        <div class="grid gap-4 md:grid-cols-2 border-t border-secondary-200 dark:border-secondary-700 pt-4">
             <!-- Procès-Verbal (PV) -->
-            <div class="space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 flex flex-col justify-between">
+            <div class="space-y-2 rounded-xl border border-secondary-200 dark:border-secondary-700 bg-secondary-50/50 dark:bg-secondary-900/30 p-3.5 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <label class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                        <label class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide flex items-center gap-1.5">
                             <span>📄</span>
                             <span>Procès-Verbal (PV)</span>
                         </label>
@@ -137,12 +137,12 @@
 
                     {% if existingPvs|length > 0 %}
                         <div class="mb-2">
-                            <label for="pv_id" class="block text-[11px] font-medium text-slate-500 mb-1">
+                            <label for="pv_id" class="block text-[11px] font-medium text-secondary-500 mb-1">
                                 Choisir un PV déjà déposé :
                             </label>
                             <select name="pv_id" id="pv_id"
                                     onchange="document.getElementById('pv_file_input_wrapper').style.display = this.value ? 'none' : 'block';"
-                                    class="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs font-semibold text-slate-800 shadow-xs focus:border-indigo-500 focus:ring-indigo-500">
+                                    class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs font-semibold text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500">
                                 <option value="">-- Téléverser un nouveau PV --</option>
                                 {% for pv in existingPvs %}
                                     <option value="{{ pv.id }}">{{ pv.originalFilename }} (du {{ pv.uploadedAt|date('d/m/Y') }})</option>
@@ -153,85 +153,85 @@
                 </div>
 
                 <div id="pv_file_input_wrapper" class="space-y-1">
-                    <label for="file" class="block text-[11px] font-medium text-slate-500">
+                    <label for="file" class="block text-[11px] font-medium text-secondary-500">
                         {{ existingPvs|length > 0 ? 'Ou téléverser un nouveau fichier PDF :' : 'Téléverser le fichier PDF :' }}
                     </label>
                     <input type="file" name="file" id="file" accept="application/pdf"
-                           class="w-full rounded-lg border border-slate-300 bg-white p-1.5 text-xs text-slate-700 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                           class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-1.5 text-xs text-secondary-700 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:text-primary-300">
                 </div>
             </div>
 
             <!-- Date de validation -->
-            <div class="space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3.5 flex flex-col justify-between">
+            <div class="space-y-2 rounded-xl border border-secondary-200 dark:border-secondary-700 bg-secondary-50/50 dark:bg-secondary-900/30 p-3.5 flex flex-col justify-between">
                 <div>
-                    <label for="date" class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5 mb-1">
+                    <label for="date" class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide flex items-center gap-1.5 mb-1">
                         <span>📅</span>
                         <span>Date de validation</span>
                     </label>
-                    <p class="text-[11px] text-slate-500">
+                    <p class="text-[11px] text-secondary-500">
                         Date d'effet ou date de tenue du conseil / commission de décision.
                     </p>
                 </div>
 
                 <div class="space-y-1">
-                    <label for="date" class="block text-[11px] font-medium text-slate-500">
+                    <label for="date" class="block text-[11px] font-medium text-secondary-500">
                         Sélectionner la date :
                     </label>
                     <input type="date"
                            name="date"
                            id="date"
                            value="{{ 'now'|date('Y-m-d') }}"
-                           class="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs font-semibold text-slate-800 shadow-xs focus:border-indigo-500 focus:ring-indigo-500">
+                           class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs font-semibold text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500">
                 </div>
             </div>
         </div>
 
         <!-- Ligne 2 : Laissez-passer optionnel -->
-        <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-3.5 space-y-2">
-            <label class="flex items-center gap-2.5 cursor-pointer font-bold text-amber-900 text-xs uppercase tracking-wide">
+        <div class="rounded-xl border border-warning-200 dark:border-warning-700 bg-warning-50/50 dark:bg-warning-900/30 p-3.5 space-y-2">
+            <label class="flex items-center gap-2.5 cursor-pointer font-bold text-warning-900 dark:text-warning-100 text-xs uppercase tracking-wide">
                 <input type="checkbox"
                        name="laisserPasser"
                        id="laisserPasser"
                        value="1"
                        onchange="document.getElementById('laisser_passer_justif_wrapper').style.display = this.checked ? 'block' : 'none';"
-                       class="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500 cursor-pointer">
+                       class="h-4 w-4 rounded border-warning-300 text-warning-600 focus:ring-warning-500 cursor-pointer dark:text-warning-400">
                 <span>Demander / Activer un laissez-passer exceptionnel</span>
             </label>
             <div id="laisser_passer_justif_wrapper" style="display: none;" class="space-y-1 pt-1">
-                <label for="laisserPasserJustif" class="block text-[11px] font-medium text-amber-800">
+                <label for="laisserPasserJustif" class="block text-[11px] font-medium text-warning-800 dark:text-warning-100">
                     Justification du laissez-passer (PV différé, décision dérogatoire, etc.) :
                 </label>
                 <input type="text"
                        name="laisserPasserJustif"
                        id="laisserPasserJustif"
                        placeholder="Ex : PV en cours de signature, validation accordée en séance du..."
-                       class="w-full rounded-lg border border-amber-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-amber-500 focus:ring-amber-500">
+                       class="w-full rounded-lg border border-warning-300 dark:border-secondary-600 bg-surface p-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-warning-500 focus:ring-warning-500">
             </div>
         </div>
 
         <!-- Ligne 3 : Note explicative (obligatoire) -->
-        <div class="space-y-2 rounded-xl border border-slate-200 bg-slate-50/50 p-3.5">
+        <div class="space-y-2 rounded-xl border border-secondary-200 dark:border-secondary-700 bg-secondary-50/50 dark:bg-secondary-900/30 p-3.5">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <label class="text-xs font-bold text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <label class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide flex items-center gap-1.5">
                         <span>📝</span>
                         <span>Note explicative</span>
                     </label>
-                    <span class="text-[10px] font-bold text-red-500 uppercase">Requis</span>
+                    <span class="text-[10px] font-bold text-danger-500 uppercase">Requis</span>
                 </div>
-                <a href="{{ asset('modeles/note_explicative.docx') }}" target="_blank" class="text-[11px] font-semibold text-indigo-600 hover:underline">
+                <a href="{{ asset('modeles/note_explicative.docx') }}" target="_blank" class="text-[11px] font-semibold text-primary-600 hover:underline dark:text-primary-400">
                     Modèle .docx
                 </a>
             </div>
 
             {% if existingNotes|length > 0 %}
                 <div>
-                    <label for="note_id" class="block text-[11px] font-medium text-slate-500 mb-1">
+                    <label for="note_id" class="block text-[11px] font-medium text-secondary-500 mb-1">
                         Choisir une Note déjà déposée :
                     </label>
                     <select name="note_id" id="note_id"
                             onchange="document.getElementById('note_file_input_wrapper').style.display = this.value ? 'none' : 'block';"
-                            class="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs font-semibold text-slate-800 shadow-xs focus:border-indigo-500 focus:ring-indigo-500">
+                            class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs font-semibold text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500">
                         <option value="">-- Téléverser une nouvelle Note --</option>
                         {% for note in existingNotes %}
                             <option value="{{ note.id }}">{{ note.originalFilename }} (du {{ note.uploadedAt|date('d/m/Y') }})</option>
@@ -241,30 +241,30 @@
             {% endif %}
 
             <div id="note_file_input_wrapper" class="space-y-1">
-                <label for="fileNote" class="block text-[11px] font-medium text-slate-500">
+                <label for="fileNote" class="block text-[11px] font-medium text-secondary-500">
                     {{ existingNotes|length > 0 ? 'Ou téléverser une nouvelle Note PDF :' : 'Téléverser le fichier PDF :' }}
                 </label>
                 <input type="file" name="fileNote" id="fileNote" accept="application/pdf"
-                       class="w-full rounded-lg border border-slate-300 bg-white p-1.5 text-xs text-slate-700 shadow-xs focus:border-indigo-500 focus:ring-indigo-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                       class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-1.5 text-xs text-secondary-700 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:text-primary-300">
             </div>
         </div>
     {% else %}
         <!-- Si refus : Date de décision -->
-        <div class="border-t border-slate-200 pt-4">
-            <label for="date" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+        <div class="border-t border-secondary-200 dark:border-secondary-700 pt-4">
+            <label for="date" class="block text-xs font-bold text-secondary-700 dark:text-secondary-100 uppercase tracking-wide mb-1">
                 Date de décision :
             </label>
             <input type="date"
                    name="date"
                    id="date"
                    value="{{ 'now'|date('Y-m-d') }}"
-                   class="w-full max-w-xs rounded-lg border border-slate-300 bg-white p-2 text-xs font-semibold text-slate-800 shadow-xs focus:border-indigo-500 focus:ring-indigo-500">
+                   class="w-full max-w-xs rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs font-semibold text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500">
         </div>
     {% endif %}
 
     <!-- Ligne 4 : Commentaire libre -->
-    <div class="border-t border-slate-200 pt-4">
-        <label for="commentaire" class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">
+    <div class="border-t border-secondary-200 dark:border-secondary-700 pt-4">
+        <label for="commentaire" class="block text-xs font-bold text-secondary-700 dark:text-secondary-100 uppercase tracking-wide mb-1">
             {{ isRefuse ? 'Motif du retour / modifications demandées :' : 'Commentaire / Remarques (optionnel) :' }}
         </label>
         <textarea name="commentaire"
@@ -272,7 +272,7 @@
                   rows="2"
                   {{ isRefuse ? 'required' : '' }}
                   placeholder="{{ isRefuse ? 'Précisez les corrections attendues...' : 'Ajouter une observation...' }}"
-                  class="w-full rounded-lg border border-slate-300 bg-white p-2 text-xs text-slate-800 shadow-xs focus:border-indigo-500 focus:ring-indigo-500"></textarea>
+                  class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500"></textarea>
     </div>
 </form>
 

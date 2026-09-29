@@ -1,4 +1,4 @@
-<div class="flex items-start justify-between gap-4 border-b border-secondary-200 dark:border-secondary-700 bg-bg px-4 py-3 text-[10px] font-bold uppercase tracking-tight text-secondary-400 {% if enfant is defined and enfant %}border-l-4 border-l-amber-300 bg-amber-50/40{% endif %}">
+<div class="flex items-start justify-between gap-4 border-b border-secondary-200 dark:border-secondary-700 bg-bg px-4 py-3 text-[10px] font-bold uppercase tracking-tight text-secondary-400 {% if enfant is defined and enfant %}border-l-4 border-l-warning-300 bg-warning-50/40 dark:bg-warning-900/30{% endif %}">
     {% set hasDistancielData = ue.heuresEctsUe.sommeUeTotalDist > 0 %}
 
     <div class="flex items-center gap-4">
@@ -12,12 +12,12 @@
                     {{ ue.ue.libelle }}
                 </span>
                 {% if ue.raccroche == true %}
-                    <span class="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-[10px] font-black text-amber-700">
+                    <span class="inline-flex items-center gap-1 rounded-full bg-warning-100 px-2 py-1 text-[10px] font-black text-warning-700 dark:bg-warning-900/30 dark:text-warning-300">
                         <i class="fal fa-link"></i> Raccrochée
                     </span>
                 {% endif %}
                 {% if ue.ue.ueMutualisables|length >0 %}
-                    <span class="inline-flex items-center gap-1 rounded-full bg-sky-100 px-2 py-1 text-[10px] font-black text-sky-700"
+                    <span class="inline-flex items-center gap-1 rounded-full bg-info-100 px-2 py-1 text-[10px] font-black text-info-700 dark:bg-info-900/30 dark:text-info-300"
                           data-controller="tooltip"
                           data-tooltip-placement-value="bottom"
                           title="UE mutualisée">
@@ -25,7 +25,7 @@
                     </span>
                 {% endif %}
                 {% if is_granted('ROLE_ADMIN') %}
-                    <span class="rounded-full bg-secondary-200 px-2 py-1 text-[10px] font-semibold text-secondary-500 normal-case">#{{ ue.ue.id }}</span>
+                    <span class="rounded-full bg-secondary-200 px-2 py-1 text-[10px] font-semibold text-secondary-500 normal-case dark:bg-secondary-800">#{{ ue.ue.id }}</span>
                 {% endif %}
             </div>
 
@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <span class="flex flex-wrap items-center justify-end gap-2 text-indigo-600 font-black whitespace-nowrap">
+    <span class="flex flex-wrap items-center justify-end gap-2 text-primary-600 font-black whitespace-nowrap dark:text-primary-400">
         {% if ue.ue.natureUeEc is defined and ue.ue.natureUeEc != null and ue.ue.natureUeEc.libre == true %}
             <twig:Badge label="UE a choix libre" variant="secondary"/>
         {% endif %}
@@ -57,10 +57,10 @@
         <tbody>
         <tr class="ec">
             <td colspan="{{ colspan + 5 }}"
-                class="px-4 py-4 text-sm leading-relaxed text-secondary-700 bg-secondary-50/60">{{ ue.ue.descriptionUeLibre }}</td>
+                class="px-4 py-4 text-sm leading-relaxed text-secondary-700 bg-secondary-50/60 dark:bg-secondary-800/60 dark:text-secondary-100">{{ ue.ue.descriptionUeLibre }}</td>
         </tr>
         </tbody>
-        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 bg-secondary-50/30 border-b border-secondary-100 text-center">
+        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 dark:text-secondary-400 bg-secondary-50/30 border-b border-secondary-100 dark:border-secondary-700 text-center dark:bg-secondary-800/30">
         {% include 'typeDiplome/licence/structure/v2/_structure_ue_tfoot.html.twig' %}
         </tfoot>
     </table>
@@ -74,7 +74,7 @@
 
     {# Total de l'UE parente dans son propre tableau (hors des sous-tables) #}
     <table class="w-full text-xs">
-        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 bg-secondary-50/30 border-b border-secondary-100 text-center">
+        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 dark:text-secondary-400 bg-secondary-50/30 border-b border-secondary-100 dark:border-secondary-700 text-center dark:bg-secondary-800/30">
         {% include 'typeDiplome/licence/structure/v2/_structure_ue_tfoot.html.twig' %}
         </tfoot>
     </table>
@@ -84,13 +84,13 @@
     {# ---- Cas 3 : UE normale avec ECs ---- #}
     {% set hasDistancielData = ue.heuresEctsUe.sommeUeTotalDist > 0 %}
     {% set distancielInline = presentiel and (not distanciel) and hasDistancielData %}
-    <table class="w-full text-xs bg-white">
-        <thead class="text-[10px] font-black uppercase tracking-tighter text-secondary-400 bg-bg border-b border-secondary-100 text-center">
+    <table class="w-full text-xs bg-surface">
+        <thead class="text-[10px] font-black uppercase tracking-tighter text-secondary-400 bg-bg border-b border-secondary-100 dark:border-secondary-700 text-center">
         <tr class="ec">
             <th class="px-5 py-3 text-left w-2/5 font-bold">
                 Fiche EC/Matiere
                 {% if distancielInline %}
-                    <span class="ml-2 inline-flex items-center rounded-full bg-orange-100 px-2 py-0.5 text-[9px] font-black text-orange-700">
+                    <span class="ml-2 inline-flex items-center rounded-full bg-warning-100 px-2 py-0.5 text-[9px] font-black text-warning-700 dark:bg-warning-900/30 dark:text-warning-300">
                         Dist. integre
                     </span>
                 {% endif %}
@@ -145,7 +145,7 @@
             {% endfor %}
         {% endfor %}
         </tbody>
-        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 bg-secondary-50/30 border-b border-secondary-100 text-center">
+        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 dark:text-secondary-400 bg-secondary-50/30 border-b border-secondary-100 dark:border-secondary-700 text-center dark:bg-secondary-800/30">
         {% include 'typeDiplome/licence/structure/v2/_structure_ue_tfoot.html.twig' %}
         </tfoot>
     </table>

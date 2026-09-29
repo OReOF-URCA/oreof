@@ -1,202 +1,53 @@
-# 🧪 Testing Setup — ORéOF v2
+# Tests PHP — ORéOF v2
 
-## ✅ Installation complétée !
+Quand lire : écrire ou lancer des tests PHPUnit.
+À mettre à jour si : `tests/Support/`, `tests/Fixtures/`, arborescence `tests/`, `phpunit.xml.dist`, cibles `test*` du `../Makefile`, CI.
 
-Votre infrastructure de test est **100% opérationnelle**. Voici ce qui a été mis en place :
+## Lancer
 
----
+Docker requis ; le Makefile est dans `../` et cible v1 par défaut → toujours `APP=v2`.
 
-## 📁 Structure créée
+| Besoin | Commande |
+|---|---|
+| Toute la suite | `make test APP=v2` |
+| Avec couverture (xdebug) | `make test-coverage APP=v2` (ajouter `--coverage-html var/coverage` en CLI pour un rapport HTML ; aucun rapport n'est configuré dans `phpunit.xml.dist`) |
+| Ciblé | `make cli APP=v2` puis `php bin/phpunit tests/Unit/Service/XTest.php` |
+| Options utiles | `--testdox`, `--stop-on-failure`, `--filter testNom` |
 
-```
-tests/
-├── Support/                          # 🔧 Classes de base
-│   ├── TestCase.php                 # Classe parente (accès Symfony)
-│   └── DatabaseTrait.php            # Helpers DB (persist, refresh, etc.)
-│
-├── Fixtures/                         # 📦 Données de test
-│   └── EntityFixturesTrait.php      # Factories pour créer entités rapidement
-│
-├── Unit/                             # 🧬 Tests unitaires (sans DB)
-│   ├── Service/
-│   │   ├── VersioningParcoursExampleTest.php
-│   │   └── SecureUploadServiceExampleTest.php
-│   ├── DTO/
-│   │   └── StructureParcoursExampleTest.php
-│   └── Entity/
-│
-├── Integration/                      # 🔗 Tests d'intégration (avec DB)
-│   ├── Doctrine/
-│   │   └── ParcoursRepositoryExampleTest.php
-│   └── Workflow/
-│       └── WorkflowTransitionExampleTest.php
-│
-├── Functional/                       # 🌐 Tests fonctionnels (HTTP)
-│   ├── Controller/
-│   │   └── ParcoursControllerExampleTest.php
-│   └── Security/
-│
-├── bootstrap.php                     # ✅ Existant
-├── ParcoursCopyDataTest.php         # ✅ Existant
-└── VolumeHoraireParcoursTest.php    # ✅ Existant
-```
+Suite unique « Project Test Suite » (`phpunit.xml.dist`) : `tests/` + `packages/workflow-operations-bundle/tests`.
 
----
+## Organisation
 
-## 📚 Documentation
+| Dossier | Contenu | Base |
+|---|---|---|
+| `tests/Unit/` (`Service`, `DTO`, `Navigation`…) | logique pure, dépendances mockées, sans BD | `PHPUnit\Framework\TestCase` |
+| `tests/Integration/` (`Doctrine`, `Workflow`) | persistance, relations, transitions | `App\Tests\Support\TestCase` + traits |
+| `tests/Functional/` (`Controller`, `Security`) | routes HTTP, droits, CSRF | `WebTestCase` |
+| `tests/Workflow/` | configuration et formulaires des workflows | `PHPUnit` ou `KernelTestCase` |
+| `tests/*.php` | tests historiques (`ParcoursCopyDataTest`, `VolumeHoraireParcoursTest`) | — |
 
-### 🚀 Pour commencer
-👉 **[GETTING_STARTED.md](GETTING_STARTED.md)** — Guide complet d'utilisation + commandes
+Les fichiers `*ExampleTest.php` sont des **gabarits** (`markTestIncomplete('À impléter')`) : copier, renommer, adapter.
 
-### 📋 Stratégie globale
-👉 **[STRATEGY.md](STRATEGY.md)** — Services à tester en priorité + couverture + templates
+## Helpers (`tests/Support/`, `tests/Fixtures/`)
 
----
+- `TestCase` (extends `KernelTestCase`) : `getService(id)`, `createEntity(class, data)`.
+- `DatabaseTrait` : `setUpDatabase()` ouvre une transaction, `tearDownDatabase()` rollback ; `persist()`,
+  `persistAll()`, `refresh()`, `clearEntityManager()`.
+- `EntityFixturesTrait` : `createMinimalParcours()`, `createMinimalFicheMatiere()`, `createMinimalDpeParcours()`
+  (tableau d'overrides en paramètre).
 
-## 🎯 Prochaines étapes
+## Règles
 
-### Phase 3 — Implémenter les tests réels
+- Arrange / Act / Assert ; un test = un scénario, nom explicite (`testCreateVersionIncrementsBuild`, pas `testV1`).
+- Tests indépendants (aucun ordre implicite) ; `setUp()` léger.
+- Assertions précises (`assertSame`, `assertCount`) plutôt que `assertTrue($x)`.
+- `declare(strict_types=1);`, namespace `App\Tests\<Dossier>`.
 
-Choisissez un service et commencez :
+## Priorités de couverture (non encore implémentées)
 
-**Option 1 : Service simple (recommandé pour débuter)**
-```bash
-# Copie le template
-cp tests/Unit/Service/SecureUploadServiceExampleTest.php \
-   tests/Unit/Service/SecureUploadServiceTest.php
+1. `VersioningParcours` (unit + intégration), `SecureUploadService` (unit, sécurité), `TypeDiplomeResolver` (unit).
+2. Entité `Parcours` (persistance), workflow `Parcours` (transitions), `FicheMatiere` (calculs ECTS/heures).
+3. Fonctionnel : routes `/parcours`, exports PDF/Excel, authentification.
 
-# Adapter le fichier avec votre logique réelle
-# Lance les tests
-php bin/phpunit tests/Unit/Service/SecureUploadServiceTest.php
-```
-
-**Option 2 : Entité avec persistance**
-```bash
-# Copie le template
-cp tests/Integration/Doctrine/ParcoursRepositoryExampleTest.php \
-   tests/Integration/Doctrine/ParcoursTest.php
-
-# Adapter et lancer
-php bin/phpunit tests/Integration/Doctrine/ParcoursTest.php
-```
-
-### Phase 4 — Intégrer CI/CD
-
-```bash
-# Vérifier que make test fonctionne
-make test
-
-# Ajouter à GitHub Actions si absent
-# .github/workflows/test.yml
-```
-
-### Phase 5 — Mesurez la couverture
-
-```bash
-# Générer rapport HTML
-php bin/phpunit --coverage-html=coverage/
-
-# Ouvrir dans le navigateur
-open coverage/index.html
-```
-
----
-
-## 🔧 Commandes rapides
-
-```bash
-# ✅ Lancer tous les tests
-make test
-
-# 🧬 Unitaires seulement
-php bin/phpunit tests/Unit/
-
-# 🔗 Intégration seulement
-php bin/phpunit tests/Integration/
-
-# 🌐 Fonctionnels seulement
-php bin/phpunit tests/Functional/
-
-# 📊 Format lisible
-php bin/phpunit --testdox
-
-# 🎯 S'arrêter au premier échec
-php bin/phpunit --stop-on-failure
-
-# 📈 Rapport couverture
-php bin/phpunit --coverage-html=coverage/
-
-# 🔍 Un test spécifique
-php bin/phpunit tests/Unit/Service/MyTest.php
-```
-
----
-
-## 💡 Quick Tips
-
-### 1️⃣ Tester un **service métier**
-```php
-class MyServiceTest extends TestCase {
-    public function testLogique() {
-        $service = $this->getService(MyService::class);
-        // Pas de DB, juste la logique métier
-    }
-}
-```
-
-### 2️⃣ Tester une **entité + persistance**
-```php
-class MyEntityTest extends TestCase {
-    use DatabaseTrait, EntityFixturesTrait;
-    
-    public function testPersist() {
-        $entity = $this->createMinimalParcours();
-        $this->persist($entity);
-        // Entité persiste en transaction de test
-    }
-}
-```
-
-### 3️⃣ Tester une **route HTTP**
-```php
-class MyControllerTest extends WebTestCase {
-    public function testRoute() {
-        $client = static::createClient();
-        $client->request('GET', '/parcours');
-        $this->assertResponseIsSuccessful();
-    }
-}
-```
-
----
-
-## 📊 Objectifs de couverture
-
-| Zone | Minimum | Objectif |
-|------|---------|----------|
-| Services | 70% | 85% |
-| Entités | 60% | 80% |
-| DTO | 80% | 95% |
-| Type Diplôme | 70% | 85% |
-| **GLOBAL** | **70%** | **80%** |
-
----
-
-## 📖 Fichiers de référence
-
-- **Base de tous les tests** → `tests/Support/TestCase.php`
-- **Pour accès BD** → `tests/Support/DatabaseTrait.php` + `tests/Fixtures/EntityFixturesTrait.php`
-- **Templates d'exemple** → `tests/Unit/Service/*ExampleTest.php`, etc.
-
----
-
-## ❓ Questions ?
-
-- 📖 Lire `docs/testing/GETTING_STARTED.md`
-- 📋 Consulter `docs/testing/STRATEGY.md`
-- 🔍 Explorer les fichiers `*ExampleTest.php` pour patterns
-- 🧪 Lancer un test avec `-v` pour debug
-
----
-
-**Bon testing ! 🚀**
+Objectifs : global 70 % min / 80 % cible ; `Service` et `TypeDiplome` 70/85 ; `Entity` 60/80 ; `DTO` 80/95 ;
+`Controller` 40/60. Pas encore de CI de tests (`.github/workflows/` ne contient que `release-please.yml`).

@@ -56,7 +56,7 @@ final class CampagneCollecteDataTable extends AbstractAppDataTable
                 'title' => 'Paramétrer les options de publication',
             ])
             ->icon(Icon::Wrench)
-            ->setClassName('inline-flex items-center gap-1 rounded-md border border-blue-300 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 transition hover:bg-blue-100');
+            ->setClassName('inline-flex items-center gap-1 rounded-md border border-primary-300 bg-primary-50 px-2.5 py-1 text-xs font-semibold text-primary-700 transition hover:bg-primary-100 dark:bg-primary-900 dark:text-primary-300 dark:border-primary-500 dark:hover:border-primary-300 dark:hover:text-primary-100');
 
         return $actions
             ->add($this->createShowAction('app_campagne_collecte_show', static fn(CampagneCollecte $c): array => ['id' => $c->getId()], modal: false))

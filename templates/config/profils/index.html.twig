@@ -6,15 +6,15 @@
         urlListe: path('app_administration_profils_liste'),
         urlChangeDroit: path('app_administration_profils_change_droit'),
     }) }}>
-        <div class="mt-2 rounded-lg border border-gray-200 bg-white shadow-sm">
+        <div class="mt-2 rounded-lg border border-secondary-200 dark:border-secondary-700 bg-surface shadow-sm">
             <div class="p-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label for="profil" class="mb-1 block text-sm font-medium text-gray-700">
-                            Profil <span class="text-red-500">*</span>
+                        <label for="profil" class="mb-1 block text-sm font-medium text-secondary-700 dark:text-secondary-100">
+                            Profil <span class="text-danger-500">*</span>
                         </label>
                         <select name="profil" id="profil"
-                                class="block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+                                class="block w-full rounded-md border border-secondary-300 dark:border-secondary-700 bg-surface px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
                                 {{ stimulus_action('profil--index', 'changeProfil') }}
                                 {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
                         >
@@ -46,7 +46,7 @@
                 modalTitle: 'Ajouter un profil',
                 modalUrl: path('app_administration_profils_creer') }) }}
             data-action="click->modal#openModal"
-            class="btn border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+            class="btn border border-success-300 bg-success-50 text-success-700 hover:bg-success-100 hover:text-success-800 dark:bg-success-900 dark:text-success-300 dark:border-success-500 dark:hover:border-success-300 dark:hover:text-success-100"
             {{ stimulus_controller('tooltip', {
                 placement: 'bottom',
                 customClass: 'app-tooltip',

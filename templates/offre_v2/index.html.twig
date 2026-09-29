@@ -61,39 +61,39 @@
         <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" class="space-y-6">
             <!-- KPI -->
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-                <div class="rounded-xl border bg-white p-4 shadow-sm">
-                    <p class="text-sm text-slate-500">Formations</p>
+                <div class="rounded-xl border bg-surface p-4 shadow-sm">
+                    <p class="text-sm text-secondary-500">Formations</p>
                     <p class="mt-2 text-3xl font-bold">{{ tabStatistiques.nbFormations }}</p>
                 </div>
 
-                <div class="rounded-xl border bg-white p-4 shadow-sm">
-                    <p class="text-sm text-slate-500">Parcours</p>
+                <div class="rounded-xl border bg-surface p-4 shadow-sm">
+                    <p class="text-sm text-secondary-500">Parcours</p>
                     <p class="mt-2 text-3xl font-bold">{{ tabStatistiques.nbParcours }}</p>
                 </div>
 
-                <div class="rounded-xl border bg-white p-4 shadow-sm">
-                    <p class="text-sm text-slate-500">Ouverts</p>
-                    <p class="mt-2 text-3xl font-bold text-green-700">{{ tabStatistiques.nbParcoursOuvert }}</p>
+                <div class="rounded-xl border bg-surface p-4 shadow-sm">
+                    <p class="text-sm text-secondary-500">Ouverts</p>
+                    <p class="mt-2 text-3xl font-bold text-success-700 dark:text-success-300">{{ tabStatistiques.nbParcoursOuvert }}</p>
                 </div>
 
-                <div class="rounded-xl border bg-white p-4 shadow-sm">
-                    <p class="text-sm text-slate-500">Capacité</p>
-                    <p class="mt-2 text-3xl font-bold text-green-700">{{ tabStatistiques.capacite }}</p>
+                <div class="rounded-xl border bg-surface p-4 shadow-sm">
+                    <p class="text-sm text-secondary-500">Capacité</p>
+                    <p class="mt-2 text-3xl font-bold text-success-700 dark:text-success-300">{{ tabStatistiques.capacite }}</p>
                 </div>
 
-                <div class="rounded-xl border bg-white p-4 shadow-sm">
-                    <p class="text-sm text-slate-500">À confirmer</p>
-                    <p class="mt-2 text-3xl font-bold text-amber-600">{{ tabStatistiques.nbAConfirmer }}</p>
+                <div class="rounded-xl border bg-surface p-4 shadow-sm">
+                    <p class="text-sm text-secondary-500">À confirmer</p>
+                    <p class="mt-2 text-3xl font-bold text-warning-600 dark:text-warning-400">{{ tabStatistiques.nbAConfirmer }}</p>
                 </div>
 
-                <div class="rounded-xl border bg-white p-4 shadow-sm">
-                    <p class="text-sm text-slate-500">Anomalies</p>
-                    <p class="mt-2 text-3xl font-bold text-red-600">{{ tabStatistiques.nbAnomalies }}</p>
+                <div class="rounded-xl border bg-surface p-4 shadow-sm">
+                    <p class="text-sm text-secondary-500">Anomalies</p>
+                    <p class="mt-2 text-3xl font-bold text-danger-600 dark:text-danger-400">{{ tabStatistiques.nbAnomalies }}</p>
                 </div>
             </div>
 
             <!-- Filters -->
-            <div class="rounded-xl border bg-white p-4 shadow-sm">
+            <div class="rounded-xl border bg-surface p-4 shadow-sm">
                 <div class="grid gap-4 md:grid-cols-12">
                     <div class="{% if composante %}md:col-span-5{% else %}md:col-span-3{% endif %}">
                         <input name="q" value="{{ filters.q|default('') }}" class="rounded-lg border px-3 py-2 text-sm w-full" placeholder="Rechercher une formation…" oninput="this.form.requestSubmit()">
@@ -139,7 +139,7 @@
                     </div>
 
                     <div class="md:col-span-1">
-                        <a href="{{ formUrl }}" data-turbo-frame="offre_table" class="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-2 text-sm font-semibold text-red-700 transition-colors w-full text-center">
+                        <a href="{{ formUrl }}" data-turbo-frame="offre_table" class="inline-flex items-center justify-center rounded-lg border border-danger-200 bg-danger-50 hover:bg-danger-100 px-3 py-2 text-sm font-semibold text-danger-700 transition-colors w-full text-center dark:border-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
                             Effacer
                         </a>
                     </div>
@@ -159,29 +159,29 @@
             {% endif %}
 
             <!-- Table -->
-            <div class="overflow-hidden rounded-xl border bg-white shadow-sm">
+            <div class="overflow-hidden rounded-xl border bg-surface shadow-sm">
                 <!-- Table Controls -->
-                <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50/70 px-4 py-3 border-b border-slate-200 text-sm">
-                    <div class="font-semibold text-slate-700">
+                <div class="flex flex-wrap items-center justify-between gap-4 bg-secondary-50/70 px-4 py-3 border-b border-secondary-200 text-sm dark:border-secondary-700 dark:bg-secondary-800/70">
+                    <div class="font-semibold text-secondary-700 dark:text-secondary-100">
                         Offre de formation {% if composante %}— <span class="text-primary font-bold">{{ composante.libelle }}</span>{% endif %}
                     </div>
                     <div class="flex items-center gap-4 text-xs font-medium">
                         {% if not composante %}
-                            <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
-                                <span class="text-slate-400 px-1.5 font-normal">Composantes:</span>
-                                <button type="button" onclick="toggleAllComposantes(true)" class="px-2 py-1 hover:bg-slate-50 text-indigo-600 rounded font-semibold transition-colors">Déplier tout</button>
-                                <button type="button" onclick="toggleAllComposantes(false)" class="px-2 py-1 hover:bg-slate-50 text-slate-600 rounded font-semibold transition-colors">Replier tout</button>
+                            <div class="flex items-center gap-1.5 bg-surface border border-secondary-200 rounded-lg p-1 shadow-sm dark:border-secondary-700">
+                                <span class="text-secondary-400 px-1.5 font-normal">Composantes:</span>
+                                <button type="button" onclick="toggleAllComposantes(true)" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400">Déplier tout</button>
+                                <button type="button" onclick="toggleAllComposantes(false)" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors">Replier tout</button>
                             </div>
                         {% endif %}
-                        <div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg p-1 shadow-sm">
-                            <span class="text-slate-400 px-1.5 font-normal">Parcours:</span>
-                            <button type="button" onclick="toggleAllParcours(true)" class="px-2 py-1 hover:bg-slate-50 text-indigo-600 rounded font-semibold transition-colors">Déplier tout</button>
-                            <button type="button" onclick="toggleAllParcours(false)" class="px-2 py-1 hover:bg-slate-50 text-slate-600 rounded font-semibold transition-colors">Replier tout</button>
+                        <div class="flex items-center gap-1.5 bg-surface border border-secondary-200 rounded-lg p-1 shadow-sm dark:border-secondary-700">
+                            <span class="text-secondary-400 px-1.5 font-normal">Parcours:</span>
+                            <button type="button" onclick="toggleAllParcours(true)" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400">Déplier tout</button>
+                            <button type="button" onclick="toggleAllParcours(false)" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors">Replier tout</button>
                         </div>
                     </div>
                 </div>
                 <table class="w-full text-sm">
-                    <thead class="bg-slate-50 text-left text-xs uppercase text-slate-500">
+                    <thead class="bg-secondary-50 text-left text-xs uppercase text-secondary-500 dark:bg-secondary-800">
                     <tr>
                         <th class="px-4 py-3">Formation</th>
                         <th class="px-4 py-3">Composante</th>
@@ -199,22 +199,22 @@
                         {% set compId = loop.index %}
 
                         <!-- Group Composante -->
-                        <tr class="bg-slate-100 hover:bg-slate-200/80 cursor-pointer select-none transition-colors border-t border-slate-200"
+                        <tr class="bg-secondary-100 hover:bg-secondary-200/80 cursor-pointer select-none transition-colors border-t border-secondary-200 dark:border-secondary-700 dark:bg-secondary-800"
                             onclick="document.querySelectorAll('.comp-{{ compId }}-row').forEach(row => row.classList.toggle('comp-collapsed')); this.querySelector('.comp-chevron').classList.toggle('rotate-90');">
-                            <td colspan="3" class="px-4 py-3 font-semibold text-slate-700">
+                            <td colspan="3" class="px-4 py-3 font-semibold text-secondary-700 dark:text-secondary-100">
                                 <div class="flex items-center gap-2">
-                                    <svg class="comp-chevron h-4 w-4 text-slate-500 transform transition-transform duration-200 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <svg class="comp-chevron h-4 w-4 text-secondary-500 transform transition-transform duration-200 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                                     </svg>
-                                    <span class="font-bold text-slate-900">{{ compGroup.libelle }}</span>
-                                    <span class="text-xs font-normal text-slate-500 ml-1">({{ compGroup.nbFormations }} formation{{ compGroup.nbFormations > 1 ? 's' : '' }} · {{ compGroup.nbParcours }} parcours)</span>
+                                    <span class="font-bold text-secondary-900 dark:text-secondary-100">{{ compGroup.libelle }}</span>
+                                    <span class="text-xs font-normal text-secondary-500 ml-1">({{ compGroup.nbFormations }} formation{{ compGroup.nbFormations > 1 ? 's' : '' }} · {{ compGroup.nbParcours }} parcours)</span>
                                 </div>
                             </td>
                             <td class="px-4 py-3">
                                 <twig:Badge variant="secondary" label="{{ compGroup.nbParcoursOuvert }}/{{ compGroup.nbParcours }} ouverts" />
                             </td>
                             <td class="px-4 py-3">&nbsp;</td>
-                            <td class="px-4 py-3 text-right font-bold text-slate-800">{{ compGroup.capacite }}</td>
+                            <td class="px-4 py-3 text-right font-bold text-secondary-800 dark:text-secondary-100">{{ compGroup.capacite }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <twig:Badge variant="{{ compGroup.nbPv == compGroup.nbFormations and compGroup.nbFormations > 0 ? 'success' : (compGroup.nbPv > 0 ? 'warning' : 'secondary') }}"
@@ -239,7 +239,7 @@
                                                data-turbo-stream="true"
                                                data-turbo-frame="_top"
                                                data-action="click->modalturbo#open"
-                                               class="rounded-lg bg-{{ transition.metadata.btn|default('indigo') == 'success' ? 'green-600 hover:bg-green-700' : (transition.metadata.btn|default('indigo') == 'warning' ? 'amber-600 hover:bg-amber-700' : 'indigo-600 hover:bg-indigo-700') }} px-3 py-1.5 text-xs font-semibold text-white cursor-pointer inline-flex items-center gap-1 shadow-sm transition-colors"
+                                               class="rounded-lg bg-{{ transition.metadata.btn|default('indigo') == 'success' ? 'success-600 hover:bg-success-700' : (transition.metadata.btn|default('indigo') == 'warning' ? 'warning-600 hover:bg-warning-700' : 'primary-600 hover:bg-primary-700') }} px-3 py-1.5 text-xs font-semibold text-white cursor-pointer inline-flex items-center gap-1 shadow-sm transition-colors"
                                                title="{{ transition.metadata.label|default(transition.name) }}"
                                             >
                                                 {% if transition.metadata.icon is defined %}
@@ -256,30 +256,30 @@
                         {% for forma in compGroup.formations %}
                             {% set formation = forma.formation %}
                             {% set formationOuverte = forma.isOuverte %}
-                            <tr class="hover:bg-slate-50 comp-{{ compId }}-row composante-child-row transition-all duration-150">
+                            <tr class="hover:bg-secondary-50 comp-{{ compId }}-row composante-child-row transition-all duration-150">
                                 <td class="px-4 py-3">
-                                    <div class="font-medium text-slate-900">
+                                    <div class="font-medium text-secondary-900 dark:text-secondary-100">
                                         {{ formation.display }}
                                         {% if forma.anomalies|length > 0 %}
-                                            <span class="inline-flex items-center text-red-600 ml-1 cursor-help animate-pulse" title="{{ forma.anomalies|join('\n') }}">⚠️</span>
+                                            <span class="inline-flex items-center text-danger-600 ml-1 cursor-help animate-pulse dark:text-danger-400" title="{{ forma.anomalies|join('\n') }}">⚠️</span>
                                         {% endif %}
                                     </div>
-                                    <div class="text-xs text-slate-500 flex items-center gap-1.5 flex-wrap mt-0.5">
+                                    <div class="text-xs text-secondary-500 flex items-center gap-1.5 flex-wrap mt-0.5">
                                         <span>{{ formation.typeDiplome ? formation.typeDiplome.libelle : '' }}</span>
                                         {% set tcAnnees = formation.anneesTroncCommun %}
                                         {% if tcAnnees|length > 0 %}
-                                            <span class="inline-flex items-center gap-1 rounded bg-indigo-50 px-1.5 py-0.5 text-[11px] font-semibold text-indigo-700 border border-indigo-200/80" title="Année(s) en tronc commun à tous les parcours">
+                                            <span class="inline-flex items-center gap-1 rounded bg-primary-50 px-1.5 py-0.5 text-[11px] font-semibold text-primary-700 border border-primary-200/80 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300" title="Année(s) en tronc commun à tous les parcours">
                                                 <twig:UX:Icon name="ph:users-three-bold" class="h-3 w-3" />
                                                 Tronc commun : {% for aOrdre in tcAnnees %}{{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ aOrdre }}{% if not loop.last %}, {% endif %}{% endfor %}
                                             </span>
                                         {% endif %}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-slate-600">
+                                <td class="px-4 py-3 text-secondary-600">
                                     {{ formation.composantePorteuse ? formation.composantePorteuse.libelle : '' }}
                                 </td>
 
-                                <td class="px-4 py-3 text-slate-400">({{ forma.parcoursData|length }} parcours)</td>
+                                <td class="px-4 py-3 text-secondary-400">({{ forma.parcoursData|length }} parcours)</td>
                                 <td class="px-4 py-3">
                                     <twig:Badge variant="{{ formationOuverte ? 'success' : 'danger' }}" label="{{ formationOuverte ? 'Oui' : 'Non' }}" />
                                 </td>
@@ -295,7 +295,7 @@
                                         {% endif %}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-right font-semibold text-slate-800">{{ forma.capacite }}</td>
+                                <td class="px-4 py-3 text-right font-semibold text-secondary-800 dark:text-secondary-100">{{ forma.capacite }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-1.5 flex-wrap items-center">
                                         {% set renderedStates = [] %}
@@ -309,7 +309,7 @@
                                             {% endif %}
                                         {% endfor %}
                                         {% if forma.dpeParcours|length == 0 %}
-                                            <span class="text-xs text-slate-400">Non initialisé</span>
+                                            <span class="text-xs text-secondary-400">Non initialisé</span>
                                         {% endif %}
 
                                         <!-- PV & Note Badges -->
@@ -358,27 +358,27 @@
                                 {% set parcoursCapacite = pd.capacite %}
                                 {% set isParcoursOuvert = pd.isOuvert %}
                                 {% set dpeParc = pd.dpeParcours %}
-                                <tr class="bg-slate-50/50 hover:bg-slate-100/80 transition-colors cursor-pointer select-none border-t border-slate-100 comp-{{ compId }}-row composante-child-row"
+                                <tr class="bg-secondary-50/50 hover:bg-secondary-100/80 transition-colors cursor-pointer select-none border-t border-secondary-100 comp-{{ compId }}-row composante-child-row dark:bg-secondary-800/50"
                                     {% if pd.annees|length > 0 %}
                                     onclick="document.querySelectorAll('.parcours-{{ parcours.id }}-row').forEach(row => row.classList.toggle('hidden')); this.querySelector('.chevron-icon').classList.toggle('rotate-90');"
                                     {% endif %}
                                 >
                                     <td>&nbsp;</td>
-                                    <td class="px-4 py-3 text-slate-500 font-medium">
+                                    <td class="px-4 py-3 text-secondary-500 font-medium">
                                         {{ pd.composanteLibelle }}
                                     </td>
-                                    <td class="px-4 py-3 font-semibold text-slate-700">
+                                    <td class="px-4 py-3 font-semibold text-secondary-700 dark:text-secondary-100">
                                         <div class="flex items-center gap-2">
                                             {% if pd.annees|length > 0 %}
-                                                <svg class="chevron-icon h-4 w-4 text-slate-400 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg class="chevron-icon h-4 w-4 text-secondary-400 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                                                 </svg>
                                             {% endif %}
                                             <span>{{ parcours.libelle }}</span>
-                                            <span class="text-xs font-normal text-slate-400">({{ pd.annees|length }} année{{ pd.annees|length > 1 ? 's' : '' }})</span>
+                                            <span class="text-xs font-normal text-secondary-400">({{ pd.annees|length }} année{{ pd.annees|length > 1 ? 's' : '' }})</span>
                                             {% set parcAnomalies = forma.parcoursAnomalies[parcours.id]|default([]) %}
                                             {% if parcAnomalies|length > 0 %}
-                                                <span class="inline-flex items-center text-red-600 ml-1 cursor-help animate-pulse" title="{{ parcAnomalies|join('\n') }}">⚠️</span>
+                                                <span class="inline-flex items-center text-danger-600 ml-1 cursor-help animate-pulse dark:text-danger-400" title="{{ parcAnomalies|join('\n') }}">⚠️</span>
                                             {% endif %}
                                         </div>
                                     </td>
@@ -386,7 +386,7 @@
                                         <twig:Badge variant="{{ isParcoursOuvert ? 'success' : 'danger' }}" label="{{ isParcoursOuvert ? 'Oui' : 'Non' }}" />
                                     </td>
                                     <td class="px-4 py-3">&nbsp;</td>
-                                    <td class="px-4 py-3 text-right font-semibold text-slate-700">{{ parcoursCapacite }}</td>
+                                    <td class="px-4 py-3 text-right font-semibold text-secondary-700 dark:text-secondary-100">{{ parcoursCapacite }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex gap-1.5 flex-wrap items-center">
                                             {% if dpeParc %}
@@ -433,14 +433,14 @@
                                 </tr>
                                 {% for annee in pd.annees %}
                                     {% set isAnneeTc = formation.isAnneeTroncCommun(annee.ordre) %}
-                                    <tr class="parcours-{{ parcours.id }}-row parcours-child-row {{ isAnneeTc ? 'bg-indigo-50/40 hover:bg-indigo-50/70 border-l-4 border-l-indigo-500' : 'hover:bg-slate-50/80' }} hidden transition-all border-t border-slate-100 comp-{{ compId }}-row composante-child-row">
+                                    <tr class="parcours-{{ parcours.id }}-row parcours-child-row {{ isAnneeTc ? 'bg-primary-50/40 hover:bg-primary-50/70 border-l-4 border-l-primary-500 dark:bg-primary-900/30' : 'hover:bg-secondary-50/80' }} hidden transition-all border-t border-secondary-100 comp-{{ compId }}-row composante-child-row">
                                         <td>&nbsp;</td>
                                         <td>&nbsp;</td>
-                                        <td class="px-4 py-3 {{ isAnneeTc ? 'pl-6 font-semibold text-indigo-950' : 'pl-8 text-slate-600 font-medium' }}">
+                                        <td class="px-4 py-3 {{ isAnneeTc ? 'pl-6 font-semibold text-primary-950' : 'pl-8 text-secondary-600 font-medium' }}">
                                             <div class="flex items-center gap-2 flex-wrap">
                                                 <span>{{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}</span>
                                                 {% if isAnneeTc %}
-                                                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-xs" title="Cette année est commune à tous les parcours de la formation">
+                                                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold bg-primary-100 text-primary-800 border border-primary-200 shadow-xs dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300" title="Cette année est commune à tous les parcours de la formation">
                                                         <twig:UX:Icon name="ph:users-three-bold" class="h-3 w-3" />
                                                         Tronc commun
                                                     </span>
@@ -462,7 +462,7 @@
                                                 {% endif %}
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3 text-right font-medium text-slate-700">{{ annee.capaciteAccueil|default(0) }}</td>
+                                        <td class="px-4 py-3 text-right font-medium text-secondary-700 dark:text-secondary-100">{{ annee.capaciteAccueil|default(0) }}</td>
                                         <td class="px-4 py-3">
                                             {% if dpeParc %}
                                                 <div class="flex gap-1 flex-wrap">
@@ -475,7 +475,7 @@
                                             {% endif %}
                                         </td>
                                         <td class="px-4 py-3 text-right">
-                                            {#                                    <button class="text-sm font-medium text-indigo-600">Ouvrir</button> #}
+                                            {#                                    <button class="text-sm font-medium text-primary-600 dark:text-primary-400">Ouvrir</button> #}
                                         </td>
                                     </tr>
                                 {% endfor %}

@@ -52,7 +52,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
                     <div class="flex items-center gap-3">
                         <span class="inline-flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 p-2.5 text-slate-700 dark:text-slate-300">
-                            <twig:ux:icon name="ph:table-bold" class="h-5 w-5 text-primary-600" />
+                            <twig:ux:icon name="ph:table-bold" class="h-5 w-5 text-primary-600 dark:text-primary-400" />
                         </span>
                         <div>
                             <div class="flex items-center gap-2 flex-wrap">
@@ -118,7 +118,7 @@
                                 {% if item.typesDiplome|length > 1 and not item.isExportParDiplome %}
                                     <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme_zip' : 'offre_v2_export_plateforme_zip', { plateforme: p.id, composante: composante ? composante.id : null, split: 'diplomes' }) }}"
                                        data-turbo="false"
-                                       class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                                       class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
                                         <twig:ux:icon name="ph:file-archive" class="h-3.5 w-3.5" />
                                         <span>Pack ZIP diplômes</span>
                                     </a>
@@ -129,7 +129,7 @@
                                 {% for td in item.typesDiplome %}
                                     <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme' : 'offre_v2_export_plateforme', { plateforme: p.id, composante: composante ? composante.id : null, typeDiplome: td.id }) }}"
                                        data-turbo="false"
-                                       class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:border-primary-400 hover:text-primary-700 hover:bg-primary-50/30 transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-primary-500"
+                                       class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:border-primary-400 hover:text-primary-700 hover:bg-primary-50/30 transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-primary-500 dark:hover:text-primary-300"
                                        title="Télécharger l'annexe {{ item.libelle }} pour {{ td.libelle }}">
                                         <twig:ux:icon name="ph:file-xls" class="h-3.5 w-3.5 text-green-600 shrink-0" />
                                         <span>{{ td.libelleCourt|default(td.libelle) }}</span>
@@ -150,7 +150,7 @@
                                 {% if item.composantes|length > 1 %}
                                     <a href="{{ path('offre_v2_export_plateforme_zip', { plateforme: p.id, split: 'composantes' }) }}"
                                        data-turbo="false"
-                                       class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400">
+                                       class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
                                         <twig:ux:icon name="ph:file-archive" class="h-3.5 w-3.5" />
                                         <span>Pack ZIP composantes</span>
                                     </a>
@@ -161,7 +161,7 @@
                                 {% for comp in item.composantes %}
                                     <a href="{{ path('offre_v2_export_plateforme', { plateforme: p.id, targetComposante: comp.id }) }}"
                                        data-turbo="false"
-                                       class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:border-primary-400 hover:text-primary-700 hover:bg-primary-50/30 transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-primary-500"
+                                       class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 hover:border-primary-400 hover:text-primary-700 hover:bg-primary-50/30 transition-all dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-primary-500 dark:hover:text-primary-300"
                                        title="{{ comp.libelle }}">
                                         <twig:ux:icon name="ph:file-xls" class="h-3.5 w-3.5 text-green-600 shrink-0" />
                                         <span>{{ comp.sigle|default(comp.libelle) }}</span>

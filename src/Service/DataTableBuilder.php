@@ -100,7 +100,7 @@ class DataTableBuilder
             'route' => $route,
             'icon' => 'fal fa-copy',
             'method' => 'duplicate',
-            'class' => 'inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100',
+            'class' => 'inline-flex items-center gap-1 rounded-md border border-success-300 bg-success-50 px-2.5 py-1 text-xs font-semibold text-success-700 transition hover:bg-success-100 dark:border-success-500 dark:bg-success-900 dark:text-success-300 dark:hover:border-success-300 dark:hover:text-success-100',
         ], $options));
     }
 
@@ -154,7 +154,7 @@ class DataTableBuilder
             'label' => 'Activer/Désactiver',
             'route' => $route,
             'icon' => 'fal fa-toggle-on',
-            'class' => 'inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 transition hover:bg-amber-100',
+            'class' => 'inline-flex items-center gap-1 rounded-md border border-warning-300 bg-warning-50 px-2.5 py-1 text-xs font-semibold text-warning-700 transition hover:bg-warning-100 dark:border-warning-500 dark:bg-warning-900 dark:text-warning-300 dark:hover:border-warning-300 dark:hover:text-warning-100',
         ], $options));
     }
 
@@ -191,7 +191,7 @@ class DataTableBuilder
             'label' => 'Voir',
             'route' => $route,
             'icon' => 'icon:info',
-            'class' => 'inline-flex items-center gap-1 rounded-md border border-cyan-300 bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700 transition hover:bg-cyan-100',
+            'class' => 'inline-flex items-center gap-1 rounded-md border border-info-300 bg-info-50 px-2.5 py-1 text-xs font-semibold text-info-700 transition hover:bg-info-100 dark:border-info-500 dark:bg-info-900 dark:text-info-300 dark:hover:border-info-300 dark:hover:text-info-100',
         ], $options));
     }
 
@@ -204,7 +204,7 @@ class DataTableBuilder
             'label' => 'Modifier',
             'route' => $route,
             'icon' => 'fal fa-edit',
-            'class' => 'inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 transition hover:bg-amber-100',
+            'class' => 'inline-flex items-center gap-1 rounded-md border border-warning-300 bg-warning-50 px-2.5 py-1 text-xs font-semibold text-warning-700 transition hover:bg-warning-100 dark:border-warning-500 dark:bg-warning-900 dark:text-warning-300 dark:hover:border-warning-300 dark:hover:text-warning-100',
             'modal' => false, // Peut être surchargé
         ], $options));
     }
@@ -219,7 +219,7 @@ class DataTableBuilder
             'route' => $route,
             'icon' => 'fal fa-trash-alt',
             'method' => 'delete',
-            'class' => 'inline-flex items-center gap-1 rounded-md border border-rose-300 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100',
+            'class' => 'inline-flex items-center gap-1 rounded-md border border-danger-300 bg-danger-50 px-2.5 py-1 text-xs font-semibold text-danger-700 transition hover:bg-danger-100 dark:border-danger-500 dark:bg-danger-900 dark:text-danger-300 dark:hover:border-danger-300 dark:hover:text-danger-100',
             'confirm' => 'Êtes-vous sûr de vouloir supprimer cet élément ?',
         ], $options));
     }
