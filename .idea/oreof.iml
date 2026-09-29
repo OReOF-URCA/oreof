@@ -203,6 +203,9 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-deepclone" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-php82" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/davidannebicque/html-to-spreadsheet-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/pentiminax/ux-datatables" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-php86" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/twig/html-extra" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

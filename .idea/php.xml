@@ -223,7 +223,6 @@
       <path value="$PROJECT_DIR$/vendor/dompdf/php-svg-lib" />
       <path value="$PROJECT_DIR$/vendor/dompdf/php-font-lib" />
       <path value="$PROJECT_DIR$/vendor/staabm/side-effects-detector" />
-      <path value="$PROJECT_DIR$/vendor/thecodingmachine/safe" />
       <path value="$PROJECT_DIR$/vendor/sebastian/git-state" />
       <path value="$PROJECT_DIR$/vendor/sensiolabs/gotenberg-bundle" />
       <path value="$PROJECT_DIR$/tools/php-cs-fixer/vendor/sebastian/diff" />
@@ -265,6 +264,9 @@
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php82" />
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-deepclone" />
       <path value="$PROJECT_DIR$/vendor/davidannebicque/html-to-spreadsheet-bundle" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php86" />
+      <path value="$PROJECT_DIR$/vendor/pentiminax/ux-datatables" />
+      <path value="$PROJECT_DIR$/vendor/twig/html-extra" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration">
