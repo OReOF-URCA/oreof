@@ -60,7 +60,7 @@
                 class="px-4 py-4 text-sm leading-relaxed text-secondary-700 bg-secondary-50/60 dark:bg-secondary-800/60 dark:text-secondary-100">{{ ue.ue.descriptionUeLibre }}</td>
         </tr>
         </tbody>
-        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 bg-secondary-50/30 border-b border-secondary-100 text-center dark:bg-secondary-800/30">
+        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 dark:text-secondary-400 bg-secondary-50/30 border-b border-secondary-100 dark:border-secondary-700 text-center dark:bg-secondary-800/30">
         {% include 'typeDiplome/licence/structure/v2/_structure_ue_tfoot.html.twig' %}
         </tfoot>
     </table>
@@ -74,7 +74,7 @@
 
     {# Total de l'UE parente dans son propre tableau (hors des sous-tables) #}
     <table class="w-full text-xs">
-        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 bg-secondary-50/30 border-b border-secondary-100 text-center dark:bg-secondary-800/30">
+        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 dark:text-secondary-400 bg-secondary-50/30 border-b border-secondary-100 dark:border-secondary-700 text-center dark:bg-secondary-800/30">
         {% include 'typeDiplome/licence/structure/v2/_structure_ue_tfoot.html.twig' %}
         </tfoot>
     </table>
@@ -85,7 +85,7 @@
     {% set hasDistancielData = ue.heuresEctsUe.sommeUeTotalDist > 0 %}
     {% set distancielInline = presentiel and (not distanciel) and hasDistancielData %}
     <table class="w-full text-xs bg-surface">
-        <thead class="text-[10px] font-black uppercase tracking-tighter text-secondary-400 bg-bg border-b border-secondary-100 text-center">
+        <thead class="text-[10px] font-black uppercase tracking-tighter text-secondary-400 bg-bg border-b border-secondary-100 dark:border-secondary-700 text-center">
         <tr class="ec">
             <th class="px-5 py-3 text-left w-2/5 font-bold">
                 Fiche EC/Matiere
@@ -145,7 +145,7 @@
             {% endfor %}
         {% endfor %}
         </tbody>
-        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 bg-secondary-50/30 border-b border-secondary-100 text-center dark:bg-secondary-800/30">
+        <tfoot class="text-[10px] font-black uppercase tracking-tighter text-secondary-600 dark:text-secondary-400 bg-secondary-50/30 border-b border-secondary-100 dark:border-secondary-700 text-center dark:bg-secondary-800/30">
         {% include 'typeDiplome/licence/structure/v2/_structure_ue_tfoot.html.twig' %}
         </tfoot>
     </table>

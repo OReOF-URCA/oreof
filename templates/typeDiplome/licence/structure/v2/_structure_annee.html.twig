@@ -8,7 +8,7 @@
                 <div class="w-2 h-2 bg-primary-500 rounded-full"></div>
                 <span class="text-[10px] font-bold text-primary-700 dark:text-primary-500 uppercase tracking-wider">Présentiel</span>
             </div>
-            <div class="flex items-center gap-2 px-3 py-1 bg-warning-50 dark:bg-warning-900 border border-orange-100 dark:border-warning-800 rounded-md">
+            <div class="flex items-center gap-2 px-3 py-1 bg-warning-50 dark:bg-warning-900 border border-warning-100 dark:border-warning-800 rounded-md">
                 <div class="w-2 h-2 bg-warning-500 rounded-full"></div>
                 <span class="text-[10px] font-bold text-warning-700 dark:text-warning-500 uppercase tracking-wider">Distanciel</span>
             </div>
@@ -29,7 +29,7 @@
                     class="flex cursor-pointer list-none flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between">
                 <span class="flex flex-wrap items-center gap-6 md:gap-10">
                     <span class="flex flex-col">
-                        <span class="block text-xs font-black uppercase tracking-[0.2em] text-indigo-400">Bilan annuel {{ displayAnnee }}</span>
+                        <span class="block text-xs font-black uppercase tracking-[0.2em] text-primary-400">Bilan annuel {{ displayAnnee }}</span>
                         <span class="mt-1 block text-xs text-secondary-400">Vue synthétique, détail disponible au clic</span>
                     </span>
 
@@ -44,7 +44,7 @@
                     </span>
 
                     <span class="text-center">
-                        <span class="block text-[9px] font-bold uppercase text-orange-400">Distanciel</span>
+                        <span class="block text-[9px] font-bold uppercase text-warning-400">Distanciel</span>
                         <span class="block text-xl font-black">{{ annee.heuresEctsAnnee.sommeAnneeTotalDist|filtreHeures }} h</span>
                     </span>
                 </span>
@@ -54,10 +54,10 @@
                         <span class="block text-[9px] font-bold uppercase text-secondary-400">Volume annuel</span>
                         <span class="block text-3xl font-black italic tracking-tighter">{{ annee.heuresEctsAnnee.sommeAnneeTotalPresDist|filtreHeures }} h</span>
                         {% if annee.heuresEctsAnnee.sommeAnneeTePres > 0 %}
-                            <span class="mt-1 block text-[11px] font-medium text-emerald-300">+ {{ annee.heuresEctsAnnee.sommeAnneeTePres|filtreHeures }} h autonomie</span>
+                            <span class="mt-1 block text-[11px] font-medium text-success-300">+ {{ annee.heuresEctsAnnee.sommeAnneeTePres|filtreHeures }} h autonomie</span>
                         {% endif %}
                     </span>
-                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-secondary-300 transition group-open:rotate-180">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-surface/5 text-secondary-300 transition group-open:rotate-180">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -68,40 +68,40 @@
 
             <div class="border-t border-white/10 bg-secondary-950/40 px-6 py-5">
                 <div class="grid gap-4 lg:grid-cols-3">
-                    <div class="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
+                    <div class="rounded-xl border border-primary-500/20 bg-primary-500/5 p-4">
                         <p class="text-[10px] font-black uppercase tracking-[0.18em] text-primary-300">Détail
                             présentiel</p>
                         <p class="mt-2 text-2xl font-black text-white">{{ annee.heuresEctsAnnee.sommeAnneeTotalPres|filtreHeures }}
                             h</p>
                         <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-secondary-200">
-                            <span class="rounded-full bg-white/10 px-3 py-1">CM {{ annee.heuresEctsAnnee.sommeAnneeCmPres|filtreHeures }} h</span>
-                            <span class="rounded-full bg-white/10 px-3 py-1">TD {{ annee.heuresEctsAnnee.sommeAnneeTdPres|filtreHeures }} h</span>
-                            <span class="rounded-full bg-white/10 px-3 py-1">TP {{ annee.heuresEctsAnnee.sommeAnneeTpPres|filtreHeures }} h</span>
+                            <span class="rounded-full bg-surface/10 px-3 py-1">CM {{ annee.heuresEctsAnnee.sommeAnneeCmPres|filtreHeures }} h</span>
+                            <span class="rounded-full bg-surface/10 px-3 py-1">TD {{ annee.heuresEctsAnnee.sommeAnneeTdPres|filtreHeures }} h</span>
+                            <span class="rounded-full bg-surface/10 px-3 py-1">TP {{ annee.heuresEctsAnnee.sommeAnneeTpPres|filtreHeures }} h</span>
                         </div>
                     </div>
 
-                    <div class="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4">
-                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-orange-300">Détail
+                    <div class="rounded-xl border border-warning-500/20 bg-warning-500/5 p-4">
+                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-warning-300">Détail
                             distanciel</p>
                         <p class="mt-2 text-2xl font-black text-white">{{ annee.heuresEctsAnnee.sommeAnneeTotalDist|filtreHeures }}
                             h</p>
                         <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-secondary-200">
-                            <span class="rounded-full bg-white/10 px-3 py-1">CM {{ annee.heuresEctsAnnee.sommeAnneeCmDist|filtreHeures }} h</span>
-                            <span class="rounded-full bg-white/10 px-3 py-1">TD {{ annee.heuresEctsAnnee.sommeAnneeTdDist|filtreHeures }} h</span>
-                            <span class="rounded-full bg-white/10 px-3 py-1">TP {{ annee.heuresEctsAnnee.sommeAnneeTpDist|filtreHeures }} h</span>
+                            <span class="rounded-full bg-surface/10 px-3 py-1">CM {{ annee.heuresEctsAnnee.sommeAnneeCmDist|filtreHeures }} h</span>
+                            <span class="rounded-full bg-surface/10 px-3 py-1">TD {{ annee.heuresEctsAnnee.sommeAnneeTdDist|filtreHeures }} h</span>
+                            <span class="rounded-full bg-surface/10 px-3 py-1">TP {{ annee.heuresEctsAnnee.sommeAnneeTpDist|filtreHeures }} h</span>
                         </div>
                     </div>
 
-                    <div class="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4">
-                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-indigo-300">Vue globale</p>
+                    <div class="rounded-xl border border-primary-500/20 bg-primary-500/5 p-4">
+                        <p class="text-[10px] font-black uppercase tracking-[0.18em] text-primary-300">Vue globale</p>
                         <p class="mt-2 text-2xl font-black text-white">{{ annee.heuresEctsAnnee.sommeAnneeTotalPresDist|filtreHeures }}
                             h</p>
                         <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold text-secondary-200">
-                            <span class="rounded-full bg-white/10 px-3 py-1">CM {{ (annee.heuresEctsAnnee.sommeAnneeCmPres + annee.heuresEctsAnnee.sommeAnneeCmDist)|filtreHeures }} h</span>
-                            <span class="rounded-full bg-white/10 px-3 py-1">TD {{ (annee.heuresEctsAnnee.sommeAnneeTdPres + annee.heuresEctsAnnee.sommeAnneeTdDist)|filtreHeures }} h</span>
-                            <span class="rounded-full bg-white/10 px-3 py-1">TP {{ (annee.heuresEctsAnnee.sommeAnneeTpPres + annee.heuresEctsAnnee.sommeAnneeTpDist)|filtreHeures }} h</span>
+                            <span class="rounded-full bg-surface/10 px-3 py-1">CM {{ (annee.heuresEctsAnnee.sommeAnneeCmPres + annee.heuresEctsAnnee.sommeAnneeCmDist)|filtreHeures }} h</span>
+                            <span class="rounded-full bg-surface/10 px-3 py-1">TD {{ (annee.heuresEctsAnnee.sommeAnneeTdPres + annee.heuresEctsAnnee.sommeAnneeTdDist)|filtreHeures }} h</span>
+                            <span class="rounded-full bg-surface/10 px-3 py-1">TP {{ (annee.heuresEctsAnnee.sommeAnneeTpPres + annee.heuresEctsAnnee.sommeAnneeTpDist)|filtreHeures }} h</span>
                             {% if annee.heuresEctsAnnee.sommeAnneeTePres > 0 %}
-                                <span class="rounded-full bg-emerald-500/20 px-3 py-1 text-emerald-200">Autonomie {{ annee.heuresEctsAnnee.sommeAnneeTePres|filtreHeures }} h</span>
+                                <span class="rounded-full bg-success-500/20 px-3 py-1 text-success-200">Autonomie {{ annee.heuresEctsAnnee.sommeAnneeTePres|filtreHeures }} h</span>
                             {% endif %}
                         </div>
                     </div>
