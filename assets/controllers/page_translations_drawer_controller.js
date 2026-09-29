@@ -37,12 +37,26 @@ export default class extends Controller {
     window.addEventListener('oreof:toggle-translations', this._onGlobalToggle)
 
     this._restoreWidth()
+
+    // Si le tiroir était ouvert avant un rechargement / sauvegarde, le réouvrir
+    if (sessionStorage.getItem('oreof:page-translations-drawer:open') === 'true') {
+      this.open()
+      const savedSearch = sessionStorage.getItem('oreof:page-translations-drawer:search')
+      if (savedSearch && this.hasSearchInputTarget) {
+        this.searchInputTarget.value = savedSearch
+        this.filter()
+      }
+    }
   }
 
   disconnect () {
     window.oreofToggleTranslations = null
     window.removeEventListener('oreof:toggle-translations', this._onGlobalToggle)
     this._onPointerUp()
+  }
+
+  _onGlobalToggle (event) {
+    this.toggle(event)
   }
 
   get drawerElement () {
@@ -71,6 +85,8 @@ export default class extends Controller {
     const drawer = this.drawerElement
     if (!drawer) return
 
+    sessionStorage.setItem('oreof:page-translations-drawer:open', 'true')
+
     drawer.classList.remove('translate-x-full')
     drawer.classList.add('translate-x-0')
     drawer.setAttribute('aria-hidden', 'false')
@@ -95,6 +111,8 @@ export default class extends Controller {
 
   close (event) {
     event?.preventDefault()
+    sessionStorage.removeItem('oreof:page-translations-drawer:open')
+
     const drawer = this.drawerElement
     if (!drawer) return
 
@@ -313,6 +331,21 @@ export default class extends Controller {
       displayBox.classList.remove('hidden')
 
       callOut('Traduction enregistrée avec succès !', 'success')
+
+      // Mémoriser l'état ouvert et la recherche pour le rechargement Turbo
+      sessionStorage.setItem('oreof:page-translations-drawer:open', 'true')
+      if (this.hasSearchInputTarget && this.searchInputTarget.value.trim() !== '') {
+        sessionStorage.setItem('oreof:page-translations-drawer:search', this.searchInputTarget.value.trim())
+      }
+
+      // Recharger le contenu de la page via Turbo de manière fluide
+      setTimeout(() => {
+        if (window.Turbo && typeof window.Turbo.visit === 'function') {
+          window.Turbo.visit(window.location.href, { action: 'replace' })
+        } else {
+          window.location.reload()
+        }
+      }, 300)
     } catch (e) {
       callOut(e.message, 'danger')
     } finally {

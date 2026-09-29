@@ -41,7 +41,7 @@ menu.config.faq: 'Configuration FAQ'
 menu.config.help: 'Configurations des aides'
 menu.config.langues: Langues
 menu.config.mentions: Mentions
-menu.config.menu_config_globale: menu.config.menu_config_globale
+menu.config.menu_config_globale: 'Configuration globale'
 menu.config.menu_etablissement: 'Configuration établissement'
 menu.config.nature_ue: 'Nature des UE/EC'
 menu.config.notifications: 'Notifications et mails'
@@ -200,7 +200,7 @@ page.app_validation_composante_dpe_index.title: page.app_validation_composante_d
 page.app_validation_composante_fiche_index.description: page.app_validation_composante_fiche_index.description
 page.app_validation_composante_fiche_index.title: 'Gestion des validations fiches matières'
 page.app_validation_composante_pilotage.description: page.app_validation_composante_pilotage.description
-page.app_validation_dpe_index.description: 'Gestion des validations DPE.'
+page.app_validation_dpe_index.description: 'Gestion des validations DPE'
 page.app_validation_dpe_index.title: 'Gestion des validations DPE'
 page.app_validation_fiche_index.description: page.app_validation_fiche_index.description
 page.app_validation_fiches_ec_index.description: 'Gestion des validations Fiches EC/matières.'
