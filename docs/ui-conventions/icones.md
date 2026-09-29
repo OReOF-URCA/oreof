@@ -24,7 +24,7 @@ Quand lire : remplacement d'un `<i class="fa…">` ou choix d'une icône dans un
 `icon:face-sad` `icon:file-text` `icon:git-pull-request` `icon:inbox` `icon:info-circle` `icon:layers` `icon:login` `icon:pencil`
 `icon:delete` `icon:edit` `icon:duplicate` `icon:info` `icon:success` `icon:danger` `icon:gear`
 `icon:mail` `icon:phone` `icon:refresh` `icon:upload` `icon:sort` `icon:sort-up` `icon:sort-down`
-`icon:ellipsis-vertical` `icon:arrows-up-down-left-right`
+`icon:ellipsis-vertical` `icon:arrows-up-down-left-right` `icon:translate`
 
 ## Correspondance FontAwesome → cible
 

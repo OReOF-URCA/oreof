@@ -74,6 +74,7 @@ ux_icons:
     icon:link: 'ph:link-light'
     icon:comment: 'ph:chat-light'
     icon:comments: 'ph:chats-light'
+    icon:translate: 'ph:translate-light'
 
     # Métier / navigation ORéOF
     icon:school: 'ph:student-light'

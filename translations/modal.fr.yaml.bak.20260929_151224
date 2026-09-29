@@ -22,7 +22,4 @@ plateforme_adminission:
     show:
         title: "Détails de la plateforme d'admission"
 plateforme_adminission.show.title: plateforme_adminission.show.title
-user.gestion_profil.title: user.gestion_profil.title
-user_new_hors_urca.new.title: user_new_hors_urca.new.title
-user_new_ldap.new.title: user_new_ldap.new.title
 

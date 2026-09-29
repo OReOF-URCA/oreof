@@ -340,6 +340,9 @@
 {# Inclusion du menu d'aide contextuel externalisé #}
 {% include '_layout/_help_drawer.html.twig' %}
 
+{# Inclusion du panneau d'inspection des traductions de la page #}
+{% include '_layout/_translations_drawer.html.twig' %}
+
 <template id="global-spinner-template">
     <div class="turbo-spinner-overlay absolute top-0 left-0 w-full h-full flex justify-center items-center z-40 pointer-events-none">
         <twig:Spinner variant="primary" size="lg"/>

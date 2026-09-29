@@ -79,9 +79,13 @@ final class TranslationFileManager
         $cacheDir = $this->cacheDir;
         $translationCache = $cacheDir . '/translations';
         if (is_dir($translationCache)) {
-            $files = glob($translationCache . '/*');
-            foreach ($files as $file) {
-                @unlink($file);
+            try {
+                $finder = (new Finder())->files()->in($translationCache);
+                foreach ($finder as $file) {
+                    @unlink($file->getRealPath());
+                }
+            } catch (\Throwable) {
+                // Ignore if directory empty or unavailable
             }
         }
     }

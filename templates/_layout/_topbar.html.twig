@@ -10,6 +10,14 @@
 
                     {% if is_granted('ROLE_ADMIN') %}
                         <span class="text-danger whitespace-nowrap">/ Adm.</span>
+                        {% if app.session.get('i18n_keys') %}
+                            <a href="{{ path('i18n_toggle_keys') }}"
+                               class="inline-flex items-center gap-1 rounded-full bg-warning-100 px-2 py-0.5 text-[11px] font-bold text-warning-800 hover:bg-warning-200 dark:bg-warning-900/60 dark:text-warning-200 border border-warning-300 transition"
+                               title="Mode clés actif - Cliquez pour désactiver">
+                                <twig:UX:Icon name="icon:translate" class="w-3 h-3"/>
+                                <span>Clés ON</span>
+                            </a>
+                        {% endif %}
                     {% endif %}
                 </div>
 
@@ -40,6 +48,18 @@
                         <kbd class="rounded border border-secondary-200 bg-secondary-50 px-1.5 py-0.5 text-[11px] dark:border-secondary-700 dark:bg-secondary-800">K</kbd>
                     </span>
                 </button>
+
+                {% if is_granted('ROLE_ADMIN') and app.session.get('i18n_keys') %}
+                    <button
+                            type="button"
+                            onclick="if (window.oreofToggleTranslations) { window.oreofToggleTranslations(); } else { const d = document.getElementById('pageTranslationsOffcanvas'); const b = document.getElementById('pageTranslationsBackdrop'); if (d) { d.classList.toggle('translate-x-full'); d.classList.toggle('translate-x-0'); } if (b) { b.classList.toggle('hidden'); b.classList.toggle('block'); } }"
+                            class="hidden md:flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50/80 px-3 py-1.5 text-xs font-bold text-indigo-700 shadow-xs hover:border-indigo-400 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 dark:hover:border-indigo-600 transition cursor-pointer"
+                            title="Ouvrir le panneau des textes et traductions de cette page"
+                    >
+                        <twig:UX:Icon name="icon:translate" class="h-4 w-4 text-indigo-600 dark:text-indigo-400"/>
+                        <span>Textes page</span>
+                    </button>
+                {% endif %}
 
                 {# Replaced legacy inline search with notifications / action icons component (Tailwind) #}
                 {{ component('notifications', {
@@ -107,13 +127,13 @@
                         {#                                        <i class="fas fa-circle-half-stroke"></i> #}
                         {#                                        <span data-theme-target="label">Basculer le thème</span> #}
                         {#                                    </button> #}
-                        {#                                {% if is_granted('ROLE_ADMIN') %} #}
-                        {#                                    <li> #}
-                        {#                                        <a href="{{ path('i18n_toggle_keys') }}"> #}
-                        {#                                            {{ app.session.get('i18n_keys') ? '🔤 Mode clés: ON' : '🔤 Mode clés: OFF' }} #}
-                        {#                                        </a> #}
-                        {#                                    </li> #}
-                        {#                                {% endif %} #}
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a href="{{ path('i18n_toggle_keys') }}"
+                               class="flex items-center px-4 py-2 text-sm text-text hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                                <twig:UX:Icon name="icon:translate" class="w-4 h-4 mr-3 text-text"/>
+                                <span>{{ app.session.get('i18n_keys') ? 'Mode traduction : Activé' : 'Mode traduction : Désactivé' }}</span>
+                            </a>
+                        {% endif %}
                         <a href="{{ path('app_accessibilite') }}"
                            class="flex items-center px-4 py-2 text-sm text-text hover:bg-secondary-50 dark:hover:bg-secondary-800"
                            data-turbo="true"

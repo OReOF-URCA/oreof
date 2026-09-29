@@ -35,7 +35,6 @@ menu.config.campagne_collecte: 'Campagne Collecte'
 menu.config.composante: Composantes
 menu.config.config_emails: 'Configurations des emails'
 menu.config.domaines: Domaines
-menu.config.duplication_campagne: 'Bascule & Duplication N ➔ N+1'
 menu.config.etablissement: Etablissement
 menu.config.faq: 'Configuration FAQ'
 menu.config.help: 'Configurations des aides'
@@ -54,9 +53,10 @@ menu.config.type_diplome: 'Type de diplôme'
 menu.config.type_ec: "Type d'EC"
 menu.config.type_epreuve: "Type d'épreuve"
 menu.config.type_ue: "Type d'UE"
-menu.config.versioning_json: 'Fichiers de versioning JSON'
 menu.config.ville: Villes
 menu.config.workflows: 'Cartographie des workflows'
+menu.config.versioning_json: 'Fichiers de versioning JSON'
+menu.config.duplication_campagne: 'Bascule & Duplication N ➔ N+1'
 menu.conseils.chgt_rf: 'Changement RF/co RF'
 menu.conseils.documents: Documents
 menu.conseils.synthese_offre: 'Synthèse offre de formation'
@@ -108,8 +108,8 @@ page.app_config_email.title: Emails
 page.app_conseils_documents_index.description: 'Documents de conseil (PV & justificatifs)'
 page.app_conseils_documents_index.title: 'Documents de conseil'
 page.app_conseils_synthese_offre.description: page.app_conseils_synthese_offre.description
-page.app_demande_dpe.description: 'Consultez les demandes de modifications ouvertes, filtrez rapidement par contexte et suivez leur état de validation.'
-page.app_demande_dpe.title: 'Liste des demandes de DPE ouverts'
+page.app_demande_dpe.description: Consultez les demandes de modifications ouvertes, filtrez rapidement par contexte et suivez leur état de validation.
+page.app_demande_dpe.title: Liste des demandes de DPE ouverts
 page.app_demande_dpe_composante.description: page.app_demande_dpe_composante.description
 page.app_demande_dpe_composante.title: page.app_demande_dpe_composante.title
 page.app_document.description: page.app_document.description
@@ -223,3 +223,4 @@ page.translations_edit.description: page.translations_edit.description
 page.translations_edit.title: page.translations_edit.title
 page.translations_index.description: "Gérer les traductions et textes de l'application."
 page.translations_index.title: Traductions
+
