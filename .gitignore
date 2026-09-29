@@ -133,3 +133,8 @@ public/Docs-Offre/Annexe eCandidat BUT2 et BUT3 proposées pour 2026 2027  pour 
 
 ### Icones de l'application ###
 assets/icons
+
+###> symfony/reprise ###
+/node_modules/
+/public/build/
+###< symfony/reprise ###
