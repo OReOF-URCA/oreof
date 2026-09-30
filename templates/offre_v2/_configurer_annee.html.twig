@@ -19,6 +19,24 @@
                             </span>
                         {% endif %}
                         <twig:Badge variant="success" label="Ouverte"/>
+                        <span id="annee_{{ annee.id }}_regime_badges" class="inline-flex items-center gap-1.5 flex-wrap">
+                            {% for reg in annee.regimeInscription %}
+                                {% set regVal = reg.value|default(reg) %}
+                                {% set badgeVariant = 'info' %}
+                                {% set badgeIcon = 'ph:graduation-cap' %}
+                                {% if 'apprentissage' in regVal|lower or 'alternance' in regVal|lower %}
+                                    {% set badgeVariant = 'warning' %}
+                                    {% set badgeIcon = 'ph:briefcase' %}
+                                {% elseif 'continue' in regVal|lower or 'contrat' in regVal|lower %}
+                                    {% set badgeVariant = 'secondary' %}
+                                    {% set badgeIcon = 'ph:chalkboard-teacher' %}
+                                {% elseif 'initiale' in regVal|lower %}
+                                    {% set badgeVariant = 'primary' %}
+                                    {% set badgeIcon = 'ph:student' %}
+                                {% endif %}
+                                <twig:Badge :variant="badgeVariant" :label="regVal" :icon="badgeIcon" />
+                            {% endfor %}
+                        </span>
                     </div>
                 </summary>
 
@@ -63,6 +81,35 @@
                                 {% endif %}
                             </div>
                         {% endif %}
+                    </div>
+                </div>
+
+                <!-- Régimes d'inscription -->
+                <div class="mt-4 rounded-xl border border-secondary-200 bg-surface p-4 dark:border-secondary-700">
+                    <input type="hidden" name="annee_{{ annee.id }}_regime_present" value="1">
+                    <div class="flex items-center justify-between mb-3">
+                        <div>
+                            <h5 class="font-semibold text-text">Régimes d'inscription</h5>
+                            <p class="text-xs text-secondary-500 mt-0.5">Modalités d'inscription proposées pour cette année.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+                        {% for regimeEnum in enum('App\\Enums\\RegimeInscriptionEnum').cases %}
+                            {% set isChecked = annee.hasRegimeInscription(regimeEnum) %}
+                            <label class="flex items-center gap-2.5 p-2.5 rounded-lg border border-secondary-200 bg-secondary-50/50 hover:bg-secondary-100/70 dark:border-secondary-700 dark:bg-secondary-900/40 dark:hover:bg-secondary-800 transition cursor-pointer text-xs select-none">
+                                <input type="checkbox"
+                                       name="annee_{{ annee.id }}_regimeInscription[]"
+                                       value="{{ regimeEnum.value }}"
+                                       data-tc-field="regime_{{ regimeEnum.name }}"
+                                       {{ isChecked ? 'checked' : '' }}
+                                       {{ not can_edit ? 'disabled' : '' }}
+                                       class="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-900 cursor-pointer"
+                                >
+                                <span class="font-medium text-secondary-800 dark:text-secondary-200">
+                                    {{ regimeEnum.value }}
+                                </span>
+                            </label>
+                        {% endfor %}
                     </div>
                 </div>
 
@@ -392,6 +439,24 @@
                         </span>
                     {% endif %}
                     <twig:Badge variant="danger" label="Fermée"/>
+                    <span id="annee_{{ annee.id }}_regime_badges" class="inline-flex items-center gap-1.5 flex-wrap">
+                        {% for reg in annee.regimeInscription %}
+                            {% set regVal = reg.value|default(reg) %}
+                            {% set badgeVariant = 'info' %}
+                            {% set badgeIcon = 'ph:graduation-cap' %}
+                            {% if 'apprentissage' in regVal|lower or 'alternance' in regVal|lower %}
+                                {% set badgeVariant = 'warning' %}
+                                {% set badgeIcon = 'ph:briefcase' %}
+                            {% elseif 'continue' in regVal|lower or 'contrat' in regVal|lower %}
+                                {% set badgeVariant = 'secondary' %}
+                                {% set badgeIcon = 'ph:chalkboard-teacher' %}
+                            {% elseif 'initiale' in regVal|lower %}
+                                {% set badgeVariant = 'primary' %}
+                                {% set badgeIcon = 'ph:student' %}
+                            {% endif %}
+                            <twig:Badge :variant="badgeVariant" :label="regVal" :icon="badgeIcon" />
+                        {% endfor %}
+                    </span>
                 </div>
             </summary>
 

@@ -261,6 +261,21 @@ final class OffreConfigurerController extends BaseController
                         $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
                     }
                 }
+
+                $regimeKey = 'annee_' . $anneeId . '_regimeInscription';
+                $oldRegimes = $annee->getRegimeInscriptionValues();
+                if ($request->request->has($regimeKey)) {
+                    $newRegimes = (array)$request->request->all($regimeKey);
+                    $annee->setRegimeInscription($newRegimes);
+                    if ($oldRegimes !== $annee->getRegimeInscriptionValues()) {
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                    }
+                } elseif ($request->request->has('annee_' . $anneeId . '_regime_present')) {
+                    $annee->setRegimeInscription([]);
+                    if ($oldRegimes !== []) {
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                    }
+                }
                 
                 $typeDiplome = $formation->getTypeDiplome();
                 if ($typeDiplome) {
@@ -393,6 +408,10 @@ final class OffreConfigurerController extends BaseController
                 }
                 if ($targetAnnee->getCapaciteAccueil() !== $sourceAnnee->getCapaciteAccueil()) {
                     $targetAnnee->setCapaciteAccueil($sourceAnnee->getCapaciteAccueil());
+                    $changed = true;
+                }
+                if ($targetAnnee->getRegimeInscriptionValues() !== $sourceAnnee->getRegimeInscriptionValues()) {
+                    $targetAnnee->setRegimeInscription($sourceAnnee->getRegimeInscriptionValues());
                     $changed = true;
                 }
 

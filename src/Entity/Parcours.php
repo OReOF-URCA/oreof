@@ -715,21 +715,25 @@ class Parcours
     public function getRegimeInscription(): array
     {
         if ($this->regimeInscription !== null && count($this->regimeInscription) === 0) {
-            if (count($this->getFormation()?->getRegimeInscription()) !== 0) {
-                return $this->getFormation()?->getRegimeInscription();
+            $formaRegimes = $this->getFormation()?->getRegimeInscription() ?? [];
+            if (count($formaRegimes) !== 0) {
+                return $formaRegimes;
             }
         }
 
         if ($this->regimeInscription === null) {
-            return [];
+            return $this->getFormation()?->getRegimeInscription() ?? [];
         }
 
         $t = [];
         foreach ($this->regimeInscription as $value) {
             if ($value instanceof RegimeInscriptionEnum) {
                 $t[] = $value;
-            } else {
-                $t[] = RegimeInscriptionEnum::from($value);
+            } elseif (is_string($value)) {
+                $case = RegimeInscriptionEnum::tryFrom($value);
+                if ($case !== null) {
+                    $t[] = $case;
+                }
             }
         }
 

@@ -36,6 +36,39 @@ export default class extends Controller {
     }
   }
 
+  updateRegimeBadgesForContainer(container) {
+    if (!container) return
+    const badgesContainer = container.querySelector('[id$="_regime_badges"]')
+    if (!badgesContainer) return
+
+    const checkedInputs = Array.from(container.querySelectorAll('input[name$="_regimeInscription[]"]:checked'))
+    
+    const badgesHtml = checkedInputs.map(input => {
+      const val = input.value
+      const lower = val.toLowerCase()
+      let colorClasses = 'border border-info-300 bg-info-50 text-info-700 dark:border-info-700 dark:bg-info-900/30 dark:text-info-300'
+      let icon = '<svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M251.76,88.94l-120-64a8,8,0,0,0-7.52,0l-120,64a8,8,0,0,0,0,14.12L32,117.87v48.42a15.91,15.91,0,0,0,4.06,10.65C49.16,191.53,78.51,216,128,216s78.84-24.47,91.94-39.06A15.91,15.91,0,0,0,224,166.29V117.87l27.76-14.81a8,8,0,0,0,0-14.12ZM128,41.42l94.84,50.58L128,142.58,33.16,92ZM208,166.29c-11.27,12.51-36.87,33.71-80,33.71s-68.73-21.2-80-33.71V126.4l76.24,40.66a8,8,0,0,0,7.52,0L208,126.4Z"/></svg>'
+
+      if (lower.includes('apprentissage') || lower.includes('alternance')) {
+        colorClasses = 'border border-warning-300 bg-warning-50 text-warning-700 dark:border-warning-700 dark:bg-warning-900/30 dark:text-warning-300'
+        icon = '<svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,56H176V48a24,24,0,0,0-24-24H104A24,24,0,0,0,80,48v8H40A16,16,0,0,0,24,72V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V72A16,16,0,0,0,216,56ZM96,48a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96ZM216,72v32H40V72ZM40,200V120H216v80Z"/></svg>'
+      } else if (lower.includes('continue') || lower.includes('contrat')) {
+        colorClasses = 'border border-secondary-300 bg-secondary-100 text-secondary-700 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-300'
+        icon = '<svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,48H32A16,16,0,0,0,16,64V176a16,16,0,0,0,16,16H80v16a8,8,0,0,0,16,0V192h64v16a8,8,0,0,0,16,0V192h48a16,16,0,0,0,16-16V64A16,16,0,0,0,224,48ZM224,176H32V64H224V176Z"/></svg>'
+      } else if (lower.includes('initiale')) {
+        colorClasses = 'border border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300'
+        icon = '<svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm-8-120a8,8,0,0,1,8-8h24a8,8,0,0,1,0,16H136v40a8,8,0,0,1-16,0Z"/></svg>'
+      }
+
+      return `<span class="inline-flex items-center font-semibold rounded-full px-2 py-0.5 text-xs gap-1 ${colorClasses}">
+        ${icon}
+        <span>${val}</span>
+      </span>`
+    }).join('')
+
+    badgesContainer.innerHTML = badgesHtml
+  }
+
   syncTroncCommun(target) {
     if (!target) return
     const container = target.closest('[data-annee-ordre]')
@@ -55,6 +88,9 @@ export default class extends Controller {
         } else {
           otherInput.value = target.value
         }
+      }
+      if (tcField.startsWith('regime_')) {
+        this.updateRegimeBadgesForContainer(otherContainer)
       }
     })
   }
@@ -77,6 +113,13 @@ export default class extends Controller {
 
     const name = event.target.name
     const value = event.target.value
+
+    if (name && name.includes('regimeInscription')) {
+      const container = event.target.closest('[data-annee-ordre]')
+      if (container) {
+        this.updateRegimeBadgesForContainer(container)
+      }
+    }
 
     // 1. If it's a year opening select (annee_{id}_isOuvert)
     if (name && name.startsWith('annee_') && name.endsWith('_isOuvert')) {

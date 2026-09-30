@@ -515,15 +515,21 @@ class Formation
 
     public function getRegimeInscription(): array
     {
+        if ($this->regimeInscription === null) {
+            return [];
+        }
+
         $t = [];
         foreach ($this->regimeInscription as $value) {
             if ($value instanceof RegimeInscriptionEnum) {
                 $t[] = $value;
-            } else {
-                $t[] = RegimeInscriptionEnum::from($value);
+            } elseif (is_string($value)) {
+                $case = RegimeInscriptionEnum::tryFrom($value);
+                if ($case !== null) {
+                    $t[] = $case;
+                }
             }
         }
-
 
         return $t;
     }

@@ -52,6 +52,9 @@ class Annee
     #[ORM\Column]
     private ?bool $isProposeRecrutement = true;
 
+    #[ORM\Column(nullable: true)]
+    private ?array $regimeInscription = [];
+
     /**
      * @var Collection<int, PlateformeAdmissionParametre>
      */
@@ -263,4 +266,73 @@ class Annee
 
         return $this;
     }
+
+    /**
+     * @return list<\App\Enums\RegimeInscriptionEnum>
+     */
+    public function getRegimeInscription(): array
+    {
+        if ($this->regimeInscription !== null && count($this->regimeInscription) === 0) {
+            if ($this->getParcours() !== null && count($this->getParcours()->getRegimeInscription()) !== 0) {
+                return array_values($this->getParcours()->getRegimeInscription());
+            }
+        }
+
+        if ($this->regimeInscription === null) {
+            return [];
+        }
+
+        $t = [];
+        foreach ($this->regimeInscription as $value) {
+            if ($value instanceof \App\Enums\RegimeInscriptionEnum) {
+                $t[] = $value;
+            } elseif (is_string($value)) {
+                $case = \App\Enums\RegimeInscriptionEnum::tryFrom($value);
+                if ($case !== null) {
+                    $t[] = $case;
+                }
+            }
+        }
+
+        return $t;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getRegimeInscriptionValues(): array
+    {
+        $regimes = $this->getRegimeInscription();
+        return array_map(static fn(\App\Enums\RegimeInscriptionEnum $r) => $r->value, $regimes);
+    }
+
+    public function hasRegimeInscription(string|\App\Enums\RegimeInscriptionEnum $regime): bool
+    {
+        $val = $regime instanceof \App\Enums\RegimeInscriptionEnum ? $regime->value : $regime;
+        return in_array($val, $this->getRegimeInscriptionValues(), true);
+    }
+
+    /**
+     * @param array<int, string|\App\Enums\RegimeInscriptionEnum>|null $regimeInscription
+     */
+    public function setRegimeInscription(?array $regimeInscription): self
+    {
+        if ($regimeInscription === null) {
+            $this->regimeInscription = [];
+            return $this;
+        }
+
+        $t = [];
+        foreach ($regimeInscription as $value) {
+            if ($value instanceof \App\Enums\RegimeInscriptionEnum) {
+                $t[] = $value->value;
+            } elseif (is_string($value)) {
+                $t[] = $value;
+            }
+        }
+        $this->regimeInscription = array_values(array_unique($t));
+
+        return $this;
+    }
 }
+

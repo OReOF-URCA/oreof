@@ -1,27 +1,37 @@
 {% set typeDiplome = formation.typeDiplome %}
 <turbo-stream action="replace" target="configurer_global_stats">
     <template>
-        <div id="configurer_global_stats" class="mt-4 grid gap-3 md:grid-cols-4">
-            <div class="rounded-xl bg-success-50 dark:bg-success-900/30 p-3 text-sm text-success-700 dark:text-success-300">
-                <div class="text-lg font-bold">{{ tabStatistiques.nbParcoursOuvert }}
-                    /{{ formation.parcours|length }}</div>
-                parcours ouverts
-            </div>
+        <div id="configurer_global_stats" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-4">
+            <twig:Kpi
+                title="Parcours ouverts"
+                value="{{ tabStatistiques.nbParcoursOuvert }}"
+                total="{{ formation.parcours|length }}"
+                variant="success"
+                icon="icon:check-circle"
+            />
 
-            <div class="rounded-xl bg-primary-50 dark:bg-primary-900/30 p-3 text-sm text-primary-700 dark:text-primary-300">
-                <div class="text-lg font-bold">{{ plateformes|length }}</div>
-                plateforme{{ plateformes|length > 1 ? 's' : '' }} active{{ plateformes|length > 1 ? 's' : '' }}
-            </div>
+            <twig:Kpi
+                title="Plateformes"
+                value="{{ plateformes|length }}"
+                unit="active{{ plateformes|length > 1 ? 's' : '' }}"
+                variant="primary"
+                icon="icon:globe"
+            />
 
-            <div class="rounded-xl bg-secondary-50 dark:bg-secondary-900/30 p-3 text-sm text-secondary-700 dark:text-secondary-300">
-                <div class="text-lg font-bold">{{ tabStatistiques.capacite }}</div>
-                capacité
-            </div>
+            <twig:Kpi
+                title="Capacité totale"
+                value="{{ tabStatistiques.capacite }}"
+                unit="places"
+                variant="info"
+                icon="icon:users"
+            />
 
-            <div class="rounded-xl bg-warning-50 dark:bg-warning-900/30 p-3 text-sm text-warning-700 dark:text-warning-300">
-                <div class="text-lg font-bold">{{ anomalies|length }}</div>
-                anomalie{{ anomalies|length > 1 ? 's' : '' }}
-            </div>
+            <twig:Kpi
+                title="Anomalies"
+                value="{{ anomalies|length }}"
+                variant="{{ anomalies|length > 0 ? 'warning' : 'secondary' }}"
+                icon="{{ anomalies|length > 0 ? 'icon:warning' : 'icon:check-circle' }}"
+            />
         </div>
     </template>
 </turbo-stream>
@@ -47,30 +57,22 @@
 
 <turbo-stream action="replace" target="configurer_tronc_commun_block">
     <template>
-        <div id="configurer_tronc_commun_block" class="mt-4 p-3.5 rounded-xl border border-primary-200 dark:border-primary-700 bg-primary-50/50 dark:bg-primary-900/30 text-sm shadow-xs">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                    <div class="flex items-center gap-2 font-semibold text-primary-950 dark:text-primary-100">
-                        <twig:UX:Icon name="ph:users-three-bold" class="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                        <span>Tronc commun de la formation</span>
-                    </div>
-                    <p class="text-xs text-secondary-600 dark:text-secondary-300 mt-0.5">
-                        Cochez les années communes à l'ensemble des parcours de cette mention / formation.
-                    </p>
-                </div>
-                <div class="flex items-center gap-2.5 flex-wrap">
-                    {% for anneeOrdre in formation.anneesOrdres %}
-                        {% set isTc = formation.isAnneeTroncCommun(anneeOrdre) %}
-                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border {{ isTc ? 'bg-primary-600 border-primary-600 text-white shadow-xs font-semibold' : 'bg-surface border-secondary-300 dark:border-secondary-700 text-secondary-700 dark:text-secondary-100 hover:bg-secondary-50 font-medium' }} transition-colors cursor-pointer text-xs select-none">
-                            <input type="checkbox"
-                                   name="tronc_commun_annee_{{ anneeOrdre }}"
-                                   value="1"
-                                   {{ isTc ? 'checked' : '' }}
-                                   class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400">
-                            <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ anneeOrdre }} (Tronc commun)</span>
-                        </label>
-                    {% endfor %}
-                </div>
+        <div id="configurer_tronc_commun_block">
+            <p class="text-xs text-secondary-600 dark:text-secondary-300 mb-3">
+                Cochez les années communes à l'ensemble des parcours de cette mention / formation. Lorsqu'une année est déclarée en tronc commun, ses capacités d'accueil, régimes d'inscription et plateformes de recrutement sont automatiquement synchronisés entre les parcours.
+            </p>
+            <div class="flex items-center gap-2.5 flex-wrap">
+                {% for anneeOrdre in formation.anneesOrdres %}
+                    {% set isTc = formation.isAnneeTroncCommun(anneeOrdre) %}
+                    <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border {{ isTc ? 'bg-primary-600 border-primary-600 text-white shadow-xs font-semibold' : 'bg-surface border-secondary-300 dark:border-secondary-700 text-secondary-700 dark:text-secondary-100 hover:bg-secondary-50 font-medium' }} transition-colors cursor-pointer text-xs select-none">
+                        <input type="checkbox"
+                               name="tronc_commun_annee_{{ anneeOrdre }}"
+                               value="1"
+                               {{ isTc ? 'checked' : '' }}
+                               class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400">
+                        <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ anneeOrdre }} (Tronc commun)</span>
+                    </label>
+                {% endfor %}
             </div>
         </div>
     </template>
@@ -80,27 +82,37 @@
     {% set statParcours = tabStatistiques['parcours'][parcours.id] %}
     <turbo-stream action="replace" target="parcours_{{ parcours.id }}_stats">
         <template>
-            <div id="parcours_{{ parcours.id }}_stats" class="mt-4 grid gap-3 md:grid-cols-4">
-                <div class="rounded-xl bg-success-50 dark:bg-success-900/30 p-3 text-sm text-success-700 dark:text-success-300">
-                    <div class="text-lg font-bold">{{ statParcours.nbAnneesOuvertes }}
-                        /{{ statParcours.nbAnnees }}</div>
-                    années ouvertes
-                </div>
+            <div id="parcours_{{ parcours.id }}_stats" class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <twig:Kpi
+                    title="Années ouvertes"
+                    value="{{ statParcours.nbAnneesOuvertes }}"
+                    total="{{ statParcours.nbAnnees }}"
+                    variant="success"
+                    icon="icon:check-circle"
+                />
 
-                <div class="rounded-xl bg-primary-50 dark:bg-primary-900/30 p-3 text-sm text-primary-700 dark:text-primary-300">
-                    <div class="text-lg font-bold">{{ statParcours.nbPlateformesActives }}</div>
-                    plateforme{{ statParcours.nbPlateformesActives > 1 ? 's' : '' }} active{{ statParcours.nbPlateformesActives > 1 ? 's' : '' }}
-                </div>
+                <twig:Kpi
+                    title="Plateformes"
+                    value="{{ statParcours.nbPlateformesActives }}"
+                    unit="active{{ statParcours.nbPlateformesActives > 1 ? 's' : '' }}"
+                    variant="primary"
+                    icon="icon:globe"
+                />
 
-                <div class="rounded-xl bg-secondary-50 dark:bg-secondary-900/30 p-3 text-sm text-secondary-700 dark:text-secondary-300">
-                    <div class="text-lg font-bold">{{ statParcours.capacite }}</div>
-                    capacité totale
-                </div>
+                <twig:Kpi
+                    title="Capacité totale"
+                    value="{{ statParcours.capacite }}"
+                    unit="places"
+                    variant="info"
+                    icon="icon:users"
+                />
 
-                <div class="rounded-xl bg-warning-50 dark:bg-warning-900/30 p-3 text-sm text-warning-700 dark:text-warning-300">
-                    <div class="text-lg font-bold">{{ statParcours.anomalies|length }}</div>
-                    anomalie{{ statParcours.anomalies|length > 1 ? 's' : '' }}
-                </div>
+                <twig:Kpi
+                    title="Anomalies"
+                    value="{{ statParcours.anomalies|length }}"
+                    variant="{{ statParcours.anomalies|length > 0 ? 'warning' : 'secondary' }}"
+                    icon="{{ statParcours.anomalies|length > 0 ? 'icon:warning' : 'icon:check-circle' }}"
+                />
             </div>
         </template>
     </turbo-stream>
@@ -120,6 +132,33 @@
             </span>
         </template>
     </turbo-stream>
+{% endfor %}
+
+{% for parcours in formation.parcours %}
+    {% for annee in parcours.annees %}
+        <turbo-stream action="replace" target="annee_{{ annee.id }}_regime_badges">
+            <template>
+                <span id="annee_{{ annee.id }}_regime_badges" class="inline-flex items-center gap-1.5 flex-wrap">
+                    {% for reg in annee.regimeInscription %}
+                        {% set regVal = reg.value|default(reg) %}
+                        {% set badgeVariant = 'info' %}
+                        {% set badgeIcon = 'ph:graduation-cap' %}
+                        {% if 'apprentissage' in regVal|lower or 'alternance' in regVal|lower %}
+                            {% set badgeVariant = 'warning' %}
+                            {% set badgeIcon = 'ph:briefcase' %}
+                        {% elseif 'continue' in regVal|lower or 'contrat' in regVal|lower %}
+                            {% set badgeVariant = 'secondary' %}
+                            {% set badgeIcon = 'ph:chalkboard-teacher' %}
+                        {% elseif 'initiale' in regVal|lower %}
+                            {% set badgeVariant = 'primary' %}
+                            {% set badgeIcon = 'ph:student' %}
+                        {% endif %}
+                        <twig:Badge :variant="badgeVariant" :label="regVal" :icon="badgeIcon" />
+                    {% endfor %}
+                </span>
+            </template>
+        </turbo-stream>
+    {% endfor %}
 {% endfor %}
 
 {% if changedYears is defined %}
