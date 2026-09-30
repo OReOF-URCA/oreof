@@ -51,6 +51,15 @@ class TypeDiplomePlateformeType extends AbstractType
                 'required' => false,
                 'help' => 'Cochez les années où la saisie d\'une capacité est obligatoire (si décoché, la capacité reste optionnelle)',
             ]);
+
+            $builder->add('anneesCapaciteSpecifique', ChoiceType::class, [
+                'choices' => $anneesChoices,
+                'multiple' => true,
+                'expanded' => true,
+                'label' => 'Capacité spécifique pour les années',
+                'required' => false,
+                'help' => 'Cochez les années pour lesquelles le champ de capacité spécifique doit être disponible',
+            ]);
         }
     }
 

@@ -202,8 +202,12 @@
                                         <div class="mt-2 flex flex-wrap gap-1">
                                             {% for an in tpa.annees %}
                                                 {% set isReq = an in (tpa.anneesCapaciteRequise ?? []) %}
-                                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md {{ isReq ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-secondary-200 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-300' }}">
-                                                    Année {{ an }}{{ isReq ? ' (Capacité requise)' : '' }}
+                                                {% set isSpe = an in (tpa.anneesCapaciteSpecifique ?? []) %}
+                                                {% set labels = [] %}
+                                                {% if isReq %}{% set labels = labels|merge(['Requise']) %}{% endif %}
+                                                {% if isSpe %}{% set labels = labels|merge(['Spécifique']) %}{% endif %}
+                                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md {{ isReq ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' : (isSpe ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300' : 'bg-secondary-200 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-300') }}">
+                                                    Année {{ an }}{{ labels|length > 0 ? ' (' ~ labels|join(', ') ~ ')' : '' }}
                                                 </span>
                                             {% endfor %}
                                         </div>

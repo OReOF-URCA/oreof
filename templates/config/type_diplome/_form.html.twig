@@ -155,10 +155,11 @@
                     </button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                     <div>{{ form_row(form.plateformesAdmission.vars.prototype.plateforme) }}</div>
                     <div>{{ form_row(form.plateformesAdmission.vars.prototype.annees) }}</div>
                     <div>{{ form_row(form.plateformesAdmission.vars.prototype.anneesCapaciteRequise) }}</div>
+                    <div>{{ form_row(form.plateformesAdmission.vars.prototype.anneesCapaciteSpecifique) }}</div>
                 </div>
             </div>
         {% endset %}
@@ -186,10 +187,11 @@
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                             <div>{{ form_row(plateformeForm.plateforme) }}</div>
                             <div>{{ form_row(plateformeForm.annees) }}</div>
                             <div>{{ form_row(plateformeForm.anneesCapaciteRequise) }}</div>
+                            <div>{{ form_row(plateformeForm.anneesCapaciteSpecifique) }}</div>
                         </div>
                     </div>
                 {% endfor %}

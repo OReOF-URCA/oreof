@@ -73,6 +73,7 @@ final class OffreConfigurerController extends BaseController
                         'hasDefinitionChamps' => $plateforme->hasDefinitionChamps(),
                         'annees' => array_values($tpa->getAnnees() ?? []),
                         'anneesCapaciteRequise' => array_values($tpa->getAnneesCapaciteRequise() ?? []),
+                        'anneesCapaciteSpecifique' => array_values($tpa->getAnneesCapaciteSpecifique() ?? []),
                     ];
                 }
             }
@@ -500,6 +501,7 @@ final class OffreConfigurerController extends BaseController
                             'hasDefinitionChamps' => $plateforme->hasDefinitionChamps(),
                             'annees' => array_values($tpa->getAnnees() ?? []),
                             'anneesCapaciteRequise' => array_values($tpa->getAnneesCapaciteRequise() ?? []),
+                            'anneesCapaciteSpecifique' => array_values($tpa->getAnneesCapaciteSpecifique() ?? []),
                         ];
                     }
                 }

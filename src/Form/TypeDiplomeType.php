@@ -215,6 +215,7 @@ class TypeDiplomeType extends AbstractType
                         'plateforme' => $tpa->getPlateforme(),
                         'annees' => $tpa->getAnnees() ?? [],
                         'anneesCapaciteRequise' => $tpa->getAnneesCapaciteRequise() ?? [],
+                        'anneesCapaciteSpecifique' => $tpa->getAnneesCapaciteSpecifique() ?? [],
                     ];
                 }
             }
