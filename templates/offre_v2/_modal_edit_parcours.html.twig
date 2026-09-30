@@ -69,14 +69,26 @@
                 Rythme de formation
             </label>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <label class="flex items-center gap-2.5 p-3 rounded-xl border border-secondary-200 bg-white hover:bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-900 dark:hover:bg-secondary-800/60 transition cursor-pointer">
+                    <input type="radio"
+                           name="rythmeFormation"
+                           value=""
+                           id="parcours_rythme_formation_empty"
+                           {% if not parcours.rythmeFormation %}checked{% endif %}
+                           class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500 dark:border-secondary-600 dark:bg-secondary-900 cursor-pointer"
+                    >
+                    <span class="text-sm font-medium text-secondary-900 dark:text-secondary-100">
+                        Non renseigné
+                    </span>
+                </label>
                 {% for type in rythmesFormation %}
                     <label class="flex items-center gap-2.5 p-3 rounded-xl border border-secondary-200 bg-white hover:bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-900 dark:hover:bg-secondary-800/60 transition cursor-pointer">
-                        <input type="checkbox"
-                               name="rythmeFormation[]"
+                        <input type="radio"
+                               name="rythmeFormation"
                                value="{{ type.id }}"
                                id="parcours_rythme_formation_{{ type.id }}"
                                {% if parcours.rythmeFormation and parcours.rythmeFormation.id == type.id %}checked{% endif %}
-                               class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500 dark:border-secondary-600 dark:bg-secondary-900 dark:checked:bg-indigo-600 cursor-pointer"
+                               class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500 dark:border-secondary-600 dark:bg-secondary-900 cursor-pointer"
                         >
                         <span class="text-sm font-medium text-secondary-900 dark:text-secondary-100">
                             {{ type.libelle }}
