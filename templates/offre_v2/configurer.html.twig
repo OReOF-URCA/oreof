@@ -1,16 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% block bouton_header %}
-    <twig:Button variant="success" href="" icon="icon:add">
-        Ajouter un parcours
-    </twig:Button>
-    <twig:Button variant="primary" href="{{ path('app_offre_index') }}"
-                 icon="icon:arrow-left"
-    >
-        Retour à la liste des offres
-    </twig:Button>
-{% endblock %}
-
 {% set header_title = "Configurer la formation : "~formation.displayLong %}
 {% set header_description = "Paramètrer les plateformes d'admissions, les capacités et les ouvertures." %}
 {% set typeDiplome = formation.typeDiplome %}
@@ -19,6 +8,23 @@
 {% set is_period_active = campagne and campagne.isPeriodActive() %}
 
 {% set can_edit = is_ses_or_admin or (is_brouillon and is_period_active) %}
+
+{% block bouton_header %}
+    {% if can_edit %}
+        <twig:Button variant="success"
+                     href="{{ path('offre_v2_parcours_modal_add', {slug: formation.slug}) }}"
+                     dataAction="click->modalturbo#open"
+                     icon="icon:add"
+        >
+            Ajouter un parcours
+        </twig:Button>
+    {% endif %}
+    <twig:Button variant="primary" href="{{ path('app_offre_index') }}"
+                 icon="icon:arrow-left"
+    >
+        Retour à la liste des offres
+    </twig:Button>
+{% endblock %}
 
 {% block content %}
     {% if not can_edit %}
