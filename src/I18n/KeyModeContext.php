@@ -27,6 +27,6 @@ final class KeyModeContext
 
     public function setEnabled(bool $enabled): void
     {
-        $this->rs->getSession()?->set('i18n_keys', $enabled);
+        $this->rs->getSession()->set('i18n_keys', $enabled);
     }
 }

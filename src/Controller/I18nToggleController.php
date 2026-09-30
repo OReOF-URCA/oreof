@@ -25,7 +25,6 @@ final class I18nToggleController extends AbstractController
     {
         $enabled = !$ctx->isEnabled();
         $ctx->setEnabled($enabled);
-        $this->addFlash('info', $enabled ? 'Mode clés activé' : 'Mode clés désactivé');
 
         return $this->redirect($this->referer($requestStack) ?? $this->generateUrl('app_homepage'));
     }

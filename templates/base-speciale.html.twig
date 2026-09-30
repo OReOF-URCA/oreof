@@ -9,13 +9,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap" rel="stylesheet"/>
     {% block stylesheets %}
-        {{ encore_entry_link_tags('app') }}
+        {{ reprise_entry_link_tags('styles') }}
+        {{ reprise_entry_link_tags('app') }}
     {% endblock %}
     {% block javascripts %}
         <script>
           let toasts = {{ app.session.flashbag.get('toast')|json_encode|raw }};
         </script>
-        {{ encore_entry_script_tags('app') }}
+        {{ reprise_entry_script_tags('app') }}
     {% endblock %}
 </head>
 <body class="min-h-dvh bg-secondary-950 text-secondary-900 antialiased">

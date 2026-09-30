@@ -1,11 +1,11 @@
 <twig:alerte type="danger">
     <h4>Erreur</h4>
     <p>{{ message }}</p>
-    {% if details is not empty %}
+    {% if details is defined and details is not empty %}
         <p><strong>Détails :</strong></p>
         <pre>{{ details }}</pre>
     {% endif %}
-    {% if url is not empty %}
+    {% if url is defined and url is not empty %}
         <p><a href="{{ url }}" class="btn btn-primary">Retour</a></p>
     {% endif %}
 </twig:alerte>

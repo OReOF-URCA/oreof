@@ -47,22 +47,98 @@ class UserController extends BaseController
         ]);
     }
 
-    #[Route('/ajouter-ldap', name: 'app_user_new_ldap', methods: ['GET'])]
+    #[Route('/ajouter-ldap', name: 'app_user_new_ldap', methods: ['GET', 'POST'])]
     public function newLdap(
         TurboStreamResponseFactory $turboStream,
-        Request $request
+        Request $request,
+        Mailer $myMailer,
+        Ldap $ldap,
+        UserRepository $userRepository,
+        ProfilRepository $profilRepository
     ): Response {
-        $dpe = false;
-
-        if ($request->query->has('access') && $request->query->get('access') === 'dpe') {
-            $dpe = true;
-        }
-
+        $dpe = ($request->query->get('access') === 'dpe' || $request->query->get('acces') === 'dpe');
 
         $user = new User();
         $form = $this->createForm(UserLdapType::class, $user, [
             'action' => $dpe ? $this->generateUrl('app_user_new_ldap', ['access' => 'dpe']) : $this->generateUrl('app_user_new_ldap'),
         ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $email = $user->getEmail();
+            $dataUsers = $ldap->getDatas($email);
+            if ($dataUsers === null) {
+                return $turboStream->streamToastError("L'utilisateur n'a pas été trouvé dans l'annuaire LDAP");
+            }
+
+            $existingUser = $userRepository->findOneBy(['email' => $email]);
+            if ($existingUser !== null) {
+                $user = $existingUser;
+                $user->setIsDeleted(false);
+                $user->setUsername($dataUsers['username']);
+                $user->setNom($dataUsers['nom']);
+                $user->setPrenom($dataUsers['prenom']);
+                $this->addFlash('info', "L'utilisateur existant a été mis à jour avec les informations LDAP.");
+            } else {
+                $user->setUsername($dataUsers['username']);
+                $user->setNom($dataUsers['nom']);
+                $user->setPrenom($dataUsers['prenom']);
+            }
+
+            $user->setIsEnable(true);
+            if ($dpe === false) {
+                $user->setIsValideAdministration(true);
+                $user->setDateValideAdministration(new DateTime());
+
+                $myMailer->initEmail();
+                $myMailer->setTemplate(
+                    'mails/user/acces_ajoute.txt.twig',
+                    ['user' => $user]
+                );
+            } else {
+                $admins = $userRepository->findByRole('ROLE_ADMIN');
+
+                $user->setIsValidDpe(true);
+                $user->setComposanteDemande($this->getUser()?->getComposanteResponsableDpe()->first());
+                $user->setDateDemande(new DateTime());
+                $user->setDateValideDpe(new DateTime());
+
+                foreach ($admins as $admin) {
+                    $myMailer->initEmail();
+                    $myMailer->setTemplate(
+                        'mails/user/ajout_oreof_dpe.txt.twig',
+                        [
+                            'user' => $user,
+                            'dpe' => $this->getUser(),
+                        ]
+                    );
+                    $myMailer->sendMessage([$admin->getEmail()], '[ORéOF] Nouvel ajout d\'un utilisateur par un DPE');
+                }
+                $myMailer->initEmail();
+                $myMailer->setTemplate(
+                    'mails/user/ajout_oreof.txt.twig',
+                    ['user' => $user, 'dpe' => $this->getUser()]
+                );
+            }
+            $myMailer->sendMessage([$user->getEmail()], '[ORéOF] Accès ORéOF');
+            $userRepository->save($user, true);
+
+            if ($dpe) {
+                return $turboStream->streamToastSuccess("L'utilisateur a été ajouté avec succès, il est en attente de validation par le SES", true);
+            }
+
+            return $turboStream->streamOpenModalFromTemplates(
+                new TranslatableKey('user.gestion_profil.title', [], 'modal'),
+                'Utilisateur : ' . $user->getDisplay(),
+                'user_profils/_gestion_profils.html.twig',
+                [
+                    'user' => $user,
+                    'profils' => $profilRepository->findAll(),
+                ],
+                '_ui/_footer_cancel.html.twig',
+                []
+            );
+        }
 
         return $turboStream->streamOpenModalFromTemplates(
             new TranslatableKey('user_new_ldap.new.title', [], 'modal'),
@@ -72,18 +148,68 @@ class UserController extends BaseController
                 'form' => $form->createView(),
             ],
             '_ui/_footer_submit_cancel.html.twig',
-            []
+            [],
+            $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK
         );
     }
 
-    #[Route('/ajouter-hors-urca', name: 'app_user_new_hors_urca', methods: ['GET'])]
+    #[Route('/ajouter-hors-urca', name: 'app_user_new_hors_urca', methods: ['GET', 'POST'])]
     public function horsUrca(
         TurboStreamResponseFactory $turboStream,
+        UserPasswordHasherInterface $passwordEncoder,
+        Mailer $myMailer,
+        Request $request,
+        UserRepository $userRepository,
+        ProfilRepository $profilRepository
     ): Response {
         $user = new User();
         $form = $this->createForm(UserHorsUrcaType::class, $user, [
             'action' => $this->generateUrl('app_user_new_hors_urca'),
         ]);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $existingUser = $userRepository->findOneBy(['email' => $user->getEmail()]);
+
+            $password = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#!?&@'), 0, 8);
+
+            if ($existingUser !== null) {
+                $user = $existingUser;
+                $user->setIsDeleted(false);
+                $passwordEncode = $passwordEncoder->hashPassword($user, $password);
+            } else {
+                $passwordEncode = $passwordEncoder->hashPassword($user, $password);
+                $user->setUsername($user->getEmail());
+            }
+            $user->setPassword($passwordEncode);
+            $user->setIsEnable(true);
+            $user->setIsValideAdministration(true);
+            $user->setDateValideAdministration(new DateTime());
+
+            $myMailer->initEmail();
+            $myMailer->setTemplate(
+                'mails/user/acces_ajoute_hors_urca.html.twig',
+                [
+                    'user' => $user,
+                    'password' => $password,
+                ]
+            );
+            $myMailer->sendMessage([$user->getEmail()], '[ORéOF] Accès ORéOF');
+
+            $userRepository->save($user, true);
+
+            return $turboStream->streamOpenModalFromTemplates(
+                new TranslatableKey('user.gestion_profil.title', [], 'modal'),
+                'Utilisateur : ' . $user->getDisplay(),
+                'user_profils/_gestion_profils.html.twig',
+                [
+                    'user' => $user,
+                    'profils' => $profilRepository->findAll(),
+                ],
+                '_ui/_footer_cancel.html.twig',
+                []
+            );
+        }
 
         return $turboStream->streamOpenModalFromTemplates(
             new TranslatableKey('user_new_hors_urca.new.title', [], 'modal'),
@@ -93,149 +219,11 @@ class UserController extends BaseController
                 'form' => $form->createView(),
             ],
             '_ui/_footer_submit_cancel.html.twig',
-            []
+            [],
+            $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK
         );
     }
 
-    #[Route('/ajouter-ldap', name: 'app_user_new_ldap_valide', methods: ['POST'])]
-    public function saveLdap(
-        Mailer         $myMailer,
-        Ldap           $ldap,
-        Request        $request,
-        UserRepository $userRepository
-    ): Response {
-        $dpe = false;
-
-        if ($request->query->has('access') && $request->query->get('access') === 'dpe') {
-            $dpe = true;
-        }
-
-        $email = $request->request->get('user_ldap_email');
-
-        $user = $userRepository->findOneBy(['email' => $email]);
-
-        if ($user !== null) {
-            // utilisateur déjà en BDD, on le réactive et on met à jour ses infos depuis le LDAP
-
-            $dataUsers = $ldap->getDatas($email);
-            if ($dataUsers === null) {
-                $this->addFlash('danger', 'L\'utilisateur n\'a pas été trouvé dans l\'annuaire LDAP');
-                return $this->json(false, 500);
-            }
-            $user->setIsDeleted(false);
-            $user->setUsername($dataUsers['username']);
-            $user->setNom($dataUsers['nom']);
-            $user->setPrenom($dataUsers['prenom']);
-            $this->addFlash('info', 'L\'utilisateur existant a été mis à jour avec les informations LDAP.');
-        } else {
-            $user = new User();
-            $user->setEmail($email);
-            $dataUsers = $ldap->getDatas($email);
-            if ($dataUsers === null) {
-                $this->addFlash('danger', 'L\'utilisateur n\'a pas été trouvé dans l\'annuaire LDAP');
-                return $this->json(false, 500);
-            }
-            $user->setUsername($dataUsers['username']);
-            $user->setNom($dataUsers['nom']);
-            $user->setPrenom($dataUsers['prenom']);
-        }
-
-        $user->setIsEnable(true);
-        if ($dpe === false) {
-            $user->setIsValideAdministration(true);
-            $user->setDateValideAdministration(new DateTime());
-            $this->addFlash('success', 'L\'utilisateur a été ajouté avec succès');
-
-            $myMailer->initEmail();
-            $myMailer->setTemplate(
-                'mails/user/acces_ajoute.txt.twig',
-                ['user' => $user]
-            );
-        } else {
-            $admins = $userRepository->findByRole('ROLE_ADMIN');
-
-            $user->setIsValidDpe(true);
-            $user->setComposanteDemande($this->getUser()?->getComposanteResponsableDpe()->first());
-            $user->setDateDemande(new DateTime());
-            $user->setDateValideDpe(new DateTime());
-            $this->addFlash('success', 'L\'utilisateur a été ajouté avec succès, il est en attente de validation par le SES');
-            // mail pour l'administrateur
-            foreach ($admins as $admin) {
-                $myMailer->initEmail();
-                $myMailer->setTemplate(
-                    'mails/user/ajout_oreof_dpe.txt.twig',
-                    [
-                        'user' => $user,
-                        'dpe' => $this->getUser()]
-                );
-                $myMailer->sendMessage([$admin->getEmail()], '[ORéOF] Nouvel ajout d\'un utilisateur par un DPE');
-            }
-            $myMailer->initEmail();
-            $myMailer->setTemplate(
-                'mails/user/ajout_oreof.txt.twig',
-                ['user' => $user, 'dpe' => $this->getUser()]
-            );
-        }
-        $myMailer->sendMessage([$user->getEmail()], '[ORéOF] Accès ORéOF');
-        $userRepository->save($user, true);
-
-        // mail pour le nouvel utilisateur
-
-        return $this->json([
-            'success' => true,
-            'url' => $this->generateUrl('app_user_profils_gestion', ['user' => $user->getId()])
-        ]);
-    }
-
-    #[Route('/ajouter-hors-urca', name: 'app_user_new_hors_urca_valide', methods: ['POST'])]
-    public function saveHorsUrca(
-        UserPasswordHasherInterface $passwordEncoder,
-        Mailer                      $myMailer,
-        Request                     $request,
-        UserRepository              $userRepository
-    ): Response {
-        $email = $request->request->get('user_ldap_email');
-        $nom = $request->request->get('user_nom');
-        $prenom = $request->request->get('user_prenom');
-
-        $user = $userRepository->findOneBy(['email' => $email]);
-
-        // genre un mot de passe aléatoire de 8 caractères
-        $password = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#!?&@'), 0, 8);
-
-        if ($user !== null) {
-            $user->setIsDeleted(false);
-            $passwordEncode = $passwordEncoder->hashPassword($user, $password);
-        } else {
-            $user = new User();
-            $passwordEncode = $passwordEncoder->hashPassword($user, $password);
-            $user->setEmail($email);
-            $user->setUsername($email);
-            $user->setNom($nom);
-            $user->setPrenom($prenom);
-        }
-        $user->setPassword($passwordEncode);
-
-        $user->setIsEnable(true);
-        $user->setIsValideAdministration(true);
-        $user->setDateValideAdministration(new DateTime());
-        $this->addFlash('success', 'L\'utilisateur a été ajouté avec succès, un email lui a été envoyé.');
-
-        $myMailer->initEmail();
-        $myMailer->setTemplate(
-            'mails/user/acces_ajoute_hors_urca.html.twig',
-            ['user' => $user,
-                'password' => $password]
-        );
-        $myMailer->sendMessage([$user->getEmail()], '[ORéOF] Accès ORéOF');
-
-        $userRepository->save($user, true);
-
-        return $this->json([
-            'success' => true,
-            'url' => $this->generateUrl('app_user_profils_gestion', ['user' => $user->getId()])
-        ]);
-    }
 
     #[Route('/{id}', name: 'app_user_show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(

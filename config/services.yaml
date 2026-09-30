@@ -117,11 +117,14 @@ services:
       arguments:
         $providers: !tagged_iterator app.variable_provider
 
+    App\I18n\PageTranslationCollector: ~
+
     App\I18n\KeyModeTranslator:
       decorates: 'translator.default'   # << important
       arguments:
         - '@App\I18n\KeyModeTranslator.inner'
         - '@App\I18n\KeyModeContext'
+        - '@App\I18n\PageTranslationCollector'
         - '@monolog.logger.translation'
         - '%kernel.debug%'
       public: false

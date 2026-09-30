@@ -86,7 +86,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
           rel="stylesheet"/>
     {% block stylesheets %}
-        {{ encore_entry_link_tags('app') }}
+        {{ reprise_entry_link_tags('styles') }}
+        {{ reprise_entry_link_tags('app') }}
     {% endblock %}
 
     {% block javascripts %}
@@ -94,7 +95,7 @@
         <script>
           window.toasts = {{ app.flashes('toast')|json_encode|raw }};
         </script>
-        {{ encore_entry_script_tags('app') }}
+        {{ reprise_entry_script_tags('app') }}
     {% endblock %}
 </head>
 <body
@@ -339,6 +340,9 @@
 
 {# Inclusion du menu d'aide contextuel externalisé #}
 {% include '_layout/_help_drawer.html.twig' %}
+
+{# Inclusion du panneau d'inspection des traductions de la page #}
+{% include '_layout/_translations_drawer.html.twig' %}
 
 <template id="global-spinner-template">
     <div class="turbo-spinner-overlay absolute top-0 left-0 w-full h-full flex justify-center items-center z-40 pointer-events-none">

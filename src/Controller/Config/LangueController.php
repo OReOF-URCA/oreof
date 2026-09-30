@@ -113,7 +113,7 @@ class LangueController extends AbstractController
 
 
         return $turboStream->streamOpenModalFromTemplates(
-            new TranslatableKey('composante.edit.title', [], 'modal'),
+            new TranslatableKey('langue.edit.title', [], 'modal'),
             'Langue : ' . $langue->getLibelle(),
             '_ui/_modal_new_generic.html.twig',
             [

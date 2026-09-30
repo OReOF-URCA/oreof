@@ -1,6 +1,4 @@
 '-': '-'
-'Adresse email URCA': 'Adresse email URCA'
-'Adresse email valide': 'Adresse email valide'
 'Boîte postale, bâtiment, ...': 'Boîte postale, bâtiment, ...'
 "Cochez les années où la saisie d'une capacité est obligatoire (si décoché, la capacité reste optionnelle)": "Cochez les années où la saisie d'une capacité est obligatoire (si décoché, la capacité reste optionnelle)"
 'Décoché : les formations/parcours créés via le formulaire générique sont initialisés sans passage en CFVU.': 'Décoché : les formations/parcours créés via le formulaire générique sont initialisés sans passage en CFVU.'
@@ -564,8 +562,6 @@ user.helps.telFixe: ''
 user.helps.telPortable: ''
 user.helps.username: "Indiquez le login URCA de l'utilisateur."
 user_add.helps.email: "Indiquez un email valide de l'utilisateur à ajouter pour récupérer ses informations."
-user_hors_urca.helps.nom: user_hors_urca.helps.nom
-user_hors_urca.helps.prenom: user_hors_urca.helps.prenom
 user_ldap.helps.centreDemande: "Définissez le périmètre d’action et/ou de visualisation de l'utilisateur."
 user_ldap.helps.email: ''
 user_ldap.helps.role.help: "Définissez le rôle de l'utilisateur (et donc ses droits d'accès)."

@@ -9,12 +9,12 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
-###> symfony/webpack-encore-bundle ###
+###> frontend build ###
 /node_modules/
 /public/build/
 npm-debug.log
 yarn-error.log
-###< symfony/webpack-encore-bundle ###
+###< frontend build ###
 /.idea/csv-editor.xml
 /graph.svg
 /oreof.mwb
@@ -133,3 +133,8 @@ public/Docs-Offre/Annexe eCandidat BUT2 et BUT3 proposées pour 2026 2027  pour 
 
 ### Icones de l'application ###
 assets/icons
+
+###> symfony/reprise ###
+/node_modules/
+/public/build/
+###< symfony/reprise ###

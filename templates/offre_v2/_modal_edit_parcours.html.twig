@@ -6,8 +6,8 @@
         </div>
     </div>
 
-    <form id="modal_form" action="{{ path('offre_v2_parcours_modal_sauvegarder', {parcours: parcours.id}) }}" method="post" class="space-y-5">
-        <input type="hidden" name="_token" value="{{ csrf_token('parcours_edit_' ~ parcours.id) }}">
+    <form id="modal_form" action="{{ isAdd|default(false) ? path('offre_v2_parcours_modal_add_sauvegarder', {slug: formation.slug}) : path('offre_v2_parcours_modal_sauvegarder', {parcours: parcours.id}) }}" method="post" class="space-y-5">
+        <input type="hidden" name="_token" value="{{ isAdd|default(false) ? csrf_token('parcours_add_' ~ formation.id) : csrf_token('parcours_edit_' ~ parcours.id) }}">
 
         {# Libellé du parcours #}
         <div>
@@ -21,14 +21,6 @@
                    required
                    class="w-full rounded-xl border border-secondary-300 bg-white px-3.5 py-2.5 text-sm font-medium text-secondary-900 shadow-sm transition placeholder:text-secondary-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-secondary-600 dark:bg-secondary-900 dark:text-secondary-100"
                    placeholder="Ex: Parcours Métiers du Livre..."
-                   data-original-libelle="{{ parcoursOrigine ? parcoursOrigine.libelle : parcours.libelle }}"
-                   oninput="
-                       const orig = this.getAttribute('data-original-libelle');
-                       const chk = document.getElementById('parcours_is_modifie_n1');
-                       if (orig && this.value.trim() !== orig.trim() && chk) {
-                           chk.checked = true;
-                       }
-                   "
             >
             {% if parcoursOrigine %}
                 <div class="mt-2 flex items-center gap-1.5 text-xs text-secondary-500 dark:text-secondary-400">
@@ -99,27 +91,6 @@
             <p class="mt-1.5 text-xs text-secondary-500 dark:text-secondary-400">
                 Indique le rythme de formation (FI, FC, alternance ou apprentissage)
             </p>
-        </div>
-
-        {# Marquer comme modifié par rapport à N-1 #}
-        <div class="pt-2">
-            <label class="flex items-start gap-3.5 p-4 rounded-xl border border-secondary-200 bg-secondary-50/50 hover:bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-800/40 dark:hover:bg-secondary-800/60 transition cursor-pointer">
-                <input type="checkbox"
-                       name="isModifieN1"
-                       value="1"
-                       id="parcours_is_modifie_n1"
-                       {% if isModifieN1 %}checked{% endif %}
-                       class="mt-0.5 h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500 dark:border-secondary-600 dark:bg-secondary-900 dark:checked:bg-indigo-600 cursor-pointer"
-                >
-                <div class="text-sm">
-                    <span class="font-semibold text-secondary-900 dark:text-secondary-100">
-                        Marquer comme modifié par rapport à N-1
-                    </span>
-                    <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
-                        Indique que l'intitulé de ce parcours a été modifié par rapport à la maquette de l'année précédente (modification d'intitulé DPE).
-                    </p>
-                </div>
-            </label>
         </div>
     </form>
 </div>

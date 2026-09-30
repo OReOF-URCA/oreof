@@ -12,19 +12,13 @@ namespace App\Controller\Config;
 use App\Controller\Traits\CsrfDeleteTrait;
 use App\DataTable\CampagneCollecteDataTable;
 use App\DTO\TranslatableKey;
-use App\Entity\AnneeUniversitaire;
 use App\Entity\CampagneCollecte;
-use App\Entity\User;
 use App\Enums\CampagnePublicationTagEnum;
 use App\Enums\ConfigurationPublicationEnum;
 use App\Form\CampagneCollecteType;
 use App\Form\ConfigurePublicationType;
 use App\Repository\CampagneCollecteRepository;
-use App\Repository\DpeParcoursRepository;
-use App\Service\DetailBuilder;
-use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
-use Doctrine\ORM\EntityManagerInterface;
 use JsonException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -75,6 +69,9 @@ class CampagneCollecteController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($campagne_collecte->getAnnee() === null && $campagne_collecte->getAnneeUniversitaire() !== null) {
+                $campagne_collecte->setAnnee((int) $campagne_collecte->getAnneeUniversitaire()->getAnnee());
+            }
             $campagneCollecteRepository->save($campagne_collecte, true);
 
             return $turboStream->streamToastSuccess('Campagne de collecte créée avec succès', true);
@@ -89,7 +86,8 @@ class CampagneCollecteController extends AbstractController
                 'form' => $form->createView(),
             ],
             '_ui/_footer_submit_cancel.html.twig',
-            []
+            [],
+            $form->isSubmitted() ? 422 : 200
         );
     }
 

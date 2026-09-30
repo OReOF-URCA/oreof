@@ -279,6 +279,11 @@ class CampagneCollecte
         return $this;
     }
 
+    public function __clone()
+    {
+        $this->id = null;
+    }
+
     public function getAnneeUniversitaire(): ?AnneeUniversitaire
     {
         return $this->annee_universitaire;
@@ -287,6 +292,9 @@ class CampagneCollecte
     public function setAnneeUniversitaire(?AnneeUniversitaire $annee_universitaire): static
     {
         $this->annee_universitaire = $annee_universitaire;
+        if ($annee_universitaire !== null && ($this->annee === null || $this->annee === 0)) {
+            $this->annee = $annee_universitaire->getAnnee();
+        }
 
         return $this;
     }

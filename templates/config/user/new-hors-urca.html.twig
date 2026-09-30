@@ -1,19 +1,14 @@
-<div {{ stimulus_controller('register', {
-
-}) }}
-        data-action="register:refreshModale@window->base#refreshModale"
->
+<div>
     {% form_theme form 'communs/form_theme_v2.html.twig' %}
     {{ form_start(form, {
         attr: {
-            id: 'modalForm',
+            id: 'modal_form',
         }}) }}
-    <div class="row">
-        <div class="col-12">
-            {{ form_row(form.nom) }}
-            {{ form_row(form.prenom) }}
-            {{ form_row(form.email) }}
-        </div>
+    <div class="space-y-3">
+        {{ form_row(form.nom) }}
+        {{ form_row(form.prenom) }}
+        {{ form_row(form.email) }}
     </div>
     {{ form_end(form) }}
 </div>
+

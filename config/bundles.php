@@ -9,7 +9,7 @@ return [
     Twig\Extra\TwigExtraBundle\TwigExtraBundle::class => ['all' => true],
     Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],
     Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class => ['dev' => true, 'test' => true],
-    Symfony\WebpackEncoreBundle\WebpackEncoreBundle::class => ['all' => true],
+    Symfony\Reprise\RepriseBundle::class => ['all' => true],
     Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle::class => ['dev' => true, 'test' => true],
     Symfony\UX\TwigComponent\TwigComponentBundle::class => ['all' => true],
     Symfony\UX\StimulusBundle\StimulusBundle::class => ['all' => true],
@@ -26,5 +26,5 @@ return [
     Liip\ImagineBundle\LiipImagineBundle::class => ['all' => true],
     Davidannebicque\HtmlToSpreadsheetBundle\HtmlToSpreadsheetBundle::class => ['all' => true],
     Dannebicque\WorkflowOperationsBundle\WorkflowOperationsBundle::class => ['all' => true],
-    Pentiminax\UX\DataTables\PentiminaxDataTablesBundle::class => ['all' => true]
+    Pentiminax\UX\DataTables\PentiminaxDataTablesBundle::class => ['all' => true],
 ];

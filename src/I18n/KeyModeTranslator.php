@@ -20,6 +20,7 @@ final class KeyModeTranslator implements TranslatorInterface, TranslatorBagInter
     /** @var TranslatorInterface&TranslatorBagInterface&LocaleAwareInterface */
     private $inner;
     private KeyModeContext $context;
+    private PageTranslationCollector $collector;
     private LoggerInterface $logger;
     private bool $kernelDebug;
 
@@ -29,25 +30,26 @@ final class KeyModeTranslator implements TranslatorInterface, TranslatorBagInter
     public function __construct(
         $inner,
         KeyModeContext $context,
+        PageTranslationCollector $collector,
         LoggerInterface $logger,
         bool $kernelDebug
     )
     {
         $this->inner = $inner;
         $this->context = $context;
+        $this->collector = $collector;
         $this->logger = $logger;
         $this->kernelDebug = $kernelDebug;
     }
 
     public function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
     {
-        // si en mode "key mode" on retourne la clé au rendu immédiatement (on ne veut pas évaluer la traduction)
-        if ($this->context->isEnabled()) {
-            $label = $id . ($domain ? " ($domain)" : '');
-            return "⟦{$label}⟧";
-        }
-
+        $domainName = $domain ?? 'messages';
+        $localeName = $locale ?? $this->inner->getLocale();
         $translated = $this->inner->trans($id, $parameters, $domain, $locale);
+
+        // Collecter la traduction pour le panneau d'inspection de la page
+        $this->collector->add($domainName, $id, $translated, $localeName);
 
         // journaliser les traductions manquantes uniquement en debug
         if ($this->kernelDebug) {

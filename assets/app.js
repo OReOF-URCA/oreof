@@ -37,7 +37,6 @@ import 'trix'
 import 'trix/dist/trix.css'
 
 import callOut from './js/callOut'
-import './styles/app.css'
 import './styles/_timeline.scss'
 
 import 'datatables.net-dt/css/dataTables.dataTables.min.css'
@@ -67,6 +66,125 @@ document.addEventListener('turbo:frame-load', (event) => {
   initBootstrapTooltips(event.target)
 })
 
+// Track active DataTables when connected via Stimulus
+document.addEventListener('pentiminax--ux-datatables--datatable:connect', (event) => {
+  if (event.target && event.detail?.table) {
+    event.target._uxDataTable = event.detail.table
+  }
+})
+document.addEventListener('@pentiminax/ux-datatables/datatable:connect', (event) => {
+  if (event.target && event.detail?.table) {
+    event.target._uxDataTable = event.detail.table
+  }
+})
+
+export const reloadAllDataTables = () => {
+  const tables = document.querySelectorAll(
+    'table.dataTable, table[data-controller*="pentiminax--ux-datatables--datatable"], .dt-container table, table[id]'
+  )
+
+  let reloaded = false
+
+  tables.forEach((tableEl) => {
+    // 1. Direct cached instance from connect event
+    if (tableEl._uxDataTable) {
+      if (typeof tableEl._uxDataTable.ajax?.reload === 'function') {
+        tableEl._uxDataTable.ajax.reload(null, false)
+        reloaded = true
+        return
+      }
+      if (typeof tableEl._uxDataTable.draw === 'function') {
+        tableEl._uxDataTable.draw(false)
+        reloaded = true
+        return
+      }
+    }
+
+    // 2. Via Stimulus controller instance
+    if (window.Stimulus) {
+      try {
+        const controller = window.Stimulus.getControllerForElementAndIdentifier(
+          tableEl,
+          'pentiminax--ux-datatables--datatable'
+        )
+        if (controller?.table) {
+          if (typeof controller.table.ajax?.reload === 'function') {
+            controller.table.ajax.reload(null, false)
+            reloaded = true
+            return
+          }
+          if (typeof controller.table.draw === 'function') {
+            controller.table.draw(false)
+            reloaded = true
+            return
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 3. Via global DataTable API
+    if (window.DataTable) {
+      try {
+        if (window.DataTable.isDataTable?.(tableEl)) {
+          const api = new window.DataTable.Api(tableEl)
+          if (typeof api.ajax?.reload === 'function') {
+            api.ajax.reload(null, false)
+            reloaded = true
+            return
+          }
+          if (typeof api.draw === 'function') {
+            api.draw(false)
+            reloaded = true
+            return
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 4. Via jQuery DataTable plugin
+    if (window.$ && typeof window.$.fn?.dataTable === 'object') {
+      try {
+        if (window.$.fn.dataTable.isDataTable(tableEl)) {
+          const dt = window.$(tableEl).DataTable()
+          if (typeof dt.ajax?.reload === 'function') {
+            dt.ajax.reload(null, false)
+            reloaded = true
+            return
+          }
+          if (typeof dt.draw === 'function') {
+            dt.draw(false)
+            reloaded = true
+            return
+          }
+        }
+      } catch (e) {}
+    }
+  })
+
+  // 5. Global DataTable.tables fallback
+  if (!reloaded && window.DataTable && typeof window.DataTable.tables === 'function') {
+    try {
+      const allTables = window.DataTable.tables({ api: true })
+      if (typeof allTables.ajax?.reload === 'function') {
+        allTables.ajax.reload(null, false)
+      } else if (typeof allTables.draw === 'function') {
+        allTables.draw(false)
+      }
+    } catch (e) {}
+  }
+
+  // 6. Legacy datatable LiveComponent fallback
+  const legacyEl = document.querySelector('.datatable-wrapper')
+  if (legacyEl && legacyEl.__component) {
+    legacyEl.__component.render()
+  }
+}
+
+window.reloadAllDataTables = reloadAllDataTables
+
+window.addEventListener('datatable:reload', () => {
+  reloadAllDataTables()
+})
 
 window.addEventListener('load', () => { // le dom est chargé
   const savedTheme = localStorage.getItem('oreof-theme')

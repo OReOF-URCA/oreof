@@ -106,7 +106,7 @@ final class UserProfilsController extends BaseController
             ->setProfil($profil);
         $entityManager->persist($nCentre);
 
-        $centreType = $profil->getCentre();
+        $centreType = $profil->getCentre() ?? CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT;
         $centreId = $data['centreId'];
         $force = (bool)$data['force'];
 
@@ -127,7 +127,7 @@ final class UserProfilsController extends BaseController
             CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT => $userProfilRepository->findOneBy(['user' => $user, 'etablissement' => $centre]),
             CentreGestionEnum::CENTRE_GESTION_FORMATION => $userProfilRepository->findFormationWithSameRole($centre, $profil, $this->getCampagneCollecte()),
             CentreGestionEnum::CENTRE_GESTION_PARCOURS => $userProfilRepository->findParcoursWithSameRole($centre, $profil, $this->getCampagneCollecte()),
-            CentreGestionEnum::CENTRE_GESTION_NULL => throw new Exception('To be implemented'),
+            default => throw new Exception('To be implemented'),
         };
 
         if ($existingCentre && $profil->isExclusif()) {
@@ -156,7 +156,7 @@ final class UserProfilsController extends BaseController
             CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT => $nCentre->setEtablissement($centre),
             CentreGestionEnum::CENTRE_GESTION_FORMATION => $nCentre->setFormation($centre),
             CentreGestionEnum::CENTRE_GESTION_PARCOURS => $nCentre->setParcours($centre),
-            CentreGestionEnum::CENTRE_GESTION_NULL => throw new Exception('To be implemented'),
+            default => throw new Exception('To be implemented'),
         };
 
         $event = match ($centreType) {
@@ -164,7 +164,7 @@ final class UserProfilsController extends BaseController
             CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT => new NotifCentreEtablissementEvent($centre, $user, $profil),
             CentreGestionEnum::CENTRE_GESTION_FORMATION => new NotifCentreFormationEvent($centre, $user, $profil),
             CentreGestionEnum::CENTRE_GESTION_PARCOURS => new NotifCentreParcoursEvent($centre, $user, $profil),
-            CentreGestionEnum::CENTRE_GESTION_NULL => throw new Exception('To be implemented'),
+            default => null,
         };
 
         if ($event) {
@@ -211,7 +211,9 @@ final class UserProfilsController extends BaseController
         $profil = $profilRepository->find($profilId);
 
         if ($profil !== null) {
-            return match ($profil->getCentre()) {
+            $centre = $profil->getCentre() ?? CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT;
+
+            return match ($centre) {
                 CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT => $this->render('user_profils/_config_profil_etablissement.html.twig', [
                     'user' => $user,
                     'profil' => $profil,
@@ -236,8 +238,6 @@ final class UserProfilsController extends BaseController
                     'message' => 'Le centre de gestion n\'est pas reconnu'
                 ]),
             };
-
-
         }
 
         return $this->render('communs/_erreur.html.twig', [
