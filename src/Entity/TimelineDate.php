@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Enums\TimelineDateFlagEnum;
 
 #[ORM\Entity(repositoryClass: TimelineDateRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class TimelineDate
 {
     #[ORM\Id]
@@ -31,7 +32,7 @@ class TimelineDate
     private ?\DateTime $heure = null;
 
     #[ORM\Column]
-    private ?bool $inTimeline = true;
+    private ?bool $inTimeline = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
@@ -39,8 +40,14 @@ class TimelineDate
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $dateDebut = null;
 
+    #[ORM\Column(options: ['default' => false])]
+    private ?bool $isCfvu = null;
+
     #[ORM\Column(type: 'string', length: 30, enumType: TimelineDateFlagEnum::class)]
     private TimelineDateFlagEnum $flag = TimelineDateFlagEnum::NONE;
+
+    #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
+    private int $ordre = 0;
 
     /**
      * @var array<string>
@@ -51,6 +58,18 @@ class TimelineDate
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getOrdre(): int
+    {
+        return $this->ordre;
+    }
+
+    public function setOrdre(int $ordre): static
+    {
+        $this->ordre = $ordre;
+
+        return $this;
     }
 
     public function getCampagneCollecte(): ?CampagneCollecte
@@ -157,18 +176,31 @@ class TimelineDate
     public function setFlag(TimelineDateFlagEnum $flag): static
     {
         $this->flag = $flag;
+        $this->isCfvu = ($flag === TimelineDateFlagEnum::CFVU);
 
         return $this;
     }
 
-    public function isCfvu(): bool
+    #[ORM\PrePersist]
+    #[ORM\PreUpdate]
+    public function syncIsCfvu(): void
     {
-        return $this->flag === TimelineDateFlagEnum::CFVU;
+        $this->isCfvu = ($this->flag === TimelineDateFlagEnum::CFVU);
     }
 
-    public function setIsCfvu(bool $isCfvu): static
+    public function isCfvu(): bool
     {
-        $this->flag = $isCfvu ? TimelineDateFlagEnum::CFVU : TimelineDateFlagEnum::NONE;
+        return $this->isCfvu ?? ($this->flag === TimelineDateFlagEnum::CFVU);
+    }
+
+    public function setIsCfvu(?bool $isCfvu): static
+    {
+        $this->isCfvu = $isCfvu ?? false;
+        if ($this->isCfvu) {
+            $this->flag = TimelineDateFlagEnum::CFVU;
+        } elseif ($this->flag === TimelineDateFlagEnum::CFVU) {
+            $this->flag = TimelineDateFlagEnum::NONE;
+        }
 
         return $this;
     }
@@ -178,7 +210,7 @@ class TimelineDate
      */
     public function getModulesActifs(): array
     {
-        return $this->modulesActifs ?? [];
+        return $this->modulesActifs;
     }
 
     /**

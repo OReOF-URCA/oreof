@@ -236,8 +236,10 @@
                         {% set currentEtat = dpe ? dpe.getEtatReconduction().value : 'OUVERT' %}
                         <span id="parcours_{{ parcours.id }}_badge" class="mr-2">
                             {% set isParcoursFerme = currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}
-                            {% if isParcoursFerme %}
-                                <twig:Badge variant="danger" label="Fermé" />
+                            {% if currentEtat == 'FERMETURE_DEFINITIVE' %}
+                                <twig:Badge variant="danger" label="Fermeture définitive" />
+                            {% elseif isParcoursFerme %}
+                                <twig:Badge variant="danger" label="Non ouvert" />
                             {% else %}
                                 <twig:Badge variant="success" label="Ouvert" />
                             {% endif %}
@@ -249,8 +251,8 @@
                                 {{ not can_edit ? 'disabled' : '' }}
                         >
                             <option value="OUVERT" {% if currentEtat == 'OUVERT' or currentEtat == 'CREATION' or currentEtat == 'MODIFICATION' or currentEtat == 'MODIFICATION_INTITULE' or currentEtat == 'MODIFICATION_PARCOURS' or currentEtat == 'MODIFICATION_TEXTE' or currentEtat == 'MODIFICATION_MCCC' or currentEtat == 'MODIFICATION_MCCC_TEXTE' %}selected{% endif %}>Ouvert</option>
-                            <option value="NON_OUVERTURE" {% if currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}selected{% endif %}>Fermé</option>
-                            <option value="ATTENTE" {% if currentEtat == 'ATTENTE' %}selected{% endif %}>À confirmer</option>
+                            <option value="NON_OUVERTURE" {% if currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'ATTENTE' %}selected{% endif %}>Non ouvert</option>
+                            <option value="FERMETURE_DEFINITIVE" {% if currentEtat == 'FERMETURE_DEFINITIVE' %}selected{% endif %}>Fermeture définitive</option>
                         </select>
                     </twig:block>
                 <!-- Parcours -->

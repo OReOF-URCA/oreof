@@ -1,2 +1,5 @@
-{{ item.parcours ? item.parcours.display : '-' }}
-
+{% if item.parcours is defined and item.parcours %}
+    {{ item.parcours.display }}
+{% else %}
+    -
+{% endif %}

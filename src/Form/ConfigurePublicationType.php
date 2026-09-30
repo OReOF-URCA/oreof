@@ -5,6 +5,7 @@ namespace App\Form;
 use App\Entity\CampagneCollecte;
 use App\Enums\CampagnePublicationTagEnum;
 use App\Enums\ConfigurationPublicationEnum;
+use App\Form\Type\YesNoType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -33,7 +34,7 @@ class ConfigurePublicationType extends AbstractType
                     'Année suivante (N+1)' => $options['publicationTag'] === CampagnePublicationTagEnum::ANNEE_SUIVANTE->value ? ['selected' => ''] : []
                 ]
             ])
-            ->add('enablePublication', CheckboxType::class, [
+            ->add('enablePublication', YesNoType::class, [
                 'label' => 'Activer la publication ?',
                 'required' => true
             ])

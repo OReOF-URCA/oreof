@@ -118,7 +118,7 @@ page.app_domaine_index.description: 'Gérer les domaines de formation.'
 page.app_domaine_index.title: Domaines
 page.app_etablissement_index.description: 'Gérer les établissements de référence.'
 page.app_etablissement_index.title: Etablissements
-page.app_export_composante_index.description: "Exporter les données de formation de la composante."
+page.app_export_composante_index.description: 'Exporter les données de formation de la composante.'
 page.app_export_index.description: "Accéder aux exports des données de l'offre de formation"
 page.app_export_index.title: 'Gestion des Exports'
 page.app_faq.description: 'Foire aux questions et réponses aux interrogations fréquentes.'
@@ -130,7 +130,7 @@ page.app_formation_index.title: 'Détail des formations'
 page.app_formation_responsable_liste.description: 'Liste des responsables et co-responsables de formation.'
 page.app_formation_responsable_liste.title: 'Responsables de formation'
 page.app_help.description: "Centre d'aide et documentation d'utilisation d'ORéOF."
-page.app_help.title: 'Aide'
+page.app_help.title: Aide
 page.app_help_index.description: "Gérer les contenus d'aide."
 page.app_help_index.title: Aides
 page.app_homepage.description: Accueil
@@ -149,7 +149,7 @@ page.app_notication_liste.title: Notifications
 page.app_offre_composante_index.description: "Gestion de l'offre de formation de votre composante. Capacités d''accueil, ouvertures, ..."
 page.app_offre_composante_index.title: "Gestion de l'offre de formation"
 page.app_offre_index.description: 'Synthèse de l’offre de formation. Ouverture, plateformes, capacités et validations.'
-page.app_offre_index.title: 'Synthèse de l’offre de formation'
+page.app_offre_index.title: "Gestion de l'offre et capacités"
 page.app_parcours_lheo_invalid_list.description: "Contrôle de la conformité au format LHEO de l'offre"
 page.app_parcours_lheo_invalid_list.title: "Contrôle LHEO de l'offre"
 page.app_plaquette.description: 'Générer et consulter les plaquettes des formations.'
@@ -160,17 +160,17 @@ page.app_plateforme_adminission_new.title: "Nouvelle plateforme d'admission"
 page.app_rythme_formation_index.description: 'Gérer les rythmes de formation.'
 page.app_rythme_formation_index.title: 'Rythmes de formation'
 page.app_search.description: 'Recherche globale de formations, parcours et fiches matières.'
-page.app_search.title: 'Recherche'
+page.app_search.title: Recherche
 page.app_section_administration.description: Administration
 page.app_section_administration.title: Administration
 page.app_section_conseils.description: 'Espace de gestion des conseils et des validations officielles.'
-page.app_section_conseils.title: 'Conseils'
+page.app_section_conseils.title: Conseils
 page.app_section_droits.description: "Espace d'administration des droits d'accès et des profils."
 page.app_section_droits.title: 'Droits & Profils'
 page.app_section_offre_formation.description: 'Détails des mentions/spécialités'
 page.app_section_offre_formation.title: 'Offre de formation'
 page.app_section_pilotage.description: "Espace de pilotage et d'indicateurs de l'offre de formation."
-page.app_section_pilotage.title: 'Pilotage'
+page.app_section_pilotage.title: Pilotage
 page.app_synthese_modification_export_pdf.description: "Export PDF de la synthèse des modifications apportées à l'offre."
 page.app_type_diplome_edit.description: 'Modifier les paramètres du type de diplôme.'
 page.app_type_diplome_edit.title: 'Modifier le type de diplôme'

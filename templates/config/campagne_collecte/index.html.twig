@@ -9,18 +9,13 @@
 {% endset %}
 
 {% block bouton_header %}
-    <a
-            data-action="click->modalturbo#open"
-            data-turbo="true"
+    <twig:Button
             href="{{ path('app_campagne_collecte_new') }}"
-            class="btn border border-success-300 bg-success-50 text-success-700 hover:bg-success-100 hover:text-success-800 dark:bg-success-900 dark:text-success-300 dark:border-success-500 dark:hover:border-success-300 dark:hover:text-success-100"
-            {{ stimulus_controller('tooltip', {
-                placement: 'bottom',
-                customClass: 'app-tooltip',
-                title: "Ajouter une campagne de collecte"
-            }) }}
-    >
-        <twig:UX:Icon name="icon:add" class="h-4 w-4"/>
-        <span> Ajouter une campagne de collecte</span>
-    </a>
+            variant="success"
+            :soft="false"
+            :outline="false"
+            icon="icon:add"
+            label="Ajouter une campagne de collecte"
+            tooltip="Créer une nouvelle campagne de collecte"
+    />
 {% endblock %}

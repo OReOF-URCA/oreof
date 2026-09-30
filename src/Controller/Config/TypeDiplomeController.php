@@ -104,13 +104,14 @@ class TypeDiplomeController extends BaseController
                 'title' => $hasFormatError || $hasSizeError || $hasLimitError ? 'Attention' : 'Succès',
             ]);
 
-            return $this->redirectToRoute('app_type_diplome_index');
+            return $this->redirectToRoute('app_type_diplome_show', [
+                'id' => $typeDiplome->getId()
+            ]);
         }
 
         return $this->render('config/type_diplome/new.html.twig', [
             'type_diplome' => $typeDiplome,
             'form' => $form->createView(),
-            'titre' => "Création d'un type de diplôme"
         ]);
     }
 
@@ -221,115 +222,15 @@ class TypeDiplomeController extends BaseController
     //endregion
 
     #[Route('/{id}', name: 'app_type_diplome_show', methods: ['GET'])]
+    #[Breadcrumb(menuKey: 'administration.type_diplome')]
+    #[Breadcrumb(label: 'Détail')]
     public function show(
-        TurboStreamResponseFactory $turboStream,
-        TypeDiplome                $typeDiplome,
-        DetailBuilder              $builder
+        TypeDiplome $typeDiplome
     ): Response
     {
-        $detail = $builder
-            ->setEntity(TypeDiplome::class)
-            ->addField('libelle', [
-                'label' => 'Libellé du type de diplôme',
-            ])
-            ->addField('libelleCourt', [
-                'label' => 'Sigle',
-            ])
-            ->addField('codeApogee', [
-                'label' => 'Code Apogée',
-                'empty_text' => 'Non renseigné',
-            ])
-            ->addField('hasMemoire', [
-                'label' => 'Mémoire ?',
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addField('hasStage', [
-                'label' => 'Stage ?',
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addField('hasProjet', [
-                'label' => 'Projet ?',
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addField('hasSituationPro', [
-                'label' => 'Situation Pro. ?',
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addField('ectsObligatoireSurEc', [
-                'label' => 'ECTS obligatoires sur EC ?',
-                'type' => 'boolean',
-                'format' => 'boolean',
-            ])
-            ->addField('modalitesAdmission', [
-                'label' => 'Modalités d’admission',
-                'format' => 'html',
-                'empty_text' => 'Non renseigné',
-            ])
-            ->addField('presentationFormation', [
-                'label' => 'Présentation des formations',
-                'format' => 'html',
-                'empty_text' => 'Non renseigné',
-            ])
-            ->addField('prerequisObligatoires', [
-                'label' => 'Prérequis obligatoires',
-                'format' => 'html',
-                'empty_text' => 'Non renseigné',
-            ])
-            ->addField('insertionProfessionnelle', [
-                'label' => 'Devenir des diplômés',
-                'format' => 'html',
-                'empty_text' => 'Non renseigné',
-            ])
-            ->addCustomField('plateformes', function ($typeDiplome) {
-                $plateformes = $typeDiplome->getTypeDiplomePlateformeAdmissions();
-                if ($plateformes->isEmpty()) {
-                    return 'Aucune plateforme définie';
-                }
-
-                $html = '<ul class="list-disc pl-5">';
-                foreach ($plateformes as $tpa) {
-                    $plateforme = $tpa->getPlateforme();
-                    $annees = $tpa->getAnnees();
-                    $anneesCapacite = $tpa->getAnneesCapaciteRequise() ?? [];
-
-                    $anneesText = '';
-                    if ($annees && count($annees) > 0) {
-                        sort($annees);
-                        $details = [];
-                        foreach ($annees as $an) {
-                            $isReq = in_array($an, $anneesCapacite, true);
-                            $details[] = 'Année ' . $an . ($isReq ? ' (capacité requise)' : ' (optionnelle)');
-                        }
-                        $anneesText = ' (' . implode(', ', $details) . ')';
-                    }
-
-                    $html .= '<li><strong>' . htmlspecialchars($plateforme?->getLibelle() ?? '') . '</strong>' . $anneesText . '</li>';
-                }
-                $html .= '</ul>';
-
-                return $html;
-            }, [
-                'label' => 'Plateformes d\'admission configurées',
-                'format' => 'html',
-            ])
-            ->build();
-
-
-        return $turboStream->streamOpenModalFromTemplates(
-            new TranslatableKey('type_diplome.show.title', [], 'modal'),
-            'Dans : type diplôme ' . $typeDiplome->getLibelle(),
-            '_ui/_modal_show_generic.html.twig',
-            [
-                'entity' => $typeDiplome,
-                'detail' => $detail,
-            ],
-            '_ui/_footer_cancel.html.twig',
-            []
-        );
+        return $this->render('config/type_diplome/show.html.twig', [
+            'type_diplome' => $typeDiplome,
+        ]);
     }
 
     #[Route('/{id}/edit', name: 'app_type_diplome_edit', methods: ['GET', 'POST'])]
@@ -354,20 +255,20 @@ class TypeDiplomeController extends BaseController
             $plateformesData = $form->get('plateformesAdmission')->getData();
             $typeDiplomePlateformeService->syncPlateformes($typeDiplome, $plateformesData ?? [], $this->getCampagneCollecte());
 
-            // Abandon de la fenêtre modale
-            // return $this->json(true);
             $this->addFlash('toast', [
                 'type' => 'success',
                 'text' => 'Type diplôme modifié avec succès',
                 'title' => 'Succès',
             ]);
-            return $this->redirectToRoute('app_type_diplome_index');
+
+            return $this->redirectToRoute('app_type_diplome_show', [
+                'id' => $typeDiplome->getId()
+            ]);
         }
 
-        return $this->render('config/type_diplome/new.html.twig', [
+        return $this->render('config/type_diplome/edit.html.twig', [
             'type_diplome' => $typeDiplome,
             'form' => $form->createView(),
-            'titre' => "Modification d'un type de diplôme"
         ]);
     }
 

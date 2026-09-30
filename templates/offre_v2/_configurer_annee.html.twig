@@ -36,7 +36,7 @@
                         <label for="annee_{{ annee.id }}_isOuvert" class="text-sm font-medium">Ouverture</label>
                         <select id="annee_{{ annee.id }}_isOuvert" name="annee_{{ annee.id }}_isOuvert" data-tc-field="isOuvert" class="mt-1 w-full rounded-lg border bg-surface px-3 py-2 text-sm text-text dark:border-secondary-600">
                             <option value="1" {% if annee.isOuvert %}selected{% endif %}>Ouverte</option>
-                            <option value="0" {% if not annee.isOuvert %}selected{% endif %}>Fermée</option>
+                            <option value="0" {% if not annee.isOuvert %}selected{% endif %}>Non</option>
                             <option value="to_confirm">À confirmer</option>
                         </select>
                         {% if anneeComparaison.anneePrecedente %}

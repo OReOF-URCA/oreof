@@ -408,15 +408,17 @@ final class OffreConfigurerController extends BaseController
                                 'plateforme' => $plat,
                                 'campagne' => $campagne
                             ]);
-                            if (!$targetParam) {
-                                $targetParam = new PlateformeAdmissionParametre();
-                                $targetParam->setAnnee($targetAnnee);
-                                $targetParam->setPlateforme($plat);
-                                $targetParam->setCampagne($campagne);
-                            }
 
                             $srcParam = $sourceParams[$platId] ?? null;
                             if ($srcParam) {
+                                if (!$targetParam) {
+                                    $targetParam = new PlateformeAdmissionParametre();
+                                    $targetParam->setAnnee($targetAnnee);
+                                    $targetParam->setPlateforme($plat);
+                                    $targetParam->setCampagne($campagne);
+                                    $targetParam->setActive(false);
+                                }
+
                                 if ($targetParam->isActive() !== $srcParam->isActive()
                                     || $targetParam->getCapaciteGlobale() !== $srcParam->getCapaciteGlobale()
                                     || $targetParam->getCapaciteFi() !== $srcParam->getCapaciteFi()
@@ -424,7 +426,7 @@ final class OffreConfigurerController extends BaseController
                                     || $targetParam->getCapaciteSpecifique() !== $srcParam->getCapaciteSpecifique()
                                     || $targetParam->getRemarques() !== $srcParam->getRemarques()
                                 ) {
-                                    $targetParam->setActive($srcParam->isActive());
+                                    $targetParam->setActive((bool)$srcParam->isActive());
                                     $targetParam->setCapaciteGlobale($srcParam->getCapaciteGlobale());
                                     $targetParam->setCapaciteFi($srcParam->getCapaciteFi());
                                     $targetParam->setCapaciteAlternance($srcParam->getCapaciteAlternance());
@@ -432,18 +434,21 @@ final class OffreConfigurerController extends BaseController
                                     $targetParam->setRemarques($srcParam->getRemarques());
                                     $changed = true;
                                 }
+                                $em->persist($targetParam);
                             } else {
-                                if ($targetParam->isActive()) {
-                                    $targetParam->setActive(false);
-                                    $targetParam->setCapaciteGlobale(null);
-                                    $targetParam->setCapaciteFi(null);
-                                    $targetParam->setCapaciteAlternance(0);
-                                    $targetParam->setCapaciteSpecifique(0);
-                                    $targetParam->setRemarques(null);
-                                    $changed = true;
+                                if ($targetParam !== null) {
+                                    if ($targetParam->isActive()) {
+                                        $targetParam->setActive(false);
+                                        $targetParam->setCapaciteGlobale(null);
+                                        $targetParam->setCapaciteFi(null);
+                                        $targetParam->setCapaciteAlternance(0);
+                                        $targetParam->setCapaciteSpecifique(0);
+                                        $targetParam->setRemarques(null);
+                                        $changed = true;
+                                    }
+                                    $em->persist($targetParam);
                                 }
                             }
-                            $em->persist($targetParam);
                         }
                     }
                 }

@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    {{ include('config/type_diplome/_form.html.twig') }}
+{% endblock %}
+
+{% set header_title %}
+    Modifier le type de diplôme : {{ type_diplome.libelle }}
+{% endset %}
+
+{% block bouton_header %}
+    <div class="flex items-center gap-2">
+        <twig:Button
+                href="{{ path('app_type_diplome_show', { id: type_diplome.id }) }}"
+                variant="primary"
+                :outline="false"
+                :soft="false"
+                icon="icon:eye"
+                label="Voir le détail"
+                tooltip="Voir le détail du type de diplôme"
+        />
+        <twig:Button
+                href="{{ path('app_type_diplome_index') }}"
+                variant="secondary"
+                :outline="true"
+                :soft="false"
+                icon="icon:arrow-left"
+                label="Retour à la liste"
+                tooltip="Retour à la liste des types de diplômes"
+        />
+    </div>
+{% endblock %}

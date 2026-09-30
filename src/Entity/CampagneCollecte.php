@@ -100,8 +100,8 @@ class CampagneCollecte
     /**
      * @var Collection<int, TimelineDate>
      */
-    #[ORM\OneToMany(mappedBy: 'campagneCollecte', targetEntity: TimelineDate::class, cascade: ['persist', 'remove'])]
-    #[ORM\OrderBy(['date' => 'ASC'])]
+    #[ORM\OneToMany(mappedBy: 'campagneCollecte', targetEntity: TimelineDate::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['ordre' => 'ASC', 'date' => 'ASC'])]
     private Collection $timelineDates;
 
     #[ORM\Column(nullable: true)]

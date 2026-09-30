@@ -108,8 +108,11 @@ export default class extends Controller {
 
     // 2. If it's a parcours status select (parcours_{id}_reconduction)
     if (name && name.startsWith('parcours_') && name.endsWith('_reconduction')) {
-      if (value === 'NON_OUVERTURE') {
-        const confirmClose = confirm("Êtes-vous sûr de vouloir fermer ce parcours ? Cela fermera toutes ses années et réinitialisera leurs capacités à 0.")
+      if (value === 'NON_OUVERTURE' || value === 'FERMETURE_DEFINITIVE') {
+        const message = value === 'FERMETURE_DEFINITIVE'
+          ? "Êtes-vous sûr de vouloir fermer définitivement ce parcours ? Cela fermera toutes ses années et réinitialisera leurs capacités à 0."
+          : "Êtes-vous sûr de passer ce parcours en non ouvert ? Cela fermera toutes ses années et réinitialisera leurs capacités à 0."
+        const confirmClose = confirm(message)
         if (confirmClose) {
           const parentCard = event.target.closest('[data-parcours-id]')
           if (parentCard) {

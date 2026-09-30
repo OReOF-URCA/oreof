@@ -17,6 +17,7 @@ use App\Enums\CampagnePublicationTagEnum;
 use App\Enums\ConfigurationPublicationEnum;
 use App\Form\CampagneCollecteType;
 use App\Form\ConfigurePublicationType;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\CampagneCollecteRepository;
 use App\Utils\TurboStreamResponseFactory;
 use JsonException;
@@ -53,9 +54,10 @@ class CampagneCollecteController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_campagne_collecte_new', methods: ['GET', 'POST'])]
+    #[Route('/ajouter', name: 'app_campagne_collecte_new', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.campagne_collecte')]
+    #[Breadcrumb(label: 'Création')]
     public function new(
-        TurboStreamResponseFactory $turboStream,
         Request                    $request,
         CampagneCollecteRepository $campagneCollecteRepository
     ): Response
@@ -74,24 +76,26 @@ class CampagneCollecteController extends AbstractController
             }
             $campagneCollecteRepository->save($campagne_collecte, true);
 
-            return $turboStream->streamToastSuccess('Campagne de collecte créée avec succès', true);
+            $this->addFlash('toast', [
+                'type' => 'success',
+                'text' => 'Campagne de collecte créée avec succès',
+                'title' => 'Succès',
+            ]);
+
+            return $this->redirectToRoute('app_campagne_collecte_show', [
+                'id' => $campagne_collecte->getId()
+            ]);
         }
 
-        return $turboStream->streamOpenModalFromTemplates(
-            new TranslatableKey('campagne_collecte.new.title', [], 'modal'),
-            '',
-            '_ui/_modal_new_generic.html.twig',
-            [
-                'campagne_collecte' => $campagne_collecte,
-                'form' => $form->createView(),
-            ],
-            '_ui/_footer_submit_cancel.html.twig',
-            [],
-            $form->isSubmitted() ? 422 : 200
-        );
+        return $this->render('config/campagne_collecte/new.html.twig', [
+            'campagne_collecte' => $campagne_collecte,
+            'form' => $form->createView(),
+        ]);
     }
 
     #[Route('/{id}', name: 'app_campagne_collecte_show', methods: ['GET'])]
+    #[Breadcrumb(menuKey: 'administration.campagne_collecte')]
+    #[Breadcrumb(label: 'Détail')]
     public function show(CampagneCollecte $campagne_collecte): Response
     {
         return $this->render('config/campagne_collecte/show.html.twig', [
@@ -100,6 +104,8 @@ class CampagneCollecteController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_campagne_collecte_edit', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.campagne_collecte')]
+    #[Breadcrumb(label: 'Modification')]
     public function edit(
         Request                    $request,
         CampagneCollecte           $campagne_collecte,

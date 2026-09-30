@@ -9,7 +9,7 @@ correspondant à la tâche (table « Routage »). Ne jamais s'appuyer sur `docs/
 Symfony 8 / PHP 8.4+, Doctrine, Twig + Twig Components, Symfony UX (Turbo, Stimulus, Live, Autocomplete/Tom Select,
 Icons, Chart.js). Métier universitaire : offre de formation, maquettes, parcours, MCCC, workflows de validation, exports.
 
-- Front : Webpack Encore (pas Vite), entrées `assets/app.js` (charge aussi Bootstrap JS pour le legacy, Trix,
+- Front :  Vite (Symfony Reprise), entrées `assets/app.js` (charge aussi Bootstrap JS pour le legacy, Trix,
   DataTables) et `assets/print.js`. Tailwind v4 dans `assets/styles/app.css`. Migration Bootstrap → Tailwind
   **en cours** : l'UI est mixte.
 - Routes en attributs dans `src/Controller/`. Logique métier dans services/handlers, pas dans les contrôleurs.

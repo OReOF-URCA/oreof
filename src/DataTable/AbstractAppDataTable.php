@@ -103,6 +103,7 @@ abstract class AbstractAppDataTable extends AbstractDataTable
         Icon|string|null $icon = Icon::Copy
     ): Action {
         $action = Action::new('duplicate', $label, self::BTN_DUPLICATE_CLASS)
+            ->askConfirmation('Êtes-vous sûr de vouloir dupliquer cet élément ?')
             ->linkToRoute($routeName, $routeParameters)
             ->htmlAttributes([
                 'data-turbo' => 'true',
