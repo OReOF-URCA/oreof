@@ -18,6 +18,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class OffreParcoursController extends BaseController
 {
+    use OffreAccessTrait;
+
     #[Route('/offre/parcours/{parcours}/modal-edit', name: 'offre_v2_parcours_modal_edit', methods: ['GET'])]
     public function modalEditParcours(
         RythmeFormationRepository $rythmeFormationRepository,
@@ -27,6 +29,7 @@ final class OffreParcoursController extends BaseController
     ): Response {
         $campagne = $this->getCampagneCollecte();
         $formation = $parcours->getFormation();
+        $this->denyAccessUnlessCanConfigurerOffre($formation);
 
         $dpeParcours = $em->getRepository(DpeParcours::class)->findOneBy([
             'parcours' => $parcours,
@@ -67,6 +70,8 @@ final class OffreParcoursController extends BaseController
         EntityManagerInterface $em,
         TurboStreamResponseFactory $turboStream,
     ): Response {
+        $this->denyAccessUnlessCanConfigurerOffre($parcours->getFormation());
+
         $csrfToken = (string)$request->request->get('_token');
         if (!$this->isCsrfTokenValid('parcours_edit_' . $parcours->getId(), $csrfToken)) {
             return $turboStream->streamToastError('Token CSRF invalide.');

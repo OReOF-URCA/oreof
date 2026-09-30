@@ -4,7 +4,9 @@
     <twig:Button variant="success" href="" icon="icon:add">
         Ajouter un parcours
     </twig:Button>
-    <twig:Button variant="primary" href="{{ path('app_offre_index') }}"
+    {# La liste globale (/offrev2) est réservée aux admins : les autres reviennent à la liste de leur composante #}
+    {% set composantePorteuse = formation.composantePorteuse %}
+    <twig:Button variant="primary" href="{{ is_granted('ROLE_ADMIN') or not composantePorteuse ? path('app_offre_index') : path('app_offre_composante_index', { composante: composantePorteuse.id }) }}"
                  icon="icon:arrow-left"
     >
         Retour à la liste des offres

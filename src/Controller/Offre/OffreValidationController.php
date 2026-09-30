@@ -74,6 +74,7 @@ final class OffreValidationController extends BaseController
 
         // 3. Récupérer toutes les formations de la composante et leurs parcours
         $allFormations = $formationRepository->findBy([
+            'dpe' => $campagne,
             'composantePorteuse' => $composante,
         ]);
 
