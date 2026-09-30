@@ -651,9 +651,17 @@ class Formation
         if (isset($struct['annees_tronc_commun']) && is_array($struct['annees_tronc_commun'])) {
             $res = array_map('intval', $struct['annees_tronc_commun']);
         }
-        foreach ($this->getAnneesOrdres() as $ordre) {
-            if (!in_array($ordre, $res, true) && $this->isAnneeTroncCommun($ordre)) {
-                $res[] = $ordre;
+        foreach ($struct as $k => $v) {
+            if (is_string($k) && str_starts_with($k, 'annee_') && !empty($v)) {
+                $anneeNum = (int)substr($k, 6);
+                if ($anneeNum > 0 && !in_array($anneeNum, $res, true)) {
+                    $res[] = $anneeNum;
+                }
+            } elseif (is_numeric($k) && $v === 'tronc_commun') {
+                $anneeNum = (int)ceil((int)$k / 2);
+                if ($anneeNum > 0 && !in_array($anneeNum, $res, true)) {
+                    $res[] = $anneeNum;
+                }
             }
         }
         sort($res);
