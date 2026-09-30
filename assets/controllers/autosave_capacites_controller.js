@@ -98,6 +98,14 @@ export default class extends Controller {
   onInput(event) {
     this.syncTroncCommun(event.target)
 
+    if (event.target.name && event.target.name.startsWith('annee_') && event.target.name.endsWith('_capaciteAccueil')) {
+      const anneeId = event.target.name.split('_')[1]
+      const capValEl = this.element.querySelector(`#annee_${anneeId}_capacite_val`)
+      if (capValEl) {
+        capValEl.textContent = event.target.value || '0'
+      }
+    }
+
     // Only debounce text and number fields
     if (event.target.type === 'number' || event.target.type === 'text') {
       this.setStatus('typing', 'Modifications en cours...')

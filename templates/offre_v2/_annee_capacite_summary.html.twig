@@ -1,0 +1,40 @@
+{% set forma = formation|default(parcours.formation) %}
+{% set isCapaciteNulle = annee.isOuvert and (annee.capaciteAccueil is null or annee.capaciteAccueil <= 0) %}
+{% set hasActiveReqPlatWithoutCap = false %}
+{% for plat in plateformes|filter(p => annee.ordre in p.annees) %}
+    {% set isReq = annee.ordre in (plat.anneesCapaciteRequise ?? []) %}
+    {% set pParam = annee.admissionPlateformeParametres|filter(param => param.campagne == campagne and param.plateforme and param.plateforme.id == plat.id)|first %}
+    {% if isReq and pParam and pParam.active %}
+        {% set hasCap = (pParam.capaciteGlobale > 0 or pParam.capaciteFi > 0 or pParam.capaciteAlternance > 0 or pParam.capaciteSpecifique > 0) %}
+        {% if not hasCap %}
+            {% set hasActiveReqPlatWithoutCap = true %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+{% set isAnneeWarning = annee.isOuvert and (isCapaciteNulle or hasActiveReqPlatWithoutCap) %}
+{% set anneeComparaison = (comparaison[parcours.id] is defined and comparaison[parcours.id][annee.ordre] is defined) ? comparaison[parcours.id][annee.ordre] : null %}
+
+<div id="annee_{{ annee.id }}_capacite_summary" class="inline-flex items-center gap-2 text-xs text-secondary-600 dark:text-secondary-300 flex-wrap">
+    {% if annee.isOuvert %}
+        <span class="inline-flex items-center gap-1 font-semibold px-2.5 py-1 rounded-lg {{ isAnneeWarning ? 'border border-warning-300 bg-warning-50 text-warning-900 dark:bg-warning-900/30 dark:border-warning-700 dark:text-warning-200' : 'bg-secondary-100 dark:bg-secondary-800 text-secondary-800 dark:text-secondary-200' }}">
+            <twig:UX:Icon name="icon:users" class="h-3.5 w-3.5 {{ isAnneeWarning ? 'text-warning-600 dark:text-warning-400' : 'text-secondary-500' }}" />
+            Capacité : <strong id="annee_{{ annee.id }}_capacite_val" class="{{ isAnneeWarning ? 'text-warning-900 dark:text-warning-100' : 'text-text' }}">{{ annee.capaciteAccueil|default(0) }}</strong> pl.
+            {% if anneeComparaison and anneeComparaison.anneePrecedente %}
+                {% set diff = annee.capaciteAccueil - anneeComparaison.anneePrecedente.capaciteAccueil %}
+                {% if diff != 0 %}
+                    <span class="ml-0.5 font-bold {% if diff > 0 %}text-success-600 dark:text-success-400{% else %}text-danger-600 dark:text-danger-400{% endif %}">
+                        ({{ diff > 0 ? '+' : '' }}{{ diff }})
+                    </span>
+                {% endif %}
+            {% endif %}
+        </span>
+        {% if isAnneeWarning %}
+            <span class="inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-md bg-warning-100 text-warning-800 border border-warning-300 text-[11px] dark:bg-warning-900/40 dark:text-warning-300 dark:border-warning-700 shadow-xs" title="Capacité globale nulle ou plateforme obligatoire incomplète">
+                <twig:UX:Icon name="icon:warning" class="h-3.5 w-3.5 text-warning-600 dark:text-warning-400" />
+                <span>À compléter</span>
+            </span>
+        {% endif %}
+    {% else %}
+        <span class="italic text-secondary-500">Année fermée (0 place)</span>
+    {% endif %}
+</div>
