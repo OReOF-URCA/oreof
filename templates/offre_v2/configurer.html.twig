@@ -19,7 +19,8 @@
             Ajouter un parcours
         </twig:Button>
     {% endif %}
-    <twig:Button variant="primary" href="{{ path('app_offre_index') }}"
+    {% set composantePorteuse = formation.composantePorteuse %}
+    <twig:Button variant="primary" href="{{ is_granted('ROLE_ADMIN') or not composantePorteuse ? path('app_offre_index') : path('app_offre_composante_index', { composante: composantePorteuse.id }) }}"
                  icon="icon:arrow-left"
     >
         Retour à la liste des offres

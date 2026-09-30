@@ -24,6 +24,8 @@ use Symfony\Component\Workflow\WorkflowInterface;
 
 final class OffreConfigurerController extends BaseController
 {
+    use OffreAccessTrait;
+
     #[Route('/offre/{slug}/configurer', name: 'offre_v2_configurer')]
     public function configurer(
         #[MapEntity(mapping: ['slug' => 'slug'])]
@@ -34,6 +36,8 @@ final class OffreConfigurerController extends BaseController
         WorkflowInterface          $dpeFormationWorkflow,
     ): Response
     {
+        $this->denyAccessUnlessCanConfigurerOffre($formation);
+
         $campagne = $this->getCampagneCollecte();
 
         $dpeFormation = $em->getRepository(DpeFormation::class)->findOneBy([
@@ -109,6 +113,8 @@ final class OffreConfigurerController extends BaseController
         ParcoursComparaisonService             $comparaisonService,
         OffreValidationService                 $offreValidationService,
     ): Response {
+        $this->denyAccessUnlessCanConfigurerOffre($formation);
+
         $csrfToken = (string)$request->request->get('_token');
         if (!$this->isCsrfTokenValid('offre_v2_configurer_' . $formation->getId(), $csrfToken)) {
             return new JsonResponse(['success' => false, 'message' => 'Token CSRF invalide.'], Response::HTTP_BAD_REQUEST);

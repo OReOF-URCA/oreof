@@ -74,6 +74,7 @@ final class OffreValidationController extends BaseController
 
         // 3. Récupérer toutes les formations de la composante et leurs parcours
         $allFormations = $formationRepository->findBy([
+            'dpe' => $campagne,
             'composantePorteuse' => $composante,
         ]);
 
@@ -152,6 +153,14 @@ final class OffreValidationController extends BaseController
 
         // 4. Traitement POST
         if ($request->isMethod('POST')) {
+            $errors = $this->collectValidationErrors($composante, $request, $meta, $isRefuse);
+            if ($errors !== []) {
+                return $turboStream->stream('offre_v2/turbo/validation_errors.stream.html.twig', [
+                    'title' => sprintf('Enregistrement impossible : %d point%s à corriger', count($errors), count($errors) > 1 ? 's' : ''),
+                    'errors' => $errors,
+                ]);
+            }
+
             $selectedFormationIds = array_map('intval', (array)$request->request->all('formations'));
             $selectedParcoursIds = array_map('intval', (array)$request->request->all('parcours'));
 
@@ -222,7 +231,7 @@ final class OffreValidationController extends BaseController
 
             foreach ($allFormations as $forma) {
                 $fId = $forma->getId();
-                if (!empty($selectedFormationIds) && !in_array($fId, $selectedFormationIds, true)) {
+                if (!in_array($fId, $selectedFormationIds, true)) {
                     continue;
                 }
 
@@ -323,5 +332,64 @@ final class OffreValidationController extends BaseController
             ],
             '_ui/_footer_submit_cancel.html.twig'
         );
+    }
+
+    /**
+     * Messages d'erreur de la fenêtre de validation, collectés avant tout upload / persist / apply.
+     *
+     * @param  array<string, mixed> $meta
+     * @return list<string>
+     */
+    private function collectValidationErrors(Composante $composante, Request $request, array $meta, bool $isRefuse): array
+    {
+        // Jeton CSRF : la session est peut-être expirée, on s'arrête là.
+        if (!$this->isCsrfTokenValid('offre_v2_valider_' . $composante->getId(), (string)$request->request->get('_token'))) {
+            return ['Session expirée : rechargez la page puis recommencez.'];
+        }
+
+        $errors = [];
+
+        if ($request->request->all('formations') === []) {
+            $errors[] = 'Cochez au moins une formation.';
+        }
+
+        $dateSaisie = trim((string)$request->request->get('date'));
+        if ($dateSaisie === '' || \DateTime::createFromFormat('Y-m-d', $dateSaisie) === false) {
+            $errors[] = 'Indiquez la date de validation.';
+        }
+
+        $laisserPasser = $request->request->getBoolean('laisserPasser');
+        // Un champ fichier laissé vide est soumis avec UPLOAD_ERR_NO_FILE : ce n'est pas un dépôt.
+        $aFichierPv = $request->files->has('file') && $request->files->get('file')?->isValid();
+        $aFichierNote = $request->files->has('fileNote') && $request->files->get('fileNote')?->isValid();
+
+        if ($isRefuse) {
+            if (trim((string)$request->request->get('commentaire')) === '') {
+                $errors[] = 'Indiquez le motif du renvoi.';
+            }
+
+            return $errors;
+        }
+
+        if (($meta['hasUpload'] ?? false) === true
+            && trim((string)$request->request->get('pv_id')) === ''
+            && !$aFichierPv
+            && !$laisserPasser
+        ) {
+            $errors[] = 'Déposez le procès-verbal (PDF), choisissez un PV déjà déposé, ou cochez le laissez-passer exceptionnel.';
+        }
+
+        if ($laisserPasser && trim((string)$request->request->get('laisserPasserJustif')) === '') {
+            $errors[] = 'Indiquez la justification du laissez-passer.';
+        }
+
+        if (($meta['hasUploadNote'] ?? false) === true
+            && trim((string)$request->request->get('note_id')) === ''
+            && !$aFichierNote
+        ) {
+            $errors[] = 'Déposez la note explicative (PDF) ou choisissez une note déjà déposée.';
+        }
+
+        return $errors;
     }
 }

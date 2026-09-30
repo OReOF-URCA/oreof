@@ -1,5 +1,5 @@
-{% set hasUpload = meta.hasUpload|default(true) %}
-{% set hasUploadNote = meta.hasUploadNote|default(true) %}
+{% set hasUpload = meta.hasUpload|default(false) %}
+{% set hasUploadNote = meta.hasUploadNote|default(false) %}
 
 <form id="modal_form"
       action="{{ path('offre_v2_composante_valider', { composante: composante.id, transition: transition }) }}"
@@ -7,6 +7,8 @@
       enctype="multipart/form-data"
       class="space-y-5"
 >
+    <input type="hidden" name="_token" value="{{ csrf_token('offre_v2_valider_' ~ composante.id) }}">
+
     <!-- Alerte informative -->
     <twig:alerte type="{{ isRefuse ? 'warning' : 'info' }}">
         <h4 class="font-bold text-sm">{{ meta.label|default(transition) }}</h4>
@@ -128,11 +130,15 @@
             <!-- Procès-Verbal (PV) -->
             <div class="space-y-2 rounded-xl border border-secondary-200 dark:border-secondary-700 bg-secondary-50/50 dark:bg-secondary-900/30 p-3.5 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-1">
+                    <div class="flex items-center justify-between gap-2 mb-1">
                         <label class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide flex items-center gap-1.5">
                             <span>📄</span>
                             <span>Procès-Verbal (PV)</span>
                         </label>
+                        <twig:Badge size="sm"
+                                    :variant="hasUpload ? 'danger' : 'secondary'"
+                                    :label="hasUpload ? 'Requis sauf laissez-passer' : 'Optionnel'"
+                        />
                     </div>
 
                     {% if existingPvs|length > 0 %}
@@ -164,10 +170,13 @@
             <!-- Date de validation -->
             <div class="space-y-2 rounded-xl border border-secondary-200 dark:border-secondary-700 bg-secondary-50/50 dark:bg-secondary-900/30 p-3.5 flex flex-col justify-between">
                 <div>
-                    <label for="date" class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide flex items-center gap-1.5 mb-1">
-                        <span>📅</span>
-                        <span>Date de validation</span>
-                    </label>
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                        <label for="date" class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide flex items-center gap-1.5">
+                            <span>📅</span>
+                            <span>Date de validation</span>
+                        </label>
+                        <twig:Badge size="sm" variant="danger" label="Requis" />
+                    </div>
                     <p class="text-[11px] text-secondary-500">
                         Date d'effet ou date de tenue du conseil / commission de décision.
                     </p>
@@ -181,6 +190,7 @@
                            name="date"
                            id="date"
                            value="{{ 'now'|date('Y-m-d') }}"
+                           required
                            class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs font-semibold text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500">
                 </div>
             </div>
@@ -198,9 +208,12 @@
                 <span>Demander / Activer un laissez-passer exceptionnel</span>
             </label>
             <div id="laisser_passer_justif_wrapper" style="display: none;" class="space-y-1 pt-1">
-                <label for="laisserPasserJustif" class="block text-[11px] font-medium text-warning-800 dark:text-warning-100">
-                    Justification du laissez-passer (PV différé, décision dérogatoire, etc.) :
-                </label>
+                <div class="flex flex-wrap items-center gap-2">
+                    <label for="laisserPasserJustif" class="block text-[11px] font-medium text-warning-800 dark:text-warning-100">
+                        Justification du laissez-passer (PV différé, décision dérogatoire, etc.) :
+                    </label>
+                    <twig:Badge size="sm" variant="danger" label="Requis" />
+                </div>
                 <input type="text"
                        name="laisserPasserJustif"
                        id="laisserPasserJustif"
@@ -217,7 +230,10 @@
                         <span>📝</span>
                         <span>Note explicative</span>
                     </label>
-                    <span class="text-[10px] font-bold text-danger-500 uppercase">Requis</span>
+                    <twig:Badge size="sm"
+                                :variant="hasUploadNote ? 'danger' : 'secondary'"
+                                :label="hasUploadNote ? 'Requis' : 'Optionnel'"
+                    />
                 </div>
                 <a href="{{ asset('modeles/note_explicative.docx') }}" target="_blank" class="text-[11px] font-semibold text-primary-600 hover:underline dark:text-primary-400">
                     Modèle .docx
@@ -251,22 +267,32 @@
     {% else %}
         <!-- Si refus : Date de décision -->
         <div class="border-t border-secondary-200 dark:border-secondary-700 pt-4">
-            <label for="date" class="block text-xs font-bold text-secondary-700 dark:text-secondary-100 uppercase tracking-wide mb-1">
-                Date de décision :
-            </label>
+            <div class="mb-1 flex flex-wrap items-center gap-2">
+                <label for="date" class="block text-xs font-bold text-secondary-700 dark:text-secondary-100 uppercase tracking-wide">
+                    Date de décision :
+                </label>
+                <twig:Badge size="sm" variant="danger" label="Requis" />
+            </div>
             <input type="date"
                    name="date"
                    id="date"
                    value="{{ 'now'|date('Y-m-d') }}"
+                   required
                    class="w-full max-w-xs rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs font-semibold text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500">
         </div>
     {% endif %}
 
     <!-- Ligne 4 : Commentaire libre -->
     <div class="border-t border-secondary-200 dark:border-secondary-700 pt-4">
-        <label for="commentaire" class="block text-xs font-bold text-secondary-700 dark:text-secondary-100 uppercase tracking-wide mb-1">
-            {{ isRefuse ? 'Motif du retour / modifications demandées :' : 'Commentaire / Remarques (optionnel) :' }}
-        </label>
+        <div class="mb-1 flex flex-wrap items-center gap-2">
+            <label for="commentaire" class="block text-xs font-bold text-secondary-700 dark:text-secondary-100 uppercase tracking-wide">
+                {{ isRefuse ? 'Motif du retour / modifications demandées :' : 'Commentaire / Remarques (optionnel) :' }}
+            </label>
+            <twig:Badge size="sm"
+                        :variant="isRefuse ? 'danger' : 'secondary'"
+                        :label="isRefuse ? 'Requis' : 'Optionnel'"
+            />
+        </div>
         <textarea name="commentaire"
                   id="commentaire"
                   rows="2"
@@ -274,6 +300,9 @@
                   placeholder="{{ isRefuse ? 'Précisez les corrections attendues...' : 'Ajouter une observation...' }}"
                   class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500"></textarea>
     </div>
+
+    {# Collé en bas de la zone défilante : reste visible au-dessus du bouton Enregistrer #}
+    <div id="offre_validation_errors" aria-live="assertive" class="sticky bottom-0 z-10"></div>
 </form>
 
 <script>

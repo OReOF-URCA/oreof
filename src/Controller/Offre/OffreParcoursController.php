@@ -22,6 +22,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class OffreParcoursController extends BaseController
 {
+    use OffreAccessTrait;
+  
     #[Route('/offre/{slug}/parcours/modal-add', name: 'offre_v2_parcours_modal_add', methods: ['GET'])]
     public function modalAddParcours(
         #[MapEntity(mapping: ['slug' => 'slug'])]
@@ -157,6 +159,7 @@ final class OffreParcoursController extends BaseController
     ): Response {
         $campagne = $this->getCampagneCollecte();
         $formation = $parcours->getFormation();
+        $this->denyAccessUnlessCanConfigurerOffre($formation);
 
         $dpeParcours = $em->getRepository(DpeParcours::class)->findOneBy([
             'parcours' => $parcours,
@@ -191,6 +194,8 @@ final class OffreParcoursController extends BaseController
         EntityManagerInterface $em,
         TurboStreamResponseFactory $turboStream,
     ): Response {
+        $this->denyAccessUnlessCanConfigurerOffre($parcours->getFormation());
+
         $csrfToken = (string)$request->request->get('_token');
         if (!$this->isCsrfTokenValid('parcours_edit_' . $parcours->getId(), $csrfToken)) {
             return $turboStream->streamToastError('Token CSRF invalide.');

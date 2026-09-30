@@ -1,4 +1,5 @@
-{% set can_edit = is_granted('ROLE_ADMIN') or (campagne and campagne.isPeriodActive()) %}
+{# can_edit vient de la page (configurer.html.twig) ; repli pour les flux Turbo qui ne le transmettent pas #}
+{% set can_edit = can_edit is defined ? can_edit : (is_granted('ROLE_SES') or (campagne and campagne.isPeriodActive())) %}
 {% set forma = formation|default(parcours.formation) %}
 {% set isTroncCommun = forma ? forma.isAnneeTroncCommun(annee.ordre) : false %}
 <div id="annee_{{ annee.id }}_container" data-annee-ordre="{{ annee.ordre }}" data-is-tronc-commun="{{ isTroncCommun ? '1' : '0' }}">
