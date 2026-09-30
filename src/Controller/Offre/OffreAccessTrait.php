@@ -16,7 +16,7 @@ trait OffreAccessTrait
             throw $this->createAccessDeniedException();
         }
 
-        if ($this->isGranted('ROLE_SES')) {
+        if ($this->isGranted('ROLE_ADMIN')) {
             return;
         }
 
