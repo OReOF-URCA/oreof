@@ -14,6 +14,15 @@
 
 {% block bouton_header %}
     <twig:Button
+            label="Import / export"
+            variant="secondary"
+            icon="icon:sort"
+            size="sm"
+            href="{{ path('app_help_transfer') }}"
+            tooltip="Exporter ou importer les aides, la FAQ et les images entre instances"
+            class="mx-2"
+    />
+    <twig:Button
             label="Galerie d'images"
             variant="secondary"
             icon="mdi:image-multiple-outline"
@@ -50,6 +59,7 @@
         </div>
     {% else %}
         <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-900 overflow-hidden">
+            <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
                 <tr class="border-b border-secondary-200 bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-800">
@@ -113,12 +123,12 @@
                                 />
                                 <form method="post"
                                       action="{{ path('app_faq_delete', {'id': faq.id}) }}"
-                                      style="display: inline;"
+                                      class="inline"
                                       onsubmit="return confirm('Vraiment supprimer cette question FAQ ?');">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ faq.id) }}">
                                     <twig:Button
                                             type="submit"
-                                            icon="ph:trash-light"
+                                            icon="icon:delete"
                                             variant="danger"
                                             size="md"
                                             tooltip="Supprimer cette question"
@@ -130,6 +140,7 @@
                 {% endfor %}
                 </tbody>
             </table>
+            </div>
         </div>
     {% endif %}
 
@@ -167,6 +178,7 @@
     <script>
         function toggleFaqImagesModal() {
             document.getElementById('faqImagesModal').classList.remove('hidden');
+            loadImages();
         }
 
         function closeFaqImagesModal() {

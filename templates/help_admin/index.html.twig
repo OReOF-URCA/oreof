@@ -14,6 +14,15 @@
 
 {% block bouton_header %}
     <twig:Button
+            label="Import / export"
+            variant="secondary"
+            icon="icon:sort"
+            size="sm"
+            href="{{ path('app_help_transfer') }}"
+            tooltip="Exporter ou importer les aides, la FAQ et les images entre instances"
+            class="mx-2"
+    />
+    <twig:Button
             label="Galerie d'images"
             variant="secondary"
             icon="mdi:image-multiple-outline"
@@ -91,13 +100,15 @@
                                             tooltip="Voir la page"
                                     />
                                 {% else %}
-                                            <button type="button"
-                                            class="inline-flex items-center justify-center h-9 w-9 rounded-md border border-secondary-300 bg-secondary-200 text-secondary-400 cursor-not-allowed dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-500 disabled:opacity-50"
-                                            title="Route avec paramètres obligatoires : aperçu direct indisponible"
-                                            disabled
-                                            aria-label="Aperçu indisponible">
-                                        {{ ux_icon('wordpress:external', {class: 'h-4 w-4'}) }}
-                                    </button>
+                                    <span title="Route avec paramètres obligatoires : aperçu direct indisponible">
+                                        <twig:Button
+                                                icon="wordpress:external"
+                                                variant="secondary"
+                                                size="md"
+                                                :disabled="true"
+                                                aria-label="Aperçu indisponible"
+                                        />
+                                    </span>
                                 {% endif %}
 
                                 <twig:Button
@@ -124,7 +135,7 @@
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ help.id) }}">
                                     <twig:Button
                                             type="submit"
-                                            icon="ph:trash-light"
+                                            icon="icon:delete"
                                             variant="danger"
                                             size="md"
                                             tooltip="Supprimer cette aide"

@@ -173,6 +173,53 @@ class SecureUploadService
         return rtrim($config['target_dir'], '/') . '/' . $safeFilename;
     }
 
+    /**
+     * Dépose dans un contexte un fichier déjà nommé (ex. import d'une archive exportée depuis une autre instance),
+     * avec les mêmes contrôles taille/extension/MIME que upload(). Le nom doit respecter le format des fichiers stockés.
+     */
+    public function importStoredFile(string $sourcePath, string $storedFilename, string $context): string
+    {
+        $targetPath = $this->resolveStoredFilePath($context, $storedFilename);
+        $config = $this->uploadContexts[$context];
+
+        if (!is_file($sourcePath)) {
+            throw FileUploadException::invalidFile();
+        }
+
+        $size = (int)filesize($sourcePath);
+        if ($size <= 0) {
+            throw FileUploadException::emptyFile();
+        }
+
+        $maxSize = (int)($config['max_size'] ?? 10485760);
+        if ($size > $maxSize) {
+            throw FileUploadException::fileTooLarge($size, $maxSize);
+        }
+
+        $extension = strtolower(pathinfo($storedFilename, PATHINFO_EXTENSION));
+        if (!in_array($extension, $config['allowed_extensions'], true)) {
+            throw FileUploadException::extensionNotAllowed($extension === '' ? '(vide)' : $extension);
+        }
+
+        $mimeType = (string)(new \finfo(FILEINFO_MIME_TYPE))->file($sourcePath);
+        if ($mimeType === '') {
+            throw FileUploadException::missingMimeType();
+        }
+
+        if (!in_array($mimeType, $config['allowed_mime_types'], true)) {
+            throw FileUploadException::mimeTypeNotAllowed($mimeType);
+        }
+
+        if (!in_array($mimeType, $this->mimesForExtension($extension), true)) {
+            throw FileUploadException::extensionMimeMismatch($extension, $mimeType);
+        }
+
+        $this->filesystem->mkdir(dirname($targetPath), 0750);
+        $this->filesystem->copy($sourcePath, $targetPath, true);
+
+        return $targetPath;
+    }
+
     public function getDownloadFilename(?string $originalName, string $storedFilename): string
     {
         if ($originalName !== null && trim($originalName) !== '') {
