@@ -40,7 +40,6 @@ final class OffreParcoursController extends BaseController
                 'formation' => $formation,
                 'parcoursOrigine' => null,
                 'dpeParcours' => null,
-                'isModifieN1' => false,
                 'isAdd' => true,
                 'rythmesFormation' => $rythmeFormationRepository->findBy([], ['libelle' => 'ASC']),
                 'typesParcours' => TypeParcoursEnum::cases(),
@@ -126,13 +125,7 @@ final class OffreParcoursController extends BaseController
         $dpeParcours->setCampagneCollecte($campagne);
         $dpeParcours->setFormation($formation);
         $dpeParcours->setVersion('0.1');
-
-        $isModifieN1 = $request->request->getBoolean('isModifieN1');
-        if ($isModifieN1) {
-            $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_INTITULE);
-        } else {
-            $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::CREATION);
-        }
+        $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::CREATION);
         $em->persist($dpeParcours);
         $parcours->addDpeParcour($dpeParcours);
 
@@ -172,11 +165,6 @@ final class OffreParcoursController extends BaseController
 
         $parcoursOrigine = $parcours->getParcoursOrigine() ?? $parcours->getParcoursOrigineCopie();
 
-        $isModifieN1 = ($dpeParcours?->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_INTITULE);
-        if (!$isModifieN1 && $parcoursOrigine && $parcoursOrigine->getLibelle() !== $parcours->getLibelle()) {
-            $isModifieN1 = true;
-        }
-
         return $turboStream->streamOpenModalFromTemplates(
             'Modifier le parcours',
             $parcours->getLibelle(),
@@ -186,7 +174,6 @@ final class OffreParcoursController extends BaseController
                 'formation' => $formation,
                 'parcoursOrigine' => $parcoursOrigine,
                 'dpeParcours' => $dpeParcours,
-                'isModifieN1' => $isModifieN1,
                 'rythmesFormation' => $rythmeFormationRepository->findBy([], ['libelle' => 'ASC']),
                 'typesParcours' => TypeParcoursEnum::cases(),
             ],
@@ -267,11 +254,11 @@ final class OffreParcoursController extends BaseController
             $em->persist($dpeParcours);
         }
 
-        $isModifieN1 = $request->request->getBoolean('isModifieN1');
-        if ($isModifieN1) {
-            $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_INTITULE);
-        } else {
-            if ($dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_INTITULE) {
+        $parcoursOrigine = $parcours->getParcoursOrigine() ?? $parcours->getParcoursOrigineCopie();
+        if ($dpeParcours->getEtatReconduction() !== TypeModificationDpeEnum::CREATION) {
+            if ($parcoursOrigine && $parcoursOrigine->getLibelle() !== $parcours->getLibelle()) {
+                $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_INTITULE);
+            } elseif ($dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_INTITULE) {
                 $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
             }
         }

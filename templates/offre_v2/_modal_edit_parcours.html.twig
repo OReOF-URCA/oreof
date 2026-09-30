@@ -21,14 +21,6 @@
                    required
                    class="w-full rounded-xl border border-secondary-300 bg-white px-3.5 py-2.5 text-sm font-medium text-secondary-900 shadow-sm transition placeholder:text-secondary-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-secondary-600 dark:bg-secondary-900 dark:text-secondary-100"
                    placeholder="Ex: Parcours Métiers du Livre..."
-                   data-original-libelle="{{ parcoursOrigine ? parcoursOrigine.libelle : parcours.libelle }}"
-                   oninput="
-                       const orig = this.getAttribute('data-original-libelle');
-                       const chk = document.getElementById('parcours_is_modifie_n1');
-                       if (orig && this.value.trim() !== orig.trim() && chk) {
-                           chk.checked = true;
-                       }
-                   "
             >
             {% if parcoursOrigine %}
                 <div class="mt-2 flex items-center gap-1.5 text-xs text-secondary-500 dark:text-secondary-400">

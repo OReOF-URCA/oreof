@@ -2739,8 +2739,8 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     max_page_length?: int|Param, // Upper bound applied to the DataTables "length" parameter on Ajax requests. "length=-1" (show all) is honored only when the table declares -1 in lengthMenu(); otherwise it is capped to this value. // Default: 1000
  *     options?: array{
  *         language?: scalar|Param|null, // Default: "en-GB"
- *         stateSave?: bool|Param, // Default: false
- *         showHeaderResetButton?: bool|Param, // Default: false
+ *         stateSave?: bool|Param,
+ *         showHeaderResetButton?: bool|Param,
  *         layout?: mixed, // Default: {"topStart":"pageLength","topEnd":"search","bottomStart":"info","bottomEnd":"paging"}
  *         lengthMenu?: list<scalar|Param|null>,
  *         pageLength?: int|Param,
