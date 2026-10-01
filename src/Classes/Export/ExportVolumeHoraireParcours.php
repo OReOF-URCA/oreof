@@ -99,9 +99,11 @@ class ExportVolumeHoraireParcours implements ExportInterface
                 ? 'Parcours non ouvert'
                 : '';
             $heuresCourantes = '';
+            $heuresCourantesMaj = '';
             $heuresPrecedentes = $previousVolume?->getHeuresTotal();
             $heuresPrecedentesMaj = $previousVolume?->getHeuresTotalMajore();
             $ecart = '';
+            $ecartMaj = '';
 
             try {
                 $currentVolume = $this->volumeHoraireParcoursCalculator->calculate($parcours, $campagneCollecte);
@@ -109,8 +111,10 @@ class ExportVolumeHoraireParcours implements ExportInterface
                 $heuresCourantesMaj = $this->formatHeures($currentVolume->getHeuresTotalMajore());
 
                 if ($heuresPrecedentes !== null) {
-                    $ecart = $this->formatHeures($heuresCourantes - $heuresPrecedentes);
-                    $ecartMaj = $this->formatHeures($heuresCourantesMaj - $heuresPrecedentesMaj);
+                    $ecart = $this->formatHeures($currentVolume->getHeuresTotal() - $heuresPrecedentes);
+                }
+                if ($heuresPrecedentesMaj !== null) {
+                    $ecartMaj = $this->formatHeures($currentVolume->getHeuresTotalMajore() - $heuresPrecedentesMaj);
                 }
             } catch (\Throwable $e) {
                 $commentaire = trim($commentaire . ' ' . 'Erreur calcul volume : ' . $e->getMessage());
