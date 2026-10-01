@@ -113,7 +113,7 @@
 {# --- SELECT --- #}
 {% block choice_widget_collapsed %}
     {% set isDisabled = (attr.disabled is defined and attr.disabled) or (disabled is defined and disabled) or (form.vars.disabled is defined and form.vars.disabled) %}
-    {% set isAutocomplete = (attr['data-controller'] is defined and 'autocomplete' in attr['data-controller']) or (form.vars.attr['data-controller'] is defined and 'autocomplete' in form.vars.attr['data-controller']) %}
+    {% set isAutocomplete = (attr['data-controller'] is defined and ('autocomplete' in attr['data-controller'] or 'icon-select' in attr['data-controller'])) or (form.vars.attr['data-controller'] is defined and ('autocomplete' in form.vars.attr['data-controller'] or 'icon-select' in form.vars.attr['data-controller'])) %}
     
     {% if isAutocomplete %}
         {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full' }) %}

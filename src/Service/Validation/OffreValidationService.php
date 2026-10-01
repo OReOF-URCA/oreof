@@ -62,6 +62,7 @@ final class OffreValidationService
     /**
      * @param array<int, list<PlateformeAdmissionParametre>>|null $paramsByAnnee
      * @param array<int, \App\Entity\Annee>|null $annees
+     * @param array<int, list<\App\Entity\TypeDiplomePlateformeAdmission>>|null $tpaByTypeDiplome
      * @return array<int, string>
      */
     public function getAnomaliesParcours(
@@ -69,7 +70,8 @@ final class OffreValidationService
         CampagneCollecte $campagne,
         ?DpeParcours $dpeParcours = null,
         ?array $paramsByAnnee = null,
-        ?array $annees = null
+        ?array $annees = null,
+        ?array $tpaByTypeDiplome = null
     ): array {
         $anomalies = [];
         
@@ -107,7 +109,12 @@ final class OffreValidationService
                     $typeDiplome = $formation?->getTypeDiplome();
                     $tpaMap = [];
                     if ($typeDiplome !== null) {
-                        foreach ($typeDiplome->getTypeDiplomePlateformeAdmissions() as $tpa) {
+                        $typeDiplId = $typeDiplome->getId();
+                        $tpaList = ($tpaByTypeDiplome !== null && $typeDiplId !== null)
+                            ? ($tpaByTypeDiplome[$typeDiplId] ?? [])
+                            : $typeDiplome->getTypeDiplomePlateformeAdmissions();
+
+                        foreach ($tpaList as $tpa) {
                             if ($tpa->getCampagne() === $campagne && $tpa->getPlateforme() !== null) {
                                 $tpaMap[$tpa->getPlateforme()->getId()] = $tpa;
                             }

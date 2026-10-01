@@ -25,7 +25,7 @@ readonly class TypeDiplomePlateformeService
      *
      * @param TypeDiplome $typeDiplome
      * @param array $plateformesData Liste des données [['plateforme' => PlateformeAdmission, 'annees' => [1, 2, 3]], ...]
-     * @param CampagneCollecte|null $campagne Campagne à utiliser (null = campagne par défaut)
+     * @param CampagneCollecte $campagne Campagne à utiliser
      */
     public function syncPlateformes(TypeDiplome $typeDiplome, array $plateformesData, CampagneCollecte $campagne): void
     {
@@ -69,12 +69,14 @@ readonly class TypeDiplomePlateformeService
             $plateforme = $data['plateforme'];
             $annees = $data['annees'] ?? [];
             $anneesCapaciteRequise = $data['anneesCapaciteRequise'] ?? [];
+            $anneesCapaciteSpecifique = $data['anneesCapaciteSpecifique'] ?? [];
             $plateformeId = $plateforme->getId();
 
             if (isset($existingMap[$plateformeId])) {
                 // Mettre à jour l'association existante
                 $existingMap[$plateformeId]->setAnnees($annees);
                 $existingMap[$plateformeId]->setAnneesCapaciteRequise($anneesCapaciteRequise);
+                $existingMap[$plateformeId]->setAnneesCapaciteSpecifique($anneesCapaciteSpecifique);
             } else {
                 // Créer une nouvelle association
                 $association = new TypeDiplomePlateformeAdmission();
@@ -83,6 +85,7 @@ readonly class TypeDiplomePlateformeService
                 $association->setCampagne($campagne);
                 $association->setAnnees($annees);
                 $association->setAnneesCapaciteRequise($anneesCapaciteRequise);
+                $association->setAnneesCapaciteSpecifique($anneesCapaciteSpecifique);
                 $this->entityManager->persist($association);
             }
         }

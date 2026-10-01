@@ -139,16 +139,22 @@ class NatureUeEcController extends AbstractController
     }
 
 
-    #[Route('/{id}/duplicate', name: 'app_nature_ue_ec_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_nature_ue_ec_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         NatureUeEcRepository $natureUeEcRepository,
         NatureUeEc $natureUeEc
     ): Response {
-        $natureUeEcNew = clone $natureUeEc;
-        $natureUeEcNew->setLibelle($natureUeEc->getLibelle() . ' - Copie');
-        $natureUeEcRepository->save($natureUeEcNew, true);
-        return $turboStream->streamToastSuccess('Nature UE/EC dupliquée avec succès', true);
+        if ($this->isDuplicateTokenValid($natureUeEc, $this->getCsrfTokenFromRequest($request))) {
+            $natureUeEcNew = clone $natureUeEc;
+            $natureUeEcNew->setLibelle($natureUeEc->getLibelle() . ' - Copie');
+            $natureUeEcRepository->save($natureUeEcNew, true);
+
+            return $turboStream->streamToastSuccess('Nature UE/EC dupliquée avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

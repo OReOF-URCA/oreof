@@ -1,39 +1,49 @@
 {% form_theme form 'communs/form_theme_v2.html.twig' %}
-        {{ form_start(form) }}
 
-        {# Affichage des champs standards #}
-        {{ form_row(form.libelle) }}
-        {{ form_row(form.libelle_court) }}
-        {{ form_row(form.codeApogee) }}
-        {{ form_row(form.codifIntermediaire) }}
-        {{ form_row(form.modalites_admission) }}
-        {{ form_row(form.prerequis_obligatoires) }}
-        {{ form_row(form.presentationFormation) }}
-        {{ form_row(form.insertionProfessionnelle) }}
-        {% if form.logo is defined %}
-            {{ form_row(form.logo, { attr: { multiple: 'multiple' } }) }}
-        {% elseif type_diplome.id is not null and is_granted('ROLE_ADMIN') %}
-            <div class="card mb-4">
-                <div class="card-body"
-                        {{ stimulus_controller('type-diplome-logos', {
-                            logosUrl: path('app_type_diplome_logos', {id: type_diplome.id, editable: true}),
-                            deleteLogoUrl: path('app_type_diplome_delete_logo', {id: type_diplome.id}),
-                            uploadLogoUrl: path('app_type_diplome_upload_logo', {id: type_diplome.id}),
-                        }) }}>
-                    <label class="text-[12px] font-black text-secondary-500 group-focus-within:text-primary-500 transition-colors uppercase">Logos
-                        du type de diplôme</label>
-                    <p class="text-[11px] text-secondary-400 italic mt-1 pl-1 flex items-start gap-2">
-            <span class="flex-shrink-0 w-5 h-5 bg-secondary-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
-                <twig:UX:Icon name="icon:info"/>
-            </span>
-                        <span>Ajoutez un logo, validez, puis ajoutez le second si besoin (max 2).</span>
+{{ form_start(form) }}
+<div class="space-y-6">
+    {# 1. Informations générales #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+            <twig:UX:Icon name="icon:graduation" class="w-5 h-5 text-primary"/>
+            <span>Informations générales</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">{{ form_row(form.libelle) }}</div>
+            <div>{{ form_row(form.libelle_court) }}</div>
+            <div>{{ form_row(form.codeApogee) }}</div>
+            <div class="md:col-span-2">{{ form_row(form.classique) }}</div>
+            <div class="md:col-span-3">{{ form_row(form.passageCfvu) }}</div>
+            {% if form.codifIntermediaire is defined %}
+                <div class="hidden">{{ form_row(form.codifIntermediaire) }}</div>
+            {% endif %}
+        </div>
+
+        {# Logos #}
+        <div class="mt-4 pt-4 border-t border-secondary-200 dark:border-secondary-700">
+            {% if form.logo is defined %}
+                {{ form_row(form.logo) }}
+            {% elseif type_diplome.id is not null and is_granted('ROLE_ADMIN') %}
+                <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-4 dark:border-secondary-700 dark:bg-secondary-800/50"
+                     {{ stimulus_controller('type-diplome-logos', {
+                         logosUrl: path('app_type_diplome_logos', {id: type_diplome.id, editable: true}),
+                         deleteLogoUrl: path('app_type_diplome_delete_logo', {id: type_diplome.id}),
+                         uploadLogoUrl: path('app_type_diplome_upload_logo', {id: type_diplome.id}),
+                     }) }}>
+                    <label class="text-[12px] font-black text-secondary-500 uppercase tracking-wider block mb-1">
+                        Logos du type de diplôme
+                    </label>
+                    <p class="text-[11px] text-secondary-400 italic mb-3 flex items-center gap-1.5">
+                        <twig:UX:Icon name="icon:info" class="w-4 h-4 text-primary shrink-0"/>
+                        <span>Ajoutez un logo, validez, puis ajoutez le second si besoin (max 2 logos).</span>
                     </p>
                     {% include 'config/type_diplome/_logos.html.twig' with {typeDiplome: type_diplome, editable: true} %}
-                    <div class="mt-3">
+                    <div class="mt-3 flex flex-wrap items-center gap-3">
                         <input type="file"
                                name="logo[]"
                                accept="image/png, image/jpeg"
-                               class="form-control"
+                               class="text-xs text-secondary-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary hover:file:bg-primary-100 dark:file:bg-primary-950/50 dark:file:text-primary-300"
                                data-type-diplome-logos-target="fileInput">
                         <twig:Button
                                 type="button"
@@ -43,96 +53,211 @@
                                 icon="icon:add"
                                 label="Ajouter ce logo"
                                 dataAction="click->type-diplome-logos#uploadLogo"
-                                extraClass="mt-2"
                         />
-                        <div id="logo-upload-errors" class="mt-2"></div>
+                    </div>
+                    <div id="logo-upload-errors" class="mt-2"></div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# 2. Structure & Maquette #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+            <twig:UX:Icon name="icon:layers" class="w-5 h-5 text-primary"/>
+            <span>Structure & Maquette des enseignements</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>{{ form_row(form.semestreDebut) }}</div>
+            <div>{{ form_row(form.semestreFin) }}</div>
+            <div>{{ form_row(form.debutSemestreFlexible) }}</div>
+            <div>{{ form_row(form.nbUeMin) }}</div>
+            <div>{{ form_row(form.nbUeMax) }}</div>
+            <div>{{ form_row(form.nbEcParUe) }}</div>
+            <div class="md:col-span-3">{{ form_row(form.ModeleMcc) }}</div>
+        </div>
+    </div>
+
+    {# 3. ECTS & MCCC #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+            <twig:UX:Icon name="icon:award" class="w-5 h-5 text-primary"/>
+            <span>ECTS & Modalités de contrôle des connaissances (MCCC)</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>{{ form_row(form.hasEcts) }}</div>
+            <div>{{ form_row(form.nbEctsParSemestre) }}</div>
+            <div>{{ form_row(form.nbEctsMaxUe) }}</div>
+            <div>{{ form_row(form.ectsObligatoireSurEc) }}</div>
+            <div>{{ form_row(form.mcccObligatoireSurEc) }}</div>
+            <div>{{ form_row(form.controleAssiduite) }}</div>
+        </div>
+    </div>
+
+    {# 4. Spécificités de la formation #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+            <twig:UX:Icon name="icon:wrench" class="w-5 h-5 text-primary"/>
+            <span>Spécificités & Éléments constitutifs</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>{{ form_row(form.hasMemoire) }}</div>
+            <div>{{ form_row(form.hasStage) }}</div>
+            <div>{{ form_row(form.hasSituationPro) }}</div>
+            <div>{{ form_row(form.hasProjet) }}</div>
+        </div>
+    </div>
+
+    {# 5. Descriptifs & Textes de présentation #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+            <twig:UX:Icon name="icon:file-text" class="w-5 h-5 text-primary"/>
+            <span>Descriptifs & Textes de présentation</span>
+        </h3>
+
+        <div class="space-y-4">
+            <div>{{ form_row(form.presentationFormation) }}</div>
+            <div>{{ form_row(form.modalites_admission) }}</div>
+            <div>{{ form_row(form.prerequis_obligatoires) }}</div>
+            <div>{{ form_row(form.insertionProfessionnelle) }}</div>
+        </div>
+    </div>
+
+    {# 6. Plateformes d'admission #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="mb-4">
+            <h3 class="text-base font-bold text-text flex items-center gap-2">
+                <twig:UX:Icon name="icon:globe" class="w-5 h-5 text-primary"/>
+                <span>Plateformes d'admission</span>
+            </h3>
+            <p class="text-xs text-secondary-500 mt-1">
+                Configurez les plateformes d'admission (ex: Parcoursup, MonMaster) ainsi que les années d'études concernées.
+            </p>
+        </div>
+
+        {% set prototypeHtml %}
+            <div data-form-collection-target="field"
+                 class="rounded-xl border border-secondary-200 bg-secondary-50 p-5 dark:border-secondary-700 dark:bg-secondary-800/60 shadow-sm relative transition mb-4">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-secondary-200 dark:border-secondary-700">
+                    <span class="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                        <twig:UX:Icon name="icon:globe" class="w-4 h-4"/>
+                        <span>Plateforme d'admission</span>
+                    </span>
+
+                    <button type="button"
+                            data-action="click->form-collection#removeItem"
+                            class="inline-flex items-center gap-1 text-xs font-semibold text-danger-600 hover:text-danger-700 hover:underline dark:text-danger-400 dark:hover:text-danger-300 cursor-pointer">
+                        <twig:UX:Icon name="icon:delete" class="w-4 h-4"/>
+                        Supprimer
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                    <div>
+                        {% if form.plateformesAdmission.vars.prototype.plateforme is defined %}
+                            {{ form_row(form.plateformesAdmission.vars.prototype.plateforme) }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if form.plateformesAdmission.vars.prototype.annees is defined %}
+                            {{ form_row(form.plateformesAdmission.vars.prototype.annees) }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if form.plateformesAdmission.vars.prototype.anneesCapaciteRequise is defined %}
+                            {{ form_row(form.plateformesAdmission.vars.prototype.anneesCapaciteRequise) }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if form.plateformesAdmission.vars.prototype.anneesCapaciteSpecifique is defined %}
+                            {{ form_row(form.plateformesAdmission.vars.prototype.anneesCapaciteSpecifique) }}
+                        {% endif %}
                     </div>
                 </div>
             </div>
-        {% endif %}
-        {{ form_row(form.semestreDebut) }}
-        {{ form_row(form.semestreFin) }}
-        {{ form_row(form.nbUeMin) }}
-        {{ form_row(form.nbUeMax) }}
-        {{ form_row(form.nbEctsMaxUe) }}
-        {{ form_row(form.nbEcParUe) }}
-        {{ form_row(form.ModeleMcc) }}
-        {{ form_row(form.debutSemestreFlexible) }}
-        {{ form_row(form.hasMemoire) }}
-        {{ form_row(form.hasStage) }}
-        {{ form_row(form.hasSituationPro) }}
-        {{ form_row(form.hasProjet) }}
-        {{ form_row(form.ectsObligatoireSurEc) }}
-        {{ form_row(form.mcccObligatoireSurEc) }}
-        {{ form_row(form.controleAssiduite) }}
+        {% endset %}
 
-        {# Section Plateformes d'admission avec gestion dynamique #}
-<div class="mt-6 border-t pt-6">
-    <h3 class="mb-4 text-lg font-semibold text-secondary-900 dark:text-secondary-100">
-        Plateformes d'admission
-    </h3>
+        <div {{ stimulus_controller('form-collection', {
+            'prototype': prototypeHtml|json_encode,
+            'max-items': 0,
+            'sortable': false
+        }) }}>
+            <div data-form-collection-target="fields" class="space-y-4">
+                {% for plateformeForm in form.plateformesAdmission %}
+                    <div data-form-collection-target="field"
+                         class="rounded-xl border border-secondary-200 bg-secondary-50 p-5 dark:border-secondary-700 dark:bg-secondary-800/60 shadow-sm relative transition">
+                        <div class="flex items-center justify-between pb-3 mb-4 border-b border-secondary-200 dark:border-secondary-700">
+                            <span class="text-xs font-bold uppercase tracking-wider text-primary flex items-center gap-1.5">
+                                <twig:UX:Icon name="icon:globe" class="w-4 h-4"/>
+                                <span>Plateforme : {{ plateformeForm.vars.data.plateforme ? plateformeForm.vars.data.plateforme.libelle : 'Nouvelle plateforme' }}</span>
+                            </span>
 
-    {% set prototypeHtml %}
-        <div data-form-collection-target="field"
-             class="mb-4 rounded-lg border border-secondary-200 bg-secondary-50 p-4 dark:border-secondary-700 dark:bg-secondary-800">
-            {{ form_widget(form.plateformesAdmission.vars.prototype) }}
+                            <button type="button"
+                                    data-action="click->form-collection#removeItem"
+                                    class="inline-flex items-center gap-1 text-xs font-semibold text-danger-600 hover:text-danger-700 hover:underline dark:text-danger-400 dark:hover:text-danger-300 cursor-pointer">
+                                <twig:UX:Icon name="icon:delete" class="w-4 h-4"/>
+                                Supprimer
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                            <div>
+                                {% if plateformeForm.plateforme is defined %}
+                                    {{ form_row(plateformeForm.plateforme) }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if plateformeForm.annees is defined %}
+                                    {{ form_row(plateformeForm.annees) }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if plateformeForm.anneesCapaciteRequise is defined %}
+                                    {{ form_row(plateformeForm.anneesCapaciteRequise) }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if plateformeForm.anneesCapaciteSpecifique is defined %}
+                                    {{ form_row(plateformeForm.anneesCapaciteSpecifique) }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
             <button type="button"
-                    data-action="click->form-collection#removeItem"
-                    class="mt-2 text-sm text-danger-600 hover:text-danger-800 dark:text-danger-400 dark:hover:text-danger-300">
-                <twig:UX:Icon name="icon:delete" class="mr-1 inline h-4 w-4"/>
-                Supprimer cette plateforme
+                    data-form-collection-target="addButton"
+                    data-action="click->form-collection#addItem"
+                    class="mt-4 inline-flex items-center gap-2 rounded-xl border border-dashed border-primary/40 bg-primary-50/50 px-4 py-3 text-sm font-semibold text-primary hover:bg-primary-50 transition w-full justify-center">
+                <twig:UX:Icon name="icon:add" class="w-4 h-4"/>
+                Ajouter une plateforme d'admission
             </button>
         </div>
-    {% endset %}
+        {% do form.plateformesAdmission.setRendered %}
+    </div>
 
-    <div {{ stimulus_controller('form-collection', {
-        'prototype': prototypeHtml|json_encode,
-        'max-items': 0
-    }) }}>
-        <div data-form-collection-target="fields">
-            {% for plateformeForm in form.plateformesAdmission %}
-                <div data-form-collection-target="field"
-                     class="mb-4 rounded-lg border border-secondary-200 bg-secondary-50 p-4 dark:border-secondary-700 dark:bg-secondary-800">
-                    {{ form_row(plateformeForm.plateforme) }}
-                    {{ form_row(plateformeForm.annees) }}
-                    {{ form_row(plateformeForm.anneesCapaciteRequise) }}
-                    <button type="button"
-                            data-action="click->form-collection#removeItem"
-                            class="mt-2 text-sm text-danger-600 hover:text-danger-800 dark:text-danger-400 dark:hover:text-danger-300">
-                        <twig:UX:Icon name="icon:delete" class="mr-1 inline h-4 w-4"/>
-                        Supprimer cette plateforme
-                    </button>
-                </div>
-            {% endfor %}
-        </div>
-
-        <button type="button"
-                data-form-collection-target="addButton"
-                data-action="click->form-collection#addItem"
-                class="mt-2 inline-flex items-center rounded-lg border border-success-300 bg-success-50 px-4 py-2 text-sm font-medium text-success-700 hover:bg-success-100 hover:text-success-800 dark:bg-success-900 dark:text-success-300 dark:border-success-500 dark:hover:border-success-300 dark:hover:text-success-100">
-            <twig:UX:Icon name="icon:add" class="mr-2 h-4 w-4"/>
-            Ajouter une plateforme
-        </button>
+    {# 7. Actions (TOUJOURS en bas) #}
+    <div class="flex flex-wrap items-center gap-3">
+        <twig:Button
+                type="submit"
+                variant="success"
+                :soft="false"
+                :outline="false"
+                icon="icon:save"
+                label="Enregistrer le type de diplôme"
+        />
+        <twig:Button
+                href="{{ type_diplome.id ? path('app_type_diplome_show', {id: type_diplome.id}) : path('app_type_diplome_index') }}"
+                variant="secondary"
+                :outline="true"
+                :soft="false"
+                icon="icon:arrow-left"
+                label="Annuler"
+        />
     </div>
 </div>
-
-<div class="mt-6 flex flex-wrap items-center gap-2 border-t pt-6">
-    <twig:Button
-            type="submit"
-            variant="success"
-            :soft="false"
-            :outline="false"
-            icon="icon:save"
-            label="Enregistrer"
-    />
-    <twig:Button
-            href="{{ path('app_type_diplome_index') }}"
-            variant="secondary"
-            :outline="true"
-            :soft="false"
-            icon="icon:arrow-left"
-            label="Annuler"
-    />
-</div>
-
 {{ form_end(form) }}

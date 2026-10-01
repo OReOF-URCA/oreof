@@ -140,16 +140,22 @@ class VilleController extends AbstractController
         );
     }
 
-    #[Route('/{id}/duplicate', name: 'app_ville_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_ville_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         VilleRepository $villeRepository,
         Ville $ville
     ): Response {
-        $villeNew = clone $ville;
-        $villeNew->setLibelle($ville->getLibelle() . ' - Copie');
-        $villeRepository->save($villeNew, true);
-        return $turboStream->streamToastSuccess('Ville dupliquée avec succès', true);
+        if ($this->isDuplicateTokenValid($ville, $this->getCsrfTokenFromRequest($request))) {
+            $villeNew = clone $ville;
+            $villeNew->setLibelle($ville->getLibelle() . ' - Copie');
+            $villeRepository->save($villeNew, true);
+
+            return $turboStream->streamToastSuccess('Ville dupliquée avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

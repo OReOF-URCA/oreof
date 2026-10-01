@@ -1,0 +1,274 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+<div class="space-y-6">
+    {# 1. Résumé en KPI / Statistiques clés #}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <twig:Kpi
+            title="Type de formation"
+            value="{{ type_diplome.classique ? 'Accréditée' : 'Non accréditée' }}"
+            variant="{{ type_diplome.classique ? 'success' : 'secondary' }}"
+            icon="{{ type_diplome.classique ? 'icon:check-circle' : 'icon:danger' }}"
+        />
+
+        <twig:Kpi
+            title="Code Apogée"
+            value="{{ type_diplome.codeApogee|default('—') }}"
+            variant="primary"
+            icon="icon:info"
+        />
+
+        <twig:Kpi
+            title="Semestres"
+            value="{{ 'S' ~ type_diplome.semestreDebut ~ ' à S' ~ type_diplome.semestreFin }}"
+            description="{{ type_diplome.debutSemestreFlexible ? 'Début flexible' : null }}"
+            variant="info"
+            icon="icon:calendar"
+        />
+
+        <twig:Kpi
+            title="ECTS / Semestre"
+            value="{{ type_diplome.hasEcts ? (type_diplome.nbEctsParSemestre ?: 'Variable') : 'Sans ECTS' }}"
+            unit="{{ type_diplome.hasEcts and type_diplome.nbEctsParSemestre ? 'ECTS' : null }}"
+            variant="{{ type_diplome.hasEcts ? 'warning' : 'secondary' }}"
+            icon="icon:award"
+        />
+
+        <twig:Kpi
+            title="Plateformes"
+            value="{{ type_diplome.typeDiplomePlateformeAdmissions|length }}"
+            unit="active(s)"
+            variant="default"
+            icon="icon:globe"
+        />
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {# 2. Colonne principale (2 colonnes) #}
+        <div class="lg:col-span-2 space-y-6">
+            {# Structure & Maquette #}
+            <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-secondary-200 dark:border-secondary-700">
+                    <h3 class="text-base font-bold text-text flex items-center gap-2">
+                        <twig:UX:Icon name="icon:layers" class="w-5 h-5 text-primary"/>
+                        <span>Structure & Maquette de formation</span>
+                    </h3>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                    <div class="p-3 bg-secondary-50/70 rounded-xl dark:bg-secondary-800/40">
+                        <span class="text-xs text-secondary-500 uppercase block font-semibold">Semestres actifs</span>
+                        <span class="font-bold text-text text-base mt-1 block">Du semestre {{ type_diplome.semestreDebut }} au semestre {{ type_diplome.semestreFin }}</span>
+                    </div>
+                    <div class="p-3 bg-secondary-50/70 rounded-xl dark:bg-secondary-800/40">
+                        <span class="text-xs text-secondary-500 uppercase block font-semibold">Unités d'enseignement (UE)</span>
+                        <span class="font-bold text-text text-base mt-1 block">De {{ type_diplome.nbUeMin }} à {{ type_diplome.nbUeMax }} UE / semestre</span>
+                    </div>
+                    <div class="p-3 bg-secondary-50/70 rounded-xl dark:bg-secondary-800/40">
+                        <span class="text-xs text-secondary-500 uppercase block font-semibold">Éléments constitutifs (EC)</span>
+                        <span class="font-bold text-text text-base mt-1 block">Max {{ type_diplome.nbEcParUe }} EC / UE</span>
+                    </div>
+                    <div class="p-3 bg-secondary-50/70 rounded-xl dark:bg-secondary-800/40">
+                        <span class="text-xs text-secondary-500 uppercase block font-semibold">Max ECTS par UE</span>
+                        <span class="font-bold text-text text-base mt-1 block">{{ type_diplome.nbEctsMaxUe ? type_diplome.nbEctsMaxUe ~ ' ECTS' : 'Non plafonné' }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-secondary-100 dark:border-secondary-800 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-surface border border-secondary-200 dark:border-secondary-700">
+                        <span class="text-secondary-600 dark:text-secondary-400">Début de semestre flexible :</span>
+                        <span class="font-bold {{ type_diplome.debutSemestreFlexible ? 'text-success-600' : 'text-secondary-500' }}">{{ type_diplome.debutSemestreFlexible ? 'Oui' : 'Non' }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-surface border border-secondary-200 dark:border-secondary-700">
+                        <span class="text-secondary-600 dark:text-secondary-400">Passage en CFVU :</span>
+                        <span class="font-bold {{ type_diplome.passageCfvu ? 'text-success-600' : 'text-secondary-500' }}">{{ type_diplome.passageCfvu ? 'Oui' : 'Non' }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-surface border border-secondary-200 dark:border-secondary-700">
+                        <span class="text-secondary-600 dark:text-secondary-400">ECTS obligatoires sur EC :</span>
+                        <span class="font-bold {{ type_diplome.ectsObligatoireSurEc ? 'text-success-600' : 'text-secondary-500' }}">{{ type_diplome.ectsObligatoireSurEc ? 'Oui' : 'Non' }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-surface border border-secondary-200 dark:border-secondary-700">
+                        <span class="text-secondary-600 dark:text-secondary-400">MCCC obligatoires sur EC :</span>
+                        <span class="font-bold {{ type_diplome.mcccObligatoireSurEc ? 'text-success-600' : 'text-secondary-500' }}">{{ type_diplome.mcccObligatoireSurEc ? 'Oui' : 'Non' }}</span>
+                    </div>
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-surface border border-secondary-200 dark:border-secondary-700 sm:col-span-2">
+                        <span class="text-secondary-600 dark:text-secondary-400">Contrôle de l'assiduité :</span>
+                        <span class="font-bold {{ type_diplome.controleAssiduite ? 'text-success-600' : 'text-secondary-500' }}">{{ type_diplome.controleAssiduite ? 'Oui' : 'Non' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {# Spécificités & Éléments #}
+            <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+                    <twig:UX:Icon name="icon:wrench" class="w-5 h-5 text-primary"/>
+                    <span>Spécificités & Éléments constitutifs</span>
+                </h3>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div class="rounded-xl border p-3 text-center {{ type_diplome.hasMemoire ? 'border-primary-200 bg-primary-50/50 text-primary dark:border-primary-800 dark:bg-primary-950/30' : 'border-secondary-200 bg-secondary-50/40 text-secondary-500 dark:border-secondary-700 dark:bg-secondary-800/20' }}">
+                        <span class="block text-xs font-bold uppercase mb-1">Mémoire</span>
+                        <span class="text-sm font-black">{{ type_diplome.hasMemoire ? 'Inclus' : 'Non' }}</span>
+                    </div>
+                    <div class="rounded-xl border p-3 text-center {{ type_diplome.hasStage ? 'border-primary-200 bg-primary-50/50 text-primary dark:border-primary-800 dark:bg-primary-950/30' : 'border-secondary-200 bg-secondary-50/40 text-secondary-500 dark:border-secondary-700 dark:bg-secondary-800/20' }}">
+                        <span class="block text-xs font-bold uppercase mb-1">Stage</span>
+                        <span class="text-sm font-black">{{ type_diplome.hasStage ? 'Inclus' : 'Non' }}</span>
+                    </div>
+                    <div class="rounded-xl border p-3 text-center {{ type_diplome.hasSituationPro ? 'border-primary-200 bg-primary-50/50 text-primary dark:border-primary-800 dark:bg-primary-950/30' : 'border-secondary-200 bg-secondary-50/40 text-secondary-500 dark:border-secondary-700 dark:bg-secondary-800/20' }}">
+                        <span class="block text-xs font-bold uppercase mb-1">Situation Pro.</span>
+                        <span class="text-sm font-black">{{ type_diplome.hasSituationPro ? 'Inclus' : 'Non' }}</span>
+                    </div>
+                    <div class="rounded-xl border p-3 text-center {{ type_diplome.hasProjet ? 'border-primary-200 bg-primary-50/50 text-primary dark:border-primary-800 dark:bg-primary-950/30' : 'border-secondary-200 bg-secondary-50/40 text-secondary-500 dark:border-secondary-700 dark:bg-secondary-800/20' }}">
+                        <span class="block text-xs font-bold uppercase mb-1">Projet</span>
+                        <span class="text-sm font-black">{{ type_diplome.hasProjet ? 'Inclus' : 'Non' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {# Descriptifs & Textes #}
+            <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+                    <twig:UX:Icon name="icon:file-text" class="w-5 h-5 text-primary"/>
+                    <span>Descriptifs & Textes de présentation</span>
+                </h3>
+
+                <div class="space-y-4">
+                    <div>
+                        <span class="text-xs font-bold text-secondary-500 uppercase tracking-wider block mb-1">Présentation des formations</span>
+                        <div class="rounded-xl bg-secondary-50 p-4 text-sm text-secondary-800 dark:bg-secondary-800/40 dark:text-secondary-200">
+                            {{ type_diplome.presentationFormation ? type_diplome.presentationFormation|raw : '<span class="italic text-secondary-400">Non renseigné</span>'|raw }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-xs font-bold text-secondary-500 uppercase tracking-wider block mb-1">Modalités d'admission</span>
+                        <div class="rounded-xl bg-secondary-50 p-4 text-sm text-secondary-800 dark:bg-secondary-800/40 dark:text-secondary-200">
+                            {{ type_diplome.modalitesAdmission ? type_diplome.modalitesAdmission|raw : '<span class="italic text-secondary-400">Non renseigné</span>'|raw }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-xs font-bold text-secondary-500 uppercase tracking-wider block mb-1">Prérequis obligatoires</span>
+                        <div class="rounded-xl bg-secondary-50 p-4 text-sm text-secondary-800 dark:bg-secondary-800/40 dark:text-secondary-200">
+                            {{ type_diplome.prerequisObligatoires ? type_diplome.prerequisObligatoires|raw : '<span class="italic text-secondary-400">Non renseigné</span>'|raw }}
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-xs font-bold text-secondary-500 uppercase tracking-wider block mb-1">Devenir des diplômés</span>
+                        <div class="rounded-xl bg-secondary-50 p-4 text-sm text-secondary-800 dark:bg-secondary-800/40 dark:text-secondary-200">
+                            {{ type_diplome.insertionProfessionnelle ? type_diplome.insertionProfessionnelle|raw : '<span class="italic text-secondary-400">Non renseigné</span>'|raw }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# 3. Colonne latérale (1 colonne) #}
+        <div class="space-y-6">
+            {# Logos #}
+            <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+                    <twig:UX:Icon name="icon:upload" class="w-5 h-5 text-primary"/>
+                    <span>Logos du type de diplôme</span>
+                </h3>
+
+                {% include 'config/type_diplome/_logos.html.twig' with { typeDiplome: type_diplome, editable: false } %}
+            </div>
+
+            {# Plateformes d'admission #}
+            <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+                    <twig:UX:Icon name="icon:globe" class="w-5 h-5 text-primary"/>
+                    <span>Plateformes d'admission associées</span>
+                </h3>
+
+                {% set plateformes = type_diplome.typeDiplomePlateformeAdmissions %}
+                {% if plateformes is empty %}
+                    <p class="text-xs text-secondary-400 italic">Aucune plateforme configurée pour ce type de diplôme.</p>
+                {% else %}
+                    <div class="space-y-3">
+                        {% for tpa in plateformes %}
+                            {% set pf = tpa.plateforme %}
+                            {% if pf %}
+                                <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-3.5 dark:border-secondary-700 dark:bg-secondary-800/40">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-sm text-text">{{ pf.libelle }}</span>
+                                        <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 dark:bg-primary-950 dark:text-primary-300">
+                                            {{ pf.code }}
+                                        </span>
+                                    </div>
+                                    {% if tpa.annees and tpa.annees|length > 0 %}
+                                        <div class="mt-2 flex flex-wrap gap-1">
+                                            {% for an in tpa.annees %}
+                                                {% set isReq = an in (tpa.anneesCapaciteRequise ?? []) %}
+                                                {% set isSpe = an in (tpa.anneesCapaciteSpecifique ?? []) %}
+                                                {% set labels = [] %}
+                                                {% if isReq %}{% set labels = labels|merge(['Requise']) %}{% endif %}
+                                                {% if isSpe %}{% set labels = labels|merge(['Spécifique']) %}{% endif %}
+                                                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md {{ isReq ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' : (isSpe ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300' : 'bg-secondary-200 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-300') }}">
+                                                    Année {{ an }}{{ labels|length > 0 ? ' (' ~ labels|join(', ') ~ ')' : '' }}
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {# Statistiques associées #}
+            <div class="rounded-2xl border border-secondary-200 bg-white p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                <h3 class="text-base font-bold text-text mb-4 flex items-center gap-2">
+                    <twig:UX:Icon name="icon:info" class="w-5 h-5 text-primary"/>
+                    <span>Données rattachées</span>
+                </h3>
+
+                <dl class="space-y-3 text-sm">
+                    <div class="flex justify-between border-b border-secondary-100 pb-2 dark:border-secondary-800">
+                        <dt class="text-secondary-500">Mentions configurées</dt>
+                        <dd class="font-semibold text-text">{{ type_diplome.mentions|length }}</dd>
+                    </div>
+                    <div class="flex justify-between border-b border-secondary-100 pb-2 dark:border-secondary-800">
+                        <dt class="text-secondary-500">Formations actives</dt>
+                        <dd class="font-semibold text-text">{{ type_diplome.formations|length }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                        <dt class="text-secondary-500">Types d'épreuve autorisés</dt>
+                        <dd class="font-semibold text-text">{{ type_diplome.typeEpreuves|length }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% set header_title %}
+    Type de diplôme : {{ type_diplome.libelle }}
+{% endset %}
+
+{% block bouton_header %}
+    <div class="flex items-center gap-2">
+        <twig:Button
+                href="{{ path('app_type_diplome_edit', { id: type_diplome.id }) }}"
+                variant="primary"
+                :soft="false"
+                :outline="false"
+                icon="icon:edit"
+                label="Modifier le type de diplôme"
+                tooltip="Modifier les caractéristiques du diplôme"
+        />
+        <twig:Button
+                href="{{ path('app_type_diplome_index') }}"
+                variant="secondary"
+                :outline="true"
+                :soft="false"
+                icon="icon:arrow-left"
+                label="Retour à la liste"
+                tooltip="Retour à la liste des types de diplômes"
+        />
+    </div>
+{% endblock %}

@@ -131,16 +131,22 @@ class ActualiteController extends AbstractController
         );
     }
 
-    #[Route('/{id}/duplicate', name: 'app_actualite_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_actualite_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         ActualiteRepository $actualiteRepository,
         Actualite $actualite
     ): Response {
-        $actualiteNew = clone $actualite;
-        $actualiteNew->setTitre($actualite->getTitre() . ' - Copie');
-        $actualiteRepository->save($actualiteNew, true);
-        return $turboStream->streamToastSuccess('Actualité dupliquée avec succès', true);
+        if ($this->isDuplicateTokenValid($actualite, $this->getCsrfTokenFromRequest($request))) {
+            $actualiteNew = clone $actualite;
+            $actualiteNew->setTitre($actualite->getTitre() . ' - Copie');
+            $actualiteRepository->save($actualiteNew, true);
+
+            return $turboStream->streamToastSuccess('Actualité dupliquée avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

@@ -28,9 +28,19 @@ class TypeDiplomePlateformeAdmission
     #[ORM\Column(type: 'json', nullable: true)]
     private ?array $anneesCapaciteRequise = null;
 
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $anneesCapaciteSpecifique = null;
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function setId(?int $id): static
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     public function getTypeDiplome(): ?TypeDiplome
@@ -96,5 +106,22 @@ class TypeDiplomePlateformeAdmission
     public function isCapaciteRequise(int $anneeOrdre): bool
     {
         return in_array($anneeOrdre, $this->anneesCapaciteRequise ?? [], true);
+    }
+
+    public function getAnneesCapaciteSpecifique(): ?array
+    {
+        return $this->anneesCapaciteSpecifique ?? [];
+    }
+
+    public function setAnneesCapaciteSpecifique(?array $anneesCapaciteSpecifique): static
+    {
+        $this->anneesCapaciteSpecifique = $anneesCapaciteSpecifique;
+
+        return $this;
+    }
+
+    public function isCapaciteSpecifique(int $anneeOrdre): bool
+    {
+        return in_array($anneeOrdre, $this->anneesCapaciteSpecifique ?? [], true);
     }
 }

@@ -267,6 +267,7 @@
       <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php86" />
       <path value="$PROJECT_DIR$/vendor/pentiminax/ux-datatables" />
       <path value="$PROJECT_DIR$/vendor/twig/html-extra" />
+      <path value="$PROJECT_DIR$/vendor/symfony/reprise" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration">

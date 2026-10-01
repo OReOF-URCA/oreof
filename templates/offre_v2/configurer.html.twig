@@ -28,42 +28,28 @@
 
 {% block content %}
     {% if not can_edit %}
-        <div class="rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-800 flex items-start gap-3 mb-4 shadow-sm dark:bg-danger-900/30 dark:text-danger-300 dark:border-danger-700">
-            <div class="text-xl">⚠️</div>
-            <div>
+        <div class="rounded-lg border border-danger-200 bg-danger-50 p-2.5 text-xs text-danger-800 flex items-center gap-2.5 mb-3 shadow-xs dark:bg-danger-900/30 dark:text-danger-300 dark:border-danger-700">
+            <span class="text-base shrink-0">⚠️</span>
+            <div class="flex-1">
                 {% if campagne and not campagne.isPeriodActive() %}
-                    <h3 class="font-semibold text-danger-900 dark:text-danger-100">La campagne de collecte est fermée</h3>
-                    <p class="mt-1 text-danger-700 dark:text-danger-300">
-                        {% if campagne.dateOuvertureDpe and date() < campagne.dateOuvertureDpe %}
-                            Elle ouvrira le {{ campagne.dateOuvertureDpe|date('d/m/Y à H:i') }}.
-                        {% elseif campagne.dateClotureDpe and date() > campagne.dateClotureDpe %}
-                            Elle a fermé le {{ campagne.dateClotureDpe|date('d/m/Y à H:i') }}.
-                        {% else %}
-                            Elle n'est pas ouverte actuellement.
-                        {% endif %}
-                        Les modifications sont désactivées pour votre rôle.
-                    </p>
+                    <strong>Campagne fermée :</strong>
+                    {% if campagne.dateOuvertureDpe and date() < campagne.dateOuvertureDpe %}
+                        Ouverture le {{ campagne.dateOuvertureDpe|date('d/m/Y à H:i') }}.
+                    {% elseif campagne.dateClotureDpe and date() > campagne.dateClotureDpe %}
+                        Clôturée le {{ campagne.dateClotureDpe|date('d/m/Y à H:i') }}.
+                    {% endif %}
+                    Modifications désactivées.
                 {% elseif not is_brouillon %}
-                    <h3 class="font-semibold text-danger-900 dark:text-danger-100">L'offre a été transmise pour validation</h3>
-                    <p class="mt-1 text-danger-700 dark:text-danger-300">
-                        Elle est actuellement en cours d'instruction et ne peut plus être modifiée par les responsables de formation ou de parcours.
-                    </p>
+                    <strong>Offre transmise :</strong> En cours d'instruction, modifications désactivées.
                 {% endif %}
             </div>
         </div>
     {% elseif is_ses_or_admin %}
         {% if (campagne and not campagne.isPeriodActive()) or not is_brouillon %}
-            <div class="rounded-xl border border-primary-200 bg-primary-50 p-4 text-sm text-primary-800 flex items-start gap-3 mb-4 shadow-sm dark:bg-primary-900/30 dark:text-primary-300 dark:border-primary-700">
-                <div class="text-xl">ℹ️</div>
-                <div>
-                    <h3 class="font-semibold text-primary-900 dark:text-primary-100">Mode d'édition Scolarité Centrale</h3>
-                    <p class="mt-1 text-primary-700 dark:text-primary-300">
-                        {% if campagne and not campagne.isPeriodActive() %}
-                            La campagne de collecte est fermée, mais en tant que gestionnaire SES/Admin, vous conservez le droit d'éditer les capacités.
-                        {% else %}
-                            L'offre a été transmise pour validation, mais en tant que gestionnaire SES/Admin, vous conservez le droit d'éditer les capacités.
-                        {% endif %}
-                    </p>
+            <div class="rounded-lg border border-primary-200 bg-primary-50 p-2.5 text-xs text-primary-800 flex items-center gap-2.5 mb-3 shadow-xs dark:bg-primary-900/30 dark:text-primary-300 dark:border-primary-700">
+                <span class="text-base shrink-0">ℹ️</span>
+                <div class="flex-1">
+                    <strong>Mode d'édition Scolarité Centrale :</strong> Vous conservez le droit d'éditer les capacités en tant que gestionnaire SES/Admin.
                 </div>
             </div>
         {% endif %}
@@ -76,222 +62,289 @@
     >
         <input type="hidden" name="_token" value="{{ csrf_token('offre_v2_configurer_' ~ formation.id) }}">
 
+        <!-- KPI Globaux -->
+        <div id="configurer_global_stats" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-4">
+            <twig:Kpi
+                title="Parcours ouverts"
+                value="{{ tabStatistiques.nbParcoursOuvert }}"
+                total="{{ formation.parcours|length }}"
+                variant="success"
+                icon="icon:check-circle"
+            />
+
+            <twig:Kpi
+                title="Plateformes"
+                value="{{ plateformes|length }}"
+                unit="active{{ plateformes|length > 1 ? 's' : '' }}"
+                variant="primary"
+                icon="icon:globe"
+            />
+
+            <twig:Kpi
+                title="Capacité totale"
+                value="{{ tabStatistiques.capacite }}"
+                unit="places"
+                variant="info"
+                icon="icon:users"
+            />
+
+            <twig:Kpi
+                title="Anomalies"
+                value="{{ anomalies|length }}"
+                variant="{{ anomalies|length > 0 ? 'warning' : 'secondary' }}"
+                icon="{{ anomalies|length > 0 ? 'icon:warning' : 'icon:check-circle' }}"
+            />
+        </div>
+
         <twig:Card extraClass="mb-4"
                    title="Contrôle avant transmission"
         >
-            <div id="configurer_global_stats" class="mt-4 grid gap-3 md:grid-cols-4">
-                <div class="rounded-xl bg-success-50 p-3 text-sm text-success-700 dark:bg-success-900/30 dark:text-success-300">
-                    <div class="text-lg font-bold">{{ tabStatistiques.nbParcoursOuvert }}
-                        /{{ formation.parcours|length }}</div>
-                    parcours ouverts
-                </div>
-
-                <div class="rounded-xl bg-primary-50 p-3 text-sm text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
-                    <div class="text-lg font-bold">{{ plateformes|length }}</div>
-                    plateforme{{ plateformes|length > 1 ? 's' : '' }} active{{ plateformes|length > 1 ? 's' : '' }}
-                </div>
-
-                <div class="rounded-xl bg-secondary-50 p-3 text-sm text-secondary-700 dark:bg-secondary-900/30 dark:text-secondary-300">
-                    <div class="text-lg font-bold">{{ tabStatistiques.capacite }}</div>
-                    capacité
-                </div>
-
-                <div class="rounded-xl bg-warning-50 p-3 text-sm text-warning-700 dark:bg-warning-900/30 dark:text-warning-300">
-                    <div class="text-lg font-bold">{{ anomalies|length }}</div>
-                    anomalie{{ anomalies|length > 1 ? 's' : '' }}
-                </div>
-            </div>
-            <div id="configurer_global_warnings" class="mt-4 space-y-3 text-sm">
+            <div id="configurer_global_warnings" class="mt-2 text-xs">
                 {% if anomalies is empty %}
-                    <div class="rounded-xl bg-success-50 p-3 text-success-800 dark:bg-success-900/30 dark:text-success-300">
-                        ✓ Les informations et capacités de la formation sont complètes. Aucune anomalie détectée.
+                    <div class="rounded-lg bg-success-50 dark:bg-success-900/30 px-3 py-2 text-success-800 dark:text-success-300 flex items-center gap-2">
+                        <span>✓</span>
+                        <span>Les informations et capacités de la formation sont complètes. Aucune anomalie détectée.</span>
                     </div>
                 {% else %}
-                    {% for anomaly in anomalies %}
-                        <div class="rounded-xl bg-warning-50 p-3 text-warning-800 flex items-center gap-2 dark:bg-warning-900/30 dark:text-warning-300">
+                    <div class="rounded-lg bg-warning-50 dark:bg-warning-900/30 p-3 text-warning-900 dark:text-warning-200 border border-warning-200 dark:border-warning-700">
+                        <div class="font-semibold flex items-center gap-1.5 mb-1 text-warning-800 dark:text-warning-300">
                             <span>⚠</span>
-                            <span>{{ anomaly.message }}</span>
+                            <span>{{ anomalies|length }} anomalie{{ anomalies|length > 1 ? 's' : '' }} détectée{{ anomalies|length > 1 ? 's' : '' }} :</span>
                         </div>
-                    {% endfor %}
+                        <ul class="list-disc list-inside space-y-0.5 text-warning-800 dark:text-warning-300 ml-1">
+                            {% for anomaly in anomalies %}
+                                <li>{{ anomaly.message }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 {% endif %}
             </div>
 
-            <!-- État de validation de l'offre -->
+            <!-- État de validation de l'offre & documents -->
             {% set activeState = dpeFormation.etatValidation|keys|first %}
-            <div class="mt-4 flex items-center justify-between border-t pt-4">
-                <div class="flex items-center gap-2 text-sm text-secondary-600 dark:text-secondary-300">
-                    <span class="font-semibold text-secondary-800 dark:text-secondary-100">Statut de validation :</span>
+            {% set pvDocs = formation.documentConseils|filter(d => d.type == 'pv') %}
+            {% set noteDocs = formation.documentConseils|filter(d => d.type == 'note_explicative') %}
+            <div class="mt-3 flex items-center justify-between border-t border-secondary-200 dark:border-secondary-700 pt-3 flex-wrap gap-2 text-xs">
+                <div class="flex items-center gap-2 text-secondary-600 dark:text-secondary-300 flex-wrap">
+                    <span class="font-semibold text-secondary-800 dark:text-secondary-100">Statut :</span>
                     {% if activeState == 'brouillon' %}
-                        <span class="inline-flex items-center rounded-md bg-secondary-100 px-2 py-1 text-xs font-medium text-secondary-600 ring-1 ring-inset ring-secondary-500/10 dark:bg-secondary-900/30 dark:text-secondary-300 dark:ring-secondary-700">Brouillon</span>
+                        <span class="inline-flex items-center rounded-md bg-secondary-100 px-2 py-0.5 text-xs font-medium text-secondary-600 ring-1 ring-inset ring-secondary-500/10 dark:bg-secondary-900/30 dark:text-secondary-300 dark:ring-secondary-700">Brouillon</span>
                     {% elseif activeState == 'soumis_ses' %}
-                        <span class="inline-flex items-center rounded-md bg-warning-50 px-2 py-1 text-xs font-medium text-warning-800 ring-1 ring-inset ring-warning-600/20 dark:bg-warning-900/30 dark:text-warning-300 dark:ring-warning-700">Soumis Scolarité (SES)</span>
+                        <span class="inline-flex items-center rounded-md bg-warning-50 px-2 py-0.5 text-xs font-medium text-warning-800 ring-1 ring-inset ring-warning-600/20 dark:bg-warning-900/30 dark:text-warning-300 dark:ring-warning-700">Soumis Scolarité (SES)</span>
                     {% elseif activeState == 'soumis_cfvu' %}
-                        <span class="inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10 dark:bg-primary-900/30 dark:text-primary-300 dark:ring-primary-700">Soumis CFVU</span>
+                        <span class="inline-flex items-center rounded-md bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10 dark:bg-primary-900/30 dark:text-primary-300 dark:ring-primary-700">Soumis CFVU</span>
                     {% elseif activeState == 'attente_pv' %}
-                        <span class="inline-flex items-center rounded-md bg-warning-50 px-2 py-1 text-xs font-medium text-warning-800 ring-1 ring-inset ring-warning-600/20 dark:bg-warning-900/30 dark:text-warning-300 dark:ring-warning-700">CFVU validé (Attente PV)</span>
+                        <span class="inline-flex items-center rounded-md bg-warning-50 px-2 py-0.5 text-xs font-medium text-warning-800 ring-1 ring-inset ring-warning-600/20 dark:bg-warning-900/30 dark:text-warning-300 dark:ring-warning-700">CFVU validé (Attente PV)</span>
                     {% elseif activeState == 'publie' %}
-                        <span class="inline-flex items-center rounded-md bg-success-50 px-2 py-1 text-xs font-medium text-success-700 ring-1 ring-inset ring-success-600/20 dark:bg-success-900/30 dark:text-success-300 dark:ring-success-700">Publié</span>
+                        <span class="inline-flex items-center rounded-md bg-success-50 px-2 py-0.5 text-xs font-medium text-success-700 ring-1 ring-inset ring-success-600/20 dark:bg-success-900/30 dark:text-success-300 dark:ring-success-700">Publié</span>
+                    {% endif %}
+
+                    {% if dpeFormation.laissezPasser %}
+                        <span class="text-warning-700 bg-warning-50 rounded-md px-2 py-0.5 border border-warning-200 inline-flex items-center gap-1 dark:bg-warning-900/30 dark:text-warning-300 dark:border-warning-700">
+                            <span>⚠️ Laissez-passer : <strong>{{ dpeFormation.laissezPasser }}</strong></span>
+                        </span>
+                    {% endif %}
+
+                    {% if pvDocs is not empty or noteDocs is not empty %}
+                        {% for doc in pvDocs %}
+                            <a class="inline-flex items-center gap-1 text-primary-600 hover:underline bg-primary-50 px-2 py-0.5 rounded-md dark:bg-primary-900/30 dark:text-primary-300" target="_blank" href="{{ path('app_upload_download', {context: 'conseils', filename: doc.filename, originalName: doc.originalFilename}) }}">
+                                📄 PV : {{ doc.originalFilename }}
+                            </a>
+                        {% endfor %}
+                        {% for doc in noteDocs %}
+                            <a class="inline-flex items-center gap-1 text-primary-600 hover:underline bg-primary-50 px-2 py-0.5 rounded-md dark:bg-primary-900/30 dark:text-primary-300" target="_blank" href="{{ path('app_upload_download', {context: 'conseils', filename: doc.filename, originalName: doc.originalFilename}) }}">
+                                📄 Note : {{ doc.originalFilename }}
+                            </a>
+                        {% endfor %}
                     {% endif %}
                 </div>
 
-                {% if dpeFormation.laissezPasser %}
-                    <div class="text-sm text-warning-700 bg-warning-50 rounded-lg px-3 py-1.5 border border-warning-200 flex items-center gap-1.5 dark:bg-warning-900/30 dark:text-warning-300 dark:border-warning-700">
-                        <span>⚠️</span>
-                        <span>Laissez-passer actif : <strong>{{ dpeFormation.laissezPasser }}</strong></span>
+                <div class="flex items-center gap-3">
+                    <div data-autosave-capacites-target="status" class="text-xs font-semibold flex items-center gap-1 opacity-0 transition-opacity duration-300">
                     </div>
-                {% endif %}
-            </div>
 
-            <!-- Documents de Conseil Actifs -->
-            {% set pvDocs = formation.documentConseils|filter(d => d.type == 'pv') %}
-            {% set noteDocs = formation.documentConseils|filter(d => d.type == 'note_explicative') %}
-            {% if pvDocs is not empty or noteDocs is not empty %}
-                <div class="mt-4 p-3 bg-secondary-50 border border-secondary-200 rounded-lg text-sm space-y-2 dark:bg-secondary-900/30 dark:border-secondary-700">
-                    <h4 class="font-semibold text-secondary-700 dark:text-secondary-100">Documents validés en vigueur :</h4>
-                    {% for doc in pvDocs %}
-                        <div class="flex items-center gap-2">
-                            <span class="text-secondary-500">📄 Procès-Verbal :</span>
-                            <a class="text-primary-600 hover:underline font-medium dark:text-primary-400" target="_blank" href="{{ path('app_upload_download', {context: 'conseils', filename: doc.filename, originalName: doc.originalFilename}) }}">
-                                {{ doc.originalFilename }}
-                            </a>
-                            <span class="text-xs text-secondary-400">(déposé le {{ doc.uploadedAt|date('d/m/Y') }})</span>
-                        </div>
-                    {% endfor %}
-                    {% for doc in noteDocs %}
-                        <div class="flex items-center gap-2">
-                            <span class="text-secondary-500">📄 Note Explicative :</span>
-                            <a class="text-primary-600 hover:underline font-medium dark:text-primary-400" target="_blank" href="{{ path('app_upload_download', {context: 'conseils', filename: doc.filename, originalName: doc.originalFilename}) }}">
-                                {{ doc.originalFilename }}
-                            </a>
-                            <span class="text-xs text-secondary-400">(déposée le {{ doc.uploadedAt|date('d/m/Y') }})</span>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
-            <!-- Configuration du Tronc commun -->
-            <input type="hidden" name="has_tronc_commun_config" value="1">
-            <div id="configurer_tronc_commun_block" class="mt-4 p-3.5 rounded-xl border border-primary-200 bg-primary-50/50 text-sm shadow-xs dark:bg-primary-900/30 dark:border-primary-700">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                        <div class="flex items-center gap-2 font-semibold text-primary-950 dark:text-primary-100">
-                            <twig:UX:Icon name="ph:users-three-bold" class="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                            <span>Tronc commun de la formation</span>
-                        </div>
-                        <p class="text-xs text-secondary-600 dark:text-secondary-300 mt-0.5">
-                            Cochez les années communes à l'ensemble des parcours de cette mention / formation.
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-2.5 flex-wrap">
-                        {% for anneeOrdre in formation.anneesOrdres %}
-                            {% set isTc = formation.isAnneeTroncCommun(anneeOrdre) %}
-                            <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border {{ isTc ? 'bg-primary-600 border-primary-600 text-white shadow-xs font-semibold' : 'bg-surface border-secondary-300 text-secondary-700 hover:bg-secondary-50 font-medium dark:bg-secondary-900 dark:text-secondary-300 dark:border-secondary-500 dark:hover:border-secondary-300 dark:hover:text-secondary-100' }} transition-colors cursor-pointer text-xs select-none">
-                                <input type="checkbox"
-                                       name="tronc_commun_annee_{{ anneeOrdre }}"
-                                       value="1"
-                                       {{ isTc ? 'checked' : '' }}
-                                       {{ not can_edit ? 'disabled' : '' }}
-                                       class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400">
-                                <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ anneeOrdre }} (Tronc commun)</span>
-                            </label>
-                        {% endfor %}
-                    </div>
+                    {% if can_edit %}
+                        <button type="submit" class="rounded-lg border border-secondary-200 px-3 py-1.5 text-xs font-medium hover:bg-secondary-50 cursor-pointer dark:border-secondary-700 dark:bg-secondary-900 dark:hover:border-secondary-300 dark:hover:text-secondary-100">
+                            Sauvegarder en brouillon
+                        </button>
+                    {% else %}
+                        <span class="text-xs text-secondary-500 italic">
+                            Modifications désactivées
+                        </span>
+                    {% endif %}
                 </div>
             </div>
-
-            <div class="mt-5 flex items-center justify-end gap-3 flex-wrap">
-                <!-- Autosave state indicator -->
-                <div data-autosave-capacites-target="status" class="text-sm font-semibold flex items-center gap-2 opacity-0 transition-opacity duration-300">
-                </div>
-
-                {% if can_edit %}
-                    <button type="submit" class="rounded-lg border border-secondary-200 px-4 py-2 text-sm font-medium hover:bg-secondary-50 cursor-pointer dark:border-secondary-700 dark:bg-secondary-900 dark:hover:border-secondary-300 dark:hover:text-secondary-100">
-                        Sauvegarder en brouillon
-                    </button>
-                {% else %}
-                    <div class="text-sm text-secondary-500 italic bg-secondary-100 rounded-lg px-3 py-2 dark:bg-secondary-900/30">
-                        Modifications de l'offre désactivées
-                    </div>
-                {% endif %}
-            </div>
-
         </twig:Card>
 
-        {% for parcours in formation.parcours %}
-            <div data-parcours-id="{{ parcours.id }}">
-                {% set statParcours = tabStatistiques['parcours'][parcours.id] %}
-                <twig:Card extraClass="mb-4">
-                    <twig:block name="title">
-                        {{ include('offre_v2/_parcours_title_area.html.twig', {
-                            parcours: parcours,
-                            campagne: campagne,
-                            can_edit: can_edit
-                        }) }}
-                    </twig:block>
-                    <twig:block name="actions">
-                        {# todo: badge si tronc commun, ... #}
+        <!-- Configuration du Tronc commun -->
+        <twig:Card extraClass="mb-4"
+                   title="Tronc commun de la formation"
+        >
+            <input type="hidden" name="has_tronc_commun_config" value="1">
+            <div id="configurer_tronc_commun_block">
+                <p class="text-xs text-secondary-600 dark:text-secondary-300 mb-3">
+                    Cochez les années communes à l'ensemble des parcours de cette mention / formation. Lorsqu'une année est déclarée en tronc commun, ses capacités d'accueil, régimes d'inscription et plateformes de recrutement sont automatiquement synchronisés entre les parcours.
+                </p>
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    {% for anneeOrdre in formation.anneesOrdres %}
+                        {% set isTc = formation.isAnneeTroncCommun(anneeOrdre) %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border {{ isTc ? 'bg-primary-600 border-primary-600 text-white shadow-xs font-semibold' : 'bg-surface border-secondary-300 text-secondary-700 hover:bg-secondary-50 font-medium dark:bg-secondary-900 dark:text-secondary-300 dark:border-secondary-500 dark:hover:border-secondary-300 dark:hover:text-secondary-100' }} transition-colors cursor-pointer text-xs select-none">
+                            <input type="checkbox"
+                                   name="tronc_commun_annee_{{ anneeOrdre }}"
+                                   value="1"
+                                   {{ isTc ? 'checked' : '' }}
+                                   {{ not can_edit ? 'disabled' : '' }}
+                                   class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400">
+                            <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ anneeOrdre }} (Tronc commun)</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+        </twig:Card>
+
+
+        <div class="app-tabs mt-6" data-controller="tabs" data-tabs-active-tab-class="app-tab-active active">
+            <div class="flex items-center justify-between flex-wrap gap-3 mb-3">
+                <div class="app-tabs-list flex-wrap overflow-visible gap-1.5" role="tablist" aria-label="Parcours de la formation">
+                    {% for parcours in formation.parcours %}
+                        {% set statP = tabStatistiques['parcours'][parcours.id] ?? null %}
                         {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
                         {% set currentEtat = dpe ? dpe.getEtatReconduction().value : 'OUVERT' %}
-                        <span id="parcours_{{ parcours.id }}_badge" class="mr-2">
-                            {% set isParcoursFerme = currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}
-                            {% if isParcoursFerme %}
-                                <twig:Badge variant="danger" label="Fermé" />
-                            {% else %}
-                                <twig:Badge variant="success" label="Ouvert" />
-                            {% endif %}
-                        </span>
-                        <label for="parcours-{{ parcours.id }}" class="cursor-pointer"></label>
-                        <select class="rounded-lg border bg-surface text-text px-3 py-2 text-sm disabled:bg-secondary-100 disabled:text-secondary-500 dark:border-secondary-600 dark:bg-secondary-900/30"
-                                id="parcours-{{ parcours.id }}"
-                                name="parcours_{{ parcours.id }}_reconduction"
-                                {{ not can_edit ? 'disabled' : '' }}
+                        {% set isParcoursFerme = currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}
+
+                        <button type="button"
+                                id="tab-parcours-{{ parcours.id }}"
+                                class="app-tab gap-2 cursor-pointer {% if loop.first %}app-tab-active active{% endif %}"
+                                role="tab"
+                                aria-selected="{{ loop.first ? 'true' : 'false' }}"
+                                aria-controls="panel-parcours-{{ parcours.id }}"
+                                tabindex="{{ loop.first ? '0' : '-1' }}"
+                                data-tabs-target="tab"
+                                data-action="click->tabs#change"
+                                data-tab-id="parcours-{{ parcours.id }}"
                         >
-                            <option value="OUVERT" {% if currentEtat == 'OUVERT' or currentEtat == 'CREATION' or currentEtat == 'MODIFICATION' or currentEtat == 'MODIFICATION_INTITULE' or currentEtat == 'MODIFICATION_PARCOURS' or currentEtat == 'MODIFICATION_TEXTE' or currentEtat == 'MODIFICATION_MCCC' or currentEtat == 'MODIFICATION_MCCC_TEXTE' %}selected{% endif %}>Ouvert</option>
-                            <option value="NON_OUVERTURE" {% if currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}selected{% endif %}>Fermé</option>
-                            <option value="ATTENTE" {% if currentEtat == 'ATTENTE' %}selected{% endif %}>À confirmer</option>
-                        </select>
-                    </twig:block>
-                <!-- Parcours -->
-                <article>
-                    <div id="parcours_{{ parcours.id }}_stats" class="mt-4 grid gap-3 md:grid-cols-4">
-                        <div class="rounded-xl bg-success-50 p-3 text-sm text-success-700 dark:bg-success-900/30 dark:text-success-300">
-                            <div class="text-lg font-bold">{{ statParcours.nbAnneesOuvertes }}
-                                /{{ statParcours.nbAnnees }}</div>
-                            années ouvertes
-                        </div>
+                            <twig:UX:Icon name="icon:layers" class="size-4" />
+                            <span>{{ parcours.libelle }}</span>
+                            {% if isParcoursFerme %}
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-danger-100 text-danger-700 dark:bg-danger-900/60 dark:text-danger-300">
+                                    Fermé
+                                </span>
+                            {% endif %}
+                            {% if statP and statP.anomalies|length > 0 %}
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-warning-500 text-white shadow-xs" title="{{ statP.anomalies|length }} anomalie(s)">
+                                    {{ statP.anomalies|length }}
+                                </span>
+                            {% endif %}
+                        </button>
+                    {% endfor %}
+                </div>
 
-                        <div class="rounded-xl bg-primary-50 p-3 text-sm text-primary-700 dark:bg-primary-900/30 dark:text-primary-300">
-                            <div class="text-lg font-bold">{{ statParcours.nbPlateformesActives }}</div>
-                            plateforme{{ statParcours.nbPlateformesActives > 1 ? 's' : '' }} active{{ statParcours.nbPlateformesActives > 1 ? 's' : '' }}
-                        </div>
-
-                        <div class="rounded-xl bg-secondary-50 p-3 text-sm text-secondary-700 dark:bg-secondary-900/30 dark:text-secondary-300">
-                            <div class="text-lg font-bold">{{ statParcours.capacite }}</div>
-                            capacité totale
-                        </div>
-
-                        <div class="rounded-xl bg-warning-50 p-3 text-sm text-warning-700 dark:bg-warning-900/30 dark:text-warning-300">
-                            <div class="text-lg font-bold">{{ statParcours.anomalies|length }}</div>
-                            anomalie{{ statParcours.anomalies|length > 1 ? 's' : '' }}
-                        </div>
-                    </div>
-
-                    <!-- Années du parcours -->
-                    <div class="mt-5 space-y-4">
-                        {% for annee in parcours.annees %}
-                            {{ include('offre_v2/_configurer_annee.html.twig', {
-                                'annee': annee,
-                                'parcours': parcours,
-                                'typeDiplome': typeDiplome,
-                                'comparaison': comparaison,
-                                'plateformes': plateformes
-                            }) }}
-                        {% endfor %}
-                    </div>
-                </article>
-            </twig:Card>
+                <button type="button"
+                        class="inline-flex items-center gap-1.5 rounded-xl border border-secondary-200 bg-surface px-3.5 py-2 text-xs font-semibold text-secondary-600 hover:bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-300 dark:hover:bg-secondary-700 shadow-xs transition cursor-pointer"
+                        data-action="click->tabs#toggleDetails"
+                >
+                    <twig:UX:Icon name="icon:chevron-down" class="h-4 w-4 transition-transform duration-200" data-toggle-icon="true" />
+                    <span data-toggle-label="true">Tout déplier / replier</span>
+                </button>
             </div>
-        {% endfor %}
+
+            <div>
+                {% for parcours in formation.parcours %}
+                    <div id="panel-parcours-{{ parcours.id }}"
+                         data-tabs-target="panel"
+                         data-panel-id="parcours-{{ parcours.id }}"
+                         class="{% if not loop.first %}hidden{% endif %}"
+                         role="tabpanel"
+                         aria-labelledby="tab-parcours-{{ parcours.id }}"
+                         data-parcours-id="{{ parcours.id }}"
+                    >
+                        {% set statParcours = tabStatistiques['parcours'][parcours.id] %}
+                        <twig:Card extraClass="mb-4">
+                            <twig:block name="title">
+                                {{ include('offre_v2/_parcours_title_area.html.twig', {
+                                    parcours: parcours,
+                                    campagne: campagne,
+                                    can_edit: can_edit
+                                }) }}
+                            </twig:block>
+                            <twig:block name="actions">
+                                {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
+                                {% set currentEtat = dpe ? dpe.getEtatReconduction().value : 'OUVERT' %}
+                                <span id="parcours_{{ parcours.id }}_badge" class="mr-2">
+                                    {% set isParcoursFerme = currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}
+                                    {% if currentEtat == 'FERMETURE_DEFINITIVE' %}
+                                        <twig:Badge variant="danger" label="Fermeture définitive" />
+                                    {% elseif isParcoursFerme %}
+                                        <twig:Badge variant="danger" label="Non ouvert" />
+                                    {% else %}
+                                        <twig:Badge variant="success" label="Ouvert" />
+                                    {% endif %}
+                                </span>
+                                <label for="parcours-{{ parcours.id }}" class="cursor-pointer"></label>
+                                <select class="rounded-lg border bg-surface text-text px-3 py-2 text-sm disabled:bg-secondary-100 disabled:text-secondary-500 dark:border-secondary-600 dark:bg-secondary-900/30"
+                                        id="parcours-{{ parcours.id }}"
+                                        name="parcours_{{ parcours.id }}_reconduction"
+                                        {{ not can_edit ? 'disabled' : '' }}
+                                >
+                                    <option value="OUVERT" {% if currentEtat == 'OUVERT' or currentEtat == 'CREATION' or currentEtat == 'MODIFICATION' or currentEtat == 'MODIFICATION_INTITULE' or currentEtat == 'MODIFICATION_PARCOURS' or currentEtat == 'MODIFICATION_TEXTE' or currentEtat == 'MODIFICATION_MCCC' or currentEtat == 'MODIFICATION_MCCC_TEXTE' %}selected{% endif %}>Ouvert</option>
+                                    <option value="NON_OUVERTURE" {% if currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'ATTENTE' %}selected{% endif %}>Non ouvert</option>
+                                    <option value="FERMETURE_DEFINITIVE" {% if currentEtat == 'FERMETURE_DEFINITIVE' %}selected{% endif %}>Fermeture définitive</option>
+                                </select>
+                            </twig:block>
+                            <!-- Parcours -->
+                            <article>
+                                <div id="parcours_{{ parcours.id }}_stats" class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                                    <twig:Kpi
+                                        title="Années ouvertes"
+                                        value="{{ statParcours.nbAnneesOuvertes }}"
+                                        total="{{ statParcours.nbAnnees }}"
+                                        variant="success"
+                                        icon="icon:check-circle"
+                                    />
+
+                                    <twig:Kpi
+                                        title="Plateformes"
+                                        value="{{ statParcours.nbPlateformesActives }}"
+                                        unit="active{{ statParcours.nbPlateformesActives > 1 ? 's' : '' }}"
+                                        variant="primary"
+                                        icon="icon:globe"
+                                    />
+
+                                    <twig:Kpi
+                                        title="Capacité totale"
+                                        value="{{ statParcours.capacite }}"
+                                        unit="places"
+                                        variant="info"
+                                        icon="icon:users"
+                                    />
+
+                                    <twig:Kpi
+                                        title="Anomalies"
+                                        value="{{ statParcours.anomalies|length }}"
+                                        variant="{{ statParcours.anomalies|length > 0 ? 'warning' : 'secondary' }}"
+                                        icon="{{ statParcours.anomalies|length > 0 ? 'icon:warning' : 'icon:check-circle' }}"
+                                    />
+                                </div>
+
+                                <!-- Années du parcours -->
+                                <div class="mt-5 space-y-4">
+                                    {% for annee in parcours.annees %}
+                                        {{ include('offre_v2/_configurer_annee.html.twig', {
+                                            'annee': annee,
+                                            'parcours': parcours,
+                                            'formation': formation,
+                                            'typeDiplome': typeDiplome,
+                                            'comparaison': comparaison,
+                                            'plateformes': plateformes
+                                        }) }}
+                                    {% endfor %}
+                                </div>
+                            </article>
+                        </twig:Card>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
     </form>
 
     <!-- Historique des validations documentaires (PV & Notes) -->

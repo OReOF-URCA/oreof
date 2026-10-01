@@ -53,6 +53,32 @@ class FormationRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * @return Formation[]
+     */
+    public function findByCampagneWithRelations(CampagneCollecte $campagne, ?Composante $composante = null): array
+    {
+        $qb = $this->createQueryBuilder('f')
+            ->leftJoin('f.composantePorteuse', 'cp')
+            ->leftJoin('f.mention', 'm')
+            ->leftJoin('f.typeDiplome', 'td')
+            ->leftJoin('f.domaine', 'dom')
+            ->leftJoin('f.composantesInscription', 'ci')
+            ->addSelect('cp', 'm', 'td', 'dom', 'ci')
+            ->where('f.dpe = :campagne')
+            ->setParameter('campagne', $campagne)
+            ->orderBy('td.libelle', 'ASC')
+            ->addOrderBy('m.libelle', 'ASC')
+            ->addOrderBy('f.mentionTexte', 'ASC');
+
+        if ($composante !== null) {
+            $qb->andWhere('f.composantePorteuse = :composante')
+                ->setParameter('composante', $composante);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
     public function findByComposanteDpe(
         UserInterface    $user,
         CampagneCollecte $campagneCollecte,

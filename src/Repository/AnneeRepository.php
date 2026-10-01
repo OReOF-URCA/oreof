@@ -24,6 +24,7 @@ class AnneeRepository extends ServiceEntityRepository
         $annees = $this->createQueryBuilder('a')
             ->join('a.parcours', 'p')
             ->join('p.dpeParcours', 'dp')
+            ->addSelect('p')
             ->where('dp.campagneCollecte = :campagne')
             ->setParameter('campagne', $campagne)
             ->orderBy('a.ordre', 'ASC')

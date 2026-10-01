@@ -152,16 +152,22 @@ class TypeEcController extends AbstractController
         );
     }
 
-    #[Route('/{id}/duplicate', name: 'app_type_ec_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_type_ec_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         TypeEcRepository $typeEcRepository,
         TypeEc $typeEc
     ): Response {
-        $typeEcNew = clone $typeEc;
-        $typeEcNew->setLibelle($typeEc->getLibelle() . ' - Copie');
-        $typeEcRepository->save($typeEcNew, true);
-        return $turboStream->streamToastSuccess('Type d\'EC dupliqué avec succès', true);
+        if ($this->isDuplicateTokenValid($typeEc, $this->getCsrfTokenFromRequest($request))) {
+            $typeEcNew = clone $typeEc;
+            $typeEcNew->setLibelle($typeEc->getLibelle() . ' - Copie');
+            $typeEcRepository->save($typeEcNew, true);
+
+            return $turboStream->streamToastSuccess('Type d\'EC dupliqué avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

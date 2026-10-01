@@ -1,2 +1,7 @@
-{{ item.parcours and item.parcours.formation ? item.parcours.formation.display : '-' }}
-
+{% if item.formation is defined and item.formation %}
+    {{ item.formation.display }}
+{% elseif item.parcours and item.parcours.formation %}
+    {{ item.parcours.formation.display }}
+{% else %}
+    -
+{% endif %}

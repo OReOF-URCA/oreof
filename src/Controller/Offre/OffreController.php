@@ -66,12 +66,8 @@ final class OffreController extends BaseController
 
         $campagne = $this->getCampagneCollecte();
 
-        // 1. Récupérer les formations de la campagne (directement via dpe et/ou via dpeParcours)
-        $formationCriteria = ['dpe' => $campagne];
-        if ($composante !== null) {
-            $formationCriteria['composantePorteuse'] = $composante;
-        }
-        $formations = $formationRepository->findBy($formationCriteria);
+        // 1. Récupérer les formations de la campagne avec relations préchargées
+        $formations = $formationRepository->findByCampagneWithRelations($campagne, $composante);
 
         $tFormations = [];
         foreach ($formations as $formation) {
@@ -127,7 +123,7 @@ final class OffreController extends BaseController
             $parcoursAnnees = $anneesByParcours[$parcours->getId()] ?? [];
 
             // Calcul anomalies pour ce parcours en mémoire (0 requête)
-            $parcAnoms = $offreValidationService->getAnomaliesParcours($parcours, $campagne, $dpePar, $paramsByAnnee, $parcoursAnnees);
+            $parcAnoms = $offreValidationService->getAnomaliesParcours($parcours, $campagne, $dpePar, $paramsByAnnee, $parcoursAnnees, $tpaByTypeDiplome);
             if (count($parcAnoms) > 0) {
                 $tFormations[$idFormation]['parcoursAnomalies'][$parcours->getId()] = $parcAnoms;
                 $tFormations[$idFormation]['anomalies'] = array_merge($tFormations[$idFormation]['anomalies'], $parcAnoms);
@@ -160,7 +156,14 @@ final class OffreController extends BaseController
         $docsByFormation = $documentConseilRepository->findIndexedByFormationIds($formationIds);
 
         // Batch loading des DpeFormation pour la gestion du workflow de validation des composantes
-        $dpeFormations = $em->getRepository(DpeFormation::class)->findBy(['campagneCollecte' => $campagne]);
+        /** @var list<DpeFormation> $dpeFormations */
+        $dpeFormations = $em->getRepository(DpeFormation::class)->createQueryBuilder('df')
+            ->join('df.formation', 'f')
+            ->addSelect('f')
+            ->where('df.campagneCollecte = :campagne')
+            ->setParameter('campagne', $campagne)
+            ->getQuery()
+            ->getResult();
         $dpeFormationMap = [];
         foreach ($dpeFormations as $df) {
             if ($df->getFormation() !== null) {
@@ -172,7 +175,28 @@ final class OffreController extends BaseController
         foreach ($tFormations as $fId => &$row) {
             $formationCapacite = $row['formation']->getCapaciteAccueil();
             if ($formationCapacite <= 0) {
-                $formationCapacite = $row['formation']->getCapaciteCalculee();
+                // Calcul en mémoire depuis les données préchargées (0 requête supplémentaire)
+                $tcAnneesCounted = [];
+                $formationCapacite = 0;
+                foreach ($row['parcoursData'] as $pd) {
+                    if (!$pd['isOuvert']) {
+                        continue;
+                    }
+                    foreach ($pd['annees'] as $annee) {
+                        if (!$annee->isOuvert()) {
+                            continue;
+                        }
+                        $ordre = $annee->getOrdre();
+                        if ($ordre !== null && $row['formation']->isAnneeTroncCommun($ordre)) {
+                            if (!isset($tcAnneesCounted[$ordre])) {
+                                $formationCapacite += $annee->getCapaciteAccueil();
+                                $tcAnneesCounted[$ordre] = true;
+                            }
+                        } else {
+                            $formationCapacite += $annee->getCapaciteAccueil();
+                        }
+                    }
+                }
             }
             $row['capacite'] = $formationCapacite;
 
@@ -377,12 +401,42 @@ final class OffreController extends BaseController
             $groupedFormations[$compLibelle]['formations'][] = $row;
         }
 
-        ksort($groupedFormations);
+        // Tri par défaut :
+        // 1. Composantes par ordre alphabétique
+        // 2. Formations (dont le libellé est en lien avec la mention) par ordre alphabétique
+        // 3. Parcours par libellé
+        $collator = class_exists(\Collator::class) ? new \Collator('fr_FR') : null;
+        $compareStr = static function (string $a, string $b) use ($collator): int {
+            if ($collator !== null) {
+                $res = $collator->compare($a, $b);
+                return $res !== false ? $res : strcasecmp($a, $b);
+            }
+            return strcasecmp($a, $b);
+        };
+
+        uksort($groupedFormations, static fn(string $a, string $b) => $compareStr($a, $b));
 
         $isSesOrAdmin = $this->isGranted('ROLE_SES') || $this->isGranted('ROLE_ADMIN');
         $isPeriodActive = $campagne->isPeriodActive();
 
         foreach ($groupedFormations as &$compGroup) {
+            // Tri alphabétique des formations de la composante (selon display / mention)
+            usort($compGroup['formations'], static function (array $a, array $b) use ($compareStr): int {
+                $libA = (string)($a['formation']->getDisplay() ?? $a['formation']->getDisplayLong() ?? '');
+                $libB = (string)($b['formation']->getDisplay() ?? $b['formation']->getDisplayLong() ?? '');
+                return $compareStr($libA, $libB);
+            });
+
+            // Tri alphabétique des parcours au sein de chaque formation
+            foreach ($compGroup['formations'] as &$formaRow) {
+                uasort($formaRow['parcoursData'], static function (array $a, array $b) use ($compareStr): int {
+                    $libA = (string)$a['parcours']->getLibelle();
+                    $libB = (string)$b['parcours']->getLibelle();
+                    return $compareStr($libA, $libB);
+                });
+            }
+            unset($formaRow);
+
             $enabledTransitionsMap = [];
             $stateCounts = [];
 

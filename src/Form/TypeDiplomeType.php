@@ -8,7 +8,7 @@ use App\Form\Type\YesNoType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use App\TypeDiplome\NonClassique\NonClassiqueHandler;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
-use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -25,7 +25,7 @@ class TypeDiplomeType extends AbstractType
     private iterable $typeDiplomeHandlers;
 
     public function __construct(
-        #[TaggedIterator('app.type_diplome_handler')] iterable $typeDiplomeHandlers
+        #[AutowireIterator('app.type_diplome_handler')] iterable $typeDiplomeHandlers
     )
     {
         $this->typeDiplomeHandlers = $typeDiplomeHandlers;
@@ -145,29 +145,42 @@ class TypeDiplomeType extends AbstractType
             ->add('nbEctsMaxUe', null, [
                 'row_attr' => ['class' => 'ects-field'],
             ])
-            ->add('nbEctsMaxUe')
-            ->add('nbEcParUe')
-            // « Nombre maximum d'EC par UE » : sans objet à la fois pour une formation
-            // non accréditée ET pour un diplôme sans ECTS → présent dans les deux groupes.
             ->add('nbEcParUe', null, [
                 'row_attr' => ['class' => 'semestre-field ects-field'],
             ])
             ->add('ModeleMcc', ChoiceType::class, [
                 'choices' => $choices,
             ])
-            ->add('debutSemestreFlexible', null, [
+            ->add('debutSemestreFlexible', YesNoType::class, [
+                'label' => 'Début de semestre flexible ?',
                 'row_attr' => ['class' => 'semestre-field'],
             ])
-            ->add('hasMemoire', YesNoType::class)
-            ->add('hasStage', YesNoType::class)
-            ->add('hasSituationPro', YesNoType::class)
-            ->add('hasProjet', YesNoType::class)
-            ->add('ectsObligatoireSurEc', YesNoType::class, ['empty_data' => true, 'row_attr' => ['class' => 'ects-field']])
-            ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true])
-            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
-            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
-            ->add('mcccObligatoireSurEc', YesNoType::class, ['empty_data' => true, 'row_attr' => ['class' => 'semestre-field']])
-            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
+            ->add('hasMemoire', YesNoType::class, [
+                'label' => 'Présence d\'un mémoire ?',
+            ])
+            ->add('hasStage', YesNoType::class, [
+                'label' => 'Présence d\'un stage ?',
+            ])
+            ->add('hasSituationPro', YesNoType::class, [
+                'label' => 'Situation professionnelle ?',
+            ])
+            ->add('hasProjet', YesNoType::class, [
+                'label' => 'Présence d\'un projet ?',
+            ])
+            ->add('ectsObligatoireSurEc', YesNoType::class, [
+                'label' => 'ECTS obligatoires sur les EC ?',
+                'empty_data' => true,
+                'row_attr' => ['class' => 'ects-field'],
+            ])
+            ->add('mcccObligatoireSurEc', YesNoType::class, [
+                'label' => 'MCCC obligatoires sur les EC ?',
+                'empty_data' => true,
+                'row_attr' => ['class' => 'semestre-field'],
+            ])
+            ->add('controleAssiduite', YesNoType::class, [
+                'label' => 'Contrôle de l\'assiduité ?',
+                'empty_data' => true,
+            ]);
 
         // En création, l'upload est dans le formulaire. En modification, il est géré
         // par la carte dédiée (ajout/suppression logo par logo).
@@ -189,9 +202,13 @@ class TypeDiplomeType extends AbstractType
             $typeDiplome = $event->getData();
             $form = $event->getForm();
 
-            $nbAnnees = 1;
-            if ($typeDiplome && $typeDiplome->getId()) {
-                $nbAnnees = $typeDiplome->getNbAnnee();
+            $nbAnnees = 3;
+            if ($typeDiplome) {
+                if ($typeDiplome->getNbAnnee() > 0) {
+                    $nbAnnees = $typeDiplome->getNbAnnee();
+                } elseif ($typeDiplome->getSemestreDebut() !== null && $typeDiplome->getSemestreFin() !== null) {
+                    $nbAnnees = max(1, (int) ceil(($typeDiplome->getSemestreFin() - $typeDiplome->getSemestreDebut() + 1) / 2));
+                }
             }
 
             // Récupérer les associations plateformes/années existantes
@@ -202,6 +219,7 @@ class TypeDiplomeType extends AbstractType
                         'plateforme' => $tpa->getPlateforme(),
                         'annees' => $tpa->getAnnees() ?? [],
                         'anneesCapaciteRequise' => $tpa->getAnneesCapaciteRequise() ?? [],
+                        'anneesCapaciteSpecifique' => $tpa->getAnneesCapaciteSpecifique() ?? [],
                     ];
                 }
             }
@@ -223,17 +241,7 @@ class TypeDiplomeType extends AbstractType
                     'class' => 'plateformes-collection',
                 ],
             ]);
-        })
-            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true])
-            ->add('hasEcts', YesNoType::class, [
-                'label' => 'Utilise les ECTS',
-                'empty_data' => true,
-            ])
-            ->add('nbEctsParSemestre', null, [
-                'label' => 'Nombre d\'ECTS par semestre (laisser vide si pas de quota fixe)',
-                'required' => false,
-            ])
-            ->add('controleAssiduite', YesNoType::class, ['empty_data' => true]);
+        });
 
         // Quand le diplôme n'utilise pas les ECTS, le champ « Nombre maximum d'ECTS
         // par UE » est grisé côté client et sans objet. On lui fournit une valeur
@@ -249,7 +257,7 @@ class TypeDiplomeType extends AbstractType
 
             // YesNoType : « Oui » est soumis avec la valeur '1' ; tout le reste
             // (vide, '0', absent) signifie que les ECTS ne sont pas utilisés.
-            $hasEcts = !empty($data['hasEcts']) && $data['hasEcts'] !== '0';
+            $hasEcts = !empty($data['hasEcts']);
             $classique = ($data['classique'] ?? null) === 'accreditee';
 
             // Les champs entiers NOT NULL grisés côté client (donc absents du POST)

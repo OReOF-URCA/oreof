@@ -26,7 +26,7 @@ class HistoriqueFormation extends Historique
 
     public function getFormation(): ?Formation
     {
-        return $this->formation;
+        return $this->formation ?? $this->changeRf?->getFormation() ?? $this->dpeFormation?->getFormation();
     }
 
     public function setFormation(?Formation $formation): static

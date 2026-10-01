@@ -4,24 +4,28 @@ namespace App\Form;
 
 use App\Entity\CampagneCollecte;
 use App\Entity\TimelineDate;
+use App\Enums\TimelineDateFlagEnum;
 use App\Form\Type\YesNoType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\EnumType;
-use App\Enums\TimelineDateFlagEnum;
-use function Sodium\add;
 
 class TimelineDateType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('ordre', HiddenType::class, [
+                'empty_data' => '0',
+            ])
             ->add('libelle', TextType::class, [
                 'label' => 'timeline.libelle',
             ])
@@ -29,8 +33,30 @@ class TimelineDateType extends AbstractType
                 'label' => 'timeline.description',
                 'required' => false,
             ])
-            ->add('icone', TextType::class, [
+            ->add('icone', ChoiceType::class, [
                 'label' => 'timeline.icone',
+                'choices' => [
+                    'Horloge / Temps' => 'icon:clock',
+                    'Calendrier' => 'icon:calendar',
+                    'Drapeau (Étape clé)' => 'icon:flag',
+                    'Validation / Succès' => 'icon:check',
+                    'Diplôme / Formation' => 'icon:graduation',
+                    'Utilisateurs / Équipe' => 'icon:users',
+                    'Édition / Saisie' => 'icon:edit',
+                    'Livre / Enseignements' => 'icon:book-open',
+                    'Document' => 'icon:document',
+                    'Verrou / Clôture' => 'icon:lock',
+                    'Couches / Maquette' => 'icon:layers',
+                    'Envoi / Transmission' => 'icon:paper-plane',
+                    'Cloche / Notification' => 'icon:bell',
+                    'Information' => 'icon:info',
+                    'Avertissement' => 'icon:warning',
+                    'Outil / Configuration' => 'icon:wrench',
+                    'Étoile' => 'icon:star',
+                    'Œil / Consultation' => 'icon:eye',
+                ],
+                'required' => true,
+                'placeholder' => 'Choisir une icône...',
             ])
             ->add('dateDebut', DateType::class, [
                 'widget' => 'single_text',

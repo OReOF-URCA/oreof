@@ -137,16 +137,22 @@ class AnneeUniversitaireController extends AbstractController
         );
     }
 
-    #[Route('/{id}/duplicate', name: 'app_annee_universitaire_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_annee_universitaire_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         AnneeUniversitaireRepository $anneeUniversitaireRepository,
         AnneeUniversitaire           $annee_universitaire
     ): Response {
-        $annee_universitaireNew = clone $annee_universitaire;
-        $annee_universitaireNew->setLibelle($annee_universitaire->getLibelle() . ' - Copie');
-        $anneeUniversitaireRepository->save($annee_universitaireNew, true);
-        return $turboStream->streamToastSuccess('Année universitaire dupliquée avec succès', true);
+        if ($this->isDuplicateTokenValid($annee_universitaire, $this->getCsrfTokenFromRequest($request))) {
+            $annee_universitaireNew = clone $annee_universitaire;
+            $annee_universitaireNew->setLibelle($annee_universitaire->getLibelle() . ' - Copie');
+            $anneeUniversitaireRepository->save($annee_universitaireNew, true);
+
+            return $turboStream->streamToastSuccess('Année universitaire dupliquée avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

@@ -37,19 +37,86 @@
 
 {% block content %}
     <turbo-frame id="offre_table">
-        {% if campagne and not campagne.isPeriodActive() %}
+        {% set moduleStatus = module_status('offre_formation', campagne) %}
+        {% set timelineStep = campagne ? campagne.timelineDateForModule('offre_formation') : null %}
+        {% set dateDebut = timelineStep ? (timelineStep.dateDebut ?? timelineStep.date) : (campagne ? campagne.dateOuvertureDpe : null) %}
+        {% set dateFin = timelineStep ? timelineStep.date : (campagne ? campagne.dateClotureDpe : null) %}
+        {% set heureFin = timelineStep ? timelineStep.heure : null %}
+
+        <!-- Dates de collecte et Statut -->
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-secondary-200 bg-surface px-4 py-3 shadow-xs dark:border-secondary-700 dark:bg-secondary-800">
+            <div class="flex items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg {{ moduleStatus.isOpen ? 'bg-success-100 text-success-700 dark:bg-success-900/40 dark:text-success-300' : (dateDebut or dateFin ? 'bg-secondary-100 text-secondary-600 dark:bg-secondary-700 dark:text-secondary-300' : 'bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-300') }}">
+                    <twig:UX:Icon name="icon:calendar" class="h-5 w-5" />
+                </div>
+                <div>
+                    <div class="text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
+                        Période de collecte de l'offre
+                    </div>
+                    <div class="text-sm font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-2 flex-wrap">
+                        {% if dateDebut or dateFin %}
+                            <span>
+                                {% if dateDebut %}Du <strong>{{ dateDebut|date('d/m/Y') }}</strong>{% endif %}
+                                {% if dateFin %} au <strong>{{ dateFin|date('d/m/Y') }}</strong>{% if heureFin %} à {{ heureFin|date('H:i') }}{% endif %}{% endif %}
+                            </span>
+                        {% else %}
+                            <span class="text-warning-700 dark:text-warning-300 font-medium">Non configurée dans la timeline</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                {% if moduleStatus.isOpen %}
+                    <twig:Badge variant="success" label="Collecte ouverte" icon="icon:check" />
+                {% elseif moduleStatus.nextOpeningDate %}
+                    <twig:Badge variant="warning" label="{{ 'Ouverture le ' ~ moduleStatus.nextOpeningDate|date('d/m/Y') }}" icon="icon:clock" />
+                {% elseif dateFin and date() > dateFin %}
+                    <twig:Badge variant="danger" label="Collecte clôturée" icon="icon:lock" />
+                {% elseif not dateDebut and not dateFin %}
+                    <twig:Badge variant="warning" label="Dates non définies" icon="icon:warning" />
+                {% else %}
+                    <twig:Badge variant="secondary" label="Non ouverte" icon="icon:lock" />
+                {% endif %}
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    <twig:Button href="{{ path('offre_v2_configurer_dates') }}"
+                                 size="xs"
+                                 variant="secondary"
+                                 data-turbo="true"
+                                 data-turbo-stream="true"
+                                 data-action="click->modalturbo#open"
+                                 icon="icon:edit"
+                                 label="Modifier les dates"
+                    />
+                {% endif %}
+            </div>
+        </div>
+
+        {% if not campagne %}
+            <twig:alerte type="warning" class="mb-4">
+                <h3 class="font-semibold">Aucune campagne de collecte active</h3>
+                <p class="mt-1 text-sm">Veuillez sélectionner ou configurer une campagne de collecte par défaut.</p>
+            </twig:alerte>
+        {% elseif campagne.timelineDates is empty or moduleStatus.allSteps is empty %}
+            <twig:alerte type="warning" class="mb-4">
+                <h3 class="font-semibold">Aucune période de collecte configurée</h3>
+                <p class="mt-1 text-sm">
+                    La campagne « {{ campagne.libelle }} » ne comporte pas encore d'étape de saisie pour l'offre de formation dans sa timeline.
+                    {% if is_granted('ROLE_ADMIN') %}
+                        Cliquez sur <strong>« Modifier les dates »</strong> ou <strong>« Dates de collecte »</strong> pour définir les dates de début et de fin.
+                    {% else %}
+                        Veuillez contacter l'administrateur pour ouvrir la campagne.
+                    {% endif %}
+                </p>
+            </twig:alerte>
+        {% elseif not moduleStatus.isOpen %}
             <twig:alerte type="danger" class="mb-4">
                 <h3 class="font-semibold">La campagne de collecte est fermée</h3>
-                <p class="mt-1">
-                    {% if campagne.dateOuvertureDpe and date() < campagne.dateOuvertureDpe %}
-                        Elle ouvrira le {{ campagne.dateOuvertureDpe|date('d/m/Y à H:i') }}.
-                    {% elseif campagne.dateClotureDpe and date() > campagne.dateClotureDpe %}
-                        Elle a fermé le {{ campagne.dateClotureDpe|date('d/m/Y à H:i') }}.
-                    {% else %}
-                        Elle n'est pas ouverte actuellement.
-                    {% endif %}
+                <p class="mt-1 text-sm">
+                    {{ moduleStatus.message }}
                     {% if is_granted('ROLE_ADMIN') %}
-                        En tant qu'administrateur, vous pouvez exceptionnellement modifier les capacités.
+                        En tant qu'administrateur, vous pouvez exceptionnellement modifier les capacités et les paramètres.
                     {% else %}
                         Les modifications sont désactivées.
                     {% endif %}
@@ -61,35 +128,48 @@
         <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" class="space-y-6">
             <!-- KPI -->
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
-                <div class="rounded-xl border bg-surface p-4 shadow-sm">
-                    <p class="text-sm text-secondary-500">Formations</p>
-                    <p class="mt-2 text-3xl font-bold">{{ tabStatistiques.nbFormations }}</p>
-                </div>
+                <twig:Kpi
+                    title="Formations"
+                    value="{{ tabStatistiques.nbFormations }}"
+                    variant="default"
+                    icon="icon:graduation"
+                />
 
-                <div class="rounded-xl border bg-surface p-4 shadow-sm">
-                    <p class="text-sm text-secondary-500">Parcours</p>
-                    <p class="mt-2 text-3xl font-bold">{{ tabStatistiques.nbParcours }}</p>
-                </div>
+                <twig:Kpi
+                    title="Parcours"
+                    value="{{ tabStatistiques.nbParcours }}"
+                    variant="default"
+                    icon="icon:layers"
+                />
 
-                <div class="rounded-xl border bg-surface p-4 shadow-sm">
-                    <p class="text-sm text-secondary-500">Ouverts</p>
-                    <p class="mt-2 text-3xl font-bold text-success-700 dark:text-success-300">{{ tabStatistiques.nbParcoursOuvert }}</p>
-                </div>
+                <twig:Kpi
+                    title="Ouverts"
+                    value="{{ tabStatistiques.nbParcoursOuvert }}"
+                    variant="success"
+                    icon="icon:check-circle"
+                />
 
-                <div class="rounded-xl border bg-surface p-4 shadow-sm">
-                    <p class="text-sm text-secondary-500">Capacité</p>
-                    <p class="mt-2 text-3xl font-bold text-success-700 dark:text-success-300">{{ tabStatistiques.capacite }}</p>
-                </div>
+                <twig:Kpi
+                    title="Capacité"
+                    value="{{ tabStatistiques.capacite }}"
+                    unit="places"
+                    variant="info"
+                    icon="icon:users"
+                />
 
-                <div class="rounded-xl border bg-surface p-4 shadow-sm">
-                    <p class="text-sm text-secondary-500">À confirmer</p>
-                    <p class="mt-2 text-3xl font-bold text-warning-600 dark:text-warning-400">{{ tabStatistiques.nbAConfirmer }}</p>
-                </div>
+                <twig:Kpi
+                    title="À confirmer"
+                    value="{{ tabStatistiques.nbAConfirmer }}"
+                    variant="{{ tabStatistiques.nbAConfirmer > 0 ? 'warning' : 'secondary' }}"
+                    icon="icon:clock"
+                />
 
-                <div class="rounded-xl border bg-surface p-4 shadow-sm">
-                    <p class="text-sm text-secondary-500">Anomalies</p>
-                    <p class="mt-2 text-3xl font-bold text-danger-600 dark:text-danger-400">{{ tabStatistiques.nbAnomalies }}</p>
-                </div>
+                <twig:Kpi
+                    title="Anomalies"
+                    value="{{ tabStatistiques.nbAnomalies }}"
+                    variant="{{ tabStatistiques.nbAnomalies > 0 ? 'danger' : 'secondary' }}"
+                    icon="{{ tabStatistiques.nbAnomalies > 0 ? 'icon:warning' : 'icon:check-circle' }}"
+                />
             </div>
 
             <!-- Filters -->

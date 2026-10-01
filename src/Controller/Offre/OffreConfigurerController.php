@@ -8,6 +8,7 @@ use App\Entity\Constantes;
 use App\Entity\DpeFormation;
 use App\Entity\Formation;
 use App\Entity\PlateformeAdmissionParametre;
+use App\Enums\CampagneModuleEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Service\CampagneCollecteService;
@@ -73,6 +74,7 @@ final class OffreConfigurerController extends BaseController
                         'hasDefinitionChamps' => $plateforme->hasDefinitionChamps(),
                         'annees' => array_values($tpa->getAnnees() ?? []),
                         'anneesCapaciteRequise' => array_values($tpa->getAnneesCapaciteRequise() ?? []),
+                        'anneesCapaciteSpecifique' => array_values($tpa->getAnneesCapaciteSpecifique() ?? []),
                     ];
                 }
             }
@@ -261,6 +263,21 @@ final class OffreConfigurerController extends BaseController
                         $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
                     }
                 }
+
+                $regimeKey = 'annee_' . $anneeId . '_regimeInscription';
+                $oldRegimes = $annee->getRegimeInscriptionValues();
+                if ($request->request->has($regimeKey)) {
+                    $newRegimes = (array)$request->request->all($regimeKey);
+                    $annee->setRegimeInscription($newRegimes);
+                    if ($oldRegimes !== $annee->getRegimeInscriptionValues()) {
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                    }
+                } elseif ($request->request->has('annee_' . $anneeId . '_regime_present')) {
+                    $annee->setRegimeInscription([]);
+                    if ($oldRegimes !== []) {
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                    }
+                }
                 
                 $typeDiplome = $formation->getTypeDiplome();
                 if ($typeDiplome) {
@@ -395,6 +412,10 @@ final class OffreConfigurerController extends BaseController
                     $targetAnnee->setCapaciteAccueil($sourceAnnee->getCapaciteAccueil());
                     $changed = true;
                 }
+                if ($targetAnnee->getRegimeInscriptionValues() !== $sourceAnnee->getRegimeInscriptionValues()) {
+                    $targetAnnee->setRegimeInscription($sourceAnnee->getRegimeInscriptionValues());
+                    $changed = true;
+                }
 
                 $typeDiplome = $formation->getTypeDiplome();
                 if ($typeDiplome) {
@@ -408,15 +429,17 @@ final class OffreConfigurerController extends BaseController
                                 'plateforme' => $plat,
                                 'campagne' => $campagne
                             ]);
-                            if (!$targetParam) {
-                                $targetParam = new PlateformeAdmissionParametre();
-                                $targetParam->setAnnee($targetAnnee);
-                                $targetParam->setPlateforme($plat);
-                                $targetParam->setCampagne($campagne);
-                            }
 
                             $srcParam = $sourceParams[$platId] ?? null;
                             if ($srcParam) {
+                                if (!$targetParam) {
+                                    $targetParam = new PlateformeAdmissionParametre();
+                                    $targetParam->setAnnee($targetAnnee);
+                                    $targetParam->setPlateforme($plat);
+                                    $targetParam->setCampagne($campagne);
+                                    $targetParam->setActive(false);
+                                }
+
                                 if ($targetParam->isActive() !== $srcParam->isActive()
                                     || $targetParam->getCapaciteGlobale() !== $srcParam->getCapaciteGlobale()
                                     || $targetParam->getCapaciteFi() !== $srcParam->getCapaciteFi()
@@ -424,7 +447,7 @@ final class OffreConfigurerController extends BaseController
                                     || $targetParam->getCapaciteSpecifique() !== $srcParam->getCapaciteSpecifique()
                                     || $targetParam->getRemarques() !== $srcParam->getRemarques()
                                 ) {
-                                    $targetParam->setActive($srcParam->isActive());
+                                    $targetParam->setActive((bool)$srcParam->isActive());
                                     $targetParam->setCapaciteGlobale($srcParam->getCapaciteGlobale());
                                     $targetParam->setCapaciteFi($srcParam->getCapaciteFi());
                                     $targetParam->setCapaciteAlternance($srcParam->getCapaciteAlternance());
@@ -432,18 +455,21 @@ final class OffreConfigurerController extends BaseController
                                     $targetParam->setRemarques($srcParam->getRemarques());
                                     $changed = true;
                                 }
+                                $em->persist($targetParam);
                             } else {
-                                if ($targetParam->isActive()) {
-                                    $targetParam->setActive(false);
-                                    $targetParam->setCapaciteGlobale(null);
-                                    $targetParam->setCapaciteFi(null);
-                                    $targetParam->setCapaciteAlternance(0);
-                                    $targetParam->setCapaciteSpecifique(0);
-                                    $targetParam->setRemarques(null);
-                                    $changed = true;
+                                if ($targetParam !== null) {
+                                    if ($targetParam->isActive()) {
+                                        $targetParam->setActive(false);
+                                        $targetParam->setCapaciteGlobale(null);
+                                        $targetParam->setCapaciteFi(null);
+                                        $targetParam->setCapaciteAlternance(0);
+                                        $targetParam->setCapaciteSpecifique(0);
+                                        $targetParam->setRemarques(null);
+                                        $changed = true;
+                                    }
+                                    $em->persist($targetParam);
                                 }
                             }
-                            $em->persist($targetParam);
                         }
                     }
                 }
@@ -476,6 +502,7 @@ final class OffreConfigurerController extends BaseController
                             'hasDefinitionChamps' => $plateforme->hasDefinitionChamps(),
                             'annees' => array_values($tpa->getAnnees() ?? []),
                             'anneesCapaciteRequise' => array_values($tpa->getAnneesCapaciteRequise() ?? []),
+                            'anneesCapaciteSpecifique' => array_values($tpa->getAnneesCapaciteSpecifique() ?? []),
                         ];
                     }
                 }
@@ -571,12 +598,25 @@ final class OffreConfigurerController extends BaseController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $campagne = $this->getCampagneCollecte();
 
+        $timelineStep = $campagne->getTimelineDateForModule(CampagneModuleEnum::OFFRE_FORMATION);
+        $dateDebut = $timelineStep?->getDateDebut() ?? $campagne->getDateOuvertureDpe();
+        $dateFin = $timelineStep?->getDate() ?? $campagne->getDateClotureDpe();
+        $heureFin = $timelineStep?->getHeure();
+        $libelle = $timelineStep?->getLibelle() ?? 'Saisie de l\'offre de formation (ouverture, capacités)';
+        $inTimeline = $timelineStep?->isInTimeline() ?? true;
+
         return $turboStream->streamOpenModalFromTemplates(
-            'Dates de collecte des capacités',
+            'Dates de collecte — Offre de formation',
             'Campagne : ' . $campagne->getLibelle(),
             'offre_v2/_modal_configurer_dates.html.twig',
             [
                 'campagne' => $campagne,
+                'timelineStep' => $timelineStep,
+                'dateDebut' => $dateDebut,
+                'dateFin' => $dateFin,
+                'heureFin' => $heureFin,
+                'libelle' => $libelle,
+                'inTimeline' => $inTimeline,
             ],
             'offre_v2/_modal_configurer_dates_footer.html.twig',
             [
@@ -598,14 +638,34 @@ final class OffreConfigurerController extends BaseController
             return new JsonResponse(['success' => false, 'message' => 'Token CSRF invalide.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $dateOuvertureStr = (string)$request->request->get('dateOuvertureDpe');
-        $dateClotureStr = (string)$request->request->get('dateClotureDpe');
+        $libelle = trim((string)$request->request->get('libelle', ''));
+        $dateDebutStr = (string)$request->request->get('dateDebut');
+        $dateFinStr = (string)$request->request->get('dateFin');
+        $heureFinStr = (string)$request->request->get('heureFin');
+        $inTimeline = (bool)$request->request->get('inTimeline', true);
 
-        $dateOuverture = $dateOuvertureStr !== '' ? new \DateTime($dateOuvertureStr) : null;
-        $dateCloture = $dateClotureStr !== '' ? new \DateTime($dateClotureStr) : null;
+        // Rétrocompatibilité si anciens champs transmis
+        if ($dateDebutStr === '' && $request->request->has('dateOuvertureDpe')) {
+            $dateDebutStr = (string)$request->request->get('dateOuvertureDpe');
+        }
+        if ($dateFinStr === '' && $request->request->has('dateClotureDpe')) {
+            $dateFinStr = (string)$request->request->get('dateClotureDpe');
+        }
 
-        $campagneService->updateDates($campagne, $dateOuverture, $dateCloture);
+        $dateDebut = $dateDebutStr !== '' ? new \DateTime($dateDebutStr) : null;
+        $dateFin = $dateFinStr !== '' ? new \DateTime($dateFinStr) : null;
+        $heureFin = $heureFinStr !== '' ? new \DateTime($heureFinStr) : null;
 
-        return $turboStream->streamToastSuccess('Dates de la campagne de collecte des capacités enregistrées.', true);
+        $campagneService->updateModuleDates(
+            $campagne,
+            CampagneModuleEnum::OFFRE_FORMATION,
+            $dateDebut,
+            $dateFin,
+            $heureFin,
+            $libelle !== '' ? $libelle : null,
+            $inTimeline
+        );
+
+        return $turboStream->streamToastSuccess('Dates de collecte de l\'offre enregistrées et synchronisées avec la timeline.', true);
     }
 }

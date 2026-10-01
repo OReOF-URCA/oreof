@@ -160,17 +160,23 @@ class PlateformAdmissionController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/duplicate', name: 'app_plateforme_adminission_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_plateforme_adminission_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         PlateformeAdmissionRepository $plateformeAdmissionRepository,
         PlateformeAdmission           $plateformeAdmission
     ): Response
     {
-        $plateformeAdmissionNew = clone $plateformeAdmission;
-        $plateformeAdmissionNew->setLibelle($plateformeAdmission->getLibelle() . ' - Copie');
-        $plateformeAdmissionRepository->save($plateformeAdmissionNew, true);
-        return $turboStream->streamToastSuccess('Plateforme d\'admission dupliquée avec succès', true);
+        if ($this->isDuplicateTokenValid($plateformeAdmission, $this->getCsrfTokenFromRequest($request))) {
+            $plateformeAdmissionNew = clone $plateformeAdmission;
+            $plateformeAdmissionNew->setLibelle($plateformeAdmission->getLibelle() . ' - Copie');
+            $plateformeAdmissionRepository->save($plateformeAdmissionNew, true);
+
+            return $turboStream->streamToastSuccess('Plateforme d\'admission dupliquée avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

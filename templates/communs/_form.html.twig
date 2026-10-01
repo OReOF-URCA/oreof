@@ -9,7 +9,7 @@
     ? stimulus_action('base', 'sauvegardeFormModal', 'click')
     : {} %}
 
-    {% if isModal is defined and isModal == false %}
+    {% if isModal is not defined or isModal == false %}
 <twig:Button
         type="submit"
         variant="success"

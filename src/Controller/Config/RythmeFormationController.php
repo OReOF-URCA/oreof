@@ -124,16 +124,22 @@ class RythmeFormationController extends AbstractController
         );
     }
 
-    #[Route('/{id}/duplicate', name: 'app_rythme_formation_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_rythme_formation_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         RythmeFormationRepository $rythmeFormationRepository,
         RythmeFormation $rythmeFormation
     ): Response {
-        $rythmeFormationNew = clone $rythmeFormation;
-        $rythmeFormationNew->setLibelle($rythmeFormation->getLibelle() . ' - Copie');
-        $rythmeFormationRepository->save($rythmeFormationNew, true);
-        return $turboStream->streamToastSuccess('Rythme de formation dupliqué avec succès', true);
+        if ($this->isDuplicateTokenValid($rythmeFormation, $this->getCsrfTokenFromRequest($request))) {
+            $rythmeFormationNew = clone $rythmeFormation;
+            $rythmeFormationNew->setLibelle($rythmeFormation->getLibelle() . ' - Copie');
+            $rythmeFormationRepository->save($rythmeFormationNew, true);
+
+            return $turboStream->streamToastSuccess('Rythme de formation dupliqué avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

@@ -144,16 +144,22 @@ class TypeUeController extends AbstractController
         );
     }
 
-    #[Route('/{id}/duplicate', name: 'app_type_ue_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_type_ue_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         TypeUeRepository $typeUeRepository,
         TypeUe $typeUe
     ): Response {
-        $typeUeNew = clone $typeUe;
-        $typeUeNew->setLibelle($typeUe->getLibelle() . ' - Copie');
-        $typeUeRepository->save($typeUeNew, true);
-        return $turboStream->streamToastSuccess('Type d\'UE dupliqué avec succès', true);
+        if ($this->isDuplicateTokenValid($typeUe, $this->getCsrfTokenFromRequest($request))) {
+            $typeUeNew = clone $typeUe;
+            $typeUeNew->setLibelle($typeUe->getLibelle() . ' - Copie');
+            $typeUeRepository->save($typeUeNew, true);
+
+            return $turboStream->streamToastSuccess('Type d\'UE dupliqué avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

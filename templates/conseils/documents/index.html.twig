@@ -1,10 +1,9 @@
 {% extends 'base.html.twig' %}
 
-
-
 {% block bouton_header %}
     <twig:Button
             href="{{ path('app_conseils_documents_download', {
+                process: selectedProcess,
                 composante: selectedComposanteId,
                 formation: selectedFormationId,
                 parcours: selectedParcoursId,
@@ -19,7 +18,59 @@
 {% endblock %}
 
 {% block content %}
+    <div class="app-tabs mb-6">
+        <div class="app-tabs-list" role="tablist" aria-label="Processus documents conseils">
+            <a id="tab-dpe-parcours"
+               class="app-tab gap-2 {% if selectedProcess == 'dpe_parcours' %}app-tab-active active{% endif %}"
+               href="{{ path('app_conseils_documents_index', {
+                   process: 'dpe_parcours',
+                   composante: selectedComposanteId,
+                   formation: selectedFormationId,
+                   parcours: selectedParcoursId,
+                   hasPv: selectedHasPv,
+                   hasJustification: selectedHasJustification
+               }) }}"
+               role="tab"
+               aria-selected="{{ selectedProcess == 'dpe_parcours' ? 'true' : 'false' }}"
+               tabindex="{{ selectedProcess == 'dpe_parcours' ? '0' : '-1' }}"
+            >
+                <twig:UX:Icon name="icon:layers" class="size-4" />
+                DPE (Parcours)
+            </a>
+            <a id="tab-dpe-formation"
+               class="app-tab gap-2 {% if selectedProcess == 'dpe_formation' %}app-tab-active active{% endif %}"
+               href="{{ path('app_conseils_documents_index', {
+                   process: 'dpe_formation',
+                   composante: selectedComposanteId,
+                   formation: selectedFormationId,
+                   hasPv: selectedHasPv,
+                   hasJustification: selectedHasJustification
+               }) }}"
+               role="tab"
+               aria-selected="{{ selectedProcess == 'dpe_formation' ? 'true' : 'false' }}"
+               tabindex="{{ selectedProcess == 'dpe_formation' ? '0' : '-1' }}"
+            >
+                <twig:UX:Icon name="icon:graduation" class="size-4" />
+                Consolidation de l'offre
+            </a>
+            <a id="tab-change-rf"
+               class="app-tab gap-2 {% if selectedProcess == 'change_rf' %}app-tab-active active{% endif %}"
+               href="{{ path('app_conseils_documents_index', {
+                   process: 'change_rf',
+                   composante: selectedComposanteId,
+                   formation: selectedFormationId,
+                   hasPv: selectedHasPv,
+                   hasJustification: selectedHasJustification
+               }) }}"
+               role="tab"
+               aria-selected="{{ selectedProcess == 'change_rf' ? 'true' : 'false' }}"
+               tabindex="{{ selectedProcess == 'change_rf' ? '0' : '-1' }}"
+            >
+                <twig:UX:Icon name="icon:users" class="size-4" />
+                Changement de RF
+            </a>
+        </div>
+    </div>
+
     {{ component('DataTable', { config: table }) }}
 {% endblock %}
-
-

@@ -8,10 +8,10 @@ use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\HistoriqueParcours;
 use App\Entity\Parcours;
-use App\Entity\RythmeFormation;
+use App\Entity\User;
+use App\Enums\RegimeInscriptionEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
-use App\Repository\RythmeFormationRepository;
 use App\Service\Parcours\GenereStructureParcours;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,7 +28,6 @@ final class OffreParcoursController extends BaseController
     public function modalAddParcours(
         #[MapEntity(mapping: ['slug' => 'slug'])]
         Formation $formation,
-        RythmeFormationRepository $rythmeFormationRepository,
         TurboStreamResponseFactory $turboStream,
     ): Response {
         $parcours = new Parcours($formation);
@@ -43,7 +42,7 @@ final class OffreParcoursController extends BaseController
                 'parcoursOrigine' => null,
                 'dpeParcours' => null,
                 'isAdd' => true,
-                'rythmesFormation' => $rythmeFormationRepository->findBy([], ['libelle' => 'ASC']),
+                'regimesInscription' => RegimeInscriptionEnum::cases(),
                 'typesParcours' => TypeParcoursEnum::cases(),
             ],
             '_ui/_footer_submit_cancel.html.twig',
@@ -102,14 +101,18 @@ final class OffreParcoursController extends BaseController
             }
         }
 
-        $rythmeRaw = $request->request->all('rythmeFormation');
-        $rythmeId = !empty($rythmeRaw) ? (int)reset($rythmeRaw) : (int)$request->request->get('rythmeFormation');
-        if ($rythmeId > 0) {
-            $rythme = $em->getRepository(RythmeFormation::class)->find($rythmeId);
-            $parcours->setRythmeFormation($rythme);
-        } else {
-            $parcours->setRythmeFormation(null);
+        $regimesRaw = $request->request->all('regimeInscription');
+        $regimes = [];
+        foreach ($regimesRaw as $raw) {
+            if ($raw === '' || $raw === null) {
+                continue;
+            }
+            $enum = RegimeInscriptionEnum::tryFrom((string)$raw);
+            if ($enum !== null) {
+                $regimes[] = $enum;
+            }
         }
+        $parcours->setRegimeInscription($regimes);
 
         if ($formation->getResponsableMention() !== null) {
             $parcours->setRespParcours($formation->getResponsableMention());
@@ -137,7 +140,7 @@ final class OffreParcoursController extends BaseController
         $histo->setCreated(new \DateTime());
         $histo->setEtat('valide');
         $histo->setEtape('creation');
-        $histo->setUser($this->getUser());
+        $histo->setUser($this->getUser() instanceof User ? $this->getUser() : null);
         $em->persist($histo);
 
         $em->flush();
@@ -152,7 +155,6 @@ final class OffreParcoursController extends BaseController
 
     #[Route('/offre/parcours/{parcours}/modal-edit', name: 'offre_v2_parcours_modal_edit', methods: ['GET'])]
     public function modalEditParcours(
-        RythmeFormationRepository $rythmeFormationRepository,
         Parcours $parcours,
         TurboStreamResponseFactory $turboStream,
         EntityManagerInterface $em,
@@ -177,7 +179,7 @@ final class OffreParcoursController extends BaseController
                 'formation' => $formation,
                 'parcoursOrigine' => $parcoursOrigine,
                 'dpeParcours' => $dpeParcours,
-                'rythmesFormation' => $rythmeFormationRepository->findBy([], ['libelle' => 'ASC']),
+                'regimesInscription' => RegimeInscriptionEnum::cases(),
                 'typesParcours' => TypeParcoursEnum::cases(),
             ],
             '_ui/_footer_submit_cancel.html.twig',
@@ -236,14 +238,18 @@ final class OffreParcoursController extends BaseController
             }
         }
 
-        $rythmeRaw = $request->request->all('rythmeFormation');
-        $rythmeId = !empty($rythmeRaw) ? (int)reset($rythmeRaw) : (int)$request->request->get('rythmeFormation');
-        if ($rythmeId > 0) {
-            $rythme = $em->getRepository(RythmeFormation::class)->find($rythmeId);
-            $parcours->setRythmeFormation($rythme);
-        } else {
-            $parcours->setRythmeFormation(null);
+        $regimesRaw = $request->request->all('regimeInscription');
+        $regimes = [];
+        foreach ($regimesRaw as $raw) {
+            if ($raw === '' || $raw === null) {
+                continue;
+            }
+            $enum = RegimeInscriptionEnum::tryFrom((string)$raw);
+            if ($enum !== null) {
+                $regimes[] = $enum;
+            }
         }
+        $parcours->setRegimeInscription($regimes);
 
         $dpeParcours = $em->getRepository(DpeParcours::class)->findOneBy([
             'parcours' => $parcours,

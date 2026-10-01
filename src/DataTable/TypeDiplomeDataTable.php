@@ -7,6 +7,7 @@ namespace App\DataTable;
 use App\DataTable\Column\YesNoBadgeColumn;
 use App\Entity\TypeDiplome;
 use Pentiminax\UX\DataTables\Attribute\AsDataTable;
+use Pentiminax\UX\DataTables\Column\TemplateColumn;
 use Pentiminax\UX\DataTables\Column\TextColumn;
 use Pentiminax\UX\DataTables\Enum\ActionsAlignment;
 use Pentiminax\UX\DataTables\Filter\TextFilter;
@@ -37,18 +38,21 @@ final class TypeDiplomeDataTable extends AbstractAppDataTable
             TextColumn::new('libelle', 'Libellé du type de diplôme'),
             TextColumn::new('libelleCourt', 'Sigle'),
             TextColumn::new('codeApogee', 'Code Apogée'),
+            TemplateColumn::new('plateformes', 'Plateformes d\'admission')
+                ->setTemplate('config/type_diplome/_column_plateformes.html.twig'),
+            YesNoBadgeColumn::new('classique', 'Accrédité ?'),
             YesNoBadgeColumn::new('hasMemoire', 'Mémoire ?'),
             YesNoBadgeColumn::new('hasStage', 'Stage ?'),
             YesNoBadgeColumn::new('hasProjet', 'Projet ?'),
-            YesNoBadgeColumn::new('hasSituationPro', 'Situation Pro. ?'),
-            YesNoBadgeColumn::new('ectsObligatoireSurEc', 'ECTS Obli. ?'),
+            YesNoBadgeColumn::new('hasSituationPro', 'Sit. Pro. ?'),
+            YesNoBadgeColumn::new('hasEcts', 'ECTS ?'),
         ];
     }
 
     public function configureActions(Actions $actions): Actions
     {
         return $actions
-            ->add($this->createShowAction('app_type_diplome_show', static fn(TypeDiplome $t): array => ['id' => $t->getId()]))
+            ->add($this->createShowAction('app_type_diplome_show', static fn(TypeDiplome $t): array => ['id' => $t->getId()], modal: false))
             ->add($this->createEditAction('app_type_diplome_edit', static fn(TypeDiplome $t): array => ['id' => $t->getId()], modal: false))
             ->add($this->createDuplicateAction('app_type_diplome_duplicate', static fn(TypeDiplome $t): array => ['id' => $t->getId()]))
             ->add($this->createDeleteAction(

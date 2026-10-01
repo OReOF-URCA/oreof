@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\CampagneCollecte;
 use App\Entity\ChangeRf;
 use App\Entity\Formation;
 use App\Entity\HistoriqueFormation;
@@ -79,5 +80,51 @@ class HistoriqueFormationRepository extends ServiceEntityRepository
             ->getResult();
 
         return count($data) > 0 ? $data[0] : null;
+    }
+
+    /**
+     * @return list<HistoriqueFormation>
+     */
+    public function findForConseilDocuments(
+        ?CampagneCollecte $campagneCollecte,
+        ?int              $composanteId = null,
+        ?int              $formationId = null,
+        ?string           $processType = null,
+    ): array
+    {
+        $qb = $this->createQueryBuilder('h')
+            ->addSelect('f', 'c', 'cr', 'df', 'pv', 'note')
+            ->leftJoin('h.formation', 'f')
+            ->leftJoin('h.changeRf', 'cr')
+            ->leftJoin('h.dpeFormation', 'df')
+            ->leftJoin('h.documentPv', 'pv')
+            ->leftJoin('h.documentNote', 'note')
+            ->leftJoin('f.composantePorteuse', 'c')
+            ->orderBy('h.created', 'DESC');
+
+        if ($processType === 'change_rf') {
+            $qb->andWhere('h.changeRf IS NOT NULL OR h.etape LIKE :changeRfPrefix')
+                ->setParameter('changeRfPrefix', 'changeRf.%');
+        } elseif ($processType === 'dpe_formation') {
+            $qb->andWhere('(h.dpeFormation IS NOT NULL OR h.changeRf IS NULL) AND (h.etape NOT LIKE :changeRfPrefix OR h.etape IS NULL)')
+                ->setParameter('changeRfPrefix', 'changeRf.%');
+        }
+
+        if ($campagneCollecte !== null) {
+            $qb->andWhere('f.dpe = :dpe OR df.campagneCollecte = :dpe OR cr.campagneCollecte = :dpe')
+                ->setParameter('dpe', $campagneCollecte);
+        }
+
+        if ($composanteId !== null) {
+            $qb->andWhere('c.id = :composanteId')
+                ->setParameter('composanteId', $composanteId);
+        }
+
+        if ($formationId !== null) {
+            $qb->andWhere('f.id = :formationId OR cr.formation = :formationId OR df.formation = :formationId')
+                ->setParameter('formationId', $formationId);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 }

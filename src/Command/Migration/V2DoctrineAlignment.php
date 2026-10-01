@@ -95,11 +95,23 @@ SQL;
             }
         }
 
+        if ($this->tableExists('annee') && !$this->columnExists('annee', 'regime_inscription')) {
+            $sql['Ajout annee.regime_inscription'] = "ALTER TABLE annee ADD regime_inscription JSON DEFAULT NULL COMMENT '(DC2Type:json)'";
+        }
+
+        if ($this->tableExists('type_diplome_plateforme_admission') && !$this->columnExists('type_diplome_plateforme_admission', 'annees_capacite_specifique')) {
+            $sql['Ajout type_diplome_plateforme_admission.annees_capacite_specifique'] = "ALTER TABLE type_diplome_plateforme_admission ADD annees_capacite_specifique JSON DEFAULT NULL COMMENT '(DC2Type:json)'";
+        }
+
         if ($this->tableExists('etablissement_information') && !$this->columnExists('etablissement_information', 'tarif_inscription')) {
             $sql['Ajout etablissement_information.tarif_inscription'] = 'ALTER TABLE etablissement_information ADD tarif_inscription LONGTEXT DEFAULT NULL';
         }
 
         if ($this->tableExists('timeline_date')) {
+            if (!$this->columnExists('timeline_date', 'ordre')) {
+                $sql['Ajout timeline_date.ordre'] = 'ALTER TABLE timeline_date ADD ordre INT DEFAULT 0 NOT NULL';
+            }
+
             if (!$this->columnExists('timeline_date', 'modules_actifs')) {
                 $sql['Ajout timeline_date.modules_actifs'] = 'ALTER TABLE timeline_date ADD modules_actifs JSON DEFAULT NULL';
             }

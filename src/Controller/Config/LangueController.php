@@ -125,16 +125,22 @@ class LangueController extends AbstractController
         );
     }
 
-    #[Route('/{id}/duplicate', name: 'app_langue_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_langue_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         LangueRepository $langueRepository,
         Langue $langue
     ): Response {
-        $langueNew = clone $langue;
-        $langueNew->setLibelle($langue->getLibelle() . ' - Copie');
-        $langueRepository->save($langueNew, true);
-        return $turboStream->streamToastSuccess('Langue dupliquée avec succès', true);
+        if ($this->isDuplicateTokenValid($langue, $this->getCsrfTokenFromRequest($request))) {
+            $langueNew = clone $langue;
+            $langueNew->setLibelle($langue->getLibelle() . ' - Copie');
+            $langueRepository->save($langueNew, true);
+
+            return $turboStream->streamToastSuccess('Langue dupliquée avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

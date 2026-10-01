@@ -109,6 +109,11 @@ ux_icons:
     icon:layers: 'ph:stack-light'
     icon:login: 'ph:sign-in-light'
     icon:pencil: 'ph:pencil-light'
+    icon:calendar: 'ph:calendar-light'
+    icon:flag: 'ph:flag-light'
+    icon:paper-plane: 'ph:paper-plane-tilt-light'
+    icon:star: 'ph:star-light'
+    icon:globe: 'ph:globe-light'
 
 when@prod:
   ux_icons:

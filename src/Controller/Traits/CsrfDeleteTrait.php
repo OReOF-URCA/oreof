@@ -37,7 +37,17 @@ trait CsrfDeleteTrait
     protected function isDeleteTokenValid(object $entity, ?string $token): bool
     {
         $className = (new \ReflectionClass($entity))->getShortName();
-        $intention = sprintf('delete-%s-%s', strtolower($className), $entity->getId());
+        $id = method_exists($entity, 'getId') ? (string) $entity->getId() : (method_exists($entity, 'getSlug') ? (string) $entity->getSlug() : '');
+        $intention = sprintf('delete-%s-%s', strtolower($className), $id);
+
+        return $this->isCsrfTokenValid($intention, $token);
+    }
+
+    protected function isDuplicateTokenValid(object $entity, ?string $token): bool
+    {
+        $className = (new \ReflectionClass($entity))->getShortName();
+        $id = method_exists($entity, 'getId') ? (string) $entity->getId() : (method_exists($entity, 'getSlug') ? (string) $entity->getSlug() : '');
+        $intention = sprintf('duplicate-%s-%s', strtolower($className), $id);
 
         return $this->isCsrfTokenValid($intention, $token);
     }

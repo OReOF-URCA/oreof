@@ -20,7 +20,7 @@ class PlateformeAdmissionParametre
     private ?PlateformeAdmission $plateforme = null;
 
     #[ORM\Column]
-    private ?bool $active = null;
+    private bool $active = false;
 
     #[ORM\Column(nullable: true)]
     private ?int $capaciteGlobale = null;
@@ -72,7 +72,7 @@ class PlateformeAdmissionParametre
         return $this;
     }
 
-    public function isActive(): ?bool
+    public function isActive(): bool
     {
         return $this->active;
     }

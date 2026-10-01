@@ -206,6 +206,7 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/pentiminax/ux-datatables" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-php86" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/twig/html-extra" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/reprise" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

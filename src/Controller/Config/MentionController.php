@@ -228,14 +228,18 @@ class MentionController extends AbstractController
         }
     }
 
-    #[Route('/{id}/duplicate', name: 'app_mention_duplicate', methods: ['GET'])]
-    public function duplicate(TurboStreamResponseFactory $turboStream, int $id): Response
+    #[Route('/{id}/duplicate', name: 'app_mention_duplicate', methods: ['POST'])]
+    public function duplicate(TurboStreamResponseFactory $turboStream, Request $request, int $id): Response
     {
         try {
             $mention = $this->mentionService->getMentionById($id);
-            $this->mentionService->duplicateMention($mention);
+            if ($this->isDuplicateTokenValid($mention, $this->getCsrfTokenFromRequest($request))) {
+                $this->mentionService->duplicateMention($mention);
 
-            return $turboStream->streamToastSuccess('Mention dupliquée avec succès', true);
+                return $turboStream->streamToastSuccess('Mention dupliquée avec succès', true);
+            }
+
+            return $turboStream->streamToastError('Jeton CSRF invalide', true);
         } catch (Exception $e) {
             return $turboStream->streamToastError('Erreur lors de la duplication : ' . $e->getMessage(), true);
         }
