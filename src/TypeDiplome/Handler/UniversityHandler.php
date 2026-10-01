@@ -54,6 +54,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'M'])]
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'MEEF'])]
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'LP'])]
+#[AutoconfigureTag('app.type_diplome_handler', ['code' => 'DCG'])]
+#[AutoconfigureTag('app.type_diplome_handler', ['code' => 'DSCG'])]
+#[AutoconfigureTag('app.type_diplome_handler', ['code' => 'DEFAULT'])]
 class UniversityHandler extends AbstractTypeDiplomeHandler
 {
     public const TEMPLATE_FOLDER = 'licence';
