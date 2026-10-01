@@ -30,17 +30,22 @@ class DataTableExportController extends AbstractController
     public function exportCsv(Request $request): Response
     {
         // Récupérer les données de l'état du composant depuis la session ou la requête
-        $entityClass = $request->query->get('entityClass');
-        $columns = json_decode($request->query->get('columns', '[]'), true);
-        $filters = json_decode($request->query->get('filters', '[]'), true);
-        $globalSearch = $request->query->get('globalSearch', '');
-        $sortField = $request->query->get('sortField', '');
-        $sortDirection = $request->query->get('sortDirection', 'asc');
+        $entityClass = $request->query->getString('entityClass');
+        $columns = json_decode($request->query->getString('columns', '[]'), true);
+        $filters = json_decode($request->query->getString('filters', '[]'), true);
+        $globalSearch = $request->query->getString('globalSearch');
+        $sortField = $request->query->getString('sortField');
+        $sortDirection = $request->query->getString('sortDirection', 'asc');
 
-        if (!$entityClass) {
+        if ($entityClass === '' || !class_exists($entityClass)) {
             throw new \InvalidArgumentException('Entity class is required');
         }
 
+        if (!is_array($columns) || !is_array($filters)) {
+            throw new \InvalidArgumentException('Invalid export configuration');
+        }
+
+        /** @var class-string $entityClass */
         // Créer la requête avec tous les filtres appliqués
         $qb = $this->createQueryBuilder($entityClass, $columns);
         $this->applyFilters($qb, $columns, $filters);
@@ -52,6 +57,9 @@ class DataTableExportController extends AbstractController
         // Créer le fichier CSV
         $response = new StreamedResponse(function () use ($results, $columns) {
             $handle = fopen('php://output', 'w+');
+            if ($handle === false) {
+                throw new \RuntimeException('Impossible d’ouvrir le flux CSV.');
+            }
 
             // Ajouter le BOM UTF-8 pour Excel
             fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
@@ -92,7 +100,7 @@ class DataTableExportController extends AbstractController
                     } elseif (is_object($value)) {
                         $value = method_exists($value, '__toString') ? (string)$value : '';
                     } elseif ($column['format'] === 'currency' && is_numeric($value)) {
-                        $value = number_format($value, 2, ',', ' ') . ' €';
+                        $value = number_format((float)$value, 2, ',', ' ') . ' €';
                     } elseif ($column['format'] === 'badge' && isset($column['choices'][$value])) {
                         $value = $column['choices'][$value];
                     }
@@ -118,6 +126,9 @@ class DataTableExportController extends AbstractController
         return $response;
     }
 
+    /**
+     * @param class-string $entityClass
+     */
     private function createQueryBuilder(string $entityClass, array $columns): QueryBuilder
     {
         $qb = $this->entityManager->createQueryBuilder();
