@@ -74,7 +74,6 @@ class ExportMccc
                             ),
                             default => null,
                         };
-                        /* legacy branches removed */
                         if ($fichier === null) {
                             continue;
                         }
