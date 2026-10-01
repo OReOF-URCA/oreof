@@ -38,6 +38,7 @@ Icons, Chart.js). Métier universitaire : offre de formation, maquettes, parcour
 | Template Twig, CSS, composant UI, migration Bootstrap | `docs/ui-conventions/ui-conventions.md` |
 | Icônes (`fa-*` → `icon:*`) | `docs/ui-conventions/icones.md` |
 | Menu, section, breadcrumb | `docs/composants/navigation.md` |
+| Aides contextuelles, FAQ, import/export des aides | `docs/composants/aides-faq.md` |
 | Champs JSON configurables (`JsonConfigType`, `DynamicFieldsType`) | `docs/formulaires/README.md` |
 | Entité, colonne, migration, bascule V2 | `docs/architecture/migration-v2.md` |
 | Refonte structure/validation/rendu de maquette | `docs/architecture/maquette-modulaire.md` |

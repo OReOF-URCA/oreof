@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    Import / export des aides
+{% endset %}
+
+{% set header_description %}
+    Transférez les aides contextuelles, la FAQ et la galerie d'images d'une instance à l'autre (local, pré-production, production) sans passer par un dump de base de données.
+{% endset %}
+
+{% block header %}
+    Import / export des aides et de la FAQ
+{% endblock %}
+
+{% block bouton_header %}
+    <twig:Button label="Gestion des aides" variant="secondary" icon="icon:arrow-left" href="{{ path('app_help_index') }}" />
+    <twig:Button label="Gestion de la FAQ" variant="secondary" icon="icon:arrow-left" href="{{ path('app_faq_index') }}" />
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-6">
+        {% if report %}
+            {% component 'alerte' with { type: report.warnings|length > 0 ? 'warning' : 'success' } %}
+                {% block content %}
+                    <p class="font-semibold">Bilan du dernier import</p>
+                    <p>{{ report.summary }}</p>
+                    {% if report.warnings|length > 0 %}
+                        <ul class="mt-2 list-disc pl-5 text-sm">
+                            {% for warning in report.warnings %}
+                                <li>{{ warning }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endblock %}
+            {% endcomponent %}
+        {% endif %}
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {# EXPORT #}
+            <section class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700" aria-labelledby="help-export-title">
+                <h2 id="help-export-title" class="flex items-center gap-2 text-lg font-semibold text-text">
+                    {{ ux_icon('icon:upload', {class: 'h-5 w-5 text-info-600 dark:text-info-400'}) }}
+                    Exporter depuis cette instance
+                </h2>
+                <p class="mt-2 text-sm text-secondary-500 dark:text-secondary-400">
+                    Génère une archive ZIP contenant un fichier Markdown par aide et par question (relisible et modifiable tel quel), leurs réglages, et les images de la galerie.
+                </p>
+
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <twig:Badge label="{{ nbHelps }} aide(s)" variant="info" />
+                    <twig:Badge label="{{ nbFaqs }} question(s) FAQ" variant="info" />
+                    <twig:Badge label="{{ nbImages }} image(s)" variant="info" />
+                </div>
+
+                <div class="mt-6 flex flex-wrap gap-2">
+                    <twig:Button
+                            label="Exporter tout (avec les images)"
+                            variant="primary"
+                            size="md"
+                            icon="icon:upload"
+                            href="{{ path('app_help_export') }}"
+                            :attr="{'data-turbo': 'false'}"
+                    />
+                    <twig:Button
+                            label="Exporter sans les images"
+                            variant="secondary"
+                            size="md"
+                            icon="icon:upload"
+                            href="{{ path('app_help_export', {images: 0}) }}"
+                            tooltip="Archive plus légère : utile si les images sont déjà présentes sur l'instance cible"
+                            :attr="{'data-turbo': 'false'}"
+                    />
+                </div>
+            </section>
+
+            {# IMPORT #}
+            <section class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700" aria-labelledby="help-import-title">
+                <h2 id="help-import-title" class="flex items-center gap-2 text-lg font-semibold text-text">
+                    {{ ux_icon('icon:download', {class: 'h-5 w-5 text-success-600 dark:text-success-400'}) }}
+                    Importer dans cette instance
+                </h2>
+                <p class="mt-2 text-sm text-secondary-500 dark:text-secondary-400">
+                    Sélectionnez une archive produite par le bouton « Exporter ». Les aides sont rapprochées par page cible, les questions par intitulé et les images par nom de fichier : les liens d'images du Markdown restent valides.
+                </p>
+
+                <form method="post" action="{{ path('app_help_import') }}" enctype="multipart/form-data" class="mt-4 space-y-4" data-turbo="false">
+                    <input type="hidden" name="_token" value="{{ csrf_token('help_import') }}">
+
+                    <div>
+                        <label for="help-import-archive" class="mb-1 block text-sm font-medium text-text dark:text-secondary-200">Archive d'export (.zip)</label>
+                        <input type="file" id="help-import-archive" name="archive" accept=".zip,application/zip" required
+                               class="w-full rounded-lg border border-secondary-200 bg-white px-3 py-2 text-sm text-text file:mr-4 file:rounded file:border-0 file:bg-info-50 file:px-4 file:py-1.5 file:text-sm file:font-semibold file:text-info-700 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100 dark:file:bg-info-900 dark:file:text-info-300">
+                        <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">Taille maximale acceptée par ce serveur : {{ maxUploadSize }}.</p>
+                    </div>
+
+                    <label class="flex cursor-pointer items-start gap-3 rounded-lg border border-warning-300 bg-warning-50 p-3 dark:border-warning-700 dark:bg-warning-900/30">
+                        <input type="checkbox" name="overwrite" value="1" class="mt-0.5 h-4 w-4 rounded">
+                        <span class="text-sm text-warning-700 dark:text-warning-300">
+                            <span class="font-semibold">Remplacer les éléments déjà présents</span><br>
+                            Coché : les aides, questions et images existantes sont écrasées par celles de l'archive. Décoché : seuls les éléments absents sont ajoutés.
+                        </span>
+                    </label>
+
+                    <div class="flex justify-end border-t border-secondary-200 pt-3 dark:border-secondary-700">
+                        <twig:Button label="Importer l'archive" variant="success" :soft="false" size="md" type="submit" icon="icon:download" />
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+{% endblock %}

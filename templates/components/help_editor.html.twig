@@ -59,14 +59,8 @@
 
                 <!-- Boutons d'action -->
                 <div class="flex gap-3 pt-4">
-                    <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg bg-success-600 text-white hover:bg-success-700 dark:bg-success-700 dark:hover:bg-success-600 transition">
-                        {{ ux_icon('icon:save', {class: 'h-5 w-5'}) }}
-                        Enregistrer
-                    </button>
-                    <a href="{{ path('app_help_index') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border border-secondary-300 bg-surface text-secondary-700 hover:bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:bg-secondary-700 transition">
-                        {{ ux_icon('icon:arrow-left', {class: 'h-5 w-5'}) }}
-                        Retour
-                    </a>
+                    <twig:Button label="Enregistrer" variant="success" :soft="false" size="md" type="submit" icon="icon:save" />
+                    <twig:Button label="Retour" variant="secondary" size="md" icon="icon:arrow-left" href="{{ path('app_help_index') }}" />
                 </div>
             </div>
 
@@ -86,9 +80,9 @@
 
                     <div class="app-help-markdown text-secondary-700 dark:text-secondary-300 break-words">
                         {% if form.content.vars.value %}
-                            <div id="help-preview" data-live-ignore>{ form.content.vars.value|help_markdown|parse_embeds }}</div>
+                            <div id="help-preview" data-live-ignore>{{ form.content.vars.value|help_markdown|parse_embeds }}</div>
                         {% else %}
-                            <div id="help-preview" data-live-ignore><p class="text-secondary-500 dark:text-secondary-400 italic">Commencez à rédiger pour voir l'aperçu...</p></div>
+                            <div id="help-preview" data-live-ignore><p class="italic text-secondary-400">Commencez à rédiger pour voir l'aperçu...</p></div>
                         {% endif %}
                     </div>
                 </div>
@@ -100,7 +94,6 @@
         {{ component('help_image_manager', { showModal: true, editorTextarea: 'textarea[name="help[content]"]' }) }}
     </div>
 
-    <script src="{{ asset('js/editor_helpers.js') }}"></script>
 </div>
 
 

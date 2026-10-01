@@ -1,4 +1,14 @@
 (function () {
+  // Le script est inclus dans des pages visitées via Turbo : sans ce garde-fou, chaque visite
+  // réenregistrerait les écouteurs globaux (aperçu rendu plusieurs fois, historique dupliqué).
+  if (window.__editorHelpersLoaded) {
+    if (typeof window.refreshEditorPreviews === "function") {
+      window.refreshEditorPreviews();
+    }
+    return;
+  }
+  window.__editorHelpersLoaded = true;
+
   var editorHistory = new WeakMap();
   var lastFocusedEditor = null;
 
@@ -103,16 +113,17 @@
     var content = textarea ? textarea.value : "";
     if (content.trim() === "") {
       preview.innerHTML =
-          '<p class="text-muted fst-italic">Commencez à rédiger pour voir l\'aperçu...</p>';
+          '<p class="italic text-secondary-400">Commencez à rédiger pour voir l\'aperçu...</p>';
       return;
     }
 
     function render() {
       try {
-        // 1. Configuration stricte pour activer les tableaux GFM
+        // 1. Tableaux GFM activés ; pas de `breaks` pour rester fidèle au rendu serveur
+        // (filtre Twig help_markdown / CommonMark : un simple retour à la ligne ne crée pas de <br>).
         window.marked.setOptions({
           gfm: true,
-          breaks: true
+          breaks: false
         });
 
         // 2. CORRECTIF : Normaliser les retours à la ligne (\r\n -> \n)
@@ -160,21 +171,34 @@
     true,
   );
 
-  // Initial render au chargement
-  document.addEventListener("DOMContentLoaded", function () {
-    document.addEventListener(
-      "focusin",
-      function (e) {
-        if (isTrackedTextarea(e.target)) {
-          lastFocusedEditor = e.target;
-          getEditorHistory(e.target);
-        }
-      },
-      true,
-    );
-    updatePreviewFor('textarea[name="help[content]"]', "help-preview");
-    updatePreviewFor('textarea[name="faq[reponse]"]', "faq-preview");
-  });
+  document.addEventListener(
+    "focusin",
+    function (e) {
+      if (isTrackedTextarea(e.target)) {
+        lastFocusedEditor = e.target;
+        getEditorHistory(e.target);
+      }
+    },
+    true,
+  );
+
+  // Rendu initial : au chargement complet, et à chaque visite Turbo (DOMContentLoaded n'y est pas rejoué).
+  // Sans textarea dans la page, on ne touche pas à l'aperçu rendu par le serveur.
+  window.refreshEditorPreviews = function () {
+    if (document.querySelector('textarea[name="help[content]"]')) {
+      updatePreviewFor('textarea[name="help[content]"]', "help-preview");
+    }
+    if (document.querySelector('textarea[name="faq[reponse]"]')) {
+      updatePreviewFor('textarea[name="faq[reponse]"]', "faq-preview");
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", window.refreshEditorPreviews);
+  } else {
+    window.refreshEditorPreviews();
+  }
+  document.addEventListener("turbo:load", window.refreshEditorPreviews);
 
   // Helpers globaux (définir seulement s'ils n'existent pas déjà)
   if (typeof window.updateTextarea === "undefined") {

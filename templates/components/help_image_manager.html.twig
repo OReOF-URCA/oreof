@@ -105,6 +105,10 @@
 {% endif %}
 
 <script>
+  // Ce script est réévalué à chaque visite Turbo : pas de `let`/`const` au niveau global (redéclaration = SyntaxError),
+  // sélecteur de l'éditeur rafraîchi à chaque page, écouteurs globaux enregistrés une seule fois.
+  window.helpImageEditorSelector = '{{ editorTextarea|e('js') }}';
+
   function switchTab(tabName) {
     document.getElementById('gallery-tab-pane').classList.add('hidden');
     document.getElementById('upload-tab-pane').classList.add('hidden');
@@ -136,15 +140,18 @@
     preview.src = ''; preview.classList.add('hidden'); if (icon) icon.classList.remove('hidden'); if (text) { text.textContent = 'Aperçu de l\'image'; text.classList.remove('hidden'); }
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    const uploadFileInput = document.getElementById('uploadFile');
-    if (uploadFileInput) uploadFileInput.addEventListener('change', function(e) { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = function(e) { updateImagePreview(e.target.result, file.name); }; reader.readAsDataURL(file); } else updateImagePreview(''); });
-    loadImages();
-  });
+  if (!window.__helpImageManagerBound) {
+    window.__helpImageManagerBound = true;
 
-  document.addEventListener('change', function(e) { if (!e.target) return; if (e.target.id !== 'uploadFile') return; const file = e.target.files ? e.target.files[0] : null; if (file) { const reader = new FileReader(); reader.onload = function(ev) { updateImagePreview(ev.target.result, file.name); }; reader.readAsDataURL(file); } else updateImagePreview(''); });
+    document.addEventListener('change', function(e) { if (!e.target) return; if (e.target.id !== 'uploadFile') return; const file = e.target.files ? e.target.files[0] : null; if (file) { const reader = new FileReader(); reader.onload = function(ev) { updateImagePreview(ev.target.result, file.name); }; reader.readAsDataURL(file); } else updateImagePreview(''); });
 
-  function getEditor() { const textareaSelector = '{{ editorTextarea|e('js') }}'; if (!textareaSelector) return document.querySelector('textarea[name="help[content]"]'); return document.querySelector(textareaSelector); }
+    document.addEventListener('click', function(e) { const target = e.target.closest('.js-select-image'); if (!target) return; const url = target.getAttribute('data-image-url'); const name = target.getAttribute('data-image-name') || ''; if (typeof window.insertSelectedImage === 'function') { window.insertSelectedImage(url, name, window.helpImageEditorSelector); closeImageManagerModal(); } });
+
+    // Fermer le modal à la touche Escape
+    document.addEventListener('keydown', function(event) { if (event.key === 'Escape') { closeImageManagerModal(); } });
+  }
+
+  function getEditor() { const textareaSelector = window.helpImageEditorSelector; if (!textareaSelector) return document.querySelector('textarea[name="help[content]"]'); return document.querySelector(textareaSelector); }
 
   function loadImages(query = '') {
     const gallery = document.getElementById('imageGallery');
@@ -176,7 +183,7 @@
       .catch(err => { console.error(err); gallery.innerHTML = '<div class="col-span-2 sm:col-span-3 md:col-span-4 p-4 rounded-lg bg-danger-50 border border-danger-200 text-danger-800 dark:bg-danger-900/20 dark:border-danger-700 dark:text-danger-400">Erreur lors du chargement des images.</div>'; });
   }
 
-  let searchTimeout = null;
+  var searchTimeout = null;
   function searchImages() { const input = document.getElementById('imageSearchInput'); clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { loadImages(input.value); }, 400); }
 
   function uploadImage(e) {
@@ -230,9 +237,7 @@
       });
   }
 
-  document.addEventListener('click', function(e) { const target = e.target.closest('.js-select-image'); if (!target) return; const url = target.getAttribute('data-image-url'); const name = target.getAttribute('data-image-name') || ''; if (typeof window.insertSelectedImage === 'function') { window.insertSelectedImage(url, name, '{{ editorTextarea|e('js') }}'); closeImageManagerModal(); } });
-
-  function selectImage(url, altName) { if (typeof window.insertSelectedImage === 'function') { window.insertSelectedImage(url, altName, '{{ editorTextarea|e('js') }}'); closeImageManagerModal(); } }
+  function selectImage(url, altName) { if (typeof window.insertSelectedImage === 'function') { window.insertSelectedImage(url, altName, window.helpImageEditorSelector); closeImageManagerModal(); } }
 
   function deleteImage(e, id) { e.stopPropagation(); if (!confirm('Êtes-vous sûr de vouloir supprimer cette image définitivement ?')) return; const btn = e.currentTarget; const originalIcon = btn.innerHTML; btn.innerHTML = '<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>'; btn.disabled = true; fetch('/admin/help/images/' + id + '/delete', { method: 'DELETE' }).then(res => res.json()).then(data => { if (data.success) { loadImages(document.getElementById('imageSearchInput').value); } else { alert('Erreur : ' + (data.error || 'Impossible de supprimer.')); btn.innerHTML = originalIcon; btn.disabled = false; } }).catch(err => { alert('Erreur système lors de la suppression.'); console.error(err); btn.innerHTML = originalIcon; btn.disabled = false; }); }
 
@@ -241,6 +246,6 @@
   function openImageModal() { loadImages(); const modal = document.getElementById('imageManagerModal'); if (modal) modal.classList.remove('hidden'); }
   function closeImageManagerModal() { const modal = document.getElementById('imageManagerModal'); if (modal) modal.classList.add('hidden'); }
 
-  // Fermer le modal à la touche Escape
-  document.addEventListener('keydown', function(event) { if (event.key === 'Escape') { closeImageManagerModal(); } });
+  // Chargement initial de la galerie (le script est placé après le markup, y compris lors d'une visite Turbo)
+  loadImages();
 </script>
