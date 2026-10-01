@@ -50,7 +50,8 @@ class CompetenceController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($request->query->get('ordre') === null) {
+            $ordreDemande = $request->query->has('ordre') ? $request->query->getInt('ordre') : null;
+            if ($ordreDemande === null) {
                 //pas d'ordre donc on ajoute à la fin
                 $ordre = $competenceRepository->getMaxOrdreBlocCompetence($bcc);
                 $competence->setOrdre($ordre + 1);
@@ -58,9 +59,9 @@ class CompetenceController extends AbstractController
                 //on décale les autres compétences
                 $competenceRepository->decaleCompetence(
                     $bcc,
-                    $request->query->get('ordre'),
+                    $ordreDemande,
                 );
-                $competence->setOrdre($request->query->get('ordre'));
+                $competence->setOrdre($ordreDemande);
             }
 
 
