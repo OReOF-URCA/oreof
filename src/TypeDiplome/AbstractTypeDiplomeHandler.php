@@ -57,13 +57,14 @@ abstract class AbstractTypeDiplomeHandler implements TypeDiplomeHandlerInterface
         $dpeParcoursWorkflow = $context['workflow'];
         $router = $context['router'];
 
-        if (array_key_exists(
-                'mention',
-                $request->request->all()['formation_ses'] ?? []
-            ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre') {
-            $mention = $mentionRepository->find($request->request->all()['formation_ses']['mention']);
-            $formation->setMentionTexte(null);
-            $formation->setMention($mention);
+        $formationSesData = $request->request->all('formation_ses');
+        $mentionId = $formationSesData['mention'] ?? null;
+        if ($mentionId !== null && $mentionId !== '' && $mentionId !== 'autre' && $formation->getMention() === null) {
+            $mention = $mentionRepository->find($mentionId);
+            if ($mention !== null) {
+                $formation->setMentionTexte(null);
+                $formation->setMention($mention);
+            }
         }
 
         $formation->addComposantesInscription($formation->getComposantePorteuse());
@@ -123,6 +124,15 @@ abstract class AbstractTypeDiplomeHandler implements TypeDiplomeHandlerInterface
         $em->flush();
         $dpeParcoursWorkflow->apply($dpeParcours, 'initialiser');
         $dpeParcoursWorkflow->apply($dpeParcours, 'autoriser');
+        $em->flush();
+
+        $controller = $context['controller'] ?? null;
+        if ($controller instanceof \App\Controller\BaseController) {
+            $controller->addFlashBag(
+                \App\Entity\Constantes::FLASHBAG_SUCCESS,
+                'La formation et son parcours ont été créés avec succès.'
+            );
+        }
 
         $redirect = $request->query->get('redirect') ?? $request->request->get('redirect');
         if ($redirect === 'app_offre_index') {

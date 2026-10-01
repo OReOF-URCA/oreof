@@ -65,7 +65,7 @@ final class ButHandler extends AbstractTypeDiplomeHandler
         protected ButMcccVersion                 $butMcccVersion,
         private readonly ButCompetenceRepository $butCompetenceRepository,
         private readonly StructureParcoursBut $structureParcoursBut,
-        private readonly ValideParcoursBUt    $valideParcoursBut
+        private readonly ValideParcoursBut    $valideParcoursBut
     )
     {
     }
@@ -249,12 +249,12 @@ final class ButHandler extends AbstractTypeDiplomeHandler
 
     public function calcul(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
     {
-        // TODO: Implement calcul() method.
+        return $this->structureParcoursBut->calcul($parcours, $optionsCalculStructure);
     }
 
     public function calculVersioning(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
     {
-        // TODO: Implement calculVersioning() method.
+        return $this->structureParcoursBut->calculVersioning($parcours, $optionsCalculStructure);
     }
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre

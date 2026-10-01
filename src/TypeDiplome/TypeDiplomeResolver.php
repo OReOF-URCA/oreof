@@ -42,8 +42,9 @@ final readonly class TypeDiplomeResolver
     public function fromTypeDiplome(TypeDiplome $type): TypeDiplomeHandlerInterface
     {
         $code = strtoupper(trim($type->getLibelleCourt())); // idéalement $type->getCode()
+        $key = $this->handlersByCode->has($code) ? $code : 'DEFAULT';
 
-        if (!$this->handlersByCode->has($code)) {
+        if (!$this->handlersByCode->has($key)) {
             throw new LogicException(sprintf(
                 'No handler for TypeDiplome "%s" (%s)',
                 $type->getLibelle(),
@@ -51,9 +52,8 @@ final readonly class TypeDiplomeResolver
             ));
         }
 
-        $handler = $this->handlersByCode->get($code);
+        $handler = $this->handlersByCode->get($key);
 
-        // Sécurité de type (au cas où)
         if (!$handler instanceof TypeDiplomeHandlerInterface) {
             throw new LogicException(sprintf('Handler for "%s" is invalid.', $code));
         }
@@ -61,7 +61,7 @@ final readonly class TypeDiplomeResolver
         return $handler;
     }
 
-    public function get($type): TypeDiplomeHandlerInterface
+    public function get(TypeDiplome|Formation|Parcours $type): TypeDiplomeHandlerInterface
     {
         if ($type instanceof TypeDiplome) {
             return $this->fromTypeDiplome($type);
@@ -71,10 +71,6 @@ final readonly class TypeDiplomeResolver
             return $this->fromFormation($type);
         }
 
-        if ($type instanceof Parcours) {
-            return $this->fromParcours($type);
-        }
-
-        return throw new LogicException('Unsupported type for TypeDiplome resolution.');
+        return $this->fromParcours($type);
     }
 }

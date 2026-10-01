@@ -56,8 +56,10 @@ class CalculStructureParcoursBut
                             if ($elementConstitutif !== null && $elementConstitutif->getEcParent() === null) {
                                 //récupérer le bon EC selon tous les liens
                                 $dtoEc = new StructureEc($elementConstitutif, $parcours, true);
+                                $dtoStructure->statsFichesMatieresParcours?->addEc($elementConstitutif, $raccrocheUe);
                                 foreach ($elementConstitutif->getEcEnfants() as $elementConstitutifEnfant) {
                                     $dtoEcEnfant = new StructureEc($elementConstitutifEnfant, $parcours, true);
+                                    $dtoStructure->statsFichesMatieresParcours?->addEc($elementConstitutifEnfant, $raccrocheUe);
                                     $dtoEc->addEcEnfant($elementConstitutifEnfant->getId(), $dtoEcEnfant);
                                 }
                                 $dtoUe->addEc($dtoEc);
@@ -77,7 +79,7 @@ class CalculStructureParcoursBut
         return $dtoStructure;
     }
 
-    private function addEcSemestre(StructureEc $dtoEc, StructureSemestre $dtoSemestre)
+    private function addEcSemestre(StructureEc $dtoEc, StructureSemestre $dtoSemestre): void
     {
         //vérifier si le code de l'EC n'est pas déjà ajouté au semestre et ajouter les heures
         if (

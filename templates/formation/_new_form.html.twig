@@ -4,35 +4,99 @@
     url: path('app_formation_api'),
 }) }}>
     {{ form_start(form, { attr: { id: (is_modal|default(false) ? 'modal_form' : '') } }) }}
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 text-slate-700">
-        <div class="hidden">{{ form_row(form.typeDiplome) }}</div>
-        <div>{{ form_row(form.domaine) }}</div>
-        {% if form.composantePorteuse is defined %}
-            <div class="md:col-span-2">{{ form_row(form.composantePorteuse) }}</div>
-        {% endif %}
+    
+    {% if not form.vars.valid %}
+        <div class="mb-6 rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-800 dark:border-danger-800 dark:bg-danger-950/40 dark:text-danger-200">
+            <div class="flex items-center gap-2 font-bold mb-1">
+                <twig:UX:Icon name="icon:warning" class="size-5 shrink-0" />
+                <span>Des erreurs sont présentes dans le formulaire</span>
+            </div>
+            {{ form_errors(form) }}
+        </div>
+    {% endif %}
 
-        <div>{{ form_row(form.mention) }}</div>
-        <div>{{ form_row(form.mentionTexte) }}</div>
+    <div class="hidden">
+        {{ form_row(form.typeDiplome) }}
+    </div>
 
-        <div>{{ form_row(form.niveauEntree) }}</div>
-        <div>{{ form_row(form.niveauSortie) }}</div>
+    <div class="space-y-6 text-secondary-800 dark:text-secondary-100">
+        <!-- Section 1: Rattachement institutionnel -->
+        <div class="rounded-xl border border-secondary-100 bg-secondary-50/50 p-4 dark:border-secondary-800 dark:bg-secondary-800/30">
+            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-secondary-200 dark:border-secondary-700">
+                <twig:UX:Icon name="icon:school" class="size-4 text-primary-600 dark:text-primary-400" />
+                <h3 class="text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300">
+                    Rattachement institutionnel & Domaine
+                </h3>
+            </div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>{{ form_row(form.domaine) }}</div>
+                <div>{{ form_row(form.codeMentionApogee) }}</div>
+                {% if form.composantePorteuse is defined %}
+                    <div class="md:col-span-2">{{ form_row(form.composantePorteuse) }}</div>
+                {% endif %}
+            </div>
+        </div>
 
-        <div>{{ form_row(form.inRncp) }}</div>
-        <div>{{ form_row(form.codeRNCP) }}</div>
-        <div class="md:col-span-2">{{ form_row(form.codeMentionApogee) }}</div>
+        <!-- Section 2: Intitulé & Mention -->
+        <div class="rounded-xl border border-secondary-100 bg-secondary-50/50 p-4 dark:border-secondary-800 dark:bg-secondary-800/30">
+            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-secondary-200 dark:border-secondary-700">
+                <twig:UX:Icon name="icon:graduation" class="size-4 text-primary-600 dark:text-primary-400" />
+                <h3 class="text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300">
+                    Intitulé & Mention
+                </h3>
+            </div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>{{ form_row(form.mention) }}</div>
+                <div>{{ form_row(form.mentionTexte) }}</div>
+            </div>
+        </div>
 
-        <div>{{ form_row(form.responsableMention) }}</div>
-        <div>{{ form_row(form.coResponsable) }}</div>
+        <!-- Section 3: Niveaux & Certification -->
+        <div class="rounded-xl border border-secondary-100 bg-secondary-50/50 p-4 dark:border-secondary-800 dark:bg-secondary-800/30">
+            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-secondary-200 dark:border-secondary-700">
+                <twig:UX:Icon name="icon:award" class="size-4 text-primary-600 dark:text-primary-400" />
+                <h3 class="text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300">
+                    Niveaux & Référentiel
+                </h3>
+            </div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>{{ form_row(form.niveauEntree) }}</div>
+                <div>{{ form_row(form.niveauSortie) }}</div>
+                <div>{{ form_row(form.inRncp) }}</div>
+                <div>{{ form_row(form.codeRNCP) }}</div>
+            </div>
+        </div>
+
+        <!-- Section 4: Responsabilités pédagogiques -->
+        <div class="rounded-xl border border-secondary-100 bg-secondary-50/50 p-4 dark:border-secondary-800 dark:bg-secondary-800/30">
+            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-secondary-200 dark:border-secondary-700">
+                <twig:UX:Icon name="icon:users" class="size-4 text-primary-600 dark:text-primary-400" />
+                <h3 class="text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300">
+                    Responsabilités pédagogiques
+                </h3>
+            </div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>{{ form_row(form.responsableMention) }}</div>
+                <div>{{ form_row(form.coResponsable) }}</div>
+            </div>
+        </div>
     </div>
 
     {% if is_modal is not defined or not is_modal %}
-        <div class="mt-4">
+        <div class="mt-6 pt-4 border-t border-secondary-200 dark:border-secondary-700 flex items-center justify-between">
+            <twig:Button
+                    href="{{ path('app_offre_index') }}"
+                    variant="secondary"
+                    :soft="true"
+                    icon="icon:arrow-left"
+                    label="Annuler"
+            />
             <twig:Button
                     type="submit"
                     variant="success"
                     :soft="false"
                     icon="icon:save"
-                    label="Enregistrer"
+                    label="Enregistrer la formation"
             />
         </div>
     {% endif %}
