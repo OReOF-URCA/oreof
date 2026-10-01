@@ -4,14 +4,6 @@
     {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
 {% endblock %}
 
-{% set header_title %}
-    Répertoire des contacts
-{% endset %}
-
-{% set header_description %}
-    RListe des utilisateurs enregistrés, sans droits spécifiques
-{% endset %}
-
 {% block bouton_header %}
     <div class="flex flex-wrap justify-end gap-2">
     {% if is_granted('ROLE_ADMIN') %}

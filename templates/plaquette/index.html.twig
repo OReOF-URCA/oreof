@@ -14,15 +14,12 @@
         <div class="card-title"></div>
         <div class="card-body" {{ stimulus_target('plaquette', 'listeRubriques') }}>
 
-
         </div>
     </div>
 
 {% endblock %}
 
-{% set header_title %}
-    Configuration plaquette : {{ composante.libelle }}
-{% endset %}
+{% set header_title = 'app_plaquette.title'|trans({'%libelle%': composante.libelle}, 'header') %}
 
 {% block bouton_header %}
 

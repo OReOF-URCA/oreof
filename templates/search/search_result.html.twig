@@ -1,12 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% set header_title %}
-    Résultats de la recherche{% if keyword_1 is not empty %} — {{ keyword_1 }}{% endif %}
+    {{ 'tpl.search.search_result.title'|trans({}, 'header') }} {% if keyword_1 is not empty %} — {{ keyword_1 }}{% endif %}
 {% endset %}
 
 {% block content %}
     <div class="space-y-8">
-
 
         <twig:SearchForm
                 action="{{ path('app_search_action') }}"

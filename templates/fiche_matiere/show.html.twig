@@ -91,7 +91,7 @@
 {% endblock %}
 
 {% set header_title %}
-    Fiche EC/matière <strong id="fiche_matiere_libelle">{{ ficheMatiere.libelle }}</strong> {% if ficheMatiere.ficheMatiereParcours|length > 0 %}<span class="badge bg-info">Mutualisée</span>{% endif %}
+    {{ 'tpl.fiche_matiere.show.title'|trans({}, 'header') }} <strong id="fiche_matiere_libelle">{{ ficheMatiere.libelle }}</strong> {% if ficheMatiere.ficheMatiereParcours|length > 0 %}<span class="badge bg-info">Mutualisée</span>{% endif %}
 {% endset %}
 
 {% block bouton_header %}

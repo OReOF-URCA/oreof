@@ -76,5 +76,5 @@
 {% endblock %}
 
 {% set header_title %}
-    Détail du parcours : {{ parcours.libelle }} <h2 class="text-primary">Version du : {{ dateVersion }}</h2>
+    {{ 'tpl.parcours.show_version.title'|trans({}, 'header') }} {{ parcours.libelle }} <h2 class="text-primary">Version du : {{ dateVersion }}</h2>
 {% endset %}

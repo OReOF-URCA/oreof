@@ -12,10 +12,6 @@
     </div>
 {% endblock %}
 
-{% set header_title %}
-    Gestion des formations
-{% endset %}
-
 {% block bouton_header %}
         {% if is_granted('CAN_FORMATION_ADD_ALL', app.user) %}
 {#   todo: a reprendre         <a href="{{ path('app_formation_etat_send_ouverture') }}"#}

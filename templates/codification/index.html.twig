@@ -49,9 +49,7 @@
     </div>
 {% endblock %}
 
-{% set header_title %}
-    Codification : {{ formation.displayLong }}
-{% endset %}
+{% set header_title = 'app_codification_index.title'|trans({'%displayLong%': formation.displayLong}, 'header') %}
 
 {% block bouton_header %}
     <a

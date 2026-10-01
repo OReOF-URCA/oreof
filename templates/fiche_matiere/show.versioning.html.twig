@@ -49,7 +49,7 @@
 {% endblock %}
 
 {% set header_title %}
-    Détail de la fiche EC/matière : {{ ficheMatiere.libelle }} - <span class="text-primary">Version du {{ dateHeure }}</span>
+    {{ 'tpl.fiche_matiere.show.versioning.title'|trans({}, 'header') }} {{ ficheMatiere.libelle }} - <span class="text-primary">Version du {{ dateHeure }}</span>
 {% endset %}
 
 {# {% block bouton_header %}

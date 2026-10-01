@@ -208,7 +208,6 @@
             {% endif %}
         </div>
 
-
         <div class="card-footer d-flex justify-content-between align-items-center">
             <div class="small text-danger">Cette action est irréversible.</div>
             <div {{ stimulus_controller('modal_confirm', {
@@ -243,6 +242,4 @@
     </a>
 {% endblock %}
 
-{% set header_title %}
-    Suppression du parcours : {{ parcours.display }}
-{% endset %}
+{% set header_title = 'app_parcours_delete.title'|trans({'%display%': parcours.display}, 'header') %}

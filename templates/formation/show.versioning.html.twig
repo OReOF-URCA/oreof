@@ -153,7 +153,7 @@
 {% endblock %}
 
 {% set header_title %}
-    Détail de la formation : {{ formation.display }} <h2 class="text-primary">Version du : {{ dateHeureVersion }}</h2>
+    {{ 'tpl.formation.show.versioning.title'|trans({}, 'header') }} {{ formation.display }} <h2 class="text-primary">Version du : {{ dateHeureVersion }}</h2>
 {% endset %}
 
 {# {% block bouton_header %}

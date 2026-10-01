@@ -69,12 +69,6 @@
     </script>
 {% endblock %}
 
-{% set header_title %}
-    Créer une nouvelle formation
-{% endset %}
-
-
-
 {% block bouton_header %}
     {% if is_granted('ROLE_ADMIN') %}
         <twig:Button

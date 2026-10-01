@@ -1,16 +1,7 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Rapport de Bascule de Campagne
-{% endset %}
-
-{% block header %}
-    Rapport de Duplication de Campagne
-{% endblock %}
-
-{% set header_description %}
-    Bilan complet de la création de la nouvelle campagne et de la duplication des maquettes de formation.
-{% endset %}
+{% set header_title = 'tpl.admin.duplication.result.title'|trans({}, 'header') %}
+{% set header_description = 'tpl.admin.duplication.result.description'|trans({}, 'header') %}
 
 {% block bouton_header %}
     <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ path('app_admin_duplication_campagne_index') }}">

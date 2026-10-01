@@ -72,7 +72,6 @@
                         </a>
                     </p>
 
-
                     <div class="row my-3">
                         <div class="col-lg-3 col-sm-6">
                             <h3 class="small-title">Versions de ce parcours</h3>
@@ -214,7 +213,6 @@
                     </a>
                 </li>
 
-
                 <li>
                     <a class="nav-link p-2" href="#admission_{{ parcours.id }}">
                         <i class="fal fa-chevron-right"></i>
@@ -246,7 +244,7 @@
 {% endblock %}
 
 {% set header_title %}
-    Détail du parcours : {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
+    {{ 'tpl.parcours.show.title'|trans({}, 'header') }} {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
 {% endset %}
 
 {% block bouton_header %}

@@ -140,9 +140,7 @@
 
 {% endblock %}
 
-{% set header_title %}
-    Fichier : {{ filename }}
-{% endset %}
+{% set header_title = 'translations_edit.title'|trans({'%filename%': filename}, 'header') %}
 
 {% block bouton_header %}
     <twig:Button
@@ -154,5 +152,4 @@
             :centered="false"
     />
 {% endblock %}
-
 

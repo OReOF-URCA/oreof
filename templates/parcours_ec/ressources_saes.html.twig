@@ -110,7 +110,7 @@
 {% endblock %}
 
 {% set header_title %}
-    EC : {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
+    {{ 'tpl.parcours_ec.ressources_saes.title'|trans({}, 'header') }} {{ parcours.libelle }} {{ component('Badge', { dto: parcours.typeParcours|badgeTypeParcours }) }}
 {% endset %}
 
 {% block bouton_header %}

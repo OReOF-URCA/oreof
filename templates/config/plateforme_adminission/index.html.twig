@@ -4,10 +4,6 @@
     {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
 {% endblock %}
 
-{% set header_title %}
-    Gestion des plateformes d'admissions
-{% endset %}
-
 {% block bouton_header %}
     <a href="{{ path('app_plateforme_adminission_new') }}"
        class="btn border border-success-300 bg-success-50 text-success-700 hover:bg-success-100 hover:text-success-800 dark:bg-success-900 dark:text-success-300 dark:border-success-500 dark:hover:border-success-300 dark:hover:text-success-100"

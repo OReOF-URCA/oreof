@@ -86,7 +86,6 @@
             />
         </div>
 
-
         {# Barre d'actions globale #}
         <div class="flex flex-col gap-3 rounded-xl border border-secondary-200 bg-secondary-50/70 p-4 dark:border-secondary-700 dark:bg-secondary-800/40 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-2 text-sm text-secondary-700 dark:text-secondary-200">
@@ -219,9 +218,7 @@
     </section>
 {% endblock %}
 
-{% set header_title %}
-    Fiches EC/matières — {{ formation.displayLong }}
-{% endset %}
+{% set header_title = 'fiche_matiere_valide_formation.title'|trans({'%displayLong%': formation.displayLong}, 'header') %}
 
 {% block bouton_header %}
     <twig:Button
@@ -233,5 +230,4 @@
         tooltip="Retour à la formation"
     />
 {% endblock %}
-
 
