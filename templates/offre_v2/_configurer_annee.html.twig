@@ -90,7 +90,7 @@
                     </div>
 
                     <div>
-                        <label for="annee_{{ annee.id }}_capaciteAccueil" class="text-xs font-semibold text-secondary-700 dark:text-secondary-200">Capacité globale d'accueil</label>
+                        <label for="annee_{{ annee.id }}_capaciteAccueil" class="text-xs font-semibold text-secondary-700 dark:text-secondary-200">{{ 'plateforme.capacite.globale.libelle'|trans|default('Capacité globale d\'accueil') }}</label>
                         <input id="annee_{{ annee.id }}_capaciteAccueil" name="annee_{{ annee.id }}_capaciteAccueil" data-tc-field="capaciteAccueil" value="{{ annee.capaciteAccueil }}"
                                type="number" min="0" class="mt-1 w-full rounded-lg border bg-surface px-3 py-2 text-sm text-text dark:border-secondary-600">
                         {% if anneeComparaison.anneePrecedente %}
