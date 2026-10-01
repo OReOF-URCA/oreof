@@ -94,13 +94,15 @@ class FormationController extends BaseController
 
         if ($formation->hasParcours() === false) {
             $parcours = $formation->getParcours()->first();
-            //pas de parcours, donc on calcul les data du parcours par défaut
-            $tabStatesParcours = $parcoursTabStateRepository->indexByTabKey($parcours);
-            $typeD = $typeDiplomeResolver->fromParcours($parcours);
-            $dto = $typeD->calculStructureParcours($parcours);
+            if ($parcours instanceof Parcours) {
+                //pas de parcours, donc on calcule les données du parcours par défaut
+                $tabStatesParcours = $parcoursTabStateRepository->indexByTabKey($parcours);
+                $typeD = $typeDiplomeResolver->fromParcours($parcours);
+                $dto = $typeD->calcul($parcours);
 
-            $parameters['tabStatesParcours'] = $tabStatesParcours;
-            $parameters['dto'] = $dto;
+                $parameters['tabStatesParcours'] = $tabStatesParcours;
+                $parameters['dto'] = $dto;
+            }
         }
 
         // Si Turbo charge un frame, ne calcule pas la structure complète
@@ -219,7 +221,7 @@ class FormationController extends BaseController
             return $this->render('parcours_v2/tabs/_semestre.html.twig', $parameters);
         }
 
-        $dto = $typeD->calculStructureParcours($parcours);
+        $dto = $typeD->calcul($parcours);
 
         // Sinon renvoyer la page complète (index) qui inclura le fragment dans son corps
         return $this->render('parcours_v2/modifier.html.twig', array_merge($parameters, [
