@@ -20,7 +20,7 @@ export default class extends Controller {
     const isHidden = form.classList.toggle('hidden')
     if (this.hasToggleButtonTarget) {
       this.toggleButtonTarget.textContent = isHidden
-        ? 'Se connecter avec login/mot de passe'
+        ? 'Connexion avec login/mot de passe'
         : 'Masquer le formulaire login/mot de passe'
     }
   }

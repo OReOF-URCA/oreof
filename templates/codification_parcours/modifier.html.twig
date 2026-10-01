@@ -7,7 +7,6 @@
         </div>
     </div>
 
-
     <div class="card mt-3">
         <form method="post">
             <div class="card-body">
@@ -68,9 +67,7 @@
     </div>
 {% endblock %}
 
-{% set header_title %}
-    Modifier Codification : {{ parcours.display }}
-{% endset %}
+{% set header_title = 'app_codification_parcours_modifier.title'|trans({'%display%': parcours.display}, 'header') %}
 
         {% block bouton_header %}
             <a

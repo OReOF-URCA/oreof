@@ -71,9 +71,7 @@
 
 {% endblock %}
 
-{% set header_title %}
-    BCC pour le parcours {{ parcours.libelle }}
-{% endset %}
+{% set header_title = 'app_parcours_bcc_but.title'|trans({'%libelle%': parcours.libelle}, 'header') %}
 
 {% block bouton_header %}
     <a href="{{ path('app_competence_export_bcc', {parcours:parcours.id}) }}"

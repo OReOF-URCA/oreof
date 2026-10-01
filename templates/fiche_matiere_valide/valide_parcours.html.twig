@@ -66,7 +66,6 @@
             />
         </div>
 
-
         {# Barre d'action #}
         <div class="flex flex-col gap-3 rounded-xl border border-secondary-200 bg-secondary-50/70 p-4 dark:border-secondary-700 dark:bg-secondary-800/40 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-2 text-sm text-secondary-700 dark:text-secondary-200">
@@ -105,9 +104,7 @@
     </section>
 {% endblock %}
 
-{% set header_title %}
-    Fiches EC/matières — {{ parcours.libelle }}
-{% endset %}
+{% set header_title = 'fiche_matiere_valide_parcours.title'|trans({'%libelle%': parcours.libelle}, 'header') %}
 
 {% block bouton_header %}
     <twig:Button
@@ -119,5 +116,4 @@
         tooltip="Retour au parcours"
     />
 {% endblock %}
-
 

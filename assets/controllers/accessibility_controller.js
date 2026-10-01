@@ -55,6 +55,11 @@ export default class extends Controller {
   reset () {
     this.settings = { ...DEFAULTS }
     this._persistAndApply()
+
+    // Thème de couleur : retour au thème par défaut (géré par theme_controller)
+    localStorage.removeItem('oreof-color-theme')
+    document.documentElement.removeAttribute('data-color-theme')
+    window.dispatchEvent(new CustomEvent('color-theme:reset'))
   }
 
   _persistAndApply (syncToggles = true) {
@@ -72,7 +77,13 @@ export default class extends Controller {
         return { ...DEFAULTS }
       }
 
-      return { ...DEFAULTS, ...JSON.parse(raw) }
+      const settings = { ...DEFAULTS, ...JSON.parse(raw) }
+      // « Très grande » a été supprimée : l'ancienne valeur correspond désormais à « Grande »
+      if (settings.size === 'xlarge') {
+        settings.size = 'large'
+      }
+
+      return settings
     } catch {
       return { ...DEFAULTS }
     }

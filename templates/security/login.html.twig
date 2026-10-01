@@ -8,9 +8,10 @@
             <p class="inline-flex items-center rounded-full bg-primary-100 dark:bg-primary-800 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-700 dark:text-primary-400">
                 Connexion</p>
             <h2 class="text-3xl font-black leading-tight text-text">Bienvenue, connectez-vous</h2>
-            <p class="text-sm text-secondary">Choisissez la methode la plus rapide pour acceder a la plateforme.</p>
+            <p class="text-sm text-secondary">Choisissez la méthode la plus rapide pour accéder a la plateforme.</p>
         </div>
 
+        {# Parcours principal : compte institutionnel, puis demande d'accès #}
         <div class="space-y-3 m-0">
             <twig:Button
                     href="{{ path('cas_return') }}"
@@ -21,23 +22,37 @@
                     label="Se connecter avec votre compte URCA"
                     extraClass="w-full justify-center"
             />
-            <p class="pt-1 text-center text-xs font-semibold uppercase tracking-[0.2em] text-secondary-400">ou</p>
+            <p class="pt-1 text-center text-xs font-semibold uppercase tracking-[0.15em] text-secondary-400">ou pour votre première connexion</p>
+            <twig:Button
+                    href="{{ path('app_register') }}"
+                    variant="success"
+                    :solid="true"
+                    :soft="false"
+                    size="md"
+                    label="Demander un accès"
+                    extraClass="w-full justify-center"
+            />
+        </div>
 
-            {% if error %}
-                {{ component('alerte', {type:'danger', message: error.messageKey|trans(error.messageData, 'security') }) }}
-            {% endif %}
+        {# Accès secondaire (administrateurs) : login / mot de passe, formulaire ouvert d'office après une erreur #}
+        {% set formOpen = error is not null %}
+        {% if error %}
+            {{ component('alerte', {type:'danger', message: error.messageKey|trans(error.messageData, 'security') }) }}
+        {% endif %}
 
+        {# 32 px au-dessus du trait, du trait au bouton, et du bouton au pied de page (le pied de page a mt-10 : -mb-2 le ramène à 32 px) #}
+        <div class="-mb-2 mt-8 border-t border-secondary-300 pt-8 dark:border-secondary-600">
             <twig:Button
                     variant="secondary"
                     size="md"
-                    label="Se connecter avec login/mot de passe"
+                    :label="formOpen ? 'Masquer le formulaire login/mot de passe' : 'Connexion avec login/mot de passe'"
                     dataAction="click->login#showFormLogin"
                     extraClass="w-full justify-center"
                     data-login-target="toggleButton"
             />
         </div>
 
-        <form class="hidden space-y-4 rounded-2xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4 mt-6 mb-0" method="post" id="formLogin">
+        <form class="{{ formOpen ? '' : 'hidden ' }}space-y-4 rounded-2xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4 mt-6 mb-0" method="post" id="formLogin">
             <div class="space-y-1">
                 <label for="inputUsername" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300">Login</label>
                 <input
@@ -74,22 +89,13 @@
             >
             <twig:Button
                     type="submit"
-                    variant="secondary"
+                    variant="warning"
+                    :soft="false"
                     size="md"
                     label="Se connecter"
                     extraClass="w-full justify-center"
             />
         </form>
 
-        <p class="pt-1 text-center text-xs font-semibold uppercase tracking-[0.2em] my-3 text-secondary-400">ou</p>
-        <twig:Button
-                href="{{ path('app_register') }}"
-                variant="success"
-                :solid="true"
-                :soft="false"
-                size="md"
-                label="Demander un accès"
-                extraClass="w-full justify-center"
-        />
     </div>
 {% endblock %}

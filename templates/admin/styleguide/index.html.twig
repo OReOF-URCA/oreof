@@ -1,23 +1,10 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Styleguide
-{% endset %}
-
-{% block header %}
-    Styleguide - Composants graphiques
-{% endblock %}
-
-{% set header_description %}
-    Liste des composants graphiques disponibles dans l'application, avec des exemples d'utilisation.
-{% endset %}
-
 {% block bouton_header %}
     <twig:Button variant="secondary" href="/administration/styleguide/templates/index-type">Voir la page exemple type
     </twig:Button>
 {% endblock %}
 {% block content %}
-
 
     <div class="space-y-12 pb-12">
 
@@ -362,7 +349,6 @@
             </div>
             </twig:Card>
 
-
             {# Section Composant : Boutons #}
         <twig:Card title="Bouton" description="Composant bouton polyvalent avec plusieurs variantes de style, taille
                     et état.">
@@ -439,7 +425,6 @@
                 </div>
             </div>
         </twig:Card>
-
 
         {# Section Composant : Dropdown Button #}
         <twig:Card title="Dropdown Button" description="Bouton d’actions avec menu contextuel (liens, actions avec
@@ -519,7 +504,6 @@
                 </div>
             </div>
         </twig:Card>
-
 
             {# Section Composant : DeleteButton #}
         <twig:Card title="DeleteButton" description="Bouton de suppression avec confirmation modale.">
@@ -899,6 +883,62 @@
             </div>
         </twig:Card>
 
+        {# Section Composant : PageHeader #}
+        <twig:Card title="PageHeader" description="En-tête de page (titre, description, actions, fil d'Ariane), affiché automatiquement par base.html.twig. Faites défiler cette page : l'en-tête reste collé sous la topbar, la description disparaît et le titre se réduit.">
+
+            <div>
+                <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Propriétés</h3>
+                <ul class="text-sm text-secondary space-y-1 list-disc list-inside">
+                    <li><code>titleKey</code> / <code>title</code> - Clé de traduction (domaine <code>header</code> par défaut) ou texte déjà traduit ; la clé est prioritaire</li>
+                    <li><code>descriptionKey</code> / <code>description</code> - Idem ; si vide ou absente, la description n'est pas affichée</li>
+                    <li><code>translationParams</code> / <code>translationDomain</code> - Paramètres et domaine des clés</li>
+                    <li><code>breadcrumb</code> - <code>true</code> par défaut ; à <code>false</code>, ni fil d'Ariane ni trait de séparation</li>
+                    <li><code>sticky</code> - <code>true</code> par défaut ; collé sous la topbar au scroll (description masquée, titre réduit)</li>
+                    <li><code>actions</code> ou bloc <code>actions</code> - Boutons d'action à droite du titre</li>
+                </ul>
+                <p class="mt-3 text-sm text-secondary">
+                    Dans une page qui étend <code>base.html.twig</code>, ne pas utiliser le composant directement : le titre et la description viennent des clés
+                    <code>&lt;route&gt;.title</code> / <code>&lt;route&gt;.description</code> (domaine <code>header</code>, repli sur <code>page.&lt;route&gt;.*</code> du domaine <code>menu</code>), les boutons du bloc <code>bouton_header</code>.
+                    Variables optionnelles : <code>header_breadcrumb</code> et <code>header_sticky</code>.
+                </p>
+            </div>
+
+            <div class="space-y-8 mt-6">
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Complet (description, actions, fil d'Ariane)</h3>
+                    <twig:PageHeader :sticky="false" title="Titre de la page" description="Description facultative de la page.">
+                        <twig:block name="actions">
+                            <twig:Button variant="secondary" size="sm" icon="icon:arrow-left" label="Retour"/>
+                            <twig:Button variant="success" size="sm" icon="icon:add" label="Ajouter"/>
+                        </twig:block>
+                    </twig:PageHeader>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Sans description ni fil d'Ariane</h3>
+                    <twig:PageHeader :sticky="false" :breadcrumb="false" title="Titre seul"/>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Avec clés de traduction</h3>
+                    <twig:PageHeader :sticky="false" :breadcrumb="false" titleKey="page.admin_styleguide_index.title" descriptionKey="page.admin_styleguide_index.description" translationDomain="menu"/>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-secondary-900 text-secondary-200 p-4 rounded-md text-xs overflow-x-auto"><code>{% verbatim %}&lt;twig:PageHeader
+    titleKey="app_composante.title"
+    descriptionKey="app_composante.description"
+    :breadcrumb="true"
+    :sticky="true">
+    &lt;twig:block name="actions">
+        &lt;twig:Button variant="success" icon="icon:add" label="Ajouter" href="#"/>
+    &lt;/twig:block>
+&lt;/twig:PageHeader>{% endverbatim %}</code></pre>
+                </div>
+            </div>
+        </twig:Card>
+
         {# Section Composant : Card #}
         <twig:Card title="Card" description="Composant carte réutilisable : titre, description.">
 
@@ -1005,7 +1045,6 @@
 
         {# Section Composant : Kpi #}
         <twig:Card title="Kpi" description="Indicateur clé de performance et compteur statistique synthétique avec variantes de couleur, barre de progression et icônes.">
-
 
             <div class="space-y-8">
                 <div>

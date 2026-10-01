@@ -4,6 +4,18 @@
     {% set total_keys = page_translations_count() %}
     {% set is_keys_on = is_key_mode_enabled() %}
 
+    {# Clé manquante : aucun texte associé, ou texte identique à la clé (trans() renvoie la clé quand elle n'existe pas).
+       Les clés en langage naturel (« Formation », « Type de diplôme »… : le texte est la clé) ne sont pas des manques :
+       seules les clés à points sans espace (menu.validation.fiche_matiere) sont considérées. #}
+    {% set missing_keys = 0 %}
+    {% for domain, keys in translations_by_domain %}
+        {% for key, info in keys %}
+            {% if info.value is empty or (info.value == key and key matches '/^[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)+$/') %}
+                {% set missing_keys = missing_keys + 1 %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+
     <div data-controller="page-translations-drawer" data-action="keydown@window->page-translations-drawer#onEscape">
 
         {# ── Bouton Flottant (FAB) ── #}
@@ -12,16 +24,17 @@
                     id="pageTranslationsFabToggle"
                     type="button"
                     class="relative shadow-lg rounded-full flex items-center justify-center w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 transition cursor-pointer"
-                    title="Traductions et textes de la page"
+                    title="Traductions et textes de la page{{ missing_keys > 0 ? ' — ' ~ missing_keys ~ ' traduction(s) manquante(s)' : '' }}"
                     aria-expanded="false"
                     aria-controls="pageTranslationsOffcanvas"
-                    aria-label="Ouvrir le panneau des traductions de la page"
+                    aria-label="Ouvrir le panneau des traductions de la page{{ missing_keys > 0 ? ' (' ~ missing_keys ~ ' traduction(s) manquante(s))' : '' }}"
                     data-action="click->page-translations-drawer#toggle"
             >
                 <twig:UX:Icon name="icon:translate" class="w-6 h-6 text-white"/>
-                {% if total_keys > 0 %}
+                {# Pastille : uniquement les traductions manquantes (rien d'affiché s'il n'en manque aucune) #}
+                {% if missing_keys > 0 %}
                     <span class="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger-500 px-1 text-[11px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-secondary-900">
-                        {{ total_keys }}
+                        {{ missing_keys }}
                     </span>
                 {% endif %}
             </button>
@@ -64,7 +77,7 @@
                             </h5>
                             <p class="text-xs text-secondary-500 dark:text-secondary-400">
                                 <span data-page-translations-drawer-target="countBadge">{{ total_keys }}</span> clé(s)
-                                détectée(s)
+                                détectée(s){% if missing_keys > 0 %} · <span class="font-semibold text-danger-600 dark:text-danger-400">{{ missing_keys }} manquante(s)</span>{% endif %}
                             </p>
                         </div>
                     </div>
@@ -120,7 +133,7 @@
                 </div>
 
                 {# Filtres par domaine #}
-                {% if translations_by_domain|length > 1 %}
+                {% if translations_by_domain|length > 1 or missing_keys > 0 %}
                     <div class="mt-2.5 flex flex-wrap gap-1.5">
                         <button
                                 type="button"
@@ -131,6 +144,18 @@
                         >
                             Tous ({{ total_keys }})
                         </button>
+                        {% if missing_keys > 0 %}
+                            <button
+                                    type="button"
+                                    data-page-translations-drawer-target="domainFilter"
+                                    data-domain="__missing__"
+                                    data-action="click->page-translations-drawer#selectDomain"
+                                    class="inline-flex items-center gap-1 rounded-md border border-secondary-200 bg-white px-2 py-0.5 text-[11px] font-medium text-secondary-700 hover:bg-secondary-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:bg-secondary-700 transition cursor-pointer"
+                            >
+                                <span class="inline-block h-1.5 w-1.5 rounded-full bg-danger-500" aria-hidden="true"></span>
+                                Manquantes ({{ missing_keys }})
+                            </button>
+                        {% endif %}
                         {% for domain, keys in translations_by_domain %}
                             <button
                                     type="button"
@@ -161,6 +186,7 @@
                                     data-page-translations-drawer-target="item"
                                     data-translation-key="{{ key }}"
                                     data-translation-domain="{{ domain }}"
+                                    data-missing="{{ info.value is empty or (info.value == key and key matches '/^[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)+$/') ? 'true' : 'false' }}"
                                     data-original-value="{{ info.value|e('html_attr') }}"
                                     data-save-url="{{ path('translations_save_one', {filename: filename}) }}"
                                     class="group rounded-xl border border-secondary-200 bg-white p-3 shadow-xs transition hover:border-primary-300 hover:shadow-sm dark:border-secondary-700 dark:bg-secondary-800/80 dark:hover:border-secondary-600"
@@ -171,6 +197,11 @@
                                         <span class="rounded bg-secondary-100 px-1.5 py-0.5 text-[10px] font-semibold text-secondary-600 dark:bg-secondary-700 dark:text-secondary-300 shrink-0">
                                             {{ domain }}
                                         </span>
+                                        {% if info.value is empty or (info.value == key and key matches '/^[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)+$/') %}
+                                            <span class="rounded bg-danger-100 px-1.5 py-0.5 text-[10px] font-semibold text-danger-700 dark:bg-danger-900/50 dark:text-danger-300 shrink-0" title="Aucun texte associé à cette clé">
+                                                Manquante
+                                            </span>
+                                        {% endif %}
                                         <button
                                                 type="button"
                                                 class="font-mono text-xs font-semibold text-secondary-800 dark:text-secondary-200 truncate select-all hover:text-primary-600 dark:hover:text-primary-400 text-left"
@@ -196,10 +227,43 @@
 
                                 {# Mode Affichage du texte #}
                                 <div data-role="value-display-box" class="space-y-2">
-                                    <div class="rounded-lg bg-secondary-50 p-2.5 text-xs text-secondary-800 dark:bg-secondary-900/70 dark:text-secondary-200 whitespace-pre-wrap break-words leading-relaxed font-normal">
-                                        <span data-role="value-display">{{ info.value }}</span>
+                                    <div class="rounded-lg bg-secondary-50 p-2.5 text-xs text-secondary-800 dark:bg-secondary-900/70 dark:text-secondary-200 break-words leading-relaxed font-normal">
+                                        <span data-role="value-display" class="whitespace-pre-wrap">{{ info.value }}</span>
                                     </div>
-                                    <div class="flex justify-end">
+                                    <div class="flex items-center justify-between gap-2">
+                                        {# Repérer le texte sur la page (surbrillance + défilement) #}
+                                        <div class="flex items-center gap-1.5">
+                                            <button
+                                                    type="button"
+                                                    data-role="locate-btn"
+                                                    data-action="click->page-translations-drawer#locate"
+                                                    class="inline-flex items-center gap-1 rounded-md border border-secondary-200 bg-white px-2 py-1 text-xs font-medium text-secondary-700 hover:bg-secondary-50 hover:text-primary-700 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:bg-secondary-700 transition cursor-pointer"
+                                                    title="Surligner ce texte sur la page et l'afficher à l'écran"
+                                            >
+                                                <twig:UX:Icon name="icon:search" class="w-3 h-3"/>
+                                                <span>Repérer</span>
+                                            </button>
+                                            <div data-role="locate-nav" class="hidden">
+                                                <div class="flex items-center gap-1">
+                                                    <button type="button" data-action="click->page-translations-drawer#locatePrev"
+                                                            class="rounded-md border border-secondary-200 bg-white p-1 text-secondary-600 hover:bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 cursor-pointer"
+                                                            title="Occurrence précédente" aria-label="Occurrence précédente">
+                                                        <twig:UX:Icon name="icon:chevron-left" class="w-3 h-3"/>
+                                                    </button>
+                                                    <span data-role="locate-count" class="min-w-8 text-center text-[11px] tabular-nums text-secondary-600 dark:text-secondary-300" aria-live="polite"></span>
+                                                    <button type="button" data-action="click->page-translations-drawer#locateNext"
+                                                            class="rounded-md border border-secondary-200 bg-white p-1 text-secondary-600 hover:bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 cursor-pointer"
+                                                            title="Occurrence suivante" aria-label="Occurrence suivante">
+                                                        <twig:UX:Icon name="icon:chevron-right" class="w-3 h-3"/>
+                                                    </button>
+                                                    <button type="button" data-action="click->page-translations-drawer#locateClear"
+                                                            class="rounded-md p-1 text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200 cursor-pointer"
+                                                            title="Retirer la surbrillance" aria-label="Retirer la surbrillance">
+                                                        <twig:UX:Icon name="icon:close" class="w-3 h-3"/>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <button
                                                 type="button"
                                                 data-action="click->page-translations-drawer#edit"

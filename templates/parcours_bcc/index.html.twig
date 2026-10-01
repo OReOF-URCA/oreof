@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% set header_title %}
-    BCC pour le parcours {{ parcours.libelle }} {# todo: ou formation? #}
+    {{ 'tpl.parcours_bcc.index.title'|trans({}, 'header') }} {{ parcours.libelle }} {# todo: ou formation? #}
 {% endset %}
 
 {% block bouton_header %}

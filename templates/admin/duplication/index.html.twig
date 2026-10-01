@@ -2,17 +2,8 @@
 
 {% form_theme form 'communs/form_theme_v2.html.twig' %}
 
-{% set header_title %}
-    Bascule & Duplication de Campagne
-{% endset %}
-
-{% block header %}
-    Assistant de Bascule & Duplication de Campagne
-{% endblock %}
-
-{% set header_description %}
-    Création guidée d'une nouvelle année universitaire et duplication de la maquette de formation (Formations, Parcours, DPE, Compétences, Fiches Matières, UEs et MCCC) avec reconduction tacite et gestion des collisions d'URLs.
-{% endset %}
+{% set header_title = 'tpl.admin.duplication.index.title'|trans({}, 'header') %}
+{% set header_description = 'tpl.admin.duplication.index.description'|trans({}, 'header') %}
 
 {% block bouton_header %}
     <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ path('app_section_administration') }}">

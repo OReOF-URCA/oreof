@@ -85,9 +85,13 @@ export default class extends Controller {
   connect () {
     this.closeHandler = () => this.close()
     window.addEventListener('modal:close', this.closeHandler)
+    // une navigation Turbo depuis la modal ne passe pas par close() : on la ferme (overlay + scroll)
+    this.visitHandler = () => this.close()
+    document.addEventListener('turbo:before-visit', this.visitHandler)
   }
 
   disconnect () {
     window.removeEventListener('modal:close', this.closeHandler)
+    document.removeEventListener('turbo:before-visit', this.visitHandler)
   }
 }

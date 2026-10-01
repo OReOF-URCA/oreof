@@ -30,7 +30,6 @@
     </script>
 {% endblock %}
 
-
 {% block content %}
     <div id="fiche_matiere_header_component">
         <twig:FicheMatiereHeader ficheMatiereId="{{ ficheMatiere.id }}"/>
@@ -38,8 +37,8 @@
 
     <div class="flex" data-controller="scroll-spy">
         <aside class="app-scrollspy-aside w-72 flex flex-col p-3 space-y-8">
-            <div class="sticky top-20 space-y-8">
-                <div class="h-[90vh] overflow-y-scroll">
+            <div class="sticky top-[calc(var(--page-header-offset,4rem)+0.5rem)] space-y-8">
+                <div class="h-[calc(100vh-var(--page-header-offset,4rem)-1rem)] overflow-y-scroll">
                     <p class="app-scrollspy-section-title">Navigation</p>
                     <nav class="space-y-1">
                         <a href="#identite_enseignement" data-scroll-spy-target="link"
@@ -86,7 +85,7 @@
 {% endblock %}
 
 {% set header_title %}
-    Fiche EC/matière : <strong
+    {{ 'tpl.fiche_matiere_v2.voir.title'|trans({}, 'header') }} <strong
         id="fiche_matiere_libelle">{{ ficheMatiere.libelle }}</strong> {% if ficheMatiere.ficheMatiereParcours|length > 0 %}
     <span class="badge bg-info">Mutualisée</span>{% endif %}
 {% endset %}

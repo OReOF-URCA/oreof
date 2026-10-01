@@ -18,6 +18,10 @@ export default class extends Controller {
     this._updateActiveColorButton(currentColorTheme)
   }
 
+  resetColorTheme () {
+    this._updateActiveColorButton('normal')
+  }
+
   toggle (event) {
     event.preventDefault()
     const nextTheme = this._currentTheme() === 'dark' ? 'light' : 'dark'

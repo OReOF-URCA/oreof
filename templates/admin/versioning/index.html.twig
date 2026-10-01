@@ -1,12 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Contrôle du Versioning JSON
-{% endset %}
-
-{% block header %}
-    Contrôle & Inspection des Fichiers de Versioning JSON
-{% endblock %}
+{% set header_title = 'tpl.admin.versioning.index.title'|trans({}, 'header') %}
 
 {% set header_description %}
     Vérification de la présence des fichiers JSON générés à la racine du projet (répertoire <code class="px-1.5 py-0.5 rounded bg-secondary-100 dark:bg-secondary-800 text-secondary-800 dark:text-secondary-200 text-xs font-mono font-semibold">versioning_json/</code>), suivi des dates de génération et détection des éléments manquants par campagne de collecte.

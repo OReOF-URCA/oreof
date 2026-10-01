@@ -2,17 +2,13 @@
 
 {# Page de type d'exemple alignée sur les conventions UI Tailwind + Twig Components #}
 
-{% set header_title %}
-    Insérer un titre d'onglet
-{% endset %}
-
-{% block header %}
-    Insérer un titre de page général.
-{% endblock %}
-
-{% set header_description %}
-    Insérer une description générale de la page, qui peut être utilisée pour contextualiser les composants présentés et expliquer leur usage dans l'application.
-{% endset %}
+{#
+    En-tête de page (titre, description, fil d'Ariane, sticky) : géré par le composant PageHeader via base.html.twig.
+    - Titre/description : clés `<route>.title` / `<route>.description` du domaine `header` (translations/header.fr.yaml).
+      Titre dynamique : {% set header_title = 'ma_route.title'|trans({'%libelle%': entite.libelle}, 'header') %}
+    - Boutons d'action : bloc `bouton_header` ci-dessous.
+    - Options : header_breadcrumb (true), header_sticky (true).
+#}
 
 {% block bouton_header %}
     <twig:Button variant="secondary" icon="icon:arrow-left" href="/administration/styleguide">Revenir sur styleguide</twig:Button>
@@ -21,18 +17,6 @@
 
 {% block content %}
     <div class="space-y-6">
-        {# Entête de page #}
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-text">Page Type : Gestion des Éléments</h1>
-                <p class="text-secondary text-sm">Template de référence pour les vues de type index, formulaires et contenus textuels.</p>
-            </div>
-
-            <div class="flex items-center gap-2">
-                <twig:Button variant="primary" icon="fa-solid:plus">Créer un élément</twig:Button>
-            </div>
-        </div>
-
         {# SECTION 1 : DATATABLE EXEMPLE #}
         <section class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface shadow-sm">
             <div class="p-4 border-b border-secondary-200 dark:border-secondary-700">

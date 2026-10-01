@@ -91,14 +91,8 @@ page.app_administration_profils_index.description: 'Gestion et configuration des
 page.app_administration_profils_index.title: 'Gestion des profils'
 page.app_annee_universitaire_index.description: 'Gérer les années universitaires.'
 page.app_annee_universitaire_index.title: 'Années universitaires'
-page.app_campagne_collecte_edit.description: 'Modifier les paramètres et dates de la campagne de collecte.'
-page.app_campagne_collecte_edit.title: 'Modifier la campagne de collecte'
 page.app_campagne_collecte_index.description: 'Configurer les campagnes de collecte.'
 page.app_campagne_collecte_index.title: 'Campagnes de collecte'
-page.app_campagne_collecte_show.description: 'Consulter les paramètres et détails de la campagne de collecte.'
-page.app_campagne_collecte_show.title: 'Détails de la campagne de collecte'
-page.app_commentaire.description: 'Gestion des commentaires sur les formations pour les conseillers.'
-page.app_commentaire.title: 'Gestion des commentaires'
 page.app_composante.description: "Gérer la composante de l'organisation."
 page.app_composante.title: 'Composante : %composante%'
 page.app_composante_index.description: "Gérer les composantes de l'établissement."
@@ -112,8 +106,6 @@ page.app_demande_dpe.description: 'Consultez les demandes de modifications ouver
 page.app_demande_dpe.title: 'Liste des demandes de DPE ouverts'
 page.app_demande_dpe_composante.description: "Consulter et gérer les demandes d'ouverture de DPE par composante."
 page.app_demande_dpe_composante.title: 'Demandes DPE par composante'
-page.app_document.description: 'Consulter et télécharger la documentation et les guides utilisateurs.'
-page.app_document.title: 'Documents et guides'
 page.app_domaine_index.description: 'Gérer les domaines de formation.'
 page.app_domaine_index.title: Domaines
 page.app_etablissement_index.description: 'Gérer les établissements de référence.'
@@ -121,22 +113,15 @@ page.app_etablissement_index.title: Etablissements
 page.app_export_composante_index.description: 'Exporter les données de formation de la composante.'
 page.app_export_index.description: "Accéder aux exports des données de l'offre de formation"
 page.app_export_index.title: 'Gestion des Exports'
-page.app_faq.description: 'Foire aux questions et réponses aux interrogations fréquentes.'
-page.app_faq.title: 'Foire aux questions'
 page.app_faq_index.description: 'Gérer la FAQ.'
 page.app_faq_index.title: FAQ
 page.app_formation_index.description: 'Détails des mentions/spécialités'
 page.app_formation_index.title: 'Détail des formations'
 page.app_formation_responsable_liste.description: 'Liste des responsables et co-responsables de formation.'
 page.app_formation_responsable_liste.title: 'Responsables de formation'
-page.app_help.description: "Centre d'aide et documentation d'utilisation d'ORéOF."
-page.app_help.title: Aide
 page.app_help_index.description: "Gérer les contenus d'aide."
 page.app_help_index.title: Aides
-page.app_homepage.description: Accueil
-page.app_homepage.title: Accueil
 page.app_impersonation_list.description: 'Sélectionner un utilisateur pour naviguer avec ses droits et son profil.'
-page.app_impersonation_list.title: "Impersonation d'un utilisateur"
 page.app_langue_index.description: 'Gérer les langues proposées.'
 page.app_langue_index.title: Langues
 page.app_log_viewer_index.description: "Consulter les journaux d'activité et logs système."
@@ -155,12 +140,8 @@ page.app_parcours_lheo_invalid_list.title: "Contrôle LHEO de l'offre"
 page.app_plaquette.description: 'Générer et consulter les plaquettes des formations.'
 page.app_plateforme_adminission_index.description: "Configurer les plateformes d'admission."
 page.app_plateforme_adminission_index.title: "Plateformes d''admission"
-page.app_plateforme_adminission_new.description: "Ajouter une nouvelle plateforme d'admission."
-page.app_plateforme_adminission_new.title: "Nouvelle plateforme d'admission"
 page.app_rythme_formation_index.description: 'Gérer les rythmes de formation.'
 page.app_rythme_formation_index.title: 'Rythmes de formation'
-page.app_search.description: 'Recherche globale de formations, parcours et fiches matières.'
-page.app_search.title: Recherche
 page.app_section_administration.description: Administration
 page.app_section_administration.title: Administration
 page.app_section_conseils.description: 'Espace de gestion des conseils et des validations officielles.'
@@ -172,8 +153,6 @@ page.app_section_offre_formation.title: 'Offre de formation'
 page.app_section_pilotage.description: "Espace de pilotage et d'indicateurs de l'offre de formation."
 page.app_section_pilotage.title: Pilotage
 page.app_synthese_modification_export_pdf.description: "Export PDF de la synthèse des modifications apportées à l'offre."
-page.app_type_diplome_edit.description: 'Modifier les paramètres du type de diplôme.'
-page.app_type_diplome_edit.title: 'Modifier le type de diplôme'
 page.app_type_diplome_index.description: 'Gérer les types de diplôme.'
 page.app_type_diplome_index.title: 'Type de diplôme'
 page.app_type_ec_index.description: "Gérer les types d'EC."
@@ -182,10 +161,6 @@ page.app_type_epreuve_index.description: "Gérer les types d'épreuve."
 page.app_type_epreuve_index.title: "Types d''épreuve"
 page.app_type_ue_index.description: "Gérer les types d'UE."
 page.app_type_ue_index.title: "Types d''UE"
-page.app_user_mes_informations.description: "Consulter les informations de mon compte et mes profils d'accès."
-page.app_user_mes_informations.title: 'Mes informations'
-page.app_user_mes_notifications.description: 'Gérer mes préférences de notification.'
-page.app_user_mes_notifications.title: 'Mes notifications'
 page.app_user_profil_attente.description: 'Liste des demandes de profils ou de comptes en attente de validation.'
 page.app_user_profil_attente.title: 'Utilisateurs en attente'
 page.app_user_profil_index.description: 'Affecter et gérer les profils des utilisateurs.'
@@ -193,7 +168,6 @@ page.app_user_profil_index.title: 'Affectation des profils'
 page.app_user_repertoire.description: "Consulter le répertoire des contacts et utilisateurs de l'établissement."
 page.app_user_repertoire.title: 'Répertoire des contacts'
 page.app_validation_change_rf_index.description: 'Gestion des validations RF/co-RF.'
-page.app_validation_change_rf_index.title: 'Gestion des validations RF/co-RF'
 page.app_validation_composante_change_rf_index.description: 'Valider les demandes de changement de responsable au niveau composante.'
 page.app_validation_composante_dpe_index.description: 'Suivre et valider les dossiers DPE au niveau composante.'
 page.app_validation_composante_dpe_index.title: 'Validation DPE composante'
@@ -201,25 +175,14 @@ page.app_validation_composante_fiche_index.description: 'Suivre et valider les f
 page.app_validation_composante_fiche_index.title: 'Gestion des validations fiches matières'
 page.app_validation_composante_pilotage.description: 'Pilotage des validations au niveau de la composante.'
 page.app_validation_dpe_index.description: 'Gestion des validations DPE'
-page.app_validation_dpe_index.title: 'Gestion des validations DPE'
 page.app_validation_fiche_index.description: 'Suivi et validation des fiches matières.'
-page.app_validation_fiches_ec_index.description: 'Gestion des validations Fiches EC/matières.'
-page.app_validation_fiches_ec_index.title: 'Gestion des validations Fiches EC/matières'
 page.app_ville_index.description: "Gérer les villes utilisées dans l'application."
 page.app_ville_index.title: Villes
-page.campagne_collecte.show.description: "Accéder aux détails d'une campagne de collecte et aux paramètres de publication"
-page.campagne_collecte.show.title: "Détails d'une campagne de collecte"
-page.mon_compte.mes_informations: 'Mes informations'
-page.mon_compte.mes_notifications: 'Mes notifications'
-page.offre_v2_configurer.description: "Page de configuration de l'offre de formation"
-page.offre_v2_configurer.title: "Configuration de l'offre de formation"
 page.structure_composante_index.description: "Détail de l'offre de formation par composante"
 page.structure_composante_index.title: "Gestion de l'offre de formation"
 page.structure_fiche_matiere_index.description: 'Liste des fiches EC/matières associées à une mention / spécialité'
 page.structure_fiche_matiere_index.title: 'Détails des fiches EC/matière'
 page.structure_fiche_matiere_index_hd.description: 'Liste des fiches EC/matières non associées à une mention / spécialité et accessibles à toutes les formations'
 page.structure_fiche_matiere_index_hd.title: 'Détails des fiches EC/matières "hors diplômes"'
-page.translations_edit.description: "Modifier et personnaliser les textes de l'application."
-page.translations_edit.title: 'Édition des traductions'
 page.translations_index.description: "Gérer les traductions et textes de l'application."
 page.translations_index.title: Traductions

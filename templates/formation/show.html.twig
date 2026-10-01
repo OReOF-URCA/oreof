@@ -209,9 +209,7 @@
     </div>
 {% endblock %}
 
-{% set header_title %}
-    Détail de la formation : {{ formation.display }}
-{% endset %}
+{% set header_title = 'app_formation_show.title'|trans({'%display%': formation.display}, 'header') %}
 
 {% block bouton_header %}
 

@@ -1,16 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Gestion des validations DPE
-{% endset %}
-
-{% set header_description %}
-    {% if composante is defined and composante is not null %}
-        Consultez les étapes ouvertes pour la composante {{ composante.libelle }} et chargez la liste associée.
-    {% else %}
-        Ouvrez une étape pour charger dynamiquement la liste des parcours concernés.
-    {% endif %}
-{% endset %}
+{% set header_description = composante is defined and composante is not null ? 'tpl.validation.dpe.description.composante'|trans({'%libelle%': composante.libelle}, 'header') : 'tpl.validation.dpe.description.defaut'|trans({}, 'header') %}
 
 {% block content %}
     {% set toneMap = {

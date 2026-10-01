@@ -4,10 +4,6 @@
     {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
 {% endblock %}
 
-{% set header_title %}
-    Gestion des domaines
-{% endset %}
-
 {% block bouton_header %}
     <a
             data-action="click->modalturbo#open"

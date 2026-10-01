@@ -88,7 +88,7 @@
 {% endblock %}
 
 {% set header_title %}
-    Fiche EC/matière <strong
+    {{ 'tpl.fiche_matiere.edit.title'|trans({}, 'header') }} <strong
         id="fiche_matiere_libelle">{{ fiche_matiere.libelle }}</strong> {% if fiche_matiere.ficheMatiereParcours|length > 0 %}
     <span class="badge bg-info">Mutualisée</span>{% endif %}
 {% endset %}

@@ -1,3 +1,22 @@
+accessibilite.couleurs.titre: Thèmes
+accessibilite.description: "Adapter l'affichage et les interactions selon vos besoins"
+accessibilite.intro: "Ces réglages sont appliqués immédiatement et mémorisés sur cet appareil."
+accessibilite.lisibilite.contraste: "Mode haut contraste"
+accessibilite.lisibilite.titre: Lisibilité
+accessibilite.menu: "Paramètres & accessibilité"
+accessibilite.police.dyslexie: "Police dyslexie"
+accessibilite.police.standard: "Police standard"
+accessibilite.police.titre: Police
+accessibilite.reinitialiser.aide: "Vous pouvez revenir aux réglages par défaut à tout moment."
+accessibilite.reinitialiser.bouton: Réinitialiser
+accessibilite.taille.grande: Grande
+accessibilite.taille.standard: Standard
+accessibilite.taille.titre: "Taille du texte"
+accessibilite.theme.clair: Clair
+accessibilite.theme.sombre: Sombre
+accessibilite.theme.systeme: Système
+accessibilite.theme.titre: Thème
+accessibilite.titre: Accessibilité
 'Adresse email': 'Adresse email'
 'Choisir dans la liste ou choisir "+" pour ajouter un utilisateur': 'Choisir dans la liste ou choisir "+" pour ajouter un utilisateur'
 'Choisissez un rythme de formation ou complétez le champ ci-dessous': 'Choisissez un rythme de formation ou complétez le champ ci-dessous'

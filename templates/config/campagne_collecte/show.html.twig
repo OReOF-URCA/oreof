@@ -191,9 +191,7 @@
 </div>
 {% endblock %}
 
-{% set header_title %}
-    Campagne de collecte : {{ campagne_collecte.libelle }}
-{% endset %}
+{% set header_title = 'app_campagne_collecte_show.title'|trans({'%libelle%': campagne_collecte.libelle}, 'header') %}
 
 {% block bouton_header %}
     <div class="flex items-center gap-2">

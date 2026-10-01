@@ -1,17 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Cartographie des Workflows
-{% endset %}
-
-{% block header %}
-    Supervision & Cartographie des Workflows
-{% endblock %}
-
-{% set header_description %}
-    Visualisation interactive, matrice des transitions et audit des règles de validation de l'application.
-{% endset %}
-
 {% block content %}
 <div class="space-y-6 pb-12"
      data-controller="workflow-viewer"

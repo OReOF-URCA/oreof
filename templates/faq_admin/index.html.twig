@@ -1,17 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% set header_title %}
-    Gestion de la FAQ
-{% endset %}
-
-{% set header_description %}
-    Organisez et gérez les questions fréquemment posées. Réordonnez les questions par glisser-déposer.
-{% endset %}
-
-{% block header %}
-    Gestion de la FAQ
-{% endblock %}
-
 {% block bouton_header %}
     <twig:Button
             label="Import / export"
@@ -41,8 +29,6 @@
             class="mx-2"
     />
 {% endblock %}
-
-
 
 {% block content %}
     <div id="faq-reorder-feedback" class="hidden fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition" role="alert"></div>

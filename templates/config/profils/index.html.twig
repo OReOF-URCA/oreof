@@ -35,9 +35,7 @@
     </div>
 {% endblock %}
 
-{% set header_title %}
-    Gestion des profils
-{% endset %}
+{% set header_title = 'tpl.config.profils.index.title'|trans({}, 'header') %}
 
 {% block bouton_header %}
     <button

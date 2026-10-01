@@ -4,10 +4,6 @@
     {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
 {% endblock %}
 
-{% set header_title %}
-    Gestion des campagnes de collecte
-{% endset %}
-
 {% block bouton_header %}
     <twig:Button
             href="{{ path('app_campagne_collecte_new') }}"

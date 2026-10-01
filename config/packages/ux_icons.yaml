@@ -88,7 +88,6 @@ ux_icons:
 
     # Marques
     icon:github: 'simple-icons:github'
-    icon:twitter: 'simple-icons:twitter'
     icon:folder: 'ph:folder-light'
 
     # tris

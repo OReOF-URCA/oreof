@@ -3,7 +3,6 @@
 {% block javascripts %}
     {{ parent() }}
 
-
     <!-- Test Script -->
     <script>
       let isSaveClicked = false
@@ -73,11 +72,10 @@
     {#        {% endif %} #}
     {#    {% endif %} #}
 
-
     <div class="flex bg-surface dark:bg-secondary-900" data-controller="scroll-spy">
         <aside class="app-scrollspy-aside w-72 flex flex-col p-3 space-y-8">
-            <div class="sticky top-20 space-y-8">
-                <div class="h-[90vh] overflow-y-scroll">
+            <div class="sticky top-[calc(var(--page-header-offset,4rem)+0.5rem)] space-y-8">
+                <div class="h-[calc(100vh-var(--page-header-offset,4rem)-1rem)] overflow-y-scroll">
                     <p class="app-scrollspy-section-title">Navigation</p>
                     <nav class="space-y-1">
                         <a href="#identite_formation" data-scroll-spy-target="link"
@@ -127,7 +125,6 @@
                              {% for parcours in formation.parcours %}
                                  <p class="app-scrollspy-section-title--accent">
                                      Parcours {{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</p>
-
 
                                  <a href="#presentation_{{ parcours.id }}" data-scroll-spy-target="link"
                                     class="app-scrollspy-link">
@@ -179,9 +176,7 @@
     </div>
 {% endblock %}
 
-{% set header_title %}
-    Détail de la formation : {{ formation.display }}
-{% endset %}
+{% set header_title = 'formation_v2_voir.title'|trans({'%display%': formation.display}, 'header') %}
 
 {% block bouton_header %}
     {% if formation.hasParcours == true %}

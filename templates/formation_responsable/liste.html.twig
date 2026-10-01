@@ -4,10 +4,6 @@
     {{ component('DataTable', { config: table }) }}
 {% endblock %}
 
-{% set header_title %}
-    Demandes de changement de responsable de formation
-{% endset %}
-
 {% block bouton_header %}
     <a href="{{ path('app_formation_responsable_liste_export') }}"
        class="inline-flex items-center gap-2 rounded-md border border-info-300 bg-info-50 px-3 py-2 text-sm font-medium text-info-700 transition hover:bg-info-100 hover:text-info-800 dark:bg-info-900 dark:text-info-300 dark:border-info-500 dark:hover:border-info-300 dark:hover:text-info-100"

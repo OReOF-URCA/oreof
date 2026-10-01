@@ -20,10 +20,6 @@
     </section>
 {% endblock %}
 
-{% set header_title %}
-    Détails des formations
-{% endset %}
-
 {% block bouton_header %}
     {% if is_granted('ROLE_ADMIN') %}
         <twig:Button

@@ -1,12 +1,6 @@
 {% extends 'base.html.twig' %}
 {# todo: proto de mise en page, à voir #}
 
-{% set header_title %}Impersonation Admin{% endset %}
-{% set header_description %}
-    Impersonation utilisateur. Prendre le rôle d'un autre utilisateur pour tester son expérience. Attention, toutes les actions seront enregistrées au nom de l'utilisateur impersonné.
-{% endset %}
-
-
 {% block content %}
     <div class="space-y-4">
         {% if is_granted('IS_IMPERSONATOR') %}

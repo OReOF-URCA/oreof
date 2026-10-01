@@ -1,21 +1,20 @@
+{#- Titre/description de page : header_title/header_description (surcharge de la page) > clés `<route>.title|description` du domaine `header` > clés `page.<route>.*` du domaine `menu` > nom de route.
+    header_text_key() teste l'existence des clés sans trans() : chaque appel à trans() est collecté par le panneau des traductions. -#}
 {%- set _route = app.request.attributes.get('_route') -%}
-{%- if _route -%}
-    {%- set _default_title_key = 'page.' ~ _route ~ '.title' -%}
-    {%- set _default_description_key = 'page.' ~ _route ~ '.description' -%}
 
-    {%- set _translated_title = _default_title_key|trans({}, 'menu') -%}
-    {%- set _translated_description = _default_description_key|trans({}, 'menu') -%}
-
-    {# Fallback to formatted route name if no translation exists #}
-    {%- set _fallback_title = _translated_title != _default_title_key ? _translated_title : _route|replace({'_': ' ', 'app_': ''})|title -%}
-    {%- set _fallback_description = _translated_description != _default_description_key ? _translated_description : '' -%}
-{%- else -%}
-    {%- set _fallback_title = 'Titre par défaut' -%}
-    {%- set _fallback_description = '' -%}
+{%- if header_title|default(null) is empty -%}
+    {%- set _title_key = header_text_key(_route, 'title') -%}
+    {%- if _title_key -%}
+        {%- set header_title = _title_key.key|trans({}, _title_key.domain) -%}
+    {%- else -%}
+        {%- set header_title = _route ? _route|replace({'_': ' ', 'app_': ''})|title : 'Titre par défaut' -%}
+    {%- endif -%}
 {%- endif -%}
 
-{%- set header_title = header_title|default(null) is not empty ? header_title : _fallback_title -%}
-{%- set header_description = header_description|default(null) is not empty ? header_description : _fallback_description -%}
+{%- if header_description|default(null) is empty -%}
+    {%- set _description_key = header_text_key(_route, 'description') -%}
+    {%- set header_description = _description_key ? _description_key.key|trans({}, _description_key.domain) : '' -%}
+{%- endif -%}
 <!DOCTYPE html>
 <html lang="fr" data-footer="true" data-placement="horizontal" data-behaviour="pinned" data-theme="light">
 <head>
@@ -131,40 +130,22 @@
             </div>
 
             {{ include('_layout/_campaign_banner.html.twig') }}
-
-
-            {% block page_header %}
-                <section
-                        class="mb-8 rounded-2xl border border-secondary-200 bg-white/90 p-4 shadow-sm backdrop-blur-sm dark:border-secondary-700 dark:bg-secondary-900/80 sm:mb-10 sm:p-5">
-                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                        <div class="min-w-0 lg:basis-1/2 lg:pr-6">
-                            <h1 class="text-xl font-black leading-tight tracking-tight text-secondary-900 sm:text-3xl lg:overflow-hidden lg:text-ellipsis lg:whitespace-nowrap dark:text-secondary-100"
-                                id="title">
-                                {% block header %}
-                                    {{ header_title }}
-                                {% endblock %}</h1>
-                            <p class="max-w-3xl text-sm text-secondary-600 dark:text-secondary-300">
-                                {{ header_description }}
-                            </p>
-                        </div>
-
-                        <div class="flex flex-wrap items-center gap-2 self-start lg:basis-1/2 lg:justify-end lg:self-start [&_.btn]:inline-flex [&_.btn]:items-center [&_.btn]:gap-2 [&_.btn]:rounded-lg [&_.btn]:px-3 [&_.btn]:py-2 [&_.btn]:text-xs [&_.btn]:font-semibold">
-                            {% block bouton_header %}
-
-                            {% endblock %}
-                        </div>
-                    </div>
-
-                    <div class="mt-4 border-t border-secondary-100 pt-3 dark:border-secondary-700/80">
-                        <nav class="breadcrumb-container" aria-label="breadcrumb">
-                            {{ include('_layout/_breadcrumb.html.twig') }}
-                        </nav>
-                    </div>
-                </section>
-            {% endblock %}
-
         </div>
     </div>
+
+    {# L'en-tête est un enfant direct de #root (et non du wrapper ci-dessus) pour pouvoir rester sticky sur toute la page. #}
+    {% block page_header %}
+        {% set _page_header_title %}{% block header %}{{ header_title }}{% endblock %}{% endset %}
+        {% set _page_header_actions %}{% block bouton_header %}{% endblock %}{% endset %}
+        <twig:PageHeader
+                class="px-4 sm:px-6 lg:px-8"
+                :title="_page_header_title"
+                :description="header_description"
+                :actions="_page_header_actions"
+                :breadcrumb="header_breadcrumb|default(true)"
+                :sticky="header_sticky|default(true)"
+        />
+    {% endblock %}
     <main class="flex-1">
         <!-- messages flash (Tailwind) -->
         {# read and display all flash messages #}
