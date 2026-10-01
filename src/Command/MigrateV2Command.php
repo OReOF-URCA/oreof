@@ -497,7 +497,7 @@ final class MigrateV2Command extends Command
         $errors = [];
         $warnings = [];
 
-        foreach ([['plateforme_admission','mode_export'], ['parcours','duree_parcours'], ['type_diplome','has_ects'], ['type_diplome_plateforme_admission','annees'], ['type_diplome_plateforme_admission','annees_capacite_requise'], ['type_diplome_plateforme_admission','annees_capacite_specifique'], ['timeline_date','ordre'], ['semestre','validation_status'], ['ue','validation_status'], ['element_constitutif','validation_status']] as [$table, $column]) {
+        foreach ([['plateforme_admission','mode_export'], ['parcours','duree_parcours'], ['type_diplome','has_ects'], ['type_diplome_plateforme_admission','annees'], ['type_diplome_plateforme_admission','annees_capacite_requise'], ['type_diplome_plateforme_admission','annees_capacite_specifique'], ['timeline_date','ordre'], ['annee','regime_inscription'], ['semestre','validation_status'], ['ue','validation_status'], ['element_constitutif','validation_status']] as [$table, $column]) {
             if (!$this->columnExists($table, $column)) {
                 $errors[] = "Colonne manquante : {$table}.{$column}";
             }
