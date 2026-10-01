@@ -40,7 +40,7 @@ class ComposanteController extends BaseController
         ParcoursRepository $parcoursRepository,
         ParcoursVersioningRepository $parcoursVersioningRepository,
         MyGotenbergPdf $myGotenbergPdf,
-        EntityManagerInterface $entityManager,
+        ComposanteRepository $composanteRepository,
     ) : Response {
 
         /**
@@ -59,7 +59,13 @@ class ComposanteController extends BaseController
           *
           */
 
-        $cmp = $entityManager->getRepository(Composante::class)->findOneById($composante_id);
+        $cmp = $composanteRepository->find($composante_id);
+        if ($cmp === null) {
+            throw $this->createNotFoundException('Composante non trouvée.');
+        }
+
+        $hasPatch = false;
+        $tDemandes = [];
 
         $patterns = [
             '\/heuresEctsFormation\/',
@@ -110,7 +116,6 @@ class ComposanteController extends BaseController
                 $result['modified'] = [];
                 $result['added'] = [];
                 $result['removed'] = [];
-                $hasPatch = false;
                 foreach ($r->getPatch()->jsonSerialize() as $patch) {
                     if (ExtractTextFromJsonPatch::getLastItem($patch->path)) {
                         $key = $this->extractPatternsFromString($patterns, $patch->path, $patternsAIgnorer);
