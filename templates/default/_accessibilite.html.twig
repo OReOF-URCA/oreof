@@ -1,77 +1,71 @@
 <div class="space-y-6" {{ stimulus_controller('accessibility') }}>
     <p class="text-sm text-secondary-600 dark:text-secondary-300">
-        Ces réglages sont appliqués immediatement et memorisés sur cet appareil.
+        {{ 'accessibilite.intro'|trans }}
     </p>
 
     <section class="space-y-2">
-        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">Theme</h3>
+        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">{{ 'accessibilite.theme.titre'|trans }}</h3>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <button type="button"
                     class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
                     data-action="click->accessibility#setTheme"
                     data-accessibility-theme-param="system">
-                Systeme
+                {{ 'accessibilite.theme.systeme'|trans }}
             </button>
             <button type="button"
                     class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
                     data-action="click->accessibility#setTheme"
                     data-accessibility-theme-param="light">
-                Clair
+                {{ 'accessibilite.theme.clair'|trans }}
             </button>
             <button type="button"
                     class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
                     data-action="click->accessibility#setTheme"
                     data-accessibility-theme-param="dark">
-                Sombre
+                {{ 'accessibilite.theme.sombre'|trans }}
             </button>
         </div>
     </section>
 
     <section class="space-y-2">
-        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">Police</h3>
+        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">{{ 'accessibilite.police.titre'|trans }}</h3>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button type="button"
                     class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
                     data-action="click->accessibility#setFont"
                     data-accessibility-font-param="default">
-                Police standard
+                {{ 'accessibilite.police.standard'|trans }}
             </button>
             <button type="button"
                     class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
                     data-action="click->accessibility#setFont"
                     data-accessibility-font-param="dys">
-                Police dyslexie
+                {{ 'accessibilite.police.dyslexie'|trans }}
             </button>
         </div>
     </section>
 
     <section class="space-y-2">
-        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">Taille du texte</h3>
-        <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">{{ 'accessibilite.taille.titre'|trans }}</h3>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button type="button"
                     class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
                     data-action="click->accessibility#setSize"
                     data-accessibility-size-param="normal">
-                Standard
+                {{ 'accessibilite.taille.standard'|trans }}
             </button>
             <button type="button"
                     class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
                     data-action="click->accessibility#setSize"
                     data-accessibility-size-param="large">
-                Grande
-            </button>
-            <button type="button"
-                    class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
-                    data-action="click->accessibility#setSize"
-                    data-accessibility-size-param="xlarge">
-                Tres grande
+                {{ 'accessibilite.taille.grande'|trans }}
             </button>
         </div>
     </section>
 
-    <section data-controller="theme" class="mt-8 border-t border-secondary-200 pt-6 dark:border-secondary-700">
+    <section data-controller="theme" data-action="color-theme:reset@window->theme#resetColorTheme" class="mt-8 border-t border-secondary-200 pt-6 dark:border-secondary-700">
         <h3 class="text-base font-semibold text-secondary-800 dark:text-secondary-100 mb-4 flex items-center gap-2">
-            Themes
+            {{ 'accessibilite.couleurs.titre'|trans }}
         </h3>
 
         <div class="flex items-center gap-4">
@@ -118,9 +112,9 @@
     </section>
 
     <section class="space-y-3">
-        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">Lisibilite</h3>
+        <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">{{ 'accessibilite.lisibilite.titre'|trans }}</h3>
         <label class="flex items-center justify-between gap-3 rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2 text-sm dark:border-secondary-700 dark:bg-secondary-800/60">
-            <span class="font-medium text-secondary-700 dark:text-secondary-200">Mode haut contraste</span>
+            <span class="font-medium text-secondary-700 dark:text-secondary-200">{{ 'accessibilite.lisibilite.contraste'|trans }}</span>
             <input type="checkbox"
                    class="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 dark:text-primary-400"
                    data-accessibility-target="contrast"
@@ -129,12 +123,11 @@
     </section>
 
     <div class="flex items-center justify-between gap-3 border-t border-secondary-200 pt-4 dark:border-secondary-700">
-        <p class="text-xs text-secondary-500 dark:text-secondary-400">Vous pouvez revenir aux reglages par defaut a tout
-            moment.</p>
+        <p class="text-xs text-secondary-500 dark:text-secondary-400">{{ 'accessibilite.reinitialiser.aide'|trans }}</p>
         <button type="button"
                 class="app-modal-footer-btn app-modal-footer-btn--secondary"
                 data-action="click->accessibility#reset">
-            Reinitialiser
+            {{ 'accessibilite.reinitialiser.bouton'|trans }}
         </button>
     </div>
 </div>

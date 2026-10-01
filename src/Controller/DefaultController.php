@@ -56,8 +56,8 @@ class DefaultController extends BaseController
     ): Response
     {
         return $turboStream->streamOpenModalFromTemplates(
-            'Accessibilite',
-            'Adapter l affichage et les interactions selon vos besoins',
+            new TranslatableKey('accessibilite.titre'),
+            new TranslatableKey('accessibilite.description'),
             'default/_accessibilite.html.twig',
             [],
             '_ui/_footer_cancel.html.twig',

@@ -66,6 +66,7 @@
         }
     },
     "dependencies": {
+        "@fontsource/opendyslexic": "^5.3.0",
         "@hotwired/stimulus": "^3.2.2",
         "@iconify-json/ph": "^1.2.2",
         "@iconify-json/simple-icons": "^1.2.80",
