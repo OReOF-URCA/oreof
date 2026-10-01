@@ -20,6 +20,9 @@
     {% endblock %}
 </head>
 <body class="min-h-dvh bg-secondary-950 text-secondary-900 antialiased">
+{# Clé d'aide de la page : la route courante par défaut, surchargeable par {% block help_route %} (pages d'erreur). #}
+{% set help_route %}{% block help_route %}{{ app.request.attributes.get('_route', '') }}{% endblock %}{% endset %}
+<div data-controller="help-drawer" data-action="keydown@window->help-drawer#onEscape">
 <div id="root" class="relative min-h-dvh overflow-hidden">
     <!-- Couches de fond: image + overlays sémantiques -->
     <div class="pointer-events-none absolute inset-0 bg-cover bg-center bg-no-repeat opacity-35"
@@ -29,38 +32,47 @@
     <div class="pointer-events-none absolute inset-0 opacity-35" style="background: linear-gradient(to bottom right, var(--color-primary-900, #3730a3), var(--color-info-900, #164e63), var(--color-primary-950, #1e1b4b));"></div>
     <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,rgba(255,255,255,0.18),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(100,180,255,0.1),transparent_25%)] dark:bg-[radial-gradient(circle_at_10%_20%,rgba(255,255,255,0.06),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(100,180,255,0.1),transparent_25%)]"></div>
 
-    <div class="relative mx-auto grid min-h-screen w-full max-w-7xl gap-8 px-4 py-6 lg:grid-cols-[minmax(0,1fr)_30rem] lg:px-8 lg:py-10">
-        <aside class="hidden lg:flex lg:flex-col lg:justify-between">
-            <div class="max-w-xl space-y-6 text-white">
-                <p class="text-sm font-semibold uppercase tracking-[0.25em] text-primary-200">Plateforme</p>
-                <img src="{{ asset('Logo/Logo_white.svg', 'image_package') }}" alt="Logo ORéOF" class="h-18 w-auto block">
-                <h2 class="text-2xl font-semibold leading-relaxed text-primary-100">
-                    Outil de Rédaction de l'Offre de Formation
-                </h2>
-                <p class="max-w-lg text-base text-primary-200 opacity-85">
-                    Centralisez vos demandes, simplifiez les échanges et connectez-vous rapidement avec votre compte
-                    institutionnel.
-                </p>
+    <div class="relative mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-6 lg:px-8 lg:py-10">
+        {# Une seule carte en deux volets : présentation à gauche, connexion à droite #}
+        {# lg : la carte tient dans la fenêtre, seul le volet de droite défile (formulaires longs) #}
+        <div class="grid w-full overflow-hidden rounded-3xl shadow-2xl lg:max-h-[calc(100dvh-5rem)] lg:grid-rows-[minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_30rem]">
+        {# Dégradé blanc 80 % → transparent du haut vers le bas, par-dessus le fond flouté #}
+        <aside class="hidden rounded-l-3xl border border-r-0 border-white/40 bg-secondary/10 bg-linear-to-b from-black/80 to-transparent p-10 backdrop-blur-xl lg:flex lg:flex-col">
+            <p class="text-xs font-semibold uppercase tracking-[0.25em] text-primary-300">Plateforme</p>
+
+            {# Remonte le logo pour que le haut du drapeau orange (tout en haut du SVG) s'aligne sur le haut de
+               « Plateforme » : -1rem = hauteur de la ligne « Plateforme ». #}
+            <div class="-mt-4 space-y-6">
+                {# @container + cqw : la taille de police suit la largeur du bloc, la phrase occupe ~96 % de la ligne #}
+                <div class="@container pb-0.5">
+                    <img src="{{ asset('Logo/Logo_texte_white_lueur.svg', 'image_package') }}" alt="ORéOF" class="block h-auto w-full">
+                    <p class="mt-6 whitespace-nowrap text-center text-[4.85cqw] font-bold leading-tight text-white">Outil de Rédaction de l'Offre de Formation</p>
+                </div>
+                <ul class="list-disc space-y-3 border-t border-white/40 pt-6 pl-5 text-base font-medium leading-relaxed text-secondary-300">
+                    <li>Centralisez vos demandes</li>
+                    <li>Simplifiez les échanges</li>
+                    <li>Connectez-vous rapidement avec votre compte institutionnel.</li>
+                </ul>
             </div>
 
-            <div class="flex items-center gap-5 text-info-200 opacity-90 dark:text-info-300 dark:opacity-90">
+            <div class="mt-auto flex items-center gap-5 pt-10 text-white">
                 <a href="mailto:oreof@univ-reims.fr" target="_blank" rel="noreferrer"
-                   class="transition hover:text-white dark:hover:text-info-50" aria-label="Contacter l'equipe ORéOF">
-                    <i class="fal fa-envelope text-lg"></i>
+                   class="transition hover:text-primary-300" aria-label="Contacter l'equipe ORéOF">
+                    {{ ux_icon('icon:mail', {class: 'h-5 w-5'}) }}
                 </a>
                 <a href="https://github.com/Dannebicque/oreof" target="_blank" rel="noreferrer"
-                   class="transition hover:text-white dark:hover:text-info-50" aria-label="Depôt GitHub ORéOF">
-                    <i class="fa-brands fa-github text-lg"></i>
+                   class="transition hover:text-primary-300" aria-label="Depôt GitHub ORéOF">
+                    {{ ux_icon('icon:github', {class: 'h-5 w-5'}) }}
                 </a>
                 <a href="https://twitter.com/davidannebicque" target="_blank" rel="noreferrer"
-                   class="transition hover:text-white dark:hover:text-info-50" aria-label="Profil Twitter">
-                    <i class="fa-brands fa-twitter text-lg"></i>
+                   class="transition hover:text-primary-300" aria-label="Profil Twitter">
+                    {{ ux_icon('icon:twitter', {class: 'h-5 w-5'}) }}
                 </a>
             </div>
         </aside>
 
-        <main class="flex items-center">
-            <section class="w-full rounded-3xl border border-secondary-200 dark:border-secondary-700 bg-surface p-6 shadow-2xl md:p-8">
+        <main class="flex min-h-0">
+            <section class="w-full overflow-y-auto bg-surface p-6 md:p-8">
                 <div class="mb-8 flex items-center justify-between gap-4">
                     <img src="{{ asset('images/logo_urca.png') }}" alt="Logo URCA" class="h-14 w-auto" loading="lazy">
                     <div class="inline-flex items-center gap-2 rounded-full bg-primary-50 dark:bg-primary-800 px-4 py-2 text-sm font-semibold text-primary-700 dark:text-primary-400">
@@ -71,19 +83,27 @@
 
                 {% block content %}{% endblock %}
 
-                <footer class="mt-10 border-t border-secondary-200 pt-5 text-sm text-secondary-600 dark:border-secondary-700 dark:text-secondary-400">
-                    <p>&copy; {{ 'now'|date('Y') }} David Annebicque // Emeline Lang-Lannoy -
+                <footer class="relative mt-10 border-t border-secondary-200 pt-5 text-sm text-secondary-600 dark:border-secondary-700 dark:text-secondary-400">
+                    <p>&copy; {{ 'now'|date('Y') }} David Annebicque // Emeline Lang-Lannoy<br>
                         version {{ user_data.version|default('n/a') }}</p>
                     <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-                        <a href="#"
-                           class="font-medium text-secondary-700 underline decoration-secondary-300 underline-offset-4 transition hover:text-secondary-900 dark:text-secondary-300 dark:decoration-secondary-600 dark:hover:text-white">Docs</a>
-                        <span aria-hidden="true" class="text-secondary-300 dark:text-secondary-600">|</span>
+                        <twig:Button
+                                label="Aide"
+                                icon="icon:question"
+                                variant="info"
+                                size="sm"
+                                dataAction="click->help-drawer#open"
+                                tooltip="Ouvrir l'aide de cette page"
+                                aria-controls="helpOffcanvas"
+                        />
                         <details class="group inline-block">
                             <summary
-                                    class="cursor-pointer list-none font-medium text-secondary-700 underline decoration-secondary-300 underline-offset-4 transition hover:text-secondary-900 dark:text-secondary-300 dark:decoration-secondary-600 dark:hover:text-white">
+                                    class="inline-flex h-8 cursor-pointer list-none items-center gap-1.5 whitespace-nowrap rounded-md border border-info-300 bg-info-50 px-2.5 text-sm font-medium text-info-700 transition-colors hover:bg-info-100 hover:text-info-800 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:border-info-500 dark:bg-info-900 dark:text-info-300 dark:hover:border-info-300 dark:hover:text-info-100">
+                                {{ ux_icon('icon:info', {class: 'h-4 w-4'}) }}
                                 Usage des données
                             </summary>
-                            <div class="mt-3 max-w-2xl space-y-2 rounded-xl border border-secondary-200 bg-secondary-50 p-4 text-sm text-secondary-600 dark:border-secondary-700 dark:bg-secondary-900/30 dark:text-secondary-400">
+                            {# flottant au-dessus du bouton : ne déplace pas « Aide » à l'ouverture #}
+                            <div class="absolute inset-x-0 bottom-full z-10 mb-2 space-y-2 rounded-xl border border-secondary-200 bg-secondary-50 p-4 text-sm shadow-lg text-secondary-600 dark:border-secondary-700 dark:bg-secondary-900/30 dark:text-secondary-400">
                                 <p>Ce site n'enregistre aucune donnée sur votre utilisation de l'outil.</p>
                                 <p>Un seul cookie est utilisé pour gérer la connexion lorsque vous activez l'option "se
                                     souvenir de moi" sur la page de connexion.</p>
@@ -109,8 +129,11 @@
                 </footer>
             </section>
         </main>
+        </div>
     </div>
 </div>
 
+{% include '_layout/_help_drawer.html.twig' with { embedded: true, help_route: help_route|trim } %}
+</div>
 </body>
 </html>

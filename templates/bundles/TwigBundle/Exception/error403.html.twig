@@ -1,5 +1,7 @@
 {% extends 'base-speciale.html.twig' %}
 
+{% block help_route %}erreur{% endblock %}
+
 {% block content %}
     {{ include('bundles/TwigBundle/Exception/_error_content.html.twig', {
         badge: 'Erreur 403',

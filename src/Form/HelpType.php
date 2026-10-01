@@ -39,6 +39,10 @@ class HelpType extends AbstractType
             }
         }
 
+        // Clé virtuelle (sans route) : aide des pages d'erreur 403/404/500, voir base-speciale.html.twig
+        $routeChoices['erreur'] = 'erreur';
+        ksort($routeChoices);
+
         foreach (CentreGestionEnum::cases() as $centre) {
             if ($centre === CentreGestionEnum::CENTRE_GESTION_NULL) {
                 continue;
