@@ -21,7 +21,7 @@ class ExportResponsable
 {
 
     private string $dir;
-    private string $filename;
+    private string $fileName;
 
     public function __construct(
         protected FormationRepository $formationRepository,
