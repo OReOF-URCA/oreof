@@ -121,4 +121,3 @@ Cible = alias existant, sinon icône Phosphor à utiliser directement (ou à dé
 | `fal fa-bell` | `icon:bell` |
 | `fal fa-envelope` | `icon:envelope` |
 | `fa-brands fa-github` | `icon:github` |
-| `fa-brands fa-twitter` | `icon:twitter` |
