@@ -55,26 +55,27 @@ class ExportMccc
                 $typeDiplome = $this->typeDiplomeResolver->fromFormation($formation);
                 foreach ($formation->getParcours() as $parcours)
                 {
-                        if ($this->format === 'xlsx') {
-                            $fichier = $typeDiplome->exportAndSaveExcelMccc(
+                        $fichier = match ($this->format) {
+                            'xlsx' => $typeDiplome->exportAndSaveExcelMccc(
                                 $dir,
                                 $this->annee,
                                 $parcours,
                                 $this->date,
                                 null,
                                 $this->isLight
-                            );
-                        } elseif ($this->format === 'pdf') {
-                            $fichier = $typeDiplome->exportAndSavePdfMccc(
+                            ),
+                            'pdf' => $typeDiplome->exportAndSavePdfMccc(
                                 $dir,
                                 $this->annee,
                                 $parcours,
                                 $this->date,
                                 null,
                                 $this->isLight
-                            );
-                        }
-                        if (!isset($fichier)) {
+                            ),
+                            default => null,
+                        };
+                        /* legacy branches removed */
+                        if ($fichier === null) {
                             continue;
                         }
                         $tabFiles[] = $fichier;
