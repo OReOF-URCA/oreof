@@ -48,8 +48,8 @@ class CommentaireController extends AbstractController
     ): Response
     {
         $id = $request->query->getInt('id');
-        $type = $request->query->get('type');
-        $zone = $request->query->get('zone');
+        $type = $request->query->getString('type');
+        $zone = $request->query->getString('zone');
 
         if ($request->isMethod('POST')) {
             $message = $request->request->get('message');
@@ -80,8 +80,8 @@ class CommentaireController extends AbstractController
     ): Response
     {
         $id = $request->query->getInt('id');
-        $type = $request->query->get('type');
-        $zone = $request->query->get('zone');
+        $type = $request->query->getString('type');
+        $zone = $request->query->getString('zone');
 
         $commentaires = $getCommentaires->getCommentairesByUser($id, $type, $zone, $this->getUser());
 
