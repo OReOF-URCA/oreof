@@ -47,6 +47,8 @@ class ParcoursMcccExportController extends BaseController
 
         $dpe = GetDpeParcours::getFromParcours($parcours);
 
+        $cfvu = null;
+        $conseil = null;
         if ($dpe !== null) {
             $cfvu = $getHistorique->getHistoriqueParcoursLastStep($dpe, 'soumis_cfvu');
             //$conseil = $getHistorique->getHistoriqueParcoursLastStep($dpe, 'soumis_conseil');
@@ -64,7 +66,7 @@ class ParcoursMcccExportController extends BaseController
                 $this->getCampagneCollecte(),
                 $parcours,
                 $cfvu?->getDate() ?? null,
-                $conseil?->getDate() ?? null
+                $conseil
             ),
             default => throw new Exception('Format non géré'),
         };
@@ -87,6 +89,7 @@ class ParcoursMcccExportController extends BaseController
 
         //date conseil
         $dpe = GetDpeParcours::getFromParcours($parcours);
+        $dateConseil = null;
         if ($dpe !== null) {
             //$dateConseil = $getHistorique->getHistoriqueParcoursLastStep($dpe, 'soumis_conseil');
             $dateConseil = $getDateConseilComposante->getDateConseilComposante($dpe);
@@ -161,16 +164,6 @@ class ParcoursMcccExportController extends BaseController
         $dpeArray = $entityManager->getRepository(CampagneCollecte::class)->findBy([], ["id" => "ASC"]);
         $dpeArray = array_map(fn($dpe) => $dpe->getAnnee(), $dpeArray);
 
-        function getFileName($parcours, $campagneId, $format, $dpeArray){
-            $fileYear = $dpeArray[$campagneId - 1];
-
-            $fileName = $format === 'simplifie'
-            ? "MCCC-Parcours-{$parcours->getId()}-{$fileYear}-simplifie.pdf"
-            : "MCCC-Parcours-{$parcours->getId()}-{$fileYear}.pdf";
-
-            $fileName = __DIR__ . "/../../public/mccc-export/{$fileName}";
-            return $fileName;
-        };
 
         if(in_array($format, ['complet', 'simplifie']) === false){
             throw $this->createNotFoundException('File Type is invalid');
@@ -182,13 +175,13 @@ class ParcoursMcccExportController extends BaseController
         // On essaie la première année
         try {
             $pdf = file_get_contents(
-                getFileName($parcours, 2, $format, $dpeArray)
+                $this->getFileName($parcours, 2, $format, $dpeArray)
             );
         } catch (Exception $e) {
             // Sinon, on essaie avec la deuxième
             try{
                 $pdf = file_get_contents(
-                    getFileName($parcours, 3, $format, $dpeArray) // On teste 2026, et non pas 2025 une deuxième fois.
+                    $this->getFileName($parcours, 3, $format, $dpeArray) // On teste 2026, et non pas 2025 une deuxième fois.
                 );
             }
             // S'il n'y a pas de correspondance, on émet un message d'erreur
@@ -197,8 +190,26 @@ class ParcoursMcccExportController extends BaseController
             }
         }
 
+        if ($pdf === false) {
+            throw $this->createNotFoundException("Le fichier demandé n'a pas été trouvé");
+        }
+
         return new Response($pdf, 200, [
             'Content-Type' => 'application/pdf',
         ]);
+    }
+
+    /**
+     * @param array<int, string|int> $dpeArray
+     */
+    private function getFileName(Parcours $parcours, int $campagneId, string $format, array $dpeArray): string
+    {
+        $fileYear = $dpeArray[$campagneId - 1];
+
+        $fileName = $format === 'simplifie'
+            ? "MCCC-Parcours-{$parcours->getId()}-{$fileYear}-simplifie.pdf"
+            : "MCCC-Parcours-{$parcours->getId()}-{$fileYear}.pdf";
+
+        return __DIR__ . "/../../public/mccc-export/{$fileName}";
     }
 }
