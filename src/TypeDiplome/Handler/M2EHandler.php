@@ -672,17 +672,17 @@ final class M2EHandler extends AbstractTypeDiplomeHandler
 
     public function calcul(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
     {
-        // TODO: Implement calcul() method.
+        return $this->structureParcoursM2e->calcul($parcours, $optionsCalculStructure);
     }
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre
     {
-        // TODO: Implement calculStructureSemestre() method.
+        return new StructureSemestre();
     }
 
     public function calculVersioning(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
     {
-        // TODO: Implement calculVersioning() method.
+        return $this->structureParcoursM2e->calculVersioning($parcours, $optionsCalculStructure);
     }
 
     public function getValidator(): ValideParcoursInterface

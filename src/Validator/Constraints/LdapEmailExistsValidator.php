@@ -21,7 +21,6 @@ final class LdapEmailExistsValidator extends ConstraintValidator
         }
 
         $email = trim((string)$value);
-        dump($email);
         if ($email === '') {
             return;
         }

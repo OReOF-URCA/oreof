@@ -17,7 +17,9 @@ use App\Entity\User;
 use App\Enums\NiveauFormationEnum;
 use App\Form\Type\InlineCreateEntitySelectType;
 use App\Form\Type\YesNoType;
+use App\Repository\DomaineRepository;
 use App\Repository\MentionRepository;
+use App\Repository\TypeDiplomeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -28,20 +30,19 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use UnitEnum;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class FormationSesType extends AbstractType
 {
     public function __construct(
-        private readonly MentionRepository $mentionRepository
+        private readonly MentionRepository $mentionRepository,
+        private readonly DomaineRepository $domaineRepository,
+        private readonly TypeDiplomeRepository $typeDiplomeRepository
     ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $mentionRepository = $this->mentionRepository;
-
         $builder
             ->add('typeDiplome', EntityType::class, [
                 'class' => TypeDiplome::class,
@@ -49,7 +50,6 @@ class FormationSesType extends AbstractType
                     return $er->createQueryBuilder('t')
                         ->orderBy('t.libelle', 'ASC');
                 },
-                'autocomplete' => true,
                 'choice_label' => 'libelle',
                 'attr' => ['data-action' => 'change->formation#changeTypeDiplome']
             ])
@@ -61,10 +61,11 @@ class FormationSesType extends AbstractType
                 },
                 'choice_label' => 'libelle',
                 'autocomplete' => true,
+                'placeholder' => 'Choisir un domaine...',
                 'attr' => ['data-action' => 'change->formation#changeDomaine']
             ])
             ->add('composantePorteuse', EntityType::class, [
-                'attr' => ['placeholder' => 'Choisir la composante porteuse du projet'],
+                'placeholder' => 'Choisir la composante porteuse du projet',
                 'class' => Composante::class,
                 'query_builder' => static function ($er) {
                     return $er->createQueryBuilder('c')
@@ -78,13 +79,11 @@ class FormationSesType extends AbstractType
             ->add('mention', ChoiceType::class, [
                 'attr' => ['data-action' => 'change->formation#changeMention'],
                 'choices' => [
-                    'Choisir une mention' => null,
+                    'Choisir une mention' => '',
                     'Autre mention' => 'autre'
                 ],
                 'required' => false,
-                'validation_groups' => false,
                 'mapped' => false,
-                'autocomplete' => true,
                 'help' => 'Si la mention n\'existe pas, veuillez la créer dans la section "Autre mention"'
             ])
             ->add('mentionTexte', TextType::class, [
@@ -99,13 +98,13 @@ class FormationSesType extends AbstractType
             ])
             ->add('niveauEntree', EnumType::class, [
                 'class' => NiveauFormationEnum::class,
-                'choice_label' => static function (UnitEnum $choice): string {
+                'choice_label' => static function (NiveauFormationEnum $choice): string {
                     return $choice->libelle();
                 },
             ])
             ->add('niveauSortie', EnumType::class, [
                 'class' => NiveauFormationEnum::class,
-                'choice_label' => static function (UnitEnum $choice): string {
+                'choice_label' => static function (NiveauFormationEnum $choice): string {
                     return $choice->libelle();
                 },
             ])
@@ -130,8 +129,6 @@ class FormationSesType extends AbstractType
                 'required' => true,
                 'label' => 'Responsable de la mention',
                 'ldap_check' => true,
-
-                // évite doublons (optionnel)
                 'find_existing' => function (string $label, $scope, EntityManagerInterface $em) {
                     return $em->getRepository(User::class)->createQueryBuilder('t')
                         ->andWhere('LOWER(t.email) = LOWER(:l)')
@@ -139,14 +136,11 @@ class FormationSesType extends AbstractType
                         ->getQuery()
                         ->getOneOrNullResult();
                 },
-
-                // création (obligatoire)
                 'create' => function (string $label, EntityManagerInterface $em) {
                     $e = new User();
                     $e->setEmail($label);
-                    return $e; // persist/flush gérés par le type (ou tu peux le faire ici)
+                    return $e;
                 },
-
             ])
             ->add('coResponsable', InlineCreateEntitySelectType::class, [
                 'help' => '',
@@ -162,8 +156,6 @@ class FormationSesType extends AbstractType
                 'required' => false,
                 'label' => 'Co-Responsable de la mention',
                 'ldap_check' => true,
-
-                // évite doublons (optionnel)
                 'find_existing' => function (string $label, $scope, EntityManagerInterface $em) {
                     return $em->getRepository(User::class)->createQueryBuilder('t')
                         ->andWhere('LOWER(t.email) = LOWER(:l)')
@@ -171,59 +163,118 @@ class FormationSesType extends AbstractType
                         ->getQuery()
                         ->getOneOrNullResult();
                 },
-
-                // création (obligatoire)
                 'create' => function (string $label, EntityManagerInterface $em) {
                     $e = new User();
                     $e->setEmail($label);
-                    return $e; // persist/flush gérés par le type (ou tu peux le faire ici)
+                    return $e;
                 },
-
             ])
-
-            ->addEventListener(
-                FormEvents::POST_SUBMIT,
-                static function (FormEvent $event) use ($mentionRepository) {
-                    $formation = $event->getData();
-                    $form = $event->getForm();
-                    $mention = $form->get('mention')->getData();
-                    if ($mention !== '' && $mention !== null) {
-                        $objMention = $mentionRepository->find($mention);
-                        $formation->setMention($objMention);
-                    } else {
-                        $formation->setMention(null);
-                    }
-                }
-            )
             ->addEventListener(
                 FormEvents::PRE_SET_DATA,
-                static function (FormEvent $event) use ($mentionRepository) {
+                function (FormEvent $event) {
                     $formation = $event->getData();
-                    if ($formation->getDomaine() !== null && $formation->getTypeDiplome() !== null) {
+                    if ($formation instanceof Formation && $formation->getDomaine() !== null && $formation->getTypeDiplome() !== null) {
                         $form = $event->getForm();
-                        $mentions = $mentionRepository->findByDomaineAndTypeDiplome(
+                        $mentions = $this->mentionRepository->findByDomaineAndTypeDiplome(
                             $formation->getDomaine(),
                             $formation->getTypeDiplome()
                         );
+                        $tabMentions = [
+                            'Choisir une mention' => '',
+                        ];
                         foreach ($mentions as $mention) {
-                            $tabMentions[$mention->getLibelle()] = $mention->getId();
+                            $tabMentions[$mention->getLibelle()] = (string)$mention->getId();
                         }
-                        $tabMentions['Autre'] = 'autre';
-                        $tabMentions[''] = null;
+                        $tabMentions['Autre mention'] = 'autre';
+
+                        $initialValue = '';
+                        if ($formation->getMention() !== null) {
+                            $initialValue = (string)$formation->getMention()->getId();
+                        } elseif ($formation->getMentionTexte() !== null && $formation->getMentionTexte() !== '') {
+                            $initialValue = 'autre';
+                        }
+
                         $form->add('mention', ChoiceType::class, [
                             'attr' => ['data-action' => 'change->formation#changeMention'],
                             'choices' => $tabMentions,
                             'label' => 'Mention',
                             'required' => false,
                             'mapped' => false,
+                            'data' => $initialValue,
                             'help' => 'Si la mention n\'existe pas, veuillez la créer dans la section "Autre mention"'
                         ]);
+                    }
+                }
+            )
+            ->addEventListener(
+                FormEvents::PRE_SUBMIT,
+                function (FormEvent $event) {
+                    $data = $event->getData();
+                    if (!is_array($data)) {
+                        return;
+                    }
+
+                    $form = $event->getForm();
+                    $tabMentions = [
+                        'Choisir une mention' => '',
+                        'Autre mention' => 'autre',
+                    ];
+
+                    $domaineId = $data['domaine'] ?? null;
+                    $typeDiplomeId = $data['typeDiplome'] ?? null;
+
+                    if ($domaineId && $typeDiplomeId) {
+                        $domaine = $this->domaineRepository->find($domaineId);
+                        $typeDiplome = $this->typeDiplomeRepository->find($typeDiplomeId);
+                        if ($domaine && $typeDiplome) {
+                            $mentions = $this->mentionRepository->findByDomaineAndTypeDiplome($domaine, $typeDiplome);
+                            foreach ($mentions as $mention) {
+                                $tabMentions[$mention->getLibelle()] = (string)$mention->getId();
+                            }
+                        }
+                    }
+
+                    $submittedMention = $data['mention'] ?? null;
+                    if ($submittedMention && $submittedMention !== 'autre' && !in_array((string)$submittedMention, $tabMentions, true)) {
+                        $objMention = $this->mentionRepository->find($submittedMention);
+                        if ($objMention !== null) {
+                            $tabMentions[$objMention->getLibelle()] = (string)$objMention->getId();
+                        }
+                    }
+
+                    $form->add('mention', ChoiceType::class, [
+                        'attr' => ['data-action' => 'change->formation#changeMention'],
+                        'choices' => $tabMentions,
+                        'label' => 'Mention',
+                        'required' => false,
+                        'mapped' => false,
+                        'help' => 'Si la mention n\'existe pas, veuillez la créer dans la section "Autre mention"'
+                    ]);
+                }
+            )
+            ->addEventListener(
+                FormEvents::POST_SUBMIT,
+                function (FormEvent $event) {
+                    $formation = $event->getData();
+                    if (!$formation instanceof Formation) {
+                        return;
+                    }
+                    $form = $event->getForm();
+                    $mention = $form->get('mention')->getData();
+                    if ($mention !== '' && $mention !== null && $mention !== 'autre') {
+                        $objMention = $this->mentionRepository->find($mention);
+                        $formation->setMention($objMention);
+                        $formation->setMentionTexte(null);
+                    } elseif ($mention === 'autre') {
+                        $formation->setMention(null);
+                    } else {
+                        $formation->setMention(null);
                     }
                 }
             );
 
         $formation = $builder->getData();
-        if (($formation?->getTypeDiplome()?->isClassique() ?? true) === false) {
+        if ($formation instanceof Formation && ($formation->getTypeDiplome()?->isClassique() ?? true) === false) {
             $builder->remove('composantePorteuse');
         }
     }

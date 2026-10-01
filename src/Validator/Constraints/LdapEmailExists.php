@@ -18,7 +18,6 @@ final class LdapEmailExists extends Constraint
         mixed                   $payload = null
     )
     {
-        dump($options);
         parent::__construct($options ?? [], $groups, $payload);
 
         if ($message !== null) {

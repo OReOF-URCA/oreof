@@ -34,10 +34,20 @@ class StructureParcours
     public ?DureeParcoursUniteEnum $dureeParcoursUnite = null;
 
     public function __construct(
-        private $withEcts = true,
-        private $withBcc = true,
+        private bool $withEcts = true,
+        private bool $withBcc = true,
     )
     {
+    }
+
+    public function isWithEcts(): bool
+    {
+        return $this->withEcts;
+    }
+
+    public function isWithBcc(): bool
+    {
+        return $this->withBcc;
     }
 
     // Factory statique : crée un DTO à partir d'une Entity (pas autowiré)
@@ -74,10 +84,26 @@ class StructureParcours
     public function addSemestre(int $ordre, StructureSemestre $structureSemestre): void
     {
         $this->semestres[$ordre] = $structureSemestre;
-        $this->annees[$structureSemestre->semestreParcours?->getAnnee()?->getOrdre()]['semestres'][$ordre] = $structureSemestre;
-        $this->annees[$structureSemestre->semestreParcours?->getAnnee()?->getOrdre()]['heuresEctsAnnee']->addSemestre($structureSemestre->heuresEctsSemestre);
-        if ($this->withEcts) {
-            $this->heuresEctsFormation->addSemestre($structureSemestre->heuresEctsSemestre);
+
+        $anneeOrdre = $structureSemestre->semestreParcours?->getAnnee()?->getOrdre() ?? $structureSemestre->getAnnee();
+
+        if (!isset($this->annees[$anneeOrdre])) {
+            $this->annees[$anneeOrdre] = [
+                'heuresEctsAnnee' => new HeuresEctsAnnee(),
+                'annee' => $structureSemestre->semestreParcours?->getAnnee(),
+                'semestres' => [],
+            ];
+        } elseif (!isset($this->annees[$anneeOrdre]['heuresEctsAnnee'])) {
+            $this->annees[$anneeOrdre]['heuresEctsAnnee'] = new HeuresEctsAnnee();
+        }
+
+        $this->annees[$anneeOrdre]['semestres'][$ordre] = $structureSemestre;
+
+        if (isset($structureSemestre->heuresEctsSemestre)) {
+            $this->annees[$anneeOrdre]['heuresEctsAnnee']->addSemestre($structureSemestre->heuresEctsSemestre);
+            if ($this->withEcts && isset($this->heuresEctsFormation)) {
+                $this->heuresEctsFormation->addSemestre($structureSemestre->heuresEctsSemestre);
+            }
         }
     }
 
