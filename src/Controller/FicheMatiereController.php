@@ -17,13 +17,14 @@ use App\Entity\ElementConstitutif;
 use App\Entity\FicheMatiere;
 use App\Entity\FicheMatiereVersioning;
 use App\Entity\Parcours;
-use App\Entity\TypeEpreuve;
+use App\Entity\User;
 use App\Form\FicheMatiereType;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereMutualisableRepository;
 use App\Repository\FicheMatiereRepository;
 use App\Repository\LangueRepository;
 use App\Repository\TypeDiplomeRepository;
+use App\Repository\TypeEpreuveRepository;
 use App\Repository\UeRepository;
 use App\Service\VersioningFicheMatiere;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
@@ -436,10 +437,8 @@ class FicheMatiereController extends BaseController
         FicheMatiereVersioning $ficheMatiereVersioning,
         VersioningFicheMatiere $ficheMatiereVersioningService,
         Filesystem $filesystem,
-        EntityManagerInterface $em,
-        LicenceTypeDiplome $licenceTypeD,
-        ButTypeDiplome $butTypeD,
-        MeefTypeDiplome $meefTypeD
+        ElementConstitutifRepository $elementConstitutifRepository,
+        TypeEpreuveRepository $typeEpreuveRepository,
     ): RedirectResponse|Response
     {
         try {
@@ -452,13 +451,8 @@ class FicheMatiereController extends BaseController
                 'Bachelor Universitaire de Technologie' => 'but.html.twig',
                 'Master MEEF' => 'meef.html.twig'
             ];
-            $mcccTypeDiplome = [
-                'Licence' => $licenceTypeD,
-                'Bachelor Universitaire de Technologie' => $butTypeD,
-                'Master MEEF' => $meefTypeD
-            ];
+            $mcccTypeDiplome = $this->typeDiplomeResolver->fromTypeDiplome($typeD);
             $templateForm = array_key_exists($typeD->getLibelle(), $templateFormArray) ? $templateFormArray[$typeD->getLibelle()] : [];
-            $mcccTypeDiplome = array_key_exists($typeD->getLibelle(), $mcccTypeDiplome) ? $mcccTypeDiplome[$typeD->getLibelle()] : [];
             $bccs = [];
             foreach ($ficheMatiere->getCompetences() as $competence) {
                 if (!array_key_exists($competence->getBlocCompetence()?->getId(), $bccs)) {
@@ -468,9 +462,8 @@ class FicheMatiereController extends BaseController
                 $bccs[$competence->getBlocCompetence()?->getId()]['competences'][] = $competence;
             }
 
-            $ecParcours = $em->getRepository(ElementConstitutif::class)
-                ->findByFicheMatiereParcours($ficheMatiereVersioning->getFicheMatiere());
-            $typeEpreuves = $em->getRepository(TypeEpreuve::class)->findByTypeDiplome($typeD);
+            $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiereVersioning->getFicheMatiere());
+            $typeEpreuves = $typeEpreuveRepository->findByTypeDiplome($typeD);
 
             return $this->render('fiche_matiere/show.versioning.html.twig', [
                 'ficheMatiere' => $ficheMatiere,
@@ -504,15 +497,13 @@ class FicheMatiereController extends BaseController
 
     #[Route('/recherche/parcours/{parcours}/{keyword}', name: 'app_fiche_matiere_search')]
     public function getFicheMatiereForParcoursAndKeyword(
-        EntityManagerInterface $entityManager,
+        FicheMatiereRepository $ficheMatiereRepository,
         TurboStreamResponseFactory $turboStream,
         Parcours $parcours,
         string $keyword = ""
     ): Response
     {
-        $associatedFicheMatiere = $entityManager
-            ->getRepository(FicheMatiere::class)
-            ->findForParcoursWithKeyword($parcours, $keyword);
+        $associatedFicheMatiere = $ficheMatiereRepository->findForParcoursWithKeyword($parcours, $keyword);
 
         $count = count($associatedFicheMatiere);
         $title = $count > 1
