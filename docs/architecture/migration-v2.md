@@ -43,7 +43,7 @@ php bin/console app:migrate:v2:cleanup --apply --confirm-backup
 | `020_validation_schema` | socle de validation, états d'onglets, `volume_horaire_parcours` |
 | `030_admission_years` | `annees`, `annees_capacite_requise` sur les associations diplôme/plateforme |
 | `040_new_v2_tables` | FAQ, aide, documents de conseil |
-| `045_help_seed_data` | aides contextuelles et images livrées avec V2 (`V2HelpSeedData`), sans écraser l'existant (`route_slug`/`fichier`) |
+| `045_help_seed_data` | aides contextuelles et images livrées avec V2 (`V2HelpSeedData`), sans écraser l'existant (`route_slug`/`fichier`) ; répare les aides semées avec des `\n` littéraux et jamais modifiées depuis (rejouer avec `--step=045_help_seed_data --force`). Contenus à jour : import d'archive, voir `docs/composants/aides-faq.md` |
 | `050_history_documents` | relations historique → documents de conseil |
 | `060_doctrine_alignment` | alignement non destructif du schéma restant sur le mapping Doctrine V2 (`V2DoctrineAlignment`) |
 | `090_reconcile_schema` | répare les structures V2 partielles (FK, index, UNIQUE, `validation_issue`) ; UNIQUE ajouté seulement sans doublon, aucun doublon fusionné automatiquement |

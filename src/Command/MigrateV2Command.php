@@ -195,6 +195,7 @@ final class MigrateV2Command extends Command
         $this->addColumn($sql, 'type_diplome', 'classique', 'TINYINT(1) NOT NULL DEFAULT 1');
         $this->addColumn($sql, 'type_diplome', 'has_ects', 'TINYINT(1) NOT NULL DEFAULT 1');
         $this->addColumn($sql, 'type_diplome', 'nb_ects_par_semestre', 'INT DEFAULT 30');
+        $this->addColumn($sql, 'timeline_date', 'ordre', 'INT NOT NULL DEFAULT 0');
 
         $this->modifyIfPresent($sql, 'formation', 'niveau_entree', 'INT DEFAULT NULL');
         $this->modifyIfPresent($sql, 'formation', 'niveau_sortie', 'INT DEFAULT NULL');
@@ -288,6 +289,7 @@ final class MigrateV2Command extends Command
                 campagne_id INT DEFAULT NULL,
                 annees JSON DEFAULT NULL COMMENT '(DC2Type:json)',
                 annees_capacite_requise JSON DEFAULT NULL COMMENT '(DC2Type:json)',
+                annees_capacite_specifique JSON DEFAULT NULL COMMENT '(DC2Type:json)',
                 INDEX IDX_TDPA_TYPE_DIPLOME (type_diplome_id),
                 INDEX IDX_TDPA_PLATEFORME (plateforme_id),
                 INDEX IDX_TDPA_CAMPAGNE (campagne_id),
@@ -299,6 +301,7 @@ final class MigrateV2Command extends Command
         } else {
             $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees', "JSON NULL COMMENT 'Années concernées par la plateforme (ex: [1, 2, 3])'");
             $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees_capacite_requise', "JSON DEFAULT NULL COMMENT 'Années pour lesquelles une capacité est requise'");
+            $this->addColumn($sql, 'type_diplome_plateforme_admission', 'annees_capacite_specifique', "JSON DEFAULT NULL COMMENT '(DC2Type:json)'");
         }
 
         return $sql;
@@ -494,7 +497,7 @@ final class MigrateV2Command extends Command
         $errors = [];
         $warnings = [];
 
-        foreach ([['plateforme_admission','mode_export'], ['parcours','duree_parcours'], ['type_diplome','has_ects'], ['type_diplome_plateforme_admission','annees'], ['type_diplome_plateforme_admission','annees_capacite_requise'], ['semestre','validation_status'], ['ue','validation_status'], ['element_constitutif','validation_status']] as [$table, $column]) {
+        foreach ([['plateforme_admission','mode_export'], ['parcours','duree_parcours'], ['type_diplome','has_ects'], ['type_diplome_plateforme_admission','annees'], ['type_diplome_plateforme_admission','annees_capacite_requise'], ['type_diplome_plateforme_admission','annees_capacite_specifique'], ['timeline_date','ordre'], ['annee','regime_inscription'], ['semestre','validation_status'], ['ue','validation_status'], ['element_constitutif','validation_status']] as [$table, $column]) {
             if (!$this->columnExists($table, $column)) {
                 $errors[] = "Colonne manquante : {$table}.{$column}";
             }

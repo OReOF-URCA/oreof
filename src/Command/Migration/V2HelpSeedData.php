@@ -26,15 +26,30 @@ final class V2HelpSeedData
         }
         if ($this->tableExists('help')) {
             foreach ($this->helps() as $help) {
-                if (!$this->connection->fetchOne('SELECT 1 FROM help WHERE route_slug = ? LIMIT 1', [$help['route_slug']])) {
+                // Les contenus ci-dessous sont des chaînes PHP à quotes simples : leurs « \n » sont littéraux
+                // et doivent être convertis en vrais retours à la ligne, sinon le Markdown est cassé.
+                $content = self::decodeNewlines($help['content']);
+                $existing = $this->connection->fetchOne('SELECT content FROM help WHERE route_slug = ? LIMIT 1', [$help['route_slug']]);
+                if ($existing === false) {
                     $sql['Aide '.$help['route_slug']] = sprintf(
                         'INSERT INTO help (title, content, route_slug, is_active, centres_show) VALUES (%s, %s, %s, %d, %s)',
-                        $this->connection->quote($help['title']), $this->connection->quote($help['content']), $this->connection->quote($help['route_slug']), $help['is_active'], $this->connection->quote($help['centres_show'])
+                        $this->connection->quote($help['title']), $this->connection->quote($content), $this->connection->quote($help['route_slug']), $help['is_active'], $this->connection->quote($help['centres_show'])
+                    );
+                } elseif ($existing === $help['content'] && $existing !== $content) {
+                    // Répare une aide semée par une version antérieure (« \n » littéraux) et jamais modifiée depuis.
+                    $sql['Réparation des retours à la ligne de l\'aide '.$help['route_slug']] = sprintf(
+                        'UPDATE help SET content = %s WHERE route_slug = %s',
+                        $this->connection->quote($content), $this->connection->quote($help['route_slug'])
                     );
                 }
             }
         }
         return $sql;
+    }
+
+    private static function decodeNewlines(string $content): string
+    {
+        return str_replace(['\r\n', '\n'], "\n", $content);
     }
 
     private function images(): array

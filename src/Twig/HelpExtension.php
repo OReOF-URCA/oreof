@@ -16,6 +16,7 @@ use App\Service\HelpGrantService;
 use Doctrine\ORM\EntityManagerInterface;
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\Strikethrough\StrikethroughExtension;
 use League\CommonMark\Extension\Table\TableExtension; // L'extension magique pour les tableaux
 use League\CommonMark\MarkdownConverter;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -40,6 +41,7 @@ class HelpExtension extends AbstractExtension
         $environment = new Environment($config);
         $environment->addExtension(new CommonMarkCoreExtension());
         $environment->addExtension(new TableExtension());
+        $environment->addExtension(new StrikethroughExtension()); // ~~barré~~, comme l'aperçu (marked GFM)
 
         $this->converter = new MarkdownConverter($environment);
     }
@@ -65,7 +67,7 @@ class HelpExtension extends AbstractExtension
         return $this->converter->convert($cleanContent)->getContent();
     }
 
-    public function getPageHelp(string $routeSlug = null): ?Help
+    public function getPageHelp(?string $routeSlug = null): ?Help
     {
         if (!$routeSlug) {
             return null;

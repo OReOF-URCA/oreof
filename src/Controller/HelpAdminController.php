@@ -29,7 +29,7 @@ class HelpAdminController extends AbstractController
     #[Route('/', name: 'app_help_index', methods: ['GET'])]
     public function index(EntityManagerInterface $em, RouterInterface $router): Response
     {
-        $helps = $em->getRepository(Help::class)->findAll();
+        $helps = $em->getRepository(Help::class)->findBy([], ['routeSlug' => 'ASC']);
         $previewUrls = [];
 
         foreach ($helps as $help) {
@@ -105,7 +105,6 @@ class HelpAdminController extends AbstractController
             return $this->redirectToRoute('app_help_index');
         }
 
-        // VÉRIFIE CETTE LIGNE :
         return $this->render('help_admin/form.html.twig', [
             'help' => $help,
             'form' => $form->createView(),
