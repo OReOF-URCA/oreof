@@ -16,7 +16,7 @@ class TypeDiplomePlateformeType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $nbAnnees = $options['nb_annees'];
+        $nbAnnees = max(1, (int)($options['nb_annees'] ?? 1));
         
         $builder
             ->add('plateforme', EntityType::class, [
@@ -28,39 +28,37 @@ class TypeDiplomePlateformeType extends AbstractType
             ]);
         
         // Générer dynamiquement les cases à cocher pour les années
-        if ($nbAnnees > 0) {
-            $anneesChoices = [];
-            for ($i = 1; $i <= $nbAnnees; $i++) {
-                $anneesChoices["Année $i"] = $i;
-            }
-            
-            $builder->add('annees', ChoiceType::class, [
-                'choices' => $anneesChoices,
-                'multiple' => true,
-                'expanded' => true,
-                'label' => 'Années concernées',
-                'required' => true,
-                'help' => 'Sélectionnez les années pour lesquelles cette plateforme est utilisée',
-            ]);
-
-            $builder->add('anneesCapaciteRequise', ChoiceType::class, [
-                'choices' => $anneesChoices,
-                'multiple' => true,
-                'expanded' => true,
-                'label' => 'Capacité obligatoire pour les années',
-                'required' => false,
-                'help' => 'Cochez les années où la saisie d\'une capacité est obligatoire (si décoché, la capacité reste optionnelle)',
-            ]);
-
-            $builder->add('anneesCapaciteSpecifique', ChoiceType::class, [
-                'choices' => $anneesChoices,
-                'multiple' => true,
-                'expanded' => true,
-                'label' => 'Capacité spécifique pour les années',
-                'required' => false,
-                'help' => 'Cochez les années pour lesquelles le champ de capacité spécifique doit être disponible',
-            ]);
+        $anneesChoices = [];
+        for ($i = 1; $i <= $nbAnnees; $i++) {
+            $anneesChoices["Année $i"] = $i;
         }
+        
+        $builder->add('annees', ChoiceType::class, [
+            'choices' => $anneesChoices,
+            'multiple' => true,
+            'expanded' => true,
+            'label' => 'Années concernées',
+            'required' => true,
+            'help' => 'Sélectionnez les années pour lesquelles cette plateforme est utilisée',
+        ]);
+
+        $builder->add('anneesCapaciteRequise', ChoiceType::class, [
+            'choices' => $anneesChoices,
+            'multiple' => true,
+            'expanded' => true,
+            'label' => 'Capacité obligatoire pour les années',
+            'required' => false,
+            'help' => 'Cochez les années où la saisie d\'une capacité est obligatoire (si décoché, la capacité reste optionnelle)',
+        ]);
+
+        $builder->add('anneesCapaciteSpecifique', ChoiceType::class, [
+            'choices' => $anneesChoices,
+            'multiple' => true,
+            'expanded' => true,
+            'label' => 'Capacité spécifique pour les années',
+            'required' => false,
+            'help' => 'Cochez les années pour lesquelles le champ de capacité spécifique doit être disponible',
+        ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

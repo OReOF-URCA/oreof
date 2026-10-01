@@ -50,10 +50,10 @@ class TimelineDate
     private int $ordre = 0;
 
     /**
-     * @var array<string>
+     * @var array<string>|null
      */
     #[ORM\Column(type: Types::JSON, nullable: true)]
-    private array $modulesActifs = [];
+    private ?array $modulesActifs = [];
 
     public function getId(): ?int
     {
@@ -210,7 +210,7 @@ class TimelineDate
      */
     public function getModulesActifs(): array
     {
-        return $this->modulesActifs;
+        return $this->modulesActifs ?? [];
     }
 
     /**

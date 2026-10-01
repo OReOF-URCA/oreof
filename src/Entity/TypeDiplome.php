@@ -594,7 +594,9 @@ class TypeDiplome
         if ($this->semestreFin === null || $this->semestreDebut === null) {
             return 0;
         }
-        return ($this->semestreFin - $this->semestreDebut + 1) / 2;
+        $semestres = max(1, $this->semestreFin - $this->semestreDebut + 1);
+
+        return (int) ceil($semestres / 2);
     }
 
     public function isCodifIntermediaire(): ?bool

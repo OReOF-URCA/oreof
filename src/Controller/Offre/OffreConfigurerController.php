@@ -8,6 +8,7 @@ use App\Entity\Constantes;
 use App\Entity\DpeFormation;
 use App\Entity\Formation;
 use App\Entity\PlateformeAdmissionParametre;
+use App\Enums\CampagneModuleEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Service\CampagneCollecteService;
@@ -597,12 +598,25 @@ final class OffreConfigurerController extends BaseController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $campagne = $this->getCampagneCollecte();
 
+        $timelineStep = $campagne->getTimelineDateForModule(CampagneModuleEnum::OFFRE_FORMATION);
+        $dateDebut = $timelineStep?->getDateDebut() ?? $campagne->getDateOuvertureDpe();
+        $dateFin = $timelineStep?->getDate() ?? $campagne->getDateClotureDpe();
+        $heureFin = $timelineStep?->getHeure();
+        $libelle = $timelineStep?->getLibelle() ?? 'Saisie de l\'offre de formation (ouverture, capacités)';
+        $inTimeline = $timelineStep?->isInTimeline() ?? true;
+
         return $turboStream->streamOpenModalFromTemplates(
-            'Dates de collecte des capacités',
+            'Dates de collecte — Offre de formation',
             'Campagne : ' . $campagne->getLibelle(),
             'offre_v2/_modal_configurer_dates.html.twig',
             [
                 'campagne' => $campagne,
+                'timelineStep' => $timelineStep,
+                'dateDebut' => $dateDebut,
+                'dateFin' => $dateFin,
+                'heureFin' => $heureFin,
+                'libelle' => $libelle,
+                'inTimeline' => $inTimeline,
             ],
             'offre_v2/_modal_configurer_dates_footer.html.twig',
             [
@@ -624,14 +638,34 @@ final class OffreConfigurerController extends BaseController
             return new JsonResponse(['success' => false, 'message' => 'Token CSRF invalide.'], Response::HTTP_BAD_REQUEST);
         }
 
-        $dateOuvertureStr = (string)$request->request->get('dateOuvertureDpe');
-        $dateClotureStr = (string)$request->request->get('dateClotureDpe');
+        $libelle = trim((string)$request->request->get('libelle', ''));
+        $dateDebutStr = (string)$request->request->get('dateDebut');
+        $dateFinStr = (string)$request->request->get('dateFin');
+        $heureFinStr = (string)$request->request->get('heureFin');
+        $inTimeline = (bool)$request->request->get('inTimeline', true);
 
-        $dateOuverture = $dateOuvertureStr !== '' ? new \DateTime($dateOuvertureStr) : null;
-        $dateCloture = $dateClotureStr !== '' ? new \DateTime($dateClotureStr) : null;
+        // Rétrocompatibilité si anciens champs transmis
+        if ($dateDebutStr === '' && $request->request->has('dateOuvertureDpe')) {
+            $dateDebutStr = (string)$request->request->get('dateOuvertureDpe');
+        }
+        if ($dateFinStr === '' && $request->request->has('dateClotureDpe')) {
+            $dateFinStr = (string)$request->request->get('dateClotureDpe');
+        }
 
-        $campagneService->updateDates($campagne, $dateOuverture, $dateCloture);
+        $dateDebut = $dateDebutStr !== '' ? new \DateTime($dateDebutStr) : null;
+        $dateFin = $dateFinStr !== '' ? new \DateTime($dateFinStr) : null;
+        $heureFin = $heureFinStr !== '' ? new \DateTime($heureFinStr) : null;
 
-        return $turboStream->streamToastSuccess('Dates de la campagne de collecte des capacités enregistrées.', true);
+        $campagneService->updateModuleDates(
+            $campagne,
+            CampagneModuleEnum::OFFRE_FORMATION,
+            $dateDebut,
+            $dateFin,
+            $heureFin,
+            $libelle !== '' ? $libelle : null,
+            $inTimeline
+        );
+
+        return $turboStream->streamToastSuccess('Dates de collecte de l\'offre enregistrées et synchronisées avec la timeline.', true);
     }
 }

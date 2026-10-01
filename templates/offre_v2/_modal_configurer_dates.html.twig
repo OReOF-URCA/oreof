@@ -1,17 +1,101 @@
-<form action="{{ path('offre_v2_sauvegarder_dates') }}" method="POST" id="configurer_dates_form">
+<form action="{{ path('offre_v2_sauvegarder_dates') }}" method="POST" id="configurer_dates_form" class="space-y-5">
     <input type="hidden" name="_token" value="{{ csrf_token('configurer_dates_' ~ campagne.id) }}">
-    <div class="space-y-4">
-        <div>
-            <label for="dateOuvertureDpe" class="block text-sm font-semibold text-slate-700">Date d'ouverture de la collecte</label>
-            <input type="datetime-local" id="dateOuvertureDpe" name="dateOuvertureDpe"
-                   value="{{ campagne.dateOuvertureDpe ? campagne.dateOuvertureDpe|date('Y-m-d\\TH:i') : '' }}"
-                   class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+
+    <!-- Bandeau explicatif Module Timeline -->
+    <div class="flex items-start gap-3 rounded-xl border border-primary-200 bg-primary-50/60 p-4 dark:border-primary-800 dark:bg-primary-950/30">
+        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/60 dark:text-primary-300">
+            <twig:UX:Icon name="icon:calendar" class="h-5 w-5" />
         </div>
-        <div>
-            <label for="dateClotureDpe" class="block text-sm font-semibold text-slate-700">Date de clôture de la collecte</label>
-            <input type="datetime-local" id="dateClotureDpe" name="dateClotureDpe"
-                   value="{{ campagne.dateClotureDpe ? campagne.dateClotureDpe|date('Y-m-d\\TH:i') : '' }}"
-                   class="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        <div class="text-sm">
+            <div class="font-semibold text-primary-900 dark:text-primary-100 flex items-center gap-2">
+                <span>Période de collecte de l'offre de formation</span>
+                <twig:Badge variant="primary" label="Module : Offre de formation" />
+            </div>
+            <p class="mt-1 text-primary-700 dark:text-primary-300 text-xs">
+                Ces dates définissent la période pendant laquelle les composantes et responsables peuvent éditer et transmettre l'offre de formation et les capacités. Elles sont synchronisées directement avec la timeline de la campagne.
+            </p>
         </div>
     </div>
+
+    <!-- Champs du formulaire -->
+    <div class="space-y-4">
+        <div>
+            <label for="libelle" class="block text-xs font-semibold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
+                Libellé de l'étape dans la timeline
+            </label>
+            <input type="text" id="libelle" name="libelle"
+                   value="{{ libelle|default('Saisie de l\'offre de formation (ouverture, capacités)') }}"
+                   required
+                   class="block w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm shadow-xs transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+                <label for="dateDebut" class="block text-xs font-semibold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
+                    Date de début
+                </label>
+                <input type="date" id="dateDebut" name="dateDebut"
+                       value="{{ dateDebut ? dateDebut|date('Y-m-d') : '' }}"
+                       class="block w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm shadow-xs transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100">
+                <p class="mt-1 text-[11px] text-secondary-500">Date d'ouverture de la saisie</p>
+            </div>
+
+            <div>
+                <label for="dateFin" class="block text-xs font-semibold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
+                    Date de fin (échéance) <span class="text-danger-500">*</span>
+                </label>
+                <input type="date" id="dateFin" name="dateFin"
+                       value="{{ dateFin ? dateFin|date('Y-m-d') : '' }}"
+                       required
+                       class="block w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm shadow-xs transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100">
+                <p class="mt-1 text-[11px] text-secondary-500">Date limite de transmission</p>
+            </div>
+
+            <div>
+                <label for="heureFin" class="block text-xs font-semibold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
+                    Heure limite
+                </label>
+                <input type="time" id="heureFin" name="heureFin"
+                       value="{{ heureFin ? heureFin|date('H:i') : '23:59' }}"
+                       class="block w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm shadow-xs transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100">
+                <p class="mt-1 text-[11px] text-secondary-500">Heure de clôture (défaut: 23:59)</p>
+            </div>
+        </div>
+
+        <div class="pt-2 border-t border-secondary-200 dark:border-secondary-700">
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+                <input type="checkbox" name="inTimeline" value="1" {% if inTimeline %}checked{% endif %}
+                       class="rounded border-secondary-300 text-primary-600 shadow-xs focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800">
+                <span class="text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                    Afficher cette étape dans la frise chronologique (timeline) publique
+                </span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Autres étapes de la campagne (contexte) -->
+    {% if campagne.timelineDates|length > 0 %}
+        <div class="mt-4 pt-3 border-t border-secondary-200 dark:border-secondary-700">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-2">
+                Toutes les étapes de la campagne ({{ campagne.timelineDates|length }})
+            </h4>
+            <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1 text-xs">
+                {% for step in campagne.timelineDates %}
+                    {% set isOffreStep = step.hasModule('offre_formation') %}
+                    <div class="flex items-center justify-between rounded-lg p-2 {{ isOffreStep ? 'bg-primary-50 border border-primary-200 font-semibold text-primary-900 dark:bg-primary-950/40 dark:border-primary-800 dark:text-primary-200' : 'bg-secondary-50 border border-secondary-200/70 text-secondary-700 dark:bg-secondary-800 dark:border-secondary-700 dark:text-secondary-300' }}">
+                        <div class="flex items-center gap-2">
+                            <twig:UX:Icon :name="step.icone|default('icon:clock')" class="h-3.5 w-3.5 opacity-70" />
+                            <span>{{ step.libelle }}</span>
+                            {% if isOffreStep %}
+                                <twig:Badge variant="primary" label="Actif ici" size="xs" />
+                            {% endif %}
+                        </div>
+                        <div class="text-secondary-500 dark:text-secondary-400 text-[11px] whitespace-nowrap">
+                            {% if step.dateDebut %}{{ step.dateDebut|date('d/m/Y') }} → {% endif %}{{ step.date|date('d/m/Y') }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
 </form>

@@ -156,10 +156,26 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                    <div>{{ form_row(form.plateformesAdmission.vars.prototype.plateforme) }}</div>
-                    <div>{{ form_row(form.plateformesAdmission.vars.prototype.annees) }}</div>
-                    <div>{{ form_row(form.plateformesAdmission.vars.prototype.anneesCapaciteRequise) }}</div>
-                    <div>{{ form_row(form.plateformesAdmission.vars.prototype.anneesCapaciteSpecifique) }}</div>
+                    <div>
+                        {% if form.plateformesAdmission.vars.prototype.plateforme is defined %}
+                            {{ form_row(form.plateformesAdmission.vars.prototype.plateforme) }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if form.plateformesAdmission.vars.prototype.annees is defined %}
+                            {{ form_row(form.plateformesAdmission.vars.prototype.annees) }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if form.plateformesAdmission.vars.prototype.anneesCapaciteRequise is defined %}
+                            {{ form_row(form.plateformesAdmission.vars.prototype.anneesCapaciteRequise) }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if form.plateformesAdmission.vars.prototype.anneesCapaciteSpecifique is defined %}
+                            {{ form_row(form.plateformesAdmission.vars.prototype.anneesCapaciteSpecifique) }}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         {% endset %}
@@ -188,10 +204,26 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-                            <div>{{ form_row(plateformeForm.plateforme) }}</div>
-                            <div>{{ form_row(plateformeForm.annees) }}</div>
-                            <div>{{ form_row(plateformeForm.anneesCapaciteRequise) }}</div>
-                            <div>{{ form_row(plateformeForm.anneesCapaciteSpecifique) }}</div>
+                            <div>
+                                {% if plateformeForm.plateforme is defined %}
+                                    {{ form_row(plateformeForm.plateforme) }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if plateformeForm.annees is defined %}
+                                    {{ form_row(plateformeForm.annees) }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if plateformeForm.anneesCapaciteRequise is defined %}
+                                    {{ form_row(plateformeForm.anneesCapaciteRequise) }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if plateformeForm.anneesCapaciteSpecifique is defined %}
+                                    {{ form_row(plateformeForm.anneesCapaciteSpecifique) }}
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}

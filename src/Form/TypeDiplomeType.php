@@ -202,9 +202,13 @@ class TypeDiplomeType extends AbstractType
             $typeDiplome = $event->getData();
             $form = $event->getForm();
 
-            $nbAnnees = 1;
-            if ($typeDiplome && $typeDiplome->getId()) {
-                $nbAnnees = $typeDiplome->getNbAnnee();
+            $nbAnnees = 3;
+            if ($typeDiplome) {
+                if ($typeDiplome->getNbAnnee() > 0) {
+                    $nbAnnees = $typeDiplome->getNbAnnee();
+                } elseif ($typeDiplome->getSemestreDebut() !== null && $typeDiplome->getSemestreFin() !== null) {
+                    $nbAnnees = max(1, (int) ceil(($typeDiplome->getSemestreFin() - $typeDiplome->getSemestreDebut() + 1) / 2));
+                }
             }
 
             // Récupérer les associations plateformes/années existantes

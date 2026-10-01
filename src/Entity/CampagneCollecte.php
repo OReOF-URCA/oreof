@@ -16,6 +16,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+use App\Enums\CampagneModuleEnum;
 use App\Enums\TimelineDateFlagEnum;
 use Symfony\Component\Serializer\Attribute\Groups;
 
@@ -211,32 +212,85 @@ class CampagneCollecte
     }
 
 
-    public function getDateOuvertureDpe(): ?DateTimeInterface
+    public function getTimelineDateForModule(CampagneModuleEnum|string $module): ?TimelineDate
     {
+        $moduleStr = $module instanceof CampagneModuleEnum ? $module->value : $module;
         foreach ($this->getTimelineDates() as $time) {
-            if ($time->getFlag() === TimelineDateFlagEnum::OUVERTURE_COLLECTE) {
-                return $time->getDate();
+            if ($time->hasModule($moduleStr)) {
+                return $time;
             }
         }
+
         return null;
     }
 
+    public function getDateOuvertureDpe(): ?DateTimeInterface
+    {
+        $step = $this->getTimelineDateForModule(CampagneModuleEnum::OFFRE_FORMATION);
+        if ($step !== null) {
+            return $step->getDateDebut() ?? $step->getDate();
+        }
+
+        foreach ($this->getTimelineDates() as $time) {
+            if ($time->getFlag() === TimelineDateFlagEnum::OUVERTURE_COLLECTE) {
+                return $time->getDateDebut() ?? $time->getDate();
+            }
+        }
+
+        return null;
+    }
 
     public function getDateClotureDpe(): ?DateTimeInterface
     {
+        $step = $this->getTimelineDateForModule(CampagneModuleEnum::OFFRE_FORMATION);
+        if ($step !== null) {
+            return $step->getDate();
+        }
+
         foreach ($this->getTimelineDates() as $time) {
             if ($time->getFlag() === TimelineDateFlagEnum::CLOTURE_COLLECTE) {
                 return $time->getDate();
             }
         }
+
         return null;
     }
-
 
     public function isPeriodActive(?\DateTimeInterface $now = null): bool
     {
         if ($now === null) {
             $now = new \DateTime();
+        }
+
+        $step = $this->getTimelineDateForModule(CampagneModuleEnum::OFFRE_FORMATION);
+        if ($step !== null) {
+            $startDate = $step->getDateDebut();
+            if ($startDate !== null) {
+                $startLimit = (clone $startDate)->setTime(0, 0, 0);
+                if ($now < $startLimit) {
+                    return false;
+                }
+            }
+
+            $endDate = $step->getDate();
+            if ($endDate !== null) {
+                $endLimit = (clone $endDate);
+                if ($step->getHeure() !== null) {
+                    $endLimit->setTime(
+                        (int) $step->getHeure()->format('H'),
+                        (int) $step->getHeure()->format('i'),
+                        (int) $step->getHeure()->format('s')
+                    );
+                } else {
+                    $endLimit->setTime(23, 59, 59);
+                }
+
+                if ($now > $endLimit) {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         $dateOuverture = $this->getDateOuvertureDpe();
