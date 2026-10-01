@@ -19,4 +19,22 @@ class PlateformeAdmissionRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, PlateformeAdmission::class);
     }
+
+    public function save(PlateformeAdmission $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(PlateformeAdmission $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
 }

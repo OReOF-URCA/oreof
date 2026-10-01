@@ -100,16 +100,26 @@ abstract class AbstractAppDataTable extends AbstractDataTable
         string $routeName,
         callable $routeParameters,
         string $label = 'Dupliquer',
-        Icon|string|null $icon = Icon::Copy
+        Icon|string|null $icon = Icon::Copy,
+        ?string $confirm = 'Êtes-vous sûr de vouloir dupliquer cet élément ?',
+        string|callable|null $csrfToken = null
     ): Action {
         $action = Action::new('duplicate', $label, self::BTN_DUPLICATE_CLASS)
-            ->askConfirmation('Êtes-vous sûr de vouloir dupliquer cet élément ?')
+            ->askConfirmation($confirm)
             ->linkToRoute($routeName, $routeParameters)
             ->htmlAttributes([
-                'data-turbo' => 'true',
                 'data-turbo-prefetch' => 'false',
                 'data-turbo-preload' => 'false',
             ]);
+
+        $csrfTokenResolver = $csrfToken ?? static function (object $item): string {
+            $className = (new \ReflectionClass($item))->getShortName();
+            $id = method_exists($item, 'getId') ? (string) $item->getId() : (method_exists($item, 'getSlug') ? (string) $item->getSlug() : '');
+
+            return sprintf('duplicate-%s-%s', strtolower($className), $id);
+        };
+
+        $action->asAjaxRequest($csrfTokenResolver, 'POST');
 
         if ($icon !== null && $icon !== '') {
             $action->icon($icon);

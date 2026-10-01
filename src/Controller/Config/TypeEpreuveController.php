@@ -147,16 +147,22 @@ class TypeEpreuveController extends AbstractController
         );
     }
 
-    #[Route('/{id}/duplicate', name: 'app_type_epreuve_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_type_epreuve_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         TypeEpreuveRepository $typeEpreuveRepository,
         TypeEpreuve $typeEpreuve
     ): Response {
-        $typeEpreuveNew = clone $typeEpreuve;
-        $typeEpreuveNew->setLibelle($typeEpreuve->getLibelle() . ' - Copie');
-        $typeEpreuveRepository->save($typeEpreuveNew, true);
-        return $turboStream->streamToastSuccess('Type d\'épreuve dupliqué avec succès', true);
+        if ($this->isDuplicateTokenValid($typeEpreuve, $this->getCsrfTokenFromRequest($request))) {
+            $typeEpreuveNew = clone $typeEpreuve;
+            $typeEpreuveNew->setLibelle($typeEpreuve->getLibelle() . ' - Copie');
+            $typeEpreuveRepository->save($typeEpreuveNew, true);
+
+            return $turboStream->streamToastSuccess('Type d\'épreuve dupliqué avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

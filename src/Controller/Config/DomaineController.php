@@ -132,16 +132,22 @@ class DomaineController extends AbstractController
         );
     }
 
-    #[Route('/{id}/duplicate', name: 'app_domaine_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_domaine_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         DomaineRepository $domaineRepository,
         Domaine                    $domaine
     ): Response {
-        $domaineNew = clone $domaine;
-        $domaineNew->setLibelle($domaine->getLibelle() . ' - Copie');
-        $domaineRepository->save($domaineNew, true);
-        return $turboStream->streamToastSuccess('Domaine dupliqué avec succès', true);
+        if ($this->isDuplicateTokenValid($domaine, $this->getCsrfTokenFromRequest($request))) {
+            $domaineNew = clone $domaine;
+            $domaineNew->setLibelle($domaine->getLibelle() . ' - Copie');
+            $domaineRepository->save($domaineNew, true);
+
+            return $turboStream->streamToastSuccess('Domaine dupliqué avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

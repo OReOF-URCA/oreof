@@ -272,16 +272,22 @@ class TypeDiplomeController extends BaseController
         ]);
     }
 
-    #[Route('/{id}/duplicate', name: 'app_type_diplome_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_type_diplome_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         TypeDiplomeRepository $typeDiplomeRepository,
         TypeDiplome $typeDiplome
     ): Response {
-        $typeDiplomeNew = clone $typeDiplome;
-        $typeDiplomeNew->setLibelle($typeDiplome->getLibelle() . ' - Copie');
-        $typeDiplomeRepository->save($typeDiplomeNew, true);
-        return $turboStream->streamToastSuccess('Type de diplôme dupliqué avec succès', true);
+        if ($this->isDuplicateTokenValid($typeDiplome, $this->getCsrfTokenFromRequest($request))) {
+            $typeDiplomeNew = clone $typeDiplome;
+            $typeDiplomeNew->setLibelle($typeDiplome->getLibelle() . ' - Copie');
+            $typeDiplomeRepository->save($typeDiplomeNew, true);
+
+            return $turboStream->streamToastSuccess('Type de diplôme dupliqué avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**

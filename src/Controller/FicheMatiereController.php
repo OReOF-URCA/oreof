@@ -241,7 +241,7 @@ class FicheMatiereController extends BaseController
         ]);
     }
 
-    #[Route('/{slug}/dupliquer', name: 'app_fiche_matiere_dupliquer', methods: ['GET'])]
+    #[Route('/{slug}/dupliquer', name: 'app_fiche_matiere_dupliquer', methods: ['POST', 'GET'])]
     public function dupliquer(
         #[MapEntity(mapping: ['slug' => 'slug'])]
         FicheMatiere $ficheMatiere,

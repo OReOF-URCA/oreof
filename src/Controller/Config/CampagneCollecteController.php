@@ -141,16 +141,22 @@ class CampagneCollecteController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/duplicate', name: 'app_campagne_collecte_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_campagne_collecte_duplicate', methods: ['POST'])]
     public function duplicate(
+        Request $request,
         TurboStreamResponseFactory $turboStream,
         CampagneCollecteRepository $campagneCollecteRepository,
         CampagneCollecte           $campagne_collecte
     ): Response {
-        $campagne_collecteNew = clone $campagne_collecte;
-        $campagne_collecteNew->setLibelle($campagne_collecte->getLibelle() . ' - Copie');
-        $campagneCollecteRepository->save($campagne_collecteNew, true);
-        return $turboStream->streamToastSuccess('Campagne de collecte dupliquée avec succès', true);
+        if ($this->isDuplicateTokenValid($campagne_collecte, $this->getCsrfTokenFromRequest($request))) {
+            $campagne_collecteNew = clone $campagne_collecte;
+            $campagne_collecteNew->setLibelle($campagne_collecte->getLibelle() . ' - Copie');
+            $campagneCollecteRepository->save($campagne_collecteNew, true);
+
+            return $turboStream->streamToastSuccess('Campagne de collecte dupliquée avec succès', true);
+        }
+
+        return $turboStream->streamToastError('Jeton CSRF invalide', true);
     }
 
     /**
