@@ -11,7 +11,6 @@ use App\Repository\ParcoursRepository;
 use App\Repository\ParcoursVersioningRepository;
 use App\Service\VersioningParcours;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Swaggest\JsonDiff\JsonDiff;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
