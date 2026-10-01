@@ -1,12 +1,12 @@
 # Conventions UI (Tailwind + Twig Components)
 
 Quand lire : toute création/modification de template Twig, CSS ou composant UI, et toute migration Bootstrap → Tailwind.
-À mettre à jour si : `src/Twig/Components/UI/`, `templates/components/_ui/`, `templates/admin/styleguide/`, classes `app-*` ou tokens de `assets/styles/app.css`.
+À mettre à jour si : `src/Twig/Components/UI/`, `templates/components/_ui/`, `templates/admin/styleguide/`, `templates/base.html.twig` (en-tête de page), `translations/header.fr.yaml`, `assets/controllers/page_header_controller.js`, classes `app-*` ou tokens de `assets/styles/app.css`.
 
 ## Sources de vérité
 
 - Démo vivante de tous les composants et couleurs : `templates/admin/styleguide/index.html.twig`.
-- Gabarit de page CRUD/index (blocs breadcrumb, page_title, page_actions, content) :
+- Gabarit de page CRUD/index (en-tête, bloc `bouton_header`, `content`) :
   `templates/admin/styleguide/templates/index_type.html.twig` — à dupliquer pour toute nouvelle page.
 - Styles : `assets/styles/app.css` (sources Tailwind, dark mode `html[data-theme="dark"]`, classes `app-*`, compat
   Bootstrap, thème Tom Select `.ts-*`).
@@ -46,6 +46,7 @@ Quand lire : toute création/modification de template Twig, CSS ou composant UI,
 | `<twig:DownloadCard>` | `title`*, `href`*, `type` word/excel/pdf/powerpoint/archive/video/audio/image/link/file, `description`, `meta`, `variant`, `cta`, `icon`, `target` (_blank) |
 | `<twig:Kpi>` | `title`*, `value`*, `total`, `unit`, `percent` (affiche une jauge), `variant` (+`default`), `icon`, `description`, `href`, `extraClass` |
 | `{{ component('alerte', {type, message}) }}` | messages info/succès/alerte |
+| `<twig:PageHeader>` | `titleKey`/`title`, `descriptionKey`/`description`, `translationParams`, `translationDomain` (`header`), `breadcrumb` (true), `sticky` (true), bloc/prop `actions` — voir « En-tête de page » |
 | `Card`, `DeleteButton`, `Dot`, `IconBox`, `Select`, `Spinner`, `dropdown_actions` | voir la classe PHP et le styleguide |
 
 Composants métier (badges ECTS/heures/MCCC, headers formation/parcours, `RemplissageProgress`…) : `src/Twig/Components/`.
@@ -58,6 +59,24 @@ Composants métier (badges ECTS/heures/MCCC, headers formation/parcours, `Rempli
 ```
 
 Grilles : cartes `grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3` ; KPI `grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6`.
+
+## En-tête de page (`PageHeader`)
+
+`base.html.twig` affiche l'en-tête (titre, description, boutons, fil d'Ariane) via `<twig:PageHeader>` : **ne pas recréer
+cet en-tête dans une page**. Il est sticky par défaut sous la topbar ; une fois collé (`data-stuck="true"`, contrôleur
+Stimulus `page-header`) la description est masquée et le titre réduit ; actions et fil d'Ariane restent.
+
+- Titre/description = **clés de traduction**, domaine `header` (`translations/header.fr.yaml`), résolues par route :
+  `<route>.title` / `<route>.description` (repli : `page.<route>.*` du domaine `menu`, puis nom de route). Une page
+  sans description n'en affiche pas. Ne pas écrire dans `page.<route>.*` : ces clés servent aussi aux libellés de menu
+  et breadcrumbs (`MenuItem`).
+- Titre dynamique : `{% set header_title = 'app_xxx.title'|trans({'%libelle%': entite.libelle}, 'header') %}` avec
+  `app_xxx.title: 'Détail : %libelle%'`. Template partagé par plusieurs routes à titres différents ou sans route
+  détectable : clé `tpl.<chemin.du.template>.title`. Titre avec balisage (`<strong id=…>`, badge) : ne traduire que le
+  texte, garder le balisage et ses `id` dans le template.
+- Boutons d'action : bloc `{% block bouton_header %}` de la page. Options : `{% set header_breadcrumb = false %}`
+  (supprime aussi le trait de séparation), `{% set header_sticky = false %}`.
+- Usage direct (hors `base`) : `<twig:PageHeader titleKey="…" :sticky="false"><twig:block name="actions">…</twig:block></twig:PageHeader>`.
 
 ## Actions CRUD
 
