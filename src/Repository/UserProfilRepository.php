@@ -64,6 +64,14 @@ class UserProfilRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    public function remove(UserProfil $userProfil, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($userProfil);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
     public function deleteAll(): void
     {
         $this->getEntityManager()->getConnection()->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
