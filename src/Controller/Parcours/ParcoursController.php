@@ -277,7 +277,7 @@ class ParcoursController extends BaseController
         $dtoSemestre = $typeD->calculStructureSemestre($semestreParcours, $parcours);
 
 
-        dump($dtoSemestre);
+        //dump($dtoSemestre);
 
         switch ($dtoSemestre->semestre->getValidationStatus()) {
             case ValidationStatusEnum::VALID:
