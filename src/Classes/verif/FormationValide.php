@@ -42,7 +42,7 @@ class FormationValide extends AbstractValide
 
         if ($this->formation->isHasParcours() === false && $this->formation->getParcours()->count() === 1) {
             $parcours = $this->formation->getParcours()->first();
-            if ($parcours->isParcoursDefaut() === true) {
+            if ($parcours !== false && $parcours->isParcoursDefaut() === true) {
                 $this->etat['erreurHasParcours'] = self::COMPLET;
                 //validation du parcours
                 $parcoursValide = new ParcoursValide($parcours, $this->formation->getTypeDiplome());
