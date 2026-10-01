@@ -60,14 +60,14 @@
         </div>
 
         <!-- Zone d'aperçu en direct -->
-        <div class="space-y-4 flex flex-col">
+        <div class="space-y-4 flex flex-col lg:self-start lg:sticky lg:top-[calc(var(--page-header-offset,4rem)+0.5rem)]">
             <h3 class="text-lg font-semibold text-secondary-900 dark:text-secondary-50 flex items-center gap-2">
                 {{ ux_icon('icon:eye', {class: 'h-5 w-5 text-info-600 dark:text-info-400'}) }}
                 Aperçu utilisateur
             </h3>
 
             <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-800 flex flex-col flex-1">
-                <div class="p-6 overflow-y-auto">
+                <div class="p-6 overflow-y-auto lg:max-h-[calc(100vh-var(--page-header-offset,4rem)-6rem)]">
                     <h4 class="mb-4 text-base font-semibold text-secondary-900 dark:text-secondary-50">{{ form.question.vars.value ?: 'Question...' }}</h4>
 
                     <div class="app-help-markdown text-secondary-700 dark:text-secondary-300 break-words">
