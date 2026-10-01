@@ -690,7 +690,12 @@ class SemestreController extends BaseController
             ->add('raccrocher', EntityType::class, [
                 'class' => SemestreMutualisable::class,
                 'choice_label' => function (SemestreMutualisable $sem) {
-                    return $sem->getSemestre()?->getSemestreParcours()?->first()->display() . ' - ' . $sem->getSemestre()?->getSemestreParcours()?->first()?->getParcours()?->getLibelle() . ')';
+                    $semestreParcours = $sem->getSemestre()?->getSemestreParcours()->first();
+                    if (!$semestreParcours instanceof SemestreParcours) {
+                        return '';
+                    }
+
+                    return $semestreParcours->display() . ' - ' . $semestreParcours->getParcours()?->getLibelle() . ')';
                 },
                 'placeholder' => 'choisir.semestre.a.raccrocher',
                 'translation_domain' => 'form',
