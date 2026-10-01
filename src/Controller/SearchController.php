@@ -60,8 +60,8 @@ class SearchController extends AbstractController
             ->findOneBy(['defaut' => true]);
 
         $request = Request::createFromGlobals();
-        $keyword_1 = $request->query->get('keyword_1');
-        $typeRecherche = $request->query->get('searchType');
+        $keyword_1 = $request->query->getString('keyword_1');
+        $typeRecherche = $request->query->getString('searchType');
 
         $typeRechercheValide = $typeRecherche;
         if (in_array($typeRecherche, ['parcours', 'ficheMatiere']) === false) {
@@ -102,10 +102,11 @@ class SearchController extends AbstractController
 
                 $parcours = $parcoursRepository->find($parcoursArray[$i]['parcours_id']);
 
-                $linkedFicheMatiere = $ficheMatiereRepository->findForParcoursWithKeyword($parcours, $keyword_1);
+                $linkedFicheMatiere = $parcours !== null
+                    ? $ficheMatiereRepository->findForParcoursWithKeyword($parcours, $keyword_1)
+                    : [];
 
-                $libelleMention = $formationRepository->find($parcoursArray[$i]['formation_id'])
-                    ->getDisplayLong() ?? "";
+                $libelleMention = $formationRepository->find($parcoursArray[$i]['formation_id'])?->getDisplayLong() ?? '';
 
                 $typeParcoursLibelle = "";
                 if ($parcoursArray[$i]['type_parcours'] !== null) {
@@ -140,10 +141,11 @@ class SearchController extends AbstractController
 
                 $parcoursDefaut = $parcoursRepository->find($parcoursParDefautArray[$j]['parcours_id']);
 
-                $linkedFicheMatiereDefault = $ficheMatiereRepository->findForParcoursWithKeyword($parcoursDefaut, $keyword_1);
+                $linkedFicheMatiereDefault = $parcoursDefaut !== null
+                    ? $ficheMatiereRepository->findForParcoursWithKeyword($parcoursDefaut, $keyword_1)
+                    : [];
 
-                $libelleMentionParDefaut = $formationRepository->find($parcoursParDefautArray[$j]['formation_id'])
-                    ->getDisplayLong() ?? "";
+                $libelleMentionParDefaut = $formationRepository->find($parcoursParDefautArray[$j]['formation_id'])?->getDisplayLong() ?? '';
 
                 $typeParcoursDefautLibelle = "";
                 if ($parcoursParDefautArray[$j]['type_parcours'] !== null) {
@@ -169,7 +171,7 @@ class SearchController extends AbstractController
                 'resultArrayBadge' => $resultArrayBadge,
                 'isParcoursDefautArray' => $isParcoursParDefautArray
             ];
-        } elseif ($typeRechercheValide === 'ficheMatiere') {
+        } else {
             $countFiche = $ficheMatiereRepository->findCountForKeyword($keyword_1, $campagneCollecte)[0]['nombre_total'];
 
             $dataTwigRenderer = [
