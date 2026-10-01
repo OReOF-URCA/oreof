@@ -19,7 +19,7 @@ interface TypeDiplomeHandlerInterface extends TypeDiplomeMcccInterface, Structur
 
     public function getStructureCompetences(Parcours $parcours): array;
 
-    public function getDisplayMccc(array $mcccs, string $typeMccc = ''): array;
+    public function getDisplayMccc(array $mcccs, string $typeMccc): array;
 
     public function getTypeEpreuves(): array;
 
