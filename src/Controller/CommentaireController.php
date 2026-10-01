@@ -47,7 +47,7 @@ class CommentaireController extends AbstractController
         Request         $request
     ): Response
     {
-        $id = $request->query->get('id');
+        $id = $request->query->getInt('id');
         $type = $request->query->get('type');
         $zone = $request->query->get('zone');
 
@@ -79,7 +79,7 @@ class CommentaireController extends AbstractController
         Request         $request
     ): Response
     {
-        $id = $request->query->get('id');
+        $id = $request->query->getInt('id');
         $type = $request->query->get('type');
         $zone = $request->query->get('zone');
 
