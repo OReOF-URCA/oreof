@@ -7,10 +7,13 @@
 
 import { Controller } from '@hotwired/stimulus'
 import callOut from '../js/callOut'
+import Toast from '../components/Toast'
 
 const WIDTH_STORAGE_KEY = 'oreof:page-translations-drawer:width'
 const MIN_WIDTH = 340
 const MAX_WIDTH_RATIO = 0.9
+// Conteneurs masqués que « Repérer » sait ouvrir : sous-menus de la navbar (contrôleur navbar-dropdown) et <details>
+const REVEALABLE_SELECTOR = '[data-navbar-dropdown-target="content"], details'
 
 export default class extends Controller {
   static targets = [
@@ -50,6 +53,7 @@ export default class extends Controller {
   }
 
   disconnect () {
+    this.locateClear()
     window.oreofToggleTranslations = null
     window.removeEventListener('oreof:toggle-translations', this._onGlobalToggle)
     this._onPointerUp()
@@ -111,6 +115,7 @@ export default class extends Controller {
 
   close (event) {
     event?.preventDefault()
+    this.locateClear()
     sessionStorage.removeItem('oreof:page-translations-drawer:open')
 
     const drawer = this.drawerElement
@@ -216,7 +221,9 @@ export default class extends Controller {
       const value = (item.dataset.originalValue || '').toLowerCase()
       const domain = item.dataset.translationDomain || ''
 
-      const matchesDomain = !activeDomain || activeDomain === 'all' || domain === activeDomain
+      // Onglet spécial « Manquantes » (data-domain="__missing__") : filtre sur l'état de l'élément, pas sur son domaine
+      const matchesDomain = !activeDomain || activeDomain === 'all' ||
+        (activeDomain === '__missing__' ? item.dataset.missing === 'true' : domain === activeDomain)
       const matchesQuery = !query || key.includes(query) || value.includes(query)
 
       if (matchesDomain && matchesQuery) {
@@ -361,5 +368,200 @@ export default class extends Controller {
     navigator.clipboard.writeText(key).then(() => {
       callOut(`Clé copiée : ${key}`, 'info')
     })
+  }
+
+  // ── Repérage du texte sur la page ─────────────────────────────────────────
+  // Surbrillance via l'API CSS Custom Highlight (aucune modification du DOM, donc sans effet sur Turbo/Stimulus).
+  // Styles : ::highlight(translation-match) et ::highlight(translation-current) dans assets/styles/app.css.
+
+  locate (event) {
+    event.preventDefault()
+    const item = event.currentTarget.closest('[data-page-translations-drawer-target="item"]')
+    if (!item) return
+
+    this.locateClear()
+
+    // Valeur traduite, ou clé brute si le mode clés affiche les clés dans la page
+    const candidates = [item.dataset.originalValue, item.dataset.translationKey]
+    let ranges = []
+    for (const text of candidates) {
+      ranges = this._findRanges(text)
+      if (ranges.length > 0) break
+    }
+
+    if (ranges.length === 0) {
+      Toast.warning('Ce texte n\'apparaît pas dans le contenu visible de la page : il peut se trouver dans un attribut, un élément masqué, ou être découpé par du balisage.', 'Texte introuvable')
+      return
+    }
+
+    this._locate = { item, ranges, index: 0 }
+    this._applyHighlights()
+    const nav = item.querySelector('[data-role="locate-nav"]')
+    nav?.classList.remove('hidden')
+    this._goTo(0)
+  }
+
+  locateNext (event) {
+    event?.preventDefault()
+    if (!this._locate) return
+    this._goTo((this._locate.index + 1) % this._locate.ranges.length)
+  }
+
+  locatePrev (event) {
+    event?.preventDefault()
+    if (!this._locate) return
+    this._goTo((this._locate.index - 1 + this._locate.ranges.length) % this._locate.ranges.length)
+  }
+
+  locateClear (event) {
+    event?.preventDefault()
+    if (window.CSS?.highlights) {
+      window.CSS.highlights.delete('translation-match')
+      window.CSS.highlights.delete('translation-current')
+    }
+    this._clearFlash()
+    this._locate?.item.querySelector('[data-role="locate-nav"]')?.classList.add('hidden')
+    this._locate = null
+  }
+
+  _goTo (index) {
+    const state = this._locate
+    if (!state) return
+    state.index = index
+    const range = state.ranges[index]
+
+    if (window.CSS?.highlights && typeof window.Highlight !== 'undefined') {
+      window.CSS.highlights.set('translation-current', new window.Highlight(range))
+    } else {
+      this._flash(range.startContainer.parentElement)
+    }
+
+    const count = state.item.querySelector('[data-role="locate-count"]')
+    if (count) count.textContent = `${index + 1}/${state.ranges.length}`
+
+    const target = range.startContainer.parentElement
+    this._reveal(target)
+    // Un texte dans la barre de navigation (collée en haut) n'a pas besoin de défilement
+    if (!target?.closest('[data-navbar-dropdown-target="content"]')) {
+      target?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'smooth' })
+    }
+  }
+
+  // Ouvre les sous-menus / <details> qui contiennent l'élément pour le rendre visible.
+  // Les sous-menus de la navbar se referment au moindre clic hors du menu (dont celui sur « Repérer ») :
+  // on les rouvre donc juste après la fin du clic.
+  _reveal (element) {
+    if (!element) return
+
+    // Sous-menu de la navbar : toujours rouvert après le clic, même s'il est ouvert à cet instant, car ce même clic
+    // va le refermer (écouteur global click@window->navbar-dropdown#close)
+    const content = element.closest('[data-navbar-dropdown-target="content"]')
+    if (content) {
+      window.setTimeout(() => content.classList.remove('hidden'), 0)
+    }
+
+    let details = element.closest('details')
+    while (details) {
+      details.open = true
+      details = details.parentElement?.closest('details')
+    }
+  }
+
+  _applyHighlights () {
+    if (!window.CSS?.highlights || typeof window.Highlight === 'undefined') return
+    window.CSS.highlights.set('translation-match', new window.Highlight(...this._locate.ranges))
+  }
+
+  // Repli sans CSS Custom Highlight : contour temporaire sur l'élément
+  _flash (element) {
+    this._clearFlash()
+    if (!element) return
+    this._flashed = element
+    this._flashedOutline = element.style.outline
+    element.style.outline = '3px solid #facc15'
+    element.style.outlineOffset = '2px'
+  }
+
+  _clearFlash () {
+    if (this._flashed) {
+      this._flashed.style.outline = this._flashedOutline || ''
+      this._flashed.style.outlineOffset = ''
+      this._flashed = null
+    }
+  }
+
+  // Retrouve toutes les occurrences visibles de `text` dans la page, hors panneau (espaces insensibles à la casse de mise en forme)
+  _findRanges (text) {
+    const needle = (text || '').trim()
+    if (needle === '') return []
+
+    const drawer = this.drawerElement
+    const nodes = []
+    let full = ''
+    const walker = document.createTreeWalker(document.body, window.NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) => {
+        const parent = node.parentElement
+        if (!parent || drawer?.contains(parent)) return window.NodeFilter.FILTER_REJECT
+        if (parent.closest('script, style, noscript, template, textarea, [hidden], [aria-hidden="true"]')) return window.NodeFilter.FILTER_REJECT
+        // Texte masqué : conservé seulement si on sait le révéler (sous-menu de la barre de navigation, <details> fermé)
+        if (typeof parent.checkVisibility === 'function' && !parent.checkVisibility() && !parent.closest(REVEALABLE_SELECTOR)) return window.NodeFilter.FILTER_REJECT
+        return node.nodeValue ? window.NodeFilter.FILTER_ACCEPT : window.NodeFilter.FILTER_REJECT
+      },
+    })
+    while (walker.nextNode()) {
+      const node = walker.currentNode
+      nodes.push({ node, start: full.length })
+      full += node.nodeValue
+    }
+
+    const pattern = needle.split(/\s+/).map(part => part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('\\s+')
+    // Mots entiers uniquement : « Traductions » ne doit pas correspondre à « Traductions et textes » par simple préfixe
+    const regex = new RegExp(`(?<![\\p{L}\\p{N}])${pattern}(?![\\p{L}\\p{N}])`, 'gu')
+    const ranges = []
+    let match
+    while ((match = regex.exec(full)) !== null) {
+      const start = this._locateOffset(nodes, match.index, false)
+      const end = this._locateOffset(nodes, match.index + match[0].length, true)
+      if (start && end) {
+        const range = document.createRange()
+        range.setStart(start.node, start.offset)
+        range.setEnd(end.node, end.offset)
+        ranges.push(range)
+      }
+      if (match[0].length === 0) regex.lastIndex++
+    }
+
+    // Si le texte occupe à lui seul un élément (titre, libellé, description…), ne garder que ces occurrences :
+    // elles sont bien plus probablement celles de la clé que les mêmes mots noyés dans une autre phrase.
+    const normalize = (value) => value.replace(/\s+/g, ' ').trim()
+    const target = normalize(needle)
+    const exact = ranges.filter(range => {
+      const container = range.commonAncestorContainer
+      const element = container.nodeType === 1 ? container : container.parentElement
+      return element && normalize(element.textContent) === target
+    })
+    return exact.length > 0 ? exact : ranges
+  }
+
+  // Convertit un index dans le texte concaténé en (nœud, décalage). Un début appartient au nœud qui le contient,
+  // une fin au nœud qu'elle termine (et non au suivant), pour ne pas déborder sur le nœud voisin.
+  _locateOffset (nodes, index, isEnd) {
+    let low = 0
+    let high = nodes.length - 1
+    while (low <= high) {
+      const mid = (low + high) >> 1
+      const { node, start } = nodes[mid]
+      const end = start + node.nodeValue.length
+      const afterStart = isEnd ? index > start : index >= start
+      const beforeEnd = isEnd ? index <= end : index < end
+      if (!afterStart) {
+        high = mid - 1
+      } else if (!beforeEnd) {
+        low = mid + 1
+      } else {
+        return { node, offset: index - start }
+      }
+    }
+    return null
   }
 }
