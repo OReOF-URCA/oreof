@@ -51,7 +51,7 @@ readonly class AddUser
         return null;
     }
 
-    public function addRole(UserInterface $user, string $role): void
+    public function addRole(User $user, string $role): void
     {
         $user->setRoles([$role]);
     }

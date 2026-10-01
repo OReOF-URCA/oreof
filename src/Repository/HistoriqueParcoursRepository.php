@@ -58,6 +58,24 @@ class HistoriqueParcoursRepository extends ServiceEntityRepository
     /**
      * @return list<HistoriqueParcours>
      */
+    public function findByParcours(Parcours $parcours): array
+    {
+        return $this->createQueryBuilder('h')
+            ->leftJoin('h.user', 'u')
+            ->leftJoin('h.parcours', 'p')
+            ->leftJoin('p.formation', 'f')
+            ->leftJoin('f.composantePorteuse', 'c')
+            ->addSelect('u', 'p', 'f', 'c')
+            ->where('h.parcours = :parcours')
+            ->setParameter('parcours', $parcours)
+            ->orderBy('h.created', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return list<HistoriqueParcours>
+     */
     public function findForConseilDocuments(
         ?CampagneCollecte $campagneCollecte,
         ?int              $composanteId = null,
