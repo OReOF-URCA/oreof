@@ -74,6 +74,9 @@ class ExportMccc
                                 $this->isLight
                             );
                         }
+                        if (!isset($fichier)) {
+                            continue;
+                        }
                         $tabFiles[] = $fichier;
                         $zip->addFile(
                             $dir . $fichier,
@@ -170,7 +173,7 @@ class ExportMccc
         $this->isLight = $isLight;
     }
 
-    public function exportVersion(string $dir, TypeDiplomeResolver $typeDiplomeResolver, array $formations, ?CampagneCollecte $campagneCollecte): void
+    public function exportVersion(string $dir, TypeDiplomeResolver $typeDiplomeResolver, array $formations, CampagneCollecte $campagneCollecte): void
     {
         $this->dir = $dir;
         $this->typeDiplomeResolver = $typeDiplomeResolver;
