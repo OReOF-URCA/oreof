@@ -71,7 +71,7 @@ class ExportBcc implements ExportInterface
         $this->excelWriter->getColumnDimension('B', 50);
 
         $typeD = $this->typeDiplomeResolver->fromParcours($parcours);
-        $dto = $typeD->calculStructureParcours($parcours, new OptionsCalculStructure(dataFromFicheMatiere: true));
+        $dto = $typeD->calcul($parcours, new OptionsCalculStructure(dataFromFicheMatiere: true));
 
         foreach ($dto->semestres as $semestre) {
             $ligne = 7;
