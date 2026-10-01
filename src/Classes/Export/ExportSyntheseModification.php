@@ -17,6 +17,7 @@ use App\Repository\TypeEpreuveRepository;
 use App\Service\ProjectDirProvider;
 use App\Service\VersioningParcours;
 use App\Service\VersioningStructureExtractDiff;
+use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\Tools;
 use ZipArchive;
@@ -39,6 +40,7 @@ class ExportSyntheseModification
 
     public function exportLink(array $formations, CampagneCollecte $campagneCollecte): string
     {
+        $typeEpreuves = [];
         $epreuves = $this->typeEpreuveRepository->findAll();
         foreach ($epreuves as $epreuve) {
             $typeEpreuves[$epreuve->getId()] = $epreuve;
@@ -50,6 +52,7 @@ class ExportSyntheseModification
             $form = $formation['formation'];
             if ($formation['hasModif'] === true) {
                 foreach ($formation['parcours'] as $parc) {
+                    $diffStructure = null;
                     $parco = $this->parcoursRepository->find($parc['parcours']->getId());
                     if ($parc['parcours']->getParcoursOrigineCopie() === null) {
                         $dto = null;
@@ -59,7 +62,7 @@ class ExportSyntheseModification
                         if ($parco === null) {
                             continue;
                         }
-                        $dto = $typeD->calculStructureParcours($parco, true, false);
+                        $dto = $typeD->calcul($parco, new OptionsCalculStructure(withEcts: true, withBcc: false));
                         $structureDifferencesParcours = $this->versioningParcours->getStructureDifferencesBetweenParcoursAndLastVersion($parco);
                         if ($structureDifferencesParcours !== null) {
                             $diffStructure = new VersioningStructureExtractDiff($structureDifferencesParcours, $dto, $typeEpreuves);
