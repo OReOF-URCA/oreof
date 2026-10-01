@@ -8,6 +8,9 @@ use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Enums\TypeParcoursEnum;
 use App\Navigation\NavigationSearchService;
+use App\Repository\FicheMatiereRepository;
+use App\Repository\FormationRepository;
+use App\Repository\ParcoursRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -48,6 +51,9 @@ class SearchController extends AbstractController
     #[Route('/recherche/mot_cle', name: 'app_search_action')]
     public function searchWithKeyword(
         EntityManagerInterface $entityManager,
+        ParcoursRepository $parcoursRepository,
+        FicheMatiereRepository $ficheMatiereRepository,
+        FormationRepository $formationRepository,
     ): RedirectResponse|Response
     {
         $campagneCollecte = $entityManager->getRepository(CampagneCollecte::class)
@@ -76,10 +82,8 @@ class SearchController extends AbstractController
             $resultArrayBadge = [];
             $isParcoursParDefautArray = [];
 
-            $parcoursArray = $entityManager->getRepository(Parcours::class)
-                ->findWithKeyword($keyword_1, $campagneCollecte);
-            $parcoursParDefautArray = $entityManager->getRepository(Parcours::class)
-                ->findWithKeywordForDefaultParcours($keyword_1, $campagneCollecte);
+            $parcoursArray = $parcoursRepository->findWithKeyword($keyword_1, $campagneCollecte);
+            $parcoursParDefautArray = $parcoursRepository->findWithKeywordForDefaultParcours($keyword_1, $campagneCollecte);
 
             for ($i = 0; $i < count($parcoursArray); $i++) {
                 $textContains = [];
@@ -96,17 +100,11 @@ class SearchController extends AbstractController
                     $textContains[] = 'resultatsAttendus';
                 }
 
-                $parcours = $entityManager
-                    ->getRepository(Parcours::class)
-                    ->findOneById($parcoursArray[$i]['parcours_id']);
+                $parcours = $parcoursRepository->find($parcoursArray[$i]['parcours_id']);
 
-                $linkedFicheMatiere = $entityManager
-                    ->getRepository(FicheMatiere::class)
-                    ->findForParcoursWithKeyword($parcours, $keyword_1);
+                $linkedFicheMatiere = $ficheMatiereRepository->findForParcoursWithKeyword($parcours, $keyword_1);
 
-                $libelleMention = $entityManager
-                    ->getRepository(Formation::class)
-                    ->findOneById($parcoursArray[$i]['formation_id'])
+                $libelleMention = $formationRepository->find($parcoursArray[$i]['formation_id'])
                     ->getDisplayLong() ?? "";
 
                 $typeParcoursLibelle = "";
@@ -140,17 +138,11 @@ class SearchController extends AbstractController
                     $textContainsDefault[] = 'poursuitesEtudes';
                 }
 
-                $parcoursDefaut = $entityManager
-                    ->getRepository(Parcours::class)
-                    ->findOneById($parcoursParDefautArray[$j]['parcours_id']);
+                $parcoursDefaut = $parcoursRepository->find($parcoursParDefautArray[$j]['parcours_id']);
 
-                $linkedFicheMatiereDefault = $entityManager
-                    ->getRepository(FicheMatiere::class)
-                    ->findForParcoursWithKeyword($parcoursDefaut, $keyword_1);
+                $linkedFicheMatiereDefault = $ficheMatiereRepository->findForParcoursWithKeyword($parcoursDefaut, $keyword_1);
 
-                $libelleMentionParDefaut = $entityManager
-                    ->getRepository(Formation::class)
-                    ->findOneById($parcoursParDefautArray[$j]['formation_id'])
+                $libelleMentionParDefaut = $formationRepository->find($parcoursParDefautArray[$j]['formation_id'])
                     ->getDisplayLong() ?? "";
 
                 $typeParcoursDefautLibelle = "";
@@ -178,9 +170,7 @@ class SearchController extends AbstractController
                 'isParcoursDefautArray' => $isParcoursParDefautArray
             ];
         } elseif ($typeRechercheValide === 'ficheMatiere') {
-            $countFiche = $entityManager
-                ->getRepository(FicheMatiere::class)
-                ->findCountForKeyword($keyword_1, $campagneCollecte)[0]['nombre_total'];
+            $countFiche = $ficheMatiereRepository->findCountForKeyword($keyword_1, $campagneCollecte)[0]['nombre_total'];
 
             $dataTwigRenderer = [
                 'typeRecherche' => 'ficheMatiere',
@@ -197,11 +187,10 @@ class SearchController extends AbstractController
     private function isStringContainingText(string $needle, string|null $haystack): bool
     {
         if ($haystack !== null) {
-            return
-                mb_strstr(
-                    mb_strtoupper(Tools::removeAccent($haystack)),
-                    mb_strtoupper(Tools::removeAccent($needle))
-                );
+            return mb_strstr(
+                mb_strtoupper(Tools::removeAccent($haystack)),
+                mb_strtoupper(Tools::removeAccent($needle))
+            ) !== false;
         } else {
             return false;
         }
@@ -211,14 +200,14 @@ class SearchController extends AbstractController
     public function searchFicheMatiereForKeywordAndPage(
         int $page,
         string $mot_cle,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        FicheMatiereRepository $ficheMatiereRepository
     ): \Symfony\Component\HttpFoundation\JsonResponse
     {
         $campagneCollecteDefaut = $entityManager->getRepository(CampagneCollecte::class)
             ->findOneBy(['defaut' => true]);
 
-        $data = $entityManager->getRepository(FicheMatiere::class)
-                ->findFicheMatiereWithKeywordAndPagination($mot_cle, $page, true, $campagneCollecteDefaut);
+        $data = $ficheMatiereRepository->findFicheMatiereWithKeywordAndPagination($mot_cle, $page, true, $campagneCollecteDefaut);
 
         return $this->json($data);
     }
@@ -227,14 +216,14 @@ class SearchController extends AbstractController
     public function exportFicheMatiereRecherche(
         string $mot_cle,
         EntityManagerInterface $entityManager,
+        FicheMatiereRepository $ficheMatiereRepository,
         Filesystem $fs
     ) : Response {
 
         $campagne = $entityManager->getRepository(CampagneCollecte::class)
             ->findOneBy(['defaut' => true]);
 
-        $data = $entityManager->getRepository(FicheMatiere::class)
-            ->findFicheMatiereWithKeywordAndPagination($mot_cle, 0, false, $campagne);
+        $data = $ficheMatiereRepository->findFicheMatiereWithKeywordAndPagination($mot_cle, 0, false, $campagne);
 
         $data = array_map(function ($ficheMatiere) {
             $libelleMention = $ficheMatiere['type_diplome_libelle'] ? $ficheMatiere['type_diplome_libelle'] . ' - ' : '';
@@ -292,6 +281,10 @@ class SearchController extends AbstractController
         $writer->save($path . $filename);
 
         $dataFile = file_get_contents($path . $filename);
+        if ($dataFile === false) {
+            throw new \RuntimeException('Impossible de lire le fichier Excel généré.');
+        }
+
         return new Response(
             $dataFile,
             200,
