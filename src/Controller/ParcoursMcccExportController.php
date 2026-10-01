@@ -128,6 +128,7 @@ class ParcoursMcccExportController extends BaseController
 
         $typeDiplome = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
         $dpe = GetDpeParcours::getFromParcours($parcours);
+        $cfvu = null;
         $conseil = null;
         if ($dpe !== null) {
             $cfvu = $getHistorique->getHistoriqueParcoursLastStep($dpe, 'soumis_cfvu');
