@@ -21,21 +21,21 @@ final class StructureParcoursDaeu implements StructureInterface
 
     public function calcul(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
     {
-        // TODO: Implement calcul() method.
+        return StructureParcours::fromEntity($parcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
     }
 
     public function calculVersioning(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
     {
-        // TODO: Implement calculVersioning() method.
+        return StructureParcours::fromEntity($parcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
     }
 
     public function showStructure(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): array
     {
-        // TODO: Implement showStructure() method.
+        return [];
     }
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre
     {
-        // TODO: Implement calculStructureSemestre() method.
+        return new StructureSemestre();
     }
 }

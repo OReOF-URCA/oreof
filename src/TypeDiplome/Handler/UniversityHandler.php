@@ -708,7 +708,7 @@ class UniversityHandler extends AbstractTypeDiplomeHandler
 
     public function calculVersioning(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
     {
-        // TODO: Implement calculVersioning() method.
+        return $this->structureParcoursLicence->calculVersioning($parcours, $optionsCalculStructure);
     }
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre

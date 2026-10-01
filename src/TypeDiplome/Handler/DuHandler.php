@@ -127,17 +127,17 @@ final class DuHandler extends AbstractTypeDiplomeHandler
 
     public function calcul(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
     {
-        // TODO: Implement calcul() method.
+        return StructureParcours::fromEntity($parcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
     }
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre
     {
-        // TODO: Implement calculStructureSemestre() method.
+        return new StructureSemestre();
     }
 
     public function calculVersioning(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
     {
-        // TODO: Implement calculVersioning() method.
+        return StructureParcours::fromEntity($parcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
     }
 
     public function checkIfMcccValide(ElementConstitutif|FicheMatiere $owner): bool
