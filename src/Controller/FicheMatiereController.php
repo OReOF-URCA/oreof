@@ -441,6 +441,8 @@ class FicheMatiereController extends BaseController
         TypeEpreuveRepository $typeEpreuveRepository,
     ): RedirectResponse|Response
     {
+        $sourceFicheMatiere = $ficheMatiereVersioning->getFicheMatiere();
+
         try {
             $version = $ficheMatiereVersioningService->loadFicheMatiereVersion($ficheMatiereVersioning);
             $ficheMatiere = $version['ficheMatiere'];
@@ -484,14 +486,14 @@ class FicheMatiereController extends BaseController
             $now = new DateTimeImmutable();
             $dateHeure = $now->format('d-m-Y_H-i-s');
             $logTxt = "[{$dateHeure}] La visualisation de la version de la fiche matière : "
-            . "{$ficheMatiere->getSlug()}"
+            . "{$sourceFicheMatiere->getSlug()}"
             . " - a rencontré une erreur.\nMessage : {$e->getMessage()}\n";
             $filesystem->appendToFile(__DIR__ . "/../../versioning_json/error_log/view_fiche_matiere_error.log", $logTxt);
             $this->addFlash('toast', [
                 'type' => 'error',
                 'text' => "Une erreur est survenue lors de la visualisation."
             ]);
-            return $this->redirectToRoute('fiche_matiere_v2_voir', ['slug' => $ficheMatiere->getSlug()]);
+            return $this->redirectToRoute('fiche_matiere_v2_voir', ['slug' => $sourceFicheMatiere->getSlug()]);
         }
     }
 
