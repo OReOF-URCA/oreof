@@ -59,7 +59,19 @@
         }) }}
     {% endfor %}
 </div>
-    <div class="mt-4 flex flex-col gap-2 border-t border-secondary-100 pt-4 sm:flex-row dark:border-secondary-700/80">
+    <div class="mt-4 border-t border-secondary-100 pt-4 dark:border-secondary-700/80">
+        <twig:Button
+                extraClass="w-full justify-center"
+                href="{{ path('app_user_mes_notifications') }}"
+                label="Paramétrer mes notifications"
+                :attr="{'data-turbo-frame': '_top'}"
+                icon="icon:gear"
+                variant="secondary"
+                :outline="true"
+                :soft="false"
+        />
+    </div>
+    <div class="mt-2 flex flex-col gap-2 sm:flex-row">
         <twig:Button
                 extraClass="w-full sm:flex-1 justify-center"
                 :attr="{
