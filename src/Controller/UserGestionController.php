@@ -273,7 +273,7 @@ class UserGestionController extends BaseController
         Request $request,
         User $user): Response
     {
-        $motif = $request->request->get('motif');
+        $motif = (string) $request->request->get('motif', '');
         $this->userRepository->remove($user, true);
 
         $userEvent = new UserEvent($user);
