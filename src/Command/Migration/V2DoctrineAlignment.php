@@ -95,6 +95,14 @@ SQL;
             }
         }
 
+        if ($this->tableExists('annee') && !$this->columnExists('annee', 'regime_inscription')) {
+            $sql['Ajout annee.regime_inscription'] = "ALTER TABLE annee ADD regime_inscription JSON DEFAULT NULL COMMENT '(DC2Type:json)'";
+        }
+
+        if ($this->tableExists('type_diplome_plateforme_admission') && !$this->columnExists('type_diplome_plateforme_admission', 'annees_capacite_specifique')) {
+            $sql['Ajout type_diplome_plateforme_admission.annees_capacite_specifique'] = "ALTER TABLE type_diplome_plateforme_admission ADD annees_capacite_specifique JSON DEFAULT NULL COMMENT '(DC2Type:json)'";
+        }
+
         if ($this->tableExists('etablissement_information') && !$this->columnExists('etablissement_information', 'tarif_inscription')) {
             $sql['Ajout etablissement_information.tarif_inscription'] = 'ALTER TABLE etablissement_information ADD tarif_inscription LONGTEXT DEFAULT NULL';
         }
