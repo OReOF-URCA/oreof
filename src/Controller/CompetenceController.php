@@ -174,7 +174,7 @@ class CompetenceController extends AbstractController
     ): Response {
         if ($this->isCsrfTokenValid(
             'delete' . $competence->getId(),
-            $request->request->get('_token')
+            $request->request->getString('_token')
         )) {
             $bc = $competence->getBlocCompetence();
             //supprimer les refs à la compétence
