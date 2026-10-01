@@ -211,6 +211,8 @@ class SemestreController extends BaseController
                 $entityManager->flush();
                 return JsonReponse::success('Semestre marqué comme non dispensé');
         }
+
+        return JsonReponse::error('Action semestre inconnue');
     }
 
     #[Route('/changer/{semestre}/{parcours}', name: 'changer')]
