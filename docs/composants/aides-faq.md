@@ -4,6 +4,7 @@ Quand lire : modification de l'administration des aides / de la FAQ, de l'édite
 instances (local → pré-production → production).
 À mettre à jour si : `src/Service/HelpTransferService.php`, `src/Controller/Help*Controller.php`,
 `src/Controller/Faq*Controller.php`, `src/Twig/HelpExtension.php`, `templates/help_admin/`, `templates/faq_admin/`,
+`templates/_layout/_help_drawer.html.twig`, `templates/base-speciale.html.twig`, `templates/bundles/TwigBundle/Exception/`,
 `templates/components/{help_editor,faq_editor,help_image_manager,markdown_toolbar}.html.twig`,
 `public/js/editor_helpers.js`, `src/Command/Migration/V2HelpSeedData.php`.
 
@@ -17,6 +18,7 @@ instances (local → pré-production → production).
 | Éditeur | Live Components `help_editor` / `faq_editor` + `markdown_toolbar` + `public/js/editor_helpers.js` |
 | Rendu Markdown | filtres Twig `help_markdown` puis `parse_embeds` (`HelpExtension`, CommonMark + tableaux + barré) |
 | Affichage utilisateur | `templates/help/_content.html.twig` (panneau d'aide et page autonome), `templates/faq/index.html.twig` |
+| Pages publiques (connexion, demande d'accès, erreurs) | `base-speciale.html.twig` inclut `_help_drawer` en mode `embedded` (pas de bouton flottant) ; le bouton « Aide » du pied de page l'ouvre (`help-drawer#open`). Clé d'aide = route courante, surchargeable via `{% block help_route %}` : les pages d'erreur 403/404/500 utilisent la clé virtuelle `erreur` (ajoutée aux choix de `HelpType`). Aides livrées dans `V2HelpSeedData` : `app_login`, `app_register`, `erreur` |
 | Droits d'affichage | `HelpGrantService` (centres + rôle de la route cible) |
 
 ## Import / export entre instances
