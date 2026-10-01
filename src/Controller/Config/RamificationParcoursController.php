@@ -6,6 +6,7 @@ use App\Entity\CampagneCollecte;
 use App\Entity\Parcours;
 use App\Entity\TypeRamificationParcours;
 use App\Form\TypeRamificationType;
+use App\Repository\ParcoursRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -120,17 +121,19 @@ final class RamificationParcoursController extends AbstractController
     #[Route('/administration/parcours/search_by_name', name: 'app_config_type_ramification_search_parcours_by_name')]
     public function searchParcoursByName(
         EntityManagerInterface $em,
+        ParcoursRepository $parcoursRepository,
         Request $request
     ) : Response {
-        $keyword = $request->query->get('keyword', '');
+        $keyword = $request->query->getString('keyword');
         if(strlen($keyword) < 4){
             return new JsonResponse(['error' => 'Keyword length too short. Minimum : 4 characters']);
         }
 
         $campagne = $em->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => 1]);
-        return new JsonResponse(
-            $em->getRepository(Parcours::class)
-                ->findByNomComplet($keyword, $campagne->getId())
-        );
+        if ($campagne === null) {
+            return new JsonResponse(['error' => 'Aucune campagne par défaut configurée.'], Response::HTTP_NOT_FOUND);
+        }
+
+        return new JsonResponse($parcoursRepository->findByNomComplet($keyword, $campagne->getId()));
     }
 }
