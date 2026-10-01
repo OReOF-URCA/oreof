@@ -21,8 +21,11 @@ class UserController extends AbstractController
     #[Breadcrumb(label: 'menu.mon_compte.mes_informations')]
     public function mesInformations(): Response
     {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
         return $this->render('user/mes-informations.html.twig', [
-            'profils' => $this->getUser()->getUserProfils(),
+            'profils' => $user->getUserProfils(),
         ]);
     }
 
