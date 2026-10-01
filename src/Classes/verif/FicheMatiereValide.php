@@ -46,7 +46,7 @@ class FicheMatiereValide extends AbstractValide
     }
 
 
-    public function verifierEtat($etat): bool
+    public function verifierEtat(array $etat): bool
     {
         foreach ($etat as $element) {
             if (is_array($element)) {
