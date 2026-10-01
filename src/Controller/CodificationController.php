@@ -111,7 +111,7 @@ class CodificationController extends BaseController
                 $this->getCampagneCollecte()
             );
             $formations[] = $formationRepository->findByResponsableOuCoResponsableParcours(
-                $this->getUser(),
+                $user,
                 $this->getCampagneCollecte(),
                 []
             );
@@ -187,7 +187,7 @@ class CodificationController extends BaseController
             $this->getCampagneCollecte()
         );
         $formations[] = $formationRepository->findByResponsableOuCoResponsableParcours(
-            $this->getUser(),
+            $user,
             $this->getCampagneCollecte(),
             []
         );
