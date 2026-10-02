@@ -23,6 +23,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 abstract class AbstractTypeDiplomeHandler implements TypeDiplomeHandlerInterface
 {
+    /**
+     * @return class-string<\Symfony\Component\Form\FormTypeInterface<mixed>>
+     */
     public function getFormationFormType(): string
     {
         return FormationSesType::class;
