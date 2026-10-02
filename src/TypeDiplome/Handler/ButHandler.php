@@ -48,6 +48,11 @@ final class ButHandler extends AbstractTypeDiplomeHandler
     public const SOURCE = 'but';
     public const TEMPLATE_FORM_MCCC = 'but.html.twig';
 
+    public function getMcccTemplate(): string
+    {
+        return self::TEMPLATE_FORM_MCCC;
+    }
+
     private array $typeEpreuves = [
         'sae' => [
             'iut_portfolio', 'iut_livrable', 'iut_rapport', 'iut_soutenance',
