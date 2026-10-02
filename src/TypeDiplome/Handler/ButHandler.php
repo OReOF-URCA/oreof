@@ -9,6 +9,8 @@
 
 namespace App\TypeDiplome\Handler;
 
+use App\TypeDiplome\McccDisplayInterface;
+
 use App\DTO\StructureParcours;
 use App\DTO\StructureSemestre;
 use App\Entity\CampagneCollecte;
@@ -41,7 +43,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'BUT'])]
-final class ButHandler extends AbstractTypeDiplomeHandler
+final class ButHandler extends AbstractTypeDiplomeHandler implements McccDisplayInterface
 {
 
     public const TEMPLATE_FOLDER = 'but';
