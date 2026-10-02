@@ -36,6 +36,11 @@ final class DaeuHandler extends AbstractTypeDiplomeHandler
     public const SOURCE = 'licence'; //todo: a remplacer
     public const TEMPLATE_FORM_MCCC = 'licence.html.twig'; //todo: a remplacer
 
+    public function getMcccTemplate(): string
+    {
+        return self::TEMPLATE_FORM_MCCC;
+    }
+
     public function createFormMccc(ElementConstitutif|FicheMatiere $element): FormInterface
     {
 

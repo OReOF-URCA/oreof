@@ -33,6 +33,11 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
     public const SOURCE = 'non_classique';
     public const TEMPLATE_FORM_MCCC = 'non_classique.html.twig';
 
+    public function getMcccTemplate(): string
+    {
+        return self::TEMPLATE_FORM_MCCC;
+    }
+
     public function supports(string $type): bool
     {
         return false;
