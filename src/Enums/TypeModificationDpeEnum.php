@@ -101,6 +101,18 @@ enum TypeModificationDpeEnum: string implements BadgeEnumInterface
         return !$this->isFerme();
     }
 
+    /**
+     * Choix proposé dans l'écran de configuration de l'offre : OUVERT, NON_OUVERTURE ou FERMETURE_DEFINITIVE.
+     */
+    public function getCategorieOuverture(): self
+    {
+        return match (true) {
+            $this === self::FERMETURE_DEFINITIVE => self::FERMETURE_DEFINITIVE,
+            $this->isFerme() => self::NON_OUVERTURE,
+            default => self::OUVERT,
+        };
+    }
+
     public static function listeEtatParcours(): array
     {
         return [

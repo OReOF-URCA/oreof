@@ -209,8 +209,8 @@
                     {% for parcours in formation.parcours %}
                         {% set statP = tabStatistiques['parcours'][parcours.id] ?? null %}
                         {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
-                        {% set currentEtat = dpe ? dpe.getEtatReconduction().value : 'OUVERT' %}
-                        {% set isParcoursFerme = currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}
+                        {% set categorieOuverture = dpe and dpe.etatReconduction ? dpe.etatReconduction.categorieOuverture.value : 'OUVERT' %}
+                        {% set isParcoursFerme = categorieOuverture != 'OUVERT' %}
 
                         <button type="button"
                                 id="tab-parcours-{{ parcours.id }}"
@@ -269,12 +269,11 @@
                             </twig:block>
                             <twig:block name="actions">
                                 {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
-                                {% set currentEtat = dpe ? dpe.getEtatReconduction().value : 'OUVERT' %}
+                                {% set categorieOuverture = dpe and dpe.etatReconduction ? dpe.etatReconduction.categorieOuverture.value : 'OUVERT' %}
                                 <span id="parcours_{{ parcours.id }}_badge" class="mr-2">
-                                    {% set isParcoursFerme = currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}
-                                    {% if currentEtat == 'FERMETURE_DEFINITIVE' %}
+                                    {% if categorieOuverture == 'FERMETURE_DEFINITIVE' %}
                                         <twig:Badge variant="danger" label="Fermeture définitive" />
-                                    {% elseif isParcoursFerme %}
+                                    {% elseif categorieOuverture == 'NON_OUVERTURE' %}
                                         <twig:Badge variant="danger" label="Non ouvert" />
                                     {% else %}
                                         <twig:Badge variant="success" label="Ouvert" />
@@ -286,9 +285,9 @@
                                         name="parcours_{{ parcours.id }}_reconduction"
                                         {{ not can_edit ? 'disabled' : '' }}
                                 >
-                                    <option value="OUVERT" {% if currentEtat == 'OUVERT' or currentEtat == 'CREATION' or currentEtat == 'MODIFICATION' or currentEtat == 'MODIFICATION_INTITULE' or currentEtat == 'MODIFICATION_PARCOURS' or currentEtat == 'MODIFICATION_TEXTE' or currentEtat == 'MODIFICATION_MCCC' or currentEtat == 'MODIFICATION_MCCC_TEXTE' %}selected{% endif %}>Ouvert</option>
-                                    <option value="NON_OUVERTURE" {% if currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'ATTENTE' %}selected{% endif %}>Non ouvert</option>
-                                    <option value="FERMETURE_DEFINITIVE" {% if currentEtat == 'FERMETURE_DEFINITIVE' %}selected{% endif %}>Fermeture définitive</option>
+                                    <option value="OUVERT" {% if categorieOuverture == 'OUVERT' %}selected{% endif %}>Ouvert</option>
+                                    <option value="NON_OUVERTURE" {% if categorieOuverture == 'NON_OUVERTURE' %}selected{% endif %}>Non ouvert</option>
+                                    <option value="FERMETURE_DEFINITIVE" {% if categorieOuverture == 'FERMETURE_DEFINITIVE' %}selected{% endif %}>Fermeture définitive</option>
                                 </select>
                             </twig:block>
                             <!-- Parcours -->

@@ -174,58 +174,26 @@ final class OffreConfigurerController extends BaseController
 
         foreach ($formation->getParcours() as $parcours) {
             $parcoursKey = 'parcours_' . $parcours->getId() . '_reconduction';
-            $isParcoursClosed = false;
             $trackOpenClosedChanged = false;
 
-            // Find current status in DB
-            $oldEnumVal = null;
-            foreach ($parcours->getDpeParcours() as $d) {
-                if ($d->getCampagneCollecte() === $campagne) {
-                    $oldEnumVal = $d->getEtatReconduction();
-                    break;
-                }
-            }
-            $oldIsClosed = $oldEnumVal ? in_array($oldEnumVal, [
-                TypeModificationDpeEnum::NON_OUVERTURE,
-                TypeModificationDpeEnum::NON_OUVERTURE_SES,
-                TypeModificationDpeEnum::NON_OUVERTURE_CFVU,
-                TypeModificationDpeEnum::FERMETURE_DEFINITIVE
-            ], true) : false;
+            $dpeParcours = $parcours->getDpeParcoursPourCampagne($campagne);
+            $oldEnumVal = $dpeParcours?->getEtatReconduction();
+            $oldIsClosed = $oldEnumVal?->isFerme() ?? false;
+            $isParcoursClosed = $oldIsClosed;
 
-            if ($request->request->has($parcoursKey)) {
-                $val = (string)$request->request->get($parcoursKey);
-                $enumVal = TypeModificationDpeEnum::from($val);
-                if ($enumVal === TypeModificationDpeEnum::OUVERT && $oldEnumVal !== null) {
-                    $isOpenState = in_array($oldEnumVal, [
-                        TypeModificationDpeEnum::OUVERT,
-                        TypeModificationDpeEnum::CREATION,
-                        TypeModificationDpeEnum::MODIFICATION,
-                        TypeModificationDpeEnum::MODIFICATION_INTITULE,
-                        TypeModificationDpeEnum::MODIFICATION_PARCOURS,
-                        TypeModificationDpeEnum::MODIFICATION_TEXTE,
-                        TypeModificationDpeEnum::MODIFICATION_MCCC,
-                        TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE,
-                    ], true);
-                    if ($isOpenState) {
-                        $enumVal = $oldEnumVal;
-                    }
-                }
-                foreach ($parcours->getDpeParcours() as $d) {
-                    if ($d->getCampagneCollecte() === $campagne) {
-                        $d->setEtatReconduction($enumVal);
-                        $em->persist($d);
-                        break;
-                    }
-                }
-                $isParcoursClosed = in_array($enumVal, [
-                    TypeModificationDpeEnum::NON_OUVERTURE,
-                    TypeModificationDpeEnum::NON_OUVERTURE_SES,
-                    TypeModificationDpeEnum::NON_OUVERTURE_CFVU,
-                    TypeModificationDpeEnum::FERMETURE_DEFINITIVE
-                ], true);
+            // Le select ne propose que 3 choix : l'état n'est modifié que si l'utilisateur change de choix,
+            // pour ne pas écraser un état plus précis (MODIFICATION_*, NON_OUVERTURE_CFVU…) à chaque autosave.
+            $choixPossibles = [
+                TypeModificationDpeEnum::OUVERT,
+                TypeModificationDpeEnum::NON_OUVERTURE,
+                TypeModificationDpeEnum::FERMETURE_DEFINITIVE,
+            ];
+            $enumVal = TypeModificationDpeEnum::tryFrom((string)$request->request->get($parcoursKey));
+            $oldCategorie = $oldEnumVal?->getCategorieOuverture() ?? TypeModificationDpeEnum::OUVERT;
+            if ($dpeParcours !== null && in_array($enumVal, $choixPossibles, true) && $enumVal !== $oldCategorie) {
+                $dpeParcours->setEtatReconduction($enumVal);
+                $isParcoursClosed = $enumVal->isFerme();
                 $trackOpenClosedChanged = ($oldIsClosed !== $isParcoursClosed);
-            } else {
-                $isParcoursClosed = $oldIsClosed;
             }
 
             foreach ($parcours->getAnnees() as $annee) {

@@ -126,11 +126,10 @@
         <template>
             <span id="parcours_{{ parcours.id }}_badge" class="mr-2">
                 {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
-                {% set currentEtat = dpe ? dpe.getEtatReconduction().value : 'OUVERT' %}
-                {% set isParcoursFerme = currentEtat == 'NON_OUVERTURE' or currentEtat == 'NON_OUVERTURE_SES' or currentEtat == 'NON_OUVERTURE_CFVU' or currentEtat == 'FERMETURE_DEFINITIVE' %}
-                {% if currentEtat == 'FERMETURE_DEFINITIVE' %}
+                {% set categorieOuverture = dpe and dpe.etatReconduction ? dpe.etatReconduction.categorieOuverture.value : 'OUVERT' %}
+                {% if categorieOuverture == 'FERMETURE_DEFINITIVE' %}
                     <twig:Badge variant="danger" label="Fermeture définitive" />
-                {% elseif isParcoursFerme %}
+                {% elseif categorieOuverture == 'NON_OUVERTURE' %}
                     <twig:Badge variant="danger" label="Non ouvert" />
                 {% else %}
                     <twig:Badge variant="success" label="Ouvert" />
