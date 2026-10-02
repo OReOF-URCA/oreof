@@ -81,7 +81,7 @@ class FaqAdminController extends AbstractController
     #[Route('/reorder', name: 'app_faq_reorder', methods: ['POST'])]
     public function reorder(Request $request, FaqRepository $faqRepository, EntityManagerInterface $em): JsonResponse
     {
-        if (!$this->isCsrfTokenValid('faq_reorder', (string) $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('faq_reorder', $request->request->getString('_token'))) {
             return $this->json(['success' => false, 'message' => 'Token CSRF invalide.'], Response::HTTP_FORBIDDEN);
         }
 
