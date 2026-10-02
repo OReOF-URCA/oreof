@@ -17,6 +17,7 @@ use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
 use App\Service\ParcoursExport;
 use App\Service\VersioningParcours;
+use App\Repository\ParcoursVersioningRepository;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\CleanTexte;
@@ -72,14 +73,13 @@ class ParcoursExportController extends AbstractController
     #[Route('/parcours/{parcours}/versioning/export-pdf', name: 'app_parcours_export_pdf_versioning')]
     public function exportPdfVersioning(
         Parcours $parcours,
-        EntityManagerInterface $entityManager,
+        ParcoursVersioningRepository $parcoursVersioningRepository,
         VersioningParcours $versioningParcours
-    ){
-        $lastCfvuVersion = $entityManager->getRepository(ParcoursVersioning::class)
-            ->findLastCfvuVersion($parcours);
+    ): Response {
+        $lastCfvuVersion = $parcoursVersioningRepository->findLastCfvuVersion($parcours);
         $lastCfvuVersion = count($lastCfvuVersion) > 0 ? $lastCfvuVersion[0] : null;
 
-        if($lastCfvuVersion){
+        if ($lastCfvuVersion !== null) {
             $versionData = $versioningParcours->loadParcoursFromVersion($lastCfvuVersion);
             $parcoursVersionData = $versionData['parcours'];
             $dtoVersionData = $versionData['dto'];
@@ -94,6 +94,8 @@ class ParcoursExportController extends AbstractController
                 'isVersioning' => true
             ], 'Parcours_' . $parcours->getLibelle());
         }
+
+        return $this->json(['error' => 'no valid version available'], Response::HTTP_NOT_FOUND);
     }
 
     #[Route('/parcours/{parcours}/maquette/validee_cfvu/export-json', name: 'app_parcours_export_maquette_json_validee_cfvu')]
@@ -101,11 +103,9 @@ class ParcoursExportController extends AbstractController
         Parcours $parcours,
         ParcoursExport $parcoursExport,
         VersioningParcours $versioningParcours,
-        EntityManagerInterface $entityManager
+        ParcoursVersioningRepository $parcoursVersioningRepository
     ) : Response {
-        $lastCfvuVersion = $entityManager
-            ->getRepository(ParcoursVersioning::class)
-            ->findLastCfvuVersion($parcours);
+        $lastCfvuVersion = $parcoursVersioningRepository->findLastCfvuVersion($parcours);
 
         if(count($lastCfvuVersion) === 0){
             return $this->json(["error" => "no valid version available"]);
