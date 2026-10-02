@@ -65,7 +65,7 @@ class ParcoursExportController extends AbstractController
             'parcours' => $parcours,
             'hasParcours' => $parcours->getFormation()?->isHasParcours(),
             'titre' => 'Détails du parcours ' . $parcours->getDisplay(),
-            'dto' => $typeD->calculStructureParcours($parcours),
+            'dto' => $typeD->calcul($parcours),
         ], 'Parcours_' . $parcours->getDisplay());
     }
 
@@ -166,7 +166,7 @@ class ParcoursExportController extends AbstractController
         }
 
         $typeD = $typeDiplomeResolver->fromTypeDiplome($typeDiplome);
-        $dto = $typeD->calculStructureParcours($parcours);
+        $dto = $typeD->calcul($parcours);
 
         $data = [
             'path' => $this->generateUrl('app_parcours_export_maquette_json', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
