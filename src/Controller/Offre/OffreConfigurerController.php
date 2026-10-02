@@ -610,7 +610,7 @@ final class OffreConfigurerController extends BaseController
         $dateDebutStr = (string)$request->request->get('dateDebut');
         $dateFinStr = (string)$request->request->get('dateFin');
         $heureFinStr = (string)$request->request->get('heureFin');
-        $inTimeline = (bool)$request->request->get('inTimeline', true);
+        $inTimeline = $request->request->getBoolean('inTimeline', true);
 
         // Rétrocompatibilité si anciens champs transmis
         if ($dateDebutStr === '' && $request->request->has('dateOuvertureDpe')) {
@@ -620,9 +620,16 @@ final class OffreConfigurerController extends BaseController
             $dateFinStr = (string)$request->request->get('dateClotureDpe');
         }
 
-        $dateDebut = $dateDebutStr !== '' ? new \DateTime($dateDebutStr) : null;
-        $dateFin = $dateFinStr !== '' ? new \DateTime($dateFinStr) : null;
-        $heureFin = $heureFinStr !== '' ? new \DateTime($heureFinStr) : null;
+        try {
+            $dateDebut = $dateDebutStr !== '' ? new \DateTime($dateDebutStr) : null;
+            $dateFin = $dateFinStr !== '' ? new \DateTime($dateFinStr) : null;
+            $heureFin = $heureFinStr !== '' ? new \DateTime($heureFinStr) : null;
+        } catch (\Exception) {
+            return $turboStream->streamToastError('Date ou heure invalide.');
+        }
+        if ($dateDebut !== null && $dateFin !== null && $dateDebut > $dateFin) {
+            return $turboStream->streamToastError('La date de début doit précéder la date de fin.');
+        }
 
         $campagneService->updateModuleDates(
             $campagne,
