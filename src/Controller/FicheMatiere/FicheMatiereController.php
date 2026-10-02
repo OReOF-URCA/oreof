@@ -115,8 +115,12 @@ class FicheMatiereController extends BaseController
         }
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
-        if (!$typeD instanceof McccDisplayInterface && $ficheMatiere->getTypeMccc() !== null) {
-            throw new \RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
+        $mcccs = [];
+        if ($ficheMatiere->getTypeMccc() !== null) {
+            if (!$typeD instanceof McccDisplayInterface) {
+                throw new \RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
+            }
+            $mcccs = $typeD->getDisplayMccc($typeD->getMcccs($ficheMatiere), $ficheMatiere->getTypeMccc());
         }
 
         $cssDiff = DiffHelper::getStyleSheet();
@@ -134,7 +138,7 @@ class FicheMatiereController extends BaseController
             'typeD' => $typeD,
             'typeDiplome' => $typeDiplome,
             'ects' => $ficheMatiere->getEcts(),
-            'mcccs' => $ficheMatiere->getTypeMccc() != null ? $typeD->getDisplayMccc($typeD->getMcccs($ficheMatiere), $ficheMatiere->getTypeMccc()) : [],
+            'mcccs' => $mcccs,
             'bccs' => $bccs,
             'typeMccc' => $ficheMatiere->getTypeMccc(),
             'stringDifferences' => $textDifferences,
