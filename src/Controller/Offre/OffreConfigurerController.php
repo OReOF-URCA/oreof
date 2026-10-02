@@ -119,7 +119,7 @@ final class OffreConfigurerController extends BaseController
 
         $csrfToken = (string)$request->request->get('_token');
         if (!$this->isCsrfTokenValid('offre_v2_configurer_' . $formation->getId(), $csrfToken)) {
-            return new JsonResponse(['success' => false, 'message' => 'Token CSRF invalide.'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['success' => false, 'message' => 'Votre session a expiré : rechargez la page puis recommencez.'], Response::HTTP_BAD_REQUEST);
         }
 
         $campagne = $this->getCampagneCollecte();

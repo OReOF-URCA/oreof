@@ -248,7 +248,10 @@ export default class extends Controller {
       })
 
       if (!response.ok) {
-        throw new Error('Network response was not ok')
+        const message = await this.errorMessage(response)
+        this.setStatus('error', message)
+        callOut(message, 'danger')
+        return
       }
 
       const contentType = response.headers.get('content-type') || ''
@@ -284,6 +287,21 @@ export default class extends Controller {
       this.setStatus('error', 'Erreur de connexion.')
       callOut('Impossible de sauvegarder le brouillon. Vérifiez votre connexion.', 'danger')
     }
+  }
+
+  // Message lisible pour une réponse en erreur : celui du serveur s'il est fourni (JSON), sinon selon le code HTTP.
+  async errorMessage(response) {
+    try {
+      const data = await response.clone().json()
+      if (data && data.message) return data.message
+    } catch {
+      // réponse non JSON (page d'erreur HTML)
+    }
+
+    if (response.status === 403) return 'Vous n\'avez pas les droits pour modifier cette offre.'
+    if (response.status === 400 || response.status === 419) return 'Votre session a expiré : rechargez la page puis recommencez.'
+
+    return 'Erreur serveur : les dernières modifications n\'ont pas été enregistrées. Réessayez.'
   }
 
   setStatus(state, message) {
