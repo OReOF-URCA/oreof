@@ -6,12 +6,12 @@ use App\Classes\GetDpeParcours;
 use App\Classes\GetHistorique;
 use App\Classes\JsonReponse;
 use App\Classes\Mailer;
-use App\Classes\Process\ChangeRfProcess;
 use App\DTO\TranslatableKey;
 use App\Entity\ChangeRf;
 use App\Entity\HistoriqueFormation;
 use App\Entity\HistoriqueParcours;
 use App\Entity\Parcours;
+use App\Entity\User;
 use App\Exception\FileUploadException;
 use App\Service\SecureUploadService;
 use App\Utils\TurboStreamResponseFactory;
@@ -56,7 +56,11 @@ class PvConseilController extends BaseController
                 } else {
                     $histo = new HistoriqueParcours();
                     $histo->setParcours($parcours);
-                    $histo->setUser($this->getUser());
+                    $currentUser = $this->getUser();
+                    if (!$currentUser instanceof User) {
+                        throw $this->createAccessDeniedException();
+                    }
+                    $histo->setUser($currentUser);
                     $histo->setEtape('soumis_conseil');
 
                 }
@@ -75,15 +79,13 @@ class PvConseilController extends BaseController
                         return JsonReponse::error($exception->getPublicMessage());
                     }
 
-                    if ($upload !== null) {
-                        $tab['fichier'] = $upload->getStoredFilename();
-                        $tab['fichier_original'] = $upload->getOriginalFilename();
-                    }
+                    $tab['fichier'] = $upload->getStoredFilename();
+                    $tab['fichier_original'] = $upload->getOriginalFilename();
                 } else {
                     return JsonReponse::success($translator->trans('deposer.pv.flash.error', [], 'process'));
                 }
 
-                $histo->setComplements($tab ?? []);
+                $histo->setComplements($tab);
                 $entityManager->persist($histo);
                 $entityManager->flush();
 
@@ -116,7 +118,6 @@ class PvConseilController extends BaseController
 
     #[Route('/pv/conseil/change-rf/{changeRf}', name: 'app_deposer_pv_conseil_change_rf')]
     public function changeRfPv(
-        ChangeRfProcess $changeRfProcess,
         GetHistorique $getHistorique,
         Mailer $myMailer,
         SecureUploadService $secureUploadService,
@@ -135,14 +136,17 @@ class PvConseilController extends BaseController
                 return JsonReponse::error($translator->trans('deposer.pv.flash.error', [], 'process'));
             }
 
-            if ($changeRf !== null) {
-                $conseilLaisserPasser = $getHistorique->getHistoriqueChangeRfLastStep($changeRf, 'changeRf.soumis_conseil');
+            $conseilLaisserPasser = $getHistorique->getHistoriqueChangeRfLastStep($changeRf, 'changeRf.soumis_conseil');
                 if ($conseilLaisserPasser !== null && $conseilLaisserPasser->getEtat() === 'laisserPasser') {
                     $histo = $conseilLaisserPasser;
                 } else {
                     $histo = new HistoriqueFormation();
                     $histo->setChangeRf($changeRf);
-                    $histo->setUser($this->getUser());
+                    $currentUser = $this->getUser();
+                    if (!$currentUser instanceof User) {
+                        throw $this->createAccessDeniedException();
+                    }
+                    $histo->setUser($currentUser);
                     $histo->setEtape('changeRf.soumis_conseil');
 
                 }
@@ -170,7 +174,7 @@ class PvConseilController extends BaseController
                     return JsonReponse::error($translator->trans('deposer.pv.flash.error', [], 'process'));
                 }
 
-                $histo->setComplements($tab ?? []);
+                $histo->setComplements($tab);
                 $entityManager->persist($histo);
                 $entityManager->flush();
 
@@ -191,9 +195,7 @@ class PvConseilController extends BaseController
                 );
 
                 return JsonReponse::success($translator->trans('deposer.pv.flash.success', [], 'process'));
-            }
 
-            return JsonReponse::error('Pas de DPE associé au parcours');
         }
         return $this->render('pv_conseil/_index.html.twig', [
             'changeRf' => $changeRf,
