@@ -26,6 +26,7 @@ use App\Repository\LangueRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Repository\TypeEpreuveRepository;
 use App\Repository\UeRepository;
+use App\Service\Recherche\RechercheParcours;
 use App\Service\VersioningFicheMatiere;
 use App\TypeDiplome\McccDisplayInterface;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
@@ -504,13 +505,13 @@ class FicheMatiereController extends BaseController
 
     #[Route('/recherche/parcours/{parcours}/{keyword}', name: 'app_fiche_matiere_search')]
     public function getFicheMatiereForParcoursAndKeyword(
-        FicheMatiereRepository $ficheMatiereRepository,
+        RechercheParcours $rechercheParcours,
         TurboStreamResponseFactory $turboStream,
         Parcours $parcours,
         string $keyword = ""
     ): Response
     {
-        $associatedFicheMatiere = $ficheMatiereRepository->findForParcoursWithKeyword($parcours, $keyword);
+        $associatedFicheMatiere = $rechercheParcours->fichesMatieresAssociees((int) $parcours->getId(), $keyword);
 
         $count = count($associatedFicheMatiere);
         $title = $count > 1

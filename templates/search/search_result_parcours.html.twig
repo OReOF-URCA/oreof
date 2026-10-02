@@ -1,74 +1,81 @@
+{% set champsRecherche = {
+    intitule: {label: 'Intitulé', variant: 'secondary'},
+    objectifsParcours: {label: 'Objectifs du parcours', variant: 'success'},
+    objectifsFormation: {label: 'Objectifs de la formation', variant: 'secondary'},
+    contenuFormation: {label: 'Contenu de la formation', variant: 'primary'},
+    resultatsAttendus: {label: 'Résultats attendus', variant: 'info'},
+    poursuitesEtudes: {label: "Poursuite d'études", variant: 'warning'},
+} %}
+
 <div
         class="space-y-4"
         id="rootListElement"
         data-fiche-matiere-url="{{ absolute_url(path('fiche_matiere_v2_voir', {slug: 'µ#+'})) }}"
 >
+    {% if recherche.corrections is not empty or recherche.termesSansCorrespondance is not empty %}
+        <twig:alerte type="info">
+            <ul class="space-y-1">
+                {% for saisi, propose in recherche.corrections %}
+                    <li>Aucun mot exact pour « {{ saisi }} » : les résultats incluent le mot proche « {{ propose }} ».</li>
+                {% endfor %}
+                {% for saisi in recherche.termesSansCorrespondance %}
+                    <li>Aucun texte ne contient « {{ saisi }} » ni de mot proche.</li>
+                {% endfor %}
+            </ul>
+        </twig:alerte>
+    {% endif %}
+
     <div class="space-y-4">
-        {% if parcoursArray|length > 0 %}
-            {% for p in parcoursArray %}
+        {% if recherche.resultats|length > 0 %}
+            {% for resultat in recherche.resultats %}
                 <article
                         class="rounded-2xl border border-secondary-200 bg-surface p-5 shadow-sm transition hover:border-primary-300 hover:shadow-md dark:border-secondary-700 dark:bg-secondary-950/40">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div class="min-w-0 space-y-3">
                             <div class="flex flex-wrap items-center gap-2">
-                                {% if isParcoursDefautArray[loop.index0] == true %}
+                                {% if resultat.estParcoursDefaut %}
                                     <twig:Badge label="Parcours par défaut" variant="info"/>
                                 {% endif %}
 
-                                {% if resultArrayBadge[loop.index0]['typeParcoursLibelle']|length > 0 %}
-                                    <twig:Badge :label="resultArrayBadge[loop.index0]['typeParcoursLibelle']"
-                                                variant="secondary"/>
+                                {% if resultat.typeParcoursLibelle is not empty %}
+                                    <twig:Badge :label="resultat.typeParcoursLibelle" variant="secondary"/>
                                 {% endif %}
                             </div>
 
-                            {% if isParcoursDefautArray[loop.index0] == true %}
-                                <a
-                                        href="{{ path('formation_v2_voir', {slug: p.formation_slug}) }}"
-                                        class="block text-lg font-semibold text-primary-700 transition hover:text-primary-800 hover:underline dark:text-primary-300 dark:hover:text-primary-200"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                >
-                                    {{ resultArrayBadge[loop.index0]['libelleMention'] }}
-                                </a>
-                            {% else %}
-                                <a
-                                        href="{{ path('parcours_v2_voir', {parcours: p.parcours_id}) }}"
-                                        class="block text-lg font-semibold text-primary-700 transition hover:text-primary-800 hover:underline dark:text-primary-300 dark:hover:text-primary-200"
-                                        target="_blank"
-                                        rel="noreferrer"
-                                >
-                                    {{ resultArrayBadge[loop.index0]['libelleMention'] }} -
-                                    Parcours {{ p.parcours_libelle }}
-                                </a>
+                            <a
+                                    href="{{ resultat.estParcoursDefaut
+                                        ? path('formation_v2_voir', {slug: resultat.formationSlug})
+                                        : path('parcours_v2_voir', {parcours: resultat.parcoursId}) }}"
+                                    class="block text-lg font-semibold text-primary-700 transition hover:text-primary-800 hover:underline dark:text-primary-300 dark:hover:text-primary-200"
+                                    target="_blank"
+                                    rel="noreferrer"
+                            >
+                                {{ resultat.titre }}
+                            </a>
+
+                            {% if resultat.sigle is not empty %}
+                                <p class="text-sm text-secondary-500 dark:text-secondary-400">
+                                    Sigle : {{ resultat.sigle }}
+                                </p>
                             {% endif %}
 
-                            <p class="text-sm text-secondary-500 dark:text-secondary-400">
-                                Sigle
-                                : {{ isParcoursDefautArray[loop.index0] == true ? p.formation_sigle : p.parcours_sigle }}
-                            </p>
+                            <twig:SearchExcerpt
+                                    :segments="resultat.extrait"
+                                    :label="champsRecherche[resultat.champExtrait].label ?? null"
+                            />
                         </div>
                     </div>
 
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        {% if 'objectifsParcours' in resultArrayBadge[loop.index0] %}
-                            <twig:Badge label="Objectifs du parcours" variant="success"/>
-                        {% endif %}
-                        {% if 'poursuitesEtudes' in resultArrayBadge[loop.index0] %}
-                            <twig:Badge label="Poursuite d'études" variant="warning"/>
-                        {% endif %}
-                        {% if 'contenuFormation' in resultArrayBadge[loop.index0] %}
-                            <twig:Badge label="Contenu de la formation" variant="primary"/>
-                        {% endif %}
-                        {% if 'resultatsAttendus' in resultArrayBadge[loop.index0] %}
-                            <twig:Badge label="Résultats attendus" variant="info"/>
-                        {% endif %}
-                        {% if 'objectifsFormation' in resultArrayBadge[loop.index0] %}
-                            <twig:Badge label="Objectifs de la formation" variant="secondary"/>
-                        {% endif %}
+                    <div class="mt-4 flex flex-wrap gap-2" aria-label="Champs contenant la recherche">
+                        {% for champ in resultat.champs %}
+                            {% if champsRecherche[champ] is defined %}
+                                <twig:Badge :label="champsRecherche[champ].label" :variant="champsRecherche[champ].variant"/>
+                            {% endif %}
+                        {% endfor %}
                     </div>
 
-                    {% if resultArrayBadge[loop.index0]['fichesMatieres'] is defined and resultArrayBadge[loop.index0]['fichesMatieres']|length > 0 %}
-                        {% set nbFichesMatieres = resultArrayBadge[loop.index0]['fichesMatieres']|length %}
+                    {% if resultat.nbFichesMatieres > 0 %}
+                        {% set nbFichesMatieres = resultat.nbFichesMatieres %}
                         <div class="mt-4">
                             <twig:Button
                                     :label="nbFichesMatieres > 1 ? nbFichesMatieres ~ ' fiches matières associées' : nbFichesMatieres ~ ' fiche matière associée'"
@@ -76,7 +83,7 @@
                                     size="sm"
                                     icon="icon:folder"
                                     dataAction="click->modalturbo#open"
-                                    href="{{ path('app_fiche_matiere_search', { parcours: p.parcours_id, keyword: keyword_1 }) }}"
+                                    href="{{ path('app_fiche_matiere_search', { parcours: resultat.parcoursId, keyword: keyword_1 }) }}"
                             />
                         </div>
                     {% endif %}

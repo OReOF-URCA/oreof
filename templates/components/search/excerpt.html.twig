@@ -1,0 +1,14 @@
+{% if segments is not empty %}
+    <p class="text-sm leading-relaxed text-secondary-600 dark:text-secondary-300" {{ attributes }}>
+        {%- if label -%}
+            <span class="font-medium text-secondary-700 dark:text-secondary-200">{{ label }} : </span>
+        {%- endif -%}
+        {%- for segment in segments -%}
+            {%- if segment.surligne -%}
+                <mark class="rounded bg-warning-200 px-0.5 font-medium text-secondary-900 dark:bg-warning-900 dark:text-warning-100">{{ segment.texte }}</mark>
+            {%- else -%}
+                {{ segment.texte }}
+            {%- endif -%}
+        {%- endfor -%}
+    </p>
+{% endif %}

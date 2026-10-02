@@ -358,19 +358,25 @@ class FicheMatiereRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findForParcoursWithKeyword(Parcours $parcours, string $keyword)
+    /**
+     * Fiches matières portées par les parcours donnés, pour la recherche plein texte.
+     *
+     * @param list<int> $parcoursIds
+     *
+     * @return list<array{id: int, slug: ?string, libelle: ?string, description: ?string, parcours_id: int}>
+     */
+    public function findPourRechercheParcours(array $parcoursIds): array
     {
-        $qb = $this->createQueryBuilder('fm');
+        if ($parcoursIds === []) {
+            return [];
+        }
 
-        $qb = $qb->select('fm.id, fm.description, fm.objectifs, fm.slug, fm.libelle')
-            ->where(
-                $qb->expr()->like('UPPER(fm.description)', 'UPPER(:keyword)')
-            )
-            ->andWhere('fm.parcours = :parcours')
-            ->setParameter('keyword', '%' . $keyword . '%')
-            ->setParameter('parcours', $parcours);
-
-        return $qb->getQuery()->getResult();
+        return $this->createQueryBuilder('fm')
+            ->select('fm.id, fm.slug, fm.libelle, fm.description, IDENTITY(fm.parcours) AS parcours_id')
+            ->andWhere('fm.parcours IN (:parcours)')
+            ->setParameter('parcours', $parcoursIds)
+            ->getQuery()
+            ->getResult();
     }
 
     public function findCountForKeyword(string $keyword, CampagneCollecte $campagne) : array
