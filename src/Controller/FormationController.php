@@ -39,7 +39,6 @@ use App\TypeDiplome\TypeDiplomeResolver;
 use App\Repository\UserRepository;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
-use App\Service\SecureUploadService;
 use App\Utils\Access;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -65,10 +64,8 @@ use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 class FormationController extends BaseController
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly SecureUploadService    $secureUploadService
-    )
-    {
+        private readonly EntityManagerInterface $entityManager
+    ) {
     }
 
     #[Route('/', name: 'app_formation_index', methods: ['GET'])]
@@ -97,7 +94,7 @@ class FormationController extends BaseController
         return $this->render('validation/_liste.html.twig', [
             'nbFormations' => $nbFormations,
             'nbParcours' => $nbParcours,
-            'allparcours' => $allparcours ?? [],
+            'allparcours' => $allparcours,
             'etape' => 'cfvu',
             'isCfvu' => true,
         ]);
@@ -394,12 +391,10 @@ class FormationController extends BaseController
             $savedMention = $formation->getMention();
             $savedMentionTexte = $formation->getMentionTexte();
 
-            if (array_key_exists(
-                    'mention',
-                    $request->request->all()['formation_ses']
-                ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre')
+            $formationSes = $request->request->all('formation_ses');
+            if (array_key_exists('mention', $formationSes) && $formationSes['mention'] !== null && $formationSes['mention'] !== 'autre')
             {
-                $mention = $mentionRepository->find($request->request->all()['formation_ses']['mention']);
+                $mention = $mentionRepository->find($formationSes['mention']);
                 $formation->setMentionTexte(null);
                 $formation->setMention($mention);
             }
@@ -509,8 +504,8 @@ class FormationController extends BaseController
             'cssDiff' => $cssDiff,
             'stringDifferencesParcoursDefautCampagne' => $textDifferencesParcoursCampagne ?? [],
             'stringDifferencesParcoursDefaut' => $textDifferencesParcours ?? [],
-            'stringDifferencesFormation' => $formationStringDifferences ?? [],
-            'stringDifferencesFormationCampagne' => $formationCampagneStringDifferences ?? [],
+            'stringDifferencesFormation' => $formationStringDifferences,
+            'stringDifferencesFormationCampagne' => $formationCampagneStringDifferences,
             'versioningParcours' => $versioningParcours,
             'hasLastVersion' => $hasLastVersion,
             'displayComparaison' => $displayComparaison,
@@ -554,8 +549,9 @@ class FormationController extends BaseController
 
         $formationState->setFormation($formation);
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
-        if ($formation->getParcours()?->first() !== false) {
-            $parcoursState->setParcours($formation->getParcours()?->first());
+        $firstParcours = $formation->getParcours()->first();
+        if ($firstParcours !== false) {
+            $parcoursState->setParcours($firstParcours);
         }
 
         if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
@@ -628,12 +624,14 @@ class FormationController extends BaseController
     }
 
     #[Route('/{slug}/maquette_iframe', name: 'app_formation_maquette_iframe')]
-    public function getFormationMaquetteIframe(#[MapEntity(mapping: ['slug' => 'slug'])] Formation $formation, CalculStructureParcours $calcul): Response
-    {
+    public function getFormationMaquetteIframe(
+        #[MapEntity(mapping: ['slug' => 'slug'])] Formation $formation,
+        TypeDiplomeResolver $typeDiplomeResolver
+    ): Response {
         $listeParcours = [];
 
         foreach ($formation->getParcours() as $parcours) {
-            $listeParcours[] = $calcul->calcul($parcours);
+            $listeParcours[] = $typeDiplomeResolver->fromParcours($parcours)->calcul($parcours);
         }
 
         return $this->render('formation/maquette_iframe.html.twig', [
