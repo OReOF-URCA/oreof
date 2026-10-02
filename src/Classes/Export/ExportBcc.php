@@ -10,11 +10,12 @@
 namespace App\Classes\Export;
 
 use App\Classes\Excel\ExcelWriter;
-use App\Classes\GetElementConstitutif;
+use App\DTO\StructureEc;
+use App\DTO\StructureSemestre;
+use App\DTO\StructureUe;
 use App\Entity\CampagneCollecte;
 use App\Entity\Parcours;
 use App\Repository\FormationRepository;
-use App\Service\ProjectDirProvider;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\Utils\Tools;
@@ -25,7 +26,6 @@ class ExportBcc implements ExportInterface
 {
     //todo: a revoir complétement
     private string $fileName;
-    private string $dir;
 
     public function __construct(
         protected TypeDiplomeResolver $typeDiplomeResolver,
@@ -200,7 +200,8 @@ class ExportBcc implements ExportInterface
         return '';
     }
 
-    private function buildUeGroups(object $semestre): array
+    /** @return array<int, array{label: string, ecs: array<StructureEc>, width: int}> */
+    private function buildUeGroups(StructureSemestre $semestre): array
     {
         $groups = [];
 
@@ -231,37 +232,24 @@ class ExportBcc implements ExportInterface
         return $groups;
     }
 
-    private function getUesEnfants(object $ue): array
+    /** @return array<StructureUe> */
+    private function getUesEnfants(StructureUe $ue): array
     {
-        if (property_exists($ue, 'uesEnfants')) {
-            return is_array($ue->uesEnfants) ? $ue->uesEnfants : iterator_to_array($ue->uesEnfants);
-        }
-
-        if (method_exists($ue, 'uesEnfants')) {
-            $children = $ue->uesEnfants();
-            return is_array($children) ? $children : iterator_to_array($children);
-        }
-
-        return [];
+        return $ue->uesEnfants();
     }
 
-    private function getEcChildren(object $ec): array
+    /** @return array<StructureEc> */
+    private function getEcChildren(StructureEc $ec): array
     {
-        if (!property_exists($ec, 'elementsConstitutifsEnfants')) {
-            return [];
-        }
-
-        return is_array($ec->elementsConstitutifsEnfants)
-            ? $ec->elementsConstitutifsEnfants
-            : iterator_to_array($ec->elementsConstitutifsEnfants);
+        return $ec->elementsConstitutifsEnfants;
     }
 
-    private function isChoixEc(object $ec): bool
+    private function isChoixEc(StructureEc $ec): bool
     {
         return $ec->elementConstitutif->getNatureUeEc()?->isChoix() === true;
     }
 
-    private function getEcDisplayWidth(object $ec): int
+    private function getEcDisplayWidth(StructureEc $ec): int
     {
         $ecChildren = $this->getEcChildren($ec);
         if ($this->isChoixEc($ec) && count($ecChildren) > 0) {
@@ -271,6 +259,7 @@ class ExportBcc implements ExportInterface
         return 1;
     }
 
+    /** @param iterable<StructureEc> $ecs */
     private function getEcListDisplayWidth(iterable $ecs): int
     {
         $width = 0;
@@ -281,13 +270,9 @@ class ExportBcc implements ExportInterface
         return $width;
     }
 
-    private function isCompetenceMobilisee(object $ecStructure, string $competenceCode): bool
+    private function isCompetenceMobilisee(StructureEc $ecStructure, string $competenceCode): bool
     {
-        if (!property_exists($ecStructure, 'bccs')) {
-            return false;
-        }
-
-        $bccs = $ecStructure->bccs;
+        $bccs = $ecStructure->bccs ?? [];
         if (is_array($bccs)) {
             if (array_key_exists($competenceCode, $bccs)) {
                 return true;
