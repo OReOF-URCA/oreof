@@ -216,6 +216,9 @@ class Parcours
     #[ORM\Column(nullable: true)]
     private ?array $remplissage = [];
 
+    /** Non persisté : voir suspendreRecalculRemplissage(). */
+    private bool $recalculRemplissageSuspendu = false;
+
     #[ORM\Column(nullable: true)]
     private ?array $etatsFichesMatieres = [];
 
@@ -1152,9 +1155,22 @@ class Parcours
     }
 
 
+    /**
+     * Évite le recalcul du remplissage (parcours complet de la maquette) aux flush() de la requête en cours,
+     * quand seules des données sans effet sur le remplissage sont modifiées (capacités, ouverture des années…).
+     */
+    public function suspendreRecalculRemplissage(): void
+    {
+        $this->recalculRemplissageSuspendu = true;
+    }
+
     #[ORM\PreFlush]
     public function updateRemplissage(PreFlushEventArgs $args): void
     {
+        if ($this->recalculRemplissageSuspendu) {
+            return;
+        }
+
         $remplissage = $this->remplissageBrut();
         $this->setRemplissage($remplissage);
     }

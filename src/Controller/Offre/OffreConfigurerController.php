@@ -45,12 +45,11 @@ final class OffreConfigurerController extends BaseController
         ]);
 
         if ($dpeFormation === null) {
+            // Affichage seul : le DpeFormation est créé lors de la première transition (validation composante).
             $dpeFormation = new DpeFormation();
             $dpeFormation->setFormation($formation);
             $dpeFormation->setCampagneCollecte($campagne);
             $dpeFormation->setEtatValidation(['brouillon' => 1]);
-            $em->persist($dpeFormation);
-            $em->flush();
         }
 
         $statsData = $this->calculerStatistiques($formation, $campagne, $comparaisonService, $offreValidationService);
@@ -135,6 +134,23 @@ final class OffreConfigurerController extends BaseController
 
         $changedYears = [];
         $modifiedAnneesByOrdre = [];
+
+        // Paramètres de plateforme existants des années de la formation, en une requête : [anneeId][plateformeId]
+        $annees = [];
+        foreach ($formation->getParcours() as $p) {
+            // Cette sauvegarde ne touche pas la maquette : inutile de recalculer le remplissage au flush().
+            $p->suspendreRecalculRemplissage();
+            foreach ($p->getAnnees() as $a) {
+                $annees[] = $a;
+            }
+        }
+        $parametresParAnnee = [];
+        $parametresExistants = $annees === [] ? [] : $plateformeParamRepo->findBy(['annee' => $annees, 'campagne' => $campagne]);
+        foreach ($parametresExistants as $param) {
+            if ($param->getAnnee() !== null && $param->getPlateforme() !== null) {
+                $parametresParAnnee[$param->getAnnee()->getId()][$param->getPlateforme()->getId()] = $param;
+            }
+        }
 
         // Gestion de la configuration du tronc commun
         if ($request->request->has('has_tronc_commun_config')) {
@@ -246,17 +262,14 @@ final class OffreConfigurerController extends BaseController
                                 $specifiqueKey = 'annee_' . $anneeId . '_plateforme_' . $plateformeId . '_specifique';
                                 $remarquesKey = 'annee_' . $anneeId . '_plateforme_' . $plateformeId . '_remarques';
                                 
-                                $parametre = $plateformeParamRepo->findOneBy([
-                                    'annee' => $annee,
-                                    'plateforme' => $plateforme,
-                                    'campagne' => $campagne
-                                ]);
-                                
+                                $parametre = $parametresParAnnee[$anneeId][$plateformeId] ?? null;
+
                                 if (!$parametre) {
                                     $parametre = new PlateformeAdmissionParametre();
-                                    $parametre->setAnnee($annee);
+                                    $annee->addAdmissionPlateformeParametre($parametre);
                                     $parametre->setPlateforme($plateforme);
                                     $parametre->setCampagne($campagne);
+                                    $parametresParAnnee[$anneeId][$plateformeId] = $parametre;
                                 }
                                 
                                 $oldParamActive = $parametre->isActive();
@@ -343,12 +356,7 @@ final class OffreConfigurerController extends BaseController
             // Trouver l'année source : l'année qui a été modifiée, sinon la première
             $sourceAnnee = $modifiedAnneesByOrdre[$tcOrdre] ?? $allAnneesWithOrdre[0];
 
-            $sourceParams = [];
-            foreach ($sourceAnnee->getAdmissionPlateformeParametres() as $param) {
-                if ($param->getCampagne() === $campagne && $param->getPlateforme() !== null) {
-                    $sourceParams[$param->getPlateforme()->getId()] = $param;
-                }
-            }
+            $sourceParams = $parametresParAnnee[$sourceAnnee->getId()] ?? [];
 
             foreach ($allAnneesWithOrdre as $targetAnnee) {
                 if ($targetAnnee->getId() === $sourceAnnee->getId()) {
@@ -376,20 +384,17 @@ final class OffreConfigurerController extends BaseController
                             $plat = $tpa->getPlateforme();
                             $platId = $plat->getId();
 
-                            $targetParam = $plateformeParamRepo->findOneBy([
-                                'annee' => $targetAnnee,
-                                'plateforme' => $plat,
-                                'campagne' => $campagne
-                            ]);
+                            $targetParam = $parametresParAnnee[$targetAnnee->getId()][$platId] ?? null;
 
                             $srcParam = $sourceParams[$platId] ?? null;
                             if ($srcParam) {
                                 if (!$targetParam) {
                                     $targetParam = new PlateformeAdmissionParametre();
-                                    $targetParam->setAnnee($targetAnnee);
+                                    $targetAnnee->addAdmissionPlateformeParametre($targetParam);
                                     $targetParam->setPlateforme($plat);
                                     $targetParam->setCampagne($campagne);
                                     $targetParam->setActive(false);
+                                    $parametresParAnnee[$targetAnnee->getId()][$platId] = $targetParam;
                                 }
 
                                 if ($targetParam->isActive() !== $srcParam->isActive()
@@ -494,7 +499,7 @@ final class OffreConfigurerController extends BaseController
         $tabStatistiques['nbParcoursOuvert'] = 0;
         $tabStatistiques['capacite'] = 0;
         
-        $anomalies = $offreValidationService->getAnomaliesFormation($formation, $campagne);
+        $anomalies = [];
         $tableau = [];
 
         foreach ($formation->getParcours() as $parcours) {
@@ -525,12 +530,17 @@ final class OffreConfigurerController extends BaseController
                 $nbPlateformesActives = count($activePlateformes);
             }
 
+            $anomaliesParcours = $offreValidationService->getAnomaliesParcours($parcours, $campagne);
+            foreach ($anomaliesParcours as $message) {
+                $anomalies[] = ['message' => $message];
+            }
+
             $tabStatistiques['parcours'][$pId] = [
                 'nbAnnees' => $parcours->getAnnees()->count(),
                 'nbAnneesOuvertes' => $nbAnneesOuvertes,
                 'capacite' => $parcoursCapacite,
                 'nbPlateformesActives' => $nbPlateformesActives,
-                'anomalies' => $offreValidationService->getAnomaliesParcours($parcours, $campagne),
+                'anomalies' => $anomaliesParcours,
             ];
         }
 
