@@ -31,6 +31,8 @@ final class OffreParcoursController extends BaseController
         Formation $formation,
         TurboStreamResponseFactory $turboStream,
     ): Response {
+        $this->denyAccessUnlessCanConfigurerOffre($formation);
+
         $parcours = new Parcours($formation);
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -63,6 +65,8 @@ final class OffreParcoursController extends BaseController
         GenereStructureParcours $genereStructureParcours,
         RemplissageSuspension $remplissageSuspension,
     ): Response {
+        $this->denyAccessUnlessCanConfigurerOffre($formation);
+
         $csrfToken = (string)$request->request->get('_token');
         if (!$this->isCsrfTokenValid('parcours_add_' . $formation->getId(), $csrfToken)) {
             return $turboStream->streamToastError('Token CSRF invalide.');
