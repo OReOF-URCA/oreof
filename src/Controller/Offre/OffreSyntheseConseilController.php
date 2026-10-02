@@ -4,7 +4,6 @@ namespace App\Controller\Offre;
 
 use App\Controller\BaseController;
 use App\Entity\PlateformeAdmission;
-use App\Enums\TypeModificationDpeEnum;
 use App\Repository\AnneeRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
@@ -162,7 +161,7 @@ final class OffreSyntheseConseilController extends BaseController
                         ];
                     }
                     
-                    $isParcoursOuvert = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+                    $isParcoursOuvert = $dpePar->isOuvert();
 
                     $tFormations[$idFormation]['parcoursList'][] = [
                         'parcours' => $par,

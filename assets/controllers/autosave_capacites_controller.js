@@ -10,7 +10,9 @@ export default class extends Controller {
 
   connect() {
     this.timeout = null
-    this.abortController = null
+    this.saving = false
+    this.pendingSave = false
+    this.pendingManual = false
     this.fadeTimeout = null
     this.previousValues = {}
 
@@ -26,7 +28,7 @@ export default class extends Controller {
 
   disconnect() {
     if (this.timeout) clearTimeout(this.timeout)
-    if (this.abortController) this.abortController.abort()
+    this.pendingSave = false
     if (this.fadeTimeout) clearTimeout(this.fadeTimeout)
   }
 
@@ -226,13 +228,18 @@ export default class extends Controller {
     await this.save(true)
   }
 
+  // Un seul enregistrement à la fois : annuler la requête côté navigateur n'arrête pas le serveur,
+  // et une requête plus ancienne pouvait finir après la suivante et réécrire d'anciennes valeurs.
+  // Les modifications faites pendant un enregistrement partent ensuite en un seul envoi (état le plus récent).
   async save(isManual = false) {
-    this.setStatus('saving', 'Enregistrement en cours...')
-
-    if (this.abortController) {
-      this.abortController.abort()
+    if (this.saving) {
+      this.pendingSave = true
+      this.pendingManual = this.pendingManual || isManual
+      return
     }
-    this.abortController = new AbortController()
+    this.saving = true
+
+    this.setStatus('saving', 'Enregistrement en cours...')
 
     const formData = new FormData(this.element)
 
@@ -243,12 +250,14 @@ export default class extends Controller {
           'X-Requested-With': 'XMLHttpRequest',
           'Accept': 'text/vnd.turbo-stream.html, application/json'
         },
-        body: formData,
-        signal: this.abortController.signal
+        body: formData
       })
 
       if (!response.ok) {
-        throw new Error('Network response was not ok')
+        const message = await this.errorMessage(response)
+        this.setStatus('error', message)
+        callOut(message, 'danger')
+        return
       }
 
       const contentType = response.headers.get('content-type') || ''
@@ -276,14 +285,33 @@ export default class extends Controller {
         }
       }
     } catch (error) {
-      if (error.name === 'AbortError') {
-        // Ignored since it was cancelled by a newer request
-        return
-      }
       console.error('Autosave error:', error)
       this.setStatus('error', 'Erreur de connexion.')
       callOut('Impossible de sauvegarder le brouillon. Vérifiez votre connexion.', 'danger')
+    } finally {
+      this.saving = false
+      if (this.pendingSave) {
+        const manual = this.pendingManual
+        this.pendingSave = false
+        this.pendingManual = false
+        this.save(manual)
+      }
     }
+  }
+
+  // Message lisible pour une réponse en erreur : celui du serveur s'il est fourni (JSON), sinon selon le code HTTP.
+  async errorMessage(response) {
+    try {
+      const data = await response.clone().json()
+      if (data && data.message) return data.message
+    } catch {
+      // réponse non JSON (page d'erreur HTML)
+    }
+
+    if (response.status === 403) return 'Vous n\'avez pas les droits pour modifier cette offre.'
+    if (response.status === 400 || response.status === 419) return 'Votre session a expiré : rechargez la page puis recommencez.'
+
+    return 'Erreur serveur : les dernières modifications n\'ont pas été enregistrées. Réessayez.'
   }
 
   setStatus(state, message) {
@@ -299,9 +327,9 @@ export default class extends Controller {
     let iconHtml = ''
     switch (state) {
       case 'saved':
-        target.classList.add('text-green-600')
+        target.classList.add('text-success-600', 'dark:text-success-400')
         iconHtml = `
-          <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
           </svg>
         `
@@ -314,9 +342,9 @@ export default class extends Controller {
         break
 
       case 'saving':
-        target.classList.add('text-indigo-600')
+        target.classList.add('text-primary-600', 'dark:text-primary-400')
         iconHtml = `
-          <svg class="w-4 h-4 text-indigo-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <svg class="w-4 h-4 text-primary-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
@@ -324,18 +352,18 @@ export default class extends Controller {
         break
 
       case 'typing':
-        target.classList.add('text-slate-500')
+        target.classList.add('text-secondary-500', 'dark:text-secondary-400')
         iconHtml = `
-          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
           </svg>
         `
         break
 
       case 'error':
-        target.classList.add('text-rose-600')
+        target.classList.add('text-danger-600', 'dark:text-danger-400')
         iconHtml = `
-          <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4 text-danger-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
           </svg>
         `

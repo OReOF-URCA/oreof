@@ -1,0 +1,14 @@
+{# Insère les lignes d'années de chaque parcours demandé juste après sa ligne (tr#offre-parcours-{id}). #}
+{% for ligne in lignes %}
+    <turbo-stream action="after" target="offre-parcours-{{ ligne.parcours.id }}">
+        <template>
+            {{ include('offre_v2/_annees_parcours_rows.html.twig', {
+                parcours: ligne.parcours,
+                formation: ligne.parcours.formation,
+                annees: ligne.annees,
+                dpeParc: ligne.dpeParcours,
+                tpaByTypeDiplome: tpaByTypeDiplome,
+            }, with_context = false) }}
+        </template>
+    </turbo-stream>
+{% endfor %}

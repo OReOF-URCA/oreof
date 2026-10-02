@@ -1,14 +1,5 @@
 {% extends 'base.html.twig' %}
 
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        .comp-collapsed {
-            display: none !important;
-        }
-    </style>
-{% endblock %}
-
 {% block bouton_header %}
     {% if is_granted('ROLE_ADMIN') %}
         <twig:Button href="{{ path('app_formation_new', { redirect: composante ? 'app_offre_composante_index' : 'app_offre_index', composante: composante ? composante.id : null }) }}"
@@ -125,7 +116,8 @@
         {% endif %}
         
         {% set formUrl = composante ? path('app_offre_composante_index', {composante: composante.id}) : path('app_offre_index') %}
-        <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" class="space-y-6">
+        <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" class="space-y-6"
+              data-controller="auto-submit">
             <!-- KPI -->
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
                 <twig:Kpi
@@ -176,12 +168,12 @@
             <div class="rounded-xl border bg-surface p-4 shadow-sm">
                 <div class="grid gap-4 md:grid-cols-12">
                     <div class="{% if composante %}md:col-span-5{% else %}md:col-span-3{% endif %}">
-                        <input name="q" value="{{ filters.q|default('') }}" class="rounded-lg border px-3 py-2 text-sm w-full" placeholder="Rechercher une formation…" oninput="this.form.requestSubmit()">
+                        <input type="search" name="q" value="{{ filters.q|default('') }}" class="rounded-lg border px-3 py-2 text-sm w-full" placeholder="Rechercher une formation…" aria-label="Rechercher une formation ou un parcours" autocomplete="off" data-action="input->auto-submit#debouncedSubmit">
                     </div>
 
                     {% if not composante %}
                         <div class="md:col-span-2">
-                            <select name="comp" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
+                            <select name="comp" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit">
                                 <option value="">Toutes les composantes</option>
                                 {% for compItem in composantes %}
                                     <option value="{{ compItem.id }}" {% if filters.comp|default('') == compItem.id %}selected{% endif %}>{{ compItem.libelle }}</option>
@@ -191,7 +183,7 @@
                     {% endif %}
 
                     <div class="md:col-span-2">
-                        <select name="type" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
+                        <select name="type" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit">
                             <option value="">Tous les diplômes</option>
                             {% for typeDiplome in typesDiplome %}
                                 <option value="{{ typeDiplome.id }}" {% if filters.type|default('') == typeDiplome.id %}selected{% endif %}>{{ typeDiplome.libelle }}</option>
@@ -200,7 +192,7 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <select name="plateforme" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
+                        <select name="plateforme" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit">
                             <option value="">Toutes les plateformes</option>
                             {% for plateforme in plateformes %}
                                 <option value="{{ plateforme.id }}" {% if filters.plateforme|default('') == plateforme.id %}selected{% endif %}>{{ plateforme.libelle }}</option>
@@ -209,11 +201,11 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <select name="statut" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
+                        <select name="statut" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit">
                             <option value="">Tous les statuts</option>
-                            <option value="Brouillon" {% if filters.statut|default('') == 'Brouillon' %}selected{% endif %}>Brouillon</option>
-                            <option value="Validé composante" {% if filters.statut|default('') == 'Validé composante' %}selected{% endif %}>Validé composante</option>
-                            <option value="Validé central" {% if filters.statut|default('') == 'Validé central' %}selected{% endif %}>Validé central</option>
+                            {% for etatValeur, etatLibelle in {'brouillon': 'Brouillon', 'soumis_ses': 'Soumis Scolarité', 'soumis_cfvu': 'Soumis CFVU', 'attente_pv': 'Validé CFVU (attente PV)', 'publie': 'Publié'} %}
+                                <option value="{{ etatValeur }}" {% if filters.statut|default('') == etatValeur %}selected{% endif %}>{{ etatLibelle }}</option>
+                            {% endfor %}
                             <option value="Anomalie" {% if filters.statut|default('') == 'Anomalie' %}selected{% endif %}>Anomalie</option>
                         </select>
                     </div>
@@ -239,7 +231,8 @@
             {% endif %}
 
             <!-- Table -->
-            <div class="overflow-hidden rounded-xl border bg-surface shadow-sm">
+            <div class="overflow-hidden rounded-xl border bg-surface shadow-sm" data-controller="offre-table"
+                 data-offre-table-annees-url-value="{{ path('offre_v2_annees_parcours') }}">
                 <!-- Table Controls -->
                 <div class="flex flex-wrap items-center justify-between gap-4 bg-secondary-50/70 px-4 py-3 border-b border-secondary-200 text-sm dark:border-secondary-700 dark:bg-secondary-800/70">
                     <div class="font-semibold text-secondary-700 dark:text-secondary-100">
@@ -249,14 +242,14 @@
                         {% if not composante %}
                             <div class="flex items-center gap-1.5 bg-surface border border-secondary-200 rounded-lg p-1 shadow-sm dark:border-secondary-700">
                                 <span class="text-secondary-400 px-1.5 font-normal">Composantes:</span>
-                                <button type="button" onclick="toggleAllComposantes(true)" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400">Déplier tout</button>
-                                <button type="button" onclick="toggleAllComposantes(false)" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors">Replier tout</button>
+                                <button type="button" data-action="offre-table#expandComposantes" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400">Déplier tout</button>
+                                <button type="button" data-action="offre-table#collapseComposantes" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors">Replier tout</button>
                             </div>
                         {% endif %}
                         <div class="flex items-center gap-1.5 bg-surface border border-secondary-200 rounded-lg p-1 shadow-sm dark:border-secondary-700">
                             <span class="text-secondary-400 px-1.5 font-normal">Parcours:</span>
-                            <button type="button" onclick="toggleAllParcours(true)" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400">Déplier tout</button>
-                            <button type="button" onclick="toggleAllParcours(false)" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors">Replier tout</button>
+                            <button type="button" data-action="offre-table#expandParcours" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400">Déplier tout</button>
+                            <button type="button" data-action="offre-table#collapseParcours" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors">Replier tout</button>
                         </div>
                     </div>
                 </div>
@@ -274,21 +267,22 @@
                     </tr>
                     </thead>
 
-                    <tbody class="divide-y">
                     {% for compName, compGroup in groupedFormations %}
-                        {% set compId = loop.index %}
-
+                    {# Un tbody par composante : data-collapsed (posé par offre-table) masque ses lignes enfants. #}
+                    <tbody class="group divide-y" data-offre-table-target="composante">
                         <!-- Group Composante -->
-                        <tr class="bg-secondary-100 hover:bg-secondary-200/80 cursor-pointer select-none transition-colors border-t border-secondary-200 dark:border-secondary-700 dark:bg-secondary-800"
-                            onclick="document.querySelectorAll('.comp-{{ compId }}-row').forEach(row => row.classList.toggle('comp-collapsed')); this.querySelector('.comp-chevron').classList.toggle('rotate-90');">
+                        <tr class="bg-secondary-100 transition-colors border-t border-secondary-200 dark:border-secondary-700 dark:bg-secondary-800">
                             <td colspan="3" class="px-4 py-3 font-semibold text-secondary-700 dark:text-secondary-100">
-                                <div class="flex items-center gap-2">
-                                    <svg class="comp-chevron h-4 w-4 text-secondary-500 transform transition-transform duration-200 rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <button type="button"
+                                        class="group/toggle flex w-full items-center gap-2 text-left cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-primary-500"
+                                        data-action="offre-table#toggleComposante"
+                                        aria-expanded="true">
+                                    <svg class="h-4 w-4 text-secondary-500 transition-transform duration-200 group-aria-expanded/toggle:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                                     </svg>
                                     <span class="font-bold text-secondary-900 dark:text-secondary-100">{{ compGroup.libelle }}</span>
                                     <span class="text-xs font-normal text-secondary-500 ml-1">({{ compGroup.nbFormations }} formation{{ compGroup.nbFormations > 1 ? 's' : '' }} · {{ compGroup.nbParcours }} parcours)</span>
-                                </div>
+                                </button>
                             </td>
                             <td class="px-4 py-3">
                                 <twig:Badge variant="secondary" label="{{ compGroup.nbParcoursOuvert }}/{{ compGroup.nbParcours }} ouverts" />
@@ -307,7 +301,7 @@
                                     />
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-right" onclick="event.stopPropagation()">
+                            <td class="px-4 py-3 text-right">
                                 {% if compGroup.composante and compGroup.transitions|length > 0 %}
                                     <div class="flex items-center justify-end gap-1.5 flex-wrap">
                                         {% for transition in compGroup.transitions %}
@@ -335,7 +329,7 @@
                         {% for forma in compGroup.formations %}
                             {% set formation = forma.formation %}
                             {% set formationOuverte = forma.isOuverte %}
-                            <tr class="hover:bg-secondary-50 comp-{{ compId }}-row composante-child-row transition-all duration-150">
+                            <tr class="hover:bg-secondary-50 transition-all duration-150 group-data-[collapsed]:hidden">
                                 <td class="px-4 py-3">
                                     <div class="font-medium text-secondary-900 dark:text-secondary-100">
                                         {{ formation.display }}
@@ -377,19 +371,7 @@
                                 <td class="px-4 py-3 text-right font-semibold text-secondary-800 dark:text-secondary-100">{{ forma.capacite }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-1.5 flex-wrap items-center">
-                                        {% set renderedStates = [] %}
-                                        {% for dpePar in forma.dpeParcours %}
-                                            {% set state = (dpePar.etatValidation|keys)|first|default('initialisation_dpe') %}
-                                            {% if state not in renderedStates %}
-                                                {% set renderedStates = renderedStates|merge([state]) %}
-                                                {% for badge in dpePar.etatValidation|badgeDpeDto %}
-                                                    <twig:Badge :variant="badge.variant" :label="badge.label" />
-                                                {% endfor %}
-                                            {% endif %}
-                                        {% endfor %}
-                                        {% if forma.dpeParcours|length == 0 %}
-                                            <span class="text-xs text-secondary-400">Non initialisé</span>
-                                        {% endif %}
+                                        {{ include('offre_v2/_etat_offre_badge.html.twig', {etat: forma.etatValidation|keys|first}) }}
 
                                         <!-- PV & Note Badges -->
                                         {% if forma.hasPv and forma.pvDoc %}
@@ -437,11 +419,8 @@
                                 {% set parcoursCapacite = pd.capacite %}
                                 {% set isParcoursOuvert = pd.isOuvert %}
                                 {% set dpeParc = pd.dpeParcours %}
-                                <tr class="bg-secondary-50/50 hover:bg-secondary-100/80 transition-colors cursor-pointer select-none border-t border-secondary-100 comp-{{ compId }}-row composante-child-row dark:bg-secondary-800/50"
-                                    {% if pd.annees|length > 0 %}
-                                    onclick="document.querySelectorAll('.parcours-{{ parcours.id }}-row').forEach(row => row.classList.toggle('hidden')); this.querySelector('.chevron-icon').classList.toggle('rotate-90');"
-                                    {% endif %}
-                                >
+                                {# Lignes d'années chargées à la demande (offre-table → offre_v2_annees_parcours), insérées après cette ligne. #}
+                                <tr id="offre-parcours-{{ parcours.id }}" class="bg-secondary-50/50 hover:bg-secondary-100/80 transition-colors border-t border-secondary-100 group-data-[collapsed]:hidden dark:bg-secondary-800/50">
                                     <td>&nbsp;</td>
                                     <td class="px-4 py-3 text-secondary-500 font-medium">
                                         {{ pd.composanteLibelle }}
@@ -449,11 +428,19 @@
                                     <td class="px-4 py-3 font-semibold text-secondary-700 dark:text-secondary-100">
                                         <div class="flex items-center gap-2">
                                             {% if pd.annees|length > 0 %}
-                                                <svg class="chevron-icon h-4 w-4 text-secondary-400 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                                                </svg>
+                                                <button type="button"
+                                                        class="group/toggle inline-flex items-center gap-2 text-left cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-primary-500"
+                                                        data-action="offre-table#toggleParcours"
+                                                        data-parcours-id="{{ parcours.id }}"
+                                                        aria-expanded="false">
+                                                    <svg class="h-4 w-4 text-secondary-400 transition-transform duration-200 group-aria-expanded/toggle:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                                                    </svg>
+                                                    <span>{{ parcours.libelle }}</span>
+                                                </button>
+                                            {% else %}
+                                                <span>{{ parcours.libelle }}</span>
                                             {% endif %}
-                                            <span>{{ parcours.libelle }}</span>
                                             <span class="text-xs font-normal text-secondary-400">({{ pd.annees|length }} année{{ pd.annees|length > 1 ? 's' : '' }})</span>
                                             {% set parcAnomalies = forma.parcoursAnomalies[parcours.id]|default([]) %}
                                             {% if parcAnomalies|length > 0 %}
@@ -482,7 +469,6 @@
                                                             href="{{ path('app_upload_download', {context: 'conseils', filename: forma.pvDoc.filename, originalName: forma.pvDoc.originalFilename}) }}"
                                                             target="_blank"
                                                             title="PV : {{ forma.pvDoc.originalFilename }} (déposé le {{ forma.pvDoc.uploadedAt|date('d/m/Y') }})"
-                                                            onclick="event.stopPropagation()"
                                                 />
                                             {% else %}
                                                 <twig:Badge variant="secondary"
@@ -498,7 +484,6 @@
                                                             href="{{ path('app_upload_download', {context: 'conseils', filename: forma.noteDoc.filename, originalName: forma.noteDoc.originalFilename}) }}"
                                                             target="_blank"
                                                             title="Note explicative : {{ forma.noteDoc.originalFilename }} (déposée le {{ forma.noteDoc.uploadedAt|date('d/m/Y') }})"
-                                                            onclick="event.stopPropagation()"
                                                 />
                                             {% else %}
                                                 <twig:Badge variant="secondary"
@@ -510,99 +495,12 @@
                                     </td>
                                     <td class="px-4 py-3">&nbsp;</td>
                                 </tr>
-                                {% for annee in pd.annees %}
-                                    {% set isAnneeTc = formation.isAnneeTroncCommun(annee.ordre) %}
-                                    <tr class="parcours-{{ parcours.id }}-row parcours-child-row {{ isAnneeTc ? 'bg-primary-50/40 hover:bg-primary-50/70 border-l-4 border-l-primary-500 dark:bg-primary-900/30' : 'hover:bg-secondary-50/80' }} hidden transition-all border-t border-secondary-100 comp-{{ compId }}-row composante-child-row">
-                                        <td>&nbsp;</td>
-                                        <td>&nbsp;</td>
-                                        <td class="px-4 py-3 {{ isAnneeTc ? 'pl-6 font-semibold text-primary-950' : 'pl-8 text-secondary-600 font-medium' }}">
-                                            <div class="flex items-center gap-2 flex-wrap">
-                                                <span>{{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}</span>
-                                                {% if isAnneeTc %}
-                                                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold bg-primary-100 text-primary-800 border border-primary-200 shadow-xs dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300" title="Cette année est commune à tous les parcours de la formation">
-                                                        <twig:UX:Icon name="ph:users-three-bold" class="h-3 w-3" />
-                                                        Tronc commun
-                                                    </span>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            <twig:Badge variant="{{ annee.isOuvert ? 'success' : 'danger' }}" label="{{ annee.isOuvert ? 'Oui' : 'Non' }}" />
-                                        </td>
-                                        <td class="px-4 py-3">
-                                            <div class="flex gap-1 flex-wrap">
-                                                {% set typeDiplId = formation.typeDiplome ? formation.typeDiplome.id : null %}
-                                                {% if typeDiplId and tpaByTypeDiplome[typeDiplId] is defined %}
-                                                    {% for tpa in tpaByTypeDiplome[typeDiplId] %}
-                                                        {% if tpa.plateforme and tpa.plateforme.active and tpa.annees and annee.ordre in tpa.annees %}
-                                                            <twig:Badge :variant="tpa.plateforme.color" :label="tpa.plateforme.code" />
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                        <td class="px-4 py-3 text-right font-medium text-secondary-700 dark:text-secondary-100">{{ annee.capaciteAccueil|default(0) }}</td>
-                                        <td class="px-4 py-3">
-                                            {% if dpeParc %}
-                                                <div class="flex gap-1 flex-wrap">
-                                                    {% for badge in dpeParc.etatValidation|badgeDpeDto %}
-                                                        <twig:Badge :variant="badge.variant" :label="badge.label" />
-                                                    {% endfor %}
-                                                </div>
-                                            {% else %}
-                                                &nbsp;
-                                            {% endif %}
-                                        </td>
-                                        <td class="px-4 py-3 text-right">
-                                            {#                                    <button class="text-sm font-medium text-primary-600 dark:text-primary-400">Ouvrir</button> #}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
                             {% endfor %}
                         {% endfor %}
-                    {% endfor %}
                     </tbody>
+                    {% endfor %}
                 </table>
             </div>
         </form>
     </turbo-frame>
-{% endblock %}
-
-{% block javascripts %}
-    {{ parent() }}
-    <script>
-        function toggleAllComposantes(expand) {
-            document.querySelectorAll('.composante-child-row').forEach(row => {
-                if (expand) {
-                    row.classList.remove('comp-collapsed');
-                } else {
-                    row.classList.add('comp-collapsed');
-                }
-            });
-            document.querySelectorAll('.comp-chevron').forEach(icon => {
-                if (expand) {
-                    icon.classList.add('rotate-90');
-                } else {
-                    icon.classList.remove('rotate-90');
-                }
-            });
-        }
-
-        function toggleAllParcours(expand) {
-            document.querySelectorAll('.parcours-child-row').forEach(row => {
-                if (expand) {
-                    row.classList.remove('hidden');
-                } else {
-                    row.classList.add('hidden');
-                }
-            });
-            document.querySelectorAll('.chevron-icon').forEach(icon => {
-                if (expand) {
-                    icon.classList.add('rotate-90');
-                } else {
-                    icon.classList.remove('rotate-90');
-                }
-            });
-        }
-    </script>
 {% endblock %}

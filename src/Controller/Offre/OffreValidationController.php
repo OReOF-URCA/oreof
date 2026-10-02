@@ -7,7 +7,6 @@ use App\Entity\Composante;
 use App\Entity\DocumentConseil;
 use App\Entity\DpeFormation;
 use App\Entity\HistoriqueFormation;
-use App\Enums\TypeModificationDpeEnum;
 use App\Exception\FileUploadException;
 use App\Repository\AnneeRepository;
 use App\Repository\DocumentConseilRepository;
@@ -15,6 +14,7 @@ use App\Repository\DpeFormationRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
+use App\Service\Offre\RemplissageSuspension;
 use App\Service\SecureUploadService;
 use App\Service\Validation\OffreValidationService;
 use App\Utils\TurboStreamResponseFactory;
@@ -41,7 +41,8 @@ final class OffreValidationController extends BaseController
         SecureUploadService $secureUploadService,
         EntityManagerInterface $em,
         WorkflowInterface $dpeFormationWorkflow,
-        TurboStreamResponseFactory $turboStream
+        TurboStreamResponseFactory $turboStream,
+        RemplissageSuspension $remplissageSuspension,
     ): Response {
         $campagne = $this->getCampagneCollecte();
 
@@ -63,12 +64,15 @@ final class OffreValidationController extends BaseController
         }
 
         // 2. Récupérer les métadonnées de la transition du workflow
-        $meta = [];
+        $meta = null;
         foreach ($dpeFormationWorkflow->getDefinition()->getTransitions() as $t) {
             if ($t->getName() === $transition) {
                 $meta = $dpeFormationWorkflow->getMetadataStore()->getTransitionMetadata($t);
                 break;
             }
+        }
+        if ($meta === null) {
+            throw $this->createNotFoundException(sprintf('Transition « %s » inconnue.', $transition));
         }
         $isRefuse = ($meta['type'] ?? '') === 'reserver' || str_starts_with($transition, 'reserver');
 
@@ -79,10 +83,10 @@ final class OffreValidationController extends BaseController
         ]);
 
         $allParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne, $composante);
+        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne, $composante);
         // Limité à la composante : sinon tous les parcours de la campagne sont gérés par l'EntityManager
         // et leur remplissage (PreFlush) est recalculé à chaque flush().
         $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne, $composante);
-        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne);
 
         $dpeFormations = !empty($allFormations) ? $dpeFormationRepository->findBy([
             'campagneCollecte' => $campagne,
@@ -137,7 +141,7 @@ final class OffreValidationController extends BaseController
                 $parcoursList[] = [
                     'parcours' => $parcours,
                     'dpeParcours' => $dpePar,
-                    'isOuvert' => ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT),
+                    'isOuvert' => $dpePar->isOuvert(),
                     'capacite' => $capParcours,
                     'isConforme' => $isParcConforme,
                     'anomalies' => $parcAnoms,
@@ -166,6 +170,37 @@ final class OffreValidationController extends BaseController
             $selectedFormationIds = array_map('intval', (array)$request->request->all('formations'));
             $selectedParcoursIds = array_map('intval', (array)$request->request->all('parcours'));
 
+            // Validation partielle possible : on ne garde que les formations cochées qui peuvent franchir la transition.
+            $formationsAValider = [];
+            $nbIgnorees = 0;
+            foreach ($allFormations as $forma) {
+                $fId = $forma->getId();
+                if (!in_array($fId, $selectedFormationIds, true)) {
+                    continue;
+                }
+
+                $dpeF = $dpeFormationByFormationId[$fId] ?? null;
+                if ($dpeF === null) {
+                    $dpeF = new DpeFormation();
+                    $dpeF->setFormation($forma);
+                    $dpeF->setCampagneCollecte($campagne);
+                    $dpeF->setEtatValidation(['brouillon' => 1]);
+                }
+
+                if (!$dpeFormationWorkflow->can($dpeF, $transition)) {
+                    ++$nbIgnorees;
+                    continue;
+                }
+                $formationsAValider[] = ['formation' => $forma, 'dpeFormation' => $dpeF];
+            }
+
+            if ($formationsAValider === []) {
+                return $turboStream->stream('offre_v2/turbo/validation_errors.stream.html.twig', [
+                    'title' => 'Enregistrement impossible',
+                    'errors' => ['Aucune des formations cochées ne peut passer cette étape : elles ont déjà été traitées.'],
+                ]);
+            }
+
             $dateStr = (string)$request->request->get('date');
             $dateConseil = !empty($dateStr) ? new \DateTime($dateStr) : new \DateTime();
 
@@ -177,7 +212,10 @@ final class OffreValidationController extends BaseController
             $docPv = null;
             $pvId = $request->request->get('pv_id');
             if ($pvId) {
-                $docPv = $documentConseilRepository->find($pvId);
+                $docPv = $documentConseilRepository->findOneBy(['id' => (int)$pvId, 'composante' => $composante, 'type' => 'pv']);
+                if ($docPv === null) {
+                    return $turboStream->streamToastError('Le PV sélectionné est introuvable pour cette composante.');
+                }
             } elseif ($request->files->has('file') && $request->files->get('file') !== null) {
                 try {
                     $uploadedPv = $secureUploadService->uploadFromRequest($request, 'file', 'conseils');
@@ -202,7 +240,10 @@ final class OffreValidationController extends BaseController
             $docNote = null;
             $noteId = $request->request->get('note_id');
             if ($noteId) {
-                $docNote = $documentConseilRepository->find($noteId);
+                $docNote = $documentConseilRepository->findOneBy(['id' => (int)$noteId, 'composante' => $composante, 'type' => 'note_explicative']);
+                if ($docNote === null) {
+                    return $turboStream->streamToastError('La note explicative sélectionnée est introuvable pour cette composante.');
+                }
             } elseif ($request->files->has('fileNote') && $request->files->get('fileNote') !== null) {
                 try {
                     $uploadedNote = $secureUploadService->uploadFromRequest($request, 'fileNote', 'conseils');
@@ -231,21 +272,8 @@ final class OffreValidationController extends BaseController
                 $motifs['motif'] = $commentaire;
             }
 
-            foreach ($allFormations as $forma) {
-                $fId = $forma->getId();
-                if (!in_array($fId, $selectedFormationIds, true)) {
-                    continue;
-                }
-
-                $dpeF = $dpeFormationByFormationId[$fId] ?? null;
-                if ($dpeF === null) {
-                    $dpeF = new DpeFormation();
-                    $dpeF->setFormation($forma);
-                    $dpeF->setCampagneCollecte($campagne);
-                    $dpeF->setEtatValidation(['brouillon' => 1]);
-                    $em->persist($dpeF);
-                    $dpeFormationByFormationId[$fId] = $dpeF;
-                }
+            foreach ($formationsAValider as ['formation' => $forma, 'dpeFormation' => $dpeF]) {
+                $em->persist($dpeF);
 
                 if ($docPv !== null) {
                     $docPv->addFormation($forma);
@@ -294,15 +322,25 @@ final class OffreValidationController extends BaseController
                 $histo->setComplements($complements);
                 $em->persist($histo);
 
-                if ($dpeFormationWorkflow->can($dpeF, $transition)) {
-                    $dpeFormationWorkflow->apply($dpeF, $transition, $motifs);
-                }
+                $dpeFormationWorkflow->apply($dpeF, $transition, $motifs);
             }
 
+            $remplissageSuspension->suspendre();
             $em->flush();
 
+            $nbValidees = count($formationsAValider);
+            $message = sprintf(
+                'Enregistré pour %d formation%s de %s',
+                $nbValidees,
+                $nbValidees > 1 ? 's' : '',
+                $composante->getLibelle()
+            );
+            if ($nbIgnorees > 0) {
+                $message .= sprintf(' (%d ignorée%s : étape déjà franchie)', $nbIgnorees, $nbIgnorees > 1 ? 's' : '');
+            }
+
             return $turboStream->stream('offre_v2/turbo/apply_success.stream.html.twig', [
-                'message' => sprintf('Validation de l\'offre enregistrée pour %s', $composante->getLibelle()),
+                'message' => $message,
             ]);
         }
 

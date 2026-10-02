@@ -1,12 +1,18 @@
 {{ include('_ui/_toast.stream.html.twig', { message: message|default('Action enregistrée avec succès'), undo: null, type: 'success' }) }}
+{{ include('_ui/_force_close_modal.html.twig') }}
 
+{# Recharge uniquement le tableau de l'offre (le toast, hors du frame, reste affiché). #}
 <turbo-stream action="append" target="modal_control">
     <template>
         <script data-turbo-eval="true">
-          window.dispatchEvent(new Event('modal:close'));
-          setTimeout(function() {
-              window.location.reload();
-          }, 1000);
+          (function () {
+            var frame = document.getElementById('offre_table');
+            if (frame) {
+              frame.src = window.location.href;
+            } else if (window.Turbo) {
+              window.Turbo.visit(window.location.href, { action: 'replace' });
+            }
+          })();
         </script>
     </template>
 </turbo-stream>

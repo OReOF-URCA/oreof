@@ -83,6 +83,36 @@ enum TypeModificationDpeEnum: string implements BadgeEnumInterface
         return $this->getBadgeVariant();
     }
 
+    /**
+     * Seule définition de « parcours non ouvert » pour l'offre de formation.
+     * NON_OUVERTURE est l'état cible ; les variantes _SES / _CFVU sont conservées pour les données existantes.
+     * Tous les autres états (y compris ATTENTE, CREATION, MODIFICATION_*) valent « ouvert ».
+     */
+    public function isFerme(): bool
+    {
+        return match ($this) {
+            self::NON_OUVERTURE, self::NON_OUVERTURE_SES, self::NON_OUVERTURE_CFVU, self::FERMETURE_DEFINITIVE => true,
+            default => false,
+        };
+    }
+
+    public function isOuvert(): bool
+    {
+        return !$this->isFerme();
+    }
+
+    /**
+     * Choix proposé dans l'écran de configuration de l'offre : OUVERT, NON_OUVERTURE ou FERMETURE_DEFINITIVE.
+     */
+    public function getCategorieOuverture(): self
+    {
+        return match (true) {
+            $this === self::FERMETURE_DEFINITIVE => self::FERMETURE_DEFINITIVE,
+            $this->isFerme() => self::NON_OUVERTURE,
+            default => self::OUVERT,
+        };
+    }
+
     public static function listeEtatParcours(): array
     {
         return [

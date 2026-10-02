@@ -5,17 +5,18 @@ namespace App\Controller\Offre;
 use App\Controller\BaseController;
 use App\Entity\Composante;
 use App\Entity\DpeFormation;
-use App\Enums\TypeModificationDpeEnum;
 use App\Repository\AnneeRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DocumentConseilRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
+use App\Repository\ParcoursRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
 use App\Repository\TypeDiplomePlateformeAdmissionRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\Validation\OffreValidationService;
+use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -58,7 +59,6 @@ final class OffreController extends BaseController
             'nbParcours' => 0,
             'nbParcoursOuvert' => 0,
             'capacite' => 0,
-            'capaciteTotale' => 0,
             'nbAConfirmer' => 0,
             'nbAnomalies' => 0,
             'allAnomalies' => [],
@@ -87,10 +87,10 @@ final class OffreController extends BaseController
         $allParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne, $composante);
 
         // 2. Batch loading des années (1 requête pour tous les parcours au lieu de 400+)
-        $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne);
+        $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne, $composante);
 
         // 3. Batch loading des configurations et paramètres de plateformes (1 requête chacune au lieu de 1000+)
-        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne);
+        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne, $composante);
         $tpaByTypeDiplome = $typeDiplomePlateformeAdmissionRepository->findByCampagneIndexedByTypeDiplome($campagne);
 
         foreach ($allParcours as $dpePar) {
@@ -115,7 +115,7 @@ final class OffreController extends BaseController
                 ];
             }
 
-            $isParcoursOuvert = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+            $isParcoursOuvert = $dpePar->isOuvert();
             if ($isParcoursOuvert) {
                 $tFormations[$idFormation]['isOuverte'] = true;
             }
@@ -156,14 +156,17 @@ final class OffreController extends BaseController
         $docsByFormation = $documentConseilRepository->findIndexedByFormationIds($formationIds);
 
         // Batch loading des DpeFormation pour la gestion du workflow de validation des composantes
-        /** @var list<DpeFormation> $dpeFormations */
-        $dpeFormations = $em->getRepository(DpeFormation::class)->createQueryBuilder('df')
+        $dpeFormationsQb = $em->getRepository(DpeFormation::class)->createQueryBuilder('df')
             ->join('df.formation', 'f')
             ->addSelect('f')
             ->where('df.campagneCollecte = :campagne')
-            ->setParameter('campagne', $campagne)
-            ->getQuery()
-            ->getResult();
+            ->setParameter('campagne', $campagne);
+        if ($composante !== null) {
+            $dpeFormationsQb->andWhere('f.composantePorteuse = :composante')
+                ->setParameter('composante', $composante);
+        }
+        /** @var list<DpeFormation> $dpeFormations */
+        $dpeFormations = $dpeFormationsQb->getQuery()->getResult();
         $dpeFormationMap = [];
         foreach ($dpeFormations as $df) {
             if ($df->getFormation() !== null) {
@@ -212,30 +215,14 @@ final class OffreController extends BaseController
         }
         unset($row);
 
-        // Construire les listes de filtres disponibles à partir des données en mémoire
-        $types = [];
-        $composantes = [];
+        // Types de diplôme présents (liste du filtre sur la page d'une composante)
         $typeDiplomeMap = [];
         foreach ($tFormations as $row) {
-            $tabStatistiques['capaciteTotale'] += $row['capacite'];
-            $f = $row['formation'];
-            $typeDipl = $f->getTypeDiplome();
+            $typeDipl = $row['formation']->getTypeDiplome();
             if ($typeDipl) {
-                $typeLib = $typeDipl->getLibelle();
-                if ($typeLib) {
-                    $types[$typeLib] = true;
-                }
                 $typeDiplomeMap[$typeDipl->getId()] = $typeDipl;
             }
-            $compLib = $f->getComposantePorteuse()?->getLibelle();
-            if ($compLib) {
-                $composantes[$compLib] = true;
-            }
         }
-        $types = array_values(array_filter(array_keys($types)));
-        sort($types);
-        $composantes = array_values(array_filter(array_keys($composantes)));
-        sort($composantes);
 
         if ($composante !== null) {
             $typesDiplomeList = array_values($typeDiplomeMap);
@@ -306,32 +293,11 @@ final class OffreController extends BaseController
                     }
                 }
                 
-                // 5. Statut
+                // 5. Statut : état de l'offre de la formation (workflow dpeFormation) ou présence d'anomalies
                 if ($statut !== '') {
-                    $match = false;
-                    if ($statut === 'Anomalie') {
-                        $match = (count($row['anomalies']) > 0);
-                    } else {
-                        foreach ($row['dpeParcours'] as $dpePar) {
-                            $state = array_key_first($dpePar->getEtatValidation()) ?? 'initialisation_dpe';
-                            if ($statut === 'Brouillon') {
-                                if (in_array($state, ['initialisation_dpe', 'autorisation_saisie', 'en_cours_redaction', 'tacite_reconduction', 'soumis_parcours'], true)) {
-                                    $match = true;
-                                    break;
-                                }
-                            } elseif ($statut === 'Validé composante') {
-                                if (in_array($state, ['soumis_dpe_composante', 'soumis_conseil', 'soumis_central'], true)) {
-                                    $match = true;
-                                    break;
-                                }
-                            } elseif ($statut === 'Validé central') {
-                                if (in_array($state, ['soumis_cfvu', 'valide_cfvu', 'valide_a_publier', 'publie'], true)) {
-                                    $match = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    $match = $statut === 'Anomalie'
+                        ? count($row['anomalies']) > 0
+                        : array_key_first($row['etatValidation']) === $statut;
                     if (!$match) {
                         return false;
                     }
@@ -355,7 +321,7 @@ final class OffreController extends BaseController
             $allAnomalies = array_merge($allAnomalies, $row['anomalies']);
             
             foreach ($row['dpeParcours'] as $dpePar) {
-                $isOuvert = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+                $isOuvert = $dpePar->isOuvert();
                 if ($isOuvert) {
                     $nbParcoursOuvert++;
                     
@@ -438,7 +404,6 @@ final class OffreController extends BaseController
             unset($formaRow);
 
             $enabledTransitionsMap = [];
-            $stateCounts = [];
 
             foreach ($compGroup['formations'] as $formaRow) {
                 $fId = $formaRow['formation']->getId();
@@ -451,7 +416,6 @@ final class OffreController extends BaseController
                 }
 
                 $fActiveState = array_key_first($dpeF->getEtatValidation()) ?? 'brouillon';
-                $stateCounts[$fActiveState] = ($stateCounts[$fActiveState] ?? 0) + 1;
 
                 foreach ($dpeFormationWorkflow->getEnabledTransitions($dpeF) as $trans) {
                     $tName = $trans->getName();
@@ -466,10 +430,7 @@ final class OffreController extends BaseController
                 }
             }
 
-            arsort($stateCounts);
-            $compGroup['activeState'] = (string)array_key_first($stateCounts);
             $compGroup['transitions'] = array_values($enabledTransitionsMap);
-            $compGroup['can_edit'] = $isSesOrAdmin || $isPeriodActive;
         }
         unset($compGroup);
 
@@ -481,7 +442,6 @@ final class OffreController extends BaseController
 
         $params = [
             'composante' => $composante,
-            'tFormations' => $tFormations,
             'groupedFormations' => $groupedFormations,
             'tpaByTypeDiplome' => $tpaByTypeDiplome,
             'filters' => [
@@ -491,11 +451,6 @@ final class OffreController extends BaseController
                 'plateforme' => $plateforme,
                 'statut' => $statut,
             ],
-            'choices' => [
-                'types' => $types,
-                'composantes' => $composantes,
-                'villes' => [],
-            ],
             'tabStatistiques' => $tabStatistiques,
             'campagne' => $campagne,
             'composantes' => $composantesList,
@@ -504,5 +459,67 @@ final class OffreController extends BaseController
         ];
 
         return $this->render('offre_v2/index.html.twig', $params);
+    }
+
+    /**
+     * Lignes d'années des parcours demandés (?parcours=1,2,3), chargées à la demande depuis la liste de l'offre :
+     * la page ne rend pas d'emblée les centaines de lignes d'années masquées.
+     */
+    #[Route('/offre/annees-parcours', name: 'offre_v2_annees_parcours', methods: ['GET'])]
+    public function anneesParcours(
+        Request                                  $request,
+        ParcoursRepository                       $parcoursRepository,
+        AnneeRepository                          $anneeRepository,
+        DpeParcoursRepository                    $dpeParcoursRepository,
+        TypeDiplomePlateformeAdmissionRepository $typeDiplomePlateformeAdmissionRepository,
+        TurboStreamResponseFactory               $turboStream,
+    ): Response {
+        $ids = array_slice(array_values(array_unique(array_filter(
+            array_map('intval', explode(',', (string)$request->query->get('parcours', '')))
+        ))), 0, 100);
+        $campagne = $this->getCampagneCollecte();
+
+        // Mêmes droits que la liste : admin, ou gestion de la composante porteuse de la formation.
+        $parcoursAutorises = [];
+        $droitsParComposante = [];
+        foreach ($ids === [] ? [] : $parcoursRepository->findBy(['id' => $ids]) as $parcours) {
+            $composante = $parcours->getFormation()?->getComposantePorteuse();
+            if ($composante === null) {
+                continue;
+            }
+            $droitsParComposante[$composante->getId()] ??= $this->isGranted('ROLE_ADMIN') || $this->isGranted('MANAGE', [
+                'route' => 'app_composante',
+                'subject' => $composante,
+            ]);
+            if ($droitsParComposante[$composante->getId()]) {
+                $parcoursAutorises[$parcours->getId()] = $parcours;
+            }
+        }
+
+        $anneesParParcours = [];
+        $dpeParParcours = [];
+        if ($parcoursAutorises !== []) {
+            $parcoursList = array_values($parcoursAutorises);
+            foreach ($anneeRepository->findBy(['parcours' => $parcoursList], ['ordre' => 'ASC']) as $annee) {
+                $anneesParParcours[$annee->getParcours()?->getId()][] = $annee;
+            }
+            foreach ($dpeParcoursRepository->findBy(['parcours' => $parcoursList, 'campagneCollecte' => $campagne]) as $dpeParcours) {
+                $dpeParParcours[$dpeParcours->getParcours()?->getId()] ??= $dpeParcours;
+            }
+        }
+
+        $lignes = [];
+        foreach ($parcoursAutorises as $parcoursId => $parcours) {
+            $lignes[] = [
+                'parcours' => $parcours,
+                'annees' => $anneesParParcours[$parcoursId] ?? [],
+                'dpeParcours' => $dpeParParcours[$parcoursId] ?? null,
+            ];
+        }
+
+        return $turboStream->stream('offre_v2/_annees_parcours.stream.html.twig', [
+            'lignes' => $lignes,
+            'tpaByTypeDiplome' => $typeDiplomePlateformeAdmissionRepository->findByCampagneIndexedByTypeDiplome($campagne),
+        ]);
     }
 }

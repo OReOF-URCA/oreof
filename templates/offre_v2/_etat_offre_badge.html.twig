@@ -1,0 +1,10 @@
+{# État de l'offre d'une formation (workflow dpeFormation). Paramètre : etat = nom de la place (ex. 'brouillon'). #}
+{% set etatsOffre = {
+    'brouillon': {label: 'Brouillon', variant: 'secondary'},
+    'soumis_ses': {label: 'Soumis Scolarité', variant: 'warning'},
+    'soumis_cfvu': {label: 'Soumis CFVU', variant: 'primary'},
+    'attente_pv': {label: 'Validé CFVU (attente PV)', variant: 'warning'},
+    'publie': {label: 'Publié', variant: 'success'},
+} %}
+{% set etatOffre = etatsOffre[etat|default('brouillon')] ?? {label: etat, variant: 'secondary'} %}
+<twig:Badge :variant="etatOffre.variant" :label="etatOffre.label" title="État de l'offre de la formation" />

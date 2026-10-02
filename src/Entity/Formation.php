@@ -176,6 +176,9 @@ class Formation
     #[ORM\Column(nullable: true)]
     private ?array $remplissage = [];
 
+    /** Non persisté : voir suspendreRecalculRemplissage(). */
+    private bool $recalculRemplissageSuspendu = false;
+
     #[ORM\OneToMany(mappedBy: 'formation', targetEntity: CommentaireFormation::class)]
     private Collection $commentaires;
 
@@ -1021,9 +1024,21 @@ class Formation
         return $this;
     }
 
+    /**
+     * Évite le recalcul du remplissage aux flush() de la requête en cours (écritures depuis les pages de l'offre).
+     */
+    public function suspendreRecalculRemplissage(): void
+    {
+        $this->recalculRemplissageSuspendu = true;
+    }
+
     #[ORM\PreFlush]
     public function updateRemplissage(PreFlushEventArgs $args): void
     {
+        if ($this->recalculRemplissageSuspendu) {
+            return;
+        }
+
         $remplissage = $this->remplissageBrut();
         $this->setRemplissage($remplissage);
     }

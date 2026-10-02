@@ -63,13 +63,22 @@
         </div>
 
         <div class="pt-2 border-t border-secondary-200 dark:border-secondary-700">
-            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
-                <input type="checkbox" name="inTimeline" value="1" {% if inTimeline %}checked{% endif %}
-                       class="rounded border-secondary-300 text-primary-600 shadow-xs focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800">
-                <span class="text-sm font-medium text-secondary-700 dark:text-secondary-300">
+            {# Oui / Non (équivalent YesNoType) : une case décochée n'est pas envoyée, la valeur serait perdue. #}
+            <fieldset>
+                <legend class="text-sm font-medium text-secondary-700 dark:text-secondary-300">
                     Afficher cette étape dans la frise chronologique (timeline) publique
-                </span>
-            </label>
+                </legend>
+                <div class="mt-2 flex items-center gap-4">
+                    {% for valeur, libelle in {'1': 'Oui', '0': 'Non'} %}
+                        <label class="inline-flex items-center gap-2 cursor-pointer select-none text-sm text-secondary-700 dark:text-secondary-300">
+                            <input type="radio" name="inTimeline" value="{{ valeur }}"
+                                   {% if (valeur == '1') == inTimeline %}checked{% endif %}
+                                   class="border-secondary-300 text-primary-600 shadow-xs focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800">
+                            {{ libelle }}
+                        </label>
+                    {% endfor %}
+                </div>
+            </fieldset>
         </div>
     </div>
 

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\CampagneCollecte;
+use App\Entity\Composante;
 use App\Entity\Parcours;
 use App\Entity\PlateformeAdmissionParametre;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -30,16 +31,23 @@ class PlateformeAdmissionParametreRepository extends ServiceEntityRepository
     /**
      * @return array<int, list<PlateformeAdmissionParametre>>
      */
-    public function findByCampagneIndexedByAnnee(CampagneCollecte $campagne): array
+    public function findByCampagneIndexedByAnnee(CampagneCollecte $campagne, ?Composante $composante = null): array
     {
-        $results = $this->createQueryBuilder('pap')
+        $qb = $this->createQueryBuilder('pap')
             ->join('pap.plateforme', 'p')
             ->join('pap.annee', 'a')
             ->addSelect('p', 'a')
             ->where('pap.campagne = :campagne')
-            ->setParameter('campagne', $campagne)
-            ->getQuery()
-            ->getResult();
+            ->setParameter('campagne', $campagne);
+
+        if ($composante !== null) {
+            $qb->join('a.parcours', 'par')
+                ->join('par.formation', 'f')
+                ->andWhere('f.composantePorteuse = :composante')
+                ->setParameter('composante', $composante);
+        }
+
+        $results = $qb->getQuery()->getResult();
 
         $map = [];
         foreach ($results as $item) {

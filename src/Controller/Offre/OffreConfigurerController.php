@@ -12,6 +12,7 @@ use App\Enums\CampagneModuleEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Service\CampagneCollecteService;
+use App\Service\Offre\RemplissageSuspension;
 use App\Service\ParcoursComparaisonService;
 use App\Service\Validation\OffreValidationService;
 use App\Utils\TurboStreamResponseFactory;
@@ -21,7 +22,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Workflow\WorkflowInterface;
 
 final class OffreConfigurerController extends BaseController
 {
@@ -34,7 +34,6 @@ final class OffreConfigurerController extends BaseController
         ParcoursComparaisonService $comparaisonService,
         OffreValidationService     $offreValidationService,
         EntityManagerInterface     $em,
-        WorkflowInterface          $dpeFormationWorkflow,
     ): Response
     {
         $this->denyAccessUnlessCanConfigurerOffre($formation);
@@ -47,12 +46,11 @@ final class OffreConfigurerController extends BaseController
         ]);
 
         if ($dpeFormation === null) {
+            // Affichage seul : le DpeFormation est créé lors de la première transition (validation composante).
             $dpeFormation = new DpeFormation();
             $dpeFormation->setFormation($formation);
             $dpeFormation->setCampagneCollecte($campagne);
             $dpeFormation->setEtatValidation(['brouillon' => 1]);
-            $em->persist($dpeFormation);
-            $em->flush();
         }
 
         $statsData = $this->calculerStatistiques($formation, $campagne, $comparaisonService, $offreValidationService);
@@ -80,18 +78,6 @@ final class OffreConfigurerController extends BaseController
             }
         }
 
-        $otherFormations = $em->getRepository(Formation::class)->findBy([
-            'composantePorteuse' => $formation->getComposantePorteuse(),
-        ]);
-
-        $transitionsData = [];
-        foreach ($dpeFormationWorkflow->getEnabledTransitions($dpeFormation) as $transition) {
-            $transitionsData[] = [
-                'name' => $transition->getName(),
-                'metadata' => $dpeFormationWorkflow->getMetadataStore()->getTransitionMetadata($transition),
-            ];
-        }
-
         return $this->render('offre_v2/configurer.html.twig', [
             'formation' => $formation,
             'plateformes' => $plateformes,
@@ -100,8 +86,6 @@ final class OffreConfigurerController extends BaseController
             'anomalies' => $statsData['anomalies'],
             'comparaison' => $statsData['comparaison'],
             'dpeFormation' => $dpeFormation,
-            'transitions' => $transitionsData,
-            'otherFormations' => $otherFormations,
         ]);
     }
 
@@ -114,12 +98,13 @@ final class OffreConfigurerController extends BaseController
         PlateformeAdmissionParametreRepository $plateformeParamRepo,
         ParcoursComparaisonService             $comparaisonService,
         OffreValidationService                 $offreValidationService,
+        RemplissageSuspension                  $remplissageSuspension,
     ): Response {
         $this->denyAccessUnlessCanConfigurerOffre($formation);
 
         $csrfToken = (string)$request->request->get('_token');
         if (!$this->isCsrfTokenValid('offre_v2_configurer_' . $formation->getId(), $csrfToken)) {
-            return new JsonResponse(['success' => false, 'message' => 'Token CSRF invalide.'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['success' => false, 'message' => 'Votre session a expiré : rechargez la page puis recommencez.'], Response::HTTP_BAD_REQUEST);
         }
 
         $campagne = $this->getCampagneCollecte();
@@ -152,6 +137,21 @@ final class OffreConfigurerController extends BaseController
         $changedYears = [];
         $modifiedAnneesByOrdre = [];
 
+        // Paramètres de plateforme existants des années de la formation, en une requête : [anneeId][plateformeId]
+        $annees = [];
+        foreach ($formation->getParcours() as $p) {
+            foreach ($p->getAnnees() as $a) {
+                $annees[] = $a;
+            }
+        }
+        $parametresParAnnee = [];
+        $parametresExistants = $annees === [] ? [] : $plateformeParamRepo->findBy(['annee' => $annees, 'campagne' => $campagne]);
+        foreach ($parametresExistants as $param) {
+            if ($param->getAnnee() !== null && $param->getPlateforme() !== null) {
+                $parametresParAnnee[$param->getAnnee()->getId()][$param->getPlateforme()->getId()] = $param;
+            }
+        }
+
         // Gestion de la configuration du tronc commun
         if ($request->request->has('has_tronc_commun_config')) {
             $troncCommunChanged = false;
@@ -174,58 +174,26 @@ final class OffreConfigurerController extends BaseController
 
         foreach ($formation->getParcours() as $parcours) {
             $parcoursKey = 'parcours_' . $parcours->getId() . '_reconduction';
-            $isParcoursClosed = false;
             $trackOpenClosedChanged = false;
 
-            // Find current status in DB
-            $oldEnumVal = null;
-            foreach ($parcours->getDpeParcours() as $d) {
-                if ($d->getCampagneCollecte() === $campagne) {
-                    $oldEnumVal = $d->getEtatReconduction();
-                    break;
-                }
-            }
-            $oldIsClosed = $oldEnumVal ? in_array($oldEnumVal, [
-                TypeModificationDpeEnum::NON_OUVERTURE,
-                TypeModificationDpeEnum::NON_OUVERTURE_SES,
-                TypeModificationDpeEnum::NON_OUVERTURE_CFVU,
-                TypeModificationDpeEnum::FERMETURE_DEFINITIVE
-            ], true) : false;
+            $dpeParcours = $parcours->getDpeParcoursPourCampagne($campagne);
+            $oldEnumVal = $dpeParcours?->getEtatReconduction();
+            $oldIsClosed = $oldEnumVal?->isFerme() ?? false;
+            $isParcoursClosed = $oldIsClosed;
 
-            if ($request->request->has($parcoursKey)) {
-                $val = (string)$request->request->get($parcoursKey);
-                $enumVal = TypeModificationDpeEnum::from($val);
-                if ($enumVal === TypeModificationDpeEnum::OUVERT && $oldEnumVal !== null) {
-                    $isOpenState = in_array($oldEnumVal, [
-                        TypeModificationDpeEnum::OUVERT,
-                        TypeModificationDpeEnum::CREATION,
-                        TypeModificationDpeEnum::MODIFICATION,
-                        TypeModificationDpeEnum::MODIFICATION_INTITULE,
-                        TypeModificationDpeEnum::MODIFICATION_PARCOURS,
-                        TypeModificationDpeEnum::MODIFICATION_TEXTE,
-                        TypeModificationDpeEnum::MODIFICATION_MCCC,
-                        TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE,
-                    ], true);
-                    if ($isOpenState) {
-                        $enumVal = $oldEnumVal;
-                    }
-                }
-                foreach ($parcours->getDpeParcours() as $d) {
-                    if ($d->getCampagneCollecte() === $campagne) {
-                        $d->setEtatReconduction($enumVal);
-                        $em->persist($d);
-                        break;
-                    }
-                }
-                $isParcoursClosed = in_array($enumVal, [
-                    TypeModificationDpeEnum::NON_OUVERTURE,
-                    TypeModificationDpeEnum::NON_OUVERTURE_SES,
-                    TypeModificationDpeEnum::NON_OUVERTURE_CFVU,
-                    TypeModificationDpeEnum::FERMETURE_DEFINITIVE
-                ], true);
+            // Le select ne propose que 3 choix : l'état n'est modifié que si l'utilisateur change de choix,
+            // pour ne pas écraser un état plus précis (MODIFICATION_*, NON_OUVERTURE_CFVU…) à chaque autosave.
+            $choixPossibles = [
+                TypeModificationDpeEnum::OUVERT,
+                TypeModificationDpeEnum::NON_OUVERTURE,
+                TypeModificationDpeEnum::FERMETURE_DEFINITIVE,
+            ];
+            $enumVal = TypeModificationDpeEnum::tryFrom((string)$request->request->get($parcoursKey));
+            $oldCategorie = $oldEnumVal?->getCategorieOuverture() ?? TypeModificationDpeEnum::OUVERT;
+            if ($dpeParcours !== null && in_array($enumVal, $choixPossibles, true) && $enumVal !== $oldCategorie) {
+                $dpeParcours->setEtatReconduction($enumVal);
+                $isParcoursClosed = $enumVal->isFerme();
                 $trackOpenClosedChanged = ($oldIsClosed !== $isParcoursClosed);
-            } else {
-                $isParcoursClosed = $oldIsClosed;
             }
 
             foreach ($parcours->getAnnees() as $annee) {
@@ -294,17 +262,14 @@ final class OffreConfigurerController extends BaseController
                                 $specifiqueKey = 'annee_' . $anneeId . '_plateforme_' . $plateformeId . '_specifique';
                                 $remarquesKey = 'annee_' . $anneeId . '_plateforme_' . $plateformeId . '_remarques';
                                 
-                                $parametre = $plateformeParamRepo->findOneBy([
-                                    'annee' => $annee,
-                                    'plateforme' => $plateforme,
-                                    'campagne' => $campagne
-                                ]);
-                                
+                                $parametre = $parametresParAnnee[$anneeId][$plateformeId] ?? null;
+
                                 if (!$parametre) {
                                     $parametre = new PlateformeAdmissionParametre();
-                                    $parametre->setAnnee($annee);
+                                    $annee->addAdmissionPlateformeParametre($parametre);
                                     $parametre->setPlateforme($plateforme);
                                     $parametre->setCampagne($campagne);
+                                    $parametresParAnnee[$anneeId][$plateformeId] = $parametre;
                                 }
                                 
                                 $oldParamActive = $parametre->isActive();
@@ -391,12 +356,7 @@ final class OffreConfigurerController extends BaseController
             // Trouver l'année source : l'année qui a été modifiée, sinon la première
             $sourceAnnee = $modifiedAnneesByOrdre[$tcOrdre] ?? $allAnneesWithOrdre[0];
 
-            $sourceParams = [];
-            foreach ($sourceAnnee->getAdmissionPlateformeParametres() as $param) {
-                if ($param->getCampagne() === $campagne && $param->getPlateforme() !== null) {
-                    $sourceParams[$param->getPlateforme()->getId()] = $param;
-                }
-            }
+            $sourceParams = $parametresParAnnee[$sourceAnnee->getId()] ?? [];
 
             foreach ($allAnneesWithOrdre as $targetAnnee) {
                 if ($targetAnnee->getId() === $sourceAnnee->getId()) {
@@ -424,20 +384,17 @@ final class OffreConfigurerController extends BaseController
                             $plat = $tpa->getPlateforme();
                             $platId = $plat->getId();
 
-                            $targetParam = $plateformeParamRepo->findOneBy([
-                                'annee' => $targetAnnee,
-                                'plateforme' => $plat,
-                                'campagne' => $campagne
-                            ]);
+                            $targetParam = $parametresParAnnee[$targetAnnee->getId()][$platId] ?? null;
 
                             $srcParam = $sourceParams[$platId] ?? null;
                             if ($srcParam) {
                                 if (!$targetParam) {
                                     $targetParam = new PlateformeAdmissionParametre();
-                                    $targetParam->setAnnee($targetAnnee);
+                                    $targetAnnee->addAdmissionPlateformeParametre($targetParam);
                                     $targetParam->setPlateforme($plat);
                                     $targetParam->setCampagne($campagne);
                                     $targetParam->setActive(false);
+                                    $parametresParAnnee[$targetAnnee->getId()][$platId] = $targetParam;
                                 }
 
                                 if ($targetParam->isActive() !== $srcParam->isActive()
@@ -481,6 +438,7 @@ final class OffreConfigurerController extends BaseController
             }
         }
 
+        $remplissageSuspension->suspendre();
         $em->flush();
 
         // Si la requête demande explicitement du Turbo Stream
@@ -542,7 +500,7 @@ final class OffreConfigurerController extends BaseController
         $tabStatistiques['nbParcoursOuvert'] = 0;
         $tabStatistiques['capacite'] = 0;
         
-        $anomalies = $offreValidationService->getAnomaliesFormation($formation, $campagne);
+        $anomalies = [];
         $tableau = [];
 
         foreach ($formation->getParcours() as $parcours) {
@@ -553,7 +511,7 @@ final class OffreConfigurerController extends BaseController
             $parcoursCapacite = 0;
             $nbPlateformesActives = 0;
 
-            if ($parcours->isOuvert() === true) {
+            if ($parcours->isOuvertPourCampagne($campagne)) {
                 $tabStatistiques['nbParcoursOuvert']++;
 
                 $activePlateformes = [];
@@ -573,12 +531,17 @@ final class OffreConfigurerController extends BaseController
                 $nbPlateformesActives = count($activePlateformes);
             }
 
+            $anomaliesParcours = $offreValidationService->getAnomaliesParcours($parcours, $campagne);
+            foreach ($anomaliesParcours as $message) {
+                $anomalies[] = ['message' => $message];
+            }
+
             $tabStatistiques['parcours'][$pId] = [
                 'nbAnnees' => $parcours->getAnnees()->count(),
                 'nbAnneesOuvertes' => $nbAnneesOuvertes,
                 'capacite' => $parcoursCapacite,
                 'nbPlateformesActives' => $nbPlateformesActives,
-                'anomalies' => $offreValidationService->getAnomaliesParcours($parcours, $campagne),
+                'anomalies' => $anomaliesParcours,
             ];
         }
 
@@ -642,7 +605,7 @@ final class OffreConfigurerController extends BaseController
         $dateDebutStr = (string)$request->request->get('dateDebut');
         $dateFinStr = (string)$request->request->get('dateFin');
         $heureFinStr = (string)$request->request->get('heureFin');
-        $inTimeline = (bool)$request->request->get('inTimeline', true);
+        $inTimeline = $request->request->getBoolean('inTimeline', true);
 
         // Rétrocompatibilité si anciens champs transmis
         if ($dateDebutStr === '' && $request->request->has('dateOuvertureDpe')) {
@@ -652,9 +615,16 @@ final class OffreConfigurerController extends BaseController
             $dateFinStr = (string)$request->request->get('dateClotureDpe');
         }
 
-        $dateDebut = $dateDebutStr !== '' ? new \DateTime($dateDebutStr) : null;
-        $dateFin = $dateFinStr !== '' ? new \DateTime($dateFinStr) : null;
-        $heureFin = $heureFinStr !== '' ? new \DateTime($heureFinStr) : null;
+        try {
+            $dateDebut = $dateDebutStr !== '' ? new \DateTime($dateDebutStr) : null;
+            $dateFin = $dateFinStr !== '' ? new \DateTime($dateFinStr) : null;
+            $heureFin = $heureFinStr !== '' ? new \DateTime($heureFinStr) : null;
+        } catch (\Exception) {
+            return $turboStream->streamToastError('Date ou heure invalide.');
+        }
+        if ($dateDebut !== null && $dateFin !== null && $dateDebut > $dateFin) {
+            return $turboStream->streamToastError('La date de début doit précéder la date de fin.');
+        }
 
         $campagneService->updateModuleDates(
             $campagne,

@@ -192,6 +192,11 @@ class DpeParcours
 
     public function isNonOuvert(): bool
     {
-        return $this->getEtatReconduction() === TypeModificationDpeEnum::NON_OUVERTURE || $this->getEtatReconduction() === TypeModificationDpeEnum::NON_OUVERTURE_CFVU || $this->getEtatReconduction() === TypeModificationDpeEnum::FERMETURE_DEFINITIVE;
+        return $this->getEtatReconduction()?->isFerme() ?? false;
+    }
+
+    public function isOuvert(): bool
+    {
+        return !$this->isNonOuvert();
     }
 }

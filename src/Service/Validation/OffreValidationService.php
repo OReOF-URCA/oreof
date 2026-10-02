@@ -9,7 +9,7 @@ use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\PlateformeAdmissionParametre;
-use App\Enums\TypeModificationDpeEnum;
+use App\Enums\TypeParcoursEnum;
 
 final class OffreValidationService
 {
@@ -78,17 +78,28 @@ final class OffreValidationService
         // Check if parcours is open for this campaign
         $isOuvert = false;
         if ($dpeParcours !== null) {
-            $isOuvert = ($dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+            $isOuvert = $dpeParcours->isOuvert();
         } else {
             foreach ($parcours->getDpeParcours() as $d) {
                 if ($d->getCampagneCollecte() === $campagne) {
-                    $isOuvert = ($d->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+                    $isOuvert = $d->isOuvert();
                     break;
                 }
             }
         }
 
         if ($isOuvert) {
+            // Formation (type de diplôme + mention), parcours et type de parcours : deux parcours d'une même
+            // formation peuvent porter le même nom (ex. classique / en alternance).
+            $typeParcours = $parcours->getTypeParcours();
+            $sujet = sprintf(
+                '%s › parcours « %s »%s',
+                $parcours->getFormation()?->getDisplayLong() ?? 'Formation inconnue',
+                $parcours->getLibelle(),
+                $typeParcours !== null && $typeParcours !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE
+                    ? ' – ' . $typeParcours->libelle()
+                    : ''
+            );
             $hasOpenAnnee = false;
             $anneesList = $annees ?? $parcours->getAnnees();
             foreach ($anneesList as $annee) {
@@ -98,8 +109,8 @@ final class OffreValidationService
                     // Anomalie 1: Capacité globale nulle ou non renseignée
                     if ($annee->getCapaciteAccueil() <= 0) {
                         $anomalies[] = sprintf(
-                            "Le parcours \"%s\" (Année %d) est ouvert mais sa capacité globale est nulle ou non renseignée.",
-                            $parcours->getLibelle(),
+                            '%s (Année %d) : ouvert mais capacité globale nulle ou non renseignée.',
+                            $sujet,
                             $annee->getOrdre()
                         );
                     }
@@ -147,8 +158,8 @@ final class OffreValidationService
                             // Contrôle 1 : Plateforme active sans capacité alors que la capacité est obligatoire
                             if ($isCapaciteRequise && !$hasCapacite) {
                                 $anomalies[] = sprintf(
-                                    "Le parcours \"%s\" (Année %d) a la plateforme %s active, mais sa capacité (obligatoire) n'est pas renseignée.",
-                                    $parcours->getLibelle(),
+                                    '%s (Année %d) : plateforme %s active mais capacité (obligatoire) non renseignée.',
+                                    $sujet,
                                     $anneeOrdre,
                                     $platLibelle
                                 );
@@ -157,8 +168,8 @@ final class OffreValidationService
                             // Contrôle 2 : Plateforme inactive mais avec capacité renseignée
                             if ($hasCapacite) {
                                 $anomalies[] = sprintf(
-                                    "Le parcours \"%s\" (Année %d) a une capacité renseignée sur la plateforme %s, alors que celle-ci est inactive.",
-                                    $parcours->getLibelle(),
+                                    '%s (Année %d) : capacité renseignée sur la plateforme %s alors qu\'elle est inactive.',
+                                    $sujet,
                                     $anneeOrdre,
                                     $platLibelle
                                 );
@@ -171,8 +182,8 @@ final class OffreValidationService
             // Anomalie 3: Parcours ouvert mais aucune année n'est ouverte
             if (!$hasOpenAnnee && count($anneesList) > 0) {
                 $anomalies[] = sprintf(
-                    "Le parcours \"%s\" est ouvert, mais toutes ses années sont fermées.",
-                    $parcours->getLibelle()
+                    '%s : ouvert mais toutes ses années sont fermées.',
+                    $sujet
                 );
             }
         }
