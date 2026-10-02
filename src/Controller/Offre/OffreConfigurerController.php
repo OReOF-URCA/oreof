@@ -21,7 +21,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Workflow\WorkflowInterface;
 
 final class OffreConfigurerController extends BaseController
 {
@@ -34,7 +33,6 @@ final class OffreConfigurerController extends BaseController
         ParcoursComparaisonService $comparaisonService,
         OffreValidationService     $offreValidationService,
         EntityManagerInterface     $em,
-        WorkflowInterface          $dpeFormationWorkflow,
     ): Response
     {
         $this->denyAccessUnlessCanConfigurerOffre($formation);
@@ -80,18 +78,6 @@ final class OffreConfigurerController extends BaseController
             }
         }
 
-        $otherFormations = $em->getRepository(Formation::class)->findBy([
-            'composantePorteuse' => $formation->getComposantePorteuse(),
-        ]);
-
-        $transitionsData = [];
-        foreach ($dpeFormationWorkflow->getEnabledTransitions($dpeFormation) as $transition) {
-            $transitionsData[] = [
-                'name' => $transition->getName(),
-                'metadata' => $dpeFormationWorkflow->getMetadataStore()->getTransitionMetadata($transition),
-            ];
-        }
-
         return $this->render('offre_v2/configurer.html.twig', [
             'formation' => $formation,
             'plateformes' => $plateformes,
@@ -100,8 +86,6 @@ final class OffreConfigurerController extends BaseController
             'anomalies' => $statsData['anomalies'],
             'comparaison' => $statsData['comparaison'],
             'dpeFormation' => $dpeFormation,
-            'transitions' => $transitionsData,
-            'otherFormations' => $otherFormations,
         ]);
     }
 

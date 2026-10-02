@@ -57,7 +57,6 @@ final class OffreController extends BaseController
             'nbParcours' => 0,
             'nbParcoursOuvert' => 0,
             'capacite' => 0,
-            'capaciteTotale' => 0,
             'nbAConfirmer' => 0,
             'nbAnomalies' => 0,
             'allAnomalies' => [],
@@ -211,30 +210,14 @@ final class OffreController extends BaseController
         }
         unset($row);
 
-        // Construire les listes de filtres disponibles à partir des données en mémoire
-        $types = [];
-        $composantes = [];
+        // Types de diplôme présents (liste du filtre sur la page d'une composante)
         $typeDiplomeMap = [];
         foreach ($tFormations as $row) {
-            $tabStatistiques['capaciteTotale'] += $row['capacite'];
-            $f = $row['formation'];
-            $typeDipl = $f->getTypeDiplome();
+            $typeDipl = $row['formation']->getTypeDiplome();
             if ($typeDipl) {
-                $typeLib = $typeDipl->getLibelle();
-                if ($typeLib) {
-                    $types[$typeLib] = true;
-                }
                 $typeDiplomeMap[$typeDipl->getId()] = $typeDipl;
             }
-            $compLib = $f->getComposantePorteuse()?->getLibelle();
-            if ($compLib) {
-                $composantes[$compLib] = true;
-            }
         }
-        $types = array_values(array_filter(array_keys($types)));
-        sort($types);
-        $composantes = array_values(array_filter(array_keys($composantes)));
-        sort($composantes);
 
         if ($composante !== null) {
             $typesDiplomeList = array_values($typeDiplomeMap);
@@ -468,7 +451,6 @@ final class OffreController extends BaseController
             arsort($stateCounts);
             $compGroup['activeState'] = (string)array_key_first($stateCounts);
             $compGroup['transitions'] = array_values($enabledTransitionsMap);
-            $compGroup['can_edit'] = $isSesOrAdmin || $isPeriodActive;
         }
         unset($compGroup);
 
@@ -480,7 +462,6 @@ final class OffreController extends BaseController
 
         $params = [
             'composante' => $composante,
-            'tFormations' => $tFormations,
             'groupedFormations' => $groupedFormations,
             'tpaByTypeDiplome' => $tpaByTypeDiplome,
             'filters' => [
@@ -489,11 +470,6 @@ final class OffreController extends BaseController
                 'type' => $type,
                 'plateforme' => $plateforme,
                 'statut' => $statut,
-            ],
-            'choices' => [
-                'types' => $types,
-                'composantes' => $composantes,
-                'villes' => [],
             ],
             'tabStatistiques' => $tabStatistiques,
             'campagne' => $campagne,
