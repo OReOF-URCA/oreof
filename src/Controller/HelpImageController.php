@@ -27,7 +27,7 @@ class HelpImageController extends AbstractController
     #[Route('', name: 'list', methods: ['GET'])]
     public function list(Request $request, HelpImageRepository $repository): JsonResponse
     {
-        $query = $request->query->get('q');
+        $query = $request->query->getString('q');
         $images = $repository->search($query);
 
         return $this->json($images, 200, [], ['groups' => 'help_image:read']);
@@ -39,7 +39,7 @@ class HelpImageController extends AbstractController
         SecureUploadService    $secureUploadService,
         EntityManagerInterface $em
     ): JsonResponse {
-        $nom = $request->request->get('nom');
+        $nom = $request->request->getString('nom');
 
         if (empty($nom)) {
             return $this->json(['error' => 'Le nom de l\'image est requis.'], Response::HTTP_BAD_REQUEST);
