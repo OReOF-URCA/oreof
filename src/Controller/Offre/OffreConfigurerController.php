@@ -553,7 +553,7 @@ final class OffreConfigurerController extends BaseController
             $parcoursCapacite = 0;
             $nbPlateformesActives = 0;
 
-            if ($parcours->isOuvert() === true) {
+            if ($parcours->isOuvertPourCampagne($campagne)) {
                 $tabStatistiques['nbParcoursOuvert']++;
 
                 $activePlateformes = [];

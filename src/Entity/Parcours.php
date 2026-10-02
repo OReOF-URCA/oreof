@@ -2044,4 +2044,20 @@ class Parcours
     {
         return !$this->getDpeParcours()->first()?->isNonOuvert();
     }
+
+    public function getDpeParcoursPourCampagne(CampagneCollecte $campagne): ?DpeParcours
+    {
+        foreach ($this->getDpeParcours() as $dpeParcours) {
+            if ($dpeParcours->getCampagneCollecte() === $campagne) {
+                return $dpeParcours;
+            }
+        }
+
+        return null;
+    }
+
+    public function isOuvertPourCampagne(CampagneCollecte $campagne): bool
+    {
+        return $this->getDpeParcoursPourCampagne($campagne)?->isOuvert() ?? true;
+    }
 }
