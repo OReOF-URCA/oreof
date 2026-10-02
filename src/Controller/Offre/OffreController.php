@@ -86,7 +86,7 @@ final class OffreController extends BaseController
         $allParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne, $composante);
 
         // 2. Batch loading des années (1 requête pour tous les parcours au lieu de 400+)
-        $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne);
+        $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne, $composante);
 
         // 3. Batch loading des configurations et paramètres de plateformes (1 requête chacune au lieu de 1000+)
         $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne);

@@ -19,17 +19,25 @@ class AnneeRepository extends ServiceEntityRepository
     /**
      * @return array<int, list<Annee>>
      */
-    public function findByCampagneIndexedByParcours(\App\Entity\CampagneCollecte $campagne): array
-    {
-        $annees = $this->createQueryBuilder('a')
+    public function findByCampagneIndexedByParcours(
+        \App\Entity\CampagneCollecte $campagne,
+        ?\App\Entity\Composante $composante = null
+    ): array {
+        $qb = $this->createQueryBuilder('a')
             ->join('a.parcours', 'p')
             ->join('p.dpeParcours', 'dp')
             ->addSelect('p')
             ->where('dp.campagneCollecte = :campagne')
             ->setParameter('campagne', $campagne)
-            ->orderBy('a.ordre', 'ASC')
-            ->getQuery()
-            ->getResult();
+            ->orderBy('a.ordre', 'ASC');
+
+        if ($composante !== null) {
+            $qb->join('p.formation', 'f')
+                ->andWhere('f.composantePorteuse = :composante')
+                ->setParameter('composante', $composante);
+        }
+
+        $annees = $qb->getQuery()->getResult();
 
         $map = [];
         foreach ($annees as $annee) {
