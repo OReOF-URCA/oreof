@@ -14,9 +14,17 @@ class PlaquetteController extends BaseController
     #[Route('/communication/plaquette', name: 'app_plaquette')]
     public function index(): Response
     {
-        /** @var User $user */
         $user = $this->getUser();
-        $composante = $user->getUserProfils()->first()->getComposante();//todo: faire un filtre sur les droits ?
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $userProfil = $user->getUserProfils()->first();
+        if ($userProfil === false) {
+            throw $this->createAccessDeniedException('Aucun profil utilisateur disponible.');
+        }
+
+        $composante = $userProfil->getComposante();//todo: faire un filtre sur les droits ?
         return $this->render('plaquette/index.html.twig', [
             'composante' => $composante,
         ]);

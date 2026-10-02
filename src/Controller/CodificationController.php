@@ -9,6 +9,7 @@ use App\Classes\JsonReponse;
 use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
+use App\Entity\User;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\ComposanteRepository;
@@ -65,10 +66,6 @@ class CodificationController extends BaseController
         Request               $request,
         TypeDiplome           $typeDiplome
     ): Response {
-        if ($typeDiplome === null) {
-            throw new Exception('Type de diplôme non trouvé');
-        }
-
         $filtres = $request->query->all();
         $filtres['typeDiplome'] = $typeDiplome->getId();
 
@@ -85,7 +82,11 @@ class CodificationController extends BaseController
             );
         } else {
             $formations = [];
-            $centres = $this->getUser()?->getUserCentres();
+            $user = $this->getUser();
+            if (!$user instanceof User) {
+                throw $this->createAccessDeniedException();
+            }
+            $centres = $user->getUserCentres();
             foreach ($centres as $centre) {
                 //todo: gérer avec un voter
                 if ($centre->getComposante() !== null && (
@@ -102,15 +103,15 @@ class CodificationController extends BaseController
             }
 
             $formations[] = $formationRepository->findByComposanteDpe(
-                $this->getUser(),
+                $user,
                 $this->getCampagneCollecte()
             );
             $formations[] = $formationRepository->findByResponsableOuCoResponsable(
-                $this->getUser(),
+                $user,
                 $this->getCampagneCollecte()
             );
             $formations[] = $formationRepository->findByResponsableOuCoResponsableParcours(
-                $this->getUser(),
+                $user,
                 $this->getCampagneCollecte(),
                 []
             );
@@ -156,7 +157,11 @@ class CodificationController extends BaseController
 
         $formations = [];
         //gérer le cas ou l'utilisateur dispose des droits pour lire la composante
-        $centres = $this->getUser()?->getUserCentres();
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+        $centres = $user->getUserCentres();
         foreach ($centres as $centre) {
             //todo: gérer avec un voter
             if ($centre->getComposante() !== null && (
@@ -174,15 +179,15 @@ class CodificationController extends BaseController
         }
 
         $formations[] = $formationRepository->findByComposanteDpe(
-            $this->getUser(),
+            $user,
             $this->getCampagneCollecte()
         );
         $formations[] = $formationRepository->findByResponsableOuCoResponsable(
-            $this->getUser(),
+            $user,
             $this->getCampagneCollecte()
         );
         $formations[] = $formationRepository->findByResponsableOuCoResponsableParcours(
-            $this->getUser(),
+            $user,
             $this->getCampagneCollecte(),
             []
         );
@@ -213,11 +218,14 @@ class CodificationController extends BaseController
         );
         $breadcrumb->add('Codification');
 
-        $selectedParcours = $request->query->get('parcours');
+        $selectedParcours = $request->query->getInt('parcours');
+        $defaultParcours = $formation->getParcours()->first();
 
         return $this->render('codification/index.html.twig', [
             'formation' => $formation,
-            'step' => $selectedParcours ?? $formation->getParcours()->first()->getId(),
+            'step' => $selectedParcours !== 0
+                ? $selectedParcours
+                : ($defaultParcours instanceof Parcours ? $defaultParcours->getId() : null),
         ]);
     }
 
@@ -296,7 +304,7 @@ class CodificationController extends BaseController
         }
 
         $typeD = $this->typeDiplomeResolver->fromParcours($parcours);
-        $tParcours = $typeD->calculStructureParcours($parcours);
+        $tParcours = $typeD->calcul($parcours);
 
         return $this->render('codification/_parcours.html.twig', [
             'formation' => $formation,

@@ -70,7 +70,7 @@ class FaqAdminController extends AbstractController
     #[Route('/{id}/delete', name: 'app_faq_delete', methods: ['POST'])]
     public function delete(Request $request, Faq $faq, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$faq->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$faq->getId(), $request->request->getString('_token'))) {
             $em->remove($faq);
             $em->flush();
             $this->addFlash('success', 'FAQ supprimée.');
@@ -86,7 +86,7 @@ class FaqAdminController extends AbstractController
         }
 
         $ids = $request->request->all('ids');
-        if (!is_array($ids) || count($ids) === 0) {
+        if ($ids === []) {
             return $this->json(['success' => false, 'message' => 'Aucun ordre reçu.'], Response::HTTP_BAD_REQUEST);
         }
 

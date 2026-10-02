@@ -105,13 +105,9 @@ class DemandeDpeController extends BaseController
     {
         $campagneCollecte = $this->getCampagneCollecte();
 
-        if ($campagneCollecte === null) {
-            $builder->addBaseWhere('1 = 0');
-        } else {
-            $builder
-                ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
-                ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId());
-        }
+        $builder
+            ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
+            ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId());
 
         if ($composante !== null) {
             $builder
@@ -307,15 +303,15 @@ class DemandeDpeController extends BaseController
         }
         $ligne = 2;
         foreach ($demandes as $demande) {
+            $parcours = $demande->getParcours();
             if ($demande->getNiveauDemande() === 'F') {
                 $formation = $demande->getFormation();
             } else {
-                $parcours = $demande->getParcours();
                 $formation = $parcours?->getFormation();
             }
             $composante = $formation?->getComposantePorteuse();
 
-            $excelWriter->writeCellName('A' . $ligne, $composante->getLibelle());
+            $excelWriter->writeCellName('A' . $ligne, $composante?->getLibelle() ?? '');
             $excelWriter->writeCellName('B' . $ligne, $formation?->getTypeDiplome()?->getLibelle() ?? 'Inconnu');
             $excelWriter->writeCellName('C' . $ligne, $formation?->getDisplay());
 

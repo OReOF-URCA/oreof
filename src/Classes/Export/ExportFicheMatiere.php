@@ -13,6 +13,7 @@ use App\Classes\GetElementConstitutif;
 use App\Classes\MyGotenbergPdf;
 use App\Repository\ParcoursRepository;
 use App\Service\ProjectDirProvider;
+use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\Tools;
 use Exception;
@@ -42,7 +43,7 @@ class ExportFicheMatiere
         if ($formation === null) {
             throw new Exception('Formation non trouvée');
         }
-        $typeDiplome = $formation?->getTypeDiplome();
+        $typeDiplome = $formation->getTypeDiplome();
         $typeDHandler = $this->typeDResolver->get($typeDiplome);
 
         /**
@@ -50,7 +51,7 @@ class ExportFicheMatiere
          *  - UE Enfants de deuxième niveau
          *  - UE Raccrochées
          */
-        $dataFmArray = $typeDHandler->calculStructureParcours($parcours, false, false);
+        $dataFmArray = $typeDHandler->calcul($parcours, new OptionsCalculStructure(withEcts: false, withBcc: false));
         $dataFmArray = array_merge(
             ...array_map(function($sem) {
             return
@@ -108,7 +109,7 @@ class ExportFicheMatiere
                         'heures' => $getElement->getFicheMatiereHeures(),
                         'templateFormMccc' => $typeDHandler::TEMPLATE_FORM_MCCC,
                         'mcccPdf' => $typeDHandler->getDisplayMccc(
-                            $getElement->getMcccsFromFicheMatiere($typeDHandler) ?? [],
+                            $getElement->getMcccsFromFicheMatiere($typeDHandler),
                             $getElement->getTypeMcccFromFicheMatiere() ?? ''
                         ),
                         'typeEpreuves' => $typeDHandler->getTypeEpreuves()

@@ -7,10 +7,9 @@ use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\SemestreRepository;
-use App\Repository\TypeDiplomeRepository;
 use App\Repository\UeRepository;
-use App\Service\TypeDiplomeResolver;
-use App\TypeDiplome\Source\LicenceTypeDiplome;
+use App\TypeDiplome\Dto\OptionsCalculStructure;
+use App\TypeDiplome\TypeDiplomeResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -53,6 +52,11 @@ class CodificationParcoursController extends AbstractController
             //on flush
 
             foreach ($request->request->all() as $key => $value) {
+                if (!is_scalar($value)) {
+                    continue;
+                }
+                $value = (string) $value;
+
                 if ($value !== 'Aucun code Apogée') {
                     //   dump($req);
                     // foreach ($req as $key => $value) {
@@ -89,8 +93,8 @@ class CodificationParcoursController extends AbstractController
 
         }
 
-        $typeD = $typeDiplomeResolver->getFromParcours($parcours);
-        $dto = $typeD->calculStructureParcours($parcours, true, false);
+        $typeD = $typeDiplomeResolver->fromParcours($parcours);
+        $dto = $typeD->calcul($parcours, new OptionsCalculStructure(withEcts: true, withBcc: false));
 
         return $this->render('codification_parcours/modifier.html.twig', [
             'parcours' => $parcours,

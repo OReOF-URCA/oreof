@@ -18,15 +18,15 @@ class StructureShowController extends AbstractController
 
     #[Route('/structure/parcours/show/', name: 'app_structure_parcours_show')]
     public function parcoursShow(
-        Versioningstructure $versioningStructure,
+        VersioningStructure $versioningStructure,
         VersioningParcours $versioningParcours,
         Parcours $parcours,
         bool $hasLastVersion = false,
         bool $print = false
     ): Response {
 
-        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours?->getTypeDiplome());
-        $dto = $typeD->calculStructureParcours($parcours);
+        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getTypeDiplome());
+        $dto = $typeD->calcul($parcours);
 
         $structureDifferencesParcours = $versioningParcours->getStructureDifferencesBetweenParcoursAndLastCfvu($parcours);
         if ($structureDifferencesParcours !== null) {
@@ -62,7 +62,7 @@ class StructureShowController extends AbstractController
 
     #[Route('/structure/parcours/show/v2/', name: 'app_structure_parcours_show_v2')]
     public function parcoursShowV2(
-        Versioningstructure $versioningStructure,
+        VersioningStructure $versioningStructure,
         VersioningParcours $versioningParcours,
         Parcours           $parcours,
         bool               $hasLastVersion = false,
@@ -70,8 +70,8 @@ class StructureShowController extends AbstractController
     ): Response
     {
 
-        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours?->getTypeDiplome());
-        $dto = $typeD->calculStructureParcours($parcours);
+        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getTypeDiplome());
+        $dto = $typeD->calcul($parcours);
 
         $structureDifferencesParcours = $versioningParcours->getStructureDifferencesBetweenParcoursAndLastVersion($parcours);
         if ($structureDifferencesParcours !== null) {

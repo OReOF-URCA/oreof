@@ -18,4 +18,6 @@ interface TypeDiplomeMcccInterface
     public function checkIfMcccValide(FicheMatiere|ElementConstitutif $owner): bool;
 
     public function createFormMccc(ElementConstitutif|FicheMatiere $element): FormInterface;
+
+    public function getMcccTemplate(): string;
 }

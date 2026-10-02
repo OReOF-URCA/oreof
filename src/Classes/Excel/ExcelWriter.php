@@ -159,7 +159,7 @@ class ExcelWriter
     {
         $this->sheet->setCellValue($adresse, $value);
 
-        if (is_array($options) && array_key_exists('style', $options)) {
+        if (array_key_exists('style', $options)) {
             //style n'est pas un tableau
             switch ($options['style']) {
                 case 'HORIZONTAL_RIGHT':
@@ -217,7 +217,7 @@ class ExcelWriter
         }
     }
 
-    public function getRowDimension(int $ligne, int $taille): void
+    public function getRowDimension(int $ligne, float|int $taille): void
     {
         $this->sheet->getRowDimension($ligne)->setRowHeight($taille);
     }
@@ -506,7 +506,7 @@ class ExcelWriter
 
                 $richText = new RichText();
                 if ($diffObject->original !== null && $diffObject->original !== '') {
-                    $ancienneValeur = $richText->createTextRun($diffObject->original);
+                    $ancienneValeur = $richText->createTextRun((string)$diffObject->original);
                     $ancienneValeur->getFont()?->setStrikethrough(true);
                     $ancienneValeur->getFont()?->setColor(new Color(Color::COLOR_RED));
                 }
@@ -525,7 +525,7 @@ class ExcelWriter
                         $colorNew = new Color('34EB67');
                     }
 
-                    $nouvelleValeur = $richText->createTextRun($diffObject->new);
+                    $nouvelleValeur = $richText->createTextRun((string)$diffObject->new);
                     $nouvelleValeur->getFont()?->setStrikethrough(false);
                     $nouvelleValeur->getFont()?->setBold(true);
                     $nouvelleValeur->getFont()?->setColor($colorNew);

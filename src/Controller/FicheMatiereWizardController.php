@@ -27,6 +27,7 @@ use App\Repository\FicheMatiereMutualisableRepository;
 use App\Repository\FormationRepository;
 use App\Repository\ParcoursRepository;
 use App\Repository\TypeEpreuveRepository;
+use App\TypeDiplome\McccDisplayInterface;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\Utils\JsonRequest;
 use Doctrine\ORM\EntityManagerInterface;
@@ -534,6 +535,10 @@ class FicheMatiereWizardController extends BaseController
 
         if ($type === 'other') {
             $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
+            if (!$typeD instanceof McccDisplayInterface) {
+                throw new \RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
+            }
+
             return $this->render('fiche_matiere_wizard/_step4Other.html.twig', [
                 'ficheMatiere' => $ficheMatiere,
                 'parcours' => $parcours,
@@ -541,7 +546,7 @@ class FicheMatiereWizardController extends BaseController
                 'ecProprietaire' => $ecProprietaire,
                 'typeMccc' => $ficheMatiere->getTypeMccc(),
                 'typeD' => $typeD,
-                'templateForm' => $typeD !== null ? $typeD::TEMPLATE_FORM_MCCC : '',
+                'templateForm' => $typeD->getMcccTemplate(),
             ]);
         }
 

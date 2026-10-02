@@ -263,8 +263,8 @@ class ParcoursController extends BaseController
 
     #[Route('/{parcours}/modifier/semestre/{semestreParcours}/validation', name: 'semestre_validation')]
     public function semestreValidation(
-        TurbostreamResponseFactory $turboStream,
-        TypeDIplomeResolver         $typeDiplomeResolver,
+        TurboStreamResponseFactory $turboStream,
+        TypeDiplomeResolver         $typeDiplomeResolver,
         Parcours                    $parcours,
         SemestreParcours            $semestreParcours,
         SemesterValidationRefresher $refresher

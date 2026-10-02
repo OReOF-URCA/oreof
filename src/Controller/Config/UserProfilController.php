@@ -58,9 +58,13 @@ class UserProfilController extends BaseController
     ): Response
     {
         $isDpe = false;
+        $currentUser = $this->getUser();
+        $composanteResponsableDpe = $currentUser instanceof User
+            ? $currentUser->getComposanteResponsableDpe()->first()
+            : false;
         if ($this->isGranted('MANAGE', [
             'route' => 'app_composante',
-            'subject' => $this->getUser()?->getComposanteResponsableDpe()->first()
+            'subject' => $composanteResponsableDpe !== false ? $composanteResponsableDpe : null
         ])) {
             $isDpe = true;
         }
@@ -129,6 +133,7 @@ class UserProfilController extends BaseController
         // selon le centre, la composante, l'établissement, la formation ou le parcours, on vérifie que la valeur du centre n'est pas déjà existante, si oui, on modifie le profil existant, si non, on crée un nouveau profil
 
         $event = false;
+        $userProfilToNotify = null;
         switch ($data['centre']) {
             case CentreGestionEnum::CENTRE_GESTION_COMPOSANTE->value:
                 $composante = $composanteRepository->find($data['cible']);
@@ -146,11 +151,12 @@ class UserProfilController extends BaseController
                 if ($existingProfil === null) {
                     $userProfil->setComposante($composante);
                     $entityManager->persist($userProfil);
+                    $userProfilToNotify = $userProfil;
                     $event = NotifUpdateUserProfilEvent::ADD_USER_PROFIL;
                 } else {
                     // Si le profil existe déjà, on met à jour les informations
                     $existingProfil->setProfil($role);
-                    unset($userProfil);
+                    $userProfilToNotify = $existingProfil;
                     $event = NotifUpdateUserProfilEvent::UPDATE_USER_PROFIL;
                 }
 
@@ -170,11 +176,12 @@ class UserProfilController extends BaseController
                 if ($existingProfil === null) {
                     $userProfil->setEtablissement($etablissement);
                     $entityManager->persist($userProfil);
+                    $userProfilToNotify = $userProfil;
                     $event = NotifUpdateUserProfilEvent::ADD_USER_PROFIL;
                 } else {
                     // Si le profil existe déjà, on met à jour les informations
                     $existingProfil->setProfil($role);
-                    unset($userProfil);
+                    $userProfilToNotify = $existingProfil;
                     $event = NotifUpdateUserProfilEvent::UPDATE_USER_PROFIL;
                 }
                 break;
@@ -193,11 +200,12 @@ class UserProfilController extends BaseController
                 if ($existingProfil === null) {
                     $userProfil->setFormation($formation);
                     $entityManager->persist($userProfil);
+                    $userProfilToNotify = $userProfil;
                     $event = NotifUpdateUserProfilEvent::ADD_USER_PROFIL;
                 } else {
                     // Si le profil existe déjà, on met à jour les informations
                     $existingProfil->setProfil($role);
-                    unset($userProfil);
+                    $userProfilToNotify = $existingProfil;
                     $event = NotifUpdateUserProfilEvent::UPDATE_USER_PROFIL;
                 }
                 break;
@@ -216,19 +224,20 @@ class UserProfilController extends BaseController
                 if ($existingProfil === null) {
                     $userProfil->setParcours($parcours);
                     $entityManager->persist($userProfil);
+                    $userProfilToNotify = $userProfil;
                     $event = NotifUpdateUserProfilEvent::ADD_USER_PROFIL;
                 } else {
                     // Si le profil existe déjà, on met à jour les informations
                     $existingProfil->setProfil($role);
-                    unset($userProfil);
+                    $userProfilToNotify = $existingProfil;
                     $event = NotifUpdateUserProfilEvent::UPDATE_USER_PROFIL;
                 }
                 break;
         }
 
-        if ($event !== false) {
+        if ($event !== false && $userProfilToNotify instanceof UserProfil) {
             $this->entityManager->flush();
-            $eventDispatcher->dispatch(new NotifUpdateUserProfilEvent($existingProfil ?? $userProfil), $event);
+            $eventDispatcher->dispatch(new NotifUpdateUserProfilEvent($userProfilToNotify), $event);
         }
 
         if ($event === NotifUpdateUserProfilEvent::UPDATE_USER_PROFIL) {

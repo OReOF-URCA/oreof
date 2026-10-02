@@ -63,7 +63,7 @@ class CodificationFormation
 
     public function __construct(
         protected EntityManagerInterface $entityManager,
-        protected TypeDiplomeHandlerInterface $typeDiplomeResolver
+        protected TypeDiplomeHandlerInterface $typeDiplomeHandler
     ) {
     }
 
@@ -201,7 +201,7 @@ class CodificationFormation
     public function setCodificationSemestre(Parcours $parcours): void
     {
         // structure semestre
-        $structureParcours = $this->typeDiplomeResolver->calculStructureParcours($parcours);
+        $structureParcours = $this->typeDiplomeHandler->calcul($parcours);
 
 
         $semestres = $structureParcours->semestres;

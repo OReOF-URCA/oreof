@@ -84,7 +84,7 @@ class FicheMatiereExportController extends AbstractController
                 'formation' => $formation,
                 'typeDiplome' => $typeDiplome,
                 'typeEpreuves' => $typeD !== null ? $typeD->getTypeEpreuves() : $typeEpreuveRepository->findAll(),
-                'templateForm' => $typeD !== null ? $typeD::TEMPLATE_FORM_MCCC : 'licence.html.twig',
+                'templateForm' => $typeD !== null ? $typeD->getMcccTemplate() : 'licence.html.twig',
                 'bccs' => $bccs,
                 'titre' => 'Fiche EC/matière ' . $ficheMatiere->getLibelle(),
                 'mcccs' => $typeD !== null ? $typeD->getMcccs($ficheMatiere) : [],
@@ -112,7 +112,7 @@ class FicheMatiereExportController extends AbstractController
                 'titre' => 'Fiches EC/matières ',
                 'typeEpreuves' => $typeDHandler->getTypeEpreuves(),
                 'typeDiplomeHandler' => $typeDHandler,
-                'templateFormMccc' => $typeDHandler::TEMPLATE_FORM_MCCC,
+                'templateFormMccc' => $typeDHandler->getMcccTemplate(),
             ],
             'FichesMatieres' . $parcours->getDisplay()
         );

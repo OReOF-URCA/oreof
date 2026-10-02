@@ -52,7 +52,7 @@ class FormationExportController extends AbstractController
 
         $tParcours = [];
         foreach ($formation->getParcours() as $parcours) {
-            $tParcours[$parcours->getId()] = $typeD->calculStructureParcours($parcours);
+            $tParcours[$parcours->getId()] = $typeD->calcul($parcours);
         }
 
         return $this->myPdf->render('pdf/formation.html.twig', [

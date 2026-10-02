@@ -72,13 +72,14 @@ class ExportCap
 
         $this->ligne = 2;
         foreach ($formations as $idFormation) {
-            $this->dpeParcours = $this->dpeParcoursRepository->find($idFormation);
-            $this->historique = $this->getHistorique->getHistoriqueParcoursLastStep($this->dpeParcours, 'soumis_cfvu');
-            if ($this->dpeParcours !== null) {
+            $dpeParcours = $this->dpeParcoursRepository->find($idFormation);
+            if ($dpeParcours !== null) {
+                $this->dpeParcours = $dpeParcours;
+                $this->historique = $this->getHistorique->getHistoriqueParcoursLastStep($dpeParcours, 'soumis_cfvu');
                 $parcours = $this->dpeParcours->getParcours();
                 $formation = $this->dpeParcours->getParcours()?->getFormation();
-                $typeDiplome = $this->typeDiplomeResolver->fromFormation($formation);
                 if ($formation !== null && $parcours !== null) {
+                    $typeDiplome = $this->typeDiplomeResolver->fromFormation($formation);
 //                foreach ($formation->getParcours() as $parcours) {
                     $this->data[1] = $formation->getComposantePorteuse()?->getLibelle();
                     $this->data[2] = $formation->getTypeDiplome()?->getLibelle();
@@ -90,7 +91,7 @@ class ExportCap
                     }
 
                     //récuération de la structure et des EC
-                    $dto = $typeDiplome->calculStructureParcours($parcours);
+                    $dto = $typeDiplome->calcul($parcours);
                     foreach ($dto->semestres as $ordre => $sem) {
                         $this->data[5] = 'S'.$ordre;
                         foreach ($sem->ues as $ue) {
@@ -171,7 +172,7 @@ class ExportCap
         return $this->fileName . '.xlsx';
     }
 
-    private function writeDebutLigne(int $ligne, $data): void
+    private function writeDebutLigne(int $ligne, array $data): void
     {
         foreach ($data as $key => $value) {
             $this->excelWriter->writeCellXY($key, $ligne, $value);

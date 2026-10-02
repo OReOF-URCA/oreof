@@ -162,7 +162,7 @@ class UeController extends BaseController
 
         return $this->render('structure/ue/_new.html.twig', [
             'form' => $form->createView(),
-            'isAdmin' => $isAdmin ?? false,
+            'isAdmin' => $isAdmin,
         ]);
     }
 
@@ -498,8 +498,14 @@ class UeController extends BaseController
             ->add('raccrocher', EntityType::class, [
                 'class' => UeMutualisable::class,
                 //{{ u.ue.display() }} - {{ u.ue.libelle }} ({{ u.ue.semestre.semestreParcours[0].parcours.libelle }})
-                'choice_label' => function (UeMutualisable $uem) use ($ue) {
-                    return $uem->getUe()?->display() . ' - ' . $uem->getUe()?->getLibelle() . ' (' . $uem->getUe()?->getSemestre()?->getSemestreParcours()->first()?->getParcours()?->getLibelle() . ')';
+                'choice_label' => function (UeMutualisable $uem) {
+                    $ueMutualisee = $uem->getUe();
+                    $semestreParcours = $ueMutualisee?->getSemestre()?->getSemestreParcours()->first();
+                    $parcoursLibelle = $semestreParcours instanceof SemestreParcours
+                        ? $semestreParcours->getParcours()?->getLibelle()
+                        : null;
+
+                    return $ueMutualisee?->display() . ' - ' . $ueMutualisee?->getLibelle() . ' (' . $parcoursLibelle . ')';
                 },
                 'placeholder' => 'choisir.ue.a.raccrocher',
                 'translation_domain' => 'form',
@@ -791,7 +797,7 @@ class UeController extends BaseController
                                 $entityManager->persist($newEcEnfant);
                                 if ($ecEnfant->getFicheMatiere() !== null) {
                                     $newFm = clone $ecEnfant->getFicheMatiere();
-                                    $newFm->setFicheMatiereOrigineCopie(numm);
+                                    $newFm->setFicheMatiereOrigineCopie(null);
                                     $newFm->setParcours($parcoursDestination);
                                     $newFm->setSlug($newFm->getSlug() . '-' . (new DateTime())->format('YmdHis'));
                                     $newEcEnfant->setFicheMatiere($newFm);

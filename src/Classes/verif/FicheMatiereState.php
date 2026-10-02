@@ -45,7 +45,7 @@ class FicheMatiereState
 
     public function isEmptyOnglet2(): bool
     {
-        return $this->ficheMatiere->getDescription() === null && $this->ficheMatiere->getLangueDispense()->count() === 0 && $this->ficheMatiere->getLangueSupport()->count() === 0 && $this->ficheMatiere->getObjectifs() === null && $this->ficheMatiere->getCompetences() === null;
+        return $this->ficheMatiere->getDescription() === null && $this->ficheMatiere->getLangueDispense()->count() === 0 && $this->ficheMatiere->getLangueSupport()->count() === 0 && $this->ficheMatiere->getObjectifs() === null && $this->ficheMatiere->getCompetences()->count() === 0;
     }
 
     public function isEmptyOnglet3(): bool

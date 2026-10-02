@@ -29,6 +29,7 @@ class ExportMccc
 
     public function __construct(
         protected FormationRepository $formationRepository,
+        protected DpeParcoursRepository $dpeParcoursRepository,
     ) {
     }
 
@@ -52,27 +53,29 @@ class ExportMccc
             $formation = $this->formationRepository->findOneBy(['id' => $formationId, 'anneeUniversitaire' => $this->annee->getId()]);
             if ($formation !== null) {
                 $typeDiplome = $this->typeDiplomeResolver->fromFormation($formation);
-                if (null !== $typeDiplome) {
-                    foreach ($formation->getParcours() as $parcours)
-                    {
-                        if ($this->format === 'xlsx') {
-                            $fichier = $typeDiplome->exportAndSaveExcelMccc(
+                foreach ($formation->getParcours() as $parcours)
+                {
+                        $fichier = match ($this->format) {
+                            'xlsx' => $typeDiplome->exportAndSaveExcelMccc(
                                 $dir,
                                 $this->annee,
                                 $parcours,
                                 $this->date,
                                 null,
                                 $this->isLight
-                            );
-                        } elseif ($this->format === 'pdf') {
-                            $fichier = $typeDiplome->exportAndSavePdfMccc(
+                            ),
+                            'pdf' => $typeDiplome->exportAndSavePdfMccc(
                                 $dir,
                                 $this->annee,
                                 $parcours,
                                 $this->date,
                                 null,
                                 $this->isLight
-                            );
+                            ),
+                            default => null,
+                        };
+                        if ($fichier === null) {
+                            continue;
                         }
                         $tabFiles[] = $fichier;
                         $zip->addFile(
@@ -80,7 +83,6 @@ class ExportMccc
                             $formation->getDisplay() . '/' . $fichier
                         );
                     }
-                }
             }
         }
 
@@ -120,8 +122,7 @@ class ExportMccc
 
             if ($formation !== null) {
                 $typeDiplome = $this->typeDiplomeResolver->fromFormation($formation);
-                if (null !== $typeDiplome) {
-                    if ($formation->isHasParcours() === true) {
+                if ($formation->isHasParcours() === true) {
                         $texte = $formation->gettypeDiplome()?->getLibelleCourt() . ' ' . $formation->getSigle() . ' ' . $parcours->getSigle();
                     } else {
                         $texte = $formation->gettypeDiplome()?->getLibelleCourt() . ' ' . $formation->getSigle();
@@ -140,8 +141,6 @@ class ExportMccc
                         $dir . $fichier,
                         $fichier
                     );
-
-                }
             }
         }
 
@@ -174,7 +173,7 @@ class ExportMccc
         $this->isLight = $isLight;
     }
 
-    public function exportVersion(string $dir, TypeDiplomeResolver $typeDiplomeResolver, array $formations, ?CampagneCollecte $campagneCollecte): void
+    public function exportVersion(string $dir, TypeDiplomeResolver $typeDiplomeResolver, array $formations, CampagneCollecte $campagneCollecte): void
     {
         $this->dir = $dir;
         $this->typeDiplomeResolver = $typeDiplomeResolver;

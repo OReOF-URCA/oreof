@@ -20,7 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class CreateAnneeCommand extends Command
 {
     public function __construct(
-        protected SemestreparcoursRepository $semestreparcoursRepository,
+        protected SemestreParcoursRepository $semestreparcoursRepository,
         protected EntityManagerInterface     $entityManager,
     )
     {

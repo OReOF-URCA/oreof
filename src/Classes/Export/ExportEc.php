@@ -18,7 +18,6 @@ use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
 use DateTime;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class ExportEc implements ExportInterface
 {
@@ -57,12 +56,12 @@ class ExportEc implements ExportInterface
         $ligne = 2;
         /** @var ElementConstitutif $ec */
         foreach ($ecs as $ec) {
-            $this->excelWriter->writeCellXY(1, $ligne, $ec->getParcours()?->getFormation()?->getComposantePorteuse()?->getLibelle());
-            $this->excelWriter->writeCellXY(2, $ligne, $ec->getParcours()?->getFormation()?->getTypeDiplome()?->getLibelle());
-            $this->excelWriter->writeCellXY(3, $ligne, $ec->getParcours()?->getFormation()?->getDisplay());
+            $this->excelWriter->writeCellXY(1, $ligne, $ec->getParcours()->getFormation()?->getComposantePorteuse()?->getLibelle());
+            $this->excelWriter->writeCellXY(2, $ligne, $ec->getParcours()->getFormation()?->getTypeDiplome()?->getLibelle());
+            $this->excelWriter->writeCellXY(3, $ligne, $ec->getParcours()->getFormation()?->getDisplay());
 
-            if ($ec->getParcours()?->getFormation()?->isHasParcours()) {
-                $this->excelWriter->writeCellXY(4, $ligne, $ec->getParcours()?->getLibelle());
+            if ($ec->getParcours()->getFormation()?->isHasParcours()) {
+                $this->excelWriter->writeCellXY(4, $ligne, $ec->getParcours()->getLibelle());
             } else {
                 $this->excelWriter->writeCellXY(4, $ligne, 'Pas de parcours');
             }
@@ -73,7 +72,7 @@ class ExportEc implements ExportInterface
             $this->excelWriter->writeCellXY(9, $ligne, $ec->getLibelle());
             $this->excelWriter->writeCellXY(10, $ligne, $ec->getFicheMatiere()?->getLibelle());
             $this->excelWriter->writeCellXY(11, $ligne, $ec->getTypeEc()?->getType()->value);
-            $this->excelWriter->writeCellXY(12, $ligne, $ec->getFicheMatiere()?->getResponsableFicheMatiere() !== null ? $ec->getFicheMatiere()?->getResponsableFicheMatiere()?->getDisplay() : 'Non défini - RP ou RF');
+            $this->excelWriter->writeCellXY(12, $ligne, $ec->getFicheMatiere()->getResponsableFicheMatiere() !== null ? $ec->getFicheMatiere()->getResponsableFicheMatiere()->getDisplay() : 'Non défini - RP ou RF');
 
             $this->excelWriter->getColumnsAutoSize('A', 'M');
             $ligne++;

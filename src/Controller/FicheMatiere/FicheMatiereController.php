@@ -12,6 +12,7 @@ namespace App\Controller\FicheMatiere;
 use App\Controller\BaseController;
 use App\Entity\FicheMatiere;
 use App\Form\FicheMatiereStep1Type;
+use App\Form\FicheMatiereStep1bType;
 use App\Form\FicheMatiereStep2Type;
 use App\Form\FicheMatiereStep4HdType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
@@ -22,6 +23,7 @@ use App\Repository\FicheMatiereTabStateRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\VersioningFicheMatiere;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
+use App\TypeDiplome\McccDisplayInterface;
 use Jfcherng\Diff\DiffHelper;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\Request;
@@ -113,6 +115,13 @@ class FicheMatiereController extends BaseController
         }
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
+        $mcccs = [];
+        if ($ficheMatiere->getTypeMccc() !== null) {
+            if (!$typeD instanceof McccDisplayInterface) {
+                throw new \RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
+            }
+            $mcccs = $typeD->getDisplayMccc($typeD->getMcccs($ficheMatiere), $ficheMatiere->getTypeMccc());
+        }
 
         $cssDiff = DiffHelper::getStyleSheet();
         $textDifferences = $ficheMatiereVersioningService
@@ -129,7 +138,7 @@ class FicheMatiereController extends BaseController
             'typeD' => $typeD,
             'typeDiplome' => $typeDiplome,
             'ects' => $ficheMatiere->getEcts(),
-            'mcccs' => $ficheMatiere->getTypeMccc() != null ? $typeD->getDisplayMccc($typeD->getMcccs($ficheMatiere), $ficheMatiere->getTypeMccc()) : [],
+            'mcccs' => $mcccs,
             'bccs' => $bccs,
             'typeMccc' => $ficheMatiere->getTypeMccc(),
             'stringDifferences' => $textDifferences,

@@ -20,7 +20,7 @@ class GetElementConstitutif
     /* @deprecated */
     private ?bool $isRaccroche = null;
 
-    private ElementConstitutif|FicheMatiere|null $ecSource = null;
+    private ?ElementConstitutif $ecSource = null;
 
     public function __construct(
         private readonly ElementConstitutif $elementConstitutif,
@@ -28,7 +28,7 @@ class GetElementConstitutif
     ) {
     }
 
-    public function getElementConstitutif(): ElementConstitutif|FicheMatiere
+    public function getElementConstitutif(): ElementConstitutif
     {
         //todo: ne plus en dépendre ou résumer à  return $this->elementConstitutif;
         if ($this->ecSource !== null) {
@@ -50,7 +50,7 @@ class GetElementConstitutif
         return $this->ecSource;
     }
 
-    public function getMcccsFromFicheMatiere(TypeDiplomeHandlerInterface $typeD): array
+    public function getMcccsFromFicheMatiere(TypeDiplomeHandlerInterface $typeD): array|Collection
     {
         $isMcccImpose = $this->elementConstitutif->getFicheMatiere()?->isMcccImpose();
         // MCCC spécifiques sur EC

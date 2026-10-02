@@ -46,6 +46,11 @@ final class M2EHandler extends AbstractTypeDiplomeHandler
     public const SOURCE = 'm2e';
     public const TEMPLATE_FORM_MCCC = 'm2e.html.twig';
 
+    public function getMcccTemplate(): string
+    {
+        return self::TEMPLATE_FORM_MCCC;
+    }
+
     private array $typeEpreuves;
 
     public function __construct(

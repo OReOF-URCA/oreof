@@ -108,7 +108,7 @@ class ElementConstitutifController extends BaseController
         $elementConstitutif->setFicheMatiere(null);
         $elementConstitutif->setParcours($parcours);
 
-        $elementConstitutif->setModaliteEnseignement($parcours?->getModalitesEnseignement());
+        $elementConstitutif->setModaliteEnseignement($parcours->getModalitesEnseignement());
         $elementConstitutif->setUe($ue);
         $typeDiplome = $parcours->getFormation()?->getTypeDiplome();
 
@@ -138,16 +138,16 @@ class ElementConstitutifController extends BaseController
             }
 
             if ($elementConstitutif->getNatureUeEc()?->isChoix() === false and $elementConstitutif->getNatureUeEc()?->isLibre() === false) {
-                if (str_starts_with($request->request->get('ficheMatiere'), 'id_')) {
+                if (str_starts_with($request->request->getString('ficheMatiere'), 'id_')) {
                     $ficheMatiere = $ficheMatiereRepository->find((int)str_replace(
                         'id_',
                         '',
-                        $request->request->get('ficheMatiere')
+                        $request->request->getString('ficheMatiere')
                     ));
                 } else {
                     $ficheMatiere = new FicheMatiere();
                     $ficheMatiere->setCampagneCollecte($this->getCampagneCollecte());
-                    $ficheMatiere->setLibelle($request->request->get('ficheMatiereLibelle'));
+                    $ficheMatiere->setLibelle($request->request->getString('ficheMatiereLibelle'));
                     $ficheMatiere->setParcours($parcours);
                     $ficheMatiereRepository->save($ficheMatiere, true);
                 }
@@ -158,20 +158,20 @@ class ElementConstitutifController extends BaseController
                 $elementConstitutifRepository->save($elementConstitutif, true);
             } elseif ($elementConstitutif->getNatureUeEc()?->isChoix() === true) {
                 $lastEc = $ecOrdre->getOrdreSuivant($ue, $request);
-                $elementConstitutif->setLibelle($request->request->get('ficheMatiereLibre'));
+                $elementConstitutif->setLibelle($request->request->getString('ficheMatiereLibre'));
                 $elementConstitutif->setFicheMatiere(null);
                 $elementConstitutif->setOrdre($lastEc);
                 $elementConstitutif->genereCode();
                 $elementConstitutifRepository->save($elementConstitutif, true);
                 //on récupère le champs matières, on découpe selon la ,. Si ca commence par "id_", on récupère la matière, sinon on créé la matière
-                $matieres = explode(',', $request->request->get('matieres'));
+                $matieres = explode(',', $request->request->getString('matieres'));
                 $natureEc = $natureUeEcRepository->findOneBy(['choix' => false, 'libre' => false, 'type' => 'ec']);
                 foreach ($matieres as $matiere) {
                     $ec = new ElementConstitutif();
                     $nextSousEc = $ecOrdre->getOrdreEnfantSuivant($elementConstitutif);
                     $ec->setEcParent($elementConstitutif);
                     $ec->setParcours($parcours);
-                    $ec->setModaliteEnseignement($parcours?->getModalitesEnseignement());
+                    $ec->setModaliteEnseignement($parcours->getModalitesEnseignement());
                     $ec->setUe($ue);
                     $ec->setNatureUeEc($natureEc);
 
@@ -192,8 +192,8 @@ class ElementConstitutifController extends BaseController
                 }
             } else {
                 $lastEc = $ecOrdre->getOrdreSuivant($ue, $request);
-                $elementConstitutif->setTexteEcLibre($request->request->get('ficheMatiereLibre'));
-                $elementConstitutif->setLibelle($request->request->get('ficheMatiereLibreLibelle'));
+                $elementConstitutif->setTexteEcLibre($request->request->getString('ficheMatiereLibre'));
+                $elementConstitutif->setLibelle($request->request->getString('ficheMatiereLibreLibelle'));
                 $elementConstitutif->setOrdre($lastEc);
                 $elementConstitutif->genereCode();
                 $elementConstitutifRepository->save($elementConstitutif, true);
@@ -231,7 +231,7 @@ class ElementConstitutifController extends BaseController
         $elementConstitutif = new ElementConstitutif();
         $elementConstitutif->setParcours($parcours);
 
-        $elementConstitutif->setModaliteEnseignement($parcours?->getModalitesEnseignement());
+        $elementConstitutif->setModaliteEnseignement($parcours->getModalitesEnseignement());
         $elementConstitutif->setUe($ue);
         $typeDiplome = $parcours->getFormation()?->getTypeDiplome();
 
@@ -250,7 +250,7 @@ class ElementConstitutifController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //            $typeEc = $typeEcRepository->find($request->request->get('typeEc'));
+            //            $typeEc = $typeEcRepository->find($request->request->getInt('typeEc'));
             //            $elementConstitutif->setTypeEc($typeEc);
 
             $natureEc = $natureUeEcRepository->findOneBy(['choix' => false, 'libre' => false, 'type' => 'ec']);
@@ -265,17 +265,17 @@ class ElementConstitutifController extends BaseController
                 $elementConstitutif->setTypeEc($tu);
             }
 
-            if (str_starts_with($request->request->get('ficheMatiere'), 'id_')) {
+            if (str_starts_with($request->request->getString('ficheMatiere'), 'id_')) {
                 $ficheMatiere = $ficheMatiereRepository->find((int)str_replace(
                     'id_',
                     '',
-                    $request->request->get('ficheMatiere')
+                    $request->request->getString('ficheMatiere')
                 ));
             } else {
                 $ficheMatiere = new FicheMatiere();
                 $ficheMatiere->setCampagneCollecte($this->getCampagneCollecte());
 
-                $ficheMatiere->setLibelle($request->request->get('ficheMatiereLibelle'));
+                $ficheMatiere->setLibelle($request->request->getString('ficheMatiereLibelle'));
                 $ficheMatiere->setParcours($parcours);
                 $ficheMatiereRepository->save($ficheMatiere, true);
             }
@@ -283,7 +283,7 @@ class ElementConstitutifController extends BaseController
             $elementConstitutif->setFicheMatiere($ficheMatiere);
             $elementConstitutif->setEcParent($ecParent->getEcParent());
             //si up => $ecParent->getOrdre() + 1; si down => $ecParent->getOrdre()
-            if ($request->query->get('sens', 'after') === 'avant') {
+            if ($request->query->getString('sens', 'after') === 'avant') {
                 $ordre = $ecParent->getOrdre();
             } else {
                 $ordre = $ecParent->getOrdre() + 1;
@@ -329,7 +329,7 @@ class ElementConstitutifController extends BaseController
         }
 
         $isAdmin = $this->isGranted('ROLE_ADMIN');
-        $isBut = $parcours->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT';
+        $isBut = $parcours->getFormation()->getTypeDiplome()->getLibelleCourt() === 'BUT';
         $form = $this->createForm(ElementConstitutifType::class, $elementConstitutif, [
             'action' => $this->generateUrl(
                 'app_element_constitutif_edit',
@@ -373,32 +373,32 @@ class ElementConstitutifController extends BaseController
             }
 
             if ($elementConstitutif->getNatureUeEc()?->isChoix() === false and $elementConstitutif->getNatureUeEc()?->isLibre() === false) {
-                if (str_starts_with($request->request->get('ficheMatiere'), 'id_')) {
+                if (str_starts_with($request->request->getString('ficheMatiere'), 'id_')) {
                     $ficheMatiere = $ficheMatiereRepository->find((int)str_replace(
                         'id_',
                         '',
-                        $request->request->get('ficheMatiere')
+                        $request->request->getString('ficheMatiere')
                     ));
                 } else {
                     $ficheMatiere = new FicheMatiere();
                     $ficheMatiere->setCampagneCollecte($this->getCampagneCollecte());
-                    $ficheMatiere->setLibelle($request->request->get('ficheMatiereLibelle'));
+                    $ficheMatiere->setLibelle($request->request->getString('ficheMatiereLibelle'));
                     $ficheMatiere->setParcours($parcours); //todo: ajouter le semestre
                     $ficheMatiereRepository->save($ficheMatiere, true);
                 }
                 $elementConstitutif->setFicheMatiere($ficheMatiere);
             } elseif ($elementConstitutif->getNatureUeEc()?->isLibre() === true) {
                 $elementConstitutif->setFicheMatiere(null);
-                $elementConstitutif->setTexteEcLibre($request->request->get('ficheMatiereLibre'));
-                $elementConstitutif->setLibelle($request->request->get('ficheMatiereLibreLibelle'));
+                $elementConstitutif->setTexteEcLibre($request->request->getString('ficheMatiereLibre'));
+                $elementConstitutif->setLibelle($request->request->getString('ficheMatiereLibreLibelle'));
                 //todo: supprimer MCCC...
 
             } elseif ($elementConstitutif->getNatureUeEc()?->isChoix() === true) {
                 $natureEc = $natureUeEcRepository->findOneBy(['choix' => false, 'libre' => false, 'type' => 'ec']);
-                $elementConstitutif->setLibelle($request->request->get('ficheMatiereLibre'));
+                $elementConstitutif->setLibelle($request->request->getString('ficheMatiereLibre'));
                 $elementConstitutif->setFicheMatiere(null);
                 //on récupère le champs matières, on découpe selon la ,. Si ca commence par "id_", on récupère la matière, sinon on créé la matière
-                $matieres = explode(',', $request->request->get('matieres'));
+                $matieres = explode(',', $request->request->getString('matieres'));
                 foreach ($matieres as $matiere) {
                     //on vérifie si pas déjà existant
                     if (str_starts_with($matiere, 'id_')) {
@@ -422,7 +422,7 @@ class ElementConstitutifController extends BaseController
                         $nextSousEc = $ecOrdre->getOrdreEnfantSuivant($elementConstitutif);
                         $ec->setEcParent($elementConstitutif);
                         $ec->setParcours($parcours);
-                        $ec->setModaliteEnseignement($parcours?->getModalitesEnseignement());
+                        $ec->setModaliteEnseignement($parcours->getModalitesEnseignement());
                         $ec->setUe($elementConstitutif->getUe());
                         $ec->setNatureUeEc($natureEc);
                         $ec->setFicheMatiere($ficheMatiere);
@@ -468,23 +468,23 @@ class ElementConstitutifController extends BaseController
         $typeDiplome = $parcours->getFormation()?->getTypeDiplome();
 
         if ($request->isMethod('POST')) {
-            if ($request->request->has('ficheMatiereLibre') && $request->request->get('ficheMatiereLibre') !== '') {
+            if ($request->request->has('ficheMatiereLibre') && $request->request->getString('ficheMatiereLibre') !== '') {
                 $natureEc = $natureUeEcRepository->find(9);
                 $elementConstitutif->setNatureUeEc($natureEc);
-                $elementConstitutif->setTexteEcLibre($request->request->get('ficheMatiereLibre'));
-                $elementConstitutif->setLibelle($request->request->get('ficheMatiereLibreLibelle'));
+                $elementConstitutif->setTexteEcLibre($request->request->getString('ficheMatiereLibre'));
+                $elementConstitutif->setLibelle($request->request->getString('ficheMatiereLibreLibelle'));
                 $elementConstitutif->setFicheMatiere(null);
             } else {
-                if (str_starts_with($request->request->get('ficheMatiere'), 'id_')) {
+                if (str_starts_with($request->request->getString('ficheMatiere'), 'id_')) {
                     $ficheMatiere = $ficheMatiereRepository->find((int)str_replace(
                         'id_',
                         '',
-                        $request->request->get('ficheMatiere')
+                        $request->request->getString('ficheMatiere')
                     ));
                 } else {
                     $ficheMatiere = new FicheMatiere();
                     $ficheMatiere->setCampagneCollecte($this->getCampagneCollecte());
-                    $ficheMatiere->setLibelle($request->request->get('ficheMatiereLibelle'));
+                    $ficheMatiere->setLibelle($request->request->getString('ficheMatiereLibelle'));
                     $ficheMatiere->setParcours($parcours); //todo: ajouter le semestre
                     $ficheMatiereRepository->save($ficheMatiere, true);
                 }
@@ -551,11 +551,12 @@ class ElementConstitutifController extends BaseController
         $form->handleRequest($request);
         if ($form->isSubmitted()) {
             $originalHeuresToText = $this->heuresToTexte($getElement->getFicheMatiereHeures());
-            if (array_key_exists('heuresEnfantsIdentiques', $request->request->all()['ec_step4'])) {
+            $ecStep4 = $request->request->all('ec_step4');
+            if (array_key_exists('heuresEnfantsIdentiques', $ecStep4)) {
                 if ($elementConstitutif->getEcParent() !== null) {
-                    $elementConstitutif->getEcParent()->setHeuresEnfantsIdentiques((bool)$request->request->all()['ec_step4']['heuresEnfantsIdentiques']);
+                    $elementConstitutif->getEcParent()->setHeuresEnfantsIdentiques((bool)$ecStep4['heuresEnfantsIdentiques']);
                 } else {
-                    $elementConstitutif->setHeuresEnfantsIdentiques((bool)$request->request->all()['ec_step4']['heuresEnfantsIdentiques']);
+                    $elementConstitutif->setHeuresEnfantsIdentiques((bool)$ecStep4['heuresEnfantsIdentiques']);
                 }
             } else {
                 $elementConstitutif->setHeuresEnfantsIdentiques(false);
