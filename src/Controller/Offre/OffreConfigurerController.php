@@ -12,6 +12,7 @@ use App\Enums\CampagneModuleEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Service\CampagneCollecteService;
+use App\Service\Offre\RemplissageSuspension;
 use App\Service\ParcoursComparaisonService;
 use App\Service\Validation\OffreValidationService;
 use App\Utils\TurboStreamResponseFactory;
@@ -97,6 +98,7 @@ final class OffreConfigurerController extends BaseController
         PlateformeAdmissionParametreRepository $plateformeParamRepo,
         ParcoursComparaisonService             $comparaisonService,
         OffreValidationService                 $offreValidationService,
+        RemplissageSuspension                  $remplissageSuspension,
     ): Response {
         $this->denyAccessUnlessCanConfigurerOffre($formation);
 
@@ -138,8 +140,6 @@ final class OffreConfigurerController extends BaseController
         // Paramètres de plateforme existants des années de la formation, en une requête : [anneeId][plateformeId]
         $annees = [];
         foreach ($formation->getParcours() as $p) {
-            // Cette sauvegarde ne touche pas la maquette : inutile de recalculer le remplissage au flush().
-            $p->suspendreRecalculRemplissage();
             foreach ($p->getAnnees() as $a) {
                 $annees[] = $a;
             }
@@ -438,6 +438,7 @@ final class OffreConfigurerController extends BaseController
             }
         }
 
+        $remplissageSuspension->suspendre();
         $em->flush();
 
         // Si la requête demande explicitement du Turbo Stream

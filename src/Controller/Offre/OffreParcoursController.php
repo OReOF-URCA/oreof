@@ -12,6 +12,7 @@ use App\Entity\User;
 use App\Enums\RegimeInscriptionEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
+use App\Service\Offre\RemplissageSuspension;
 use App\Service\Parcours\GenereStructureParcours;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
@@ -60,6 +61,7 @@ final class OffreParcoursController extends BaseController
         EntityManagerInterface $em,
         TurboStreamResponseFactory $turboStream,
         GenereStructureParcours $genereStructureParcours,
+        RemplissageSuspension $remplissageSuspension,
     ): Response {
         $csrfToken = (string)$request->request->get('_token');
         if (!$this->isCsrfTokenValid('parcours_add_' . $formation->getId(), $csrfToken)) {
@@ -143,6 +145,7 @@ final class OffreParcoursController extends BaseController
         $histo->setUser($this->getUser() instanceof User ? $this->getUser() : null);
         $em->persist($histo);
 
+        $remplissageSuspension->suspendre();
         $em->flush();
 
         $this->addFlashBag('success', 'Le parcours a été ajouté avec succès.');
@@ -195,6 +198,7 @@ final class OffreParcoursController extends BaseController
         Request $request,
         EntityManagerInterface $em,
         TurboStreamResponseFactory $turboStream,
+        RemplissageSuspension $remplissageSuspension,
     ): Response {
         $this->denyAccessUnlessCanConfigurerOffre($parcours->getFormation());
 
@@ -274,6 +278,7 @@ final class OffreParcoursController extends BaseController
             }
         }
 
+        $remplissageSuspension->suspendre();
         $em->flush();
 
         $dpeFormation = $em->getRepository(DpeFormation::class)->findOneBy([

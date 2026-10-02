@@ -14,6 +14,7 @@ use App\Repository\DpeFormationRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
+use App\Service\Offre\RemplissageSuspension;
 use App\Service\SecureUploadService;
 use App\Service\Validation\OffreValidationService;
 use App\Utils\TurboStreamResponseFactory;
@@ -40,7 +41,8 @@ final class OffreValidationController extends BaseController
         SecureUploadService $secureUploadService,
         EntityManagerInterface $em,
         WorkflowInterface $dpeFormationWorkflow,
-        TurboStreamResponseFactory $turboStream
+        TurboStreamResponseFactory $turboStream,
+        RemplissageSuspension $remplissageSuspension,
     ): Response {
         $campagne = $this->getCampagneCollecte();
 
@@ -321,6 +323,7 @@ final class OffreValidationController extends BaseController
                 $dpeFormationWorkflow->apply($dpeF, $transition, $motifs);
             }
 
+            $remplissageSuspension->suspendre();
             $em->flush();
 
             $nbValidees = count($formationsAValider);
