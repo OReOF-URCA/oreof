@@ -250,7 +250,7 @@ class ElementConstitutifController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //            $typeEc = $typeEcRepository->find($request->request->get('typeEc'));
+            //            $typeEc = $typeEcRepository->find($request->request->getInt('typeEc'));
             //            $elementConstitutif->setTypeEc($typeEc);
 
             $natureEc = $natureUeEcRepository->findOneBy(['choix' => false, 'libre' => false, 'type' => 'ec']);
@@ -551,11 +551,12 @@ class ElementConstitutifController extends BaseController
         $form->handleRequest($request);
         if ($form->isSubmitted()) {
             $originalHeuresToText = $this->heuresToTexte($getElement->getFicheMatiereHeures());
-            if (array_key_exists('heuresEnfantsIdentiques', $request->request->all()['ec_step4'])) {
+            $ecStep4 = $request->request->all('ec_step4');
+            if (array_key_exists('heuresEnfantsIdentiques', $ecStep4)) {
                 if ($elementConstitutif->getEcParent() !== null) {
-                    $elementConstitutif->getEcParent()->setHeuresEnfantsIdentiques((bool)$request->request->all()['ec_step4']['heuresEnfantsIdentiques']);
+                    $elementConstitutif->getEcParent()->setHeuresEnfantsIdentiques((bool)$ecStep4['heuresEnfantsIdentiques']);
                 } else {
-                    $elementConstitutif->setHeuresEnfantsIdentiques((bool)$request->request->all()['ec_step4']['heuresEnfantsIdentiques']);
+                    $elementConstitutif->setHeuresEnfantsIdentiques((bool)$ecStep4['heuresEnfantsIdentiques']);
                 }
             } else {
                 $elementConstitutif->setHeuresEnfantsIdentiques(false);
