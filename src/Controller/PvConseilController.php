@@ -166,10 +166,8 @@ class PvConseilController extends BaseController
                         return JsonReponse::error($exception->getPublicMessage());
                     }
 
-                    if ($upload !== null) {
-                        $tab['fichier'] = $upload->getStoredFilename();
-                        $tab['fichier_original'] = $upload->getOriginalFilename();
-                    }
+                    $tab['fichier'] = $upload->getStoredFilename();
+                    $tab['fichier_original'] = $upload->getOriginalFilename();
                 } else {
                     return JsonReponse::error($translator->trans('deposer.pv.flash.error', [], 'process'));
                 }
