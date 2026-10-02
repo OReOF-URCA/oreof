@@ -127,17 +127,7 @@
             <div class="mt-3 flex items-center justify-between border-t border-secondary-200 dark:border-secondary-700 pt-3 flex-wrap gap-2 text-xs">
                 <div class="flex items-center gap-2 text-secondary-600 dark:text-secondary-300 flex-wrap">
                     <span class="font-semibold text-secondary-800 dark:text-secondary-100">Statut :</span>
-                    {% if activeState == 'brouillon' %}
-                        <span class="inline-flex items-center rounded-md bg-secondary-100 px-2 py-0.5 text-xs font-medium text-secondary-600 ring-1 ring-inset ring-secondary-500/10 dark:bg-secondary-900/30 dark:text-secondary-300 dark:ring-secondary-700">Brouillon</span>
-                    {% elseif activeState == 'soumis_ses' %}
-                        <span class="inline-flex items-center rounded-md bg-warning-50 px-2 py-0.5 text-xs font-medium text-warning-800 ring-1 ring-inset ring-warning-600/20 dark:bg-warning-900/30 dark:text-warning-300 dark:ring-warning-700">Soumis Scolarité (SES)</span>
-                    {% elseif activeState == 'soumis_cfvu' %}
-                        <span class="inline-flex items-center rounded-md bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10 dark:bg-primary-900/30 dark:text-primary-300 dark:ring-primary-700">Soumis CFVU</span>
-                    {% elseif activeState == 'attente_pv' %}
-                        <span class="inline-flex items-center rounded-md bg-warning-50 px-2 py-0.5 text-xs font-medium text-warning-800 ring-1 ring-inset ring-warning-600/20 dark:bg-warning-900/30 dark:text-warning-300 dark:ring-warning-700">CFVU validé (Attente PV)</span>
-                    {% elseif activeState == 'publie' %}
-                        <span class="inline-flex items-center rounded-md bg-success-50 px-2 py-0.5 text-xs font-medium text-success-700 ring-1 ring-inset ring-success-600/20 dark:bg-success-900/30 dark:text-success-300 dark:ring-success-700">Publié</span>
-                    {% endif %}
+                    {{ include('offre_v2/_etat_offre_badge.html.twig', {etat: activeState}) }}
 
                     {% if dpeFormation.laissezPasser %}
                         <span class="text-warning-700 bg-warning-50 rounded-md px-2 py-0.5 border border-warning-200 inline-flex items-center gap-1 dark:bg-warning-900/30 dark:text-warning-300 dark:border-warning-700">

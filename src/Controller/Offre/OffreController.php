@@ -288,32 +288,11 @@ final class OffreController extends BaseController
                     }
                 }
                 
-                // 5. Statut
+                // 5. Statut : état de l'offre de la formation (workflow dpeFormation) ou présence d'anomalies
                 if ($statut !== '') {
-                    $match = false;
-                    if ($statut === 'Anomalie') {
-                        $match = (count($row['anomalies']) > 0);
-                    } else {
-                        foreach ($row['dpeParcours'] as $dpePar) {
-                            $state = array_key_first($dpePar->getEtatValidation()) ?? 'initialisation_dpe';
-                            if ($statut === 'Brouillon') {
-                                if (in_array($state, ['initialisation_dpe', 'autorisation_saisie', 'en_cours_redaction', 'tacite_reconduction', 'soumis_parcours'], true)) {
-                                    $match = true;
-                                    break;
-                                }
-                            } elseif ($statut === 'Validé composante') {
-                                if (in_array($state, ['soumis_dpe_composante', 'soumis_conseil', 'soumis_central'], true)) {
-                                    $match = true;
-                                    break;
-                                }
-                            } elseif ($statut === 'Validé central') {
-                                if (in_array($state, ['soumis_cfvu', 'valide_cfvu', 'valide_a_publier', 'publie'], true)) {
-                                    $match = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    $match = $statut === 'Anomalie'
+                        ? count($row['anomalies']) > 0
+                        : array_key_first($row['etatValidation']) === $statut;
                     if (!$match) {
                         return false;
                     }
@@ -420,7 +399,6 @@ final class OffreController extends BaseController
             unset($formaRow);
 
             $enabledTransitionsMap = [];
-            $stateCounts = [];
 
             foreach ($compGroup['formations'] as $formaRow) {
                 $fId = $formaRow['formation']->getId();
@@ -433,7 +411,6 @@ final class OffreController extends BaseController
                 }
 
                 $fActiveState = array_key_first($dpeF->getEtatValidation()) ?? 'brouillon';
-                $stateCounts[$fActiveState] = ($stateCounts[$fActiveState] ?? 0) + 1;
 
                 foreach ($dpeFormationWorkflow->getEnabledTransitions($dpeF) as $trans) {
                     $tName = $trans->getName();
@@ -448,8 +425,6 @@ final class OffreController extends BaseController
                 }
             }
 
-            arsort($stateCounts);
-            $compGroup['activeState'] = (string)array_key_first($stateCounts);
             $compGroup['transitions'] = array_values($enabledTransitionsMap);
         }
         unset($compGroup);

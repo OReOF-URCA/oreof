@@ -212,9 +212,9 @@
                     <div class="md:col-span-2">
                         <select name="statut" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit">
                             <option value="">Tous les statuts</option>
-                            <option value="Brouillon" {% if filters.statut|default('') == 'Brouillon' %}selected{% endif %}>Brouillon</option>
-                            <option value="Validé composante" {% if filters.statut|default('') == 'Validé composante' %}selected{% endif %}>Validé composante</option>
-                            <option value="Validé central" {% if filters.statut|default('') == 'Validé central' %}selected{% endif %}>Validé central</option>
+                            {% for etatValeur, etatLibelle in {'brouillon': 'Brouillon', 'soumis_ses': 'Soumis Scolarité', 'soumis_cfvu': 'Soumis CFVU', 'attente_pv': 'Validé CFVU (attente PV)', 'publie': 'Publié'} %}
+                                <option value="{{ etatValeur }}" {% if filters.statut|default('') == etatValeur %}selected{% endif %}>{{ etatLibelle }}</option>
+                            {% endfor %}
                             <option value="Anomalie" {% if filters.statut|default('') == 'Anomalie' %}selected{% endif %}>Anomalie</option>
                         </select>
                     </div>
@@ -378,19 +378,7 @@
                                 <td class="px-4 py-3 text-right font-semibold text-secondary-800 dark:text-secondary-100">{{ forma.capacite }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-1.5 flex-wrap items-center">
-                                        {% set renderedStates = [] %}
-                                        {% for dpePar in forma.dpeParcours %}
-                                            {% set state = (dpePar.etatValidation|keys)|first|default('initialisation_dpe') %}
-                                            {% if state not in renderedStates %}
-                                                {% set renderedStates = renderedStates|merge([state]) %}
-                                                {% for badge in dpePar.etatValidation|badgeDpeDto %}
-                                                    <twig:Badge :variant="badge.variant" :label="badge.label" />
-                                                {% endfor %}
-                                            {% endif %}
-                                        {% endfor %}
-                                        {% if forma.dpeParcours|length == 0 %}
-                                            <span class="text-xs text-secondary-400">Non initialisé</span>
-                                        {% endif %}
+                                        {{ include('offre_v2/_etat_offre_badge.html.twig', {etat: forma.etatValidation|keys|first}) }}
 
                                         <!-- PV & Note Badges -->
                                         {% if forma.hasPv and forma.pvDoc %}
