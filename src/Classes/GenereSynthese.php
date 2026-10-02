@@ -15,6 +15,7 @@ use App\Entity\Parcours;
 use App\Repository\ParcoursRepository;
 use App\Service\VersioningParcours;
 use App\Service\VersioningStructure;
+use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\TypeDiplome\TypeDiplomeResolver;
 
 class GenereSynthese
@@ -39,7 +40,7 @@ class GenereSynthese
         foreach ($parcours as $parc) {
             $typeD = $this->typeDiplomeResolver->fromParcours($parc);
             // récupérer les demandes de changement et de modification
-            $dto = $typeD->calculStructureParcours($parc, true, false);
+            $dto = $typeD->calcul($parc, new OptionsCalculStructure(withEcts: true, withBcc: false));
             $structureDifferencesParcours = $this->versioningParcours->getStructureDifferencesBetweenParcoursAndLastVersion($parc);
             if ($structureDifferencesParcours !== null) {
                 $diffStructure = ($this->versioningStructure->setDto($structureDifferencesParcours, $dto))->calculDiff();
@@ -56,7 +57,7 @@ class GenereSynthese
     {
         $typeD = $this->typeDiplomeResolver->fromParcours($parcours);
         // récupérer les demandes de changement et de modification
-        $dto = $typeD->calculStructureParcours($parcours, true, false);
+        $dto = $typeD->calcul($parcours, new OptionsCalculStructure(withEcts: true, withBcc: false));
         $structureDifferencesParcours = $this->versioningParcours->getStructureDifferencesBetweenParcoursAndLastVersion($parcours);
         if ($structureDifferencesParcours !== null) {
             $diffStructure = ($this->versioningStructure->setDto($structureDifferencesParcours, $dto))->calculDiff();

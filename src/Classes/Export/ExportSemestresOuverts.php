@@ -18,8 +18,8 @@ use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
 use DateTime;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class ExportSemestresOuverts implements ExportInterface
 {
@@ -93,7 +93,7 @@ class ExportSemestresOuverts implements ExportInterface
                 /** @var SemestreParcours $semestre */
                 foreach ($semestres as $semestre) {
                     $semestreIndex = $semestre->getOrdre() - 1; // Semestre 1 est à l'index 0
-                    $this->excelWriter->writeCellXY(chr(72 + $semestreIndex), $ligne, $semestre->getSemestre()?->isNonDispense() || !$semestre->isOuvert() ? 'Fermé' : 'Ouvert');
+                    $this->excelWriter->writeCellXY(Coordinate::stringFromColumnIndex(8 + $semestreIndex), $ligne, $semestre->getSemestre()?->isNonDispense() || !$semestre->isOuvert() ? 'Fermé' : 'Ouvert');
                 }
 
                 $this->excelWriter->writeCellXY('N', $ligne, $formation->getId());

@@ -86,5 +86,6 @@ class FormationController extends BaseController
         //écouter l'évent pour envoyer un mail
         //changer l'état de la formation avec le workflow
         //bloquer la modif
+        return new Response(status: Response::HTTP_NO_CONTENT);
     }
 }

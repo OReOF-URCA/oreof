@@ -9,6 +9,8 @@
 
 namespace App\TypeDiplome\Handler;
 
+use App\TypeDiplome\McccDisplayInterface;
+
 use App\DTO\StructureParcours;
 use App\DTO\StructureSemestre;
 use App\Entity\CampagneCollecte;
@@ -57,11 +59,16 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'DCG'])]
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'DSCG'])]
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'DEFAULT'])]
-class UniversityHandler extends AbstractTypeDiplomeHandler
+class UniversityHandler extends AbstractTypeDiplomeHandler implements McccDisplayInterface
 {
     public const TEMPLATE_FOLDER = 'licence';
     public const SOURCE = 'licence';
     public const TEMPLATE_FORM_MCCC = 'licence.html.twig';
+
+    public function getMcccTemplate(): string
+    {
+        return self::TEMPLATE_FORM_MCCC;
+    }
     public const NB_ANNEE = 3;
 
     /**

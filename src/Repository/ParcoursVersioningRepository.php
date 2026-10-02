@@ -23,7 +23,11 @@ class ParcoursVersioningRepository extends ServiceEntityRepository
     }
 
 
-    public function findLastVersion(Parcours $parcours){
+    /**
+     * @return list<ParcoursVersioning>
+     */
+    public function findLastVersion(Parcours $parcours): array
+    {
         return $this->createQueryBuilder('pv')
             ->orderBy('pv.version_timestamp', 'DESC')
             ->where('pv.parcours = :parcours')
@@ -32,7 +36,11 @@ class ParcoursVersioningRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findLastCfvuVersion(Parcours $parcours) {
+    /**
+     * @return list<ParcoursVersioning>
+     */
+    public function findLastCfvuVersion(Parcours $parcours): array
+    {
         return $this->createQueryBuilder('pv')
             ->orderBy('pv.version_timestamp', 'DESC')
             ->join('pv.parcours', 'p', 'WITH', 'pv.parcours = :parcours')

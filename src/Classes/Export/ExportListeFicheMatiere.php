@@ -12,7 +12,6 @@ namespace App\Classes\Export;
 use App\Classes\Excel\ExcelWriter;
 use App\Classes\GetHistorique;
 use App\Entity\CampagneCollecte;
-use App\Entity\ElementConstitutif;
 use App\Repository\FicheMatiereRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
@@ -54,7 +53,6 @@ class ExportListeFicheMatiere implements ExportInterface
         $this->excelWriter->writeCellXY(7, 1, 'Formation');
 
         $ligne = 2;
-        /** @var ElementConstitutif $ec */
         foreach ($fiches as $fiche) {
             $this->excelWriter->writeCellXY(1, $ligne, $fiche->getId());
             $this->excelWriter->writeCellXY(2, $ligne, $fiche->getLibelle());

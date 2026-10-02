@@ -14,6 +14,8 @@ use App\DTO\StructureSemestre;
 use App\DTO\StructureUe;
 use App\Entity\Formation;
 use App\Entity\Parcours;
+use App\TypeDiplome\Dto\OptionsCalculStructure;
+use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\Tools;
 use DateTime;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -24,7 +26,7 @@ class ExportCodification
     const GREEN = '#00B050';
 
     public function __construct(
-        protected CalculStructureParcours $calculStructureParcours,
+        protected TypeDiplomeResolver $typeDiplomeResolver,
         protected ExcelWriter         $excelWriter
     ) {
     }
@@ -108,7 +110,10 @@ class ExportCodification
 
     private function writeParcours(Parcours $parcours): void
     {
-        $dto = $this->calculStructureParcours->calcul($parcours, true, false);
+        $dto = $this->typeDiplomeResolver->fromParcours($parcours)->calcul(
+            $parcours,
+            new OptionsCalculStructure(withEcts: true, withBcc: false)
+        );
 
         $this->excelWriter->writeCellXY(1, 1, 'Diplôme ' . $parcours->getFormation()->getDisplayLong());
         $this->excelWriter->writeCellXY(1, 2, 'Parcours ' . $parcours->getLibelle());

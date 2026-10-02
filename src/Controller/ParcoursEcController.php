@@ -347,5 +347,7 @@ class ParcoursEcController extends AbstractController
                 $ecRepository->save($ec, true);
                 return JsonReponse::success('ECTS de l\'EC mis à jour');
         }
+
+        return JsonReponse::error('Champ EC inconnu');
     }
 }

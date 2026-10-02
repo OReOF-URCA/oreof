@@ -57,6 +57,27 @@ class HistoriqueFormationRepository extends ServiceEntityRepository
         return count($data) > 0 ? $data[0] : null;
     }
 
+    /**
+     * @return list<HistoriqueFormation>
+     */
+    public function findByFormation(Formation $formation): array
+    {
+        return $this->createQueryBuilder('h')
+            ->leftJoin('h.user', 'u')
+            ->leftJoin('h.formation', 'f')
+            ->leftJoin('f.composantePorteuse', 'c')
+            ->leftJoin('h.dpeFormation', 'df')
+            ->leftJoin('h.changeRf', 'cr')
+            ->leftJoin('h.documentPv', 'pv')
+            ->leftJoin('h.documentNote', 'note')
+            ->addSelect('u', 'f', 'c', 'df', 'cr', 'pv', 'note')
+            ->where('h.formation = :formation OR df.formation = :formation OR cr.formation = :formation')
+            ->setParameter('formation', $formation)
+            ->orderBy('h.created', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findBeforDate(DateTime $param): array
     {
         return $this->createQueryBuilder('h')

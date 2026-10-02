@@ -2,7 +2,6 @@
 
 namespace App\TypeDiplome;
 
-use App\DTO\StructureParcours;
 use App\Entity\Parcours;
 
 
@@ -12,6 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 interface TypeDiplomeHandlerInterface extends TypeDiplomeMcccInterface, StructureInterface, McccInterface, DiplomeExportInterface
 {
+    public function getStructureCompetences(Parcours $parcours);
+
     public function getTypeEpreuves(): array;
 
     public function getTemplateFolder(): string;

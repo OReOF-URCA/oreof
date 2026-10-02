@@ -233,7 +233,7 @@ class ParcoursWizardController extends BaseController
         'DELETE'
     ])]
     public function recopieHorsParcoursAjax(
-        BCC $bcc,
+        Bcc $bcc,
         EntityManagerInterface $entityManager,
         Request $request,
         FormationRepository $formationRepository,

@@ -25,7 +25,6 @@ use App\Repository\ProfilRepository;
 use App\Repository\UserProfilRepository;
 use App\Repository\UserRepository;
 use App\Service\DetailBuilder;
-use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
 use DateTime;
 use Symfony\Component\HttpFoundation\Request;
@@ -98,8 +97,14 @@ class UserController extends BaseController
             } else {
                 $admins = $userRepository->findByRole('ROLE_ADMIN');
 
+                $currentUser = $this->getUser();
+                if (!$currentUser instanceof User) {
+                    throw $this->createAccessDeniedException();
+                }
+
                 $user->setIsValidDpe(true);
-                $user->setComposanteDemande($this->getUser()?->getComposanteResponsableDpe()->first());
+                $composanteResponsableDpe = $currentUser->getComposanteResponsableDpe()->first();
+                $user->setComposanteDemande($composanteResponsableDpe !== false ? $composanteResponsableDpe : null);
                 $user->setDateDemande(new DateTime());
                 $user->setDateValideDpe(new DateTime());
 
@@ -109,7 +114,7 @@ class UserController extends BaseController
                         'mails/user/ajout_oreof_dpe.txt.twig',
                         [
                             'user' => $user,
-                            'dpe' => $this->getUser(),
+                            'dpe' => $currentUser,
                         ]
                     );
                     $myMailer->sendMessage([$admin->getEmail()], '[ORéOF] Nouvel ajout d\'un utilisateur par un DPE');
@@ -117,7 +122,7 @@ class UserController extends BaseController
                 $myMailer->initEmail();
                 $myMailer->setTemplate(
                     'mails/user/ajout_oreof.txt.twig',
-                    ['user' => $user, 'dpe' => $this->getUser()]
+                    ['user' => $user, 'dpe' => $currentUser]
                 );
             }
             $myMailer->sendMessage([$user->getEmail()], '[ORéOF] Accès ORéOF');
@@ -304,7 +309,11 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $user->setRoles([strtoupper($request->request->all()['user']['role'])]);
+            $userData = $request->request->all('user');
+            $role = $userData['role'] ?? null;
+            if (is_string($role) && $role !== '') {
+                $user->setRoles([strtoupper($role)]);
+            }
             $userRepository->save($user, true);
 
             return $turboStream->streamToastSuccess('Utilisateur modifié avec succès', true);
@@ -324,7 +333,6 @@ class UserController extends BaseController
     }
 
     /**
-     * @throws JsonException
      */
     #[Route('/{id}', name: 'app_user_delete', requirements: ['id' => '\d+'], methods: ['DELETE'])]
     #[IsGranted('ROLE_ADMIN')]

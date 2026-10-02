@@ -36,7 +36,7 @@ class CompetenceExportController extends AbstractController
     {
         $formation = $parcours->getFormation();
         $typeD = $typeDiplomeResolver->fromFormation($formation);
-        $dto = $typeD->calculStructureParcours($parcours, new OptionsCalculStructure(dataFromFicheMatiere: true));
+        $dto = $typeD->calcul($parcours, new OptionsCalculStructure(dataFromFicheMatiere: true));
         return $myGotenbergPdf->render('pdf/bcc_export_croise.html.twig', [
             'formation' => $formation,
             'parcours' => $parcours,

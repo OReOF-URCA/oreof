@@ -113,7 +113,7 @@ class ElementConstitutifBccController extends BaseController
             throw new RuntimeException('DPE Parcours non trouvé');
         }
 
-        $formation = $elementConstitutif->getParcours()?->getFormation();
+        $formation = $elementConstitutif->getParcours()->getFormation();
         $raccroche = $elementConstitutif->getFicheMatiere()?->getParcours() !== $parcours;
         if ($formation === null) {
             throw new RuntimeException('Formation non trouvée');
@@ -151,10 +151,8 @@ class ElementConstitutifBccController extends BaseController
             //tester si BUT ou autre...
 
 
-            foreach ($elementConstitutif->getFicheMatiere()?->getApprentissagesCritiques() as $competence) {
-                if ($competence !== null) {
-                    $ecComps[] = $competence->getId();
-                }
+            foreach ($elementConstitutif->getFicheMatiere()?->getApprentissagesCritiques() ?? [] as $competence) {
+                $ecComps[] = $competence->getId();
             }
 
             $competence = $butCompetenceRepository->findOneByUe($elementConstitutif->getUe(), $formation, $this->getCampagneCollecte());

@@ -34,7 +34,7 @@ class ParcoursCompetencesController extends BaseController
 {
     #[Route('/{parcours}/', name: 'index')]
     public function competences(
-        TypeDIplomeResolver $typeDiplomeResolver,
+        TypeDiplomeResolver $typeDiplomeResolver,
         Parcours            $parcours,
         ParcoursRepository  $parcoursRepository
     ): Response
@@ -52,7 +52,7 @@ class ParcoursCompetencesController extends BaseController
 
     #[Route('/{parcours}/competences/reset', name: 'reset')]
     public function competencesReset(
-        TypeDIplomeResolver $typeDiplomeResolver,
+        TypeDiplomeResolver $typeDiplomeResolver,
         Parcours            $parcours,
     ): Response
     {
@@ -66,7 +66,7 @@ class ParcoursCompetencesController extends BaseController
 
     #[Route('/{parcours}/competences/recopie', name: 'recopie_bcc')]
     public function competencesRecopie(
-        TypeDIplomeResolver $typeDiplomeResolver,
+        TypeDiplomeResolver $typeDiplomeResolver,
         Parcours            $parcours,
     ): Response
     {

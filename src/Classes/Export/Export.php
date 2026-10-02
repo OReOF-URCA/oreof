@@ -22,7 +22,6 @@ class Export
     private array $formations;
     private ?CampagneCollecte $campagneCollecte;
     private ?DateTimeInterface $date;
-    private ?Composante $composante = null;
     private string $dir;
 
     public function __construct(
@@ -50,11 +49,6 @@ class Export
     public function setDate(?DateTimeInterface $date): void
     {
         $this->date = $date;
-    }
-
-    public function setComposante(?Composante $composante): void
-    {
-        $this->composante = $composante;
     }
 
     public function setTypeDocument(string $typeDocument): void

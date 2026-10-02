@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Composante;
+use App\Entity\User;
 use App\Form\ExportType;
 use App\Message\Export;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
@@ -172,11 +173,6 @@ class ExportController extends BaseController
                 ])) {
                 $dpes = $dpeParcoursRepository->findParcoursByComposante($this->getCampagneCollecte(), $composante);
             } elseif ($this->isGranted('SHOW', [
-                'route' => 'app_etablissement',
-                'subject' => 'etablissement'
-            ])) {
-                $dpes = $dpeParcoursRepository->findParcoursByComposanteCfvu($this->getCampagneCollecte(), $composante);
-            } elseif ($this->isGranted('SHOW', [
                 'route' => 'app_composante',
                 'subject' => $composante
             ])) {
@@ -200,7 +196,7 @@ class ExportController extends BaseController
     ): Response {
         $typeDocument = (string)($request->request->get('type_document_global') ?: $request->request->get('type_document'));
         $liste = $request->request->all('liste');
-        if (!\is_array($liste) || $liste === []) {
+        if ($liste === []) {
             $liste = $request->request->all('dpes');
         }
         $liste = array_values(array_filter($liste, static fn($id) => null !== $id && '' !== (string)$id));
@@ -246,12 +242,15 @@ class ExportController extends BaseController
             ], Response::HTTP_OK);
         }
 
+        $user = $this->getUser();
+        $userId = $user instanceof User ? $user->getId() : null;
+
         $messageBus->dispatch(new Export(
-            $this->getUser()?->getId(),
+            $userId,
             $typeDocument,
             $liste,
             $this->getCampagneCollecte(),
-            Tools::convertDate($request->request->get('date')),
+            Tools::convertDate($request->request->getString('date') ?: null),
             $composanteId ? (string)$composanteId : null,
         ));
 
@@ -270,7 +269,7 @@ class ExportController extends BaseController
     public function exports(GenerationJobRepository $repo): Response
     {
         $user = $this->getUser();
-        $jobs = $repo->findForUser($this->getUser()?->getId());
+        $jobs = $repo->findForUser($user instanceof User ? $user->getId() : null);
 
         return $this->render('export/my_exports.html.twig', [
             'jobs' => $jobs

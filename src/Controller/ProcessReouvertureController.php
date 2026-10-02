@@ -50,9 +50,6 @@ class ProcessReouvertureController extends BaseController
         Request            $request
     ): Response
     {
-        if ($parcours === null) {
-            return JsonReponse::error('Parcours non trouvé');
-        }
         $formation = $parcours->getFormation();
         $typeDpe = 'P';
 
@@ -80,10 +77,14 @@ class ProcessReouvertureController extends BaseController
                 $demande->setFormation($formation);
                 $demande->setCampagneCollecte($this->getCampagneCollecte());
                 $demande->setParcours($parcours);
-                $demande->setAuteur($this->getUser());
+                $currentUser = $this->getUser();
+                if (!$currentUser instanceof User) {
+                    throw $this->createAccessDeniedException();
+                }
+                $demande->setAuteur($currentUser);
                 $demande->setEtatDemande(EtatDpeEnum::non_ouverture_ses);
                 $demande->setNiveauDemande($typeDpe);
-                $demande->setArgumentaireDemande(array_key_exists('argumentaire_demande_non_ouverture', $data) ? $data['argumentaire_demande_non_ouverture'] : '');
+                $demande->setArgumentaireDemande($request->request->getString('argumentaire_demande_non_ouverture'));
                 $demande->setNiveauModification($etatTypeModification);
                 $this->entityManager->persist($demande);
                 $this->entityManager->flush();
@@ -108,9 +109,6 @@ class ProcessReouvertureController extends BaseController
         VersioningParcours  $versioningParcours,
         Request             $request
     ): Response {
-        if ($parcours === null) {
-            return JsonReponse::error('Parcours non trouvé');
-        }
         $formation = $parcours->getFormation();
         $typeDpe = 'P';
 
@@ -141,15 +139,21 @@ class ProcessReouvertureController extends BaseController
                 $histoEvent = new HistoriqueParcoursEvent($parcours, $this->getUser(), 'en_cours_redaction', 'valide', $request);
                 $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
                 $this->entityManager->flush();
+            } else {
+                return JsonReponse::error('Type de réouverture inconnu');
             }
 
             $demande = new DpeDemande();
             $demande->setFormation($formation);
             $demande->setParcours($parcours);
             $demande->setCampagneCollecte($this->getCampagneCollecte());
-            $demande->setAuteur($this->getUser());
+            $currentUser = $this->getUser();
+                if (!$currentUser instanceof User) {
+                    throw $this->createAccessDeniedException();
+                }
+                $demande->setAuteur($currentUser);
             $demande->setNiveauDemande($typeDpe);
-            $demande->setArgumentaireDemande(array_key_exists('argumentaire_demande_reouverture', $data) ? $data['argumentaire_demande_reouverture'] : '');
+            $demande->setArgumentaireDemande($request->request->getString('argumentaire_demande_reouverture'));
             $demande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
             $demande->setNiveauModification($etatTypeModification);
             $this->entityManager->persist($demande);
@@ -174,9 +178,6 @@ class ProcessReouvertureController extends BaseController
         Request              $request
     ): Response
     {
-        if ($parcours === null) {
-            return JsonReponse::error('Parcours non trouvé');
-        }
 
         $demande = $dpeDemandeRepository->findLastOpenedDemande($parcours, EtatDpeEnum::en_cours_redaction, TypeModificationDpeEnum::MODIFICATION_TEXTE);
 
@@ -187,7 +188,11 @@ class ProcessReouvertureController extends BaseController
                 $demande->setFormation($parcours->getFormation());
                 $demande->setParcours($parcours);
                 $demande->setCampagneCollecte($this->getCampagneCollecte());
-                $demande->setAuteur($this->getUser());
+                $currentUser = $this->getUser();
+                if (!$currentUser instanceof User) {
+                    throw $this->createAccessDeniedException();
+                }
+                $demande->setAuteur($currentUser);
                 $demande->setNiveauDemande('P');
                 $demande->setniveauModification(TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE);
                 $this->entityManager->persist($demande);
@@ -207,7 +212,7 @@ class ProcessReouvertureController extends BaseController
             $this->entityManager->flush();
 
 
-            $demande->setArgumentaireDemande(array_key_exists('argumentaire_demande_reouverture', $data) ? $data['argumentaire_demande_reouverture'] : '');
+            $demande->setArgumentaireDemande($request->request->getString('argumentaire_demande_reouverture'));
             $demande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
 
             $this->entityManager->flush();
@@ -237,11 +242,6 @@ class ProcessReouvertureController extends BaseController
     ): Response {
         $typeDpe = 'F';
 
-        if ($formation === null) {
-            return JsonReponse::error('Formation non trouvée');
-        }
-
-
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
             if ($data['demandeReouverture'] === 'MODIFICATION_TEXTE') {
@@ -251,6 +251,8 @@ class ProcessReouvertureController extends BaseController
             } elseif ($data['demandeReouverture'] === 'MODIFICATION_PARCOURS') {
                 $etat = TypeModificationDpeEnum::MODIFICATION_PARCOURS;
                 $texte = 'DPE ouvert pour modification de la structure de la mention';
+            } else {
+                return JsonReponse::error('Type de réouverture inconnu');
             }
 
             //todo: vérifier si l'évent est OK ?
@@ -267,10 +269,14 @@ class ProcessReouvertureController extends BaseController
             $demande = new DpeDemande();
             $demande->setFormation($formation);
             $demande->setParcours(null);
-            $demande->setAuteur($this->getUser());
+            $currentUser = $this->getUser();
+                if (!$currentUser instanceof User) {
+                    throw $this->createAccessDeniedException();
+                }
+                $demande->setAuteur($currentUser);
             $demande->setCampagneCollecte($this->getCampagneCollecte());
             $demande->setNiveauDemande($typeDpe);
-            $demande->setArgumentaireDemande(array_key_exists('argumentaire_demande_reouverture', $data) ? $data['argumentaire_demande_reouverture'] : '');
+            $demande->setArgumentaireDemande($request->request->getString('argumentaire_demande_reouverture'));
             $demande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
             $demande->setNiveauModification($etat);
             $this->entityManager->persist($demande);

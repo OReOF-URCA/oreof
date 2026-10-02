@@ -36,7 +36,7 @@ class ConfigEmailController extends BaseController
     }
 
     #[Route('/', name: 'app_config_email')]
-    public function index(EmailTemplateRepository $repo)
+    public function index(EmailTemplateRepository $repo): Response
     {
         $templates = $repo->findBy([], ['workflow' => 'ASC']);
 
@@ -101,7 +101,7 @@ class ConfigEmailController extends BaseController
     #[Route('/{id}', name: 'admin_email_template_delete', methods: ['DELETE'])]
     public function delete(EmailTemplate $tpl, Request $request, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete_email_template_' . $tpl->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete_email_template_' . $tpl->getId(), $request->request->getString('_token'))) {
             $em->remove($tpl);
             $em->flush();
             $this->addFlash('success', 'Template supprimé.');
@@ -120,14 +120,16 @@ class ConfigEmailController extends BaseController
     {
         $subject = (string)$request->request->get('subject', '');
         $subjectVariant = $request->request->get('subjectVariant');
+        $subjectVariant = is_string($subjectVariant) ? $subjectVariant : null;
         $bodyHtml = (string)$request->request->get('bodyHtml', '');
         $bodyText = $request->request->get('bodyText');
+        $bodyText = is_string($bodyText) && $bodyText !== '' ? $bodyText : null;
 
 
         $tpl = (new EmailTemplate())
             ->setSubject($subject)
             ->setBodyHtml($bodyHtml)
-            ->setBodyText($bodyText ?: null)
+            ->setBodyText($bodyText)
             ->setWorkflow((string)$request->request->get('workflow', 'preview.workflow'));
 
         if ($jsonSubjects = $request->request->get('subjects')) {

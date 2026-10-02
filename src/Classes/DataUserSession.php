@@ -11,21 +11,18 @@ namespace App\Classes;
 
 use App\Entity\CampagneCollecte;
 use App\Entity\Etablissement;
+use App\Entity\User;
 use App\Repository\CampagneCollecteRepository;
-use Stringable;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 class DataUserSession
 {
-    private UserInterface $user;
-
+    private ?User $user = null;
     private string $dir;
     private ?CampagneCollecte $campagneCollecte = null;
     private ?Etablissement $etablissement = null;
-
 
     public function __construct(
         private RequestStack               $requestStack,
@@ -34,8 +31,9 @@ class DataUserSession
         KernelInterface                    $kernel,
     ) {
         $this->dir = $kernel->getProjectDir();
-        if ($tokenStorage->getToken() !== null) {
-            $this->user = $tokenStorage->getToken()->getUser();
+        $user = $tokenStorage->getToken()?->getUser();
+        if ($user instanceof User) {
+            $this->user = $user;
         }
     }
 
@@ -43,7 +41,7 @@ class DataUserSession
     {
         $session = $this->requestStack->getSession();
         if ($this->campagneCollecte === null) {
-            if ($session !== null && $session->get('campagneCollecte') !== null) {
+            if ($session->get('campagneCollecte') !== null) {
                 $this->campagneCollecte = $this->campagneCollecteRepository->find($session->get('campagneCollecte'));
             } else {
                 $this->campagneCollecte = $this->campagneCollecteRepository->findOneBy(['defaut' => true]);
@@ -56,12 +54,19 @@ class DataUserSession
     public function version(): ?string
     {
         $filename = $this->dir . '/package.json';
-        $composerData = json_decode(file_get_contents($filename), true);
+        if (!is_file($filename)) {
+            return null;
+        }
+        $content = file_get_contents($filename);
+        if ($content === false) {
+            return null;
+        }
+        $composerData = json_decode($content, true);
 
-        return $composerData['version'];
+        return is_array($composerData) ? ($composerData['version'] ?? null) : null;
     }
 
-    public function getUser(): UserInterface|Stringable|string
+    public function getUser(): ?User
     {
         return $this->user;
     }

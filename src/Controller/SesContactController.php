@@ -38,6 +38,9 @@ class SesContactController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
+            $destinataires = $request->request->all('destinataires');
+            $replyTo = $request->request->all('replyTo');
+
             $mailer->initEmail();
             $mailer->setTemplate('mails/ses_contact.html.twig', [
                 'expediteur' => $this->getUser(),
@@ -46,18 +49,18 @@ class SesContactController extends AbstractController
                 'message' => $request->request->get('message'),
             ]);
             $mailer->sendMessage(
-                $this->getUsers($request->request->all()['destinataires']),
+                $this->getUsers($destinataires),
                 '[ORéOF] ' . $request->request->get('subject'),
                 [
-                    'cc' => $this->getUsers($request->request->all()['replyTo'] ?? []),
+                    'cc' => $this->getUsers($replyTo),
                 ]
             );
 
             $mailer->initEmail();
             $mailer->setTemplate('mails/ses_contact_copie.html.twig', [
                 'message' => $request->request->get('message'),
-                'destinataires' => $this->getUsers($request->request->all()['destinataires']),
-                'cc' => $this->getUsers($request->request->all()['replyTo'] ?? []),
+                'destinataires' => $this->getUsers($destinataires),
+                'cc' => $this->getUsers($replyTo),
                 'formation' => $formation ?? null,
                 'parcours' => $parcours ?? null,
                 'expediteur' => $this->getUser(),

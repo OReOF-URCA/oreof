@@ -17,15 +17,17 @@ use App\Entity\ElementConstitutif;
 use App\Entity\FicheMatiere;
 use App\Entity\FicheMatiereVersioning;
 use App\Entity\Parcours;
-use App\Entity\TypeEpreuve;
+use App\Entity\User;
 use App\Form\FicheMatiereType;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereMutualisableRepository;
 use App\Repository\FicheMatiereRepository;
 use App\Repository\LangueRepository;
 use App\Repository\TypeDiplomeRepository;
+use App\Repository\TypeEpreuveRepository;
 use App\Repository\UeRepository;
 use App\Service\VersioningFicheMatiere;
+use App\TypeDiplome\McccDisplayInterface;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -140,6 +142,10 @@ class FicheMatiereController extends BaseController
 
         $ficheMatiereParcours = $ficheMatiereMutualisableRepository->findByFicheMatieres($ficheMatiere);
         $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiere);
+
+        if (!$typeD instanceof McccDisplayInterface) {
+            throw new RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
+        }
 
         return $this->render('fiche_matiere/show.html.twig', [
             'ficheMatiere' => $ficheMatiere,
@@ -436,12 +442,12 @@ class FicheMatiereController extends BaseController
         FicheMatiereVersioning $ficheMatiereVersioning,
         VersioningFicheMatiere $ficheMatiereVersioningService,
         Filesystem $filesystem,
-        EntityManagerInterface $em,
-        LicenceTypeDiplome $licenceTypeD,
-        ButTypeDiplome $butTypeD,
-        MeefTypeDiplome $meefTypeD
+        ElementConstitutifRepository $elementConstitutifRepository,
+        TypeEpreuveRepository $typeEpreuveRepository,
     ): RedirectResponse|Response
     {
+        $sourceFicheMatiere = $ficheMatiereVersioning->getFicheMatiere();
+
         try {
             $version = $ficheMatiereVersioningService->loadFicheMatiereVersion($ficheMatiereVersioning);
             $ficheMatiere = $version['ficheMatiere'];
@@ -452,13 +458,8 @@ class FicheMatiereController extends BaseController
                 'Bachelor Universitaire de Technologie' => 'but.html.twig',
                 'Master MEEF' => 'meef.html.twig'
             ];
-            $mcccTypeDiplome = [
-                'Licence' => $licenceTypeD,
-                'Bachelor Universitaire de Technologie' => $butTypeD,
-                'Master MEEF' => $meefTypeD
-            ];
+            $mcccTypeDiplome = $this->typeDiplomeResolver->fromTypeDiplome($typeD);
             $templateForm = array_key_exists($typeD->getLibelle(), $templateFormArray) ? $templateFormArray[$typeD->getLibelle()] : [];
-            $mcccTypeDiplome = array_key_exists($typeD->getLibelle(), $mcccTypeDiplome) ? $mcccTypeDiplome[$typeD->getLibelle()] : [];
             $bccs = [];
             foreach ($ficheMatiere->getCompetences() as $competence) {
                 if (!array_key_exists($competence->getBlocCompetence()?->getId(), $bccs)) {
@@ -468,9 +469,8 @@ class FicheMatiereController extends BaseController
                 $bccs[$competence->getBlocCompetence()?->getId()]['competences'][] = $competence;
             }
 
-            $ecParcours = $em->getRepository(ElementConstitutif::class)
-                ->findByFicheMatiereParcours($ficheMatiereVersioning->getFicheMatiere());
-            $typeEpreuves = $em->getRepository(TypeEpreuve::class)->findByTypeDiplome($typeD);
+            $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiereVersioning->getFicheMatiere());
+            $typeEpreuves = $typeEpreuveRepository->findByTypeDiplome($typeD);
 
             return $this->render('fiche_matiere/show.versioning.html.twig', [
                 'ficheMatiere' => $ficheMatiere,
@@ -491,28 +491,26 @@ class FicheMatiereController extends BaseController
             $now = new DateTimeImmutable();
             $dateHeure = $now->format('d-m-Y_H-i-s');
             $logTxt = "[{$dateHeure}] La visualisation de la version de la fiche matière : "
-            . "{$ficheMatiere->getSlug()}"
+            . "{$sourceFicheMatiere->getSlug()}"
             . " - a rencontré une erreur.\nMessage : {$e->getMessage()}\n";
             $filesystem->appendToFile(__DIR__ . "/../../versioning_json/error_log/view_fiche_matiere_error.log", $logTxt);
             $this->addFlash('toast', [
                 'type' => 'error',
                 'text' => "Une erreur est survenue lors de la visualisation."
             ]);
-            return $this->redirectToRoute('fiche_matiere_v2_voir', ['slug' => $ficheMatiere->getSlug()]);
+            return $this->redirectToRoute('fiche_matiere_v2_voir', ['slug' => $sourceFicheMatiere->getSlug()]);
         }
     }
 
     #[Route('/recherche/parcours/{parcours}/{keyword}', name: 'app_fiche_matiere_search')]
     public function getFicheMatiereForParcoursAndKeyword(
-        EntityManagerInterface $entityManager,
+        FicheMatiereRepository $ficheMatiereRepository,
         TurboStreamResponseFactory $turboStream,
         Parcours $parcours,
         string $keyword = ""
     ): Response
     {
-        $associatedFicheMatiere = $entityManager
-            ->getRepository(FicheMatiere::class)
-            ->findForParcoursWithKeyword($parcours, $keyword);
+        $associatedFicheMatiere = $ficheMatiereRepository->findForParcoursWithKeyword($parcours, $keyword);
 
         $count = count($associatedFicheMatiere);
         $title = $count > 1

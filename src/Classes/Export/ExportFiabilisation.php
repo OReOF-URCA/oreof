@@ -85,7 +85,7 @@ class ExportFiabilisation
                     }
 
                     //récuération de la structure et des EC
-                    $dto = $typeD->calculStructureParcours($parcours);
+                    $dto = $typeD->calcul($parcours);
                     foreach ($dto->semestres as $sem) {
                         foreach ($sem->ues as $ue) {
                             if ($ue->ue->getNatureUeEc()?->isChoix()) {
@@ -167,7 +167,7 @@ class ExportFiabilisation
         return $this->fileName . '.xlsx';
     }
 
-    private function writeDebutLigne(int $ligne, $data): void
+    private function writeDebutLigne(int $ligne, array $data): void
     {
         foreach ($data as $key => $value) {
             $this->excelWriter->writeCellXY($key, $ligne, $value);

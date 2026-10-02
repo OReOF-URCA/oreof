@@ -87,5 +87,7 @@ class ParcoursBccController extends BaseController
                 'parcours' => $parcours,
             ], new Response(headers: ['Content-Type' => 'text/vnd.turbo-stream.html']));
         }
+
+        return new Response(status: Response::HTTP_NO_CONTENT);
     }
 }

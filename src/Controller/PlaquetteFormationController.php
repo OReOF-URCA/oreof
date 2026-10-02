@@ -29,7 +29,7 @@ class PlaquetteFormationController extends AbstractController
         $typeD = $typeDiplomeResolver->get($typeDiplome);
         foreach ($formation->getParcours() as $parcours) {
 
-            $tParcours[$parcours->getId()] = $typeD->calculStructureParcours($parcours);
+            $tParcours[$parcours->getId()] = $typeD->calcul($parcours);
         }
 
         return $this->myPdf->render('pdf/formation_plaquette.html.twig', [
