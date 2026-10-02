@@ -3,13 +3,10 @@
 namespace App\Controller;
 
 use App\Classes\JsonReponse;
-use App\Classes\MentionProcess;
-use App\Classes\Process\FicheMatiereProcess;
-use App\Classes\ValidationProcess;
-use App\Classes\ValidationProcessFicheMatiere;
 use App\Classes\verif\FormationValide;
 use App\Entity\Formation;
 use App\Entity\HistoriqueFormation;
+use App\Entity\User;
 use App\Enums\TypeModificationDpeEnum;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,20 +14,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class ProcessValidationMentionController extends BaseController
 {
     private string $dir;
 
     public function __construct(
-        private readonly EventDispatcherInterface      $eventDispatcher,
-        private readonly EntityManagerInterface        $entityManager,
-        private readonly ValidationProcess             $validationProcess,
-        private readonly ValidationProcessFicheMatiere $validationProcessFicheMatiere,
-        private readonly MentionProcess $mentionProcess,
-        private readonly FicheMatiereProcess           $ficheMatiereProcess,
-        KernelInterface                                $kernel
+        KernelInterface $kernel
     ) {
         $this->dir = $kernel->getProjectDir() . '/public/uploads/conseils/';
     }
@@ -51,7 +41,11 @@ class ProcessValidationMentionController extends BaseController
             $histo->setDate(new DateTime());
             $histo->setEtape($etape);
             $histo->setEtat('valide');
-            $histo->setUser($this->getUser());
+            $currentUser = $this->getUser();
+            if (!$currentUser instanceof User) {
+                throw $this->createAccessDeniedException();
+            }
+            $histo->setUser($currentUser);
 
             $entityManager->persist($histo);
             $entityManager->flush();
