@@ -22,6 +22,8 @@ use App\Events\McccUpdateEvent;
 use App\Repository\TypeEpreuveRepository;
 use App\Service\McccCompletionChecker;
 use App\Service\VersioningParcours;
+use App\TypeDiplome\McccDisplayInterface;
+use App\TypeDiplome\TypeDiplomeHandlerInterface;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\Access;
 use Doctrine\Common\Collections\Collection;
@@ -261,7 +263,7 @@ class ElementConstitutifMcccController extends AbstractController
                 'ec' => $elementConstitutif,
                 'typeDiplome' => $typeDiplome,
                 'ects' => $getElement->getFicheMatiereEcts(),
-                'templateForm' => $typeD::TEMPLATE_FORM_MCCC,
+                'templateForm' => $typeD->getMcccTemplate(),
                 'mcccs' => $getElement->getMcccsFromFicheMatiereCollection(),
                 'wizard' => false,
                 'parcours' => $parcours,
@@ -279,9 +281,9 @@ class ElementConstitutifMcccController extends AbstractController
                 'typeEpreuves' => $typeD->getTypeEpreuves(),
                 'ec' => $elementConstitutif,
                 'ects' => $ects,
-                'mcccs' => $typeD->getDisplayMccc($getElement->getMcccsFromFicheMatiere($typeD), $typeMccc),
+                'mcccs' => $this->getMcccDisplayHandler($typeD)->getDisplayMccc($getElement->getMcccsFromFicheMatiere($typeD), $typeMccc),
                 'typeDiplome' => $typeD,
-                'templateForm' => $typeD::TEMPLATE_FORM_MCCC
+                'templateForm' => $typeD->getMcccTemplate()
         ]);
     }
     }
@@ -354,8 +356,8 @@ class ElementConstitutifMcccController extends AbstractController
             'ec' => $elementConstitutif,
             'ects' => $ects,
             'typeDiplome' => $typeD,
-            'templateForm' => $typeD::TEMPLATE_FORM_MCCC,
-            'mcccs' => $typeD->getDisplayMccc($getElement->getMcccsFromFicheMatiere($typeD), $typeMccc ?? ''),
+            'templateForm' => $typeD->getMcccTemplate(),
+            'mcccs' => $this->getMcccDisplayHandler($typeD)->getDisplayMccc($getElement->getMcccsFromFicheMatiere($typeD), $typeMccc ?? ''),
             'isFromVersioning' => 'false',
             'lastVersion' => $lastVersion,
             'libelleQuelleVersion' => 'Version actuellement saisie en attente de validation',
@@ -388,7 +390,7 @@ class ElementConstitutifMcccController extends AbstractController
         }
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
-        $templateForm = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome)::TEMPLATE_FORM_MCCC;//Todo: modififier => dans typeD
+        $templateForm = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome)->getMcccTemplate();//Todo: modififier => dans typeD
         $typeEpreuveDiplome = $typeEpreuveRepository->findByTypeDiplome($typeDiplome);
 
         $getElement = new GetElementConstitutif($elementConstitutif, $parcoursVersioning->getParcours());
@@ -478,10 +480,10 @@ class ElementConstitutifMcccController extends AbstractController
             }
         }
         // Nouvelle mise en forme pour le template
-        $tabMcccVersioning = $typeD->getDisplayMccc($tabMcccVersioning, $structureEc->typeMccc);
+        $tabMcccVersioning = $this->getMcccDisplayHandler($typeD)->getDisplayMccc($tabMcccVersioning, $structureEc->typeMccc);
         // MCCC Actuels
         $getElement = new GetElementConstitutif($elementConstitutif, $parcoursVersioning->getParcours());
-        $tabMcccActuels = $typeD->getDisplayMccc($getElement->getMcccsFromFicheMatiere($typeD), $typeMccc);
+        $tabMcccActuels = $this->getMcccDisplayHandler($typeD)->getDisplayMccc($getElement->getMcccsFromFicheMatiere($typeD), $typeMccc);
 
         $mcccsToDisplay = $tabMcccActuels;
         if ($isFromVersioning === 'true' || ($structureEc->typeMccc !== $typeMccc)) {
@@ -547,7 +549,7 @@ class ElementConstitutifMcccController extends AbstractController
             return $this->render('element_constitutif/_mcccEcModalBut.html.twig', [
                 'typeEpreuves' => $typeD->getTypeEpreuves(),
                 'ficheMatiere' => $ficheMatiere,
-                'templateForm' => $typeD::TEMPLATE_FORM_MCCC,
+                'templateForm' => $typeD->getMcccTemplate(),
                 'mcccs' => $typeD->getMcccs($ficheMatiere),
                 'wizard' => false,
                 'typeDiplome' => $typeDiplome,//todo: utile ?
@@ -592,6 +594,15 @@ class ElementConstitutifMcccController extends AbstractController
         }
     }
 
+
+    private function getMcccDisplayHandler(TypeDiplomeHandlerInterface $handler): McccDisplayInterface
+    {
+        if (!$handler instanceof McccDisplayInterface) {
+            throw new RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
+        }
+
+        return $handler;
+    }
 
     private function resolveMcccOwner(ElementConstitutif $elementConstitutif): FicheMatiere|ElementConstitutif
     {
