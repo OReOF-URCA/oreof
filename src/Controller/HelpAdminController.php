@@ -68,7 +68,7 @@ class HelpAdminController extends AbstractController
         $help = new Help();
         $help->setIsActive(true);
 
-        $route = $request->query->get('route');
+        $route = $request->query->getString('route');
         if ($route) {
             $help->setRouteSlug($route);
             $centre = $this->inferCentreFromRoute($route);
@@ -114,7 +114,7 @@ class HelpAdminController extends AbstractController
     #[Route('/{id}/delete', name: 'app_help_delete', methods: ['POST'])]
     public function delete(Request $request, Help $help, EntityManagerInterface $em): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$help->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$help->getId(), $request->request->getString('_token'))) {
             $em->remove($help);
             $em->flush();
             $this->addFlash('success', 'Aide supprimée.');
