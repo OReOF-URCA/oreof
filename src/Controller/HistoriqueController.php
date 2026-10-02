@@ -30,7 +30,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
-use Symfony\UX\Turbo\TurboStreamResponse;
 
 class HistoriqueController extends BaseController
 {
@@ -169,10 +168,10 @@ class HistoriqueController extends BaseController
                 $eventDispatcher->dispatch($histoEvent, HistoriqueFormationEditEvent::EDIT_HISTORIQUE_FORMATION);
             } elseif ($historique instanceof HistoriqueFicheMatiere) {
                 if ($request->request->has('date') && $request->request->get('date') !== null) {
-                    $historique->setDate(Tools::convertDate($request->request->get('date')));
+                    $historique->setDate(Tools::convertDate($request->request->getString('date')));
                 }
                 if ($request->request->has('argumentaire')) {
-                    $historique->setCommentaire($request->request->get('argumentaire'));
+                    $historique->setCommentaire($request->request->getString('argumentaire'));
                 }
                 $entityManager->flush();
             }
@@ -261,14 +260,14 @@ class HistoriqueController extends BaseController
         Historique $historique
     ): Response {
         $id = $historique->getId();
-        $token = $request->request->get('_token') ?? $request->request->get('csrf_token');
+        $token = $request->request->getString('_token') ?: $request->request->getString('csrf_token');
 
         if ($this->isCsrfTokenValid('delete' . $id, $token)) {
             $entityManager->remove($historique);
             $entityManager->flush();
 
             if (
-                $request->getPreferredFormat() === TurboStreamResponse::STREAM_FORMAT
+                $request->getPreferredFormat() === 'turbo-stream'
                 || str_contains((string)$request->headers->get('Accept'), 'text/vnd.turbo-stream.html')
             ) {
                 return $turboStream->appendStreams(
@@ -284,7 +283,7 @@ class HistoriqueController extends BaseController
         }
 
         if (
-            $request->getPreferredFormat() === TurboStreamResponse::STREAM_FORMAT
+            $request->getPreferredFormat() === 'turbo-stream'
             || str_contains((string)$request->headers->get('Accept'), 'text/vnd.turbo-stream.html')
         ) {
             return $turboStream->streamToastError('Erreur lors de la suppression de l\'historique.');
