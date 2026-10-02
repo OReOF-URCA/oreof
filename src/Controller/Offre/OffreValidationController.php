@@ -82,7 +82,7 @@ final class OffreValidationController extends BaseController
 
         $allParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne, $composante);
         $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne);
-        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne);
+        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne, $composante);
 
         $dpeFormations = !empty($allFormations) ? $dpeFormationRepository->findBy([
             'campagneCollecte' => $campagne,

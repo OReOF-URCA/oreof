@@ -88,7 +88,7 @@ final class OffreController extends BaseController
         $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne, $composante);
 
         // 3. Batch loading des configurations et paramètres de plateformes (1 requête chacune au lieu de 1000+)
-        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne);
+        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne, $composante);
         $tpaByTypeDiplome = $typeDiplomePlateformeAdmissionRepository->findByCampagneIndexedByTypeDiplome($campagne);
 
         foreach ($allParcours as $dpePar) {
@@ -154,14 +154,17 @@ final class OffreController extends BaseController
         $docsByFormation = $documentConseilRepository->findIndexedByFormationIds($formationIds);
 
         // Batch loading des DpeFormation pour la gestion du workflow de validation des composantes
-        /** @var list<DpeFormation> $dpeFormations */
-        $dpeFormations = $em->getRepository(DpeFormation::class)->createQueryBuilder('df')
+        $dpeFormationsQb = $em->getRepository(DpeFormation::class)->createQueryBuilder('df')
             ->join('df.formation', 'f')
             ->addSelect('f')
             ->where('df.campagneCollecte = :campagne')
-            ->setParameter('campagne', $campagne)
-            ->getQuery()
-            ->getResult();
+            ->setParameter('campagne', $campagne);
+        if ($composante !== null) {
+            $dpeFormationsQb->andWhere('f.composantePorteuse = :composante')
+                ->setParameter('composante', $composante);
+        }
+        /** @var list<DpeFormation> $dpeFormations */
+        $dpeFormations = $dpeFormationsQb->getQuery()->getResult();
         $dpeFormationMap = [];
         foreach ($dpeFormations as $df) {
             if ($df->getFormation() !== null) {
