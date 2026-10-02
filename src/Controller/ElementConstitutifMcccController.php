@@ -18,7 +18,6 @@ use App\Entity\Mccc;
 use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
 use App\Entity\TypeDiplome;
-use App\Entity\TypeEpreuve;
 use App\Events\McccUpdateEvent;
 use App\Repository\TypeEpreuveRepository;
 use App\Service\McccCompletionChecker;
@@ -370,7 +369,8 @@ class ElementConstitutifMcccController extends AbstractController
         ?ElementConstitutif $elementConstitutif,
         ParcoursVersioning $parcoursVersioning,
         VersioningParcours $versioningParcours,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        TypeEpreuveRepository $typeEpreuveRepository
     ): Response
     {
         if ($elementConstitutif === null) {
@@ -389,7 +389,7 @@ class ElementConstitutifMcccController extends AbstractController
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
         $templateForm = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome)::TEMPLATE_FORM_MCCC;//Todo: modififier => dans typeD
-        $typeEpreuveDiplome = $entityManager->getRepository(TypeEpreuve::class)->findByTypeDiplome($typeDiplome);
+        $typeEpreuveDiplome = $typeEpreuveRepository->findByTypeDiplome($typeDiplome);
 
         $getElement = new GetElementConstitutif($elementConstitutif, $parcoursVersioning->getParcours());
         $typeMccc = $getElement->getTypeMcccFromFicheMatiere();
