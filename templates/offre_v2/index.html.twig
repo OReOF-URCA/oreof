@@ -125,7 +125,8 @@
         {% endif %}
         
         {% set formUrl = composante ? path('app_offre_composante_index', {composante: composante.id}) : path('app_offre_index') %}
-        <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" class="space-y-6">
+        <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" class="space-y-6"
+              data-controller="auto-submit">
             <!-- KPI -->
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
                 <twig:Kpi
@@ -176,12 +177,12 @@
             <div class="rounded-xl border bg-surface p-4 shadow-sm">
                 <div class="grid gap-4 md:grid-cols-12">
                     <div class="{% if composante %}md:col-span-5{% else %}md:col-span-3{% endif %}">
-                        <input name="q" value="{{ filters.q|default('') }}" class="rounded-lg border px-3 py-2 text-sm w-full" placeholder="Rechercher une formation…" oninput="this.form.requestSubmit()">
+                        <input type="search" name="q" value="{{ filters.q|default('') }}" class="rounded-lg border px-3 py-2 text-sm w-full" placeholder="Rechercher une formation…" aria-label="Rechercher une formation ou un parcours" autocomplete="off" data-action="input->auto-submit#debouncedSubmit">
                     </div>
 
                     {% if not composante %}
                         <div class="md:col-span-2">
-                            <select name="comp" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
+                            <select name="comp" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit">
                                 <option value="">Toutes les composantes</option>
                                 {% for compItem in composantes %}
                                     <option value="{{ compItem.id }}" {% if filters.comp|default('') == compItem.id %}selected{% endif %}>{{ compItem.libelle }}</option>
@@ -191,7 +192,7 @@
                     {% endif %}
 
                     <div class="md:col-span-2">
-                        <select name="type" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
+                        <select name="type" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit">
                             <option value="">Tous les diplômes</option>
                             {% for typeDiplome in typesDiplome %}
                                 <option value="{{ typeDiplome.id }}" {% if filters.type|default('') == typeDiplome.id %}selected{% endif %}>{{ typeDiplome.libelle }}</option>
@@ -200,7 +201,7 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <select name="plateforme" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
+                        <select name="plateforme" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit">
                             <option value="">Toutes les plateformes</option>
                             {% for plateforme in plateformes %}
                                 <option value="{{ plateforme.id }}" {% if filters.plateforme|default('') == plateforme.id %}selected{% endif %}>{{ plateforme.libelle }}</option>
@@ -209,7 +210,7 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <select name="statut" class="rounded-lg border px-3 py-2 text-sm w-full" onchange="this.form.requestSubmit()">
+                        <select name="statut" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit">
                             <option value="">Tous les statuts</option>
                             <option value="Brouillon" {% if filters.statut|default('') == 'Brouillon' %}selected{% endif %}>Brouillon</option>
                             <option value="Validé composante" {% if filters.statut|default('') == 'Validé composante' %}selected{% endif %}>Validé composante</option>
