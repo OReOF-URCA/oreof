@@ -12,19 +12,10 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ProcessValidationMentionController extends BaseController
 {
-    private string $dir;
-
-    public function __construct(
-        KernelInterface $kernel
-    ) {
-        $this->dir = $kernel->getProjectDir() . '/public/uploads/conseils/';
-    }
-
     #[Route('/validation-mention/valide/{etape}/{formation}', name: 'app_validation_formation_valide')]
     public function valide(
         EntityManagerInterface $entityManager,
