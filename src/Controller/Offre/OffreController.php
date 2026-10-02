@@ -10,11 +10,13 @@ use App\Repository\ComposanteRepository;
 use App\Repository\DocumentConseilRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
+use App\Repository\ParcoursRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
 use App\Repository\TypeDiplomePlateformeAdmissionRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\Validation\OffreValidationService;
+use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -457,5 +459,67 @@ final class OffreController extends BaseController
         ];
 
         return $this->render('offre_v2/index.html.twig', $params);
+    }
+
+    /**
+     * Lignes d'années des parcours demandés (?parcours=1,2,3), chargées à la demande depuis la liste de l'offre :
+     * la page ne rend pas d'emblée les centaines de lignes d'années masquées.
+     */
+    #[Route('/offre/annees-parcours', name: 'offre_v2_annees_parcours', methods: ['GET'])]
+    public function anneesParcours(
+        Request                                  $request,
+        ParcoursRepository                       $parcoursRepository,
+        AnneeRepository                          $anneeRepository,
+        DpeParcoursRepository                    $dpeParcoursRepository,
+        TypeDiplomePlateformeAdmissionRepository $typeDiplomePlateformeAdmissionRepository,
+        TurboStreamResponseFactory               $turboStream,
+    ): Response {
+        $ids = array_slice(array_values(array_unique(array_filter(
+            array_map('intval', explode(',', (string)$request->query->get('parcours', '')))
+        ))), 0, 100);
+        $campagne = $this->getCampagneCollecte();
+
+        // Mêmes droits que la liste : admin, ou gestion de la composante porteuse de la formation.
+        $parcoursAutorises = [];
+        $droitsParComposante = [];
+        foreach ($ids === [] ? [] : $parcoursRepository->findBy(['id' => $ids]) as $parcours) {
+            $composante = $parcours->getFormation()?->getComposantePorteuse();
+            if ($composante === null) {
+                continue;
+            }
+            $droitsParComposante[$composante->getId()] ??= $this->isGranted('ROLE_ADMIN') || $this->isGranted('MANAGE', [
+                'route' => 'app_composante',
+                'subject' => $composante,
+            ]);
+            if ($droitsParComposante[$composante->getId()]) {
+                $parcoursAutorises[$parcours->getId()] = $parcours;
+            }
+        }
+
+        $anneesParParcours = [];
+        $dpeParParcours = [];
+        if ($parcoursAutorises !== []) {
+            $parcoursList = array_values($parcoursAutorises);
+            foreach ($anneeRepository->findBy(['parcours' => $parcoursList], ['ordre' => 'ASC']) as $annee) {
+                $anneesParParcours[$annee->getParcours()?->getId()][] = $annee;
+            }
+            foreach ($dpeParcoursRepository->findBy(['parcours' => $parcoursList, 'campagneCollecte' => $campagne]) as $dpeParcours) {
+                $dpeParParcours[$dpeParcours->getParcours()?->getId()] ??= $dpeParcours;
+            }
+        }
+
+        $lignes = [];
+        foreach ($parcoursAutorises as $parcoursId => $parcours) {
+            $lignes[] = [
+                'parcours' => $parcours,
+                'annees' => $anneesParParcours[$parcoursId] ?? [],
+                'dpeParcours' => $dpeParParcours[$parcoursId] ?? null,
+            ];
+        }
+
+        return $turboStream->stream('offre_v2/_annees_parcours.stream.html.twig', [
+            'lignes' => $lignes,
+            'tpaByTypeDiplome' => $typeDiplomePlateformeAdmissionRepository->findByCampagneIndexedByTypeDiplome($campagne),
+        ]);
     }
 }

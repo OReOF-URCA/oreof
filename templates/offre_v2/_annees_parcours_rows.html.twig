@@ -1,0 +1,50 @@
+{# Lignes d'années d'un parcours dans la liste de l'offre, chargées à la demande (OffreController::anneesParcours).
+   Paramètres : parcours, formation, annees, dpeParc (DpeParcours de la campagne ou null), tpaByTypeDiplome. #}
+{% for annee in annees %}
+    {% set isAnneeTc = formation.isAnneeTroncCommun(annee.ordre) %}
+    <tr data-parcours-annee="{{ parcours.id }}" class="{{ isAnneeTc ? 'bg-primary-50/40 hover:bg-primary-50/70 border-l-4 border-l-primary-500 dark:bg-primary-900/30' : 'hover:bg-secondary-50/80' }} transition-all border-t border-secondary-100 group-data-[collapsed]:hidden">
+        <td>&nbsp;</td>
+        <td>&nbsp;</td>
+        <td class="px-4 py-3 {{ isAnneeTc ? 'pl-6 font-semibold text-primary-950' : 'pl-8 text-secondary-600 font-medium' }}">
+            <div class="flex items-center gap-2 flex-wrap">
+                <span>{{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}</span>
+                {% if isAnneeTc %}
+                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold bg-primary-100 text-primary-800 border border-primary-200 shadow-xs dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300" title="Cette année est commune à tous les parcours de la formation">
+                        <twig:UX:Icon name="ph:users-three-bold" class="h-3 w-3" />
+                        Tronc commun
+                    </span>
+                {% endif %}
+            </div>
+        </td>
+        <td class="px-4 py-3">
+            <twig:Badge variant="{{ annee.isOuvert ? 'success' : 'danger' }}" label="{{ annee.isOuvert ? 'Oui' : 'Non' }}" />
+        </td>
+        <td class="px-4 py-3">
+            <div class="flex gap-1 flex-wrap">
+                {% set typeDiplId = formation.typeDiplome ? formation.typeDiplome.id : null %}
+                {% if typeDiplId and tpaByTypeDiplome[typeDiplId] is defined %}
+                    {% for tpa in tpaByTypeDiplome[typeDiplId] %}
+                        {% if tpa.plateforme and tpa.plateforme.active and tpa.annees and annee.ordre in tpa.annees %}
+                            <twig:Badge :variant="tpa.plateforme.color" :label="tpa.plateforme.code" />
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </td>
+        <td class="px-4 py-3 text-right font-medium text-secondary-700 dark:text-secondary-100">{{ annee.capaciteAccueil|default(0) }}</td>
+        <td class="px-4 py-3">
+            {% if dpeParc %}
+                <div class="flex gap-1 flex-wrap">
+                    {% for badge in dpeParc.etatValidation|badgeDpeDto %}
+                        <twig:Badge :variant="badge.variant" :label="badge.label" />
+                    {% endfor %}
+                </div>
+            {% else %}
+                &nbsp;
+            {% endif %}
+        </td>
+        <td class="px-4 py-3 text-right">
+            {#                                    <button class="text-sm font-medium text-primary-600 dark:text-primary-400">Ouvrir</button> #}
+        </td>
+    </tr>
+{% endfor %}
