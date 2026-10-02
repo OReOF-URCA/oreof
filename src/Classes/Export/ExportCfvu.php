@@ -79,7 +79,7 @@ class ExportCfvu implements ExportInterface
                     $this->excelWriter->writeCellXY(9, $ligne, $this->getHistorique->getHistoriqueFormationHasPv($formation) === true ? 'Oui' : 'Non');
                 $dpeParcours = GetDpeParcours::getFromParcours($parcours);
                 $etatValidation = array_keys($dpeParcours?->getEtatValidation())[0];
-                $this->excelWriter->writeCellXY(10, $ligne, $etatValidation ?? '-erreur état-');
+                $this->excelWriter->writeCellXY(10, $ligne, $etatValidation);
 
 
                 $this->excelWriter->getColumnsAutoSize('A', 'J');
