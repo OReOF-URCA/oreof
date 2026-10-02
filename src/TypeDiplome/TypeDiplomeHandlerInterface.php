@@ -19,6 +19,9 @@ interface TypeDiplomeHandlerInterface extends TypeDiplomeMcccInterface, Structur
 
     public function getValidator(): ValideParcoursInterface;
 
+    /**
+     * @return class-string<\Symfony\Component\Form\FormTypeInterface<mixed>>
+     */
     public function getFormationFormType(): string;
 
     public function getFormationFormTemplate(): string;
