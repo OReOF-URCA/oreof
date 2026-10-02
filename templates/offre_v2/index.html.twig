@@ -371,7 +371,7 @@
                                 <td class="px-4 py-3 text-right font-semibold text-secondary-800 dark:text-secondary-100">{{ forma.capacite }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-1.5 flex-wrap items-center">
-                                        {{ include('offre_v2/_etat_offre_badge.html.twig', {etat: forma.etatValidation|keys|first}) }}
+                                        {{ include('offre_v2/_etat_offre_badge.html.twig', {etat: forma.etatValidation|keys|first}) }}<br>
 
                                         <!-- PV & Note Badges -->
                                         {% if forma.hasPv and forma.pvDoc %}
@@ -455,12 +455,6 @@
                                     <td class="px-4 py-3 text-right font-semibold text-secondary-700 dark:text-secondary-100">{{ parcoursCapacite }}</td>
                                     <td class="px-4 py-3">
                                         <div class="flex gap-1.5 flex-wrap items-center">
-                                            {% if dpeParc %}
-                                                {% for badge in dpeParc.etatValidation|badgeDpeDto %}
-                                                    <twig:Badge :variant="badge.variant" :label="badge.label" />
-                                                {% endfor %}
-                                            {% endif %}
-
                                             <!-- PV & Note Badges pour le parcours (hérités de sa formation) -->
                                             {% if forma.hasPv and forma.pvDoc %}
                                                 <twig:Badge variant="success"
