@@ -27,6 +27,7 @@ use App\Repository\TypeDiplomeRepository;
 use App\Repository\TypeEpreuveRepository;
 use App\Repository\UeRepository;
 use App\Service\VersioningFicheMatiere;
+use App\TypeDiplome\McccDisplayInterface;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\Utils\JsonRequest;
 use App\Utils\TurboStreamResponseFactory;
@@ -141,6 +142,10 @@ class FicheMatiereController extends BaseController
 
         $ficheMatiereParcours = $ficheMatiereMutualisableRepository->findByFicheMatieres($ficheMatiere);
         $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiere);
+
+        if (!$typeD instanceof McccDisplayInterface) {
+            throw new RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
+        }
 
         return $this->render('fiche_matiere/show.html.twig', [
             'ficheMatiere' => $ficheMatiere,
