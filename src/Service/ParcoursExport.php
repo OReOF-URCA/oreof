@@ -2,12 +2,14 @@
 
 namespace App\Service;
 
+use App\Classes\GetDpeParcours;
 use App\DTO\StructureEc;
 use App\DTO\StructureParcours;
 use App\DTO\StructureUe;
 use App\Entity\FicheMatiere;
 use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
+use App\Enums\TypeModificationDpeEnum;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -38,7 +40,8 @@ class ParcoursExport {
         StructureParcours $dto,
         Parcours $parcours,
         int $parcours_id = null,
-        int $formation_id = null
+        int $formation_id = null,
+        bool $fermetureEmpty = false
     ): array
     {
         $typeDiplome = $parcours->getFormation()?->getTypeDiplome();
@@ -46,7 +49,7 @@ class ParcoursExport {
             throw new TypeDiplomeNotFoundException();
         }
 
-        return $this->getMaquetteJson($dto, $parcours, $typeDiplome, true, $parcours_id, $formation_id);
+        return $this->getMaquetteJson($dto, $parcours, $typeDiplome, true, $parcours_id, $formation_id, $fermetureEmpty);
     }
 
     public function exportMaquetteJson(Parcours $parcours): array
@@ -64,15 +67,35 @@ class ParcoursExport {
         return $this->getMaquetteJson($dto, $parcours, $typeDiplome)        ;
     }
 
+    /**
+     * @param bool $fermetureEmpty Ne pas récupérer les semestres d'un parcours fermés (ou non_ouverture)
+     */
     private function getMaquetteJson(
         StructureParcours $dto,
         Parcours $parcours,
         TypeDiplome $typeDiplome,
         bool $isVersioning = false,
         int $parcours_id = null,
-        int $formation_id = null
+        int $formation_id = null,
+        bool $fermetureEmpty = false
     ): array
     {
+        
+        $dpe = GetDpeParcours::getFromParcours(
+            $this->entityManager->getRepository(Parcours::class)->findOneById($parcours_id)
+        );
+        $isFerme = in_array($dpe?->getEtatReconduction() ?? "empty", [
+            TypeModificationDpeEnum::NON_OUVERTURE,
+            TypeModificationDpeEnum::NON_OUVERTURE_CFVU,
+            TypeModificationDpeEnum::NON_OUVERTURE_SES,
+            TypeModificationDpeEnum::FERMETURE_DEFINITIVE
+        ], true);
+
+        $hasDisplaySemestre = true;
+        if($fermetureEmpty && $isFerme){
+            $hasDisplaySemestre = false;
+        }
+
         $data = [
             'id' => $parcours->getId(),
             'formationId' => $parcours->getFormation()?->getId(),
@@ -126,154 +149,154 @@ class ParcoursExport {
                 UrlGeneratorInterface::ABSOLUTE_URL
            );
         }
-
-        foreach ($dto->semestres as $ordre => $sem) {
-            if ($sem->semestre->isNonDispense() === false) {
-                $semestre = [
-                    'ordre' => $ordre,
-                    'volumes' => [
-                        'CM' => [
-                            'presentiel' => $sem->heuresEctsSemestre->sommeSemestreCmPres,
-                            'distanciel' => $sem->heuresEctsSemestre->sommeSemestreCmDist
-                        ],
-                        'TD' => [
-                            'presentiel' => $sem->heuresEctsSemestre->sommeSemestreTdPres,
-                            'distanciel' => $sem->heuresEctsSemestre->sommeSemestreTdDist
-                        ],
-                        'TP' => [
-                            'presentiel' => $sem->heuresEctsSemestre->sommeSemestreTpPres,
-                            'distanciel' => $sem->heuresEctsSemestre->sommeSemestreTpDist
-                        ],
-                        'autonomie' => $sem->heuresEctsSemestre->sommeSemestreTePres
-                    ],
-                    'ects' => $sem->heuresEctsSemestre->sommeSemestreEcts,
-                    'ues' => []
-                ];
-                foreach ($sem->ues as $ue) {
-                    $tUe = [
-                        'ordre' => $ue->ordre(),
-                        'libelleOrdre' => $ue->display,
-                        'libelle' => $ue->ue->getLibelle() ?? $ue->display,
+        if($hasDisplaySemestre){
+            foreach ($dto->semestres as $ordre => $sem) {
+                if ($sem->semestre->isNonDispense() === false) {
+                    $semestre = [
+                        'ordre' => $ordre,
                         'volumes' => [
                             'CM' => [
-                                'presentiel' => $ue->heuresEctsUe->sommeUeCmPres,
-                                'distanciel' => $ue->heuresEctsUe->sommeUeCmDist
+                                'presentiel' => $sem->heuresEctsSemestre->sommeSemestreCmPres,
+                                'distanciel' => $sem->heuresEctsSemestre->sommeSemestreCmDist
                             ],
                             'TD' => [
-                                'presentiel' => $ue->heuresEctsUe->sommeUeTdPres,
-                                'distanciel' => $ue->heuresEctsUe->sommeUeTdDist
+                                'presentiel' => $sem->heuresEctsSemestre->sommeSemestreTdPres,
+                                'distanciel' => $sem->heuresEctsSemestre->sommeSemestreTdDist
                             ],
                             'TP' => [
-                                'presentiel' => $ue->heuresEctsUe->sommeUeTpPres,
-                                'distanciel' => $ue->heuresEctsUe->sommeUeTpDist
+                                'presentiel' => $sem->heuresEctsSemestre->sommeSemestreTpPres,
+                                'distanciel' => $sem->heuresEctsSemestre->sommeSemestreTpDist
                             ],
-                            'autonomie' => $ue->heuresEctsUe->sommeUeTePres
+                            'autonomie' => $sem->heuresEctsSemestre->sommeSemestreTePres
                         ],
-                        'ects' => $ue->heuresEctsUe->sommeUeEcts
+                        'ects' => $sem->heuresEctsSemestre->sommeSemestreEcts,
+                        'ues' => []
                     ];
-
-                    if ($ue->ue->getNatureUeEc()?->isLibre()) {
-                        if(!$isVersioning){
-                            $tUe['ects'] = $ue->ue->getEcts() ?? 0.0;
-                        }
-                        $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
-                    } elseif ($ue->ue->getNatureUeEc()?->isChoix() || count($ue->uesEnfants()) > 0) {
-                        $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
-                        $tUe['UesEnfants'] = [];
-                        $nb = 0;
-                        foreach ($ue->uesEnfants() as $ueEnfant) {
-                            $tUeEnfant = [
-                                'ordre' => $ueEnfant->ordre(),
-                                'libelleOrdre' => $ueEnfant->display,
-                                'libelle' => $ueEnfant->ue->getLibelle() ?? $ueEnfant->display,
-                                'volumes' => [
-                                    'CM' => [
-                                        'presentiel' => $ueEnfant->heuresEctsUe->sommeUeCmPres,
-                                        'distanciel' => $ueEnfant->heuresEctsUe->sommeUeCmDist
-                                    ],
-                                    'TD' => [
-                                        'presentiel' => $ueEnfant->heuresEctsUe->sommeUeTdPres,
-                                        'distanciel' => $ueEnfant->heuresEctsUe->sommeUeTdDist
-                                    ],
-                                    'TP' => [
-                                        'presentiel' => $ueEnfant->heuresEctsUe->sommeUeTpPres,
-                                        'distanciel' => $ueEnfant->heuresEctsUe->sommeUeTpDist
-                                    ],
-                                    'autonomie' => $ueEnfant->heuresEctsUe->sommeUeTePres
+                    foreach ($sem->ues as $ue) {
+                        $tUe = [
+                            'ordre' => $ue->ordre(),
+                            'libelleOrdre' => $ue->display,
+                            'libelle' => $ue->ue->getLibelle() ?? $ue->display,
+                            'volumes' => [
+                                'CM' => [
+                                    'presentiel' => $ue->heuresEctsUe->sommeUeCmPres,
+                                    'distanciel' => $ue->heuresEctsUe->sommeUeCmDist
                                 ],
-                                'ects' => $ueEnfant->heuresEctsUe->sommeUeEcts,
+                                'TD' => [
+                                    'presentiel' => $ue->heuresEctsUe->sommeUeTdPres,
+                                    'distanciel' => $ue->heuresEctsUe->sommeUeTdDist
+                                ],
+                                'TP' => [
+                                    'presentiel' => $ue->heuresEctsUe->sommeUeTpPres,
+                                    'distanciel' => $ue->heuresEctsUe->sommeUeTpDist
+                                ],
+                                'autonomie' => $ue->heuresEctsUe->sommeUeTePres
+                            ],
+                            'ects' => $ue->heuresEctsUe->sommeUeEcts
+                        ];
 
-                            ];
-                            if ($ueEnfant->ue->getNatureUeEc()?->isLibre()) {
-                                $tUeEnfant['description_libre_choix'] = $ueEnfant->ue->getDescriptionUeLibre();
+                        if ($ue->ue->getNatureUeEc()?->isLibre()) {
+                            if(!$isVersioning){
+                                $tUe['ects'] = $ue->ue->getEcts() ?? 0.0;
                             }
-
-                            $nb++;
-                            $tUe['nbChoix'] = $nb;
-                            $tUeEnfant['ec'] = $this->getEcFromUe($ueEnfant, $isVersioning);
-
-                            /**
-                             * UE enfant dans une UE enfant
-                             */
-                            if($ueEnfant->ue->getNatureUeEc()?->isLibre()){
-                                if(!$isVersioning){
-                                    $tUeEnfant['ects'] = $ueEnfant->ue->getEcts() ?? 0.0;
-                                }
-                                $tUeEnfant['description_libre_choix'] = $ueEnfant->ue->getDescriptionUeLibre();
-                            }
-                            elseif($ueEnfant->ue->getNatureUeEc()?->isChoix() || count($ueEnfant->uesEnfants()) > 0){
-                                $nbDeuxiemeNiveau = 0;
-                                $tUeEnfant['description_libre_choix'] = $ueEnfant->ue->getDescriptionUeLibre();
-                                $tUeEnfant['UesEnfants'] = [];
-                                foreach($ueEnfant->uesEnfants() as $ueEnfantDeuxiemeNiveau){
-                                    $tUeEnfantDeuxiemeNiveau = [
-                                        'ordre' => $ueEnfantDeuxiemeNiveau->ordre(),
-                                        'libelleOrdre' => $ueEnfantDeuxiemeNiveau->display,
-                                        'libelle' => $ueEnfantDeuxiemeNiveau->ue->getLibelle() ?? $ueEnfantDeuxiemeNiveau->display,
-                                        'volumes' => [
-                                            'CM' => [
-                                                'presentiel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeCmPres,
-                                                'distanciel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeCmDist
-                                            ],
-                                            'TD' => [
-                                                'presentiel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeTdPres,
-                                                'distanciel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeTdDist
-                                            ],
-                                            'TP' => [
-                                                'presentiel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeTpPres,
-                                                'distanciel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeTpDist
-                                            ],
-                                            'autonomie' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeTePres
+                            $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
+                        } elseif ($ue->ue->getNatureUeEc()?->isChoix() || count($ue->uesEnfants()) > 0) {
+                            $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
+                            $tUe['UesEnfants'] = [];
+                            $nb = 0;
+                            foreach ($ue->uesEnfants() as $ueEnfant) {
+                                $tUeEnfant = [
+                                    'ordre' => $ueEnfant->ordre(),
+                                    'libelleOrdre' => $ueEnfant->display,
+                                    'libelle' => $ueEnfant->ue->getLibelle() ?? $ueEnfant->display,
+                                    'volumes' => [
+                                        'CM' => [
+                                            'presentiel' => $ueEnfant->heuresEctsUe->sommeUeCmPres,
+                                            'distanciel' => $ueEnfant->heuresEctsUe->sommeUeCmDist
                                         ],
-                                        'ects' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeEcts,
+                                        'TD' => [
+                                            'presentiel' => $ueEnfant->heuresEctsUe->sommeUeTdPres,
+                                            'distanciel' => $ueEnfant->heuresEctsUe->sommeUeTdDist
+                                        ],
+                                        'TP' => [
+                                            'presentiel' => $ueEnfant->heuresEctsUe->sommeUeTpPres,
+                                            'distanciel' => $ueEnfant->heuresEctsUe->sommeUeTpDist
+                                        ],
+                                        'autonomie' => $ueEnfant->heuresEctsUe->sommeUeTePres
+                                    ],
+                                    'ects' => $ueEnfant->heuresEctsUe->sommeUeEcts,
 
-                                    ];
-                                    if ($ueEnfantDeuxiemeNiveau->ue->getNatureUeEc()?->isLibre()) {
-                                        $tUeEnfantDeuxiemeNiveau['description_libre_choix'] = $ueEnfantDeuxiemeNiveau->ue->getDescriptionUeLibre();
-                                    }
-
-                                    $nbDeuxiemeNiveau++;
-                                    $tUeEnfant['nbChoix'] = $nbDeuxiemeNiveau;
-                                    $tUeEnfantDeuxiemeNiveau['ec'] = $this->getEcFromUe($ueEnfantDeuxiemeNiveau, $isVersioning);
-                                    $tUeEnfant['UesEnfants'][] = $tUeEnfantDeuxiemeNiveau;
+                                ];
+                                if ($ueEnfant->ue->getNatureUeEc()?->isLibre()) {
+                                    $tUeEnfant['description_libre_choix'] = $ueEnfant->ue->getDescriptionUeLibre();
                                 }
-                            }
 
-                            $tUe['UesEnfants'][] = $tUeEnfant;
+                                $nb++;
+                                $tUe['nbChoix'] = $nb;
+                                $tUeEnfant['ec'] = $this->getEcFromUe($ueEnfant, $isVersioning);
+
+                                /**
+                                 * UE enfant dans une UE enfant
+                                 */
+                                if($ueEnfant->ue->getNatureUeEc()?->isLibre()){
+                                    if(!$isVersioning){
+                                        $tUeEnfant['ects'] = $ueEnfant->ue->getEcts() ?? 0.0;
+                                    }
+                                    $tUeEnfant['description_libre_choix'] = $ueEnfant->ue->getDescriptionUeLibre();
+                                }
+                                elseif($ueEnfant->ue->getNatureUeEc()?->isChoix() || count($ueEnfant->uesEnfants()) > 0){
+                                    $nbDeuxiemeNiveau = 0;
+                                    $tUeEnfant['description_libre_choix'] = $ueEnfant->ue->getDescriptionUeLibre();
+                                    $tUeEnfant['UesEnfants'] = [];
+                                    foreach($ueEnfant->uesEnfants() as $ueEnfantDeuxiemeNiveau){
+                                        $tUeEnfantDeuxiemeNiveau = [
+                                            'ordre' => $ueEnfantDeuxiemeNiveau->ordre(),
+                                            'libelleOrdre' => $ueEnfantDeuxiemeNiveau->display,
+                                            'libelle' => $ueEnfantDeuxiemeNiveau->ue->getLibelle() ?? $ueEnfantDeuxiemeNiveau->display,
+                                            'volumes' => [
+                                                'CM' => [
+                                                    'presentiel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeCmPres,
+                                                    'distanciel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeCmDist
+                                                ],
+                                                'TD' => [
+                                                    'presentiel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeTdPres,
+                                                    'distanciel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeTdDist
+                                                ],
+                                                'TP' => [
+                                                    'presentiel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeTpPres,
+                                                    'distanciel' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeTpDist
+                                                ],
+                                                'autonomie' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeTePres
+                                            ],
+                                            'ects' => $ueEnfantDeuxiemeNiveau->heuresEctsUe->sommeUeEcts,
+
+                                        ];
+                                        if ($ueEnfantDeuxiemeNiveau->ue->getNatureUeEc()?->isLibre()) {
+                                            $tUeEnfantDeuxiemeNiveau['description_libre_choix'] = $ueEnfantDeuxiemeNiveau->ue->getDescriptionUeLibre();
+                                        }
+
+                                        $nbDeuxiemeNiveau++;
+                                        $tUeEnfant['nbChoix'] = $nbDeuxiemeNiveau;
+                                        $tUeEnfantDeuxiemeNiveau['ec'] = $this->getEcFromUe($ueEnfantDeuxiemeNiveau, $isVersioning);
+                                        $tUeEnfant['UesEnfants'][] = $tUeEnfantDeuxiemeNiveau;
+                                    }
+                                }
+
+                                $tUe['UesEnfants'][] = $tUeEnfant;
+                            }
+                        } else {
+                            $tUe['ects'] = $ue->heuresEctsUe->sommeUeEcts;
+                            $tUe['ec'] = $this->getEcFromUe($ue, $isVersioning);
                         }
-                    } else {
-                        $tUe['ects'] = $ue->heuresEctsUe->sommeUeEcts;
-                        $tUe['ec'] = $this->getEcFromUe($ue, $isVersioning);
+                        $semestre['ues'][] = $tUe;
                     }
-                    $semestre['ues'][] = $tUe;
+                    if($isVersioning){
+                        usort($semestre['ues'], fn($ueA, $ueB) => $ueA['ordre'] <=> $ueB['ordre']);
+                    }
+                    $data['semestres'][] = $semestre;
                 }
-                if($isVersioning){
-                    usort($semestre['ues'], fn($ueA, $ueB) => $ueA['ordre'] <=> $ueB['ordre']);
-                }
-                $data['semestres'][] = $semestre;
             }
         }
-
         return $data;
     }
 
