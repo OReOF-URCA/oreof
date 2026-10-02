@@ -5,7 +5,6 @@ namespace App\Controller\Offre;
 use App\Controller\BaseController;
 use App\Entity\Composante;
 use App\Entity\DpeFormation;
-use App\Enums\TypeModificationDpeEnum;
 use App\Repository\AnneeRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DocumentConseilRepository;
@@ -115,7 +114,7 @@ final class OffreController extends BaseController
                 ];
             }
 
-            $isParcoursOuvert = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+            $isParcoursOuvert = $dpePar->isOuvert();
             if ($isParcoursOuvert) {
                 $tFormations[$idFormation]['isOuverte'] = true;
             }
@@ -355,7 +354,7 @@ final class OffreController extends BaseController
             $allAnomalies = array_merge($allAnomalies, $row['anomalies']);
             
             foreach ($row['dpeParcours'] as $dpePar) {
-                $isOuvert = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+                $isOuvert = $dpePar->isOuvert();
                 if ($isOuvert) {
                     $nbParcoursOuvert++;
                     

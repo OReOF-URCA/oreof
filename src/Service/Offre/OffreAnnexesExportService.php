@@ -15,7 +15,6 @@ use App\Entity\PlateformeAdmission;
 use App\Entity\PlateformeAdmissionParametre;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeDiplomePlateformeAdmission;
-use App\Enums\TypeModificationDpeEnum;
 use App\Repository\AnneeRepository;
 use App\Repository\CampagneCollecteRepository;
 use App\Repository\DpeParcoursRepository;
@@ -701,19 +700,7 @@ final class OffreAnnexesExportService
             ];
         }
 
-        $etat = $dpeN1->getEtatReconduction();
-        $isOuvertN1 = in_array($etat, [
-            TypeModificationDpeEnum::OUVERT,
-            TypeModificationDpeEnum::CREATION,
-            TypeModificationDpeEnum::MODIFICATION,
-            TypeModificationDpeEnum::MODIFICATION_PARCOURS,
-            TypeModificationDpeEnum::MODIFICATION_INTITULE,
-            TypeModificationDpeEnum::MODIFICATION_MCCC,
-            TypeModificationDpeEnum::MODIFICATION_TEXTE,
-            TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE,
-            TypeModificationDpeEnum::OUVERTURE_SES,
-            TypeModificationDpeEnum::OUVERTURE_CFVU,
-        ], true);
+        $isOuvertN1 = $dpeN1->isOuvert();
 
         $anneeN1 = null;
         $targetPId = $parcoursN1?->getId() ?? $parcours->getId();
@@ -833,7 +820,7 @@ final class OffreAnnexesExportService
             
             if (empty($parAnnees)) {
                 // If parcours has no separate annee entities
-                $isOuvertN = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+                $isOuvertN = $dpePar->isOuvert();
                 $capaciteN = $formation->getCapaciteAccueil();
 
                 // N-1 Data
@@ -888,7 +875,7 @@ final class OffreAnnexesExportService
                 }
 
                 // N data
-                $isOuvertN = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT) && $annee->isOuvert();
+                $isOuvertN = $dpePar->isOuvert() && $annee->isOuvert();
                 $isECN = ($param && $param->isActive()) || $isOuvertN;
                 $capaciteN = $param?->getCapaciteGlobale() ?? $annee->getCapaciteAccueil();
 
@@ -1123,7 +1110,7 @@ final class OffreAnnexesExportService
                 }
 
                 // N data
-                $isOuvertN = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT) && $annee->isOuvert();
+                $isOuvertN = $dpePar->isOuvert() && $annee->isOuvert();
                 $capGlobaleN = $param?->getCapaciteGlobale() ?? $annee->getCapaciteAccueil();
                 $capFiN = $param?->getCapaciteFi() ?? $capGlobaleN;
                 $capAltN = $param?->getCapaciteAlternance() ?? 0;
@@ -1215,7 +1202,7 @@ final class OffreAnnexesExportService
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
 
-            $isOuvert = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+            $isOuvert = $dpePar->isOuvert();
 
             $niveauxOuverts = [];
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
@@ -1313,7 +1300,7 @@ final class OffreAnnexesExportService
 
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
             if (empty($parAnnees)) {
-                $isOuvertN = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+                $isOuvertN = $dpePar->isOuvert();
                 $capaciteGlobaleN = $formation->getCapaciteAccueil();
 
                 // N-1 Data
@@ -1364,7 +1351,7 @@ final class OffreAnnexesExportService
                     }
                 }
 
-                $isOuvertN = ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT) && $annee->isOuvert();
+                $isOuvertN = $dpePar->isOuvert() && $annee->isOuvert();
                 $capGlobaleN = $param?->getCapaciteGlobale() ?? $annee->getCapaciteAccueil();
 
                 // N-1 Data

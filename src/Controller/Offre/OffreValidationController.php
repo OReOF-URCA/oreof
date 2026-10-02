@@ -7,7 +7,6 @@ use App\Entity\Composante;
 use App\Entity\DocumentConseil;
 use App\Entity\DpeFormation;
 use App\Entity\HistoriqueFormation;
-use App\Enums\TypeModificationDpeEnum;
 use App\Exception\FileUploadException;
 use App\Repository\AnneeRepository;
 use App\Repository\DocumentConseilRepository;
@@ -135,7 +134,7 @@ final class OffreValidationController extends BaseController
                 $parcoursList[] = [
                     'parcours' => $parcours,
                     'dpeParcours' => $dpePar,
-                    'isOuvert' => ($dpePar->getEtatReconduction() === TypeModificationDpeEnum::OUVERT),
+                    'isOuvert' => $dpePar->isOuvert(),
                     'capacite' => $capParcours,
                     'isConforme' => $isParcConforme,
                     'anomalies' => $parcAnoms,

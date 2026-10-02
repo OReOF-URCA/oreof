@@ -9,7 +9,6 @@ use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\PlateformeAdmissionParametre;
-use App\Enums\TypeModificationDpeEnum;
 
 final class OffreValidationService
 {
@@ -78,11 +77,11 @@ final class OffreValidationService
         // Check if parcours is open for this campaign
         $isOuvert = false;
         if ($dpeParcours !== null) {
-            $isOuvert = ($dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+            $isOuvert = $dpeParcours->isOuvert();
         } else {
             foreach ($parcours->getDpeParcours() as $d) {
                 if ($d->getCampagneCollecte() === $campagne) {
-                    $isOuvert = ($d->getEtatReconduction() === TypeModificationDpeEnum::OUVERT);
+                    $isOuvert = $d->isOuvert();
                     break;
                 }
             }
