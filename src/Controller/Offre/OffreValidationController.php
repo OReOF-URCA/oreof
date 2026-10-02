@@ -79,7 +79,9 @@ final class OffreValidationController extends BaseController
         ]);
 
         $allParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne, $composante);
-        $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne);
+        // Limité à la composante : sinon tous les parcours de la campagne sont gérés par l'EntityManager
+        // et leur remplissage (PreFlush) est recalculé à chaque flush().
+        $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne, $composante);
         $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne);
 
         $dpeFormations = !empty($allFormations) ? $dpeFormationRepository->findBy([
