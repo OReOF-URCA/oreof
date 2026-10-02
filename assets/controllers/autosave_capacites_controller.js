@@ -10,7 +10,9 @@ export default class extends Controller {
 
   connect() {
     this.timeout = null
-    this.abortController = null
+    this.saving = false
+    this.pendingSave = false
+    this.pendingManual = false
     this.fadeTimeout = null
     this.previousValues = {}
 
@@ -26,7 +28,7 @@ export default class extends Controller {
 
   disconnect() {
     if (this.timeout) clearTimeout(this.timeout)
-    if (this.abortController) this.abortController.abort()
+    this.pendingSave = false
     if (this.fadeTimeout) clearTimeout(this.fadeTimeout)
   }
 
@@ -226,13 +228,18 @@ export default class extends Controller {
     await this.save(true)
   }
 
+  // Un seul enregistrement à la fois : annuler la requête côté navigateur n'arrête pas le serveur,
+  // et une requête plus ancienne pouvait finir après la suivante et réécrire d'anciennes valeurs.
+  // Les modifications faites pendant un enregistrement partent ensuite en un seul envoi (état le plus récent).
   async save(isManual = false) {
-    this.setStatus('saving', 'Enregistrement en cours...')
-
-    if (this.abortController) {
-      this.abortController.abort()
+    if (this.saving) {
+      this.pendingSave = true
+      this.pendingManual = this.pendingManual || isManual
+      return
     }
-    this.abortController = new AbortController()
+    this.saving = true
+
+    this.setStatus('saving', 'Enregistrement en cours...')
 
     const formData = new FormData(this.element)
 
@@ -243,8 +250,7 @@ export default class extends Controller {
           'X-Requested-With': 'XMLHttpRequest',
           'Accept': 'text/vnd.turbo-stream.html, application/json'
         },
-        body: formData,
-        signal: this.abortController.signal
+        body: formData
       })
 
       if (!response.ok) {
@@ -279,13 +285,17 @@ export default class extends Controller {
         }
       }
     } catch (error) {
-      if (error.name === 'AbortError') {
-        // Ignored since it was cancelled by a newer request
-        return
-      }
       console.error('Autosave error:', error)
       this.setStatus('error', 'Erreur de connexion.')
       callOut('Impossible de sauvegarder le brouillon. Vérifiez votre connexion.', 'danger')
+    } finally {
+      this.saving = false
+      if (this.pendingSave) {
+        const manual = this.pendingManual
+        this.pendingSave = false
+        this.pendingManual = false
+        this.save(manual)
+      }
     }
   }
 
