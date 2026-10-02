@@ -261,9 +261,9 @@ class CodificationFormation
                     $ue->ueOrigine->setCodeApogee($codeUe.'X'); //UE à choix on met un X
                     foreach ($ue->uesEnfants() as $ueEnfant) {
                         if ($ueEnfant->ue->getNatureUeEc()?->isLibre() === true) {
-                            $ueEnfant->ueOrigine->setCodeApogee($codeUe. chr(64+$ordreUe).'X');
+                            $ueEnfant->ueOrigine->setCodeApogee($codeUe. $this->getCodeLetter($ordreUe).'X');
                         } else {
-                            $ueEnfant->ueOrigine->setCodeApogee($codeUe. chr(64+$ordreUe));
+                            $ueEnfant->ueOrigine->setCodeApogee($codeUe. $this->getCodeLetter($ordreUe));
                             $this->setCodificationEc($ueEnfant, true, $isLasEc);
                         }
                         $ordreUe++;
@@ -320,9 +320,9 @@ class CodificationFormation
 
                 if ($isEcEnfant === true) {
                     if ($isUeEnfant === false) {
-                        $code = $ec->elementConstitutif->getEcParent()?->getCodeApogee().chr(64 + $this->ordreEc);
+                        $code = $ec->elementConstitutif->getEcParent()?->getCodeApogee().$this->getCodeLetter($this->ordreEc);
                     } else {
-                        $code .= chr(64 + $this->ordreEc);
+                        $code .= $this->getCodeLetter($this->ordreEc);
                     }
 
                     $this->ordreEc++;
@@ -349,10 +349,10 @@ class CodificationFormation
 
             if ($ec->elementConstitutif->getNatureUeEc()?->isLibre() && $isEcEnfant === true) {
                 $code = $ec->elementConstitutif->getEcParent()?->getCodeApogee();
-                $code .= chr(64 + $this->ordreEc);
+                $code .= $this->getCodeLetter($this->ordreEc);
                 $this->ordreEc++;
             } elseif ($isUeEnfant === true) {
-                $code .= chr(64 + $this->ordreEc);
+                $code .= $this->getCodeLetter($this->ordreEc);
                 $this->ordreEc++;
             } else {
                 $code .= $ec->elementConstitutif->getOrdre();
@@ -360,6 +360,15 @@ class CodificationFormation
 
             $ec->elementConstitutif->setCodeApogee($code);
         }
+    }
+
+    private function getCodeLetter(int $order): string
+    {
+        if ($order < 1 || $order > 26) {
+            throw new \LogicException(sprintf('Ordre de codification invalide : %d (attendu entre 1 et 26).', $order));
+        }
+
+        return chr(64 + $order);
     }
 
     public function setCodificationHaute(Formation $formation): void
