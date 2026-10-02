@@ -147,7 +147,7 @@ class ParcoursSaveController extends BaseController
                     $eventDispatcher->dispatch($event, AddCentreParcoursEvent::REMOVE_CENTRE_PARCOURS);
                 }
 
-                if ($data['value'] !== null || $data['value'] !== '') {
+                if ($data['value'] !== null && $data['value'] !== '') {
                     $user = $userRepository->find($data['value']);
                     if ($user !== null) {
                         $rep = $updateEntity->saveField($parcours, 'respParcours', $user);
@@ -171,11 +171,13 @@ class ParcoursSaveController extends BaseController
                     $eventDispatcher->dispatch($event, AddCentreParcoursEvent::REMOVE_CENTRE_PARCOURS);
                 }
 
-                if ($data['value'] !== null || $data['value'] !== '') {
+                if ($data['value'] !== null && $data['value'] !== '') {
                     $user = $userRepository->find($data['value']);
-                    $rep = $updateEntity->saveField($parcours, 'coResponsable', $user);
-                    $event = new AddCentreParcoursEvent($parcours, $user, $profil, $this->getCampagneCollecte());
-                    $eventDispatcher->dispatch($event, AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
+                    if ($user !== null) {
+                        $rep = $updateEntity->saveField($parcours, 'coResponsable', $user);
+                        $event = new AddCentreParcoursEvent($parcours, $user, $profil, $this->getCampagneCollecte());
+                        $eventDispatcher->dispatch($event, AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
+                    }
                 } else {
                     $rep = $updateEntity->saveField($parcours, 'respParcours', null);
                 }
