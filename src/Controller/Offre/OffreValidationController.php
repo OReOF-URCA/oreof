@@ -208,7 +208,10 @@ final class OffreValidationController extends BaseController
             $docPv = null;
             $pvId = $request->request->get('pv_id');
             if ($pvId) {
-                $docPv = $documentConseilRepository->find($pvId);
+                $docPv = $documentConseilRepository->findOneBy(['id' => (int)$pvId, 'composante' => $composante, 'type' => 'pv']);
+                if ($docPv === null) {
+                    return $turboStream->streamToastError('Le PV sélectionné est introuvable pour cette composante.');
+                }
             } elseif ($request->files->has('file') && $request->files->get('file') !== null) {
                 try {
                     $uploadedPv = $secureUploadService->uploadFromRequest($request, 'file', 'conseils');
@@ -233,7 +236,10 @@ final class OffreValidationController extends BaseController
             $docNote = null;
             $noteId = $request->request->get('note_id');
             if ($noteId) {
-                $docNote = $documentConseilRepository->find($noteId);
+                $docNote = $documentConseilRepository->findOneBy(['id' => (int)$noteId, 'composante' => $composante, 'type' => 'note_explicative']);
+                if ($docNote === null) {
+                    return $turboStream->streamToastError('La note explicative sélectionnée est introuvable pour cette composante.');
+                }
             } elseif ($request->files->has('fileNote') && $request->files->get('fileNote') !== null) {
                 try {
                     $uploadedNote = $secureUploadService->uploadFromRequest($request, 'fileNote', 'conseils');
