@@ -62,12 +62,15 @@ final class OffreValidationController extends BaseController
         }
 
         // 2. Récupérer les métadonnées de la transition du workflow
-        $meta = [];
+        $meta = null;
         foreach ($dpeFormationWorkflow->getDefinition()->getTransitions() as $t) {
             if ($t->getName() === $transition) {
                 $meta = $dpeFormationWorkflow->getMetadataStore()->getTransitionMetadata($t);
                 break;
             }
+        }
+        if ($meta === null) {
+            throw $this->createNotFoundException(sprintf('Transition « %s » inconnue.', $transition));
         }
         $isRefuse = ($meta['type'] ?? '') === 'reserver' || str_starts_with($transition, 'reserver');
 
@@ -163,6 +166,37 @@ final class OffreValidationController extends BaseController
             $selectedFormationIds = array_map('intval', (array)$request->request->all('formations'));
             $selectedParcoursIds = array_map('intval', (array)$request->request->all('parcours'));
 
+            // Validation partielle possible : on ne garde que les formations cochées qui peuvent franchir la transition.
+            $formationsAValider = [];
+            $nbIgnorees = 0;
+            foreach ($allFormations as $forma) {
+                $fId = $forma->getId();
+                if (!in_array($fId, $selectedFormationIds, true)) {
+                    continue;
+                }
+
+                $dpeF = $dpeFormationByFormationId[$fId] ?? null;
+                if ($dpeF === null) {
+                    $dpeF = new DpeFormation();
+                    $dpeF->setFormation($forma);
+                    $dpeF->setCampagneCollecte($campagne);
+                    $dpeF->setEtatValidation(['brouillon' => 1]);
+                }
+
+                if (!$dpeFormationWorkflow->can($dpeF, $transition)) {
+                    ++$nbIgnorees;
+                    continue;
+                }
+                $formationsAValider[] = ['formation' => $forma, 'dpeFormation' => $dpeF];
+            }
+
+            if ($formationsAValider === []) {
+                return $turboStream->stream('offre_v2/turbo/validation_errors.stream.html.twig', [
+                    'title' => 'Enregistrement impossible',
+                    'errors' => ['Aucune des formations cochées ne peut passer cette étape : elles ont déjà été traitées.'],
+                ]);
+            }
+
             $dateStr = (string)$request->request->get('date');
             $dateConseil = !empty($dateStr) ? new \DateTime($dateStr) : new \DateTime();
 
@@ -228,21 +262,8 @@ final class OffreValidationController extends BaseController
                 $motifs['motif'] = $commentaire;
             }
 
-            foreach ($allFormations as $forma) {
-                $fId = $forma->getId();
-                if (!in_array($fId, $selectedFormationIds, true)) {
-                    continue;
-                }
-
-                $dpeF = $dpeFormationByFormationId[$fId] ?? null;
-                if ($dpeF === null) {
-                    $dpeF = new DpeFormation();
-                    $dpeF->setFormation($forma);
-                    $dpeF->setCampagneCollecte($campagne);
-                    $dpeF->setEtatValidation(['brouillon' => 1]);
-                    $em->persist($dpeF);
-                    $dpeFormationByFormationId[$fId] = $dpeF;
-                }
+            foreach ($formationsAValider as ['formation' => $forma, 'dpeFormation' => $dpeF]) {
+                $em->persist($dpeF);
 
                 if ($docPv !== null) {
                     $docPv->addFormation($forma);
@@ -291,15 +312,24 @@ final class OffreValidationController extends BaseController
                 $histo->setComplements($complements);
                 $em->persist($histo);
 
-                if ($dpeFormationWorkflow->can($dpeF, $transition)) {
-                    $dpeFormationWorkflow->apply($dpeF, $transition, $motifs);
-                }
+                $dpeFormationWorkflow->apply($dpeF, $transition, $motifs);
             }
 
             $em->flush();
 
+            $nbValidees = count($formationsAValider);
+            $message = sprintf(
+                'Enregistré pour %d formation%s de %s',
+                $nbValidees,
+                $nbValidees > 1 ? 's' : '',
+                $composante->getLibelle()
+            );
+            if ($nbIgnorees > 0) {
+                $message .= sprintf(' (%d ignorée%s : étape déjà franchie)', $nbIgnorees, $nbIgnorees > 1 ? 's' : '');
+            }
+
             return $turboStream->stream('offre_v2/turbo/apply_success.stream.html.twig', [
-                'message' => sprintf('Validation de l\'offre enregistrée pour %s', $composante->getLibelle()),
+                'message' => $message,
             ]);
         }
 
