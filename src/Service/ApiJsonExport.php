@@ -210,7 +210,7 @@ class ApiJsonExport
                                     'id' => $parcoursAnneeSuivante->getId(),
                                     'libelle' => $parcoursAnneeSuivante->getDisplay(),
                                     'url' => $isV2
-                                        ? $urlPrefix . $this->router->generate('app_export_json_urca_v2_annee_suivante_light',
+                                        ? $urlPrefix . $this->router->generate('api_site_web_v2_parcours_annee_suivante_light',
                                             ['parcours' => $parcoursAnneeSuivante->getId()])
                                         : $urlPrefix . $this->router->generate(
                                             'app_parcours_export_json_urca_annee_suivante_light',
