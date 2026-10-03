@@ -178,6 +178,22 @@
                             </td>
                         </tr>
 
+                        {# V2 Publication CFVU #}
+                        <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40">
+                            <td class="px-4 py-3"><twig:Badge label="V2" variant="primary" size="sm" /></td>
+                            <td class="px-4 py-3"><span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-info-100 text-info-800 dark:bg-info-900 dark:text-info-200">GET</span></td>
+                            <td class="px-4 py-3"><code class="font-mono text-xs font-semibold text-text">/api/site/web/v2/parcours/{id}/cfvu-valid</code></td>
+                            <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">Fiche de publication V2 basée sur la dernière version validée CFVU.</td>
+                        </tr>
+
+                        {# V2 Année suivante #}
+                        <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40">
+                            <td class="px-4 py-3"><twig:Badge label="V2" variant="primary" size="sm" /></td>
+                            <td class="px-4 py-3"><span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-info-100 text-info-800 dark:bg-info-900 dark:text-info-200">GET</span></td>
+                            <td class="px-4 py-3"><code class="font-mono text-xs font-semibold text-text">/api/site/web/v2/parcours/{id}/annee-suivante-light</code></td>
+                            <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">Publication allégée N+1. Réutilise la dernière maquette CFVU de l'année d'origine lorsqu'elle est disponible.</td>
+                        </tr>
+
                         {# Legacy Export JSON URCA #}
                         <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40">
                             <td class="px-4 py-3">

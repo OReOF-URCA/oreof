@@ -1178,8 +1178,9 @@ class ParcoursController extends BaseController
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
 
         $ects = 0;
-        if(isset($typeD->calculStructureParcours($parcours)->heuresEctsFormation->sommeFormationEcts)){
-            $ects = $typeD->calculStructureParcours($parcours)->heuresEctsFormation->sommeFormationEcts;
+        $structure = $typeD->calcul($parcours);
+        if (isset($structure->heuresEctsFormation->sommeFormationEcts)) {
+            $ects = $structure->heuresEctsFormation->sommeFormationEcts;
         }
 
         // Gestion de la localisation
@@ -1479,6 +1480,7 @@ class ParcoursController extends BaseController
     }
 
     #[Route('/{parcours}/export-json-urca/v2/annee-suivante-light', name: 'app_export_json_urca_v2_annee_suivante_light')]
+    #[Route('/api/site/web/v2/parcours/{parcours}/annee-suivante-light', name: 'api_site_web_v2_parcours_annee_suivante_light', methods: ['GET'])]
     public function getJsonExportUrcaV2AnneeSuivanteLight(
         Parcours $parcours,
         EntityManagerInterface $entityManager
@@ -1500,7 +1502,7 @@ class ParcoursController extends BaseController
         }
         if($parcours->getParcoursOrigineCopie()?->getId() && count($parcoursOrigineVersion) > 0){
             $urlMaquetteJson = $this->generateUrl(
-                    'app_parcours_export_maquette_json_validee_cfvu',
+                    'api_site_web_v2_parcours_maquette_validee_cfvu',
                     ['parcours' => $parcours->getParcoursOrigineCopie()->getId()],
                     UrlGeneratorInterface::ABSOLUTE_URL
             );
@@ -1519,7 +1521,7 @@ class ParcoursController extends BaseController
             throw $this->createNotFoundException('Type de diplôme non trouvé pour le parcours.');
         }
 
-        $typeD = $this->typeDiplomeResolver->get($typeDiplome);
+        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
 
         $ects = 0;
         if(isset($typeD->calculStructureParcours($parcours)->heuresEctsFormation->sommeFormationEcts)){
