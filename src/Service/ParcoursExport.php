@@ -40,9 +40,8 @@ class ParcoursExport {
     public function exportLastValidVersionMaquetteJson(
         StructureParcours $dto,
         Parcours $parcours,
-        int $formation_id = null,
-        int $parcours_id = null,
-        int $formation_id = null,
+        ?int $parcours_id = null,
+        ?int $formation_id = null,
         bool $fermetureEmpty = false
     ): array
     {
@@ -64,7 +63,7 @@ class ParcoursExport {
         }
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
-        $dto = $typeD->calculStructureParcours($parcours);
+        $dto = $typeD->calcul($parcours);
 
         return $this->getMaquetteJson($dto, $parcours, $typeDiplome)        ;
     }
