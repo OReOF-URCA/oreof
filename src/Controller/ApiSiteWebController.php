@@ -13,7 +13,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGenerator;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ApiSiteWebController extends AbstractController
 {
@@ -87,8 +86,7 @@ class ApiSiteWebController extends AbstractController
         return new JsonResponse($data);
     }
 
-    #[Route('/api/site/web/versioning_json/', name: 'api_site_web_versioning_json')]
-    #[Route('/api/site/web/legacy', name: 'api_site_web_legacy_index', methods: ['GET'])]
+    #[Route('/api/site/web/versioning_json/', name: 'api_site_web_versioning_json', methods: ['GET'])]
     public function indexVersioningJson(
         Filesystem $fs
     ) : Response {
@@ -104,7 +102,6 @@ class ApiSiteWebController extends AbstractController
         return new JsonResponse(["error" => "API File does not exist."]);
     }
 
-    #[Route('/api/site/web/export_v2')]
     #[Route('/api/site/web/v2', name: 'api_site_web_v2_index', methods: ['GET'])]
     public function indexApiJsonV2(Filesystem $fs) {
         $filename = "api_json_urca_versioning_v2.json";

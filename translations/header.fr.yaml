@@ -17,6 +17,8 @@ admin_email_template_edit.title: 'Éditer template'
 admin_email_template_new.title: 'Nouveau template'
 admin_styleguide_index.description: 'Liste des composants graphiques disponibles dans l''application, avec des exemples d''utilisation.'
 admin_styleguide_index.title: 'Styleguide - Composants graphiques'
+api_site_web_documentation.description: "Documentation technique des contrats d'API (Legacy et V2) exposant l'offre de formation pour le site web."
+api_site_web_documentation.title: 'API de publication ORéOF'
 app_actualite_index.title: 'Gestion des actualités'
 app_admin_pilotage_campagne_index.description: 'Tableau de bord stratégique : matrice d''avancement par composante, détection des goulets d''étranglement et alertes SLA.'
 app_admin_pilotage_campagne_index.title: 'Tour de Contrôle & Pilotage de Campagne'
