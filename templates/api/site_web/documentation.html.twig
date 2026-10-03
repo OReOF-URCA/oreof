@@ -110,6 +110,67 @@
             </div>
         </section>
 
+        {# ROUTES HISTORIQUES DE PUBLICATION CFVU #}
+        <section class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface shadow-sm overflow-hidden">
+            <div class="p-4 border-b border-secondary-200 dark:border-secondary-700">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <h2 class="text-base font-semibold text-text flex items-center gap-2">
+                        <twig:UX:Icon name="ph:seal-check-light" class="h-5 w-5 text-success" />
+                        Versions validées CFVU
+                    </h2>
+                    <twig:Badge label="Routes historiques maintenues" variant="secondary" size="sm" />
+                </div>
+                <p class="mt-2 text-sm text-secondary-600 dark:text-secondary-300">
+                    Ces endpoints existaient déjà dans l'API historique et restent disponibles en V2 afin de préserver la compatibilité des consommateurs existants.
+                    Ils permettent d'accéder à la dernière version du parcours validée par la CFVU plutôt qu'aux données de travail courantes.
+                </p>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-secondary-200 dark:divide-secondary-700 text-sm">
+                    <thead class="bg-secondary-50 text-left text-[11px] font-semibold text-secondary-600 uppercase tracking-wider dark:bg-secondary-900">
+                        <tr>
+                            <th class="px-4 py-3" style="width: 14%">Contrat</th>
+                            <th class="px-4 py-3" style="width: 10%">Méthode</th>
+                            <th class="px-4 py-3" style="width: 46%">Endpoint historique</th>
+                            <th class="px-4 py-3" style="width: 30%">Contenu</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-secondary-200 bg-white dark:bg-surface dark:divide-secondary-700">
+                        <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40">
+                            <td class="px-4 py-3"><twig:Badge label="Legacy" variant="secondary" size="sm" /></td>
+                            <td class="px-4 py-3"><span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-info-100 text-info-800 dark:bg-info-900 dark:text-info-200">GET</span></td>
+                            <td class="px-4 py-3"><code class="font-mono text-xs font-semibold text-text">/parcours/{id}/export-json-urca/cfvu_valid</code></td>
+                            <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">Fiche de publication URCA basée sur la dernière version validée CFVU.</td>
+                        </tr>
+                        <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40">
+                            <td class="px-4 py-3"><twig:Badge label="V2 historique" variant="primary" size="sm" /></td>
+                            <td class="px-4 py-3"><span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-info-100 text-info-800 dark:bg-info-900 dark:text-info-200">GET</span></td>
+                            <td class="px-4 py-3"><code class="font-mono text-xs font-semibold text-text">/parcours/{id}/export-json-urca/v2/cfvu_valid</code></td>
+                            <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">Fiche de publication URCA V2 basée sur la dernière version validée CFVU.</td>
+                        </tr>
+                        <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40">
+                            <td class="px-4 py-3"><twig:Badge label="Legacy" variant="secondary" size="sm" /></td>
+                            <td class="px-4 py-3"><span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-info-100 text-info-800 dark:bg-info-900 dark:text-info-200">GET</span></td>
+                            <td class="px-4 py-3"><code class="font-mono text-xs font-semibold text-text">/parcours/{id}/maquette/validee_cfvu/export-json</code></td>
+                            <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">Maquette JSON historique correspondant à la dernière version validée CFVU.</td>
+                        </tr>
+                        <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40">
+                            <td class="px-4 py-3"><twig:Badge label="V2" variant="primary" size="sm" /></td>
+                            <td class="px-4 py-3"><span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-info-100 text-info-800 dark:bg-info-900 dark:text-info-200">GET</span></td>
+                            <td class="px-4 py-3"><code class="font-mono text-xs font-semibold text-text">/api/site/web/v2/parcours/{id}/maquette/validee-cfvu</code></td>
+                            <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">Nouvelle maquette hiérarchique V2 correspondant à la dernière version validée CFVU.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="px-4 py-3 bg-secondary-50 dark:bg-secondary-900/50 border-t border-secondary-200 dark:border-secondary-700 text-xs text-secondary-500 dark:text-secondary-400 flex items-start gap-2">
+                <twig:UX:Icon name="icon:info" class="h-4 w-4 mt-0.5 shrink-0" />
+                <span>Pour une nouvelle intégration, privilégier les routes sous <code class="font-mono">/api/site/web/v2</code>. Les routes <code class="font-mono">/parcours/...</code> sont conservées comme contrats de compatibilité.</span>
+            </div>
+        </section>
+
         {# SECTION 2 : COMPARAISON DES CONTRATS #}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {# Contrat Legacy #}
