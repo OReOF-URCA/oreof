@@ -125,7 +125,7 @@ class ParcoursExportV2 {
 
         if(!$isVersioning){
             $data['path'] = $this->router->generate(
-                'api_v2_parcours_maquette',
+                'api_site_web_v2_parcours_maquette',
                 ['parcours' => $parcours->getId()],
                 UrlGeneratorInterface::ABSOLUTE_URL
             );
@@ -135,7 +135,7 @@ class ParcoursExportV2 {
 
         if($isVersioning){
             $data['path'] = $this->router->generate(
-                'api_v2_parcours_maquette_validee_cfvu',
+                'api_site_web_v2_parcours_maquette_validee_cfvu',
                 ['parcours' => $parcours_id],
                 UrlGeneratorInterface::ABSOLUTE_URL
             );
@@ -145,7 +145,7 @@ class ParcoursExportV2 {
 
         if($parcours->getId() !== null){
            $data['path'] = $this->router->generate(
-                'api_v2_parcours_maquette',
+                'api_site_web_v2_parcours_maquette',
                 ['parcours' => $parcours->getId()],
                 UrlGeneratorInterface::ABSOLUTE_URL
            );
