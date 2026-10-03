@@ -112,7 +112,7 @@ class ApiJsonExport
                             'id' => $parcours->getId(),
                             'libelle' => $lastVersionData['parcours']->getDisplay(),
                             'url' => $isV2
-                                ? $urlPrefix . $this->router->generate('app_export_json_urca_v2_cfvu_valid',
+                                ? $urlPrefix . $this->router->generate('api_site_web_v2_parcours_cfvu_valid',
                                     ['parcours' => $lastVersion[0]->getParcours()->getId()])
                                 : $urlPrefix . $this->router->generate(
                                     'app_parcours_export_json_urca_cfvu_valid',
