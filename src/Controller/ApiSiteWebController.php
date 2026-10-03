@@ -10,12 +10,19 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ApiSiteWebController extends AbstractController
 {
+    #[Route('/api/site/web/doc', name: 'api_site_web_documentation', methods: ['GET'])]
+    public function documentation(): Response
+    {
+        return $this->render('api/site_web/documentation.html.twig');
+    }
+
     #[Route('/api/site/web', name: 'app_api_site_web')]
     public function index(
         FormationRepository $formatinRepository,
@@ -81,6 +88,7 @@ class ApiSiteWebController extends AbstractController
     }
 
     #[Route('/api/site/web/versioning_json/', name: 'api_site_web_versioning_json')]
+    #[Route('/api/site/web/legacy', name: 'api_site_web_legacy_index', methods: ['GET'])]
     public function indexVersioningJson(
         Filesystem $fs
     ) : Response {
@@ -97,6 +105,7 @@ class ApiSiteWebController extends AbstractController
     }
 
     #[Route('/api/site/web/export_v2')]
+    #[Route('/api/site/web/v2', name: 'api_site_web_v2_index', methods: ['GET'])]
     public function indexApiJsonV2(Filesystem $fs) {
         $filename = "api_json_urca_versioning_v2.json";
         $path = __DIR__ . "/../../public/api_json_v2/";
