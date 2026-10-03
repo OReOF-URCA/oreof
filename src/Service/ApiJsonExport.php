@@ -121,6 +121,7 @@ class ApiJsonExport
                         ];
                         if ($isV2) {
                             $parcoursData['annee'] = $campagneCourante->getAnnee();
+                            $parcoursData['uuid_parcours'] = $this->getUuidForParcours($parcours);
                         }
                         $tParcours[] = $parcoursData;
 
@@ -158,6 +159,9 @@ class ApiJsonExport
                         'parcours' => $tParcours,
                         'dateValidation' => $dateValidationFormation?->format('Y-m-d H:i:s') ?? null,
                     ];
+                    if ($isV2) {
+                        $forma['uuid_formation'] = $this->getUuidForFormation($formation);
+                    }
                     /*
                     if($isV2){
                         $forma['logos-formation'] = $this->getFormationLogosArrayApiV2($formation, $urlPrefix);
@@ -219,6 +223,7 @@ class ApiJsonExport
                                 ];
                                 if ($isV2) {
                                     $parcoursDataNext['annee'] = $campagneSuivante->getAnnee();
+                                    $parcoursDataNext['uuid_parcours'] = $this->getUuidForParcours($parcoursAnneeSuivante);
                                 }
                                 $addedParcours[] = $parcoursDataNext;
                             }
@@ -235,6 +240,9 @@ class ApiJsonExport
                         'parcours' => $addedParcours,
                         'dateValidation' => (new DateTime('2025-12-15'))->format('Y-m-d H:i:s'),
                     ];
+                    if ($isV2) {
+                        $formationAppend['uuid_formation'] = $this->getUuidForFormation($formationAnneeSuivante);
+                    }
                     /*
                     if($isV2){
                         $formationAppend['logos-formation'] = $this->getFormationLogosArrayApiV2($formationAnneeSuivante, $urlPrefix);
@@ -264,6 +272,36 @@ class ApiJsonExport
         }
 
         return $dataJSON;
+    }
+
+    /**
+     * Returns the stable API identifier of a parcours across annual copies.
+     * The oldest parcours in the copy chain is used as the UUID.
+     */
+    private function getUuidForParcours(Parcours $parcours): int
+    {
+        $oldestVersion = $parcours;
+
+        while ($oldestVersion->getParcoursOrigineCopie() !== null) {
+            $oldestVersion = $oldestVersion->getParcoursOrigineCopie();
+        }
+
+        return $oldestVersion->getId();
+    }
+
+    /**
+     * Returns the stable API identifier of a formation across annual copies.
+     * The oldest formation in the copy chain is used as the UUID.
+     */
+    private function getUuidForFormation(Formation $formation): int
+    {
+        $oldestVersion = $formation;
+
+        while ($oldestVersion->getFormationOrigineCopie() !== null) {
+            $oldestVersion = $oldestVersion->getFormationOrigineCopie();
+        }
+
+        return $oldestVersion->getId();
     }
 
     /*
