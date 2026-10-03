@@ -11,7 +11,6 @@ use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
 use App\Enums\TypeModificationDpeEnum;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
-use App\TypeDiplome\TypeDiplomeResolver;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -120,7 +119,7 @@ class ParcoursExport {
                 'autonomie'=> $dto->heuresEctsFormation->sommeFormationTePres
             ],
             'ects' => $dto->heuresEctsFormation->sommeFormationEcts,
-            'niveau1' => []
+            'semestres' => []
         ];
 
         if(!$isVersioning){
@@ -301,25 +300,21 @@ class ParcoursExport {
         return $data;
     }
 
-    private function getEcFromUe(StructureUe $ue, int $parentDepth, bool $isVersioning = false): array
+    private function getEcFromUe(StructureUe $ue, bool $isVersioning = false): array
     {
         $tEcs = [];
-        $depth = $parentDepth + 1;
         foreach ($ue->elementConstitutifs as $ec) {
             if ($ec->elementConstitutif->getNatureUeEc()?->isLibre()) {
                 $tEcs['description_libre_choix'] =  $ec->elementConstitutif->getTexteEcLibre();
             } elseif ($ec->elementConstitutif->getNatureUeEc()?->isChoix() || count($ec->elementsConstitutifsEnfants) > 0) {
-                $tEc['typeNiveau'] = 'ec';
                 $tEc['ordre'] = $ec->elementConstitutif->getOrdre();
                 $tEc['numero'] = $ec->elementConstitutif->getCode();
                 $tEc['libelle'] = $ec->elementConstitutif?->getFicheMatiere()?->getLibelle() ?? '-';
-                $tEc['libelleNiveau'] = $tEc['numero'] . ' - ' . $tEc['libelle'];
-                $childKey = 'niveau' . ($depth + 1);
-                $tEc[$childKey] =  [];
+                $tEc['ecsEnfants'] =  [];
                 $tEc['description_libre_choix'] =  $ec->elementConstitutif->getTexteEcLibre();
                 $nb = 0;
                 foreach ($ec->elementsConstitutifsEnfants as $ecEnfant) {
-                    $tEc[$childKey][] = $this->getEc($ecEnfant, $isVersioning);
+                    $tEc['ecsEnfants'][] = $this->getEc($ecEnfant, $isVersioning);
                     $nb++;
                 }
                 $tEc['nbChoix'] =  $nb;
@@ -383,18 +378,15 @@ class ParcoursExport {
         }
 
         return [
-            'typeNiveau' => 'ec',
-            'libelleNiveau' => $ec->elementConstitutif->getCode() . ' - ' . $libelle,
             'ordre' => $ec->elementConstitutif->getOrdre(),
             'valide' => $valide,
             'ec_libre' => $ecLibre,
-            'ec_choix' => $ec->elementConstitutif->getNatureUeEc()?->isChoix(),
             'nature_ec' => $isEcFromBD ? $elementConstitutif->getTypeEc()?->getLibelle() : $ec->elementConstitutif->getTypeEc()?->getLibelle(),
             'valide_date' => new DateTime(),
             'numero'=> $ec->elementConstitutif->getCode(),
             'libelle'=> $libelle,
             'libelle_anglais' => $ficheMatiere?->getLibelleAnglais() ?? '-',
-            'sigle'=> $ficheMatiere?->getSigle() ?? '-',
+            'sigle'=> $ficheMatiere?->getSigle() ?? '-', "",
             'fiche_matiere_slug' => $ficheMatiere?->getSlug(),
             'enseignant_referent' => [
                 'nom'=> $ficheMatiere?->getResponsableFicheMatiere()?->getDisplay() ?? '-',
