@@ -81,6 +81,7 @@ class ApiSiteWebController extends AbstractController
     }
 
     #[Route('/api/site/web/versioning_json/', name: 'api_site_web_versioning_json')]
+    #[Route('/api/site/web/legacy', name: 'api_site_web_legacy_index', methods: ['GET'])]
     public function indexVersioningJson(
         Filesystem $fs
     ) : Response {
@@ -97,7 +98,7 @@ class ApiSiteWebController extends AbstractController
     }
 
     #[Route('/api/site/web/export_v2')]
-    #[Route('/api/v2/publication', name: 'api_v2_publication_index', methods: ['GET'])]
+    #[Route('/api/site/web/v2', name: 'api_site_web_v2_index', methods: ['GET'])]
     public function indexApiJsonV2(Filesystem $fs) {
         $filename = "api_json_urca_versioning_v2.json";
         $path = __DIR__ . "/../../public/api_json_v2/";
