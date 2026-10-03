@@ -42,6 +42,7 @@ class ParcoursExport {
         Parcours $parcours,
         int $formation_id = null,
         int $parcours_id = null,
+        int $formation_id = null,
         bool $fermetureEmpty = false
     ): array
     {
@@ -174,8 +175,8 @@ class ParcoursExport {
                         'ues' => []
                     ];
                     foreach ($sem->ues as $ue) {
-                            'ordre' => $ue->ordre(),
                         $tUe = [
+                            'ordre' => $ue->ordre(),
                             'libelleOrdre' => $ue->display,
                             'libelle' => $ue->ue->getLibelle() ?? $ue->display,
                             'volumes' => [
