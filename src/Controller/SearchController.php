@@ -4,13 +4,9 @@ namespace App\Controller;
 
 use App\Entity\CampagneCollecte;
 use App\Entity\FicheMatiere;
-use App\Entity\Formation;
-use App\Entity\Parcours;
-use App\Enums\TypeParcoursEnum;
 use App\Navigation\NavigationSearchService;
 use App\Repository\FicheMatiereRepository;
-use App\Repository\FormationRepository;
-use App\Repository\ParcoursRepository;
+use App\Service\Recherche\RechercheParcours;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,7 +14,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use App\Utils\Tools;
 use DateTime;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -51,9 +46,8 @@ class SearchController extends AbstractController
     #[Route('/recherche/mot_cle', name: 'app_search_action')]
     public function searchWithKeyword(
         EntityManagerInterface $entityManager,
-        ParcoursRepository $parcoursRepository,
         FicheMatiereRepository $ficheMatiereRepository,
-        FormationRepository $formationRepository,
+        RechercheParcours $rechercheParcours,
     ): RedirectResponse|Response
     {
         $campagneCollecte = $entityManager->getRepository(CampagneCollecte::class)
@@ -77,99 +71,19 @@ class SearchController extends AbstractController
             return $this->redirectToRoute('app_search');
         }
 
+        if ($typeRechercheValide === 'parcours' && !$rechercheParcours->estSignificative($keyword_1)) {
+            $this->addFlash('toast', [
+                'type' => 'error',
+                'text' => 'Le mot-clé ne contient que des mots trop courants (le, de, des…) : précisez votre recherche.'
+            ]);
+
+            return $this->redirectToRoute('app_search');
+        }
+
         if ($typeRechercheValide === 'parcours') {
-
-            $resultArrayBadge = [];
-            $isParcoursParDefautArray = [];
-
-            $parcoursArray = $parcoursRepository->findWithKeyword($keyword_1, $campagneCollecte);
-            $parcoursParDefautArray = $parcoursRepository->findWithKeywordForDefaultParcours($keyword_1, $campagneCollecte);
-
-            for ($i = 0; $i < count($parcoursArray); $i++) {
-                $textContains = [];
-                if ($this->isStringContainingText($keyword_1, $parcoursArray[$i]['contenuFormation'])) {
-                    $textContains[] = 'contenuFormation';
-                }
-                if ($this->isStringContainingText($keyword_1, $parcoursArray[$i]['poursuitesEtudes'])) {
-                    $textContains[] = 'poursuitesEtudes';
-                }
-                if ($this->isStringContainingText($keyword_1, $parcoursArray[$i]['objectifsParcours'])) {
-                    $textContains[] = 'objectifsParcours';
-                }
-                if ($this->isStringContainingText($keyword_1, $parcoursArray[$i]['resultatsAttendus'])) {
-                    $textContains[] = 'resultatsAttendus';
-                }
-
-                $parcours = $parcoursRepository->find($parcoursArray[$i]['parcours_id']);
-
-                $linkedFicheMatiere = $parcours !== null
-                    ? $ficheMatiereRepository->findForParcoursWithKeyword($parcours, $keyword_1)
-                    : [];
-
-                $libelleMention = $formationRepository->find($parcoursArray[$i]['formation_id'])?->getDisplayLong() ?? '';
-
-                $typeParcoursLibelle = "";
-                if ($parcoursArray[$i]['type_parcours'] !== null) {
-                    $typeParcoursLibelle = $parcoursArray[$i]['type_parcours']->getLabel();
-                }
-
-                $resultArrayBadge[] =
-                [
-                    ...$textContains,
-                    'fichesMatieres' => [...$linkedFicheMatiere],
-                    'libelleMention' => $libelleMention,
-                    'typeParcoursLibelle' => $typeParcoursLibelle
-                ];
-
-                $isParcoursParDefautArray[] = $parcoursArray[$i]['parcours_libelle'] === Parcours::PARCOURS_DEFAUT;
-            }
-
-            for ($j = 0; $j < count($parcoursParDefautArray); $j++) {
-                $textContainsDefault = [];
-                if ($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['contenuFormation'])) {
-                    $textContainsDefault[] = 'contenuFormation';
-                }
-                if ($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['resultatsAttendus'])) {
-                    $textContainsDefault[] = 'resultatsAttendus';
-                }
-                if ($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['objectifsFormation'])) {
-                    $textContainsDefault[] = 'objectifsFormation';
-                }
-                if ($this->isStringContainingText($keyword_1, $parcoursParDefautArray[$j]['poursuitesEtudes'])) {
-                    $textContainsDefault[] = 'poursuitesEtudes';
-                }
-
-                $parcoursDefaut = $parcoursRepository->find($parcoursParDefautArray[$j]['parcours_id']);
-
-                $linkedFicheMatiereDefault = $parcoursDefaut !== null
-                    ? $ficheMatiereRepository->findForParcoursWithKeyword($parcoursDefaut, $keyword_1)
-                    : [];
-
-                $libelleMentionParDefaut = $formationRepository->find($parcoursParDefautArray[$j]['formation_id'])?->getDisplayLong() ?? '';
-
-                $typeParcoursDefautLibelle = "";
-                if ($parcoursParDefautArray[$j]['type_parcours'] !== null) {
-                    $typeParcoursDefautLibelle = $parcoursParDefautArray[$j]['type_parcours']->getLabel();
-                }
-
-                $resultArrayBadge[] = [
-                    ...$textContainsDefault,
-                    'fichesMatieres' => [...$linkedFicheMatiereDefault],
-                    'libelleMention' => $libelleMentionParDefaut,
-                    'typeParcoursLibelle' => $typeParcoursDefautLibelle
-                ];
-
-                $isParcoursParDefautArray[] = $parcoursParDefautArray[$j]['parcours_libelle'] === Parcours::PARCOURS_DEFAUT;
-            }
-
             $dataTwigRenderer = [
                 'typeRecherche' => 'parcours',
-                'parcoursArray' => [
-                ...$parcoursArray,
-                ...$parcoursParDefautArray
-                ],
-                'resultArrayBadge' => $resultArrayBadge,
-                'isParcoursDefautArray' => $isParcoursParDefautArray
+                'recherche' => $rechercheParcours->rechercher($keyword_1, $campagneCollecte),
             ];
         } else {
             $countFiche = $ficheMatiereRepository->findCountForKeyword($keyword_1, $campagneCollecte)[0]['nombre_total'];
@@ -184,18 +98,6 @@ class SearchController extends AbstractController
             'keyword_1' => $keyword_1,
             ...$dataTwigRenderer
         ]);
-    }
-
-    private function isStringContainingText(string $needle, string|null $haystack): bool
-    {
-        if ($haystack !== null) {
-            return mb_strstr(
-                mb_strtoupper(Tools::removeAccent($haystack)),
-                mb_strtoupper(Tools::removeAccent($needle))
-            ) !== false;
-        } else {
-            return false;
-        }
     }
 
     #[Route('/recherche/fiche_matiere/{page}/{mot_cle}', name: 'app_search_fiche_matiere_pagination')]

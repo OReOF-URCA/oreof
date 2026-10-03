@@ -26,7 +26,7 @@
             />
             <twig:Badge
                     :label="typeRecherche == 'parcours'
-                    ? (parcoursArray|length ~ (parcoursArray|length > 1 ? ' parcours trouvés' : ' parcours trouvé'))
+                    ? (recherche.resultats|length ~ (recherche.resultats|length > 1 ? ' parcours trouvés' : ' parcours trouvé'))
                     : (nombreTotal ~ (nombreTotal > 1 ? ' fiches matières trouvées' : ' fiche matière trouvée'))"
                     variant="success"
             />

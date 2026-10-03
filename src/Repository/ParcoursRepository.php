@@ -222,78 +222,31 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findWithKeyword(string $keyword, CampagneCollecte $campagne) {
-        $qb = $this->createQueryBuilder('p');
-
-        $parcoursParDefaut = Parcours::PARCOURS_DEFAUT;
-
-        $qb = $qb
-            ->select(
-                [
-                    'p.id AS parcours_id', 'p.libelle AS parcours_libelle',
-                    'p.sigle AS parcours_sigle', 'p.objectifsParcours',
-                    'p.poursuitesEtudes', 'p.contenuFormation',
-                    'p.resultatsAttendus', 'f.id AS formation_id',
-                    'p.typeParcours AS type_parcours'
-                ]
-            )
+    /**
+     * Textes des parcours de la campagne pour la recherche plein texte (une ligne par parcours et DPE).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function findPourRechercheTexte(CampagneCollecte $campagne): array
+    {
+        return $this->createQueryBuilder('p')
+            ->select([
+                'p.id AS parcours_id', 'p.libelle AS parcours_libelle', 'p.sigle AS parcours_sigle',
+                'p.typeParcours AS type_parcours', 'p.objectifsParcours', 'p.poursuitesEtudes',
+                'p.contenuFormation', 'p.resultatsAttendus',
+                'f.slug AS formation_slug', 'f.sigle AS formation_sigle', 'f.mentionTexte AS formation_mention_texte',
+                'f.contenuFormation AS formation_contenu', 'f.resultatsAttendus AS formation_resultats_attendus',
+                'f.objectifsFormation AS formation_objectifs',
+                'm.libelle AS mention_libelle', 'td.libelle AS type_diplome_libelle',
+            ])
             ->join('p.formation', 'f')
             ->join('p.dpeParcours', 'dpe')
-            ->where(
-                $qb->expr()->like('UPPER(p.objectifsParcours)', 'UPPER(:keyword)')
-            )
-            ->orWhere(
-                $qb->expr()->like('UPPER(p.poursuitesEtudes)', 'UPPER(:keyword)')
-            )
-            ->orWhere(
-                $qb->expr()->like('UPPER(p.contenuFormation)', 'UPPER(:keyword)')
-            )
-            ->orWhere(
-                $qb->expr()->like('UPPER(p.resultatsAttendus)', 'UPPER(:keyword)')
-            )
-            ->andWhere("p.libelle != :parcoursParDefaut")
+            ->leftJoin('f.mention', 'm')
+            ->leftJoin('f.typeDiplome', 'td')
             ->andWhere('dpe.campagneCollecte = :campagne')
-            ->setParameter('parcoursParDefaut', $parcoursParDefaut)
-            ->setParameter('keyword', '%' . $keyword . '%')
-            ->setParameter(':campagne', $campagne);
-
-        return $qb->getQuery()->getResult();
-    }
-
-    public function findWithKeywordForDefaultParcours(string $keyword, CampagneCollecte $campagne){
-        $qb = $this->createQueryBuilder('p');
-
-        $parcoursParDefaut = Parcours::PARCOURS_DEFAUT;
-
-        $qb = $qb
-            ->join('p.formation', 'f')
-            ->join('p.dpeParcours', 'dpe')
-            ->select(
-                [
-                    'f.id AS formation_id', 'f.slug AS formation_slug', 'p.id AS parcours_id',
-                    'f.contenuFormation', 'f.resultatsAttendus', 'f.objectifsFormation',
-                    'p.poursuitesEtudes', 'p.libelle AS parcours_libelle', 'f.sigle AS formation_sigle',
-                    'p.typeParcours AS type_parcours'
-                ]
-            )
-            ->where(
-                $qb->expr()->like('UPPER(f.contenuFormation)', 'UPPER(:keyword)')
-            )
-            ->orWhere(
-                $qb->expr()->like('UPPER(f.resultatsAttendus)', 'UPPER(:keyword)')
-            )
-            ->orWhere(
-                $qb->expr()->like('UPPER(f.objectifsFormation)', 'UPPER(:keyword)')
-            )->orWhere(
-                $qb->expr()->like('UPPER(p.poursuitesEtudes)', 'UPPER(:keyword)')
-            )
-            ->andWhere('p.libelle = :parcoursParDefaut')
-            ->andWhere('dpe.campagneCollecte = :campagne')
-            ->setParameter('parcoursParDefaut', $parcoursParDefaut)
-            ->setParameter('keyword', '%' . $keyword . '%')
-            ->setParameter(':campagne', $campagne);
-
-            return $qb->getQuery()->getResult();
+            ->setParameter('campagne', $campagne)
+            ->getQuery()
+            ->getResult();
     }
 
     public function findByCampagneCollecte(CampagneCollecte $getCampagneCollecte): array

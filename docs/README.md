@@ -7,6 +7,7 @@ Point d'entrée agents : `AGENTS.md` (racine). Chaque fichier ci-dessous est aut
 | `ui-conventions/ui-conventions.md` | Composants UI Twig, tokens Tailwind, migration Bootstrap, opacité, checklist PR | toute modif de template/CSS |
 | `ui-conventions/icones.md` | Correspondance FontAwesome → alias `icon:*` | remplacement d'icône |
 | `composants/navigation.md` | `MenuItem`, providers, droits, pages de section, breadcrumbs | ajout de page/menu |
+| `composants/recherche.md` | Recherche approchée (fuzzy) des parcours : moteur, pondération, affichage | page `/recherche/parcours`, réutiliser le moteur fuzzy |
 | `composants/aides-faq.md` | Aides contextuelles, FAQ, galerie d'images, éditeur Markdown, import/export entre instances | admin aides/FAQ, transfert vers la pré-prod |
 | `formulaires/README.md` | `JsonConfigType` + `DynamicFieldsType` (technique) | champ JSON configurable |
 | `formulaires/exemples-plateformes.md` | Définitions de champs par plateforme d'admission | configurer une plateforme |
