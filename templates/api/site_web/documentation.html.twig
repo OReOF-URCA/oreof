@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}API de publication — ORéOF{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <h1>API de publication ORéOF</h1>
+    <p class="lead">
+        Cette API expose l'offre de formation publiée pour le site web.
+        Deux contrats coexistent : Legacy, conservé pour le prestataire historique, et V2,
+        destiné aux nouvelles intégrations.
+    </p>
+
+    <div class="alert alert-warning">
+        <strong>Legacy :</strong> les URLs et la structure des réponses existantes sont figées
+        pour garantir la compatibilité avec les consommateurs actuels.
+    </div>
+
+    <h2 class="mt-5">Points d'entrée</h2>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Version</th>
+            <th>Méthode</th>
+            <th>Endpoint</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Legacy</td>
+            <td><code>GET</code></td>
+            <td><a href="{{ path('api_site_web_legacy_index') }}"><code>/api/site/web/legacy</code></a></td>
+            <td>Index des formations et parcours publiés au format historique.</td>
+        </tr>
+        <tr>
+            <td>V2</td>
+            <td><code>GET</code></td>
+            <td><a href="{{ path('api_site_web_v2_index') }}"><code>/api/site/web/v2</code></a></td>
+            <td>Index de publication destiné au nouveau consommateur.</td>
+        </tr>
+        <tr>
+            <td>V2</td>
+            <td><code>GET</code></td>
+            <td><code>/api/site/web/v2/parcours/{id}/maquette</code></td>
+            <td>Maquette courante au format hiérarchique par niveaux.</td>
+        </tr>
+        <tr>
+            <td>V2</td>
+            <td><code>GET</code></td>
+            <td><code>/api/site/web/v2/parcours/{id}/maquette/validee-cfvu</code></td>
+            <td>Dernière maquette validée CFVU au format hiérarchique.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2 class="mt-5">Contrat Legacy</h2>
+    <p>
+        Le contrat Legacy reprend le format de publication historique. Il conserve notamment
+        les structures <code>semestres</code>, <code>ues</code>, <code>UesEnfants</code>,
+        <code>ec</code> et <code>ecsEnfants</code>. Il ne doit recevoir que des corrections
+        rétrocompatibles.
+    </p>
+
+    <h2 class="mt-5">Contrat V2</h2>
+    <p>
+        V2 représente la maquette sous forme hiérarchique générique. Chaque élément indique son
+        type avec <code>typeNiveau</code> et ses enfants sont placés dans
+        <code>niveau1</code>, <code>niveau2</code>, <code>niveau3</code>, etc.
+    </p>
+
+    <pre class="bg-light p-3 rounded"><code>{
+  "id": 123,
+  "formationId": 42,
+  "formation": "...",
+  "parcours": "...",
+  "niveau1": [
+    {
+      "typeNiveau": "semestre",
+      "libelleNiveau": "Semestre 1",
+      "niveau2": [
+        {
+          "typeNiveau": "ue",
+          "niveau3": []
+        }
+      ]
+    }
+  ]
+}</code></pre>
+
+    <h2 class="mt-5">Parcours fermés ou non ouverts</h2>
+    <p>
+        Pour une maquette validée CFVU correspondant à un parcours fermé ou non ouvert,
+        les métadonnées du parcours restent publiées mais la structure pédagogique n'est pas exposée.
+    </p>
+
+    <h2 class="mt-5">Compatibilité</h2>
+    <p>
+        Les anciennes routes de publication restent disponibles comme alias. Les nouvelles
+        intégrations doivent utiliser les endpoints sous <code>/api/site/web/v2</code>.
+    </p>
+</div>
+{% endblock %}
