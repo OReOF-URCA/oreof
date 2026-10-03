@@ -119,7 +119,8 @@ class ParcoursExportController extends AbstractController
             $versionData['dto'],
             $versionData['parcours'],
             $parcours_id,
-            $formation_id
+            $formation_id,
+            fermetureEmpty: true
         );
 
         return $this->json($json);
