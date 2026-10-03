@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/api/v2/parcours', name: 'api_v2_parcours_')]
+#[Route('/api/site/web/v2/parcours', name: 'api_site_web_v2_parcours_')]
 final class PublicationController extends AbstractController
 {
     #[Route('/{parcours}/maquette', name: 'maquette', methods: ['GET'])]
