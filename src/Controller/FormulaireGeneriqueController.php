@@ -296,7 +296,7 @@ final class FormulaireGeneriqueController extends BaseController
                 // Nouvelle formation (elle n'avait aucun parcours) → on affiche la formation ;
                 // ajout d'un parcours à une formation existante → on affiche le parcours.
                 if ($formationCreee) {
-                    return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
+                    return $this->redirectToRoute('formation_v2_voir', ['slug' => $formation->getSlug()]);
                 }
 
                 return $this->redirectToRoute('app_parcours_show', ['id' => $parcours->getId()]);

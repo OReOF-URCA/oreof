@@ -150,7 +150,7 @@ class FormationResponsableController extends BaseController
 
         $this->addFlashBag('success', 'La demande de changement de (co-)responsable de formation a bien été supprimée.');
 
-        return $this->redirectToRoute('app_formation_show', [
+        return $this->redirectToRoute('formation_v2_voir', [
             'slug'=> $formation?->getSlug()
         ]);
     }

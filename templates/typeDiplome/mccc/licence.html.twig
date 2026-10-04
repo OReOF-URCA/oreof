@@ -16,7 +16,7 @@
     </label>
     <select id="choix_type_mccc" name="choix_type_mccc" class="form-select synchro-mccc"
             {{ stimulus_action('mccc--licence', 'changeType') }}
-            {% if disabled and ec.natureUeEc.isChoix == false %}disabled{% endif %}
+            {% if disabled and (ec.natureUeEc != null and ec.natureUeEc.isChoix == false) %}disabled{% endif %}
     >
         <option value="">{{ 'mccc_licence.placeholder.label'|trans({}, 'form') }}</option>
         <option value="ct" {% if typeMccc == 'ct'  %}selected{% endif %}>

@@ -34,7 +34,7 @@ class StatsFichesMatieresParcours
     {
         if ($raccroche === false) {
             $ficheMatiere = $ec->getFicheMatiere();
-            if ($ficheMatiere !== null && $ficheMatiere->getParcours()?->getId() === $this->parcours->getId() && !$ec->getNatureUeEc()->isLibre()) {
+            if ($ficheMatiere !== null && $ficheMatiere->getParcours()?->getId() === $this->parcours->getId() && !$ec->getNatureUeEc()?->isLibre()) {
                 $this->addStasEc($ficheMatiere);
             }
         }

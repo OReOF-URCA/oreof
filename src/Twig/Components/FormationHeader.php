@@ -7,6 +7,7 @@ use App\Classes\MentionProcess;
 use App\Classes\ValidationProcess;
 use App\Entity\DpeParcours;
 use App\Entity\Formation;
+use App\Entity\FormationVersioning;
 use App\Entity\Parcours;
 use App\Enums\TypeModificationDpeEnum;
 use App\Repository\HistoriqueFormationRepository;
@@ -111,4 +112,15 @@ final class FormationHeader
         return '- à venir -';
     }
 
+    /**
+     * @return list<FormationVersioning>
+     */
+    public function getVersions(): array
+    {
+        if ($this->formation === null) {
+            return [];
+        }
+
+        return $this->em->getRepository(FormationVersioning::class)->findLastVersion($this->formation);
+    }
 }

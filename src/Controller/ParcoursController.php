@@ -799,7 +799,7 @@ class ParcoursController extends BaseController
             if($parcours->isParcoursDefaut() === false) {
                 return $this->redirectToRoute('app_parcours_show', ['id' => $parcours->getId()]);
             }
-            return $this->redirectToRoute('app_formation_show', ['slug' => $parcours->getFormation()->getSlug()]);
+            return $this->redirectToRoute('formation_v2_voir', ['slug' => $parcours->getFormation()->getSlug()]);
         } catch (Exception $e) {
             // Log error
             $logTxt = "[{$dateHeure}] Le versioning du parcours : {$parcours->getId()} a rencontré une erreur.\n{$e->getMessage()}\n";

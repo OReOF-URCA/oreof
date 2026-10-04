@@ -29,17 +29,17 @@ final class BadgeHeuresComponent
     #[PostMount]
     public function mounted(): void
     {
-        $this->isParcoursProprietaire = $this->elementConstitutif->getFicheMatiere()?->getParcours()?->getId() === $this->parcours->getId() || $this->elementConstitutif->getNatureUeEc()?->isChoix() || $this->elementConstitutif->getNatureUeEc()?->isLibre();
-        $this->isHeuresSpecifiques = $this->elementConstitutif->isHeuresSpecifiques();
-        if ($this->elementConstitutif->isHeuresSpecifiques() === true) {
+        $this->isParcoursProprietaire = $this->elementConstitutif?->getFicheMatiere()?->getParcours()?->getId() === $this->parcours?->getId() || $this->elementConstitutif?->getNatureUeEc()?->isChoix() || $this->elementConstitutif?->getNatureUeEc()?->isLibre();
+        $this->isHeuresSpecifiques = $this->elementConstitutif?->isHeuresSpecifiques();
+        if ($this->elementConstitutif?->isHeuresSpecifiques() === true) {
             $this->etatHeuresComplet = $this->elementConstitutif->etatStructure() === 'Complet';
-        } elseif ($this->elementConstitutif->getFicheMatiere() !== null) {
+        } elseif ($this->elementConstitutif?->getFicheMatiere() !== null) {
             $this->etatHeuresComplet = $this->elementConstitutif->getFicheMatiere()->etatStructure() === 'Complet';
-        } else {
+        } elseif ($this->elementConstitutif !== null) {
             $this->etatHeuresComplet = $this->elementConstitutif->etatStructure() === 'Complet';
         }
 
-        if ($this->elementConstitutif->getEcParent() !== null && $this->elementConstitutif->getEcParent()->isHeuresEnfantsIdentiques() === true) {
+        if ($this->elementConstitutif?->getEcParent() !== null && $this->elementConstitutif->getEcParent()->isHeuresEnfantsIdentiques() === true) {
             $this->editable = false;
             if ($this->elementConstitutif->getEcParent()->getFicheMatiere() !== null) {
                 $this->etatHeuresComplet = $this->elementConstitutif->getEcParent()->getFicheMatiere()->etatStructure() === 'Complet';

@@ -53,9 +53,9 @@
 {% block content %}
     <twig:FormationHeader formationId="{{ formation.id }}"/>
 
-    {% if formation.hasParcours == false %}
+    {% if formation.hasParcours == false and parcours is defined and parcours is not null %}
         {# si la formation n'a pas de parcours i.e. parcours par défaut, alors on affiche le menu aussi du parcours pour le processus. #}
-        <twig:ParcoursHeader formationId="{{ formation.id }}" parcoursId="{{ formation.parcours[0].id }}"/>
+        <twig:ParcoursHeader formationId="{{ formation.id }}" parcoursId="{{ parcours.id }}"/>
     {% endif %}
 
     <div class="flex">
@@ -64,7 +64,7 @@
                 <p class="text-[10px] font-black text-secondary-400 uppercase mb-4 tracking-widest px-3">Configuration
                     Formation</p>
 
-                <div class="p-6 bg-secondary-200 dark:bg-secondary-800" id="pecent_completude">{# a mettre à jour avec turbo #}
+                <div class="p-6 bg-secondary-200 dark:bg-secondary-800" id="percent_completude">{# a mettre à jour avec turbo #}
                     {% set percent = formation.remplissage.calcul() %}
                     {% set percentColor = formation.remplissage.isFull() == true ? 'green' : 'orange' %}
                     <div class="flex justify-between items-end mb-2">
@@ -72,7 +72,7 @@
                         <span class="text-xs font-bold text-{{ percentColor }}-600 italic">{{ percent|number_format(2) }}%</span>
                     </div>
                     <div class="w-full h-1 bg-secondary-700 rounded-full overflow-hidden">
-                        <div class="bg-{{ percentColor }}-500 h-full w-[{{ percent|number_format(0) }}%]"></div>
+                        <div class="bg-{{ percentColor }}-500 h-full" style="width: {{ percent|number_format(0) }}%;"></div>
                     </div>
                 </div>
 
@@ -115,8 +115,7 @@
                     </span>
                 </a>
 
-                {% if formation.hasParcours == false %}
-                    {% set parcours = formation.parcours[0] %}
+                {% if formation.hasParcours == false and parcours is defined and parcours is not null %}
                     <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
                        href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'descriptif' }) }}"
                        data-turbo-frame="tab-content"

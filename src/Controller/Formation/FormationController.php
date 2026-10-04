@@ -11,10 +11,8 @@ namespace App\Controller\Formation;
 
 use App\Classes\GetDpeParcours;
 use App\Controller\BaseController;
-use App\Entity\Annee;
 use App\Entity\Formation;
 use App\Entity\Parcours;
-use App\Entity\SemestreParcours;
 use App\Form\FormationStep1Type;
 use App\Form\FormationStep2Type;
 use App\Form\FormationStep3Type;
@@ -22,10 +20,11 @@ use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\FormationTabStateRepository;
 use App\Repository\ParcoursTabStateRepository;
-use App\Repository\ValidationIssueRepository;
 use App\Service\LheoXML;
-use App\Service\Validation\SemesterValidationRefresher;
+use App\Service\VersioningFormation;
+use App\Service\VersioningParcours;
 use App\TypeDiplome\TypeDiplomeResolver;
+use Jfcherng\Diff\DiffHelper;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,18 +56,19 @@ class FormationController extends BaseController
             )
             || !Access::isOuvert($formation)
         ) {
-            if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
+            $firstParcours = $formation->getParcours()->first() ?: null;
+            if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1 && $firstParcours instanceof Parcours) {
                 if (!$this->isGranted(
                     'EDIT',
                     [
                         'route' => 'app_parcours',
-                        'subject' => $formation->getParcours()->first(),
+                        'subject' => $firstParcours,
                     ]
                 )) {
-                    return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
+                    return $this->redirectToRoute('formation_v2_voir', ['slug' => $formation->getSlug()]);
                 }
             } else {
-                return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
+                return $this->redirectToRoute('formation_v2_voir', ['slug' => $formation->getSlug()]);
             }
         }
         
@@ -82,9 +82,13 @@ class FormationController extends BaseController
 
         $tabStates = $statesRepo->indexByTabKey($formation);
 
+        $firstParcours = $formation->getParcours()->first() ?: null;
+        $parcours = $firstParcours instanceof Parcours ? $firstParcours : null;
+
         $parameters = [
             'tab' => 'localisation',
             'formation' => $formation,
+            'parcours' => $parcours,
             'typeDiplome' => $formation->getTypeDiplome(),
             'form' => $this->createForm(FormationStep1Type::class, $formation),
             'titre' => 'Localisation et organisation de la formation',
@@ -92,23 +96,21 @@ class FormationController extends BaseController
             'tabStates' => $tabStates,
         ];
 
-        if ($formation->hasParcours() === false) {
-            $parcours = $formation->getParcours()->first();
-            if ($parcours instanceof Parcours) {
-                //pas de parcours, donc on calcule les données du parcours par défaut
-                $tabStatesParcours = $parcoursTabStateRepository->indexByTabKey($parcours);
-                $typeD = $typeDiplomeResolver->fromParcours($parcours);
-                $dto = $typeD->calcul($parcours);
+        if ($formation->hasParcours() === false && $parcours !== null) {
+            //pas de parcours, donc on calcule les données du parcours par défaut
+            $tabStatesParcours = $parcoursTabStateRepository->indexByTabKey($parcours);
+            $typeD = $typeDiplomeResolver->fromParcours($parcours);
+            $dto = $typeD->calcul($parcours);
 
-                $parameters['tabStatesParcours'] = $tabStatesParcours;
-                $parameters['dto'] = $dto;
-            }
+            $parameters['tabStatesParcours'] = $tabStatesParcours;
+            $parameters['dto'] = $dto;
         }
 
         // Si Turbo charge un frame, ne calcule pas la structure complète
         if ($request->headers->has('Turbo-Frame')) {
-            return $this->render('parcours_v2/tabs/_presentation.html.twig', [
+            return $this->render('formation_v2/tabs/_localisation.html.twig', [
                 'formation' => $formation,
+                'parcours' => $parcours,
                 'form' => $parameters['form']->createView(),
                 'titre' => $parameters['titre'],
                 'texte_help' => $parameters['texte_help'],
@@ -123,10 +125,13 @@ class FormationController extends BaseController
     #[Route('/{slug}', name: 'voir', methods: ['GET'])]
     #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function show(
+        Request             $request,
         #[MapEntity(mapping: ['slug' => 'slug'])]
-        Formation         $formation,
-        LheoXML           $lheoXML,
-        BreadcrumbService $breadcrumb,
+        Formation           $formation,
+        LheoXML             $lheoXML,
+        VersioningParcours  $versioningParcours,
+        VersioningFormation $versioningFormation,
+        BreadcrumbService   $breadcrumb,
     ): Response
     {
         $breadcrumb->add(
@@ -140,126 +145,177 @@ class FormationController extends BaseController
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
 
+        $firstParcours = $formation->getParcours()->first() ?: null;
+        $parcours = $firstParcours instanceof Parcours ? $firstParcours : null;
+        $dpeParcours = $parcours !== null ? GetDpeParcours::getFromParcours($parcours) : null;
+
+        $hasLastVersion = false;
+        $cssDiff = DiffHelper::getStyleSheet();
+        $textDifferencesParcours = [];
+        $textDifferencesParcoursCampagne = [];
+
+        if ($formation->isHasParcours() === false && $parcours !== null) {
+            $textDifferencesParcours = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours);
+            $textDifferencesParcoursCampagne = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours, true);
+            $hasLastVersion = $versioningParcours->hasLastVersion($parcours);
+        } else {
+            $hasLastVersion = $versioningFormation->hasLastVersion($formation);
+        }
+
+        $formationStringDifferences = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation);
+        $formationCampagneStringDifferences = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation, true);
+
+        $diffCountLastVersion = 0;
+        foreach (array_merge($formationStringDifferences, $textDifferencesParcours) as $fieldDiff) {
+            if (is_string($fieldDiff) && trim(strip_tags($fieldDiff)) !== '') {
+                $diffCountLastVersion++;
+            }
+        }
+
+        $diffCountCampagne = 0;
+        foreach (array_merge($formationCampagneStringDifferences, $textDifferencesParcoursCampagne) as $fieldDiff) {
+            if (is_string($fieldDiff) && trim(strip_tags($fieldDiff)) !== '') {
+                $diffCountCampagne++;
+            }
+        }
+
+        $canSeeDifferences = $this->isGranted('RELATED_TO_PARCOURS', $formation);
+        $displayComparaison = $request->query->get('optionDisplay', 'false');
+
         return $this->render('formation_v2/voir.html.twig', [
             'formation' => $formation,
+            'parcours' => $parcours,
+            'dpeParcours' => $dpeParcours,
             'typeDiplome' => $typeDiplome,
             'hasParcours' => $formation->isHasParcours(),
             'typeD' => $typeD,
             'lheoXML' => $lheoXML,
+            'cssDiff' => $cssDiff,
+            'stringDifferencesParcoursDefaut' => $textDifferencesParcours,
+            'stringDifferencesParcoursDefautCampagne' => $textDifferencesParcoursCampagne,
+            'stringDifferencesFormation' => $formationStringDifferences,
+            'stringDifferencesFormationCampagne' => $formationCampagneStringDifferences,
+            'diffCountLastVersion' => $diffCountLastVersion,
+            'diffCountCampagne' => $diffCountCampagne,
+            'versioningParcours' => $versioningParcours,
+            'hasLastVersion' => $hasLastVersion,
+            'displayComparaison' => $displayComparaison,
+            'canSeeDifferences' => $canSeeDifferences,
         ]);
     }
 
-    #[Route('/{parcours}/modifier/annee/{annee}', name: 'annee')]
-    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
-    public function annee(
-        Parcours          $parcours,
-        Annee             $annee,
-        BreadcrumbService $breadcrumb
-    ): Response
-    {
-        if ($parcours->getFormation() !== null) {
-            $breadcrumb->add(
-                $parcours->getFormation()->getDisplay(),
-                'formation_v2_voir',
-                ['slug' => $parcours->getFormation()->getSlug()]
-            );
-        }
-        $breadcrumb->add(
-            $parcours->getDisplay(),
-            'formation_v2_modifier',
-            ['slug' => $parcours->getFormation()?->getSlug()]
-        );
-        $breadcrumb->add('Année ' . $annee->getOrdre());
+    // #[Route('/{parcours}/modifier/annee/{annee}', name: 'annee')]
+    // #[Breadcrumb(menuKey: 'offre.detail_mentions')]
+    // public function annee(
+    //     Parcours          $parcours,
+    //     Annee             $annee,
+    //     BreadcrumbService $breadcrumb
+    // ): Response
+    // {
+    //     if ($parcours->getFormation() !== null) {
+    //         $breadcrumb->add(
+    //             $parcours->getFormation()->getDisplay(),
+    //             'formation_v2_voir',
+    //             ['slug' => $parcours->getFormation()->getSlug()]
+    //         );
+    //     }
+    //     $breadcrumb->add(
+    //         $parcours->getDisplay(),
+    //         'formation_v2_modifier',
+    //         ['slug' => $parcours->getFormation()?->getSlug()]
+    //     );
+    //     $breadcrumb->add('Année ' . $annee->getOrdre());
 
-        return $this->render('parcours_v2/tabs/_annee.html.twig', [
-            'annee' => $annee,
-            'parcours' => $parcours
-        ]);
-    }
+    //     return $this->render('parcours_v2/tabs/_annee.html.twig', [
+    //         'annee' => $annee,
+    //         'parcours' => $parcours
+    //     ]);
+    // }
 
-    #[Route('/{parcours}/modifier/semestre/{semestreParcours}', name: 'semestre')]
-    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
-    public function semestre(
-        ValidationIssueRepository   $validationIssueRepository,
-        Request                     $request,
-        TypeDiplomeResolver         $typeDiplomeResolver,
-        Parcours                    $parcours,
-        SemestreParcours            $semestreParcours,
-        SemesterValidationRefresher $refresher,
-        BreadcrumbService           $breadcrumb,
-    ): Response
-    {
-        if ($parcours->getFormation() !== null) {
-            $breadcrumb->add(
-                $parcours->getFormation()->getDisplay(),
-                'formation_v2_voir',
-                ['slug' => $parcours->getFormation()->getSlug()]
-            );
-        }
-        $breadcrumb->add(
-            $parcours->getDisplay(),
-            'formation_v2_modifier',
-            ['slug' => $parcours->getFormation()?->getSlug()]
-        );
-        $breadcrumb->add('Semestre ' . $semestreParcours->getOrdre());
+    // #[Route('/{parcours}/modifier/semestre/{semestreParcours}', name: 'semestre')]
+    // #[Breadcrumb(menuKey: 'offre.detail_mentions')]
+    // public function semestre(
+    //     ValidationIssueRepository   $validationIssueRepository,
+    //     Request                     $request,
+    //     TypeDiplomeResolver         $typeDiplomeResolver,
+    //     Parcours                    $parcours,
+    //     SemestreParcours            $semestreParcours,
+    //     SemesterValidationRefresher $refresher,
+    //     BreadcrumbService           $breadcrumb,
+    // ): Response
+    // {
+    //     if ($parcours->getFormation() !== null) {
+    //         $breadcrumb->add(
+    //             $parcours->getFormation()->getDisplay(),
+    //             'formation_v2_voir',
+    //             ['slug' => $parcours->getFormation()->getSlug()]
+    //         );
+    //     }
+    //     $breadcrumb->add(
+    //         $parcours->getDisplay(),
+    //         'formation_v2_modifier',
+    //         ['slug' => $parcours->getFormation()?->getSlug()]
+    //     );
+    //     $breadcrumb->add('Semestre ' . $semestreParcours->getOrdre());
 
-        // refresh du semestre si dirty
-        $refresher->refreshIfDirty($semestreParcours, $parcours);
+    //     // refresh du semestre si dirty
+    //     $refresher->refreshIfDirty($semestreParcours, $parcours);
 
-        $typeD = $typeDiplomeResolver->fromParcours($parcours);
-        $dtoSemestre = $typeD->calculStructureSemestre($semestreParcours, $parcours);
+    //     $typeD = $typeDiplomeResolver->fromParcours($parcours);
+    //     $dtoSemestre = $typeD->calculStructureSemestre($semestreParcours, $parcours);
 
-        $parameters = [
-            'semestreParcours' => $semestreParcours,
-            'semestre' => $dtoSemestre,
-            'parcours' => $parcours,
-            'validationsIssues' => $validationIssueRepository->findBySemestre($dtoSemestre->semestre->getId())
-        ];
+    //     $parameters = [
+    //         'semestreParcours' => $semestreParcours,
+    //         'semestre' => $dtoSemestre,
+    //         'parcours' => $parcours,
+    //         'validationsIssues' => $validationIssueRepository->findBySemestre($dtoSemestre->semestre->getId())
+    //     ];
 
-        // Si la requête vient d'un Turbo Frame (header `Turbo-Frame` présent), renvoyer uniquement le fragment
-        if ($request->headers->has('Turbo-Frame')) {
-            return $this->render('parcours_v2/tabs/_semestre.html.twig', $parameters);
-        }
+    //     // Si la requête vient d'un Turbo Frame (header `Turbo-Frame` présent), renvoyer uniquement le fragment
+    //     if ($request->headers->has('Turbo-Frame')) {
+    //         return $this->render('parcours_v2/tabs/_semestre.html.twig', $parameters);
+    //     }
 
-        $dto = $typeD->calcul($parcours);
+    //     $dto = $typeD->calcul($parcours);
 
-        // Sinon renvoyer la page complète (index) qui inclura le fragment dans son corps
-        return $this->render('parcours_v2/modifier.html.twig', array_merge($parameters, [
-            'tab' => 'semestre',
-            'dpeParcours' => GetDpeParcours::getFromParcours($parcours),
-            'dto' => $dto
-        ]));
-    }
+    //     // Sinon renvoyer la page complète (index) qui inclura le fragment dans son corps
+    //     return $this->render('parcours_v2/modifier.html.twig', array_merge($parameters, [
+    //         'tab' => 'semestre',
+    //         'dpeParcours' => GetDpeParcours::getFromParcours($parcours),
+    //         'dto' => $dto
+    //     ]));
+    // }
 
-    #[Route('/{parcours}/modifier/semestre/{semestreParcours}/validation', name: 'semestre_validation')]
-    public function semestreValidation(
-        Request                     $request,
-        TypeDiplomeResolver         $typeDiplomeResolver,
-        Parcours                    $parcours,
-        SemestreParcours            $semestreParcours,
-        SemesterValidationRefresher $refresher
-    ): Response
-    {
-        // refresh du semestre si dirty
-        $refresher->forceRefresh($semestreParcours, $parcours);
+    // #[Route('/{parcours}/modifier/semestre/{semestreParcours}/validation', name: 'semestre_validation')]
+    // public function semestreValidation(
+    //     Request                     $request,
+    //     TypeDiplomeResolver         $typeDiplomeResolver,
+    //     Parcours                    $parcours,
+    //     SemestreParcours            $semestreParcours,
+    //     SemesterValidationRefresher $refresher
+    // ): Response
+    // {
+    //     // refresh du semestre si dirty
+    //     $refresher->forceRefresh($semestreParcours, $parcours);
 
-        $typeD = $typeDiplomeResolver->fromParcours($parcours);
-        $dtoSemestre = $typeD->calculStructureSemestre($semestreParcours, $parcours);
+    //     $typeD = $typeDiplomeResolver->fromParcours($parcours);
+    //     $dtoSemestre = $typeD->calculStructureSemestre($semestreParcours, $parcours);
 
-        $parameters = [
-            'semestreParcours' => $semestreParcours,
-            'semestre' => $dtoSemestre,
-            'parcours' => $parcours
-        ];
+    //     $parameters = [
+    //         'semestreParcours' => $semestreParcours,
+    //         'semestre' => $dtoSemestre,
+    //         'parcours' => $parcours
+    //     ];
 
-        return $this->render('parcours_v2/tabs/_semestre.html.twig', $parameters);
-    }
+    //     return $this->render('parcours_v2/tabs/_semestre.html.twig', $parameters);
+    // }
 
     #[Route('/{formation}/modifier/tabs/{tab}', name: 'tabs')]
     #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function tabs(
         TypeDiplomeResolver         $typeDiplomeResolver,
         FormationTabStateRepository $statesRepo,
+        ParcoursTabStateRepository  $parcoursTabStateRepository,
         Formation                   $formation,
         string                      $tab,
         Request                     $request,
@@ -294,26 +350,38 @@ class FormationController extends BaseController
                 $texte_help = 'Indiquez les éléments structurant de la formation';
                 $form = $this->createForm(FormationStep3Type::class, $formation);
                 break;
-
+            default:
+                throw $this->createNotFoundException('Onglet de formation inconnu');
         }
 
         $tabStates = $statesRepo->indexByTabKey($formation);
 
+        $firstParcours = $formation->getParcours()->first() ?: null;
+        $parcours = $firstParcours instanceof Parcours ? $firstParcours : null;
+
         $parameters = [
             'formation' => $formation,
-            'form' => $form?->createView(),
+            'parcours' => $parcours,
+            'form' => $form->createView(),
             'titre' => $titre,
             'texte_help' => $texte_help,
             'tabStates' => $tabStates,
             'typeDiplome' => $formation->getTypeDiplome(),
         ];
 
+        if ($formation->hasParcours() === false && $parcours !== null) {
+            $tabStatesParcours = $parcoursTabStateRepository->indexByTabKey($parcours);
+            $typeD = $typeDiplomeResolver->fromParcours($parcours);
+            $dto = $typeD->calcul($parcours);
+
+            $parameters['tabStatesParcours'] = $tabStatesParcours;
+            $parameters['dto'] = $dto;
+        }
+
         // Si la requête vient d'un Turbo Frame (header `Turbo-Frame` présent), renvoyer uniquement le fragment
         if ($request->headers->has('Turbo-Frame')) {
             return $this->render('formation_v2/tabs/_' . $tabView . '.html.twig', $parameters);
         }
-
-        $typeD = $typeDiplomeResolver->fromFormation($formation);
 
         // Sinon renvoyer la page complète (index) qui inclura le fragment dans son corps
         return $this->render('formation_v2/modifier.html.twig', array_merge($parameters, [

@@ -454,119 +454,119 @@ class FormationController extends BaseController
         ]);
     }
 
-    #[Route('/{slug}', name: 'app_formation_show', methods: ['GET'])]
-    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
-    public function show(
-        #[MapEntity(mapping: ['slug' => 'slug'])]
-        Formation           $formation,
-        VersioningParcours  $versioningParcours,
-        VersioningFormation $versioningFormation,
-        BreadcrumbService   $breadcrumb
-    ): Response {
-        $breadcrumb->add($formation->getDisplay());
-        $typeDiplome = $formation->getTypeDiplome();
+    // #[Route('/{slug}', name: 'app_formation_show', methods: ['GET'])]
+    // #[Breadcrumb(menuKey: 'offre.detail_mentions')]
+    // public function show(
+    //     #[MapEntity(mapping: ['slug' => 'slug'])]
+    //     Formation           $formation,
+    //     VersioningParcours  $versioningParcours,
+    //     VersioningFormation $versioningFormation,
+    //     BreadcrumbService   $breadcrumb
+    // ): Response {
+    //     $breadcrumb->add($formation->getDisplay());
+    //     $typeDiplome = $formation->getTypeDiplome();
 
-        if ($typeDiplome === null) {
-            throw new Exception('Type de diplôme non trouvé');
-        }
+    //     if ($typeDiplome === null) {
+    //         throw new Exception('Type de diplôme non trouvé');
+    //     }
 
-        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
-        $hasLastVersion = false;
-        /**
-         * VERSIONING PARCOURS PAR DÉFAUT
-         */
-        $cssDiff = DiffHelper::getStyleSheet();
-        if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
-            $textDifferencesParcours = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($formation->getParcours()[0]);
-            $textDifferencesParcoursCampagne = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($formation->getParcours()[0], true);
-            $hasLastVersion = $versioningParcours->hasLastVersion($formation->getParcours()[0]);
-        }
+    //     $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
+    //     $hasLastVersion = false;
+    //     /**
+    //      * VERSIONING PARCOURS PAR DÉFAUT
+    //      */
+    //     $cssDiff = DiffHelper::getStyleSheet();
+    //     if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
+    //         $textDifferencesParcours = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($formation->getParcours()[0]);
+    //         $textDifferencesParcoursCampagne = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($formation->getParcours()[0], true);
+    //         $hasLastVersion = $versioningParcours->hasLastVersion($formation->getParcours()[0]);
+    //     }
 
-        /**
-         * VERSIONING FORMATION
-         */
-        $formationStringDifferences = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation);
-        $formationCampagneStringDifferences = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation, true);
+    //     /**
+    //      * VERSIONING FORMATION
+    //      */
+    //     $formationStringDifferences = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation);
+    //     $formationCampagneStringDifferences = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation, true);
 
-        //Si l'utilisateur peut voir les différences
-        $canSeeDifferences = $this->isGranted('RELATED_TO_PARCOURS', $formation);
+    //     //Si l'utilisateur peut voir les différences
+    //     $canSeeDifferences = $this->isGranted('RELATED_TO_PARCOURS', $formation);
 
-        // Afficher les comparaisons directement
-        $request = Request::createFromGlobals();
-        $displayComparaison = $request->query->get('optionDisplay', 'false');
+    //     // Afficher les comparaisons directement
+    //     $request = Request::createFromGlobals();
+    //     $displayComparaison = $request->query->get('optionDisplay', 'false');
 
-        return $this->render('formation/show.html.twig', [
-            'formation' => $formation,
-            'typeDiplome' => $typeDiplome,
-            'typeD' => $typeD,
-            'cssDiff' => $cssDiff,
-            'stringDifferencesParcoursDefautCampagne' => $textDifferencesParcoursCampagne ?? [],
-            'stringDifferencesParcoursDefaut' => $textDifferencesParcours ?? [],
-            'stringDifferencesFormation' => $formationStringDifferences,
-            'stringDifferencesFormationCampagne' => $formationCampagneStringDifferences,
-            'versioningParcours' => $versioningParcours,
-            'hasLastVersion' => $hasLastVersion,
-            'displayComparaison' => $displayComparaison,
-            'canSeeDifferences' => $canSeeDifferences
-        ]);
-    }
+    //     return $this->render('formation/show.html.twig', [
+    //         'formation' => $formation,
+    //         'typeDiplome' => $typeDiplome,
+    //         'typeD' => $typeD,
+    //         'cssDiff' => $cssDiff,
+    //         'stringDifferencesParcoursDefautCampagne' => $textDifferencesParcoursCampagne ?? [],
+    //         'stringDifferencesParcoursDefaut' => $textDifferencesParcours ?? [],
+    //         'stringDifferencesFormation' => $formationStringDifferences,
+    //         'stringDifferencesFormationCampagne' => $formationCampagneStringDifferences,
+    //         'versioningParcours' => $versioningParcours,
+    //         'hasLastVersion' => $hasLastVersion,
+    //         'displayComparaison' => $displayComparaison,
+    //         'canSeeDifferences' => $canSeeDifferences
+    //     ]);
+    // }
 
-    #[Route('/{slug}/edit', name: 'app_formation_edit', methods: ['GET', 'POST'])]
-    public function edit(
-        VersioningParcours $versioningParcours,
-        ParcoursState       $parcoursState,
-        FormationState      $formationState,
-        Request             $request,
-        #[MapEntity(mapping: ['slug' => 'slug'])]
-        Formation           $formation,
-    ): Response {
+    // #[Route('/{slug}/edit', name: 'app_formation_edit', methods: ['GET', 'POST'])]
+    // public function edit(
+    //     VersioningParcours $versioningParcours,
+    //     ParcoursState       $parcoursState,
+    //     FormationState      $formationState,
+    //     Request             $request,
+    //     #[MapEntity(mapping: ['slug' => 'slug'])]
+    //     Formation           $formation,
+    // ): Response {
 
-        if (
-            !(
-                $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $formation]) ||
-                $this->isGranted('EDIT', ['route' => 'app_composante', 'subject' => $formation]) ||
-                $this->isGranted('EDIT', ['route' => 'app_etablissement', 'subject' => $formation]) ||
-                $this->isGranted('ROLE_ADMIN')
-            )
-            || !Access::isOuvert($formation)
-        ) {
-            if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
-                if (!$this->isGranted(
-                    'EDIT',
-                    [
-                        'route' => 'app_parcours',
-                        'subject' => $formation->getParcours()->first(),
-                    ]
-                )) {
-                    return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
-                }
-            } else {
-                return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
-            }
-        }
+    //     if (
+    //         !(
+    //             $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $formation]) ||
+    //             $this->isGranted('EDIT', ['route' => 'app_composante', 'subject' => $formation]) ||
+    //             $this->isGranted('EDIT', ['route' => 'app_etablissement', 'subject' => $formation]) ||
+    //             $this->isGranted('ROLE_ADMIN')
+    //         )
+    //         || !Access::isOuvert($formation)
+    //     ) {
+    //         if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
+    //             if (!$this->isGranted(
+    //                 'EDIT',
+    //                 [
+    //                     'route' => 'app_parcours',
+    //                     'subject' => $formation->getParcours()->first(),
+    //                 ]
+    //             )) {
+    //                 return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
+    //             }
+    //         } else {
+    //             return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
+    //         }
+    //     }
 
-        $formationState->setFormation($formation);
-        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
-        if ($formation->getParcours()->first() !== false) {
-            $parcoursState->setParcours($formation->getParcours()->first());
-        }
+    //     $formationState->setFormation($formation);
+    //     $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
+    //     if ($formation->getParcours()->first() !== false) {
+    //         $parcoursState->setParcours($formation->getParcours()->first());
+    //     }
 
-        if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
-            $hasLastVersion = $versioningParcours->hasLastVersion($formation->getParcours()[0]);
-            $dpeParcours = GetDpeParcours::getFromParcours($formation->getParcours()[0]);
-        }
+    //     if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
+    //         $hasLastVersion = $versioningParcours->hasLastVersion($formation->getParcours()[0]);
+    //         $dpeParcours = GetDpeParcours::getFromParcours($formation->getParcours()[0]);
+    //     }
 
-        return $this->render('formation/edit.html.twig', [
-            'formation' => $formation,
-            'selectedStep' => $request->query->get('step', 1),
-            'typeDiplome' => $formation->getTypeDiplome(),
-            'parcoursState' => $parcoursState,
-            'formationState' => $formationState,
-            'typeD' => $typeD,
-            'dpeParcours' => $dpeParcours ?? null,
-            'hasLastVersion' => $hasLastVersion ?? null
-        ]);
-    }
+    //     return $this->render('formation/edit.html.twig', [
+    //         'formation' => $formation,
+    //         'selectedStep' => $request->query->get('step', 1),
+    //         'typeDiplome' => $formation->getTypeDiplome(),
+    //         'parcoursState' => $parcoursState,
+    //         'formationState' => $formationState,
+    //         'typeD' => $typeD,
+    //         'dpeParcours' => $dpeParcours ?? null,
+    //         'hasLastVersion' => $hasLastVersion ?? null
+    //     ]);
+    // }
 
     #[Route('/{id}', name: 'app_formation_delete', methods: ['DELETE'])]
     public function delete(
@@ -669,7 +669,7 @@ class FormationController extends BaseController
             $filesystem->appendToFile(__DIR__ . "/../../versioning_json/success_log/save_formation_success.log", $successMessage);
 
             $this->addFlashBag('success', 'La formation a bien été sauvegardée.');
-            return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
+            return $this->redirectToRoute('formation_v2_voir', ['slug' => $formation->getSlug()]);
         } catch (Exception $e) {
             $userDisplay = $utilisateur instanceof User ? "{$utilisateur->getPrenom()} {$utilisateur->getNom()} - ID : {$utilisateur->getUserIdentifier()}" : 'Anonyme';
             $errorMessage = "[{$dateHeure}] Le versioning de la formation a rencontré une erreur."
@@ -678,7 +678,7 @@ class FormationController extends BaseController
             $filesystem->appendToFile(__DIR__ . "/../../versioning_json/error_log/save_formation_error.log", $errorMessage);
 
             $this->addFlashBag('error', 'Une erreur est survenue lors de la sauvegarde.');
-            return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
+            return $this->redirectToRoute('formation_v2_voir', ['slug' => $formation->getSlug()]);
         }
     }
 
@@ -729,7 +729,7 @@ class FormationController extends BaseController
             $filesystem->appendToFile(__DIR__ . "/../../versioning_json/error_log/view_formation_error.log", $errorMessage);
 
             $this->addFlashBag('error', 'Une erreur est survenue lors de la visualisation');
-            return $this->redirectToRoute('app_formation_show', ['slug' => $versionFormation->getFormation()->getSlug()]);
+            return $this->redirectToRoute('formation_v2_voir', ['slug' => $versionFormation->getFormation()->getSlug()]);
         }
     }
 

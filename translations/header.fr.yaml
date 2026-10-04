@@ -49,7 +49,6 @@ app_formation_edit_modal.title: 'Modifier une fiche d''identité de la formation
 app_formation_index.title: 'Détails des formations'
 app_formation_new.title: 'Créer une nouvelle formation'
 app_formation_responsable_liste.title: 'Demandes de changement de responsable de formation'
-app_formation_show.title: 'Détail de la formation : %display%'
 app_formation_wizard.title: 'Détails des formations'
 app_formulaire_generique_new.title: 'Créer une formation'
 app_help.description: 'Liste des aides et tutoriels disponibles pour vous accompagner dans l''utilisation de la plateforme.'

@@ -283,8 +283,8 @@
                 {% endif %}
 
                 <button class="{{ quickBtnSecondary }}"
-                        data-toggle-group="accordion-1"
-                        data-toggle="actions" data-target="#actions-panel"
+                        data-toggle-group="accordion-parcours"
+                        data-toggle="actions" data-target="#actions-panel-parcours"
                         data-toggle-icon-open="rotate-0"
                         data-toggle-icon-close="rotate-180">
                     {{ ux_icon('icon:gear', {class: 'h-4 w-4'}) }}
@@ -293,8 +293,8 @@
                 </button>
 
                 <button class="{{ quickBtnInfo }}"
-                        data-toggle-group="accordion-1"
-                        data-toggle="actions" data-target="#exports-panel"
+                        data-toggle-group="accordion-parcours"
+                        data-toggle="actions" data-target="#exports-panel-parcours"
                         data-toggle-icon-open="rotate-0"
                         data-toggle-icon-close="rotate-180">
                     {{ ux_icon('icon:download', {class: 'h-4 w-4'}) }}
@@ -304,9 +304,9 @@
 
                 {% if is_granted('ROLE_ADMIN') %}
                     <button class="{{ quickBtnSecondary }} relative"
-                            data-toggle-group="accordion-1"
+                            data-toggle-group="accordion-parcours"
                             data-toggle="actions"
-                            data-target="#actions-panel-admin"
+                            data-target="#actions-panel-admin-parcours"
                             data-toggle-icon-open="rotate-0"
                             data-toggle-icon-close="rotate-180">
                         {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
@@ -320,7 +320,7 @@
             </div>
         </section>
 
-        <div class="{{ panelClass }}" id="actions-panel">
+        <div class="{{ panelClass }}" id="actions-panel-parcours">
             <div class="{{ panelGridClass }}">
                 <div>
                     <a class="{{ quickBtnPrimary }} w-full"
@@ -380,7 +380,7 @@
             </div>
         </div>
 
-        <div class="{{ panelClass }}" id="exports-panel">
+        <div class="{{ panelClass }}" id="exports-panel-parcours">
             <div class="space-y-4">
                 <div>
                     <p class="{{ metaLabelClass }}">Fiche descriptive</p>
@@ -457,7 +457,7 @@
         </div>
 
         {% if is_granted('ROLE_ADMIN') %}
-            <div class="{{ panelClass }}" id="actions-panel-admin">
+            <div class="{{ panelClass }}" id="actions-panel-admin-parcours">
                 <div class="{{ panelGridClass }}">
                     <div>
                         <a class="{{ quickBtnSecondary }} w-full"

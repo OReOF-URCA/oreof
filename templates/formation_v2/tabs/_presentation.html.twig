@@ -5,7 +5,7 @@
         {% form_theme form 'communs/form_theme_v2.html.twig' %}
         {{ form_start(form, {
             attr: {
-                id: 'tab_form_structure',
+                id: 'tab_form_presentation',
                 'data-controller': 'autosave',
                 'data-autosave-url-value': path('formation_v2_tab_autosave', { id: formation.id, tabKey: 'presentation' }),
                 'data-action': 'change->autosave#queue'

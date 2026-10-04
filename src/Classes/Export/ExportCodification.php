@@ -194,7 +194,7 @@ class ExportCodification
                 $ligne++;
                 $this->excelWriter->writeCellXY($col, $ligne, $ec->elementConstitutif->getCode());
                 $this->excelWriter->writeCellXY($col + 1, $ligne, $ec->elementConstitutif->displayCodeApogee(), ['bold' => true]);
-                if ($ec->elementConstitutif->getNatureUeEc()->isChoix()) {
+                if ($ec->elementConstitutif->getNatureUeEc()?->isChoix()) {
                     $this->excelWriter->writeCellXY($col +2, $ligne, 'CHOIX', ['color' => self::BLUE]);
                     foreach ($ec->elementsConstitutifsEnfants as $ecsEnfant) {
                         $ligne++;
@@ -209,7 +209,7 @@ class ExportCodification
                         $this->excelWriter->writeCellXY($col + 5, $ligne, $ecsEnfant->elementConstitutif->getTypeApogee());
                     }
                 } else {
-                    if ($ec->elementConstitutif->getNatureUeEc()->isLibre()) {
+                    if ($ec->elementConstitutif->getNatureUeEc()?->isLibre()) {
                         $this->excelWriter->writeCellXY($col + 3, $ligne, 'CHOIX', ['color' => self::BLUE]);
                     } else {
                         $this->excelWriter->writeCellXY($col +2, $ligne, 'EC', ['color' => self::BLUE]);

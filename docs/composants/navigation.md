@@ -52,4 +52,4 @@ Chaque grand domaine a une section avec route `app_section_<key>` ; le contrôle
   `#[Breadcrumb(menuKey: 'droits.affectation_profils')]` (`App\Navigation\Breadcrumb\Attribute\Breadcrumb`, répétable ;
   paramètres `label`, `route`, `menuKey`, `parentRoute`).
 - Niveau dynamique (entité) : injecter `App\Navigation\Breadcrumb\Breadcrumb` puis
-  `$breadcrumb->add($formation->getDisplay(), 'app_formation_show', ['id' => $formation->getId()])`.
+  `$breadcrumb->add($formation->getDisplay(), 'formation_v2_voir', ['id' => $formation->getId()])`.

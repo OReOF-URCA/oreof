@@ -403,7 +403,7 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
             );
 
             if ($formationCreee) {
-                return new RedirectResponse($router->generate('app_formation_show', ['slug' => $formation->getSlug()]));
+                return new RedirectResponse($router->generate('formation_v2_voir', ['slug' => $formation->getSlug()]));
             }
 
             return new RedirectResponse($router->generate('app_parcours_show', ['id' => $parcours->getId()]));
