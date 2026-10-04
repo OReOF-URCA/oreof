@@ -31,35 +31,6 @@ export default class extends Controller {
 
   /** @deprecated */
   async connect () {
-    // if (document.getElementById('element_constitutif_natureUeEc')) {
-    //   const natureEc = document.getElementById('element_constitutif_natureUeEc').value
-    //   if (natureEc !== '') {
-    //     let url
-    //     if (this.urlValue.includes('?')) {
-    //       url = `${this.urlValue}&choix=${natureEc}`
-    //     } else {
-    //       url = `${this.urlValue}?choix=${natureEc}`
-    //     }
-    //
-    //     const response = await fetch(url)
-    //     this.matieresTarget.innerHTML = await response.text()
-    //     if (document.getElementById('ficheMatiere')) {
-    //       this.tom = new TomSelect('#ficheMatiere')
-    //     }
-    //
-    //     if (document.getElementById('tableFiches')) {
-    //       // parcourir les lignes de tbody pour ajouter dans matieres
-    //       const table = document.getElementById('tableFiches')
-    //       const tbody = table.getElementsByTagName('tbody')[0]
-    //       const lignes = tbody.getElementsByTagName('tr')
-    //       for (let i = 0; i < lignes.length; i++) {
-    //         const { id } = lignes[i].getElementsByTagName('td')[0].dataset
-    //         this.matieres.push(id)
-    //       }
-    //     }
-    //   }
-    // }
-
     // Initialiser l'affichage et l'état (required/disabled) des sections
     try {
       this.updateNature()

@@ -40,7 +40,6 @@
             </div>
             {% if formation.hasParcours == false and formation.parcours[0] is defined %}
                     {{ include('communs/_boutonSynthese.html.twig', {parcours: formation.parcours[0], col:'col-3'}) }}
-                <twig:ParcoursOuvert :parcours="formation.parcours[0]" type="formation" />
             {% endif %}
 
 

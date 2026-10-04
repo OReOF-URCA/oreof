@@ -49,19 +49,14 @@ class AppExtension extends AbstractExtension
             new TwigFilter('dateFr', $this->dateFr(...), ['is_safe' => ['html']]),
             new TwigFilter('dateTimeFr', $this->dateTimeFr(...), ['is_safe' => ['html']]),
             new TwigFilter('rncp_link', $this->rncpLink(...), ['is_safe' => ['html']]),
-            // new TwigFilter('badgeBoolean', $this->badgeBoolean(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeBooleanDto', $this->badgeBooleanDto(...)),
-            // new TwigFilter('badgeDroits', $this->badgeDroits(...), ['is_safe' => ['html']]),
-            //new TwigFilter('badgeTypeCentre', $this->badgeTypeCentre(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeTypeCentreDto', $this->badgeTypeCentreDto(...)),
             new TwigFilter('centre', $this->centre(...), ['is_safe' => ['html']]),
             new TwigFilter('displayOrBadge', $this->displayOrBadge(...), ['is_safe' => ['html']]),
             new TwigFilter('etatRemplissage', $this->etatRemplissage(...), ['is_safe' => ['html']]),
             new TwigFilter('printTexte', $this->printTexte(...), ['is_safe' => ['html']]),
             new TwigFilter('filtreHeures', $this->filtreHeures(...), ['is_safe' => ['html']]),
-            //   new TwigFilter('badgeEnum', $this->badgeEnum(...), ['is_safe' => ['html']]),  //deprecated
             new TwigFilter('badgeEnumDto', $this->badgeEnumDto(...)),
-            //  new TwigFilter('badgeStatus', $this->badgeStatus(...), ['is_safe' => ['html']]), //deprecated
             new TwigFilter('badgeStatusDto', $this->badgeStatusDto(...)),
             new TwigFilter('startWith', $this->startWith(...), ['is_safe' => ['html']]),
             new TwigFilter('isUeUtilisee', $this->isUeUtilisee(...), ['is_safe' => ['html']]),
@@ -85,25 +80,9 @@ class AppExtension extends AbstractExtension
         return false;
     }
 
-    /** @deprecated */
-    public function badgeEnum(?BadgeEnumInterface $value): string
-    {
-        @trigger_error(__METHOD__ . '() is deprecated, use the badgeEnumDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
-
-        return $this->renderLegacyBadge($this->badgeEnumDto($value));
-    }
-
     public function badgeEnumDto(?BadgeEnumInterface $value): BadgeView
     {
         return $this->badgePresenter->fromEnum($value);
-    }
-
-    /** @deprecated */
-    public function badgeStatus(?string $value): string
-    {
-        @trigger_error(__METHOD__ . '() is deprecated, use the badgeStatusDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
-
-        return $this->renderLegacyBadge($this->badgeStatusDto($value));
     }
 
     public function badgeStatusDto(?string $value): BadgeView
@@ -202,14 +181,6 @@ class AppExtension extends AbstractExtension
         return 'asc';
     }
 
-    /** @deprecated */
-    public function badgeBoolean(?bool $value = false): string
-    {
-        @trigger_error(__METHOD__ . '() is deprecated, use the badgeBooleanDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
-
-        return $this->renderLegacyBadge($this->badgeBooleanDto($value));
-    }
-
     public function badgeBooleanDto(?bool $value = false): BadgeView
     {
         return $this->badgePresenter->fromBoolean($value);
@@ -222,27 +193,6 @@ class AppExtension extends AbstractExtension
         }
 
         return '';
-    }
-
-    /** @deprecated */
-    public function badgeDroits(array $droits): string
-    {
-        $html = '';
-        foreach ($droits as $droit) {
-            if ($droit !== 'ROLE_LECTEUR') {
-                $html .= '<span class="badge bg-success me-1">' . $droit . '</span>';
-            }
-        }
-
-        return $html;
-    }
-
-    /** @deprecated */
-    public function badgeTypeCentre(UserProfil $userProfil): string
-    {
-        @trigger_error(__METHOD__ . '() is deprecated, use the badgeTypeCentreDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
-
-        return $this->renderLegacyBadge($this->badgeTypeCentreDto($userProfil));
     }
 
     public function badgeTypeCentreDto(UserProfil $userProfil): BadgeView
@@ -304,23 +254,6 @@ class AppExtension extends AbstractExtension
     public function telFormat(?string $number): ?string
     {
         return Tools::telFormat($number);
-    }
-
-    private function renderLegacyBadge(BadgeView $badge): string
-    {
-        $label = htmlspecialchars($badge->label, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-        $colors = [
-            'primary' => 'border border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300',
-            'success' => 'border border-success-300 bg-success-50 text-success-700 dark:border-success-700 dark:bg-success-900/30 dark:text-success-300',
-            'warning' => 'border border-warning-300 bg-warning-50 text-warning-700 dark:border-warning-700 dark:bg-warning-900/30 dark:text-warning-300',
-            'danger' => 'border border-danger-300 bg-danger-50 text-danger-700 dark:border-danger-700 dark:bg-danger-900/30 dark:text-danger-300',
-            'info' => 'border border-info-300 bg-info-50 text-info-700 dark:border-info-700 dark:bg-info-900/30 dark:text-info-300',
-            'secondary' => 'border border-secondary-300 bg-secondary-100 text-secondary-700 dark:border-secondary-700 dark:bg-secondary-900/30 dark:text-secondary-300',
-        ];
-
-        $classes = trim('inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ' . ($colors[$badge->variant] ?? $colors['secondary']));
-
-        return sprintf('<span class="%s">%s</span>', $classes, $label);
     }
 
     public function getPageHelp(string $route): ?Help

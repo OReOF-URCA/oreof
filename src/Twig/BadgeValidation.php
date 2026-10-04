@@ -31,9 +31,6 @@ class BadgeValidation extends AbstractExtension
             new TwigFilter('badgeValidationShortDto', $this->badgeValidationShortDto(...)),
             // Nouveau filtre pour le composant Dot (rond coloré minimaliste)
             new TwigFilter('badgeValidationDot', $this->badgeValidationDot(...)),
-            // Anciennes méthodes dépréciées pour rétrocompatibilité
-            //   new TwigFilter('badgeValidationLong', $this->badgeValidationLong(...), ['is_safe' => ['html']]),
-            //   new TwigFilter('badgeValidationShort', $this->badgeValidationShort(...), ['is_safe' => ['html']]),
             new TwigFilter('displayMessage', $this->displayMessage(...), ['is_safe' => ['html']])
         ];
     }
@@ -56,36 +53,6 @@ class BadgeValidation extends AbstractExtension
             default:
                 return $issue->getMessage();
         }
-    }
-
-    /**
-     * @deprecated Utiliser badgeValidationShortDto et le composant Twig Badge au lieu de cette méthode
-     */
-    public function badgeValidationShort(ValidationStatusEnum $status, string $size = '1.5'): string
-    {
-        @trigger_error(__METHOD__ . '() is deprecated, use the badgeValidationShortDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
-
-        return match ($status) {
-            ValidationStatusEnum::VALID => '<span class="inline-block w-' . $size . ' h-' . $size . ' rounded-full bg-green-400"></span>',
-            ValidationStatusEnum::INVALID => '<span class="inline-block w-' . $size . ' h-' . $size . ' rounded-full bg-red-400"></span>',
-            ValidationStatusEnum::INCOMPLETE => '<span class="inline-block w-' . $size . ' h-' . $size . ' rounded-full bg-orange-300"></span>',
-            ValidationStatusEnum::NA => '<span class="inline-block w-' . $size . ' h-' . $size . ' rounded-full bg-gray-400"></span>',
-        };
-    }
-
-    /**
-     * @deprecated Utiliser badgeValidationLongDto et le composant Twig Badge au lieu de cette méthode
-     */
-    public function badgeValidationLong(ValidationStatusEnum $status): string
-    {
-        @trigger_error(__METHOD__ . '() is deprecated, use the badgeValidationLongDto filter and the Twig Badge component instead.', E_USER_DEPRECATED);
-
-        return match ($status) {
-            ValidationStatusEnum::VALID => '<span class="inline-block px-2 py-0.5 rounded-full bg-green-600 text-white text-sm">● Conforme aux règles</span>',
-            ValidationStatusEnum::INVALID => '<span class="inline-block px-2 py-0.5 rounded-full bg-red-600 text-white text-sm">● Non conforme aux règles</span>',
-            ValidationStatusEnum::INCOMPLETE => '<span class="inline-block px-2 py-0.5 rounded-full bg-yellow-300 text-gray-800 text-sm">● Incomplet</span>',
-            ValidationStatusEnum::NA => '<span class="inline-block px-2 py-0.5 rounded-full bg-gray-400 text-white text-sm">Non applicable</span>',
-        };
     }
 
     /**

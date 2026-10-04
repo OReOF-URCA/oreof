@@ -56,13 +56,4 @@ enum EtatChangeRfEnum: string implements BadgeEnumInterface
         return $this->badge();
     }
 
-    /**
-     * @deprecated Utiliser getBadgeVariant() et le composant Twig Badge.
-     */
-    public function getBadge(): string
-    {
-        @trigger_error(sprintf('%s::getBadge() is deprecated, use %s::getBadgeVariant() and the Twig Badge component instead.', self::class, self::class), E_USER_DEPRECATED);
-
-        return $this->getBadgeVariant();
-    }
 }

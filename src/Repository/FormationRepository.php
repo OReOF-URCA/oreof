@@ -324,27 +324,6 @@ class FormationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-
-
-    /** @deprecated  */
-    public function findByComposanteTypeValidation(Composante $composante, CampagneCollecte $campagneCollecte, string $typeValidation): array
-    {
-        $query = $this->createQueryBuilder('f')
-            ->innerJoin(Composante::class, 'c', 'WITH', 'f.composantePorteuse = c.id')
-            ->leftJoin('f.dpeParcours', 'dp')
-            ->addSelect('dp')
-            ->andWhere('c.id = :composante')
-            ->andWhere("JSON_CONTAINS(dp.etatValidation, :etatDpe) = 1")
-            ->setParameter('etatDpe', json_encode([$typeValidation => 1]))
-            ->andWhere('dp.campagneCollecte = :campagneCollecte')
-            ->setParameter('campagneCollecte', $campagneCollecte)
-            ->setParameter('composante', $composante);
-
-
-        return $query->getQuery()
-            ->getResult();
-    }
-
     public function findByResponsableOuCoResponsableParcours(?UserInterface $user, CampagneCollecte $campagneCollecte, array $sorts): array
     {
         $query = $this->createQueryBuilder('f')
