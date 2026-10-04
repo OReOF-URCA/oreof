@@ -97,7 +97,7 @@ class FormationSynchronisationController extends AbstractController
 
         $entityManager->flush();
 
-        return $this->redirectToRoute('app_formation_edit', [
+        return $this->redirectToRoute('formation_v2_modifier', [
             'slug' => $formation->getSlug(),
         ]);
     }
@@ -113,7 +113,7 @@ class FormationSynchronisationController extends AbstractController
         $campagneCollecte = $dpeParcours ? $dpeParcours->getCampagneCollecte() : null;
         if ($campagneCollecte === null) {
             $this->addFlash('danger', 'Aucune campagne de collecte trouvée.');
-            return $this->redirectToRoute('app_formation_edit', ['slug' => $formation->getSlug()]);
+            return $this->redirectToRoute('formation_v2_modifier', ['slug' => $formation->getSlug()]);
         }
 
         $state = $butSynchronisation->synchroniser($formation, $campagneCollecte);
@@ -124,7 +124,7 @@ class FormationSynchronisationController extends AbstractController
             $this->addFlash('danger', 'La synchronisation a échoué.');
         }
 
-        return $this->redirectToRoute('app_formation_edit', [
+        return $this->redirectToRoute('formation_v2_modifier', [
             'slug' => $formation->getSlug(),
         ]);
     }
@@ -139,7 +139,7 @@ class FormationSynchronisationController extends AbstractController
         $butSynchronisation->synchroniserMccc($formation);
         $this->addFlash('success', 'La synchronisation a été effectuée avec succès.');
 
-        return $this->redirectToRoute('app_formation_edit', [
+        return $this->redirectToRoute('formation_v2_modifier', [
             'slug' => $formation->getSlug(),
         ]);
     }

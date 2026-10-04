@@ -369,10 +369,10 @@
                     </a>
                 </div>
                 <div>
-                    {% if is_granted('ROLE_ADMIN') and hasLastVersion is defined and hasLastVersion == true %}
+                    {% if is_granted('ROLE_ADMIN') %}
                         <a class="{{ quickBtnWarning }} w-full"
-                           data-bs-toggle="collapse" data-bs-target="#diffGlobalParcours">
-                            {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
+                           href="{{ path('parcours_v2_voir', {parcours: parcours.id, optionDisplay: 'diffGlobalParcours'}) }}">
+                            {{ ux_icon('ph:not-equals-bold', {class: 'h-4 w-4'}) }}
                             <span>Comparer les descriptifs</span>
                         </a>
                     {% endif %}
@@ -458,48 +458,129 @@
 
         {% if is_granted('ROLE_ADMIN') %}
             <div class="{{ panelClass }}" id="actions-panel-admin-parcours">
-                <div class="{{ panelGridClass }}">
+                <div class="space-y-4">
                     <div>
-                        <a class="{{ quickBtnSecondary }} w-full"
-                           data-action="click->modalturbo#open"
-                           data-turbo="true"
-                           href="{{ path('parcours_ses_changer_etat', { dpeParcours: dpeParcours.id }) }}">
-                            {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
-                            <span>Changer état DPE</span>
-                        </a>
+                        <p class="{{ metaLabelClass }}">Gestion des versions & Comparaisons</p>
+                        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                            {# Bloc 1 : Consulter / Sauvegarder une version figée #}
+                            <div class="flex flex-col justify-between rounded-xl border border-secondary-200 bg-secondary-50/50 p-3.5 dark:border-secondary-700 dark:bg-secondary-800/40">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">
+                                            {{ ux_icon('mdi:history', {class: 'h-4 w-4'}) }}
+                                        </div>
+                                        <span class="text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-200">Versions figées</span>
+                                    </div>
+                                    <p class="text-xs text-secondary-500 dark:text-secondary-400 mb-3">
+                                        Consulter l'état du parcours tel qu'enregistré lors d'une sauvegarde antérieure.
+                                    </p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-secondary-200/70 dark:border-secondary-700/70">
+                                    {% set versions = this.versions %}
+                                    {% if versions|length > 0 %}
+                                        <select id="selectVersionParcours"
+                                                class="flex-1 min-w-[14rem] rounded-xl border border-secondary-300 bg-white px-3 py-1.5 text-xs font-medium text-secondary-700 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200"
+                                                onchange="if (this.value && this.value !== '#') { window.location.href = this.value; }">
+                                            <option value="#" selected>Consulter une version ({{ versions|length }} dispo)...</option>
+                                            {% for version in versions %}
+                                                <option value="{{ path('app_parcours_versioning_view', {parcours_versioning: version.id}) }}">
+                                                    Version du {{ version.versionTimestamp ? version.versionTimestamp|date('d/m/Y à H:i') : 'N/C' }}{{ version.cvfuFlag ? ' (CFVU)' : '' }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        <span class="text-xs text-secondary-400 dark:text-secondary-500 italic">Aucune version archivée</span>
+                                    {% endif %}
+
+                                    <a href="{{ path('app_parcours_versioning_save', {parcours: parcours.id}) }}"
+                                       class="{{ quickBtnSuccess }} text-xs py-1.5"
+                                       {{ stimulus_controller('tooltip') }}
+                                       title="Figer une nouvelle version du parcours">
+                                        {{ ux_icon('icon:add', {class: 'h-3.5 w-3.5'}) }}
+                                        <span>Sauvegarder</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {# Bloc 2 : Comparer les saisies actuelles #}
+                            <div class="flex flex-col justify-between rounded-xl border border-secondary-200 bg-secondary-50/50 p-3.5 dark:border-secondary-700 dark:bg-secondary-800/40">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-info-100 text-info-700 dark:bg-info-900/40 dark:text-info-300">
+                                            {{ ux_icon('ph:not-equals-bold', {class: 'h-4 w-4'}) }}
+                                        </div>
+                                        <span class="text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-200">Comparer les saisies</span>
+                                    </div>
+                                    <p class="text-xs text-secondary-500 dark:text-secondary-400 mb-3">
+                                        Surligner les écarts entre les textes actuels et une version de référence.
+                                    </p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-secondary-200/70 dark:border-secondary-700/70">
+                                    <a href="{{ path('parcours_v2_voir', {parcours: parcours.id, optionDisplay: 'diffGlobalParcours'}) }}"
+                                       class="{{ quickBtnInfo }} text-xs py-1.5 flex-1"
+                                       {{ stimulus_controller('tooltip') }}
+                                       title="Comparer les textes actuels avec la dernière version validée">
+                                        {{ ux_icon('mdi:history', {class: 'h-3.5 w-3.5'}) }}
+                                        <span>Dernière version validée</span>
+                                    </a>
+                                    <a href="{{ path('parcours_v2_voir', {parcours: parcours.id, optionDisplay: 'diffGlobalParcoursCampagne'}) }}"
+                                       class="{{ quickBtnInfo }} text-xs py-1.5 flex-1"
+                                       {{ stimulus_controller('tooltip') }}
+                                       title="Comparer les textes actuels avec l'année précédente (campagne N-1)">
+                                        {{ ux_icon('icon:calendar', {class: 'h-3.5 w-3.5'}) }}
+                                        <span>Campagne N-1</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <a class="{{ quickBtnSecondary }} w-full"
-                           data-action="click->modalturbo#open"
-                           data-turbo="true"
-                           href="{{ path('parcours_ses_changer_ouverture', { dpeParcours: dpeParcours.id }) }}">
-                            {{ ux_icon('icon:unlock', {class: 'h-4 w-4'}) }}
-                            <span>Modifier ouverture</span>
-                        </a>
-                    </div>
-                    <div>
-                        <a class="{{ quickBtnSecondary }} relative w-full"
-                           data-action="click->modalturbo#open"
-                           data-turbo="true"
-                           href="{{ path('parcours_ses_commentaires', { dpeParcours: dpeParcours.id }) }}">
-                            {{ ux_icon('icon:info', {class: 'h-4 w-4'}) }}
-                            <span>Commentaires</span>
-                            {% if parcours.commentaire != null %}
-                                <span class="absolute -right-1 -top-1 inline-flex h-3 w-3 rounded-full border border-white bg-danger-500 dark:border-secondary-900"></span>
-                            {% endif %}
-                        </a>
-                    </div>
-                    <div>
-                        <button class="{{ quickBtnSecondary }} w-full">
-                            {{ ux_icon('icon:print', {class: 'h-4 w-4'}) }}
-                            <span>Mettre à jours PDF</span>
-                        </button>
-                    </div>
-                    <div>
-                        <button class="{{ quickBtnSecondary }} w-full">
-                            {{ ux_icon('icon:gear', {class: 'h-4 w-4'}) }}
-                            <span>Gérer codification</span>
-                        </button>
+
+                    <div class="border-t border-secondary-200 pt-3 dark:border-secondary-700">
+                        <p class="{{ metaLabelClass }}">Autres actions SES</p>
+                        <div class="{{ panelGridClass }}">
+                            <div>
+                                <a class="{{ quickBtnSecondary }} w-full"
+                                   data-action="click->modalturbo#open"
+                                   data-turbo="true"
+                                   href="{{ path('parcours_ses_changer_etat', { dpeParcours: dpeParcours.id }) }}">
+                                    {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
+                                    <span>Changer état DPE</span>
+                                </a>
+                            </div>
+                            <div>
+                                <a class="{{ quickBtnSecondary }} w-full"
+                                   data-action="click->modalturbo#open"
+                                   data-turbo="true"
+                                   href="{{ path('parcours_ses_changer_ouverture', { dpeParcours: dpeParcours.id }) }}">
+                                    {{ ux_icon('icon:unlock', {class: 'h-4 w-4'}) }}
+                                    <span>Modifier ouverture</span>
+                                </a>
+                            </div>
+                            <div>
+                                <a class="{{ quickBtnSecondary }} relative w-full"
+                                   data-action="click->modalturbo#open"
+                                   data-turbo="true"
+                                   href="{{ path('parcours_ses_commentaires', { dpeParcours: dpeParcours.id }) }}">
+                                    {{ ux_icon('icon:info', {class: 'h-4 w-4'}) }}
+                                    <span>Commentaires</span>
+                                    {% if parcours.commentaire != null %}
+                                        <span class="absolute -right-1 -top-1 inline-flex h-3 w-3 rounded-full border border-white bg-danger-500 dark:border-secondary-900"></span>
+                                    {% endif %}
+                                </a>
+                            </div>
+                            <div>
+                                <button class="{{ quickBtnSecondary }} w-full">
+                                    {{ ux_icon('icon:print', {class: 'h-4 w-4'}) }}
+                                    <span>Mettre à jours PDF</span>
+                                </button>
+                            </div>
+                            <div>
+                                <button class="{{ quickBtnSecondary }} w-full">
+                                    {{ ux_icon('icon:gear', {class: 'h-4 w-4'}) }}
+                                    <span>Gérer codification</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

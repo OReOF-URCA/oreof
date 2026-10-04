@@ -299,7 +299,7 @@ final class FormulaireGeneriqueController extends BaseController
                     return $this->redirectToRoute('formation_v2_voir', ['slug' => $formation->getSlug()]);
                 }
 
-                return $this->redirectToRoute('app_parcours_show', ['id' => $parcours->getId()]);
+                return $this->redirectToRoute('parcours_v2_voir', ['id' => $parcours->getId()]);
 
             } catch (\Throwable $e) {
                 $this->entityManager->clear();

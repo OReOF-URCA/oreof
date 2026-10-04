@@ -146,7 +146,7 @@
                                 {{ component('Badge', { dto: parcours.dpeParcours[0].etatReconduction|badgeTypeModificationDto }) }}
                             </td>
                             <td>
-                                <a href="{{ path('app_parcours_show', {id:parcours.id}) }}"
+                                <a href="{{ path('parcours_v2_voir', {parcours:parcours.id}) }}"
                                    class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 mb-1">
                                     <i class="{{ iconShow }}"></i> Fiche Descriptive</a>
                             </td>

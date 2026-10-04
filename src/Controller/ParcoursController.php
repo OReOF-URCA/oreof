@@ -325,139 +325,139 @@ class ParcoursController extends BaseController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_parcours_show', methods: ['GET'])]
-    public function show(
-        Parcours            $parcours,
-        LheoXML             $lheoXML,
-        VersioningParcours $versioningParcours,
-        VersioningFormation $versioningFormation,
-        EntityManagerInterface $entityManager,
-    ): Response {
-        $formation = $parcours->getFormation();
-        if ($formation === null) {
-            throw $this->createNotFoundException();
-        }
-        $typeDiplome = $formation->getTypeDiplome();
-        if ($typeDiplome === null) {
-            throw $this->createNotFoundException();
-        }
+    // #[Route('/{id}', name: 'app_parcours_show', methods: ['GET'])]
+    // public function show(
+    //     Parcours            $parcours,
+    //     LheoXML             $lheoXML,
+    //     VersioningParcours $versioningParcours,
+    //     VersioningFormation $versioningFormation,
+    //     EntityManagerInterface $entityManager,
+    // ): Response {
+    //     $formation = $parcours->getFormation();
+    //     if ($formation === null) {
+    //         throw $this->createNotFoundException();
+    //     }
+    //     $typeDiplome = $formation->getTypeDiplome();
+    //     if ($typeDiplome === null) {
+    //         throw $this->createNotFoundException();
+    //     }
 
-        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
+    //     $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
 
-        // Entre versions JSON
-        $textDifferencesParcours = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours);
-        $textDifferencesFormation = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation);
-        // Entre N et N+1
-        $textDiffParcoursCampagne = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours, true);
-        $textDiffFormationCampagne = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation, true);
-        $hasLastVersionCampagne = count($textDiffParcoursCampagne) > 0 || count($textDiffFormationCampagne) > 0;
-        // Si l'utilisateur peut voir les différences
-        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
-        $canSeeDifferences = $this->isGranted('RELATED_TO_PARCOURS', $parcours);
+    //     // Entre versions JSON
+    //     $textDifferencesParcours = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours);
+    //     $textDifferencesFormation = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation);
+    //     // Entre N et N+1
+    //     $textDiffParcoursCampagne = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours, true);
+    //     $textDiffFormationCampagne = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation, true);
+    //     $hasLastVersionCampagne = count($textDiffParcoursCampagne) > 0 || count($textDiffFormationCampagne) > 0;
+    //     // Si l'utilisateur peut voir les différences
+    //     $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+    //     $canSeeDifferences = $this->isGranted('RELATED_TO_PARCOURS', $parcours);
 
-        $version = $versioningParcours->hasLastVersion($parcours);
+    //     $version = $versioningParcours->hasLastVersion($parcours);
 
-        $cssDiff = DiffHelper::getStyleSheet();
+    //     $cssDiff = DiffHelper::getStyleSheet();
 
-        // Afficher les comparaisons directement
-        $request = Request::createFromGlobals();
-        $displayComparaison = $request->query->get('optionDisplay', 'false');
+    //     // Afficher les comparaisons directement
+    //     $request = Request::createFromGlobals();
+    //     $displayComparaison = $request->query->get('optionDisplay', 'false');
 
-        // Ordre des semestres manquants
-        $missingSemestre = [];
+    //     // Ordre des semestres manquants
+    //     $missingSemestre = [];
 
-        // Si le parcours est en alternance sans les premiers semestres
-        // on met un lien vers le parcours de base
-        $parcoursDeBase = null;
-        if($parcours->getTypeParcours() === TypeParcoursEnum::TYPE_PARCOURS_ALTERNANCE
-            && $parcours->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT'
-        ) {
-            $parcoursDeBase = $entityManager->getRepository(Parcours::class)
-                ->findParcoursDeBaseAlternance(
-                    $parcours->getLibelle(),
-                    GetDpeParcours::getFromParcours($parcours)?->getCampagneCollecte()?->getId()
-                );
-            $parcoursDeBase = count($parcoursDeBase) > 0 ? $parcoursDeBase[0] : null;
+    //     // Si le parcours est en alternance sans les premiers semestres
+    //     // on met un lien vers le parcours de base
+    //     $parcoursDeBase = null;
+    //     if($parcours->getTypeParcours() === TypeParcoursEnum::TYPE_PARCOURS_ALTERNANCE
+    //         && $parcours->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT'
+    //     ) {
+    //         $parcoursDeBase = $entityManager->getRepository(Parcours::class)
+    //             ->findParcoursDeBaseAlternance(
+    //                 $parcours->getLibelle(),
+    //                 GetDpeParcours::getFromParcours($parcours)?->getCampagneCollecte()?->getId()
+    //             );
+    //         $parcoursDeBase = count($parcoursDeBase) > 0 ? $parcoursDeBase[0] : null;
 
-            $missingSemestre = $entityManager->getRepository(Parcours::class)
-            ->findParcoursAlternanceHasMissingSemestre($parcours);
-        }
+    //         $missingSemestre = $entityManager->getRepository(Parcours::class)
+    //         ->findParcoursAlternanceHasMissingSemestre($parcours);
+    //     }
 
-        return $this->render('parcours/show.html.twig', [
-            'parcours' => $parcours,
-            'dpeParcours' => GetDpeParcours::getFromParcours($parcours),
-            'formation' => $formation,
-            'typeDiplome' => $typeDiplome,
-            'hasParcours' => $formation->isHasParcours(),
-            'typeD' => $typeD,
-            'lheoXML' => $lheoXML,
-            'stringDifferencesParcours' => $textDifferencesParcours,
-            'stringDifferencesFormation' => $textDifferencesFormation,
-            'stringDifferencesParcoursCampagne' => $textDiffParcoursCampagne,
-            'stringDifferencesFormationCampagne' => $textDiffFormationCampagne,
-            'hasLastVersion' => $versioningParcours->hasLastVersion($parcours) || $hasLastVersionCampagne,
-            'cssDiff' => $cssDiff,
-            'version' => $version,
-            'parcoursDeBase' => $parcoursDeBase,
-            'missingSemestre' => $missingSemestre,
-            'displayComparaison' => $displayComparaison,
-            'canSeeDifferences' => $canSeeDifferences
-        ]);
-    }
+    //     return $this->render('parcours/show.html.twig', [
+    //         'parcours' => $parcours,
+    //         'dpeParcours' => GetDpeParcours::getFromParcours($parcours),
+    //         'formation' => $formation,
+    //         'typeDiplome' => $typeDiplome,
+    //         'hasParcours' => $formation->isHasParcours(),
+    //         'typeD' => $typeD,
+    //         'lheoXML' => $lheoXML,
+    //         'stringDifferencesParcours' => $textDifferencesParcours,
+    //         'stringDifferencesFormation' => $textDifferencesFormation,
+    //         'stringDifferencesParcoursCampagne' => $textDiffParcoursCampagne,
+    //         'stringDifferencesFormationCampagne' => $textDiffFormationCampagne,
+    //         'hasLastVersion' => $versioningParcours->hasLastVersion($parcours) || $hasLastVersionCampagne,
+    //         'cssDiff' => $cssDiff,
+    //         'version' => $version,
+    //         'parcoursDeBase' => $parcoursDeBase,
+    //         'missingSemestre' => $missingSemestre,
+    //         'displayComparaison' => $displayComparaison,
+    //         'canSeeDifferences' => $canSeeDifferences
+    //     ]);
+    // }
 
-    /**
-     * @throws TypeDiplomeNotFoundException
-     */
-    /** @deprecated */
-    #[Route('/{id}/edit', name: 'app_parcours_edit', methods: ['GET', 'POST'])]
-    public function edit(
-        Request             $request,
-        ParcoursState       $parcoursState,
-        Parcours            $parcour,
-        VersioningParcours $versioningParcours,
-    ): Response {
+    // /**
+    //  * @throws TypeDiplomeNotFoundException
+    //  */
+    // /** @deprecated */
+    // #[Route('/{id}/edit', name: 'app_parcours_edit', methods: ['GET', 'POST'])]
+    // public function edit(
+    //     Request             $request,
+    //     ParcoursState       $parcoursState,
+    //     Parcours            $parcour,
+    //     VersioningParcours $versioningParcours,
+    // ): Response {
 
-        $request->getSession()->set('semestreAffiche', $request->query->get('semestre') ?? null);
-        $request->getSession()->set('ueAffichee', $request->query->get('ue') ?? null);
+    //     $request->getSession()->set('semestreAffiche', $request->query->get('semestre') ?? null);
+    //     $request->getSession()->set('ueAffichee', $request->query->get('ue') ?? null);
 
-        $dpeParcours = GetDpeParcours::getFromParcours($parcour);
+    //     $dpeParcours = GetDpeParcours::getFromParcours($parcour);
 
-        if ($dpeParcours === null) {
-            throw $this->createNotFoundException();
-        }
+    //     if ($dpeParcours === null) {
+    //         throw $this->createNotFoundException();
+    //     }
 
-        $canSeeDifferences = false;
+    //     $canSeeDifferences = false;
 
-        if (!(
-            $this->isGranted('EDIT', ['route' => 'app_parcours', 'subject' => $dpeParcours->getParcours()]) ||
-            $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $dpeParcours])
-        )) {
-            return $this->redirectToRoute('app_parcours_show', ['id' => $parcour->getId()]);
-        }
+    //     if (!(
+    //         $this->isGranted('EDIT', ['route' => 'app_parcours', 'subject' => $dpeParcours->getParcours()]) ||
+    //         $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $dpeParcours])
+    //     )) {
+    //         return $this->redirectToRoute('app_parcours_show', ['id' => $parcour->getId()]);
+    //     }
 
-        $canSeeDifferences = true;
-        $version = $versioningParcours->hasLastVersion($parcour);
+    //     $canSeeDifferences = true;
+    //     $version = $versioningParcours->hasLastVersion($parcour);
 
-        $parcoursState->setParcours($parcour);
-        $typeDiplome = $parcour->getFormation()?->getTypeDiplome();
+    //     $parcoursState->setParcours($parcour);
+    //     $typeDiplome = $parcour->getFormation()?->getTypeDiplome();
 
-        if ($typeDiplome === null) {
-            throw $this->createNotFoundException('Type de diplôme non trouvé pour le parcours.');
-        }
+    //     if ($typeDiplome === null) {
+    //         throw $this->createNotFoundException('Type de diplôme non trouvé pour le parcours.');
+    //     }
 
-        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
-        return $this->render('parcours/edit.html.twig', [
-            'dpeParcours' => $dpeParcours,
-            'parcours' => $parcour,
-            'typeDiplome' => $typeDiplome,
-            'typeD' => $typeD,
-            'formation' => $parcour->getFormation(),
-            'parcoursState' => $parcoursState,
-            'step' => $request->query->get('step') ?? 0,
-            'version' => $version,
-            'canSeeDifferences' => $canSeeDifferences
-        ]);
-    }
+    //     $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
+    //     return $this->render('parcours/edit.html.twig', [
+    //         'dpeParcours' => $dpeParcours,
+    //         'parcours' => $parcour,
+    //         'typeDiplome' => $typeDiplome,
+    //         'typeD' => $typeD,
+    //         'formation' => $parcour->getFormation(),
+    //         'parcoursState' => $parcoursState,
+    //         'step' => $request->query->get('step') ?? 0,
+    //         'version' => $version,
+    //         'canSeeDifferences' => $canSeeDifferences
+    //     ]);
+    // }
 
     #[Route('/{id}/dupliquer/modal', name: 'app_parcours_dupliquer_modal', methods: ['GET'])]
     public function dupliquerModal(
@@ -797,7 +797,7 @@ class ParcoursController extends BaseController
             // Message de réussite + redirection
             $this->addFlashBag('success', 'La version du parcours à bien été sauvegardée.');
             if($parcours->isParcoursDefaut() === false) {
-                return $this->redirectToRoute('app_parcours_show', ['id' => $parcours->getId()]);
+                return $this->redirectToRoute('parcours_v2_voir', ['parcours' => $parcours->getId()]);
             }
             return $this->redirectToRoute('formation_v2_voir', ['slug' => $parcours->getFormation()->getSlug()]);
         } catch (Exception $e) {
@@ -806,7 +806,7 @@ class ParcoursController extends BaseController
             $fileSystem->appendToFile(__DIR__ . "/../../versioning_json/error_log/save_parcours_error.log", $logTxt);
 
             $this->addFlashBag('error', "Une erreur est survenue lors de la sauvegarde.");
-            return $this->redirectToRoute('app_parcours_show', ['id' => $parcours->getId()]);
+            return $this->redirectToRoute('parcours_v2_voir', ['parcours' => $parcours->getId()]);
         }
     }
 
@@ -841,7 +841,7 @@ class ParcoursController extends BaseController
             $fileSystem->appendToFile(__DIR__ . "/../../versioning_json/error_log/view_parcours_error.log", $logTxt);
 
             $this->addFlashBag('error', "La visualisation de la version a rencontré une erreur.");
-            return $this->redirectToRoute('app_parcours_show', ['id' => $parcours_versioning->getParcours()?->getId()]);
+            return $this->redirectToRoute('parcours_v2_voir', ['parcours' => $parcours_versioning->getParcours()?->getId()]);
         }
     }
 

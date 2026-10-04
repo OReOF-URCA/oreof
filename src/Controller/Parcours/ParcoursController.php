@@ -32,6 +32,7 @@ use App\Service\VersioningParcours;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use Jfcherng\Diff\DiffHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -50,11 +51,13 @@ class ParcoursController extends BaseController
     ): Response
     {
         $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        $subjectDpe = $dpeParcours ?? $parcours;
         if (!(
-            $this->isGranted('EDIT', ['route' => 'app_parcours', 'subject' => $dpeParcours->getParcours()]) ||
-            $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $dpeParcours])
+            $this->isGranted('EDIT', ['route' => 'app_parcours', 'subject' => $subjectDpe]) ||
+            ($parcours->getFormation() !== null && $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $parcours->getFormation()])) ||
+            $this->isGranted('ROLE_ADMIN')
         )) {
-            return $this->redirectToRoute('app_parcours_show', ['id' => $parcours->getId()]);
+            return $this->redirectToRoute('parcours_v2_voir', ['parcours' => $parcours->getId()]);
         }
 
         if ($parcours->getFormation() !== null) {
@@ -106,11 +109,11 @@ class ParcoursController extends BaseController
     #[Route('/{parcours}', name: 'voir', methods: ['GET'])]
     #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function voir(
+        Request                $request,
         Parcours               $parcours,
         LheoXML                $lheoXML,
         VersioningParcours     $versioningParcours,
         VersioningFormation    $versioningFormation,
-        EntityManagerInterface $entityManager,
         BreadcrumbService      $breadcrumb,
     ): Response
     {
@@ -134,32 +137,30 @@ class ParcoursController extends BaseController
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
 
+        $cssDiff = DiffHelper::getStyleSheet();
         $textDifferencesParcours = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours);
+        $textDifferencesParcoursCampagne = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours, true);
         $textDifferencesFormation = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation);
-//        $version = $versioningParcours->hasLastVersion($parcours);
-//
-//        $cssDiff = DiffHelper::getStyleSheet();
+        $textDifferencesFormationCampagne = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation, true);
+        $hasLastVersion = $versioningParcours->hasLastVersion($parcours);
 
+        $diffCountLastVersion = 0;
+        foreach (array_merge($textDifferencesFormation, $textDifferencesParcours) as $fieldDiff) {
+            if (is_string($fieldDiff) && trim(strip_tags($fieldDiff)) !== '') {
+                $diffCountLastVersion++;
+            }
+        }
 
-//        // Ordre des semestres manquants
-//        $missingSemestre = [];
-//
-//        // Si le parcours est en alternance sans les premiers semestres
-//        // on met un lien vers le parcours de base
-//        $parcoursDeBase = null;
-//        if($parcours->getTypeParcours() === TypeParcoursEnum::TYPE_PARCOURS_ALTERNANCE
-//            && $parcours->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT'
-//        ) {
-//            $parcoursDeBase = $entityManager->getRepository(Parcours::class)
-//                ->findParcoursDeBaseAlternance(
-//                    $parcours->getLibelle(),
-//                    GetDpeParcours::getFromParcours($parcours)?->getCampagneCollecte()?->getId()
-//                );
-//            $parcoursDeBase = count($parcoursDeBase) > 0 ? $parcoursDeBase[0] : null;
-//
-//            $missingSemestre = $entityManager->getRepository(Parcours::class)
-//                ->findParcoursAlternanceHasMissingSemestre($parcours);
-//        }
+        $diffCountCampagne = 0;
+        foreach (array_merge($textDifferencesFormationCampagne, $textDifferencesParcoursCampagne) as $fieldDiff) {
+            if (is_string($fieldDiff) && trim(strip_tags($fieldDiff)) !== '') {
+                $diffCountCampagne++;
+            }
+        }
+
+        $canSeeDifferences = $this->isGranted('RELATED_TO_PARCOURS', $parcours);
+        $displayComparaison = $request->query->get('optionDisplay', 'false');
+
         return $this->render('parcours_v2/voir.html.twig', [
             'parcours' => $parcours,
             'dpeParcours' => GetDpeParcours::getFromParcours($parcours),
@@ -168,13 +169,16 @@ class ParcoursController extends BaseController
             'hasParcours' => $formation->isHasParcours(),
             'typeD' => $typeD,
             'lheoXML' => $lheoXML,
+            'cssDiff' => $cssDiff,
             'stringDifferencesParcours' => $textDifferencesParcours,
+            'stringDifferencesParcoursCampagne' => $textDifferencesParcoursCampagne,
             'stringDifferencesFormation' => $textDifferencesFormation,
-//            'hasLastVersion' => $versioningParcours->hasLastVersion($parcours),
-//            'cssDiff' => $cssDiff,
-//            'version' => $version,
-//            'parcoursDeBase' => $parcoursDeBase,
-//            'missingSemestre' => $missingSemestre
+            'stringDifferencesFormationCampagne' => $textDifferencesFormationCampagne,
+            'diffCountLastVersion' => $diffCountLastVersion,
+            'diffCountCampagne' => $diffCountCampagne,
+            'hasLastVersion' => $hasLastVersion,
+            'displayComparaison' => $displayComparaison,
+            'canSeeDifferences' => $canSeeDifferences,
         ]);
     }
 
@@ -327,6 +331,11 @@ class ParcoursController extends BaseController
             ['parcours' => $parcours->getId()]
         );
         $breadcrumb->add('Modifier le parcours');
+
+        $validTabs = ['presentation_formation', 'presentation', 'maquette', 'descriptif', 'admission', 'et_apres', 'configuration'];
+        if (!in_array($tab, $validTabs, true)) {
+            throw $this->createNotFoundException('Onglet inconnu : ' . $tab);
+        }
 
         $form = null;
         $tabView = $tab;

@@ -1,5 +1,22 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {% if cssDiff is defined and cssDiff is not empty %}
+        <style>
+            {{ cssDiff|raw }}
+            {{ include('communs/versioning_view_style.html.twig') }}
+        </style>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% if (canSeeDifferences ?? false) == true %}
+        <script src="{{ asset('versioning/display_differences.js') }}"></script>
+    {% endif %}
+{% endblock %}
+
 {% set header_title %}
     {% if parcours.parcoursParent == null %}
         Parcours
@@ -35,6 +52,61 @@
     <div id="parcours_header_component">
         <twig:ParcoursHeader parcoursId="{{ parcours.id }}" formationId="{{ parcours.formation.id }}"/>
     </div>
+
+    {% if (canSeeDifferences ?? false) and displayComparaison in ['diffGlobalParcours', 'diffGlobalParcoursCampagne'] %}
+        {% set isCampagne = displayComparaison == 'diffGlobalParcoursCampagne' %}
+        {% set diffCount = isCampagne ? (diffCountCampagne ?? 0) : (diffCountLastVersion ?? 0) %}
+        {% set modeTitle = isCampagne ? "Comparaison avec l'année précédente (campagne N-1)" : "Comparaison avec la dernière version validée" %}
+
+        <div class="mb-4 rounded-2xl border p-4 shadow-sm transition {{ diffCount > 0 ? 'border-info-300 bg-info-50/90 text-info-950 dark:border-info-700 dark:bg-info-950/40 dark:text-info-100' : 'border-secondary-300 bg-secondary-50 text-secondary-800 dark:border-secondary-700 dark:bg-secondary-800/60 dark:text-secondary-200' }}">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-start sm:items-center gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl {{ diffCount > 0 ? 'bg-info-100 text-info-700 dark:bg-info-900/50 dark:text-info-300' : 'bg-secondary-200 text-secondary-600 dark:bg-secondary-700 dark:text-secondary-300' }}">
+                        {{ ux_icon('ph:not-equals-bold', {class: 'h-5 w-5'}) }}
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="text-xs font-black uppercase tracking-wider text-info-700 dark:text-info-300">Mode Comparaison Actif</span>
+                            <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold {{ diffCount > 0 ? 'bg-info-200 text-info-800 dark:bg-info-900/80 dark:text-info-200' : 'bg-secondary-200 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-300' }}">
+                                {{ diffCount }} champ{{ diffCount > 1 ? 's' : '' }} avec modification{{ diffCount > 1 ? 's' : '' }}
+                            </span>
+                        </div>
+                        <p class="text-sm font-semibold mt-0.5">
+                            {{ modeTitle }}
+                        </p>
+                        <p class="text-xs opacity-80 mt-0.5">
+                            {% if diffCount > 0 %}
+                                Les modifications sont surlignées dans les blocs descriptifs ci-dessous (<span class="font-semibold text-success-700 dark:text-success-300">texte vert</span> = ajouts, <span class="font-semibold text-danger-700 dark:text-danger-300 line-through">texte rouge barré</span> = suppressions).
+                            {% else %}
+                                <strong>Aucune modification détectée</strong> : la saisie actuelle est strictement identique à la version de référence comparée.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 self-end sm:self-center shrink-0">
+                    {% if not isCampagne %}
+                        <a href="{{ path('parcours_v2_voir', {parcours: parcours.id, optionDisplay: 'diffGlobalParcoursCampagne'}) }}"
+                           class="inline-flex items-center gap-1.5 rounded-xl border border-secondary-300 bg-white px-3 py-1.5 text-xs font-semibold text-secondary-700 shadow-sm hover:bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:bg-secondary-700">
+                            {{ ux_icon('icon:calendar', {class: 'h-3.5 w-3.5 text-info-500'}) }}
+                            <span>Comparer avec N-1</span>
+                        </a>
+                    {% else %}
+                        <a href="{{ path('parcours_v2_voir', {parcours: parcours.id, optionDisplay: 'diffGlobalParcours'}) }}"
+                           class="inline-flex items-center gap-1.5 rounded-xl border border-secondary-300 bg-white px-3 py-1.5 text-xs font-semibold text-secondary-700 shadow-sm hover:bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:bg-secondary-700">
+                            {{ ux_icon('mdi:history', {class: 'h-3.5 w-3.5 text-info-500'}) }}
+                            <span>Comparer avec version validée</span>
+                        </a>
+                    {% endif %}
+                    <a href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}"
+                       class="inline-flex items-center gap-1.5 rounded-xl border border-secondary-300 bg-white px-3 py-1.5 text-xs font-semibold text-secondary-700 shadow-sm hover:bg-secondary-50 hover:text-secondary-900 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:bg-secondary-700">
+                        {{ ux_icon('icon:close', {class: 'h-3.5 w-3.5'}) }}
+                        <span>Quitter</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
     <div class="flex" data-controller="scroll-spy">
         <aside class="app-scrollspy-aside w-72 flex flex-col p-3 space-y-8">
             <div class="sticky top-[calc(var(--page-header-offset,4rem)+0.5rem)] space-y-8">

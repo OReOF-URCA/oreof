@@ -7,6 +7,7 @@ use App\Classes\ValidationProcess;
 use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\Parcours;
+use App\Entity\ParcoursVersioning;
 use App\Enums\TypeModificationDpeEnum;
 use App\Repository\HistoriqueFormationRepository;
 use App\Repository\HistoriqueParcoursRepository;
@@ -274,4 +275,15 @@ final class ParcoursHeader
         return '- à venir -';
     }
 
+    /**
+     * @return list<ParcoursVersioning>
+     */
+    public function getVersions(): array
+    {
+        if ($this->parcours === null) {
+            return [];
+        }
+
+        return $this->em->getRepository(ParcoursVersioning::class)->findLastVersion($this->parcours);
+    }
 }

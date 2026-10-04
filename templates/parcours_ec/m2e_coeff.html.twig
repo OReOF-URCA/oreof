@@ -5,7 +5,7 @@
 {% endset %}
 
 {% block bouton_header %}
-    <a href="{{ path('app_parcours_edit', {id:parcours.id}) }}"
+    <a href="{{ path('parcours_v2_modifier', {parcours:parcours.id}) }}"
        class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
        data-bs-toggle="tooltip"
        data-bs-placement="bottom"

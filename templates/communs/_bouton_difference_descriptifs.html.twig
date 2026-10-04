@@ -5,9 +5,9 @@
 {% set hrefCurrentData = "#" %}
 
 {% if withUrlLink is defined and withUrlLink == true %}
-    {% set hrefLastVersion = path('app_parcours_show', {id: parcours_id}) ~ "?optionDisplay=diffGlobalParcours" %}
-    {% set hrefLastYear = path('app_parcours_show', {id: parcours_id}) ~ "?optionDisplay=diffGlobalParcoursCampagne" %}
-    {% set hrefCurrentData = path('app_parcours_show', {id: parcours_id}) %}
+    {% set hrefLastVersion = path('parcours_v2_voir', {parcours: parcours_id}) ~ "?optionDisplay=diffGlobalParcours" %}
+    {% set hrefLastYear = path('parcours_v2_voir', {parcours: parcours_id}) ~ "?optionDisplay=diffGlobalParcoursCampagne" %}
+    {% set hrefCurrentData = path('parcours_v2_voir', {parcours: parcours_id}) %}
 {% endif %}
 
 <div class="btn-group">

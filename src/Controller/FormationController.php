@@ -422,7 +422,7 @@ class FormationController extends BaseController
 
             $formationRepository->save($formation, true);
 
-            return $this->redirectToRoute('app_formation_edit', ['slug' => $formation->getSlug()]);
+            return $this->redirectToRoute('formation_v2_modifier', ['slug' => $formation->getSlug()]);
         }
 
         return $this->render('formation/editModal.html.twig', [
