@@ -76,12 +76,12 @@ class FormulaireGeneriqueType extends AbstractType
             ->add('niveauEntree', EnumType::class, [
                 'class' => NiveauFormationEnum::class,
                 'label' => 'Niveau d\'entrée',
-                'choice_label' => fn(UnitEnum $c) => $c->libelle(),
+                'choice_label' => fn(NiveauFormationEnum $c) => $c->libelle(),
             ])
             ->add('niveauSortie', EnumType::class, [
                 'class' => NiveauFormationEnum::class,
                 'label' => 'Niveau de sortie',
-                'choice_label' => fn(UnitEnum $c) => $c->libelle(),
+                'choice_label' => fn(NiveauFormationEnum $c) => $c->libelle(),
             ])
             ->add('responsableMention', $respMentionType, $respMentionOptions)
             ->add('coResponsableMention', $coRespMentionType, $coRespMentionOptions)

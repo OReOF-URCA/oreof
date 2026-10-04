@@ -48,15 +48,15 @@ class WorkFlowData
             case Parcours::class:
                 $this->parcours = $data;
                 $this->formation = $data->getFormation();
-                $this->hasParcours = $this->parcours?->isParcoursDefaut() === false;
+                $this->hasParcours = $this->parcours->isParcoursDefaut() === false;
                 $this->composante = $this->formation?->getComposantePorteuse();
-                $this->dpeParcours = $this->parcours?->getDpeParcours()->first();
+                $this->dpeParcours = $this->parcours->getDpeParcours()->first() ?: null;
                 $this->fiche = null;
                 break;
             case Formation::class:
                 $this->formation = $data;
-                $this->composante = $this->formation?->getComposantePorteuse();
-                $this->dpeParcours = $this->formation?->getDpeParcours()->first();
+                $this->composante = $this->formation->getComposantePorteuse();
+                $this->dpeParcours = $this->formation->getDpeParcours()->first() ?: null;
                 $this->parcours = $this->dpeParcours?->getParcours();
                 $this->hasParcours = $this->parcours?->isParcoursDefaut() === false;
                 $this->fiche = null;

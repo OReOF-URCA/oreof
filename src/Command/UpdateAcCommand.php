@@ -37,10 +37,11 @@ class UpdateAcCommand extends Command
 
         /** @var ElementConstitutif $ec */
         foreach ($ecs as $ec) {
-            //pour chaque apprentissageCritique
-            foreach ($ec->getApprentissagesCritiques() as $ac) {
-                $fiche = $ec->getFicheMatiere();
-                $fiche?->addApprentissagesCritique($ac);
+            $fiche = $ec->getFicheMatiere();
+            if ($fiche !== null) {
+                foreach ($fiche->getApprentissagesCritiques() as $ac) {
+                    $fiche->addApprentissagesCritique($ac);
+                }
             }
         }
 

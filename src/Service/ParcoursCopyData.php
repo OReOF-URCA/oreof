@@ -2,8 +2,6 @@
 
 namespace App\Service;
 
-use App\Classes\CalculButStructureParcours;
-use App\Classes\CalculStructureParcours;
 use App\Classes\MyGotenbergPdf;
 use App\DTO\HeuresEctsEc;
 use App\DTO\StructureEc;
@@ -20,8 +18,8 @@ use App\Entity\Ue;
 use App\Repository\ElementConstitutifCopyRepository;
 use App\Repository\FicheMatiereCopyRepository;
 use App\Repository\McccCopyRepository;
-use App\Repository\ParcoursCopyRepository;
-use App\Repository\UeCopyRepository;
+use App\TypeDiplome\Dto\OptionsCalculStructure;
+use App\TypeDiplome\TypeDiplomeResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
@@ -33,13 +31,13 @@ class ParcoursCopyData {
 
     private EntityManagerInterface $entityManager;
 
-    private EntityManagerInterface $entityManagerCopy;
+    private ?EntityManagerInterface $entityManagerCopy = null;
 
-    private ElementConstitutifCopyRepository $ecCopyRepo;
+    private ?ElementConstitutifCopyRepository $ecCopyRepo = null;
 
-    private FicheMatiereCopyRepository $fmCopyRepo;
+    private ?FicheMatiereCopyRepository $fmCopyRepo = null;
 
-    private McccCopyRepository $mcccCopyRepo;
+    private ?McccCopyRepository $mcccCopyRepo = null;
 
     private MyGotenbergPdf $myPdf;
 
@@ -56,13 +54,23 @@ class ParcoursCopyData {
 
     public function __construct(
         ManagerRegistry $doctrine,
-        MyGotenbergPdf $myPdf
+        MyGotenbergPdf $myPdf,
+        private readonly TypeDiplomeResolver $typeDiplomeResolver
     ){
-        $this->entityManager = $doctrine->getManager('default');
-        $this->entityManagerCopy = $doctrine->getManager('parcours_copy');
-        $this->ecCopyRepo = new ElementConstitutifCopyRepository($this->entityManagerCopy, ElementConstitutif::class);
-        $this->fmCopyRepo = new FicheMatiereCopyRepository($this->entityManagerCopy, FicheMatiere::class);
-        $this->mcccCopyRepo = new McccCopyRepository($this->entityManagerCopy, Mccc::class);
+        $em = $doctrine->getManager('default');
+        assert($em instanceof EntityManagerInterface);
+        $this->entityManager = $em;
+        try {
+            $emCopy = $doctrine->getManager('parcours_copy');
+            if ($emCopy instanceof EntityManagerInterface) {
+                $this->entityManagerCopy = $emCopy;
+                $this->ecCopyRepo = new ElementConstitutifCopyRepository($this->entityManagerCopy, ElementConstitutif::class);
+                $this->fmCopyRepo = new FicheMatiereCopyRepository($this->entityManagerCopy, FicheMatiere::class);
+                $this->mcccCopyRepo = new McccCopyRepository($this->entityManagerCopy, Mccc::class);
+            }
+        } catch (\Throwable) {
+            $this->entityManagerCopy = null;
+        }
 
         $this->myPdf = $myPdf;
     }
@@ -276,6 +284,7 @@ class ParcoursCopyData {
             $hasFicheMatiereEcPorteur = count($hasFicheMatiereEcPorteur) > 0;
             $countEcForFiche = count($ficheMatiereSource->getElementConstitutifs()->toArray());
             $ecEcts = null;
+            $ec = null;
 
             $isEcPorteur = false;
             // Si l'EC et la FM font partie du parcours
@@ -318,6 +327,7 @@ class ParcoursCopyData {
             }
             if(($isEcPorteur || $hasFicheMatiereEcPorteur === false || $countEcForFiche === 1)
                 && $this->hasHeuresFicheMatiereCopy($ficheMatiereSource) === false
+                && $ec !== null
             ) {
                 $ficheMatiereFromCopy = $this->fmCopyRepo->find($ficheMatiereSource->getId());
                 // Si le volume est imposé ou que la FM est hors diplôme, les heures sont déjà dessus
@@ -387,7 +397,7 @@ class ParcoursCopyData {
 
             if( $ec->elementConstitutif->getEcParent() === null
                 && $isDifferent === true
-                && !$ec->elementConstitutif->getFicheMatiere()?->isEctsImpose()
+                && !$ec->elementConstitutif->getFicheMatiere()->isEctsImpose()
             ){
                 $ecCopyEcts = $this->ecCopyRepo->find($ec->elementConstitutif->getId());
                 $ecCopyEcts->setEctsSpecifiques(true);
@@ -490,8 +500,8 @@ class ParcoursCopyData {
             $mcccResult = $this->mcccCopyRepo->findBy(
                 ['ficheMatiere' => $structEc->elementConstitutif->getFicheMatiere()->getId()]
             );
-            $ficheMatiereCopy = $this->fmCopyRepo->findOneById($structEc->elementConstitutif->getFicheMatiere()->getId());
-            $typeMcccAreEqual = $structEc->typeMccc === $ficheMatiereCopy->getTypeMccc();
+            $ficheMatiereCopy = $this->fmCopyRepo->find($structEc->elementConstitutif->getFicheMatiere()->getId());
+            $typeMcccAreEqual = $structEc->typeMccc === $ficheMatiereCopy?->getTypeMccc();
         }
         if(is_array($mcccResult)){
             $mcccAreEqual = $this->compareTwoMcccArray($structEc->mcccs, $mcccResult);
@@ -508,36 +518,12 @@ class ParcoursCopyData {
         bool $dataFromFicheMatiere = false,
         bool $withCopy = false,
         bool $fromCopy = false
-    ){
-        if($parcours->getTypeDiplome()->getLibelleCourt() === 'BUT'){
-            $calcul = new CalculButStructureParcours();
-            $dto = $calcul->calcul($parcours);
-
-            return $dto;
+    ): StructureParcours {
+        if ($withCopy) {
+            $this->copyDataForParcours($parcours);
         }
-        else {
-            if($fromCopy || $withCopy){
-                $ueCopyRepository = new UeCopyRepository($this->entityManagerCopy, Ue::class);
-                $ecCopyRepository = new ElementConstitutifCopyRepository($this->entityManagerCopy, ElementConstitutif::class);
-                $parcoursCopyRepository = new ParcoursCopyRepository($this->entityManagerCopy, Parcours::class);
-                $calcul = new CalculStructureParcours($this->entityManagerCopy, $ecCopyRepository, $ueCopyRepository, $parcoursCopyRepository);
-            }else {
-                $ueRepository = $this->entityManager->getRepository(Ue::class);
-                $ecRepository = $this->entityManager->getRepository(ElementConstitutif::class);
-                $parcoursRepository = $this->entityManager->getRepository(Parcours::class);
-                $calcul = new CalculStructureParcours($this->entityManager, $ecRepository, $ueRepository, $parcoursRepository);
-            }
-            if($withCopy){
-                $parcoursData = $parcours;
-                $this->copyDataForParcours($parcoursData);
-                $dto = $calcul->calcul($parcoursData, dataFromFicheMatiere: $dataFromFicheMatiere);
-            }
-            else {
-                $dto = $calcul->calcul($parcours, dataFromFicheMatiere: $dataFromFicheMatiere);
-            }
-
-            return $dto;
-        }
+        $handler = $this->typeDiplomeResolver->fromParcours($parcours);
+        return $handler->calcul($parcours, new OptionsCalculStructure(dataFromFicheMatiere: $dataFromFicheMatiere));
     }
 
     private function getUe(Ue $ue): ?Ue
@@ -748,7 +734,7 @@ class ParcoursCopyData {
             foreach($ue1->elementConstitutifs as $indexEc => $ec){
                 $mcccTest = $this->compareTwoMcccArray(
                     $ec->mcccs,
-                    $ue2->elementConstitutifs[$indexEc]?->mcccs ?? [],
+                    $ue2->elementConstitutifs[$indexEc]->mcccs ?? [],
                     $parcoursId,
                     $ue1->display . " " . $ec->elementConstitutif->getCode()
                 );
@@ -760,7 +746,7 @@ class ParcoursCopyData {
                 foreach($ec->elementsConstitutifsEnfants as $indexEcEnfant => $ecEnfant){
                     $mcccEnfantTest = $this->compareTwoMcccArray(
                         $ecEnfant->mcccs,
-                        $ue2->elementConstitutifs[$indexEc]?->elementsConstitutifsEnfants[$indexEcEnfant]?->mcccs ?? [],
+                        $ue2->elementConstitutifs[$indexEc]?->elementsConstitutifsEnfants[$indexEcEnfant]->mcccs ?? [],
                         $parcoursId,
                         $ue1->display . " " . $ecEnfant->elementConstitutif->getCode()
                     );
@@ -781,11 +767,10 @@ class ParcoursCopyData {
         StructureSemestre $semestre2
     ) : bool {
 
-        $result = true;
         /**
          * Même nombre d'heures total sur le semestre
          */
-        $result = $result && $semestre1->heuresEctsSemestre->sommeSemestreTotalPres()
+        $result = $semestre1->heuresEctsSemestre->sommeSemestreTotalPres()
             === $semestre2->heuresEctsSemestre->sommeSemestreTotalPres();
 
         $result = $result && $semestre1->heuresEctsSemestre->sommeSemestreTotalDist()
@@ -834,9 +819,8 @@ class ParcoursCopyData {
         StructureUe $ue2
     ) : bool {
 
-        $result = true;
         // Totaux
-        $result = $result && $ue1->heuresEctsUe->sommeUeTotalPres()
+        $result = $ue1->heuresEctsUe->sommeUeTotalPres()
             === $ue2->heuresEctsUe->sommeUeTotalPres();
 
         $result = $result && $ue1->heuresEctsUe->sommeUeTotalDist()
@@ -886,9 +870,8 @@ class ParcoursCopyData {
         string $ueDisplay = ""
     ) : bool {
 
-        $result = true;
         // Totaux
-        $result = $result && $ec1->heuresEctsEc->sommeEcTotalPres()
+        $result = $ec1->heuresEctsEc->sommeEcTotalPres()
             === $ec2->heuresEctsEc->sommeEcTotalPres();
 
         $result = $result && $ec1->heuresEctsEc->sommeEcTotalDist()
@@ -1217,7 +1200,7 @@ class ParcoursCopyData {
             }
 
 
-            $return = $return && count($alreadyUsedIndex) === count($array1);
+            $return = count($alreadyUsedIndex) === count($array1);
         }
 
         return $return;
@@ -1227,7 +1210,7 @@ class ParcoursCopyData {
         StructureEc $ec1,
         StructureEc $ec2,
         string $debugText = ""
-    ){
+    ): bool {
         $result = $ec1->heuresEctsEc->ects === $ec2->heuresEctsEc->ects;
         if($result === false){
             self::$errorMessageArray[] = $debugText . " EC {$ec1->elementConstitutif->getCode()} - "
@@ -1255,15 +1238,7 @@ class ParcoursCopyData {
         return $retour;
     }
 
-    private function placeErrorMessage(int $parcoursId, string $message): void
-    {
-        if(array_key_exists($parcoursId, self::$errorMessageArray) === false){
-            self::$errorMessageArray[$parcoursId] = [];
-        }
-        self::$errorMessageArray[$parcoursId][] = $message;
-    }
-
-    private function hasEctsDifferent(StructureEc $ec) : bool|null {
+    private function hasEctsDifferent(StructureEc $ec) : bool {
         return $ec->heuresEctsEc->ects !== $this->ficheMatiereEctsCopyArray[$ec->elementConstitutif->getFicheMatiere()->getId()];
     }
 

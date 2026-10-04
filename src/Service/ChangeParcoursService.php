@@ -8,9 +8,14 @@
  */
 
 namespace App\Service;
-
+ 
+use App\Entity\ChangeParcours;
+use App\Entity\Parcours;
+use App\Enums\ParcoursActionStatusEnum;
+use App\Enums\ParcoursActionTypeEnum;
 use Doctrine\ORM\EntityManagerInterface;
-
+ 
+//todo: encore utile ?
 class ChangeParcoursService
 {
     public function __construct(
@@ -19,57 +24,63 @@ class ChangeParcoursService
     )
     {
     }
-
+ 
     /**
      * Applique une demande marquée APPROVED.
      */
-    public function applyApproved(DemandeAction $demande): void
+    public function applyApproved(ChangeParcours $demande): void
     {
-        if ($demande->getStatus() !== ActionStatus::APPROVED) {
+        if (!in_array(ParcoursActionStatusEnum::APPROVED, $demande->getActionStatus(), true)) {
             throw new \LogicException('Demande non approuvée');
         }
-
-        $type = $demande->getType();
-        $payload = $demande->getPayload() ?? [];
-
-        switch ($type) {
-            case ActionType::MODIFY_LABEL:
-                $parcours = $demande->getParcours();
-                if ($parcours === null) {
-                    throw new \RuntimeException('Parcours manquant pour modification');
-                }
-                $newLabel = $payload['libelle'] ?? null;
-                if ($newLabel !== null) {
-                    $parcours->setLibelle($newLabel);
-                    $this->em->persist($parcours);
-                    // optionnel : versionner
+ 
+        $payload = $demande->getPayload();
+ 
+        foreach ($demande->getActionType() as $type) {
+            switch ($type) {
+                case ParcoursActionTypeEnum::MODIFY_LABEL:
+                    $parcours = $demande->getParcours();
+                    if ($parcours === null) {
+                        throw new \RuntimeException('Parcours manquant pour modification');
+                    }
+                    $newLabel = $payload['libelle'] ?? null;
+                    if ($newLabel !== null) {
+                        $parcours->setLibelle($newLabel);
+                        $this->em->persist($parcours);
+                        // optionnel : versionner
+                        $this->versioningParcours->saveVersionOfParcours($parcours, new \DateTimeImmutable('now'), true);
+                    }
+                    break;
+ 
+                case ParcoursActionTypeEnum::CLOSE_PARCOURS:
+                    $parcours = $demande->getParcours();
+                    if ($parcours === null) {
+                        throw new \RuntimeException('Parcours manquant pour fermeture');
+                    }
+                    $dpe = $parcours->getDpeParcours()->last();
+                    if ($dpe instanceof \App\Entity\DpeParcours) {
+                        $dpe->setEtatReconduction(\App\Enums\TypeModificationDpeEnum::FERMETURE_DEFINITIVE);
+                        $this->em->persist($dpe);
+                    }
                     $this->versioningParcours->saveVersionOfParcours($parcours, new \DateTimeImmutable('now'), true);
-                }
-                break;
-
-            case ActionType::CLOSE_PARCOURS:
-                $parcours = $demande->getParcours();
-                if ($parcours === null) {
-                    throw new \RuntimeException('Parcours manquant pour fermeture');
-                }
-                $parcours->setActif(false); // exemple : champ `actif`
-                $this->em->persist($parcours);
-                $this->versioningParcours->saveVersionOfParcours($parcours, new \DateTimeImmutable('now'), true);
-                break;
-
-            case ActionType::CREATE_PARCOURS:
-                // payload doit contenir les champs nécessaires pour créer le parcours
-                $data = $payload['data'] ?? [];
-                $parcours = new \App\Entity\Parcours($data['formation']); // adapter selon constructeur
-                $parcours->setLibelle($data['libelle'] ?? 'Nouveau parcours');
-                $this->em->persist($parcours);
-                // versioning si vous voulez
-                break;
-
-            default:
-                throw new \RuntimeException('Type d\'action non géré');
+                    break;
+ 
+                case ParcoursActionTypeEnum::CREATE_PARCOURS:
+                    $formation = $demande->getFormation();
+                    if ($formation === null) {
+                        throw new \RuntimeException('Formation manquante pour création de parcours');
+                    }
+                    $data = $payload['data'] ?? [];
+                    $parcours = new Parcours($formation);
+                    $parcours->setLibelle($data['libelle'] ?? 'Nouveau parcours');
+                    $this->em->persist($parcours);
+                    break;
+ 
+                default:
+                    throw new \RuntimeException('Type d\'action non géré');
+            }
         }
-
+ 
         $this->em->flush();
     }
 }

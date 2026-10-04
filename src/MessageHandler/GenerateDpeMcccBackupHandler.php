@@ -45,32 +45,27 @@ final readonly class GenerateDpeMcccBackupHandler
         }
 
         $typeDiplome = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
-        if (null === $typeDiplome) {
-            throw new \RuntimeException('Aucun modèle MCC n\'est défini pour ce diplôme.');
-        }
 
         $campagneCollecte = $dpeParcours->getCampagneCollecte();
         if (null === $campagneCollecte) {
             throw new \RuntimeException('Aucune campagne de collecte n\'est définie pour ce diplôme.');
         }
 
-        $filename = Tools::FileName(sprintf(
+        $filename = (string) Tools::FileName(sprintf(
             'MCCC - %s - %d-v%s',
             $campagneCollecte->getAnneeUniversitaire()?->getLibelle(),
             $parcours->getId(),
             $dpeParcours->getVersion(),
         ));
 
-        $export = $typeDiplome->exportExcelAndSaveVersionMccc(
+        $typeDiplome->exportExcelAndSaveVersionMccc(
             $campagneCollecte,
             $parcours,
             $this->backupDirectory,
             $filename,
         );
 
-        if (false !== $export) {
-            $dpeParcours->updateMinorVersion();
-            $this->entityManager->flush();
-        }
+        $dpeParcours->updateMinorVersion();
+        $this->entityManager->flush();
     }
 }

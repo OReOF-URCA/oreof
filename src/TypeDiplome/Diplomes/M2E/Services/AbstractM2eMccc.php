@@ -12,6 +12,7 @@ namespace App\TypeDiplome\Diplomes\M2E\Services;
 use App\Classes\Excel\ExcelWriter;
 use App\DTO\StructureEc;
 use App\Entity\Mccc;
+use App\Repository\TypeEpreuveRepository;
 use DateTimeInterface;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
@@ -85,7 +86,8 @@ class AbstractM2eMccc
 
 
     public function __construct(
-        protected ExcelWriter $excelWriter,
+        protected ExcelWriter           $excelWriter,
+        protected TypeEpreuveRepository $typeEpreuveRepository,
     )
     {
     }

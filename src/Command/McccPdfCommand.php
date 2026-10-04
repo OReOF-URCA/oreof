@@ -20,7 +20,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsCommand(
     name: 'app:mccc-pdf',
@@ -30,8 +29,6 @@ class McccPdfCommand extends Command
 {
 
     private EntityManagerInterface $entityManager;
-
-    private HttpClientInterface $httpClient;
 
     private Filesystem $fs;
 
@@ -45,7 +42,6 @@ class McccPdfCommand extends Command
         private GetDateConseilComposante $getDateConseilComposante,
         EntityManagerInterface $entityManager,
         Filesystem $fs,
-        HttpClientInterface $httpClient,
         GetHistorique $getHistorique,
         LicenceMccc $licenceMccc,
         ButMccc $butMccc
@@ -54,7 +50,6 @@ class McccPdfCommand extends Command
         parent::__construct();
         $this->entityManager = $entityManager;
         $this->fs = $fs;
-        $this->httpClient = $httpClient;
         $this->getHistorique = $getHistorique;
 
         $this->licenceMccc = $licenceMccc;

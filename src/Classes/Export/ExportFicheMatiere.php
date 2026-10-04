@@ -14,6 +14,7 @@ use App\Classes\MyGotenbergPdf;
 use App\Repository\ParcoursRepository;
 use App\Service\ProjectDirProvider;
 use App\TypeDiplome\Dto\OptionsCalculStructure;
+use App\TypeDiplome\McccDisplayInterface;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\Tools;
 use Exception;
@@ -107,11 +108,13 @@ class ExportFicheMatiere
                         'typeDiplome' => $typeDiplome,
                         'titre' => 'Fiche EC/matière ' . $ficheMatieres->getLibelle(),
                         'heures' => $getElement->getFicheMatiereHeures(),
-                        'templateFormMccc' => $typeDHandler::TEMPLATE_FORM_MCCC,
-                        'mcccPdf' => $typeDHandler->getDisplayMccc(
-                            $getElement->getMcccsFromFicheMatiere($typeDHandler),
-                            $getElement->getTypeMcccFromFicheMatiere() ?? ''
-                        ),
+                        'templateFormMccc' => $typeDHandler->getMcccTemplate(),
+                        'mcccPdf' => $typeDHandler instanceof McccDisplayInterface
+                            ? $typeDHandler->getDisplayMccc(
+                                ($rawMcccs = $getElement->getMcccsFromFicheMatiere($typeDHandler)) instanceof \Doctrine\Common\Collections\Collection ? $rawMcccs->toArray() : (array) $rawMcccs,
+                                $getElement->getTypeMcccFromFicheMatiere() ?? ''
+                            )
+                            : [],
                         'typeEpreuves' => $typeDHandler->getTypeEpreuves()
 
                     ],

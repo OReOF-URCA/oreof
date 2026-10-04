@@ -23,10 +23,10 @@ class SelectCentre extends BaseController
     public ?string $selectedCentre = '';
 
     #[LiveProp(writable: true)]
-    public $selectedCibleId = null;
+    public ?int $selectedCibleId = null;
 
     #[LiveProp(writable: true)]
-    public $selectedProfilId = null;
+    public ?int $selectedProfilId = null;
 
     #[LiveProp(writable: true)]
     public array $cibles = [];
@@ -99,9 +99,11 @@ class SelectCentre extends BaseController
         }
 
         // profils selon le centre sélectionné
-        $profils = $this->profilRepository->findByCentre(['centre' => $this->selectedCentre], ['libelle' => 'ASC']);
-        foreach ($profils as $profil) {
-            $this->profils[$profil->getId()] = $profil->getLibelle();
+        if ($this->selectedCentre !== null && $this->selectedCentre !== '') {
+            $profils = $this->profilRepository->findByCentre($this->selectedCentre);
+            foreach ($profils as $profil) {
+                $this->profils[$profil->getId()] = $profil->getLibelle();
+            }
         }
     }
 }

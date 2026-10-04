@@ -23,7 +23,7 @@ abstract class ExtractTextFromJsonPatch
         self::$typeEpreuveRepository = $typeEpreuveRepository;
     }
 
-    public static function getNewValueFromPatch($patch): string
+    public static function getNewValueFromPatch(object $patch): string
     {
         self::getKey($patch->path);
 
@@ -35,18 +35,18 @@ abstract class ExtractTextFromJsonPatch
 
     }
 
-    public static function getOriginalValueFromPatch($patch): string
+    public static function getOriginalValueFromPatch(object $patch): string
     {
         self::getKey($patch->path);
-        return self::getValue($patch->value) ?? 'pas de valeur';
+        return self::getValue($patch->value);
     }
 
-    public static function getTextFromPath($patch): string
+    public static function getTextFromPath(object $patch): string
     {
         return self::translatePath($patch->path);
     }
 
-    public static function translatePath($path): string
+    public static function translatePath(string $path): string
     {
         // partir de cette chaine pour construire une chaine texte compréhensible
 
@@ -69,7 +69,7 @@ abstract class ExtractTextFromJsonPatch
         return $path;
     }
 
-    private static function getField($path): string
+    private static function getField(string $path): string
     {
         $translateField = [
             'libelle' => 'Libellé',
@@ -122,8 +122,8 @@ abstract class ExtractTextFromJsonPatch
 
     public static function getLibelle(
         string $path,
-        string  $jsonCourant
-    ) {
+        string $jsonCourant
+    ): string {
         $tab = JsonPointer::splitPath($path);
         //selon la dernière valeur du tableau $tab, reconstruire un path avec les éléments précédents
         if (count($tab) > 2 &&
@@ -188,10 +188,10 @@ abstract class ExtractTextFromJsonPatch
 
     }
 
-    private static function getValue($value): string
+    private static function getValue(mixed $value): string
     {
         if (self::$key === 'libre' || self::$key === 'raccroche') {
-            return (bool)$value === 1 ? 'Oui' : 'Non';
+            return (bool)$value ? 'Oui' : 'Non';
         }
 
         if (self::$key === 'typeMccc') {
@@ -211,10 +211,10 @@ abstract class ExtractTextFromJsonPatch
             }
         }
 
-        return $value;
+        return (string)$value;
     }
 
-    private static function getKey($path): void
+    private static function getKey(string $path): void
     {
         $tab = JsonPointer::splitPath($path);
 

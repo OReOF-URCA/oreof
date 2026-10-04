@@ -76,8 +76,8 @@ class ParcoursExportV2 {
         Parcours $parcours,
         TypeDiplome $typeDiplome,
         bool $isVersioning = false,
-        int $parcours_id = null,
-        int $formation_id = null,
+        ?int $parcours_id = null,
+        ?int $formation_id = null,
         bool $fermetureEmpty = false
     ): array
     {
@@ -234,7 +234,7 @@ class ParcoursExportV2 {
 
                                 $nb++;
                                 $tUe['nbChoix'] = $nb;
-                                $tUeEnfant['ec'] = $this->getEcFromUe($ueEnfant, $isVersioning);
+                                $tUeEnfant['ec'] = $this->getEcFromUe($ueEnfant, 1, $isVersioning);
 
                                 /**
                                  * UE enfant dans une UE enfant
@@ -278,7 +278,7 @@ class ParcoursExportV2 {
 
                                         $nbDeuxiemeNiveau++;
                                         $tUeEnfant['nbChoix'] = $nbDeuxiemeNiveau;
-                                        $tUeEnfantDeuxiemeNiveau['ec'] = $this->getEcFromUe($ueEnfantDeuxiemeNiveau, $isVersioning);
+                                        $tUeEnfantDeuxiemeNiveau['ec'] = $this->getEcFromUe($ueEnfantDeuxiemeNiveau, 2, $isVersioning);
                                         $tUeEnfant['UesEnfants'][] = $tUeEnfantDeuxiemeNiveau;
                                     }
                                 }
@@ -287,7 +287,7 @@ class ParcoursExportV2 {
                             }
                         } else {
                             $tUe['ects'] = $ue->heuresEctsUe->sommeUeEcts;
-                            $tUe['ec'] = $this->getEcFromUe($ue, $isVersioning);
+                            $tUe['ec'] = $this->getEcFromUe($ue, 0, $isVersioning);
                         }
                         $semestre['ues'][] = $tUe;
                     }
@@ -301,7 +301,7 @@ class ParcoursExportV2 {
         return $data;
     }
 
-    private function getEcFromUe(StructureUe $ue, int $parentDepth, bool $isVersioning = false): array
+    private function getEcFromUe(StructureUe $ue, int $parentDepth = 0, bool $isVersioning = false): array
     {
         $tEcs = [];
         $depth = $parentDepth + 1;
@@ -378,7 +378,7 @@ class ParcoursExportV2 {
             $libelle = $ec->elementConstitutif->getTexteEcLibre();
             $ecLibre = true;
         } else {
-            $libelle = $ficheMatiere?->getLibelle() ?? $ec->elementConstitutif->getLibelle() ?? $ec->elementConstitutif->display() ?? '-';
+            $libelle = $ficheMatiere?->getLibelle() ?? $ec->elementConstitutif->getLibelle() ?? $ec->elementConstitutif->display();
             $ecLibre = false;
         }
 

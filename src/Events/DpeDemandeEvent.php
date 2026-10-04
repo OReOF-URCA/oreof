@@ -20,11 +20,11 @@ class DpeDemandeEvent
     public const DPE_DEMANDE_UPDATED = 'demande_dpe.updated';
 
     protected DpeDemande $dpeDemande;
-    protected UserInterface $user;
+    protected ?User $user;
 
     public function __construct(
         DpeDemande $dpeDemande,
-        UserInterface|User $user
+        ?User $user = null
     ) {
         $this->dpeDemande = $dpeDemande;
         $this->user = $user;
@@ -35,7 +35,7 @@ class DpeDemandeEvent
         return $this->dpeDemande;
     }
 
-    public function getUser(): UserInterface
+    public function getUser(): ?User
     {
         return $this->user;
     }

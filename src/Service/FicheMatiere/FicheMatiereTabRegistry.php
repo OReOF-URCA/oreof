@@ -9,9 +9,11 @@
 
 namespace App\Service\FicheMatiere;
 
-use App\Form\FormationStep1Type;
-use App\Form\FormationStep2Type;
-use App\Form\FormationStep3Type;
+use App\Form\FicheMatiereStep1bType;
+use App\Form\FicheMatiereStep1Type;
+use App\Form\FicheMatiereStep2Type;
+use App\Form\FicheMatiereStep3Type;
+use App\Form\FicheMatiereStep4Type;
 
 final class FicheMatiereTabRegistry
 {
@@ -27,10 +29,12 @@ final class FicheMatiereTabRegistry
     public static function formTypeFor(string $tabKey): string
     {
         return match ($tabKey) {
-            'localisation' => FormationStep1Type::class,
-            'presentation' => FormationStep2Type::class,
-            'structure' => FormationStep3Type::class,
-
+            'identite' => FicheMatiereStep1Type::class,
+            'presentation' => FicheMatiereStep2Type::class,
+            'volumes_horaires' => FicheMatiereStep4Type::class,
+            'mccc' => FicheMatiereStep3Type::class,
+            'mutualisation' => FicheMatiereStep1bType::class,
+            default => throw new \InvalidArgumentException('Unknown tab: ' . $tabKey),
         };
     }
 

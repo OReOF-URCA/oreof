@@ -187,8 +187,7 @@ class ParcoursDupliquer
 
                     //le cas échéant dupliquer les compétences de la fiche
                     foreach ($ec->getFicheMatiere()->getCompetences() as $competence) {
-                        if (isset($tabCompetences[$competence->getCode()])
-                            && null !== $tabCompetences[$competence->getCode()]) {
+                        if (isset($tabCompetences[$competence->getCode()])) {
                             $newFiche->addCompetence($tabCompetences[$competence->getCode()]);
                         }
                     }
@@ -243,8 +242,7 @@ class ParcoursDupliquer
 
                         //le cas échéant dupliquer les compétences de la fiche
                         foreach ($ece->getFicheMatiere()->getCompetences() as $competence) {
-                            if (isset($tabCompetences[$competence->getCode()])
-                                && null !== $tabCompetences[$competence->getCode()]) {
+                            if (isset($tabCompetences[$competence->getCode()])) {
                                 $newFiche->addCompetence($tabCompetences[$competence->getCode()]);
                             }
                         }

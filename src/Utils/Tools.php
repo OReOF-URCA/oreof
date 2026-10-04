@@ -11,8 +11,7 @@ namespace App\Utils;
 
 use DateTime;
 use DateTimeInterface;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\ORM\PersistentCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use function Symfony\Component\String\u;
 use Transliterator;
@@ -118,33 +117,28 @@ abstract class Tools
     }
 
 
-    public static function removeAccent(string|null $inputString){
-        if($inputString !== null){
+    public static function removeAccent(?string $inputString): ?string
+    {
+        if ($inputString !== null) {
             $rules = "À > A; Ç > C; É > E; È > E; é > e; è > e; à > a; â > a; ô > o; ù > u; î > i; :: NFC;";
             $transliterator = Transliterator::createFromRules($rules);
 
-            return $transliterator->transliterate($inputString);
+            return $transliterator?->transliterate($inputString) ?? $inputString;
         }
+
+        return null;
     }
 
-    public static function isEmptyArrayOrCollection(array|ArrayCollection|null|PersistentCollection $array): bool
+    public static function isEmptyArrayOrCollection(array|Collection|null $array): bool
     {
         if ($array === null) {
             return true;
         }
 
         if (is_array($array)) {
-            return empty($array) || count($array) === 0;
+            return $array === [];
         }
 
-        if ($array instanceof ArrayCollection) {
-            return $array->count() === 0;
-        }
-
-        if ($array instanceof PersistentCollection) {
-            return $array->count() === 0;
-        }
-
-        return false;
+        return $array->count() === 0;
     }
 }

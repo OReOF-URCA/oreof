@@ -16,12 +16,10 @@ use App\Classes\verif\FormationState;
 use App\Classes\verif\ParcoursState;
 use App\DTO\StatsFichesMatieres;
 use App\Entity\Composante;
-use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\FormationVersioning;
-use App\Entity\HistoriqueParcours;
-use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
+use App\Entity\User;
 use App\Entity\UserProfil;
 use App\Entity\Constantes;
 use App\Enums\TypeModificationDpeEnum;
@@ -39,11 +37,8 @@ use App\TypeDiplome\TypeDiplomeResolver;
 use App\Repository\UserRepository;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
-use App\Service\SecureUploadService;
 use App\Utils\Access;
 use App\Utils\JsonRequest;
-use App\Utils\TurboStreamResponseFactory;
-use App\Exception\FileUploadException;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -57,7 +52,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Workflow\WorkflowInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 
@@ -66,7 +60,6 @@ class FormationController extends BaseController
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly SecureUploadService    $secureUploadService
     )
     {
     }
@@ -97,7 +90,7 @@ class FormationController extends BaseController
         return $this->render('validation/_liste.html.twig', [
             'nbFormations' => $nbFormations,
             'nbParcours' => $nbParcours,
-            'allparcours' => $allparcours ?? [],
+            'allparcours' => $allparcours,
             'etape' => 'cfvu',
             'isCfvu' => true,
         ]);
@@ -509,8 +502,8 @@ class FormationController extends BaseController
             'cssDiff' => $cssDiff,
             'stringDifferencesParcoursDefautCampagne' => $textDifferencesParcoursCampagne ?? [],
             'stringDifferencesParcoursDefaut' => $textDifferencesParcours ?? [],
-            'stringDifferencesFormation' => $formationStringDifferences ?? [],
-            'stringDifferencesFormationCampagne' => $formationCampagneStringDifferences ?? [],
+            'stringDifferencesFormation' => $formationStringDifferences,
+            'stringDifferencesFormationCampagne' => $formationCampagneStringDifferences,
             'versioningParcours' => $versioningParcours,
             'hasLastVersion' => $hasLastVersion,
             'displayComparaison' => $displayComparaison,
@@ -554,8 +547,8 @@ class FormationController extends BaseController
 
         $formationState->setFormation($formation);
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
-        if ($formation->getParcours()?->first() !== false) {
-            $parcoursState->setParcours($formation->getParcours()?->first());
+        if ($formation->getParcours()->first() !== false) {
+            $parcoursState->setParcours($formation->getParcours()->first());
         }
 
         if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1) {
@@ -628,12 +621,13 @@ class FormationController extends BaseController
     }
 
     #[Route('/{slug}/maquette_iframe', name: 'app_formation_maquette_iframe')]
-    public function getFormationMaquetteIframe(#[MapEntity(mapping: ['slug' => 'slug'])] Formation $formation, CalculStructureParcours $calcul): Response
+    public function getFormationMaquetteIframe(#[MapEntity(mapping: ['slug' => 'slug'])] Formation $formation, TypeDiplomeResolver $typeDiplomeResolver): Response
     {
         $listeParcours = [];
 
         foreach ($formation->getParcours() as $parcours) {
-            $listeParcours[] = $calcul->calcul($parcours);
+            $typeD = $typeDiplomeResolver->fromParcours($parcours);
+            $listeParcours[] = $typeD->calcul($parcours);
         }
 
         return $this->render('formation/maquette_iframe.html.twig', [
@@ -663,22 +657,23 @@ class FormationController extends BaseController
         Filesystem $filesystem
     ): \Symfony\Component\HttpFoundation\RedirectResponse
     {
+        $utilisateur = $this->getUser();
+        $now = new DateTimeImmutable();
+        $dateHeure = $now->format('d-m-Y_H-i-s');
         try {
-            /** @var User $utilisateur */
-            $utilisateur = $this->getUser();
-            $now = new DateTimeImmutable();
-            $dateHeure = $now->format('d-m-Y_H-i-s');
             $versioningFormationService->saveVersionOfFormation($formation, $now, true);
             // Log
+            $userDisplay = $utilisateur instanceof User ? "{$utilisateur->getPrenom()} {$utilisateur->getNom()} - ID : {$utilisateur->getUserIdentifier()}" : 'Anonyme';
             $successMessage = "[{$dateHeure}] La formation a bien été sauvegardée ({$formation->getSlug()})"
-            . "\nUtilisateur : {$utilisateur->getPrenom()} {$utilisateur->getNom()} - ID : {$utilisateur->getUsername()}\n";
+            . "\nUtilisateur : {$userDisplay}\n";
             $filesystem->appendToFile(__DIR__ . "/../../versioning_json/success_log/save_formation_success.log", $successMessage);
 
             $this->addFlashBag('success', 'La formation a bien été sauvegardée.');
             return $this->redirectToRoute('app_formation_show', ['slug' => $formation->getSlug()]);
         } catch (Exception $e) {
+            $userDisplay = $utilisateur instanceof User ? "{$utilisateur->getPrenom()} {$utilisateur->getNom()} - ID : {$utilisateur->getUserIdentifier()}" : 'Anonyme';
             $errorMessage = "[{$dateHeure}] Le versioning de la formation a rencontré une erreur."
-                . "\nUtilisateur : {$utilisateur->getPrenom()} {$utilisateur->getNom()} - ID : {$utilisateur->getUsername()}"
+                . "\nUtilisateur : {$userDisplay}"
                 ."\nMessage : {$e->getMessage()}\n";
             $filesystem->appendToFile(__DIR__ . "/../../versioning_json/error_log/save_formation_error.log", $errorMessage);
 

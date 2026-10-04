@@ -144,7 +144,7 @@ class ExportFiabilisation
             if ($typeEc !== '') {
                 $this->excelWriter->writeCellXY(16, $this->ligne, $typeEc);
             } else {
-                $this->excelWriter->writeCellXY(16, $this->ligne, $ec->elementConstitutif->getNatureUeEc()?->getLibelle() ?? 'erreur type');
+                $this->excelWriter->writeCellXY(16, $this->ligne, $ec->elementConstitutif->getNatureUeEc()->getLibelle() ?? 'erreur type');
             }
 
             $this->excelWriter->writeCellXY(17, $this->ligne, $ec->elementConstitutif->getFicheMatiere()?->getTypeApogee() ?? '-');

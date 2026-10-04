@@ -70,7 +70,7 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
         return 'NON_CLASSIQUE';
     }
 
-    public function getMcccs(ElementConstitutif|FicheMatiere $elementConstitutif): array|Collection
+    public function getMcccs(ElementConstitutif|FicheMatiere $elementConstitutif): array
     {
         return [];
     }
@@ -163,7 +163,8 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
         OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()
     ): StructureSemestre
     {
-        return new StructureSemestre();
+        $semestre = $semestreParcours->getSemestre() ?? new \App\Entity\Semestre();
+        return new StructureSemestre($semestre, $semestreParcours->getOrdre(), false, $semestreParcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
     }
 
     public function createFormMccc(ElementConstitutif|FicheMatiere $element): FormInterface
@@ -247,6 +248,8 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
             $formationCreee = $formation === null;
             $plusieursParcours = (bool)$form->get('plusieursParcours')->getData();
             $estMono = $formationCreee && !$plusieursParcours;
+            $responsableMention = $formation !== null ? $formation->getResponsableMention() : null;
+            $coResponsableMention = $formation !== null ? $formation->getCoResponsable() : null;
 
             if ($formation === null) {
                 $formation = new Formation($context['campagne']);
@@ -370,25 +373,25 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
             // Dispatch events
             $respParcoursProfil = $profilRepository->findOneBy(['code' => 'ROLE_RESP_PARCOURS']);
             if ($respParcoursProfil !== null) {
-                $event = new \App\Event\AddCentreParcoursEvent(
+                $event = new \App\Events\AddCentreParcoursEvent(
                     $parcours,
                     $context['user'],
                     $respParcoursProfil,
                     $context['campagne']
                 );
-                $eventDispatcher->dispatch($event, \App\Event\AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
+                $eventDispatcher->dispatch($event, \App\Events\AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
             }
 
             if ($coRespParcours !== null) {
                 $coRespParcoursProfil = $profilRepository->findOneBy(['code' => 'ROLE_CO_RESP_PARCOURS']);
                 if ($coRespParcoursProfil !== null) {
-                    $event = new \App\Event\AddCentreParcoursEvent(
+                    $event = new \App\Events\AddCentreParcoursEvent(
                         $parcours,
                         $coRespParcours,
                         $coRespParcoursProfil,
                         $context['campagne']
                     );
-                    $eventDispatcher->dispatch($event, \App\Event\AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
+                    $eventDispatcher->dispatch($event, \App\Events\AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
                 }
             }
 

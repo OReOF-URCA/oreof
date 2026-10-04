@@ -57,7 +57,7 @@ class ComposanteRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('c');
         $qb->innerJoin(UserProfil::class, 'cg', 'WITH', 'c.id = cg.composante');
         $qb->where('cg.user = :user');
-        $qb->setParameter('user', $user->getId());
+        $qb->setParameter('user', $user);
 
         return $qb->getQuery()->getResult();
     }
@@ -71,7 +71,7 @@ class ComposanteRepository extends ServiceEntityRepository
             ->getQuery()->getResult();
     }
 
-    public function findAllId()
+    public function findAllId(): array
     {
         $qb = $this->createQueryBuilder('c');
         $qb->select('c.id, c.libelle, c.sigle');

@@ -185,7 +185,7 @@ class HistoriqueSubscriber implements EventSubscriberInterface
         // Lier DpeFormation
         $campagne = $this->dataUserSession->getCampagneCollecte();
         $dpeFormation = null;
-        if ($campagne !== null && $formation !== null) {
+        if ($campagne !== null) {
             $dpeFormation = $this->entityManager->getRepository(DpeFormation::class)->findOneBy([
                 'formation' => $formation,
                 'campagneCollecte' => $campagne,

@@ -49,9 +49,10 @@ class ApiSiteWebController extends AbstractController
             foreach ($formation->getParcours() as $parcours) {
                 $isPubliable = false;
 
-                if($parcours->getDpeParcours()?->last() instanceof DpeParcours){
-                    $etatValidation = $parcours->getDpeParcours()?->last()->getEtatValidation();
-                    $campagneCollecte = $parcours->getDpeParcours()?->last()->getCampagneCollecte()?->getId();
+                $lastDpe = $parcours->getDpeParcours()->last();
+                if ($lastDpe instanceof DpeParcours) {
+                    $etatValidation = $lastDpe->getEtatValidation();
+                    $campagneCollecte = $lastDpe->getCampagneCollecte()?->getId();
                     if (($etatValidation === ['valide_a_publier' => 1] || $etatValidation === ['publie' => 1]) && $campagneCollecte === 2) {
                         $isPubliable = true;
                         ++$countParcours;
@@ -103,7 +104,8 @@ class ApiSiteWebController extends AbstractController
     }
 
     #[Route('/api/site/web/v2', name: 'api_site_web_v2_index', methods: ['GET'])]
-    public function indexApiJsonV2(Filesystem $fs) {
+    public function indexApiJsonV2(Filesystem $fs): Response 
+    {
         $filename = "api_json_urca_versioning_v2.json";
         $path = __DIR__ . "/../../public/api_json_v2/";
 

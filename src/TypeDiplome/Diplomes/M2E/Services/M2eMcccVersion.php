@@ -17,7 +17,6 @@ use App\DTO\StructureUe;
 use App\DTO\TotalVolumeHeure;
 use App\Entity\CampagneCollecte;
 use App\Entity\Formation;
-use App\Entity\Mccc;
 use App\Entity\Parcours;
 use App\Enums\RegimeInscriptionEnum;
 use App\Repository\TypeEpreuveRepository;
@@ -36,6 +35,8 @@ use Symfony\Component\Filesystem\Filesystem;
 use Sensiolabs\GotenbergBundle\GotenbergInterface;
 use Sensiolabs\GotenbergBundle\Processor\FileProcessor;
 
+use App\TypeDiplome\Diplomes\M2E\Dto\Mccc;
+
 class M2eMcccVersion extends AbstractM2eMccc implements TypeDiplomeExportInterface
 {
 
@@ -47,12 +48,13 @@ class M2eMcccVersion extends AbstractM2eMccc implements TypeDiplomeExportInterfa
         KernelInterface                      $kernel,
         protected GotenbergInterface         $gotenberg,
         protected CalculStructureParcoursM2e $calculStructureParcours,
+        protected VersioningStructure        $versioningStructure,
         protected VersioningParcours         $versioningParcours,
         protected ExcelWriter                $excelWriter,
         protected TypeEpreuveRepository      $typeEpreuveRepository
     )
     {
-        parent::__construct($excelWriter);
+        parent::__construct($excelWriter, $typeEpreuveRepository);
         $this->dir = $kernel->getProjectDir() . '/public';
     }
 
@@ -95,7 +97,7 @@ class M2eMcccVersion extends AbstractM2eMccc implements TypeDiplomeExportInterfa
 
         $structureDifferencesParcours = $this->versioningParcours->getStructureDifferencesBetweenParcoursAndLastCfvu($parcours);
         if ($structureDifferencesParcours !== null) {
-            $diffStructure = (new VersioningStructure($structureDifferencesParcours, $dto))->calculDiff();
+            $diffStructure = $this->versioningStructure->setDto($structureDifferencesParcours, $dto)->calculDiff();
         } else {
             return false;
         }
@@ -104,9 +106,6 @@ class M2eMcccVersion extends AbstractM2eMccc implements TypeDiplomeExportInterfa
 
         // Prépare le modèle avant de dupliquer
         $modele = $this->excelWriter->getSheetByName(self::PAGE_MODELE);
-        if ($modele === null) {
-            throw new \Exception('Le modèle n\'existe pas');
-        }
 
         //récupération des données
         // récupération des semestres du parcours puis classement par année et par ordre
@@ -526,9 +525,9 @@ class M2eMcccVersion extends AbstractM2eMccc implements TypeDiplomeExportInterfa
                 $mcccsNew = $this->getMcccs($diffEc['mcccs']['new'], $diffEc['typeMccc']->new);
 
                 //cas Original sans écrire dans les cellules
-                $displayMcccOriginal = new \App\TypeDiplome\M2E\Dto\Mccc($mcccsOriginal, $diffEc['typeMccc']->original ?? '', $this->typeEpreuves, $diffEc['quitus']->original ?? false);
+                $displayMcccOriginal = new Mccc($mcccsOriginal, $diffEc['typeMccc']->original ?? '', $this->typeEpreuves, $diffEc['quitus']->original ?? false);
                 $displayMcccOriginal->calculDisplayMccc();
-                $displayMcccNew = new \App\TypeDiplome\M2E\Dto\Mccc($mcccsNew, $diffEc['typeMccc']->new, $this->typeEpreuves, $diffEc['quitus']->new ?? false);
+                $displayMcccNew = new Mccc($mcccsNew, $diffEc['typeMccc']->new, $this->typeEpreuves, $diffEc['quitus']->new ?? false);
                 $displayMcccNew->calculDisplayMccc();
 
                 // utiliser le nouveau DTO via toArray()
@@ -550,9 +549,10 @@ class M2eMcccVersion extends AbstractM2eMccc implements TypeDiplomeExportInterfa
                 $mcccsNew = $this->getMcccs($diffEc['mcccs']['new'], $diffEc['typeMccc']->new);
 
                 //$displayMcccNew = $this->calculDisplayMccc($mcccsNew, $diffEc['typeMccc']->new, $diffEc['quitus']->new ?? false);
-                $displayMcccNew = new \App\TypeDiplome\M2E\Dto\Mccc($mcccsNew, $diffEc['typeMccc']->new, $this->typeEpreuves, $diffEc['quitus']->new ?? false);
+                $displayMcccNew = new Mccc($mcccsNew, $diffEc['typeMccc']->new, $this->typeEpreuves, $diffEc['quitus']->new ?? false);
                 $displayMcccNew->calculDisplayMccc();
 
+                $diffMccc = [];
                 foreach ($displayMcccNew->toArray() as $key => $value) {
                     $diffMccc[$key] = new DiffObject('', $value);
                 }
@@ -613,9 +613,6 @@ class M2eMcccVersion extends AbstractM2eMccc implements TypeDiplomeExportInterfa
     private function genereReferentielCompetences(Parcours $parcours, Formation $formation): void
     {
         $modele = $this->excelWriter->getSheetByName(self::PAGE_REF_COMPETENCES);
-        if ($modele === null) {
-            throw new \Exception('Le modèle n\'existe pas');
-        }
 
         //en-tête du fichier
         $modele->setCellValue(self::CEL_ANNEE_UNIVERSITAIRE, 'Année Universitaire ' . $formation->getDpe()?->getLibelle());
@@ -670,7 +667,7 @@ class M2eMcccVersion extends AbstractM2eMccc implements TypeDiplomeExportInterfa
             ->office()
             ->files(new \SplFileInfo($fichier))
             ->generate()
-            ->stream($this->fileName . '.pdf');
+            ->stream();
 
         unlink($fichier);
 

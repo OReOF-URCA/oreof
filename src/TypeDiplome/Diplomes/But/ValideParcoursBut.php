@@ -21,16 +21,16 @@ class ValideParcoursBut implements ValideParcoursInterface
 
     public function valideSemestre(StructureSemestre $structureSemestre): ValidationResult
     {
-        // TODO: Implement valideSemestre() method.
+        return new ValidationResult();
     }
 
     public function valideUe(Ue $ue): ValidationResult
     {
-        // TODO: Implement valideUe() method.
+        return new ValidationResult();
     }
 
     public function valideParcours(StructureParcours $structureParcours): ValidationResult
     {
-        // TODO: Implement valideParcours() method.
+        return new ValidationResult();
     }
 }

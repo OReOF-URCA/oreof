@@ -17,161 +17,37 @@ class NotificationListeFixtures extends Fixture
 {
     public function load(ObjectManager $manager): void
     {
-        $n = new NotificationListe();
-        $n->setLibelle('Ouverture d\'une campagne annuelle de collecte');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
+        $steps = [
+            ['workflow' => 'dpe_parcours', 'step' => 'ouverture_campagne'],
+            ['workflow' => 'dpe_parcours', 'step' => 'responsables_composantes'],
+            ['workflow' => 'dpe_parcours', 'step' => 'responsables_mentions'],
+            ['workflow' => 'dpe_parcours', 'step' => 'associer_redacteurs'],
+            ['workflow' => 'dpe_parcours', 'step' => 'soumission_fiche_ec'],
+            ['workflow' => 'dpe_parcours', 'step' => 'validation_fiche_ec'],
+            ['workflow' => 'dpe_parcours', 'step' => 'reserve_fiche_ec'],
+            ['workflow' => 'dpe_parcours', 'step' => 'soumission_dpe'],
+            ['workflow' => 'dpe_parcours', 'step' => 'reception_reserves_dpe'],
+            ['workflow' => 'dpe_parcours', 'step' => 'visa_projet_dpe'],
+            ['workflow' => 'dpe_parcours', 'step' => 'soumission_conseil'],
+            ['workflow' => 'dpe_parcours', 'step' => 'avis_conseil'],
+            ['workflow' => 'dpe_parcours', 'step' => 'validation_dpe'],
+            ['workflow' => 'dpe_parcours', 'step' => 'soumission_central'],
+            ['workflow' => 'dpe_parcours', 'step' => 'reserves_central'],
+            ['workflow' => 'dpe_parcours', 'step' => 'visa_direct_dpe'],
+            ['workflow' => 'dpe_parcours', 'step' => 'transmission_vp'],
+            ['workflow' => 'dpe_parcours', 'step' => 'avis_central'],
+            ['workflow' => 'dpe_parcours', 'step' => 'visa_central'],
+            ['workflow' => 'dpe_parcours', 'step' => 'soumission_cfvu'],
+            ['workflow' => 'dpe_parcours', 'step' => 'avis_cfvu'],
+            ['workflow' => 'dpe_parcours', 'step' => 'visa_publication'],
+        ];
 
-        $n = new NotificationListe();
-        $n->setLibelle('Renseigner/associer les responsables DPE composantes');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Renseigner/associer les responsables de mentions (après validation en CFVU)');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Associer les rédacteurs');
-        $n->setCodeNotification('');
-        $n->setIsCentral(false);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Soumission une fiche EC/saisie d\'un argumentaire sur EC');
-        $n->setCodeNotification('');
-        $n->setIsCentral(false);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Validation une fiche EC soumise par rédacteur');
-        $n->setCodeNotification('');
-        $n->setIsCentral(false);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Saisie d\'une réserve sur fiche EC/resp de formation');
-        $n->setCodeNotification('');
-        $n->setIsCentral(false);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Soumission d\'un projet de DPE/saisie d\'un argumentaire');
-        $n->setCodeNotification('');
-        $n->setIsCentral(false);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Réception réserves resp DPE');
-        $n->setCodeNotification('');
-        $n->setIsCentral(false);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Visa projet DPE');
-        $n->setCodeNotification('');
-        $n->setIsCentral(false);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Soumission projet DPE au conseil');
-        $n->setCodeNotification('');
-        $n->setIsCentral(false);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Saisie avis/réserves conseil');
-        $n->setCodeNotification('');
-        $n->setIsCentral(false);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Validation projet DPE');
-        $n->setCodeNotification('');
-        $n->setIsCentral(false);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Soumission projet DPE au Central');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Saisie réserves central (modifications mineures ou suites CFVU)');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Visa direct projet DPE (modifications mineures ou suites CFVU)');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Transmission VP (modifications réglementées) avec commentaire facultatif');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(false);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Saisie avis/réserves central');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Visa central projet DPE');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Soumission projet DPE à la CFVU / date de CFVU');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Saisie avis/réserves CFVU');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-        $n = new NotificationListe();
-        $n->setLibelle('Visa publication DPE / date de publication');
-        $n->setCodeNotification('');
-        $n->setIsCentral(true);
-        $n->setIsComposante(true);
-        $manager->persist($n);
-
-
+        foreach ($steps as $stepData) {
+            $n = new NotificationListe();
+            $n->setWorkflow($stepData['workflow']);
+            $n->setStep($stepData['step']);
+            $manager->persist($n);
+        }
 
         $manager->flush();
     }

@@ -156,7 +156,6 @@ final class UserProfilsController extends BaseController
             CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT => $nCentre->setEtablissement($centre),
             CentreGestionEnum::CENTRE_GESTION_FORMATION => $nCentre->setFormation($centre),
             CentreGestionEnum::CENTRE_GESTION_PARCOURS => $nCentre->setParcours($centre),
-            default => throw new Exception('To be implemented'),
         };
 
         $event = match ($centreType) {
@@ -164,12 +163,9 @@ final class UserProfilsController extends BaseController
             CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT => new NotifCentreEtablissementEvent($centre, $user, $profil),
             CentreGestionEnum::CENTRE_GESTION_FORMATION => new NotifCentreFormationEvent($centre, $user, $profil),
             CentreGestionEnum::CENTRE_GESTION_PARCOURS => new NotifCentreParcoursEvent($centre, $user, $profil),
-            default => null,
         };
 
-        if ($event) {
-            $eventDispatcher->dispatch($event, $event::NOTIF_ADD_CENTRE);
-        }
+        $eventDispatcher->dispatch($event, $event::NOTIF_ADD_CENTRE);
 
         if ($centreType === CentreGestionEnum::CENTRE_GESTION_COMPOSANTE) {
             if ($profil->getCode() === 'ROLE_DPE') {

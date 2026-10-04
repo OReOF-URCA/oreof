@@ -58,14 +58,11 @@ class ElementConstitutifRepository extends ServiceEntityRepository
     public function findByComposanteDpe(UserInterface $user, CampagneCollecte $campagneCollecte): array
     {
         return $this->createQueryBuilder('ec')
-            ->join('ec.ecUes', 'ecue')
-            ->join('ecue.ue', 'ue')
-            ->innerJoin(Semestre::class, 's', 'WITH', 's.id = ue.semestre')
-            ->join('s.semestreParcours', 'sp')
-            ->innerJoin(Parcours::class, 'p', 'WITH', 'p.id = sp.parcours')
-            ->innerJoin(Formation::class, 'f', 'WITH', 'f.id = p.formation')
-            ->join('f.dpeParcours', 'dp')
-            ->innerJoin(Composante::class, 'c', 'WITH', 'f.composantePorteuse = c.id')
+            ->join('ec.ue', 'ue')
+            ->join('ec.parcours', 'p')
+            ->join('p.dpeParcours', 'dp')
+            ->innerJoin('p.formation', 'f')
+            ->innerJoin('f.composantePorteuse', 'c')
             ->where('c.responsableDpe = :user')
             ->andWhere('dp.campagneCollecte = :campagneCollecte')
             ->setParameter('user', $user)
@@ -77,13 +74,10 @@ class ElementConstitutifRepository extends ServiceEntityRepository
     public function findByResponsableFormation(UserInterface $user, CampagneCollecte $campagneCollecte): array
     {
         return $this->createQueryBuilder('ec')
-            ->join('ec.ecUes', 'ecue')
-            ->join('ecue.ue', 'ue')
-            ->innerJoin(Semestre::class, 's', 'WITH', 's.id = ue.semestre')
-            ->join('s.semestreParcours', 'sp')
-            ->innerJoin(Parcours::class, 'p', 'WITH', 'p.id = sp.parcours')
-            ->join('p.dpeParcourss', 'dp')
-            ->innerJoin(Formation::class, 'f', 'WITH', 'f.id = p.formation')
+            ->join('ec.ue', 'ue')
+            ->join('ec.parcours', 'p')
+            ->join('p.dpeParcours', 'dp')
+            ->innerJoin('p.formation', 'f')
             ->where('f.responsableMention = :user')
             ->andWhere('dp.campagneCollecte = :campagneCollecte')
             ->setParameter('user', $user)
@@ -95,14 +89,11 @@ class ElementConstitutifRepository extends ServiceEntityRepository
     public function findByResponsableEc(UserInterface $user, CampagneCollecte $campagneCollecte): array
     {
         return $this->createQueryBuilder('ec')
-            ->join('ec.ecUes', 'ecue')
-            ->join('ecue.ue', 'ue')
-            ->innerJoin(Semestre::class, 's', 'WITH', 's.id = ue.semestre')
-            ->join('s.semestreParcours', 'sp')
-            ->innerJoin(Parcours::class, 'p', 'WITH', 'p.id = sp.parcours')
-            ->join('p.dpeParcourss', 'dp')
-            ->innerJoin(Formation::class, 'f', 'WITH', 'f.id = p.formation')
-            ->where('ec.responsableEc = :user')
+            ->join('ec.ficheMatiere', 'fm')
+            ->join('ec.ue', 'ue')
+            ->join('ec.parcours', 'p')
+            ->join('p.dpeParcours', 'dp')
+            ->where('fm.responsableFicheMatiere = :user')
             ->andWhere('dp.campagneCollecte = :campagneCollecte')
             ->setParameter('user', $user)
             ->setParameter('campagneCollecte', $campagneCollecte)
@@ -113,14 +104,10 @@ class ElementConstitutifRepository extends ServiceEntityRepository
     public function findByAllDpe(CampagneCollecte $campagneCollecte): array
     {
         return $this->createQueryBuilder('ec')
-            ->join('ec.ecUes', 'ecue')
-            ->join('ecue.ue', 'ue')
-            ->innerJoin(Semestre::class, 's', 'WITH', 's.id = ue.semestre')
-            ->join('s.semestreParcours', 'sp')
-            ->innerJoin(Parcours::class, 'p', 'WITH', 'p.id = sp.parcours')
-            ->join('p.dpeParcourss', 'dp')
-            ->innerJoin(Formation::class, 'f', 'WITH', 'f.id = p.formation')
-            ->andWhere('f.campagneCollecte = :campagneCollecte')
+            ->join('ec.ue', 'ue')
+            ->join('ec.parcours', 'p')
+            ->join('p.dpeParcours', 'dp')
+            ->andWhere('dp.campagneCollecte = :campagneCollecte')
             ->setParameter('campagneCollecte', $campagneCollecte)
             ->distinct()
             ->getQuery()
@@ -185,7 +172,7 @@ class ElementConstitutifRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByFormation(Formation $formation)
+    public function findByFormation(Formation $formation): array
     {
         return $this->createQueryBuilder('ec')
             ->join('ec.parcours', 'p')
@@ -195,10 +182,11 @@ class ElementConstitutifRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findWithAc()
+    public function findWithAc(): array
     {
         return $this->createQueryBuilder('ec')
-            ->join('ec.apprentissagesCritiques', 'ac')
+            ->join('ec.ficheMatiere', 'fm')
+            ->join('fm.apprentissagesCritiques', 'ac')
             ->getQuery()
             ->getResult();
     }

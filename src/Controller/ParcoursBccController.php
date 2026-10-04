@@ -39,8 +39,8 @@ class ParcoursBccController extends BaseController
         );
         $breadcrumb->add('BCC');
 
-        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getFormation()?->getTypeDiplome());
-        $dto = $typeD->calculStructureParcours($parcours, new OptionsCalculStructure(false, true, false));
+        $typeD = $this->typeDiplomeResolver->fromParcours($parcours);
+        $dto = $typeD->calcul($parcours, new OptionsCalculStructure(false, true, false));
         return $this->render('parcours_bcc/index.html.twig', [
             'parcours' => $parcours,
             'dto' => $dto,

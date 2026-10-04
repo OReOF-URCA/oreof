@@ -51,7 +51,7 @@ class AddCentreFormationSubscriber implements EventSubscriberInterface
 
         if ($existe !== null) {
             //S'il existe on met à jour les droits
-            if (!$event->droits === $existe->getProfil()?->getCode()) {
+            if ($event->droits !== $existe->getProfil()?->getCode()) {
                 // on récupère le profil correspondant
                 $existe->setProfil($profil);
                 $this->entityManager->flush();

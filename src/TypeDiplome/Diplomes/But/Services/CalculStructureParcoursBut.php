@@ -27,11 +27,13 @@ class CalculStructureParcoursBut
         //$dtoStructure->setParcours($parcours);
 
         foreach ($parcours->getSemestreParcours() as $semestreParcours) {
-            if ($semestreParcours->getSemestre()?->getSemestreRaccroche() !== null) {
-                $semestre = $semestreParcours->getSemestre()?->getSemestreRaccroche()?->getSemestre();
+            $sem = $semestreParcours->getSemestre();
+            $semRaccroche = $sem?->getSemestreRaccroche();
+            if ($semRaccroche !== null) {
+                $semestre = $semRaccroche->getSemestre();
                 $raccrocheSemestre = true;
             } else {
-                $semestre = $semestreParcours->getSemestre();
+                $semestre = $sem;
                 $raccrocheSemestre = false;
             }
 
@@ -43,15 +45,15 @@ class CalculStructureParcoursBut
                 foreach ($semestre->getUes() as $ue) {
                     if ($ue !== null && $ue->getUeParent() === null) {
                         $display = $ue->display($parcours);
+                        $ueOrigine = $ue;
                         if ($ue->getUeRaccrochee() !== null) {
-                            $ueOrigine = $ue;
                             $ue = $ue->getUeRaccrochee()->getUe();
                             $raccrocheUe = true;
                         } else {
                             $raccrocheUe = $raccrocheSemestre;
                         }
 
-                        $dtoUe = new StructureUe($ue, $raccrocheUe, $display, $ueOrigine ?? null);
+                        $dtoUe = new StructureUe($ue, $raccrocheUe, $display, $ueOrigine);
                         foreach ($ue->getElementConstitutifs() as $elementConstitutif) {
                             if ($elementConstitutif !== null && $elementConstitutif->getEcParent() === null) {
                                 //récupérer le bon EC selon tous les liens

@@ -61,7 +61,7 @@ class WorkflowRoleNotificationConfig
 
     public function getDestinataires(): array
     {
-        return $this->destinataires ?? [];
+        return $this->destinataires;
     }
 
     public function setDestinataires(array $destinataires): static
@@ -73,7 +73,7 @@ class WorkflowRoleNotificationConfig
 
     public function getCopies(): array
     {
-        return $this->copies ?? [];
+        return $this->copies;
     }
 
     public function setCopies(array $copies): static

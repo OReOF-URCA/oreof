@@ -265,14 +265,4 @@ class VersioningFicheMatiere {
 
         return $textDifferences;
     }
-
-    private function getArrayDisplayAsList(array|Collection $array, string $keyIndex): string
-    {
-        $list = "<ul>";
-        foreach($array as $value){
-            $list .= "<li>" . $array[$keyIndex] . "</li>";
-        }
-        $list .= "</ul>";
-        return $list;
-    }
 }

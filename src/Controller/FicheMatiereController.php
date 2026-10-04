@@ -123,10 +123,9 @@ class FicheMatiereController extends BaseController
             $bccs[$competence->getBlocCompetence()?->getId()]['competences'][] = $competence;
         }
 
-        if ($ficheMatiere->getParcours() !== null) {
-            $formation = $ficheMatiere->getParcours()?->getFormation();
+        $formation = $ficheMatiere->getParcours()?->getFormation();
+        if ($formation !== null) {
             $typeDiplome = $formation->getTypeDiplome();
-            $typeD = $this->typeDiplomeResolver->get($typeDiplome);
         } else {
             $typeDiplome = $typeDiplomeRepository->findOneBy(['libelle_court' => 'L']);
         }
@@ -145,7 +144,7 @@ class FicheMatiereController extends BaseController
         $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiere);
 
         if (!$typeD instanceof McccDisplayInterface) {
-            throw new RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
+            throw new \RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
         }
 
         return $this->render('fiche_matiere/show.html.twig', [
@@ -348,7 +347,7 @@ class FicheMatiereController extends BaseController
             'fiche_matiere' => $ficheMatiere,
             'typeDiplome' => $ficheMatiere->getParcours()?->getFormation()?->getTypeDiplome(),
             'formation' => $ficheMatiere->getParcours()?->getFormation(),
-            'maquetteOrigineURL' => $parcours ? $this->generateUrl('app_parcours_maquette_iframe', ['parcours' => $parcours->getId()]) : "#",
+            'maquetteOrigineURL' => $this->generateUrl('app_parcours_maquette_iframe', ['parcours' => $parcours->getId()]),
             'heuresEctsEc' => $structureEC->heuresEctsEc,
             'ects' => $ects,
             'isBUT' => $isBUT
@@ -375,7 +374,7 @@ class FicheMatiereController extends BaseController
             'fiche_matiere' => $ficheMatiere,
             'typeDiplome' => $ficheMatiere->getParcours()?->getFormation()?->getTypeDiplome(),
             'formation' => $ficheMatiere->getParcours()?->getFormation(),
-            'maquetteOrigineURL' => $parcours ? $this->generateUrl('app_parcours_maquette_iframe', ['parcours' => $parcours->getId()]) : "#",
+            'maquetteOrigineURL' => $this->generateUrl('app_parcours_maquette_iframe', ['parcours' => $parcours->getId()]),
             // $parcours ? $this->generateUrl('app_versioning_parcours_maquette_iframe', ['parcours' => $parcours->getId()]) : "#",
             'ects' => $ects,
             'heuresEctsEc' => [

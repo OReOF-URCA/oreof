@@ -26,7 +26,7 @@ abstract class AbstractNotifCentreSubscriber implements EventSubscriberInterface
     }
 
     protected function sendNotification(
-        User|UserInterface                          $user,
+        User                                        $user,
         Etablissement|Composante|Formation|Parcours $entity,
         Profil                                      $profil,
         string                                      $template,

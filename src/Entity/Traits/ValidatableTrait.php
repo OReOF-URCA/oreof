@@ -20,7 +20,7 @@ trait ValidatableTrait
         nullable: true,
         enumType: ValidationStatusEnum::class
     )]
-    private ValidationStatusEnum $validationStatus = ValidationStatusEnum::INCOMPLETE;
+    private ?ValidationStatusEnum $validationStatus = ValidationStatusEnum::INCOMPLETE;
 
     #[ORM\Column(type: 'boolean')]
     private bool $validationDirty = true;

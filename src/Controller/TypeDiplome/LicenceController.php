@@ -39,10 +39,11 @@ class LicenceController extends BaseController
         TypeDiplomeResolver   $typeDiplomeResolver,
         TypeDiplomeRepository $typeDiplomeRepository)
     {
-        $this->typeDiplome = $typeDiplomeRepository->findOneBy(['libelle_court' => 'L']);
-        if ($this->typeDiplome === null) {
+        $typeDiplome = $typeDiplomeRepository->findOneBy(['libelle_court' => 'L']);
+        if ($typeDiplome === null) {
             throw new Exception('Type de diplome Licence non trouvé');
         }
+        $this->typeDiplome = $typeDiplome;
 
         $this->typeDiplomeHandler = $typeDiplomeResolver->fromTypeDiplome($this->typeDiplome);
     }

@@ -187,7 +187,7 @@ class LheoXML
             if ($adresse = $composante->getAdresse()) {
                 $coordonneesComposante['adresse'] = [
                     'denomination' => $composante->getLibelle(),
-                    'ligne' => $adresse->getAdresse1() . " " . $adresse->getAdresse2() ?? '',
+                    'ligne' => trim(($adresse->getAdresse1() ?? '') . " " . ($adresse->getAdresse2() ?? '')),
                     'codepostal' => $adresse->getCodePostal(),
                     'ville' => $adresse->getVille(),
                 ];
@@ -211,7 +211,8 @@ class LheoXML
 
         // Si Parcours NON BUT
         if ($parcours->getTypeDiplome()?->getLibelleCourt() !== "BUT") {
-            if ($blocCompetences = $parcours->getBlocCompetences()) {
+            if ($parcours->getBlocCompetences()->count() > 0) {
+                $blocCompetences = $parcours->getBlocCompetences();
                 $competencesAcquisesExtra = $competencesAcquisesExtraTitre . "<ul>";
                 foreach ($blocCompetences as $bloc) {
                     $competencesHTML = "";
@@ -322,10 +323,10 @@ HTML;
 
         $dpeParcours = GetDpeParcours::getFromParcours($parcours);
         if ($dpeParcours !== null 
-            && ( $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE 
-                && $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE_SES 
-                && $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE_CFVU
-                && $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::FERMETURE_DEFINITIVE
+            && ( $dpeParcours->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE 
+                && $dpeParcours->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE_SES 
+                && $dpeParcours->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE_CFVU
+                && $dpeParcours->getEtatReconduction() !== TypeModificationDpeEnum::FERMETURE_DEFINITIVE
                 )
             // N'afficher le lien que sur l'année valide en cours (N)
             && $dpeParcours->getCampagneCollecte()?->getPublicationTag() === CampagnePublicationTagEnum::ANNEE_COURANTE->value
@@ -337,9 +338,9 @@ HTML;
 
         // Informations pratiques
         $informationsPratiques = "";
-        if ($parcours->getFormation()?->getTypeDiplome()?->getPresentationFormation()) {
+        if ($parcours->getFormation()->getTypeDiplome()->getPresentationFormation()) {
             $informationsPratiques .= "<h3>Pour en savoir plus sur ce type de formation :</h3>";
-            $informationsPratiques .= $parcours->getFormation()?->getTypeDiplome()?->getPresentationFormation();
+            $informationsPratiques .= $parcours->getFormation()->getTypeDiplome()->getPresentationFormation();
         }
         if ($etablissementInformation->getInformationsPratiques()) {
             $informationsPratiques .= "<br>" . $etablissementInformation->getInformationsPratiques();
@@ -366,7 +367,7 @@ HTML;
         $poursuiteEtudes .= "<br><p>Le ROME est le répertoire des métiers et d'emplois de Pôle Emploi.</p>";
         if ($parcours->getTypeDiplome()?->getInsertionProfessionnelle()) {
             $poursuiteEtudes .= "<br><h2>Devenir des étudiants</h2>";
-            $poursuiteEtudes .= $parcours->getTypeDiplome()->getInsertionProfessionnelle() ?? '-';
+            $poursuiteEtudes .= $parcours->getTypeDiplome()->getInsertionProfessionnelle();
         }
         // Poursuite d'études L.As (Licence Accès Santé)
         // Si LAS 1
@@ -399,7 +400,7 @@ HTML;
         $prerequis = "";
         if ($parcours->getTypeDiplome()?->getPrerequisObligatoires()) {
             $prerequis .= '<strong>Prérequis obligatoires :</strong><br>';
-            $prerequis .= $this->cleanString($parcours->getTypeDiplome()?->getPrerequisObligatoires());
+            $prerequis .= $this->cleanString($parcours->getTypeDiplome()->getPrerequisObligatoires());
         }
         $prerequis .= '<br><strong>Niveau de français requis :</strong><br>';
         $prerequis .= $parcours->getNiveauFrancais()?->libelle() ?? 'Aucune condition spécifique.';
@@ -417,99 +418,70 @@ HTML;
         $referentsPedagogiques = [];
         if ($parcours->isParcoursDefaut()) { // si par défaut ou parcours uniquement alors RF et CO-RF
             // Contact de la formation
-            if ($parcours->getFormation()?->getResponsableMention()) {
-                $resp = $parcours->getFormation()?->getResponsableMention();
+            if ($parcours->getFormation()->getResponsableMention()) {
+                $resp = $parcours->getFormation()->getResponsableMention();
                 $referentPedagogique = [
                     // Référent pédagogique
                     'type-contact' => 3,
                     'coordonnees' => [
-                        'nom' => $resp ? $resp->getNom() : 'Non renseigné.',
-                        'prenom' => $resp ? $resp->getPrenom() : 'Non renseigné.',
-                        'courriel' => $resp ? $resp->getEmail() : 'Non renseigné.',
+                        'nom' => $resp->getNom() ?? 'Non renseigné.',
+                        'prenom' => $resp->getPrenom() ?? 'Non renseigné.',
+                        'courriel' => $resp->getEmail() ?? 'Non renseigné.',
                     ]
                 ];
                 $referentsPedagogiques[] = $referentPedagogique;
             }
-            if ($parcours->getFormation()?->getCoResponsable()) {
-                $coResp = $parcours->getFormation()?->getCoResponsable();
+            if ($parcours->getFormation()->getCoResponsable()) {
+                $coResp = $parcours->getFormation()->getCoResponsable();
                 $coReferentPedagogique = [
                     // Référent pédagogique
                     'type-contact' => 3,
                     'coordonnees' => [
-                        'nom' => $coResp ? $coResp->getNom() : 'Non renseigné.',
-                        'prenom' => $coResp ? $coResp->getPrenom() : 'Non renseigné.',
-                        'courriel' => $coResp ? $coResp->getEmail() : 'Non renseigné.',
+                        'nom' => $coResp->getNom() ?? 'Non renseigné.',
+                        'prenom' => $coResp->getPrenom() ?? 'Non renseigné.',
+                        'courriel' => $coResp->getEmail() ?? 'Non renseigné.',
                     ]
                 ];
                 $referentsPedagogiques[] = $coReferentPedagogique;
             }
             //gestion du parcours par défaut, il faut reprendre les infs de la formation dans ce cas
-            $resultatsAttendus = $this->cleanString($parcours->getFormation()?->getResultatsAttendus()) ?? 'Non renseigné.';
-            $contenuFormation = $this->cleanString($parcours->getFormation()?->getContenuFormation()) ?? 'Non renseigné.';
-            $objectifFormation = $this->cleanString($parcours->getFormation()?->getObjectifsFormation()) ?? 'Non renseigné.';
-            if ($parcours->getFormation()?->getRythmeFormation() !== null && $parcours->getFormation()?->getRythmeFormation()->getLibelle() !== null) {
-                $rythmeFormation = $parcours->getFormation()?->getRythmeFormation()->getLibelle();
+            $resultatsAttendus = $this->cleanString($parcours->getFormation()->getResultatsAttendus()) ?? 'Non renseigné.';
+            $contenuFormation = $this->cleanString($parcours->getFormation()->getContenuFormation()) ?? 'Non renseigné.';
+            $objectifFormation = $this->cleanString($parcours->getFormation()->getObjectifsFormation()) ?? 'Non renseigné.';
+            if ($parcours->getFormation()->getRythmeFormation() !== null && $parcours->getFormation()->getRythmeFormation()->getLibelle() !== null) {
+                $rythmeFormation = $parcours->getFormation()->getRythmeFormation()->getLibelle();
             }
-            $localisation = $parcours->getFormation()?->getLocalisationMention()->first();
-            if (!empty($parcours->getFormation()?->getModalitesAlternance())) {
-                $modalitesAlternance = $this->cleanString($parcours->getFormation()?->getModalitesAlternance());
+            $localisation = $parcours->getFormation()->getLocalisationMention()->first();
+            if (!empty($parcours->getFormation()->getModalitesAlternance())) {
+                $modalitesAlternance = $this->cleanString($parcours->getFormation()->getModalitesAlternance());
             }
         } else {
             // Contact de la formation
-            //            if ($parcours->getFormation()?->getParcours()->count() === 1) {
-            //                // Un seul parcours, on reprend les infos de la formation
-            //                if ($parcours->getFormation()?->getResponsableMention()) {
-            //                    $resp = $parcours->getFormation()?->getResponsableMention();
-            //                    $referentPedagogique = [
-            //                        // Référent pédagogique
-            //                        'type-contact' => 3,
-            //                        'coordonnees' => [
-            //                            'nom' => $resp ? $resp->getNom() : 'Non renseigné.',
-            //                            'prenom' => $resp ? $resp->getPrenom() : 'Non renseigné.',
-            //                            'courriel' => $resp ? $resp->getEmail() : 'Non renseigné.',
-            //                        ]
-            //                    ];
-            //                    $referentsPedagogiques[] = $referentPedagogique;
-            //                }
-            //                if ($parcours->getFormation()?->getCoResponsable()) {
-            //                    $coResp = $parcours->getFormation()?->getCoResponsable();
-            //                    $coReferentPedagogique = [
-            //                        // Référent pédagogique
-            //                        'type-contact' => 3,
-            //                        'coordonnees' => [
-            //                            'nom' => $coResp ? $coResp->getNom() : 'Non renseigné.',
-            //                            'prenom' => $coResp ? $coResp->getPrenom() : 'Non renseigné.',
-            //                            'courriel' => $coResp ? $coResp->getEmail() : 'Non renseigné.',
-            //                        ]
-            //                    ];
-            //                    $referentsPedagogiques[] = $coReferentPedagogique;
-            //                }
-            //            } else {
-            if ($parcours->getFormation()?->getResponsableMention()) {
-                $resp = $parcours->getFormation()?->getResponsableMention();
+            if ($parcours->getFormation()->getResponsableMention()) {
+                $resp = $parcours->getFormation()->getResponsableMention();
                 $referentPedagogique = [
                     // Référent pédagogique
                     'type-contact' => 3,
                     'coordonnees' => [
-                        'nom' => $resp ? $resp->getNom() : 'Non renseigné.',
-                        'prenom' => $resp ? $resp->getPrenom() : 'Non renseigné.',
-                        'courriel' => $resp ? $resp->getEmail() : 'Non renseigné.',
+                        'nom' => $resp->getNom() ?? 'Non renseigné.',
+                        'prenom' => $resp->getPrenom() ?? 'Non renseigné.',
+                        'courriel' => $resp->getEmail() ?? 'Non renseigné.',
                     ]
                 ];
-                $referentsPedagogiques[$resp?->getId()] = $referentPedagogique;
+                $referentsPedagogiques[$resp->getId()] = $referentPedagogique;
             }
-            if ($parcours->getFormation()?->getCoResponsable()) {
-                $coResp = $parcours->getFormation()?->getCoResponsable();
+            if ($parcours->getFormation()->getCoResponsable()) {
+                $coResp = $parcours->getFormation()->getCoResponsable();
                 $coReferentPedagogique = [
                     // Référent pédagogique
                     'type-contact' => 3,
                     'coordonnees' => [
-                        'nom' => $coResp ? $coResp->getNom() : 'Non renseigné.',
-                        'prenom' => $coResp ? $coResp->getPrenom() : 'Non renseigné.',
-                        'courriel' => $coResp ? $coResp->getEmail() : 'Non renseigné.',
+                        'nom' => $coResp->getNom() ?? 'Non renseigné.',
+                        'prenom' => $coResp->getPrenom() ?? 'Non renseigné.',
+                        'courriel' => $coResp->getEmail() ?? 'Non renseigné.',
                     ]
                 ];
-                $referentsPedagogiques[$coResp?->getId()] = $coReferentPedagogique;
+                $referentsPedagogiques[$coResp->getId()] = $coReferentPedagogique;
             }
             if ($parcours->getRespParcours()) {
                 $respParcours = $parcours->getRespParcours();
@@ -517,12 +489,12 @@ HTML;
                     // Référent pédagogique
                     'type-contact' => 3,
                     'coordonnees' => [
-                        'nom' => $respParcours ? $respParcours->getNom() : 'Non renseigné.',
-                        'prenom' => $respParcours ? $respParcours->getPrenom() : 'Non renseigné.',
-                        'courriel' => $respParcours ? $respParcours->getEmail() : 'Non renseigné.',
+                        'nom' => $respParcours->getNom() ?? 'Non renseigné.',
+                        'prenom' => $respParcours->getPrenom() ?? 'Non renseigné.',
+                        'courriel' => $respParcours->getEmail() ?? 'Non renseigné.',
                     ]
                 ];
-                $referentsPedagogiques[$respParcours?->getId()] = $referentPedagogiqueParcours;
+                $referentsPedagogiques[$respParcours->getId()] = $referentPedagogiqueParcours;
             }
             if ($parcours->getCoResponsable()) {
                 $coRespParcours = $parcours->getCoResponsable();
@@ -530,12 +502,12 @@ HTML;
                     // Référent pédagogique
                     'type-contact' => 3,
                     'coordonnees' => [
-                        'nom' => $coRespParcours ? $coRespParcours->getNom() : 'Non renseigné.',
-                        'prenom' => $coRespParcours ? $coRespParcours->getPrenom() : 'Non renseigné.',
-                        'courriel' => $coRespParcours ? $coRespParcours->getEmail() : 'Non renseigné.',
+                        'nom' => $coRespParcours->getNom() ?? 'Non renseigné.',
+                        'prenom' => $coRespParcours->getPrenom() ?? 'Non renseigné.',
+                        'courriel' => $coRespParcours->getEmail() ?? 'Non renseigné.',
                     ]
                 ];
-                $referentsPedagogiques[$coRespParcours?->getId()] = $coReferentPedagogiqueParcours;
+                $referentsPedagogiques[$coRespParcours->getId()] = $coReferentPedagogiqueParcours;
             }
             // }
 

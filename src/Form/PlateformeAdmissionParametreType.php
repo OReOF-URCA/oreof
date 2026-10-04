@@ -54,7 +54,7 @@ class PlateformeAdmissionParametreType extends AbstractType
             }
 
             // Récupérer la définition des champs spécifiques
-            $fieldDefinitions = $plateforme->getDefinitionChamps() ?? [];
+            $fieldDefinitions = $plateforme->getDefinitionChamps();
 
             if (!empty($fieldDefinitions)) {
                 // Ajouter le formulaire dynamique pour les données spécifiques

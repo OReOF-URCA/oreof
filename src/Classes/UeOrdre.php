@@ -112,7 +112,9 @@ readonly class UeOrdre
         $ues = $this->ueRepository->findByUeSubOrdre($ordreDestination, $ue->getUeParent());
         $ue->setOrdre($ordreDestination);
 
-        $ues?->setOrdre($ordreInitial);
+        foreach ($ues as $subUe) {
+            $subUe->setOrdre($ordreInitial);
+        }
 
         $this->entityManager->flush();
 
@@ -123,12 +125,10 @@ readonly class UeOrdre
     {
         $ues = $this->ueRepository->findBySemestreSubOrdreAfter($ordre, $semestre, $ueParent);
 
-        if ($ues !== null) {
-            $i = $ordre;
-            foreach ($ues as $ue) {
-                $ue->setOrdre($i);
-                ++$i;
-            }
+        $i = $ordre;
+        foreach ($ues as $ue) {
+            $ue->setOrdre($i);
+            ++$i;
         }
 
         $this->entityManager->flush();
@@ -138,12 +138,10 @@ readonly class UeOrdre
     {
         $ues = $this->ueRepository->findBySemestreOrdreAfter($ordre, $semestre);
 
-        if ($ues !== null) {
-            $i = $ordre;
-            foreach ($ues as $ue) {
-                $ue->setOrdre($i);
-                ++$i;
-            }
+        $i = $ordre;
+        foreach ($ues as $ue) {
+            $ue->setOrdre($i);
+            ++$i;
         }
 
         $this->entityManager->flush();

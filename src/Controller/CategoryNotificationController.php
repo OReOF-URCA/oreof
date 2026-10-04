@@ -10,6 +10,7 @@
 namespace App\Controller;
 
 use App\Entity\NotificationCategory;
+use App\Entity\User;
 use App\Entity\UserCategoryNotificationSetting;
 use App\Notification\NotificationPreferenceResolver;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,19 +28,35 @@ final class CategoryNotificationController extends BaseController
     }
 
     #[Route('/{code}', methods: ['GET'])]
-    public function getOne(string $code, NotificationPreferenceResolver $resolver): JsonResponse
+    public function getOne(string $code): JsonResponse
     {
         $user = $this->getUser();
-        return $this->json($resolver->resolveCategory($user, $code)); // {channels, frequency, minSeverity, source}
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $cat = $this->entityManager->getRepository(NotificationCategory::class)->findOneBy(['code' => $code]);
+        $s = $cat !== null ? $this->entityManager->getRepository(UserCategoryNotificationSetting::class)->findOneBy(['user' => $user, 'category' => $cat]) : null;
+
+        return $this->json([
+            'email' => $s?->isEmailEnabled() ?? true,
+            'inapp' => $s?->isInAppEnabled() ?? true,
+            'frequency' => $s?->getFrequency() ?? 'immediate',
+            'minSeverity' => $s?->getMinSeverity() ?? 'normal',
+        ]);
     }
 
     #[Route('/{code}', methods: ['POST'])]
     public function save(string $code, Request $r): JsonResponse
     {
         $user = $this->getUser();
-        $cat = $this->entityManager->getRepository(NotificationCategory::class)->find($code);
-        $s = $this->entityManager->getRepository(UserCategoryNotificationSetting::class)
-            ->findOneBy(['user' => $user, 'category' => $cat]) ?? (new UserCategoryNotificationSetting())->setUser($user)->setCategory($cat);
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $cat = $this->entityManager->getRepository(NotificationCategory::class)->findOneBy(['code' => $code]);
+        $s = ($cat !== null ? $this->entityManager->getRepository(UserCategoryNotificationSetting::class)->findOneBy(['user' => $user, 'category' => $cat]) : null)
+            ?? (new UserCategoryNotificationSetting())->setUser($user)->setCategory($cat);
 
         $p = $r->toArray();
 
@@ -58,11 +75,18 @@ final class CategoryNotificationController extends BaseController
     public function remove(string $code): JsonResponse
     {
         $user = $this->getUser();
-        $repo = $this->entityManager->getRepository(UserCategoryNotificationSetting::class);
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
 
-        if ($s = $repo->findOneByUserAndCode($user, $code)) {
-            $this->entityManager->remove($s);
-            $this->entityManager->flush();
+        $cat = $this->entityManager->getRepository(NotificationCategory::class)->findOneBy(['code' => $code]);
+        if ($cat !== null) {
+            $repo = $this->entityManager->getRepository(UserCategoryNotificationSetting::class);
+            $s = $repo->findOneBy(['user' => $user, 'category' => $cat]);
+            if ($s !== null) {
+                $this->entityManager->remove($s);
+                $this->entityManager->flush();
+            }
         }
 
         return $this->json(['status' => 'ok']);

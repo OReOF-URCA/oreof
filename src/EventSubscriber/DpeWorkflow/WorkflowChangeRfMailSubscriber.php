@@ -7,7 +7,7 @@ use App\Message\ChangeRfWorkflowNotification;
 use DateTimeInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Component\Workflow\Event\Event;
+use Symfony\Component\Workflow\Event\CompletedEvent;
 
 readonly class WorkflowChangeRfMailSubscriber implements EventSubscriberInterface
 {
@@ -28,7 +28,7 @@ readonly class WorkflowChangeRfMailSubscriber implements EventSubscriberInterfac
         ];
     }
 
-    public function onTransitionCompleted(Event $event): void
+    public function onTransitionCompleted(CompletedEvent $event): void
     {
         $demande = $event->getSubject();
         if (!$demande instanceof ChangeRf || null === $demande->getId()) {

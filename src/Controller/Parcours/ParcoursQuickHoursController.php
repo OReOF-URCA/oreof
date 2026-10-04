@@ -48,7 +48,7 @@ class ParcoursQuickHoursController extends BaseController
         $breadcrumb->add('Saisie rapide des heures');
 
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
-        $dto = $typeD->calculStructureParcours($parcours);
+        $dto = $typeD->calcul($parcours);
 
         $selectedRef = $request->query->get('ref');
         $referenceOptions = $hoursComparator->getAvailableReferences($parcours);

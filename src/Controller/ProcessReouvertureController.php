@@ -90,7 +90,7 @@ class ProcessReouvertureController extends BaseController
                 $this->entityManager->flush();
 
                 //mail au SES
-                $dpeDemandeEvent = new DpeDemandeEvent($demande, $this->getUser());
+                $dpeDemandeEvent = new DpeDemandeEvent($demande, $currentUser);
                 $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
 
                 return JsonReponse::success('Demande de non ouverture envoyée');
@@ -160,7 +160,7 @@ class ProcessReouvertureController extends BaseController
             $this->entityManager->flush();
 
             //mail au SES
-            $dpeDemandeEvent = new DpeDemandeEvent($demande, $this->getUser());
+            $dpeDemandeEvent = new DpeDemandeEvent($demande, $currentUser);
             $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
 
             return JsonReponse::success('DPE ouvert');
@@ -220,8 +220,10 @@ class ProcessReouvertureController extends BaseController
             $histoEvent = new HistoriqueParcoursEvent($parcours, $this->getUser(), 'en_cours_redaction', 'valide', $request);
             $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
 
+            $currentUser = $this->getUser();
+            $user = $currentUser instanceof User ? $currentUser : null;
             //mail au SES
-            $dpeDemandeEvent = new DpeDemandeEvent($demande, $this->getUser());
+            $dpeDemandeEvent = new DpeDemandeEvent($demande, $user);
             $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
 
 
@@ -283,7 +285,7 @@ class ProcessReouvertureController extends BaseController
             $this->entityManager->flush();
 
             //mail au SES
-            $dpeDemandeEvent = new DpeDemandeEvent($demande, $this->getUser());
+            $dpeDemandeEvent = new DpeDemandeEvent($demande, $currentUser);
             $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
 
             $formation->setEtatReconduction($etat);
@@ -309,7 +311,7 @@ class ProcessReouvertureController extends BaseController
 
         $dpeParcours = $dpeParcoursRepository->findLastDpeForParcours($parcours);
 
-        if ($parcours === null || $dpeParcours === null) {
+        if ($dpeParcours === null) {
             return JsonReponse::error('Parcours non trouvé');
         }
 
@@ -419,10 +421,6 @@ class ProcessReouvertureController extends BaseController
     ): Response {
 
 
-        if ($formation === null) {
-            return JsonReponse::error('Parcours non trouvé');
-        }
-
         //on récupère la demande la plus récente et ouverte
         $demande = $dpeDemandeRepository->findLastOpenedDemandeMention($formation, EtatDpeEnum::en_cours_redaction);
 
@@ -494,13 +492,14 @@ class ProcessReouvertureController extends BaseController
                 'NON_OUVERTURE_SES' => TypeModificationDpeEnum::NON_OUVERTURE_CFVU,
                 'OUVERTURE_SES' => TypeModificationDpeEnum::OUVERTURE_CFVU,
                 'NON_OUVERTURE_CFVU' => TypeModificationDpeEnum::NON_OUVERTURE,
-                'OUVERTURE_CFVU' => TypeModificationDpeEnum::OUVERT
+                'OUVERTURE_CFVU' => TypeModificationDpeEnum::OUVERT,
+                default => throw new \InvalidArgumentException('Étape inconnue : ' . $etape),
             };
         } else {
             $sParcours = $request->query->get('parcours');
         }
 
-        $allParcours = explode(',', $sParcours);
+        $allParcours = explode(',', (string)$sParcours);
         $tParcours = [];
 
         foreach ($allParcours as $id) {
@@ -512,18 +511,23 @@ class ProcessReouvertureController extends BaseController
 
             if ($request->isMethod('POST')) {
                 $dpe->setEtatReconduction($nextStep);
+                $parcours = $dpe->getParcours();
                 if ($nextStep === TypeModificationDpeEnum::NON_OUVERTURE) {
                     $dpe->setEtatValidation(['non_ouvert' => 1]);
-                    if ($dpe->getParcours()?->isParcoursDefaut() === true) {
-                        $dpe->getParcours()?->setDescriptifHautPageAutomatique('Cette formation ne sera pas proposée pour la campagne ' . $this->getCampagneCollecte()->getLibelle() . '.');
-                    } else {
-                        $dpe->getParcours()?->setDescriptifHautPageAutomatique('Ce parcours ne sera pas proposé pour la campagne ' . $this->getCampagneCollecte()->getLibelle() . '.');
+                    if ($parcours !== null) {
+                        if ($parcours->isParcoursDefaut() === true) {
+                            $parcours->setDescriptifHautPageAutomatique('Cette formation ne sera pas proposée pour la campagne ' . $this->getCampagneCollecte()->getLibelle() . '.');
+                        } else {
+                            $parcours->setDescriptifHautPageAutomatique('Ce parcours ne sera pas proposé pour la campagne ' . $this->getCampagneCollecte()->getLibelle() . '.');
+                        }
                     }
                 }
 
                 if ($nextStep === TypeModificationDpeEnum::OUVERT) {
                     $dpe->setEtatValidation(['soumis_ses' => 1]);
-                    $dpe->getParcours()?->setDescriptifHautPageAutomatique(null);
+                    if ($parcours !== null) {
+                        $parcours->setDescriptifHautPageAutomatique(null);
+                    }
                 }
             }
         }

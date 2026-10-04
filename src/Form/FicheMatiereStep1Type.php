@@ -29,9 +29,7 @@ class FicheMatiereStep1Type extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $access = true;
         $builder
-
             ->add('responsableFicheMatiere', EntityType::class, [
                 'class' => User::class,
                 'autocomplete' => true,
@@ -40,7 +38,6 @@ class FicheMatiereStep1Type extends AbstractType
                         ->orderBy('u.nom', 'ASC')
                         ->addOrderBy('u.prenom', 'ASC');
                 },
-                'disabled' => !$access,
                 'required' => false,
                 'choice_label' => 'display',
             ])
@@ -49,7 +46,6 @@ class FicheMatiereStep1Type extends AbstractType
                 'required' => false
             ])
             ->add('libelle', TextType::class, [
-                'disabled' => !$access,
                 'attr' => ['maxlength' => 250],
             ])
             ->add('libelleAnglais', TextType::class, [

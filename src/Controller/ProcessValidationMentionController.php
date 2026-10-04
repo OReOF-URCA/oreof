@@ -3,10 +3,6 @@
 namespace App\Controller;
 
 use App\Classes\JsonReponse;
-use App\Classes\MentionProcess;
-use App\Classes\Process\FicheMatiereProcess;
-use App\Classes\ValidationProcess;
-use App\Classes\ValidationProcessFicheMatiere;
 use App\Classes\verif\FormationValide;
 use App\Entity\Formation;
 use App\Entity\HistoriqueFormation;
@@ -15,26 +11,10 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class ProcessValidationMentionController extends BaseController
 {
-    private string $dir;
-
-    public function __construct(
-        private readonly EventDispatcherInterface      $eventDispatcher,
-        private readonly EntityManagerInterface        $entityManager,
-        private readonly ValidationProcess             $validationProcess,
-        private readonly ValidationProcessFicheMatiere $validationProcessFicheMatiere,
-        private readonly MentionProcess $mentionProcess,
-        private readonly FicheMatiereProcess           $ficheMatiereProcess,
-        KernelInterface                                $kernel
-    ) {
-        $this->dir = $kernel->getProjectDir() . '/public/uploads/conseils/';
-    }
-
     #[Route('/validation-mention/valide/{etape}/{formation}', name: 'app_validation_formation_valide')]
     public function valide(
         EntityManagerInterface $entityManager,
@@ -51,7 +31,8 @@ class ProcessValidationMentionController extends BaseController
             $histo->setDate(new DateTime());
             $histo->setEtape($etape);
             $histo->setEtat('valide');
-            $histo->setUser($this->getUser());
+            $user = $this->getUser();
+            $histo->setUser($user instanceof \App\Entity\User ? $user : null);
 
             $entityManager->persist($histo);
             $entityManager->flush();

@@ -43,9 +43,9 @@ class LicenceMccc extends AbstractLicenceMccc
         protected GotenbergInterface     $gotenberg,
         protected CalculStructureParcoursLicence $calculStructureParcours,
         protected ExcelWriter             $excelWriter,
-        protected TypeEpreuveRepository             $typeEpreuveRepository
+        protected TypeEpreuveRepository   $typeEpreuveRepository
     ) {
-        parent::__construct($excelWriter);
+        parent::__construct($excelWriter, $typeEpreuveRepository);
         $this->dir = $kernel->getProjectDir() . '/public';
 
     }
@@ -76,9 +76,6 @@ class LicenceMccc extends AbstractLicenceMccc
 
         // Prépare le modèle avant de dupliquer
         $modele = $this->excelWriter->getSheetByName(self::PAGE_MODELE);
-        if ($modele === null) {
-            throw new \Exception('Le modèle n\'existe pas');
-        }
 
         //récupération des données
         // récupération des semestres du parcours puis classement par année et par ordre
@@ -400,7 +397,7 @@ class LicenceMccc extends AbstractLicenceMccc
             ->office()
             ->files(new \SplFileInfo($fichier))
             ->generate()
-            ->stream($this->fileName . '.pdf');
+            ->stream();
 
         unlink($fichier);
 
@@ -462,9 +459,6 @@ class LicenceMccc extends AbstractLicenceMccc
     private function genereReferentielCompetences(Parcours $parcours, Formation $formation): void
     {
         $modele = $this->excelWriter->getSheetByName(self::PAGE_REF_COMPETENCES);
-        if ($modele === null) {
-            throw new \Exception('Le modèle n\'existe pas');
-        }
 
         //en-tête du fichier
         $modele->setCellValue(self::CEL_ANNEE_UNIVERSITAIRE, 'Année Universitaire ' . $formation->getDpe()?->getLibelle());

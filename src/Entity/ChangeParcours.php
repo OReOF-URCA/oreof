@@ -37,9 +37,15 @@ class ChangeParcours
     #[ORM\Column(nullable: true)]
     private ?\DateTime $dateApprouved = null;
 
+    /**
+     * @var array<ParcoursActionTypeEnum>
+     */
     #[ORM\Column(type: Types::SIMPLE_ARRAY, enumType: ParcoursActionTypeEnum::class)]
     private array $actionType = [];
 
+    /**
+     * @var array<ParcoursActionStatusEnum>
+     */
     #[ORM\Column(type: Types::SIMPLE_ARRAY, enumType: ParcoursActionStatusEnum::class)]
     private array $actionStatus = [];
 

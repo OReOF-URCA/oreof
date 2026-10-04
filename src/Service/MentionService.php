@@ -238,10 +238,7 @@ class MentionService
      */
     private function processCodificationForTypeDiplomeAndDomaine(TypeDiplome $typeDiplome, Domaine $domaine): void
     {
-        $mentions = $this->mentionRepository->findBy(
-            ['typeDiplome' => $typeDiplome, 'domaine' => $domaine],
-            ['libelle' => 'ASC']
-        );
+        $mentions = $this->mentionRepository->findByDomaineAndTypeDiplome($domaine, $typeDiplome);
 
         $codeLettre = 0;
 

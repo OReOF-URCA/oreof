@@ -51,18 +51,6 @@ final class FicheMatiereHeader
         $this->process = $this->validationProcess->getProcess();
     }
 
-    private function reloadDerived(): void
-    {
-        // utile si l'action a pu être appelée sans que postMount soit (ré)exécuté
-        if (($this->ficheMatiere === null) && $this->ficheMatiereId !== null) {
-            $this->postMount(); // ou répéter le chargement minimal
-            return;
-        }
-        // recalculer l'historique / étapes
-        $this->init();
-        $this->getHistorique();
-    }
-
     #[PostMount]
     public function postMount(): void
     {
@@ -92,7 +80,7 @@ final class FicheMatiereHeader
         return array_keys($this->ficheWorkflow->getMarking($this->ficheMatiere)->getPlaces())[0];
     }
 
-    public function getHistorique()
+    public function getHistorique(): void
     {
         $entriesFicheMatiere = $this->historiqueFicheMatiereRepository->findBy(['ficheMatiere' => $this->ficheMatiere], ['created' => 'ASC']);
 

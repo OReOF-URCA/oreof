@@ -314,7 +314,7 @@ final class TroncCommunToMutualisationMigrator
 
         sort($formationIds);
 
-        return array_values($formationIds);
+        return $formationIds;
     }
 
     /**

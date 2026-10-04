@@ -78,7 +78,7 @@ class WorkflowExtension extends AbstractExtension
         ];
     }
 
-    public function afficheProcess(string $process, bool $withWorkflow = true)
+    public function afficheProcess(string $process, bool $withWorkflow = true): string
     {
         $parts = explode('_', $process, 2);
         if (count($parts) !== 2) {
@@ -101,7 +101,7 @@ class WorkflowExtension extends AbstractExtension
 
             if ($transitionObject !== null) {
                 $meta = $workflow->getMetadataStore()->getPlaceMetadata($transitionObject);
-                if (is_array($meta) && array_key_exists('label', $meta) && $meta['label']) {
+                if (array_key_exists('label', $meta) && $meta['label']) {
                     if ($withWorkflow) {
                         return $this->translatable->trans($meta['label'], [], 'process') . ' (' . $workflowKey . ')';
                     }
@@ -228,6 +228,7 @@ class WorkflowExtension extends AbstractExtension
 
     public function isOuvrable(Parcours|Formation $entity, string $type = 'parcours'): bool
     {
+        $dpeParcours = null;
         if ($type === 'formation') {
             $dpeParcours = GetDpeParcours::getFromFormation($entity); //todo: comment gérer depuis Formation?
         } elseif ($type === 'parcours') {
@@ -265,6 +266,7 @@ class WorkflowExtension extends AbstractExtension
             'dpe', 'parcours' => $this->dpeParcoursWorkflow,
             'fiche' => $this->ficheWorkflow,
             'changeRf' => $this->changeRfWorkflow,
+            default => throw new \InvalidArgumentException(sprintf('Workflow "%s" non supporté.', $workflow)),
         };
     }
 
@@ -381,7 +383,7 @@ class WorkflowExtension extends AbstractExtension
     /**
      * Récupère la configuration du bouton pour une transition.
      *
-     * @return array{label: string, class: string, icon: ?string, confirmation: array, comment: array}
+     * @return array{label: string, class: string, icon: ?string, confirmation: array{required: bool, message: ?string}, comment: array{required: bool, placeholder: ?string}}
      */
     public function getButtonConfig(string $transitionName, string $workflowName = 'dpeParcours'): array
     {

@@ -31,11 +31,11 @@ class ParcoursStep2Type extends AbstractType
             ->add('modalitesEnseignement', EnumType::class, [
                 //http://lheo.gouv.fr/2.3/lheo/dict-modalites-enseignement.html#dict-modalites-enseignement
                 'class' => ModaliteEnseignementEnum::class,
-                'choice_label' => fn ($choice) => match ($choice) {
-                    modaliteEnseignementEnum::NON_DEFINI => 'Choisissez une modalité d\'enseignement',
-                    modaliteEnseignementEnum::PRESENTIELLE => 'En présentiel',
-                    modaliteEnseignementEnum::DISTANCIELLE => 'En distanciel',
-                    modaliteEnseignementEnum::HYBRIDE => 'Hybride',
+                'choice_label' => fn (ModaliteEnseignementEnum $choice) => match ($choice) {
+                    ModaliteEnseignementEnum::NON_DEFINI => 'Choisissez une modalité d\'enseignement',
+                    ModaliteEnseignementEnum::PRESENTIELLE => 'En présentiel',
+                    ModaliteEnseignementEnum::DISTANCIELLE => 'En distanciel',
+                    ModaliteEnseignementEnum::HYBRIDE => 'Hybride',
                 },
                 'expanded' => false,
             ]);

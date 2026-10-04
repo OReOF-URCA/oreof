@@ -39,7 +39,7 @@ class ParcoursStructureController extends BaseController
         $genereStructureParcours->genereStructureParcours($parcours);
 
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
-        $dto = $typeD->calculStructureParcours($parcours);
+        $dto = $typeD->calcul($parcours);
 
         return $turboStream->stream('parcours_v2/turbo/structure_menu.stream.html.twig', [
             'parcours' => $parcours,

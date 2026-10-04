@@ -34,6 +34,7 @@ final class ParcoursTabRegistry
             'maquette' => ParcoursStep3Type::class,
             'et_apres' => ParcoursStep6Type::class,
             'admission' => ParcoursStep5Type::class,
+            default => throw new \InvalidArgumentException('Unknown tab: ' . $tabKey),
         };
     }
 

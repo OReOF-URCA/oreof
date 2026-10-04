@@ -7,10 +7,8 @@ use App\Entity\Formation;
 use App\Entity\Mention;
 use App\Entity\Parcours;
 use App\Entity\SemestreMutualisable;
-use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @extends ServiceEntityRepository<SemestreMutualisable>
@@ -50,42 +48,83 @@ class SemestreMutualisableRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('s')
             ->join('s.semestre', 'sem');
 
+        $joinedSemParcours = false;
+        $joinedSemFormation = false;
+        $joinedSemMention = false;
+        $joinedSemestreParcours = false;
+
+        $joinedSParcours = false;
+        $joinedSFormation = false;
+        $joinedSMention = false;
+        $joinedSComposante = false;
 
         foreach ($options as $sort => $direction) {
             if ($sort === 'formation') {
-                $qb
-                    ->join('sem.semestreParcours', 'sp')
-                    ->leftJoin(Parcours::class, 'p', 'WITH', 'sp.parcours = p.id')
-                    ->leftJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->leftJoin(Mention::class, 'm', 'WITH', 'fo.mention = m.id')
-                    ->addOrderBy(
-                        'CASE
-                            WHEN fo.mention IS NOT NULL THEN m.libelle
-                            WHEN fo.mentionTexte IS NOT NULL THEN fo.mentionTexte
-                            ELSE fo.mentionTexte
-                            END',
-                        $direction
-                    );
+                if (!$joinedSemestreParcours) {
+                    $qb->join('sem.semestreParcours', 'sem_sp');
+                    $joinedSemestreParcours = true;
+                }
+                if (!$joinedSemParcours) {
+                    $qb->leftJoin(Parcours::class, 'sem_p', 'WITH', 'sem_sp.parcours = sem_p.id');
+                    $joinedSemParcours = true;
+                }
+                if (!$joinedSemFormation) {
+                    $qb->leftJoin(Formation::class, 'sem_fo', 'WITH', 'sem_p.formation = sem_fo.id');
+                    $joinedSemFormation = true;
+                }
+                if (!$joinedSemMention) {
+                    $qb->leftJoin(Mention::class, 'sem_m', 'WITH', 'sem_fo.mention = sem_m.id');
+                    $joinedSemMention = true;
+                }
+                $qb->addOrderBy(
+                    'CASE
+                        WHEN sem_fo.mention IS NOT NULL THEN sem_m.libelle
+                        WHEN sem_fo.mentionTexte IS NOT NULL THEN sem_fo.mentionTexte
+                        ELSE sem_fo.mentionTexte
+                        END',
+                    $direction
+                );
             } elseif ($sort === 'composante') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 's.parcours = p.id')
-                    ->innerJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->innerJoin(Composante::class, 'co', 'WITH', 'fo.composantePorteuse = co.id')
-                    ->addOrderBy('co.libelle', $direction);
+                if (!$joinedSParcours) {
+                    $qb->leftJoin(Parcours::class, 's_p', 'WITH', 's.parcours = s_p.id');
+                    $joinedSParcours = true;
+                }
+                if (!$joinedSFormation) {
+                    $qb->innerJoin(Formation::class, 's_fo', 'WITH', 's_p.formation = s_fo.id');
+                    $joinedSFormation = true;
+                }
+                if (!$joinedSComposante) {
+                    $qb->innerJoin(Composante::class, 's_co', 'WITH', 's_fo.composantePorteuse = s_co.id');
+                    $joinedSComposante = true;
+                }
+                $qb->addOrderBy('s_co.libelle', $direction);
             } elseif ($sort === 'mention') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 's.parcours = p.id')
-                    ->leftJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->leftJoin(Mention::class, 'm', 'WITH', 'fo.mention = m.id')
-                    ->addOrderBy(
-                        'CASE
-                            WHEN fo.mention IS NOT NULL THEN m.libelle
-                            WHEN fo.mentionTexte IS NOT NULL THEN fo.mentionTexte
-                            ELSE fo.mentionTexte
-                            END',
-                        $direction
-                    );
+                if (!$joinedSParcours) {
+                    $qb->leftJoin(Parcours::class, 's_p', 'WITH', 's.parcours = s_p.id');
+                    $joinedSParcours = true;
+                }
+                if (!$joinedSFormation) {
+                    $qb->leftJoin(Formation::class, 's_fo', 'WITH', 's_p.formation = s_fo.id');
+                    $joinedSFormation = true;
+                }
+                if (!$joinedSMention) {
+                    $qb->leftJoin(Mention::class, 's_m', 'WITH', 's_fo.mention = s_m.id');
+                    $joinedSMention = true;
+                }
+                $qb->addOrderBy(
+                    'CASE
+                        WHEN s_fo.mention IS NOT NULL THEN s_m.libelle
+                        WHEN s_fo.mentionTexte IS NOT NULL THEN s_fo.mentionTexte
+                        ELSE s_fo.mentionTexte
+                        END',
+                    $direction
+                );
             } elseif ($sort === 'parcours') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 's.parcours = p.id')
-                    ->addOrderBy('p.libelle', $direction);
+                if (!$joinedSParcours) {
+                    $qb->leftJoin(Parcours::class, 's_p', 'WITH', 's.parcours = s_p.id');
+                    $joinedSParcours = true;
+                }
+                $qb->addOrderBy('s_p.libelle', $direction);
             } else {
                 $qb->addOrderBy('sem.' . $sort, $direction);
             }
@@ -94,54 +133,9 @@ class SemestreMutualisableRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-
     public function findByParcours(array $options): array
     {
-        $qb = $this->createQueryBuilder('s')
-            ->join('s.semestre', 'sem');
-
-
-        foreach ($options as $sort => $direction) {
-            if ($sort === 'formation') {
-                $qb
-                    ->join('sem.semestreParcours', 'sp')
-                    ->leftJoin(Parcours::class, 'p', 'WITH', 'sp.parcours = p.id')
-                    ->leftJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->leftJoin(Mention::class, 'm', 'WITH', 'fo.mention = m.id')
-                    ->addOrderBy(
-                        'CASE
-                            WHEN fo.mention IS NOT NULL THEN m.libelle
-                            WHEN fo.mentionTexte IS NOT NULL THEN fo.mentionTexte
-                            ELSE fo.mentionTexte
-                            END',
-                        $direction
-                    );
-            } elseif ($sort === 'composante') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 's.parcours = p.id')
-                    ->innerJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->innerJoin(Composante::class, 'co', 'WITH', 'fo.composantePorteuse = co.id')
-                    ->addOrderBy('co.libelle', $direction);
-            } elseif ($sort === 'mention') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 's.parcours = p.id')
-                    ->leftJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->leftJoin(Mention::class, 'm', 'WITH', 'fo.mention = m.id')
-                    ->addOrderBy(
-                        'CASE
-                            WHEN fo.mention IS NOT NULL THEN m.libelle
-                            WHEN fo.mentionTexte IS NOT NULL THEN fo.mentionTexte
-                            ELSE fo.mentionTexte
-                            END',
-                        $direction
-                    );
-            } elseif ($sort === 'parcours') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 's.parcours = p.id')
-                    ->addOrderBy('p.libelle', $direction);
-            } else {
-                $qb->addOrderBy('sem.' . $sort, $direction);
-            }
-        }
-
-        return $qb->getQuery()->getResult();
+        return $this->findAllBy($options);
     }
 
     public function findFromAnneeUniversitaire(int $idCampagneCollecte) : array {

@@ -82,9 +82,9 @@ class VersioningFormation
         }
     }
 
-    public function loadFormationFromVersion(FormationVersioning $formationVersioning)
+    public function loadFormationFromVersion(FormationVersioning $formationVersioning): Formation
     {
-        $version = file_get_contents(
+        $version = (string) file_get_contents(
             __DIR__ . "/../../versioning_json/formation/{$formationVersioning->getSlug()}/"
             . "{$formationVersioning->getFilename()}.json"
         );
@@ -126,15 +126,16 @@ class VersioningFormation
                 'wordGlues' => [' ', '.']
             ];
 
+            $localisationVersion = '';
             if ($lastVersion !== null) {
                 $localisationVersion = implode(", ", array_map(
                     fn($ville) => $ville->getLibelle(),
-                    $lastVersion?->getLocalisationMention()->toArray() ?? []
+                    $lastVersion->getLocalisationMention()->toArray()
                 ));
             }
             $localisationActuelle = implode(", ", array_map(
                 fn ($ville) => $ville->getLibelle(),
-                $formation?->getLocalisationMention()->toArray() ?? []
+                $formation->getLocalisationMention()->toArray()
             ));
 
             $this->formationTextDifferences = [
@@ -152,7 +153,7 @@ class VersioningFormation
                         "</p><p class=\"list-item\">",
                         array_map(
                             fn ($composante) => $composante->getLibelle(),
-                            $formation->getComposantesInscription()->toArray() ?? []
+                            $formation->getComposantesInscription()->toArray()
                         )
                     ) . "</p>",
                     $rendererName,
@@ -173,7 +174,7 @@ class VersioningFormation
                         "</p><p class=\"list-item\">",
                         array_map(
                             fn ($regime) => $regime->value,
-                            $formation->getRegimeInscription() ?? []
+                            $formation->getRegimeInscription()
                         )
                     ) . "</p>",
                     $rendererName,
@@ -210,9 +211,9 @@ class VersioningFormation
                     // Version
                     $lastVersion?->getCoResponsable() ?
                     (
-                        $lastVersion?->getCoResponsable()->getNom()
+                        $lastVersion->getCoResponsable()->getNom()
                      . " " .
-                        $lastVersion?->getCoResponsable()->getPrenom()
+                        $lastVersion->getCoResponsable()->getPrenom()
                     )  : "",
                     // Actuel
                     $formation->getCoResponsable() ?
@@ -336,7 +337,7 @@ class VersioningFormation
 
     public function rollbackToLastVersion(Formation $formation): void
     {
-        if ($formation and count($this->formationTextDifferences) > 0) {
+        if (count($this->formationTextDifferences) > 0) {
             //todo: a finir
             //                $formation->setC($this->formationTextDifferences['composanteInscriptionFormation']);
             //                $formation->setRegimeInscription($lastVersion->getRegimeInscription());

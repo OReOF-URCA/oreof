@@ -12,14 +12,12 @@ namespace App\Service\Validation;
 use App\Entity\Parcours;
 use App\Entity\Semestre;
 use App\Entity\SemestreParcours;
-use App\Repository\SemestreRepository;
 use App\TypeDiplome\TypeDiplomeResolver;
 
 readonly class SemesterValidationRefresher
 {
 
     public function __construct(
-        private SemestreRepository      $semestreRepository,
         private TypeDiplomeResolver     $typeDiplomeResolver,
         private ValidationResultApplier $applier
     )

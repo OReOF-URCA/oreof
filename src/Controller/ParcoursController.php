@@ -29,6 +29,7 @@ use App\Enums\EtatDpeEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
 use App\Events\AddCentreParcoursEvent;
+use App\Exception\FileUploadException;
 use App\Form\ParcoursType;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\ParcoursRepository;
@@ -207,7 +208,10 @@ class ParcoursController extends BaseController
             $dpeDemande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
             $dpeDemande->setArgumentaireDemande('Création d\'un nouveau parcours');
             $dpeDemande->setNiveauModification(TypeModificationDpeEnum::CREATION);
-            $dpeDemande->setAuteur($this->getUser());
+            $user = $this->getUser();
+            if ($user instanceof User) {
+                $dpeDemande->setAuteur($user);
+            }
 
             $this->entityManager->persist($dpeDemande);
 
@@ -529,16 +533,17 @@ class ParcoursController extends BaseController
             }
 
             foreach ($parcour->getSemestreParcours() as $semestreParcour) {
-                if ($semestreParcour->getSemestre()?->isTroncCommun() === false) {
+                $sem = $semestreParcour->getSemestre();
+                if ($sem !== null && $sem->isTroncCommun() === false) {
                     //todo: supprimer le tronc commun s'il n'est plus utilisé
-                    foreach ($semestreParcour->getSemestre()?->getUes() as $ue) {
+                    foreach ($sem->getUes() as $ue) {
                         foreach ($ue->getElementConstitutifs() as $ec) {
                             $entityManager->remove($ec);
                         }
                         $entityManager->remove($ue);
                     }
                     //todo: supprimer le semestre s'il n'est plus utilisé
-                    $entityManager->remove($semestreParcour->getSemestre());
+                    $entityManager->remove($sem);
                     $entityManager->remove($semestreParcour);
                 }
 
@@ -656,19 +661,20 @@ class ParcoursController extends BaseController
 
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
 
-        $ects = $typeD->calculStructureParcours($parcours)->heuresEctsFormation->sommeFormationEcts;
+        $ects = $typeD->calcul($parcours)->heuresEctsFormation->sommeFormationEcts;
 
         // Gestion de la localisation
         // Vide par défaut : -
         $localisationMetadata = ["-"];
         // Si l'on a une ville sur le parcours
-        if($parcours->getLocalisation()?->getLibelle() !== null) {
-            $localisationMetadata = [$parcours->getLocalisation()?->getLibelle()];
+        $loc = $parcours->getLocalisation();
+        if ($loc !== null && $loc->getLibelle() !== null) {
+            $localisationMetadata = [$loc->getLibelle()];
         }
         // Sinon on prend au niveau de la composante
         else {
             $villeArray = $parcours->getFormation()?->getLocalisationMention()?->toArray();
-            if(count($villeArray) > 0) {
+            if ($villeArray !== null && count($villeArray) > 0) {
                 $localisationMetadata = array_map(
                     fn ($ville) => $ville->getLibelle(),
                     $villeArray
@@ -681,25 +687,27 @@ class ParcoursController extends BaseController
         // "-" par défaut
         $faculteEcoleInstitut = ["-"];
         // Si on a au niveau du parcours
-        if($parcours->getComposanteInscription()?->getLibelle() !== null) {
-            if ($parcours->getComposanteInscription()?->getComposanteParent() === null) {
-                $faculteEcoleInstitut = [$parcours->getComposanteInscription()?->getLibelle()];
+        $ci = $parcours->getComposanteInscription();
+        if ($ci !== null && $ci->getLibelle() !== null) {
+            if ($ci->getComposanteParent() === null) {
+                $faculteEcoleInstitut = [$ci->getLibelle()];
             } else {
-                $faculteEcoleInstitut = [$parcours->getComposanteInscription()?->getComposanteParent()?->getLibelle()];
+                $faculteEcoleInstitut = [$ci->getComposanteParent()->getLibelle()];
             }
         }
         // Sinon, on prend les composantes d'inscription de la formation
         else {
-            if(count($parcours->getFormation()?->getComposantesInscription()->toArray()) > 0) {
+            $formation = $parcours->getFormation();
+            if ($formation !== null && count($formation->getComposantesInscription()->toArray()) > 0) {
                 $faculteEcoleInstitut = array_map(
                     fn ($composanteInscription) => $composanteInscription->getLibelle(),
-                    $parcours->getFormation()?->getComposantesInscription()->toArray()
+                    $formation->getComposantesInscription()->toArray()
                 );
             }
         }
 
         $typeF = [];
-        $typeF[] = $typeDiplome?->getLibelle() ?? '-';
+        $typeF[] = $typeDiplome->getLibelle() ?? '-';
 
         $lasTypeP = [
             TypeParcoursEnum::TYPE_PARCOURS_LAS1,
@@ -707,7 +715,7 @@ class ParcoursController extends BaseController
             TypeParcoursEnum::TYPE_PARCOURS_LAS123
         ];
 
-        $isDiplomeInge = in_array($typeDiplome?->getLibelleCourt() ?? '-', ['DI', 'CMI', 'CPI'], true);
+        $isDiplomeInge = in_array($typeDiplome->getLibelleCourt() ?? '-', ['DI', 'CMI', 'CPI'], true);
 
         if ($parcours->getTypeParcours() === TypeParcoursEnum::TYPE_PARCOURS_CPI || $isDiplomeInge) {
             $typeF[] = "Diplôme d’ingénieur / CMI / CPI";
@@ -717,13 +725,13 @@ class ParcoursController extends BaseController
 
         $data = [
             'description' => "",
-            'ects' => $ects ?? 0,
+            'ects' => $ects,
             'metadata' => [
                 'domaine' => $parcours->getFormation()?->getDomaine()?->getLibelle() ?? '-',
                 'type-formation' => $typeF,
                 'localisation' => $localisationMetadata,
                 'faculte-ecole-institut' => $faculteEcoleInstitut,
-                'public-concerne' => $parcours->getRegimeInscription() ?? [], //Certains sont des tableaux, d'autres en JSON
+                'public-concerne' => $parcours->getRegimeInscription(), //Certains sont des tableaux, d'autres en JSON
                 'niveau-francais' => $parcours->getNiveauFrancais()?->libelle() ?? '-',
             ],
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
@@ -987,12 +995,7 @@ class ParcoursController extends BaseController
     public function getMcccAsPdfForParcours(
         int $idParcours,
         EntityManagerInterface $entityManager
-    ) : Response|JsonResponse {
-
-        if(is_integer($idParcours) === false) {
-            throw $this->createNotFoundException();
-        }
-
+    ) : Response {
         $dpe = $entityManager->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => 1]);
         if ($dpe === null) {
             return new Response(null, 500);
@@ -1001,7 +1004,7 @@ class ParcoursController extends BaseController
 
         try {
             $file = file_get_contents(__DIR__ . "/../../mccc-export/MCCC-Parcours-{$idParcours}-{$annee}.pdf");
-            if($file) {
+            if($file !== false) {
                 return new Response(
                     $file,
                     200,
@@ -1011,16 +1014,17 @@ class ParcoursController extends BaseController
                 );
             }
         } catch (Exception $error) {
-            return new Response(
-                json_encode(
-                    ['error' => "Le parcours n'a pas été trouvé"]
-                ),
-                404,
-                [
-                    'Content-Type' => 'application/json'
-                ]
-            ) ;
         }
+
+        return new Response(
+            json_encode(
+                ['error' => "Le parcours n'a pas été trouvé"]
+            ) ?: '',
+            404,
+            [
+                'Content-Type' => 'application/json'
+            ]
+        );
     }
 
     #[Route('/{parcours}/export-json-urca/cfvu_valid', name: 'app_parcours_export_json_urca_cfvu_valid')]
@@ -1051,13 +1055,14 @@ class ParcoursController extends BaseController
         // Vide par défaut : -
         $localisationMetadata = ["-"];
         // Si l'on a une ville sur le parcours
-        if($parcoursVersionData->getLocalisation()?->getLibelle() !== null) {
-            $localisationMetadata = [$parcoursVersionData->getLocalisation()?->getLibelle()];
+        $loc = $parcoursVersionData->getLocalisation();
+        if ($loc !== null && $loc->getLibelle() !== null) {
+            $localisationMetadata = [$loc->getLibelle()];
         }
         // Sinon on prend au niveau de la composante
         else {
             $villeArray = $parcoursVersionData->getFormation()?->getLocalisationMention()?->toArray();
-            if(count($villeArray) > 0) {
+            if ($villeArray !== null && count($villeArray) > 0) {
                 $localisationMetadata = array_map(
                     fn ($ville) => $ville->getLibelle(),
                     $villeArray
@@ -1070,15 +1075,16 @@ class ParcoursController extends BaseController
         // "-" par défaut
         $faculteEcoleInstitut = ["-"];
         // Si on a au niveau du parcours
-        if($parcoursVersionData->getComposanteInscription()?->getLibelle() !== null) {
+        $ci = $parcoursVersionData->getComposanteInscription();
+        if ($ci !== null && $ci->getLibelle() !== null) {
 
             $composanteInscriptionParent = $entityManager->getRepository(Parcours::class)
                 ->findOneById($parcoursVersion->getParcours()->getId())
-                ->getComposanteInscription()
+                ?->getComposanteInscription()
                 ?->getComposanteParent();
 
             if ($composanteInscriptionParent === null) {
-                $faculteEcoleInstitut = [$parcoursVersionData->getComposanteInscription()?->getLibelle()];
+                $faculteEcoleInstitut = [$ci->getLibelle()];
             } else {
                 $faculteEcoleInstitut = [$composanteInscriptionParent->getLibelle()];
             }
@@ -1187,13 +1193,14 @@ class ParcoursController extends BaseController
         // Vide par défaut : -
         $localisationMetadata = ["-"];
         // Si l'on a une ville sur le parcours
-        if($parcours->getLocalisation()?->getLibelle() !== null) {
-            $localisationMetadata = [$parcours->getLocalisation()?->getLibelle()];
+        $loc = $parcours->getLocalisation();
+        if ($loc !== null && $loc->getLibelle() !== null) {
+            $localisationMetadata = [$loc->getLibelle()];
         }
         // Sinon on prend au niveau de la composante
         else {
             $villeArray = $parcours->getFormation()?->getLocalisationMention()?->toArray();
-            if(count($villeArray) > 0) {
+            if ($villeArray !== null && count($villeArray) > 0) {
                 $localisationMetadata = array_map(
                     fn ($ville) => $ville->getLibelle(),
                     $villeArray
@@ -1206,25 +1213,27 @@ class ParcoursController extends BaseController
         // "-" par défaut
         $faculteEcoleInstitut = ["-"];
         // Si on a au niveau du parcours
-        if($parcours->getComposanteInscription()?->getLibelle() !== null) {
-            if ($parcours->getComposanteInscription()?->getComposanteParent() === null) {
-                $faculteEcoleInstitut = [$parcours->getComposanteInscription()?->getLibelle()];
+        $ci = $parcours->getComposanteInscription();
+        if ($ci !== null && $ci->getLibelle() !== null) {
+            if ($ci->getComposanteParent() === null) {
+                $faculteEcoleInstitut = [$ci->getLibelle()];
             } else {
-                $faculteEcoleInstitut = [$parcours->getComposanteInscription()?->getComposanteParent()?->getLibelle()];
+                $faculteEcoleInstitut = [$ci->getComposanteParent()->getLibelle()];
             }
         }
         // Sinon, on prend les composantes d'inscription de la formation
         else {
-            if(count($parcours->getFormation()?->getComposantesInscription()->toArray()) > 0) {
+            $formation = $parcours->getFormation();
+            if ($formation !== null && count($formation->getComposantesInscription()->toArray()) > 0) {
                 $faculteEcoleInstitut = array_map(
                     fn ($composanteInscription) => $composanteInscription->getLibelle(),
-                    $parcours->getFormation()?->getComposantesInscription()->toArray()
+                    $formation->getComposantesInscription()->toArray()
                 );
             }
         }
 
         $typeF = [];
-        $typeF[] = $typeDiplome?->getLibelle() ?? '-';
+        $typeF[] = $typeDiplome->getLibelle() ?? '-';
 
         $lasTypeP = [
             TypeParcoursEnum::TYPE_PARCOURS_LAS1,
@@ -1232,7 +1241,7 @@ class ParcoursController extends BaseController
             TypeParcoursEnum::TYPE_PARCOURS_LAS123
         ];
 
-        $isDiplomeInge = in_array($typeDiplome?->getLibelleCourt() ?? '-', ['DI', 'CMI', 'CPI'], true);
+        $isDiplomeInge = in_array($typeDiplome->getLibelleCourt() ?? '-', ['DI', 'CMI', 'CPI'], true);
 
         if ($parcours->getTypeParcours() === TypeParcoursEnum::TYPE_PARCOURS_CPI || $isDiplomeInge) {
             $typeF[] = "Diplôme d’ingénieur / CMI / CPI";
@@ -1242,13 +1251,13 @@ class ParcoursController extends BaseController
 
         $data = [
             'description' => "",
-            'ects' => $ects ?? 0,
+            'ects' => $ects,
             'metadata' => [
                 'domaine' => $parcours->getFormation()?->getDomaine()?->getLibelle() ?? '-',
                 'type-formation' => $typeF,
                 'localisation' => $localisationMetadata,
                 'faculte-ecole-institut' => $faculteEcoleInstitut,
-                'public-concerne' => $parcours->getRegimeInscription() ?? [], //Certains sont des tableaux, d'autres en JSON
+                'public-concerne' => $parcours->getRegimeInscription(), //Certains sont des tableaux, d'autres en JSON
                 'niveau-francais' => $parcours->getNiveauFrancais()?->libelle() ?? '-',
             ],
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
@@ -1353,7 +1362,7 @@ class ParcoursController extends BaseController
 
     // Route directe pour alimenter l'API - logos du TypeDiplome
     #[Route('/type_diplome/{td}/logo/{filename}/export-json-urca', name: 'app_parcours_type_diplome_logos')]
-    public function typeDiplomeLogos(TypeDiplome $td, string $filename) {
+    public function typeDiplomeLogos(TypeDiplome $td, string $filename): Response {
         $filePath = $this->secureUploadService->resolveStoredFilePath('logos', $filename);
 
         if(!file_exists($filePath)) {
@@ -1369,7 +1378,7 @@ class ParcoursController extends BaseController
         Parcours $parcours,
         EntityManagerInterface $entityManager,
         VersioningParcours $versioningParcours
-    ) {
+    ): JsonResponse {
         $parcoursVersion = $entityManager
             ->getRepository(ParcoursVersioning::class)
             ->findLastCfvuVersion($parcours);
@@ -1391,13 +1400,14 @@ class ParcoursController extends BaseController
         // Vide par défaut : -
         $localisationMetadata = ["-"];
         // Si l'on a une ville sur le parcours
-        if($parcoursVersionData->getLocalisation()?->getLibelle() !== null) {
-            $localisationMetadata = [$parcoursVersionData->getLocalisation()?->getLibelle()];
+        $loc = $parcoursVersionData->getLocalisation();
+        if ($loc !== null && $loc->getLibelle() !== null) {
+            $localisationMetadata = [$loc->getLibelle()];
         }
         // Sinon on prend au niveau de la composante
         else {
             $villeArray = $parcoursVersionData->getFormation()?->getLocalisationMention()?->toArray();
-            if(count($villeArray) > 0) {
+            if ($villeArray !== null && count($villeArray) > 0) {
                 $localisationMetadata = array_map(
                     fn ($ville) => $ville->getLibelle(),
                     $villeArray
@@ -1410,15 +1420,16 @@ class ParcoursController extends BaseController
         // "-" par défaut
         $faculteEcoleInstitut = ["-"];
         // Si on a au niveau du parcours
-        if($parcoursVersionData->getComposanteInscription()?->getLibelle() !== null) {
+        $ci = $parcoursVersionData->getComposanteInscription();
+        if ($ci !== null && $ci->getLibelle() !== null) {
 
             $composanteInscriptionParent = $entityManager->getRepository(Parcours::class)
                 ->findOneById($parcoursVersion->getParcours()->getId())
-                ->getComposanteInscription()
+                ?->getComposanteInscription()
                 ?->getComposanteParent();
 
             if ($composanteInscriptionParent === null) {
-                $faculteEcoleInstitut = [$parcoursVersionData->getComposanteInscription()?->getLibelle()];
+                $faculteEcoleInstitut = [$ci->getLibelle()];
             } else {
                 $faculteEcoleInstitut = [$composanteInscriptionParent->getLibelle()];
             }
@@ -1484,7 +1495,7 @@ class ParcoursController extends BaseController
     public function getJsonExportUrcaV2AnneeSuivanteLight(
         Parcours $parcours,
         EntityManagerInterface $entityManager
-    ) {
+    ): JsonResponse {
         $optionsArray = GetDpeParcours::getFromParcours($parcours)
             ->getCampagneCollecte()
             ->getPublicationOptions() ?? [];
@@ -1524,21 +1535,23 @@ class ParcoursController extends BaseController
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
 
         $ects = 0;
-        if(isset($typeD->calculStructureParcours($parcours)->heuresEctsFormation->sommeFormationEcts)){
-            $ects = $typeD->calculStructureParcours($parcours)->heuresEctsFormation->sommeFormationEcts;
+        $structure = $typeD->calcul($parcours);
+        if (isset($structure->heuresEctsFormation->sommeFormationEcts)) {
+            $ects = $structure->heuresEctsFormation->sommeFormationEcts;
         }
 
         // Gestion de la localisation
         // Vide par défaut : -
         $localisationMetadata = ["-"];
         // Si l'on a une ville sur le parcours
-        if($parcours->getLocalisation()?->getLibelle() !== null) {
-            $localisationMetadata = [$parcours->getLocalisation()?->getLibelle()];
+        $loc = $parcours->getLocalisation();
+        if ($loc !== null && $loc->getLibelle() !== null) {
+            $localisationMetadata = [$loc->getLibelle()];
         }
         // Sinon on prend au niveau de la composante
         else {
             $villeArray = $parcours->getFormation()?->getLocalisationMention()?->toArray();
-            if(count($villeArray) > 0) {
+            if ($villeArray !== null && count($villeArray) > 0) {
                 $localisationMetadata = array_map(
                     fn ($ville) => $ville->getLibelle(),
                     $villeArray
@@ -1551,25 +1564,27 @@ class ParcoursController extends BaseController
         // "-" par défaut
         $faculteEcoleInstitut = ["-"];
         // Si on a au niveau du parcours
-        if($parcours->getComposanteInscription()?->getLibelle() !== null) {
-            if ($parcours->getComposanteInscription()?->getComposanteParent() === null) {
-                $faculteEcoleInstitut = [$parcours->getComposanteInscription()?->getLibelle()];
+        $ci = $parcours->getComposanteInscription();
+        if ($ci !== null && $ci->getLibelle() !== null) {
+            if ($ci->getComposanteParent() === null) {
+                $faculteEcoleInstitut = [$ci->getLibelle()];
             } else {
-                $faculteEcoleInstitut = [$parcours->getComposanteInscription()?->getComposanteParent()?->getLibelle()];
+                $faculteEcoleInstitut = [$ci->getComposanteParent()->getLibelle()];
             }
         }
         // Sinon, on prend les composantes d'inscription de la formation
         else {
-            if(count($parcours->getFormation()?->getComposantesInscription()->toArray()) > 0) {
+            $formation = $parcours->getFormation();
+            if ($formation !== null && count($formation->getComposantesInscription()->toArray()) > 0) {
                 $faculteEcoleInstitut = array_map(
                     fn ($composanteInscription) => $composanteInscription->getLibelle(),
-                    $parcours->getFormation()?->getComposantesInscription()->toArray()
+                    $formation->getComposantesInscription()->toArray()
                 );
             }
         }
 
         $typeF = [];
-        $typeF[] = $typeDiplome?->getLibelle() ?? '-';
+        $typeF[] = $typeDiplome->getLibelle() ?? '-';
 
         $lasTypeP = [
             TypeParcoursEnum::TYPE_PARCOURS_LAS1,
@@ -1577,7 +1592,7 @@ class ParcoursController extends BaseController
             TypeParcoursEnum::TYPE_PARCOURS_LAS123
         ];
 
-        $isDiplomeInge = in_array($typeDiplome?->getLibelleCourt() ?? '-', ['DI', 'CMI', 'CPI'], true);
+        $isDiplomeInge = in_array($typeDiplome->getLibelleCourt() ?? '-', ['DI', 'CMI', 'CPI'], true);
 
         if ($parcours->getTypeParcours() === TypeParcoursEnum::TYPE_PARCOURS_CPI || $isDiplomeInge) {
             $typeF[] = "Diplôme d’ingénieur / CMI / CPI";
@@ -1590,14 +1605,14 @@ class ParcoursController extends BaseController
 
         $data = [
             'description' => "",
-            'ects' => $ects ?? 0,
+            'ects' => $ects,
             'metadata' => [
                 'domaine' => $parcours->getFormation()?->getDomaine()?->getLibelle() ?? '-',
                 'type-formation' => $typeF,
                 'logo-type-formation' => $logoTypeDiplomeArray,
                 'localisation' => $localisationMetadata,
                 'faculte-ecole-institut' => $faculteEcoleInstitut,
-                'public-concerne' => $parcours->getRegimeInscription() ?? [], //Certains sont des tableaux, d'autres en JSON
+                'public-concerne' => $parcours->getRegimeInscription(), //Certains sont des tableaux, d'autres en JSON
                 'niveau-francais' => $parcours->getNiveauFrancais()?->libelle() ?? '-',
             ],
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),

@@ -12,6 +12,7 @@ namespace App\Classes;
 use App\Entity\CommentaireFicheMatiere;
 use App\Entity\CommentaireParcours;
 use App\Entity\CommentaireFormation;
+use App\Entity\User;
 use App\Repository\CommentaireFicheMatiereRepository;
 use App\Repository\CommentaireFormationRepository;
 use App\Repository\CommentaireParcoursRepository;
@@ -59,22 +60,24 @@ class GetCommentaires
 
     public function ajoutCommentaire(int $id, string $type, string $zone, string $message, ?UserInterface $user): void
     {
+        $userEntity = $user instanceof User ? $user : null;
+
         switch ($type) {
             case 'formation':
                 $formation = $this->formationRepository->find($id);
-                $commentaire = new CommentaireFormation($user, $message, $zone);
+                $commentaire = new CommentaireFormation($userEntity, $message, $zone);
                 $commentaire->setFormation($formation);
                 $this->entityManager->persist($commentaire);
                 break;
             case 'parcours':
                 $parcours = $this->parcoursRepository->find($id);
-                $commentaire = new CommentaireParcours($user, $message, $zone);
+                $commentaire = new CommentaireParcours($userEntity, $message, $zone);
                 $commentaire->setParcours($parcours);
                 $this->entityManager->persist($commentaire);
                 break;
             case 'ficheMatiere':
                 $ficheMatiere = $this->ficheMatiereRepository->find($id);
-                $commentaire = new CommentaireFicheMatiere($user, $message, $zone);
+                $commentaire = new CommentaireFicheMatiere($userEntity, $message, $zone);
                 $commentaire->setFicheMatiere($ficheMatiere);
                 $this->entityManager->persist($commentaire);
                 break;

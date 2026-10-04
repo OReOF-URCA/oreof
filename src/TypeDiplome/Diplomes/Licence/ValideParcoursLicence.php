@@ -31,7 +31,7 @@ class ValideParcoursLicence implements ValideParcoursInterface
             $result->setSemestreStatus(ValidationStatusEnum::INVALID);
             $result->addIssue(new ValidationIssueDto(
                 scopeType: 'parcours',
-                scopeId: (string)$structureParcours->parcours->getId(),
+                scopeId: $structureParcours->parcours->getId() ?? 0,
                 ruleCode: 'NO_SEMESTER',
                 severity: 'error',
                 message: 'Aucun semestre renseigné/calculé.',
@@ -58,7 +58,7 @@ class ValideParcoursLicence implements ValideParcoursInterface
         $result = new ValidationResult();
 
         $sem = $structureSemestre->semestre;
-        $semId = (string)$sem->getId();
+        $semId = $sem->getId() ?? 0;
 
         // Dans ton calcul DTO, un semestre n'est construit que si (nonDispense=false && ouvert=true)
         // Donc le cas NA est souvent filtré en amont. Mais on peut sécuriser :
@@ -88,7 +88,7 @@ class ValideParcoursLicence implements ValideParcoursInterface
 
         // 3) ECTS semestre = 30 (ta règle licence)
         // Idéalement on utilise ton agrégat DTO (HeuresEctsSemestre) au lieu de recalculer GetUeEcts
-        $ects = $semDto->heuresEctsSemestre->sommeSemestreEcts ?? null; // adapte au vrai champ
+        $ects = $structureSemestre->heuresEctsSemestre->sommeSemestreEcts ?? null; // adapte au vrai champ
         if ($ects !== null && \abs($ects - 30.0) > 0.0001) {
             $result->setSemestreStatus(ValidationStatusEnum::INVALID);
             $result->addIssue(new ValidationIssueDto(
@@ -97,7 +97,7 @@ class ValideParcoursLicence implements ValideParcoursInterface
                 ruleCode: 'ECTS_SEM_30',
                 severity: 'error',
                 message: 'Le semestre doit faire 30 ECTS.',
-                payload: ['ects' => $ects, 'expected' => 30.0, 'ordre' => $semDto->ordre],
+                payload: ['ects' => $ects, 'expected' => 30.0, 'ordre' => $structureSemestre->ordre],
                 status: ValidationStatusEnum::INVALID
             ));
         }
@@ -117,7 +117,7 @@ class ValideParcoursLicence implements ValideParcoursInterface
             return;
         }
 
-        $ueId = (string)$ueEntity->getId();
+        $ueId = $ueEntity->getId() ?? 0;
 
         // UE libre : ECTS à renseigner éventuellement
         if ($ueEntity->getNatureUeEc()?->isLibre()) {
@@ -180,11 +180,13 @@ class ValideParcoursLicence implements ValideParcoursInterface
     ): void
     {
         $ec = $ecDto->elementConstitutif;
-        $ecId = (string)$ec->getId();
-        $ueId = (string)($ueDto->ue?->getId() ?? '');
+        $ecId = $ec->getId() ?? 0;
+        $ueId = $ueDto->ue?->getId();
+
+        $nature = $ec->getNatureUeEc();
 
         // Si EC a des enfants dans DTO => valider enfants (analogue à ton code)
-        if (count($ecDto->elementsConstitutifsEnfants) > 0 || $ec->getNatureUeEc()?->isChoix()) {
+        if (count($ecDto->elementsConstitutifsEnfants) > 0 || ($nature !== null && $nature->isChoix())) {
             foreach ($ecDto->elementsConstitutifsEnfants as $child) {
                 $this->valideEc($result, $child, $ueDto, $semDto);
             }
@@ -209,7 +211,7 @@ class ValideParcoursLicence implements ValideParcoursInterface
         }
 
         // Fiche matière (si pas libre ou à choix)
-        if ($ec->getFicheMatiere() === null && $ec->getNatureUeEc()?->isLibre() === false && $ec->getNatureUeEc()?->isChoix() === false) {
+        if ($ec->getFicheMatiere() === null && $nature !== null && !$nature->isLibre() && !$nature->isChoix()) {
             $status = $this->worst($status, ValidationStatusEnum::INCOMPLETE);
             $result->addIssue(new ValidationIssueDto(
                 scopeType: 'ec',
@@ -224,7 +226,7 @@ class ValideParcoursLicence implements ValideParcoursInterface
             // MCCC via DTO (au lieu de GetElementConstitutif)
             // Ton StructureEc remplit $mcccs depuis fiche matière si option dataFromFicheMatiere
             $mcccs = $ecDto->mcccs ?? [];
-            if (empty($mcccs) && $ec->isControleAssiduite() === false && $ec->getNatureUeEc()?->isLibre() === false) {
+            if (empty($mcccs) && $ec->isControleAssiduite() === false && ($nature === null || !$nature->isLibre())) {
                 $status = $this->worst($status, ValidationStatusEnum::INCOMPLETE);
                 $result->addIssue(new ValidationIssueDto(
                     scopeType: 'ec',
@@ -239,10 +241,10 @@ class ValideParcoursLicence implements ValideParcoursInterface
 
             // ECTS via DTO
             // StructureEc->heuresEctsEc contient addEcts(getFicheMatiereEcts())
-            $ects = $ecDto->getHeuresEctsEc()->ects ?? null; // adapte au vrai champ
+            $ects = $ecDto->getHeuresEctsEc()->ects;
             // règle : ECTS obligatoire ou non selon type diplôme (à injecter si besoin)
             // ici, j’illustre ton ancien comportement :
-            if ($ects === null || $ects <= 0.0 || $ects > 30.0) {
+            if ($ects <= 0.0 || $ects > 30.0) {
                 $status = ValidationStatusEnum::INVALID;
                 $result->addIssue(new ValidationIssueDto(
                     scopeType: 'ec',
@@ -255,9 +257,9 @@ class ValideParcoursLicence implements ValideParcoursInterface
                 ));
             }
 
-            // Heures via DTO
-            $heuresOk = $ecDto->getHeuresEctsEc()->etatHeures ?? 'Complet'; // adapte
-            if ($heuresOk !== 'Complet' && $ec->getNatureUeEc()?->isChoix() === false && $ec->getNatureUeEc()?->isLibre() === false) {
+            // Heures via Entity
+            $heuresOk = $ec->isHeuresComplete();
+            if (!$heuresOk && $nature !== null && !$nature->isChoix() && !$nature->isLibre()) {
                 $status = $this->worst($status, ValidationStatusEnum::INCOMPLETE);
                 $result->addIssue(new ValidationIssueDto(
                     scopeType: 'ec',
@@ -289,7 +291,7 @@ class ValideParcoursLicence implements ValideParcoursInterface
         $result->setEcStatus($ecId, $status);
 
         // Optionnel (mais utile) : poser UE status “au fil de l’eau”
-        if ($ueId !== '' && $status !== ValidationStatusEnum::VALID) {
+        if ($ueId !== null && $status !== ValidationStatusEnum::VALID) {
             $prev = $result->getUeStatuses()[$ueId] ?? ValidationStatusEnum::VALID;
             $result->setUeStatus($ueId, $this->worst($prev, $status === ValidationStatusEnum::INVALID ? ValidationStatusEnum::INVALID : ValidationStatusEnum::INCOMPLETE));
         }

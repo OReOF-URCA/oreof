@@ -34,11 +34,11 @@ class ButCompetence
 
     #[Groups('parcours_json_versioning')]
     #[ORM\Column(nullable: true)]
-    private array $situations = [];
+    private ?array $situations = [];
 
     #[Groups('parcours_json_versioning')]
     #[ORM\Column(nullable: true)]
-    private array $composantes = [];
+    private ?array $composantes = [];
 
     #[Groups('parcours_json_versioning')]
     #[ORM\OneToMany(mappedBy: 'competence', targetEntity: ButNiveau::class)]
@@ -109,7 +109,7 @@ class ButCompetence
         return $this;
     }
 
-    public function getSituations(): array
+    public function getSituations(): ?array
     {
         return $this->situations;
     }
@@ -121,7 +121,7 @@ class ButCompetence
         return $this;
     }
 
-    public function getComposantes(): array
+    public function getComposantes(): ?array
     {
         return $this->composantes;
     }

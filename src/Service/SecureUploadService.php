@@ -71,7 +71,7 @@ class SecureUploadService
         if ($extension === '') {
             $extension = strtolower((string)$file->getClientOriginalExtension());
         }
-        $extension = preg_replace('/[^a-z0-9]/', '', $extension ?? '') ?? '';
+        $extension = preg_replace('/[^a-z0-9]/', '', $extension) ?? '';
 
         if ($extension === '' || !in_array($extension, $config['allowed_extensions'], true)) {
             throw FileUploadException::extensionNotAllowed($extension === '' ? '(vide)' : $extension);
@@ -137,25 +137,6 @@ class SecureUploadService
         $safe = trim($safe);
 
         return $safe !== '' ? $safe : 'document';
-    }
-
-    private function doUpload(string $context, UploadedFile $file, array $config): string
-    {
-        $this->validateFile($file, $config['max_size'], $config['allowed_extensions'], $config['allowed_mime_types']);
-
-        $extension = $file->guessExtension() ?? $file->getClientOriginalExtension();
-        $targetDir = rtrim($config['target_dir'], '/');
-        $this->filesystem->mkdir($targetDir, 0750);
-
-        $storedFilename = date('Ymd_His') . '_' . bin2hex(random_bytes(6)) . '.' . $extension;
-
-        try {
-            $file->move($targetDir, $storedFilename);
-        } catch (\Exception $e) {
-            throw FileUploadException::uploadFailed($e->getMessage());
-        }
-
-        return $storedFilename;
     }
 
     public function resolveStoredFilePath(string $context, string $storedFilename): string

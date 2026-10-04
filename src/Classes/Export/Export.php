@@ -21,6 +21,7 @@ class Export
     private string $typeDocument;
     private array $formations;
     private ?CampagneCollecte $campagneCollecte;
+    private ?Composante $composante = null;
     private ?DateTimeInterface $date;
     private string $dir;
 
@@ -44,6 +45,16 @@ class Export
         private readonly ExportSyntheseModification $exportSyntheseModification,
     ) {
         $this->dir = $projectDirProvider->getProjectDir() . '/public/temp/';
+    }
+
+    public function setComposante(?Composante $composante): void
+    {
+        $this->composante = $composante;
+    }
+
+    public function getComposante(): ?Composante
+    {
+        return $this->composante;
     }
 
     public function setDate(?DateTimeInterface $date): void

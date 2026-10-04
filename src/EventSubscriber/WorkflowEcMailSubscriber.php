@@ -14,7 +14,7 @@ use App\Repository\ComposanteRepository;
 use App\Repository\FormationRepository;
 use App\Repository\UserRepository;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Workflow\Event\Event;
+use Symfony\Component\Workflow\Event\TransitionEvent;
 
 class WorkflowEcMailSubscriber implements EventSubscriberInterface
 {
@@ -34,7 +34,7 @@ class WorkflowEcMailSubscriber implements EventSubscriberInterface
         ];
     }
 
-    public function onReserveFiche(Event $event): void
+    public function onReserveFiche(TransitionEvent $event): void
     {
         $fiche = $event->getSubject();
         $parcours = $fiche->getParcours();

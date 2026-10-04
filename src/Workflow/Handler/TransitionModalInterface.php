@@ -10,6 +10,7 @@
 namespace App\Workflow\Handler;
 
 use App\Entity\DpeParcours;
+use App\Workflow\ModalView\TransitionModalView;
 
 interface TransitionModalInterface
 {
@@ -17,7 +18,6 @@ interface TransitionModalInterface
 
     /**
      * Prépare le contenu de la modal : validations, texte, données à afficher, etc.
-     * Retourne un DTO/array avec: title, description, blocks, canSubmit, submitLabel...
      */
-    public function buildModal(DpeParcours $dpeParcours, array $meta): TransitionModalViewModel;
+    public function buildModal(DpeParcours $dpeParcours, array $meta): TransitionModalView;
 }

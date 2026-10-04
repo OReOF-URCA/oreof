@@ -96,7 +96,7 @@ final class MetaDrivenFormFactory
 
                     foreach ($fields as $field) {
                         $value = $data[$field] ?? null;
-                        if (true === $value || (is_object($value) && null !== $value)) {
+                        if (true === $value || is_object($value)) {
                             return;
                         }
 

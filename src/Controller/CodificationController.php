@@ -86,20 +86,12 @@ class CodificationController extends BaseController
             if (!$user instanceof User) {
                 throw $this->createAccessDeniedException();
             }
-            $centres = $user->getUserCentres();
-            foreach ($centres as $centre) {
-                //todo: gérer avec un voter
-                if ($centre->getComposante() !== null && (
-                    in_array('Gestionnaire', $centre->getDroits()) ||
-                    in_array('Invité', $centre->getDroits()) ||
-                    in_array('ROLE_SCOL', $centre->getDroits()) ||
-                    in_array('Directeur', $centre->getDroits())
-                )) {
-                    $formations[] = $formationRepository->findByComposante(
-                        $centre->getComposante(),
-                        $this->getCampagneCollecte()
-                    );
-                }
+            $composantes = $user->getComposantes();
+            foreach ($composantes as $composante) {
+                $formations[] = $formationRepository->findByComposante(
+                    $composante,
+                    $this->getCampagneCollecte()
+                );
             }
 
             $formations[] = $formationRepository->findByComposanteDpe(
@@ -161,21 +153,12 @@ class CodificationController extends BaseController
         if (!$user instanceof User) {
             throw $this->createAccessDeniedException();
         }
-        $centres = $user->getUserCentres();
-        foreach ($centres as $centre) {
-            //todo: gérer avec un voter
-            if ($centre->getComposante() !== null && (
-                in_array('Gestionnaire', $centre->getDroits()) ||
-                in_array('Invité', $centre->getDroits()) ||
-                in_array('ROLE_SCOL', $centre->getDroits()) ||
-                in_array('Directeur', $centre->getDroits())
-            )) {
-                //todo: il faudrait pouvoir filtrer par ce que contient le rôle et pas juste le nom
-                $formations[] = $formationRepository->findByComposante(
-                    $centre->getComposante(),
-                    $this->getCampagneCollecte()
-                );
-            }
+        $composantes = $user->getComposantes();
+        foreach ($composantes as $composante) {
+            $formations[] = $formationRepository->findByComposante(
+                $composante,
+                $this->getCampagneCollecte()
+            );
         }
 
         $formations[] = $formationRepository->findByComposanteDpe(

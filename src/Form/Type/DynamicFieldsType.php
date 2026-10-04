@@ -140,10 +140,10 @@ class DynamicFieldsType extends AbstractType
             case 'text':
             case 'textarea':
                 if (isset($definition['max_length'])) {
-                    $constraints[] = new Assert\Length([
-                        'max' => $definition['max_length'],
-                        'maxMessage' => 'Le texte ne peut pas dépasser {{ limit }} caractères.',
-                    ]);
+                    $constraints[] = new Assert\Length(
+                        max: (int) $definition['max_length'],
+                        maxMessage: 'Le texte ne peut pas dépasser {{ limit }} caractères.',
+                    );
                     $options['attr']['maxlength'] = $definition['max_length'];
                 }
                 break;

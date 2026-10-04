@@ -47,7 +47,7 @@ readonly class ExportHandler
         $user = $this->userRepository->find($exportMessage->getUser());
         $lien = $this->export->exportFormations($exportMessage->getFormations(), $campagneCollecte ?? null);
 
-        if (null !== $user && $lien !== null) {
+        if (null !== $user) {
             $mail = (new TemplatedEmail())
                 ->from('oreof@univ-reims.fr')
                 ->to($user->getEmail())

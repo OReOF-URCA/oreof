@@ -98,7 +98,7 @@ class ElementPedagogiDTO6
             // $this->dateDebutIP;
             // $this->dateFinIP;
             // $this->descriptionElp;
-            $this->volume = $elementPedagogique->heuresEctsEc->sommeEcTotalPresDist();
+            $this->volume = (string)$elementPedagogique->heuresEctsEc->sommeEcTotalPresDist();
             $this->uniteVolume = TypeVolumeElpEnum::HE->value;
             $this->codPeriode = $elementPedagogique->elementConstitutif->getUe()->getSemestre()->display();
             // $this->numOrdrePresentationElp;
@@ -155,7 +155,7 @@ class ElementPedagogiDTO6
             // $this->dateDebutIP
             // $this->dateFinIP
             // $this->descriptionElp
-            $this->volume = $elementPedagogique->heuresEctsUe->sommeUeTotalPresDist();
+            $this->volume = (string)$elementPedagogique->heuresEctsUe->sommeUeTotalPresDist();
             $this->uniteVolume = TypeVolumeElpEnum::HE->value; // Avoir si l'on met en semestre ou en heure
             $this->codPeriode = $elementPedagogique->ue->getSemestre()->display();
             // $this->numOrdrePresentationElp
@@ -201,7 +201,7 @@ class ElementPedagogiDTO6
             // $this->dateDebutIP;
             // $this->dateFinIP;
             // $this->descriptionElp;
-            $this->volume = $elementPedagogique->heuresEctsSemestre->sommeSemestreTotalPresDist();
+            $this->volume = (string)$elementPedagogique->heuresEctsSemestre->sommeSemestreTotalPresDist();
             $this->uniteVolume = TypeVolumeElpEnum::HE->value;
             $this->codPeriode = $elementPedagogique->semestre->display();
             // $this->numOrdrePresentationElp;
@@ -282,21 +282,21 @@ class ElementPedagogiDTO6
 
     /**
      * Vérification sur la nature de l'élément pédagogique
-     * @param ?CodeNatuElpEnum Nature de l'élément à tester
+     * @param ?CodeNatuElpEnum $nature Nature de l'élément à tester
      * @param string $errorIdentifier Identifiant pour le message d'erreur
      * @param bool $withChecks Si des messages d'erreurs doivent être générés
-     * @return ?CodeNatuElpEnum Nature de l'ELP
+     * @return string Nature de l'ELP
      */
     private function checkNatureElp(?CodeNatuElpEnum $nature, string $errorIdentifier, bool $withChecks, int $parcoursID) : string {
-        if(($nature === null || $nature instanceof CodeNatuElpEnum === false) && $withChecks){
+        if(($nature === null) && $withChecks){
             ExportElpApogeeCommand::$errorMessagesArray[$parcoursID][] = "La nature de l'ELP est incorrecte. {$errorIdentifier}";
         }
-        return $nature->value;
+        return $nature !== null ? $nature->value : '';
     }
 
     /**
      * Vérifie le code composante fourni par le DTO
-     * @param StructureParcours DTO du parcours
+     * @param StructureParcours $dto DTO du parcours
      * @param string $errorIdentifier Indication pour le message d'erreur
      * @param bool $withChecks Vrai si des messages d'erreurs doivent être générés
      * @return string Code composante du parcours
@@ -311,11 +311,10 @@ class ElementPedagogiDTO6
 
     /**
      * Vérifie le libellé de l'UE
-     * @param ?string $libelle Libellé à tester
+     * @param StructureUe $elementPedagogique
+     * @param StructureParcours $dto
      * @param int $length Longueur max de la chaîne à renvoyer
-     * @param string $errorIdentifier Indication pour le message d'erreur
      * @param bool $withChecks Si des messages d'erreurs doivent être générés
-     * @param int $parcoursID Identifiant du parcours
      * @return string Le libellé réduit à la taille max
      */
     private function checkLibelleUE (
@@ -361,11 +360,11 @@ class ElementPedagogiDTO6
         StructureParcours $dto,
         bool $withChecks,
         string $type
-    ){
+    ): ?string {
         if( $elementPedagogique->semestre->getOrdre()
             && ($dto->parcours->getSigle() || ($dto->parcours->isParcoursDefaut() === true && $dto->parcours->getFormation()?->getSigle()))
             && $dto->parcours->getFormation()?->getSigle()
-            && $dto->parcours->getFormation()?->getTypeDiplome()->getLibelleCourt()
+            && $dto->parcours->getFormation()->getTypeDiplome()->getLibelleCourt()
         ){
             if($type === "libelleLong"){
                 return 'SEMESTRE ' . $elementPedagogique->ordre
@@ -398,11 +397,13 @@ class ElementPedagogiDTO6
                     ExportElpApogeeCommand::$errorMessagesArray[$dto->parcours->getId()][] = "La formation n'a pas de sigle - Parcours ID : {$dto->parcours->getId()} - Formation ID : {$dto->parcours->getFormation()->getId()}";
                 }
                 // Libellé court du type diplôme
-                if($dto->parcours->getFormation()?->getTypeDiplome()->getLibelleCourt() === null){
-                    ExportElpApogeeCommand::$errorMessagesArray[$dto->parcours->getId()][] = "Le Type Diplôme n'a pas de libellé court - Type Diplôme ID : {$dto->parcours->getFormation()?->getTypeDiplome()->getId()} - Formation ID : {$dto->parcours->getFormation()->getId()}";
+                if($dto->parcours->getFormation()->getTypeDiplome()->getLibelleCourt() === null){
+                    ExportElpApogeeCommand::$errorMessagesArray[$dto->parcours->getId()][] = "Le Type Diplôme n'a pas de libellé court - Type Diplôme ID : {$dto->parcours->getFormation()->getTypeDiplome()->getId()} - Formation ID : {$dto->parcours->getFormation()->getId()}";
                 }
             }
             return "AUCUN LIBELLE";
         }
+
+        return null;
     }
 }

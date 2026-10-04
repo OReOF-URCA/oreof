@@ -176,7 +176,7 @@ class DpeParcoursRepository extends ServiceEntityRepository
     }
 
 
-    public function findByCampagneWithModification(CampagneCollecte $campagneCollecte)
+    public function findByCampagneWithModification(CampagneCollecte $campagneCollecte): array
     {
         $query = $this->createQueryBuilder('d')
             ->innerJoin('d.formation', 'f')

@@ -1329,7 +1329,7 @@ class FicheMatiere implements McccCompletionCheckerInterface
         return $this->ficheMatiereTabStates;
     }
 
-    public function addFicheMatiereTabState(FicheMatiere $ficheMatiereTabState): static
+    public function addFicheMatiereTabState(FicheMatiereTabState $ficheMatiereTabState): static
     {
         if (!$this->ficheMatiereTabStates->contains($ficheMatiereTabState)) {
             $this->ficheMatiereTabStates->add($ficheMatiereTabState);
@@ -1339,7 +1339,7 @@ class FicheMatiere implements McccCompletionCheckerInterface
         return $this;
     }
 
-    public function removeFicheMatiereTabState(FicheMatiere $ficheMatiereTabState): static
+    public function removeFicheMatiereTabState(FicheMatiereTabState $ficheMatiereTabState): static
     {
         if ($this->ficheMatiereTabStates->removeElement($ficheMatiereTabState)) {
             // set the owning side to null (unless already changed)

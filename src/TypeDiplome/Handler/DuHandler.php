@@ -43,7 +43,7 @@ final class DuHandler extends AbstractTypeDiplomeHandler
 
     public function createFormMccc(ElementConstitutif|FicheMatiere $element): FormInterface
     {
-
+        throw new \LogicException('No MCCC form for DU.');
     }
 
     public function calculStructureParcours(Parcours $parcours, bool $withEcts = true, bool $withBcc = true): StructureParcours
@@ -57,9 +57,9 @@ final class DuHandler extends AbstractTypeDiplomeHandler
         return [];
     }
 
-    public function getStructureCompetences(Parcours $parcours)
+    public function getStructureCompetences(Parcours $parcours): array
     {
-        // TODO: Implement getStructureCompetences() method.
+        return [];
     }
 
     public function exportExcelMccc(CampagneCollecte $anneeUniversitaire, Parcours $parcours, ?DateTimeInterface $dateCfvu = null, ?DateTimeInterface $dateConseil = null, bool $versionFull = true): StreamedResponse
@@ -103,7 +103,7 @@ final class DuHandler extends AbstractTypeDiplomeHandler
         // TODO: Implement clearMcccs() method.
     }
 
-    public function getMcccs(ElementConstitutif|FicheMatiere $elementConstitutif): array|Collection
+    public function getMcccs(ElementConstitutif|FicheMatiere $elementConstitutif): array
     {
         // TODO: Implement getMcccs() method.
         return [];
@@ -137,7 +137,8 @@ final class DuHandler extends AbstractTypeDiplomeHandler
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre
     {
-        return new StructureSemestre();
+        $semestre = $semestreParcours->getSemestre() ?? new \App\Entity\Semestre();
+        return new StructureSemestre($semestre, $semestreParcours->getOrdre(), false, $semestreParcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
     }
 
     public function calculVersioning(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
@@ -147,12 +148,12 @@ final class DuHandler extends AbstractTypeDiplomeHandler
 
     public function checkIfMcccValide(ElementConstitutif|FicheMatiere $owner): bool
     {
-        // TODO: Implement checkIfMcccValide() method.
+        return true;
     }
 
     public function getValidator(): ValideParcoursInterface
     {
-        // TODO: Implement getValidator() method.
+        return new \App\TypeDiplome\Diplomes\Daeu\ValideParcoursDaeu();
     }
 
 }

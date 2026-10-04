@@ -50,7 +50,7 @@ class ExportMccc
         }
 
         foreach ($this->formations as $formationId) {
-            $formation = $this->formationRepository->findOneBy(['id' => $formationId, 'anneeUniversitaire' => $this->annee->getId()]);
+            $formation = $this->formationRepository->findOneBy(['id' => $formationId, 'dpe' => $this->annee]);
             if ($formation !== null) {
                 $typeDiplome = $this->typeDiplomeResolver->fromFormation($formation);
                 foreach ($formation->getParcours() as $parcours)

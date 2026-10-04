@@ -25,7 +25,7 @@ class SidebarParcours
 
     // Cette fonction sera rappelée par l'événement 'item-updated'
     #[LiveListener('item-updated')]
-    public function refresh()
+    public function refresh(): void
     { /* Refresh automatique */
     }
 }

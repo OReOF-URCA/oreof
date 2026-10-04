@@ -96,7 +96,7 @@ class ParcoursController extends BaseController
         }
 
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
-        $dto = $typeD->calculStructureParcours($parcours);
+        $dto = $typeD->calcul($parcours);
 
         return $this->render('parcours_v2/modifier.html.twig', array_merge($parameters, [
             'dto' => $dto,
@@ -251,7 +251,7 @@ class ParcoursController extends BaseController
             return $this->render('parcours_v2/tabs/_semestre.html.twig', $parameters);
         }
 
-        $dto = $typeD->calculStructureParcours($parcours);
+        $dto = $typeD->calcul($parcours);
 
         // Sinon renvoyer la page complète (index) qui inclura le fragment dans son corps
         return $this->render('parcours_v2/modifier.html.twig', array_merge($parameters, [
@@ -392,7 +392,7 @@ class ParcoursController extends BaseController
             return $this->render('parcours_v2/tabs/_' . $tabView . '.html.twig', $parameters);
         }
 
-        $dto = $typeD->calculStructureParcours($parcours); //todo: un dto plus léger pour juste la structure...
+        $dto = $typeD->calcul($parcours); //todo: un dto plus léger pour juste la structure...
 
         // Sinon renvoyer la page complète (index) qui inclura le fragment dans son corps
         return $this->render('parcours_v2/modifier.html.twig', array_merge($parameters, [

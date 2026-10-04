@@ -55,39 +55,78 @@ class FicheMatiereMutualisableRepository extends ServiceEntityRepository
                 ->setParameter('q', '%' . $q . '%');
         }
 
+        $joinedFmParcours = false;
+        $joinedFmFormation = false;
+        $joinedFmMention = false;
+
+        $joinedFParcours = false;
+        $joinedFFormation = false;
+        $joinedFMention = false;
+        $joinedFComposante = false;
+
         foreach ($options as $sort => $direction) {
             if ($sort === 'mention') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 'fm.parcours = p.id')
-                    ->leftJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->leftJoin(Mention::class, 'm', 'WITH', 'fo.mention = m.id')
-                    ->addOrderBy(
-                        'CASE
-                            WHEN fo.mention IS NOT NULL THEN m.libelle
-                            WHEN fo.mentionTexte IS NOT NULL THEN fo.mentionTexte
-                            ELSE fo.mentionTexte
-                            END',
-                        $direction
-                    );
+                if (!$joinedFmParcours) {
+                    $qb->leftJoin(Parcours::class, 'fm_p', 'WITH', 'fm.parcours = fm_p.id');
+                    $joinedFmParcours = true;
+                }
+                if (!$joinedFmFormation) {
+                    $qb->leftJoin(Formation::class, 'fm_fo', 'WITH', 'fm_p.formation = fm_fo.id');
+                    $joinedFmFormation = true;
+                }
+                if (!$joinedFmMention) {
+                    $qb->leftJoin(Mention::class, 'fm_m', 'WITH', 'fm_fo.mention = fm_m.id');
+                    $joinedFmMention = true;
+                }
+                $qb->addOrderBy(
+                    'CASE
+                        WHEN fm_fo.mention IS NOT NULL THEN fm_m.libelle
+                        WHEN fm_fo.mentionTexte IS NOT NULL THEN fm_fo.mentionTexte
+                        ELSE fm_fo.mentionTexte
+                        END',
+                    $direction
+                );
             } elseif ($sort === 'composante') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 'f.parcours = p.id')
-                    ->innerJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->innerJoin(Composante::class, 'co', 'WITH', 'fo.composantePorteuse = co.id')
-                    ->addOrderBy('co.libelle', $direction);
+                if (!$joinedFParcours) {
+                    $qb->leftJoin(Parcours::class, 'f_p', 'WITH', 'f.parcours = f_p.id');
+                    $joinedFParcours = true;
+                }
+                if (!$joinedFFormation) {
+                    $qb->innerJoin(Formation::class, 'f_fo', 'WITH', 'f_p.formation = f_fo.id');
+                    $joinedFFormation = true;
+                }
+                if (!$joinedFComposante) {
+                    $qb->innerJoin(Composante::class, 'f_co', 'WITH', 'f_fo.composantePorteuse = f_co.id');
+                    $joinedFComposante = true;
+                }
+                $qb->addOrderBy('f_co.libelle', $direction);
             } elseif ($sort === 'mentionmutualisable') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 'f.parcours = p.id')
-                    ->leftJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->leftJoin(Mention::class, 'm', 'WITH', 'fo.mention = m.id')
-                    ->addOrderBy(
-                        'CASE
-                            WHEN fo.mention IS NOT NULL THEN m.libelle
-                            WHEN fo.mentionTexte IS NOT NULL THEN fo.mentionTexte
-                            ELSE fo.mentionTexte
-                            END',
-                        $direction
-                    );
-            }elseif ($sort === 'parcours') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 'f.parcours = p.id')
-                    ->addOrderBy('p.libelle', $direction);
+                if (!$joinedFParcours) {
+                    $qb->leftJoin(Parcours::class, 'f_p', 'WITH', 'f.parcours = f_p.id');
+                    $joinedFParcours = true;
+                }
+                if (!$joinedFFormation) {
+                    $qb->leftJoin(Formation::class, 'f_fo', 'WITH', 'f_p.formation = f_fo.id');
+                    $joinedFFormation = true;
+                }
+                if (!$joinedFMention) {
+                    $qb->leftJoin(Mention::class, 'f_m', 'WITH', 'f_fo.mention = f_m.id');
+                    $joinedFMention = true;
+                }
+                $qb->addOrderBy(
+                    'CASE
+                        WHEN f_fo.mention IS NOT NULL THEN f_m.libelle
+                        WHEN f_fo.mentionTexte IS NOT NULL THEN f_fo.mentionTexte
+                        ELSE f_fo.mentionTexte
+                        END',
+                    $direction
+                );
+            } elseif ($sort === 'parcours') {
+                if (!$joinedFParcours) {
+                    $qb->leftJoin(Parcours::class, 'f_p', 'WITH', 'f.parcours = f_p.id');
+                    $joinedFParcours = true;
+                }
+                $qb->addOrderBy('f_p.libelle', $direction);
             } else {
                 $qb->addOrderBy('fm.' . $sort, $direction);
             }
@@ -99,55 +138,9 @@ class FicheMatiereMutualisableRepository extends ServiceEntityRepository
     public function findByParcours(
         ?UserInterface $user,
         array $options, string|null $q
-    ) {
+    ): array {
         //todo: ajouter les bons parcours uniquement...
-        $qb = $this->createQueryBuilder('f')
-            ->join('f.ficheMatiere', 'fm');
-
-        if ($q) {
-            $qb->andWhere('fm.libelle LIKE :q')
-                ->setParameter('q', '%' . $q . '%');
-        }
-
-        foreach ($options as $sort => $direction) {
-            if ($sort === 'mention') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 'fm.parcours = p.id')
-                    ->leftJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->leftJoin(Mention::class, 'm', 'WITH', 'fo.mention = m.id')
-                    ->addOrderBy(
-                        'CASE
-                            WHEN fo.mention IS NOT NULL THEN m.libelle
-                            WHEN fo.mentionTexte IS NOT NULL THEN fo.mentionTexte
-                            ELSE fo.mentionTexte
-                            END',
-                        $direction
-                    );
-            } elseif ($sort === 'composante') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 'f.parcours = p.id')
-                    ->innerJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->innerJoin(Composante::class, 'co', 'WITH', 'fo.composantePorteuse = co.id')
-                    ->addOrderBy('co.libelle', $direction);
-            } elseif ($sort === 'mentionmutualisable') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 'f.parcours = p.id')
-                    ->leftJoin(Formation::class, 'fo', 'WITH', 'p.formation = fo.id')
-                    ->leftJoin(Mention::class, 'm', 'WITH', 'fo.mention = m.id')
-                    ->addOrderBy(
-                        'CASE
-                            WHEN fo.mention IS NOT NULL THEN m.libelle
-                            WHEN fo.mentionTexte IS NOT NULL THEN fo.mentionTexte
-                            ELSE fo.mentionTexte
-                            END',
-                        $direction
-                    );
-            }elseif ($sort === 'parcours') {
-                $qb->leftJoin(Parcours::class, 'p', 'WITH', 'f.parcours = p.id')
-                    ->addOrderBy('p.libelle', $direction);
-            } else {
-                $qb->addOrderBy('fm.' . $sort, $direction);
-            }
-        }
-
-        return $qb->getQuery()->getResult();
+        return $this->findAllBy($options, $q);
     }
 
     public function findByFicheMatieres(FicheMatiere $ficheMatiere): array

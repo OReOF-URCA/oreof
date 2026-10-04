@@ -32,6 +32,10 @@ class DpeDemandeSubscriber implements EventSubscriberInterface
     {
         $dpeDemande = $event->getDpeDemande();
         $user = $event->getUser();
+        if ($user === null || $user->getEmail() === null) {
+            return;
+        }
+
         $this->mailer->initEmail();
         $this->mailer->setTemplate(
             'mails/dpe/dpe_demande_created.html.twig',
@@ -44,7 +48,7 @@ class DpeDemandeSubscriber implements EventSubscriberInterface
         ];
         $withDpe = false;
 
-        if ($dpe !== null && $dpe->getId() !== $user->getId()) {
+        if ($dpe !== null && $dpe->getId() !== $user->getId() && $dpe->getEmail() !== null) {
             $mails[] = $dpe->getEmail();
             $withDpe = true;
         }
@@ -65,6 +69,9 @@ class DpeDemandeSubscriber implements EventSubscriberInterface
     {
         $dpeDemande = $event->getDpeDemande();
         $user = $event->getUser();
+        if ($user === null || $user->getEmail() === null) {
+            return;
+        }
 
         $this->mailer->initEmail();
         $this->mailer->setTemplate(

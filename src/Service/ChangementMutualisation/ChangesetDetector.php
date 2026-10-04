@@ -43,7 +43,8 @@ class ChangesetDetector
         // Filtrer les valeurs nulles identiques et nettoyer
         $changementsReels = [];
         foreach ($changeset as $champ => $valeurs) {
-            [$ancienne, $nouvelle] = $valeurs;
+            $ancienne = $valeurs[0] ?? null;
+            $nouvelle = $valeurs[1] ?? null;
 
             // Ignorer si les deux valeurs sont identiques (même null)
             if ($this->sontValeursDifferentes($ancienne, $nouvelle)) {

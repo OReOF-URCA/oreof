@@ -21,10 +21,13 @@ use App\Entity\Parcours;
 use App\Entity\Semestre;
 use App\Entity\SemestreMutualisable;
 use App\Entity\SemestreParcours;
+use App\Entity\TimelineDate;
 use App\Entity\Ue;
 use App\Entity\UeMutualisable;
+use App\Enums\TimelineDateFlagEnum;
 use App\Enums\TypeModificationDpeEnum;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -52,8 +55,14 @@ class DuplicateForNewAnneeCommand extends Command
 
     private EntityManagerInterface $entityManager;
 
+    /**
+     * @var array<int, array{name: string, value: string}>
+     */
     private array $initialisationErrorValue = [];
 
+    /**
+     * @var array<int, mixed>
+     */
     private array $entitiesArray = [];
 
     public function __construct(
@@ -83,19 +92,22 @@ class DuplicateForNewAnneeCommand extends Command
         $anneeSource = $input->getOption('annee-source');
 
         // Sélection de l'année à dupliquer
-        if(isset($anneeSource) === false) {
+        if ($anneeSource === null || !is_numeric($anneeSource)) {
             $io->error("Il faut définir l'année à copier (PK : Campagne Collecte) !");
             return Command::INVALID;
         }
 
+        $anneeSourceId = (int) $anneeSource;
+
+        /** @var CampagneCollecte|null $campagneCollecteSource */
         $campagneCollecteSource = $this->entityManager
             ->getRepository(CampagneCollecte::class)
-            ->findOneById($anneeSource);
+            ->find($anneeSourceId);
 
         // Vérification si la campagne de collecte sélectionnée
         // existe en base de données
-        if(!$campagneCollecteSource) {
-            $io->error("Aucune campagne de collecte n'a été trouvée pour cet identifiant ({$anneeSource}).");
+        if (!$campagneCollecteSource) {
+            $io->error("Aucune campagne de collecte n'a été trouvée pour cet identifiant ({$anneeSourceId}).");
             return Command::INVALID;
         }
 
@@ -103,18 +115,18 @@ class DuplicateForNewAnneeCommand extends Command
 
         $io->writeln("Initialisation de la nouvelle année universitaire (BD) à créer...");
         $newAnneeUniversitaire = new AnneeUniversitaire();
-        $libelleNewAnnee = $io->ask($promptLibelle['libelleNewAnnee']['askPrompt']);
-        $anneeNewAnnee = $io->ask($promptLibelle['anneeNewAnnee']['askPrompt']);
+        $libelleNewAnnee = (string) $io->ask($promptLibelle['libelleNewAnnee']['askPrompt']);
+        $anneeNewAnnee = (string) $io->ask($promptLibelle['anneeNewAnnee']['askPrompt']);
 
         $io->writeln("Initialisation de la nouvelle campagne de collecte à créer (BD)...");
         $newCampagneCollecte = new CampagneCollecte();
-        $libelleNewCampagne = $io->ask($promptLibelle['libelleNewCampagne']['askPrompt']);
-        $anneeNewCampagne = $io->ask($promptLibelle['anneeNewCampagne']['askPrompt']);
-        $dateOuvertureNewCampagne = $io->ask($promptLibelle['dateOuvertureNewCampagne']['askPrompt']);
-        $dateClotureNewCampagne = $io->ask($promptLibelle['dateClotureNewCampagne']['askPrompt']);
-        $dateTransmissionSesNewCampagne = $io->ask($promptLibelle['dateTransmissionSesNewCampagne']['askPrompt']);
-        $dateCfvuNewCampagne = $io->ask($promptLibelle['dateCfvuNewCampagne']['askPrompt']);
-        $datePublicationNewCampagne = $io->ask($promptLibelle['datePublicationNewCampagne']['askPrompt']);
+        $libelleNewCampagne = (string) $io->ask($promptLibelle['libelleNewCampagne']['askPrompt']);
+        $anneeNewCampagne = (string) $io->ask($promptLibelle['anneeNewCampagne']['askPrompt']);
+        $dateOuvertureNewCampagne = (string) $io->ask($promptLibelle['dateOuvertureNewCampagne']['askPrompt']);
+        $dateClotureNewCampagne = (string) $io->ask($promptLibelle['dateClotureNewCampagne']['askPrompt']);
+        $dateTransmissionSesNewCampagne = (string) $io->ask($promptLibelle['dateTransmissionSesNewCampagne']['askPrompt']);
+        $dateCfvuNewCampagne = (string) $io->ask($promptLibelle['dateCfvuNewCampagne']['askPrompt']);
+        $datePublicationNewCampagne = (string) $io->ask($promptLibelle['datePublicationNewCampagne']['askPrompt']);
 
         // Liens entre les données saisies dans la commande,
         // les libellés, messages d'erreurs, et les futurs objets
@@ -169,8 +181,8 @@ class DuplicateForNewAnneeCommand extends Command
         $this->testInitialisationInput($testInitialisationStructure);
 
         // Vérification des formats des données, pour alimenter les objets ORM.
-        if(count($this->initialisationErrorValue) > 0) {
-            foreach($this->initialisationErrorValue as $errorToDisplay) {
+        if (count($this->initialisationErrorValue) > 0) {
+            foreach ($this->initialisationErrorValue as $errorToDisplay) {
                 $errorTxt = $promptLibelle[$errorToDisplay['name']]['errorMessage'] . " ({$errorToDisplay['value']}) ";
                 $io->writeln($errorTxt);
             }
@@ -184,23 +196,28 @@ class DuplicateForNewAnneeCommand extends Command
 
         // Nouvelle Année Universitaire
         $newAnneeUniversitaire->setLibelle($libelleNewAnnee);
-        $newAnneeUniversitaire->setAnnee($anneeNewAnnee);
+        $newAnneeUniversitaire->setAnnee((int) $anneeNewAnnee);
 
         // Préparation de l'enregistrement en base de données
         $this->entityManager->persist($newAnneeUniversitaire);
 
         // Nouvelle Campagne de Collecte
         $newCampagneCollecte->setLibelle($libelleNewCampagne);
-        $newCampagneCollecte->setAnnee($anneeNewCampagne);
+        $newCampagneCollecte->setAnnee((int) $anneeNewCampagne);
         $newCampagneCollecte->setDefaut(false);
-        $newCampagneCollecte->setDateOuvertureDpe($this->createDateOrEmpty($dateOuvertureNewCampagne));
-        $newCampagneCollecte->setDateClotureDpe($this->createDateOrEmpty($dateClotureNewCampagne));
         $newCampagneCollecte->setDateTransmissionSes($this->createDateOrEmpty($dateTransmissionSesNewCampagne));
         $newCampagneCollecte->setDateCfvu($this->createDateOrEmpty($dateCfvuNewCampagne));
         $newCampagneCollecte->setDatePublication($this->createDateOrEmpty($datePublicationNewCampagne));
         $newCampagneCollecte->setAnneeUniversitaire($newAnneeUniversitaire);
         // Code APOGEE
         $newCampagneCollecte->setCodeApogee(self::CODE_APOGEE_CAMPAGNE_COLLECTE);
+
+        // Timeline dates
+        $this->setupTimelineDate($newCampagneCollecte, TimelineDateFlagEnum::OUVERTURE_COLLECTE, $this->createDateOrEmpty($dateOuvertureNewCampagne), 'Ouverture de la collecte', 'fa-solid fa-play');
+        $this->setupTimelineDate($newCampagneCollecte, TimelineDateFlagEnum::CLOTURE_COLLECTE, $this->createDateOrEmpty($dateClotureNewCampagne), 'Clôture de la collecte', 'fa-solid fa-stop');
+        $this->setupTimelineDate($newCampagneCollecte, TimelineDateFlagEnum::TRANSMISSION_SES, $this->createDateOrEmpty($dateTransmissionSesNewCampagne), 'Transmission SES', 'fa-solid fa-paper-plane');
+        $this->setupTimelineDate($newCampagneCollecte, TimelineDateFlagEnum::CFVU, $this->createDateOrEmpty($dateCfvuNewCampagne), 'Passage CFVU', 'fa-solid fa-gavel');
+        $this->setupTimelineDate($newCampagneCollecte, TimelineDateFlagEnum::PUBLICATION, $this->createDateOrEmpty($datePublicationNewCampagne), 'Publication de l’offre', 'fa-solid fa-globe');
 
         // Préparation de l'enregistrement en base de données
         $this->entityManager->persist($newCampagneCollecte);
@@ -211,7 +228,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Formation::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Formations'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $formation) {
@@ -238,7 +255,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Parcours::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Parcours'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $parcours) {
@@ -266,7 +283,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(DpeParcours::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'DPE Parcours'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $dpeParcours) {
@@ -300,7 +317,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(BlocCompetence::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Blocs de Compétences'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $blocCompetence) {
@@ -332,7 +349,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Competence::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Compétences'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $competence) {
@@ -359,7 +376,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(ButCompetence::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'BUT Compétences'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $butCompetence) {
@@ -387,7 +404,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(ButNiveau::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'BUT Niveaux'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $butNiveau) {
@@ -413,7 +430,7 @@ class DuplicateForNewAnneeCommand extends Command
          */
         $this->entitiesArray = $this->entityManager
             ->getRepository(ButApprentissageCritique::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'BUT Apprentissage Critique'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $butAppCrit) {
@@ -439,7 +456,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(FicheMatiere::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Fiches Matières'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ficheMatiere) {
@@ -487,7 +504,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(FicheMatiereMutualisable::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Fiches Matières Mutualisables'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ficheMutu) {
@@ -518,7 +535,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Semestre::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Semestres'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $semestre) {
@@ -542,7 +559,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(SemestreParcours::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Semestres Parcours'...");
         $io->progressStart(count($this->entitiesArray));
         $tabAnnee = [];
@@ -588,7 +605,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(SemestreMutualisable::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Semestres Mutualisables'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $semestreMutualisable) {
@@ -628,7 +645,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Ue::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'UE'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ue) {
@@ -656,7 +673,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Ue::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'UE Parents'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ueToProcess) {
@@ -684,7 +701,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(UeMutualisable::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'UE Mutualisables'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ueMutualisable) {
@@ -727,7 +744,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(ElementConstitutif::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Éléments Constitutifs'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ec) {
@@ -775,7 +792,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(ElementConstitutif::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'EC Parents'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $ecParentToLink) {
@@ -805,7 +822,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Contact::class)
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'Adresses' et des 'Contacts'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $contact) {
@@ -834,7 +851,7 @@ class DuplicateForNewAnneeCommand extends Command
          * 
          */
         $this->entitiesArray = $this->entityManager->getRepository(Mccc::class) 
-            ->findFromAnneeUniversitaire($anneeSource);
+            ->findFromAnneeUniversitaire($anneeSourceId);
         $io->writeln("Copie des 'MCCC'...");
         $io->progressStart(count($this->entitiesArray));
         foreach($this->entitiesArray as $mccc) {
@@ -867,15 +884,41 @@ class DuplicateForNewAnneeCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function checkYear(string $yearToCheck) {
+    private function setupTimelineDate(
+        CampagneCollecte $campagne,
+        TimelineDateFlagEnum $flag,
+        ?DateTimeInterface $date,
+        string $libelle,
+        string $icone,
+    ): void {
+        if ($date === null) {
+            return;
+        }
+
+        $time = new TimelineDate();
+        $time->setCampagneCollecte($campagne);
+        $time->setLibelle($libelle);
+        $time->setIcone($icone);
+        $dt = $date instanceof DateTime ? $date : new DateTime($date->format('Y-m-d H:i:s'), $date->getTimezone());
+        $time->setDate($dt);
+        $time->setFlag($flag);
+
+        $campagne->addTimelineDate($time);
+        $this->entityManager->persist($time);
+    }
+
+    private function checkYear(string $yearToCheck): bool
+    {
         return preg_match('/^[0-9]{4}$/', $yearToCheck) === 1;
     }
 
-    private function checkDoubleYear(string $doubleYearToCheck) {
+    private function checkDoubleYear(string $doubleYearToCheck): bool
+    {
         return preg_match('/^[0-9]{4}-[0-9]{4}$/', $doubleYearToCheck) === 1;
     }
 
-    private function checkFullDate(string $dateToCheck) {
+    private function checkFullDate(string $dateToCheck): bool
+    {
         return 
             (   preg_match('/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/', $dateToCheck) === 1
                 && DateTime::createFromFormat('Y-m-d', $dateToCheck) !== false 
@@ -883,15 +926,20 @@ class DuplicateForNewAnneeCommand extends Command
             || $dateToCheck === 'empty';
     }
 
-    private function createDateOrEmpty(string $dateOrEmpty) : DateTime|null {
-        if($dateOrEmpty === 'empty'){
+    private function createDateOrEmpty(string $dateOrEmpty): ?DateTime
+    {
+        if ($dateOrEmpty === 'empty') {
             return null;
         }
 
         return new DateTime($dateOrEmpty);
     }
 
-    private function getInitialisationLibelleArray() {
+    /**
+     * @return array<string, array{askPrompt: string, errorMessage: string}>
+     */
+    private function getInitialisationLibelleArray(): array
+    {
         return [
             'libelleNewAnnee' => [
                     'askPrompt' => "Libellé de la nouvelle année universitaire [YYYY-YYYY]",
@@ -932,30 +980,35 @@ class DuplicateForNewAnneeCommand extends Command
         ];
     }
 
-    private function testInitialisationInput(array $inputArray) {
-        foreach($inputArray as $inputData){
-            switch($inputData['type']){
+    /**
+     * @param array<int, array{type: string, libelle: string, value: string|null}> $inputArray
+     */
+    private function testInitialisationInput(array $inputArray): void
+    {
+        foreach ($inputArray as $inputData) {
+            $value = $inputData['value'] ?? '';
+            switch ($inputData['type']) {
                 case 'year':
-                    if($this->checkYear($inputData['value']) === false) {
+                    if ($this->checkYear($value) === false) {
                         $this->initialisationErrorValue[] = [
                             'name' => $inputData['libelle'],
-                            'value' => $inputData['value']
+                            'value' => $value,
                         ];
                     }
                     break;
                 case 'doubleYear': 
-                    if($this->checkDoubleYear($inputData['value']) === false) {
+                    if ($this->checkDoubleYear($value) === false) {
                         $this->initialisationErrorValue[] = [
                             'name' => $inputData['libelle'], 
-                            'value' => $inputData['value']
+                            'value' => $value,
                         ];
                     }
                     break;
                 case 'fullDate': 
-                    if($this->checkFullDate($inputData['value']) === false) {
+                    if ($this->checkFullDate($value) === false) {
                         $this->initialisationErrorValue[] = [
                             'name' => $inputData['libelle'],
-                            'value' => $inputData['value']
+                            'value' => $value,
                         ];
                     }
                     break;
@@ -963,18 +1016,21 @@ class DuplicateForNewAnneeCommand extends Command
         }
     }
 
-    private function emptyEntitiesArray() : void {
+    private function emptyEntitiesArray(): void
+    {
         $this->entitiesArray = [];
     } 
 
-    private function saveAndCleanUp(SymfonyStyle $io) : void {
+    private function saveAndCleanUp(SymfonyStyle $io): void
+    {
         $this->emptyEntitiesArray();
         $io->writeln("Enregistrement en base de données...");
         $this->entityManager->flush();
     }
 
-    private function getNewSlugForFicheMatiere(string $initialSlug) : string {
-        if(preg_match('/(.*)-2025$/', $initialSlug, $matches)) {
+    private function getNewSlugForFicheMatiere(string $initialSlug): string
+    {
+        if (preg_match('/(.*)-2025$/', $initialSlug, $matches)) {
             return $matches[1] . self::SLUG_YEAR_SUFFIX;
         }
 

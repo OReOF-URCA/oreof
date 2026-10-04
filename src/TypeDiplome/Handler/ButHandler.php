@@ -79,7 +79,7 @@ final class ButHandler extends AbstractTypeDiplomeHandler implements McccDisplay
 
     public function createFormMccc(ElementConstitutif|FicheMatiere $element): FormInterface
     {
-
+        throw new \LogicException('No MCCC form for BUT.');
     }
 
     public function calculStructureParcours(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
@@ -203,7 +203,7 @@ final class ButHandler extends AbstractTypeDiplomeHandler implements McccDisplay
         $this->entityManager->flush();
     }
 
-    public function getMcccs(ElementConstitutif|FicheMatiere $elementConstitutif): array|Collection
+    public function getMcccs(ElementConstitutif|FicheMatiere $elementConstitutif): array
     {
         $mcccs = $elementConstitutif->getMcccs();
         $tab = [];
@@ -266,7 +266,8 @@ final class ButHandler extends AbstractTypeDiplomeHandler implements McccDisplay
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre
     {
-        return new StructureSemestre();
+        $semestre = $semestreParcours->getSemestre() ?? new \App\Entity\Semestre();
+        return new StructureSemestre($semestre, $semestreParcours->getOrdre(), false, $semestreParcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
     }
 
     public function getValidator(): ValideParcoursInterface

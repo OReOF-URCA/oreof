@@ -30,7 +30,7 @@ final class FormationTabRegistry
             'localisation' => FormationStep1Type::class,
             'presentation' => FormationStep2Type::class,
             'structure' => FormationStep3Type::class,
-
+            default => throw new \InvalidArgumentException('Unknown tab: ' . $tabKey),
         };
     }
 

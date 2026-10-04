@@ -44,6 +44,10 @@ final class KeyModeTranslator implements TranslatorInterface, TranslatorBagInter
 
     public function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
     {
+        if ($this->context->isEnabled()) {
+            return $id;
+        }
+
         $domainName = $domain ?? 'messages';
         $localeName = $locale ?? $this->inner->getLocale();
         $translated = $this->inner->trans($id, $parameters, $domain, $locale);

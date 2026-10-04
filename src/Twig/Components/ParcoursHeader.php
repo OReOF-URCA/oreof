@@ -49,7 +49,7 @@ final class ParcoursHeader
 
     public int $progressPercentage = 50;
     public int $completedSteps = 0;
-    public DpeParcours $dpeParcours;
+    public ?DpeParcours $dpeParcours = null;
     public string $place = '';
     #[LiveProp(writable: true)]
     public ?int $parcoursId = null;
@@ -70,19 +70,6 @@ final class ParcoursHeader
     )
     {
         $this->process = $this->validationProcess->getProcess();
-    }
-
-
-    private function reloadDerived(): void
-    {
-        // utile si l'action a pu être appelée sans que postMount soit (ré)exécuté
-        if (($this->parcours === null || $this->formation === null) && $this->parcoursId !== null) {
-            $this->postMount(); // ou répéter le chargement minimal
-            return;
-        }
-        // recalculer l'historique / étapes
-        $this->init();
-        $this->getHistorique();
     }
 
     #[PostMount]
@@ -152,7 +139,7 @@ final class ParcoursHeader
         return array_keys($this->dpeParcoursWorkflow->getMarking($this->dpeParcours)->getPlaces())[0];
     }
 
-    public function getHistorique()
+    public function getHistorique(): void
     {
         if (null === $this->dpeParcours) {
             return;
@@ -232,7 +219,7 @@ final class ParcoursHeader
     }
 
     #[LiveAction]
-    public function reouvrir(#[LiveArg] $key): void
+    public function reouvrir(#[LiveArg] string $key): void
     {
         $url = match ($key) {
             'reouvrir_dpe' => $this->urlGenerator->generate('app_actualite_index', [

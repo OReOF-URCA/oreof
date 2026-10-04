@@ -41,10 +41,11 @@ abstract class ValideStructure extends AbstractValide
             $etatGlobal = self::ERREUR;
         } else {
             foreach (self::$parcours->getSemestreParcours() as $semestreParcour) {
-                if ($semestreParcour->getSemestre()?->getSemestreRaccroche() !== null) {
-                    $sem = $semestreParcour->getSemestre()?->getSemestreRaccroche()?->getSemestre();
+                $semestre = $semestreParcour->getSemestre();
+                if ($semestre?->getSemestreRaccroche() !== null) {
+                    $sem = $semestre->getSemestreRaccroche()->getSemestre();
                 } else {
-                    $sem = $semestreParcour->getSemestre();
+                    $sem = $semestre;
                 }
 
                 self::$structure['semestres'][$semestreParcour->getOrdre()]['global'] = self::COMPLET;
@@ -65,7 +66,6 @@ abstract class ValideStructure extends AbstractValide
                     $nbEctsAttendus = self::$typeDiplome?->getNbEctsParSemestre();
                     $ectsActifs = self::$typeDiplome?->isHasEcts() ?? true;
                     $quotaDepasse = $ectsActifs && $nbEctsAttendus !== null
-                        && ($sem->isNonDispense() === false || $semestreParcour->isOuvert() === true)
                         && self::totalEctsSemestre($sem) !== (float)$nbEctsAttendus;
                     if ($quotaDepasse) {
                         self::$structure['semestres'][$semestreParcour->getOrdre()]['global'] = self::ERREUR;
@@ -86,7 +86,7 @@ abstract class ValideStructure extends AbstractValide
 
     private static function valideUe(Ue $ue, int $ordreSemestre): void
     {
-        if ($ue !== null && $ue->getUeRaccrochee() !== null) {
+        if ($ue->getUeRaccrochee() !== null) {
             $ue = $ue->getUeRaccrochee()->getUe();
         }
 
@@ -105,7 +105,7 @@ abstract class ValideStructure extends AbstractValide
                     }
                 }
             } else {
-                if ($ue !== null && $ue->getUeEnfants()->count() > 0 && $ue->getNatureUeEc()?->isChoix() === true) {
+                if ($ue->getUeEnfants()->count() > 0 && $ue->getNatureUeEc()?->isChoix() === true) {
                     self::$structure['semestres'][$ordreSemestre]['ues'][$ue->getId()]['ue'] = $ue;
                     self::$structure['semestres'][$ordreSemestre]['ues'][$ue->getId()]['enfants'] = [];
                     self::$structure['semestres'][$ordreSemestre]['ues'][$ue->getId()]['global'] = self::COMPLET;
@@ -201,13 +201,12 @@ abstract class ValideStructure extends AbstractValide
         if ($ec->getNatureUeEc()?->isLibre() === true) {
             if (self::$typeDiplome !== null && self::$typeDiplome->isHasEcts()) {
                 $ects = $getElement->getFicheMatiereEcts();
-                if (self::$typeDiplome->isEctsObligatoireSurEc() === false && ($ects === null || $ects === 0.0)) {
+                if (self::$typeDiplome->isEctsObligatoireSurEc() === false && $ects === 0.0) {
                     $t['erreur'][] = 'ECTS non renseignés, mais ce type de diplôme l\'autorise';
                     $etatEc = self::INCOMPLET_ECTS;
                     self::$errors[] = 'ECTS non renseignés, mais ce type de diplôme l\'autorise pour l\'' . $ec->getCode() . ' de l\'' . $ue->display(self::$parcours);
                 } else {
-                    if ($ects === null ||
-                        $ects <= 0.0 ||
+                    if ($ects <= 0.0 ||
                         $ects > 30.0) {
                         $t['erreur'][] = 'ECTS non renseignés';
                         $etatEc = self::ERREUR;
@@ -234,13 +233,12 @@ abstract class ValideStructure extends AbstractValide
             }
             if (self::$typeDiplome !== null && self::$typeDiplome->isHasEcts()) {
                 $ects = $getElement->getFicheMatiereEcts();
-                if (self::$typeDiplome->isEctsObligatoireSurEc() === false && ($ects === null || $ects === 0.0)) {
+                if (self::$typeDiplome->isEctsObligatoireSurEc() === false && $ects === 0.0) {
                     $t['erreur'][] = 'ECTS non renseignés, mais ce type de diplôme l\'autorise';
                     $etatEc = self::INCOMPLET_ECTS;
                     self::$errors[] = 'ECTS non renseignés, mais ce type de diplôme l\'autorise pour l\'' . $ec->getCode() . ' de l\'' . $ue->display(self::$parcours);
                 } else {
-                    if ($ects === null ||
-                        $ects <= 0.0 ||
+                    if ($ects <= 0.0 ||
                         $ects > 30.0) {
                         $t['erreur'][] = 'ECTS non renseignés';
                         $etatEc = self::ERREUR;
@@ -284,10 +282,11 @@ abstract class ValideStructure extends AbstractValide
         self::$structure['semestres'] = [];
         self::$structure['global'] = self::COMPLET;
         foreach (self::$parcours->getSemestreParcours() as $semestreParcour) {
-            if ($semestreParcour->getSemestre()?->getSemestreRaccroche() !== null) {
-                $sem = $semestreParcour->getSemestre()?->getSemestreRaccroche()?->getSemestre();
+            $semestre = $semestreParcour->getSemestre();
+            if ($semestre?->getSemestreRaccroche() !== null) {
+                $sem = $semestre->getSemestreRaccroche()->getSemestre();
             } else {
-                $sem = $semestreParcour->getSemestre();
+                $sem = $semestre;
             }
 
             if ($sem !== null && $sem->isNonDispense() === false) {
@@ -330,33 +329,30 @@ abstract class ValideStructure extends AbstractValide
                                 self::$structure['global'] = self::INCOMPLET;
                             }
 
+                            $fm = $ec->getFicheMatiere();
                             $etatBcc = '';
-                            foreach ($ec->getFicheMatiere()?->getElementConstitutifs() as $ece) {
-                                if ($ece->getEtatBcc(self::$parcours) === 'Complet') {
-                                    $etatBcc = 'Complet';
+                            if ($fm !== null) {
+                                foreach ($fm->getElementConstitutifs() as $ece) {
+                                    if ($ece->getEtatBcc(self::$parcours) === 'Complet') {
+                                        $etatBcc = 'Complet';
+                                    }
                                 }
                             }
 
                             if ($etatBcc !== 'Complet') {
                                 self::$structure['semestres'][$semestreParcour->getOrdre()]['ues'][$ue->getId()]['ecs'][$ec->getId()]['erreur'][] = 'BCC incomplet ou non renseignés';
-                                self::$errors[] = 'BCC incomplet ou non renseignés pour l\'' . $ec->getFicheMatiere()?->getSigle() . ' de l\'' . $ue->display(self::$parcours);
+                                self::$errors[] = 'BCC incomplet ou non renseignés pour l\'' . ($fm?->getSigle() ?? $ec->getCode()) . ' de l\'' . $ue->display(self::$parcours);
                             }
 
-                            if ($ec->getFicheMatiere()?->etatStructure() !== 'Complet' && $ec->getFicheMatiere()->isSansHeures() === false) {
+                            if ($fm !== null && $fm->etatStructure() !== 'Complet' && $fm->isSansHeures() === false) {
                                 self::$structure['semestres'][$semestreParcour->getOrdre()]['ues'][$ue->getId()]['ecs'][$ec->getId()]['erreur'][] = 'Volumes horaires incomplet ou non renseignés';
-                                self::$errors[] = 'Volumes horaires incomplet ou non renseignés pour l\'' . $ec->getFicheMatiere()?->getSigle() . ' de l\'' . $ue->display(self::$parcours);
+                                self::$errors[] = 'Volumes horaires incomplet ou non renseignés pour l\'' . $fm->getSigle() . ' de l\'' . $ue->display(self::$parcours);
                             }
 
                             if ($ec->getTypeEc() === null) {
                                 self::$structure['semestres'][$semestreParcour->getOrdre()]['ues'][$ue->getId()]['ecs'][$ec->getId()]['erreur'][] = 'Type EC (ressource ou SAE) non renseignés';
-                                self::$errors[] = 'Type EC (ressource ou SAE) non renseignés l\'' . $ec->getFicheMatiere()?->getSigle() . ' de l\'' . $ue->display(self::$parcours);
+                                self::$errors[] = 'Type EC (ressource ou SAE) non renseignés l\'' . ($fm?->getSigle() ?? $ec->getCode()) . ' de l\'' . $ue->display(self::$parcours);
                             }
-                        } elseif ($ec->getFicheMatiere() === null && $ec->getFicheMatiere()->getMcccs()->count() === 0 && $ec->getFicheMatiere()?->etatStructure() === 'À compléter' && $ec->getTypeEc() === null) {
-                            self::$structure['semestres'][$semestreParcour->getOrdre()]['ues'][$ue->getId()]['ecs'][$ec->getId()]['global'] = self::VIDE;
-                            self::$structure['semestres'][$semestreParcour->getOrdre()]['ues'][$ue->getId()]['ecs'][$ec->getId()]['erreur'] = [];
-                            self::$structure['semestres'][$semestreParcour->getOrdre()]['ues'][$ue->getId()]['global'] = self::INCOMPLET;
-                            self::$structure['global'] = self::INCOMPLET;
-                            $hasUe = self::INCOMPLET;
                         } else {
                             self::$structure['semestres'][$semestreParcour->getOrdre()]['ues'][$ue->getId()]['ecs'][$ec->getId()]['global'] = self::COMPLET;
                             self::$structure['semestres'][$semestreParcour->getOrdre()]['ues'][$ue->getId()]['ecs'][$ec->getId()]['erreur'] = [];
@@ -368,7 +364,6 @@ abstract class ValideStructure extends AbstractValide
                 $nbEctsAttendus = self::$parcours->getTypeDiplome()?->getNbEctsParSemestre();
                 $ectsActifs = self::$parcours->getTypeDiplome()?->isHasEcts() ?? true;
                 $quotaDepasse = $ectsActifs && $nbEctsAttendus !== null
-                    && $sem->isNonDispense() === false
                     && self::totalEctsSemestre($sem) !== (float)$nbEctsAttendus;
                 if ($quotaDepasse) {
                     self::$errors[] = 'Le semestre ' . $semestreParcour->getOrdre() . ' doit faire ' . $nbEctsAttendus . ' ECTS';

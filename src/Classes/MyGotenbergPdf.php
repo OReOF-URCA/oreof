@@ -11,10 +11,10 @@ namespace App\Classes;
 
 use App\Entity\Parcours;
 use App\Utils\Tools;
+use Sensiolabs\GotenbergBundle\Builder\Pdf\HtmlPdfBuilder;
+use Sensiolabs\GotenbergBundle\Enumeration\EmulatedMediaType;
 use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
 use Sensiolabs\GotenbergBundle\Processor\FileProcessor;
-use Sensiolabs\GotenbergBundle\Builder\BuilderFileInterface;
-use Sensiolabs\GotenbergBundle\Enumeration\EmulatedMediaType;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -48,7 +48,7 @@ class MyGotenbergPdf
 
     }
 
-    private function buildBuilder(string $template, array $context, string $name, array $options): BuilderFileInterface
+    private function buildBuilder(string $template, array $context, string $name, array $options): HtmlPdfBuilder
     {
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);

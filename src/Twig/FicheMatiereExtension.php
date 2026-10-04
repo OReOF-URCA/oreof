@@ -49,15 +49,18 @@ class FicheMatiereExtension extends AbstractExtension
         return false;
     }
 
-    public function getElementFromEc(ElementConstitutif $ec, Parcours $p) {
+    public function getElementFromEc(ElementConstitutif $ec, Parcours $p): GetElementConstitutif
+    {
         return new GetElementConstitutif($ec, $p);
     }
 
-    public function sortUeByOrder(Ue $a, Ue $b) {
+    public function sortUeByOrder(Ue $a, Ue $b): int
+    {
         return $this->getNumericOrderForUe($a) <=> $this->getNumericOrderForUe($b);
     }
 
-    private function getNumericOrderForUe(Ue $ue) {
+    private function getNumericOrderForUe(Ue $ue): int
+    {
         // Deux niveaux d'UE Parents
         if($ue->getUeParent()?->getUeParent() !== null) {
             return ($ue->getUeParent()->getUeParent()->getOrdre() * 100)

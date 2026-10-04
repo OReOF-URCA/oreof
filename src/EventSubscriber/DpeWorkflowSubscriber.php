@@ -40,15 +40,15 @@ class DpeWorkflowSubscriber implements EventSubscriberInterface
         $subject = $event->getSubject();
         $data = new WorkflowData($subject);
         $transition = $event->getTransition();
-        if (null === $subject || null === $transition) {
+        if (null === $transition) {
             return;
         }
-        $meta = $this->dpeParcoursWorkflow->getMetadataStore()->getTransitionMetadata($transition) ?? [];
+        $meta = $this->dpeParcoursWorkflow->getMetadataStore()->getTransitionMetadata($transition);
         $eventKey = sprintf('workflow.dpeParcours.transition.%s', $transition->getName());
         $context = [
             'subject' => '[ORéOF] ' . $data->getTitre($meta),
             'data' => $data,
-            'context' => $event->getContext() ?? [],
+            'context' => $event->getContext(),
         ];
         $recipients = $this->recipients->resolveRecipients('dpeParcours', $transition->getName(), $data);
         $this->notifier->notify($recipients['recipients'], $eventKey, $this->dpeParcoursWorkflow->getName(), $context);

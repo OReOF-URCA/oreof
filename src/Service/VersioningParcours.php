@@ -91,7 +91,7 @@ class VersioningParcours
         ]);
         // DTO
         $typeD = $this->typeD->get($parcours->getFormation()?->getTypeDiplome());
-        $dto = $typeD->calculStructureParcours($parcours);
+        $dto = $typeD->calcul($parcours);
         $dtoJson = $this->serializer->serialize($dto, 'json', [
             AbstractNormalizer::GROUPS => ['DTO_json_versioning'],
             'circular_reference_limit' => 2,
@@ -143,7 +143,7 @@ class VersioningParcours
         return $lastCfvu[0] ?? null;
     }
 
-    public function getLastVersionOrLastYearCfvu(Parcours $parcours)
+    public function getLastVersionOrLastYearCfvu(Parcours $parcours): ?ParcoursVersioning
     {
         // Dernière version CFVU
         $lastVersion = $this->entityManager->getRepository(ParcoursVersioning::class)->findLastCfvuVersion($parcours);
@@ -428,7 +428,7 @@ class VersioningParcours
                     html_entity_decode(
                         DiffHelper::calculate(
                             $this->getArrayAsHtmlDiffList($lastVersion->getCodesRome() ?? [], 'code'),
-                            $this->getArrayAsHtmlDiffList($parcours->getCodesRome() ?? [], 'code'),
+                            $this->getArrayAsHtmlDiffList($parcours->getCodesRome(), 'code'),
                             $rendererName,
                             $differOptions,
                             $rendererOptions
@@ -637,19 +637,19 @@ class VersioningParcours
         return $this->getLastVersion($parcours) !== null;
     }
 
-    public function loadJsonCfvu(Parcours $parcours, ParcoursVersioning $lastVersion) : ?string
+    public function loadJsonCfvu(Parcours $parcours, ?ParcoursVersioning $lastVersion): ?string
     {
-        if($lastVersion) {
-            $fileDTO = file_get_contents(
-                __DIR__ . "/../../versioning_json/parcours/"
-                . "{$lastVersion->getParcours()->getId()}/"
-                . "{$lastVersion->getDtoFileName()}.json"
-            );
-
-            return $fileDTO;
+        if ($lastVersion === null) {
+            return null;
         }
 
-        return null;
+        $fileDTO = file_get_contents(
+            __DIR__ . "/../../versioning_json/parcours/"
+            . "{$lastVersion->getParcours()->getId()}/"
+            . "{$lastVersion->getDtoFileName()}.json"
+        );
+
+        return $fileDTO !== false ? $fileDTO : null;
     }
 
     public function saveVersionOfParcoursCourant(Parcours $parcours): string
@@ -657,7 +657,7 @@ class VersioningParcours
 
         // DTO
         $typeD = $this->typeD->get($parcours->getFormation()?->getTypeDiplome());
-        $dto = $typeD->calculStructureParcours($parcours);
+        $dto = $typeD->calcul($parcours);
         $dtoJson = $this->serializer->serialize($dto, 'json', [
             AbstractNormalizer::GROUPS => ['DTO_json_versioning'],
             'circular_reference_limit' => 2,
@@ -708,7 +708,8 @@ class VersioningParcours
         return "";
     }
 
-    private function decodeBooleanWithHours(bool $isTrue, int $nbHeures) {
+    private function decodeBooleanWithHours(bool $isTrue, float|int $nbHeures): string
+    {
         if($isTrue){
             return "Oui ({$nbHeures} heures).";
         }

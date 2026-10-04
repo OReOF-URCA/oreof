@@ -31,7 +31,30 @@ class NotificationCategory
     {
         $this->userCategoryNotificationSettings = new ArrayCollection();
     }
-    // optionnel: defaults par catégorie (canaux, fréquence)
+
+    public function getCode(): string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): static
+    {
+        $this->code = $code;
+
+        return $this;
+    }
+
+    public function getLabel(): string
+    {
+        return $this->label;
+    }
+
+    public function setLabel(string $label): static
+    {
+        $this->label = $label;
+
+        return $this;
+    }
 
     /**
      * @return Collection<int, UserCategoryNotificationSetting>

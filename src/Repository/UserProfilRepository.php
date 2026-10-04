@@ -47,7 +47,7 @@ class UserProfilRepository extends ServiceEntityRepository
         string|null                $q,
         float|bool|int|string|null $sort,
         string|null                $direction
-    )
+    ): array
     {
         return $this->createQueryBuilder('up')
             ->join('up.profil', 'p')
@@ -79,7 +79,7 @@ class UserProfilRepository extends ServiceEntityRepository
         $this->getEntityManager()->getConnection()->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
     }
 
-    public function findByComposanteEnableBySearch(CampagneCollecte $getCampagneCollecte, $composante, float|bool|int|string|null $q, float|bool|int|string|null $sort, float|bool|int|string|null $direction)
+    public function findByComposanteEnableBySearch(CampagneCollecte $getCampagneCollecte, Composante $composante, float|bool|int|string|null $q, float|bool|int|string|null $sort, float|bool|int|string|null $direction): array
     {//todo: comment filtrer par composante
         return $this->createQueryBuilder('up')
             ->join('up.profil', 'p')
@@ -96,7 +96,7 @@ class UserProfilRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByComposanteEnable(CampagneCollecte $campagneCollecte, $composante, float|bool|int|string|null $sort, float|bool|int|string|null $direction): array
+    public function findByComposanteEnable(CampagneCollecte $campagneCollecte, Composante $composante, float|bool|int|string|null $sort, float|bool|int|string|null $direction): array
     {
 
         //je veux une requete qui va récupérer les utilsateurs qui sont dans la bonne composante. Cela va dépendre du centre, si composante alors c'est une égalité, si c'est formation alors c'est la composante porteuse de la formation, si c'est le parcours alors c'est la composante porteuse de la formation du parcours, si c'est établissement pas concerné
@@ -124,7 +124,7 @@ class UserProfilRepository extends ServiceEntityRepository
 
     }
 
-    public function findFormationWithSameRole(Formation $centre, Profil $profil, CampagneCollecte $campagneCollecte)
+    public function findFormationWithSameRole(Formation $centre, Profil $profil, CampagneCollecte $campagneCollecte): array
     {
         return $this->createQueryBuilder('p')
             ->where('p.formation = :formation')

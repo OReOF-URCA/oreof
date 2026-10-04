@@ -20,21 +20,13 @@ class StructureParcoursExampleTest extends TestCase
      */
     public function testCreateWithValidData(): void
     {
-        // Arrange
-        $data = [
-            'libelle' => 'Parcours 2024-2025',
-            'libelleCourt' => 'P2024',
-            'nombreSemesters' => 4,
-            'ectsTotal' => 120,
-        ];
-
         // Act
         try {
-            $dto = new StructureParcours($data);
+            $dto = new StructureParcours(true, true);
 
             // Assert
-            $this->assertEquals('Parcours 2024-2025', $dto->libelle);
-            $this->assertEquals(120, $dto->ectsTotal);
+            $this->assertTrue($dto->isWithEcts());
+            $this->assertTrue($dto->isWithBcc());
         } catch (\Exception $e) {
             $this->fail('StructureParcours should be created with valid data: ' . $e->getMessage());
         }

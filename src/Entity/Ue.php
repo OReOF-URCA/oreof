@@ -124,7 +124,7 @@ class Ue
     }
 
     /**
-     * @var ?int $semestreOrdre Fix l'affichage du versioning
+     * @param ?int $semestreOrdre Fix l'affichage du versioning
      */
     public function display(?Parcours $parcours = null, ?int $semestreOrdre = null, bool $subsubniveau = false, string $subniveau = ''): string
     {
@@ -139,16 +139,14 @@ class Ue
         }
 
         if ($parcours !== null) {
-            if($this->getSemestre()) {
-                if($this->getSemestre()->getSemestreParcours()) {
-                    foreach ($this->getSemestre()?->getSemestreParcours() as $semestreParcours) {
-                        if ($semestreParcours->getParcours() === $parcours) {
-                            if ($parcours->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT' || $parcours->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'M2E') {
-                                return 'UE ' . $semestreParcours->getOrdre() . '.' . $ordreue . ' (' . $this->getLibelle() . ')';
-                            }
-
-                            return 'UE ' . $semestreParcours->getOrdre() . '.' . $ordreue;
+            if ($this->getSemestre() !== null) {
+                foreach ($this->getSemestre()->getSemestreParcours() as $semestreParcours) {
+                    if ($semestreParcours->getParcours() === $parcours) {
+                        if ($parcours->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT' || $parcours->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'M2E') {
+                            return 'UE ' . $semestreParcours->getOrdre() . '.' . $ordreue . ' (' . $this->getLibelle() . ')';
                         }
+
+                        return 'UE ' . $semestreParcours->getOrdre() . '.' . $ordreue;
                     }
                 }
             }

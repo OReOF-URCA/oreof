@@ -42,7 +42,7 @@ class JsonToKeyValueTransformer implements DataTransformerInterface
     public function reverseTransform($value): array
     {
         // Si vide, retourner un tableau vide
-        if (empty($value) || $value === null) {
+        if (empty($value)) {
             return [];
         }
 

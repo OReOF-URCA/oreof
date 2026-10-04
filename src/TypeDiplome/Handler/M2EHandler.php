@@ -83,7 +83,7 @@ final class M2EHandler extends AbstractTypeDiplomeHandler
 
     public function createFormMccc(ElementConstitutif|FicheMatiere $element): FormInterface
     {
-
+        throw new \LogicException('No MCCC form for M2E.');
     }
 
     public function calculStructureParcours(Parcours $parcours, bool $withEcts = true, bool $withBcc = true): \App\DTO\StructureParcours
@@ -175,7 +175,7 @@ final class M2EHandler extends AbstractTypeDiplomeHandler
         $this->entityManager->flush();
     }
 
-    public function getMcccs(ElementConstitutif|FicheMatiere $elementConstitutif): array|Collection
+    public function getMcccs(ElementConstitutif|FicheMatiere $elementConstitutif): array
     {
         // Source canonique: évite les collections inverses potentiellement vides/stales après remove+add.
         if ($elementConstitutif->getId() !== null) {
@@ -682,7 +682,8 @@ final class M2EHandler extends AbstractTypeDiplomeHandler
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre
     {
-        return new StructureSemestre();
+        $semestre = $semestreParcours->getSemestre() ?? new \App\Entity\Semestre();
+        return new StructureSemestre($semestre, $semestreParcours->getOrdre(), false, $semestreParcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
     }
 
     public function calculVersioning(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureParcours
@@ -692,7 +693,7 @@ final class M2EHandler extends AbstractTypeDiplomeHandler
 
     public function getValidator(): ValideParcoursInterface
     {
-        // TODO: Implement getValidator() method.
+        throw new \LogicException('No validator available for M2E.');
     }
 
 }

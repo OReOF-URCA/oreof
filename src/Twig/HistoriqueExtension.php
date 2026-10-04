@@ -102,12 +102,10 @@ class HistoriqueExtension extends AbstractExtension
             ];
         }
 
-        if ($historique instanceof HistoriqueFicheMatiere) {
-            return [
-                '%formation%' => $historique->getFicheMatiere()?->getLibelle(),
-                '%date%' => $historique->getDate()?->format('d/m/Y'),
-            ];
-        }
+        return [
+            '%formation%' => $historique->getFicheMatiere()?->getLibelle(),
+            '%date%' => $historique->getDate()?->format('d/m/Y'),
+        ];
     }
 
     public function etapeVariant(Historique $historique): string

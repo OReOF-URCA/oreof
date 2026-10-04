@@ -46,11 +46,7 @@ class StructureShowController extends AbstractController
             }
         }
 
-        if ($dto === null) {
-            return $this->render('typeDiplome/formation/_structure_empty.html.twig', []);
-        }
-
-        return $this->render('typeDiplome/' . $typeD::TEMPLATE_FOLDER . '/structure/_structure.html.twig', [
+        return $this->render('typeDiplome/' . $typeD->getTemplateFolder() . '/structure/_structure.html.twig', [
             'parcours' => $parcours,
             'diffStructure' => $diffStructure ?? null,
             'diffStructureCampagne' => $diffStructureCampagnePrecedente ?? null,
@@ -78,11 +74,7 @@ class StructureShowController extends AbstractController
             $diffStructure = $versioningStructure->setDto($structureDifferencesParcours, $dto)->calculDiff();
         }
 
-        if ($dto === null) {
-            return $this->render('typeDiplome/formation/_structure_empty.html.twig', []);
-        }
-//dd($dto);
-        return $this->render('typeDiplome/' . $typeD::TEMPLATE_FOLDER . '/structure/v2/_structure.html.twig', [
+        return $this->render('typeDiplome/' . $typeD->getTemplateFolder() . '/structure/v2/_structure.html.twig', [
             'parcours' => $parcours,
             'typeDiplome' => $parcours->getTypeDiplome(),
             'diffStructure' => $diffStructure ?? null,

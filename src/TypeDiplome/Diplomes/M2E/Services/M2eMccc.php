@@ -16,7 +16,6 @@ use App\DTO\StructureUe;
 use App\DTO\TotalVolumeHeure;
 use App\Entity\CampagneCollecte;
 use App\Entity\Formation;
-use App\Entity\Mccc;
 use App\Entity\Parcours;
 use App\Enums\RegimeInscriptionEnum;
 use App\Repository\TypeEpreuveRepository;
@@ -26,6 +25,8 @@ use DateTimeInterface;
 use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\PageSetup;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use App\TypeDiplome\Diplomes\M2E\Dto\Mccc;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -46,7 +47,7 @@ class M2eMccc extends AbstractM2eMccc
         protected TypeEpreuveRepository      $typeEpreuveRepository
     )
     {
-        parent::__construct($excelWriter);
+        parent::__construct($excelWriter, $typeEpreuveRepository);
         $this->dir = $kernel->getProjectDir() . '/public';
 
     }
@@ -89,9 +90,6 @@ class M2eMccc extends AbstractM2eMccc
 
         // Prépare le modèle avant de dupliquer
         $modele = $this->excelWriter->getSheetByName(self::PAGE_MODELE);
-        if ($modele === null) {
-            throw new \Exception('Le modèle n\'existe pas');
-        }
 
         //récupération des données
         // récupération des semestres du parcours puis classement par année et par ordre
@@ -479,7 +477,7 @@ class M2eMccc extends AbstractM2eMccc
         if ($structureEc->elementConstitutif->isControleAssiduite() === false) {
             if ($structureEc->typeMccc !== null) {
                 $mcccs = $this->getMcccs($structureEc, $structureEc->typeMccc);
-                $displayMccc = new \App\TypeDiplome\M2E\Dto\Mccc($mcccs, $structureEc->typeMccc, $this->typeEpreuves, $hasQuitus);
+                $displayMccc = new Mccc($mcccs, $structureEc->typeMccc, $this->typeEpreuves, $hasQuitus);
                 $displayMccc->calculDisplayMccc();
                 $mcccArray = $displayMccc->toArray();
                 foreach ($mcccArray as $key => $value) {
@@ -545,9 +543,6 @@ class M2eMccc extends AbstractM2eMccc
     private function genereReferentielCompetences(Parcours $parcours, Formation $formation): void
     {
         $modele = $this->excelWriter->getSheetByName(self::PAGE_REF_COMPETENCES);
-        if ($modele === null) {
-            throw new \Exception('Le modèle n\'existe pas');
-        }
 
         //en-tête du fichier
         $modele->setCellValue(self::CEL_ANNEE_UNIVERSITAIRE, 'Année Universitaire ' . $formation->getDpe()?->getLibelle());
@@ -602,7 +597,7 @@ class M2eMccc extends AbstractM2eMccc
             ->office()
             ->files(new \SplFileInfo($fichier))
             ->generate()
-            ->stream($this->fileName . '.pdf');
+            ->stream();
 
         unlink($fichier);
 

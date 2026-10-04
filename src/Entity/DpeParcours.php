@@ -76,7 +76,7 @@ class DpeParcours
 
     public function getEtatValidation(): array
     {
-        return $this->etatValidation ?? [];
+        return $this->etatValidation;
     }
 
     public function setEtatValidation(array $etatValidation): static

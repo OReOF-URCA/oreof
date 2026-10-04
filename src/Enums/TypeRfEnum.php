@@ -19,7 +19,6 @@ enum TypeRfEnum: string implements BadgeEnumInterface
         return match ($this) {
             self::CORF => 'Co-responsable de formation',
             self::RF => 'Responsable de formation',
-            default => 'Non défini',
         };
     }
 

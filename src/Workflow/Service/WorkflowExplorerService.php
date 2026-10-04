@@ -312,15 +312,17 @@ final class WorkflowExplorerService
     /**
      * Récupère le nombre d'entités par état en BDD via Doctrine.
      *
+     * @param class-string $entityClass
      * @return array<string, int>
      */
     private function getEntityCountsByState(string $entityClass, string $property): array
     {
         try {
-            $tableName = $this->entityManager->getClassMetadata($entityClass)->getTableName();
+            $metadata = $this->entityManager->getClassMetadata($entityClass);
+            $tableName = $metadata->getTableName();
             $connection = $this->entityManager->getConnection();
 
-            $columnName = $this->entityManager->getClassMetadata($entityClass)->getColumnName($property);
+            $columnName = $metadata->getColumnName($property);
             $sql = sprintf('SELECT `%s` FROM `%s` WHERE `%s` IS NOT NULL', $columnName, $tableName, $columnName);
             $rows = $connection->executeQuery($sql)->fetchAllAssociative();
 

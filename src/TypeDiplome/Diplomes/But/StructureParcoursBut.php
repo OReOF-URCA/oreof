@@ -36,11 +36,12 @@ final class StructureParcoursBut implements StructureInterface
 
     public function showStructure(Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): array
     {
-        // TODO: Implement showStructure() method.
+        return [];
     }
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre
     {
-        // TODO: Implement calculStructureSemestre() method.
+        $semestre = $semestreParcours->getSemestre() ?? new \App\Entity\Semestre();
+        return new StructureSemestre($semestre, $semestreParcours->getOrdre(), false, $semestreParcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
     }
 }

@@ -52,7 +52,7 @@ class MentionDto
     public ?string $codeApogee = null;
 
     /**
-     * @var int|null L'ID du type de diplôme associé
+     * @var TypeDiplome|null Le type de diplôme associé
      */
     #[Assert\NotBlank(message: 'Le type de diplôme est obligatoire')]
     public ?TypeDiplome $typeDiplomeId = null;

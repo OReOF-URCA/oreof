@@ -64,8 +64,6 @@ class ExportElpApogeeCommand extends Command
     private static string $newJsonFile = "COD_ELP_APOGEE-PRODUCTION-APRES-INSERTION-18-04-2024-11-45.json";
 
     private EntityManagerInterface $entityManager;
-    private ElementConstitutifRepository $elementConstitutifRepository;
-    private UeRepository $ueRepository;
     private Filesystem $filesystem;
     private ParameterBagInterface $parameterBag;
     private ?SoapClient $soapClient;
@@ -75,8 +73,6 @@ class ExportElpApogeeCommand extends Command
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        ElementConstitutifRepository $elementConstitutifRepository,
-        UeRepository           $ueRepository,
         Filesystem             $filesystem,
         ParameterBagInterface  $parameterBag,
         TypeDiplomeResolver    $typeDiplomeResolver
@@ -84,8 +80,6 @@ class ExportElpApogeeCommand extends Command
     {
         parent::__construct();
         $this->entityManager = $entityManager;
-        $this->elementConstitutifRepository = $elementConstitutifRepository;
-        $this->ueRepository = $ueRepository;
         $this->filesystem = $filesystem;
         $this->parameterBag = $parameterBag;
         $this->soapClient = null;
@@ -583,11 +577,13 @@ class ExportElpApogeeCommand extends Command
             // Vérifie un fichier d'export JSON pour les LSE de test (doublons)
             if($checkLseTestJsonExport){
                 $io->writeln("Vérification de la présence de doublons dans le fichier JSON (LSE - TEST)");
-                $lseArray = json_decode(file_get_contents(__DIR__ . "/../Service/Apogee/data-test/" . self::$fullLseExportDataTest));
+                $content = (string) file_get_contents(__DIR__ . "/../Service/Apogee/data-test/" . self::$fullLseExportDataTest);
+                $decoded = json_decode($content, true);
+                $lseArray = is_array($decoded) ? $decoded : [];
                 $io->progressStart(count($lseArray));
                 $nbLseDuplicates = 0;
                 $duplicatesList = [];
-                $countValues = array_count_values($lseArray);
+                $countValues = array_count_values(array_map('strval', $lseArray));
                 foreach($countValues as $value => $count){
                     if($count > 1){
                         ++$nbLseDuplicates;
@@ -645,11 +641,14 @@ class ExportElpApogeeCommand extends Command
             }
             if($checkDuplicatesFromJsonExport){
                 $io->writeln("Vérification des doublons depuis l'export JSON...");
-                $codElpArray = json_decode(file_get_contents(__DIR__ . "/../Service/Apogee/data-test/" . self::$allParcoursCodElpExport));
+                $content = (string) file_get_contents(__DIR__ . "/../Service/Apogee/data-test/" . self::$allParcoursCodElpExport);
+                $decoded = json_decode($content, true);
+                $codElpArray = is_array($decoded) ? $decoded : [];
                 $io->progressStart(count($codElpArray));
                 $nbDoublons = 0;
                 $doublonArray = [];
-                foreach(array_count_values($codElpArray) as $codeElp => $nb){
+                $counts = array_count_values(array_map('strval', $codElpArray));
+                foreach($counts as $codeElp => $nb){
                     if($nb > 1){
                         $nbDoublons += ($nb - 1);
                         $doublonArray[] = $codeElp;
@@ -822,8 +821,6 @@ class ExportElpApogeeCommand extends Command
                     $io->warning('La commande a été annulée.');
                     return Command::SUCCESS;
                 }
-
-                return Command::SUCCESS;
             }
             // Insertion de test d'une liste (LSE)
             if($dummyLseInsertion){
@@ -1017,9 +1014,9 @@ class ExportElpApogeeCommand extends Command
 
     /**
      * Créer un ELP à partir d'un Semestre, UE, ou EC
-     * @param StructureEC|StructureUe|StructureSemestre $elementPedagogique Données sources
+     * @param StructureEc|StructureUe|StructureSemestre $elementPedagogique Données sources
      * @param StructureParcours $dto DTO du parcours
-     * @param ?CodeNatuElmEnum $natureElp Nature de l'élément pédagogique
+     * @param ?CodeNatuElpEnum $natureElp Nature de l'élément pédagogique
      * @param bool $withChecks Si des messages d'erreurs doivent être générés
      */
     private function setObjectForSoapCall(
@@ -1029,7 +1026,7 @@ class ExportElpApogeeCommand extends Command
         bool $withChecks = false
     ) : ElementPedagogiDTO6 {
         $tableauParamCE = [];
-        if(in_array($natureElp->value, ['MATI', 'MATM', 'MATP', 'MATS']) && $elementPedagogique instanceof StructureEc){
+        if($natureElp !== null && in_array($natureElp->value, ['MATI', 'MATM', 'MATP', 'MATS']) && $elementPedagogique instanceof StructureEc){
            $tableauParamCE = $this->configureChargeEnseignementForEC($elementPedagogique);
         }
         return new ElementPedagogiDTO6($elementPedagogique, $dto, $natureElp, $withChecks, $tableauParamCE);
@@ -1157,7 +1154,7 @@ class ExportElpApogeeCommand extends Command
      */
     private function getDTOForParcours(Parcours $parcours): StructureParcours
     {
-        return $this->typeDiplomeResolver->fromParcours($parcours)->calculStructureParcours($parcours);
+        return $this->typeDiplomeResolver->fromParcours($parcours)->calcul($parcours);
     }
 
     /**
@@ -1210,7 +1207,7 @@ class ExportElpApogeeCommand extends Command
      * @return boolean Vrai si l'utilisateur confirme la question, Faux sinon
      */
     private function verifyUserIntent(SymfonyStyle $io, string $message) : bool {
-        return $io->ask("{$message} [Y/n]", 'n', function($message) use ($io) {
+        return $io->ask("{$message} [Y/n]", 'n', function($message) {
             if($message === "Y"){
                 return true;
             }
@@ -1231,20 +1228,10 @@ class ExportElpApogeeCommand extends Command
     }
 
     /**
-     * Création du client SOAP pour la Production.
-     */
-    private function createSoapClientProduction() : void {
-        $wsdl = $this->parameterBag->get('WSDL_APOGEE_PRODUCTION');
-        $this->soapClient = new SoapClient($wsdl, [
-            "trace" => true
-        ]);
-    }
-
-    /**
      * Méthode pour appeler la fonction d'insertion d'un ELP du Web Service Apogee
      * @param ElementPedagogiDTO6 $elementPedagogique Élément à insérer
      */
-    private function insertOneElp(ElementPedagogiDTO6 $elementPedagogique) {
+    private function insertOneElp(ElementPedagogiDTO6 $elementPedagogique): mixed {
         $param = new stdClass();
         $param->elementPedagogi = $elementPedagogique;
         if($this->soapClient){
@@ -1259,7 +1246,7 @@ class ExportElpApogeeCommand extends Command
      * Appelle la fonction d'insertion d'une liste LSE du Web Service Apogee
      * @param ListeElementPedagogiDTO3 $lseObject Élément à insérer via le WS
      */
-    private function insertOneLSE(ListeElementPedagogiDTO3 $lseObject){
+    private function insertOneLSE(ListeElementPedagogiDTO3 $lseObject): mixed {
         $param = new stdClass();
         $param->listeElementPedagogi = $lseObject;
         if($this->soapClient){
@@ -1305,27 +1292,6 @@ class ExportElpApogeeCommand extends Command
         }
     }
 
-    /**
-     * Méthode pour filtrer les formations, si elles sont étiquettées comme "publication"
-     * et si elles ne font pas partie des IUT
-     * @param Formation $formation Formation que l'on souhaite tester
-     * @return boolean Vrai si la formation peut être pris en compte, Faux si elle doit être écartée du jeu de données.
-     */
-    private function filterFormationByPublicationState(Formation $formation) : bool {
-        $return = false;
-        $historique = $this->entityManager->getRepository(HistoriqueFormation::class)->findBy(
-            ['formation' => $formation],
-            ['date' => 'DESC']
-        );
-        if(count($historique) > 0){
-            // dernier état est 'publication'
-            $return = $historique[0]->getEtape() === "publication"
-            // exclusion des IUT
-            && in_array($formation->getComposantePorteuse()?->getCodeComposante(), ['980', '983', '984', '985']) === false;
-        }
-
-        return $return;
-    }
 
     /**
      * Permet de savoir si une matière mutualisée est la matière porteuse (maître)
@@ -1344,25 +1310,6 @@ class ExportElpApogeeCommand extends Command
     private function isEcMutualise(StructureEc $ec) : bool {
         // return count($ec->elementConstitutif->getFicheMatiere()?->getFicheMatiereParcours() ?? []) >= 1;
         return $ec->elementConstitutif->getFicheMatiere()?->getTypeApogee() === 'MATM';
-    }
-
-    /**
-     * Permet de savoir si une UE est mutualisée
-     * @param StructureUe $ue UE à tester
-     * @return boolean Vrai si elle est mutualisée, Faux sinon
-     */
-    private function isUeMutualise(StructureUe $ue) : bool {
-        return count($ue->ue->getUeMutualisables()) >= 2;
-    }
-
-    /**
-     * Teste si une UE qui est mutualisée est l'UE porteuse (maître)
-     * @param StructureUe $ue UE à tester
-     * @return boolean Vrai si l'UE est celle porteuse, Faux sinon
-     */
-    private function isUeMutualiseMaster(StructureUe $ue) : bool {
-        // TO DO
-        return true;
     }
 
     /**
@@ -1551,9 +1498,9 @@ class ExportElpApogeeCommand extends Command
     /**
      * Calcule les charges d'enseignements pour l'element pédagogique fourni
      * @param StructureEc $elementPedagogique Élément pédagogique
-     * @return TableauParametrageChargeEnseignementDTO2 Paramètres des charges d'enseignement
+     * @return array Paramètres des charges d'enseignement
      */
-    private function configureChargeEnseignementForEC(StructureEc $elementPedagogique) : TableauParametrageChargeEnseignementDTO2|array {
+    private function configureChargeEnseignementForEC(StructureEc $elementPedagogique) : array {
         $typeHeureArray = [];
         if($elementPedagogique->heuresEctsEc->cmPres > 0 || $elementPedagogique->heuresEctsEc->cmDist > 0){
             $nbHeure = $elementPedagogique->heuresEctsEc->cmPres + $elementPedagogique->heuresEctsEc->cmDist;

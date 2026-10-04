@@ -75,7 +75,7 @@ class ChangeRfRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findByCampagneCollecteForStats(CampagneCollecte $campagne)
+    public function findByCampagneCollecteForStats(CampagneCollecte $campagne): array
     {
         $qb = $this->createQueryBuilder('f')
             ->select('f.etatDemande AS etat, COUNT(f.id) AS nb')

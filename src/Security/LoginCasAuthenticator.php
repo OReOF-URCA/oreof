@@ -72,7 +72,8 @@ class LoginCasAuthenticator extends AbstractAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
-        if ($token->getUser()?->isIsEnable() === false) {
+        $user = $token->getUser();
+        if ($user instanceof \App\Entity\User && $user->isIsEnable() === false) {
             throw new CustomUserMessageAuthenticationException('Votre compte est désactivé. Veuillez contacter l\'administrateur.');
         }
 

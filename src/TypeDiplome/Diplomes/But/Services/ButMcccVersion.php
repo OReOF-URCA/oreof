@@ -14,7 +14,6 @@ use App\DTO\DiffObject;
 use App\Entity\CampagneCollecte;
 use App\Entity\FicheMatiere;
 use App\Entity\Parcours;
-use App\Enums\RegimeInscriptionEnum;
 use App\Repository\FicheMatiereRepository;
 use App\Service\VersioningParcours;
 use App\Service\VersioningStructure;
@@ -33,7 +32,6 @@ use Sensiolabs\GotenbergBundle\Processor\FileProcessor;
 class ButMcccVersion extends AbstractButMccc
 {
     private string $fileName;
-    private Parcours $parcours;
 
     private string $dir;
 
@@ -80,7 +78,6 @@ class ButMcccVersion extends AbstractButMccc
         ];
 
         $formation = $parcours->getFormation();
-        $this->parcours = $parcours;
 
         if (null === $formation) {
             throw new \Exception('La formation n\'existe pas');
@@ -90,7 +87,6 @@ class ButMcccVersion extends AbstractButMccc
 
         $structureDifferencesParcours = $this->versioningParcours->getStructureDifferencesBetweenParcoursAndLastCfvu($parcours);
         if ($structureDifferencesParcours !== null) {
-            $diffStructure = (new VersioningStructure($structureDifferencesParcours, $dto))->calculDiff(true);
             $lastCfvuDescriptifs = $this->versioningParcours->loadParcoursFromVersion(
                 $this->versioningParcours->getLastVersionOrLastYearCfvu($parcours)
             )['parcours'];
@@ -113,9 +109,10 @@ class ButMcccVersion extends AbstractButMccc
         $tabSemestres = [];
         $semestres = $parcours->getSemestreParcours();
         foreach ($semestres as $semParc) {
-            if ($semParc->getSemestre()?->isNonDispense() === false && $semParc->isOuvert() === true) {
-                if ($semParc->getSemestre()?->getSemestreRaccroche() !== null) {
-                    $tabSemestres[$semParc->getOrdre()] = $semParc->getSemestre()?->getSemestreRaccroche();
+            $sem = $semParc->getSemestre();
+            if ($sem !== null && !$sem->isNonDispense() && $semParc->isOuvert()) {
+                if ($sem->getSemestreRaccroche() !== null) {
+                    $tabSemestres[$semParc->getOrdre()] = $sem->getSemestreRaccroche();
                 } else {
                     $tabSemestres[$semParc->getOrdre()] = $semParc;
                 }
@@ -129,7 +126,7 @@ class ButMcccVersion extends AbstractButMccc
         // $modele->setCellValue(self::CEL_INTITULE_FORMATION, $formation->getDisplay());
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_INTITULE_FORMATION, 0, 1),
-            substr(self::CEL_INTITULE_FORMATION, 1, 1),
+            (int) substr(self::CEL_INTITULE_FORMATION, 1),
             $diffDescriptifs['libelleMention'],
             ['withNewLine' => true]
         );
@@ -141,7 +138,7 @@ class ButMcccVersion extends AbstractButMccc
             // $modele->setCellValue(self::CEL_INTITULE_PARCOURS, $parcours->getDisplay());
             $this->excelWriter->writeCellXYDiff(
                 substr(self::CEL_INTITULE_PARCOURS, 0, 1),
-                substr(self::CEL_INTITULE_PARCOURS, 1, 1),
+                (int) substr(self::CEL_INTITULE_PARCOURS, 1),
                 $diffDescriptifs['libelleParcours'],
                 ['withNewLine' => true]
             );
@@ -184,25 +181,25 @@ class ButMcccVersion extends AbstractButMccc
         // Régimes d'inscription avec différences
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FI, 0, 1),
-            substr(self::CEL_REGIME_FI, 1, 1),
+            (int) substr(self::CEL_REGIME_FI, 1),
             $diffDescriptifs['regimeInscription']['FI'],
             ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FC, 0, 1),
-            substr(self::CEL_REGIME_FC, 1, 2),
+            (int) substr(self::CEL_REGIME_FC, 1),
             $diffDescriptifs['regimeInscription']['FC'],
             ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FI_APPRENTISSAGE, 0, 1),
-            substr(self::CEL_REGIME_FI_APPRENTISSAGE, 1, 2),
+            (int) substr(self::CEL_REGIME_FI_APPRENTISSAGE, 1),
             $diffDescriptifs['regimeInscription']['FIA'],
             ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FC_CONTRAT_PRO, 0, 1),
-            substr(self::CEL_REGIME_FC_CONTRAT_PRO, 1, 2),
+            (int) substr(self::CEL_REGIME_FC_CONTRAT_PRO, 1),
             $diffDescriptifs['regimeInscription']['FCCP'],
             ['withLighterGreen' => true]
         );
@@ -431,7 +428,7 @@ class ButMcccVersion extends AbstractButMccc
             ->office()
             ->files(new \SplFileInfo($fichier))
             ->generate()
-            ->stream($this->fileName . '.pdf');
+            ->stream();
 
         unlink($fichier);
 

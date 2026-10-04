@@ -258,9 +258,9 @@ final class FormationCompletionCheckCommand extends Command
             $isDone = count($issues) === 0;
             $statuses[$tab] = $isDone;
             $issuesSummary[$tab] = array_map(fn($i) => [
-                'field' => $i->field ?? null,
-                'label' => $i->label ?? null,
-                'message' => $i->message ?? null,
+                'field' => $i->field,
+                'label' => $i->label,
+                'message' => $i->message,
             ], $issues);
 
             // récupérer l'état existant depuis la map chargée, sinon créer et persister si demandé

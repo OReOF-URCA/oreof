@@ -94,7 +94,7 @@ class StructureEtablissementFixtures extends Fixture implements DependentFixture
 
         $composante = new Composante();
         $composante->setLibelle('Faculté des Sciences');
-        $composante->setDirecteur($this->getReference(UsersFixtures::RESPONSABLE_DPE_COMPOSANTE));
+        $composante->setDirecteur($this->getReference(UsersFixtures::RESPONSABLE_DPE_COMPOSANTE, \App\Entity\User::class));
 
         $manager->persist($composante);
 

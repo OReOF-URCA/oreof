@@ -193,7 +193,7 @@ class FormationStateComponent
                 return EtatProcessMentionEnum::WIP;
             }
 
-            if ($etat === 'publie' && $nb === $nbParcours) {
+            if ($nb === $nbParcours) {
                 //todo: vérifier formation
                 return EtatProcessMentionEnum::COMPLETE;
             }

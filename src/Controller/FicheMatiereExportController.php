@@ -83,11 +83,11 @@ class FicheMatiereExportController extends AbstractController
                 'ficheMatiere' => $ficheMatiere,
                 'formation' => $formation,
                 'typeDiplome' => $typeDiplome,
-                'typeEpreuves' => $typeD !== null ? $typeD->getTypeEpreuves() : $typeEpreuveRepository->findAll(),
-                'templateForm' => $typeD !== null ? $typeD->getMcccTemplate() : 'licence.html.twig',
+                'typeEpreuves' => $typeD->getTypeEpreuves(),
+                'templateForm' => $typeD->getMcccTemplate(),
                 'bccs' => $bccs,
                 'titre' => 'Fiche EC/matière ' . $ficheMatiere->getLibelle(),
-                'mcccs' => $typeD !== null ? $typeD->getMcccs($ficheMatiere) : [],
+                'mcccs' => $typeD->getMcccs($ficheMatiere),
                 'typeMccc' => $ficheMatiere->getTypeMccc(),
             ],
             'dpe_fiche_matiere_' . $ficheMatiere->getLibelle()
@@ -123,8 +123,9 @@ class FicheMatiereExportController extends AbstractController
         MessageBusInterface          $messageBus,
         Parcours $parcours): Response
     {
+        $user = $this->getUser();
         $messageBus->dispatch(new Export(
-            $this->getUser()?->getId(),
+            $user instanceof \App\Entity\User ? $user->getId() : null,
             'zip-fiches_matieres',
             [$parcours->getId()]
         ));

@@ -26,28 +26,24 @@ class ApiJsonExport
 
     private UrlGeneratorInterface $router;
 
-    private SecureUploadService $secureUploadService;
-
     public function __construct(
         EntityManagerInterface $entityManager,
         GetHistorique $getHistorique,
         VersioningParcours $versioningParcours,
         UrlGeneratorInterface $router,
-        SecureUploadService $secureUploadService,
     )
     {
         $this->entityManager = $entityManager;
         $this->getHistorique = $getHistorique;
         $this->versioningParcours = $versioningParcours;
         $this->router = $router;
-        $this->secureUploadService = $secureUploadService;
     }
 
     public function generateApiVersioning(
         string $hostname,
-        SymfonyStyle $io = null,
-        LheoXML $lheoXmlService,
-        LheoXMLv2 $lheoV2,
+        ?SymfonyStyle $io = null,
+        ?LheoXML $lheoXmlService = null,
+        ?LheoXMLv2 $lheoV2 = null,
         bool      $isV2 = false,
     ): array
     {
@@ -256,10 +252,10 @@ class ApiJsonExport
             $io?->progressFinish();
         }
 
-        if ($campagneCourante && !$campagneCourante?->isEnablePublication()) {
+        if ($campagneCourante && !$campagneCourante->isEnablePublication()) {
             $io?->writeln("La publication n'est pas activée pour l'année courante (N).");
         }
-        if ($campagneSuivante && !$campagneSuivante?->isEnablePublication()) {
+        if ($campagneSuivante && !$campagneSuivante->isEnablePublication()) {
             $io?->writeln("La publication n'est pas activée pour l'année suivante (N + 1).");
         }
         $io?->writeln($countParcoursCampagneActuelle . ' Parcours de la Campagne Actuelle (N) ont été ajoutés à l\'API');

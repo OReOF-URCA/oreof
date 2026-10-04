@@ -89,9 +89,7 @@ class FicheMatiereRepository extends ServiceEntityRepository
                 ->leftJoin('f.elementConstitutifs', 'ec')
                 ->groupBy('f.id')
                 ->having('count(ec.id) > 0');
-        }
-
-        if (array_key_exists('utilise', $options) && "0" === $options['utilise']) {
+        } elseif (array_key_exists('utilise', $options) && "0" === $options['utilise']) {
             $qb
                 ->leftJoin('f.elementConstitutifs', 'ec')
                 ->groupBy('f.id')
@@ -144,7 +142,7 @@ class FicheMatiereRepository extends ServiceEntityRepository
                 ->setParameter('q', '%' . $options['libelle'] . '%');
         }
 
-        if (isset($options['remplissage']) && null !== $options['remplissage'] && 'all' !== $options['remplissage']) {
+        if (isset($options['remplissage']) && 'all' !== $options['remplissage']) {
             if ($options['remplissage'] === '100') {
                 $qb->andWhere('JSON_EXTRACT(f.remplissage, \'$.pourcentage\') = :remplissage')
                     ->setParameter('remplissage', 100);
@@ -201,10 +199,7 @@ class FicheMatiereRepository extends ServiceEntityRepository
                 ->leftJoin('f.elementConstitutifs', 'ec')
                 ->groupBy('f.id')
                 ->having('count(ec.id) > 0');
-        }
-
-        if (array_key_exists('utilise', $options) && "0" === $options['utilise']) {
-
+        } elseif (array_key_exists('utilise', $options) && "0" === $options['utilise']) {
             $query
                 ->leftJoin('f.elementConstitutifs', 'ec')
                 ->groupBy('f.id')
@@ -245,10 +240,8 @@ class FicheMatiereRepository extends ServiceEntityRepository
             ->andWhere('f.campagneCollecte = :campagneCollecte')
             ->andWhere('(fo.responsableMention = :user OR fo.coResponsable = :user OR p.respParcours = :user OR p.coResponsable = :user OR f.responsableFicheMatiere = :user OR co.responsableDpe = :user)')
             ->orderBy('f.libelle', 'ASC')
-            ->setParameters([
-                'campagneCollecte' => $campagneCollecte,
-                'user' => $user
-            ]);
+            ->setParameter('campagneCollecte', $campagneCollecte)
+            ->setParameter('user', $user);
 
         $this->addFiltres($query, $options);
 
@@ -273,10 +266,8 @@ class FicheMatiereRepository extends ServiceEntityRepository
             ->andWhere('f.campagneCollecte = :campagneCollecte')
             ->andWhere('(fo.responsableMention = :user OR fo.coResponsable = :user OR p.respParcours = :user OR p.coResponsable = :user OR f.responsableFicheMatiere = :user)')
             ->orderBy('f.libelle', 'ASC')
-            ->setParameters([
-                'campagneCollecte' => $campagneCollecte,
-                'user' => $user
-            ]);
+            ->setParameter('campagneCollecte', $campagneCollecte)
+            ->setParameter('user', $user);
 
         $this->addFiltres($query, $options);
 
@@ -454,10 +445,10 @@ class FicheMatiereRepository extends ServiceEntityRepository
         return $qb;
     }
 
-    public function findAllWithPagination(int $pageNumber, int $pageLength)
+    public function findAllWithPagination(int $pageNumber, int $pageLength): array
     {
         return $this->createQueryBuilder('fm')
-            ->orderBy('id', 'ASC')
+            ->orderBy('fm.id', 'ASC')
             ->setMaxResults($pageLength)
             ->setFirstResult($pageNumber * $pageLength)
             ->getQuery()
@@ -475,7 +466,7 @@ class FicheMatiereRepository extends ServiceEntityRepository
         return $query->getQuery()->getResult();
     }
 
-    public function findByCampagneCollecteForStats(CampagneCollecte $campagne)
+    public function findByCampagneCollecteForStats(CampagneCollecte $campagne): array
     {
         $qb = $this->createQueryBuilder('f')
             ->select('f.etatFiche AS etat, COUNT(f.id) AS nb')

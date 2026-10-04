@@ -40,7 +40,7 @@ final class NotificationSettingsService
 
             $transitionsByPlace = [];
             foreach ($def->getTransitions() as $t) {
-                $meta = $wf->getMetadataStore()->getTransitionMetadata($t) ?? [];
+                $meta = $wf->getMetadataStore()->getTransitionMetadata($t);
                 foreach ((array)$t->getFroms() as $from) {
                     $transitionsByPlace[$from] ??= [];
                     $transitionsByPlace[$from][] = [
@@ -53,7 +53,7 @@ final class NotificationSettingsService
 
             $places = [];
             foreach ($def->getPlaces() as $p) {
-                $meta = $wf->getMetadataStore()->getPlaceMetadata($p) ?? [];
+                $meta = $wf->getMetadataStore()->getPlaceMetadata($p);
                 if (($meta['process'] ?? false) === true) {
                     $places[] = [
                         'name' => $p,

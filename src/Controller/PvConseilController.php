@@ -56,7 +56,8 @@ class PvConseilController extends BaseController
                 } else {
                     $histo = new HistoriqueParcours();
                     $histo->setParcours($parcours);
-                    $histo->setUser($this->getUser());
+                    $user = $this->getUser();
+                    $histo->setUser($user instanceof \App\Entity\User ? $user : null);
                     $histo->setEtape('soumis_conseil');
 
                 }
@@ -68,22 +69,22 @@ class PvConseilController extends BaseController
 
                 //upload
                 $uploadedFile = $form->get('file')->getData();
-                if ($uploadedFile !== null) {
-                    try {
-                        $upload = $secureUploadService->upload($uploadedFile, 'conseils');
-                    } catch (FileUploadException $exception) {
-                        return JsonReponse::error($exception->getPublicMessage());
-                    }
-
-                    if ($upload !== null) {
-                        $tab['fichier'] = $upload->getStoredFilename();
-                        $tab['fichier_original'] = $upload->getOriginalFilename();
-                    }
-                } else {
-                    return JsonReponse::success($translator->trans('deposer.pv.flash.error', [], 'process'));
+                if ($uploadedFile === null) {
+                    return JsonReponse::error($translator->trans('deposer.pv.flash.error', [], 'process'));
                 }
 
-                $histo->setComplements($tab ?? []);
+                try {
+                    $upload = $secureUploadService->upload($uploadedFile, 'conseils');
+                } catch (FileUploadException $exception) {
+                    return JsonReponse::error($exception->getPublicMessage());
+                }
+
+                $tab = [
+                    'fichier' => $upload->getStoredFilename(),
+                    'fichier_original' => $upload->getOriginalFilename(),
+                ];
+
+                $histo->setComplements($tab);
                 $entityManager->persist($histo);
                 $entityManager->flush();
 
@@ -135,65 +136,62 @@ class PvConseilController extends BaseController
                 return JsonReponse::error($translator->trans('deposer.pv.flash.error', [], 'process'));
             }
 
-            if ($changeRf !== null) {
-                $conseilLaisserPasser = $getHistorique->getHistoriqueChangeRfLastStep($changeRf, 'changeRf.soumis_conseil');
-                if ($conseilLaisserPasser !== null && $conseilLaisserPasser->getEtat() === 'laisserPasser') {
-                    $histo = $conseilLaisserPasser;
-                } else {
-                    $histo = new HistoriqueFormation();
-                    $histo->setChangeRf($changeRf);
-                    $histo->setUser($this->getUser());
-                    $histo->setEtape('changeRf.soumis_conseil');
+            $conseilLaisserPasser = $getHistorique->getHistoriqueChangeRfLastStep($changeRf, 'changeRf.soumis_conseil');
+            if ($conseilLaisserPasser !== null && $conseilLaisserPasser->getEtat() === 'laisserPasser') {
+                $histo = $conseilLaisserPasser;
+            } else {
+                $histo = new HistoriqueFormation();
+                $histo->setChangeRf($changeRf);
+                $user = $this->getUser();
+                $histo->setUser($user instanceof \App\Entity\User ? $user : null);
+                $histo->setEtape('changeRf.soumis_conseil');
 
-                }
-                $histo->setEtat('valide');
-                $histo->setCreated(new DateTime());
-                $dateConseil = $form->get('dateconseil')->getData();
-                if ($dateConseil instanceof \DateTimeInterface) {
-                    $histo->setDate($dateConseil);
-                }
+            }
+            $histo->setEtat('valide');
+            $histo->setCreated(new DateTime());
+            $dateConseil = $form->get('dateconseil')->getData();
+            if ($dateConseil instanceof \DateTimeInterface) {
+                $histo->setDate($dateConseil);
+            }
 
-                //upload
-                $uploadedFile = $form->get('file')->getData();
-                if ($uploadedFile !== null) {
-                    try {
-                        $upload = $secureUploadService->upload($uploadedFile, 'conseils');
-                    } catch (FileUploadException $exception) {
-                        return JsonReponse::error($exception->getPublicMessage());
-                    }
+            //upload
+            $uploadedFile = $form->get('file')->getData();
+            if ($uploadedFile === null) {
+                return JsonReponse::error($translator->trans('deposer.pv.flash.error', [], 'process'));
+            }
 
-                    if ($upload !== null) {
-                        $tab['fichier'] = $upload->getStoredFilename();
-                        $tab['fichier_original'] = $upload->getOriginalFilename();
-                    }
-                } else {
-                    return JsonReponse::error($translator->trans('deposer.pv.flash.error', [], 'process'));
-                }
+            try {
+                $upload = $secureUploadService->upload($uploadedFile, 'conseils');
+            } catch (FileUploadException $exception) {
+                return JsonReponse::error($exception->getPublicMessage());
+            }
 
-                $histo->setComplements($tab ?? []);
-                $entityManager->persist($histo);
-                $entityManager->flush();
+            $tab = [
+                'fichier' => $upload->getStoredFilename(),
+                'fichier_original' => $upload->getOriginalFilename(),
+            ];
 
-                //si déjà validé CFVU "sous réserve" de PV appliquer le changement
+            $histo->setComplements($tab);
+            $entityManager->persist($histo);
+            $entityManager->flush();
+
+            //si déjà validé CFVU "sous réserve" de PV appliquer le changement
 //                if (true) {
 //                    $changeRfProcess->valideChangeRf($changeRf, $this->getUser(), $transition, $request, $fileName);
 //                }
 
-                $myMailer->initEmail();
-                $myMailer->setTemplate(
-                    'mails/workflow/changerf/deposer_pv.html.twig',
-                    ['demande' => $changeRf,
-                        'formation' => $changeRf->getFormation(),]
-                );
-                $myMailer->sendMessage(
-                    [$this->getEtablissement()?->getEmailCentral()],
-                    '[ORéOF]  Le PV de conseil a été déposé pour le changement de RF : ' . $changeRf->getFormation()?->getDisplay()
-                );
+            $myMailer->initEmail();
+            $myMailer->setTemplate(
+                'mails/workflow/changerf/deposer_pv.html.twig',
+                ['demande' => $changeRf,
+                    'formation' => $changeRf->getFormation(),]
+            );
+            $myMailer->sendMessage(
+                [$this->getEtablissement()?->getEmailCentral()],
+                '[ORéOF]  Le PV de conseil a été déposé pour le changement de RF : ' . $changeRf->getFormation()?->getDisplay()
+            );
 
-                return JsonReponse::success($translator->trans('deposer.pv.flash.success', [], 'process'));
-            }
-
-            return JsonReponse::error('Pas de DPE associé au parcours');
+            return JsonReponse::success($translator->trans('deposer.pv.flash.success', [], 'process'));
         }
         return $this->render('pv_conseil/_index.html.twig', [
             'changeRf' => $changeRf,

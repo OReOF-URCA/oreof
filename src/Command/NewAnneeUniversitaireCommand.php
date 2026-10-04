@@ -44,8 +44,6 @@ class NewAnneeUniversitaireCommand extends Command
 
     private int $idCampagneCollecte = 2;
 
-    private int $stepFormationFlush =  35;
-
     private int $stepFicheMatiereFlush = 1000;
 
     private int $stepMutualisations = 1000;

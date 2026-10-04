@@ -11,7 +11,9 @@ use Symfony\Component\HttpFoundation\Response;
 
 interface TypeDiplomeHandlerInterface extends TypeDiplomeMcccInterface, StructureInterface, McccInterface, DiplomeExportInterface
 {
-    public function getStructureCompetences(Parcours $parcours);
+    public const TEMPLATE_FOLDER = 'licence';
+
+    public function getStructureCompetences(Parcours $parcours): array;
 
     public function getTypeEpreuves(): array;
 

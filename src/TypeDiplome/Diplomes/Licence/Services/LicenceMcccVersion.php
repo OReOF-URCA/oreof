@@ -17,7 +17,6 @@ use App\DTO\StructureUe;
 use App\DTO\TotalVolumeHeure;
 use App\Entity\CampagneCollecte;
 use App\Entity\Formation;
-use App\Entity\Mccc;
 use App\Entity\Parcours;
 use App\Enums\RegimeInscriptionEnum;
 use App\Repository\TypeEpreuveRepository;
@@ -36,13 +35,14 @@ use Symfony\Component\Filesystem\Filesystem;
 use Sensiolabs\GotenbergBundle\GotenbergInterface;
 use Sensiolabs\GotenbergBundle\Processor\FileProcessor;
 
+use App\TypeDiplome\Diplomes\Licence\Dto\Mccc;
+
 class LicenceMcccVersion extends AbstractLicenceMccc
 {
     //todo: ajouter un watermark sur le doc ou une mention que la mention est définitive ou pas.
     //todo: gérer la date de vote
 
     public function __construct(
-        private LicenceMccc $licenceMccc,
         KernelInterface                   $kernel,
         protected GotenbergInterface      $gotenberg,
         protected CalculStructureParcoursLicence $calculStructureParcours,
@@ -52,7 +52,7 @@ class LicenceMcccVersion extends AbstractLicenceMccc
         protected TypeEpreuveRepository   $typeEpreuveRepository
     )
     {
-        parent::__construct($excelWriter);
+        parent::__construct($excelWriter, $typeEpreuveRepository);
         $this->dir = $kernel->getProjectDir() . '/public';
 
     }
@@ -96,8 +96,6 @@ class LicenceMcccVersion extends AbstractLicenceMccc
 
         $structureDifferencesParcours = $this->versioningParcours->getStructureDifferencesBetweenParcoursAndLastCfvu($parcours);
         if ($structureDifferencesParcours !== null) {
-            $diffStructure = (new VersioningStructure($structureDifferencesParcours, $dto))->calculDiff();
-
             // Descriptifs Parcours
             $lastParcoursCfvuDesc = $this->versioningParcours
                 ->loadParcoursFromVersion(
@@ -114,9 +112,6 @@ class LicenceMcccVersion extends AbstractLicenceMccc
 
         // Prépare le modèle avant de dupliquer
         $modele = $this->excelWriter->getSheetByName(self::PAGE_MODELE);
-        if ($modele === null) {
-            throw new \Exception('Le modèle n\'existe pas');
-        }
 
         $this->excelWriter->setSheet($modele);
         //récupération des données
@@ -130,12 +125,12 @@ class LicenceMcccVersion extends AbstractLicenceMccc
         // $modele->setCellValue(self::CEL_INTITULE_PARCOURS, $parcours->isParcoursDefaut() === false ? $parcours->getDisplay() : '');
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_INTITULE_FORMATION, 0, 1),
-            substr(self::CEL_INTITULE_FORMATION, 1, 1),
+            (int) substr(self::CEL_INTITULE_FORMATION, 1),
             $diffDescriptifs['libelleMention']
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_INTITULE_PARCOURS, 0, 1),
-            substr(self::CEL_INTITULE_PARCOURS, 1, 1),
+            (int) substr(self::CEL_INTITULE_PARCOURS, 1),
             $diffDescriptifs['libelleParcours']
         );
         $modele->setCellValue(self::CEL_COMPOSANTE, $formation->getComposantePorteuse()?->getLibelle());
@@ -148,12 +143,12 @@ class LicenceMcccVersion extends AbstractLicenceMccc
         // $modele->setCellValue(self::CEL_RESPONSABLE_PARCOURS, $parcours->getRespParcours()?->getDisplay());
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_RESPONSABLE_MENTION, 0, 1),
-            substr(self::CEL_RESPONSABLE_MENTION, 1, 2),
+            (int) substr(self::CEL_RESPONSABLE_MENTION, 1),
             $diffDescriptifs['respFormation']
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_RESPONSABLE_PARCOURS, 0, 1),
-            substr(self::CEL_RESPONSABLE_PARCOURS, 1, 2),
+            (int) substr(self::CEL_RESPONSABLE_PARCOURS, 1),
             $diffDescriptifs['respParcours']
         );
 
@@ -191,26 +186,26 @@ class LicenceMcccVersion extends AbstractLicenceMccc
         // Différences Régimes d'Inscription
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FI, 0, 1),
-            substr(self::CEL_REGIME_FI, 1, 1),
+            (int) substr(self::CEL_REGIME_FI, 1),
             $diffDescriptifs['regimeInscription']['FI'],
             ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FC, 0, 1),
-            substr(self::CEL_REGIME_FC, 1, 1),
+            (int) substr(self::CEL_REGIME_FC, 1),
             $diffDescriptifs['regimeInscription']['FC'],
             ['withLighterGreen' => true]
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FI_APPRENTISSAGE, 0, 1),
-            substr(self::CEL_REGIME_FI_APPRENTISSAGE, 1, 2),
+            (int) substr(self::CEL_REGIME_FI_APPRENTISSAGE, 1),
             $diffDescriptifs['regimeInscription']['FIA'],
             ['withLighterGreen' => true]
 
         );
         $this->excelWriter->writeCellXYDiff(
             substr(self::CEL_REGIME_FC_CONTRAT_PRO, 0, 1),
-            substr(self::CEL_REGIME_FC_CONTRAT_PRO, 1, 2),
+            (int) substr(self::CEL_REGIME_FC_CONTRAT_PRO, 1),
             $diffDescriptifs['regimeInscription']['FCCP'],
             ['withLighterGreen' => true]
         );
@@ -607,9 +602,9 @@ class LicenceMcccVersion extends AbstractLicenceMccc
                 $mcccsNew = $this->getMcccs($diffEc['mcccs']['new'], $diffEc['typeMccc']->new);
 
                 //cas Original sans écrire dans les cellules
-                $displayMcccOriginal = new \App\TypeDiplome\Licence\Dto\Mccc($mcccsOriginal, $diffEc['typeMccc']->original ?? '', $this->typeEpreuves, $diffEc['quitus']->original ?? false);
+                $displayMcccOriginal = new Mccc($mcccsOriginal, $diffEc['typeMccc']->original ?? '', $this->typeEpreuves, $diffEc['quitus']->original ?? false);
                 $displayMcccOriginal->calculDisplayMccc();
-                $displayMcccNew = new \App\TypeDiplome\Licence\Dto\Mccc($mcccsNew, $diffEc['typeMccc']->new, $this->typeEpreuves, $diffEc['quitus']->new ?? false);
+                $displayMcccNew = new Mccc($mcccsNew, $diffEc['typeMccc']->new, $this->typeEpreuves, $diffEc['quitus']->new ?? false);
                 $displayMcccNew->calculDisplayMccc();
 
                 // utiliser le nouveau DTO via toArray()
@@ -631,9 +626,10 @@ class LicenceMcccVersion extends AbstractLicenceMccc
                 $mcccsNew = $this->getMcccs($diffEc['mcccs']['new'], $diffEc['typeMccc']->new);
 
                 //$displayMcccNew = $this->calculDisplayMccc($mcccsNew, $diffEc['typeMccc']->new, $diffEc['quitus']->new ?? false);
-                $displayMcccNew = new \App\TypeDiplome\Licence\Dto\Mccc($mcccsNew, $diffEc['typeMccc']->new, $this->typeEpreuves, $diffEc['quitus']->new ?? false);
+                $displayMcccNew = new Mccc($mcccsNew, $diffEc['typeMccc']->new, $this->typeEpreuves, $diffEc['quitus']->new ?? false);
                 $displayMcccNew->calculDisplayMccc();
 
+                $diffMccc = [];
                 foreach ($displayMcccNew->toArray() as $key => $value) {
                     $diffMccc[$key] = new DiffObject('', $value);
                 }
@@ -691,7 +687,7 @@ class LicenceMcccVersion extends AbstractLicenceMccc
         return $ligne;
     }
 
-    private function afficheSommeSemestre(int $ligne, StructureSemestre $semestre, $diffSemestre): int
+    private function afficheSommeSemestre(int $ligne, StructureSemestre $semestre, array $diffSemestre): int
     {
         $this->excelWriter->insertNewRowBefore($ligne);
 
@@ -724,9 +720,6 @@ class LicenceMcccVersion extends AbstractLicenceMccc
     private function genereReferentielCompetences(Parcours $parcours, Formation $formation): void
     {
         $modele = $this->excelWriter->getSheetByName(self::PAGE_REF_COMPETENCES);
-        if ($modele === null) {
-            throw new \Exception('Le modèle n\'existe pas');
-        }
 
         //en-tête du fichier
         $modele->setCellValue(self::CEL_ANNEE_UNIVERSITAIRE, 'Année Universitaire ' . $formation->getDpe()?->getLibelle());
@@ -780,7 +773,7 @@ class LicenceMcccVersion extends AbstractLicenceMccc
             ->office()
             ->files(new \SplFileInfo($fichier))
             ->generate()
-            ->stream($this->fileName . '.pdf');
+            ->stream();
 
         unlink($fichier);
 

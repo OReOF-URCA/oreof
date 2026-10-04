@@ -35,11 +35,11 @@ class FormationController extends BaseController
             $this->isGranted('SHOW', ['route' => 'app_composante', 'subject' => 'composante']) ||
             $this->isGranted('SHOW', ['route' => 'app_formation', 'subject' => 'formation'])
         ) {
-            $formations = $formationRepository->findBy(['anneeUniversitaire' => $this->getCampagneCollecte()]);
+            $formations = $formationRepository->findBy(['dpe' => $this->getCampagneCollecte()]);
         } else {
             $formations = [];
             $formations[] = $formationRepository->findByComposanteDpe($this->getUser(), $this->getCampagneCollecte());
-            $formations[] = $formationRepository->findBy(['responsableMention' => $this->getUser(), 'anneeUniversitaire' => $this->getCampagneCollecte()]);
+            $formations[] = $formationRepository->findBy(['responsableMention' => $this->getUser(), 'dpe' => $this->getCampagneCollecte()]);
             $formations = array_merge(...$formations);
         }
 

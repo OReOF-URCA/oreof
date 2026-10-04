@@ -38,7 +38,7 @@ abstract class Access {
         return $formation->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_TEXTE;
     }
 
-    public static function isOuvert(Parcours|Formation|DpeParcours $entity)
+    public static function isOuvert(Parcours|Formation|DpeParcours $entity): bool
     {
         if ($entity instanceof DpeParcours) {
             return in_array($entity->getEtatReconduction()->value, [

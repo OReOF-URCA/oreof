@@ -87,21 +87,21 @@ class FormationRepository extends ServiceEntityRepository
     ): array {
         $query = $this->createQueryBuilder('f')
             ->join('f.dpeParcours', 'dp')
+            ->leftJoin('dp.parcours', 'parcours')
+            ->leftJoin('f.mention', 'm')
             ->innerJoin(Composante::class, 'c', 'WITH', 'f.composantePorteuse = c.id')
             ->where('c.responsableDpe = :user')
             ->andWhere('dp.campagneCollecte = :campagneCollecte')
             ->setParameter('user', $user)
-
             ->setParameter('campagneCollecte', $campagneCollecte);
 
         if ($q !== null) {
-            $query ->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
+            $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
                 ->setParameter('q', '%' . $q . '%');
         }
 
         foreach ($sorts as $sort => $direction) {
             if ($sort === 'mention') {
-                $query->leftJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id');
                 $query->addOrderBy(
                     'CASE
                             WHEN f.mention IS NOT NULL THEN m.libelle
@@ -173,7 +173,7 @@ class FormationRepository extends ServiceEntityRepository
 //                ->setParameter('etatDpe', json_encode([$options['etatDpe'] => 1]));
 //        }
 
-        if (array_key_exists('mention', $filtres) && null !== $filtres['mention']) {
+        if (isset($filtres['mention'])) {
             $query->addOrderBy(
                 'CASE
                             WHEN f.mention IS NOT NULL THEN m.libelle
@@ -184,7 +184,7 @@ class FormationRepository extends ServiceEntityRepository
             );
         }
 
-        if (array_key_exists('domaine', $filtres) && null !== $filtres['domaine']) {
+        if (isset($filtres['domaine'])) {
             $query->addOrderBy(
                 'm.domaine',
                 $filtres['domaine']
@@ -243,7 +243,6 @@ class FormationRepository extends ServiceEntityRepository
         }
 
         if ($sort === 'mention') {
-            $query->leftJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id');
             $query->addOrderBy(
                 'CASE
                             WHEN f.mention IS NOT NULL THEN m.libelle
@@ -267,6 +266,7 @@ class FormationRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('f')
             ->leftJoin('f.dpeParcours', 'dp')
+            ->leftJoin('f.mention', 'm')
             ->addSelect('dp')
             ->where('f.responsableMention = :user')
             ->orWhere('f.coResponsable = :user')
@@ -276,7 +276,6 @@ class FormationRepository extends ServiceEntityRepository
 
         foreach ($sorts as $sort => $direction) {
             if ($sort === 'mention') {
-                $query->leftJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id');
                 $query->addOrderBy(
                     'CASE
                             WHEN f.mention IS NOT NULL THEN m.libelle
@@ -299,6 +298,7 @@ class FormationRepository extends ServiceEntityRepository
         $query = $this->createQueryBuilder('f')
             ->innerJoin(Composante::class, 'c', 'WITH', 'f.composantePorteuse = c.id')
             ->leftJoin('f.dpeParcours', 'dp')
+            ->leftJoin('f.mention', 'm')
             ->addSelect('dp')
             ->andWhere('c.id = :composante')
             ->andWhere('dp.campagneCollecte = :campagneCollecte')
@@ -307,7 +307,6 @@ class FormationRepository extends ServiceEntityRepository
 
         foreach ($sorts as $sort => $direction) {
             if ($sort === 'mention') {
-                $query->leftJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id');
                 $query->addOrderBy(
                     'CASE
                             WHEN f.mention IS NOT NULL THEN m.libelle
@@ -346,11 +345,12 @@ class FormationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByResponsableOuCoResponsableParcours(?UserInterface $user, CampagneCollecte $campagneCollecte, array $sorts)
+    public function findByResponsableOuCoResponsableParcours(?UserInterface $user, CampagneCollecte $campagneCollecte, array $sorts): array
     {
         $query = $this->createQueryBuilder('f')
             ->innerJoin(Parcours::class, 'p', 'WITH', 'f.id = p.formation')
             ->leftJoin('f.dpeParcours', 'dp')
+            ->leftJoin('f.mention', 'm')
             ->addSelect('dp')
             ->where('p.respParcours = :user')
             ->orWhere('p.coResponsable = :user')
@@ -360,7 +360,6 @@ class FormationRepository extends ServiceEntityRepository
 
         foreach ($sorts as $sort => $direction) {
             if ($sort === 'mention') {
-                $query->leftJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id');
                 $query->addOrderBy(
                     'CASE
                             WHEN f.mention IS NOT NULL THEN m.libelle
@@ -400,7 +399,7 @@ class FormationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByComposanteAndDpe(string|null $composante, ?CampagneCollecte $campagneCollecte): array
+    public function findByComposanteAndDpe(Composante|int|string|null $composante, ?CampagneCollecte $campagneCollecte): array
     {
         return $this->createQueryBuilder('f')
             ->where('f.composantePorteuse = :composante')

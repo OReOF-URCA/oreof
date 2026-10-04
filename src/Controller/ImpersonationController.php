@@ -10,10 +10,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use App\Repository\UserRepository;
 use App\Service\DataTableBuilder;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -22,14 +19,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 class ImpersonationController extends BaseController
 {
-    private const USERS_PER_PAGE = 50;
-
-    public function __construct(
-        private readonly UserRepository $userRepository,
-    )
-    {
-    }
-
     #[Route('', name: 'app_impersonation_list', methods: ['GET'])]
     public function list(DataTableBuilder $builder): Response
     {

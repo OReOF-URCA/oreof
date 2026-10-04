@@ -37,10 +37,10 @@ class StructureSemestre
 
     public ?Parcours $parcoursRaccroche = null;
     public ?SemestreParcours $semestreParcours = null;
-    private bool $withEcts;
-    private bool $withBcc;
+    public bool $withEcts;
+    public bool $withBcc;
 
-    public function __construct(Semestre $semestre, int $ordre, bool $raccroche = false, SemestreParcours $semestreParcours = null, bool $withEcts = true, $withBcc = true, ?Parcours $parcoursRaccroche = null)
+    public function __construct(Semestre $semestre, int $ordre, bool $raccroche = false, ?SemestreParcours $semestreParcours = null, bool $withEcts = true, bool $withBcc = true, ?Parcours $parcoursRaccroche = null)
     {
         $this->withEcts = $withEcts;
         $this->withBcc = $withBcc;

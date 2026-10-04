@@ -44,7 +44,7 @@ final class BadgeMcccComponent
                     // ECTS non utilisés ou non obligatoires : un EC libre est complet par défaut
                     $this->etatMcccComplet = true;
                 } else {
-                    $this->etatMcccComplet = $this->elementConstitutif->getEcts() !== 0; // sur un EC libre, juste des ECTS
+                    $this->etatMcccComplet = ($this->elementConstitutif->getEcts() ?? 0.0) > 0.0; // sur un EC libre, juste des ECTS
                 }
             } else {
                 $getElement = new GetElementConstitutif($this->elementConstitutif, $this->parcours);

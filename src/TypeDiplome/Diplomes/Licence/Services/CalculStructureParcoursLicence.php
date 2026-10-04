@@ -64,11 +64,13 @@ final class CalculStructureParcoursLicence
         $dtoStructure = StructureParcours::fromEntity($parcours);
 
         foreach ($parcours->getSemestreParcours() as $semestreParcours) {
-            if ($semestreParcours->getSemestre()?->getSemestreRaccroche() !== null) {
-                $semestre = $semestreParcours->getSemestre()?->getSemestreRaccroche()?->getSemestre();
+            $sem = $semestreParcours->getSemestre();
+            $semRaccroche = $sem?->getSemestreRaccroche();
+            if ($semRaccroche !== null) {
+                $semestre = $semRaccroche->getSemestre();
                 $raccrocheSemestre = true;
             } else {
-                $semestre = $semestreParcours->getSemestre();
+                $semestre = $sem;
                 $raccrocheSemestre = false;
             }
 
@@ -149,12 +151,14 @@ final class CalculStructureParcoursLicence
         }
 
 
-        if ($semestreParcours->getSemestre()?->getSemestreRaccroche() !== null) {
-            $semestre = $semestreParcours->getSemestre()?->getSemestreRaccroche()?->getSemestre();
-            $parcoursRaccroche = $semestreParcours->getSemestre()?->getSemestreRaccroche()?->getParcours();
+        $sem = $semestreParcours->getSemestre();
+        $semRaccroche = $sem?->getSemestreRaccroche();
+        if ($semRaccroche !== null) {
+            $semestre = $semRaccroche->getSemestre();
+            $parcoursRaccroche = $semRaccroche->getParcours();
             $raccrocheSemestre = true;
         } else {
-            $semestre = $semestreParcours->getSemestre();
+            $semestre = $sem;
             $raccrocheSemestre = false;
             $parcoursRaccroche = null;
         }
@@ -174,7 +178,7 @@ final class CalculStructureParcoursLicence
                     }
 
                     //si des UE enfants, on ne regarde pas s'il y a des EC
-                    $dtoUe = new StructureUe($ue, $raccrocheUe, $display, $ueOrigine ?? null, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
+                    $dtoUe = new StructureUe($ue, $raccrocheUe, $display, $ueOrigine, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
                     $ecs = $this->elementConstitutifRepository->getByUe($ue);
 
                     foreach ($ecs as $elementConstitutif) {

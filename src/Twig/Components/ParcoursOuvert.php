@@ -27,16 +27,15 @@ final class ParcoursOuvert
     public string $type = 'parcours';
 
     #[LiveProp]
-    public DpeParcours $dpeParcours;
+    public ?DpeParcours $dpeParcours = null;
     #[LiveProp]
-    public CampagneCollecte $campagne;
+    public ?CampagneCollecte $campagne = null;
 
     #[LiveProp(writable: true)]
     public bool $isOuvert = false;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(private readonly EntityManagerInterface $entityManager)
     {
-        $this->entityManager = $entityManager;
     }
 
     #[PostMount]
@@ -61,24 +60,26 @@ final class ParcoursOuvert
     public function save(): void
     {
         $this->dpeParcours = GetDpeParcours::getFromParcours($this->parcours);
-        $this->campagne = $this->dpeParcours->getCampagneCollecte();
+        if ($this->dpeParcours !== null) {
+            $this->campagne = $this->dpeParcours->getCampagneCollecte();
 
-        if ($this->isOuvert) {
-            $this->dpeParcours->setEtatReconduction(TypeModificationDpeEnum::OUVERTURE_SES);
-        } else {
-            $this->dpeParcours->setEtatReconduction(TypeModificationDpeEnum::NON_OUVERTURE_SES);
+            if ($this->isOuvert) {
+                $this->dpeParcours->setEtatReconduction(TypeModificationDpeEnum::OUVERTURE_SES);
+            } else {
+                $this->dpeParcours->setEtatReconduction(TypeModificationDpeEnum::NON_OUVERTURE_SES);
+            }
+
+            $this->entityManager->flush();
         }
-
-        $this->entityManager->flush();
     }
 
     public function getColor(): string
     {
-        if ($this->dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::NON_OUVERTURE) {
+        if ($this->dpeParcours?->getEtatReconduction() === TypeModificationDpeEnum::NON_OUVERTURE) {
             return 'danger';
         }
 
-        if ($this->dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::NON_OUVERTURE_SES || $this->dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::NON_OUVERTURE_CFVU) {
+        if ($this->dpeParcours?->getEtatReconduction() === TypeModificationDpeEnum::NON_OUVERTURE_SES || $this->dpeParcours?->getEtatReconduction() === TypeModificationDpeEnum::NON_OUVERTURE_CFVU) {
             return 'warning';
         }
         return 'success';

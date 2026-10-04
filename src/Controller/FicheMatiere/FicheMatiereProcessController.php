@@ -62,7 +62,7 @@ class FicheMatiereProcessController extends BaseController
         $view = $this->transitionModalViewBuilder->build($transition, $ficheMatiere, $rawMeta);
 
         if ($view->mode === 'report') {
-            $formId = $metaDto->form?->formId ?? 'modal_form';
+            $formId = $metaDto->form !== null ? $metaDto->form->formId : 'modal_form';
             $form = $this->metaDrivenFormFactory->createEmpty($formId);
         } else {
             // si pas de form dans metadata : form vide

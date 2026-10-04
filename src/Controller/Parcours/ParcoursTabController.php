@@ -94,22 +94,4 @@ final class ParcoursTabController extends AbstractController
         $response->headers->set('Content-Type', 'text/vnd.turbo-stream.html');
         return $response;
     }
-
-    /**
-     * Transforme le "data" actuel du formulaire en tableau soumis.
-     * Suffisant pour déclencher la validation sur les champs affichés dans ce tab.
-     */
-    private function extractCurrentFormData(FormInterface $form): array
-    {
-        $data = [];
-        foreach ($form as $child) {
-            $name = $child->getName();
-            $cfg = $child->getConfig();
-            $type = $cfg->getType()->getInnerType();
-
-            // radios/checkbox/select/text/textarea -> getViewData marche bien pour la plupart
-            $data[$name] = $child->getViewData();
-        }
-        return $data;
-    }
 }

@@ -148,7 +148,8 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findAllParcoursId(){
+    public function findAllParcoursId(): array
+    {
         return $this->createQueryBuilder('p')
             ->select('p.id')
             ->orderBy('p.id', 'ASC')
@@ -156,27 +157,27 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findAllParcours()
+    public function findAllParcours(): array
     {
         return $this->createQueryBuilder('p')
             ->join('p.formation', 'f')
-            ->select('p.id', 'f.id as formation_id', 'f.f.etatDpe as etatDpe')
+            ->select('p.id', 'f.id as formation_id')
             ->orderBy('p.id', 'ASC')
             ->getQuery()
             ->getResult();
     }
 
-    public function findAllParcoursForDpe(CampagneCollecte $campagneCollecte){
+    public function findAllParcoursForDpe(CampagneCollecte $campagneCollecte): array
+    {
         return $this->createQueryBuilder('p')
             ->join('p.dpeParcours', 'dp')
             ->where('dp.campagneCollecte = :campagneCollecte')
             ->setParameter('campagneCollecte', $campagneCollecte)
             ->getQuery()
             ->getResult();
-
     }
 
-    public function findByTypeValidationAttenteCfvuAndComposante(CampagneCollecte $campagneCollecte, string $typeValidation, Composante|int $composante)
+    public function findByTypeValidationAttenteCfvuAndComposante(CampagneCollecte $campagneCollecte, string $typeValidation, Composante|int $composante): array
     {
         if (!is_int($composante)) {
             $composante = $composante->getId();
@@ -198,7 +199,6 @@ class ParcoursRepository extends ServiceEntityRepository
 
         return $query->getQuery()
             ->getResult();
-
     }
 
     public function findByComposanteTypeValidation(Composante $composante,
@@ -284,7 +284,8 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findParcoursDeBaseAlternance(string $libelle, int $idCampagneCollecte) {
+    public function findParcoursDeBaseAlternance(string $libelle, int $idCampagneCollecte): array
+    {
         $qb = $this->createQueryBuilder('p');
 
         return $qb
@@ -372,7 +373,8 @@ class ParcoursRepository extends ServiceEntityRepository
         return $result;
     }
 
-    public function findAllByCampagneCollecte(CampagneCollecte $campagneC) {
+    public function findAllByCampagneCollecte(CampagneCollecte $campagneC): array
+    {
         return $this->createQueryBuilder("p")
             ->join('p.dpeParcours', 'dpe')
             ->join('dpe.campagneCollecte', 'camp')
@@ -382,7 +384,8 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByNomComplet(string $keyword, int $campagneId) {
+    public function findByNomComplet(string $keyword, int $campagneId): array
+    {
         $qb = $this->createQueryBuilder('p');
         return $qb
             ->select(

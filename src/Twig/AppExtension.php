@@ -12,9 +12,11 @@ namespace App\Twig;
 use App\DTO\BadgeView;
 use App\Entity\UeMutualisable;
 use App\Entity\UserProfil;
+use App\Entity\Help;
 use App\Enums\BadgeEnumInterface;
 use App\Enums\CentreGestionEnum;
 use App\Presenter\BadgePresenter;
+use App\Repository\HelpRepository;
 use App\Utils\Tools;
 use DateTimeInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -30,6 +32,7 @@ class AppExtension extends AbstractExtension
     public function __construct(
         private readonly ParameterBagInterface $parameterBag,
         private readonly BadgePresenter        $badgePresenter,
+        private readonly HelpRepository        $helpRepository,
     )
     {
 
@@ -320,7 +323,7 @@ class AppExtension extends AbstractExtension
         return sprintf('<span class="%s">%s</span>', $classes, $label);
     }
 
-    public function getPageHelp(string $route)
+    public function getPageHelp(string $route): ?Help
     {
         return $this->helpRepository->findOneBy(['routeSlug' => $route, 'isActive' => true]);
     }

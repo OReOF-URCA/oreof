@@ -81,12 +81,12 @@ class GetElementConstitutif
 
         // EC qui a un parent avec MCCC identiques
         if(!$isMcccImpose && $this->elementConstitutif->getEcParent()?->isMcccEnfantsIdentique()) {
-            return $this->elementConstitutif->getEcParent()?->getMcccs();
+            return $this->elementConstitutif->getEcParent()->getMcccs();
         }
 
 
         if($this->elementConstitutif->getFicheMatiere()) {
-            return $this->elementConstitutif->getFicheMatiere()?->getMcccs();
+            return $this->elementConstitutif->getFicheMatiere()->getMcccs();
         }
 
         return $this->elementConstitutif->getMcccs();
@@ -101,7 +101,7 @@ class GetElementConstitutif
         }
 
         if($this->elementConstitutif->getEcParent()?->isMcccEnfantsIdentique() && !$isMcccImpose) {
-            return $this->elementConstitutif->getEcParent()?->getTypeMccc();
+            return $this->elementConstitutif->getEcParent()->getTypeMccc();
         }
 
         if($this->elementConstitutif->getFicheMatiere()) {
@@ -133,15 +133,13 @@ class GetElementConstitutif
     public function getFicheMatiereHeures() : FicheMatiere|ElementConstitutif
     {
         $ficheMatiere = $this->elementConstitutif->getFicheMatiere() ?? $this->elementConstitutif;
-        if($this->elementConstitutif instanceof ElementConstitutif) {
-            if($this->elementConstitutif->getEcParent()?->isHeuresEnfantsIdentiques()) {
-                if(!$this->elementConstitutif->getFicheMatiere()?->isVolumesHorairesImpose()) {
-                    $ficheMatiere = $this->elementConstitutif->getEcParent();
-                }
+        if($this->elementConstitutif->getEcParent()?->isHeuresEnfantsIdentiques()) {
+            if(!$this->elementConstitutif->getFicheMatiere()?->isVolumesHorairesImpose()) {
+                $ficheMatiere = $this->elementConstitutif->getEcParent();
             }
-            if($this->elementConstitutif->isHeuresSpecifiques()) {
-                $ficheMatiere = $this->elementConstitutif;
-            }
+        }
+        if($this->elementConstitutif->isHeuresSpecifiques()) {
+            $ficheMatiere = $this->elementConstitutif;
         }
 
         return $ficheMatiere;
@@ -162,7 +160,7 @@ class GetElementConstitutif
             return false;
         }
 
-        $this->isRaccroche = $this->elementConstitutif->getFicheMatiere()?->getParcours() !== $this->parcours;
+        $this->isRaccroche = $this->elementConstitutif->getFicheMatiere()->getParcours() !== $this->parcours;
         return $this->isRaccroche;
     }
 
@@ -172,7 +170,7 @@ class GetElementConstitutif
             return $this->elementConstitutif->getEcParent()->getEtatMccc();
         }
 
-        if ($this->elementConstitutif->getEcEnfants()?->count() > 0) {
+        if ($this->elementConstitutif->getEcEnfants()->count() > 0) {
             if ($this->elementConstitutif->isMcccEnfantsIdentique() === false) {
                 return $this->elementConstitutif->getEcts() > 0 ? 'Complet' : 'A saisir';
             }
@@ -181,7 +179,7 @@ class GetElementConstitutif
         }
 
         if ($this->elementConstitutif->getFicheMatiere()?->isMcccImpose()) {
-            return $this->elementConstitutif->getFicheMatiere()?->getEtatMccc();
+            return $this->elementConstitutif->getFicheMatiere()->getEtatMccc();
         }
 
         if ($this->elementConstitutif->isMcccSpecifiques() === true) {
@@ -194,7 +192,7 @@ class GetElementConstitutif
     public function getEtatStructure(): ?string
     {
         if ($this->elementConstitutif->getFicheMatiere()?->isVolumesHorairesImpose()) {
-            return $this->elementConstitutif->getFicheMatiere()?->etatStructure();
+            return $this->elementConstitutif->getFicheMatiere()->etatStructure();
         }
 
         if ($this->elementConstitutif->getEcParent() !== null && $this->elementConstitutif->getEcParent()->isHeuresEnfantsIdentiques() === true) {
@@ -212,7 +210,7 @@ class GetElementConstitutif
         // cas du BUT
         if ($this->elementConstitutif->getFicheMatiere()?->getApprentissagesCritiques()->count() > 0) {
             //todo: les Ac doivent être dans la bonne compétence...
-            foreach ($this->elementConstitutif->getFicheMatiere()?->getApprentissagesCritiques() as $ac) {
+            foreach ($this->elementConstitutif->getFicheMatiere()->getApprentissagesCritiques() as $ac) {
                 if ($ac->getNiveau() !== null &&
                     $ac->getNiveau()->getCompetence()?->getNumero() === $this->elementConstitutif->getUe()?->getOrdre()) {
                     return 'Complet';

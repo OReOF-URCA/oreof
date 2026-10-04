@@ -34,13 +34,11 @@ class ReferentielCompetencesController extends AbstractController
         if ($formation->getTypeDiplome()?->getLibelleCourt() === 'BUT') {
             return $this->json(
                 [
-                    'referentiel' => $formation?->getDisplay(),
-                    'sigle' => $formation?->getSigle(),
-                    'type_diplome' => $formation->getTypeDiplome()?->getLibelleCourt(),
+                    'referentiel' => $formation->getDisplay(),
+                    'sigle' => $formation->getSigle(),
+                    'type_diplome' => $formation->getTypeDiplome()->getLibelleCourt(),
                     'competences' => $exportReferentielCompetencesBut->exportToArray($formation),
                 ]);
-        } else {
-
         }
 
         return $this->json([]);

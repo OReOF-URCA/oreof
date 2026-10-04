@@ -3,14 +3,11 @@
 namespace App\Command;
 
 use App\Entity\UserNotificationPreference;
-use App\Repository\UserProfilRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -20,8 +17,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class UpdateNotifCommand extends Command
 {
-    private UserProfilRepository $userProfilRepository;
-
     public function __construct(
         protected UserRepository         $userRepository,
         protected EntityManagerInterface $entityManager,

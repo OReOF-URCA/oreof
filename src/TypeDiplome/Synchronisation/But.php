@@ -545,8 +545,7 @@ class But
                     $codeAc = $apprentissageCritique['apprentissageCritique']['code'];
                     if ((int)substr($codeAc, 3, 1) === $competence['competence']['id']) {
                         $ac = $this->listeAcs[$codeAc];
-                        $ac->addElementConstitutif($ec);
-                        $ec->addApprentissagesCritique($ac);
+                        $fm->addApprentissagesCritique($ac);
                         //todo: récupe des Coeffs ???
                     }
                 }
@@ -580,8 +579,7 @@ class But
                     $codeAc = $apprentissageCritique['apprentissageCritique']['code'];
                     if ((int)substr($codeAc, 3, 1) === $competence['competence']['id']) {
                         $ac = $this->listeAcs[$codeAc];
-                        $ac->addElementConstitutif($ec);
-                        $ec->addApprentissagesCritique($ac);
+                        $fm->addApprentissagesCritique($ac);
                     }
                 }
             }
@@ -590,6 +588,7 @@ class But
 
     public function synchroniserMccc(Formation $formation): void
     {
+        $fifc = 'fi';
         foreach ($formation->getRegimeInscription() as $regime) {
             if ($regime === RegimeInscriptionEnum::FI || $regime === RegimeInscriptionEnum::FC) {
                 $fifc = 'fi';

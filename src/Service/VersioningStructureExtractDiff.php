@@ -11,6 +11,7 @@ namespace App\Service;
 
 use App\DTO\DiffObject;
 use App\DTO\HeuresEctsEc;
+use App\DTO\HeuresEctsFormation;
 use App\DTO\HeuresEctsSemestre;
 use App\DTO\StructureEc;
 use App\DTO\StructureParcours;
@@ -217,7 +218,7 @@ class VersioningStructureExtractDiff
             foreach ($ecNouveau->elementsConstitutifsEnfants as $ordreEc => $ecEnfant) {
                 if (array_key_exists($ordreEc, $ecOriginal->elementsConstitutifsEnfants)) {
                     $modif = $this->compareElementConstitutif($ecOriginal->elementsConstitutifsEnfants[$ordreEc], $ecEnfant);
-                    if ($modif !== null) {
+                    if ($modif !== false) {
                         $diff['ecEnfants'][$ordreEc] = $modif;
                     }
                 } else {
@@ -279,9 +280,13 @@ class VersioningStructureExtractDiff
         return $this->hasModifications($diff) ? $diff : false;
     }
 
-    private function compareHeuresEctsFormation(mixed $heuresEctsFormation, $heuresEctsFormationNouveau): array|false
+    private function compareHeuresEctsFormation(?HeuresEctsFormation $heuresEctsFormation, ?HeuresEctsFormation $heuresEctsFormationNouveau): array
     {
         $diff = [];
+        if ($heuresEctsFormation === null || $heuresEctsFormationNouveau === null) {
+            return $diff;
+        }
+
         $diff['sommeFormationEcts'] = new DiffObject($heuresEctsFormation->sommeFormationEcts, $heuresEctsFormationNouveau->sommeFormationEcts);
         $diff['sommeFormationCmPres'] = new DiffObject(Tools::filtreHeures($heuresEctsFormation->sommeFormationCmPres), Tools::filtreHeures($heuresEctsFormationNouveau->sommeFormationCmPres));
         $diff['sommeFormationTdPres'] = new DiffObject(Tools::filtreHeures($heuresEctsFormation->sommeFormationTdPres), Tools::filtreHeures($heuresEctsFormationNouveau->sommeFormationTdPres));
@@ -303,7 +308,7 @@ class VersioningStructureExtractDiff
         return $diff;
     }
 
-    private function compareMcccs(?array $mcccsOriginal, ?array $mcccsNouveau, DiffObject $typeMccc): ?string
+    private function compareMcccs(?array $mcccsOriginal, ?array $mcccsNouveau, DiffObject $typeMccc): string
     {
         if (null === $mcccsOriginal && null === $mcccsNouveau) {
             return 'Pas de MCCC';
@@ -417,8 +422,8 @@ class VersioningStructureExtractDiff
                     //$this->excelWriter->writeCellXY(self::COL_MCCC_CC, $ligne, $texte);
                 }
 
+                $texte2 = '';
                 if (array_key_exists(2, $mcccs) && array_key_exists('et', $mcccs[2]) && is_array($mcccs[2]['et'])) {
-                    $texte2 = '';
                     $pourcentageTpEt = $pourcentageTp / count($mcccs[2]['et']);
                     foreach ($mcccs[2]['et'] as $mccc) {
                         $texte2 .= $this->displayTypeEpreuveWithDureePourcentage($mccc);

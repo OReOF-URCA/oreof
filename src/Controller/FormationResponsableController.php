@@ -161,13 +161,9 @@ class FormationResponsableController extends BaseController
     ): Response {
         $campagneCollecte = $this->getCampagneCollecte();
 
-        if ($campagneCollecte === null) {
-            $builder->addBaseWhere('1 = 0');
-        } else {
-            $builder
-                ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
-                ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId());
-        }
+        $builder
+            ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
+            ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId());
 
         return $this->render('formation_responsable/liste.html.twig', [
             'table' => $builder
@@ -293,10 +289,6 @@ class FormationResponsableController extends BaseController
         TurboStreamResponseFactory $turboStream,
     ): Response {
 
-        if ($demande === null) {
-            return JsonReponse::error('Demande non trouvée');
-        }
-
         $inspection = $this->operationInspector->inspect($this->changeRfWorkflow, $demande, $transition);
         if (!$inspection->canExecute()) {
             return $this->operationErrorResponse(
@@ -313,7 +305,7 @@ class FormationResponsableController extends BaseController
             'meta' => $meta,
             'transition' => $transition,
             'process' => $process,
-            'processData' => $processData ?? null,
+            'processData' => $processData,
             'action' => $this->generateUrl('app_validation_change_rf_valider', [
                 'transition' => $transition,
                 'etape' => $etape,
@@ -325,6 +317,7 @@ class FormationResponsableController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var array<string, mixed> $formData */
             $formData = (array) $form->getData();
             $fileName = '';
             $originalFileName = null;
@@ -403,7 +396,7 @@ class FormationResponsableController extends BaseController
                 'demande' => $demande,
                 'process' => $process,
                 'etape' => $etape,
-                'processData' => $processData ?? null,
+                'processData' => $processData,
                 'meta' => $meta,
                 'transition' => $transition,
                 'form' => $form->createView(),

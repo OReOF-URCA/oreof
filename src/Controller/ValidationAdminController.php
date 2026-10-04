@@ -59,14 +59,14 @@ class ValidationAdminController extends BaseController
             if ($fiche->getParcours() !== null && $fiche->getElementConstitutifs()->count() > 0) {
 
                 $parcours = $fiche->getParcours();
-                $formation = $parcours?->getFormation();
+                $formation = $parcours->getFormation();
                 $composante = $formation?->getComposantePorteuse();
                 $responsable = $fiche->getResponsableFicheMatiere();
 
-                $excelWriter->writeCellXY(1, $ligne, $composante ? $composante?->getLibelle() : 'Pas de composante');
-                $excelWriter->writeCellXY(2, $ligne, $formation ? $formation?->getTypeDiplome()?->getLibelle() : 'Pas de formation');
-                $excelWriter->writeCellXY(3, $ligne, $formation ? $formation?->getDisplay() : 'Pas de formation');
-                $excelWriter->writeCellXY(4, $ligne, $parcours ? $parcours->getLibelle() : 'Pas de parcours');
+                $excelWriter->writeCellXY(1, $ligne, $composante ? $composante->getLibelle() : 'Pas de composante');
+                $excelWriter->writeCellXY(2, $ligne, $formation ? ($formation->getTypeDiplome()?->getLibelle() ?? 'Pas de formation') : 'Pas de formation');
+                $excelWriter->writeCellXY(3, $ligne, $formation ? $formation->getDisplay() : 'Pas de formation');
+                $excelWriter->writeCellXY(4, $ligne, $parcours->getLibelle());
                 $excelWriter->writeCellXY(5, $ligne, $fiche->getLibelle());
                 $excelWriter->writeCellXY(6, $ligne, $responsable ? $responsable->getNom() . ' ' . $responsable->getPrenom() : 'Pas de responsable');
 
@@ -204,15 +204,11 @@ class ValidationAdminController extends BaseController
         $nbFormations = count(array_unique($tFormations));
 
         $campagneCollecte = $this->getCampagneCollecte();
-        if ($campagneCollecte === null) {
-            $builder->addBaseWhere('1 = 0');
-        } else {
-            $builder
-                ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
-                ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId())
-                ->addBaseWhere('JSON_CONTAINS(e.etatValidation, :etatDpe) = 1')
-                ->addBaseParameter('etatDpe', json_encode([$typeValidation => 1]));
-        }
+        $builder
+            ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
+            ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId())
+            ->addBaseWhere('JSON_CONTAINS(e.etatValidation, :etatDpe) = 1')
+            ->addBaseParameter('etatDpe', json_encode([$typeValidation => 1]));
 
         if ($composante !== null) {
             $builder
@@ -292,7 +288,7 @@ class ValidationAdminController extends BaseController
             'nbFormations' => $nbFormations,
             'nbParcours' => $nbParcours,
             'process' => $process,
-            'etape' => $typeValidation ?? null,
+            'etape' => $typeValidation,
             'oneParcours' => $allparcours[0] ?? null,
         ]);
     }
@@ -336,15 +332,11 @@ class ValidationAdminController extends BaseController
         }
 
         $campagneCollecte = $this->getCampagneCollecte();
-        if ($campagneCollecte === null) {
-            $builder->addBaseWhere('1 = 0');
-        } else {
-            $builder
-                ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
-                ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId())
-                ->addBaseWhere('JSON_CONTAINS(e.etatDemande, :etatDpe) = 1')
-                ->addBaseParameter('etatDpe', json_encode([$typeValidation => 1]));
-        }
+        $builder
+            ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
+            ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId())
+            ->addBaseWhere('JSON_CONTAINS(e.etatDemande, :etatDpe) = 1')
+            ->addBaseParameter('etatDpe', json_encode([$typeValidation => 1]));
 
         if ($composante !== null) {
             $builder
@@ -428,7 +420,7 @@ class ValidationAdminController extends BaseController
         return $this->render('validation/_listeChangeRf.html.twig', [
             'table' => $table,
             'nbDemandes' => count($demandes),
-            'etape' => $typeValidation ?? null,
+            'etape' => $typeValidation,
             'oneDemande' => $demandes[0] ?? null,
         ]);
     }
@@ -448,7 +440,7 @@ class ValidationAdminController extends BaseController
         return $this->render('validation/_listeFiches.html.twig', [
             'process' => $process,
             'fiches' => $fiches,
-            'etape' => $typeValidation ?? null,
+            'etape' => $typeValidation,
             'oneFiche' => $fiches[0] ?? null,
         ]);
     }

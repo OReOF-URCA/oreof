@@ -37,7 +37,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[Groups('parcours_json_versioning', 'DTO_json_versioning')]
+    #[Groups(['parcours_json_versioning', 'DTO_json_versioning'])]
     #[ORM\Column(length: 30, nullable: true, enumType: ModaliteEnseignementEnum::class)]
     private ?ModaliteEnseignementEnum $modaliteEnseignement = null;
 
@@ -882,7 +882,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
         }
 
         if ($this->ficheMatiere !== null) {
-            return 'FM_'.$this->ficheMatiere->getId() ?? '-err-';
+            return 'FM_'.($this->ficheMatiere->getId() ?? 'err');
         }
 
         return '-err-';
@@ -1021,7 +1021,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     public function isMcccComplete(Parcours $parcours): bool
     {
         if ($this->getNatureUeEc()?->isLibre()) {
-            $etatMcccComplet = $this->getEcts() !== 0; // sur un EC libre, juste des ECTS
+            $etatMcccComplet = ($this->getEcts() ?? 0.0) > 0.0; // sur un EC libre, juste des ECTS
         } else {
             $getElement = new GetElementConstitutif($this, $parcours);
             $etatMcccComplet = $this->isControleAssiduite() === true || $getElement->getEtatsMccc() === 'Complet';

@@ -44,15 +44,16 @@ final class CalculStructureParcoursM2e
             $parcours = $this->parcoursRepository->find($parcours->getId());
         }
 
-        $dtoStructure = new StructureParcours($withEcts, $withBcc);
-        $dtoStructure->setParcours($parcours);
+        $dtoStructure = StructureParcours::fromEntity($parcours, $withEcts, $withBcc);
 
         foreach ($parcours->getSemestreParcours() as $semestreParcours) {
-            if ($semestreParcours->getSemestre()?->getSemestreRaccroche() !== null) {
-                $semestre = $semestreParcours->getSemestre()?->getSemestreRaccroche()?->getSemestre();
+            $sem = $semestreParcours->getSemestre();
+            $semRaccroche = $sem?->getSemestreRaccroche();
+            if ($semRaccroche !== null) {
+                $semestre = $semRaccroche->getSemestre();
                 $raccrocheSemestre = true;
             } else {
-                $semestre = $semestreParcours->getSemestre();
+                $semestre = $sem;
                 $raccrocheSemestre = false;
             }
 
@@ -71,7 +72,7 @@ final class CalculStructureParcoursM2e
                         }
 
                         //si des UE enfants, on ne regarde pas s'il y a des EC
-                        $dtoUe = new StructureUe($ue, $raccrocheUe, $display, $ueOrigine ?? null, $withEcts, $withBcc);
+                        $dtoUe = new StructureUe($ue, $raccrocheUe, $display, $ueOrigine, $withEcts, $withBcc);
                         $ecs = $this->elementConstitutifRepository->getByUe($ue);
 
                         foreach ($ecs as $elementConstitutif) {
@@ -161,15 +162,16 @@ final class CalculStructureParcoursM2e
 
     public function calculVersioning(Parcours $parcours): StructureParcours
     {
-        $dtoStructure = new StructureParcours();
-        $dtoStructure->setParcours($parcours);
+        $dtoStructure = StructureParcours::fromEntity($parcours);
 
         foreach ($parcours->getSemestreParcours() as $semestreParcours) {
-            if ($semestreParcours->getSemestre()?->getSemestreRaccroche() !== null) {
-                $semestre = $semestreParcours->getSemestre()?->getSemestreRaccroche()?->getSemestre();
+            $sem = $semestreParcours->getSemestre();
+            $semRaccroche = $sem?->getSemestreRaccroche();
+            if ($semRaccroche !== null) {
+                $semestre = $semRaccroche->getSemestre();
                 $raccrocheSemestre = true;
             } else {
-                $semestre = $semestreParcours->getSemestre();
+                $semestre = $sem;
                 $raccrocheSemestre = false;
             }
 

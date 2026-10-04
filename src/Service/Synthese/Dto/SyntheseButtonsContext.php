@@ -37,7 +37,7 @@ final class SyntheseButtonsContext
         return $this->publishedOrValidToPublish;
     }
 
-    public function isNewParcoursForCampaign()
+    public function isNewParcoursForCampaign(): bool
     {
         return $this->isNewParcoursForCampaign;
     }

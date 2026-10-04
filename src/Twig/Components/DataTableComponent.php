@@ -150,7 +150,9 @@ class DataTableComponent
         }
 
         if ($value['__type'] === 'entity') {
-            return $this->entityManager->getReference($value['__entity'], $value['__id']);
+            /** @var class-string<object> $entityClass */
+            $entityClass = $value['__entity'];
+            return $this->entityManager->getReference($entityClass, $value['__id']);
         }
 
         if ($value['__type'] === 'collection') {
@@ -158,8 +160,10 @@ class DataTableComponent
                 return [];
             }
 
+            /** @var class-string<object> $entityClass */
+            $entityClass = $value['__entity'];
             return array_map(
-                fn(int|string $id) => $this->entityManager->getReference($value['__entity'], $id),
+                fn(int|string $id) => $this->entityManager->getReference($entityClass, $id),
                 $value['__ids']
             );
         }
@@ -299,21 +303,20 @@ class DataTableComponent
             if (null === $field || strpos($field, '.') === false) {
                 continue;
             }
-            if (strpos($field, '.') !== false) {
-                $parts = explode('.', $field);
-                $currentAlias = 'e';
 
-                for ($i = 0; $i < count($parts) - 1; $i++) {
-                    $relation = $parts[$i];
-                    $joinAlias = $relation . '_' . $i;
+            $parts = explode('.', $field);
+            $currentAlias = 'e';
 
-                    if (!in_array($joinAlias, $joinedAliases)) {
-                        $qb->leftJoin($currentAlias . '.' . $relation, $joinAlias);
-                        $joinedAliases[] = $joinAlias;
-                    }
+            for ($i = 0; $i < count($parts) - 1; $i++) {
+                $relation = $parts[$i];
+                $joinAlias = $relation . '_' . $i;
 
-                    $currentAlias = $joinAlias;
+                if (!in_array($joinAlias, $joinedAliases)) {
+                    $qb->leftJoin($currentAlias . '.' . $relation, $joinAlias);
+                    $joinedAliases[] = $joinAlias;
                 }
+
+                $currentAlias = $joinAlias;
             }
         }
 
@@ -426,11 +429,12 @@ class DataTableComponent
     public function getEntityChoices(array $column): array
     {
         $entityClass = $column['entity'] ?? null;
-        if (!is_string($entityClass) || '' === $entityClass) {
+        if (!is_string($entityClass) || '' === $entityClass || !class_exists($entityClass)) {
             return [];
         }
 
         $entityLabel = $column['entity_label'] ?? '__toString';
+        /** @var class-string<object> $entityClass */
         $repository = $this->entityManager->getRepository($entityClass);
 
         try {
@@ -505,10 +509,11 @@ class DataTableComponent
     private function resolveFilterEntity(array $column, int|string $value): ?object
     {
         $entityClass = $column['entity'] ?? null;
-        if (!is_string($entityClass) || '' === $entityClass) {
+        if (!is_string($entityClass) || '' === $entityClass || !class_exists($entityClass)) {
             return null;
         }
 
+        /** @var class-string<object> $entityClass */
         $entity = $this->entityManager->getRepository($entityClass)->find($value);
 
         return is_object($entity) ? $entity : null;

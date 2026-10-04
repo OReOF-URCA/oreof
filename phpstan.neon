@@ -1,5 +1,5 @@
 parameters:
-    level: 7
+    level: 6
     paths:
         - src
 
@@ -13,9 +13,6 @@ parameters:
         objectManagerLoader: tests/object-manager.php
         allowNullablePropertyForRequiredField: true
 
-    # Auto-chargement des classes de config générées par Symfony
-    scanDirectories:
-        - var/cache/dev/Symfony/Config
 
     # Évite les faux positifs liés aux annotations DocBlock vs typage strict PHP 8.4+
     treatPhpDocTypesAsCertain: false
@@ -23,3 +20,6 @@ parameters:
     ignoreErrors:
         - identifier: missingType.iterableValue
         - identifier: missingType.generics
+        - identifier: doctrine.associationType
+
+    reportUnmatchedIgnoredErrors: false

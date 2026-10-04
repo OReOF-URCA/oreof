@@ -86,7 +86,7 @@ class ParcoursState
 
     public function isEmptyOnglet5(): bool
     {
-        return ($this->parcours->getPrerequis() === null || trim($this->parcours->getPrerequis()) === '') && ($this->parcours->getContacts()->count() === 0 || $this->parcours->getContacts()->count() === 0);
+        return ($this->parcours->getPrerequis() === null || trim($this->parcours->getPrerequis()) === '') && $this->parcours->getContacts()->count() === 0;
     }
 
     public function isEmptyOnglet6(): bool

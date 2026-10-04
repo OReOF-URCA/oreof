@@ -34,7 +34,6 @@ class ButMccc extends AbstractButMccc
 
 
     private string $fileName;
-    private Parcours $parcours;
 
     private string $dir;
 
@@ -78,7 +77,6 @@ class ButMccc extends AbstractButMccc
 
         //todo: gérer la date de publication et un "marquage" sur le document si pré-CFVU
         $formation = $parcours->getFormation();
-        $this->parcours = $parcours;
 
         if (null === $formation) {
             throw new \Exception('La formation n\'existe pas');
@@ -94,9 +92,10 @@ class ButMccc extends AbstractButMccc
         $tabSemestres = [];
         $semestres = $parcours->getSemestreParcours();
         foreach ($semestres as $semParc) {
-            if ($semParc->getSemestre()?->isNonDispense() === false && $semParc->isOuvert() === true) {
-                if ($semParc->getSemestre()?->getSemestreRaccroche() !== null) {
-                    $tabSemestres[$semParc->getOrdre()] = $semParc->getSemestre()?->getSemestreRaccroche();
+            $sem = $semParc->getSemestre();
+            if ($sem !== null && !$sem->isNonDispense() && $semParc->isOuvert()) {
+                if ($sem->getSemestreRaccroche() !== null) {
+                    $tabSemestres[$semParc->getOrdre()] = $sem->getSemestreRaccroche();
                 } else {
                     $tabSemestres[$semParc->getOrdre()] = $semParc;
                 }
@@ -317,7 +316,7 @@ class ButMccc extends AbstractButMccc
             ->office()
             ->files(new \SplFileInfo($fichier))
             ->generate()
-            ->stream($this->fileName . '.pdf');
+            ->stream();
 
         unlink($fichier);
 

@@ -12,13 +12,11 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 class HelpGrantService
 {
     private RouterInterface $router;
-    private AuthorizationCheckerInterface $authChecker;
 
-    // Injection du routeur et du checker de sécurité de Symfony
-    public function __construct(RouterInterface $router, AuthorizationCheckerInterface $authChecker)
+    // Injection du routeur
+    public function __construct(RouterInterface $router)
     {
         $this->router = $router;
-        $this->authChecker = $authChecker;
     }
 
     public function isAllowed(CentreRestrictedInterface $entity, ?User $user = null): bool
@@ -43,7 +41,7 @@ class HelpGrantService
 
             $matched = false;
             foreach ($user->getUserProfils() as $userProfil) {
-                $centre = $userProfil->getProfil()?->getCentre()?->value ?? null;
+                $centre = $userProfil->getProfil()?->getCentre()->value ?? null;
                 if ($centre && in_array($centre, $centres, true)) {
                     $matched = true;
                     break;

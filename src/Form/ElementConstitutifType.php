@@ -102,8 +102,9 @@ class ElementConstitutifType extends AbstractType
             // évite doublons (optionnel)
             'find_existing' => function (string $label, $scope, EntityManagerInterface $em) {
                 return $em->getRepository(TypeEc::class)->createQueryBuilder('t')
+                    ->join('t.typeDiplomes', 'td')
                     ->andWhere('LOWER(t.libelle) = LOWER(:l)')
-                    ->andWhere('t.typeDiplome = :td')
+                    ->andWhere('td = :td')
                     ->setParameter('l', $label)
                     ->setParameter('td', $scope)
                     ->getQuery()

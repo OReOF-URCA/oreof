@@ -640,7 +640,7 @@ class Parcours
     public function remplissageBrut(): Remplissage
     {
         if (null !== $this->getFormation()) {
-            $verification = new ParcoursValide($this, $this->getFormation()?->getTypeDiplome());
+            $verification = new ParcoursValide($this, $this->getFormation()->getTypeDiplome());
             $verification->valideParcours();
 
             return $verification->calcul();
@@ -1119,7 +1119,7 @@ class Parcours
         return $this;
     }
 
-    public function getValide()
+    public function getValide(): bool
     {
         return $this->getEtatParcours()['valide'] ?? false;
     }
@@ -1952,7 +1952,6 @@ class Parcours
         return match ($this->getEtatStep($step)) {
             true => 'green',
             false => 'orange',
-            default => 'red'
         };
     }
 
@@ -1988,7 +1987,7 @@ class Parcours
 
     public function getSemestreDebut(): ?int
     {
-// si c'est null, tenter formation, puis type de diplôme (depuis formation)
+        // si c'est null, tenter formation, puis type de diplôme (depuis formation)
         if ($this->semestreDebut !== null) {
             return $this->semestreDebut;
         }
@@ -1999,19 +1998,16 @@ class Parcours
         }
 
         // Priorité : information explicite sur la formation si disponible
-        if (method_exists($formation, 'getSemestreDebut')) {
-            $val = $formation->getSemestreDebut();
-            if ($val !== null) {
-                return $val;
-            }
+        $val = $formation->getSemestreDebut();
+        if ($val !== null) {
+            return $val;
         }
 
         // Sinon, tenter depuis le type de diplôme associé à la formation
         $typeDiplome = $formation->getTypeDiplome();
-        if ($typeDiplome !== null && method_exists($typeDiplome, 'getSemestreDebut')) {
+        if ($typeDiplome !== null) {
             return $typeDiplome->getSemestreDebut();
         }
-
 
         return $this->semestreDebut ?? 1;
     }
@@ -2034,15 +2030,8 @@ class Parcours
             return null;
         }
 
-        if (method_exists($formation, 'getSemestreFin')) {
-            $val = $formation->getSemestreFin();
-            if ($val !== null) {
-                return $val;
-            }
-        }
-
         $typeDiplome = $formation->getTypeDiplome();
-        if ($typeDiplome !== null && method_exists($typeDiplome, 'getSemestreFin')) {
+        if ($typeDiplome !== null) {
             return $typeDiplome->getSemestreFin();
         }
 

@@ -35,7 +35,6 @@ class DoctrineMutualisationUpdateSubscriber
         'volumeTe', 'ects', 'sansHeure', 'heuresSpecifiques', 'mcccEnfantsIdentique',
         'heuresEnfantsIdentiques', 'typeMccc', 'etatMccc',
     ];
-    private const EC_STRUCTURE_FIELDS = ['ue', 'ecParent'];
 
     // Champs d'EC qui concernent les heures/structure
     private const IGNORED_FIELDS = ['updated', 'created', 'remplissage', 'etatSteps', 'etatFiche'];

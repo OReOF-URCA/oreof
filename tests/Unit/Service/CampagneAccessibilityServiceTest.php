@@ -82,24 +82,24 @@ class CampagneAccessibilityServiceTest extends TestCase
         $campagne = new CampagneCollecte();
 
         $step = new TimelineDate();
-        $step->setLibelle('Ouverture DPE');
+        $step->setLibelle('Ouverture Offre');
         $step->setDateDebut(new DateTime('2026-11-01'));
         $step->setDate(new DateTime('2026-11-30'));
-        $step->setModulesActifs([CampagneModuleEnum::DPE]);
+        $step->setModulesActifs([CampagneModuleEnum::OFFRE_FORMATION]);
         $campagne->addTimelineDate($step);
 
         $dataUserSession->method('getCampagneCollecte')->willReturn($campagne);
         $service = new CampagneAccessibilityService($dataUserSession, $security, $repository);
 
-        $statusBefore = $service->getModuleStatus(CampagneModuleEnum::DPE, $campagne, new DateTime('2026-10-15'));
+        $statusBefore = $service->getModuleStatus(CampagneModuleEnum::OFFRE_FORMATION, $campagne, new DateTime('2026-10-15'));
         $this->assertFalse($statusBefore['isOpen']);
         $this->assertStringContainsString('Ouverture prévue le 01/11/2026', $statusBefore['message']);
 
-        $statusDuring = $service->getModuleStatus(CampagneModuleEnum::DPE, $campagne, new DateTime('2026-11-15'));
+        $statusDuring = $service->getModuleStatus(CampagneModuleEnum::OFFRE_FORMATION, $campagne, new DateTime('2026-11-15'));
         $this->assertTrue($statusDuring['isOpen']);
         $this->assertStringContainsString('ouvert jusqu\'au 30/11/2026', $statusDuring['message']);
 
-        $statusAfter = $service->getModuleStatus(CampagneModuleEnum::DPE, $campagne, new DateTime('2026-12-05'));
+        $statusAfter = $service->getModuleStatus(CampagneModuleEnum::OFFRE_FORMATION, $campagne, new DateTime('2026-12-05'));
         $this->assertFalse($statusAfter['isOpen']);
         $this->assertStringContainsString('Période de saisie terminée', $statusAfter['message']);
     }

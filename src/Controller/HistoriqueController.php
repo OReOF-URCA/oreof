@@ -28,9 +28,9 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Workflow\WorkflowInterface;
-use Symfony\UX\Turbo\TurboStreamResponse;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\UX\Turbo\TurboBundle;
 
 class HistoriqueController extends BaseController
 {
@@ -268,7 +268,7 @@ class HistoriqueController extends BaseController
             $entityManager->flush();
 
             if (
-                $request->getPreferredFormat() === TurboStreamResponse::STREAM_FORMAT
+                $request->getPreferredFormat() === TurboBundle::STREAM_FORMAT
                 || str_contains((string)$request->headers->get('Accept'), 'text/vnd.turbo-stream.html')
             ) {
                 return $turboStream->appendStreams(
@@ -284,7 +284,7 @@ class HistoriqueController extends BaseController
         }
 
         if (
-            $request->getPreferredFormat() === TurboStreamResponse::STREAM_FORMAT
+            $request->getPreferredFormat() === TurboBundle::STREAM_FORMAT
             || str_contains((string)$request->headers->get('Accept'), 'text/vnd.turbo-stream.html')
         ) {
             return $turboStream->streamToastError('Erreur lors de la suppression de l\'historique.');

@@ -16,9 +16,8 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class McccUpdateSubscriber implements EventSubscriberInterface
 {
 
-    public function __construct(
-        private readonly MutualisationChangeNotifier $mutualisationChangeNotifier,
-    ) {
+    public function __construct()
+    {
     }
 
     public static function getSubscribedEvents(): array

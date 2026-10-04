@@ -74,33 +74,33 @@ final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
         ];
     }
 
-    /** @return array<string, callable(FicheMatiere, mixed): void> */
+    /** @return array<string, \Closure(FicheMatiere, mixed): void> */
     private function handlers(): array
     {
         return [
             // ----------------- STEP 1 (identite) -----------------
-            'fiche_matiere_step1[responsableFicheMatiere]' => function (FicheMatiere $p, $v) {
+            'fiche_matiere_step1[responsableFicheMatiere]' => function (FicheMatiere $p, $v): void {
                 $p->setResponsableFicheMatiere($this->toEntity($this->userRepo, $v));
             },
-            'fiche_matiere_step1[sigle]' => function (FicheMatiere $p, $v) {
+            'fiche_matiere_step1[sigle]' => function (FicheMatiere $p, $v): void {
                 $p->setSigle($this->toString($v));
             },
-            'fiche_matiere_step1[libelle]' => function (FicheMatiere $p, $v) {
+            'fiche_matiere_step1[libelle]' => function (FicheMatiere $p, $v): void {
                 $p->setLibelle($this->toString($v));
             },
-            'fiche_matiere_step1[libelleAnglais]' => function (FicheMatiere $p, $v) {
+            'fiche_matiere_step1[libelleAnglais]' => function (FicheMatiere $p, $v): void {
                 $p->setLibelleAnglais($this->toString($v));
             },
 
 
             // ----------------- STEP 2 (présentation) -----------------
-            'fiche_matiere_step2[description]' => function (FicheMatiere $p, $v) {
+            'fiche_matiere_step2[description]' => function (FicheMatiere $p, $v): void {
                 $p->setDescription($this->toString($v));
             },
-            'fiche_matiere_step2[objectifs]' => function (FicheMatiere $p, $v) {
+            'fiche_matiere_step2[objectifs]' => function (FicheMatiere $p, $v): void {
                 $p->setObjectifs($this->toString($v));
             },
-            'fiche_matiere_step2[langueDispense][]' => function (FicheMatiere $f, $v) {
+            'fiche_matiere_step2[langueDispense][]' => function (FicheMatiere $f, $v): void {
                 $this->syncCollection(
                     $f->getLangueDispense(),
                     $this->langueRepo,
@@ -109,7 +109,7 @@ final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
                     fn($item) => $f->removeLangueDispense($item)
                 );
             },
-            'fiche_matiere_step2[langueSupport][]' => function (FicheMatiere $f, $v) {
+            'fiche_matiere_step2[langueSupport][]' => function (FicheMatiere $f, $v): void {
                 $this->syncCollection(
                     $f->getLangueSupport(),
                     $this->langueRepo,
@@ -121,19 +121,35 @@ final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
 
 
             // ----------------- STEP 3 (Mutualisation) -----------------
-            'fiche_matiere_step1b[enseignementMutualise]' => function (FicheMatiere $p, $v) {
+            'fiche_matiere_step1b[enseignementMutualise]' => function (FicheMatiere $p, $v): void {
                 $p->setEnseignementMutualise($this->toBoolOrNull($v));
             },
 
             // ----------------- STEP 4 (Volumes horaires) -----------------
-            'volumesHorairesImpose' => fn(FicheMatiere $p, $v) => $p->setVolumesHorairesImpose($this->toFloatOrNull($v)),
-            'fiche_matiere_step4_hd[volumeCmPresentiel]' => fn(FicheMatiere $p, $v) => $p->setVolumeCmPresentiel($this->toFloatOrNull($v)),
-            'fiche_matiere_step4_hd[volumeTdPresentiel]' => fn(FicheMatiere $p, $v) => $p->setVolumeTdPresentiel($this->toFloatOrNull($v)),
-            'fiche_matiere_step4_hd[volumeTpPresentiel]' => fn(FicheMatiere $p, $v) => $p->setVolumeTpPresentiel($this->toFloatOrNull($v)),
-            'fiche_matiere_step4_hd[volumeCmDistanciel]' => fn(FicheMatiere $p, $v) => $p->setVolumeCmDistanciel($this->toFloatOrNull($v)),
-            'fiche_matiere_step4_hd[volumeTdDistanciel]' => fn(FicheMatiere $p, $v) => $p->setVolumeTdDistanciel($this->toFloatOrNull($v)),
-            'fiche_matiere_step4_hd[volumeTpDistanciel]' => fn(FicheMatiere $p, $v) => $p->setVolumeTpDistanciel($this->toFloatOrNull($v)),
-            'fiche_matiere_step4_hd[volumeTe]' => fn(FicheMatiere $p, $v) => $p->setVolumeTe($this->toFloatOrNull($v))
+            'volumesHorairesImpose' => function (FicheMatiere $p, $v): void {
+                $p->setVolumesHorairesImpose($this->toBoolOrNull($v));
+            },
+            'fiche_matiere_step4_hd[volumeCmPresentiel]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeCmPresentiel($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4_hd[volumeTdPresentiel]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeTdPresentiel($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4_hd[volumeTpPresentiel]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeTpPresentiel($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4_hd[volumeCmDistanciel]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeCmDistanciel($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4_hd[volumeTdDistanciel]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeTdDistanciel($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4_hd[volumeTpDistanciel]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeTpDistanciel($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4_hd[volumeTe]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeTe($this->toFloatOrNull($v));
+            },
         ];
     }
 }

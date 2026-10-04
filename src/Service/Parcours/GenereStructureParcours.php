@@ -39,13 +39,13 @@ class GenereStructureParcours
             for ($i = $start; $i <= $end; $i++) {
 
                 // On calcule le numéro de l'année (S1,S2 -> An 1 | S3,S4 -> An 2)
-                $anneeNum = ceil($i / 2);
+                $anneeNum = (int)ceil($i / 2);
 
                 // Si l'année n'existe pas encore dans notre tableau, on l'initialise
                 if (!isset($arborescence[$anneeNum])) {
                     $annee = new Annee();
                     $annee->setParcours($parcours);
-                    $annee->setOrdre((int)$anneeNum);
+                    $annee->setOrdre($anneeNum);
                     $this->entityManager->persist($annee);
                     $arborescence[$anneeNum] = $annee;
                 }

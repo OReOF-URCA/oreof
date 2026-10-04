@@ -22,7 +22,7 @@ class TypeOfExtension extends AbstractExtension
         ];
     }
 
-    public function isElementConstitutif($value): bool
+    public function isElementConstitutif(mixed $value): bool
     {
         return $value instanceof ElementConstitutif;
     }

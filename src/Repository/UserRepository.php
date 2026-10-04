@@ -117,7 +117,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         string|null                $q,
         float|bool|int|string|null $sort,
         string|null                $direction
-    ) {
+    ): array 
+    {
         return $this->createQueryBuilder('u')
             ->where('u.isEnable = :isEnable')
             ->andWhere('u.nom LIKE :q OR u.prenom LIKE :q OR u.email LIKE :q OR u.username LIKE :q')

@@ -10,7 +10,7 @@
 // php
 
 namespace App\Enums;
-
+//todo: encore utile ?
 enum ParcoursActionTypeEnum: string
 {
     case MODIFY_LABEL = 'modify_label';

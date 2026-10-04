@@ -45,12 +45,13 @@ class SyntheseModificationController extends BaseController
         foreach ($dpes as $dpe) {
             $formation = $dpe->getFormation();
             if ($formation !== null) {
-                if (!array_key_exists($formation?->getId(), $formations)) {
-                    $formations[$formation?->getId()]['parcours'] = [];
-                    $formations[$formation?->getId()]['hasModif'] = false;
-                    $formations[$formation?->getId()]['formation'] = $formation;
-                    $formations[$formation?->getId()]['dpeDemande'] = $dpe;
-                    $formations[$formation?->getId()]['composante'] = $formation->getComposantePorteuse();
+                $formationId = $formation->getId();
+                if (!array_key_exists($formationId, $formations)) {
+                    $formations[$formationId]['parcours'] = [];
+                    $formations[$formationId]['hasModif'] = false;
+                    $formations[$formationId]['formation'] = $formation;
+                    $formations[$formationId]['dpeDemande'] = $dpe;
+                    $formations[$formationId]['composante'] = $formation->getComposantePorteuse();
                 }
 
                 if ($dpe->getParcours() !== null) {
@@ -58,16 +59,17 @@ class SyntheseModificationController extends BaseController
                     if ($dpeParcours !== null &&
                         (array_key_exists('soumis_cfvu', $dpeParcours->getEtatValidation())
                             || array_key_exists('non_ouverture_cfvu', $dpeParcours->getEtatValidation()))) {
-                        $formations[$formation?->getId()]['parcours'][] = $dpe->getParcours();
-                        $formations[$formation?->getId()]['hasModif'] = true;
+                        $formations[$formationId]['parcours'][] = $dpe->getParcours();
+                        $formations[$formationId]['hasModif'] = true;
                     }
                 }
             }
         }
 
+        $user = $this->getUser();
         $messageBus->dispatch(
             new Export(
-                $this->getUser()?->getId(),
+                $user instanceof \App\Entity\User ? $user->getId() : null,
                 'synthese_modification',
                 $formations,
                 $this->getCampagneCollecte(),
@@ -93,37 +95,37 @@ class SyntheseModificationController extends BaseController
         $formations = [];
         foreach ($dpes as $dpe) {
             $formation = $dpe->getFormation();
-            if (!array_key_exists($formation?->getId(), $formations)) {
-                $formations[$formation?->getId()]['parcours'] = [];
-                $formations[$formation?->getId()]['formation'] = $formation;
-                $formations[$formation?->getId()]['dpeDemande'] = null;
-                $formations[$formation?->getId()]['hasModif'] = false;
-                $formations[$formation?->getId()]['composante'] = $composante;
-            }
+            if ($formation !== null) {
+                $formationId = $formation->getId();
+                if (!array_key_exists($formationId, $formations)) {
+                    $formations[$formationId]['parcours'] = [];
+                    $formations[$formationId]['formation'] = $formation;
+                    $formations[$formationId]['dpeDemande'] = null;
+                    $formations[$formationId]['hasModif'] = false;
+                    $formations[$formationId]['composante'] = $composante;
+                }
 
-            if ($dpe->getParcours() === null) {
-                //dpe si c'est une formation
-                $formations[$formation?->getId()]['dpeDemande'] = $dpe;
-            } else {
-                //dpe si c'est un parcours
-                $parcours = $dpe->getParcours();
-                $dpeParcours = GetDpeParcours::getFromParcours($parcours);
-                if ($dpeParcours !== null &&
-                    (array_key_exists('soumis_central', $dpeParcours->getEtatValidation()) || array_key_exists('soumis_cfvu', $dpeParcours->getEtatValidation()) || array_key_exists('non_ouverture_cfvu', $dpeParcours->getEtatValidation()))) {
-                    $formations[$formation?->getId()]['hasModif'] = true;
-                    $formations[$formation?->getId()]['parcours'][$parcours->getId()]['parcours'] = $parcours;
-                    $formations[$formation?->getId()]['parcours'][$parcours->getId()]['dpeDemande'] = $dpe;
+                if ($dpe->getParcours() === null) {
+                    //dpe si c'est une formation
+                    $formations[$formationId]['dpeDemande'] = $dpe;
+                } else {
+                    //dpe si c'est un parcours
+                    $parcours = $dpe->getParcours();
+                    $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+                    if ($dpeParcours !== null &&
+                        (array_key_exists('soumis_central', $dpeParcours->getEtatValidation()) || array_key_exists('soumis_cfvu', $dpeParcours->getEtatValidation()) || array_key_exists('non_ouverture_cfvu', $dpeParcours->getEtatValidation()))) {
+                        $formations[$formationId]['hasModif'] = true;
+                        $formations[$formationId]['parcours'][$parcours->getId()]['parcours'] = $parcours;
+                        $formations[$formationId]['parcours'][$parcours->getId()]['dpeDemande'] = $dpe;
+                    }
                 }
             }
         }
 
-
-//        $link = $exportSyntheseModification->exportLink($formations, $this->getCampagneCollecte());
-//
-//        dd($link);
+        $user = $this->getUser();
         $messageBus->dispatch(
             new Export(
-                $this->getUser()?->getId(),
+                $user instanceof \App\Entity\User ? $user->getId() : null,
                 'pdf-synthese_modification',
                 $formations,
                 $this->getCampagneCollecte(),

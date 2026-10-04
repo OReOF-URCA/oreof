@@ -56,6 +56,7 @@ class FormationTabCompletionChecker extends AbstractChecker
         return $issues;
     }
 
+    /** @return TabIssue[] */
     private function localisationIssues(Formation $f): array
     {
         $issues = [];
@@ -85,6 +86,7 @@ class FormationTabCompletionChecker extends AbstractChecker
         return $issues;
     }
 
+    /** @return TabIssue[] */
     private function structureIssues(Formation $f): array
     {
         $issues = [];
@@ -105,17 +107,5 @@ class FormationTabCompletionChecker extends AbstractChecker
         }
 
         return $issues;
-    }
-
-    private function presentationComplete(Formation $p): bool
-    {
-        // règle "rythmeFormation OU rythmeFormationTexte"
-        $hasRythme = $p->getRythmeFormation() !== null || $this->filled($p->getRythmeFormationTexte());
-
-        return
-            $p->getResponsableMention() !== null &&
-            $this->filled($p->getResultatsAttendus()) &&
-            $this->filled($p->getContenuFormation()) &&
-            $hasRythme;
     }
 }

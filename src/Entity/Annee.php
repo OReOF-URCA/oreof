@@ -118,7 +118,7 @@ class Annee
     {
         if ($this->parcoursSemestre->removeElement($parcoursSemestre)) {
             // set the owning side to null (unless already changed)
-            if ($parcoursSemestre->getOrdreAnnee() === $this) {
+            if ($parcoursSemestre->getAnnee() === $this) {
                 $parcoursSemestre->setAnnee(null);
             }
         }
@@ -198,7 +198,7 @@ class Annee
 
     public function getCapaciteAccueil(): int
     {
-        return $this->capaciteAccueil ?? 0;
+        return $this->capaciteAccueil;
     }
 
     public function setCapaciteAccueil(int $capaciteAccueil = 0): static

@@ -34,10 +34,6 @@ final class McccCompletionChecker
 
         $typeD = $this->typeDiplomeResolver->fromParcours($parcours);
 
-        if ($typeD === null) {
-            return false;
-        }
-
         return $typeD->checkIfMcccValide($owner);
     }
 }

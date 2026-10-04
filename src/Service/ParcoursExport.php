@@ -11,6 +11,7 @@ use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
 use App\Enums\TypeModificationDpeEnum;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
+use App\TypeDiplome\TypeDiplomeResolver;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -75,8 +76,8 @@ class ParcoursExport {
         Parcours $parcours,
         TypeDiplome $typeDiplome,
         bool $isVersioning = false,
-        int $parcours_id = null,
-        int $formation_id = null,
+        ?int $parcours_id = null,
+        ?int $formation_id = null,
         bool $fermetureEmpty = false
     ): array
     {
@@ -373,7 +374,7 @@ class ParcoursExport {
             $libelle = $ec->elementConstitutif->getTexteEcLibre();
             $ecLibre = true;
         } else {
-            $libelle = $ficheMatiere?->getLibelle() ?? $ec->elementConstitutif->getLibelle() ?? $ec->elementConstitutif->display() ?? '-';
+            $libelle = $ficheMatiere?->getLibelle() ?? $ec->elementConstitutif->getLibelle() ?? $ec->elementConstitutif->display();
             $ecLibre = false;
         }
 

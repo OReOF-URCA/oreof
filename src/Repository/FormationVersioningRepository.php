@@ -22,7 +22,11 @@ class FormationVersioningRepository extends ServiceEntityRepository
         parent::__construct($registry, FormationVersioning::class);
     }
 
-    public function findLastVersion(Formation $formation){
+    /**
+     * @return list<FormationVersioning>
+     */
+    public function findLastVersion(Formation $formation): array
+    {
         return $this->createQueryBuilder('pv')
             ->orderBy('pv.version_timestamp', 'DESC')
             ->where('pv.formation = :formation')

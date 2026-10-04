@@ -25,7 +25,6 @@ class ExportBcc implements ExportInterface
 {
     //todo: a revoir complétement
     private string $fileName;
-    private string $dir;
 
     public function __construct(
         protected TypeDiplomeResolver $typeDiplomeResolver,
@@ -73,6 +72,7 @@ class ExportBcc implements ExportInterface
         $typeD = $this->typeDiplomeResolver->fromParcours($parcours);
         $dto = $typeD->calcul($parcours, new OptionsCalculStructure(dataFromFicheMatiere: true));
 
+        $ligne = 7;
         foreach ($dto->semestres as $semestre) {
             $ligne = 7;
             $debutCol = $col;

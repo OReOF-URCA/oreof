@@ -4,10 +4,10 @@ namespace App\Security\Voter;
 
 use App\Entity\Formation;
 use App\Entity\Parcours;
+use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authorization\Voter\Vote;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 final class ParcoursAccessVoter extends Voter
 {
@@ -21,9 +21,8 @@ final class ParcoursAccessVoter extends Voter
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
-        /** @var $user User */
         $user = $token->getUser();
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             return false;
         }
         // Si c'est un administrateur, on autorise directement
@@ -34,13 +33,15 @@ final class ParcoursAccessVoter extends Voter
         switch ($attribute) {
             case self::RELATED_TO_PARCOURS:
                 return $this->isUserLinkedToParcours($subject, $user->getId());
-                break;
         }
 
         return false;
     }
 
-    private function isUserLinkedToParcours(mixed $subject, int $userId) {
+    private function isUserLinkedToParcours(mixed $subject, ?int $userId): bool {
+        if ($userId === null) {
+            return false;
+        }
         $responsablesId = [];
         if ($subject instanceof Parcours){
             $responsablesId[] = $subject->getRespParcours()?->getId() ?? null;

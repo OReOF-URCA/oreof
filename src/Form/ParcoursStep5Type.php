@@ -28,7 +28,7 @@ class ParcoursStep5Type extends AbstractType
         $builder
             ->add('niveauFrancais', EnumType::class, [
                 'class' => NiveauLangueEnum::class,
-                'choice_label' => static function (UnitEnum $choice): string {
+                'choice_label' => static function (NiveauLangueEnum $choice): string {
                     return $choice->libelle();
                 },
             ])

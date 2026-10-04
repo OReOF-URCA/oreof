@@ -14,6 +14,7 @@ namespace App\Twig;
 use App\Entity\Parcours;
 use App\Enums\TypeModificationDpeEnum;
 use App\Service\Synthese\Dto\SyntheseButtonsContext;
+use App\Service\Synthese\Dto\SyntheseButtonSet;
 use App\Service\Synthese\SyntheseButtonsResolver;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Twig\Extension\AbstractExtension;
@@ -35,13 +36,13 @@ final class SyntheseButtonsExtension extends AbstractExtension
         ];
     }
 
-    public function getButtons(Parcours $parcours)
+    public function getButtons(Parcours $parcours): SyntheseButtonSet
     {
         $lastDpe = $parcours->getDpeParcours()->last();
         $etat = $lastDpe?->getEtatValidation() ?? [];
 
         $context = new SyntheseButtonsContext(
-            $lastDpe?->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE, //si modif de maquette alors version,
+            $lastDpe->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE, //si modif de maquette alors version,
             $this->authorizationChecker->isGranted('ROLE_ADMIN'),
             $etat === ['valide_a_publier' => 1] || $etat === ['publie' => 1],
             $parcours->getParcoursOrigineCopie() === null

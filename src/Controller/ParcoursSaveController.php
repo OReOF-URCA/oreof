@@ -153,6 +153,8 @@ class ParcoursSaveController extends BaseController
                         $rep = $updateEntity->saveField($parcours, 'respParcours', $user);
                         $event = new AddCentreParcoursEvent($parcours, $user, $profil, $this->getCampagneCollecte());
                         $eventDispatcher->dispatch($event, AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
+                    } else {
+                        $rep = false;
                     }
                 } else {
                     $rep = $updateEntity->saveField($parcours, 'respParcours', null);
@@ -177,9 +179,11 @@ class ParcoursSaveController extends BaseController
                         $rep = $updateEntity->saveField($parcours, 'coResponsable', $user);
                         $event = new AddCentreParcoursEvent($parcours, $user, $profil, $this->getCampagneCollecte());
                         $eventDispatcher->dispatch($event, AddCentreParcoursEvent::ADD_CENTRE_PARCOURS);
+                    } else {
+                        $rep = false;
                     }
                 } else {
-                    $rep = $updateEntity->saveField($parcours, 'respParcours', null);
+                    $rep = $updateEntity->saveField($parcours, 'coResponsable', null);
                 }
                 return $this->json($rep);
             case 'localisation':

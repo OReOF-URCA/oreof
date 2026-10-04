@@ -27,7 +27,7 @@ readonly class AddUser
     ) {
     }
 
-    public function addUser(string $email): ?UserInterface
+    public function addUser(string $email): ?User
     {
         if ($email !== '') {
             $exist = $this->userRepository->findOneBy(['email' => $email]);
@@ -56,7 +56,7 @@ readonly class AddUser
         $user->setRoles([$role]);
     }
 
-    public function setCentreComposante(UserInterface|User $usr, Composante $composante, ?string $role = null): void
+    public function setCentreComposante(User $usr, Composante $composante, ?string $role = null): void
     {
         $profil = $this->profilRepository->findOneBy(['code' => $role]);
 

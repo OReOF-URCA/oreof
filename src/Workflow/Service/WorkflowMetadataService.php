@@ -152,7 +152,7 @@ final class WorkflowMetadataService
      *
      * @param string $transitionName Nom de la transition
      * @param string $workflowName Nom du workflow (défaut: dpeParcours)
-     * @return array{label?: string, class?: string, icon?: string, confirmation?: array}
+     * @return array{label: string, class: string, icon: ?string, confirmation: array{required: bool, message: ?string}, comment: array{required: bool, placeholder: ?string}}
      */
     public function getTransitionButtonConfig(string $transitionName, string $workflowName = 'dpeParcours'): array
     {

@@ -58,7 +58,6 @@ enum TypeModificationDpeEnum: string implements BadgeEnumInterface
             self::ANNULATION_REOUVERTURE => 'Annulation de la réouverture',
             self::FORMATION_SOUMIS_SES => 'Formation soumise à la validation du SES',
             self::FERMETURE_DEFINITIVE => 'Fermeture definitive',
-            default => 'Non défini',
         };
     }
 

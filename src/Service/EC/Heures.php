@@ -32,7 +32,7 @@ class Heures
         Parcours                        $parcours,
         ElementConstitutif|FicheMatiere $ecHeures,
         InputBag                        $request,
-    )
+    ): bool
     {
         //            $originalHeuresToText = $this->heuresToTexte($getElement->getFicheMatiereHeures());
         if (array_key_exists('heuresEnfantsIdentiques', $request->all()['ec_step4'])) {

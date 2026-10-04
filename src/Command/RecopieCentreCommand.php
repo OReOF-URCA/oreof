@@ -58,21 +58,25 @@ class RecopieCentreCommand extends Command
         $centres = $this->userCentreRepository->findBy(['campagneCollecte' => 2]);
         $io->progressStart(count($centres));
         foreach ($centres as $centre) {
-            if ($centre->getFormation() !== null) {
-                if (isset($tFormations[$centre->getFormation()?->getId()])) {
+            $formation = $centre->getFormation();
+            $parcours = $centre->getParcours();
+            if ($formation !== null) {
+                $formationId = $formation->getId();
+                if ($formationId !== null && isset($tFormations[$formationId])) {
                     $newCentre = new UserProfil();
                     $newCentre->setUser($centre->getUser());
-                    $newCentre->setFormation($tFormations[$centre->getFormation()?->getId()]);
+                    $newCentre->setFormation($tFormations[$formationId]);
                     $newCentre->setProfil($centre->getProfil());
                     $newCentre->setCampagneCollecte($campagneCollecte);
                     $this->entityManager->persist($newCentre);
                     unset($newCentre);
                 }
-            } elseif ($centre->getParcours() !== null) {
-                if (isset($tParcours[$centre->getParcours()?->getId()])) {
+            } elseif ($parcours !== null) {
+                $parcoursId = $parcours->getId();
+                if ($parcoursId !== null && isset($tParcours[$parcoursId])) {
                     $newCentre = new UserProfil();
                     $newCentre->setUser($centre->getUser());
-                    $newCentre->setParcours($tParcours[$centre->getParcours()?->getId()]);
+                    $newCentre->setParcours($tParcours[$parcoursId]);
                     $newCentre->setProfil($centre->getProfil());
                     $newCentre->setCampagneCollecte($campagneCollecte);
                     $this->entityManager->persist($newCentre);

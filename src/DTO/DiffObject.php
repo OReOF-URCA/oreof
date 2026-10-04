@@ -12,8 +12,8 @@ namespace App\DTO;
 class DiffObject implements \Stringable {
 
     public function __construct(
-        public string|float|int|null $original,
-        public string|float|int|null $new
+        public string|float|int|bool|null $original,
+        public string|float|int|bool|null $new
     )
     {}
 
@@ -29,7 +29,9 @@ class DiffObject implements \Stringable {
 
     public function displayDiff(): string
     {
-        return $this->new . ' (au lieu de ' . $this->original.')';
+        $orig = is_bool($this->original) ? ($this->original ? 'Oui' : 'Non') : (string)$this->original;
+        $new = is_bool($this->new) ? ($this->new ? 'Oui' : 'Non') : (string)$this->new;
+        return $new . ' (au lieu de ' . $orig . ')';
     }
 
     public function getOriginalFloat(): float
@@ -44,6 +46,9 @@ class DiffObject implements \Stringable {
 
     public function __toString(): string
     {
+        if (is_bool($this->new)) {
+            return $this->new ? 'Oui' : 'Non';
+        }
         return (string)($this->new ?? '');
     }
 }

@@ -91,15 +91,7 @@ class ParcoursValide extends AbstractValide
             $this->etat['projet'] = self::NON_CONCERNE;
         }
 
-        if (($this->parcours->isHasSituationPro() === null || $this->parcours->isHasSituationPro() === false)) {
-            if ($this->typeDiplome->isHasSituationPro() === true) {
-                $this->etat['situationPro'] = self::INCOMPLET;
-                $this->etat['situationProModalite'] = self::VIDE;
-                $this->etat['situationProHeures'] = self::VIDE;
-            } else {
-                $this->etat['situationPro'] = self::NON_CONCERNE;
-            }
-        } elseif ($this->parcours->isHasSituationPro() === true) {
+        if ($this->parcours->isHasSituationPro() === true) {
             if ($this->parcours->getSituationProText() === null || trim($this->parcours->getSituationProText()) === '') {
                 $this->etat['situationProModalite'] = self::INCOMPLET;
                 $this->etat['situationPro'] = self::INCOMPLET;
@@ -116,19 +108,15 @@ class ParcoursValide extends AbstractValide
             if ($this->etat['situationProModalite'] === self::COMPLET && $this->etat['situationProHeures'] === self::COMPLET) {
                 $this->etat['situationPro'] = self::COMPLET;
             }
+        } elseif ($this->typeDiplome->isHasSituationPro() === true) {
+            $this->etat['situationPro'] = self::INCOMPLET;
+            $this->etat['situationProModalite'] = self::VIDE;
+            $this->etat['situationProHeures'] = self::VIDE;
         } else {
             $this->etat['situationPro'] = self::NON_CONCERNE;
         }
 
-
-        if (($this->parcours->isHasMemoire() === null || $this->parcours->isHasMemoire() === false)) {
-            if ($this->typeDiplome->isHasMemoire() === true) {
-                $this->etat['memoire'] = self::INCOMPLET;
-                $this->etat['memoireModalite'] = self::VIDE;
-            } else {
-                $this->etat['memoire'] = self::NON_CONCERNE;
-            }
-        } elseif ($this->parcours->isHasMemoire() === true) {
+        if ($this->parcours->isHasMemoire() === true) {
             if ($this->parcours->getMemoireText() === null || trim($this->parcours->getMemoireText()) === '') {
                 $this->etat['memoireModalite'] = self::INCOMPLET;
                 $this->etat['memoire'] = self::INCOMPLET;
@@ -136,6 +124,9 @@ class ParcoursValide extends AbstractValide
                 $this->etat['memoireModalite'] = self::COMPLET;
                 $this->etat['memoire'] = self::COMPLET;
             }
+        } elseif ($this->typeDiplome->isHasMemoire() === true) {
+            $this->etat['memoire'] = self::INCOMPLET;
+            $this->etat['memoireModalite'] = self::VIDE;
         } else {
             $this->etat['memoire'] = self::NON_CONCERNE;
         }
@@ -201,9 +192,9 @@ class ParcoursValide extends AbstractValide
     }
 
 
-    public function verifierEtat($etat): bool
+    public function verifierEtat(array $etat): bool
     {
-        foreach ($etat as $key => $element) {
+        foreach ($etat as $element) {
             if (is_array($element)) {
                 if (!$this->verifierEtat($element)) {
                     return false;
@@ -255,15 +246,20 @@ class ParcoursValide extends AbstractValide
         $tFiches = [];
         //vérifier que les parcours sont validés
         foreach ($this->parcours->getSemestreParcours() as $semestreParcour) {
-            if ($semestreParcour->getSemestre()?->getSemestreRaccroche() !== null) {
-                $sem = $semestreParcour->getSemestre()?->getSemestreRaccroche()->getSemestre();
+            $semestre = $semestreParcour->getSemestre();
+            if ($semestre?->getSemestreRaccroche() !== null) {
+                $sem = $semestre->getSemestreRaccroche()->getSemestre();
             } else {
-                $sem = $semestreParcour->getSemestre();
+                $sem = $semestre;
             }
             if ($sem !== null) {
                 foreach ($sem->getUes() as $ue) {
                     if ($ue->getUeRaccrochee() !== null) {
-                        $ue = $ue->getUeRaccrochee()?->getUe();
+                        $ue = $ue->getUeRaccrochee()->getUe();
+                    }
+
+                    if ($ue === null) {
+                        continue;
                     }
 
                     foreach ($ue->getElementConstitutifs() as $ec) {

@@ -8,10 +8,8 @@ use App\Entity\CampagneCollecte;
 use App\Entity\Composante;
 use App\Entity\DpeParcours;
 use App\Entity\HistoriqueParcours;
-use App\Repository\CampagneCollecteRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeParcoursRepository;
-use App\Workflow\Service\WorkflowExplorerService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -56,8 +54,6 @@ final class CampagnePilotageService
         private readonly EntityManagerInterface $entityManager,
         private readonly DpeParcoursRepository $dpeParcoursRepository,
         private readonly ComposanteRepository $composanteRepository,
-        private readonly CampagneCollecteRepository $campagneCollecteRepository,
-        private readonly WorkflowExplorerService $workflowExplorerService,
         private readonly TranslatorInterface $translator,
     ) {
     }
@@ -174,7 +170,7 @@ final class CampagnePilotageService
                 }
             }
 
-            $progressPercent = $totalComp > 0 ? (int)round(($validatedComp / $totalComp) * 100) : 0;
+            $progressPercent = (int)round(($validatedComp / $totalComp) * 100);
 
             $statusVariant = match (true) {
                 $progressPercent >= 80 => 'success',
@@ -293,16 +289,7 @@ final class CampagnePilotageService
     {
         $etat = $dpe->getEtatValidation();
 
-        if (is_string($etat)) {
-            $decoded = json_decode($etat, true);
-            if (is_array($decoded) && count($decoded) > 0) {
-                $key = array_key_first($decoded);
-                return is_string($key) && !is_numeric($key) ? (string)$key : (string)$decoded[$key];
-            }
-            return $etat !== '' ? $etat : 'initialisation_dpe';
-        }
-
-        if (is_array($etat) && count($etat) > 0) {
+        if (count($etat) > 0) {
             $key = array_key_first($etat);
             return is_string($key) && !is_numeric($key) ? (string)$key : (string)$etat[$key];
         }

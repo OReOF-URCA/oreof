@@ -42,10 +42,10 @@ class StructureUe
     #[Groups(['DTO_json_versioning'])]
     public HeuresEctsUe $heuresEctsUe;
 
-    private bool $withEcts;
-    private bool $withBcc;
+    public bool $withEcts;
+    public bool $withBcc;
 
-    public function __construct(?Ue $ue, bool $raccroche = false, ?string $display = null, ?Ue $ueOrigine = null, bool $withEcts = true, $withBcc = true)
+    public function __construct(?Ue $ue, bool $raccroche = false, ?string $display = null, ?Ue $ueOrigine = null, bool $withEcts = true, bool $withBcc = true)
     {
         $this->withEcts = $withEcts;
         $this->withBcc = $withBcc;

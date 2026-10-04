@@ -14,14 +14,12 @@ final class ContextVariableProvider implements VariableProviderInterface
 
     public function provide(array $context): array
     {
-        $motif = null;
-
-        if (is_array($context)) {
-            $motif = $f['motif'] ?? null;
-        }
+        $motif = isset($context['motif']) && is_string($context['motif']) && $context['motif'] !== ''
+            ? $context['motif']
+            : null;
 
         return [
-            'motif' => $motif ?: null,
+            'motif' => $motif,
         ];
     }
 

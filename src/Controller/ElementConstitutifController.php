@@ -137,7 +137,7 @@ class ElementConstitutifController extends BaseController
                 $elementConstitutif->setTypeEc($tu);
             }
 
-            if ($elementConstitutif->getNatureUeEc()?->isChoix() === false and $elementConstitutif->getNatureUeEc()?->isLibre() === false) {
+            if ($elementConstitutif->getNatureUeEc()->isChoix() === false && $elementConstitutif->getNatureUeEc()->isLibre() === false) {
                 if (str_starts_with($request->request->getString('ficheMatiere'), 'id_')) {
                     $ficheMatiere = $ficheMatiereRepository->find((int)str_replace(
                         'id_',
@@ -372,7 +372,7 @@ class ElementConstitutifController extends BaseController
                 }
             }
 
-            if ($elementConstitutif->getNatureUeEc()?->isChoix() === false and $elementConstitutif->getNatureUeEc()?->isLibre() === false) {
+            if ($elementConstitutif->getNatureUeEc()->isChoix() === false && $elementConstitutif->getNatureUeEc()->isLibre() === false) {
                 if (str_starts_with($request->request->getString('ficheMatiere'), 'id_')) {
                     $ficheMatiere = $ficheMatiereRepository->find((int)str_replace(
                         'id_',

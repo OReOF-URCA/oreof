@@ -22,7 +22,8 @@ class PlateformeAdmissionParametreRepository extends ServiceEntityRepository
     public function findByParcours(Parcours $parcours): array
     {
         return $this->createQueryBuilder('p')
-            ->andWhere('p.parcours = :val')
+            ->join('p.annee', 'a')
+            ->andWhere('a.parcours = :val')
             ->setParameter('val', $parcours)
             ->getQuery()
             ->getResult();

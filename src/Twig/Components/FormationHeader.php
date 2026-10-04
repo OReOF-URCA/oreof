@@ -48,18 +48,6 @@ final class FormationHeader
         $this->process = $this->validationProcess->getProcess();
     }
 
-    private function reloadDerived(): void
-    {
-        // utile si l'action a pu être appelée sans que postMount soit (ré)exécuté
-        if (($this->formation === null) && $this->formationId !== null) {
-            $this->postMount(); // ou répéter le chargement minimal
-            return;
-        }
-        // recalculer l'historique / étapes
-        $this->init();
-        $this->getHistorique();
-    }
-
     #[PostMount]
     public function postMount(): void
     {
@@ -73,10 +61,10 @@ final class FormationHeader
 
     private function init(): void
     {
-        $this->hasDemande = $this->formation->getEtatReconduction() !== TypeModificationDpeEnum::OUVERT || TypeModificationDpeEnum::FERMETURE_DEFINITIVE; //todo: peut être d'autres cas ou traiter dans le sens ouvert
+        $this->hasDemande = $this->formation->getEtatReconduction() !== TypeModificationDpeEnum::OUVERT;
     }
 
-    public function getHistorique()
+    public function getHistorique(): void
     {
         $entriesFormation = $this->historiqueFormationRepository->findBy(['formation' => $this->formation], ['created' => 'ASC']);
 

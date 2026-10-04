@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Profil;
+use App\Enums\CentreGestionEnum;
+use App\Enums\PermissionEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -23,22 +25,21 @@ class ProfilRepository extends ServiceEntityRepository
         $this->getEntityManager()->getConnection()->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
     }
 
-    public function findByPermission(string $attribute): array
+    public function findByPermission(PermissionEnum|string $permission): array
     {
-        $t = [];
-        $all = $this->findAll();
-        foreach ($all as $role) {
-            if (in_array($attribute, $role->getDroits(), true)) {
-                $t[] = $role->getCodeRole();
-            }
-        }
-
-        return array_unique($t);
+        $permissionEnum = is_string($permission) ? PermissionEnum::tryFrom($permission) ?? $permission : $permission;
+        return $this->createQueryBuilder('p')
+            ->join('p.profilDroits', 'pd')
+            ->andWhere('pd.permission = :permission')
+            ->setParameter('permission', $permissionEnum)
+            ->select('DISTINCT p.code')
+            ->getQuery()
+            ->getSingleColumnResult();
     }
 
     public function findByAll(): array
     {
-        return $this->findBy(['porte' => 'All'], ['libelle' => 'ASC']);
+        return $this->findBy([], ['libelle' => 'ASC']);
     }
 
     public function findByDpe(): array
@@ -46,13 +47,15 @@ class ProfilRepository extends ServiceEntityRepository
         return $this->findBy(['onlyAdmin' => false], ['libelle' => 'ASC']);
     }
 
-    public function findByCentre(string $centre): array
+    public function findByCentre(CentreGestionEnum|string $centre): array
     {
-        return $this->findBy(['centre' => $centre], ['libelle' => 'ASC']);
+        $centreEnum = is_string($centre) ? CentreGestionEnum::tryFrom($centre) ?? $centre : $centre;
+        return $this->findBy(['centre' => $centreEnum], ['libelle' => 'ASC']);
     }
 
-    public function findByCentreDpe(string $centre): array
+    public function findByCentreDpe(CentreGestionEnum|string $centre): array
     {
-        return $this->findBy(['centre' => $centre, 'onlyAdmin' => false], ['libelle' => 'ASC']);
+        $centreEnum = is_string($centre) ? CentreGestionEnum::tryFrom($centre) ?? $centre : $centre;
+        return $this->findBy(['centre' => $centreEnum, 'onlyAdmin' => false], ['libelle' => 'ASC']);
     }
 }

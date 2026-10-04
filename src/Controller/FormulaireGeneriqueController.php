@@ -9,9 +9,11 @@ use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\Mention;
 use App\Entity\Parcours;
+use App\Entity\User;
 use App\Entity\UserProfil;
 use App\Enums\EtatDpeEnum;
 use App\Enums\TypeModificationDpeEnum;
+use RuntimeException;
 use App\Events\AddCentreParcoursEvent;
 use App\Form\FormulaireGeneriqueType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
@@ -105,12 +107,19 @@ final class FormulaireGeneriqueController extends BaseController
                 }
 
                 $formationCreee = $formation === null;
+                $user = $this->getUser();
+                if (!$user instanceof User) {
+                    throw new RuntimeException('Utilisateur non connecté');
+                }
 
                 // Case « Cette formation aura plusieurs parcours » (proposée uniquement
                 // pour une formation neuve). Mono = formation neuve sans la case cochée :
                 // la formation EST son parcours unique (champs nommés « … de formation »).
                 $plusieursParcours = (bool)$form->get('plusieursParcours')->getData();
                 $estMono = $formationCreee && !$plusieursParcours;
+
+                $responsableMention = null;
+                $coResponsableMention = null;
 
                 if ($formation === null) {
                     $formation = new Formation($this->getCampagneCollecte());
@@ -122,7 +131,7 @@ final class FormulaireGeneriqueController extends BaseController
                     $formation->setSigle($mention->getSigle());
                     // Même garde-fou que pour le responsable du parcours : seul un admin
                     // peut désigner quelqu'un d'autre, sinon c'est l'utilisateur courant.
-                    $responsableMention = $canChooseResponsable ? ($data['responsableMention'] ?? $this->getUser()) : $this->getUser();
+                    $responsableMention = $canChooseResponsable ? ($data['responsableMention'] ?? $user) : $user;
                     $formation->setResponsableMention($responsableMention);
                     // Co-responsable de formation : optionnel, choix libre pour tous
                     // (jamais verrouillé), donc indépendant de $canChooseResponsable.
@@ -169,7 +178,7 @@ final class FormulaireGeneriqueController extends BaseController
                     // Multi / formation existante : libellé saisi (ou intitulé de la formation si vide),
                     // responsable choisi (garde-fou : un non-admin reste responsable de son parcours).
                     $libelleParcours = trim((string)($data['libelle'] ?? '')) ?: $mention->getLibelle();
-                    $respParcours = $canChooseResponsable ? ($data['respParcours'] ?? $this->getUser()) : $this->getUser();
+                    $respParcours = $canChooseResponsable ? ($data['respParcours'] ?? $user) : $user;
                     $coRespParcours = $data['coRespParcours'] ?? null;
                 }
                 $parcours->setLibelle($libelleParcours);
@@ -219,7 +228,7 @@ final class FormulaireGeneriqueController extends BaseController
                 $dpeDemande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
                 $dpeDemande->setArgumentaireDemande('Création d\'un nouveau parcours');
                 $dpeDemande->setNiveauModification(TypeModificationDpeEnum::CREATION);
-                $dpeDemande->setAuteur($this->getUser());
+                $dpeDemande->setAuteur($user);
 
                 $this->entityManager->persist($dpeDemande);
 
@@ -227,7 +236,7 @@ final class FormulaireGeneriqueController extends BaseController
                 $profilRespFormation = $profilRepository->findOneBy(['code' => 'ROLE_RESP_FORMATION']);
                 if ($profilRespFormation !== null) {
                     $uc = new UserProfil();
-                    $uc->setUser($this->getUser());
+                    $uc->setUser($user);
                     $uc->setCampagneCollecte($this->getCampagneCollecte());
                     $uc->setFormation($formation);
                     $uc->setProfil($profilRespFormation);
@@ -256,7 +265,7 @@ final class FormulaireGeneriqueController extends BaseController
                 if ($respParcoursProfil !== null) {
                     $event = new AddCentreParcoursEvent(
                         $parcours,
-                        $this->getUser(),
+                        $user,
                         $respParcoursProfil,
                         $this->getCampagneCollecte()
                     );

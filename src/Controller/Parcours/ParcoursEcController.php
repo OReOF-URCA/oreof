@@ -77,13 +77,13 @@ class ParcoursEcController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($elementConstitutif->getNatureUeEc()?->isChoix() === false and $elementConstitutif->getNatureUeEc()?->isLibre() === false) {
+            if ($elementConstitutif->getNatureUeEc()->isChoix() === false && $elementConstitutif->getNatureUeEc()->isLibre() === false) {
 
                 $lastEc = $ecOrdre->getOrdreSuivant($ue, $request);
                 $elementConstitutif->setOrdre($lastEc);
                 $elementConstitutif->genereCode();
                 $elementConstitutifRepository->save($elementConstitutif, true);
-            } elseif ($elementConstitutif->getNatureUeEc()?->isChoix() === true) {
+            } elseif ($elementConstitutif->getNatureUeEc()->isChoix() === true) {
                 $lastEc = $ecOrdre->getOrdreSuivant($ue, $request);
                 $elementConstitutif->setLibelle($form->get('libelleChoix')->getData());
                 $elementConstitutif->setFicheMatiere(null);
@@ -163,12 +163,12 @@ class ParcoursEcController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($elementConstitutif->getNatureUeEc()?->isChoix() === false and $elementConstitutif->getNatureUeEc()?->isLibre() === false) {
+            if ($elementConstitutif->getNatureUeEc()->isChoix() === false && $elementConstitutif->getNatureUeEc()->isLibre() === false) {
                 $lastEc = $ecOrdre->getOrdreSuivant($ue, $request);
                 $elementConstitutif->setOrdre($lastEc);
                 $elementConstitutif->genereCode();
                 $elementConstitutifRepository->save($elementConstitutif, true);
-            } elseif ($elementConstitutif->getNatureUeEc()?->isChoix() === true) {
+            } elseif ($elementConstitutif->getNatureUeEc()->isChoix() === true) {
                 $lastEc = $ecOrdre->getOrdreSuivant($ue, $request);
                 $elementConstitutif->setLibelle($form->get('libelleChoix')->getData());
                 $elementConstitutif->setFicheMatiere(null);

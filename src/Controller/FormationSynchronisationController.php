@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Formation;
 use App\Repository\FicheMatiereRepository;
-use App\TypeDiplome\TypeDiplomeResolver;
+use App\TypeDiplome\Synchronisation\But;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
+//todo: a revoir pour lien BUT-ORéBUT
 class FormationSynchronisationController extends AbstractController
 {
     #[Route('/formation/synchronisation-acs/{formation}', name: 'app_formation_synchronisation_acs')]
@@ -103,13 +104,19 @@ class FormationSynchronisationController extends AbstractController
 
     #[Route('/formation/synchronisation/{formation}', name: 'app_formation_synchronisation')]
     public function index(
-        TypeDiplomeResolver $typeDiplomeResolver,
+        But $butSynchronisation,
         Formation $formation
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        $typeDiplome = $typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
-        $state = $typeDiplome->synchroniser($formation);
+        $dpeParcours = $formation->getDpeParcours()->first();
+        $campagneCollecte = $dpeParcours ? $dpeParcours->getCampagneCollecte() : null;
+        if ($campagneCollecte === null) {
+            $this->addFlash('danger', 'Aucune campagne de collecte trouvée.');
+            return $this->redirectToRoute('app_formation_edit', ['slug' => $formation->getSlug()]);
+        }
+
+        $state = $butSynchronisation->synchroniser($formation, $campagneCollecte);
 
         if ($state) {
             $this->addFlash('success', 'La synchronisation a été effectuée avec succès.');
@@ -124,19 +131,13 @@ class FormationSynchronisationController extends AbstractController
 
     #[Route('/formation/synchronisation-mccc/{formation}', name: 'app_formation_synchronisation_mccc')]
     public function synchronisationMccc(
-        TypeDiplomeResolver $typeDiplomeResolver,
+        But $butSynchronisation,
         Formation $formation
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        $typeDiplome = $typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
-        $state = $typeDiplome->synchroniserMccc($formation);
-
-        if ($state) {
-            $this->addFlash('success', 'La synchronisation a été effectuée avec succès.');
-        } else {
-            $this->addFlash('danger', 'La synchronisation a échoué.');
-        }
+        $butSynchronisation->synchroniserMccc($formation);
+        $this->addFlash('success', 'La synchronisation a été effectuée avec succès.');
 
         return $this->redirectToRoute('app_formation_edit', [
             'slug' => $formation->getSlug(),

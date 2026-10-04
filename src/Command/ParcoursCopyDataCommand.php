@@ -23,7 +23,7 @@ use Symfony\Component\Filesystem\Filesystem;
 )]
 class ParcoursCopyDataCommand extends Command
 {
-    private EntityManagerInterface $entityManagerCopyData;
+    private ?EntityManagerInterface $entityManagerCopyData = null;
 
     private EntityManagerInterface $entityManager;
 
@@ -38,8 +38,15 @@ class ParcoursCopyDataCommand extends Command
     )
     {
         parent::__construct();
-        $this->entityManager = $doctrine->getManager('default');
-        $this->entityManagerCopyData = $doctrine->getManager('parcours_copy');
+        $em = $doctrine->getManager('default');
+        assert($em instanceof EntityManagerInterface);
+        $this->entityManager = $em;
+        try {
+            $emCopy = $doctrine->getManager('parcours_copy');
+            $this->entityManagerCopyData = $emCopy instanceof EntityManagerInterface ? $emCopy : null;
+        } catch (\Throwable) {
+            $this->entityManagerCopyData = null;
+        }
         $this->parcoursCopyData = $parcoursCopyData;
         $this->fs = $fs;
     }
@@ -116,13 +123,13 @@ class ParcoursCopyDataCommand extends Command
                     $now = (new DateTime())->format('d-m-Y_H-i-s');
                     $path = __DIR__ . "/../../export/";
                     $fileName = "{$now}-Maquette-DTO-Parcours-{$dtoPdfExport}" . $fromCopyFilename;
-                    if($afterCopy){
+                    if ($afterCopy) {
                         $fileName .= "-after-copy.pdf";
                         $pdf = $this->parcoursCopyData->exportDTOAsPdf($parcours, true, true, fromCopy: $dtoFromCopy);
-                    }elseif(!$afterCopy && !$fromCopy) {
+                    } elseif (!$fromCopy) {
                         $fileName .= "-initial.pdf";
                         $pdf = $this->parcoursCopyData->exportDTOAsPdf($parcours, false, fromCopy: $dtoFromCopy);
-                    }elseif($fromCopy){
+                    } else {
                         $fileName .= "-initial.pdf";
                         $pdf = $this->parcoursCopyData->exportDTOAsPdf($parcours, true, fromCopy: $dtoFromCopy);
                     }

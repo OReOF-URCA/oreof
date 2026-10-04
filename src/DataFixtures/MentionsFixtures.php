@@ -27,9 +27,9 @@ class MentionsFixtures extends Fixture implements DependentFixtureInterface
             $mention->setSigle('M' . $i);
 
             if ($i % 2 === 1) {
-                $mention->addDomaine($this->getReference('domaine_st'));
+                $mention->addDomaine($this->getReference('domaine_st', \App\Entity\Domaine::class));
             } else {
-                $mention->addDomaine($this->getReference('domaine_shs'));
+                $mention->addDomaine($this->getReference('domaine_shs', \App\Entity\Domaine::class));
             }
             $manager->persist($mention);
         }

@@ -9,7 +9,7 @@
 
 namespace App\Utils;
 
-use App\Dto\TranslatableKey;
+use App\DTO\TranslatableKey;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;

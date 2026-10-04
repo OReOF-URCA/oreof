@@ -39,7 +39,7 @@ class ParcoursMcccController extends BaseController
         return $turboStream->streamOpenModalFromTemplates(
             'Modifier les MCCC de l\'EC',
             'Dans l\'EC ' . $elementConstitutif->display(),
-            'typeDiplome/' . $typeDiplome::TEMPLATE_FOLDER . '/mccc/_mccc.html.twig',
+            'typeDiplome/' . $typeDiplome->getTemplateFolder() . '/mccc/_mccc.html.twig',
             [
                 'form' => $typeDiplome->createFormMccc($elementConstitutif)->createView(),
                 'ec' => $elementConstitutif,

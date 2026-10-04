@@ -26,6 +26,7 @@ final class AlerteComponent extends AbstractController
             'success' => 'icon:success:bold',
             'warning' => 'icon:warning:bold',
             'danger' => 'icon:danger:bold',
+            default => 'icon:info:bold',
         };
     }
 }

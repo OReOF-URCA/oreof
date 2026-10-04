@@ -12,7 +12,9 @@ namespace App\Workflow;
 
 final class StepHandlerRegistry
 {
-    /** @var array<string, StepHandlerInterface> keyed by place name */
+    /**
+     * @param iterable<string, StepHandlerInterface> $handlers keyed by place name
+     */
     public function __construct(private iterable $handlers = [])
     {
     }

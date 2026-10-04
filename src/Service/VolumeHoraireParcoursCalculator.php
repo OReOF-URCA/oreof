@@ -35,8 +35,8 @@ final readonly class VolumeHoraireParcoursCalculator
             throw new LogicException('Le parcours ne possède pas de formation.');
         }
 
-        $typeDiplome = $this->typeDiplomeResolver->getFromFormation($formation);
-        $structure = $typeDiplome->calculStructureParcours($parcours);
+        $typeDiplome = $this->typeDiplomeResolver->fromFormation($formation);
+        $structure = $typeDiplome->calcul($parcours);
         $heuresFormation = $structure->heuresEctsFormation;
 
         $volumeHoraireParcours ??= new VolumeHoraireParcours();

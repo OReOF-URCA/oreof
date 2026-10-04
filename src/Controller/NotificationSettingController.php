@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\UserNotificationPreference;
 use App\Entity\UserWorkflowNotificationSetting;
 use App\Notification\NotificationPreferenceResolver;
@@ -25,6 +26,9 @@ class NotificationSettingController extends BaseController
     public function getSettings(string $workflow, ?string $step, ?string $transition, NotificationPreferenceResolver $resolver): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
         $data = $resolver->resolveFor($user, $workflow, $step ?: null, $transition ?: null);
         return $this->json($data);
     }
@@ -34,6 +38,9 @@ class NotificationSettingController extends BaseController
     public function setSettings(string $workflow, ?string $step, ?string $transition, Request $req): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
         $repo = $this->entityManager->getRepository(UserWorkflowNotificationSetting::class);
 
         $setting = $repo->findOneBy([
@@ -57,6 +64,9 @@ class NotificationSettingController extends BaseController
     public function deleteSettings(string $workflow, ?string $step, ?string $transition): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
         $repo = $this->entityManager->getRepository(UserWorkflowNotificationSetting::class);
         if ($s = $repo->findOneBy(['user' => $user, 'workflow' => $workflow, 'step' => $step ?: null, 'transitionName' => $transition ?: null])) {
             $this->entityManager->remove($s);
@@ -70,6 +80,9 @@ class NotificationSettingController extends BaseController
     public function patchGlobal(Request $req): JsonResponse
     {
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException();
+        }
         $pref = $user->getNotificationPreference() ?? (new UserNotificationPreference())->setUser($user);
 
         $payload = $req->toArray();

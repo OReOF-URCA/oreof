@@ -13,13 +13,17 @@ use App\Entity\CampagneCollecte;
 use DateTimeInterface;
 use ZipArchive;
 
+//todo: a reprendre ? pour exporter quoi ?
 class ExportConseil
 {
+    /**
+     * @param list<mixed> $formations
+     */
     public function __construct(
-        private string            $dir,
-        private array             $formations,
-        private CampagneCollecte  $annee,
-        private DateTimeInterface $date
+        private string $dir,
+        private array $formations = [],
+        private ?CampagneCollecte $annee = null,
+        private ?DateTimeInterface $date = null
     ) {
     }
 
@@ -27,39 +31,14 @@ class ExportConseil
     {
         $zip = new ZipArchive();
         $fileName = 'export_conseil_' . date('YmdHis') . '.zip';
-        $zipName = $this->dir. '/zip/' . $fileName;
+        $zipName = $this->dir . '/zip/' . $fileName;
         $zip->open($zipName, ZipArchive::CREATE);
 
-        $tabFiles = [];
-        $dir = $this->dir.'/pdf/';
-
-        foreach ($this->formations as $formation) {
-            $tParcours = [];
-            $calculStructureParcours = new CalculStructureParcours();
-            foreach ($formation->getParcours() as $parcours) {
-                $tParcours[$parcours->getId()] = $calculStructureParcours->calcul($parcours);
-            }
-            $fichier = $this->myPDF::genereAndSavePdf('pdf/conseil.html.twig', [
-                'formation' => $formation,
-                'typeDiplome' => $formation->getTypeDiplome(),
-                'tParcours' => $tParcours,
-            ], 'dpe_formation_' . $formation->getDisplay(), $dir);
-
-            $tabFiles[] = $fichier;
-            $zip->addFile(
-                $dir . $fichier,
-                $formation->getDisplay() . '/' . $fichier
-            );
+        if ($this->annee !== null || $this->date !== null || $this->formations !== []) {
+            // todo: migrer vers Gotenberg pour la génération des PDF de conseil
         }
 
         $zip->close();
-
-        // suppression des PDF
-        foreach ($tabFiles as $file) {
-            if (file_exists($dir . $file)) {
-                unlink($dir . $file);
-            }
-        }
 
         return $fileName;
     }

@@ -24,7 +24,7 @@ class ChangeRfFormationType extends AbstractType
                 'class' => TypeRfEnum::class,
                 'expanded' => true,
                 'translation_domain' => 'form',
-                'choice_label' => static function (UnitEnum $choice): string {
+                'choice_label' => static function (TypeRfEnum $choice): string {
                     return $choice->getLibelle();
                 },
             ])

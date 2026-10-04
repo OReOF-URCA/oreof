@@ -15,7 +15,7 @@ use App\DTO\ProcessData;
 use App\Entity\FicheMatiere;
 use App\Events\HistoriqueFicheMatiereEvent;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,7 +56,7 @@ class FicheMatiereProcess extends AbstractProcess
         return $processData;
     }
 
-    public function valideFicheMatiere(FicheMatiere $ficheMatiere, UserInterface $user, array $process, string $etape, $request): ?Response
+    public function valideFicheMatiere(FicheMatiere $ficheMatiere, UserInterface $user, array $process, string $etape, Request $request): ?Response
     {
         if ($this->ficheMatiereWorkflow->can($ficheMatiere, $process['canValide'])) {
             $this->ficheMatiereWorkflow->apply($ficheMatiere, $process['canValide']);
@@ -67,7 +67,7 @@ class FicheMatiereProcess extends AbstractProcess
         return null;
     }
 
-    public function reserveFicheMatiere(FicheMatiere $ficheMatiere, UserInterface $user, $process, $etape, $request): Response
+    public function reserveFicheMatiere(FicheMatiere $ficheMatiere, UserInterface $user, array $process, string $etape, Request $request): Response
     {
         $this->ficheMatiereWorkflow->apply($ficheMatiere, $process['canReserve'], ['motif' => $request->request->get('argumentaire')]);
         $this->entityManager->flush();

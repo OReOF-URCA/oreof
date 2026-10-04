@@ -14,7 +14,6 @@ use Doctrine\ORM\EntityManagerInterface;
 class ParcoursHoursComparator
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
         private readonly VersioningParcours $versioningParcours,
         private readonly ParcoursVersioningRepository $versioningRepository,
         private readonly TypeDiplomeResolver $typeDiplomeResolver
@@ -103,7 +102,7 @@ class ParcoursHoursComparator
             $orig = $parcours->getParcoursOrigineCopie();
             if ($orig !== null) {
                 $typeD = $this->typeDiplomeResolver->fromParcours($orig);
-                $refDto = $typeD->calculStructureParcours($orig);
+                $refDto = $typeD->calcul($orig);
                 $dpeOrig = GetDpeParcours::getFromParcours($orig);
                 $campagne = $dpeOrig?->getCampagneCollecte()?->getLibelle() ?? 'N-1';
                 $refLabel = "Année précédente ({$campagne})";
@@ -175,20 +174,20 @@ class ParcoursHoursComparator
                     $elem = $ecDto->elementConstitutif;
                     $h = $ecDto->heuresEctsEc;
 
-                    $cmP = (float)($h?->cmPres ?? 0);
-                    $tdP = (float)($h?->tdPres ?? 0);
-                    $tpP = (float)($h?->tpPres ?? 0);
-                    $teP = (float)($h?->tePres ?? 0);
+                    $cmP = (float)$h->cmPres;
+                    $tdP = (float)$h->tdPres;
+                    $tpP = (float)$h->tpPres;
+                    $teP = (float)$h->tePres;
 
-                    $cmD = (float)($h?->cmDist ?? 0);
-                    $tdD = (float)($h?->tdDist ?? 0);
-                    $tpD = (float)($h?->tpDist ?? 0);
+                    $cmD = (float)$h->cmDist;
+                    $tdD = (float)$h->tdDist;
+                    $tpD = (float)$h->tpDist;
 
                     $totP = $cmP + $tdP + $tpP;
                     $totD = $cmD + $tdD + $tpD;
                     $totG = $totP + $totD;
 
-                    $ects = (float)($h?->ects ?? $elem?->getEcts() ?? 0);
+                    $ects = (float)$h->ects;
 
                     $ecData = [
                         'ects' => $ects,
@@ -224,14 +223,14 @@ class ParcoursHoursComparator
                         $eceElem = $eceDto->elementConstitutif;
                         $eceH = $eceDto->heuresEctsEc;
 
-                        $eceCmP = (float)($eceH?->cmPres ?? 0);
-                        $eceTdP = (float)($eceH?->tdPres ?? 0);
-                        $eceTpP = (float)($eceH?->tpPres ?? 0);
-                        $eceTeP = (float)($eceH?->tePres ?? 0);
-                        $eceCmD = (float)($eceH?->cmDist ?? 0);
-                        $eceTdD = (float)($eceH?->tdDist ?? 0);
-                        $eceTpD = (float)($eceH?->tpDist ?? 0);
-                        $eceEcts = (float)($eceH?->ects ?? $eceElem?->getEcts() ?? 0);
+                        $eceCmP = (float)$eceH->cmPres;
+                        $eceTdP = (float)$eceH->tdPres;
+                        $eceTpP = (float)$eceH->tpPres;
+                        $eceTeP = (float)$eceH->tePres;
+                        $eceCmD = (float)$eceH->cmDist;
+                        $eceTdD = (float)$eceH->tdDist;
+                        $eceTpD = (float)$eceH->tpDist;
+                        $eceEcts = (float)$eceH->ects;
 
                         $eceTotP = $eceCmP + $eceTdP + $eceTpP;
                         $eceTotD = $eceCmD + $eceTdD + $eceTpD;

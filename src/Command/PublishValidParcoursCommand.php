@@ -88,7 +88,7 @@ class PublishValidParcoursCommand extends Command
             $parcoursArray = array_filter(
                 $parcoursArray,
                 fn($p) => $p->getDpeParcours()->last() instanceof DpeParcours
-                    && $p->getDpeParcours()->last()?->getEtatValidation() === ["valide_a_publier" => 1]
+                    && $p->getDpeParcours()->last()->getEtatValidation() === ["valide_a_publier" => 1]
             );
 
             // Récupération des parcours à publier aujourd'hui
@@ -244,5 +244,8 @@ class PublishValidParcoursCommand extends Command
 
             return Command::SUCCESS;
         }
+
+        $io->warning("Aucune option spécifiée (--date-is-today ou --export-missing=<type>).");
+        return Command::INVALID;
     }
 }
