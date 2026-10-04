@@ -3,17 +3,12 @@
 {% block bouton_header %}
     <twig:Button
             href="{{ path('app_conseils_documents_download', {
-                process: selectedProcess,
-                composante: selectedComposanteId,
-                formation: selectedFormationId,
-                parcours: selectedParcoursId,
-                hasPv: selectedHasPv,
-                hasJustification: selectedHasJustification
+                process: selectedProcess
             }) }}"
             variant="info"
             icon="icon:download"
-            label="Télécharger les documents filtrés (ZIP)"
-            tooltip="Télécharger tous les PV et justificatifs correspondant aux filtres"
+            label="Télécharger les documents (ZIP)"
+            tooltip="Télécharger tous les PV et justificatifs pour ce processus"
     />
 {% endblock %}
 
@@ -23,12 +18,7 @@
             <a id="tab-dpe-parcours"
                class="app-tab gap-2 {% if selectedProcess == 'dpe_parcours' %}app-tab-active active{% endif %}"
                href="{{ path('app_conseils_documents_index', {
-                   process: 'dpe_parcours',
-                   composante: selectedComposanteId,
-                   formation: selectedFormationId,
-                   parcours: selectedParcoursId,
-                   hasPv: selectedHasPv,
-                   hasJustification: selectedHasJustification
+                   process: 'dpe_parcours'
                }) }}"
                role="tab"
                aria-selected="{{ selectedProcess == 'dpe_parcours' ? 'true' : 'false' }}"
@@ -40,11 +30,7 @@
             <a id="tab-dpe-formation"
                class="app-tab gap-2 {% if selectedProcess == 'dpe_formation' %}app-tab-active active{% endif %}"
                href="{{ path('app_conseils_documents_index', {
-                   process: 'dpe_formation',
-                   composante: selectedComposanteId,
-                   formation: selectedFormationId,
-                   hasPv: selectedHasPv,
-                   hasJustification: selectedHasJustification
+                   process: 'dpe_formation'
                }) }}"
                role="tab"
                aria-selected="{{ selectedProcess == 'dpe_formation' ? 'true' : 'false' }}"
@@ -56,11 +42,7 @@
             <a id="tab-change-rf"
                class="app-tab gap-2 {% if selectedProcess == 'change_rf' %}app-tab-active active{% endif %}"
                href="{{ path('app_conseils_documents_index', {
-                   process: 'change_rf',
-                   composante: selectedComposanteId,
-                   formation: selectedFormationId,
-                   hasPv: selectedHasPv,
-                   hasJustification: selectedHasJustification
+                   process: 'change_rf'
                }) }}"
                role="tab"
                aria-selected="{{ selectedProcess == 'change_rf' ? 'true' : 'false' }}"
@@ -72,5 +54,6 @@
         </div>
     </div>
 
-    {{ component('DataTable', { config: table }) }}
+    {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
 {% endblock %}
+

@@ -1,6 +1,7 @@
-{% set complements = item.complements ?? {} %}
-{% set fichier = complements.fichier_note|default(item.documentNote is defined and item.documentNote ? item.documentNote.filename : null) %}
-{% set fichierOriginal = complements.fichier_note_original|default(item.documentNote is defined and item.documentNote ? item.documentNote.originalFilename : fichier) %}
+{% set entity = row|default(item|default(null)) %}
+{% set complements = entity ? (entity.complements ?? {}) : {} %}
+{% set fichier = complements.fichier_note|default(entity and entity.documentNote is defined and entity.documentNote ? entity.documentNote.filename : null) %}
+{% set fichierOriginal = complements.fichier_note_original|default(entity and entity.documentNote is defined and entity.documentNote ? entity.documentNote.originalFilename : fichier) %}
 
 {% if fichier %}
     <div class="flex items-center gap-2">
@@ -22,3 +23,4 @@
 {% else %}
     <twig:Badge label="Non" variant="danger" size="sm"/>
 {% endif %}
+

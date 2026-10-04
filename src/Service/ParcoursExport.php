@@ -82,9 +82,10 @@ class ParcoursExport {
     ): array
     {
         
-        $dpe = GetDpeParcours::getFromParcours(
-            $this->entityManager->getRepository(Parcours::class)->findOneById($parcours_id)
-        );
+        $targetParcours = $parcours_id !== null
+            ? $this->entityManager->getRepository(Parcours::class)->find($parcours_id)
+            : $parcours;
+        $dpe = GetDpeParcours::getFromParcours($targetParcours);
         $isFerme = in_array($dpe?->getEtatReconduction() ?? "empty", [
             TypeModificationDpeEnum::NON_OUVERTURE,
             TypeModificationDpeEnum::NON_OUVERTURE_CFVU,

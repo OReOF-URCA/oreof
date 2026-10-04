@@ -20,8 +20,12 @@ abstract class GetDpeParcours
     {
     }
 
-    public static function getFromParcours(Parcours $parcours): ?DpeParcours
+    public static function getFromParcours(?Parcours $parcours): ?DpeParcours
     {
+        if ($parcours === null) {
+            return null;
+        }
+
         if ($parcours->getDpeParcours()->count() > 0) {
             return $parcours->getDpeParcours()->first() !== false ? $parcours->getDpeParcours()->first() : null; //trié par ordre décroissant, le premier est donc le plus récent
         }

@@ -1,7 +1,9 @@
-{% if item.formation is defined and item.formation %}
-    {{ item.formation.display }}
-{% elseif item.parcours and item.parcours.formation %}
-    {{ item.parcours.formation.display }}
+{% set entity = row|default(item|default(null)) %}
+{% if entity and entity.formation is defined and entity.formation %}
+    {{ entity.formation.display }}
+{% elseif entity and entity.parcours is defined and entity.parcours and entity.parcours.formation %}
+    {{ entity.parcours.formation.display }}
 {% else %}
     -
 {% endif %}
+

@@ -1,5 +1,7 @@
-{% if item.parcours is defined and item.parcours %}
-    {{ item.parcours.display }}
+{% set entity = row|default(item|default(null)) %}
+{% if entity and entity.parcours is defined and entity.parcours %}
+    {{ entity.parcours.display }}
 {% else %}
     -
 {% endif %}
+

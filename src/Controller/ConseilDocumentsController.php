@@ -11,14 +11,13 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DataTable\ConseilDocumentsChangeRfDataTable;
+use App\DataTable\ConseilDocumentsDpeFormationDataTable;
+use App\DataTable\ConseilDocumentsDpeParcoursDataTable;
 use App\Entity\HistoriqueFormation;
 use App\Entity\HistoriqueParcours;
-use App\Repository\ComposanteRepository;
-use App\Repository\FormationRepository;
 use App\Repository\HistoriqueFormationRepository;
 use App\Repository\HistoriqueParcoursRepository;
-use App\Repository\ParcoursRepository;
-use App\Service\DataTableBuilder;
 use App\Service\SecureUploadService;
 use DateTimeImmutable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -30,388 +29,31 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class ConseilDocumentsController extends BaseController
 {
-    #[Route('/conseils/documents', name: 'app_conseils_documents_index', methods: ['GET'])]
+    #[Route('/conseils/documents', name: 'app_conseils_documents_index', methods: ['GET', 'POST'])]
     public function index(
-        Request              $request,
-        DataTableBuilder     $builder,
-        ComposanteRepository $composanteRepository,
-        FormationRepository  $formationRepository,
-        ParcoursRepository   $parcoursRepository,
+        Request                               $request,
+        ConseilDocumentsDpeParcoursDataTable  $parcoursTable,
+        ConseilDocumentsDpeFormationDataTable $formationTable,
+        ConseilDocumentsChangeRfDataTable     $changeRfTable,
     ): Response
     {
         $this->denyConseilDocumentsAccess();
 
-        [$process, $composanteId, $formationId, $parcoursId, $hasPv, $hasJustification] = $this->extractFilters($request);
-
-        if ($process === 'dpe_formation') {
-            $tableBuilder = $this->buildDpeFormationTable($builder, $composanteId, $formationId, $hasPv, $hasJustification);
-        } elseif ($process === 'change_rf') {
-            $tableBuilder = $this->buildChangeRfTable($builder, $composanteId, $formationId, $hasPv, $hasJustification);
-        } else {
-            $tableBuilder = $this->buildDpeParcoursTable($builder, $composanteId, $formationId, $parcoursId, $hasPv, $hasJustification);
+        $process = (string) $request->query->get('process', 'dpe_parcours');
+        if (!in_array($process, ['dpe_parcours', 'dpe_formation', 'change_rf'], true)) {
+            $process = 'dpe_parcours';
         }
 
-        $composantes = $composanteRepository->findBy([], ['libelle' => 'ASC']);
-        $formations = $formationRepository->findBy(
-            $composanteId !== null ? ['composantePorteuse' => $composanteId] : [],
-            ['sigle' => 'ASC'],
-        );
-        $parcours = $parcoursRepository->findBy(
-            $formationId !== null ? ['formation' => $formationId] : [],
-            ['libelle' => 'ASC'],
-        );
+        $table = match ($process) {
+            'dpe_formation' => $formationTable,
+            'change_rf' => $changeRfTable,
+            default => $parcoursTable,
+        };
 
         return $this->render('conseils/documents/index.html.twig', [
-            'table' => $tableBuilder->build(),
-            'composantes' => $composantes,
-            'formations' => $formations,
-            'parcoursList' => $parcours,
+            'table' => $table,
             'selectedProcess' => $process,
-            'selectedComposanteId' => $composanteId,
-            'selectedFormationId' => $formationId,
-            'selectedParcoursId' => $parcoursId,
-            'selectedHasPv' => $hasPv,
-            'selectedHasJustification' => $hasJustification,
         ]);
-    }
-
-    private function buildDpeParcoursTable(
-        DataTableBuilder $builder,
-        ?int             $composanteId,
-        ?int             $formationId,
-        ?int             $parcoursId,
-        ?string          $hasPv,
-        ?string          $hasJustification,
-    ): DataTableBuilder
-    {
-        $tableBuilder = $builder
-            ->setEntity(HistoriqueParcours::class)
-            ->setPerPage(20)
-            ->setDefaultSort('created', 'desc');
-
-        $tableBuilder->addBaseWhere('e.parcours IS NOT NULL');
-        $tableBuilder->addBaseJoin('inner', 'e.parcours', 'parcours');
-        $tableBuilder->addBaseJoin('inner', 'parcours.formation', 'formation');
-        $tableBuilder
-            ->addBaseWhere('formation.dpe = :campagneCollecte')
-            ->addBaseParameter('campagneCollecte', $this->getCampagneCollecte());
-
-        if ($composanteId !== null) {
-            $tableBuilder
-                ->addBaseJoin('left', 'formation.composantePorteuse', 'composante')
-                ->addBaseWhere('composante.id = :composanteId')
-                ->addBaseParameter('composanteId', $composanteId);
-        }
-
-        if ($formationId !== null) {
-            $tableBuilder
-                ->addBaseWhere('formation.id = :formationId')
-                ->addBaseParameter('formationId', $formationId);
-        }
-
-        if ($parcoursId !== null) {
-            $tableBuilder
-                ->addBaseWhere('parcours.id = :parcoursId')
-                ->addBaseParameter('parcoursId', $parcoursId);
-        }
-
-        if ($hasPv === '1') {
-            $tableBuilder
-                ->addBaseWhere("e.complements LIKE :hasPvKey")
-                ->addBaseParameter('hasPvKey', '%"fichier"%');
-        } elseif ($hasPv === '0') {
-            $tableBuilder
-                ->addBaseWhere("(e.complements IS NULL OR e.complements NOT LIKE :hasPvKey)")
-                ->addBaseParameter('hasPvKey', '%"fichier"%');
-        }
-
-        if ($hasJustification === '1') {
-            $tableBuilder
-                ->addBaseWhere("e.complements LIKE :hasJustificationKey")
-                ->addBaseParameter('hasJustificationKey', '%"fichier_note"%');
-        } elseif ($hasJustification === '0') {
-            $tableBuilder
-                ->addBaseWhere("(e.complements IS NULL OR e.complements NOT LIKE :hasJustificationKey)")
-                ->addBaseParameter('hasJustificationKey', '%"fichier_note"%');
-        }
-
-        $tableBuilder
-            ->addColumn('parcours.formation.composantePorteuse.libelle', [
-                'label' => 'Composante',
-                'sortable' => true,
-                'filterable' => false,
-                'searchable' => true,
-            ])
-            ->addColumn('parcours.formation.id', [
-                'label' => 'Formation',
-                'sortable' => false,
-                'filterable' => false,
-                'searchable' => false,
-                'template' => 'conseils/documents/_datatable_formation.html.twig',
-            ])
-            ->addColumn('parcours.id', [
-                'label' => 'Parcours',
-                'sortable' => false,
-                'filterable' => false,
-                'searchable' => false,
-                'template' => 'conseils/documents/_datatable_parcours.html.twig',
-            ])
-            ->addColumn('etape', [
-                'label' => 'Étape',
-                'sortable' => true,
-                'filterable' => true,
-                'searchable' => true,
-            ])
-            ->addColumn('created', [
-                'label' => 'Date de création',
-                'sortable' => true,
-                'filterable' => true,
-                'searchable' => false,
-                'type' => 'date',
-                'format' => 'datetime',
-            ])
-            ->addColumn('id', [
-                'id' => 'hasPv',
-                'label' => 'PV',
-                'sortable' => false,
-                'filterable' => true,
-                'searchable' => false,
-                'type' => 'select',
-                'choices' => ['1' => 'Avec PV', '0' => 'Sans PV'],
-                'filter_expression' => "CASE WHEN e.complements LIKE '%\\\"fichier\\\"%' THEN '1' ELSE '0' END",
-                'template' => 'conseils/documents/_datatable_pv.html.twig',
-            ])
-            ->addColumn('id', [
-                'id' => 'hasJustification',
-                'label' => 'Justificatif',
-                'sortable' => false,
-                'filterable' => true,
-                'searchable' => false,
-                'type' => 'select',
-                'choices' => ['1' => 'Avec justificatif', '0' => 'Sans justificatif'],
-                'filter_expression' => "CASE WHEN e.complements LIKE '%\\\"fichier_note\\\"%' THEN '1' ELSE '0' END",
-                'template' => 'conseils/documents/_datatable_justification.html.twig',
-            ]);
-
-        return $tableBuilder;
-    }
-
-    private function buildDpeFormationTable(
-        DataTableBuilder $builder,
-        ?int             $composanteId,
-        ?int             $formationId,
-        ?string          $hasPv,
-        ?string          $hasJustification,
-    ): DataTableBuilder
-    {
-        $tableBuilder = $builder
-            ->setEntity(HistoriqueFormation::class)
-            ->setPerPage(20)
-            ->setDefaultSort('created', 'desc');
-
-        $tableBuilder->addBaseWhere('(e.dpeFormation IS NOT NULL OR e.changeRf IS NULL) AND (e.etape NOT LIKE :changeRfPrefix OR e.etape IS NULL)');
-        $tableBuilder->addBaseParameter('changeRfPrefix', 'changeRf.%');
-
-        $tableBuilder->addBaseJoin('left', 'e.formation', 'formation');
-        $tableBuilder->addBaseJoin('left', 'e.dpeFormation', 'dpeFormation');
-        $tableBuilder
-            ->addBaseWhere('(formation.dpe = :campagneCollecte OR dpeFormation.campagneCollecte = :campagneCollecte)')
-            ->addBaseParameter('campagneCollecte', $this->getCampagneCollecte());
-
-        if ($composanteId !== null) {
-            $tableBuilder
-                ->addBaseJoin('left', 'formation.composantePorteuse', 'composante')
-                ->addBaseWhere('composante.id = :composanteId')
-                ->addBaseParameter('composanteId', $composanteId);
-        }
-
-        if ($formationId !== null) {
-            $tableBuilder
-                ->addBaseWhere('(formation.id = :formationId OR dpeFormation.formation = :formationId)')
-                ->addBaseParameter('formationId', $formationId);
-        }
-
-        if ($hasPv === '1') {
-            $tableBuilder
-                ->addBaseWhere("(e.complements LIKE :hasPvKey OR e.documentPv IS NOT NULL)")
-                ->addBaseParameter('hasPvKey', '%"fichier"%');
-        } elseif ($hasPv === '0') {
-            $tableBuilder
-                ->addBaseWhere("((e.complements IS NULL OR e.complements NOT LIKE :hasPvKey) AND e.documentPv IS NULL)")
-                ->addBaseParameter('hasPvKey', '%"fichier"%');
-        }
-
-        if ($hasJustification === '1') {
-            $tableBuilder
-                ->addBaseWhere("(e.complements LIKE :hasJustificationKey OR e.documentNote IS NOT NULL)")
-                ->addBaseParameter('hasJustificationKey', '%"fichier_note"%');
-        } elseif ($hasJustification === '0') {
-            $tableBuilder
-                ->addBaseWhere("((e.complements IS NULL OR e.complements NOT LIKE :hasJustificationKey) AND e.documentNote IS NULL)")
-                ->addBaseParameter('hasJustificationKey', '%"fichier_note"%');
-        }
-
-        $tableBuilder
-            ->addColumn('formation.composantePorteuse.libelle', [
-                'label' => 'Composante',
-                'sortable' => true,
-                'filterable' => false,
-                'searchable' => true,
-            ])
-            ->addColumn('formation.id', [
-                'label' => 'Formation',
-                'sortable' => false,
-                'filterable' => false,
-                'searchable' => false,
-                'template' => 'conseils/documents/_datatable_formation.html.twig',
-            ])
-            ->addColumn('etape', [
-                'label' => 'Étape',
-                'sortable' => true,
-                'filterable' => true,
-                'searchable' => true,
-            ])
-            ->addColumn('created', [
-                'label' => 'Date de création',
-                'sortable' => true,
-                'filterable' => true,
-                'searchable' => false,
-                'type' => 'date',
-                'format' => 'datetime',
-            ])
-            ->addColumn('id', [
-                'id' => 'hasPv',
-                'label' => 'PV',
-                'sortable' => false,
-                'filterable' => true,
-                'searchable' => false,
-                'type' => 'select',
-                'choices' => ['1' => 'Avec PV', '0' => 'Sans PV'],
-                'filter_expression' => "CASE WHEN (e.complements LIKE '%\\\"fichier\\\"%' OR e.documentPv IS NOT NULL) THEN '1' ELSE '0' END",
-                'template' => 'conseils/documents/_datatable_pv.html.twig',
-            ])
-            ->addColumn('id', [
-                'id' => 'hasJustification',
-                'label' => 'Justificatif',
-                'sortable' => false,
-                'filterable' => true,
-                'searchable' => false,
-                'type' => 'select',
-                'choices' => ['1' => 'Avec justificatif', '0' => 'Sans justificatif'],
-                'filter_expression' => "CASE WHEN (e.complements LIKE '%\\\"fichier_note\\\"%' OR e.documentNote IS NOT NULL) THEN '1' ELSE '0' END",
-                'template' => 'conseils/documents/_datatable_justification.html.twig',
-            ]);
-
-        return $tableBuilder;
-    }
-
-    private function buildChangeRfTable(
-        DataTableBuilder $builder,
-        ?int             $composanteId,
-        ?int             $formationId,
-        ?string          $hasPv,
-        ?string          $hasJustification,
-    ): DataTableBuilder
-    {
-        $tableBuilder = $builder
-            ->setEntity(HistoriqueFormation::class)
-            ->setPerPage(20)
-            ->setDefaultSort('created', 'desc');
-
-        $tableBuilder->addBaseWhere('(e.changeRf IS NOT NULL OR e.etape LIKE :changeRfPrefix)');
-        $tableBuilder->addBaseParameter('changeRfPrefix', 'changeRf.%');
-
-        $tableBuilder->addBaseJoin('left', 'e.formation', 'formation');
-        $tableBuilder->addBaseJoin('left', 'e.changeRf', 'changeRf');
-        $tableBuilder
-            ->addBaseWhere('(formation.dpe = :campagneCollecte OR changeRf.campagneCollecte = :campagneCollecte)')
-            ->addBaseParameter('campagneCollecte', $this->getCampagneCollecte());
-
-        if ($composanteId !== null) {
-            $tableBuilder
-                ->addBaseJoin('left', 'formation.composantePorteuse', 'composante')
-                ->addBaseWhere('composante.id = :composanteId')
-                ->addBaseParameter('composanteId', $composanteId);
-        }
-
-        if ($formationId !== null) {
-            $tableBuilder
-                ->addBaseWhere('(formation.id = :formationId OR changeRf.formation = :formationId)')
-                ->addBaseParameter('formationId', $formationId);
-        }
-
-        if ($hasPv === '1') {
-            $tableBuilder
-                ->addBaseWhere("(e.complements LIKE :hasPvKey OR e.documentPv IS NOT NULL)")
-                ->addBaseParameter('hasPvKey', '%"fichier"%');
-        } elseif ($hasPv === '0') {
-            $tableBuilder
-                ->addBaseWhere("((e.complements IS NULL OR e.complements NOT LIKE :hasPvKey) AND e.documentPv IS NULL)")
-                ->addBaseParameter('hasPvKey', '%"fichier"%');
-        }
-
-        if ($hasJustification === '1') {
-            $tableBuilder
-                ->addBaseWhere("(e.complements LIKE :hasJustificationKey OR e.documentNote IS NOT NULL)")
-                ->addBaseParameter('hasJustificationKey', '%"fichier_note"%');
-        } elseif ($hasJustification === '0') {
-            $tableBuilder
-                ->addBaseWhere("((e.complements IS NULL OR e.complements NOT LIKE :hasJustificationKey) AND e.documentNote IS NULL)")
-                ->addBaseParameter('hasJustificationKey', '%"fichier_note"%');
-        }
-
-        $tableBuilder
-            ->addColumn('formation.composantePorteuse.libelle', [
-                'label' => 'Composante',
-                'sortable' => true,
-                'filterable' => false,
-                'searchable' => true,
-            ])
-            ->addColumn('formation.id', [
-                'label' => 'Formation',
-                'sortable' => false,
-                'filterable' => false,
-                'searchable' => false,
-                'template' => 'conseils/documents/_datatable_formation.html.twig',
-            ])
-            ->addColumn('etape', [
-                'label' => 'Étape',
-                'sortable' => true,
-                'filterable' => true,
-                'searchable' => true,
-            ])
-            ->addColumn('created', [
-                'label' => 'Date de création',
-                'sortable' => true,
-                'filterable' => true,
-                'searchable' => false,
-                'type' => 'date',
-                'format' => 'datetime',
-            ])
-            ->addColumn('id', [
-                'id' => 'hasPv',
-                'label' => 'PV',
-                'sortable' => false,
-                'filterable' => true,
-                'searchable' => false,
-                'type' => 'select',
-                'choices' => ['1' => 'Avec PV', '0' => 'Sans PV'],
-                'filter_expression' => "CASE WHEN (e.complements LIKE '%\\\"fichier\\\"%' OR e.documentPv IS NOT NULL) THEN '1' ELSE '0' END",
-                'template' => 'conseils/documents/_datatable_pv.html.twig',
-            ])
-            ->addColumn('id', [
-                'id' => 'hasJustification',
-                'label' => 'Justificatif',
-                'sortable' => false,
-                'filterable' => true,
-                'searchable' => false,
-                'type' => 'select',
-                'choices' => ['1' => 'Avec justificatif', '0' => 'Sans justificatif'],
-                'filter_expression' => "CASE WHEN (e.complements LIKE '%\\\"fichier_note\\\"%' OR e.documentNote IS NOT NULL) THEN '1' ELSE '0' END",
-                'template' => 'conseils/documents/_datatable_justification.html.twig',
-            ]);
-
-        return $tableBuilder;
     }
 
     private function denyConseilDocumentsAccess(): void
