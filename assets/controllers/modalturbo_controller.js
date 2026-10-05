@@ -69,7 +69,22 @@ export default class extends Controller {
     }
   }
 
-  close () {
+  close (event) {
+    // If the close was triggered by Escape key, check if an input/select/TomSelect is currently active
+    if (event && event.type === 'keydown' && (event.key === 'Escape' || event.key === 'Esc')) {
+      const activeEl = document.activeElement
+      if (activeEl && (
+        activeEl.tagName === 'INPUT' ||
+        activeEl.tagName === 'TEXTAREA' ||
+        activeEl.tagName === 'SELECT' ||
+        activeEl.closest('.ts-wrapper') ||
+        activeEl.closest('.ts-dropdown')
+      )) {
+        activeEl.blur()
+        return
+      }
+    }
+
     // clear modal frames content when closing to avoid leaking previous data
     const titleFrame = document.getElementById('modal_title')
     const bodyFrame = document.getElementById('modal_body')
@@ -80,6 +95,15 @@ export default class extends Controller {
     if (footerFrame) footerFrame.innerHTML = ''
     this.wrapperTarget.classList.add('hidden')
     document.documentElement.classList.remove('overflow-hidden')
+  }
+
+  preventEnterSubmit (event) {
+    if (event.key === 'Enter' && event.target && event.target.tagName === 'INPUT') {
+      const type = (event.target.type || '').toLowerCase()
+      if (type !== 'submit' && type !== 'button' && !event.target.closest('.ts-wrapper')) {
+        event.preventDefault()
+      }
+    }
   }
 
   connect () {

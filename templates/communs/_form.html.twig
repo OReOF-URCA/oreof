@@ -1,7 +1,7 @@
 {% form_theme form 'communs/form_theme_v2.html.twig' %}
 {% set formAttr = {} %}
 {% if isModal is defined and isModal == true %}
-    {% set formAttr = { 'id': 'modal_form' } %}
+    {% set formAttr = { 'id': 'modal_form', 'autocomplete': 'off' } %}
 {% endif %}
 {{ form_start(form, { 'attr': formAttr }) }}
     {{ form_widget(form) }}

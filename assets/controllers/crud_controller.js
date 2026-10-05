@@ -28,7 +28,7 @@ export default class extends Controller {
   scrollPosition = 0
 
   connect() {
-    useDebounce(this)
+    useDebounce(this, { wait: 500 })
 
     // Restaurer l'état depuis localStorage si disponible
     const savedState = this.getSavedState()
@@ -37,7 +37,7 @@ export default class extends Controller {
 
       // Restaurer la valeur du champ de recherche si elle existe
       if (savedState.q) {
-        const searchInput = document.getElementById('filtre_crud')
+        const searchInput = document.getElementById('filtre_crud') || document.getElementById('filter-quick-search')
         if (searchInput) {
           searchInput.value = savedState.q
         }
@@ -88,14 +88,18 @@ export default class extends Controller {
   }
 
   rechercher(event) {
-    event.preventDefault()
-    this.fields.q = event.target.value
+    if (event) {
+      event.preventDefault()
+      this.fields.q = event.target.value
+    }
     this.saveState()
     this._updateListe(this.fields)
   }
 
   effaceFiltre(event) {
-    event.preventDefault()
+    if (event) {
+      event.preventDefault()
+    }
     this.fields = {}
 
     const searchInput = document.getElementById('filtre_crud')
@@ -143,7 +147,6 @@ export default class extends Controller {
         }
       })
     })
-    modal = null
   }
 
   async duplicate(event) {
@@ -168,10 +171,27 @@ export default class extends Controller {
 
   async _updateListe(params) {
     this.scrollPosition = window.scrollY
+    const activeElement = document.activeElement
+    const activeId = activeElement?.id
+    const isSearchInput = activeId === 'filter-quick-search' || activeId === 'filtre_crud'
+    const selectionStart = isSearchInput ? activeElement.selectionStart : null
+    const selectionEnd = isSearchInput ? activeElement.selectionEnd : null
+
     const _params = new URLSearchParams(params)
     this.listeTarget.innerHTML = window.da.loaderStimulus
     const response = await fetch(`${this.urlValue}?${_params.toString()}`)
     this.listeTarget.innerHTML = await response.text()
+
+    if (isSearchInput && activeId) {
+      const refreshedInput = document.getElementById(activeId)
+      if (refreshedInput) {
+        refreshedInput.focus()
+        if (typeof selectionStart === 'number' && typeof selectionEnd === 'number') {
+          refreshedInput.setSelectionRange(selectionStart, selectionEnd)
+        }
+      }
+    }
+
     window.scrollTo(0, this.scrollPosition)
   }
 

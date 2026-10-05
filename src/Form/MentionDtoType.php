@@ -36,7 +36,6 @@ class MentionDtoType extends AbstractType
                 'choice_label' => 'libelle',
                 'choice_value' => 'id',
                 'label' => 'Type de diplôme',
-                'attr' => ['data-action' => 'change->formation#changeTypeDiplome'],
                 'placeholder' => 'Sélectionnez un type de diplôme',
                 'required' => true,
                 'property_path' => 'typeDiplomeId',
@@ -46,7 +45,8 @@ class MentionDtoType extends AbstractType
                 'required' => true,
                 'attr' => [
                     'placeholder' => 'Entrez le libellé de la mention',
-                    'maxlength' => 255
+                    'maxlength' => 255,
+                    'autocomplete' => 'off',
                 ],
             ])
             ->add('sigle', TextType::class, [
@@ -55,7 +55,8 @@ class MentionDtoType extends AbstractType
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Entrez le sigle (optionnel)',
-                    'maxlength' => 20
+                    'maxlength' => 20,
+                    'autocomplete' => 'off',
                 ],
             ])
             ->add('domaines', EntityType::class, [
@@ -77,7 +78,8 @@ class MentionDtoType extends AbstractType
                 'label' => 'Code Apogée',
                 'attr' => [
                     'maxlength' => 1,
-                    'placeholder' => 'A-Z, 0-9'
+                    'placeholder' => 'A-Z, 0-9',
+                    'autocomplete' => 'off',
                 ],
                 'required' => true,
                 'help' => 'Un seul caractère (lettre ou chiffre)',
@@ -91,6 +93,7 @@ class MentionDtoType extends AbstractType
             'translation_domain' => 'form',
             'attr' => [
                 'novalidate' => 'novalidate', // Désactive la validation HTML5 pour utiliser la validation côté serveur
+                'autocomplete' => 'off',
             ],
         ]);
     }
