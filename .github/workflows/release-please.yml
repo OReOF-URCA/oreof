@@ -27,13 +27,19 @@ jobs:
           target-branch: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Get Release Please branch
+      - name: Find open Release Please PR branch
         id: release-pr
-        if: steps.release.outputs.prs_created == 'true'
         env:
-          RELEASE_PRS: ${{ steps.release.outputs.prs }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          branch="$(jq -r '.[0].headBranchName // empty' <<< "$RELEASE_PRS")"
+          branch="$(gh pr list \
+            --base "$GITHUB_REF_NAME" \
+            --state open \
+            --author "app/github-actions" \
+            --search "chore($GITHUB_REF_NAME): release in:title" \
+            --json headRefName \
+            --jq '.[0].headRefName // empty')"
+
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
 
       - name: Checkout Release Please branch
