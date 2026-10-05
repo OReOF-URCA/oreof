@@ -324,6 +324,7 @@ HTML;
             && ( $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE 
                 && $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE_SES 
                 && $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE_CFVU
+                && $dpeParcours?->getEtatReconduction() !== TypeModificationDpeEnum::FERMETURE_DEFINITIVE
                 )
             // N'afficher le lien que sur l'année valide en cours (N)
             && $dpeParcours->getCampagneCollecte()?->getPublicationTag() === CampagnePublicationTagEnum::ANNEE_COURANTE->value
