@@ -488,21 +488,21 @@ parcours_step5.labels.adresses.label.__name__.label: parcours_step5.labels.adres
 parcours_step5.labels.composanteInscription: "Composante d'inscription"
 parcours_step5.labels.composanteInscription.label: "Régime(s) d'inscription"
 parcours_step5.labels.contacts: 'Contacts de la formation/du parcours'
-parcours_step5.labels.contacts.0.denomination: parcours_step5.labels.contacts.0.denomination
-parcours_step5.labels.contacts.0.email: parcours_step5.labels.contacts.0.email
-parcours_step5.labels.contacts.0.nom: parcours_step5.labels.contacts.0.nom
-parcours_step5.labels.contacts.0.prenom: parcours_step5.labels.contacts.0.prenom
-parcours_step5.labels.contacts.0.telephone: parcours_step5.labels.contacts.0.telephone
-parcours_step5.labels.contacts.__name__.denomination: parcours_step5.labels.contacts.__name__.denomination
-parcours_step5.labels.contacts.__name__.email: parcours_step5.labels.contacts.__name__.email
-parcours_step5.labels.contacts.__name__.nom: parcours_step5.labels.contacts.__name__.nom
-parcours_step5.labels.contacts.__name__.prenom: parcours_step5.labels.contacts.__name__.prenom
-parcours_step5.labels.contacts.__name__.telephone: parcours_step5.labels.contacts.__name__.telephone
-parcours_step5.labels.contacts.label: parcours_step5.labels.contacts.label
+parcours_step5.labels.contacts.0.denomination: 'Dénomination'
+parcours_step5.labels.contacts.0.email: 'Email'
+parcours_step5.labels.contacts.0.nom: 'Nom'
+parcours_step5.labels.contacts.0.prenom: 'Prénom'
+parcours_step5.labels.contacts.0.telephone: 'Téléphone'
+parcours_step5.labels.contacts.__name__.denomination: 'Dénomination'
+parcours_step5.labels.contacts.__name__.email: 'Email'
+parcours_step5.labels.contacts.__name__.nom: 'Nom'
+parcours_step5.labels.contacts.__name__.prenom: 'Prénom'
+parcours_step5.labels.contacts.__name__.telephone: 'Téléphone'
+parcours_step5.labels.contacts.label: 'Contacts de la formation/du parcours'
 parcours_step5.labels.contacts.label.0.label: parcours_step5.labels.contacts.label.0.label
 parcours_step5.labels.contacts.label.0.label.adresse.label: parcours_step5.labels.contacts.label.0.label.adresse.label
 parcours_step5.labels.contacts.label.__name__.label: parcours_step5.labels.contacts.label.__name__.label
-parcours_step5.labels.contacts.label.__name__.label.adresse.label: parcours_step5.labels.contacts.label.__name__.label.adresse.label
+parcours_step5.labels.contacts.label.__name__.label.adresse.label: 'Adresse'
 parcours_step5.labels.coordSecretariat: 'Coordonnées du secrétariat pédagogique'
 parcours_step5.labels.modalitesAdmission: parcours_step5.labels.modalitesAdmission
 parcours_step5.labels.modalitesAlternance: "Précisez les modalités de l'alternance"
@@ -515,15 +515,15 @@ parcours_step6.labels.poursuitesEtudes: "Poursuites d'études envisageables"
 parcours_step7.labels.codeRNCP: 'Code RNCP du parcours, si spécifique'
 parcours_step7.labels.codeRome: 'Code(s) ROME'
 parcours_step7.labels.debouches: Débouchés
-parcours_step7.labels.descriptifBasPage: parcours_step7.labels.descriptifBasPage
-parcours_step7.labels.descriptifHautPage: parcours_step7.labels.descriptifHautPage
-parcours_step7.labels.descriptifHautPageAutomatique: parcours_step7.labels.descriptifHautPageAutomatique
+parcours_step7.labels.descriptifBasPage: 'Descriptif bas page sur le site institutionnel'
+parcours_step7.labels.descriptifHautPage: 'Descriptif haut page sur le site institutionnel'
+parcours_step7.labels.descriptifHautPageAutomatique: 'Descriptif haut page sur le site institutionnel, généré automatiquement'
 parcours_step7.labels.poursuitesEtudes: "Poursuites d'études envisageables"
 parcours_step8.labels.coordSecretariat: 'Coordonnées du secrétariat'
 parcours_step8.labels.respParcours: 'Responsable du parcours'
-plateforme_admission.labels.active.label: plateforme_admission.labels.active.label
-plateforme_admission.labels.code: plateforme_admission.labels.code
-plateforme_admission.labels.libelle: plateforme_admission.labels.libelle
+plateforme_admission.labels.active.label: 'Plateforme active ?'
+plateforme_admission.labels.code: 'Code de la plateforme'
+plateforme_admission.labels.libelle: 'Libellé de la plateforme'
 profil.labels.centre.label: 'Centre(s) pour ce profil'
 profil.labels.code: 'Code du profil'
 profil.labels.libelle: 'Libellé du profil'

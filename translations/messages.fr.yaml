@@ -137,6 +137,23 @@ plateforme:
   remarques: "Remarques / Précisions"
   champs_specifiques: "Champs spécifiques"
 
+  capacite:
+    globale:
+      libelle: "Capacité globale d'accueil"
+
+  psup:
+    libelle: "Parcoursup"
+    active: "Active"
+    globale: "Globale"
+    capacite_globale: "Globale"
+    classique: "Formation initiale"
+    capacite_classique: "Formation initiale"
+    alternance: "Apprentissage"
+    capacite_alternance: "Apprentissage"
+    specifique: "Spécifique"
+    capacite_specifique: "Spécifique"
+    remarques: "Remarques / Précisions (Parcoursup)"
+
   parcoursup:
     libelle: "Parcoursup"
     active: "Active"
@@ -150,6 +167,19 @@ plateforme:
     capacite_specifique: "Spécifique"
     remarques: "Remarques / Précisions (Parcoursup)"
 
+  mm:
+    libelle: "Mon Master"
+    active: "Active"
+    globale: "Globale"
+    capacite_globale: "Globale"
+    classique: "Formation initiale"
+    capacite_classique: "Formation initiale"
+    alternance: "Alternance"
+    capacite_alternance: "Alternance"
+    specifique: "Spécifique"
+    capacite_specifique: "Spécifique"
+    remarques: "Remarques / Précisions (Mon Master)"
+
   monmaster:
     libelle: "Mon Master"
     active: "Active"
@@ -162,6 +192,19 @@ plateforme:
     specifique: "Spécifique"
     capacite_specifique: "Spécifique"
     remarques: "Remarques / Précisions (Mon Master)"
+
+  ec:
+    libelle: "eCandidat"
+    active: "Active"
+    globale: "Globale"
+    capacite_globale: "Globale"
+    classique: "Classique"
+    capacite_classique: "Classique"
+    alternance: "Alternance"
+    capacite_alternance: "Alternance"
+    specifique: "Spécifique"
+    capacite_specifique: "Spécifique"
+    remarques: "Remarques / Précisions (eCandidat)"
 
   ecandidat:
     libelle: "eCandidat"
