@@ -25,33 +25,34 @@
     {% endif %}
 
     {% if (isFromVersioning is defined and isFromVersioning != 'true') %}
-        <div class="row justify-content-start mt-5">
+        <div class="mt-5 flex flex-wrap justify-start gap-3">
             {% if (isMcccFromVersion is not defined or isMcccFromVersion == false)
                 and (lastVersion is defined and lastVersion != null) %}
-                <div class="col-4">
-                    <button class="btn btn-sm btn-primary"
-                            {{ stimulus_action('modal', 'refreshModalWithUrl', 'click',
-                                {   url: path('app_element_constitutif_mccc_versioning', {
-                                    parcoursVersioning: lastVersion.id,
-                                    elementConstitutif: ec.id,
-                                    isFromVersioning: isFromVersioning
-                                })
-                                }) }}
+                <div>
+                    <a class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                       href="{{ path('app_element_constitutif_mccc_versioning', {
+                           parcoursVersioning: lastVersion.id,
+                           elementConstitutif: ec.id,
+                           isFromVersioning: isFromVersioning
+                       }) }}"
+                       data-action="click->modalturbo#open"
+                       data-turbo="true"
                     >
                         Comparaison avec la dernière version validée
-                    </button>
+                    </a>
                 </div>
-            {% elseif ec.deserializedId is defined and ec.deserializedId != null %}
-                <div class="col-4">
-                    <button class="btn btn-sm btn-primary"
-                            {{ stimulus_action('modal', 'refreshModalWithUrl', 'click',
-                                { url: path('app_element_constitutif_mccc_non_editable',
-                                    {id: ec.deserializedId, parcours: parcoursId}
-                                )
-                                }) }}
+            {% elseif (ec.deserializedId is defined and ec.deserializedId != null) or (ec.id is defined and ec.id != null) %}
+                <div>
+                    <a class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                       href="{{ path('parcours_mccc_voir', {
+                           id: ec.deserializedId ?? ec.id,
+                           parcours: parcoursId
+                       }) }}"
+                       data-action="click->modalturbo#open"
+                       data-turbo="true"
                     >
                         Version actuellement saisie
-                    </button>
+                    </a>
                 </div>
             {% endif %}
         </div>

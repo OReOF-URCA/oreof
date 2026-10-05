@@ -8,11 +8,11 @@
         {% if ec.quitus %}
             {% set quitusText = ec.quitusText %}
         {% endif %}
-        {% if ec.ficheMatiere.quitus and ec.isMcccSpecifiques() ?? false != true %}
+        {% if ec.ficheMatiere != null and ec.ficheMatiere.quitus and ec.isMcccSpecifiques() ?? false != true %}
             {% set quitusText = ec.ficheMatiere.quitusText %}
         {% endif %}
 
-        {% if ec.quitus ?? false or (ec.ficheMatiere.quitus ?? false and ec.isMcccSpecifiques() != true) %}
+        {% if ec.quitus ?? false or (ec.ficheMatiere != null and ec.ficheMatiere.quitus ?? false and ec.isMcccSpecifiques() != true) %}
             <div class="mt-4 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-secondary-700">
                 <p class="my-1">
                     <span class="font-semibold text-sky-700">Cet EC donne lieu à un quitus</span>
@@ -29,29 +29,30 @@
             {% if (isMcccFromVersion is not defined or isMcccFromVersion == false)
                 and (lastVersion is defined and lastVersion != null) %}
                 <div>
-                    <button class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
-                            {{ stimulus_action('modal', 'refreshModalWithUrl', 'click',
-                                {   url: path('app_element_constitutif_mccc_versioning', {
-                                    parcoursVersioning: lastVersion.id,
-                                    elementConstitutif: ec.id,
-                                    isFromVersioning: isFromVersioning
-                                })
-                                }) }}
+                    <a class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                       href="{{ path('app_element_constitutif_mccc_versioning', {
+                           parcoursVersioning: lastVersion.id,
+                           elementConstitutif: ec.id,
+                           isFromVersioning: isFromVersioning
+                       }) }}"
+                       data-action="click->modalturbo#open"
+                       data-turbo="true"
                     >
                         Comparaison avec la dernière version validée
-                    </button>
+                    </a>
                 </div>
-            {% elseif ec.deserializedId is defined and ec.deserializedId != null %}
+            {% elseif (ec.deserializedId is defined and ec.deserializedId != null) or (ec.id is defined and ec.id != null) %}
                 <div>
-                    <button class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
-                            {{ stimulus_action('modal', 'refreshModalWithUrl', 'click',
-                                { url: path('app_element_constitutif_mccc_non_editable',
-                                    {id: ec.deserializedId, parcours: parcoursId}
-                                )
-                                }) }}
+                    <a class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                       href="{{ path('parcours_mccc_voir', {
+                           id: ec.deserializedId ?? ec.id,
+                           parcours: parcoursId
+                       }) }}"
+                       data-action="click->modalturbo#open"
+                       data-turbo="true"
                     >
                         Version actuellement saisie
-                    </button>
+                    </a>
                 </div>
             {% endif %}
         </div>

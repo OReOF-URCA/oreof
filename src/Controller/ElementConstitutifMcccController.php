@@ -26,6 +26,7 @@ use App\TypeDiplome\McccDisplayInterface;
 use App\TypeDiplome\TypeDiplomeHandlerInterface;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\Access;
+use App\Utils\TurboStreamResponseFactory;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use RuntimeException;
@@ -287,7 +288,9 @@ class ElementConstitutifMcccController extends AbstractController
     public function mcccEcNonEditable(
         ElementConstitutif           $elementConstitutif,
         Parcours                     $parcours,
-        VersioningParcours           $versioningParcours
+        VersioningParcours           $versioningParcours,
+        Request                      $request,
+        TurboStreamResponseFactory   $turboStream
     ): Response {
 //todo: gérer par type de diplôme
         $dpeParcours = GetDpeParcours::getFromParcours($parcours);
@@ -319,6 +322,33 @@ class ElementConstitutifMcccController extends AbstractController
             'cc_ct' => 'Contrôle Continu + Contrôle Terminal'
         ];
 
+        if ($request->headers->get('Accept') && str_contains($request->headers->get('Accept'), 'text/vnd.turbo-stream.html')) {
+            $template = 'typeDiplome/' . $typeD->getTemplateFolder() . '/mccc-non-editable/' . constant($typeD::class . '::TEMPLATE_FORM_MCCC');
+            return $turboStream->streamOpenModalFromTemplates(
+                'Modalités de Contrôle des Connaissances et des Compétences',
+                'Dans l\'EC ' . $elementConstitutif->display(),
+                $template,
+                [
+                    'isMcccImpose' => $elementConstitutif->getFicheMatiere()?->isMcccImpose(),
+                    'isEctsImpose' => $elementConstitutif->getFicheMatiere()?->isEctsImpose(),
+                    'typeMccc' => $typeMccc,
+                    'typeEpreuves' => $typeD->getTypeEpreuves(),
+                    'typeMcccLibelle' => $typeMcccLibelle,
+                    'ec' => $elementConstitutif,
+                    'ects' => $ects,
+                    'typeDiplome' => $typeD,
+                    'templateForm' => $typeD->getMcccTemplate(),
+                    'mcccs' => $this->getMcccDisplayHandler($typeD)->getDisplayMccc($getElement->getMcccsFromFicheMatiere($typeD), $typeMccc ?? ''),
+                    'isFromVersioning' => 'false',
+                    'lastVersion' => $lastVersion,
+                    'libelleQuelleVersion' => 'Version actuellement saisie en attente de validation',
+                    'parcoursId' => $parcours->getId()
+                ],
+                '_ui/_footer_cancel.html.twig',
+                []
+            );
+        }
+
         return $this->render('element_constitutif/_mcccEcNonEditable.html.twig', [
             'isMcccImpose' => $elementConstitutif->getFicheMatiere()?->isMcccImpose(),
             'isEctsImpose' => $elementConstitutif->getFicheMatiere()?->isEctsImpose(),
@@ -344,10 +374,22 @@ class ElementConstitutifMcccController extends AbstractController
         ParcoursVersioning $parcoursVersioning,
         VersioningParcours $versioningParcours,
         EntityManagerInterface $entityManager,
-        TypeEpreuveRepository $typeEpreuveRepository
+        TypeEpreuveRepository $typeEpreuveRepository,
+        Request $request,
+        TurboStreamResponseFactory $turboStream
     ): Response
     {
         if ($elementConstitutif === null) {
+            if ($request->headers->get('Accept') && str_contains($request->headers->get('Accept'), 'text/vnd.turbo-stream.html')) {
+                return $turboStream->streamOpenModalFromTemplates(
+                    'Modalités de Contrôle des Connaissances et des Compétences',
+                    'Comparaison des versions',
+                    'element_constitutif/_versioning_ecNotFound.html.twig',
+                    ['ecNotFound' => true],
+                    '_ui/_footer_cancel.html.twig',
+                    []
+                );
+            }
             return $this->render("element_constitutif/_versioning_ecNotFound.html.twig", [
                 'ecNotFound' => true
             ]);
@@ -405,13 +447,13 @@ class ElementConstitutifMcccController extends AbstractController
         foreach ($ueArray as $structUe) {
             foreach ($structUe->elementConstitutifs as $structEc) {
                 if (($structEc->elementConstitutif->getDeserializedId() === $elementConstitutif->getId())
-                    || ($structEc->elementConstitutif->getDeserializedId() === $elementConstitutif->getEcOrigineCopie()->getId())
+                    || ($structEc->elementConstitutif->getDeserializedId() === $elementConstitutif->getEcOrigineCopie()?->getId())
                 ) {
                     $structureEc = $structEc;
                 }
                 foreach ($structEc->elementsConstitutifsEnfants as $structEcEnfant) {
                     if (($structEcEnfant->elementConstitutif->getDeserializedId() === $elementConstitutif->getId())
-                        || ($structEcEnfant->elementConstitutif->getDeserializedId() === $elementConstitutif->getEcOrigineCopie()->getId())
+                        || ($structEcEnfant->elementConstitutif->getDeserializedId() === $elementConstitutif->getEcOrigineCopie()?->getId())
                     ) {
                         $structureEc = $structEcEnfant;
                     }
@@ -420,6 +462,16 @@ class ElementConstitutifMcccController extends AbstractController
         }
 
         if ($structureEc === null) {
+            if ($request->headers->get('Accept') && str_contains($request->headers->get('Accept'), 'text/vnd.turbo-stream.html')) {
+                return $turboStream->streamOpenModalFromTemplates(
+                    'Modalités de Contrôle des Connaissances et des Compétences',
+                    'Comparaison des versions',
+                    'element_constitutif/_versioning_ecNotFound.html.twig',
+                    ['structureEcNotFound' => true],
+                    '_ui/_footer_cancel.html.twig',
+                    []
+                );
+            }
             return $this->render("element_constitutif/_versioning_ecNotFound.html.twig", [
                 'structureEcNotFound' => true
             ]);
@@ -462,6 +514,39 @@ class ElementConstitutifMcccController extends AbstractController
             $mcccsToDisplay = $tabMcccVersioning;
         }
 
+        $lastVersion = $versioningParcours->getLastVersionOrLastYearCfvu($parcoursVersioning->getParcours());
+
+        if ($request->headers->get('Accept') && str_contains($request->headers->get('Accept'), 'text/vnd.turbo-stream.html')) {
+            $template = 'typeDiplome/' . $typeD->getTemplateFolder() . '/mccc-non-editable/' . constant($typeD::class . '::TEMPLATE_FORM_MCCC');
+            return $turboStream->streamOpenModalFromTemplates(
+                'Modalités de Contrôle des Connaissances et des Compétences',
+                'Comparaison des versions - EC : ' . $structureEc->elementConstitutif->display(),
+                $template,
+                [
+                    'isMcccImpose' => $structureEc->elementConstitutif->getFicheMatiere()?->isMcccImpose(),
+                    'isEctsImpose' => $structureEc->elementConstitutif->getFicheMatiere()?->isEctsImpose(),
+                    'typeMccc' => $structureEc->typeMccc, //Versioning
+                    'typeMcccActuel' => $typeMccc, // Actuel
+                    'typeEpreuves' => $typeEpreuveDiplome,
+                    'typeMcccLibelle' => $typeMcccLibelle,
+                    'ec' => $structureEc->elementConstitutif,
+                    'ects' => $ectsActuel, // Actuel
+                    'typeDiplome' => $typeD,
+                    'ectsVersioning' => $structureEc->heuresEctsEc->ects, // Versioning
+                    'templateForm' => $templateForm,
+                    'mcccVersioning' => $tabMcccVersioning, // Versioning
+                    'mcccs' => $mcccsToDisplay,
+                    'isMcccFromVersion' => true,
+                    'parcoursId' => $parcoursVersioning->getParcours()?->getId(),
+                    'isFromVersioning' => $isFromVersioning,
+                    'libelleQuelleVersion' => 'Comparaison des versions',
+                    'lastVersion' => $lastVersion,
+                ],
+                '_ui/_footer_cancel.html.twig',
+                []
+            );
+        }
+
         return $this->render('element_constitutif/_mcccEcNonEditable.html.twig', [
             'isMcccImpose' => $structureEc->elementConstitutif->getFicheMatiere()?->isMcccImpose(),
             'isEctsImpose' => $structureEc->elementConstitutif->getFicheMatiere()?->isEctsImpose(),
@@ -479,7 +564,8 @@ class ElementConstitutifMcccController extends AbstractController
             'isMcccFromVersion' => true,
             'parcoursId' => $parcoursVersioning->getParcours()?->getId(),
             'isFromVersioning' => $isFromVersioning,
-            'libelleQuelleVersion' => 'Comparaison des versions'
+            'libelleQuelleVersion' => 'Comparaison des versions',
+            'lastVersion' => $lastVersion,
         ]);
     }
 

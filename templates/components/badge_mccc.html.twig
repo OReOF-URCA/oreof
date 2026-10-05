@@ -2,8 +2,12 @@
     {% if this.elementConstitutifParent != null and this.elementConstitutifParent.mcccEnfantsIdentique == true %}
         <span class="inline-flex w-full items-center justify-center rounded-md bg-cyan-100 px-2 py-1 text-xs font-semibold text-cyan-800">MCCC du parent</span>
     {% else %}
+        {% set modalUrl = this.editable
+            ? path('parcours_mccc_saisir', { parcours: this.parcours.id, id: this.elementConstitutif.id })
+            : path('parcours_mccc_voir', { parcours: this.parcours.id, id: this.elementConstitutif.id })
+        %}
         <a
-                href="{{ path('parcours_mccc_saisir', { parcours: this.parcours.id, id: this.elementConstitutif.id }) }}"
+                href="{{ modalUrl }}"
                 data-action="click->modalturbo#open"
                 data-turbo="true"
                 class="inline-flex w-full items-center justify-center gap-1 rounded-md border border-secondary-300 dark:border-secondary-700 bg-white dark:bg-secondary-800 px-2 py-1.5 text-xs font-semibold text-secondary-700 dark:text-secondary-300 hover:bg-secondary-50 dark:hover:bg-secondary-700 transition-colors"

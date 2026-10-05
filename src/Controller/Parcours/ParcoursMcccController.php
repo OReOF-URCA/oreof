@@ -14,6 +14,9 @@ use App\Controller\BaseController;
 use App\Entity\ElementConstitutif;
 use App\Entity\Parcours;
 use App\Form\EcStep4Type;
+use App\Service\VersioningParcours;
+use App\TypeDiplome\McccDisplayInterface;
+use App\TypeDiplome\TypeDiplomeHandlerInterface;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\TurboStreamResponseFactory;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +27,59 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/parcours/v2/ec', name: 'parcours_mccc')]
 class ParcoursMcccController extends BaseController
 {
+    #[Route('/{parcours}/mccc/{id}/voir', name: '_voir', methods: ['GET'])]
+    public function voir(
+        TypeDiplomeResolver        $typeDiplomeResolver,
+        TurboStreamResponseFactory $turboStream,
+        Parcours                   $parcours,
+        ElementConstitutif         $elementConstitutif,
+        VersioningParcours         $versioningParcours
+    ): Response {
+        $typeDiplome = $parcours->getFormation()?->getTypeDiplome();
+        $typeD = $typeDiplomeResolver->fromParcours($parcours);
+        $getElement = new GetElementConstitutif($elementConstitutif, $parcours);
+        $typeMccc = $getElement->getTypeMcccFromFicheMatiere();
+        $ects = $getElement->getFicheMatiereEcts();
+
+        $lastVersion = $versioningParcours->getLastVersionOrLastYearCfvu($parcours);
+
+        $typeMcccLibelle = [
+            'ct' => 'Contrôle Terminal',
+            'cc' => 'Contrôle Continu',
+            'cci' => 'Contrôle Continu Intégral',
+            'cc_ct' => 'Contrôle Continu + Contrôle Terminal',
+        ];
+
+        $mcccs = $typeD instanceof McccDisplayInterface
+            ? $typeD->getDisplayMccc($getElement->getMcccsFromFicheMatiere($typeD), $typeMccc ?? '')
+            : $typeD->getMcccs($elementConstitutif);
+
+        $template = 'typeDiplome/' . $typeD->getTemplateFolder() . '/mccc-non-editable/' . constant($typeD::class . '::TEMPLATE_FORM_MCCC');
+
+        return $turboStream->streamOpenModalFromTemplates(
+            'Modalités de Contrôle des Connaissances et des Compétences',
+            'Dans l\'EC ' . $elementConstitutif->display(),
+            $template,
+            [
+                'isMcccImpose' => $elementConstitutif->getFicheMatiere()?->isMcccImpose(),
+                'isEctsImpose' => $elementConstitutif->getFicheMatiere()?->isEctsImpose(),
+                'typeMccc' => $typeMccc,
+                'typeEpreuves' => $typeD->getTypeEpreuves(),
+                'typeMcccLibelle' => $typeMcccLibelle,
+                'ec' => $elementConstitutif,
+                'ects' => $ects,
+                'typeDiplome' => $typeD,
+                'templateForm' => $typeD->getMcccTemplate(),
+                'mcccs' => $mcccs,
+                'isFromVersioning' => 'false',
+                'lastVersion' => $lastVersion,
+                'libelleQuelleVersion' => 'Version actuellement saisie en attente de validation',
+                'parcoursId' => $parcours->getId(),
+            ],
+            '_ui/_footer_cancel.html.twig',
+            []
+        );
+    }
     #[Route('/{parcours}/mccc/{id}', name: '_saisir', methods: ['GET'])]
     public function saisir(
         TypeDiplomeResolver        $typeDiplomeResolver,
