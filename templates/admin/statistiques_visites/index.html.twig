@@ -1,0 +1,137 @@
+{% extends 'base.html.twig' %}
+
+{% block bouton_header %}
+    {% for p in periodes %}
+        <twig:Button :label="p ~ ' jours'" variant="primary" size="sm" :soft="p != periode"
+                     href="{{ path('app_admin_statistiques_visites_index', {periode: p}) }}"/>
+    {% endfor %}
+{% endblock %}
+
+{% block content %}
+    {% set totals = stats.totals %}
+    <div class="space-y-6">
+        <p class="text-sm text-secondary-500 dark:text-secondary-400">
+            Du {{ from|date('d/m/Y') }} au {{ to|date('d/m/Y') }} —
+            source : journaux <code>{{ environment }}.auth-*.log</code> (connexions) et
+            <code>{{ environment }}.all-*.log</code> (pages vues : requêtes GET, hors profiler et composants Live).
+        </p>
+
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <twig:Kpi title="Connexions" :value="totals.logins" variant="primary" icon="icon:login"
+                      description="Authentifications réussies"/>
+            <twig:Kpi title="Utilisateurs uniques" :value="totals.uniqueUsers" variant="success" icon="icon:users"
+                      description="Comptes connectés sur la période"/>
+            <twig:Kpi title="Pages vues" :value="totals.pageViews" variant="info" icon="icon:eye"
+                      :description="totals.activeDays ~ ' jour(s) d\'activité'"/>
+            <twig:Kpi title="Pages vues / jour actif"
+                      :value="totals.activeDays > 0 ? (totals.pageViews / totals.activeDays)|round : 0"
+                      variant="secondary" icon="icon:calendar" description="Moyenne sur les jours d'activité"/>
+        </div>
+
+        {# Activité quotidienne : un graphique par mesure (échelles différentes, pas de double axe) #}
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700">
+                <h2 class="mb-4 text-sm font-semibold text-text">Pages vues par jour</h2>
+                <div class="h-56">
+                    {{ render_chart(chartPagesVues, {'aria-label': 'Pages vues par jour du ' ~ from|date('d/m/Y') ~ ' au ' ~ to|date('d/m/Y'), role: 'img'}) }}
+                </div>
+            </section>
+            <section class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700">
+                <h2 class="mb-4 text-sm font-semibold text-text">Utilisateurs uniques par jour</h2>
+                <div class="h-56">
+                    {{ render_chart(chartUtilisateurs, {'aria-label': 'Utilisateurs uniques connectés par jour du ' ~ from|date('d/m/Y') ~ ' au ' ~ to|date('d/m/Y'), role: 'img'}) }}
+                </div>
+            </section>
+        </div>
+
+        <details class="rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700">
+            <summary class="cursor-pointer px-4 py-3 text-sm font-semibold text-text">Données quotidiennes (tableau)</summary>
+            <div class="max-h-80 overflow-x-auto overflow-y-auto border-t border-secondary-200 px-4 pb-3 dark:border-secondary-700">
+                <table class="table w-full text-sm">
+                    <thead class="text-[11px] uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                    <tr>
+                        <th class="py-2 text-left font-semibold">Date</th>
+                        <th class="py-2 text-right font-semibold">Pages vues</th>
+                        <th class="py-2 text-right font-semibold">Connexions</th>
+                        <th class="py-2 text-right font-semibold">Utilisateurs uniques</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                    {% for date, day in stats.days|reverse(true) %}
+                        <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800/60">
+                            <td class="py-1.5 text-text">{{ date|date('d/m/Y') }}</td>
+                            <td class="py-1.5 text-right tabular-nums text-text">{{ day.pageViews|number_format(0, ',', ' ') }}</td>
+                            <td class="py-1.5 text-right tabular-nums text-text">{{ day.logins }}</td>
+                            <td class="py-1.5 text-right tabular-nums text-text">{{ day.uniqueUsers }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {# Répartition horaire (Europe/Paris) #}
+            <section class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700">
+                <h2 class="mb-4 text-sm font-semibold text-text">Répartition horaire des pages vues</h2>
+                <div class="h-56">
+                    {{ render_chart(chartHeures, {'aria-label': 'Pages vues par heure de la journée', role: 'img'}) }}
+                </div>
+            </section>
+
+            {# Pages les plus consultées #}
+            <section class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700">
+                <h2 class="mb-3 text-sm font-semibold text-text">Pages les plus consultées</h2>
+                {% if stats.topRoutes is empty %}
+                    <p class="text-sm text-secondary-400">Aucune page vue sur la période.</p>
+                {% else %}
+                    <div class="overflow-x-auto">
+                        <table class="table w-full text-sm">
+                            <thead class="text-[11px] uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                            <tr>
+                                <th class="py-2 text-left font-semibold">Route</th>
+                                <th class="py-2 text-right font-semibold">Vues</th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                            {% for route, count in stats.topRoutes %}
+                                <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800/60">
+                                    <td class="max-w-0 truncate py-1.5 pr-2 font-mono text-xs text-text" title="{{ route }}">{{ route }}</td>
+                                    <td class="py-1.5 text-right tabular-nums text-text">{{ count|number_format(0, ',', ' ') }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </section>
+
+            {# Utilisateurs les plus actifs #}
+            <section class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700">
+                <h2 class="mb-3 text-sm font-semibold text-text">Utilisateurs les plus connectés</h2>
+                {% if stats.topUsers is empty %}
+                    <p class="text-sm text-secondary-400">Aucune connexion sur la période.</p>
+                {% else %}
+                    <div class="overflow-x-auto">
+                        <table class="table w-full text-sm">
+                            <thead class="text-[11px] uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                            <tr>
+                                <th class="py-2 text-left font-semibold">Identifiant</th>
+                                <th class="py-2 text-right font-semibold">Connexions</th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                            {% for username, count in stats.topUsers %}
+                                <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800/60">
+                                    <td class="max-w-0 truncate py-1.5 pr-2 text-text" title="{{ username }}">{{ username }}</td>
+                                    <td class="py-1.5 text-right tabular-nums text-text">{{ count }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+{% endblock %}

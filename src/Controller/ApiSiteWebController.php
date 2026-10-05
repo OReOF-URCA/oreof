@@ -13,10 +13,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class ApiSiteWebController extends AbstractController
 {
     #[Route('/api/site/web/doc', name: 'api_site_web_documentation', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function documentation(): Response
     {
         return $this->render('api/site_web/documentation.html.twig');

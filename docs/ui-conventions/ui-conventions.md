@@ -1,7 +1,7 @@
 # Conventions UI (Tailwind + Twig Components)
 
 Quand lire : toute création/modification de template Twig, CSS ou composant UI, et toute migration Bootstrap → Tailwind.
-À mettre à jour si : `src/Twig/Components/UI/`, `templates/components/_ui/`, `templates/admin/styleguide/`, `templates/base.html.twig` (en-tête de page), `translations/header.fr.yaml`, `assets/controllers/page_header_controller.js`, classes `app-*` ou tokens de `assets/styles/app.css`.
+À mettre à jour si : `src/Twig/Components/UI/`, `templates/components/_ui/`, `templates/admin/styleguide/`, `templates/base.html.twig` (en-tête de page), `translations/header.fr.yaml`, `assets/controllers/page_header_controller.js`, `assets/js/chartTheme.js`, classes `app-*` ou tokens de `assets/styles/app.css`.
 
 ## Sources de vérité
 
@@ -39,6 +39,8 @@ Quand lire : toute création/modification de template Twig, CSS ou composant UI,
   classe `app-filter-select` (aspect « champ », cf. `app.css`). Si le JS remplace les `<option>`, resynchroniser via
   `select.tomselect` (cf. `fillFilterSelect()` dans `offre_v2/synthese_offre.html.twig`). Les `<select>` natifs restants
   sont thémés globalement (`select`/`option` dans `app.css`).
+- Groupe de choix exclusifs (boutons `app-modal-footer-btn--secondary`, ex. panneau accessibilité) : signaler l'option
+  active avec `aria-pressed="true"` (style dans `app.css`) + icône `icon:check` en `hidden group-aria-pressed:inline-block`.
 - Exception au composant tolérée seulement si : aucun composant ne couvre le besoin, prototype à refactoriser, ou
   extension non supportée — à justifier dans la PR.
 
@@ -65,6 +67,17 @@ Composants métier (badges ECTS/heures/MCCC, headers formation/parcours, `Rempli
 
 Grilles : cartes `grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3` ; KPI `grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6`.
 
+## Graphiques (`symfony/ux-chartjs`)
+
+- `ChartBuilderInterface` côté contrôleur + `{{ render_chart(chart, {role: 'img', 'aria-label': '…'}) }}` dans un
+  conteneur à hauteur fixe (`h-56`, option `maintainAspectRatio: false`).
+- Couleurs : jamais de hex dans le PHP. Déclarer `'colorToken' => 'primary'` sur le dataset : `assets/js/chartTheme.js`
+  résout les tokens sémantiques (marques, grille, graduations) et recolore à chaud en sombre / thème de couleur. Un
+  nouveau token = une entrée dans `MARK_CLASSES` (classes écrites en clair pour que Tailwind les émette). Définir
+  `scales.x` / `scales.y` pour que les axes soient thémés.
+- Une série par graphique (pas de double axe) ; plusieurs séries = palette à valider, `success`/`warning`/`danger`
+  réservés aux statuts. Fournir une vue tableau des données (ex. `<details>`).
+
 ## En-tête de page (`PageHeader`)
 
 `base.html.twig` affiche l'en-tête (titre, description, boutons, fil d'Ariane) via `<twig:PageHeader>` : **ne pas recréer
@@ -79,6 +92,8 @@ Stimulus `page-header`) la description est masquée et le titre réduit ; action
   `app_xxx.title: 'Détail : %libelle%'`. Template partagé par plusieurs routes à titres différents ou sans route
   détectable : clé `tpl.<chemin.du.template>.title`. Titre avec balisage (`<strong id=…>`, badge) : ne traduire que le
   texte, garder le balisage et ses `id` dans le template.
+- Offset sticky : `top-(--topbar-height)` (variable définie dans `app.css`, 4rem ; 7rem quand la topbar est sur deux
+  lignes) ; le contrôleur `page-header` mesure `.topbar-nav` et publie `--page-header-offset`. Ne pas coder `top-16`.
 - Boutons d'action : bloc `{% block bouton_header %}` de la page. Options : `{% set header_breadcrumb = false %}`
   (supprime aussi le trait de séparation), `{% set header_sticky = false %}`.
 - Usage direct (hors `base`) : `<twig:PageHeader titleKey="…" :sticky="false"><twig:block name="actions">…</twig:block></twig:PageHeader>`.

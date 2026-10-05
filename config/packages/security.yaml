@@ -31,6 +31,8 @@ security:
 
     access_control:
         - { path: ^/synthese/modification/pdf, roles: PUBLIC_ACCESS }
+        # Documentation de l'API : réservée aux admins (doit précéder la règle publique ^/api)
+        - { path: ^/api/site/web/doc, roles: ROLE_ADMIN }
         - { path: ^/api, roles: PUBLIC_ACCESS }
         - { path: ^/connexion, roles: PUBLIC_ACCESS }
         - { path: ^/demande-acces, roles: PUBLIC_ACCESS }

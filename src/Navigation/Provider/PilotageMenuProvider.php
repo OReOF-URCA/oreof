@@ -103,12 +103,6 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                     'menu.admin.exports',
                     'app_export_index',
                 ),
-
-                MenuItem::link(
-                    'pilotage.logs_applicatifs',
-                    'menu.admin.logs.applicatifs',
-                    'app_log_viewer_index',
-                ),
             ],
         )->withPosition(20);
     }

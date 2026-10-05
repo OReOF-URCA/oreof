@@ -19,7 +19,8 @@
     <div data-controller="page-translations-drawer" data-action="keydown@window->page-translations-drawer#onEscape">
 
         {# ── Bouton Flottant (FAB) ── #}
-        <div id="page-translations-fab-container" class="fixed right-6 sm:right-8 w-fit z-[65]" style="bottom: 5.5rem;">
+        {# Au-dessus du FAB d'aide (bottom-6/sm:bottom-8, h-14) avec 1rem d'écart #}
+        <div id="page-translations-fab-container" class="fixed bottom-24 right-6 sm:bottom-[6.5rem] sm:right-8 w-fit z-[65]">
             <button
                     id="pageTranslationsFabToggle"
                     type="button"

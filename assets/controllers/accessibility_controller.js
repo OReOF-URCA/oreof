@@ -11,7 +11,7 @@ import { Controller } from '@hotwired/stimulus'
 const STORAGE_KEY = 'oreof-a11y'
 
 const DEFAULTS = {
-  theme: 'system',
+  theme: 'light',
   font: 'default',
   size: 'normal',
   contrast: false,
@@ -19,7 +19,7 @@ const DEFAULTS = {
 }
 
 export default class extends Controller {
-  static targets = ['contrast', 'motion']
+  static targets = ['contrast', 'motion', 'option']
 
   connect () {
     this.settings = this._load()
@@ -28,7 +28,7 @@ export default class extends Controller {
   }
 
   setTheme (event) {
-    this.settings.theme = event.params.theme || 'system'
+    this.settings.theme = event.params.theme || DEFAULTS.theme
     this._persistAndApply()
   }
 
@@ -74,7 +74,9 @@ export default class extends Controller {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) {
-        return { ...DEFAULTS }
+        // Aligné sur base.html.twig : sans réglage enregistré, la bascule rapide (oreof-theme) prime sur le défaut
+        const quickTheme = localStorage.getItem('oreof-theme')
+        return { ...DEFAULTS, ...(['dark', 'light'].includes(quickTheme) ? { theme: quickTheme } : {}) }
       }
 
       const settings = { ...DEFAULTS, ...JSON.parse(raw) }
@@ -110,6 +112,13 @@ export default class extends Controller {
   }
 
   _syncToggles () {
+    // Boutons de choix (thème, police, taille) : l'option active est signalée par aria-pressed (style dans app.css)
+    this.optionTargets.forEach((button) => {
+      const setting = button.dataset.accessibilitySetting
+      const param = `accessibility${setting.charAt(0).toUpperCase()}${setting.slice(1)}Param`
+      button.setAttribute('aria-pressed', this.settings[setting] === button.dataset[param] ? 'true' : 'false')
+    })
+
     if (this.hasContrastTarget) {
       this.contrastTarget.checked = !!this.settings.contrast
     }

@@ -3,19 +3,19 @@
     {% if item.route %}
         <a href="{{ path(item.route, item.routeParams) }}"
            data-turbo-prefetch="false"
-           class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium transition">
+           class="topbar-link">
             {{ item.label|trans({}, 'menu') }}
             {% if item.children is not empty %}
-                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="ml-1 w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M19 9l-7 7-7-7"></path>
                 </svg>
             {% endif %}
         </a>
     {% else %}
-        <span class="flex items-center text-text hover:text-primary px-3 py-2 text-sm font-medium cursor-default">
+        <span class="topbar-link cursor-default">
             {{ item.label|trans({}, 'menu') }}
             {% if item.children is not empty %}
-                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="ml-1 w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M19 9l-7 7-7-7"></path>
                 </svg>
             {% endif %}

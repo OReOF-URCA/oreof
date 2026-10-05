@@ -26,6 +26,7 @@ menu.compo.validation_ec: 'Validation Fiches EC/matières'
 menu.compo.validation_rf: 'Validation RF/co-RF'
 menu.config.actualites: 'Actualités ORéOF'
 menu.config.annee_universitaire: 'Année Universitaire'
+menu.config.api_documentation: "Documentation de l'API site web"
 menu.config.campagne_collecte: 'Campagne Collecte'
 menu.config.composante: Composantes
 menu.config.config_emails: 'Configurations des emails'
@@ -37,12 +38,14 @@ menu.config.help: 'Configurations des aides'
 menu.config.langues: Langues
 menu.config.mentions: Mentions
 menu.config.menu_config_globale: 'Configuration globale'
+menu.config.menu_developpement: 'Développement'
 menu.config.menu_etablissement: 'Configuration établissement'
 menu.config.nature_ue: 'Nature des UE/EC'
 menu.config.notifications: 'Notifications et mails'
 menu.config.offre_formation: 'Configuration Offre de formation'
 menu.config.plateforme_adminission: "Plateforme d'admission"
 menu.config.rythme_formation: 'Rythmes de formation'
+menu.config.statistiques_visites: 'Statistiques de visites'
 menu.config.styleguide: 'Consulter le styleguide'
 menu.config.traductions: 'Traductions et textes'
 menu.config.type_diplome: 'Type de diplôme'
@@ -77,9 +80,12 @@ menu.offre_formation: 'Offre de formation'
 menu.tableau_de_bord: 'Tableau de bord'
 page.admin_styleguide_index.description: "Consulter le styleguide d'interface."
 page.admin_styleguide_index.title: Styleguide
+page.api_site_web_documentation.description: "Contrats de l'API de publication de l'offre vers le site web."
 page.app_actualite_index.description: 'Gérer les actualités ORéOF.'
 page.app_actualite_index.title: Actualités
 page.app_admin_pilotage_campagne_index.description: 'Tableau de bord et pilotage de la campagne de collecte.'
+page.app_admin_statistiques_visites_index.description: 'Suivre les connexions et les pages vues à partir des journaux.'
+page.app_admin_versioning_index.description: 'Contrôler les fichiers JSON de versioning par campagne.'
 page.app_admin_workflow_index.description: 'Visualiser et analyser la cartographie des transitions de workflows.'
 page.app_admin_workflow_index.title: 'Cartographie des workflows'
 page.app_administration_profils_index.description: 'Gestion et configuration des profils et permissions utilisateurs.'

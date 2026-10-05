@@ -23,7 +23,7 @@ contrôleur Stimulus page-header), la description est masquée et le titre rédu
 {% set hasBreadcrumb = breadcrumb and breadcrumbs()|length > 1 %}
 
 {% set rootClass = sticky
-    ? 'group sticky top-16 z-40 pt-4 pb-8 transition-[padding,background-color] duration-200 data-[stuck=true]:bg-bg data-[stuck=true]:pt-3 data-[stuck=true]:pb-4 sm:pt-6 sm:pb-10 sm:data-[stuck=true]:pt-3 sm:data-[stuck=true]:pb-4'
+    ? 'group sticky top-(--topbar-height) z-40 pt-4 pb-8 transition-[padding,background-color] duration-200 data-[stuck=true]:bg-bg data-[stuck=true]:pt-3 data-[stuck=true]:pb-4 sm:pt-6 sm:pb-10 sm:data-[stuck=true]:pt-3 sm:data-[stuck=true]:pb-4'
     : 'pt-4 pb-8 sm:pt-6 sm:pb-10' %}
 
 {% set extraClass = attributes.render('class') %}
