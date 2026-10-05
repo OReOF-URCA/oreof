@@ -35,7 +35,6 @@ jobs:
           branch="$(gh pr list \
             --base "$GITHUB_REF_NAME" \
             --state open \
-            --author "app/github-actions" \
             --search "chore($GITHUB_REF_NAME): release in:title" \
             --json headRefName \
             --jq '.[0].headRefName // empty')"
