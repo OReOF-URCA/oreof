@@ -409,6 +409,7 @@ reserve.validation.soumis_conseil.argumentaire.label: 'Argumentaire :'
 reserve.validation.soumis_conseil.date.label: 'Date du conseil de composante'
 reserve.validation.soumis_conseil.helps.argumentaire.help: ''
 reserve.validation.soumis_conseil.helps.date.help: ''
+reserver_ses: reserver_ses
 ses.change_etat.alerte: "La modification de l'état aura un impact direct sur la visibilité du dossier."
 ses.change_ouverture.alerte: "La modification de l'ouverture impactera la saisie des maquettes."
 ses.commentaires.alerte: 'Attention : un commentaire SES a été émis sur ce dossier.'
@@ -483,6 +484,7 @@ validation.change_rf.btn-success: 'Pas de demande de change de responsable de fo
 validation.change_rf.btn-warning: 'Une ou plusieurs demande de change de responsable de formation avec des réserves'
 validation.change_rf.info: 'Demande de changement de responsable de formation'
 validation.change_rf.success: 'Demande de changement de responsable de formation validée'
+validation.change_rf.warning: validation.change_rf.warning
 validation.cloture_ses_ss_cfvu: 'Valider la clôture de la demande de réouverture'
 validation.conseil.btn-danger: 'Parcours refusé par le conseil de composante'
 validation.conseil.btn-info: 'Parcours soumis au conseil de composante'

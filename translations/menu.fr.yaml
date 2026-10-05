@@ -1,3 +1,5 @@
+'Créer une formation': 'Créer une formation'
+'UFR Sciences Economiques, Sociales et de Gestion': 'UFR Sciences Economiques, Sociales et de Gestion'
 breadcrumb.home: Accueil
 menu.admin.consulter_offre: "Consulter l'offre de formation"
 menu.admin.controle_lheo: 'Controle LHEO'
@@ -79,10 +81,10 @@ menu.mon_compte.mes_notifications: 'Mes notifications'
 menu.offre_formation: 'Offre de formation'
 menu.tableau_de_bord: 'Tableau de bord'
 page.admin_styleguide_index.description: "Consulter le styleguide d'interface."
-page.admin_styleguide_index.title: Styleguide
 page.api_site_web_documentation.description: "Contrats de l'API de publication de l'offre vers le site web."
 page.app_actualite_index.description: 'Gérer les actualités ORéOF.'
 page.app_actualite_index.title: Actualités
+page.app_admin_duplication_campagne_index.description: page.app_admin_duplication_campagne_index.description
 page.app_admin_pilotage_campagne_index.description: 'Tableau de bord et pilotage de la campagne de collecte.'
 page.app_admin_statistiques_visites_index.description: 'Suivre les connexions et les pages vues à partir des journaux.'
 page.app_admin_versioning_index.description: 'Contrôler les fichiers JSON de versioning par campagne.'
