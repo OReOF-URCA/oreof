@@ -369,594 +369,594 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
-* add bug report functionality with modal form and email notifications ([742b402](https://github.com/Dannebicque/oreof/commit/742b402e7df2194fa860bea0a4e70cdb2f24f568))
-* add configuration files and commands for improved application structure ([cc615ed](https://github.com/Dannebicque/oreof/commit/cc615ed7f0414c1673e3d47c87573804d1619297))
-* add configuration files and commands for improved application structure ([97a08c0](https://github.com/Dannebicque/oreof/commit/97a08c0940bccb3cdc2f641f405ddb66a8140b96))
-* add select all/deselect all functionality for BCC competencies in step3 ([b86279a](https://github.com/Dannebicque/oreof/commit/b86279a4cb96f44692a2b553b2f50c1c9feae68b))
-* implement parcours porteur management with dynamic selection and AJAX updates ([e50f164](https://github.com/Dannebicque/oreof/commit/e50f164404ed5a9f22dfd03b5cb7c6bd706ffad8))
+* add bug report functionality with modal form and email notifications ([742b402](https://github.com/Dannebicque/oreof/commit/742b402e7df2194fa860bea0a4e70cdb2f24f568)) — [@Dannebicque](https://github.com/Dannebicque)
+* add configuration files and commands for improved application structure ([cc615ed](https://github.com/Dannebicque/oreof/commit/cc615ed7f0414c1673e3d47c87573804d1619297)) — [@Dannebicque](https://github.com/Dannebicque)
+* add configuration files and commands for improved application structure ([97a08c0](https://github.com/Dannebicque/oreof/commit/97a08c0940bccb3cdc2f641f405ddb66a8140b96)) — [@Dannebicque](https://github.com/Dannebicque)
+* add select all/deselect all functionality for BCC competencies in step3 ([b86279a](https://github.com/Dannebicque/oreof/commit/b86279a4cb96f44692a2b553b2f50c1c9feae68b)) — [@Dannebicque](https://github.com/Dannebicque)
+* implement parcours porteur management with dynamic selection and AJAX updates ([e50f164](https://github.com/Dannebicque/oreof/commit/e50f164404ed5a9f22dfd03b5cb7c6bd706ffad8)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* add null checks for co-responsable before dispatching events in UserGestionController ([c1bd68c](https://github.com/Dannebicque/oreof/commit/c1bd68c1af289e6ec52da666b885780adac2d731))
-* add type check for existingCentre before removal in UserProfilsController ([2a9347d](https://github.com/Dannebicque/oreof/commit/2a9347db971e009eeb6d9fae4c5ca3ffb925d10b))
-* bugs dans les logs ([541ccec](https://github.com/Dannebicque/oreof/commit/541ccec84674f518703f3b498ec987ed6a212a29))
-* enhance ownership logic in ElementConstitutifController ([bccd374](https://github.com/Dannebicque/oreof/commit/bccd374bad9bb22972b7283f176371bd8f62bdfa))
-* implement MCCC management methods in M2EHandler for better data handling ([9c5b96b](https://github.com/Dannebicque/oreof/commit/9c5b96b73fec8a89d5abe987e90a3b2572f406bc))
-* improve quitus logic in LicenceController and related template ([790ed64](https://github.com/Dannebicque/oreof/commit/790ed64f02aacdeac24e4d802c16feb5691a5a5c))
-* improve quitus logic in LicenceController and related template ([c606ccc](https://github.com/Dannebicque/oreof/commit/c606ccc3858944d1cfb272af8774ecae9aa9e94c))
-* refactor access control logic in RessourceVoter for better readability ([2b9dce5](https://github.com/Dannebicque/oreof/commit/2b9dce50dff26c022277902eab670a25a517d24a))
-* refactor constructor properties in RessourceVoter and update permission checks in fiche_matiere_manage template ([0d94d6b](https://github.com/Dannebicque/oreof/commit/0d94d6bafba33dc492180d9d34debca8f92245d7))
-* update saveMotsCles method to use event target value for better input handling ([9d1aa4b](https://github.com/Dannebicque/oreof/commit/9d1aa4b36aea3a5b59c2d958daa178bc43fded55))
-* update saveMotsCles method to use event target value for better input handling ([09eecb7](https://github.com/Dannebicque/oreof/commit/09eecb7730a1faab2dbcea830552a7c3bed07d5f))
-* update suppression link visibility for admins in ChangeRfState templates ([2812fe4](https://github.com/Dannebicque/oreof/commit/2812fe437021c6aa1f3a99b1a68bed54d3379b3e))
-* update suppression link visibility logic in ChangeRfState template ([47a90ca](https://github.com/Dannebicque/oreof/commit/47a90cab0757d9121503d20f098569bc64163d8e))
+* add null checks for co-responsable before dispatching events in UserGestionController ([c1bd68c](https://github.com/Dannebicque/oreof/commit/c1bd68c1af289e6ec52da666b885780adac2d731)) — [@Dannebicque](https://github.com/Dannebicque)
+* add type check for existingCentre before removal in UserProfilsController ([2a9347d](https://github.com/Dannebicque/oreof/commit/2a9347db971e009eeb6d9fae4c5ca3ffb925d10b)) — [@Dannebicque](https://github.com/Dannebicque)
+* bugs dans les logs ([541ccec](https://github.com/Dannebicque/oreof/commit/541ccec84674f518703f3b498ec987ed6a212a29)) — [@Dannebicque](https://github.com/Dannebicque)
+* enhance ownership logic in ElementConstitutifController ([bccd374](https://github.com/Dannebicque/oreof/commit/bccd374bad9bb22972b7283f176371bd8f62bdfa)) — [@Dannebicque](https://github.com/Dannebicque)
+* implement MCCC management methods in M2EHandler for better data handling ([9c5b96b](https://github.com/Dannebicque/oreof/commit/9c5b96b73fec8a89d5abe987e90a3b2572f406bc)) — [@Dannebicque](https://github.com/Dannebicque)
+* improve quitus logic in LicenceController and related template ([790ed64](https://github.com/Dannebicque/oreof/commit/790ed64f02aacdeac24e4d802c16feb5691a5a5c)) — [@Dannebicque](https://github.com/Dannebicque)
+* improve quitus logic in LicenceController and related template ([c606ccc](https://github.com/Dannebicque/oreof/commit/c606ccc3858944d1cfb272af8774ecae9aa9e94c)) — [@Dannebicque](https://github.com/Dannebicque)
+* refactor access control logic in RessourceVoter for better readability ([2b9dce5](https://github.com/Dannebicque/oreof/commit/2b9dce50dff26c022277902eab670a25a517d24a)) — [@Dannebicque](https://github.com/Dannebicque)
+* refactor constructor properties in RessourceVoter and update permission checks in fiche_matiere_manage template ([0d94d6b](https://github.com/Dannebicque/oreof/commit/0d94d6bafba33dc492180d9d34debca8f92245d7)) — [@Dannebicque](https://github.com/Dannebicque)
+* update saveMotsCles method to use event target value for better input handling ([9d1aa4b](https://github.com/Dannebicque/oreof/commit/9d1aa4b36aea3a5b59c2d958daa178bc43fded55)) — [@Dannebicque](https://github.com/Dannebicque)
+* update saveMotsCles method to use event target value for better input handling ([09eecb7](https://github.com/Dannebicque/oreof/commit/09eecb7730a1faab2dbcea830552a7c3bed07d5f)) — [@Dannebicque](https://github.com/Dannebicque)
+* update suppression link visibility for admins in ChangeRfState templates ([2812fe4](https://github.com/Dannebicque/oreof/commit/2812fe437021c6aa1f3a99b1a68bed54d3379b3e)) — [@Dannebicque](https://github.com/Dannebicque)
+* update suppression link visibility logic in ChangeRfState template ([47a90ca](https://github.com/Dannebicque/oreof/commit/47a90cab0757d9121503d20f098569bc64163d8e)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.51.0](https://github.com/Dannebicque/oreof/compare/v1.50.0...v1.51.0) (2026-03-15)
 
 
 ### Features
 
-* add M2E structure and export functionalities ([f7b61dd](https://github.com/Dannebicque/oreof/commit/f7b61dd217992e32a4964749add9c5adbf593ee3))
-* add mutualisation impacts modal and remove all liaisons functionality ([e068905](https://github.com/Dannebicque/oreof/commit/e06890501721b961a27403f1ffb6b76e970b7fd2))
-* implement M2E coefficient calculation and update related methods ([31e22f9](https://github.com/Dannebicque/oreof/commit/31e22f96938dcc63de35a74a7928f3a800690b22))
-* implement Synthese button functionality and context management ([791e9bf](https://github.com/Dannebicque/oreof/commit/791e9bf1748dc6c979825929d1bab3e6f93745d5))
-* update Makefile for Docker commands and add database import/export functionalities ([386f6c9](https://github.com/Dannebicque/oreof/commit/386f6c9e5803a6bfa5908556664daa999f9595ef))
-* update Makefile for Docker commands and add database import/export functionalities ([d0d2158](https://github.com/Dannebicque/oreof/commit/d0d21585146089690e78fdaafeb7e30cc2ced266))
+* add M2E structure and export functionalities ([f7b61dd](https://github.com/Dannebicque/oreof/commit/f7b61dd217992e32a4964749add9c5adbf593ee3)) — [@Dannebicque](https://github.com/Dannebicque)
+* add mutualisation impacts modal and remove all liaisons functionality ([e068905](https://github.com/Dannebicque/oreof/commit/e06890501721b961a27403f1ffb6b76e970b7fd2)) — [@Dannebicque](https://github.com/Dannebicque)
+* implement M2E coefficient calculation and update related methods ([31e22f9](https://github.com/Dannebicque/oreof/commit/31e22f96938dcc63de35a74a7928f3a800690b22)) — [@Dannebicque](https://github.com/Dannebicque)
+* implement Synthese button functionality and context management ([791e9bf](https://github.com/Dannebicque/oreof/commit/791e9bf1748dc6c979825929d1bab3e6f93745d5)) — [@Dannebicque](https://github.com/Dannebicque)
+* update Makefile for Docker commands and add database import/export functionalities ([386f6c9](https://github.com/Dannebicque/oreof/commit/386f6c9e5803a6bfa5908556664daa999f9595ef)) — [@Dannebicque](https://github.com/Dannebicque)
+* update Makefile for Docker commands and add database import/export functionalities ([d0d2158](https://github.com/Dannebicque/oreof/commit/d0d21585146089690e78fdaafeb7e30cc2ced266)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* handle null TypeDiplome in LicenceController to ensure fallback value ([b0ec3dd](https://github.com/Dannebicque/oreof/commit/b0ec3dd1c6b93a676dc2be1b5aa515247bb2c9f7))
-* handle null TypeDiplome in typeEpreuves retrieval ([54a36f4](https://github.com/Dannebicque/oreof/commit/54a36f4d710e4a725fce5e184e475726ff22dd4c))
-* reorder MCCC badge display in _liste.html.twig for better layout ([fab40f1](https://github.com/Dannebicque/oreof/commit/fab40f12c13b259ee20f78802a6e65bd3bb8bb43))
-* update getOwner method to allow null return type and comment out unused menu item in base.html.twig ([90cdac1](https://github.com/Dannebicque/oreof/commit/90cdac17477569161f8f9bbcbe82e811c061a6ea))
+* handle null TypeDiplome in LicenceController to ensure fallback value ([b0ec3dd](https://github.com/Dannebicque/oreof/commit/b0ec3dd1c6b93a676dc2be1b5aa515247bb2c9f7)) — [@Dannebicque](https://github.com/Dannebicque)
+* handle null TypeDiplome in typeEpreuves retrieval ([54a36f4](https://github.com/Dannebicque/oreof/commit/54a36f4d710e4a725fce5e184e475726ff22dd4c)) — [@Dannebicque](https://github.com/Dannebicque)
+* reorder MCCC badge display in _liste.html.twig for better layout ([fab40f1](https://github.com/Dannebicque/oreof/commit/fab40f12c13b259ee20f78802a6e65bd3bb8bb43)) — [@Dannebicque](https://github.com/Dannebicque)
+* update getOwner method to allow null return type and comment out unused menu item in base.html.twig ([90cdac1](https://github.com/Dannebicque/oreof/commit/90cdac17477569161f8f9bbcbe82e811c061a6ea)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.50.0](https://github.com/Dannebicque/oreof/compare/v1.49.0...v1.50.0) (2026-03-11)
 
 
 ### Features
 
-* add display table for types and coefficients in but.html.twig ([2c662e1](https://github.com/Dannebicque/oreof/commit/2c662e1b1b23c1bbd64bc1297248ddabac2716ed))
-* add display table for types and coefficients in but.html.twig ([36b7777](https://github.com/Dannebicque/oreof/commit/36b7777be2196f251a6bbc9406886f279abda1cd))
-* add display table for types and coefficients in but.html.twig ([f656d63](https://github.com/Dannebicque/oreof/commit/f656d639ed6590689b064b9e3ce6bb13c8847039))
-* blocage si offre consolidée ([e74691c](https://github.com/Dannebicque/oreof/commit/e74691ce440080e19b87a3446db4a95900a1713b))
-* DiplomeIngenieur ([3e06cb9](https://github.com/Dannebicque/oreof/commit/3e06cb909af9caccbd0865fabe4490fddf0e5f57))
-* mise à jour des profils commande ([0d3bda7](https://github.com/Dannebicque/oreof/commit/0d3bda7c6e9bb29b6b6e717b39066b0ae6f3a3fe))
-* mise à jour des profils commande ([2fe2309](https://github.com/Dannebicque/oreof/commit/2fe230901571fbb5210b3593a98cf5bb44e2fe1f))
-* mise à jour des profils commande ([d5c5d0e](https://github.com/Dannebicque/oreof/commit/d5c5d0ed745c6338354cf7c1f7cc41e347cdd0bb))
-* mise à jour des profils commande ([7ac4c11](https://github.com/Dannebicque/oreof/commit/7ac4c11be64b1e85399cf7ba0915d0dd86a8a352))
-* Type de diplôme CPI et DI ([b74eb8a](https://github.com/Dannebicque/oreof/commit/b74eb8ac3552002ece19ee7d87bfc82dbc5be972))
-* update docker-compose configuration and add installation guide ([798d26c](https://github.com/Dannebicque/oreof/commit/798d26c63fdf77fdab737bd982b4d91a4272df7e))
+* add display table for types and coefficients in but.html.twig ([2c662e1](https://github.com/Dannebicque/oreof/commit/2c662e1b1b23c1bbd64bc1297248ddabac2716ed)) — [@Dannebicque](https://github.com/Dannebicque)
+* add display table for types and coefficients in but.html.twig ([36b7777](https://github.com/Dannebicque/oreof/commit/36b7777be2196f251a6bbc9406886f279abda1cd)) — [@Dannebicque](https://github.com/Dannebicque)
+* add display table for types and coefficients in but.html.twig ([f656d63](https://github.com/Dannebicque/oreof/commit/f656d639ed6590689b064b9e3ce6bb13c8847039)) — [@Dannebicque](https://github.com/Dannebicque)
+* blocage si offre consolidée ([e74691c](https://github.com/Dannebicque/oreof/commit/e74691ce440080e19b87a3446db4a95900a1713b)) — [@Dannebicque](https://github.com/Dannebicque)
+* DiplomeIngenieur ([3e06cb9](https://github.com/Dannebicque/oreof/commit/3e06cb909af9caccbd0865fabe4490fddf0e5f57)) — [@Dannebicque](https://github.com/Dannebicque)
+* mise à jour des profils commande ([0d3bda7](https://github.com/Dannebicque/oreof/commit/0d3bda7c6e9bb29b6b6e717b39066b0ae6f3a3fe)) — [@Dannebicque](https://github.com/Dannebicque)
+* mise à jour des profils commande ([2fe2309](https://github.com/Dannebicque/oreof/commit/2fe230901571fbb5210b3593a98cf5bb44e2fe1f)) — [@Dannebicque](https://github.com/Dannebicque)
+* mise à jour des profils commande ([d5c5d0e](https://github.com/Dannebicque/oreof/commit/d5c5d0ed745c6338354cf7c1f7cc41e347cdd0bb)) — [@Dannebicque](https://github.com/Dannebicque)
+* mise à jour des profils commande ([7ac4c11](https://github.com/Dannebicque/oreof/commit/7ac4c11be64b1e85399cf7ba0915d0dd86a8a352)) — [@Dannebicque](https://github.com/Dannebicque)
+* Type de diplôme CPI et DI ([b74eb8a](https://github.com/Dannebicque/oreof/commit/b74eb8ac3552002ece19ee7d87bfc82dbc5be972)) — [@Dannebicque](https://github.com/Dannebicque)
+* update docker-compose configuration and add installation guide ([798d26c](https://github.com/Dannebicque/oreof/commit/798d26c63fdf77fdab737bd982b4d91a4272df7e)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* add username existence check during user creation ([d9e986b](https://github.com/Dannebicque/oreof/commit/d9e986b2659920b00ec1085e79394ee6f4eab6bf))
-* Affichage ouverture/non ouverture parcours ([391f0ec](https://github.com/Dannebicque/oreof/commit/391f0ecd670633643f21698dc24a72100fa13aab))
-* Affichage partie offre ([270178f](https://github.com/Dannebicque/oreof/commit/270178fef07dc2ec2426ec3d25e1c0a8a7f340d7))
-* amélioration texte fiche matière/MCCC ([b4925b7](https://github.com/Dannebicque/oreof/commit/b4925b79145f1491d55510de5069d916f69b736d))
-* apostrophe ([e7b9bd0](https://github.com/Dannebicque/oreof/commit/e7b9bd055a83ca7791cf420feb09050e6d3bdcae))
-* apostrophe ([62a260e](https://github.com/Dannebicque/oreof/commit/62a260ed6157292d4d276342606d9d2e60300b47))
-* contrôle MCCC ([e9af57a](https://github.com/Dannebicque/oreof/commit/e9af57a28dfb903471974e345ef1ffafa2f9d725))
-* contrôle MCCC ([4bdfaaf](https://github.com/Dannebicque/oreof/commit/4bdfaaf869cb84b573680cc38319547bedbda662))
-* EC MCCC cas "0" ([23ca917](https://github.com/Dannebicque/oreof/commit/23ca91721a0ee9e0294234a4f1ab87e4c8d2e291))
-* EC MCCC cas "0" ([99c9033](https://github.com/Dannebicque/oreof/commit/99c9033c4b551a8c85d970930862ce5cdbc590c1))
-* enhance access control for formation and parcours editing ([05d310b](https://github.com/Dannebicque/oreof/commit/05d310b0b670cf084d2e5f8c07bbfee4438afbbf))
-* ensure respParcours is not null before dispatching AddCentreParcoursEvent ([71fc621](https://github.com/Dannebicque/oreof/commit/71fc621e76393f988128994d918c4f2b47a44cf1))
-* export JSON - parcours N+1 ([1bd2fe7](https://github.com/Dannebicque/oreof/commit/1bd2fe79478401b68534643991b6a5ac02d21079))
-* improve localization handling in OffreController ([c01d19a](https://github.com/Dannebicque/oreof/commit/c01d19a272fe32410ccdfb19cda5769dce330b18))
-* improve validation logic for 'cci' case in AbstractLicenceHandler ([c40411e](https://github.com/Dannebicque/oreof/commit/c40411e0cf8228770440f1d584fb6f2d97c03fb6))
-* LHEO - parcours en construction ([7ed1457](https://github.com/Dannebicque/oreof/commit/7ed145763d3df9e01a6ce9a93faa069a57adff99))
-* lien alternance / formation initiale ([4e6cb46](https://github.com/Dannebicque/oreof/commit/4e6cb466aa07912be87e8061805dd8c1a34fa693))
-* nullable parcoursVersioning variable ([64478c4](https://github.com/Dannebicque/oreof/commit/64478c45f06cb7d4b3c58e8d99e95293a16e9eb8))
-* optimize user profile display by filtering based on campagneCollecte ([c5c258e](https://github.com/Dannebicque/oreof/commit/c5c258ec485b261bf12e54cfcc100217f6b4f729))
-* refactor Mccc entity listener and add post flush listener for owner updates ([323c471](https://github.com/Dannebicque/oreof/commit/323c471c92dfc16ed538d4fd9b60d0e67ee11314))
-* remove access check for formation in FormationWizardController ([b51721f](https://github.com/Dannebicque/oreof/commit/b51721f11870a414e33f98920ce5892500eec62a))
-* remove access check for formation in FormationWizardController ([29d2101](https://github.com/Dannebicque/oreof/commit/29d210165f8a7d6b17406b52bffb45aafe86ae05))
-* routing api json versioning ([e58ec7e](https://github.com/Dannebicque/oreof/commit/e58ec7ea1f2b047598fe0e7ba583c16a052ceae1))
-* script mise à jour commande ([5e2e0cd](https://github.com/Dannebicque/oreof/commit/5e2e0cdf937e2c1e4168ef9ce0ed9a048bd4f3ed))
-* Stats fiches ([1772c11](https://github.com/Dannebicque/oreof/commit/1772c11ed24445d07739d64a535e13691f42ee3b))
-* steps changement RF ([37d371a](https://github.com/Dannebicque/oreof/commit/37d371a08e0713e81e49943ce3194e74fba60456))
-* type Diplome sur HD ([4d03aae](https://github.com/Dannebicque/oreof/commit/4d03aaedd94c0bb08a720e79a0863f41fa1a0692))
-* type Diplome sur HD ([11c0857](https://github.com/Dannebicque/oreof/commit/11c08574028bc8a1fa3b7d0a3cc71b3e32ff8df0))
-* type Diplome sur HD ([7ef02b9](https://github.com/Dannebicque/oreof/commit/7ef02b96bae2630e74bd1d5f55fd29c8d16f2bb4))
-* type MCCC ([2d7d22c](https://github.com/Dannebicque/oreof/commit/2d7d22ce3d3c15e642b89c0c6a374a4225f6ae56))
-* typeParcours enum ([ace856a](https://github.com/Dannebicque/oreof/commit/ace856ad0d8b56c289a9c1b2eb5724b3de102b19))
-* typo nom template ([9b2b19f](https://github.com/Dannebicque/oreof/commit/9b2b19fcf1deebae955d148b3760916e51748b9f))
-* update alert message in _step4Other.html.twig for clarity and accuracy ([e4975dc](https://github.com/Dannebicque/oreof/commit/e4975dc6459f90c66c858ed6691b2fc5565abe63))
-* update document links and titles in index.html.twig ([8cd0cb6](https://github.com/Dannebicque/oreof/commit/8cd0cb627979f0ec950815f4b8a2cf44b779a0c6))
-* update include path in _mccc.html.twig for licence template ([212ed6a](https://github.com/Dannebicque/oreof/commit/212ed6a03047fa38e8852a7db4576e2aa0d6c94e))
-* update include path in _mccc.html.twig for licence template ([572b01b](https://github.com/Dannebicque/oreof/commit/572b01bf7daaed4ba8bd9b2c46eaf47d26a1fe7f))
-* update mcccs retrieval logic in FicheMatiereWizardController ([d20dd9a](https://github.com/Dannebicque/oreof/commit/d20dd9ae9994e13cb1c6d37a92dcc91af557ea6c))
-* update parcours descriptif based on ouverture state ([0ced4fa](https://github.com/Dannebicque/oreof/commit/0ced4fa9a12a8d8d7f5654d9aa17180b89c7f3b8))
-* Workflow uniquement sur dpe ([ebfe1d6](https://github.com/Dannebicque/oreof/commit/ebfe1d617817d8af2eb0ae3c63eb8b249268f90e))
+* add username existence check during user creation ([d9e986b](https://github.com/Dannebicque/oreof/commit/d9e986b2659920b00ec1085e79394ee6f4eab6bf)) — [@Dannebicque](https://github.com/Dannebicque)
+* Affichage ouverture/non ouverture parcours ([391f0ec](https://github.com/Dannebicque/oreof/commit/391f0ecd670633643f21698dc24a72100fa13aab)) — [@Dannebicque](https://github.com/Dannebicque)
+* Affichage partie offre ([270178f](https://github.com/Dannebicque/oreof/commit/270178fef07dc2ec2426ec3d25e1c0a8a7f340d7)) — [@Dannebicque](https://github.com/Dannebicque)
+* amélioration texte fiche matière/MCCC ([b4925b7](https://github.com/Dannebicque/oreof/commit/b4925b79145f1491d55510de5069d916f69b736d)) — [@Dannebicque](https://github.com/Dannebicque)
+* apostrophe ([e7b9bd0](https://github.com/Dannebicque/oreof/commit/e7b9bd055a83ca7791cf420feb09050e6d3bdcae)) — [@pmarchal51100](https://github.com/pmarchal51100)
+* apostrophe ([62a260e](https://github.com/Dannebicque/oreof/commit/62a260ed6157292d4d276342606d9d2e60300b47)) — [@pmarchal51100](https://github.com/pmarchal51100)
+* contrôle MCCC ([e9af57a](https://github.com/Dannebicque/oreof/commit/e9af57a28dfb903471974e345ef1ffafa2f9d725)) — [@Dannebicque](https://github.com/Dannebicque)
+* contrôle MCCC ([4bdfaaf](https://github.com/Dannebicque/oreof/commit/4bdfaaf869cb84b573680cc38319547bedbda662)) — [@Dannebicque](https://github.com/Dannebicque)
+* EC MCCC cas "0" ([23ca917](https://github.com/Dannebicque/oreof/commit/23ca91721a0ee9e0294234a4f1ab87e4c8d2e291)) — [@Dannebicque](https://github.com/Dannebicque)
+* EC MCCC cas "0" ([99c9033](https://github.com/Dannebicque/oreof/commit/99c9033c4b551a8c85d970930862ce5cdbc590c1)) — [@Dannebicque](https://github.com/Dannebicque)
+* enhance access control for formation and parcours editing ([05d310b](https://github.com/Dannebicque/oreof/commit/05d310b0b670cf084d2e5f8c07bbfee4438afbbf)) — [@Dannebicque](https://github.com/Dannebicque)
+* ensure respParcours is not null before dispatching AddCentreParcoursEvent ([71fc621](https://github.com/Dannebicque/oreof/commit/71fc621e76393f988128994d918c4f2b47a44cf1)) — [@Dannebicque](https://github.com/Dannebicque)
+* export JSON - parcours N+1 ([1bd2fe7](https://github.com/Dannebicque/oreof/commit/1bd2fe79478401b68534643991b6a5ac02d21079)) — [@pmarchal51100](https://github.com/pmarchal51100)
+* improve localization handling in OffreController ([c01d19a](https://github.com/Dannebicque/oreof/commit/c01d19a272fe32410ccdfb19cda5769dce330b18)) — [@Dannebicque](https://github.com/Dannebicque)
+* improve validation logic for 'cci' case in AbstractLicenceHandler ([c40411e](https://github.com/Dannebicque/oreof/commit/c40411e0cf8228770440f1d584fb6f2d97c03fb6)) — [@Dannebicque](https://github.com/Dannebicque)
+* LHEO - parcours en construction ([7ed1457](https://github.com/Dannebicque/oreof/commit/7ed145763d3df9e01a6ce9a93faa069a57adff99)) — [@pmarchal51100](https://github.com/pmarchal51100)
+* lien alternance / formation initiale ([4e6cb46](https://github.com/Dannebicque/oreof/commit/4e6cb466aa07912be87e8061805dd8c1a34fa693)) — [@pmarchal51100](https://github.com/pmarchal51100)
+* nullable parcoursVersioning variable ([64478c4](https://github.com/Dannebicque/oreof/commit/64478c45f06cb7d4b3c58e8d99e95293a16e9eb8)) — [@pmarchal51100](https://github.com/pmarchal51100)
+* optimize user profile display by filtering based on campagneCollecte ([c5c258e](https://github.com/Dannebicque/oreof/commit/c5c258ec485b261bf12e54cfcc100217f6b4f729)) — [@Dannebicque](https://github.com/Dannebicque)
+* refactor Mccc entity listener and add post flush listener for owner updates ([323c471](https://github.com/Dannebicque/oreof/commit/323c471c92dfc16ed538d4fd9b60d0e67ee11314)) — [@Dannebicque](https://github.com/Dannebicque)
+* remove access check for formation in FormationWizardController ([b51721f](https://github.com/Dannebicque/oreof/commit/b51721f11870a414e33f98920ce5892500eec62a)) — [@Dannebicque](https://github.com/Dannebicque)
+* remove access check for formation in FormationWizardController ([29d2101](https://github.com/Dannebicque/oreof/commit/29d210165f8a7d6b17406b52bffb45aafe86ae05)) — [@Dannebicque](https://github.com/Dannebicque)
+* routing api json versioning ([e58ec7e](https://github.com/Dannebicque/oreof/commit/e58ec7ea1f2b047598fe0e7ba583c16a052ceae1)) — [@pmarchal51100](https://github.com/pmarchal51100)
+* script mise à jour commande ([5e2e0cd](https://github.com/Dannebicque/oreof/commit/5e2e0cdf937e2c1e4168ef9ce0ed9a048bd4f3ed)) — [@Dannebicque](https://github.com/Dannebicque)
+* Stats fiches ([1772c11](https://github.com/Dannebicque/oreof/commit/1772c11ed24445d07739d64a535e13691f42ee3b)) — [@Dannebicque](https://github.com/Dannebicque)
+* steps changement RF ([37d371a](https://github.com/Dannebicque/oreof/commit/37d371a08e0713e81e49943ce3194e74fba60456)) — [@Dannebicque](https://github.com/Dannebicque)
+* type Diplome sur HD ([4d03aae](https://github.com/Dannebicque/oreof/commit/4d03aaedd94c0bb08a720e79a0863f41fa1a0692)) — [@Dannebicque](https://github.com/Dannebicque)
+* type Diplome sur HD ([11c0857](https://github.com/Dannebicque/oreof/commit/11c08574028bc8a1fa3b7d0a3cc71b3e32ff8df0)) — [@Dannebicque](https://github.com/Dannebicque)
+* type Diplome sur HD ([7ef02b9](https://github.com/Dannebicque/oreof/commit/7ef02b96bae2630e74bd1d5f55fd29c8d16f2bb4)) — [@Dannebicque](https://github.com/Dannebicque)
+* type MCCC ([2d7d22c](https://github.com/Dannebicque/oreof/commit/2d7d22ce3d3c15e642b89c0c6a374a4225f6ae56)) — [@Dannebicque](https://github.com/Dannebicque)
+* typeParcours enum ([ace856a](https://github.com/Dannebicque/oreof/commit/ace856ad0d8b56c289a9c1b2eb5724b3de102b19)) — [@pmarchal51100](https://github.com/pmarchal51100)
+* typo nom template ([9b2b19f](https://github.com/Dannebicque/oreof/commit/9b2b19fcf1deebae955d148b3760916e51748b9f)) — [@Dannebicque](https://github.com/Dannebicque)
+* update alert message in _step4Other.html.twig for clarity and accuracy ([e4975dc](https://github.com/Dannebicque/oreof/commit/e4975dc6459f90c66c858ed6691b2fc5565abe63)) — [@Dannebicque](https://github.com/Dannebicque)
+* update document links and titles in index.html.twig ([8cd0cb6](https://github.com/Dannebicque/oreof/commit/8cd0cb627979f0ec950815f4b8a2cf44b779a0c6)) — [@Dannebicque](https://github.com/Dannebicque)
+* update include path in _mccc.html.twig for licence template ([212ed6a](https://github.com/Dannebicque/oreof/commit/212ed6a03047fa38e8852a7db4576e2aa0d6c94e)) — [@Dannebicque](https://github.com/Dannebicque)
+* update include path in _mccc.html.twig for licence template ([572b01b](https://github.com/Dannebicque/oreof/commit/572b01bf7daaed4ba8bd9b2c46eaf47d26a1fe7f)) — [@Dannebicque](https://github.com/Dannebicque)
+* update mcccs retrieval logic in FicheMatiereWizardController ([d20dd9a](https://github.com/Dannebicque/oreof/commit/d20dd9ae9994e13cb1c6d37a92dcc91af557ea6c)) — [@Dannebicque](https://github.com/Dannebicque)
+* update parcours descriptif based on ouverture state ([0ced4fa](https://github.com/Dannebicque/oreof/commit/0ced4fa9a12a8d8d7f5654d9aa17180b89c7f3b8)) — [@Dannebicque](https://github.com/Dannebicque)
+* Workflow uniquement sur dpe ([ebfe1d6](https://github.com/Dannebicque/oreof/commit/ebfe1d617817d8af2eb0ae3c63eb8b249268f90e)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.49.0](https://github.com/Dannebicque/oreof/compare/v1.48.0...v1.49.0) (2025-12-11)
 
 
 ### Features
 
-* add ChangeParcours entity and related services for managing parcours changes ([05771e2](https://github.com/Dannebicque/oreof/commit/05771e272545068e371f109e8e487b07ef2f3624))
-* add ChangeParcours entity and related services for managing parcours changes ([44e0fd6](https://github.com/Dannebicque/oreof/commit/44e0fd6a15096c7cc101592196d2d4c447586a2c))
+* add ChangeParcours entity and related services for managing parcours changes ([05771e2](https://github.com/Dannebicque/oreof/commit/05771e272545068e371f109e8e487b07ef2f3624)) — [@Dannebicque](https://github.com/Dannebicque)
+* add ChangeParcours entity and related services for managing parcours changes ([44e0fd6](https://github.com/Dannebicque/oreof/commit/44e0fd6a15096c7cc101592196d2d4c447586a2c)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.48.0](https://github.com/Dannebicque/oreof/compare/v1.47.0...v1.48.0) (2025-12-10)
 
 
 ### Features
 
-* **fiche matiere:** enhance access control for FicheMatiere objects ([39cf2db](https://github.com/Dannebicque/oreof/commit/39cf2db572f05d53d921cb57bf1072ba2e081384))
-* **handler:** expose getLibelleCourt method in various handlers ([6ff36ec](https://github.com/Dannebicque/oreof/commit/6ff36ecc8e437d9f5c0040b6f46b873dc82a536d))
-* **parcours:** enhance event dispatching and add state display in list ([ff6ab8f](https://github.com/Dannebicque/oreof/commit/ff6ab8fe40db1b71a00a92e9645218a5dfa24db0))
+* **fiche matiere:** enhance access control for FicheMatiere objects ([39cf2db](https://github.com/Dannebicque/oreof/commit/39cf2db572f05d53d921cb57bf1072ba2e081384)) — [@Dannebicque](https://github.com/Dannebicque)
+* **handler:** expose getLibelleCourt method in various handlers ([6ff36ec](https://github.com/Dannebicque/oreof/commit/6ff36ecc8e437d9f5c0040b6f46b873dc82a536d)) — [@Dannebicque](https://github.com/Dannebicque)
+* **parcours:** enhance event dispatching and add state display in list ([ff6ab8f](https://github.com/Dannebicque/oreof/commit/ff6ab8fe40db1b71a00a92e9645218a5dfa24db0)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **controller:** correct variable name in getMcccsFromFicheMatiere method ([a1b9c05](https://github.com/Dannebicque/oreof/commit/a1b9c05f814a513d3d330d703c0e0841b20710a0))
-* **RessourceVoter:** add additional permissions for manage attribute ([9c81b7f](https://github.com/Dannebicque/oreof/commit/9c81b7f47a296680ba99560d827d4ea76300800e))
+* **controller:** correct variable name in getMcccsFromFicheMatiere method ([a1b9c05](https://github.com/Dannebicque/oreof/commit/a1b9c05f814a513d3d330d703c0e0841b20710a0)) — [@Dannebicque](https://github.com/Dannebicque)
+* **RessourceVoter:** add additional permissions for manage attribute ([9c81b7f](https://github.com/Dannebicque/oreof/commit/9c81b7f47a296680ba99560d827d4ea76300800e)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.47.0](https://github.com/Dannebicque/oreof/compare/v1.46.0...v1.47.0) (2025-12-05)
 
 
 ### Features
 
-* **cpi:** add CpiHandler class for handling CPI type diploma operations ([a38b356](https://github.com/Dannebicque/oreof/commit/a38b356400448dc44efe11cbcc6c56de9453f70e))
-* **droits:** replace RoleRepository with ProfilRepository in getDroits method ([b410730](https://github.com/Dannebicque/oreof/commit/b41073039aaae079967788c5aac886efb300ccf9))
-* **droits:** replace RoleRepository with ProfilRepository in getDroits method ([cc836ba](https://github.com/Dannebicque/oreof/commit/cc836bae2dd69eee03fea480870a8f7648a4c984))
-* **droits:** replace RoleRepository with ProfilRepository in getDroits method ([ee75059](https://github.com/Dannebicque/oreof/commit/ee7505919080f0f2fcf370ad0ddf69b9e070e418))
-* **droits:** replace RoleRepository with ProfilRepository in getDroits method ([0402878](https://github.com/Dannebicque/oreof/commit/040287888689a691971227074384a0013fc3bfdc))
-* **m2e:** add M2EHandler class for handling M2E type diploma operations ([936a312](https://github.com/Dannebicque/oreof/commit/936a312ae5edd556d4a8dc4fcac0a221d740be9e))
-* **m2e:** add M2EHandler class for handling M2E type diploma operations ([51119bd](https://github.com/Dannebicque/oreof/commit/51119bdef873158acadd8930fc2ac8abbc28e60a))
-* **m2e:** add M2EHandler class for handling M2E type diploma operations ([17fbf4c](https://github.com/Dannebicque/oreof/commit/17fbf4c93e5c32cd32c1d202bb41ea334f17e313))
-* **offre:** add capability to change 'capaciteAccueil' for formations and parcours ([69f8833](https://github.com/Dannebicque/oreof/commit/69f8833e7dd4ffc46678ed19ab4ee899bec48d29))
-* **offre:** add capability to change 'capaciteAccueil' for formations and parcours ([79e51ac](https://github.com/Dannebicque/oreof/commit/79e51acdf865a592b53fdc966844bcf7c5357299))
-* **offre:** add statistics for formations and parcours in OffreController ([6b22530](https://github.com/Dannebicque/oreof/commit/6b225308b8d95ecf12fe658f9904797822b35230))
-* **offre:** enhance Offre table with statistics and improved layout ([e471de7](https://github.com/Dannebicque/oreof/commit/e471de7d0c2d0974651b76b5d49a055664795d82))
-* **parcours:** update edit modal to include ProfilRepository and handle ROLE_RESP_PARCOURS ([cff2b4c](https://github.com/Dannebicque/oreof/commit/cff2b4cb4c54901da1b70d85523a7af228b5c7bb))
-* **table:** replace link with button for editing parcours with modal ([4720c36](https://github.com/Dannebicque/oreof/commit/4720c36268f6fac4709bec17ce9c5377e044e176))
-* **timeline:** implement timeline feature with dynamic progress and date markers ([8a273b0](https://github.com/Dannebicque/oreof/commit/8a273b0a6616289468c797414cb0ebad221190de))
-* **timeline:** implement timeline feature with dynamic progress and date markers ([aa0b7fe](https://github.com/Dannebicque/oreof/commit/aa0b7fe592d6b282b9dbc7f64fd631b3848c591b))
-* **timeline:** implement timeline feature with dynamic progress and date markers ([5daa2c9](https://github.com/Dannebicque/oreof/commit/5daa2c9f30d07aba8d6c5c5730742a1d94464a0f))
-* **timeline:** implement timeline feature with dynamic progress and date markers ([f2af413](https://github.com/Dannebicque/oreof/commit/f2af41379ece3a561c9ed440013085463f6970b8))
-* **timeline:** implement timeline feature with dynamic progress and date markers ([862dc26](https://github.com/Dannebicque/oreof/commit/862dc26a33602be00bb6ac7935d9771edf426351))
-* **type diploe:** add two new type of diploma ([7420b54](https://github.com/Dannebicque/oreof/commit/7420b54ca2990b3c6aa79957cf43733a12e3d0e1))
-* **user pfofil:** filtre sur les profils ([255b9d0](https://github.com/Dannebicque/oreof/commit/255b9d0a0f06809d8660bcd903a40595e4251eb6))
+* **cpi:** add CpiHandler class for handling CPI type diploma operations ([a38b356](https://github.com/Dannebicque/oreof/commit/a38b356400448dc44efe11cbcc6c56de9453f70e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **droits:** replace RoleRepository with ProfilRepository in getDroits method ([b410730](https://github.com/Dannebicque/oreof/commit/b41073039aaae079967788c5aac886efb300ccf9)) — [@Dannebicque](https://github.com/Dannebicque)
+* **droits:** replace RoleRepository with ProfilRepository in getDroits method ([cc836ba](https://github.com/Dannebicque/oreof/commit/cc836bae2dd69eee03fea480870a8f7648a4c984)) — [@Dannebicque](https://github.com/Dannebicque)
+* **droits:** replace RoleRepository with ProfilRepository in getDroits method ([ee75059](https://github.com/Dannebicque/oreof/commit/ee7505919080f0f2fcf370ad0ddf69b9e070e418)) — [@Dannebicque](https://github.com/Dannebicque)
+* **droits:** replace RoleRepository with ProfilRepository in getDroits method ([0402878](https://github.com/Dannebicque/oreof/commit/040287888689a691971227074384a0013fc3bfdc)) — [@Dannebicque](https://github.com/Dannebicque)
+* **m2e:** add M2EHandler class for handling M2E type diploma operations ([936a312](https://github.com/Dannebicque/oreof/commit/936a312ae5edd556d4a8dc4fcac0a221d740be9e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **m2e:** add M2EHandler class for handling M2E type diploma operations ([51119bd](https://github.com/Dannebicque/oreof/commit/51119bdef873158acadd8930fc2ac8abbc28e60a)) — [@Dannebicque](https://github.com/Dannebicque)
+* **m2e:** add M2EHandler class for handling M2E type diploma operations ([17fbf4c](https://github.com/Dannebicque/oreof/commit/17fbf4c93e5c32cd32c1d202bb41ea334f17e313)) — [@Dannebicque](https://github.com/Dannebicque)
+* **offre:** add capability to change 'capaciteAccueil' for formations and parcours ([69f8833](https://github.com/Dannebicque/oreof/commit/69f8833e7dd4ffc46678ed19ab4ee899bec48d29)) — [@Dannebicque](https://github.com/Dannebicque)
+* **offre:** add capability to change 'capaciteAccueil' for formations and parcours ([79e51ac](https://github.com/Dannebicque/oreof/commit/79e51acdf865a592b53fdc966844bcf7c5357299)) — [@Dannebicque](https://github.com/Dannebicque)
+* **offre:** add statistics for formations and parcours in OffreController ([6b22530](https://github.com/Dannebicque/oreof/commit/6b225308b8d95ecf12fe658f9904797822b35230)) — [@Dannebicque](https://github.com/Dannebicque)
+* **offre:** enhance Offre table with statistics and improved layout ([e471de7](https://github.com/Dannebicque/oreof/commit/e471de7d0c2d0974651b76b5d49a055664795d82)) — [@Dannebicque](https://github.com/Dannebicque)
+* **parcours:** update edit modal to include ProfilRepository and handle ROLE_RESP_PARCOURS ([cff2b4c](https://github.com/Dannebicque/oreof/commit/cff2b4cb4c54901da1b70d85523a7af228b5c7bb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **table:** replace link with button for editing parcours with modal ([4720c36](https://github.com/Dannebicque/oreof/commit/4720c36268f6fac4709bec17ce9c5377e044e176)) — [@Dannebicque](https://github.com/Dannebicque)
+* **timeline:** implement timeline feature with dynamic progress and date markers ([8a273b0](https://github.com/Dannebicque/oreof/commit/8a273b0a6616289468c797414cb0ebad221190de)) — [@Dannebicque](https://github.com/Dannebicque)
+* **timeline:** implement timeline feature with dynamic progress and date markers ([aa0b7fe](https://github.com/Dannebicque/oreof/commit/aa0b7fe592d6b282b9dbc7f64fd631b3848c591b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **timeline:** implement timeline feature with dynamic progress and date markers ([5daa2c9](https://github.com/Dannebicque/oreof/commit/5daa2c9f30d07aba8d6c5c5730742a1d94464a0f)) — [@Dannebicque](https://github.com/Dannebicque)
+* **timeline:** implement timeline feature with dynamic progress and date markers ([f2af413](https://github.com/Dannebicque/oreof/commit/f2af41379ece3a561c9ed440013085463f6970b8)) — [@Dannebicque](https://github.com/Dannebicque)
+* **timeline:** implement timeline feature with dynamic progress and date markers ([862dc26](https://github.com/Dannebicque/oreof/commit/862dc26a33602be00bb6ac7935d9771edf426351)) — [@Dannebicque](https://github.com/Dannebicque)
+* **type diploe:** add two new type of diploma ([7420b54](https://github.com/Dannebicque/oreof/commit/7420b54ca2990b3c6aa79957cf43733a12e3d0e1)) — [@Dannebicque](https://github.com/Dannebicque)
+* **user pfofil:** filtre sur les profils ([255b9d0](https://github.com/Dannebicque/oreof/commit/255b9d0a0f06809d8660bcd903a40595e4251eb6)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **editModal:** remove codeMentionApogee field for improved layout ([2ae5644](https://github.com/Dannebicque/oreof/commit/2ae5644b7a751e71fcc80688dbb38813eec8f68d))
-* **editModal:** remove codeMentionApogee field for improved layout ([787a1c9](https://github.com/Dannebicque/oreof/commit/787a1c99bda2515b7bcd5f4c1273d0c62ae4e6e9))
-* **formation_controller, editModal, new:** uncomment methods and adjust layout for better clarity ([e957f2f](https://github.com/Dannebicque/oreof/commit/e957f2fe2738985f29c1567373a4fe1db6c22afb))
-* **Mention, VersioningParcours:** deprecate domaine property and update null-safe access for parcours ID ([e807267](https://github.com/Dannebicque/oreof/commit/e807267e231c07475be5c5425c43781f32743783))
-* **MentionRepository:** update query to use MEMBER OF for domain filtering ([27a448d](https://github.com/Dannebicque/oreof/commit/27a448d7441ca391232f558e45bdfa02cb91e154))
-* **step3:** correct alert tag from 'alertes' to 'alerte' ([a3049fd](https://github.com/Dannebicque/oreof/commit/a3049fdb51be2db22150795074d08a82d36e8f09))
+* **editModal:** remove codeMentionApogee field for improved layout ([2ae5644](https://github.com/Dannebicque/oreof/commit/2ae5644b7a751e71fcc80688dbb38813eec8f68d)) — [@Dannebicque](https://github.com/Dannebicque)
+* **editModal:** remove codeMentionApogee field for improved layout ([787a1c9](https://github.com/Dannebicque/oreof/commit/787a1c99bda2515b7bcd5f4c1273d0c62ae4e6e9)) — [@Dannebicque](https://github.com/Dannebicque)
+* **formation_controller, editModal, new:** uncomment methods and adjust layout for better clarity ([e957f2f](https://github.com/Dannebicque/oreof/commit/e957f2fe2738985f29c1567373a4fe1db6c22afb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Mention, VersioningParcours:** deprecate domaine property and update null-safe access for parcours ID ([e807267](https://github.com/Dannebicque/oreof/commit/e807267e231c07475be5c5425c43781f32743783)) — [@Dannebicque](https://github.com/Dannebicque)
+* **MentionRepository:** update query to use MEMBER OF for domain filtering ([27a448d](https://github.com/Dannebicque/oreof/commit/27a448d7441ca391232f558e45bdfa02cb91e154)) — [@Dannebicque](https://github.com/Dannebicque)
+* **step3:** correct alert tag from 'alertes' to 'alerte' ([a3049fd](https://github.com/Dannebicque/oreof/commit/a3049fdb51be2db22150795074d08a82d36e8f09)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.46.0](https://github.com/Dannebicque/oreof/compare/v1.45.0...v1.46.0) (2025-11-20)
 
 
 ### Features
 
-* **cmd:** Recopie des profils d'une campagne à une autre ([daf1b01](https://github.com/Dannebicque/oreof/commit/daf1b0108a7bce10ba723ea7ea957b1db9cd6aab))
-* **dependencies:** Add DebugBundle for development and update configuration for UX packages ([fac45ef](https://github.com/Dannebicque/oreof/commit/fac45efe88f878cefe40cef8ed46f28acbce9050))
-* **docker:** Add Apache configuration and Docker Compose setup for w… ([120d765](https://github.com/Dannebicque/oreof/commit/120d7655e26d1177ffdad568b935598a9a9662ee))
-* **docker:** Add Apache configuration and Docker Compose setup for web and database services ([57078d2](https://github.com/Dannebicque/oreof/commit/57078d26d51f59c96c265bc219af3834e59b545e))
-* **email:** add support for DI ([da80fca](https://github.com/Dannebicque/oreof/commit/da80fcab01d3c89a153367f7e89468c02ceacbdf))
-* **email:** add support for subject variants and JSON subjects input ([099ce58](https://github.com/Dannebicque/oreof/commit/099ce58a848cdb6bae6b15cbfec9cc722b8c6e8f))
-* **EtatDpeEnum:** add tacite reconduction state with corresponding label ([1fa2696](https://github.com/Dannebicque/oreof/commit/1fa26968cbd705ac3d373982a54bf886efd903e6))
-* **notification:** Add user notification preferences and update workflow transition handling ([13b09e4](https://github.com/Dannebicque/oreof/commit/13b09e4c297fa5a57d4f4abb2e23ae86c1530c01))
-* **offre de formation:** add recruitment year toggle functionality ([8e19f7a](https://github.com/Dannebicque/oreof/commit/8e19f7a856555e8f83b00f7a609344d7beecaccf))
-* **offre de formation:** gestion des capacités / années ([7715825](https://github.com/Dannebicque/oreof/commit/7715825741e874231c6d30e147c6f9451c6dcee0))
-* **offre de formation:** gestion des capacités / années ([bd35094](https://github.com/Dannebicque/oreof/commit/bd35094a9cce340ffbff3fd76887c2eb7fca28fc))
-* **step3:** add warning for multiple parcours and improve hasParcours handling ([a72b9bc](https://github.com/Dannebicque/oreof/commit/a72b9bc9c85b613e8dad937279c23a25f5a9b1e6))
-* traduction des menus ([8317c6d](https://github.com/Dannebicque/oreof/commit/8317c6dd7ee04e81a07cc619c541b7dfe62dbbc5))
-* **Workflow:** enhance button styles and add tacite reconduction check ([637232e](https://github.com/Dannebicque/oreof/commit/637232e221841095398f398ba6ca71dbe407a525))
+* **cmd:** Recopie des profils d'une campagne à une autre ([daf1b01](https://github.com/Dannebicque/oreof/commit/daf1b0108a7bce10ba723ea7ea957b1db9cd6aab)) — [@Dannebicque](https://github.com/Dannebicque)
+* **dependencies:** Add DebugBundle for development and update configuration for UX packages ([fac45ef](https://github.com/Dannebicque/oreof/commit/fac45efe88f878cefe40cef8ed46f28acbce9050)) — [@Dannebicque](https://github.com/Dannebicque)
+* **docker:** Add Apache configuration and Docker Compose setup for w… ([120d765](https://github.com/Dannebicque/oreof/commit/120d7655e26d1177ffdad568b935598a9a9662ee)) — [@Dannebicque](https://github.com/Dannebicque)
+* **docker:** Add Apache configuration and Docker Compose setup for web and database services ([57078d2](https://github.com/Dannebicque/oreof/commit/57078d26d51f59c96c265bc219af3834e59b545e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **email:** add support for DI ([da80fca](https://github.com/Dannebicque/oreof/commit/da80fcab01d3c89a153367f7e89468c02ceacbdf)) — [@Dannebicque](https://github.com/Dannebicque)
+* **email:** add support for subject variants and JSON subjects input ([099ce58](https://github.com/Dannebicque/oreof/commit/099ce58a848cdb6bae6b15cbfec9cc722b8c6e8f)) — [@Dannebicque](https://github.com/Dannebicque)
+* **EtatDpeEnum:** add tacite reconduction state with corresponding label ([1fa2696](https://github.com/Dannebicque/oreof/commit/1fa26968cbd705ac3d373982a54bf886efd903e6)) — [@Dannebicque](https://github.com/Dannebicque)
+* **notification:** Add user notification preferences and update workflow transition handling ([13b09e4](https://github.com/Dannebicque/oreof/commit/13b09e4c297fa5a57d4f4abb2e23ae86c1530c01)) — [@Dannebicque](https://github.com/Dannebicque)
+* **offre de formation:** add recruitment year toggle functionality ([8e19f7a](https://github.com/Dannebicque/oreof/commit/8e19f7a856555e8f83b00f7a609344d7beecaccf)) — [@Dannebicque](https://github.com/Dannebicque)
+* **offre de formation:** gestion des capacités / années ([7715825](https://github.com/Dannebicque/oreof/commit/7715825741e874231c6d30e147c6f9451c6dcee0)) — [@Dannebicque](https://github.com/Dannebicque)
+* **offre de formation:** gestion des capacités / années ([bd35094](https://github.com/Dannebicque/oreof/commit/bd35094a9cce340ffbff3fd76887c2eb7fca28fc)) — [@Dannebicque](https://github.com/Dannebicque)
+* **step3:** add warning for multiple parcours and improve hasParcours handling ([a72b9bc](https://github.com/Dannebicque/oreof/commit/a72b9bc9c85b613e8dad937279c23a25f5a9b1e6)) — [@Dannebicque](https://github.com/Dannebicque)
+* traduction des menus ([8317c6d](https://github.com/Dannebicque/oreof/commit/8317c6dd7ee04e81a07cc619c541b7dfe62dbbc5)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance button styles and add tacite reconduction check ([637232e](https://github.com/Dannebicque/oreof/commit/637232e221841095398f398ba6ca71dbe407a525)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **AbstractLicenceHandler:** refactor mcccs retrieval method in checkIfMcccValide ([0f4dc3b](https://github.com/Dannebicque/oreof/commit/0f4dc3b80380edff7a87691bfe8028e8bef1aeb2))
-* **date:** Correct variable usage for historique retrieval in GetDateConseilComposante ([dc5a11a](https://github.com/Dannebicque/oreof/commit/dc5a11a61366d4921593b2be81e690310e92f3da))
-* **date:** Correct variable usage for historique retrieval in GetDateConseilComposante ([be63573](https://github.com/Dannebicque/oreof/commit/be6357325fdc502eae86cac2bfefae2c16f8a421))
-* **export:** Remove unnecessary blank line and improve stage condition check in LheoXML ([d3c7390](https://github.com/Dannebicque/oreof/commit/d3c73908f5d21d161ff86a01e25e7dd493240a23))
-* **export:** Simplify retrieval of validation state in ExportCfvu ([97ff7da](https://github.com/Dannebicque/oreof/commit/97ff7dab51c632a6a5f757a91a7b3f37ae46199f))
-* **formation:** création d'une nouvelle formation ([7162c01](https://github.com/Dannebicque/oreof/commit/7162c014a1660d54c65a0d7316dfb82c31a1fb53))
-* **pdf:** Refactor date retrieval logic in McccPdfCommand and ParcoursMcccExportController ([13116e0](https://github.com/Dannebicque/oreof/commit/13116e07e2df99321237ff6a60837cd3377d1008))
-* **pdf:** Update default campaign retrieval in McccPdfCommand to use the correct year ([bb92350](https://github.com/Dannebicque/oreof/commit/bb92350399ce56b81aa22628e45d7cf09f3fe356))
-* **quitus:** quitus par défaut false ([0bcac35](https://github.com/Dannebicque/oreof/commit/0bcac358f3bc88d6f264fabb0c088f69ae5571b2))
-* **quitus:** quitus par défaut false ([aa3b613](https://github.com/Dannebicque/oreof/commit/aa3b613e53f1e559871ccfcf123cf8bd25a01117))
-* **TypeDiplome:** clean up service configuration and improve code readability ([6adc11f](https://github.com/Dannebicque/oreof/commit/6adc11f899ddf5b7721edd71783edcef40ec14cb))
+* **AbstractLicenceHandler:** refactor mcccs retrieval method in checkIfMcccValide ([0f4dc3b](https://github.com/Dannebicque/oreof/commit/0f4dc3b80380edff7a87691bfe8028e8bef1aeb2)) — [@Dannebicque](https://github.com/Dannebicque)
+* **date:** Correct variable usage for historique retrieval in GetDateConseilComposante ([dc5a11a](https://github.com/Dannebicque/oreof/commit/dc5a11a61366d4921593b2be81e690310e92f3da)) — [@Dannebicque](https://github.com/Dannebicque)
+* **date:** Correct variable usage for historique retrieval in GetDateConseilComposante ([be63573](https://github.com/Dannebicque/oreof/commit/be6357325fdc502eae86cac2bfefae2c16f8a421)) — [@Dannebicque](https://github.com/Dannebicque)
+* **export:** Remove unnecessary blank line and improve stage condition check in LheoXML ([d3c7390](https://github.com/Dannebicque/oreof/commit/d3c73908f5d21d161ff86a01e25e7dd493240a23)) — [@Dannebicque](https://github.com/Dannebicque)
+* **export:** Simplify retrieval of validation state in ExportCfvu ([97ff7da](https://github.com/Dannebicque/oreof/commit/97ff7dab51c632a6a5f757a91a7b3f37ae46199f)) — [@Dannebicque](https://github.com/Dannebicque)
+* **formation:** création d'une nouvelle formation ([7162c01](https://github.com/Dannebicque/oreof/commit/7162c014a1660d54c65a0d7316dfb82c31a1fb53)) — [@Dannebicque](https://github.com/Dannebicque)
+* **pdf:** Refactor date retrieval logic in McccPdfCommand and ParcoursMcccExportController ([13116e0](https://github.com/Dannebicque/oreof/commit/13116e07e2df99321237ff6a60837cd3377d1008)) — [@Dannebicque](https://github.com/Dannebicque)
+* **pdf:** Update default campaign retrieval in McccPdfCommand to use the correct year ([bb92350](https://github.com/Dannebicque/oreof/commit/bb92350399ce56b81aa22628e45d7cf09f3fe356)) — [@Dannebicque](https://github.com/Dannebicque)
+* **quitus:** quitus par défaut false ([0bcac35](https://github.com/Dannebicque/oreof/commit/0bcac358f3bc88d6f264fabb0c088f69ae5571b2)) — [@Dannebicque](https://github.com/Dannebicque)
+* **quitus:** quitus par défaut false ([aa3b613](https://github.com/Dannebicque/oreof/commit/aa3b613e53f1e559871ccfcf123cf8bd25a01117)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** clean up service configuration and improve code readability ([6adc11f](https://github.com/Dannebicque/oreof/commit/6adc11f899ddf5b7721edd71783edcef40ec14cb)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.45.0](https://github.com/Dannebicque/oreof/compare/v1.44.1...v1.45.0) (2025-11-03)
 
 
 ### Features
 
-* **_ue.html.twig:** add badges for free and restricted choice UEs ([ddbc32d](https://github.com/Dannebicque/oreof/commit/ddbc32d6c8cf9313c2a6084ebcf9f8706e36094d))
-* **année:** Ajout de la notion d'année entre semestrparcours et parcours pour contenir notamment les capacités ([be8397a](https://github.com/Dannebicque/oreof/commit/be8397a7b31cd9d751a1407b88c6674c8df73fa4))
-* **API:** Cacher la maquette PDF si non ouverture ([5ffb196](https://github.com/Dannebicque/oreof/commit/5ffb196c7941c551aaf0f952b132c7055bd3e3bb))
-* **API:** Cacher la maquette PDF si non ouverture ([3173934](https://github.com/Dannebicque/oreof/commit/31739344bb883ee7e3ebd7c2513f5a9535c9983f))
-* **API:** Cacher la maquette PDF si non ouverture ([106e04e](https://github.com/Dannebicque/oreof/commit/106e04edee47eaeed9c692d7495350b070142543))
-* **API:** Cacher la maquette PDF si non ouverture ([aa8da8d](https://github.com/Dannebicque/oreof/commit/aa8da8d1b6e6bbb14edae41d28367eab9a34949b))
-* **API:** Cacher la maquette PDF si non ouverture ([d81c56c](https://github.com/Dannebicque/oreof/commit/d81c56c7db903a4049d9ddbd27adda78ec00c819))
-* **API:** Cacher la maquette PDF si non ouverture ([3368c71](https://github.com/Dannebicque/oreof/commit/3368c71f11c7e78d4a75cd1f64c35b0610ae440c))
-* **date:** Add GetDateConseilComposante class for retrieving component council dates ([a46ae8e](https://github.com/Dannebicque/oreof/commit/a46ae8efd612ae559f71c364b1b16960383355e1))
-* **email:** Add email template controller with live preview functionality ([c4f197e](https://github.com/Dannebicque/oreof/commit/c4f197eaa641094967b6c032b915c4f33db4fa8a))
-* **email:** Add email template management with CRUD operations and preview functionality ([c6369a2](https://github.com/Dannebicque/oreof/commit/c6369a20502a07fb1e2c8d3dc755b2ca5cfa3d45))
-* **ExportCfvu:** Add 'Etat validation' column to export ([155e557](https://github.com/Dannebicque/oreof/commit/155e557ccf56ca5794f20273418be52d37ad50df))
-* **ExportCfvu:** Add 'Etat validation' column to export ([1afaf57](https://github.com/Dannebicque/oreof/commit/1afaf572157f7b86b3bf17ce85fa3a1343268663))
-* **ExportCfvu:** Add 'Etat validation' column to export ([acefeec](https://github.com/Dannebicque/oreof/commit/acefeec74ec7a4e3bb5693c29e6dfc95036bb951))
-* **Formation:** add user responsibilities to formation list and update template + counter ([6490613](https://github.com/Dannebicque/oreof/commit/64906135a1ff37e5cf139e3f5ae4c426ab13c168))
-* **Formation:** update domain display to support multiple domains in templates ([7fd567f](https://github.com/Dannebicque/oreof/commit/7fd567ffd30ec9301e9d4eb4e9155ad2c5475ee3))
-* **i18n:** Implement KeyModeTranslator and context for internationalization key toggling ([4242f59](https://github.com/Dannebicque/oreof/commit/4242f59450c575a01da2a7353497eb54cb152953))
-* **MCCC:** Add Mccc class and associated Twig templates for MCCC display logic ([e2a7f0e](https://github.com/Dannebicque/oreof/commit/e2a7f0e72073263e7a185e637b561261b42f14cd))
-* **MCCC:** Add McccEntityListener and McccCompletionChecker for managing MCCC completion logic ([2962199](https://github.com/Dannebicque/oreof/commit/2962199c66ab8205cd4022aab5ff68bc55481dbe))
-* **MCCC:** Implement McccCompletionCheckerInterface in ElementConstitutif and FicheMatiere classes ([4ce86bc](https://github.com/Dannebicque/oreof/commit/4ce86bc944ffcee71de62c6c9693e297cd656d65))
-* **mccc:** Refactor MCCC display logic to use new DTO for improved readability and maintainability ([88ccc91](https://github.com/Dannebicque/oreof/commit/88ccc91bcdf66bf8f4c2949e22a831694e0a6b6e))
-* **notification:** Add recherche controller for search functionality and enhance notification preferences ([e169435](https://github.com/Dannebicque/oreof/commit/e169435b3aae0428f03008c0940507385dd0fb50))
-* **notification:** Enhance notification management with workflow and profile integration ([97e5cf9](https://github.com/Dannebicque/oreof/commit/97e5cf901dcdbb053ff19ad27383b1988a06f676))
-* **Notifications:** Notifications ([3ce19ae](https://github.com/Dannebicque/oreof/commit/3ce19ae48a98a5534b1732761d4f2aab2b512f44))
-* **offre:** Add update functionality for offer states and enhance year management ([372db48](https://github.com/Dannebicque/oreof/commit/372db4862a6ecedd4b536864541ee9df50facd00))
-* **offre:** Implement OffreController and associated views for managing offers and filtering options ([1986f93](https://github.com/Dannebicque/oreof/commit/1986f93088ff3e0844ac2bb5d9864503cad6b00b))
-* **Parcours:** Add 'mots clés' field and update presentation ([6d86db4](https://github.com/Dannebicque/oreof/commit/6d86db428d94a7c65b4c904ed3ec9afe8394f048))
-* **Parcours:** implement event-driven notifications for newly created parcours ([c02765e](https://github.com/Dannebicque/oreof/commit/c02765eff53b3c9bd45d332aa909c78a7d685f03))
-* **parcours:** Validation des changements de RF ([8d0a64e](https://github.com/Dannebicque/oreof/commit/8d0a64e3ba51a64ca76984910e9eee38f49a66b9))
-* **Validation:** display counts for formations and parcours ([d10d261](https://github.com/Dannebicque/oreof/commit/d10d261323dece62d2a07671d0a7e8650f03d4a0))
-* **validation:** Update validation templates and logic for improved user experience ([74e141e](https://github.com/Dannebicque/oreof/commit/74e141e8cef17099b920d141852b7f9b0e08e560))
-* **Workflow:** enhance notification system with new email templates and recipient handling for generic with workflow ([8742814](https://github.com/Dannebicque/oreof/commit/87428148e803c6f96f1b6b75c284472bc7bf9091))
+* **_ue.html.twig:** add badges for free and restricted choice UEs ([ddbc32d](https://github.com/Dannebicque/oreof/commit/ddbc32d6c8cf9313c2a6084ebcf9f8706e36094d)) — [@Dannebicque](https://github.com/Dannebicque)
+* **année:** Ajout de la notion d'année entre semestrparcours et parcours pour contenir notamment les capacités ([be8397a](https://github.com/Dannebicque/oreof/commit/be8397a7b31cd9d751a1407b88c6674c8df73fa4)) — [@Dannebicque](https://github.com/Dannebicque)
+* **API:** Cacher la maquette PDF si non ouverture ([5ffb196](https://github.com/Dannebicque/oreof/commit/5ffb196c7941c551aaf0f952b132c7055bd3e3bb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **API:** Cacher la maquette PDF si non ouverture ([3173934](https://github.com/Dannebicque/oreof/commit/31739344bb883ee7e3ebd7c2513f5a9535c9983f)) — [@Dannebicque](https://github.com/Dannebicque)
+* **API:** Cacher la maquette PDF si non ouverture ([106e04e](https://github.com/Dannebicque/oreof/commit/106e04edee47eaeed9c692d7495350b070142543)) — [@Dannebicque](https://github.com/Dannebicque)
+* **API:** Cacher la maquette PDF si non ouverture ([aa8da8d](https://github.com/Dannebicque/oreof/commit/aa8da8d1b6e6bbb14edae41d28367eab9a34949b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **API:** Cacher la maquette PDF si non ouverture ([d81c56c](https://github.com/Dannebicque/oreof/commit/d81c56c7db903a4049d9ddbd27adda78ec00c819)) — [@Dannebicque](https://github.com/Dannebicque)
+* **API:** Cacher la maquette PDF si non ouverture ([3368c71](https://github.com/Dannebicque/oreof/commit/3368c71f11c7e78d4a75cd1f64c35b0610ae440c)) — [@Dannebicque](https://github.com/Dannebicque)
+* **date:** Add GetDateConseilComposante class for retrieving component council dates ([a46ae8e](https://github.com/Dannebicque/oreof/commit/a46ae8efd612ae559f71c364b1b16960383355e1)) — [@Dannebicque](https://github.com/Dannebicque)
+* **email:** Add email template controller with live preview functionality ([c4f197e](https://github.com/Dannebicque/oreof/commit/c4f197eaa641094967b6c032b915c4f33db4fa8a)) — [@Dannebicque](https://github.com/Dannebicque)
+* **email:** Add email template management with CRUD operations and preview functionality ([c6369a2](https://github.com/Dannebicque/oreof/commit/c6369a20502a07fb1e2c8d3dc755b2ca5cfa3d45)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportCfvu:** Add 'Etat validation' column to export ([155e557](https://github.com/Dannebicque/oreof/commit/155e557ccf56ca5794f20273418be52d37ad50df)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportCfvu:** Add 'Etat validation' column to export ([1afaf57](https://github.com/Dannebicque/oreof/commit/1afaf572157f7b86b3bf17ce85fa3a1343268663)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportCfvu:** Add 'Etat validation' column to export ([acefeec](https://github.com/Dannebicque/oreof/commit/acefeec74ec7a4e3bb5693c29e6dfc95036bb951)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Formation:** add user responsibilities to formation list and update template + counter ([6490613](https://github.com/Dannebicque/oreof/commit/64906135a1ff37e5cf139e3f5ae4c426ab13c168)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Formation:** update domain display to support multiple domains in templates ([7fd567f](https://github.com/Dannebicque/oreof/commit/7fd567ffd30ec9301e9d4eb4e9155ad2c5475ee3)) — [@Dannebicque](https://github.com/Dannebicque)
+* **i18n:** Implement KeyModeTranslator and context for internationalization key toggling ([4242f59](https://github.com/Dannebicque/oreof/commit/4242f59450c575a01da2a7353497eb54cb152953)) — [@Dannebicque](https://github.com/Dannebicque)
+* **MCCC:** Add Mccc class and associated Twig templates for MCCC display logic ([e2a7f0e](https://github.com/Dannebicque/oreof/commit/e2a7f0e72073263e7a185e637b561261b42f14cd)) — [@Dannebicque](https://github.com/Dannebicque)
+* **MCCC:** Add McccEntityListener and McccCompletionChecker for managing MCCC completion logic ([2962199](https://github.com/Dannebicque/oreof/commit/2962199c66ab8205cd4022aab5ff68bc55481dbe)) — [@Dannebicque](https://github.com/Dannebicque)
+* **MCCC:** Implement McccCompletionCheckerInterface in ElementConstitutif and FicheMatiere classes ([4ce86bc](https://github.com/Dannebicque/oreof/commit/4ce86bc944ffcee71de62c6c9693e297cd656d65)) — [@Dannebicque](https://github.com/Dannebicque)
+* **mccc:** Refactor MCCC display logic to use new DTO for improved readability and maintainability ([88ccc91](https://github.com/Dannebicque/oreof/commit/88ccc91bcdf66bf8f4c2949e22a831694e0a6b6e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **notification:** Add recherche controller for search functionality and enhance notification preferences ([e169435](https://github.com/Dannebicque/oreof/commit/e169435b3aae0428f03008c0940507385dd0fb50)) — [@Dannebicque](https://github.com/Dannebicque)
+* **notification:** Enhance notification management with workflow and profile integration ([97e5cf9](https://github.com/Dannebicque/oreof/commit/97e5cf901dcdbb053ff19ad27383b1988a06f676)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Notifications:** Notifications ([3ce19ae](https://github.com/Dannebicque/oreof/commit/3ce19ae48a98a5534b1732761d4f2aab2b512f44)) — [@Dannebicque](https://github.com/Dannebicque)
+* **offre:** Add update functionality for offer states and enhance year management ([372db48](https://github.com/Dannebicque/oreof/commit/372db4862a6ecedd4b536864541ee9df50facd00)) — [@Dannebicque](https://github.com/Dannebicque)
+* **offre:** Implement OffreController and associated views for managing offers and filtering options ([1986f93](https://github.com/Dannebicque/oreof/commit/1986f93088ff3e0844ac2bb5d9864503cad6b00b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Parcours:** Add 'mots clés' field and update presentation ([6d86db4](https://github.com/Dannebicque/oreof/commit/6d86db428d94a7c65b4c904ed3ec9afe8394f048)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Parcours:** implement event-driven notifications for newly created parcours ([c02765e](https://github.com/Dannebicque/oreof/commit/c02765eff53b3c9bd45d332aa909c78a7d685f03)) — [@Dannebicque](https://github.com/Dannebicque)
+* **parcours:** Validation des changements de RF ([8d0a64e](https://github.com/Dannebicque/oreof/commit/8d0a64e3ba51a64ca76984910e9eee38f49a66b9)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Validation:** display counts for formations and parcours ([d10d261](https://github.com/Dannebicque/oreof/commit/d10d261323dece62d2a07671d0a7e8650f03d4a0)) — [@Dannebicque](https://github.com/Dannebicque)
+* **validation:** Update validation templates and logic for improved user experience ([74e141e](https://github.com/Dannebicque/oreof/commit/74e141e8cef17099b920d141852b7f9b0e08e560)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance notification system with new email templates and recipient handling for generic with workflow ([8742814](https://github.com/Dannebicque/oreof/commit/87428148e803c6f96f1b6b75c284472bc7bf9091)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **_formation.html.twig:** add conditional link for PV based on etape type ([c0ccde2](https://github.com/Dannebicque/oreof/commit/c0ccde250603f05b5532f86877900ff9f3f47f6b))
-* **_formation.html.twig:** add conditional link for PV based on etape type ([8025870](https://github.com/Dannebicque/oreof/commit/80258705a14a25dd382851e3df27d7ea9f28f9ca))
-* **_liste.html.twig:** remove commented-out delete button code for user management ([9a633ee](https://github.com/Dannebicque/oreof/commit/9a633eead7dea048d5a89934efc28703880e2ee2))
-* **_liste.html.twig:** remove commented-out delete button code for user management ([256dbd6](https://github.com/Dannebicque/oreof/commit/256dbd64e410c2916cffef5476b0cee418859305))
-* **AbstractLicenceMccc:** correct percentage calculation in display logic ([5b3e4dd](https://github.com/Dannebicque/oreof/commit/5b3e4dd1c3c701cd99aae0bd699eac9525beefe8))
-* **AbstractLicenceMccc:** update comparison for facteur to use float type ([b8884ee](https://github.com/Dannebicque/oreof/commit/b8884ee1901ff42966a08893dd0ace7b68495051))
-* **AbstractLicenceMccc:** update comparison for facteur to use float type ([c5a7fbb](https://github.com/Dannebicque/oreof/commit/c5a7fbb6f6a8b3fa31679c2c171a2d987cdcf349))
-* **ApiJsonExport:** update parcours and formation ID retrieval for accurate data export ([c163ac9](https://github.com/Dannebicque/oreof/commit/c163ac98ba61e004eb2fdcff347bc929ed73c3c9))
-* **authenticator:** Update LAST_USERNAME session key to use SecurityRequestAttributes ([abdd823](https://github.com/Dannebicque/oreof/commit/abdd8239affe3920c4a69420e9400d37c4b065b8))
-* **ButMccc.php, ButMcccVersion.php, CalculStructureParcoursBut.php:** enhance semester filtering logic to include only open semesters ([4f68485](https://github.com/Dannebicque/oreof/commit/4f6848585fb9f848207aa1fac3738a0edced66be))
-* **Controllers:** ensure asynchronous updates in changeListe and related methods ([84c6904](https://github.com/Dannebicque/oreof/commit/84c6904872e50090a816d8460835fabbc615fc66))
-* **DpeParcours.php:** update logic to retrieve demandes for default parcours ([60346ee](https://github.com/Dannebicque/oreof/commit/60346ee57be6fda63464d791568bc31ce2c42a18))
-* **ElementConstitutifMcccController, _mcccEcNonEditable.html.twig:** update method call and improve code formatting ([6d8316e](https://github.com/Dannebicque/oreof/commit/6d8316e3d819b5d830e581935e04499cef981392))
-* **FormationController.php, WorkflowExtension.php, Access.php:** refactor access checks using isOuvert function for improved clarity and maintainability ([d911332](https://github.com/Dannebicque/oreof/commit/d91133297e6730c2dfb38c91bb720f483856e0e0))
-* **GetFormations.php:** comment out authorization check for formation visibility ([3c430e3](https://github.com/Dannebicque/oreof/commit/3c430e3728029202b71fcdd4302c0bbbd805c2b1))
-* **layout:** Update column width in various templates for improved layout consistency ([c704a96](https://github.com/Dannebicque/oreof/commit/c704a9606e7d4487de1c8bcf3b2ed16bb30b2048))
-* **LheoXML:** Refactor referent pedagogique handling to use IDs for unique identification ([1151050](https://github.com/Dannebicque/oreof/commit/11510500e7341b726e42c2acdd1a0859788f2c25))
-* **LicenceMcccVersion.php:** adjust percentage calculations in display functions to account for varying factors ([7d90dc1](https://github.com/Dannebicque/oreof/commit/7d90dc1e78dda28a507b3732f08bd101cbd12ce5))
-* **LicenceMcccVersion.php:** adjust percentage calculations in display functions to account for varying factors ([11cf8c5](https://github.com/Dannebicque/oreof/commit/11cf8c5cdbe68b06c59524b0c0033b9b4707e459))
-* **parcours_manage.html.twig:** enhance permission checks for formation and composante management ([ddafa9d](https://github.com/Dannebicque/oreof/commit/ddafa9d3220b317c6485fa6f5cc40324cb4f1ca1))
-* **parcours:** Affichage du texte descriptif automatique pour information ([8f78487](https://github.com/Dannebicque/oreof/commit/8f78487c407f36d3704c121a02fbb881ef64313b))
-* **ParcoursContactController.php:** remove associated adresse entity when deleting contact ([6bb83da](https://github.com/Dannebicque/oreof/commit/6bb83da6465841efe5e7cfd3854c2f482f7cc6af))
-* **ParcoursContactController.php:** remove associated adresse entity when deleting contact ([a0bfb23](https://github.com/Dannebicque/oreof/commit/a0bfb2335c44eaa68b91786e0ead2306c6d77e26))
-* **ProcessValidationController.php, ValidationAdminController.php, DpeParcoursRepository.php:** update redirect routes and enhance query filtering for validation processes ([ceb2c68](https://github.com/Dannebicque/oreof/commit/ceb2c68cd13d3fc7070ada0de2d355b8ac48df8d))
-* **Profils:** enhance profil management with dynamic updates and improved form handling ([90cfa27](https://github.com/Dannebicque/oreof/commit/90cfa27e3b29753bf3dc9e1fbf21ec22030d7c14))
-* **show.html.twig:** refine permission checks for parcours editing based on status ([7ded66d](https://github.com/Dannebicque/oreof/commit/7ded66d977dcd7ebf41b9ea2d0285cd661201d9a))
-* **show.html.twig:** replace direct state checks with isOuvert function for better clarity ([1724421](https://github.com/Dannebicque/oreof/commit/17244215cf704235ef9ab3c81bf85139a3ccc0d9))
-* **step1.html.twig:** enhance permission checks for parcours editing ([315c9fe](https://github.com/Dannebicque/oreof/commit/315c9fe86a55b787740edb11cef75986e8005aeb))
-* **Structure BUT:** Coeff plutôt que ECTS sur les EC ([16602de](https://github.com/Dannebicque/oreof/commit/16602de8e723c4b1525406a9f95cf306a21b6fa1))
-* **UI:** Enhance translation forms with card layout and breadcrumb navigation ([269e40c](https://github.com/Dannebicque/oreof/commit/269e40c8573b3a4d6262b7dbef873d8015a7658b))
-* **UI:** improve accessibility by adding labels to form elements and enhancing HTML structure ([91b9787](https://github.com/Dannebicque/oreof/commit/91b978750878fe4815bb5f5184d707269c97a293))
-* **UserController.php, UserGestionController.php:** update user data from LDAP when reactivating existing users ([bacedde](https://github.com/Dannebicque/oreof/commit/baceddeaff9aaf26198492723dae2c0f1f6674f6))
-* **UserProfilsController, UserProfilRepository:** add campagneCollecte parameter to role checks and enhance parcours selection in profile configuration ([e9e4ade](https://github.com/Dannebicque/oreof/commit/e9e4aded666136bbc983dacda832b9e93f4d45fb))
-* **validation:** Update form field name for state selection ([55f1329](https://github.com/Dannebicque/oreof/commit/55f1329a4dce6ca10e45b512128f4ccbc305cdce))
-* **WorkflowExtension.php:** add isOuvert function to enhance entity state checks ([fbd4652](https://github.com/Dannebicque/oreof/commit/fbd4652e2d680a8ddd9f1e34e0e48502b797a827))
+* **_formation.html.twig:** add conditional link for PV based on etape type ([c0ccde2](https://github.com/Dannebicque/oreof/commit/c0ccde250603f05b5532f86877900ff9f3f47f6b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **_formation.html.twig:** add conditional link for PV based on etape type ([8025870](https://github.com/Dannebicque/oreof/commit/80258705a14a25dd382851e3df27d7ea9f28f9ca)) — [@Dannebicque](https://github.com/Dannebicque)
+* **_liste.html.twig:** remove commented-out delete button code for user management ([9a633ee](https://github.com/Dannebicque/oreof/commit/9a633eead7dea048d5a89934efc28703880e2ee2)) — [@Dannebicque](https://github.com/Dannebicque)
+* **_liste.html.twig:** remove commented-out delete button code for user management ([256dbd6](https://github.com/Dannebicque/oreof/commit/256dbd64e410c2916cffef5476b0cee418859305)) — [@Dannebicque](https://github.com/Dannebicque)
+* **AbstractLicenceMccc:** correct percentage calculation in display logic ([5b3e4dd](https://github.com/Dannebicque/oreof/commit/5b3e4dd1c3c701cd99aae0bd699eac9525beefe8)) — [@Dannebicque](https://github.com/Dannebicque)
+* **AbstractLicenceMccc:** update comparison for facteur to use float type ([b8884ee](https://github.com/Dannebicque/oreof/commit/b8884ee1901ff42966a08893dd0ace7b68495051)) — [@Dannebicque](https://github.com/Dannebicque)
+* **AbstractLicenceMccc:** update comparison for facteur to use float type ([c5a7fbb](https://github.com/Dannebicque/oreof/commit/c5a7fbb6f6a8b3fa31679c2c171a2d987cdcf349)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ApiJsonExport:** update parcours and formation ID retrieval for accurate data export ([c163ac9](https://github.com/Dannebicque/oreof/commit/c163ac98ba61e004eb2fdcff347bc929ed73c3c9)) — [@Dannebicque](https://github.com/Dannebicque)
+* **authenticator:** Update LAST_USERNAME session key to use SecurityRequestAttributes ([abdd823](https://github.com/Dannebicque/oreof/commit/abdd8239affe3920c4a69420e9400d37c4b065b8)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ButMccc.php, ButMcccVersion.php, CalculStructureParcoursBut.php:** enhance semester filtering logic to include only open semesters ([4f68485](https://github.com/Dannebicque/oreof/commit/4f6848585fb9f848207aa1fac3738a0edced66be)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Controllers:** ensure asynchronous updates in changeListe and related methods ([84c6904](https://github.com/Dannebicque/oreof/commit/84c6904872e50090a816d8460835fabbc615fc66)) — [@Dannebicque](https://github.com/Dannebicque)
+* **DpeParcours.php:** update logic to retrieve demandes for default parcours ([60346ee](https://github.com/Dannebicque/oreof/commit/60346ee57be6fda63464d791568bc31ce2c42a18)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ElementConstitutifMcccController, _mcccEcNonEditable.html.twig:** update method call and improve code formatting ([6d8316e](https://github.com/Dannebicque/oreof/commit/6d8316e3d819b5d830e581935e04499cef981392)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FormationController.php, WorkflowExtension.php, Access.php:** refactor access checks using isOuvert function for improved clarity and maintainability ([d911332](https://github.com/Dannebicque/oreof/commit/d91133297e6730c2dfb38c91bb720f483856e0e0)) — [@Dannebicque](https://github.com/Dannebicque)
+* **GetFormations.php:** comment out authorization check for formation visibility ([3c430e3](https://github.com/Dannebicque/oreof/commit/3c430e3728029202b71fcdd4302c0bbbd805c2b1)) — [@Dannebicque](https://github.com/Dannebicque)
+* **layout:** Update column width in various templates for improved layout consistency ([c704a96](https://github.com/Dannebicque/oreof/commit/c704a9606e7d4487de1c8bcf3b2ed16bb30b2048)) — [@Dannebicque](https://github.com/Dannebicque)
+* **LheoXML:** Refactor referent pedagogique handling to use IDs for unique identification ([1151050](https://github.com/Dannebicque/oreof/commit/11510500e7341b726e42c2acdd1a0859788f2c25)) — [@Dannebicque](https://github.com/Dannebicque)
+* **LicenceMcccVersion.php:** adjust percentage calculations in display functions to account for varying factors ([7d90dc1](https://github.com/Dannebicque/oreof/commit/7d90dc1e78dda28a507b3732f08bd101cbd12ce5)) — [@Dannebicque](https://github.com/Dannebicque)
+* **LicenceMcccVersion.php:** adjust percentage calculations in display functions to account for varying factors ([11cf8c5](https://github.com/Dannebicque/oreof/commit/11cf8c5cdbe68b06c59524b0c0033b9b4707e459)) — [@Dannebicque](https://github.com/Dannebicque)
+* **parcours_manage.html.twig:** enhance permission checks for formation and composante management ([ddafa9d](https://github.com/Dannebicque/oreof/commit/ddafa9d3220b317c6485fa6f5cc40324cb4f1ca1)) — [@Dannebicque](https://github.com/Dannebicque)
+* **parcours:** Affichage du texte descriptif automatique pour information ([8f78487](https://github.com/Dannebicque/oreof/commit/8f78487c407f36d3704c121a02fbb881ef64313b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ParcoursContactController.php:** remove associated adresse entity when deleting contact ([6bb83da](https://github.com/Dannebicque/oreof/commit/6bb83da6465841efe5e7cfd3854c2f482f7cc6af)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ParcoursContactController.php:** remove associated adresse entity when deleting contact ([a0bfb23](https://github.com/Dannebicque/oreof/commit/a0bfb2335c44eaa68b91786e0ead2306c6d77e26)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ProcessValidationController.php, ValidationAdminController.php, DpeParcoursRepository.php:** update redirect routes and enhance query filtering for validation processes ([ceb2c68](https://github.com/Dannebicque/oreof/commit/ceb2c68cd13d3fc7070ada0de2d355b8ac48df8d)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Profils:** enhance profil management with dynamic updates and improved form handling ([90cfa27](https://github.com/Dannebicque/oreof/commit/90cfa27e3b29753bf3dc9e1fbf21ec22030d7c14)) — [@Dannebicque](https://github.com/Dannebicque)
+* **show.html.twig:** refine permission checks for parcours editing based on status ([7ded66d](https://github.com/Dannebicque/oreof/commit/7ded66d977dcd7ebf41b9ea2d0285cd661201d9a)) — [@Dannebicque](https://github.com/Dannebicque)
+* **show.html.twig:** replace direct state checks with isOuvert function for better clarity ([1724421](https://github.com/Dannebicque/oreof/commit/17244215cf704235ef9ab3c81bf85139a3ccc0d9)) — [@Dannebicque](https://github.com/Dannebicque)
+* **step1.html.twig:** enhance permission checks for parcours editing ([315c9fe](https://github.com/Dannebicque/oreof/commit/315c9fe86a55b787740edb11cef75986e8005aeb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Structure BUT:** Coeff plutôt que ECTS sur les EC ([16602de](https://github.com/Dannebicque/oreof/commit/16602de8e723c4b1525406a9f95cf306a21b6fa1)) — [@Dannebicque](https://github.com/Dannebicque)
+* **UI:** Enhance translation forms with card layout and breadcrumb navigation ([269e40c](https://github.com/Dannebicque/oreof/commit/269e40c8573b3a4d6262b7dbef873d8015a7658b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **UI:** improve accessibility by adding labels to form elements and enhancing HTML structure ([91b9787](https://github.com/Dannebicque/oreof/commit/91b978750878fe4815bb5f5184d707269c97a293)) — [@Dannebicque](https://github.com/Dannebicque)
+* **UserController.php, UserGestionController.php:** update user data from LDAP when reactivating existing users ([bacedde](https://github.com/Dannebicque/oreof/commit/baceddeaff9aaf26198492723dae2c0f1f6674f6)) — [@Dannebicque](https://github.com/Dannebicque)
+* **UserProfilsController, UserProfilRepository:** add campagneCollecte parameter to role checks and enhance parcours selection in profile configuration ([e9e4ade](https://github.com/Dannebicque/oreof/commit/e9e4aded666136bbc983dacda832b9e93f4d45fb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **validation:** Update form field name for state selection ([55f1329](https://github.com/Dannebicque/oreof/commit/55f1329a4dce6ca10e45b512128f4ccbc305cdce)) — [@Dannebicque](https://github.com/Dannebicque)
+* **WorkflowExtension.php:** add isOuvert function to enhance entity state checks ([fbd4652](https://github.com/Dannebicque/oreof/commit/fbd4652e2d680a8ddd9f1e34e0e48502b797a827)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.44.1](https://github.com/Dannebicque/oreof/compare/v1.44.0...v1.44.1) (2025-09-02)
 
 
 ### Bug Fixes
 
-* **ApiJsonExport:** update campaign collection ID check from 1 to 2 ([4a4fade](https://github.com/Dannebicque/oreof/commit/4a4fade7aad63bf3176f4540e3674d8649769f63))
-* **BadgeHeuresComponent:** simplify logic for determining 'etatHeuresComplet' ([e20ba60](https://github.com/Dannebicque/oreof/commit/e20ba604b96a907862eb2edb756c6452ffe70f74))
-* **ButHandler, ButTwigExtension:** simplify EC sorting logic and enhance natural sorting for elements ([a60067b](https://github.com/Dannebicque/oreof/commit/a60067b46503af2d445eb102a0e0f6a12ece0f90))
-* **ButHandler, StructureParcoursBut:** enhance EC sorting in parcours structure calculation ([274eb4c](https://github.com/Dannebicque/oreof/commit/274eb4ca8c9c461ae4666132413eb1e9cabc996b))
-* **CalculStructureParcoursBut:** enhance ECTS calculations and refactor structure handling ([3f1ca2e](https://github.com/Dannebicque/oreof/commit/3f1ca2e7c5753df6e6ee51d590b5162b42695813))
-* **Contact, AppExtension:** handle null values in display and text printing methods ([22f5a52](https://github.com/Dannebicque/oreof/commit/22f5a52d2d64940e292af1acc4799cc7b35d666a))
-* **ExportSyntheseModification:** update structure differences retrieval for parcours ([6ad33d6](https://github.com/Dannebicque/oreof/commit/6ad33d68ec514fed3d4247b5bf60e42a115af701))
-* **FicheMatiereController, ParcoursController, RessourceVoter, show.html.twig:** enhance EDIT permission checks for various subjects ([b1164e3](https://github.com/Dannebicque/oreof/commit/b1164e3f7d6a3efa0c17ea53b8fb71d19b6f8961))
-* **FicheMatiereExportController, fiche_matiere_manage.html.twig:** add TypeEpreuveRepository for enhanced type handling and update access checks ([29faf60](https://github.com/Dannebicque/oreof/commit/29faf607efaddc0fcc6506af94df6159b022d0d8))
-* **ParcoursMcccExportController:** remove unused dateCfvu variable and simplify export method parameters ([126b1b1](https://github.com/Dannebicque/oreof/commit/126b1b182ae4b0acd1dbd715042dfde02ced6c61))
-* Plusieurs années pour les PDF (MCCC) ([5bd0a47](https://github.com/Dannebicque/oreof/commit/5bd0a471f52aa852b27d6176ebdd6a5d389983ad))
-* **PvConseilController:** correct typo in email subject for RF change notification ([2f8ca07](https://github.com/Dannebicque/oreof/commit/2f8ca079887bb69afd3da2a25206cec9c8f2059e))
-* **RessourceVoter, show.html.twig:** enhance access control for 'manage' attribute and update edit permission checks ([27bbe15](https://github.com/Dannebicque/oreof/commit/27bbe1577cbca6cdca1c59dc7702a2f4b9be9781))
-* **RessourceVoter:** add validation check for 'valider_publication' in workflow ([8b52808](https://github.com/Dannebicque/oreof/commit/8b528084b8c0846b57149899e2c4b5cd289d5c32))
-* **SyntheseModificationController:** enhance validation checks for parcours states ([00b396d](https://github.com/Dannebicque/oreof/commit/00b396d0403c7a4d9b339f1a229b010530682dfa))
-* **UserController:** remove unused RoleRepository dependency and simplify user show method ([c3c701e](https://github.com/Dannebicque/oreof/commit/c3c701ea927f36fede1ead433b29e1df5ffff874))
+* **ApiJsonExport:** update campaign collection ID check from 1 to 2 ([4a4fade](https://github.com/Dannebicque/oreof/commit/4a4fade7aad63bf3176f4540e3674d8649769f63)) — [@Dannebicque](https://github.com/Dannebicque)
+* **BadgeHeuresComponent:** simplify logic for determining 'etatHeuresComplet' ([e20ba60](https://github.com/Dannebicque/oreof/commit/e20ba604b96a907862eb2edb756c6452ffe70f74)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ButHandler, ButTwigExtension:** simplify EC sorting logic and enhance natural sorting for elements ([a60067b](https://github.com/Dannebicque/oreof/commit/a60067b46503af2d445eb102a0e0f6a12ece0f90)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ButHandler, StructureParcoursBut:** enhance EC sorting in parcours structure calculation ([274eb4c](https://github.com/Dannebicque/oreof/commit/274eb4ca8c9c461ae4666132413eb1e9cabc996b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **CalculStructureParcoursBut:** enhance ECTS calculations and refactor structure handling ([3f1ca2e](https://github.com/Dannebicque/oreof/commit/3f1ca2e7c5753df6e6ee51d590b5162b42695813)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Contact, AppExtension:** handle null values in display and text printing methods ([22f5a52](https://github.com/Dannebicque/oreof/commit/22f5a52d2d64940e292af1acc4799cc7b35d666a)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportSyntheseModification:** update structure differences retrieval for parcours ([6ad33d6](https://github.com/Dannebicque/oreof/commit/6ad33d68ec514fed3d4247b5bf60e42a115af701)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FicheMatiereController, ParcoursController, RessourceVoter, show.html.twig:** enhance EDIT permission checks for various subjects ([b1164e3](https://github.com/Dannebicque/oreof/commit/b1164e3f7d6a3efa0c17ea53b8fb71d19b6f8961)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FicheMatiereExportController, fiche_matiere_manage.html.twig:** add TypeEpreuveRepository for enhanced type handling and update access checks ([29faf60](https://github.com/Dannebicque/oreof/commit/29faf607efaddc0fcc6506af94df6159b022d0d8)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ParcoursMcccExportController:** remove unused dateCfvu variable and simplify export method parameters ([126b1b1](https://github.com/Dannebicque/oreof/commit/126b1b182ae4b0acd1dbd715042dfde02ced6c61)) — [@Dannebicque](https://github.com/Dannebicque)
+* Plusieurs années pour les PDF (MCCC) ([5bd0a47](https://github.com/Dannebicque/oreof/commit/5bd0a471f52aa852b27d6176ebdd6a5d389983ad)) — [@pmarchal51100](https://github.com/pmarchal51100)
+* **PvConseilController:** correct typo in email subject for RF change notification ([2f8ca07](https://github.com/Dannebicque/oreof/commit/2f8ca079887bb69afd3da2a25206cec9c8f2059e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **RessourceVoter, show.html.twig:** enhance access control for 'manage' attribute and update edit permission checks ([27bbe15](https://github.com/Dannebicque/oreof/commit/27bbe1577cbca6cdca1c59dc7702a2f4b9be9781)) — [@Dannebicque](https://github.com/Dannebicque)
+* **RessourceVoter:** add validation check for 'valider_publication' in workflow ([8b52808](https://github.com/Dannebicque/oreof/commit/8b528084b8c0846b57149899e2c4b5cd289d5c32)) — [@Dannebicque](https://github.com/Dannebicque)
+* **SyntheseModificationController:** enhance validation checks for parcours states ([00b396d](https://github.com/Dannebicque/oreof/commit/00b396d0403c7a4d9b339f1a229b010530682dfa)) — [@Dannebicque](https://github.com/Dannebicque)
+* **UserController:** remove unused RoleRepository dependency and simplify user show method ([c3c701e](https://github.com/Dannebicque/oreof/commit/c3c701ea927f36fede1ead433b29e1df5ffff874)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.44.0](https://github.com/Dannebicque/oreof/compare/v1.43.0...v1.44.0) (2025-08-22)
 
 
 ### Features
 
-* **Profils:** add form handling and update template for profil management ([8e0beba](https://github.com/Dannebicque/oreof/commit/8e0bebab2dcf9fb471253931ab4167f33a420f92))
-* **TypeDiplome:** refactor addEc method and update show templates for better structure ([659553b](https://github.com/Dannebicque/oreof/commit/659553bc089224691f9dbb2ee1a34d36591b16fb))
-* **TypeDiplome:** refactor addEc method and update show templates for better structure ([75d6ed8](https://github.com/Dannebicque/oreof/commit/75d6ed8cda8c8581dd64478b7f4838809fb0aed6))
-* **User:** refactor user management to replace UserCentre with UserProfil and update related templates ([b01eb55](https://github.com/Dannebicque/oreof/commit/b01eb55c710b43a1e8491bd24d03cf649d997368))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([63f5bce](https://github.com/Dannebicque/oreof/commit/63f5bce3c0566844ebbc7ab9a8556d98e7e1fa70))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([8c0317e](https://github.com/Dannebicque/oreof/commit/8c0317ece09b734a76805f23068f03cabc46d61c))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([68c5699](https://github.com/Dannebicque/oreof/commit/68c5699cb1d59b36f78e2391cbce8222ad928f54))
+* **Profils:** add form handling and update template for profil management ([8e0beba](https://github.com/Dannebicque/oreof/commit/8e0bebab2dcf9fb471253931ab4167f33a420f92)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** refactor addEc method and update show templates for better structure ([659553b](https://github.com/Dannebicque/oreof/commit/659553bc089224691f9dbb2ee1a34d36591b16fb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** refactor addEc method and update show templates for better structure ([75d6ed8](https://github.com/Dannebicque/oreof/commit/75d6ed8cda8c8581dd64478b7f4838809fb0aed6)) — [@Dannebicque](https://github.com/Dannebicque)
+* **User:** refactor user management to replace UserCentre with UserProfil and update related templates ([b01eb55](https://github.com/Dannebicque/oreof/commit/b01eb55c710b43a1e8491bd24d03cf649d997368)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([63f5bce](https://github.com/Dannebicque/oreof/commit/63f5bce3c0566844ebbc7ab9a8556d98e7e1fa70)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([8c0317e](https://github.com/Dannebicque/oreof/commit/8c0317ece09b734a76805f23068f03cabc46d61c)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([68c5699](https://github.com/Dannebicque/oreof/commit/68c5699cb1d59b36f78e2391cbce8222ad928f54)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **FicheMatiereExportController:** integrate TypeDiplomeResolver and update template logic ([0205aec](https://github.com/Dannebicque/oreof/commit/0205aec25fa70edcb2d53f92ce7dbbaa1c8e4ca9))
-* **FicheMatiereExportController:** integrate TypeDiplomeResolver and update template logic ([fff61c7](https://github.com/Dannebicque/oreof/commit/fff61c7e5fa5202ab70d32381c3fda80cb384d27))
-* **FicheMatiereExportController:** integrate TypeDiplomeResolver and update template logic ([a70945f](https://github.com/Dannebicque/oreof/commit/a70945f082cfd01f32f2ace891a4fb953bf98f11))
-* **FicheMatiereWizardController:** streamline handling of 'hd' type in form rendering ([aa75759](https://github.com/Dannebicque/oreof/commit/aa757590d8c08889878f7dd5f96cc3183edea680))
-* **formation:** refactor export logic to use TypeDiplomeResolver and handle missing TypeDiplome ([48006f0](https://github.com/Dannebicque/oreof/commit/48006f0fb161aa2949464b92003434a14a497f1f))
-* **formation:** refactor export logic to use TypeDiplomeResolver and handle missing TypeDiplome ([4d52b51](https://github.com/Dannebicque/oreof/commit/4d52b512071cd29b05cc1825222c58473672ceec))
-* **GetUeEcts:** handle child UE cases in totalEcts calculation ([bb6d769](https://github.com/Dannebicque/oreof/commit/bb6d76986b55ffa5dcff0cdc6b9df5c94bbab82c))
-* **LicenceController:** refactor mcccs retrieval and improve twig template logic ([cd4caa1](https://github.com/Dannebicque/oreof/commit/cd4caa19af2a7e0ede3fe0d671a4b3a8bd45560e))
-* **ParcoursMcccExport:** correct parameter order in getCfvuMcccExportFromFile call ([f5eb144](https://github.com/Dannebicque/oreof/commit/f5eb1443956d8fc4e9a5ef015914f82713a39466))
-* **ParcoursMcccExport:** correct parameter order in getCfvuMcccExportFromFile call ([ac5e699](https://github.com/Dannebicque/oreof/commit/ac5e699c2a84a0bee377f02a9209b09bc7b1466f))
-* **ParcoursSaveController, AddCentreFormationSubscriber, AddCentreParcoursSubscriber:** optimize event handling and ensure entity flushing ([60d1f9b](https://github.com/Dannebicque/oreof/commit/60d1f9b327b82e85062a49280231ee9daa414921))
-* **RessourceVoter:** enhance access checks for Composante and Formation objects ([3d429ad](https://github.com/Dannebicque/oreof/commit/3d429adccd28a94a119e95301bbdbdddd6aba34e))
-* **RessourceVoter:** enhance access checks for Composante and Formation objects ([2509475](https://github.com/Dannebicque/oreof/commit/2509475372d7dbade0ceae94873041ac08085a30))
-* **RessourceVoter:** enhance access checks for FicheMatiere and add new validation logic ([b58db42](https://github.com/Dannebicque/oreof/commit/b58db42927343a87dfb94b79c4322a560a829319))
-* **RessourceVoter:** update access checks for DpeParcours and enhance workflow transitions ([6b4a65b](https://github.com/Dannebicque/oreof/commit/6b4a65bc5cb6b74c2c173116f308749102d87af2))
-* **template:** correct logical operators in permission checks ([7d7320b](https://github.com/Dannebicque/oreof/commit/7d7320b9dade861e6a46363489c9a69ceb750f08))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([cfe2bd8](https://github.com/Dannebicque/oreof/commit/cfe2bd8b962f5a2ccfa56e0d60bff9c949fffaff))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([0c0afe3](https://github.com/Dannebicque/oreof/commit/0c0afe317af7cb4d2468345671e020317bb8efbc))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([65339e6](https://github.com/Dannebicque/oreof/commit/65339e6e594e778cc1ce41b46cc9dd0cb156f3c0))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([5e15837](https://github.com/Dannebicque/oreof/commit/5e15837920f40b87c64508f3bdc43adf4ad0bd9d))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([68180c6](https://github.com/Dannebicque/oreof/commit/68180c6f4fe1794474506f5273814c894aa82490))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([1211b65](https://github.com/Dannebicque/oreof/commit/1211b65c2b7fb7a7cb7e2685c13758801aa9b09c))
-* **WorkflowExtension:** add condition for 'valide_a_publier' in place checks ([51755d6](https://github.com/Dannebicque/oreof/commit/51755d6b7f3baf0736e3188e5317af0d6ea7185b))
+* **FicheMatiereExportController:** integrate TypeDiplomeResolver and update template logic ([0205aec](https://github.com/Dannebicque/oreof/commit/0205aec25fa70edcb2d53f92ce7dbbaa1c8e4ca9)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FicheMatiereExportController:** integrate TypeDiplomeResolver and update template logic ([fff61c7](https://github.com/Dannebicque/oreof/commit/fff61c7e5fa5202ab70d32381c3fda80cb384d27)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FicheMatiereExportController:** integrate TypeDiplomeResolver and update template logic ([a70945f](https://github.com/Dannebicque/oreof/commit/a70945f082cfd01f32f2ace891a4fb953bf98f11)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FicheMatiereWizardController:** streamline handling of 'hd' type in form rendering ([aa75759](https://github.com/Dannebicque/oreof/commit/aa757590d8c08889878f7dd5f96cc3183edea680)) — [@Dannebicque](https://github.com/Dannebicque)
+* **formation:** refactor export logic to use TypeDiplomeResolver and handle missing TypeDiplome ([48006f0](https://github.com/Dannebicque/oreof/commit/48006f0fb161aa2949464b92003434a14a497f1f)) — [@Dannebicque](https://github.com/Dannebicque)
+* **formation:** refactor export logic to use TypeDiplomeResolver and handle missing TypeDiplome ([4d52b51](https://github.com/Dannebicque/oreof/commit/4d52b512071cd29b05cc1825222c58473672ceec)) — [@Dannebicque](https://github.com/Dannebicque)
+* **GetUeEcts:** handle child UE cases in totalEcts calculation ([bb6d769](https://github.com/Dannebicque/oreof/commit/bb6d76986b55ffa5dcff0cdc6b9df5c94bbab82c)) — [@Dannebicque](https://github.com/Dannebicque)
+* **LicenceController:** refactor mcccs retrieval and improve twig template logic ([cd4caa1](https://github.com/Dannebicque/oreof/commit/cd4caa19af2a7e0ede3fe0d671a4b3a8bd45560e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ParcoursMcccExport:** correct parameter order in getCfvuMcccExportFromFile call ([f5eb144](https://github.com/Dannebicque/oreof/commit/f5eb1443956d8fc4e9a5ef015914f82713a39466)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ParcoursMcccExport:** correct parameter order in getCfvuMcccExportFromFile call ([ac5e699](https://github.com/Dannebicque/oreof/commit/ac5e699c2a84a0bee377f02a9209b09bc7b1466f)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ParcoursSaveController, AddCentreFormationSubscriber, AddCentreParcoursSubscriber:** optimize event handling and ensure entity flushing ([60d1f9b](https://github.com/Dannebicque/oreof/commit/60d1f9b327b82e85062a49280231ee9daa414921)) — [@Dannebicque](https://github.com/Dannebicque)
+* **RessourceVoter:** enhance access checks for Composante and Formation objects ([3d429ad](https://github.com/Dannebicque/oreof/commit/3d429adccd28a94a119e95301bbdbdddd6aba34e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **RessourceVoter:** enhance access checks for Composante and Formation objects ([2509475](https://github.com/Dannebicque/oreof/commit/2509475372d7dbade0ceae94873041ac08085a30)) — [@Dannebicque](https://github.com/Dannebicque)
+* **RessourceVoter:** enhance access checks for FicheMatiere and add new validation logic ([b58db42](https://github.com/Dannebicque/oreof/commit/b58db42927343a87dfb94b79c4322a560a829319)) — [@Dannebicque](https://github.com/Dannebicque)
+* **RessourceVoter:** update access checks for DpeParcours and enhance workflow transitions ([6b4a65b](https://github.com/Dannebicque/oreof/commit/6b4a65bc5cb6b74c2c173116f308749102d87af2)) — [@Dannebicque](https://github.com/Dannebicque)
+* **template:** correct logical operators in permission checks ([7d7320b](https://github.com/Dannebicque/oreof/commit/7d7320b9dade861e6a46363489c9a69ceb750f08)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([cfe2bd8](https://github.com/Dannebicque/oreof/commit/cfe2bd8b962f5a2ccfa56e0d60bff9c949fffaff)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([0c0afe3](https://github.com/Dannebicque/oreof/commit/0c0afe317af7cb4d2468345671e020317bb8efbc)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([65339e6](https://github.com/Dannebicque/oreof/commit/65339e6e594e778cc1ce41b46cc9dd0cb156f3c0)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([5e15837](https://github.com/Dannebicque/oreof/commit/5e15837920f40b87c64508f3bdc43adf4ad0bd9d)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([68180c6](https://github.com/Dannebicque/oreof/commit/68180c6f4fe1794474506f5273814c894aa82490)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([1211b65](https://github.com/Dannebicque/oreof/commit/1211b65c2b7fb7a7cb7e2685c13758801aa9b09c)) — [@Dannebicque](https://github.com/Dannebicque)
+* **WorkflowExtension:** add condition for 'valide_a_publier' in place checks ([51755d6](https://github.com/Dannebicque/oreof/commit/51755d6b7f3baf0736e3188e5317af0d6ea7185b)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ### [1.43.1](https://github.com/Dannebicque/oreof/compare/v1.43.0...v1.43.1) (2025-08-18)
 
 
 ### Features
 
-* **Profils:** add form handling and update template for profil management ([8e0beba](https://github.com/Dannebicque/oreof/commit/8e0bebab2dcf9fb471253931ab4167f33a420f92))
-* **TypeDiplome:** refactor addEc method and update show templates for better structure ([659553b](https://github.com/Dannebicque/oreof/commit/659553bc089224691f9dbb2ee1a34d36591b16fb))
-* **TypeDiplome:** refactor addEc method and update show templates for better structure ([75d6ed8](https://github.com/Dannebicque/oreof/commit/75d6ed8cda8c8581dd64478b7f4838809fb0aed6))
-* **User:** refactor user management to replace UserCentre with UserProfil and update related templates ([b01eb55](https://github.com/Dannebicque/oreof/commit/b01eb55c710b43a1e8491bd24d03cf649d997368))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([63f5bce](https://github.com/Dannebicque/oreof/commit/63f5bce3c0566844ebbc7ab9a8556d98e7e1fa70))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([8c0317e](https://github.com/Dannebicque/oreof/commit/8c0317ece09b734a76805f23068f03cabc46d61c))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([68c5699](https://github.com/Dannebicque/oreof/commit/68c5699cb1d59b36f78e2391cbce8222ad928f54))
+* **Profils:** add form handling and update template for profil management ([8e0beba](https://github.com/Dannebicque/oreof/commit/8e0bebab2dcf9fb471253931ab4167f33a420f92)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** refactor addEc method and update show templates for better structure ([659553b](https://github.com/Dannebicque/oreof/commit/659553bc089224691f9dbb2ee1a34d36591b16fb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** refactor addEc method and update show templates for better structure ([75d6ed8](https://github.com/Dannebicque/oreof/commit/75d6ed8cda8c8581dd64478b7f4838809fb0aed6)) — [@Dannebicque](https://github.com/Dannebicque)
+* **User:** refactor user management to replace UserCentre with UserProfil and update related templates ([b01eb55](https://github.com/Dannebicque/oreof/commit/b01eb55c710b43a1e8491bd24d03cf649d997368)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([63f5bce](https://github.com/Dannebicque/oreof/commit/63f5bce3c0566844ebbc7ab9a8556d98e7e1fa70)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([8c0317e](https://github.com/Dannebicque/oreof/commit/8c0317ece09b734a76805f23068f03cabc46d61c)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([68c5699](https://github.com/Dannebicque/oreof/commit/68c5699cb1d59b36f78e2391cbce8222ad928f54)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **ParcoursMcccExport:** correct parameter order in getCfvuMcccExportFromFile call ([f5eb144](https://github.com/Dannebicque/oreof/commit/f5eb1443956d8fc4e9a5ef015914f82713a39466))
-* **ParcoursMcccExport:** correct parameter order in getCfvuMcccExportFromFile call ([ac5e699](https://github.com/Dannebicque/oreof/commit/ac5e699c2a84a0bee377f02a9209b09bc7b1466f))
-* **template:** correct logical operators in permission checks ([7d7320b](https://github.com/Dannebicque/oreof/commit/7d7320b9dade861e6a46363489c9a69ceb750f08))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([cfe2bd8](https://github.com/Dannebicque/oreof/commit/cfe2bd8b962f5a2ccfa56e0d60bff9c949fffaff))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([0c0afe3](https://github.com/Dannebicque/oreof/commit/0c0afe317af7cb4d2468345671e020317bb8efbc))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([65339e6](https://github.com/Dannebicque/oreof/commit/65339e6e594e778cc1ce41b46cc9dd0cb156f3c0))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([5e15837](https://github.com/Dannebicque/oreof/commit/5e15837920f40b87c64508f3bdc43adf4ad0bd9d))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([68180c6](https://github.com/Dannebicque/oreof/commit/68180c6f4fe1794474506f5273814c894aa82490))
-* **Workflow:** enhance place validation logic in WorkflowExtension ([1211b65](https://github.com/Dannebicque/oreof/commit/1211b65c2b7fb7a7cb7e2685c13758801aa9b09c))
+* **ParcoursMcccExport:** correct parameter order in getCfvuMcccExportFromFile call ([f5eb144](https://github.com/Dannebicque/oreof/commit/f5eb1443956d8fc4e9a5ef015914f82713a39466)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ParcoursMcccExport:** correct parameter order in getCfvuMcccExportFromFile call ([ac5e699](https://github.com/Dannebicque/oreof/commit/ac5e699c2a84a0bee377f02a9209b09bc7b1466f)) — [@Dannebicque](https://github.com/Dannebicque)
+* **template:** correct logical operators in permission checks ([7d7320b](https://github.com/Dannebicque/oreof/commit/7d7320b9dade861e6a46363489c9a69ceb750f08)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([cfe2bd8](https://github.com/Dannebicque/oreof/commit/cfe2bd8b962f5a2ccfa56e0d60bff9c949fffaff)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([0c0afe3](https://github.com/Dannebicque/oreof/commit/0c0afe317af7cb4d2468345671e020317bb8efbc)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([65339e6](https://github.com/Dannebicque/oreof/commit/65339e6e594e778cc1ce41b46cc9dd0cb156f3c0)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([5e15837](https://github.com/Dannebicque/oreof/commit/5e15837920f40b87c64508f3bdc43adf4ad0bd9d)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([68180c6](https://github.com/Dannebicque/oreof/commit/68180c6f4fe1794474506f5273814c894aa82490)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Workflow:** enhance place validation logic in WorkflowExtension ([1211b65](https://github.com/Dannebicque/oreof/commit/1211b65c2b7fb7a7cb7e2685c13758801aa9b09c)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.43.0](https://github.com/Dannebicque/oreof/compare/v1.42.0...v1.43.0) (2025-07-17)
 
 
 ### Features
 
-* add commentaire field to Formation and Parcours entities, implement CommentaireAdmin component for editing ([046d1d1](https://github.com/Dannebicque/oreof/commit/046d1d1d92cd54ab8395f8edc3e458b8cec773c6))
-* implement TranslationController and TranslationFileManager for managing translation files ([44c61a0](https://github.com/Dannebicque/oreof/commit/44c61a08b108d726bc446babce1ac9eb513edaad))
-* **Licence:** update CalculStructureParcours dependency and modify calculDisplayMccc method signature ([7f8c733](https://github.com/Dannebicque/oreof/commit/7f8c7337d3b2b39e02ce84c6db087839c353028d))
-* **TypeDiplome:** add Cypress support files for login and dashboard tests ([b9b4e63](https://github.com/Dannebicque/oreof/commit/b9b4e63b73312a3d1cbf84e73c154f6fa24a4212))
-* **TypeDiplome:** add Cypress support files for login and dashboard tests ([62b8ca2](https://github.com/Dannebicque/oreof/commit/62b8ca213b33792b1497bff11fc2d3caf8ba89a8))
-* **TypeDiplome:** add Cypress support files for login and dashboard tests ([13a34b4](https://github.com/Dannebicque/oreof/commit/13a34b4a4367cb3e5c11afcbe652160b395fcf28))
-* **TypeDiplome:** add Cypress support files for login and dashboard tests ([b5e6846](https://github.com/Dannebicque/oreof/commit/b5e68463442f1084ce464e78a9056882fa7f0a9e))
-* **TypeDiplome:** add Cypress support files for login and dashboard tests ([9496954](https://github.com/Dannebicque/oreof/commit/949695476f330b051a30357e7cc2ffd9646ccdbf))
-* **TypeDiplome:** add Cypress support files for login and dashboard tests ([92b144f](https://github.com/Dannebicque/oreof/commit/92b144fb69c3f401bcb720a202c465bef753e89b))
-* **TypeDiplome:** add Cypress support files for login and dashboard tests ([107b1fa](https://github.com/Dannebicque/oreof/commit/107b1fac7ab0c586e14591d8a91a71a1693dc57f))
-* **TypeDiplome:** add Cypress support files for login and dashboard tests ([fa1b761](https://github.com/Dannebicque/oreof/commit/fa1b7612b182b581389db75ed9c14ea382cc216b))
-* **TypeDiplome:** add serviceDemande field to User and enhance DpeDemande relationships ([9e48f8d](https://github.com/Dannebicque/oreof/commit/9e48f8dc09d13948b70f23365bca1722367e7f16))
-* **TypeDiplome:** add storageKey to stimulus controllers for improved state management ([0278427](https://github.com/Dannebicque/oreof/commit/0278427fb7df4cfcb621b62990f4bfaa7eecda4a))
-* **TypeDiplome:** add user profile management features and update role checks ([26067ad](https://github.com/Dannebicque/oreof/commit/26067ada3154114a5797fc62a3e3bd27dbccd75b))
-* **TypeDiplome:** deprecate old domain handling and improve mention management ([cce86c1](https://github.com/Dannebicque/oreof/commit/cce86c1556dd337da6f4c8c233ea489d0fe50856))
-* **TypeDiplome:** enhance TranslationFileManager with project and cache directory management ([0275d69](https://github.com/Dannebicque/oreof/commit/0275d69aadaeaa9b43aceb24673aa110f06ef4c4))
-* **TypeDiplome:** enhance workflow with date metadata and add reserve notification email ([e11e56a](https://github.com/Dannebicque/oreof/commit/e11e56a0058466cbfebc08d71614c947bd9f04f2))
-* **TypeDiplome:** implement database connection and job tracking for export processes ([b75be42](https://github.com/Dannebicque/oreof/commit/b75be42bd89f867ad7e01cff07c0cdbf17b55512))
-* **TypeDiplome:** improve URL handling in export controller for dynamic query parameters ([27daec3](https://github.com/Dannebicque/oreof/commit/27daec3cdff41801ba129b6a05f2bb71cc154086))
-* **TypeDiplome:** refactor export classes to use ProjectDirProvider for directory management ([386f920](https://github.com/Dannebicque/oreof/commit/386f9204ecc8c9f6999f5acb3e78e31eb6dee9e5))
-* **TypeDiplome:** update event handling and user profile management in formation processes ([f646830](https://github.com/Dannebicque/oreof/commit/f646830d6dd1645a27ea03e0e8815af066325099))
-* **TypeDiplome:** update export functionality in DemandeDpeController to include Type Diplôme and adjust column indices ([4b10081](https://github.com/Dannebicque/oreof/commit/4b10081245af92c4438f57de8e33cacc89e5ee5b))
+* add commentaire field to Formation and Parcours entities, implement CommentaireAdmin component for editing ([046d1d1](https://github.com/Dannebicque/oreof/commit/046d1d1d92cd54ab8395f8edc3e458b8cec773c6)) — [@Dannebicque](https://github.com/Dannebicque)
+* implement TranslationController and TranslationFileManager for managing translation files ([44c61a0](https://github.com/Dannebicque/oreof/commit/44c61a08b108d726bc446babce1ac9eb513edaad)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Licence:** update CalculStructureParcours dependency and modify calculDisplayMccc method signature ([7f8c733](https://github.com/Dannebicque/oreof/commit/7f8c7337d3b2b39e02ce84c6db087839c353028d)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add Cypress support files for login and dashboard tests ([b9b4e63](https://github.com/Dannebicque/oreof/commit/b9b4e63b73312a3d1cbf84e73c154f6fa24a4212)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add Cypress support files for login and dashboard tests ([62b8ca2](https://github.com/Dannebicque/oreof/commit/62b8ca213b33792b1497bff11fc2d3caf8ba89a8)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add Cypress support files for login and dashboard tests ([13a34b4](https://github.com/Dannebicque/oreof/commit/13a34b4a4367cb3e5c11afcbe652160b395fcf28)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add Cypress support files for login and dashboard tests ([b5e6846](https://github.com/Dannebicque/oreof/commit/b5e68463442f1084ce464e78a9056882fa7f0a9e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add Cypress support files for login and dashboard tests ([9496954](https://github.com/Dannebicque/oreof/commit/949695476f330b051a30357e7cc2ffd9646ccdbf)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add Cypress support files for login and dashboard tests ([92b144f](https://github.com/Dannebicque/oreof/commit/92b144fb69c3f401bcb720a202c465bef753e89b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add Cypress support files for login and dashboard tests ([107b1fa](https://github.com/Dannebicque/oreof/commit/107b1fac7ab0c586e14591d8a91a71a1693dc57f)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add Cypress support files for login and dashboard tests ([fa1b761](https://github.com/Dannebicque/oreof/commit/fa1b7612b182b581389db75ed9c14ea382cc216b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add serviceDemande field to User and enhance DpeDemande relationships ([9e48f8d](https://github.com/Dannebicque/oreof/commit/9e48f8dc09d13948b70f23365bca1722367e7f16)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add storageKey to stimulus controllers for improved state management ([0278427](https://github.com/Dannebicque/oreof/commit/0278427fb7df4cfcb621b62990f4bfaa7eecda4a)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** add user profile management features and update role checks ([26067ad](https://github.com/Dannebicque/oreof/commit/26067ada3154114a5797fc62a3e3bd27dbccd75b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** deprecate old domain handling and improve mention management ([cce86c1](https://github.com/Dannebicque/oreof/commit/cce86c1556dd337da6f4c8c233ea489d0fe50856)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** enhance TranslationFileManager with project and cache directory management ([0275d69](https://github.com/Dannebicque/oreof/commit/0275d69aadaeaa9b43aceb24673aa110f06ef4c4)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** enhance workflow with date metadata and add reserve notification email ([e11e56a](https://github.com/Dannebicque/oreof/commit/e11e56a0058466cbfebc08d71614c947bd9f04f2)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** implement database connection and job tracking for export processes ([b75be42](https://github.com/Dannebicque/oreof/commit/b75be42bd89f867ad7e01cff07c0cdbf17b55512)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** improve URL handling in export controller for dynamic query parameters ([27daec3](https://github.com/Dannebicque/oreof/commit/27daec3cdff41801ba129b6a05f2bb71cc154086)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** refactor export classes to use ProjectDirProvider for directory management ([386f920](https://github.com/Dannebicque/oreof/commit/386f9204ecc8c9f6999f5acb3e78e31eb6dee9e5)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** update event handling and user profile management in formation processes ([f646830](https://github.com/Dannebicque/oreof/commit/f646830d6dd1645a27ea03e0e8815af066325099)) — [@Dannebicque](https://github.com/Dannebicque)
+* **TypeDiplome:** update export functionality in DemandeDpeController to include Type Diplôme and adjust column indices ([4b10081](https://github.com/Dannebicque/oreof/commit/4b10081245af92c4438f57de8e33cacc89e5ee5b)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.42.0](https://github.com/Dannebicque/oreof/compare/v1.41.0...v1.42.0) (2025-06-05)
 
 
 ### Features
 
-* **DemandeDpeController.php:** add admin-specific columns for parcours and mention IDs in DPE export ([57264d2](https://github.com/Dannebicque/oreof/commit/57264d20920d57c0cb3ef8f67b76b23c493ea5f5))
-* **ElementConstitutif:** add getHasQuitus method for quitus status retrieval ([f1b75f5](https://github.com/Dannebicque/oreof/commit/f1b75f5998a185cc0afd102d8eec8c61e940eaee))
-* **Export:** add export functionality for semestres ouverts ([1ca8295](https://github.com/Dannebicque/oreof/commit/1ca82954667c94914cc276d30110f3e7c46478a9))
-* **Export:** add export functionality for semestres ouverts ([a8d6afe](https://github.com/Dannebicque/oreof/commit/a8d6afeff24c1c581ae3acb12732f46a161860c1))
-* **Export:** add export functionality for semestres ouverts ([b58cc63](https://github.com/Dannebicque/oreof/commit/b58cc632a79383d857b07921c580f047178c4df2))
-* **Export:** add export functionality for semestres ouverts ([4d14ffa](https://github.com/Dannebicque/oreof/commit/4d14ffa7c2ab7d438e893255d5890235c36f5e14))
-* **Export:** add mention and parcours IDs to semestres export ([4c75de3](https://github.com/Dannebicque/oreof/commit/4c75de37de81b349bd49f221a42dc9984541c72e))
-* **Export:** add mention and parcours IDs to semestres export ([91b0958](https://github.com/Dannebicque/oreof/commit/91b0958cda8cc1cbf59b2a0b2c717cdb9c8b4f8e))
-* **Licence:** prepend 'QUITUS' to texte if applicable ([fea3f01](https://github.com/Dannebicque/oreof/commit/fea3f01710051f9b73fbb250528782298e486127))
-* **Licence:** prepend 'QUITUS' to texte if applicable ([0cb158a](https://github.com/Dannebicque/oreof/commit/0cb158a2aade9aebdefdc2be0f4d2ded93f17057))
-* **Licence:** prepend 'QUITUS' to texte if applicable ([3f62ee0](https://github.com/Dannebicque/oreof/commit/3f62ee09ab2cef0b5504a4ca1d163bc8de02d728))
-* **Licence:** prepend 'QUITUS' to texte if applicable ([6a0c38f](https://github.com/Dannebicque/oreof/commit/6a0c38ff89773de727f955f3a9b8e9f3bded0005))
-* **Licence:** prepend 'QUITUS' to texte if applicable ([b2004b5](https://github.com/Dannebicque/oreof/commit/b2004b5e7cc431ebe312bd1f2b8921fb01e4e0b2))
-* **SyntheseModificationController.php:** add validation checks for parcours before adding to formations ([2fb3a50](https://github.com/Dannebicque/oreof/commit/2fb3a50c1c4849905879e4d6c69483b2476c56e7))
+* **DemandeDpeController.php:** add admin-specific columns for parcours and mention IDs in DPE export ([57264d2](https://github.com/Dannebicque/oreof/commit/57264d20920d57c0cb3ef8f67b76b23c493ea5f5)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ElementConstitutif:** add getHasQuitus method for quitus status retrieval ([f1b75f5](https://github.com/Dannebicque/oreof/commit/f1b75f5998a185cc0afd102d8eec8c61e940eaee)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Export:** add export functionality for semestres ouverts ([1ca8295](https://github.com/Dannebicque/oreof/commit/1ca82954667c94914cc276d30110f3e7c46478a9)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Export:** add export functionality for semestres ouverts ([a8d6afe](https://github.com/Dannebicque/oreof/commit/a8d6afeff24c1c581ae3acb12732f46a161860c1)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Export:** add export functionality for semestres ouverts ([b58cc63](https://github.com/Dannebicque/oreof/commit/b58cc632a79383d857b07921c580f047178c4df2)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Export:** add export functionality for semestres ouverts ([4d14ffa](https://github.com/Dannebicque/oreof/commit/4d14ffa7c2ab7d438e893255d5890235c36f5e14)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Export:** add mention and parcours IDs to semestres export ([4c75de3](https://github.com/Dannebicque/oreof/commit/4c75de37de81b349bd49f221a42dc9984541c72e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Export:** add mention and parcours IDs to semestres export ([91b0958](https://github.com/Dannebicque/oreof/commit/91b0958cda8cc1cbf59b2a0b2c717cdb9c8b4f8e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Licence:** prepend 'QUITUS' to texte if applicable ([fea3f01](https://github.com/Dannebicque/oreof/commit/fea3f01710051f9b73fbb250528782298e486127)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Licence:** prepend 'QUITUS' to texte if applicable ([0cb158a](https://github.com/Dannebicque/oreof/commit/0cb158a2aade9aebdefdc2be0f4d2ded93f17057)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Licence:** prepend 'QUITUS' to texte if applicable ([3f62ee0](https://github.com/Dannebicque/oreof/commit/3f62ee09ab2cef0b5504a4ca1d163bc8de02d728)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Licence:** prepend 'QUITUS' to texte if applicable ([6a0c38f](https://github.com/Dannebicque/oreof/commit/6a0c38ff89773de727f955f3a9b8e9f3bded0005)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Licence:** prepend 'QUITUS' to texte if applicable ([b2004b5](https://github.com/Dannebicque/oreof/commit/b2004b5e7cc431ebe312bd1f2b8921fb01e4e0b2)) — [@Dannebicque](https://github.com/Dannebicque)
+* **SyntheseModificationController.php:** add validation checks for parcours before adding to formations ([2fb3a50](https://github.com/Dannebicque/oreof/commit/2fb3a50c1c4849905879e4d6c69483b2476c56e7)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **ExportSyntheseModification.php, SyntheseModificationController.php:** add modification check for formations and update demand array accordingly ([c8a80f4](https://github.com/Dannebicque/oreof/commit/c8a80f46220f4d7556d681d7496b82343b5225c6))
-* **ExportSyntheseModification.php, SyntheseModificationController.php:** add modification check for formations and update demand array accordingly ([1f13bcb](https://github.com/Dannebicque/oreof/commit/1f13bcb39add24bc23e5ae450f7b8ddd28a674dd))
-* **ExportSyntheseModification.php, SyntheseModificationController.php:** add modification check for formations and update demand array accordingly ([f8af902](https://github.com/Dannebicque/oreof/commit/f8af90236a192e337b051ecbb8ac24595f6c918c))
-* **ExportSyntheseModification.php, SyntheseModificationController.php:** add modification check for formations and update demand array accordingly ([657d222](https://github.com/Dannebicque/oreof/commit/657d2222744c0cd8012609372d97605b406160ca))
-* **ExportSyntheseModification.php:** retrieve parcours entity and add dpe to the data array ([145c04b](https://github.com/Dannebicque/oreof/commit/145c04b1be00ccb8e9432648c3fa5030dd06f18e))
-* **new.html.twig:** restructure layout and add breadcrumb and back button ([1509314](https://github.com/Dannebicque/oreof/commit/1509314189d4a84db3c25a0217ed1f4fc9d3fb58))
-* **valide_conseil_composante.html.twig:** correct spelling of 'laisser passer' to 'laissez-passer' ([2ce78f7](https://github.com/Dannebicque/oreof/commit/2ce78f73e51f6173c645ce551c06b9fb56082d19))
+* **ExportSyntheseModification.php, SyntheseModificationController.php:** add modification check for formations and update demand array accordingly ([c8a80f4](https://github.com/Dannebicque/oreof/commit/c8a80f46220f4d7556d681d7496b82343b5225c6)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportSyntheseModification.php, SyntheseModificationController.php:** add modification check for formations and update demand array accordingly ([1f13bcb](https://github.com/Dannebicque/oreof/commit/1f13bcb39add24bc23e5ae450f7b8ddd28a674dd)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportSyntheseModification.php, SyntheseModificationController.php:** add modification check for formations and update demand array accordingly ([f8af902](https://github.com/Dannebicque/oreof/commit/f8af90236a192e337b051ecbb8ac24595f6c918c)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportSyntheseModification.php, SyntheseModificationController.php:** add modification check for formations and update demand array accordingly ([657d222](https://github.com/Dannebicque/oreof/commit/657d2222744c0cd8012609372d97605b406160ca)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportSyntheseModification.php:** retrieve parcours entity and add dpe to the data array ([145c04b](https://github.com/Dannebicque/oreof/commit/145c04b1be00ccb8e9432648c3fa5030dd06f18e)) — [@Dannebicque](https://github.com/Dannebicque)
+* **new.html.twig:** restructure layout and add breadcrumb and back button ([1509314](https://github.com/Dannebicque/oreof/commit/1509314189d4a84db3c25a0217ed1f4fc9d3fb58)) — [@Dannebicque](https://github.com/Dannebicque)
+* **valide_conseil_composante.html.twig:** correct spelling of 'laisser passer' to 'laissez-passer' ([2ce78f7](https://github.com/Dannebicque/oreof/commit/2ce78f73e51f6173c645ce551c06b9fb56082d19)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.41.0](https://github.com/Dannebicque/oreof/compare/v1.40.0...v1.41.0) (2025-05-26)
 
 
 ### Features
 
-* **_boutonSynthese_version.html.twig:** add export option for MCCC based on button condition ([408e313](https://github.com/Dannebicque/oreof/commit/408e3135ead1a95aef4eb00e345ca8451c618769))
-* **_boutonSynthese_version.html.twig:** update export buttons for MCCC with improved styling ([e585127](https://github.com/Dannebicque/oreof/commit/e5851273c3516cda9529a7b5956808fdef571592))
-* **_liste.html.twig, process.fr.yaml:** add conditional display for validation state and new validation messages ([8ff127a](https://github.com/Dannebicque/oreof/commit/8ff127a63ecdd1715d6160e8714d4b9b2aec82e5))
-* **BadgeEcts:** update ECTS validation logic to include upper boundary ([8d4157f](https://github.com/Dannebicque/oreof/commit/8d4157f2f2f8ee19142aea42b97710cbf2d143c9))
-* **BadgeHeures:** improve logic for editable state and enhance display for admin users ([b95b2bc](https://github.com/Dannebicque/oreof/commit/b95b2bcbb4e54f4820b8d1814b558f7897726386))
-* **DemandeDpe:** add validation state filter and update list view ([ef3b635](https://github.com/Dannebicque/oreof/commit/ef3b6353ace96d28a5a94b5fc3ebf8bea0c167eb))
-* **DpeDemandeRepository:** enhance search functionality with additional filters and nullable return type ([59c11cf](https://github.com/Dannebicque/oreof/commit/59c11cf325e8b94dd206f2b939b801c25104507c))
-* **FormationResponsableController, ValidationController, _changeRf.html.twig:** implement conditional composante selection and export functionality based on user roles ([e372383](https://github.com/Dannebicque/oreof/commit/e3723833ded9076db6d8ef05104a5202006698f8))
-* **FormationResponsableController, ValidationController, _changeRf.html.twig:** implement conditional composante selection and export functionality based on user roles ([2558b47](https://github.com/Dannebicque/oreof/commit/2558b47757f20d5def46c08ab367bab3178da6c1))
-* **index:** refine semester filtering to include only open semesters ([a23811f](https://github.com/Dannebicque/oreof/commit/a23811fa5094544cc039b407f89e150db01b9b8f))
+* **_boutonSynthese_version.html.twig:** add export option for MCCC based on button condition ([408e313](https://github.com/Dannebicque/oreof/commit/408e3135ead1a95aef4eb00e345ca8451c618769)) — [@Dannebicque](https://github.com/Dannebicque)
+* **_boutonSynthese_version.html.twig:** update export buttons for MCCC with improved styling ([e585127](https://github.com/Dannebicque/oreof/commit/e5851273c3516cda9529a7b5956808fdef571592)) — [@Dannebicque](https://github.com/Dannebicque)
+* **_liste.html.twig, process.fr.yaml:** add conditional display for validation state and new validation messages ([8ff127a](https://github.com/Dannebicque/oreof/commit/8ff127a63ecdd1715d6160e8714d4b9b2aec82e5)) — [@Dannebicque](https://github.com/Dannebicque)
+* **BadgeEcts:** update ECTS validation logic to include upper boundary ([8d4157f](https://github.com/Dannebicque/oreof/commit/8d4157f2f2f8ee19142aea42b97710cbf2d143c9)) — [@Dannebicque](https://github.com/Dannebicque)
+* **BadgeHeures:** improve logic for editable state and enhance display for admin users ([b95b2bc](https://github.com/Dannebicque/oreof/commit/b95b2bcbb4e54f4820b8d1814b558f7897726386)) — [@Dannebicque](https://github.com/Dannebicque)
+* **DemandeDpe:** add validation state filter and update list view ([ef3b635](https://github.com/Dannebicque/oreof/commit/ef3b6353ace96d28a5a94b5fc3ebf8bea0c167eb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **DpeDemandeRepository:** enhance search functionality with additional filters and nullable return type ([59c11cf](https://github.com/Dannebicque/oreof/commit/59c11cf325e8b94dd206f2b939b801c25104507c)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FormationResponsableController, ValidationController, _changeRf.html.twig:** implement conditional composante selection and export functionality based on user roles ([e372383](https://github.com/Dannebicque/oreof/commit/e3723833ded9076db6d8ef05104a5202006698f8)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FormationResponsableController, ValidationController, _changeRf.html.twig:** implement conditional composante selection and export functionality based on user roles ([2558b47](https://github.com/Dannebicque/oreof/commit/2558b47757f20d5def46c08ab367bab3178da6c1)) — [@Dannebicque](https://github.com/Dannebicque)
+* **index:** refine semester filtering to include only open semesters ([a23811f](https://github.com/Dannebicque/oreof/commit/a23811fa5094544cc039b407f89e150db01b9b8f)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.40.0](https://github.com/Dannebicque/oreof/compare/v1.39.2...v1.40.0) (2025-05-24)
 
 
 ### Features
 
-* **crud_controller:** add localStorage key value for state persistence ([a1a4463](https://github.com/Dannebicque/oreof/commit/a1a4463c23af6596b7adcb2a780413048ae7e6d0))
-* **DemandeDpe:** enhance DPE request management with search filters and localStorage state persistence ([3a17c0b](https://github.com/Dannebicque/oreof/commit/3a17c0b950a04aa62f1592ffd8e32bd552efb795))
+* **crud_controller:** add localStorage key value for state persistence ([a1a4463](https://github.com/Dannebicque/oreof/commit/a1a4463c23af6596b7adcb2a780413048ae7e6d0)) — [@Dannebicque](https://github.com/Dannebicque)
+* **DemandeDpe:** enhance DPE request management with search filters and localStorage state persistence ([3a17c0b](https://github.com/Dannebicque/oreof/commit/3a17c0b950a04aa62f1592ffd8e32bd552efb795)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **ParcoursMcccExportController:** add historical date retrieval for DPE in export functions ([2971305](https://github.com/Dannebicque/oreof/commit/2971305b3afc19aa4dbd8659dcf20e25dbf8b88e))
+* **ParcoursMcccExportController:** add historical date retrieval for DPE in export functions ([2971305](https://github.com/Dannebicque/oreof/commit/2971305b3afc19aa4dbd8659dcf20e25dbf8b88e)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.39.2](https://github.com/Dannebicque/oreof/compare/v1.39.1...v1.39.2) (2025-05-19)
 
 
 ### Bug Fixes
 
-* **_semestre_heures.html.twig, synthese_modifications.html.twig:** remove nonDispense check and add semester opening comments ([ad1e59c](https://github.com/Dannebicque/oreof/commit/ad1e59cb0ae1187f19815df9227ac5771e44f9ef))
-* **SemestreController:** handle null checks for parcours and DPE, improve phrase construction ([149ac4f](https://github.com/Dannebicque/oreof/commit/149ac4f36427f78ee8dd07b24557f2455f6071d8))
+* **_semestre_heures.html.twig, synthese_modifications.html.twig:** remove nonDispense check and add semester opening comments ([ad1e59c](https://github.com/Dannebicque/oreof/commit/ad1e59cb0ae1187f19815df9227ac5771e44f9ef)) — [@Dannebicque](https://github.com/Dannebicque)
+* **SemestreController:** handle null checks for parcours and DPE, improve phrase construction ([149ac4f](https://github.com/Dannebicque/oreof/commit/149ac4f36427f78ee8dd07b24557f2455f6071d8)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.39.1](https://github.com/Dannebicque/oreof/compare/v1.39.0...v1.39.1) (2025-05-19)
 
 
 ### Bug Fixes
 
-* **_semestre_heures.html.twig:** correct variable path for nonDispense check ([7451585](https://github.com/Dannebicque/oreof/commit/7451585556b9ef2c7498f1be6a7bfec1a4d9d432))
-* **_semestre_heures.html.twig:** correct variable path for nonDispense check ([ac85407](https://github.com/Dannebicque/oreof/commit/ac85407d9e62a884b942e9bf29aeb865a5e05cd5))
-* **ExportSyntheseModification, SyntheseModificationController, synthese_modifications.html.twig:** refactor parcours handling and update data structure for DPE requests ([9d962eb](https://github.com/Dannebicque/oreof/commit/9d962eb8bd791e9711f152ecdcc46593add7b1c9))
-* **ExportSyntheseModification:** handle null parcoursOrigineCopie and update structure differences calculation ([777e50f](https://github.com/Dannebicque/oreof/commit/777e50f532e2b5d45195a6f8eed67653dc2db608))
-* **ExportSyntheseModification:** improve structure differences calculation by integrating ParcoursRepository ([54d4e12](https://github.com/Dannebicque/oreof/commit/54d4e12f7d2241e98d6dba2b9c86a18b3d4216ac))
-* **ExportSyntheseModification:** improve structure differences calculation by integrating ParcoursRepository ([9223fbf](https://github.com/Dannebicque/oreof/commit/9223fbfc571daa6f176a9e7be5555ec9c1870a63))
-* **ExportSyntheseModification:** update structure differences calculation to use original parcours copy ([c8b0f9a](https://github.com/Dannebicque/oreof/commit/c8b0f9a87c2b0ae15c741b846e65d3eae59c7955))
-* **synthese_modifications.html.twig:** update niveauModification checks for non-dispensation and creation cases ([edecbca](https://github.com/Dannebicque/oreof/commit/edecbca1149f36cc6320a1e2204f0a2c64ff3e58))
+* **_semestre_heures.html.twig:** correct variable path for nonDispense check ([7451585](https://github.com/Dannebicque/oreof/commit/7451585556b9ef2c7498f1be6a7bfec1a4d9d432)) — [@Dannebicque](https://github.com/Dannebicque)
+* **_semestre_heures.html.twig:** correct variable path for nonDispense check ([ac85407](https://github.com/Dannebicque/oreof/commit/ac85407d9e62a884b942e9bf29aeb865a5e05cd5)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportSyntheseModification, SyntheseModificationController, synthese_modifications.html.twig:** refactor parcours handling and update data structure for DPE requests ([9d962eb](https://github.com/Dannebicque/oreof/commit/9d962eb8bd791e9711f152ecdcc46593add7b1c9)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportSyntheseModification:** handle null parcoursOrigineCopie and update structure differences calculation ([777e50f](https://github.com/Dannebicque/oreof/commit/777e50f532e2b5d45195a6f8eed67653dc2db608)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportSyntheseModification:** improve structure differences calculation by integrating ParcoursRepository ([54d4e12](https://github.com/Dannebicque/oreof/commit/54d4e12f7d2241e98d6dba2b9c86a18b3d4216ac)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportSyntheseModification:** improve structure differences calculation by integrating ParcoursRepository ([9223fbf](https://github.com/Dannebicque/oreof/commit/9223fbfc571daa6f176a9e7be5555ec9c1870a63)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ExportSyntheseModification:** update structure differences calculation to use original parcours copy ([c8b0f9a](https://github.com/Dannebicque/oreof/commit/c8b0f9a87c2b0ae15c741b846e65d3eae59c7955)) — [@Dannebicque](https://github.com/Dannebicque)
+* **synthese_modifications.html.twig:** update niveauModification checks for non-dispensation and creation cases ([edecbca](https://github.com/Dannebicque/oreof/commit/edecbca1149f36cc6320a1e2204f0a2c64ff3e58)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.39.0](https://github.com/Dannebicque/oreof/compare/v1.38.2...v1.39.0) (2025-05-19)
 
 
 ### Features
 
-* **AbstractLicenceMccc:** add dir property to manage directory path ([eeb055b](https://github.com/Dannebicque/oreof/commit/eeb055b5ea53b5adb70d0d49cd4a71e7d55006bf))
-* **Etablissement:** add userProfils relationship and methods for managing user profiles ([64b0181](https://github.com/Dannebicque/oreof/commit/64b01811777aee99e9a2b4f02f7a30af2508f471))
-* **ProcessValidationMentionController:** add validation and history logging for formation submission ([f86118d](https://github.com/Dannebicque/oreof/commit/f86118de581bf13a7c9b5f5f7a1e7864d3569343))
+* **AbstractLicenceMccc:** add dir property to manage directory path ([eeb055b](https://github.com/Dannebicque/oreof/commit/eeb055b5ea53b5adb70d0d49cd4a71e7d55006bf)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Etablissement:** add userProfils relationship and methods for managing user profiles ([64b0181](https://github.com/Dannebicque/oreof/commit/64b01811777aee99e9a2b4f02f7a30af2508f471)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ProcessValidationMentionController:** add validation and history logging for formation submission ([f86118d](https://github.com/Dannebicque/oreof/commit/f86118de581bf13a7c9b5f5f7a1e7864d3569343)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **BadgeHeuresComponent:** update ownership check logic and adjust completion state handling ([2bef0a0](https://github.com/Dannebicque/oreof/commit/2bef0a0bd8a5496481befe85dcca8659b479bae0))
-* **ButTypeDiplome, LicenceTypeDiplome:** add missing fichier parameter to export methods ([87b814a](https://github.com/Dannebicque/oreof/commit/87b814a083978d29cd9b47f07f15de2b2db532dd))
-* **DpeDemande:** add campagneCollecte parameter to DpeDemande instances in multiple controllers ([d4dbae9](https://github.com/Dannebicque/oreof/commit/d4dbae9365663cb9cde6219cbfb2eee411a3ffc7))
-* **Export:** enhance export functionality by adding missing parameters and improving data structure handling ([2391ad6](https://github.com/Dannebicque/oreof/commit/2391ad66dfa08262eac1ee09021c828df718334c))
-* **FormationValide:** comment out validation check for 'valide_parcours_rf' ([237b899](https://github.com/Dannebicque/oreof/commit/237b899b861e930bd32a0d3fe578b45fbdcdd595))
-* **FormationWizardController:** remove access check for 'ss_cfvu' in step2 method ([89960d7](https://github.com/Dannebicque/oreof/commit/89960d778b187d0a14f3d57c4a6e3c51f434768b))
-* **GetElementConstitutif:** reorder ECTS calculation logic for clarity ([e6440c9](https://github.com/Dannebicque/oreof/commit/e6440c9de4c7a6a37014c27e20b128e5a88bbab6))
-* **help.fr.yaml:** add help text for specific hours in parcours ([4cc11f9](https://github.com/Dannebicque/oreof/commit/4cc11f930b3d1e15d0225565784392e935a0e635))
-* **licence:** update disabled condition for choix_type_mccc select based on natureUeEc ([2180d3d](https://github.com/Dannebicque/oreof/commit/2180d3d3c83be08f8f63443ee6f9412b1e26bf37))
-* **McccUpdateSubscriber:** ensure ficheMatiere is not null before processing element constitutifs ([e2096d6](https://github.com/Dannebicque/oreof/commit/e2096d66f919ff8d862566d7593304fcf0adf090))
+* **BadgeHeuresComponent:** update ownership check logic and adjust completion state handling ([2bef0a0](https://github.com/Dannebicque/oreof/commit/2bef0a0bd8a5496481befe85dcca8659b479bae0)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ButTypeDiplome, LicenceTypeDiplome:** add missing fichier parameter to export methods ([87b814a](https://github.com/Dannebicque/oreof/commit/87b814a083978d29cd9b47f07f15de2b2db532dd)) — [@Dannebicque](https://github.com/Dannebicque)
+* **DpeDemande:** add campagneCollecte parameter to DpeDemande instances in multiple controllers ([d4dbae9](https://github.com/Dannebicque/oreof/commit/d4dbae9365663cb9cde6219cbfb2eee411a3ffc7)) — [@Dannebicque](https://github.com/Dannebicque)
+* **Export:** enhance export functionality by adding missing parameters and improving data structure handling ([2391ad6](https://github.com/Dannebicque/oreof/commit/2391ad66dfa08262eac1ee09021c828df718334c)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FormationValide:** comment out validation check for 'valide_parcours_rf' ([237b899](https://github.com/Dannebicque/oreof/commit/237b899b861e930bd32a0d3fe578b45fbdcdd595)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FormationWizardController:** remove access check for 'ss_cfvu' in step2 method ([89960d7](https://github.com/Dannebicque/oreof/commit/89960d778b187d0a14f3d57c4a6e3c51f434768b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **GetElementConstitutif:** reorder ECTS calculation logic for clarity ([e6440c9](https://github.com/Dannebicque/oreof/commit/e6440c9de4c7a6a37014c27e20b128e5a88bbab6)) — [@Dannebicque](https://github.com/Dannebicque)
+* **help.fr.yaml:** add help text for specific hours in parcours ([4cc11f9](https://github.com/Dannebicque/oreof/commit/4cc11f930b3d1e15d0225565784392e935a0e635)) — [@Dannebicque](https://github.com/Dannebicque)
+* **licence:** update disabled condition for choix_type_mccc select based on natureUeEc ([2180d3d](https://github.com/Dannebicque/oreof/commit/2180d3d3c83be08f8f63443ee6f9412b1e26bf37)) — [@Dannebicque](https://github.com/Dannebicque)
+* **McccUpdateSubscriber:** ensure ficheMatiere is not null before processing element constitutifs ([e2096d6](https://github.com/Dannebicque/oreof/commit/e2096d66f919ff8d862566d7593304fcf0adf090)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.38.2](https://github.com/Dannebicque/oreof/compare/v1.38.1...v1.38.2) (2025-05-16)
 
 
 ### Bug Fixes
 
-* **GlobalVoter:** add default parcours handling for edit permissions ([4094fdd](https://github.com/Dannebicque/oreof/commit/4094fddfd8ab0d528704c0159bceabc1becb4e90))
-* **GlobalVoter:** ensure parcours is an instance of Parcours before accessing its methods ([7de5081](https://github.com/Dannebicque/oreof/commit/7de5081aa01afbac196b64eeb2d5d6c5f09562b6))
-* **liste:** rename raccrocheEnfant variable and update conditions for child links ([1912919](https://github.com/Dannebicque/oreof/commit/19129191f152d337e03b7a3a2330eef4be858ae2))
-* **valider_ses:** add confirmation message for effective change of responsible/co-responsible ([0a8c570](https://github.com/Dannebicque/oreof/commit/0a8c57095ece40aea2940c278c632c4d24fbcc52))
-* **versioning:** handle null values for MCCC and update university year display ([f162a01](https://github.com/Dannebicque/oreof/commit/f162a0179b01ad525aea4bf30385a6f0f85c7af5))
+* **GlobalVoter:** add default parcours handling for edit permissions ([4094fdd](https://github.com/Dannebicque/oreof/commit/4094fddfd8ab0d528704c0159bceabc1becb4e90)) — [@Dannebicque](https://github.com/Dannebicque)
+* **GlobalVoter:** ensure parcours is an instance of Parcours before accessing its methods ([7de5081](https://github.com/Dannebicque/oreof/commit/7de5081aa01afbac196b64eeb2d5d6c5f09562b6)) — [@Dannebicque](https://github.com/Dannebicque)
+* **liste:** rename raccrocheEnfant variable and update conditions for child links ([1912919](https://github.com/Dannebicque/oreof/commit/19129191f152d337e03b7a3a2330eef4be858ae2)) — [@Dannebicque](https://github.com/Dannebicque)
+* **valider_ses:** add confirmation message for effective change of responsible/co-responsible ([0a8c570](https://github.com/Dannebicque/oreof/commit/0a8c57095ece40aea2940c278c632c4d24fbcc52)) — [@Dannebicque](https://github.com/Dannebicque)
+* **versioning:** handle null values for MCCC and update university year display ([f162a01](https://github.com/Dannebicque/oreof/commit/f162a0179b01ad525aea4bf30385a6f0f85c7af5)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.38.1](https://github.com/Dannebicque/oreof/compare/v1.38.0...v1.38.1) (2025-05-13)
 
 
 ### Bug Fixes
 
-* **SemestreController:** adjust condition for semester open status message ([ec6b928](https://github.com/Dannebicque/oreof/commit/ec6b928e998b07e18919112fe96ab64c524058b3))
-* **step4Hd:** enable MCCC display in the stimulus controller ([f9a6ff5](https://github.com/Dannebicque/oreof/commit/f9a6ff5556ca05f8ac583360859d05a96f6e5a2d))
+* **SemestreController:** adjust condition for semester open status message ([ec6b928](https://github.com/Dannebicque/oreof/commit/ec6b928e998b07e18919112fe96ab64c524058b3)) — [@Dannebicque](https://github.com/Dannebicque)
+* **step4Hd:** enable MCCC display in the stimulus controller ([f9a6ff5](https://github.com/Dannebicque/oreof/commit/f9a6ff5556ca05f8ac583360859d05a96f6e5a2d)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.38.0](https://github.com/Dannebicque/oreof/compare/v1.37.0...v1.38.0) (2025-05-11)
 
 
 ### Features
 
-* **but-mccc-version:** add methods to retrieve original and new float values for hours ([be1f913](https://github.com/Dannebicque/oreof/commit/be1f9138524d8a2b3072fc6bc2f9cdc3c6df65cb))
-* **security:** enhance GlobalVoter permissions ([ac3d397](https://github.com/Dannebicque/oreof/commit/ac3d397c7613736b904f082ba73b22039d4d3ca8))
-* **translations:** update labels and help texts for validation and profile fields ([ac3d397](https://github.com/Dannebicque/oreof/commit/ac3d397c7613736b904f082ba73b22039d4d3ca8))
+* **but-mccc-version:** add methods to retrieve original and new float values for hours ([be1f913](https://github.com/Dannebicque/oreof/commit/be1f9138524d8a2b3072fc6bc2f9cdc3c6df65cb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **security:** enhance GlobalVoter permissions ([ac3d397](https://github.com/Dannebicque/oreof/commit/ac3d397c7613736b904f082ba73b22039d4d3ca8)) — [@Dannebicque](https://github.com/Dannebicque)
+* **translations:** update labels and help texts for validation and profile fields ([ac3d397](https://github.com/Dannebicque/oreof/commit/ac3d397c7613736b904f082ba73b22039d4d3ca8)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **but-mccc-version:** adjust total hours calculation to exclude TE from sums ([a394341](https://github.com/Dannebicque/oreof/commit/a3943410c15793ad0ffb86f97b4f12d6bc8b6d64))
-* **but-mccc-version:** calculate and update total coefficients for resources and SAEs ([c1d71a6](https://github.com/Dannebicque/oreof/commit/c1d71a6b5aab5dd575389624a53574ff2f4b132b))
-* **but-mccc-version:** update total hours calculation to use new float values ([d070c39](https://github.com/Dannebicque/oreof/commit/d070c39ba27dba3dcba816676a36130d97889cf3))
-* **liste:** update conditions for button disabling based on semester status ([4c102b0](https://github.com/Dannebicque/oreof/commit/4c102b080c5d1a92c8fafb7c1b78fdef48f9af39))
+* **but-mccc-version:** adjust total hours calculation to exclude TE from sums ([a394341](https://github.com/Dannebicque/oreof/commit/a3943410c15793ad0ffb86f97b4f12d6bc8b6d64)) — [@Dannebicque](https://github.com/Dannebicque)
+* **but-mccc-version:** calculate and update total coefficients for resources and SAEs ([c1d71a6](https://github.com/Dannebicque/oreof/commit/c1d71a6b5aab5dd575389624a53574ff2f4b132b)) — [@Dannebicque](https://github.com/Dannebicque)
+* **but-mccc-version:** update total hours calculation to use new float values ([d070c39](https://github.com/Dannebicque/oreof/commit/d070c39ba27dba3dcba816676a36130d97889cf3)) — [@Dannebicque](https://github.com/Dannebicque)
+* **liste:** update conditions for button disabling based on semester status ([4c102b0](https://github.com/Dannebicque/oreof/commit/4c102b080c5d1a92c8fafb7c1b78fdef48f9af39)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.37.0](https://github.com/Dannebicque/oreof/compare/v1.36.0...v1.37.0) (2025-05-08)
 
 
 ### Features
 
-* **controller:** ensure DPE parcours is added to parcour during initialization ([a90a3e1](https://github.com/Dannebicque/oreof/commit/a90a3e18ec474ecb93cb2a7e15b5bf1d2bde09d2))
-* **workflow:** remove admin guard from "initialiser" transition ([a90a3e1](https://github.com/Dannebicque/oreof/commit/a90a3e18ec474ecb93cb2a7e15b5bf1d2bde09d2))
+* **controller:** ensure DPE parcours is added to parcour during initialization ([a90a3e1](https://github.com/Dannebicque/oreof/commit/a90a3e18ec474ecb93cb2a7e15b5bf1d2bde09d2)) — [@Dannebicque](https://github.com/Dannebicque)
+* **workflow:** remove admin guard from "initialiser" transition ([a90a3e1](https://github.com/Dannebicque/oreof/commit/a90a3e18ec474ecb93cb2a7e15b5bf1d2bde09d2)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* **controller:** dispatch McccUpdateEvent only for owner parcours ([2e4aa13](https://github.com/Dannebicque/oreof/commit/2e4aa131ded8287d8600431dfef8978f4d27df69))
-* **controller:** simplify MCCC logic and remove commented code ([f233c0e](https://github.com/Dannebicque/oreof/commit/f233c0e4446a5308860c37b7386a72042a59f527))
-* **ec-controller:** ensure FicheMatiere libelle is trimmed and validated ([845bb4b](https://github.com/Dannebicque/oreof/commit/845bb4b74dc8f68f338c863d2afbf0fd19be17bb))
-* **ec-controller:** remove redundant setNatureUeEc assignment ([845bb4b](https://github.com/Dannebicque/oreof/commit/845bb4b74dc8f68f338c863d2afbf0fd19be17bb))
-* **FicheMatiereController:** update property name for copied fiche matiere ([16df861](https://github.com/Dannebicque/oreof/commit/16df8616f03b6237d932d5c063fe0a4b7b430c10))
-* **js:** update placeholder text for TomSelect dropdown ([845bb4b](https://github.com/Dannebicque/oreof/commit/845bb4b74dc8f68f338c863d2afbf0fd19be17bb))
-* **js:** validate matieres existence based on both input array and table rows ([845bb4b](https://github.com/Dannebicque/oreof/commit/845bb4b74dc8f68f338c863d2afbf0fd19be17bb))
-* **parcours:** handle linked UEs in element constitutifs processing ([a28c32f](https://github.com/Dannebicque/oreof/commit/a28c32fe9c13d8a11ec9910452fbb6685d084f8c))
-* **twig:** refine condition for ECTS input visibility ([845bb4b](https://github.com/Dannebicque/oreof/commit/845bb4b74dc8f68f338c863d2afbf0fd19be17bb))
+* **controller:** dispatch McccUpdateEvent only for owner parcours ([2e4aa13](https://github.com/Dannebicque/oreof/commit/2e4aa131ded8287d8600431dfef8978f4d27df69)) — [@Dannebicque](https://github.com/Dannebicque)
+* **controller:** simplify MCCC logic and remove commented code ([f233c0e](https://github.com/Dannebicque/oreof/commit/f233c0e4446a5308860c37b7386a72042a59f527)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ec-controller:** ensure FicheMatiere libelle is trimmed and validated ([845bb4b](https://github.com/Dannebicque/oreof/commit/845bb4b74dc8f68f338c863d2afbf0fd19be17bb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **ec-controller:** remove redundant setNatureUeEc assignment ([845bb4b](https://github.com/Dannebicque/oreof/commit/845bb4b74dc8f68f338c863d2afbf0fd19be17bb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **FicheMatiereController:** update property name for copied fiche matiere ([16df861](https://github.com/Dannebicque/oreof/commit/16df8616f03b6237d932d5c063fe0a4b7b430c10)) — [@Dannebicque](https://github.com/Dannebicque)
+* **js:** update placeholder text for TomSelect dropdown ([845bb4b](https://github.com/Dannebicque/oreof/commit/845bb4b74dc8f68f338c863d2afbf0fd19be17bb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **js:** validate matieres existence based on both input array and table rows ([845bb4b](https://github.com/Dannebicque/oreof/commit/845bb4b74dc8f68f338c863d2afbf0fd19be17bb)) — [@Dannebicque](https://github.com/Dannebicque)
+* **parcours:** handle linked UEs in element constitutifs processing ([a28c32f](https://github.com/Dannebicque/oreof/commit/a28c32fe9c13d8a11ec9910452fbb6685d084f8c)) — [@Dannebicque](https://github.com/Dannebicque)
+* **twig:** refine condition for ECTS input visibility ([845bb4b](https://github.com/Dannebicque/oreof/commit/845bb4b74dc8f68f338c863d2afbf0fd19be17bb)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.36.0](https://github.com/Dannebicque/oreof/compare/v1.35.0...v1.36.0) (2025-05-06)
 
 
 ### Features
 
-* **entity:** include numeroEpreuve in CleUnique generation ([41df5d0](https://github.com/Dannebicque/oreof/commit/41df5d02d26cbc1edf157d73005ac4af623f5eaa))
+* **entity:** include numeroEpreuve in CleUnique generation ([41df5d0](https://github.com/Dannebicque/oreof/commit/41df5d02d26cbc1edf157d73005ac4af623f5eaa)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.35.0](https://github.com/Dannebicque/oreof/compare/v1.34.0...v1.35.0) (2025-05-05)
 
 
 ### Features
 
-* **dpe-demande:** add edit functionality for argumentaireDemande ([3644516](https://github.com/Dannebicque/oreof/commit/364451600bc5c1dc1509e3f0fe36847fe5ce28af))
-* **mccc:** enhance display logic for MCCC CC with table structure ([90831a2](https://github.com/Dannebicque/oreof/commit/90831a2442d008ef3d70544da02905022fd7399d))
+* **dpe-demande:** add edit functionality for argumentaireDemande ([3644516](https://github.com/Dannebicque/oreof/commit/364451600bc5c1dc1509e3f0fe36847fe5ce28af)) — [@Dannebicque](https://github.com/Dannebicque)
+* **mccc:** enhance display logic for MCCC CC with table structure ([90831a2](https://github.com/Dannebicque/oreof/commit/90831a2442d008ef3d70544da02905022fd7399d)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.34.0](https://github.com/Dannebicque/oreof/compare/v1.33.11...v1.34.0) (2025-05-03)
 
 
 ### Features
 
-* add new label for reopening request cancellation in French translations ([2b8a878](https://github.com/Dannebicque/oreof/commit/2b8a87899e6ad0c06cb39281a06212fd0c342bbd))
-* replace ROLE_SES with ROLE_ADMIN across controllers and fixtures ([9c3baef](https://github.com/Dannebicque/oreof/commit/9c3baef7be62dbf9d85f85de86acb2d267b70f4f))
-* update role-based access from ROLE_SES to ROLE_ADMIN ([85e6b71](https://github.com/Dannebicque/oreof/commit/85e6b71609aea83df0c8ea7c0aa2e411766b76aa))
+* add new label for reopening request cancellation in French translations ([2b8a878](https://github.com/Dannebicque/oreof/commit/2b8a87899e6ad0c06cb39281a06212fd0c342bbd)) — [@Dannebicque](https://github.com/Dannebicque)
+* replace ROLE_SES with ROLE_ADMIN across controllers and fixtures ([9c3baef](https://github.com/Dannebicque/oreof/commit/9c3baef7be62dbf9d85f85de86acb2d267b70f4f)) — [@Dannebicque](https://github.com/Dannebicque)
+* update role-based access from ROLE_SES to ROLE_ADMIN ([85e6b71](https://github.com/Dannebicque/oreof/commit/85e6b71609aea83df0c8ea7c0aa2e411766b76aa)) — [@Dannebicque](https://github.com/Dannebicque)
 
 
 ### Bug Fixes
 
-* adjust workflow transition condition in `ChangeRfProcess` to apply changes at the CFVU submission step ([2b8a878](https://github.com/Dannebicque/oreof/commit/2b8a87899e6ad0c06cb39281a06212fd0c342bbd))
+* adjust workflow transition condition in `ChangeRfProcess` to apply changes at the CFVU submission step ([2b8a878](https://github.com/Dannebicque/oreof/commit/2b8a87899e6ad0c06cb39281a06212fd0c342bbd)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ## [1.33.11](https://github.com/Dannebicque/oreof/compare/v1.33.10...v1.33.11) (2025-05-03)
 
 
 ### Bug Fixes
 
-* Update calcul call to include dataFromFicheMatiere flag ([7ce3404](https://github.com/Dannebicque/oreof/commit/7ce3404494774b9e8e300540fe564c66e7ed3918))
+* Update calcul call to include dataFromFicheMatiere flag ([7ce3404](https://github.com/Dannebicque/oreof/commit/7ce3404494774b9e8e300540fe564c66e7ed3918)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ### [1.33.10](https://github.com/Dannebicque/oreof/compare/v1.33.9...v1.33.10) (2025-05-01)
 
@@ -967,14 +967,14 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Bug Fixes
 
-* Refactor key usage from IDs to unique identifiers. ([974e85f](https://github.com/Dannebicque/oreof/commit/974e85f8d8877368bea19d421d34bc25b8c14d81))
+* Refactor key usage from IDs to unique identifiers. ([974e85f](https://github.com/Dannebicque/oreof/commit/974e85f8d8877368bea19d421d34bc25b8c14d81)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ### [1.33.7](https://github.com/Dannebicque/oreof/compare/v1.33.6...v1.33.7) (2025-04-29)
 
 
 ### Bug Fixes
 
-* Refactor key usage from IDs to unique identifiers. ([a0b30f1](https://github.com/Dannebicque/oreof/commit/a0b30f1d5793a1e9c66f011cb50f542faeaf1bb4))
+* Refactor key usage from IDs to unique identifiers. ([a0b30f1](https://github.com/Dannebicque/oreof/commit/a0b30f1d5793a1e9c66f011cb50f542faeaf1bb4)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ### [1.33.6](https://github.com/Dannebicque/oreof/compare/v1.33.5...v1.33.6) (2025-04-28)
 
@@ -985,22 +985,22 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Bug Fixes
 
-* Refactor template to use 'modalite' instead of 'ec.modaliteEnseignement' ([fd6ca69](https://github.com/Dannebicque/oreof/commit/fd6ca69cbcc4213c403fbbea2b63deaad87fecbe))
+* Refactor template to use 'modalite' instead of 'ec.modaliteEnseignement' ([fd6ca69](https://github.com/Dannebicque/oreof/commit/fd6ca69cbcc4213c403fbbea2b63deaad87fecbe)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ### [1.33.3](https://github.com/Dannebicque/oreof/compare/v1.33.2...v1.33.3) (2025-04-28)
 
 
 ### Bug Fixes
 
-* Add support for non-opening demands with detailed argumentation ([0d2a766](https://github.com/Dannebicque/oreof/commit/0d2a766f1cc11e9fdf4c94c3a634592adc6299fa))
-* Update EC rendering to use fiche matiere hours data ([7335bc6](https://github.com/Dannebicque/oreof/commit/7335bc6eb459aeb279236d55994e0a52e9c6b212))
+* Add support for non-opening demands with detailed argumentation ([0d2a766](https://github.com/Dannebicque/oreof/commit/0d2a766f1cc11e9fdf4c94c3a634592adc6299fa)) — [@Dannebicque](https://github.com/Dannebicque)
+* Update EC rendering to use fiche matiere hours data ([7335bc6](https://github.com/Dannebicque/oreof/commit/7335bc6eb459aeb279236d55994e0a52e9c6b212)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ### [1.33.2](https://github.com/Dannebicque/oreof/compare/v1.33.1...v1.33.2) (2025-04-28)
 
 
 ### Features
 
-* Add CFVU request switch functionality for DPE demands ([2ade9b5](https://github.com/Dannebicque/oreof/commit/2ade9b50c2b4587bd90e265899e9a13f930577a7))
+* Add CFVU request switch functionality for DPE demands ([2ade9b5](https://github.com/Dannebicque/oreof/commit/2ade9b50c2b4587bd90e265899e9a13f930577a7)) — [@Dannebicque](https://github.com/Dannebicque)
 
 ### [1.33.1](https://github.com/Dannebicque/oreof/compare/v1.33.0...v1.33.1) (2025-04-27)
 
@@ -1010,16 +1010,16 @@ All notable changes to this project will be documented in this file. See [standa
 ### Features
 
 * Add 'En cours rédaction' statistics to fiches components ([61ead39](https://github.com/Dannebicque/oreof/commit/61ead39b979f9b34d4a75225b797a3e30496528a))
-* Add `etatValidation` method to handle demand state validation ([4b7dcee](https://github.com/Dannebicque/oreof/commit/4b7dcee13dead04f2a64e2afa3c82333e5688058))
+* Add `etatValidation` method to handle demand state validation ([4b7dcee](https://github.com/Dannebicque/oreof/commit/4b7dcee13dead04f2a64e2afa3c82333e5688058)) — [@Dannebicque](https://github.com/Dannebicque)
 * Add campagne collecte filtering to user centres display ([6af376b](https://github.com/Dannebicque/oreof/commit/6af376bbfca091650b6839a40c58ef8119b80fc6))
 * Add campagne collecte filtering to user centres display ([5d5bd38](https://github.com/Dannebicque/oreof/commit/5d5bd38c73a3cdb9f18686ffe2bc3b1e89ac6570))
 * Add campagne collecte filtering to user centres display ([4ef12a3](https://github.com/Dannebicque/oreof/commit/4ef12a38a0ce4c7f51e3e9bb90f5062973f1ced1))
 * Add campagne collecte filtering to user centres display ([914146b](https://github.com/Dannebicque/oreof/commit/914146be6afcbadd958648e1625e437869c16d47))
-* Add controleAssiduite field and update related forms and translations ([4e5e18b](https://github.com/Dannebicque/oreof/commit/4e5e18bcc17975007cadd11112e5bc8ca5656c09))
-* Add DpeDemande creation in ParcoursController with initial state and attributes ([e5dc5d5](https://github.com/Dannebicque/oreof/commit/e5dc5d572cd0d65d0e4ccba29004a7069c19231c))
-* Add DpeDemande listing and deletion functionality; refactor index and create new template ([8c3f2c0](https://github.com/Dannebicque/oreof/commit/8c3f2c0ce7cb967cc63ec7d2e39c23f2d077f8b5))
+* Add controleAssiduite field and update related forms and translations ([4e5e18b](https://github.com/Dannebicque/oreof/commit/4e5e18bcc17975007cadd11112e5bc8ca5656c09)) — [@Dannebicque](https://github.com/Dannebicque)
+* Add DpeDemande creation in ParcoursController with initial state and attributes ([e5dc5d5](https://github.com/Dannebicque/oreof/commit/e5dc5d572cd0d65d0e4ccba29004a7069c19231c)) — [@Dannebicque](https://github.com/Dannebicque)
+* Add DpeDemande listing and deletion functionality; refactor index and create new template ([8c3f2c0](https://github.com/Dannebicque/oreof/commit/8c3f2c0ce7cb967cc63ec7d2e39c23f2d077f8b5)) — [@Dannebicque](https://github.com/Dannebicque)
 * Add event dispatching for MCCC and ECTS updates in ElementConstitutifController and ElementConstitutifMcccController ([479219c](https://github.com/Dannebicque/oreof/commit/479219cc700a6c4e50d189ffe75634828cf7dce2))
-* Add export functionality and update access controls ([f431ca9](https://github.com/Dannebicque/oreof/commit/f431ca9b37a798d2f939d8413865a7267636e2bc))
+* Add export functionality and update access controls ([f431ca9](https://github.com/Dannebicque/oreof/commit/f431ca9b37a798d2f939d8413865a7267636e2bc)) — [@Dannebicque](https://github.com/Dannebicque)
 * Add ExportResponsable class and integrate composante handling in export process ([543fd6a](https://github.com/Dannebicque/oreof/commit/543fd6aac51105a5c485a8e6ccbe71abcfe56b4a))
 * Add ExportResponsable class and integrate composante handling in export process ([024ab74](https://github.com/Dannebicque/oreof/commit/024ab742c199c400c902b03234534169cfefcffe))
 * Add HelpController and SignalerProblemeController with corresponding views; update DpeDemandeRepository to find by Composante ([cf8e49f](https://github.com/Dannebicque/oreof/commit/cf8e49fb8a7fa7b2734cf40dc2d5bbce90a62d39))
@@ -1027,16 +1027,16 @@ All notable changes to this project will be documented in this file. See [standa
 * Add option to specify campaign in UpdateRemplissageCommand and update related logic ([1c076db](https://github.com/Dannebicque/oreof/commit/1c076db199ff38d5273ab4fb4cec3a4d16f6f582))
 * Add option to specify campaign in UpdateRemplissageCommand and update related logic ([8d3a97a](https://github.com/Dannebicque/oreof/commit/8d3a97acced22d96534e310f5f5c8f9e64877cae))
 * Add option to specify campaign in UpdateRemplissageCommand and update related logic ([febc9a0](https://github.com/Dannebicque/oreof/commit/febc9a0c814ee1f0a6ef5dbcd3eaeb110514a2b5))
-* Add profil.fr.yaml configuration file ([3dfafb1](https://github.com/Dannebicque/oreof/commit/3dfafb1290d43bd9f03046ef838555beb05c9335))
+* Add profil.fr.yaml configuration file ([3dfafb1](https://github.com/Dannebicque/oreof/commit/3dfafb1290d43bd9f03046ef838555beb05c9335)) — [@Dannebicque](https://github.com/Dannebicque)
 * Add RecopieCentreCommand to replicate user centre entries for next campaign ([eaf9046](https://github.com/Dannebicque/oreof/commit/eaf9046b6e41d0219bf3e81e92d73d7abb675009))
-* Add relations between CampagneCollecte and additional entities ([a95e443](https://github.com/Dannebicque/oreof/commit/a95e4439123ede78e3b0870e96a12c00d32683cb))
+* Add relations between CampagneCollecte and additional entities ([a95e443](https://github.com/Dannebicque/oreof/commit/a95e4439123ede78e3b0870e96a12c00d32683cb)) — [@Dannebicque](https://github.com/Dannebicque)
 * Enhance ccHasTp functionality and update visibility logic for percentage input ([7ae8d06](https://github.com/Dannebicque/oreof/commit/7ae8d060b26046bbf89caadd5fda5500ee0f46a4))
-* Enhance controleAssiduite functionality with form updates and validation checks ([4f7eff6](https://github.com/Dannebicque/oreof/commit/4f7eff6ddadff446a9b4df27a87783061834abf3))
-* Implement controleAssiduite functionality with form updates and translations ([f972381](https://github.com/Dannebicque/oreof/commit/f972381e278d4ce6d978965d77361d07abda72e9))
-* Implement controleAssiduite functionality with form updates and translations ([d04a2cc](https://github.com/Dannebicque/oreof/commit/d04a2cc18d1cc76ce2f67f77b124367f8634030d))
-* Update EtablissementInformationType to make descriptif fields optional ([c077569](https://github.com/Dannebicque/oreof/commit/c07756997bfd2c3c002db626a652dac277c21b2c))
+* Enhance controleAssiduite functionality with form updates and validation checks ([4f7eff6](https://github.com/Dannebicque/oreof/commit/4f7eff6ddadff446a9b4df27a87783061834abf3)) — [@Dannebicque](https://github.com/Dannebicque)
+* Implement controleAssiduite functionality with form updates and translations ([f972381](https://github.com/Dannebicque/oreof/commit/f972381e278d4ce6d978965d77361d07abda72e9)) — [@Dannebicque](https://github.com/Dannebicque)
+* Implement controleAssiduite functionality with form updates and translations ([d04a2cc](https://github.com/Dannebicque/oreof/commit/d04a2cc18d1cc76ce2f67f77b124367f8634030d)) — [@Dannebicque](https://github.com/Dannebicque)
+* Update EtablissementInformationType to make descriptif fields optional ([c077569](https://github.com/Dannebicque/oreof/commit/c07756997bfd2c3c002db626a652dac277c21b2c)) — [@Dannebicque](https://github.com/Dannebicque)
 * Update FicheMatiereWizardController and VersioningStructure to enhance MCCC comparison logic and improve data handling in export process ([ea209be](https://github.com/Dannebicque/oreof/commit/ea209be0512a9e0a469fc7db25e2b1af54191aad))
-* Update formation editing permissions to include parcours editing checks ([05b7bbd](https://github.com/Dannebicque/oreof/commit/05b7bbd0cfba4454114ff4f9195ef9c1c7b5c74f))
+* Update formation editing permissions to include parcours editing checks ([05b7bbd](https://github.com/Dannebicque/oreof/commit/05b7bbd0cfba4454114ff4f9195ef9c1c7b5c74f)) — [@Dannebicque](https://github.com/Dannebicque)
 * User centre avec campagne collecte ([79c50e7](https://github.com/Dannebicque/oreof/commit/79c50e70ee86931841c8e96c1ab810e3bbb86294))
 * User centre avec campagne collecte ([fd3746b](https://github.com/Dannebicque/oreof/commit/fd3746b3634892c6525ba99c0485777f7fad3402))
 * User centre avec campagne collecte ([89d82c1](https://github.com/Dannebicque/oreof/commit/89d82c12c3de19371c4ec8f9d374f0bc19115c83))
@@ -1075,9 +1075,9 @@ All notable changes to this project will be documented in this file. See [standa
 * Enhance MCCC state determination logic for child elements and improve completeness check ([5d876f9](https://github.com/Dannebicque/oreof/commit/5d876f9f54801f003f6ef2aefce88390d07195de))
 * Enhance permission checks for managing formations and DPE parcours ([2818a25](https://github.com/Dannebicque/oreof/commit/2818a25433e5f2adbedcb7f3649229b252a36347))
 * Enhance permission checks for managing formations and DPE parcours ([1b9cc7d](https://github.com/Dannebicque/oreof/commit/1b9cc7d8cb01b92711a164caad7d38fb59ffbbaf))
-* Fix condition for adding new child UEs in VersioningStructure ([ea52a36](https://github.com/Dannebicque/oreof/commit/ea52a362535df5177acc5281e0b9cfe08f8805b9))
-* Refactor and improve competence lookup in repository method ([28d9b56](https://github.com/Dannebicque/oreof/commit/28d9b565c467c65efedbb2156b291431a5569623))
-* Refactor and improve competence lookup in repository method ([49c1912](https://github.com/Dannebicque/oreof/commit/49c19125ad4cdf56338c116f6bc1a7fb1350959d))
+* Fix condition for adding new child UEs in VersioningStructure ([ea52a36](https://github.com/Dannebicque/oreof/commit/ea52a362535df5177acc5281e0b9cfe08f8805b9)) — [@Dannebicque](https://github.com/Dannebicque)
+* Refactor and improve competence lookup in repository method ([28d9b56](https://github.com/Dannebicque/oreof/commit/28d9b565c467c65efedbb2156b291431a5569623)) — [@Dannebicque](https://github.com/Dannebicque)
+* Refactor and improve competence lookup in repository method ([49c1912](https://github.com/Dannebicque/oreof/commit/49c19125ad4cdf56338c116f6bc1a7fb1350959d)) — [@Dannebicque](https://github.com/Dannebicque)
 * Refactor DefaultController to use FormationRepository for fetching formations ([00f4094](https://github.com/Dannebicque/oreof/commit/00f4094fa627ff67dd1626162af4b0968efd4e2d))
 * Refactor MCCC state retrieval logic, enhance EC parent handling, and improve template structure ([ff9fb90](https://github.com/Dannebicque/oreof/commit/ff9fb9089ac9787448753c40eaa75fe935bac3d2))
 * Refactor modalite handling in EcStep4Type, update MCCC display logic, and clean up YAML files ([3ce7ad8](https://github.com/Dannebicque/oreof/commit/3ce7ad85e514e2dbaccf4c67e46f73adffd6d704))
@@ -1109,7 +1109,7 @@ All notable changes to this project will be documented in this file. See [standa
 * Update button visibility logic based on user permissions in mention_manage template ([b415678](https://github.com/Dannebicque/oreof/commit/b4156787d408abc9c5561c84b9ec768bb27564ea))
 * Update button visibility logic based on user permissions in parcours_manage template ([e87bf7e](https://github.com/Dannebicque/oreof/commit/e87bf7e7d41142533f6c26c8ee9469f3468129d9))
 * Update column headers for clarity in fiches templates ([4c624f0](https://github.com/Dannebicque/oreof/commit/4c624f0f9cc68706064e9043f5d6cd26fb14eb3b))
-* Update composante reference in URL path for CRUD stimulus controller ([b90e11e](https://github.com/Dannebicque/oreof/commit/b90e11e0d344ce925b571579e3a80edb7a9c8fff))
+* Update composante reference in URL path for CRUD stimulus controller ([b90e11e](https://github.com/Dannebicque/oreof/commit/b90e11e0d344ce925b571579e3a80edb7a9c8fff)) — [@Dannebicque](https://github.com/Dannebicque)
 * Update condition for button display in fiche_matiere_manage ([169b5a4](https://github.com/Dannebicque/oreof/commit/169b5a4eabe3aaa9576ff8997d8dfb4b9e4116ec))
 * Update condition for button display in fiche_matiere_manage ([1558a40](https://github.com/Dannebicque/oreof/commit/1558a40e24aeb86ad6bf725f88a96ab3c42e308f))
 * Update condition for button display in fiche_matiere_manage ([18954e4](https://github.com/Dannebicque/oreof/commit/18954e45fadd204f6ab4aa9cea5a7421cd1cd69b))
@@ -1118,7 +1118,7 @@ All notable changes to this project will be documented in this file. See [standa
 * Update help text for respParcours and coResponsable fields in new.html.twig ([457b991](https://github.com/Dannebicque/oreof/commit/457b9914d60f5abf5d6689ed0a974f0af762759a))
 * Update McccUpdateEvent to use new structure and ECTS properties ([7fbd97b](https://github.com/Dannebicque/oreof/commit/7fbd97b7052942949d7c08124ad3343a40e64b79))
 * Update notification messages for DPE requests to clarify information provided ([8705110](https://github.com/Dannebicque/oreof/commit/8705110b27cfb78d8215cb9e10a54bdddb50b333))
-* Update parcours management logic and roles ([ed6716e](https://github.com/Dannebicque/oreof/commit/ed6716e95d22686fa46516dfab83b057eee2a080))
+* Update parcours management logic and roles ([ed6716e](https://github.com/Dannebicque/oreof/commit/ed6716e95d22686fa46516dfab83b057eee2a080)) — [@Dannebicque](https://github.com/Dannebicque)
 * Update semestre condition and adjust colspan in structure template ([0e62b95](https://github.com/Dannebicque/oreof/commit/0e62b9591f728050097e72a3bb7729967e13bebc))
 * Update workflow icons and labels, enhance DpeDemande handling, and improve template logic ([80e12c9](https://github.com/Dannebicque/oreof/commit/80e12c9e4a535c4b90f67a1600dccfed1aafcb8f))
 
