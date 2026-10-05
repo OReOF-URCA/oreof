@@ -119,12 +119,13 @@
         <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" class="space-y-6"
               data-controller="auto-submit">
             <!-- KPI -->
-            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
                 <twig:Kpi
                     title="Formations"
                     value="{{ tabStatistiques.nbFormations }}"
                     variant="default"
                     icon="icon:graduation"
+                    help="Nombre total de formations (mentions) affichées selon les filtres sélectionnés."
                 />
 
                 <twig:Kpi
@@ -132,6 +133,7 @@
                     value="{{ tabStatistiques.nbParcours }}"
                     variant="default"
                     icon="icon:layers"
+                    help="Nombre total de parcours de formation recensés pour ces formations."
                 />
 
                 <twig:Kpi
@@ -139,7 +141,34 @@
                     value="{{ tabStatistiques.nbParcoursOuvert }}"
                     variant="success"
                     icon="icon:check-circle"
+                    help="Nombre de parcours ouverts au recrutement et à la formation pour cette campagne."
                 />
+
+                <twig:Kpi
+                    title="Non ouverts"
+                    value="{{ tabStatistiques.nbParcoursNonOuvert }}"
+                    variant="{{ tabStatistiques.nbParcoursNonOuvert > 0 ? 'danger' : 'secondary' }}"
+                    icon="icon:danger"
+                    help="Parcours non ouverts ou fermés définitivement : non-ouverture, attente SES/CFVU ou fermeture définitive."
+                >
+                    {% if tabStatistiques.nbParcoursNonOuvert > 0 %}
+                        <div class="mt-2 space-y-1 border-t border-secondary-200/60 pt-1.5 text-[11px] text-secondary-600 dark:border-secondary-700/60 dark:text-secondary-400">
+                           
+                            {% if tabStatistiques.nbNonOuverture > 0 %}
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="truncate">Attente SES :</span>
+                                    <span class="font-semibold text-warning-700 dark:text-warning-300">{{ tabStatistiques.nbNonOuverture }}</span>
+                                </div>
+                            {% endif %}
+                            {% if tabStatistiques.nbFermetureDefinitive > 0 %}
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="truncate">Fermeture déf. :</span>
+                                    <span class="font-semibold text-danger-700 dark:text-danger-300">{{ tabStatistiques.nbFermetureDefinitive }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </twig:Kpi>
 
                 <twig:Kpi
                     title="Capacité"
@@ -147,6 +176,7 @@
                     unit="places"
                     variant="info"
                     icon="icon:users"
+                    help="Somme des capacités d'accueil cumulées des formations et parcours ouverts."
                 />
 
                 <twig:Kpi
@@ -154,6 +184,7 @@
                     value="{{ tabStatistiques.nbAConfirmer }}"
                     variant="{{ tabStatistiques.nbAConfirmer > 0 ? 'warning' : 'secondary' }}"
                     icon="icon:clock"
+                    help="Parcours ouverts dont le workflow de validation n'a pas encore atteint l'état validé CFVU ou publié."
                 />
 
                 <twig:Kpi
@@ -161,6 +192,7 @@
                     value="{{ tabStatistiques.nbAnomalies }}"
                     variant="{{ tabStatistiques.nbAnomalies > 0 ? 'danger' : 'secondary' }}"
                     icon="{{ tabStatistiques.nbAnomalies > 0 ? 'icon:warning' : 'icon:check-circle' }}"
+                    help="Nombre d'alertes ou blocages détectés sur les parcours et paramétrages des plateformes."
                 />
             </div>
 

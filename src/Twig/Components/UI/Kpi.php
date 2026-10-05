@@ -58,6 +58,12 @@ final class Kpi
     /** Lien optionnel */
     public ?string $href = null;
 
+    /** Texte d'infobulle / aide contextuelle sur le calcul */
+    public ?string $help = null;
+
+    /** Alias optionnel pour help */
+    public ?string $tooltip = null;
+
     /** Classes CSS supplémentaires */
     public string $extraClass = '';
 

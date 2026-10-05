@@ -8,6 +8,7 @@ Exemples :
 
 {% set resolvedTitle = this.resolvedTitle %}
 {% set isLink = this.href is not null and this.href != '' %}
+{% set helpText = this.help ?? this.tooltip %}
 {% set cardClasses = "rounded-xl border border-secondary-200 bg-secondary-50/60 p-3.5 shadow-sm dark:border-secondary-700 dark:bg-secondary-800/40 transition-all " ~ (isLink ? "hover:border-secondary-300 hover:shadow-md dark:hover:border-secondary-600 cursor-pointer block " : "") ~ this.extraClass %}
 
 {% set slotContent %}
@@ -20,9 +21,23 @@ Exemples :
 <div class="{{ cardClasses }}" {{- attributes -}}>
 {% endif %}
     <div class="flex items-center justify-between gap-2">
-        <span class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400 truncate">
-            {{ resolvedTitle }}
-        </span>
+        <div class="flex items-center gap-1.5 min-w-0">
+            <span class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400 truncate">
+                {{ resolvedTitle }}
+            </span>
+            {% if helpText %}
+                <span class="inline-flex cursor-help text-secondary-400 hover:text-secondary-600 dark:text-secondary-500 dark:hover:text-secondary-300 transition-colors"
+                      {{ stimulus_controller('tooltip', {
+                          title: helpText,
+                          placement: 'top'
+                      }) }}
+                      tabindex="0"
+                      role="tooltip"
+                      aria-label="{{ helpText }}">
+                    {{ ux_icon('icon:info-circle', {class: 'h-3.5 w-3.5'}) }}
+                </span>
+            {% endif %}
+        </div>
         {% if this.icon %}
             {{ ux_icon(this.icon, {class: 'h-4 w-4 shrink-0 ' ~ this.iconColorClass}) }}
         {% endif %}

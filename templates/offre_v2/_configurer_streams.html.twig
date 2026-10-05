@@ -8,6 +8,7 @@
                 total="{{ formation.parcours|length }}"
                 variant="success"
                 icon="icon:check-circle"
+                help="Nombre de parcours de cette formation ouverts au recrutement."
             />
 
             <twig:Kpi
@@ -16,6 +17,7 @@
                 unit="active{{ plateformes|length > 1 ? 's' : '' }}"
                 variant="primary"
                 icon="icon:globe"
+                help="Plateformes d'admission actives configurées pour ce type de diplôme."
             />
 
             <twig:Kpi
@@ -24,6 +26,7 @@
                 unit="places"
                 variant="info"
                 icon="icon:users"
+                help="Somme des capacités d'accueil de la formation (ou somme des parcours ouverts)."
             />
 
             <twig:Kpi
@@ -31,6 +34,7 @@
                 value="{{ anomalies|length }}"
                 variant="{{ anomalies|length > 0 ? 'warning' : 'secondary' }}"
                 icon="{{ anomalies|length > 0 ? 'icon:warning' : 'icon:check-circle' }}"
+                help="Alertes de cohérence (capacités manquantes, paramétrages incomplets)."
             />
         </div>
     </template>

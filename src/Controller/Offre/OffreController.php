@@ -58,6 +58,9 @@ final class OffreController extends BaseController
             'nbFormations' => 0,
             'nbParcours' => 0,
             'nbParcoursOuvert' => 0,
+            'nbParcoursNonOuvert' => 0,
+            'nbNonOuverture' => 0,
+            'nbFermetureDefinitive' => 0,
             'capacite' => 0,
             'nbAConfirmer' => 0,
             'nbAnomalies' => 0,
@@ -311,6 +314,9 @@ final class OffreController extends BaseController
         $allAnomalies = [];
         $nbAConfirmer = 0;
         $nbParcoursOuvert = 0;
+        $nbParcoursNonOuvert = 0;
+        $nbNonOuverture = 0;
+        $nbFermetureDefinitive = 0;
         $capacite = 0;
         $groupedFormations = [];
 
@@ -328,6 +334,14 @@ final class OffreController extends BaseController
                     $state = array_key_first($dpePar->getEtatValidation()) ?? 'initialisation_dpe';
                     if (!in_array($state, ['valide_cfvu', 'valide_a_publier', 'publie'], true)) {
                         $nbAConfirmer++;
+                    }
+                } else {
+                    $nbParcoursNonOuvert++;
+                    $etatRecond = $dpePar->getEtatReconduction();
+                    if ($etatRecond === \App\Enums\TypeModificationDpeEnum::FERMETURE_DEFINITIVE) {
+                        $nbFermetureDefinitive++;
+                    } elseif ($etatRecond === \App\Enums\TypeModificationDpeEnum::NON_OUVERTURE_CFVU || $etatRecond === \App\Enums\TypeModificationDpeEnum::NON_OUVERTURE_SES || $etatRecond === \App\Enums\TypeModificationDpeEnum::NON_OUVERTURE) {
+                        $nbNonOuverture++;
                     }
                 }
             }
@@ -435,6 +449,9 @@ final class OffreController extends BaseController
         unset($compGroup);
 
         $tabStatistiques['nbParcoursOuvert'] = $nbParcoursOuvert;
+        $tabStatistiques['nbParcoursNonOuvert'] = $nbParcoursNonOuvert;
+        $tabStatistiques['nbNonOuverture'] = $nbNonOuverture;
+        $tabStatistiques['nbFermetureDefinitive'] = $nbFermetureDefinitive;
         $tabStatistiques['capacite'] = $capacite;
         $tabStatistiques['nbAConfirmer'] = $nbAConfirmer;
         $tabStatistiques['nbAnomalies'] = count($allAnomalies);
