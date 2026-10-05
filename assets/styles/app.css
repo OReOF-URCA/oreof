@@ -271,7 +271,27 @@ html[data-a11y-size="xlarge"] .topbar-right > * {
     color: var(--color-text);
   }
 
-  /* "xlarge" : ancienne valeur éventuellement mémorisée par le navigateur */
+  /* Listes déroulantes natives : couleurs du thème (sinon le popup suit l'OS : texte noir sur fond noir en sombre) */
+  select {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  select option,
+  select optgroup {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  select option:checked {
+    background-color: color-mix(in oklab, var(--semantic-primary) 25%, var(--color-surface));
+  }
+
+  select option:disabled {
+    color: var(--color-text-muted);
+  }
+
+  /* "xlarge": ancienne valeur éventuellement mémorisée par le navigateur */
   html[data-a11y-size="large"],
   html[data-a11y-size="xlarge"] {
     font-size: 125%;
@@ -1790,6 +1810,23 @@ html[data-a11y-size="xlarge"] .topbar-right > * {
 
   html[data-theme="dark"] .ts-wrapper.focus .ts-control {
     @apply border-indigo-500 ring-indigo-500/30;
+  }
+
+  /* Selects de filtres (classe `app-filter-select` sur le <select>) : même aspect que le champ de recherche voisin, pas de « grisé » */
+  .ts-wrapper.single.app-filter-select .ts-control {
+    @apply rounded-lg border-secondary-300 py-2 text-sm font-normal text-text cursor-pointer
+    hover:border-primary-400 dark:border-secondary-600 dark:text-secondary-100;
+    background-color: var(--color-surface) !important;
+  }
+
+  .ts-wrapper.single.app-filter-select .ts-control * {
+    font-weight: 400 !important;
+  }
+
+  .ts-wrapper.single.app-filter-select .ts-control > .item,
+  .ts-wrapper.single.app-filter-select .ts-control > input::placeholder {
+    color: var(--color-text) !important;
+    opacity: 1;
   }
 
   html[data-theme="dark"] .ts-wrapper.multi .ts-control > div {
