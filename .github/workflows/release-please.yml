@@ -26,19 +26,16 @@ jobs:
           target-branch: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Find Release Please PR
+      - name: Detect Release Please branch
         id: release-pr
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          branch="$(gh pr list \
-            --base "$GITHUB_REF_NAME" \
-            --state open \
-            --label "autorelease: pending" \
-            --json headRefName \
-            --jq '.[0].headRefName // ""')"
+          branch="release-please--branches--${GITHUB_REF_NAME}"
 
-          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          else
+            echo "branch=" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Checkout Release Please branch
         if: steps.release-pr.outputs.branch != ''
