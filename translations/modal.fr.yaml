@@ -1,161 +1,135 @@
 Enregistrer: Enregistrer
-
+"Enregistrer les MCCC de l'EC": "Enregistrer les MCCC de l'EC"
 actualite:
-    new:
-        title: "Ajouter une actualité"
-    show:
-        title: "Détails de l'actualité"
     edit:
         title: "Modifier l'actualité"
-
-annee_universitaire:
     new:
-        title: "Ajouter une année universitaire"
+        title: 'Ajouter une actualité'
     show:
-        title: "Détails de l'année universitaire"
+        title: "Détails de l'actualité"
+actualite.edit.title: "Modifier l'actualité"
+actualite.new.title: 'Ajouter une actualité'
+actualite.show.title: "Détails de l'actualité"
+annee_universitaire:
     edit:
         title: "Modifier l'année universitaire"
-
+    new:
+        title: 'Ajouter une année universitaire'
+    show:
+        title: "Détails de l'année universitaire"
+annee_universitaire.edit.title: "Modifier l'année universitaire"
+annee_universitaire.new.title: 'Ajouter une année universitaire'
+annee_universitaire.show.title: "Détails de l'année universitaire"
 campagne_collecte:
-    new:
-        title: "Ajouter une campagne de collecte"
-    show:
-        title: "Détails de la campagne de collecte"
-    edit:
-        title: "Modifier la campagne de collecte"
     configure_publication:
-        title: "Configuration de la publication"
-        description: "Paramétrer la publication des maquettes et MCCC"
-        success: "Options de publication enregistrées avec succès"
-
+        description: 'Paramétrer la publication des maquettes et MCCC'
+        success: 'Options de publication enregistrées avec succès'
+        title: 'Configuration de la publication'
+    edit:
+        title: 'Modifier la campagne de collecte'
+    new:
+        title: 'Ajouter une campagne de collecte'
+    show:
+        title: 'Détails de la campagne de collecte'
+campagne_collecte.configure_publication.description: 'Paramétrer la publication des maquettes et MCCC'
+campagne_collecte.configure_publication.success: 'Options de publication enregistrées avec succès'
+campagne_collecte.configure_publication.title: 'Configuration de la publication'
+campagne_collecte.edit.title: 'Modifier la campagne de collecte'
+campagne_collecte.new.title: 'Ajouter une campagne de collecte'
+campagne_collecte.show.title: 'Détails de la campagne de collecte'
 composante:
-    new:
-        title: "Ajouter une composante"
-    show:
-        title: "Détails de la composante"
     edit:
-        title: "Modifier la composante"
-
+        title: 'Modifier la composante'
+    new:
+        title: 'Ajouter une composante'
+    show:
+        title: 'Détails de la composante'
+composante.edit.title: 'Modifier la composante'
+composante.new.title: 'Ajouter une composante'
+composante.show.title: 'Détails de la composante'
 domaine:
-    new:
-        title: "Ajouter un domaine"
-    show:
-        title: "Détails du domaine"
     edit:
-        title: "Modifier le domaine"
-
-etablissement:
+        title: 'Modifier le domaine'
     new:
-        title: "Ajouter un établissement"
+        title: 'Ajouter un domaine'
     show:
-        title: "Détails de l'établissement"
+        title: 'Détails du domaine'
+domaine.edit.title: 'Modifier le domaine'
+domaine.new.title: 'Ajouter un domaine'
+domaine.show.title: 'Détails du domaine'
+etablissement:
     edit:
         title: "Modifier l'établissement"
-
+    new:
+        title: 'Ajouter un établissement'
+    show:
+        title: "Détails de l'établissement"
+etablissement.edit.title: "Modifier l'établissement"
+etablissement.new.title: 'Ajouter un établissement'
+etablissement.show.title: "Détails de l'établissement"
 langue:
-    new:
-        title: "Ajouter une langue"
-    show:
-        title: "Détails de la langue"
     edit:
-        title: "Modifier la langue"
-
+        title: 'Modifier la langue'
+    new:
+        title: 'Ajouter une langue'
+    show:
+        title: 'Détails de la langue'
+langue.edit.title: 'Modifier la langue'
+langue.new.title: 'Ajouter une langue'
+langue.show.title: 'Détails de la langue'
 mention:
-    new:
-        title: "Ajouter une mention"
-    show:
-        title: "Détails de la mention"
     edit:
-        title: "Modifier la mention"
-
+        title: 'Modifier la mention'
+    new:
+        title: 'Ajouter une mention'
+    show:
+        title: 'Détails de la mention'
+mention.edit.title: 'Modifier la mention'
+mention.new.title: 'Ajouter une mention'
+mention.show.title: 'Détails de la mention'
 nature_ue_ec:
+    edit:
+        title: "Modifier la nature d'UE/EC"
     new:
         title: "Ajouter une nature d'UE/EC"
     show:
         title: "Détails de la nature d'UE/EC"
-    edit:
-        title: "Modifier la nature d'UE/EC"
-
+nature_ue_ec.edit.title: "Modifier la nature d'UE/EC"
+nature_ue_ec.new.title: "Ajouter une nature d'UE/EC"
+nature_ue_ec.show.title: "Détails de la nature d'UE/EC"
+plateforme_adminission.show.title: "Détails de la plateforme d'admission"
 plateforme_admission:
+    edit:
+        title: "Modifier la plateforme d'admission"
     new:
         title: "Ajouter une plateforme d'admission"
     show:
         title: "Détails de la plateforme d'admission"
-    edit:
-        title: "Modifier la plateforme d'admission"
-
-# Fallback format à plat pour la compatibilité
-actualite.new.title: "Ajouter une actualité"
-actualite.show.title: "Détails de l'actualité"
-actualite.edit.title: "Modifier l'actualité"
-
-annee_universitaire.new.title: "Ajouter une année universitaire"
-annee_universitaire.show.title: "Détails de l'année universitaire"
-annee_universitaire.edit.title: "Modifier l'année universitaire"
-
-campagne_collecte.new.title: "Ajouter une campagne de collecte"
-campagne_collecte.show.title: "Détails de la campagne de collecte"
-campagne_collecte.edit.title: "Modifier la campagne de collecte"
-campagne_collecte.configure_publication.title: "Configuration de la publication"
-campagne_collecte.configure_publication.description: "Paramétrer la publication des maquettes et MCCC"
-campagne_collecte.configure_publication.success: "Options de publication enregistrées avec succès"
-
-composante.new.title: "Ajouter une composante"
-composante.show.title: "Détails de la composante"
-composante.edit.title: "Modifier la composante"
-
-domaine.new.title: "Ajouter un domaine"
-domaine.show.title: "Détails du domaine"
-domaine.edit.title: "Modifier le domaine"
-
-etablissement.new.title: "Ajouter un établissement"
-etablissement.show.title: "Détails de l'établissement"
-etablissement.edit.title: "Modifier l'établissement"
-
-langue.new.title: "Ajouter une langue"
-langue.show.title: "Détails de la langue"
-langue.edit.title: "Modifier la langue"
-
-mention.new.title: "Ajouter une mention"
-mention.show.title: "Détails de la mention"
-mention.edit.title: "Modifier la mention"
-
-nature_ue_ec.new.title: "Ajouter une nature d'UE/EC"
-nature_ue_ec.show.title: "Détails de la nature d'UE/EC"
-nature_ue_ec.edit.title: "Modifier la nature d'UE/EC"
-
+plateforme_admission.edit.title: "Modifier la plateforme d'admission"
 plateforme_admission.new.title: "Ajouter une plateforme d'admission"
 plateforme_admission.show.title: "Détails de la plateforme d'admission"
-plateforme_admission.edit.title: "Modifier la plateforme d'admission"
-plateforme_adminission.show.title: "Détails de la plateforme d'admission"
-
-rythme_formation.new.title: "Ajouter un rythme de formation"
-rythme_formation.show.title: "Détails du rythme de formation"
-rythme_formation.edit.title: "Modifier le rythme de formation"
-
-type_diplome.new.title: "Ajouter un type de diplôme"
-type_diplome.show.title: "Détails du type de diplôme"
-type_diplome.edit.title: "Modifier le type de diplôme"
-
+rythme_formation.edit.title: 'Modifier le rythme de formation'
+rythme_formation.new.title: 'Ajouter un rythme de formation'
+rythme_formation.show.title: 'Détails du rythme de formation'
+type_diplome.edit.title: 'Modifier le type de diplôme'
+type_diplome.new.title: 'Ajouter un type de diplôme'
+type_diplome.show.title: 'Détails du type de diplôme'
+type_ec.edit.title: "Modifier le type d'EC"
 type_ec.new.title: "Ajouter un type d'EC"
 type_ec.show.title: "Détails du type d'EC"
-type_ec.edit.title: "Modifier le type d'EC"
-
+type_epreuve.edit.title: "Modifier le type d'épreuve"
 type_epreuve.new.title: "Ajouter un type d'épreuve"
 type_epreuve.show.title: "Détails du type d'épreuve"
-type_epreuve.edit.title: "Modifier le type d'épreuve"
-
+type_ue.edit.title: "Modifier le type d'UE"
 type_ue.new.title: "Ajouter un type d'UE"
 type_ue.show.title: "Détails du type d'UE"
-type_ue.edit.title: "Modifier le type d'UE"
-
-user.new.title: "Ajouter un utilisateur"
-user.show.title: "Détails de l'utilisateur"
 user.edit.title: "Modifier l'utilisateur"
 user.gestion_profil.title: "Gestion des profils de l'utilisateur"
-user_new_hors_urca.new.title: "Ajouter un utilisateur externe (hors URCA)"
-user_new_ldap.new.title: "Ajouter un utilisateur depuis le LDAP URCA"
+user.new.title: 'Ajouter un utilisateur'
+user.show.title: "Détails de l'utilisateur"
+user_new_hors_urca.new.title: 'Ajouter un utilisateur externe (hors URCA)'
+user_new_ldap.new.title: 'Ajouter un utilisateur depuis le LDAP URCA'
+ville.edit.title: 'Modifier la ville'
+ville.new.title: 'Ajouter une ville'
+ville.show.title: 'Détails de la ville'
 
-ville.new.title: "Ajouter une ville"
-ville.show.title: "Détails de la ville"
-ville.edit.title: "Modifier la ville"

@@ -17,6 +17,7 @@
 2028: '2028'
 2029: '2029'
 2030: '2030'
+'A-Z, 0-9': 'A-Z, 0-9'
 'A1 (Utilisateur élémentaire débutant)': 'A1 (Utilisateur élémentaire débutant)'
 'A2 (Utilisateur élémentaire intermédiaire)': 'A2 (Utilisateur élémentaire intermédiaire)'
 Adresse: Adresse
@@ -106,6 +107,7 @@ Couleur: Couleur
 'Devenir des diplômés': 'Devenir des diplômés'
 'Directeur de composante': 'Directeur de composante'
 Disciplinaire: Disciplinaire
+Domaine(s): Domaine(s)
 'Droit à la 2nde chance': 'Droit à la 2nde chance'
 Droits: Rôle
 'Définition des champs': 'Définition des champs'
@@ -118,6 +120,8 @@ Email: Email
 'Email du responsable du parcours': 'Email du responsable du parcours'
 'En distanciel': 'En distanciel'
 'En présentiel': 'En présentiel'
+'Entrez le libellé de la mention': 'Entrez le libellé de la mention'
+'Entrez le sigle (optionnel)': 'Entrez le sigle (optionnel)'
 "Envoyer un email de conformation à l'utilisateur": "Envoyer un email de conformation à l'utilisateur"
 Etablissement: Etablissement
 Etbalissement: Etablissement
@@ -209,6 +213,7 @@ STAGE: STAGE
 'Semestre 6': 'Semestre 6'
 Sigle: Sigle
 Stage: Stage
+'Sélectionnez un type de diplôme': 'Sélectionnez un type de diplôme'
 'Sélectionnez une plateforme': 'Sélectionnez une plateforme'
 'TER – travail d’étude et de recherche': 'TER (travail d’étude et de recherche)'
 TYPE_PARCOURS_ALTERNANCE: 'Parcours en alternance uniquement'

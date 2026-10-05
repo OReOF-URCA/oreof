@@ -100,6 +100,7 @@ class ApiJsonVersioningCommand extends Command
                 $now = (new DateTime())->format('d-m-Y_H-i');
                 $this->fs->rename($path . $filename, $path . $now . "-" .  $filename);
             }
+            
             $apiJson = $this->apiJsonExport->generateApiVersioning($hostname, $io, $this->lheoXml, $this->lheoV2, $apiV2);
             $this->fs->appendToFile($path . $filename, json_encode($apiJson));
 

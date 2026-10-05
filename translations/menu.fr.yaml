@@ -1,8 +1,3 @@
-'Composante : UFR Sciences Economiques, Sociales et de Gestion': 'Composante : UFR Sciences Economiques, Sociales et de Gestion'
-Création: Création
-'Gestion des commentaires': 'Gestion des commentaires'
-Modification: Modification
-'UFR Sciences Economiques, Sociales et de Gestion': 'UFR Sciences Economiques, Sociales et de Gestion'
 breadcrumb.home: Accueil
 menu.admin.consulter_offre: "Consulter l'offre de formation"
 menu.admin.controle_lheo: 'Controle LHEO'
@@ -186,3 +181,4 @@ page.structure_fiche_matiere_index_hd.description: 'Liste des fiches EC/matière
 page.structure_fiche_matiere_index_hd.title: 'Détails des fiches EC/matières "hors diplômes"'
 page.translations_index.description: "Gérer les traductions et textes de l'application."
 page.translations_index.title: Traductions
+

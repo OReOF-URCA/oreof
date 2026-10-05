@@ -8,6 +8,7 @@
 'Indiquer la composante porteuse du projet, qui aura en charge le dépôt de la demande de création de la formation': 'Indiquer la composante porteuse du projet, qui aura en charge le dépôt de la demande de création de la formation'
 'Indiquez en 3000 caractères maximum les périodes et leurs durées en centre ou en entreprise.': 'Indiquez en 3000 caractères maximum les périodes et leurs durées en centre ou en entreprise.'
 "Le sigle est la dénomination courte de la composante, s'il existe.": "Le sigle est la dénomination courte de la composante, s'il existe."
+"Le sigle est la dénomination courte de la mention, s'il existe.": "Le sigle est la dénomination courte de la mention, s'il existe."
 'Numéro, rue, ...': 'Numéro, rue, ...'
 'Optionnel, sigle/code ou appelation courte du parcours': 'Optionnel, sigle/code ou appelation courte du parcours'
 'Personne responsable de la validation des DPE des formations de la composante': 'Personne responsable de la validation des DPE des formations de la composante'
@@ -16,6 +17,7 @@
 'Si la mention existe, veuillez la sélectionner dans la liste déroulante': ''
 'Si la mention n''existe pas, veuillez la créer dans la section "Autre mention"': ''
 'Sélectionnez les années pour lesquelles cette plateforme est utilisée': 'Sélectionnez les années pour lesquelles cette plateforme est utilisée'
+'Un seul caractère (lettre ou chiffre)': 'Un seul caractère (lettre ou chiffre)'
 __name__.helps: __name__.helps
 __name__.helps.description: __name__.helps.description
 __name__.helps.flag: __name__.helps.flag
@@ -349,6 +351,9 @@ mention.helps.domaine: ''
 mention.helps.libelle: 'Indiquez le libellé exact de la mention/spécialité.'
 mention.helps.sigle: 'Le cas échéant, indiquez le sigle/code utilisé pour cette mention/spécialité.'
 mention.helps.typeDiplome: ''
+mention_dto.helps.domaines: 'Vous pouvez indiquer 1 ou plusieurs domaines'
+mention_dto.helps.libelle: ''
+mention_dto.helps.typeDiplomeId: ''
 nature_ue_ec.helps.choix.help: "Indiquez le type d'UE."
 nature_ue_ec.helps.libelle: "Indiquez le libellé exact de la nature d'UE/EC."
 nature_ue_ec.helps.libre.help: nature_ue_ec.helps.libre.help

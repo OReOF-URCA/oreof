@@ -3,6 +3,7 @@ brouillon: brouillon
 btn.changeRf.validation.soumis_cfvu.valide: 'Valider CFVU et effectuer le changement'
 btn.changeRf.validation.soumis_conseil.valide: 'Valider et transmettre au SES'
 btn.changeRf.validation.soumis_ses.valide: 'Valider et transmettre à la CFVU'
+btn.change_rf.valide: 'Valider le changement de responsable'
 btn.demande.non.ouverture: 'Valider la demande de non ouverture du parcours'
 btn.demande.reouverture.cloture: 'Clore et soumettre les modifications'
 btn.demande.reouverture.cloture.sans_cfvu.ses: 'Clore et annuler les modifications'
@@ -24,6 +25,7 @@ btn.validation.cfvu.valide: 'Valider la formation'
 btn.validation.cfvu.valide.soumis_cfvu: 'Valider et soumettre à la CFVU'
 btn.validation.changeRf.reserver_cfvu: 'Emettre des réserves'
 btn.validation.changeRf.reserver_ses: 'Emettre des réserves'
+btn.validation.changeRf.suppression: 'Supprimer la demande de changement de responsable'
 btn.validation.changeRf.valider_cfvu_attente_pv: 'Valider CFVU sous réserve de PV'
 btn.validation.changeRf.valider_cfvu_avec_pv: 'Valider CFVU et effectuer le changement'
 btn.validation.changeRf.valider_conseil: 'Valider et transmettre au SES'
@@ -131,9 +133,13 @@ changeRf.valide.soumis_cfvu.flash.success: 'Demande de changement de responsable
 changeRf.valide.soumis_conseil.flash.success: 'Demande de changement de responsable de formation validée par le conseil de composante'
 changeRf.valide.soumis_ses.flash.success: 'Demande de changement de responsable de formation validée par le SES'
 changeRf.verification_pv: changeRf.verification_pv
+cloture: cloture
 demande.non.ouverture.alerte: 'Vous pouvez demander la non ouverture du parcours. Cette demande sera transmise au SES puis en CFVU avec votre argumentaire.'
+demande.non.ouverture.argumentaire.help: "Détaillez l'argumentaire justifiant la non-ouverture."
 demande.non.ouverture.argumentaire.label: 'Argumentaire de la demande de non ouverture du parcours'
+demande.non.ouverture.confirmation.help: 'Confirmez votre demande de non-ouverture.'
 demande.non.ouverture.confirmation.label: 'Je confirme la demande de non ouverture du parcours %parcours%'
+demande.non.ouverture.help: 'Précisez la raison pour laquelle vous demandez la non-ouverture.'
 demande.non.ouverture.label: 'Confirmer la demande de non ouverture du parcours'
 demande.reouverture: 'Demander la réouverture du DPE'
 demande.reouverture.alerte: 'La demande de réouverture permet la réouverture des onglets du formulaire de saisie. Les demandes doivent être argumentées afin de déterminer si les modifications de maquette/MCCC impliquent un passage en conseil de composantes, en CFVU ou peuvent être appliquées directement.'
@@ -158,6 +164,7 @@ demande.reouverture.mention.alerte: 'La demande de réouverture permet la réouv
 demande.reouverture.mention.annuler: 'Annuler la demande de réouverture de la mention'
 demande.reouverture.mention.clore: 'Valider et soumettre la formation'
 demande.reouverture.mention.clore.title: 'Valider et soumettre la formation'
+demande.reouverture.mention.help: 'Précisez la raison pour laquelle vous demandez la réouverture de la mention.'
 demande.reouverture.mention.label: 'Précisez quelle(s) modification(s) vous souhaitez apporter à la formation'
 demande.reouverture.mention.modification.mccc.texte.help: "Les modifications apportées à la formation (modification d'un parcours, ajout d'un parcours,...) nécessitent un passage en CFVU"
 demande.reouverture.mention.modification.mccc.texte.label: 'Modifications des parcours de la mention, de sa structure et des textes descriptifs.'
@@ -210,6 +217,7 @@ fiche_matiere.demande.cloture.commentaire.help: ''
 fiche_matiere.demande.cloture.commentaire.label: 'Commentaire obligatoire exposant les raisons des modifications :'
 fiche_matiere.demande.cloture.help: 'Confirmer la demande de réouverture et soumettre les modifications pour vérification et publication.'
 fiche_matiere.demande.cloture.label: 'Je confirme la clôture et soumets les modifications'
+fiche_matiere.demande.clotureu.help: 'Indiquez le motif de la demande de clôture de la fiche matière.'
 fiche_matiere.demande.reouverture.help: 'Confirmer la demande de réouverture.'
 fiche_matiere.demande.reouverture.label: 'Je confirme la demande de réouverture'
 fiche_matiere.demande.reouverture.ses.alerte: 'Vous avez demandé la réouverture de la fiche EC/matière pour y apporter des modifications.'
@@ -401,6 +409,9 @@ reserve.validation.soumis_conseil.argumentaire.label: 'Argumentaire :'
 reserve.validation.soumis_conseil.date.label: 'Date du conseil de composante'
 reserve.validation.soumis_conseil.helps.argumentaire.help: ''
 reserve.validation.soumis_conseil.helps.date.help: ''
+ses.change_etat.alerte: "La modification de l'état aura un impact direct sur la visibilité du dossier."
+ses.change_ouverture.alerte: "La modification de l'ouverture impactera la saisie des maquettes."
+ses.commentaires.alerte: 'Attention : un commentaire SES a été émis sur ce dossier.'
 soumis.cfvu: 'Soumis CFVU'
 soumis.cfvu.btn-danger: 'Parcours refusé par la CFVU'
 soumis.cfvu.btn-info: 'Parcours soumis à la CFVU'
@@ -450,13 +461,17 @@ transmis_ses: 'Soumis central'
 validation.attente_pv: 'Attente PV'
 validation.autorisation_saisie: 'Autorisation de saisie'
 validation.cfvu: 'Validé CFVU'
-validation.cfvu.refuse.alerte: "> Le \"refus CFVU - projet à revoir\" rend le projet de DPE de nouveau modifiable par la composante. Il devra être ensuite de nouveau soumis au central pour passage en CFVU. \n > Après le refus définitif CFVU, le projet de DPE reste non modifiable. Il pourra être retravaillé et présenté en vue d’une campagne ultérieure."
+validation.cfvu.refuse.alerte: |-
+    > Le "refus CFVU - projet à revoir" rend le projet de DPE de nouveau modifiable par la composante. Il devra être ensuite de nouveau soumis au central pour passage en CFVU. 
+     > Après le refus définitif CFVU, le projet de DPE reste non modifiable. Il pourra être retravaillé et présenté en vue d’une campagne ultérieure.
 validation.cfvu.refuse.cas.projetARevoir.soumis_cfvu: ''
 validation.cfvu.refuse.commentaire.cas: 'Préciser les raisons du refus définitif ou à revoir du DPE'
 validation.cfvu.refuse.commentaire.cas.projetARevoir.: 'Point(s) du projet à revoir :'
 validation.cfvu.refuse.helps.commentaire.cas: 'Préciser les raisons du refus définitif ou à revoir du DPE'
 validation.cfvu.timeline: 'Validation par la CFVU'
-validation.cfvu.valide.alerte: "> La \"validation CFVU -  sous réserve de modifications\" rend le projet de DPE de nouveau modifiable par la composante. Il devra être ensuite de nouveau soumis au central pour obtenir un visa définitif (sans nouvelle présentation en CFVU). \n> La \"validation CFVU -  sous réserve de validation en conseil\" ne rend pas le projet DPE \"formation\" modifiable. Le visa définitif est conditionné par le dépôt d'une pièce justifiant la validation par le conseil de composante."
+validation.cfvu.valide.alerte: |-
+    > La "validation CFVU -  sous réserve de modifications" rend le projet de DPE de nouveau modifiable par la composante. Il devra être ensuite de nouveau soumis au central pour obtenir un visa définitif (sans nouvelle présentation en CFVU). 
+    > La "validation CFVU -  sous réserve de validation en conseil" ne rend pas le projet DPE "formation" modifiable. Le visa définitif est conditionné par le dépôt d'une pièce justifiant la validation par le conseil de composante.
 validation.cfvu.valide.commentaire.cas.sous.reserve.modifications.argumentaire.valide_a_publier: 'Modifications attendues pour une validation définitive :'
 validation.cfvu.valide.helps.commentaire.cas.sous.reserve.modifications.argumentaire.valide_a_publier: 'Précisez les modifications nécessaires pour une validation définitive en CFVU'
 validation.cfvu.valide.soumis_cfvu: 'Le projet DPE "formation" a bien été transmis à la CFVU pour visa.'
@@ -514,7 +529,9 @@ validation.fiche_matiere.ses.reserve.alerte: 'Emettre des réserves sur la fiche
 validation.fiche_matiere.ses.valide.alerte: 'Valider les fiches EC/matière pour la publication'
 validation.fiche_matiere.ses.valide.fiche.alerte: ''
 validation.fiche_matiere.success: 'Fiche EC/matière validée'
-validation.fiche_matiere.valide.alerte: "La validation de la fiche EC/matière permet sa transmission au central en vue de la publication. Après transmission, la fiche \"EC/matière\" ne sera plus modifiable. \n La fiche EC/matière n'est publiable que si elle est complète."
+validation.fiche_matiere.valide.alerte: |-
+    La validation de la fiche EC/matière permet sa transmission au central en vue de la publication. Après transmission, la fiche "EC/matière" ne sera plus modifiable. 
+     La fiche EC/matière n'est publiable que si elle est complète.
 validation.fiche_matiere.valide.fiche.alerte: 'Vérifier et soumettre la fiche matière pour publication'
 validation.fiche_matiere.valide.impossible.en_cours_redaction: 'La validation de la fiche EC/matière est impossible. Les informations de cette fiche sont incomplètes/erronées.'
 validation.formation: 'Formation validée'
@@ -707,7 +724,10 @@ validation.valider.transmis_ses: validation.valider.transmis_ses
 validation.valider.transmis_ses.title: validation.valider.transmis_ses.title
 validation.valider.valide_pour_publication: 'Valider pour publication'
 validation.verification_pv: 'Vérification PV'
+valide.change_rf.attente.date.label: "Date de prise d'effet"
 valide.change_rf.attente.fichier.label: 'Pièce justifiant la demande de changement de responsable de formation (PV, relevé de décision, délibération) :'
+valide.change_rf.attente.helps.date.help: 'Indiquez la date à laquelle le changement de responsable prend effet.'
+valide.change_rf.attente.helps.fichier.help: 'Joindre un document justificatif (ex: arrêté, décision du conseil).'
 valide.change_rf.date.conseil_composante.label: 'Date du conseil de composante'
 valide.change_rf.date.valider_cfvu_attente_pv.label: 'Date de la CFVU'
 valide.change_rf.date.valider_cfvu_avec_pv.label: 'Date de la CFVU'
@@ -833,7 +853,7 @@ workflow.valider_parcours.menu.description: 'Valider le parcours'
 workflow.valider_parcours.menu.label: 'Validation du parcours'
 workflow.valider_publication.datePublication.label: 'Date de publication'
 workflow.valider_publication.menu.description: 'Publier le dossier'
-workflow.valider_publication.menu.label: 'Publication'
+workflow.valider_publication.menu.label: Publication
 workflow.valider_reserve_central_cfvu.menu.description: 'Valider avec réserve en commission centrale'
 workflow.valider_reserve_central_cfvu.menu.label: 'Validation sous réserve (Centrale)'
 workflow.valider_reserve_cfvu.argumentaire.label: 'Argumentaire de la réserve'
@@ -842,18 +862,4 @@ workflow.valider_reserve_cfvu.menu.description: 'Valider avec réserve en CFVU'
 workflow.valider_reserve_cfvu.menu.label: 'Validation sous réserve (CFVU)'
 workflow.valider_reserve_conseil_cfvu.menu.description: 'Valider avec réserve en conseil'
 workflow.valider_reserve_conseil_cfvu.menu.label: 'Validation sous réserve (Conseil)'
-
-fiche_matiere.demande.clotureu.help: "Indiquez le motif de la demande de clôture de la fiche matière."
-ses.commentaires.alerte: "Attention : un commentaire SES a été émis sur ce dossier."
-ses.change_etat.alerte: "La modification de l'état aura un impact direct sur la visibilité du dossier."
-ses.change_ouverture.alerte: "La modification de l'ouverture impactera la saisie des maquettes."
-btn.validation.changeRf.suppression: "Supprimer la demande de changement de responsable"
-demande.reouverture.mention.help: "Précisez la raison pour laquelle vous demandez la réouverture de la mention."
-demande.non.ouverture.help: "Précisez la raison pour laquelle vous demandez la non-ouverture."
-demande.non.ouverture.confirmation.help: "Confirmez votre demande de non-ouverture."
-demande.non.ouverture.argumentaire.help: "Détaillez l'argumentaire justifiant la non-ouverture."
-valide.change_rf.attente.date.label: "Date de prise d'effet"
-valide.change_rf.attente.helps.date.help: "Indiquez la date à laquelle le changement de responsable prend effet."
-valide.change_rf.attente.helps.fichier.help: "Joindre un document justificatif (ex: arrêté, décision du conseil)."
-btn.change_rf.valide: "Valider le changement de responsable"
 
