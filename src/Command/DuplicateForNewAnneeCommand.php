@@ -307,13 +307,22 @@ class DuplicateForNewAnneeCommand extends Command
             $linkParcoursDpe = $this->entityManager->getRepository(Parcours::class)
                 ->findOneBy(['parcoursOrigineCopie' => $initialDpeParcours->getParcours()]);
             $cloneDpeParcours = clone $initialDpeParcours;
-            if($cloneDpeParcours->getEtatReconduction() !== TypeModificationDpeEnum::NON_OUVERTURE){
+            if(in_array($cloneDpeParcours->getEtatReconduction(), 
+                    [
+                        TypeModificationDpeEnum::NON_OUVERTURE,
+                        TypeModificationDpeEnum::NON_OUVERTURE_SES,
+                        TypeModificationDpeEnum::NON_OUVERTURE_CFVU,
+                        TypeModificationDpeEnum::FERMETURE_DEFINITIVE
+                    ],
+                    true
+                ) === false
+            ) {
                 $cloneDpeParcours->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
             }
             $cloneDpeParcours->setParcours($linkParcoursDpe);
             $cloneDpeParcours->setFormation($linkFormationDpe);
             $cloneDpeParcours->setCampagneCollecte($newCampagneCollecte);
-            $cloneDpeParcours->setEtatValidation(['tacite_reconduction' => 1]);
+            $cloneDpeParcours->setEtatValidation(['en_cours_redaction' => 1]);
             $cloneDpeParcours->setCreated($nowDate);
 
             $this->entityManager->persist($cloneDpeParcours);
