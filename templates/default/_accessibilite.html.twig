@@ -7,21 +7,33 @@
         <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">{{ 'accessibilite.theme.titre'|trans }}</h3>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <button type="button"
-                    class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
+                    class="group app-modal-footer-btn app-modal-footer-btn--secondary justify-center gap-2"
+                    aria-pressed="false"
+                    data-accessibility-target="option"
+                    data-accessibility-setting="theme"
                     data-action="click->accessibility#setTheme"
                     data-accessibility-theme-param="system">
+                <twig:UX:Icon name="icon:check" class="hidden h-4 w-4 group-aria-pressed:inline-block" aria-hidden="true"/>
                 {{ 'accessibilite.theme.systeme'|trans }}
             </button>
             <button type="button"
-                    class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
+                    class="group app-modal-footer-btn app-modal-footer-btn--secondary justify-center gap-2"
+                    aria-pressed="false"
+                    data-accessibility-target="option"
+                    data-accessibility-setting="theme"
                     data-action="click->accessibility#setTheme"
                     data-accessibility-theme-param="light">
+                <twig:UX:Icon name="icon:check" class="hidden h-4 w-4 group-aria-pressed:inline-block" aria-hidden="true"/>
                 {{ 'accessibilite.theme.clair'|trans }}
             </button>
             <button type="button"
-                    class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
+                    class="group app-modal-footer-btn app-modal-footer-btn--secondary justify-center gap-2"
+                    aria-pressed="false"
+                    data-accessibility-target="option"
+                    data-accessibility-setting="theme"
                     data-action="click->accessibility#setTheme"
                     data-accessibility-theme-param="dark">
+                <twig:UX:Icon name="icon:check" class="hidden h-4 w-4 group-aria-pressed:inline-block" aria-hidden="true"/>
                 {{ 'accessibilite.theme.sombre'|trans }}
             </button>
         </div>
@@ -31,15 +43,23 @@
         <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">{{ 'accessibilite.police.titre'|trans }}</h3>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button type="button"
-                    class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
+                    class="group app-modal-footer-btn app-modal-footer-btn--secondary justify-center gap-2"
+                    aria-pressed="false"
+                    data-accessibility-target="option"
+                    data-accessibility-setting="font"
                     data-action="click->accessibility#setFont"
                     data-accessibility-font-param="default">
+                <twig:UX:Icon name="icon:check" class="hidden h-4 w-4 group-aria-pressed:inline-block" aria-hidden="true"/>
                 {{ 'accessibilite.police.standard'|trans }}
             </button>
             <button type="button"
-                    class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
+                    class="group app-modal-footer-btn app-modal-footer-btn--secondary justify-center gap-2"
+                    aria-pressed="false"
+                    data-accessibility-target="option"
+                    data-accessibility-setting="font"
                     data-action="click->accessibility#setFont"
                     data-accessibility-font-param="dys">
+                <twig:UX:Icon name="icon:check" class="hidden h-4 w-4 group-aria-pressed:inline-block" aria-hidden="true"/>
                 {{ 'accessibilite.police.dyslexie'|trans }}
             </button>
         </div>
@@ -49,15 +69,23 @@
         <h3 class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">{{ 'accessibilite.taille.titre'|trans }}</h3>
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button type="button"
-                    class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
+                    class="group app-modal-footer-btn app-modal-footer-btn--secondary justify-center gap-2"
+                    aria-pressed="false"
+                    data-accessibility-target="option"
+                    data-accessibility-setting="size"
                     data-action="click->accessibility#setSize"
                     data-accessibility-size-param="normal">
+                <twig:UX:Icon name="icon:check" class="hidden h-4 w-4 group-aria-pressed:inline-block" aria-hidden="true"/>
                 {{ 'accessibilite.taille.standard'|trans }}
             </button>
             <button type="button"
-                    class="app-modal-footer-btn app-modal-footer-btn--secondary justify-center"
+                    class="group app-modal-footer-btn app-modal-footer-btn--secondary justify-center gap-2"
+                    aria-pressed="false"
+                    data-accessibility-target="option"
+                    data-accessibility-setting="size"
                     data-action="click->accessibility#setSize"
                     data-accessibility-size-param="large">
+                <twig:UX:Icon name="icon:check" class="hidden h-4 w-4 group-aria-pressed:inline-block" aria-hidden="true"/>
                 {{ 'accessibilite.taille.grande'|trans }}
             </button>
         </div>

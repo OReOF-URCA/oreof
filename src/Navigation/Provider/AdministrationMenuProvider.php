@@ -143,21 +143,9 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
-                        key: 'administration.styleguide',
-                        label: 'menu.config.styleguide',
-                        route: 'admin_styleguide_index',
-                    )->inColumn('menu.menu_configuration'),
-
-                    MenuItem::link(
                         key: 'administration.workflows',
                         label: 'menu.config.workflows',
                         route: 'app_admin_workflow_index',
-                    )->inColumn('menu.menu_configuration'),
-
-                    MenuItem::link(
-                        key: 'administration.versioning_json',
-                        label: 'menu.config.versioning_json',
-                        route: 'app_admin_versioning_index',
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
@@ -165,6 +153,36 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                         label: 'menu.config.duplication_campagne',
                         route: 'app_admin_duplication_campagne_index',
                     )->inColumn('menu.menu_configuration'),
+
+                    MenuItem::link(
+                        key: 'administration.statistiques_visites',
+                        label: 'menu.config.statistiques_visites',
+                        route: 'app_admin_statistiques_visites_index',
+                    )->inColumn('menu.config.menu_developpement'),
+
+                    MenuItem::link(
+                        key: 'administration.logs_applicatifs',
+                        label: 'menu.admin.logs.applicatifs',
+                        route: 'app_log_viewer_index',
+                    )->inColumn('menu.config.menu_developpement'),
+
+                    MenuItem::link(
+                        key: 'administration.versioning_json',
+                        label: 'menu.config.versioning_json',
+                        route: 'app_admin_versioning_index',
+                    )->inColumn('menu.config.menu_developpement'),
+
+                    MenuItem::link(
+                        key: 'administration.styleguide',
+                        label: 'menu.config.styleguide',
+                        route: 'admin_styleguide_index',
+                    )->inColumn('menu.config.menu_developpement'),
+
+                    MenuItem::link(
+                        key: 'administration.api_documentation',
+                        label: 'menu.config.api_documentation',
+                        route: 'api_site_web_documentation',
+                    )->inColumn('menu.config.menu_developpement'),
 
                     MenuItem::info(
                         key: 'administration.support',

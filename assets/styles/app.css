@@ -21,6 +21,8 @@
 @source inline("text-amber-700 text-red-700 text-green-700");
 @source inline("bg-amber-50 bg-red-50 bg-green-50");
 @source inline("text-orange-600 bg-orange-500 text-green-600 bg-green-500");
+/* Mega-menu : grid-cols-{{ columns|length }} (_layout/menu/_mega_menu.html.twig) */
+@source inline("grid-cols-{1..8}");
 
 /* Dark mode via attribut html[data-theme="dark"] */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -227,6 +229,17 @@ html[data-theme="dark"][data-a11y-contrast="high"] {
   --app-border: #ffffff;
 }
 
+/* Hauteur de la topbar (_topbar.html.twig) : sert d'offset aux éléments sticky (PageHeader) */
+:root {
+  --topbar-height: 4rem;
+}
+
+@media (min-width: 48rem) and (max-width: 95.999rem) {
+  :root {
+    --topbar-height: 7rem;
+  }
+}
+
 /*
  * Texte « Grande » : la barre de navigation (admin = beaucoup d'entrées) déborde.
  * Les media queries ne suivent pas la taille de police : on compacte la barre ici.
@@ -262,6 +275,43 @@ html[data-a11y-size="xlarge"] .topbar-right {
 html[data-a11y-size="large"] .topbar-right > *,
 html[data-a11y-size="xlarge"] .topbar-right > * {
   margin-inline: 0 !important;
+}
+
+/* Texte « Grande » : la barre reste sur deux lignes jusqu'à 120rem (au lieu de 2xl) */
+@media (min-width: 48rem) and (max-width: 119.999rem) {
+  html[data-a11y-size="large"],
+  html[data-a11y-size="xlarge"] {
+    --topbar-height: 7rem;
+  }
+
+  html[data-a11y-size="large"] .topbar-row,
+  html[data-a11y-size="xlarge"] .topbar-row {
+    flex-wrap: wrap;
+    height: auto;
+  }
+
+  html[data-a11y-size="large"] .topbar-left,
+  html[data-a11y-size="xlarge"] .topbar-left {
+    display: contents;
+  }
+
+  html[data-a11y-size="large"] .topbar-left > :first-child,
+  html[data-a11y-size="xlarge"] .topbar-left > :first-child {
+    order: 1;
+  }
+
+  html[data-a11y-size="large"] .topbar-right,
+  html[data-a11y-size="xlarge"] .topbar-right {
+    order: 2;
+  }
+
+  html[data-a11y-size="large"] .topbar-menu,
+  html[data-a11y-size="xlarge"] .topbar-menu {
+    order: 3;
+    width: 100%;
+    height: 3rem;
+    border-top-width: 1px;
+  }
 }
 
 @layer base {
@@ -856,6 +906,20 @@ html[data-a11y-size="xlarge"] .topbar-right > * {
 
   html[data-theme="dark"] .app-modal-footer-btn--danger {
     @apply border-rose-600 bg-rose-600 hover:bg-rose-500 hover:border-rose-500 focus-visible:ring-offset-secondary-900;
+  }
+
+  /* Option sélectionnée dans un groupe de choix (ex. panneau accessibilité) : aria-pressed="true" */
+  .app-modal-footer-btn--secondary[aria-pressed="true"] {
+    @apply border-primary-500 bg-primary-50 text-primary-700 ring-1 ring-primary-500 hover:border-primary-600 hover:bg-primary-100 hover:text-primary-800;
+  }
+
+  html[data-theme="dark"] .app-modal-footer-btn--secondary[aria-pressed="true"] {
+    @apply border-primary-400 bg-primary-900 text-primary-100 ring-primary-400 hover:border-primary-300 hover:bg-primary-800 hover:text-white;
+  }
+
+  /* Topbar : lien de premier niveau (libellé sur une ligne, compact sous 2xl) */
+  .topbar-link {
+    @apply flex items-center whitespace-nowrap px-1 py-2 text-[13px] font-medium text-text transition hover:text-primary lg:px-1.5 lg:text-sm 2xl:px-3;
   }
 
   /* Navigation principale: couche Tailwind au-dessus des styles legacy */

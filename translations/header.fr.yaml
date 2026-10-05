@@ -63,6 +63,8 @@ app_impersonation_list.description: 'Impersonation utilisateur. Prendre le rôle
 app_impersonation_list.title: 'Impersonation Admin'
 app_langue_index.title: 'Gestion des langues'
 app_log_viewer_index.title: 'Visualiseur de logs'
+app_admin_statistiques_visites_index.title: 'Statistiques de visites'
+app_admin_statistiques_visites_index.description: 'Connexions, utilisateurs uniques et pages vues, calculés à partir des journaux de l''application.'
 app_mutualise_index.title: 'Détail des éléments mutualisés'
 app_nature_ue_ec_index.title: 'Gestion des Natures d''UE ou d''EC'
 app_notication_liste.title: 'Gérer les notifications'

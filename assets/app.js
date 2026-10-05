@@ -48,6 +48,7 @@ import './bootstrap'
 
 import './js/base/init'
 import './js/toggle'
+import './js/chartTheme'
 
 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(
   el => bootstrap.Tooltip.getOrCreateInstance(el)

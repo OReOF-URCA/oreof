@@ -30,7 +30,7 @@
       (function () {
         var root = document.documentElement
 
-        var DEFAULTS = { theme: 'system', font: 'default', size: 'normal', contrast: false, motion: false }
+        var DEFAULTS = { theme: 'light', font: 'default', size: 'normal', contrast: false, motion: false }
         var a11y = DEFAULTS
         try {
           var raw = localStorage.getItem('oreof-a11y')
@@ -40,11 +40,12 @@
         } catch (e) { /* localStorage indisponible ou JSON invalide */ }
 
         var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-        // Priorité : choix explicite du panneau accessibilité > bascule rapide (oreof-theme) > préférence système
-        var explicitTheme = (a11y.theme === 'dark' || a11y.theme === 'light') ? a11y.theme : null
-        var quickTheme = localStorage.getItem('oreof-theme')
-        var theme = explicitTheme
-          || ((quickTheme === 'dark' || quickTheme === 'light') ? quickTheme : (prefersDark ? 'dark' : 'light'))
+        // Priorité : choix du panneau accessibilité (« Système » = préférence OS) > bascule rapide (oreof-theme) > clair
+        var quickTheme = null
+        try { quickTheme = localStorage.getItem('oreof-theme') } catch (e) { /* localStorage indisponible */ }
+        var theme = (a11y.theme === 'dark' || a11y.theme === 'light') ? a11y.theme
+          : (a11y.theme === 'system' ? (prefersDark ? 'dark' : 'light')
+            : ((quickTheme === 'dark' || quickTheme === 'light') ? quickTheme : 'light'))
 
         root.setAttribute('data-theme', theme)
         root.setAttribute('data-a11y-font', a11y.font || 'default')

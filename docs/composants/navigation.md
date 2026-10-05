@@ -1,7 +1,7 @@
 # Navigation : menus, pages de section, breadcrumbs
 
 Quand lire : ajout/modification d'une page accessible depuis la navigation, d'un menu ou d'un breadcrumb.
-À mettre à jour si : `src/Navigation/` (API `MenuItem`, providers, breadcrumbs), tag `app.menu_provider`, positions des sections.
+À mettre à jour si : `src/Navigation/` (API `MenuItem`, providers, breadcrumbs), `templates/_layout/_topbar.html.twig`, `templates/_layout/menu/`, tag `app.menu_provider`, positions des sections.
 
 Principe : l'arbre de menus est la **source unique** de la navigation. Toute page navigable est déclarée dans un
 provider → topbar, page de section et breadcrumb sont générés automatiquement. Pas de liens de menu codés en Twig.
@@ -12,6 +12,13 @@ provider → topbar, page de section et breadcrumb sont générés automatiqueme
 `config/services.yaml`) → `MenuRegistry` → `MenuResolver` → topbar / pages de section / breadcrumbs.
 Providers : `Main`, `Administration`, `Droits`, `Conseils`, `Pilotage`. Breadcrumbs : `Navigation/Breadcrumb/`.
 Recherche : `NavigationSearchService`.
+
+## Topbar (`templates/_layout/_topbar.html.twig`)
+
+- < `md` : menu masqué ; `md` → `2xl` : deux lignes (logo + actions / menu) ; ≥ `2xl` : une ligne. En texte « Grande »
+  (accessibilité), deux lignes jusqu'à 120rem (règles hors `@layer` dans `app.css`). « Accès rapide » ≥ 1800px.
+- Liens de premier niveau : classe `topbar-link` (libellé sur une ligne). Hauteur publiée dans `--topbar-height`.
+- Mega-menu : `grid-cols-{{ columns|length }}` → classes `grid-cols-1..8` en safelist (`@source inline` dans `app.css`).
 
 ## `MenuItem`
 
@@ -27,6 +34,7 @@ Recherche : `NavigationSearchService`.
 | `label`, `description` | **toujours** une clé de traduction (`menu.droits.profils`), jamais un libellé en dur |
 | `icon` | nom UX Icons (`mdi:account`, `icon:*`) affiché dans les pages de section |
 | `position` | 10 Pilotage, 20 Conseils, 30 Droits, 90 Administration |
+| colonnes Administration | `menu.config.menu_etablissement`, `menu_config_globale`, `offre_formation`, `menu.menu_configuration`, `menu.config.menu_developpement` (outils techniques : stats de visites, logs, versioning JSON, styleguide, doc API) |
 
 ```php
 MenuItem::section(key: 'droits', label: 'menu.menu_droits', route: 'app_section_droits', children: [
