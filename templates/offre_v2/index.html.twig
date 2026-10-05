@@ -173,7 +173,7 @@
 
                     {% if not composante %}
                         <div class="md:col-span-2">
-                            <select name="comp" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                            <select name="comp" class="app-filter-select rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                                 <option value="">Toutes les composantes</option>
                                 {% for compItem in composantes %}
                                     <option value="{{ compItem.id }}" {% if filters.comp|default('') == compItem.id %}selected{% endif %}>{{ compItem.libelle }}</option>
@@ -183,7 +183,7 @@
                     {% endif %}
 
                     <div class="md:col-span-2">
-                        <select name="type" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                        <select name="type" class="app-filter-select rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                             <option value="">Tous les diplômes</option>
                             {% for typeDiplome in typesDiplome %}
                                 <option value="{{ typeDiplome.id }}" {% if filters.type|default('') == typeDiplome.id %}selected{% endif %}>{{ typeDiplome.libelle }}</option>
@@ -192,7 +192,7 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <select name="plateforme" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                        <select name="plateforme" class="app-filter-select rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                             <option value="">Toutes les plateformes</option>
                             {% for plateforme in plateformes %}
                                 <option value="{{ plateforme.id }}" {% if filters.plateforme|default('') == plateforme.id %}selected{% endif %}>{{ plateforme.libelle }}</option>
@@ -201,7 +201,7 @@
                     </div>
 
                     <div class="md:col-span-2">
-                        <select name="statut" class="rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                        <select name="statut" class="app-filter-select rounded-lg border px-3 py-2 text-sm w-full" data-action="change->auto-submit#submit" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                             <option value="">Tous les statuts</option>
                             {% for etatValeur, etatLibelle in {'brouillon': 'Brouillon', 'soumis_ses': 'Soumis Scolarité', 'soumis_cfvu': 'Soumis CFVU', 'attente_pv': 'Validé CFVU (attente PV)', 'publie': 'Publié'} %}
                                 <option value="{{ etatValeur }}" {% if filters.statut|default('') == etatValeur %}selected{% endif %}>{{ etatLibelle }}</option>

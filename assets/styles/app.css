@@ -1812,19 +1812,19 @@ html[data-a11y-size="xlarge"] .topbar-right > * {
     @apply border-indigo-500 ring-indigo-500/30;
   }
 
-  /* Selects de filtres (formulaire auto-submit) : même aspect que le champ de recherche voisin, pas de « grisé » */
-  [data-controller~="auto-submit"] .ts-wrapper.single .ts-control {
+  /* Selects de filtres (classe `app-filter-select` sur le <select>) : même aspect que le champ de recherche voisin, pas de « grisé » */
+  .ts-wrapper.single.app-filter-select .ts-control {
     @apply rounded-lg border-secondary-300 py-2 text-sm font-normal text-text cursor-pointer
     hover:border-primary-400 dark:border-secondary-600 dark:text-secondary-100;
     background-color: var(--color-surface) !important;
   }
 
-  [data-controller~="auto-submit"] .ts-wrapper.single .ts-control * {
+  .ts-wrapper.single.app-filter-select .ts-control * {
     font-weight: 400 !important;
   }
 
-  [data-controller~="auto-submit"] .ts-wrapper.single .ts-control > .item,
-  [data-controller~="auto-submit"] .ts-wrapper.single .ts-control > input::placeholder {
+  .ts-wrapper.single.app-filter-select .ts-control > .item,
+  .ts-wrapper.single.app-filter-select .ts-control > input::placeholder {
     color: var(--color-text) !important;
     opacity: 1;
   }
