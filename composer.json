@@ -5,7 +5,7 @@
   "prefer-stable": true,
   "name": "dannebicque/oreof",
   "author": "David Annebicque",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Outil de Rédaction de l'offre de formation de l'université",
   "require": {
     "php": ">=8.4",
