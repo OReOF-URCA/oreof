@@ -25,3 +25,47 @@ jobs:
           manifest-file: .release-please-manifest.json
           target-branch: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Find Release Please PR
+        id: release-pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch="$(gh pr list \
+            --base "$GITHUB_REF_NAME" \
+            --state open \
+            --label "autorelease: pending" \
+            --json headRefName \
+            --jq '.[0].headRefName // ""')"
+
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout Release Please branch
+        if: steps.release-pr.outputs.branch != ''
+        env:
+          RELEASE_BRANCH: ${{ steps.release-pr.outputs.branch }}
+        run: |
+          git fetch origin "$RELEASE_BRANCH"
+          git checkout -B "$RELEASE_BRANCH" "origin/$RELEASE_BRANCH"
+
+      - name: Add GitHub authors to changelog
+        if: steps.release-pr.outputs.branch != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/enrich-changelog-authors.py
+
+      - name: Commit enriched changelog
+        if: steps.release-pr.outputs.branch != ''
+        env:
+          RELEASE_BRANCH: ${{ steps.release-pr.outputs.branch }}
+        run: |
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "CHANGELOG.md already contains GitHub authors."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "chore: add GitHub authors to changelog"
+          git push origin "HEAD:$RELEASE_BRANCH"
