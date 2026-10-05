@@ -21,7 +21,7 @@ yarn-error.log
 /oreof.mwb.bak
 /tools
 .php-cs-fixer.cache
-
+phpstan_report.txt
 
 ###> phpstan/phpstan ###
 phpstan.neon

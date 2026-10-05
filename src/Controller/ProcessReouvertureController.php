@@ -40,6 +40,7 @@ class ProcessReouvertureController extends BaseController
         private readonly OperationContextNormalizer    $operationContextNormalizer,
         #[Target('dpeParcours')]
         private readonly WorkflowInterface             $dpeParcoursWorkflow,
+        private readonly \App\Service\Parcours\ParcoursDescriptifAutomatiqueGenerator $parcoursDescriptifAutomatiqueGenerator,
     ) {
     }
 
@@ -515,18 +516,14 @@ class ProcessReouvertureController extends BaseController
                 if ($nextStep === TypeModificationDpeEnum::NON_OUVERTURE) {
                     $dpe->setEtatValidation(['non_ouvert' => 1]);
                     if ($parcours !== null) {
-                        if ($parcours->isParcoursDefaut() === true) {
-                            $parcours->setDescriptifHautPageAutomatique('Cette formation ne sera pas proposée pour la campagne ' . $this->getCampagneCollecte()->getLibelle() . '.');
-                        } else {
-                            $parcours->setDescriptifHautPageAutomatique('Ce parcours ne sera pas proposé pour la campagne ' . $this->getCampagneCollecte()->getLibelle() . '.');
-                        }
+                        $this->parcoursDescriptifAutomatiqueGenerator->generateForParcours($parcours, $this->getCampagneCollecte(), $dpe);
                     }
                 }
 
                 if ($nextStep === TypeModificationDpeEnum::OUVERT) {
                     $dpe->setEtatValidation(['soumis_ses' => 1]);
                     if ($parcours !== null) {
-                        $parcours->setDescriptifHautPageAutomatique(null);
+                        $this->parcoursDescriptifAutomatiqueGenerator->generateForParcours($parcours, $this->getCampagneCollecte(), $dpe);
                     }
                 }
             }
