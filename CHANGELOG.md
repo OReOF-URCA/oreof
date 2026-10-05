@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.3](https://github.com/OReOF-URCA/oreof/compare/v2.1.2...v2.1.3) (2026-10-05)
+
+
+### Bug Fixes
+
+* **ci:** enrich existing release-please PRs ([dd57835](https://github.com/OReOF-URCA/oreof/commit/dd578359236a5823975c23807fb839904289986e))
+
 ## [2.1.2](https://github.com/OReOF-URCA/oreof/compare/v2.1.1...v2.1.2) (2026-10-05)
 
 
