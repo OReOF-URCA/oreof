@@ -66,6 +66,7 @@ class FormationRepository extends ServiceEntityRepository
             ->leftJoin('f.composantesInscription', 'ci')
             ->addSelect('cp', 'm', 'td', 'dom', 'ci')
             ->where('f.dpe = :campagne')
+            ->andWhere('td.classique = 1')
             ->setParameter('campagne', $campagne)
             ->orderBy('td.libelle', 'ASC')
             ->addOrderBy('m.libelle', 'ASC')

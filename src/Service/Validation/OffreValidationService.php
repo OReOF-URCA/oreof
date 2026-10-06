@@ -106,12 +106,13 @@ final class OffreValidationService
                 if ($annee->isOuvert() === true) {
                     $hasOpenAnnee = true;
                     
-                    // Anomalie 1: Capacité globale nulle ou non renseignée
-                    if ($annee->getCapaciteAccueil() <= 0) {
+                    // Capacité de l'année négative
+                    if ($annee->getCapaciteAccueil() < 0) {
                         $anomalies[] = sprintf(
-                            '%s (Année %d) : ouvert mais capacité globale nulle ou non renseignée.',
+                            '%s (Année %d) : capacité d\'accueil globale négative (%d).',
                             $sujet,
-                            $annee->getOrdre()
+                            $annee->getOrdre(),
+                            $annee->getCapaciteAccueil()
                         );
                     }
 
@@ -137,6 +138,8 @@ final class OffreValidationService
                         ? ($paramsByAnnee[$annee->getId()] ?? [])
                         : $annee->getAdmissionPlateformeParametres();
 
+                    $seenPlateformeIds = [];
+
                     foreach ($params as $param) {
                         if ($param->getCampagne() !== $campagne) {
                             continue;
@@ -145,20 +148,42 @@ final class OffreValidationService
                         $plateforme = $param->getPlateforme();
                         $platId = $plateforme?->getId();
                         $platLibelle = $plateforme?->getLibelle() ?? 'Inconnue';
+                        if ($platId !== null) {
+                            $seenPlateformeIds[$platId] = true;
+                        }
                         $tpa = $platId ? ($tpaMap[$platId] ?? null) : null;
                         $anneeOrdre = $annee->getOrdre();
-                        $isCapaciteRequise = $tpa !== null && $tpa->isCapaciteRequise($anneeOrdre);
+                        $isCapaciteRequise = $tpa !== null && $anneeOrdre !== null && $tpa->isCapaciteRequise($anneeOrdre);
 
-                        $hasCapacite = ($param->getCapaciteGlobale() !== null && $param->getCapaciteGlobale() > 0)
-                            || ($param->getCapaciteFi() !== null && $param->getCapaciteFi() > 0)
-                            || ($param->getCapaciteAlternance() !== null && $param->getCapaciteAlternance() > 0)
-                            || ($param->getCapaciteSpecifique() !== null && $param->getCapaciteSpecifique() > 0);
+                        $capaciteGlobale = $param->getCapaciteGlobale();
+                        $capaciteFi = $param->getCapaciteFi();
+                        $capaciteAlternance = $param->getCapaciteAlternance();
+                        $capaciteSpecifique = $param->getCapaciteSpecifique();
+
+                        $hasNegativeCapacite = ($capaciteGlobale !== null && $capaciteGlobale < 0)
+                            || ($capaciteFi !== null && $capaciteFi < 0)
+                            || ($capaciteAlternance !== null && $capaciteAlternance < 0)
+                            || ($capaciteSpecifique !== null && $capaciteSpecifique < 0);
+
+                        $sommeCapacites = ($capaciteGlobale ?? 0)
+                            + ($capaciteFi ?? 0)
+                            + ($capaciteAlternance ?? 0)
+                            + ($capaciteSpecifique ?? 0);
+
+                        if ($hasNegativeCapacite) {
+                            $anomalies[] = sprintf(
+                                '%s (Année %d) : capacité négative renseignée sur la plateforme %s.',
+                                $sujet,
+                                $anneeOrdre,
+                                $platLibelle
+                            );
+                        }
 
                         if ($param->isActive()) {
-                            // Contrôle 1 : Plateforme active sans capacité alors que la capacité est obligatoire
-                            if ($isCapaciteRequise && !$hasCapacite) {
+                            // Contrôle 1 : Plateforme active sans capacité (somme <= 0) alors que la capacité est obligatoire
+                            if ($isCapaciteRequise && $sommeCapacites <= 0 && !$hasNegativeCapacite) {
                                 $anomalies[] = sprintf(
-                                    '%s (Année %d) : plateforme %s active mais capacité (obligatoire) non renseignée.',
+                                    '%s (Année %d) : plateforme %s active mais capacité (obligatoire) non renseignée ou nulle.',
                                     $sujet,
                                     $anneeOrdre,
                                     $platLibelle
@@ -166,9 +191,33 @@ final class OffreValidationService
                             }
                         } else {
                             // Contrôle 2 : Plateforme inactive mais avec capacité renseignée
-                            if ($hasCapacite) {
+                            if ($sommeCapacites > 0) {
                                 $anomalies[] = sprintf(
                                     '%s (Année %d) : capacité renseignée sur la plateforme %s alors qu\'elle est inactive.',
+                                    $sujet,
+                                    $anneeOrdre,
+                                    $platLibelle
+                                );
+                            } elseif ($isCapaciteRequise && !$hasNegativeCapacite) {
+                                // Contrôle 3 : Plateforme inactive et sans capacité alors que la capacité est obligatoire
+                                $anomalies[] = sprintf(
+                                    '%s (Année %d) : plateforme %s inactive et sans capacité alors que sa capacité est obligatoire.',
+                                    $sujet,
+                                    $anneeOrdre,
+                                    $platLibelle
+                                );
+                            }
+                        }
+                    }
+
+                    // Contrôle 4 : Plateforme avec capacité obligatoire configurée pour l'année mais sans aucun paramètre enregistré
+                    $anneeOrdre = $annee->getOrdre();
+                    if ($anneeOrdre !== null) {
+                        foreach ($tpaMap as $platId => $tpa) {
+                            if (!isset($seenPlateformeIds[$platId]) && $tpa->isCapaciteRequise($anneeOrdre)) {
+                                $platLibelle = $tpa->getPlateforme()?->getLibelle() ?? 'Inconnue';
+                                $anomalies[] = sprintf(
+                                    '%s (Année %d) : plateforme %s inactive et sans capacité alors que sa capacité est obligatoire.',
                                     $sujet,
                                     $anneeOrdre,
                                     $platLibelle
