@@ -170,27 +170,24 @@ class ParcoursMcccExportController extends BaseController
             throw $this->createNotFoundException('File Type is invalid');
         }
 
-        //TODO
+        // TODO
         // Modifier le try/catch pour ne pas avoir à modifier le code tous les ans
-
+        //
         // On essaie la première année
         try {
             $pdf = file_get_contents(
                 $this->getFileName($parcours, 2, $format, $dpeArray)
             );
-        } catch (Exception $e) {
             // Sinon, on essaie avec la deuxième
-            try{
+            if($pdf === false){
                 $pdf = file_get_contents(
-                    $this->getFileName($parcours, 3, $format, $dpeArray) // On teste 2026, et non pas 2025 une deuxième fois.
+                    $this->getFileName($parcours, 3, $format, $dpeArray)
                 );
             }
+        } catch (Exception $e) {
             // S'il n'y a pas de correspondance, on émet un message d'erreur
-            catch(Exception $error){
-                throw $this->createNotFoundException("Le fichier demandé n'a pas été trouvé");
-            }
+            throw $this->createNotFoundException("Le fichier demandé n'a pas été trouvé");
         }
-
         if ($pdf === false) {
             throw $this->createNotFoundException("Le fichier demandé n'a pas été trouvé");
         }
