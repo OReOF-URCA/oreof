@@ -15,7 +15,8 @@
         <select id="parcours"
                 name="parcours"
                 required="required"
-                class="form-select"
+                class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
+                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
                 {{ stimulus_action('ue--manage', 'changeParcours') }}
         >
             <option value="">Choisir un parcours pour dupliquer l'UE</option>
@@ -34,7 +35,8 @@
         <select id="changer"
                 name="changer"
                 required="required"
-                class="form-select"
+                class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
+                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
         >
             <option value="">Choisir un semestre dans le parcours pour dupliquer l'UE</option>
         </select>
@@ -49,7 +51,8 @@
         <select id="position"
                 name="position"
                 required="required"
-                class="form-select"
+                class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
+                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
                 {{ stimulus_action('ue--manage', 'changePosition') }}
         >
             <option value="">Choisir la position de l'UE dans le semestre de destination</option>

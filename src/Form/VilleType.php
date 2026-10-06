@@ -29,6 +29,7 @@ class VilleType extends AbstractType
                 'class' => Etablissement::class,
                 'choice_label' => 'libelle',
                 'label' => 'Etablissement',
+                'autocomplete' => true,
             ])
             ->add('codeApogee', TextType::class, [
                 'label' => 'Code Apogée',

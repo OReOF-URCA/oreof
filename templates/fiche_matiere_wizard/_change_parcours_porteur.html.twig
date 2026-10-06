@@ -32,7 +32,8 @@
         <label for="change_parcours_porteur_formation" class="form-label">Choisir une mention</label>
         <select
                 id="change_parcours_porteur_formation"
-                class="form-select"
+                class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
+                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
                 {{ stimulus_target('fichematiere--parcours-porteur', 'formation') }}
                 data-action="change->fichematiere--parcours-porteur#changeFormation"
         >

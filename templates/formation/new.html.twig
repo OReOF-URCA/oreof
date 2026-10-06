@@ -46,8 +46,8 @@
             
             <div class="mt-2">
                 <label for="select_type_diplome" class="sr-only">Type de diplôme</label>
-                <select id="select_type_diplome" class="w-full rounded-xl border border-secondary-200 bg-white px-4 py-3 text-sm font-semibold text-secondary-800 shadow-sm transition focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:ring-primary-900/30">
-                    <option value="" disabled {% if not selectedTypeDiplome %}selected{% endif %}>Choisir un type de diplôme...</option>
+                <select id="select_type_diplome" class="app-filter-select app-select-required w-full rounded-lg border px-3 py-2 text-sm" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                    <option value="">Choisir un type de diplôme...</option>
                     {% for td in typeDiplomes %}
                         <option value="{{ td.id }}" {% if selectedTypeDiplome and selectedTypeDiplome.id == td.id %}selected{% endif %}>{{ td.libelle }} ({{ td.libelleCourt }})</option>
                     {% endfor %}
@@ -87,10 +87,24 @@
 
             select.dataset.initialValue = select.value;
 
+            // Tom Select : resynchroniser l'affichage sans redéclencher « change »
+            const restoreInitial = () => {
+                if (select.tomselect) {
+                    select.tomselect.setValue(select.dataset.initialValue, true);
+                } else {
+                    select.value = select.dataset.initialValue;
+                }
+            };
+
             select.addEventListener('change', (e) => {
+                // Le bouton « × » de Tom Select vide le champ : un type de diplôme reste obligatoire
+                if (!select.value) {
+                    restoreInitial();
+                    return;
+                }
                 if (isDirty) {
                     if (!confirm("Attention, changer le type de diplôme va réinitialiser le formulaire et vous perdrez les données déjà saisies. Voulez-vous continuer ?")) {
-                        select.value = select.dataset.initialValue;
+                        restoreInitial();
                         return;
                     }
                 }

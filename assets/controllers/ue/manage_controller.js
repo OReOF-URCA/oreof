@@ -9,6 +9,7 @@
 import { Controller } from '@hotwired/stimulus'
 import callOut from '../../js/callOut'
 import JsonResponse from '../../js/JsonResponse';
+import selectInvalid from '../../js/selectInvalid'
 
 export default class extends Controller {
   static values = {
@@ -41,12 +42,12 @@ export default class extends Controller {
     } else {
       if (value === '') {
         callOut('Vous devez choisir un semestre dans la liste', 'warning')
-        document.getElementById('changer').classList.add('is-invalid')
+        selectInvalid('changer', true)
       }
 
       if (position === '') {
         callOut('Vous devez choisir une position pour l\'UE dans la liste', 'warning')
-        document.getElementById('position').classList.add('is-invalid')
+        selectInvalid('position', true)
       }
     }
   }
@@ -73,40 +74,48 @@ export default class extends Controller {
     } else {
       if (value === '') {
         callOut('Vous devez choisir un semestre dans la liste', 'warning')
-        document.getElementById('changer').classList.add('is-invalid')
+        selectInvalid('changer', true)
       }
 
       if (position === '') {
         callOut('Vous devez choisir une position pour l\'UE dans la liste', 'warning')
-        document.getElementById('position').classList.add('is-invalid')
+        selectInvalid('position', true)
       }
     }
   }
 
   changePosition(event) {
     if (event.target.value !== '') {
-      document.getElementById('position').classList.remove('is-invalid')
+      selectInvalid('position', false)
     }
   }
 
   async changeParcours(event) {
     if (event.target.value !== '') {
-      document.getElementById('changer').classList.remove('is-invalid')
+      selectInvalid('changer', false)
     }
     // update liste des semestres
     await fetch(`${this.urlSemestreValue}?parcours=${event.target.value}`).then((response) => response.json()).then(
       (data) => {
         const select = document.getElementById('changer')
-        const items = data
+        const ts = select.tomselect
+        if (ts) {
+          // Tom Select : le placeholder (option vide initiale) est conservé par clearOptions()
+          ts.clear(true)
+          ts.clearOptions()
+          ts.addOptions(data.map((semestre) => ({ value: String(semestre.id), text: semestre.libelle })))
+          ts.refreshOptions(false)
+          return
+        }
         while (select.options.length > 0) {
-          select.remove(0);
+          select.remove(0)
         }
         let option = document.createElement('option')
-        option.value = null
+        option.value = ''
         option.text = 'Choisir dans la liste le semestre'
         select.add(option, null)
 
-        items.forEach((semestre) => {
+        data.forEach((semestre) => {
           option = document.createElement('option')
           option.value = semestre.id
           option.text = semestre.libelle

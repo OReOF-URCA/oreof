@@ -42,7 +42,8 @@
             </label>
             <select name="typeParcours"
                     id="parcours_type_parcours"
-                    class="w-full rounded-xl border border-secondary-300 bg-white px-3.5 py-2.5 text-sm font-medium text-secondary-900 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-secondary-600 dark:bg-secondary-900 dark:text-secondary-100"
+                    class="app-filter-select app-select-required w-full rounded-lg border px-3 py-2 text-sm"
+                    {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
             >
                 {% for type in typesParcours %}
                     <option value="{{ type.value }}" {% if parcours.typeParcours == type or (parcours.typeParcours is null and type.value == 'classique') %}selected{% endif %}>

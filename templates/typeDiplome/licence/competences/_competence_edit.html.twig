@@ -86,7 +86,8 @@
                                     <select
                                             id="parcoursSource"
                                             name="parcoursSource"
-                                            class="block w-full rounded-md border border-secondary-200 bg-white px-3 py-2 text-sm text-secondary-700 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                                            class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
+                                            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                                         <option value="">Choisissez un parcours de cette mention</option>
                                         {% for lp in listeParcours|filter(lp => lp.id != parcours.id) %}
                                             <option value="{{ lp.id }}">{{ lp.libelle }}</option>

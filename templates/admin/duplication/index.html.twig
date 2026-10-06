@@ -33,7 +33,7 @@
             <div class="flex items-center gap-3">
                 <form method="get" action="{{ path('app_admin_duplication_campagne_index') }}" class="flex items-center gap-2">
                     <label for="source_select" class="text-xs font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">Changer la source :</label>
-                    <select id="source_select" name="source_id" onchange="this.form.submit()" class="text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-primary-500 focus:outline-none">
+                    <select id="source_select" name="source_id" onchange="this.form.submit()" class="app-filter-select app-select-required w-full rounded-lg border px-3 py-2 text-sm" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                         {% for c in allCampagnes %}
                             <option value="{{ c.id }}" {% if c.id == sourceCampagne.id %}selected{% endif %}>
                                 {{ c.libelle }} ({{ c.anneeUniversitaire ? c.anneeUniversitaire.libelle : c.annee }})

@@ -22,6 +22,7 @@ class EmailTemplateType extends AbstractType
                 'choices' => $workflows,
                 'placeholder' => '— choisir une clé —',
                 'required' => true,
+                'autocomplete' => true,
                 'label' => 'Clé fonctionnelle',
             ])
             ->add('subject', TextType::class, [

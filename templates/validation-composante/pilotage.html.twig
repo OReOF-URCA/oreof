@@ -10,7 +10,7 @@
                   class="row g-2 align-items-end">
                 <div class="col-md-8">
                     <label for="campagne" class="form-label">Campagne de collecte</label>
-                    <select id="campagne" class="form-select" onchange="window.location.href = this.value">
+                    <select id="campagne" class="app-filter-select app-select-required w-full rounded-lg border px-3 py-2 text-sm" onchange="window.location.href = this.value" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                         {% for campagneItem in campagnes %}
                             <option value="{{ path('app_validation_composante_pilotage_campagne', {composante: composante.id, campagneCollecte: campagneItem.id}) }}"
                                     {% if campagneItem.id == campagne.id %}selected{% endif %}
