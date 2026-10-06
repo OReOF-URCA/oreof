@@ -35,7 +35,7 @@ Quand lire : toute création/modification de template Twig, CSS ou composant UI,
 - Tom Select : ne pas réactiver ses CSS par défaut (désactivés dans `assets/controllers.json`) ; vérifier focus,
   disabled, multi, dropdown, dark.
 - Select de **filtre** (liste déroulante qui relance une liste) : pas de `<select>` natif (popup OS illisible en
-  sombre) ; monter Tom Select avec `{{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}` et ajouter la
+  sombre, et menu natif qui peut s'ouvrir vers le haut et se bloquer sur petit écran, ex. `formation/new.html.twig`) ; monter Tom Select avec `{{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}` et ajouter la
   classe `app-filter-select` (aspect « champ », cf. `app.css`). Si le JS remplace les `<option>`, resynchroniser via
   `select.tomselect` (cf. `fillFilterSelect()` dans `offre_v2/synthese_offre.html.twig`). Les `<select>` natifs restants
   sont thémés globalement (`select`/`option` dans `app.css`).
