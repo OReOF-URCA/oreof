@@ -15,7 +15,7 @@
         </twig:Button>
     {% endif %}
         
-     {% if is_granted('ROLE_ADMIN') %}
+    {% if is_granted('ROLE_ADMIN') or (composante and is_granted('MANAGE', {route: 'app_composante', subject: composante})) %}
         <twig:Button href="{{ composante ? path('offre_v2_composante_modal_annexes_ca', { composante: composante.id }) : path('offre_v2_modal_annexes_ca') }}"
                      data-turbo="true"
                      data-turbo-stream="true"
@@ -23,7 +23,7 @@
                      variant="primary">
             Générer les annexes CA
         </twig:Button>
-     {% endif %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -468,7 +468,11 @@
                                                     <svg class="h-4 w-4 text-secondary-400 transition-transform duration-200 group-aria-expanded/toggle:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                                                     </svg>
-                                                    <span>{{ parcours.libelle }}</span>
+                                                    <span>{{ parcours.libelle }}
+                                                        {% if parcours.typeParcours is not null and parcours.typeParcours.value != 'classique' %}
+                                                            <twig:Badge label="{{ parcours.typeParcours.getLabel() }}" variant="{{ parcours.typeParcours.getColor() }}" size="sm"/>
+                                                        {% endif %}
+                                                    </span>
                                                 </button>
                                             {% else %}
                                                 <span>{{ parcours.libelle }}</span>

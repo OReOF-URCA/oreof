@@ -19,7 +19,7 @@
     <section
             data-scroll-spy-target="section"
             class="{{ section_card_class }}"
-            id="identite_formation">
+            id="localisation_formation">
         {{ include('communs/_header_show.html.twig', {
             title: 'Localisation',
             icon: 'ph:map-pin-area-light',
@@ -54,7 +54,7 @@
                 color: 'indigo'
             }) }}
             <div class="mt-4">
-                {{ include('typeDiplome/licence/affiche/_competences.html.twig', {parcours:formation.parcours[0]}) }}
+                {{ render(controller('App\\Controller\\BlocCompetenceController::afficheBUTReferentiel', { 'parcours': formation.parcours[0] })) }}
             </div>
         </section>
 
@@ -75,7 +75,7 @@
                         zone: 'structure',
                     }) }}
                 {% endif %}
-                {{ render(controller('App\\Controller\\StructureShowController::parcoursShowV2', {
+                {{ render(controller('App\\Controller\\StructureShowController::parcoursShow', {
                     parcours: formation.parcours[0].id,
                     hasLastVersion: hasLastVersion ?? false,
                 })) }}
@@ -97,7 +97,7 @@
 
         <section data-scroll-spy-target="section"
                  class="{{ section_card_class }}"
-                 id="inscription}">
+                 id="inscription">
             {{ include('communs/_header_show.html.twig', {
                 title: 'Inscription',
                 icon: 'ph:pen-light',
@@ -199,7 +199,7 @@
                     color: color
                 }) }}
                 <div class="mt-4">
-                    {{ include('typeDiplome/licence/affiche/_competences.html.twig', {parcours:parcours}) }}
+                    {{ render(controller('App\\Controller\\BlocCompetenceController::afficheBUTReferentiel', { 'parcours': parcours })) }}
                 </div>
             </section>
 
@@ -214,7 +214,7 @@
                     }) }}
 
                     <div class="mt-4">
-                        {{ render(controller('App\\Controller\\StructureShowController::parcoursShowV2', {
+                        {{ render(controller('App\\Controller\\StructureShowController::parcoursShow', {
                             parcours: parcours.id,
                             hasLastVersion: hasLastVersion ?? false,
                         })) }}

@@ -1,0 +1,175 @@
+{% set sectionClass = 'scroll-mt-32 rounded-2xl border border-secondary-200 dark:border-secondary-700 bg-surface p-5 shadow-sm' %}
+
+<div class="space-y-4">
+    <section
+            data-scroll-spy-target="section"
+            class="{{ sectionClass }}"
+            id="identite_formation">
+        {{ include('communs/_header_show.html.twig', {
+            title: 'Identité de la formation',
+            icon: 'ph:identification-badge',
+            color: 'indigo'
+        }) }}
+        <div class="mt-4">
+            {{ include('typeDiplome/licence/affiche/_identiteFormation.html.twig') }}
+        </div>
+    </section>
+
+    <section data-scroll-spy-target="section"
+             class="{{ sectionClass }}"
+             id="presentation">
+        {{ include('communs/_header_show.html.twig', {
+            title: 'Présentation formation ' ~ parcours.formation.display,
+            icon: 'ph:book-open',
+            color: 'indigo'
+        }) }}
+        <div class="mt-4">
+            {{ include('typeDiplome/licence/affiche/_presentationFormation.html.twig') }}
+        </div>
+    </section>
+
+    <section data-scroll-spy-target="section"
+             class="{{ sectionClass }}"
+             id="presentation_{{ parcours.id }}">
+        {{ include('communs/_header_show.html.twig', {
+            title: 'Présentation du parcours ' ~ parcours.libelle,
+            icon: 'ph:book-open',
+            color: 'indigo'
+        }) }}
+        <div class="mt-4">
+            {{ include('typeDiplome/licence/affiche/_presentationParcours.html.twig', {parcours:parcours}) }}
+        </div>
+    </section>
+
+    <section data-scroll-spy-target="section"
+             class="{{ sectionClass }}"
+             id="descriptif_{{ parcours.id }}">
+        {{ include('communs/_header_show.html.twig', {
+            title: 'Descriptif du parcours ' ~ parcours.libelle,
+            icon: 'ph:clipboard',
+            color: 'indigo'
+        }) }}
+        <div class="mt-4">
+            {{ include('typeDiplome/licence/affiche/_descriptifParcours.html.twig', {parcours:parcours}) }}
+        </div>
+    </section>
+
+    <section data-scroll-spy-target="section"
+             class="{{ sectionClass }}"
+             id="localisation_{{ parcours.id }}">
+        {{ include('communs/_header_show.html.twig', {
+            title: 'Localisation du parcours ' ~ parcours.libelle,
+            icon: 'ph:map-pin',
+            color: 'indigo'
+        }) }}
+        <div class="mt-4">
+            {{ include('typeDiplome/licence/affiche/_localisationParcours.html.twig', {parcours:parcours}) }}
+
+        </div>
+    </section>
+
+    <section data-scroll-spy-target="section"
+             class="{{ sectionClass }}"
+             id="competences_{{ parcours.id }}">
+        {{ include('communs/_header_show.html.twig', {
+            title: 'Compétences Acquises du parcours ' ~ parcours.libelle,
+            icon: 'ph:target',
+            color: 'indigo'
+        }) }}
+        <div class="mt-4">
+            {{ render(controller('App\\Controller\\BlocCompetenceController::afficheBUTReferentiel', { 'parcours': parcours })) }}
+        </div>
+    </section>
+
+    {% if isVersioning is not defined or isVersioning == false %}
+        <section data-scroll-spy-target="section"
+                 class="{{ sectionClass }}"
+                 id="structure_{{ parcours.id }}">
+            {{ include('communs/_header_show.html.twig', {
+                title: 'Structure du parcours ' ~ parcours.libelle,
+                icon: 'ph:map-pin-area-light',
+                color: 'orange'
+            }) }}
+
+            <div class="mt-4 space-y-4">
+                {{ render(controller('App\\Controller\\StructureShowController::parcoursShow', {
+                    parcours: parcours.id,
+                    hasLastVersion: hasLastVersion ?? false,
+                })) }}
+            </div>
+        </section>
+    {% else %}
+        {# Visionnage d'une version #}
+        <section data-scroll-spy-target="section"
+                 class="{{ sectionClass }}"
+                 id="structure_{{ parcours.id }}">
+            {{ include('communs/_header_show.html.twig', {
+                title: 'Structure du parcours ' ~ parcours.libelle,
+                icon: 'ph:map-pin-area-light',
+                color: 'orange'
+            }) }}
+            <div class="mt-4">
+                {{ include('typeDiplome/' ~ constant('TEMPLATE_FOLDER', typeD) ~ '/structure/_structure.html.twig',
+                    {
+                        parcours: parcours,
+                        dto: dto,
+                        hasLastVersion: false,
+                        diffStructure: null
+                    }
+                ) }}
+            </div>
+        </section>
+    {% endif %}
+    <section data-scroll-spy-target="section"
+             class="{{ sectionClass }}"
+             id="admission_{{ parcours.id }}">
+        {{ include('communs/_header_show.html.twig', {
+            title: 'Admission du parcours ' ~ parcours.libelle,
+            icon: 'ph:user-check',
+            color: 'indigo'
+        }) }}
+        <div class="mt-4">
+            {{ include('typeDiplome/licence/affiche/_admission.html.twig', {parcours:parcours}) }}
+        </div>
+    </section>
+
+    <section data-scroll-spy-target="section"
+             class="{{ sectionClass }}"
+             id="inscription_{{ parcours.id }}">
+        {{ include('communs/_header_show.html.twig', {
+            title: 'Inscription du parcours ' ~ parcours.libelle,
+            icon: 'ph:map-pin-area-light',
+            color: 'indigo'
+        }) }}
+
+        <div class="mt-4">
+            {{ include('typeDiplome/licence/affiche/_inscription.html.twig', {parcours:parcours}) }}
+        </div>
+    </section>
+
+    <section data-scroll-spy-target="section"
+             class="{{ sectionClass }}"
+             id="et_apres_{{ parcours.id }}">
+        {{ include('communs/_header_show.html.twig', {
+            title: 'Et après...',
+            icon: 'ph:graduation-cap',
+            color: 'indigo'
+        }) }}
+        <div class="mt-4">
+            {{ include('typeDiplome/licence/affiche/_etApres.html.twig', {parcours:parcours}) }}
+        </div>
+    </section>
+
+    <section data-scroll-spy-target="section"
+             class="{{ sectionClass }}"
+             id="contacts_{{ parcours.id }}">
+        {{ include('communs/_header_show.html.twig', {
+            title: 'Contacts pédagogiques',
+            icon: 'ph:users-three',
+            color: 'indigo'
+        }) }}
+        <div class="mt-4">
+            {{ include('typeDiplome/licence/affiche/_contacts.html.twig', {parcours:parcours}) }}
+        </div>
+    </section>
+</div>
