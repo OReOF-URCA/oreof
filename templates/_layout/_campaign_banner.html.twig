@@ -1,7 +1,7 @@
 <div>
     {% if user_data.campagneCollecte.defaut == true %}
         <twig:alerte type="warning"
-                     message="La campagne de collecte des Descriptifs et des Programmes des Enseignements (DPE) pour l'année universitaire <strong>{{ user_data.campagneCollecte.anneeUniversitaire.libelle }}</strong> est actuellement ouverte. <br> Vous pouvez procéder aux modifications nécessaires pour adapter vos descriptifs (sans passage en CFVU) et/ou pour proposer des changements de maquette et MCCC pour votre/vos formations (avec passage en CFVU). La date limite est fixée au {{ user_data.campagneCollecte.dateTransmissionSes|dateFr }}."></twig:alerte>
+                     message="La campagne de collecte des Descriptifs et des Programmes des Enseignements (DPE) pour l'année universitaire <strong>{{ user_data.campagneCollecte.anneeUniversitaire.libelle }}</strong> est actuellement ouverte."></twig:alerte>
     {% else %}
         <twig:alerte type="danger" message="
                     Pour information, la campagne de collecte des Descriptifs et des Programmes des Enseignements (DPE) pour l'année universitaire <strong>{{ user_data.campagneCollecte.anneeUniversitaire.libelle }}</strong> est close. Des modifications ponctuelles peuvent encore être demandées mais sont soumises à un accord préalable."></twig:alerte>
