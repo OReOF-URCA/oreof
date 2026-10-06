@@ -322,7 +322,12 @@ class DuplicateForNewAnneeCommand extends Command
             $cloneDpeParcours->setParcours($linkParcoursDpe);
             $cloneDpeParcours->setFormation($linkFormationDpe);
             $cloneDpeParcours->setCampagneCollecte($newCampagneCollecte);
-            $cloneDpeParcours->setEtatValidation(['en_cours_redaction' => 1]);
+            if($cloneDpeParcours->getEtatValidation() === ['publie' => 1] || $cloneDpeParcours->getEtatValidation() === ['valide_a_publier' => 1]) {
+                $cloneDpeParcours->setEtatValidation(['tacite_reconduction' => 1]);
+            }
+            else {
+                $cloneDpeParcours->setEtatValidation(['en_cours_redaction' => 1]);
+            }
             $cloneDpeParcours->setCreated($nowDate);
 
             $this->entityManager->persist($cloneDpeParcours);
