@@ -30,6 +30,7 @@ use App\Service\Validation\SemesterValidationRefresher;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
 use App\TypeDiplome\TypeDiplomeResolver;
+use App\Utils\Access;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Jfcherng\Diff\DiffHelper;
@@ -52,11 +53,16 @@ class ParcoursController extends BaseController
     {
         $dpeParcours = GetDpeParcours::getFromParcours($parcours);
         $subjectDpe = $dpeParcours ?? $parcours;
-        if (!(
-            $this->isGranted('EDIT', ['route' => 'app_parcours', 'subject' => $subjectDpe]) ||
-            ($parcours->getFormation() !== null && $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $parcours->getFormation()])) ||
-            $this->isGranted('ROLE_ADMIN')
-        )) {
+        if (
+            !(
+                $this->isGranted('EDIT', ['route' => 'app_parcours', 'subject' => $subjectDpe]) ||
+                $this->isGranted('EDIT', ['route' => 'app_composante', 'subject' => $subjectDpe]) ||
+                $this->isGranted('EDIT', ['route' => 'app_etablissement', 'subject' => $subjectDpe]) ||
+                ($parcours->getFormation() !== null && $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $parcours->getFormation()])) ||
+                $this->isGranted('ROLE_ADMIN')
+            )
+            || ($dpeParcours !== null && !Access::isOuvert($dpeParcours))
+        ) {
             return $this->redirectToRoute('parcours_v2_voir', ['parcours' => $parcours->getId()]);
         }
 

@@ -89,7 +89,14 @@
                                                     size="sm"
                                                     tooltip="Voir le parcours"
                                             />
-                                            {% set canAccess = is_granted('EDIT', {route: 'app_parcours', subject:  dpesParcours[parcours.id]}) %}
+                                            {% set canAccess = (
+                                                is_granted('EDIT', {route: 'app_parcours', subject: dpesParcours[parcours.id]|default(parcours)})
+                                                or is_granted('EDIT', {route: 'app_composante', subject: dpesParcours[parcours.id]|default(parcours)})
+                                                or is_granted('EDIT', {route: 'app_etablissement', subject: dpesParcours[parcours.id]|default(parcours)})
+                                                or (parcours.formation is not null and is_granted('EDIT', {route: 'app_formation', subject: parcours.formation}))
+                                                or is_granted('ROLE_ADMIN')
+                                            ) %}
+                                            {% set canEdit = isOuvert(dpesParcours[parcours.id]|default(parcours)) %}
                                             {{ component('dropdown_actions', {
                                                 label: 'Actions',
                                                 help: 'Actions disponibles pour ce parcours',
@@ -106,8 +113,8 @@
                                                         icon: 'icon:edit',
                                                         color: 'primary',
                                                         url: path('parcours_v2_modifier', {'parcours': parcours.id}),
-                                                        disabled: not canAccess,
-                                                        help: canAccess ? null : 'Vous n\'avez pas les droits pour modifier ce parcours'
+                                                        disabled: not (canEdit and canAccess),
+                                                        help: not (canEdit and canAccess) ? (not canAccess ? 'Vous n\'avez pas les droits pour modifier ce parcours' : 'Modification non autorisée : le DPE du parcours doit être ouvert.') : null
                                                     },
                                                     {
                                                         label: 'Supprimer',
@@ -164,7 +171,14 @@
                                                     size="sm"
                                                     tooltip="Voir la formation"
                                             />
-                                            {% set canAccess = is_granted('EDIT', {route: 'app_formation', subject: formation}) or is_granted('EDIT', {route: 'app_parcours', subject: formation.parcours[0]}) %}
+                                            {% set canAccess = (
+                                                is_granted('EDIT', {route: 'app_formation', subject: formation})
+                                                or is_granted('EDIT', {route: 'app_composante', subject: formation})
+                                                or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
+                                                or (formation.parcours[0] is defined and is_granted('EDIT', {route: 'app_parcours', subject: dpesParcours[formation.parcours[0].id]|default(formation.parcours[0])}))
+                                                or is_granted('ROLE_ADMIN')
+                                            ) %}
+                                            {% set canEdit = (formation.hasParcours == true and isOuvert(formation)) or (formation.hasParcours == false and formation.parcours[0] is defined and isOuvert(dpesParcours[formation.parcours[0].id]|default(formation.parcours[0]))) %}
                                             {{ component('dropdown_actions', {
                                                 label: 'Actions',
                                                 help: 'Actions disponibles pour cette formation',
@@ -181,8 +195,8 @@
                                                         icon: 'icon:edit',
                                                         color: 'primary',
                                                         url: path('formation_v2_modifier', {'slug': formation.slug}),
-                                                        disabled: not canAccess,
-                                                        help: canAccess ? null : 'Vous n\'avez pas les droits pour modifier cette formation'
+                                                        disabled: not (canEdit and canAccess),
+                                                        help: not (canEdit and canAccess) ? (not canAccess ? 'Vous n\'avez pas les droits pour modifier cette formation' : 'Modification non autorisée : la formation doit avoir un DPE ouvert.') : null
                                                     }
                                                 ]
                                             }) }}
