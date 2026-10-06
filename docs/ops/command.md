@@ -35,7 +35,8 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 | `app:update-dpe`, `app:update-slug` | DPE / slugs | — |
 | `app:update-droits` | profils selon les responsabilités | — |
 | `app:update-notif` | active les notifications par défaut | — |
-| `app:recopie-profils`, `app:recopie-domaine` | recopies de profils utilisateurs / domaines | — |
+| `app:recopie-profils` | recopie les profils utilisateurs d'une campagne vers une autre | `[annee-depart]`, `[annee-arrivee]`, `--annee-depart=`, `--annee-arrivee=`, `--dry-run`, `--force` |
+| `app:recopie-domaine` | recopie les domaines | — |
 | `app:translations:import-missing` | importe les traductions manquantes, reformate `translations/*.yaml` | `--translations-dir`, `--simulate`, `--overwrite`, `--format`, `--no-backup` |
 | `app:workflow:check-metadata-completeness` | contrôle les metadata des workflows | — |
 

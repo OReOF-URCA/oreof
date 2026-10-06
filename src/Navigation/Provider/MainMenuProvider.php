@@ -46,7 +46,10 @@ final class MainMenuProvider implements MenuProviderInterface
                         label: 'menu.exports',
                         route: 'app_export_index',
                         icon: 'icon:download'
-                    ),
+                    )->requires('SHOW', [
+                        'route' => 'app_etablissement',
+                        'subject' => 'etablissement',
+                    ]),
                 ]
             )->withPosition(10),
         ];

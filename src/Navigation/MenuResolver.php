@@ -66,6 +66,10 @@ final readonly class MenuResolver
 
     private function isVisible(MenuItem $item): bool
     {
+        if ($this->authorizationChecker->isGranted('ROLE_ADMIN')) {
+            return true;
+        }
+
         if ($item->role !== null) {
             return $this->authorizationChecker->isGranted($item->role);
         }

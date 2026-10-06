@@ -10,6 +10,7 @@
 
 namespace App\Navigation\Provider;
 
+use App\Entity\User;
 use App\Navigation\MenuDisplayModeEnum;
 use App\Navigation\MenuDisplayModeEnum as MenuDisplayMode;
 use App\Navigation\MenuItem;
@@ -28,18 +29,24 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
 
     public function getMenu(): array
     {
-        if ($this->authorizationChecker->isGranted('ROLE_ADMIN')) {
+        if (
+            $this->authorizationChecker->isGranted('ROLE_ADMIN')
+            || $this->authorizationChecker->isGranted('SHOW', [
+                'route' => 'app_etablissement',
+                'subject' => 'etablissement',
+            ])
+        ) {
             return [$this->adminPilotageMenu()];
         }
 
-        if (!$this->authorizationChecker->isGranted('SHOW', [
+        if ($this->authorizationChecker->isGranted('SHOW', [
             'route' => 'app_composante',
             'subject' => 'composante',
         ])) {
-            return [];
+            return [$this->composantePilotageMenu()];
         }
 
-        return [$this->composantePilotageMenu()];
+        return [];
     }
 
     private function adminPilotageMenu(): MenuItem
@@ -102,7 +109,10 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                     'pilotage.exports',
                     'menu.admin.exports',
                     'app_export_index',
-                ),
+                )->requires('SHOW', [
+                    'route' => 'app_etablissement',
+                    'subject' => 'etablissement',
+                ]),
             ],
         )->withPosition(20);
     }
