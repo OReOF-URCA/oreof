@@ -1,7 +1,33 @@
 {% form_theme form 'communs/form_theme_v2.html.twig' %}
 
+{% if demande is defined and demande %}
+    <div class="mb-4 p-4 rounded-xl border border-secondary-200 bg-secondary-50/60 dark:border-secondary-700 dark:bg-secondary-800/40 text-sm space-y-2">
+        <div class="flex items-center justify-between">
+            <span class="text-xs font-semibold uppercase tracking-wider text-secondary-500">Détails de la demande</span>
+            <twig:Badge label="{{ demande.typeRf.value }}" variant="primary" size="sm" />
+        </div>
+        <div class="text-secondary-900 dark:text-white">
+            Remplacement de <strong>{{ demande.ancienResponsable ? demande.ancienResponsable.display : 'non défini' }}</strong>
+            par <strong>{{ demande.nouveauResponsable ? demande.nouveauResponsable.display : 'non défini' }}</strong>
+        </div>
+        <div class="flex flex-wrap items-center gap-3 text-xs text-secondary-600 dark:text-secondary-400">
+            <span>Prise de fonction : <strong>{{ demande.datePriseFonction ? demande.datePriseFonction|date('d/m/Y') : 'non définie' }}</strong></span>
+            {% if demande.anneeUniversitaireLibelle %}
+                <span>•</span>
+                <span>Année universitaire ciblée : <strong class="text-primary-600 dark:text-primary-400">{{ demande.anneeUniversitaireLibelle }}</strong></span>
+            {% endif %}
+        </div>
+        {% if demande.commentaire %}
+            <div class="text-xs text-secondary-600 dark:text-secondary-300 italic pt-1 border-t border-secondary-200 dark:border-secondary-700">
+                « {{ demande.commentaire }} »
+            </div>
+        {% endif %}
+    </div>
+{% endif %}
+
 {{ form_start(form) }}
     {{ form_errors(form) }}
     {{ form_widget(form) }}
 {{ form_end(form) }}
+
 

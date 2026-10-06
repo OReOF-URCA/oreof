@@ -1,9 +1,41 @@
-<div>
-    {% form_theme form 'communs/form_theme_v2.html.twig' %}
-    {{ form_start(form,{
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+{% set currentAnnee = formation.dpe ? (formation.dpe.anneeUniversitaire ? formation.dpe.anneeUniversitaire.annee : null) : null %}
+
+<div data-controller="change-rf-date" data-change-rf-date-current-annee-value="{{ currentAnnee }}">
+    {{ form_start(form, {
         'attr': {
             'id': 'modal_form'
         }
     }) }}
+        <div id="change_rf_errors"></div>
+
+        {{ form_row(form.typeRf) }}
+        {{ form_row(form.user) }}
+
+
+        <div class="space-y-2 group mb-4">
+            {{ form_label(form.datePriseFonction) }}
+            {{ form_widget(form.datePriseFonction, {
+                attr: {
+                    'data-change-rf-date-target': 'input',
+                    'data-action': 'input->change-rf-date#update change->change-rf-date#update'
+                }
+            }) }}
+            {{ form_help(form.datePriseFonction) }}
+            {{ form_errors(form.datePriseFonction) }}
+
+            {# Feedback dynamique sur l'année universitaire et propagation #}
+            <div data-change-rf-date-target="preview" class="hidden p-3 rounded-lg border border-primary-200 bg-primary-50/50 dark:border-primary-800 dark:bg-primary-950/30 text-sm">
+                <div class="flex items-center gap-2 font-medium text-primary-900 dark:text-primary-200">
+                    <twig:UX:Icon name="icon:calendar" class="w-4 h-4 text-primary-600 dark:text-primary-400 shrink-0" />
+                    <span>Année universitaire ciblée : <strong data-change-rf-date-target="anneeText" class="font-bold text-primary-700 dark:text-primary-300"></strong></span>
+                </div>
+                <p data-change-rf-date-target="detailText" class="mt-1 text-xs text-secondary-600 dark:text-secondary-400 pl-6"></p>
+            </div>
+        </div>
+
+        {{ form_row(form.commentaire) }}
+        {{ form_rest(form) }}
     {{ form_end(form) }}
 </div>
+

@@ -244,4 +244,26 @@ class ChangeRf
 
         return $this;
     }
+
+    public function getAnneeUniversitaireDebut(): ?int
+    {
+        if ($this->datePriseFonction === null) {
+            return $this->campagneCollecte?->getAnneeUniversitaire()?->getAnnee();
+        }
+
+        $month = (int) $this->datePriseFonction->format('n');
+        $year = (int) $this->datePriseFonction->format('Y');
+
+        return $month >= 9 ? $year : $year - 1;
+    }
+
+    public function getAnneeUniversitaireLibelle(): ?string
+    {
+        $debut = $this->getAnneeUniversitaireDebut();
+        if ($debut === null) {
+            return null;
+        }
+
+        return sprintf('%d-%d', $debut, $debut + 1);
+    }
 }

@@ -30,7 +30,12 @@
                                     <twig:Badge label="{{ demande.typeRf.value }}" variant="primary" size="sm" />
                                     <span>•</span>
                                     <span>Prise de fonction : {{ demande.datePriseFonction ? demande.datePriseFonction|date('d/m/Y') : 'non définie' }}</span>
+                                    {% if demande.anneeUniversitaireLibelle %}
+                                        <span>•</span>
+                                        <twig:Badge label="Année {{ demande.anneeUniversitaireLibelle }}" variant="secondary" size="sm" />
+                                    {% endif %}
                                 </div>
+
                             </div>
 
                             {# Actions de transitions de workflow #}

@@ -92,8 +92,7 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-                {% if is_granted('MANAGE', {route: 'app_formation', subject: this.formation}) or is_granted('ROLE_ADMIN') %}
-                    {% if can_edit_module('offre_formation') %}
+                {% if is_granted('MANAGE', {route: 'app_formation', subject: this.formation}) or is_granted('MANAGE', {route: 'app_composante', subject: this.formation.composantePorteuse}) or is_granted('ROLE_ADMIN') %}
                         <a
                                 class="{{ quickBtnWarning }}"
                                 {{ stimulus_controller('tooltip') }}
@@ -114,7 +113,6 @@
                             {{ ux_icon('icon:lock', {class: 'h-4 w-4'}) }}
                             <span>{{ 'formation.change_rf.label'|trans({}, 'form') }}</span>
                         </span>
-                    {% endif %}
                 {% endif %}
 
                 <button class="{{ quickBtnSecondary }}"

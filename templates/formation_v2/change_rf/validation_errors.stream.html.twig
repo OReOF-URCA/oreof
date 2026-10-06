@@ -1,0 +1,16 @@
+<turbo-stream action="update" target="change_rf_errors">
+    <template>
+        <div role="alert" class="rounded-xl mb-4">
+            <twig:alerte type="danger">
+                <p class="text-sm font-semibold">{{ title }}</p>
+                <ul class="mt-1 list-disc space-y-0.5 pl-4 text-xs">
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </twig:alerte>
+        </div>
+    </template>
+</turbo-stream>
+
+{{ include('_ui/_toast.stream.html.twig', { message: title, toast_type: 'danger', undo: null }) }}

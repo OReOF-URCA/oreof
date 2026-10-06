@@ -4,9 +4,11 @@ namespace App\Classes\Process;
 
 use App\DTO\ProcessData;
 use App\Entity\ChangeRf;
+use App\Entity\Formation;
 use App\Enums\TypeRfEnum;
 use App\Events\AddCentreFormationEvent;
 use App\Events\HistoriqueChangeRfEvent;
+use App\Repository\FormationRepository;
 use App\Repository\ProfilRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -18,6 +20,7 @@ class ChangeRfProcess extends AbstractProcess
 {
     public function __construct(
         protected ProfilRepository $profilRepository,
+        private readonly FormationRepository $formationRepository,
         EntityManagerInterface $entityManager,
         EventDispatcherInterface $eventDispatcher,
         TranslatorInterface $translator,
@@ -97,6 +100,42 @@ class ChangeRfProcess extends AbstractProcess
         );
     }
 
+    /**
+     * Retourne toutes les formations liées dans la lignée (antécédents et duplications futures).
+     *
+     * @return Formation[]
+     */
+    public function getLigneeFormations(Formation $formation): array
+    {
+        $formations = [];
+        $formations[$formation->getId()] = $formation;
+
+        // Formations antérieures (remontée de la chaîne de copies)
+        $curr = $formation;
+        while (($parent = $curr->getFormationOrigineCopie()) !== null) {
+            if (isset($formations[$parent->getId()])) {
+                break;
+            }
+            $formations[$parent->getId()] = $parent;
+            $curr = $parent;
+        }
+
+        // Formations postérieures (descente de la chaîne de copies)
+        $queue = [$formation];
+        while (!empty($queue)) {
+            $item = array_shift($queue);
+            $children = $this->formationRepository->findBy(['formationOrigineCopie' => $item]);
+            foreach ($children as $child) {
+                if (!isset($formations[$child->getId()])) {
+                    $formations[$child->getId()] = $child;
+                    $queue[] = $child;
+                }
+            }
+        }
+
+        return array_values($formations);
+    }
+
     private function updateChangeRf(ChangeRf $demande): void
     {
         $formation = $demande->getFormation();
@@ -104,25 +143,23 @@ class ChangeRfProcess extends AbstractProcess
             return;
         }
 
-        $this->applyChangeToFormation($demande, $formation);
+        $anneePriseFonction = $demande->getAnneeUniversitaireDebut();
+        $lignee = $this->getLigneeFormations($formation);
 
-        // Si la date de prise de fonction est antérieure ou égale à la date de fin de la campagne de l'année précédente
-        // on l'applique aussi sur la formation de l'année précédente si elle existe.
-        $campagne = $demande->getCampagneCollecte();
-        if ($campagne && $demande->getDatePriseFonction()) {
-            $formationPrecedente = $formation->getFormationOrigineCopie();
-            if ($formationPrecedente) {
-                $campagnePrecedente = $formationPrecedente->getDpe();
-                if ($campagnePrecedente && $campagnePrecedente->getDateClotureDpe()) {
-                    if ($demande->getDatePriseFonction() <= $campagnePrecedente->getDateClotureDpe()) {
-                        $this->applyChangeToFormation($demande, $formationPrecedente);
-                    }
+        foreach ($lignee as $f) {
+            $anneeF = $f->getDpe()?->getAnneeUniversitaire()?->getAnnee();
+            if ($anneePriseFonction !== null && $anneeF !== null) {
+                // On applique le changement pour toute formation dont l'année universitaire >= année de début de prise de fonction
+                if ($anneeF >= $anneePriseFonction) {
+                    $this->applyChangeToFormation($demande, $f);
                 }
+            } elseif ($f->getId() === $formation->getId()) {
+                $this->applyChangeToFormation($demande, $f);
             }
         }
     }
 
-    private function applyChangeToFormation(ChangeRf $demande, \App\Entity\Formation $formation): void
+    private function applyChangeToFormation(ChangeRf $demande, Formation $formation): void
     {
         $isRf = $demande->getTypeRf() === TypeRfEnum::RF;
         $role = $isRf ? 'ROLE_RESP_FORMATION' : 'ROLE_CO_RESP_FORMATION';
@@ -136,17 +173,20 @@ class ChangeRfProcess extends AbstractProcess
 
         $formation->$setter(null);
 
+        $campagne = $formation->getDpe() ?? $demande->getCampagneCollecte();
+
         if ($ancien = $demande->getAncienResponsable()) {
-            $event = new AddCentreFormationEvent($formation, $ancien, $profil, $demande->getCampagneCollecte());
+            $event = new AddCentreFormationEvent($formation, $ancien, $profil, $campagne);
             $this->eventDispatcher->dispatch($event, AddCentreFormationEvent::REMOVE_CENTRE_FORMATION);
         }
 
         // On ajoute le nouveau responsable
         if ($nouveau = $demande->getNouveauResponsable()) {
-            $event = new AddCentreFormationEvent($formation, $nouveau, $profil, $demande->getCampagneCollecte());
+            $event = new AddCentreFormationEvent($formation, $nouveau, $profil, $campagne);
             $this->eventDispatcher->dispatch($event, AddCentreFormationEvent::ADD_CENTRE_FORMATION);
 
             $formation->$setter($nouveau);
         }
     }
 }
+

@@ -68,52 +68,90 @@ class FormationResponsableController extends BaseController
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $datas = $form->getData();
-            $user = $datas->getUser();
-            $commentaire = $datas->getCommentaire();
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $datas = $form->getData();
+                if ($datas->getDatePriseFonction() === null) {
+                    return $turboStream->stream('formation_v2/change_rf/validation_errors.stream.html.twig', [
+                        'title' => 'Enregistrement impossible',
+                        'errors' => ['La date de prise de fonction est obligatoire pour valider la demande.'],
+                    ], Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
 
-            if ($datas->getTypeRf() === TypeRfEnum::RF) {
-                $oldResp = $formation->getResponsableMention();
-            } else {
-                $oldResp = $formation->getCoResponsable();
+                $user = $datas->getUser();
+                $commentaire = $datas->getCommentaire();
+
+                if ($datas->getTypeRf() === TypeRfEnum::RF) {
+                    $oldResp = $formation->getResponsableMention();
+                } else {
+                    $oldResp = $formation->getCoResponsable();
+                }
+
+                $exist = $changeRfRepository->findBy([
+                    'formation' => $formation,
+                    'campagneCollecte' => $this->getCampagneCollecte(),
+                    'nouveauResponsable' => $user,
+                    'typeRf' => $datas->getTypeRf(),
+                    'ancienResponsable' => $oldResp
+                ]);
+
+                if (count($exist) !== 0) {
+                    return $turboStream->stream('formation_v2/change_rf/validation_errors.stream.html.twig', [
+                        'title' => 'Demande déjà existante',
+                        'errors' => ['Une demande de changement de responsable de formation existe déjà pour ce (co-)responsable, cette formation et ce type de (co-)responsable.'],
+                    ], Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
+
+                try {
+                    $newRf = new \App\Entity\ChangeRf();
+                    $newRf->setCampagneCollecte($this->getCampagneCollecte());
+                    $formation->addChangeRf($newRf);
+                    $newRf->setNouveauResponsable($user);
+                    $newRf->setTypeRf($datas->getTypeRf());
+                    $newRf->setDatePriseFonction($datas->getDatePriseFonction());
+                    $newRf->setCommentaire($commentaire);
+                    $newRf->setDateDemande(new DateTime());
+                    // Une nouvelle demande est immédiatement soumise au conseil.
+                    $newRf->setEtatDemande(['soumis_conseil' => 1]);
+                    $newRf->setAncienResponsable($oldResp);
+
+                    $this->entityManager->persist($newRf);
+                    $this->entityManager->flush();
+                } catch (\Throwable $exception) {
+                    $this->logger->error('Erreur lors de l’enregistrement de la demande de changement de responsable.', [
+                        'formation' => $formation->getId(),
+                        'exception' => $exception,
+                    ]);
+
+                    return $turboStream->stream('formation_v2/change_rf/validation_errors.stream.html.twig', [
+                        'title' => 'Erreur serveur',
+                        'errors' => ['Une erreur inattendue est survenue lors de l’enregistrement : ' . $exception->getMessage()],
+                    ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
+
+                // Message de toast
+                $anneeLibelle = $newRf->getAnneeUniversitaireLibelle();
+                $toastMessage = sprintf(
+                    'Le changement de (co-)responsable de formation a bien été enregistré pour l’année universitaire %s.',
+                    $anneeLibelle ?? 'concernée'
+                );
+
+                return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
+                    'toastMessage' => $toastMessage,
+                    'formation' => $formation,
+                ]);
             }
 
-            $exist = $changeRfRepository->findBy([
-                'formation' => $formation,
-                'campagneCollecte' => $this->getCampagneCollecte(),
-                'nouveauResponsable' => $user,
-                'typeRf' => $datas->getTypeRf(),
-                'ancienResponsable' => $oldResp
-            ]);
-
-            if (count($exist) !== 0) {
-                return JsonReponse::error('Une demande de changement de responsable de formation existe déjà pour ce (co-)responsable, cette formation et ce type de (co-)responsable.');
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
             }
-
-            $newRf = new \App\Entity\ChangeRf();
-            $newRf->setCampagneCollecte($this->getCampagneCollecte());
-            $formation->addChangeRf($newRf);
-            $newRf->setNouveauResponsable($user);
-            $newRf->setTypeRf($datas->getTypeRf());
-            $newRf->setDatePriseFonction($datas->getDatePriseFonction());
-            $newRf->setCommentaire($commentaire);
-            $newRf->setDateDemande(new DateTime());
-            // Une nouvelle demande est immédiatement soumise au conseil.
-            $newRf->setEtatDemande(['soumis_conseil' => 1]);
-            $newRf->setAncienResponsable($oldResp);
-
-            $this->entityManager->persist($newRf);
-            $this->entityManager->flush();
-
-
-            // Message de toast
-            $toastMessage = 'Le changement de responsable de formation a bien été enregistré.';
-
-            return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
-                'toastMessage' => $toastMessage,
-                'formation' => $formation,
-            ]);
+            if ($errors !== []) {
+                return $turboStream->stream('formation_v2/change_rf/validation_errors.stream.html.twig', [
+                    'title' => sprintf('Enregistrement impossible : %d point%s à corriger', count($errors), count($errors) > 1 ? 's' : ''),
+                    'errors' => $errors,
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
         }
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -130,6 +168,7 @@ class FormationResponsableController extends BaseController
             ]
         );
     }
+
 
     #[Route('/formation/change-responsable/suppression/{demande}', name: 'app_formation_change_rf_suppression', methods:['POST', 'DELETE'])]
     public function suppressionDemande(
@@ -369,14 +408,21 @@ class FormationResponsableController extends BaseController
                 return $this->operationErrorResponse($turboStream, 'La transition n’a pas pu être appliquée : '.$exception->getMessage());
             }
 
+            $anneeLibelle = $demande->getAnneeUniversitaireLibelle();
+            $message = sprintf(
+                'La demande a bien été validée (prise d’effet : année universitaire %s).',
+                $anneeLibelle ?? 'concernée'
+            );
+
             if ($this->isTurboFrameRequest()) {
                 return $turboStream->stream('formation_v2/change_rf/success.stream.html.twig', [
-                    'toastMessage' => 'La demande a bien été validée.',
+                    'toastMessage' => $message,
                     'formation' => $demande->getFormation(),
                 ]);
             }
 
-            return JsonReponse::success('La demande a bien été validée.');
+            return JsonReponse::success($message);
+
         }
 
         $status = $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK;
