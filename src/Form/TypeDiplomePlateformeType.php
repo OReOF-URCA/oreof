@@ -24,6 +24,7 @@ class TypeDiplomePlateformeType extends AbstractType
                 'choice_label' => 'libelle',
                 'label' => 'Plateforme',
                 'required' => true,
+                'autocomplete' => true,
                 'placeholder' => 'Sélectionnez une plateforme',
             ]);
         

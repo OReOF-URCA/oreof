@@ -91,6 +91,7 @@ class ParcoursStep1Type extends AbstractType
                 'expanded' => false,
                 'choices' => $formation->getLocalisationMention()->toArray(),
                 'data' => $options['data']->getLocalisation(),
+                'autocomplete' => true,
             ]);
             //->add('logo', FileType::class, [
             //    'help' => 'Logo du parcours',

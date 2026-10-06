@@ -59,7 +59,8 @@ class HelpType extends AbstractType
             ->add('routeSlug', ChoiceType::class, [
                 'choices' => $routeChoices,
                 'label' => 'Page cible (Route)',
-                'attr' => ['class' => 'form-select select2 mb-3']
+                'attr' => ['class' => 'form-select select2 mb-3'],
+                'autocomplete' => true,
             ])
             ->add('content', TextareaType::class, [
                 'label' => 'Contenu explicatif',

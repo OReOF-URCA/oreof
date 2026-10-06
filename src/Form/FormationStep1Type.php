@@ -37,6 +37,7 @@ class FormationStep1Type extends AbstractType
         $builder
             ->add('responsableMention', EntityType::class, [
                 'required' => false,
+                'autocomplete' => true,
                 'help' => '',
                 'disabled' => $verrouille,
                 'class' => User::class,
@@ -48,6 +49,7 @@ class FormationStep1Type extends AbstractType
             ])
             ->add('coResponsable', EntityType::class, [
                 'required' => false,
+                'autocomplete' => true,
                 'disabled' => $verrouille,
                 'help' => '',
                 'class' => User::class,
