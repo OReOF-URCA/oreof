@@ -48,6 +48,7 @@ import './bootstrap'
 
 import './js/base/init'
 import './js/toggle'
+import './js/tomSelectViewport'
 import './js/chartTheme'
 
 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(

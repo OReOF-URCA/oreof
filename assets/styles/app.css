@@ -1754,6 +1754,11 @@ html[data-a11y-size="xlarge"] .topbar-right > * {
     bg-surface shadow-lg text-sm text-secondary-700 box-border;
   }
 
+  /* Menu rattaché au <body> (dropdownParent: 'body', cas des modales) : au-dessus des modales Bootstrap (1055) */
+  body > .ts-dropdown {
+    z-index: 1100;
+  }
+
   /* Contenu scrollable du dropdown */
   .ts-dropdown-content {
     @apply max-h-52 overflow-y-auto overflow-x-hidden;
@@ -1852,6 +1857,16 @@ html[data-a11y-size="xlarge"] .topbar-right > * {
   .plugin-clear_button.focus.has-items .clear-button,
   .plugin-clear_button:not(.disabled):hover.has-items .clear-button {
     @apply opacity-100;
+  }
+
+  /* Select Tom Select en erreur de validation (classe posée sur le wrapper par assets/js/selectInvalid.js) */
+  .ts-wrapper.is-invalid .ts-control {
+    border-color: var(--color-danger) !important;
+  }
+
+  /* Select obligatoire sans option vide (classe `app-select-required` sur le <select>) : pas de bouton "clear" */
+  .ts-wrapper.app-select-required .clear-button {
+    display: none;
   }
 
   /* Accessibilité — element caché visuellement */

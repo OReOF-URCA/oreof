@@ -14,7 +14,8 @@
         <select id="changer"
                 name="changer"
                 required="required"
-                class="form-select"
+                class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
+                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
                 {{ stimulus_action('semestre--manage', 'changeParcours') }}
         >
             <option value="">Choisir un parcours pour dupliquer le semestre</option>
@@ -33,7 +34,8 @@
         <select id="position"
                 name="position"
                 required="required"
-                class="form-select"
+                class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
+                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
                 {{ stimulus_action('semestre--manage', 'changePosition') }}
         >
             <option value="">Choisir la position du semestre dans le parcours de destination</option>

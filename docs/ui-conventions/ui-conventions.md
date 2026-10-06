@@ -36,9 +36,15 @@ Quand lire : toute création/modification de template Twig, CSS ou composant UI,
   disabled, multi, dropdown, dark.
 - Select de **filtre** (liste déroulante qui relance une liste) : pas de `<select>` natif (popup OS illisible en
   sombre, et menu natif qui peut s'ouvrir vers le haut et se bloquer sur petit écran, ex. `formation/new.html.twig`) ; monter Tom Select avec `{{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}` et ajouter la
-  classe `app-filter-select` (aspect « champ », cf. `app.css`). Si le JS remplace les `<option>`, resynchroniser via
+  classe `app-filter-select` (aspect « champ », cf. `app.css`) ; `app-select-required` en plus si aucune option vide
+  n'est valide (masque le bouton « × »). Si le JS remplace les `<option>`, resynchroniser via
   `select.tomselect` (cf. `fillFilterSelect()` dans `offre_v2/synthese_offre.html.twig`). Les `<select>` natifs restants
   sont thémés globalement (`select`/`option` dans `app.css`).
+  Les menus Tom Select tiennent dans la fenêtre (hauteur réduite, ouverture vers le haut si la place manque :
+  `assets/js/tomSelectViewport.js`) et, dans une modale (`.app-modal-body`, `.modal`), sont rattachés au `<body>`
+  pour ne pas être coupés. Champ en erreur de validation : `selectInvalid(id, bool)` (`assets/js/selectInvalid.js`)
+  pose `is-invalid` sur le wrapper Tom Select. Champ de formulaire Symfony (`EntityType`/`ChoiceType`) :
+  option `'autocomplete' => true`.
 - Groupe de choix exclusifs (boutons `app-modal-footer-btn--secondary`, ex. panneau accessibilité) : signaler l'option
   active avec `aria-pressed="true"` (style dans `app.css`) + icône `icon:check` en `hidden group-aria-pressed:inline-block`.
 - Exception au composant tolérée seulement si : aucun composant ne couvre le besoin, prototype à refactoriser, ou

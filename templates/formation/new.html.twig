@@ -46,7 +46,7 @@
             
             <div class="mt-2">
                 <label for="select_type_diplome" class="sr-only">Type de diplôme</label>
-                <select id="select_type_diplome" class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                <select id="select_type_diplome" class="app-filter-select app-select-required w-full rounded-lg border px-3 py-2 text-sm" {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                     <option value="">Choisir un type de diplôme...</option>
                     {% for td in typeDiplomes %}
                         <option value="{{ td.id }}" {% if selectedTypeDiplome and selectedTypeDiplome.id == td.id %}selected{% endif %}>{{ td.libelle }} ({{ td.libelleCourt }})</option>

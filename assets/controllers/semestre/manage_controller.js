@@ -9,6 +9,7 @@
 import { Controller } from '@hotwired/stimulus'
 import callOut from '../../js/callOut'
 import JsonResponse from '../../js/JsonResponse';
+import selectInvalid from '../../js/selectInvalid'
 
 export default class extends Controller {
   static values = {
@@ -40,12 +41,12 @@ export default class extends Controller {
     } else {
       if (value === '') {
         callOut('Vous devez choisir un parcours dans la liste', 'warning')
-        document.getElementById('changer').classList.add('is-invalid')
+        selectInvalid('changer', true)
       }
 
       if (position === '') {
         callOut('Vous devez choisir une position pour le semestre dans la liste', 'warning')
-        document.getElementById('position').classList.add('is-invalid')
+        selectInvalid('position', true)
       }
     }
   }
@@ -111,25 +112,25 @@ export default class extends Controller {
     } else {
       if (value === '') {
         callOut('Vous devez choisir un parcours dans la liste', 'warning')
-        document.getElementById('changer').classList.add('is-invalid')
+        selectInvalid('changer', true)
       }
 
       if (position === '') {
         callOut('Vous devez choisir une position pour le semestre dans la liste', 'warning')
-        document.getElementById('position').classList.add('is-invalid')
+        selectInvalid('position', true)
       }
     }
   }
 
   changePosition(event) {
     if (event.target.value !== '') {
-      document.getElementById('position').classList.remove('is-invalid')
+      selectInvalid('position', false)
     }
   }
 
   changeParcours(event) {
     if (event.target.value !== '') {
-      document.getElementById('changer').classList.remove('is-invalid')
+      selectInvalid('changer', false)
     }
   }
 }
