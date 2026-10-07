@@ -40,7 +40,7 @@
         "eslint-plugin-cypress": "^7.0.2",
         "jszip": "^3.10.0",
         "lightningcss": "^1.32.0",
-        "lucide": "^1.25.0",
+        "lucide": "^1.52.0",
         "pdfmake": "^0.3.11",
         "release-please": "^17.6.0",
         "sass": "^1.99.0",
