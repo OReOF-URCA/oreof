@@ -76,7 +76,7 @@ Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
 | `release-check.yml` | manuel, lundi 02h UTC, appelable | PHPUnit PHP 8.4 + 8.5 avec couverture, mapping Doctrine, PHPStan niveau 7 (informatif), build prod `--no-dev`, `npm audit` |
 
 - **Baseline PHPStan** : `phpstan-baseline.neon` (niveau 6, ~1940 erreurs historiques). La CI refuse toute NOUVELLE
-  erreur. Après avoir corrigé des erreurs : `php vendor/bin/phpstan analyse -c phpstan.dist.neon --generate-baseline=phpstan-baseline.neon`
+  erreur. Les erreurs corrigées mais encore listées sont tolérées (`reportUnmatchedIgnoredErrors: false`). Après avoir corrigé des erreurs : `php vendor/bin/phpstan analyse -c phpstan.dist.neon --generate-baseline=phpstan-baseline.neon`
   (la baseline ne doit que rétrécir). `phpstan.neon` local est ignoré par git : la CI utilise `phpstan.dist.neon`.
 - En local, la base de test est `<base>_test` (suffixe Doctrine) : créer le schéma une fois avec
   `APP_ENV=test php bin/console doctrine:schema:create` (droits `CREATE` requis sur cette base).

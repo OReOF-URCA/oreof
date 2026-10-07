@@ -3,6 +3,9 @@ includes:
 
 parameters:
     level: 6
+    # Une erreur corrigée mais encore listée dans la baseline ne fait pas échouer la CI ;
+    # on régénère la baseline dans une PR dédiée (voir docs/ops/ci-cd.md).
+    reportUnmatchedIgnoredErrors: false
     paths:
         - bin/
         - config/

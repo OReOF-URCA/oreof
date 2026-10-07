@@ -38,7 +38,10 @@ check requis). Version de MariaDB figée à **10.8** (celle de la stack ; ne pas
 ### Baseline PHPStan
 
 - `phpstan-baseline.neon` : 1941 erreurs historiques (niveau 6). La CI refuse toute **nouvelle** erreur.
-- La baseline ne doit que rétrécir. Après correction d'erreurs, la régénérer :
+- `reportUnmatchedIgnoredErrors: false` : corriger une erreur listée dans la baseline ne fait pas échouer la CI (pas de
+  conflit sur ce fichier entre PR parallèles). Contrepartie : tant que la baseline n'est pas régénérée, le quota
+  (`count`) d'une entrée reste inchangé, donc une erreur identique réintroduite passerait inaperçue.
+- La baseline ne doit que rétrécir : la régénérer dans une PR dédiée, régulièrement, et non dans chaque PR de fonctionnalité :
   `php vendor/bin/phpstan analyse -c phpstan.dist.neon --generate-baseline=phpstan-baseline.neon`.
 - La CI utilise `phpstan.dist.neon` ; `phpstan.neon` local est ignoré par git.
 
