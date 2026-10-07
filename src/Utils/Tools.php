@@ -25,7 +25,7 @@ abstract class Tools
             return '';
         }
 
-        str_replace(['.', '-', ' '], '', $number);
+        $number = str_replace(['.', '-', ' '], '', $number);
 
         if (str_starts_with($number, '33')) {
             $number = '0'.mb_substr($number, 2, mb_strlen($number));

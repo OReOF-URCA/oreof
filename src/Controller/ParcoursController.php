@@ -673,11 +673,11 @@ class ParcoursController extends BaseController
         }
         // Sinon on prend au niveau de la composante
         else {
-            $villeArray = $parcours->getFormation()?->getLocalisationMention()?->toArray();
-            if ($villeArray !== null && count($villeArray) > 0) {
+            $villes = $parcours->getFormation()->getLocalisationMention();
+            if (!$villes->isEmpty()) {
                 $localisationMetadata = array_map(
                     fn ($ville) => $ville->getLibelle(),
-                    $villeArray
+                    $villes->toArray()
                 );
             }
         }
@@ -784,9 +784,10 @@ class ParcoursController extends BaseController
         VersioningParcours $versioningParcours
     ): \Symfony\Component\HttpFoundation\RedirectResponse
     {
+        $now = new DateTimeImmutable('now');
+        $dateHeure = $now->format('d-m-Y_H-i-s');
+
         try {
-            $now = new DateTimeImmutable('now');
-            $dateHeure = $now->format('d-m-Y_H-i-s');
             $versioningParcours->saveVersionOfParcours($parcours, $now, true);
 
             /** @var User $user */
@@ -1200,11 +1201,11 @@ class ParcoursController extends BaseController
         }
         // Sinon on prend au niveau de la composante
         else {
-            $villeArray = $parcours->getFormation()?->getLocalisationMention()?->toArray();
-            if ($villeArray !== null && count($villeArray) > 0) {
+            $villes = $parcours->getFormation()->getLocalisationMention();
+            if (!$villes->isEmpty()) {
                 $localisationMetadata = array_map(
                     fn ($ville) => $ville->getLibelle(),
-                    $villeArray
+                    $villes->toArray()
                 );
             }
         }
@@ -1552,11 +1553,11 @@ class ParcoursController extends BaseController
         }
         // Sinon on prend au niveau de la composante
         else {
-            $villeArray = $parcours->getFormation()?->getLocalisationMention()?->toArray();
-            if ($villeArray !== null && count($villeArray) > 0) {
+            $villes = $parcours->getFormation()->getLocalisationMention();
+            if (!$villes->isEmpty()) {
                 $localisationMetadata = array_map(
                     fn ($ville) => $ville->getLibelle(),
-                    $villeArray
+                    $villes->toArray()
                 );
             }
         }

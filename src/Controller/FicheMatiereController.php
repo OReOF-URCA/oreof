@@ -400,10 +400,12 @@ class FicheMatiereController extends BaseController
         VersioningFicheMatiere $ficheMatiereVersioningService
     ): RedirectResponse
     {
+        $now = new DateTimeImmutable('now');
+        $dateHeure = $now->format('d-m-Y_H-i-s');
+        
         try {
             // Date / Heure
-            $now = new DateTimeImmutable('now');
-            $dateHeure = $now->format('d-m-Y_H-i-s');
+            
             // Sauvegarde
             $ficheMatiereVersioningService->saveFicheMatiereVersion($ficheMatiere, $now);
             $entityManager->flush();

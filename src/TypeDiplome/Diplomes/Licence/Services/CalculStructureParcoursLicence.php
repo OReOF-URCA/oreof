@@ -90,7 +90,7 @@ final class CalculStructureParcoursLicence
                         }
 
                         //si des UE enfants, on ne regarde pas s'il y a des EC
-                        $dtoUe = new StructureUe($ue, $raccrocheUe, $display, $ueOrigine ?? null);
+                        $dtoUe = new StructureUe($ue, $raccrocheUe, $display, $ueOrigine);
                         // $ecs = $this->elementConstitutifRepository->getByUe($ue);
 
                         foreach ($ue->getElementConstitutifs() as $elementConstitutif) {
@@ -116,7 +116,7 @@ final class CalculStructureParcoursLicence
                             }
 
                             if ($ueEnfant !== null) {
-                                $dtoUeEnfant = new StructureUe($ueEnfant, $raccrocheUeEnfant, $display, $ueOrigine ?? null);
+                                $dtoUeEnfant = new StructureUe($ueEnfant, $raccrocheUeEnfant, $display, $ueOrigine);
                                 //$ecsEnfant = $this->elementConstitutifRepository->getByUe($ueEnfant);
 
                                 foreach ($ueEnfant->getElementConstitutifs() as $elementConstitutif) {
