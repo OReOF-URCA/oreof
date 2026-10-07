@@ -1855,13 +1855,13 @@ datatables.net-keytable@3.1.0:
   dependencies:
     datatables.net "^3.1"
 
-datatables.net-responsive-bs5@^4.0.3:
-  version "4.1.0"
-  resolved "https://registry.npmjs.org/datatables.net-responsive-bs5/-/datatables.net-responsive-bs5-4.1.0.tgz"
-  integrity sha512-CXN+rXYNLbTqdrmLpVpEzZb8iy+Ujy6TisiM9oHnh64G3r8ZKivTcnYLeRn9+D9kDm/aFKUen8Ro+kknGtP8+Q==
+datatables.net-responsive-bs5@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/datatables.net-responsive-bs5/-/datatables.net-responsive-bs5-4.1.1.tgz#7fa2f9c453e24170604aaa28685e7be888abfd5e"
+  integrity sha512-qVApBigzI1L2Mqd4eID44KR0061qxNOB5F+mdAYvfJT1rb79rIsgXjLDFjDQ5eM7qW+iJobClVXGxf3j8JFHsA==
   dependencies:
     datatables.net-bs5 "^3.1"
-    datatables.net-responsive "4.1.0"
+    datatables.net-responsive "4.1.1"
 
 datatables.net-responsive-dt@^4.0.3:
   version "4.1.0"
@@ -1875,6 +1875,13 @@ datatables.net-responsive@4.1.0:
   version "4.1.0"
   resolved "https://registry.npmjs.org/datatables.net-responsive/-/datatables.net-responsive-4.1.0.tgz"
   integrity sha512-xX26xHuXLZkbAT3kgeK7pAEAXsHu74chrEsU9MR+8bY4Xs5872/wZls+fxACrRMPaFHUZDzroTQ8LJbp5Wz1Dw==
+  dependencies:
+    datatables.net "^3.1"
+
+datatables.net-responsive@4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/datatables.net-responsive/-/datatables.net-responsive-4.1.1.tgz#50d93c147ea33abbe7c42d59f7c3a3edf9abdadd"
+  integrity sha512-FTo6k/Ov9ULpprImyupEB/3qr4W+7Ia14l1+dfk9voG4X0J6YaNrxftvumzZamZYcs9PZKDV1LXpDUBT8jnmYQ==
   dependencies:
     datatables.net "^3.1"
 

@@ -28,7 +28,7 @@
         "datatables.net-fixedheader-dt": "^5.0.0",
         "datatables.net-keytable-bs5": "^3.0.0",
         "datatables.net-keytable-dt": "^3.0.0",
-        "datatables.net-responsive-bs5": "^4.0.3",
+        "datatables.net-responsive-bs5": "^4.1.1",
         "datatables.net-responsive-dt": "^4.0.3",
         "datatables.net-rowgroup-bs5": "^2.0.0",
         "datatables.net-rowgroup-dt": "^2.0.0",
