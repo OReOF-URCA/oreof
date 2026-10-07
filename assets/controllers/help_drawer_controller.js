@@ -131,7 +131,7 @@ export default class extends Controller {
     if (!this.drawer) return;
     try {
       localStorage.setItem(WIDTH_STORAGE_KEY, this.drawer.style.width);
-    } catch (e) {
+    } catch {
       // Stockage indisponible (navigation privée, quota, etc.) : on ignore silencieusement.
     }
   }
@@ -143,7 +143,7 @@ export default class extends Controller {
       if (saved) {
         this.drawer.style.width = saved;
       }
-    } catch (e) {
+    } catch {
       // Stockage indisponible : le panneau garde sa largeur par défaut.
     }
   }

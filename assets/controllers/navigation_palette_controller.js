@@ -18,9 +18,6 @@ export default class extends Controller {
   }
 
   handleGlobalKeydown (event) {
-    const target = event.target
-    const isTyping = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target.isContentEditable
-
     const shortcut = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k'
 
     if (shortcut) {

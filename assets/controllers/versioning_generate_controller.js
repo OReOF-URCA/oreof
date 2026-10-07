@@ -77,14 +77,18 @@ export default class extends Controller {
           dt.ajax.reload(null, false)
           return
         }
-      } catch (e) {}
+      } catch {
+        // ignore
+      }
     }
 
     // 3. Try jQuery DataTable
     if (window.$ && typeof window.$(tableEl).DataTable === 'function') {
       try {
         window.$(tableEl).DataTable().ajax.reload(null, false)
-      } catch (e) {}
+      } catch {
+        // ignore
+      }
     }
   }
 }

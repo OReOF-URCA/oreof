@@ -141,7 +141,6 @@ export default class extends Controller {
         }
 
         // 3. Si c'est dans une div avec un ID spécifique de conteneur (uploadFormContainer, etc)
-        const caller = new Error().stack;
         const formContainer = document.querySelector('[id*="Container"], [id*="container"], [id*="Wrapper"], [id*="wrapper"]');
         if (formContainer && formContainer.offsetHeight > 10) {
             return formContainer;

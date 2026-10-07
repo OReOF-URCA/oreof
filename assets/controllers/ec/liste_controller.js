@@ -45,6 +45,5 @@ export default class extends Controller {
         }
       })
     })
-    modal = null
   }
 }

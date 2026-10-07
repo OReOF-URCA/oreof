@@ -9,7 +9,7 @@ export default class extends Controller {
 
     static targets = ['fileInput']
 
-    async uploadLogo(event) {
+    async uploadLogo() {
         if (!this.hasFileInputTarget) {
             console.error('File input not found')
             return

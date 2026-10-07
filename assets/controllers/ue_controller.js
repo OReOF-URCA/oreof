@@ -58,7 +58,7 @@ export default class extends Controller {
               ctrl.removeAttribute('aria-required')
             }
           }
-        } catch (e) {
+        } catch {
           // ignore control manipulation errors
         }
       })

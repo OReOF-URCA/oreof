@@ -8,7 +8,6 @@
 
 import { Controller } from '@hotwired/stimulus'
 import { Modal } from 'bootstrap'
-import { useDebounce } from 'stimulus-use'
 import callOut from '../js/callOut'
 
 export default class extends Controller {
@@ -44,6 +43,5 @@ export default class extends Controller {
         }
       })
     })
-    modal = null
   }
 }

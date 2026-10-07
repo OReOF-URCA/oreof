@@ -61,7 +61,7 @@ export default class extends Controller {
       } else {
         throw new Error('Save failed')
       }
-    } catch (err) {
+    } catch {
       input.checked = !enabled
       callOut('Erreur lors de la sauvegarde de la préférence', 'danger')
     }
@@ -117,7 +117,7 @@ export default class extends Controller {
       } else {
         throw new Error('Reset failed')
       }
-    } catch (err) {
+    } catch {
       callOut('Erreur lors du rétablissement de l\'héritage', 'danger')
     }
   }

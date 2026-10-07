@@ -311,7 +311,7 @@ export default class extends Controller {
   /* -------------------------------------------------------------
    * Gestion du repère de stock / Buffer
    * ----------------------------------------------------------- */
-  setTargetReference (event) {
+  setTargetReference () {
     let globalTotal = 0
     let globalRefTotal = 0
 
@@ -328,7 +328,7 @@ export default class extends Controller {
     this.recalculateAll()
   }
 
-  resetTargetReference (event) {
+  resetTargetReference () {
     this.targetOffset = 0
     sessionStorage.removeItem(`oreof_stock_offset_${this.parcoursIdValue}`)
     this.recalculateAll()

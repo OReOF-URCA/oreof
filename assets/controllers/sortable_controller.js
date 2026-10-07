@@ -70,7 +70,7 @@ export default class extends Controller {
 
       // update snapshot (nouvel état “valide”)
       this.snapshot = this.serialize()
-    } catch (e) {
+    } catch {
       // rollback en cas d’erreur
       this.rollback()
       Turbo.renderStreamMessage(`

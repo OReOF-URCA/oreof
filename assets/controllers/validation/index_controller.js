@@ -8,7 +8,6 @@
 
 import { Controller } from '@hotwired/stimulus'
 import callOut from '../../js/callOut'
-import JsonResponse from '../../js/JsonResponse'
 import updateUrl from '../../js/updateUrl'
 
 export default class extends Controller {

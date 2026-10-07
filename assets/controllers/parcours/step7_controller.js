@@ -8,9 +8,6 @@
 
 import { Controller } from '@hotwired/stimulus'
 import { saveData } from '../../js/saveData'
-import { updateEtatOnglet } from '../../js/updateEtatOnglet'
-import callOut from '../../js/callOut'
-import { calculEtatStep } from '../../js/calculEtatStep'
 import trixEditor from '../../js/trixEditor'
 
 export default class extends Controller {

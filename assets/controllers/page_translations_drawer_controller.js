@@ -191,7 +191,7 @@ export default class extends Controller {
     if (!this.drawer) return
     try {
       localStorage.setItem(WIDTH_STORAGE_KEY, this.drawer.style.width)
-    } catch (e) {
+    } catch {
       // Ignore
     }
   }
@@ -203,7 +203,7 @@ export default class extends Controller {
       if (saved) {
         this.drawer.style.width = saved
       }
-    } catch (e) {
+    } catch {
       // Ignore
     }
   }
@@ -242,7 +242,6 @@ export default class extends Controller {
   selectDomain (event) {
     event.preventDefault()
     const clickedBtn = event.currentTarget
-    const domain = clickedBtn.dataset.domain
 
     this.domainFilterTargets.forEach(btn => {
       if (btn === clickedBtn) {

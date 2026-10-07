@@ -50,7 +50,6 @@ export default class extends Controller {
 
         const nodeLabelColor = isDark ? '#f8fafc' : '#0f172a';
         const nodeBg = isDark ? '#1e293b' : '#ffffff';
-        const edgeColorDefault = isDark ? '#64748b' : '#94a3b8';
         const edgeLabelBg = isDark ? '#0f172a' : '#f8fafc';
         const edgeLabelColor = isDark ? '#cbd5e1' : '#475569';
 

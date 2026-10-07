@@ -47,7 +47,7 @@ export default class extends Controller {
       if (obj && typeof obj === 'object') {
         variants = Object.keys(obj).filter(k => typeof obj[k] === 'string')
       }
-    } catch (e) { /* JSON invalide -> pas d’options */ }
+    } catch { /* JSON invalide -> pas d’options */ }
 
     // Conserver la sélection actuelle si possible
     const current = this.subjectVariantTarget.value || ''

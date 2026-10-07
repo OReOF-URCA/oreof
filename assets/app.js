@@ -121,7 +121,9 @@ export const reloadAllDataTables = () => {
             return
           }
         }
-      } catch (e) {}
+      } catch {
+        // ignore
+      }
     }
 
     // 3. Via global DataTable API
@@ -140,7 +142,9 @@ export const reloadAllDataTables = () => {
             return
           }
         }
-      } catch (e) {}
+      } catch {
+        // ignore
+      }
     }
 
     // 4. Via jQuery DataTable plugin
@@ -159,7 +163,9 @@ export const reloadAllDataTables = () => {
             return
           }
         }
-      } catch (e) {}
+      } catch {
+        // ignore
+      }
     }
   })
 
@@ -172,7 +178,9 @@ export const reloadAllDataTables = () => {
       } else if (typeof allTables.draw === 'function') {
         allTables.draw(false)
       }
-    } catch (e) {}
+    } catch {
+      // ignore
+    }
   }
 
   // 6. Legacy datatable LiveComponent fallback

@@ -8,7 +8,6 @@
 
 import { Controller } from '@hotwired/stimulus'
 import { Modal } from 'bootstrap'
-import { saveData } from '../../js/saveData'
 import callOut from '../../js/callOut'
 import updateUrl from '../../js/updateUrl'
 

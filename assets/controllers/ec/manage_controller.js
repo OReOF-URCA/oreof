@@ -34,7 +34,7 @@ export default class extends Controller {
     // Initialiser l'affichage et l'état (required/disabled) des sections
     try {
       this.updateNature()
-    } catch (e) {
+    } catch {
       // ignore
     }
   }
@@ -265,7 +265,7 @@ export default class extends Controller {
               ctrl.removeAttribute('aria-required')
             }
           }
-        } catch (e) {
+        } catch {
           // ignore control manipulation errors
         }
       })

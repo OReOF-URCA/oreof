@@ -6,7 +6,6 @@
  * @lastUpdate 17/04/2023 16:41
  */
 import { Controller } from '@hotwired/stimulus'
-import callOut from '../../js/callOut'
 import JsonResponse from '../../js/JsonResponse'
 
 export default class extends Controller {

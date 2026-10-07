@@ -10,7 +10,6 @@ import { Controller } from '@hotwired/stimulus'
 import { saveData } from '../../js/saveData'
 import { updateEtatOnglet } from '../../js/updateEtatOnglet'
 import { calculEtatStep } from '../../js/calculEtatStep'
-import trixEditor from '../../js/trixEditor'
 import JsonResponse from '../../js/JsonResponse'
 
 export default class extends Controller {

@@ -208,7 +208,7 @@ export default class extends Controller {
     try {
       const parsed = JSON.parse(saved)
       this.state = { ...this.state, ...parsed }
-    } catch (error) {
+    } catch {
       localStorage.removeItem(this.storageKeyValue)
     }
   }

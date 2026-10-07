@@ -1,22 +1,28 @@
 // eslint.config.js
 import js from '@eslint/js'
 import cypress from 'eslint-plugin-cypress'
+import globals from 'globals'
 
 export default [
+  {
+    ignores: [
+      'assets/bootstrap.min.js',
+      'assets/js/vendor/**',
+      'assets/js/base/**',
+      'vendor/**',
+      'public/**',
+    ],
+  },
   js.configs.recommended,
   {
     plugins: {
       cypress,
     },
-    ignores: [
-      'assets/js/vendor/',
-      'assets/js/base/',
-      'vendor/',
-    ],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
+        ...globals.browser,
         Cypress: 'readonly',
         cy: 'readonly',
         describe: 'readonly',
@@ -28,23 +34,7 @@ export default [
         context: 'readonly',
         expect: 'readonly',
         assert: 'readonly',
-        document: 'readonly',
-        fetch: 'readonly',
-        confirm: 'readonly',
-        window: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-        localStorage: 'readonly',
-        Event: 'readonly',
-        URLSearchParams: 'readonly',
-        CustomEvent: 'readonly',
-        length: 'readonly',
-        FormData: 'readonly',
-        console: 'readonly',
         Turbo: 'readonly',
-        DOMParser: 'readonly',
       },
     },
     rules: {

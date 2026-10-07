@@ -251,7 +251,6 @@ export default class extends Controller {
    */
   validate () {
     const textarea = this.textareaTarget
-    const validation = this.validationTarget
     const value = textarea.value.trim()
 
     if (!value) {
