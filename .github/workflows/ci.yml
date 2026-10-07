@@ -80,7 +80,20 @@ jobs:
 
       # PHPStan charge le kernel (tests/object-manager.php) et l'extension Doctrine interroge la base :
       # il faut le schéma (sans données) en env dev, comme en local.
+      # En env dev, .env ne définit pas ces variables (elles viennent de .env.local ou de docker-compose en local) :
+      # valeurs factices, uniquement pour que le conteneur se construise.
       - name: PHPStan
+        env:
+          MAILER_DSN: null://null
+          APP_HOSTNAME: localhost
+          EXPORT_API_KEY: ci
+          CAS_CLIENT_SERVICE_NAME: https://localhost
+          CAS_CONTEXT: /cas
+          CAS_HOST: localhost
+          CAS_PORT: '443'
+          PARCOURS_COPY_DATABASE_URL: ${{ env.DATABASE_URL }}
+          WSDL_APOGEE_PRODUCTION: http://localhost/wsdl
+          WSDL_APOTEST: http://localhost/wsdl
         run: |
           export APP_ENV=dev
           php bin/console doctrine:database:create --if-not-exists

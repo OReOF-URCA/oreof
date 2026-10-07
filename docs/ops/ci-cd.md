@@ -47,6 +47,9 @@ check requis). Version de MariaDB figée à **10.8** (celle de la stack ; ne pas
 - L'analyse charge le kernel (`tests/object-manager.php`, `tests/console-application.php`) et l'extension Doctrine
   interroge la base : le job Lint a un service MariaDB, crée le schéma (sans données) en env `dev` et chauffe le cache
   `dev` avant PHPStan. En local, la base de dev suffit.
+- En env `dev`, `.env` ne définit pas `MAILER_DSN`, `APP_HOSTNAME`, `EXPORT_API_KEY`, `CAS_*`, `WSDL_*` ni
+  `PARCOURS_COPY_DATABASE_URL` : l'étape PHPStan de `ci.yml` leur donne des valeurs factices. Toute nouvelle variable
+  `%env(X)%` sans valeur dans `.env` doit y être ajoutée, sinon PHPStan échoue (« Environment variable not found »).
 
 ### Dette qui garde certaines étapes informatives
 
