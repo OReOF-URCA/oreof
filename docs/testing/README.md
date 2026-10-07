@@ -72,8 +72,7 @@ Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
 
 | Workflow | Quand | Contenu |
 |---|---|---|
-| `ci.yml` | PR vers `v2` + push sur `v2` | `composer audit`, lint YAML/conteneur (bloquants), lint Twig + ESLint (informatifs : dette existante), PHPStan (baseline), schéma + fixtures, PHPUnit (Project + Smoke) sur MariaDB 10.8, build Vite |
-| `release-check.yml` | manuel, lundi 02h UTC, appelable | PHPUnit PHP 8.4 + 8.5 avec couverture, mapping Doctrine, PHPStan niveau 7 (informatif), build prod `--no-dev`, `npm audit` |
+| `ci.yml` | PR vers `v2` + push sur `v2` | Job **Lint** : `composer audit`, lint YAML/conteneur (bloquants), lint Twig + ESLint (informatifs : dette existante), PHPStan (baseline). Job **Tests** : mapping Doctrine, schéma + fixtures, PHPUnit (Project + Smoke) sur MariaDB 10.8, build Vite |
 
 - **Baseline PHPStan** : `phpstan-baseline.neon` (niveau 6, ~1940 erreurs historiques). La CI refuse toute NOUVELLE
   erreur. Les erreurs corrigées mais encore listées sont tolérées (`reportUnmatchedIgnoredErrors: false`). Après avoir corrigé des erreurs : `php vendor/bin/phpstan analyse -c phpstan.dist.neon --generate-baseline=phpstan-baseline.neon`

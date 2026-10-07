@@ -1,7 +1,9 @@
 name: CI
 
-# Intégration continue : rapide (objectif < 8 min), exécutée sur chaque PR vers v2 et chaque push
-# sur v2. Les autres branches (v2-dev, v2-dev-pol…) ne sont vérifiées qu'à leur fusion dans v2.
+# Un seul workflow, deux parties, même chemin pour toute fusion dans v2 (hotfix compris) :
+#   - Lint  : qualité statique (composer, YAML/conteneur, Twig, PHPStan, ESLint)
+#   - Tests : vérification (mapping Doctrine, PHPUnit Project + Smoke sur MariaDB, build Vite)
+# Les autres branches (v2-dev, v2-dev-pol…) ne sont vérifiées qu'à leur fusion dans v2.
 # Appelable par d'autres workflows (déploiement).
 on:
   pull_request:
@@ -17,29 +19,16 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  APP_ENV: test
+  APP_SECRET: ci-secret-not-used-in-production
+  DATABASE_URL: mysql://root:root@127.0.0.1:3306/oreof?serverVersion=mariadb-10.8.0&charset=utf8mb4
+
 jobs:
-  php:
-    name: PHP (lint, PHPStan, PHPUnit)
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    services:
-      db:
-        image: mariadb:10.8
-        env:
-          MARIADB_ROOT_PASSWORD: root
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
-          --health-interval=5s
-          --health-timeout=5s
-          --health-retries=20
-
-    env:
-      APP_ENV: test
-      APP_SECRET: ci-secret-not-used-in-production
-      DATABASE_URL: mysql://root:root@127.0.0.1:3306/oreof?serverVersion=mariadb-10.8.0&charset=utf8mb4
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -81,6 +70,60 @@ jobs:
           APP_ENV=dev php bin/console cache:warmup
           php -d memory_limit=-1 vendor/bin/phpstan analyse -c phpstan.dist.neon --no-progress
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # vendor/ doit exister avant npm ci (paquets Symfony UX en liens `file:vendor/...`).
+      - run: npm ci
+
+      # 96 erreurs existantes (no-undef, no-unused-vars) : informatif tant que la dette n'est pas résorbée.
+      - name: ESLint (informatif)
+        continue-on-error: true
+        run: npm run lint
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      db:
+        image: mariadb:10.8
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, iconv, zip, intl, pdo_mysql, ldap, mbstring, xml, gd, fileinfo, libxml
+          tools: composer:v2
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Composer install
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+      - name: Mapping Doctrine valide
+        run: php bin/console doctrine:schema:validate --skip-sync
+
       - name: Base de test (schéma + fixtures)
         run: |
           php bin/console doctrine:database:create --if-not-exists
@@ -91,36 +134,12 @@ jobs:
       - name: PHPUnit
         run: vendor/bin/phpunit
 
-  front:
-    name: Front (ESLint, build)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    steps:
-      - uses: actions/checkout@v4
-
-      # Les paquets JS Symfony UX sont des liens `file:vendor/...` (package.json) : vendor/ doit exister avant npm ci.
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          extensions: ctype, iconv, zip, intl, mbstring, xml, ldap
-          tools: composer:v2
-          coverage: none
-
-      - name: Composer (assets Symfony UX)
-        run: composer install --no-dev --prefer-dist --no-progress --no-interaction --no-scripts
-
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: npm
 
-      - run: npm ci
-
-      # 96 erreurs existantes (no-undef, no-unused-vars) : informatif tant que la dette n'est pas résorbée.
-      - name: ESLint (informatif)
-        continue-on-error: true
-        run: npm run lint
-
       - name: Build Vite
-        run: npm run build
+        run: |
+          npm ci
+          npm run build

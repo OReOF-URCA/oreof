@@ -18,18 +18,21 @@ Légende de statut : **En place** = fonctionne dans le dépôt. **Cible** = déc
 
 - Les messages de commit suivent Conventional Commits (`commitlint.config.js`). Le préfixe pilote la version
   (`fix:` = patch, `feat:` = minor) et, à terme, le type de déploiement.
-- Hotfix : branche `fix/*` → PR vers `v2` → CI verte → merge. Pas de circuit séparé.
+- Toute fusion dans `v2` suit le même process (même CI, hotfix compris) : branche `fix/*` ou `feat/*` → PR vers `v2` → CI verte → merge.
 
 ## Workflows en place
 
 | Fichier | Déclencheur | Contenu |
 |---|---|---|
-| `ci.yml` | PR vers `v2` et push sur `v2` ; appelable | `composer validate` + `composer audit`, lint YAML et conteneur (bloquants), lint Twig et ESLint (informatifs), PHPStan avec baseline, schéma + fixtures de test, PHPUnit (suites Project et Smoke) sur MariaDB 10.8, build Vite |
-| `release-check.yml` | manuel, lundi 02h UTC, appelable | Vérification profonde, **hors hotfix** : PHPUnit PHP 8.4 et 8.5 avec couverture, mapping Doctrine, PHPStan niveau 7 (informatif), build `--no-dev` + `cache:warmup` prod, `npm audit` (informatif) |
+| `ci.yml` | PR vers `v2` et push sur `v2` ; appelable | Deux jobs : **Lint** (`composer validate` + `composer audit`, lint YAML et conteneur, lint Twig et ESLint informatifs, PHPStan avec baseline) et **Tests** (mapping Doctrine, schéma + fixtures, PHPUnit suites Project et Smoke sur MariaDB 10.8, build Vite) |
 | `release-please.yml` | push sur `v2` et `main` | PR de release, changelog, version dans `composer.json` |
 | `dependabot.yml` | hebdomadaire (actions : mensuel) | PR composer, npm, github-actions vers `v2` |
 
 Détails des tests et de la baseline : `docs/testing/README.md`.
+
+Choix de simplicité (retour du lead dev) : une seule CI en deux parties, sans circuit « vérification profonde » séparé.
+Contrôles écartés pour l'instant, à réintroduire si le besoin apparaît : PHP 8.5 en matrice, couverture avec seuil,
+PHPStan niveau 7 informatif, build de production `--no-dev` avec `cache:warmup` prod, `npm audit`.
 
 Origine : la branche `test/php-test-stack` (PR #184, smoke tests des routes, fixtures, `.env.test`, scripts composer) a
 été fusionnée dans `ci/cd`. Son workflow `php-tests.yml` est supprimé au profit de `ci.yml` (une seule CI, un seul
@@ -51,8 +54,8 @@ check requis). Version de MariaDB figée à **10.8** (celle de la stack ; ne pas
 |---|---|---|
 | Lint Twig | 4 templates en erreur (`badgeStep` inconnu dans `templates/parcours/_liste.html.twig`, 3 fichiers à balise vide) | corriger puis retirer `continue-on-error` dans `ci.yml` |
 | ESLint | 96 erreurs (`no-undef`, `no-unused-vars`) | résorber puis retirer `continue-on-error` dans `ci.yml` |
-| `npm audit` | `source-map-js` (high) | `npm audit fix`, puis retirer `continue-on-error` dans `release-check.yml` |
-| Couverture | aucun seuil | mesurer le premier run de `release-check.yml`, fixer un seuil qui ne fait que monter |
+| `npm audit` | `source-map-js` (high), non exécuté en CI | `npm audit fix` (Dependabot propose aussi la mise à jour) |
+| Couverture | non mesurée en CI | à réintroduire avec un seuil qui ne fait que monter (voir `docs/testing/README.md`) |
 | `composer.lock` périmé à chaque release | release-please écrit `version` dans `composer.json` sans mettre à jour le `content-hash` du lock : `composer validate` échoue après chaque release | rafraîchir avec `composer update --lock --no-install --no-scripts` (hash seul), ou automatiser dans `release-please.yml`, ou retirer `composer.json` des `extra-files` de `release-please-config.json` (la version affichée vient de `package.json`) |
 | Smoke test des routes | 65 routes GET en échec toléré (`tests/Smoke/known-failures.txt`) : templates manquants (`communs/form_theme.html.twig`, `fiche_matiere/index.html.twig`), variables Twig absentes, services externes (Gotenberg, ACS) | corriger les routes et vider la liste |
 | Tests | 20 incomplets, 1 ignoré (`ParcoursCopyDataTest` exige le parcours 405 de production) | écrire les tests prioritaires de `docs/testing/README.md` |
@@ -68,7 +71,7 @@ check requis). Version de MariaDB figée à **10.8** (celle de la stack ; ne pas
 | Migration destructive ou rupture de workflow/formulaire | fenêtre calme | maintenance courte : 503 avec `Retry-After`, bandeau Mercure préalable |
 
 Une migration est destructive si elle contient `DROP`, `RENAME` ou `NOT NULL` sans valeur par défaut.
-Un contrôle automatique de ces motifs est à ajouter à `release-check.yml`.
+Un contrôle automatique de ces motifs est à ajouter au job Tests de `ci.yml` (ou à un script de classification de release).
 
 ### Heures creuses calculées
 
@@ -118,7 +121,7 @@ verrouiller la table, à tester en pré-production sur une copie de la base.
 | 2 | Première exécution réelle sur GitHub, corrections éventuelles | Fait (PR #220 verte : Node 24, healthcheck MariaDB, composer avant npm, `composer.lock`, Reprise `strict_mode: false` en test) |
 | 3 | Protection de branche sur `v2` (CI verte obligatoire) | Bloqué : droits admin du dépôt |
 | 4 | Workflow `commitlint` sur les PR | À faire |
-| 5 | PAT ou GitHub App pour release-please (déclenche `release-check.yml` sur la PR de release) | Bloqué : droits admin |
+| 5 | PAT ou GitHub App pour release-please : la PR de release créée avec `GITHUB_TOKEN` ne déclenche pas `ci.yml` | Bloqué : droits admin |
 | 6 | `build-release.yml` : archive sur tag `v*` (`--no-dev`, build Vite, cache prod) | À faire |
 | 7 | Scripts `deploy/deploy.sh` et `rollback.sh`, testés sur dossier simulé | À faire |
 | 8 | Classification de release (patch/minor/major, migrations destructives) | À faire |
