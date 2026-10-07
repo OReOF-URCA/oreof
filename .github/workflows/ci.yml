@@ -30,7 +30,7 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=20
@@ -97,6 +97,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      # Les paquets JS Symfony UX sont des liens `file:vendor/...` (package.json) : vendor/ doit exister avant npm ci.
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, iconv, zip, intl, mbstring, xml, ldap
+          tools: composer:v2
+          coverage: none
+
+      - name: Composer (assets Symfony UX)
+        run: composer install --no-dev --prefer-dist --no-progress --no-interaction --no-scripts
 
       - uses: actions/setup-node@v4
         with:
