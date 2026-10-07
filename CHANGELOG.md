@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/OReOF-URCA/oreof/compare/v2.1.4...v2.2.0) (2026-10-07)
+
+
+### Features
+
+* Changement de RF sur la bonne année selon la date de prise de fonction ([0671786](https://github.com/OReOF-URCA/oreof/commit/06717860cdc87a6d8ee78b4d8e0eb57c1df47213))
+* fiches BUT et M2E + Améliorations page offre ([e2ad4be](https://github.com/OReOF-URCA/oreof/commit/e2ad4bed3350184ecb712246cec70bffeab337a0))
+* verifications revues sur l'offre + select sur année + filtre hors accréditation ([4a0c9c8](https://github.com/OReOF-URCA/oreof/commit/4a0c9c85a0480732ba5b114d6b9afb0490fb8b1e))
+
+
+### Bug Fixes
+
+* acces aux parcours en edit/delete ([17c24c8](https://github.com/OReOF-URCA/oreof/commit/17c24c8df3481d4300898aa8740b5ab1f50190d3))
+* **ci:** use release-please branch directly ([f23adcc](https://github.com/OReOF-URCA/oreof/commit/f23adcc6f67e076e2b78411b0ac26f2fdc4c8cb9))
+* commande de recopie des droits + menu ([162c124](https://github.com/OReOF-URCA/oreof/commit/162c124265d567014c69c6ed33edd654190c54c2))
+* doctrine config ([6f4a378](https://github.com/OReOF-URCA/oreof/commit/6f4a3785135d4a075c1aa2f6cbc4a1841f07229d))
+* **formation:** select du type de diplome en Tom Select ([3a75388](https://github.com/OReOF-URCA/oreof/commit/3a75388139ef0049024352dcf162c35c000c1847))
+* ordre de la timeline ([c2eddd9](https://github.com/OReOF-URCA/oreof/commit/c2eddd99246a80a3ead23a3fbd41b651f6801da9))
+* PDF MCCC Route ([d95e5e0](https://github.com/OReOF-URCA/oreof/commit/d95e5e0718c17d598ebc3392d9d0364c3bdb4dea))
+* PDF MCCC Route ([8b3ae57](https://github.com/OReOF-URCA/oreof/commit/8b3ae578855bf8c6b2f174e3ea7f1c7603c10b58))
+* texte campagne ([f567eba](https://github.com/OReOF-URCA/oreof/commit/f567eba2f1ff12222e74433db5a75598a3dfb252))
+* **ui:** champs de formulaire a longues listes en autocomplete (Tom Select) ([6ac3275](https://github.com/OReOF-URCA/oreof/commit/6ac3275e0e8d090b0c69910a206fb72d8acf2513))
+* **ui:** select natifs des modales et listes longues passes en Tom Select ([397ed35](https://github.com/OReOF-URCA/oreof/commit/397ed3592fdb5edea4bff35e7e1d3fa5b9614349))
+
 ## [2.1.4](https://github.com/OReOF-URCA/oreof/compare/v2.1.3...v2.1.4) (2026-10-05)
 
 
