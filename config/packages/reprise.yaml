@@ -9,3 +9,8 @@ reprise:
 framework:
     assets:
         json_manifest_path: '%kernel.project_dir%/public/build/manifest.json'
+
+when@test:
+    reprise:
+        # Les tests ne dépendent pas des assets compilés (public/build/entrypoints.json absent en CI PHP)
+        strict_mode: false

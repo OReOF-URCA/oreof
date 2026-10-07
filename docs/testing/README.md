@@ -1,7 +1,7 @@
 # Tests PHP — ORéOF v2
 
 Quand lire : écrire ou lancer des tests PHPUnit.
-À mettre à jour si : `tests/Support/`, `tests/Fixtures/`, `tests/Smoke/`, `src/DataFixtures/Test/`, `.env.test`, arborescence `tests/`, `phpunit.xml.dist`, scripts composer (`test`, `analyse`, `check`), `phpstan.dist.neon`, `phpstan-baseline.neon`, cibles `test*` du `../Makefile`, `.github/workflows/`.
+À mettre à jour si : `tests/Support/`, `tests/Fixtures/`, `tests/Smoke/`, `src/DataFixtures/Test/`, `.env.test`, arborescence `tests/`, `phpunit.xml.dist`, scripts composer (`test`, `analyse`, `check`), `phpstan.dist.neon`, `phpstan-baseline.neon`, `config/packages/reprise.yaml`, cibles `test*` du `../Makefile`, `.github/workflows/`.
 
 ## Lancer
 
@@ -80,6 +80,8 @@ Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
   (la baseline ne doit que rétrécir). `phpstan.neon` local est ignoré par git : la CI utilise `phpstan.dist.neon`.
 - En local, la base de test est `<base>_test` (suffixe Doctrine) : créer le schéma une fois avec
   `APP_ENV=test php bin/console doctrine:schema:create` (droits `CREATE` requis sur cette base).
+- Reprise (`config/packages/reprise.yaml`, `when@test`) est en `strict_mode: false` : les tests n'exigent pas
+  `public/build/entrypoints.json` (la CI PHP ne construit pas les assets).
 - Les formulaires n'ont pas de CSRF en env `test` (`framework.form.csrf_protection` dans `when@test`).
 - Le gabarit `ParcoursRepositoryExampleTest` et `ParcoursControllerExampleTest::testListParcoursPageIsSuccessful`
   sont marqués incomplets (fixtures obsolètes / authentification manquante).
