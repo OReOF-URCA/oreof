@@ -22,7 +22,7 @@ permissions:
 env:
   APP_ENV: test
   APP_SECRET: ci-secret-not-used-in-production
-  DATABASE_URL: mysql://root:root@127.0.0.1:3306/oreof?serverVersion=mariadb-10.8.0&charset=utf8mb4
+  DATABASE_URL: mysql://root:root@127.0.0.1:3306/oreof?serverVersion=mariadb-11.4.0&charset=utf8mb4
 
 jobs:
   lint:
@@ -32,13 +32,13 @@ jobs:
 
     services:
       db:
-        image: mariadb:10.8
+        image: mariadb:11.4
         env:
           MARIADB_ROOT_PASSWORD: root
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=20
@@ -121,13 +121,13 @@ jobs:
 
     services:
       db:
-        image: mariadb:10.8
+        image: mariadb:11.4
         env:
           MARIADB_ROOT_PASSWORD: root
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
           --health-interval=5s
           --health-timeout=5s
           --health-retries=20
@@ -161,9 +161,14 @@ jobs:
           php bin/console doctrine:schema:create --no-interaction
           php bin/console doctrine:fixtures:load --group=test --no-interaction
 
-      # Suites Project + Smoke (smoke test de toutes les routes GET, tolérances : tests/Smoke/known-failures.txt)
-      - name: PHPUnit
-        run: vendor/bin/phpunit
+      - name: PHPUnit Project
+        run: vendor/bin/phpunit --testsuite Project
+
+      # Smoke de toutes les routes GET résolvables.
+      # Dette temporaire : tests/Smoke/known-failures.txt
+      # Exclusions légitimes documentées : tests/Smoke/excluded-routes.txt
+      - name: Smoke routes
+        run: vendor/bin/phpunit --testsuite Smoke
 
       - uses: actions/setup-node@v4
         with:

@@ -1,0 +1,11 @@
+# Routes volontairement hors du smoke test générique.
+# Format : route | catégorie | raison
+# Une exclusion est légitime et documentée ; contrairement à known-failures.txt,
+# ce fichier n'a pas vocation à atteindre zéro.
+
+app_notification_lu | action | Action Stimulus qui modifie l'état de lecture et attend le contexte de la requête
+datatable_export | request-context | Export construit à partir de l'état DataTable porté par la session/requête
+ux_datatables_ajax_data | ajax | Endpoint technique AJAX du composant DataTable, non pertinent en GET générique
+app_conseils_documents_download | request-context | Téléchargement dépendant des filtres/processus sélectionnés dans la requête
+app_commentaire_export | external-service | Génération PDF nécessitant Gotenberg
+app_competence_export_bcc | external-service | Génération PDF nécessitant Gotenberg

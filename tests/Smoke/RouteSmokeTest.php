@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Smoke;
 
-use App\Entity\User;
 use App\Entity\CampagneCollecte;
+use App\Entity\User;
 use App\Tests\Support\RouteParameterResolver;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -14,11 +14,6 @@ use Symfony\Component\Routing\RouterInterface;
 
 final class RouteSmokeTest extends WebTestCase
 {
-    /**
-     * Smoke-test every GET route that can be generated without inventing
-     * parameters. Redirects and authorization responses are valid here:
-     * this test is intended to catch broken routes and server errors.
-     */
     public function testResolvableGetRoutesDoNotBreak(): void
     {
         $client = static::createClient();
@@ -35,8 +30,13 @@ final class RouteSmokeTest extends WebTestCase
         self::assertNotNull($campaign, 'Default test campaign is not loaded.');
         $client->getRequest()->getSession()->set('campagneCollecte', $campaign->getId());
 
-        $tested = 0;
+        $known = $this->routeList(__DIR__.'/known-failures.txt');
+        $excluded = $this->routeList(__DIR__.'/excluded-routes.txt');
+
+        $getCandidates = 0;
+        $testedRoutes = [];
         $skipped = [];
+        $excludedRoutes = [];
         $failures = [];
 
         foreach ($router->getRouteCollection() as $name => $route) {
@@ -50,6 +50,13 @@ final class RouteSmokeTest extends WebTestCase
                 continue;
             }
 
+            ++$getCandidates;
+
+            if (isset($excluded[$name])) {
+                $excludedRoutes[$name] = $excluded[$name];
+                continue;
+            }
+
             $resolution = $resolver->resolve($route);
             if ([] !== $resolution['unresolved']) {
                 $skipped[$name] = 'unresolved parameters: '.implode(', ', $resolution['unresolved']);
@@ -59,7 +66,7 @@ final class RouteSmokeTest extends WebTestCase
             try {
                 $url = $router->generate($name, $resolution['parameters'], UrlGeneratorInterface::ABSOLUTE_PATH);
                 $this->request($client, $url);
-                ++$tested;
+                $testedRoutes[$name] = true;
 
                 $status = $client->getResponse()->getStatusCode();
                 if (404 === $status || $status >= 500) {
@@ -69,12 +76,13 @@ final class RouteSmokeTest extends WebTestCase
                         $details = '' !== $body ? ' — '.mb_substr($body, 0, 500) : '';
                     }
 
-                    $failures[] = sprintf('%s (%s) returned HTTP %d%s', $name, $url, $status, $details);
+                    $failures[$name] = sprintf('%s (%s) returned HTTP %d%s', $name, $url, $status, $details);
                 }
             } catch (\Symfony\Component\Routing\Exception\InvalidParameterException $exception) {
                 $skipped[$name] = 'cannot be generated without fixture parameters: '.$exception->getMessage();
             } catch (\Throwable $exception) {
-                $failures[] = sprintf(
+                $testedRoutes[$name] = true;
+                $failures[$name] = sprintf(
                     '%s failed with %s: %s',
                     $name,
                     $exception::class,
@@ -82,6 +90,10 @@ final class RouteSmokeTest extends WebTestCase
                 );
             }
         }
+
+        $knownObserved = array_intersect_key($failures, $known);
+        $newFailures = array_diff_key($failures, $known);
+        $recoveredKnown = array_diff_key(array_intersect_key($known, $testedRoutes), $failures);
 
         $skipReasons = [];
         foreach ($skipped as $reason) {
@@ -93,51 +105,76 @@ final class RouteSmokeTest extends WebTestCase
         arsort($skipReasons);
 
         fwrite(STDOUT, sprintf(
-            "\nRoute smoke coverage: %d tested / %d skipped.\nSkipped: %s\n",
-            $tested,
+            "\nRoute smoke coverage\n--------------------\nGET/HEAD candidates      : %d\nTested                   : %d\nPassed                   : %d\nKnown failures observed  : %d\nExplicit exclusions      : %d\nSkipped / unresolved     : %d\nNew failures             : %d\nRecovered known failures : %d\n",
+            $getCandidates,
+            count($testedRoutes),
+            count($testedRoutes) - count($failures),
+            count($knownObserved),
+            count($excludedRoutes),
             count($skipped),
-            implode(', ', array_map(
+            count($newFailures),
+            count($recoveredKnown)
+        ));
+
+        if ([] !== $excludedRoutes) {
+            fwrite(STDOUT, "\nExplicit exclusions:\n");
+            foreach ($excludedRoutes as $name => $reason) {
+                fwrite(STDOUT, sprintf("  - %s: %s\n", $name, $reason));
+            }
+        }
+
+        if ([] !== $skipReasons) {
+            fwrite(STDOUT, "\nSkipped: ".implode(', ', array_map(
                 static fn (string $reason, int $count): string => sprintf('%s (%d)', $reason, $count),
                 array_keys($skipReasons),
                 array_values($skipReasons)
-            ))
-        ));
+            ))."\n");
+        }
 
-        $known = $this->knownFailures();
-        $newFailures = array_values(array_filter(
-            $failures,
-            static fn (string $failure): bool => !in_array(strtok($failure, ' '), $known, true)
-        ));
-        fwrite(STDOUT, sprintf(
-            "Known failures tolerated: %d (tests/Smoke/known-failures.txt) / new failures: %d.\n",
-            count($failures) - count($newFailures),
-            count($newFailures)
-        ));
+        if ([] !== $recoveredKnown) {
+            fwrite(STDOUT, "\nKNOWN FAILURES NOW PASS — remove them from tests/Smoke/known-failures.txt:\n");
+            foreach (array_keys($recoveredKnown) as $name) {
+                fwrite(STDOUT, sprintf("  - %s\n", $name));
+            }
+        }
 
-        self::assertGreaterThan(0, $tested, 'No application route was smoke-tested.');
-        self::assertSame(
-            [],
-            $newFailures,
-            sprintf(
-                "Smoke-tested %d routes; skipped %d. New failures (not in tests/Smoke/known-failures.txt):\n%s",
-                $tested,
-                count($skipped),
-                implode("\n", $newFailures)
-            )
-        );
+        self::assertGreaterThan(0, count($testedRoutes), 'No application route was smoke-tested.');
+
+        $problems = [];
+        if ([] !== $newFailures) {
+            $problems[] = "New failures (not in tests/Smoke/known-failures.txt):\n".implode("\n", $newFailures);
+        }
+        if ([] !== $recoveredKnown) {
+            $problems[] = "Known failures now pass and must be removed from tests/Smoke/known-failures.txt:\n".implode("\n", array_keys($recoveredKnown));
+        }
+
+        self::assertSame([], $problems, implode("\n\n", $problems));
     }
 
     /**
-     * @return list<string>
+     * Format: route_name | category | reason
+     * The category/reason columns are optional for backward compatibility.
+     *
+     * @return array<string, string>
      */
-    private function knownFailures(): array
+    private function routeList(string $file): array
     {
-        $lines = file(__DIR__.'/known-failures.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+        $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+        $routes = [];
 
-        return array_values(array_filter(
-            array_map('trim', $lines),
-            static fn (string $line): bool => '' !== $line && !str_starts_with($line, '#')
-        ));
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ('' === $line || str_starts_with($line, '#')) {
+                continue;
+            }
+
+            $parts = array_map('trim', explode('|', $line, 3));
+            $name = $parts[0];
+            $description = implode(' — ', array_filter(array_slice($parts, 1)));
+            $routes[$name] = '' !== $description ? $description : 'no reason documented';
+        }
+
+        return $routes;
     }
 
     private function request(KernelBrowser $client, string $url): void
