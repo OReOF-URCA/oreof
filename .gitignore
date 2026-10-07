@@ -30,6 +30,7 @@ phpstan.neon
 
 ### TEST CONFIG ###
 .env.local.old
+.env.test
 
 ### EXPORT MCCC PDF ###
 mccc-export/
