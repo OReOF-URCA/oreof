@@ -16,6 +16,7 @@ Point d'entrée agents : `AGENTS.md` (racine). Chaque fichier ci-dessous est aut
 | `architecture/maquette-modulaire.md` | Architecture cible maquette par profils de diplôme (non implémentée) | refonte structure/validation/rendu |
 | `testing/README.md` | Organisation des tests, helpers, commandes, priorités | écrire/lancer des tests |
 | `ops/install.md` | Installation dev (Docker) et prod | installation, déploiement |
+| `ops/ci-cd.md` | CI GitHub Actions, baseline PHPStan, modèle de branches, déploiement cible (heures creuses, quasi sans coupure), tâches restantes | modifier la CI, préparer une release ou un hotfix |
 | `ops/command.md` | Commandes console `app:*` | exécuter/modifier une commande |
 | `ops/recopie-fiche-matiere.md` | Procédure `app:parcours-copy-data` | recopie des données vers fiches matières |
 | `produit/roadmap-pilotage-admin.md` | Idées fonctionnelles pilotage/admin | cadrage produit uniquement |

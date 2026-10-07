@@ -53,6 +53,8 @@ Objectifs : global 70 % min / 80 % cible ; `Service` et `TypeDiplome` 70/85 ; `E
 `Controller` 40/60. 
 ## CI (GitHub Actions)
 
+Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
+
 | Workflow | Quand | Contenu |
 |---|---|---|
 | `ci.yml` | PR + push sur `v2`, `v2-dev`, `v2-dev-pol` | `composer audit`, lint YAML/conteneur (bloquants), lint Twig + ESLint (informatifs : dette existante), PHPStan (baseline), PHPUnit sur MariaDB 10.8, build Vite |
