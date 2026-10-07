@@ -1,7 +1,7 @@
 # CI/CD — ORéOF v2
 
 Quand lire : modifier la CI, préparer ou déployer une release, traiter un hotfix, préparer le serveur.
-À mettre à jour si : `.github/workflows/`, `.github/dependabot.yml`, `phpstan.dist.neon`, `phpstan-baseline.neon`,
+À mettre à jour si : `.github/workflows/`, `.github/dependabot.yml`, `phpstan.dist.neon`,
 `release-please-config.json`, `config/packages/framework.yaml` (`when@test`), `tests/Smoke/`, tout futur dossier `deploy/`.
 
 Légende de statut : **En place** = fonctionne dans le dépôt. **Cible** = décidé mais **non implémenté**.
@@ -24,11 +24,11 @@ Légende de statut : **En place** = fonctionne dans le dépôt. **Cible** = déc
 
 | Fichier | Déclencheur | Contenu |
 |---|---|---|
-| `ci.yml` | PR vers `v2` et push sur `v2` ; appelable | Deux jobs : **Lint** (`composer validate` + `composer audit`, lint YAML et conteneur, lint Twig et ESLint informatifs, PHPStan avec baseline) et **Tests** (mapping Doctrine, schéma + fixtures, PHPUnit suites Project et Smoke sur MariaDB 10.8, build Vite) |
+| `ci.yml` | PR vers `v2` et push sur `v2` ; appelable | Deux jobs : **Lint** (`composer validate` + `composer audit`, lint YAML et conteneur, lint Twig et ESLint informatifs, PHPStan) et **Tests** (mapping Doctrine, schéma + fixtures, PHPUnit suites Project et Smoke sur MariaDB 10.8, build Vite) |
 | `release-please.yml` | push sur `v2` et `main` | PR de release, changelog, version dans `composer.json` |
 | `dependabot.yml` | hebdomadaire (actions : mensuel) | PR composer, npm, github-actions vers `v2` |
 
-Détails des tests et de la baseline : `docs/testing/README.md`.
+Détails des tests : `docs/testing/README.md`.
 
 Choix de simplicité (retour du lead dev) : une seule CI en deux parties, sans circuit « vérification profonde » séparé.
 Contrôles écartés pour l'instant, à réintroduire si le besoin apparaît : PHP 8.5 en matrice, couverture avec seuil,
@@ -38,15 +38,15 @@ Origine : la branche `test/php-test-stack` (PR #184, smoke tests des routes, fix
 été fusionnée dans `ci/cd`. Son workflow `php-tests.yml` est supprimé au profit de `ci.yml` (une seule CI, un seul
 check requis). Version de MariaDB figée à **10.8** (celle de la stack ; ne pas la changer sans validation du lead dev).
 
-### Baseline PHPStan
+### PHPStan
 
-- `phpstan-baseline.neon` : 1941 erreurs historiques (niveau 6). La CI refuse toute **nouvelle** erreur.
-- `reportUnmatchedIgnoredErrors: false` : corriger une erreur listée dans la baseline ne fait pas échouer la CI (pas de
-  conflit sur ce fichier entre PR parallèles). Contrepartie : tant que la baseline n'est pas régénérée, le quota
-  (`count`) d'une entrée reste inchangé, donc une erreur identique réintroduite passerait inaperçue.
-- La baseline ne doit que rétrécir : la régénérer dans une PR dédiée, régulièrement, et non dans chaque PR de fonctionnalité :
-  `php vendor/bin/phpstan analyse -c phpstan.dist.neon --generate-baseline=phpstan-baseline.neon`.
-- La CI utilise `phpstan.dist.neon` ; `phpstan.neon` local est ignoré par git.
+- Config versionnée : `phpstan.dist.neon` (niveau 6, `src/` uniquement, extensions Symfony et Doctrine, identifiants
+  `missingType.iterableValue`, `missingType.generics` et `doctrine.associationType` ignorés). Elle remplace la config
+  locale `phpstan.neon` (ignorée par git) : les deux doivent rester identiques, la CI ne lit que `phpstan.dist.neon`.
+- Résultat actuel : **0 erreur**, donc pas de baseline. Toute erreur fait échouer le job Lint.
+- L'analyse charge le kernel (`tests/object-manager.php`, `tests/console-application.php`) et l'extension Doctrine
+  interroge la base : le job Lint a un service MariaDB, crée le schéma (sans données) en env `dev` et chauffe le cache
+  `dev` avant PHPStan. En local, la base de dev suffit.
 
 ### Dette qui garde certaines étapes informatives
 
@@ -117,7 +117,7 @@ verrouiller la table, à tester en pré-production sur une copie de la base.
 
 | # | Tâche | Statut |
 |---|---|---|
-| 1 | CI de base, baseline PHPStan, Dependabot, smoke tests des routes (fusion de la PR #184) | En place (branche `ci/cd`, PR à ouvrir vers `v2`, puis fermer la PR #184) |
+| 1 | CI de base, PHPStan, Dependabot, smoke tests des routes (fusion de la PR #184) | En place (branche `ci/cd`, PR à ouvrir vers `v2`, puis fermer la PR #184) |
 | 2 | Première exécution réelle sur GitHub, corrections éventuelles | Fait (PR #220 verte : Node 24, healthcheck MariaDB, composer avant npm, `composer.lock`, Reprise `strict_mode: false` en test) |
 | 3 | Protection de branche sur `v2` (CI verte obligatoire) | Bloqué : droits admin du dépôt |
 | 4 | Workflow `commitlint` sur les PR | À faire |
@@ -130,7 +130,7 @@ verrouiller la table, à tester en pré-production sur une copie de la base.
 | 11 | Route `/health` publique + test (`config/packages/security.yaml`) | À faire |
 | 12 | Page de maintenance 503 et bandeau Mercure | À faire |
 | 13 | `session.save_path` configurable par variable d'environnement | À faire |
-| 14 | Tests prioritaires, seuil de couverture, contrôle « baseline qui ne grossit pas » | À faire |
+| 14 | Tests prioritaires, seuil de couverture, étendre PHPStan à `tests/` | À faire |
 | 15 | Résorber la dette (Twig, ESLint, `npm audit`) | À faire |
 | 16 | Modèle de PR (migration destructive ? workflow modifié ?) | À faire |
 

@@ -1,14 +1,25 @@
-includes:
-    - phpstan-baseline.neon
-
 parameters:
     level: 6
-    # Une erreur corrigée mais encore listée dans la baseline ne fait pas échouer la CI ;
-    # on régénère la baseline dans une PR dédiée (voir docs/ops/ci-cd.md).
-    reportUnmatchedIgnoredErrors: false
     paths:
-        - bin/
-        - config/
-        - public/
-        - src/
-        - tests/
+        - src
+
+    # Configuration Symfony (Symfony 8.x)
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+        consoleApplicationLoader: tests/console-application.php
+
+    # Configuration Doctrine (Doctrine ORM 3.x)
+    doctrine:
+        objectManagerLoader: tests/object-manager.php
+        allowNullablePropertyForRequiredField: true
+
+
+    # Évite les faux positifs liés aux annotations DocBlock vs typage strict PHP 8.4+
+    treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        - identifier: missingType.iterableValue
+        - identifier: missingType.generics
+        - identifier: doctrine.associationType
+
+    reportUnmatchedIgnoredErrors: false

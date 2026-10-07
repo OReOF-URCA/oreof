@@ -30,6 +30,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    services:
+      db:
+        image: mariadb:10.8
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
     steps:
       - uses: actions/checkout@v4
 
@@ -65,9 +78,14 @@ jobs:
         continue-on-error: true
         run: php bin/console lint:twig templates
 
-      - name: PHPStan (baseline, aucune NOUVELLE erreur)
+      # PHPStan charge le kernel (tests/object-manager.php) et l'extension Doctrine interroge la base :
+      # il faut le schéma (sans données) en env dev, comme en local.
+      - name: PHPStan
         run: |
-          APP_ENV=dev php bin/console cache:warmup
+          export APP_ENV=dev
+          php bin/console doctrine:database:create --if-not-exists
+          php bin/console doctrine:schema:create --no-interaction
+          php bin/console cache:warmup
           php -d memory_limit=-1 vendor/bin/phpstan analyse -c phpstan.dist.neon --no-progress
 
       - uses: actions/setup-node@v4

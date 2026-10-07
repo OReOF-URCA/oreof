@@ -1,7 +1,7 @@
 # Tests PHP — ORéOF v2
 
 Quand lire : écrire ou lancer des tests PHPUnit.
-À mettre à jour si : `tests/Support/`, `tests/Fixtures/`, `tests/Smoke/`, `src/DataFixtures/Test/`, `.env.test`, arborescence `tests/`, `phpunit.xml.dist`, scripts composer (`test`, `analyse`, `check`), `phpstan.dist.neon`, `phpstan-baseline.neon`, `config/packages/reprise.yaml`, cibles `test*` du `../Makefile`, `.github/workflows/`.
+À mettre à jour si : `tests/Support/`, `tests/Fixtures/`, `tests/Smoke/`, `src/DataFixtures/Test/`, `.env.test`, arborescence `tests/`, `phpunit.xml.dist`, scripts composer (`test`, `analyse`, `check`), `phpstan.dist.neon`, `config/packages/reprise.yaml`, cibles `test*` du `../Makefile`, `.github/workflows/`.
 
 ## Lancer
 
@@ -72,11 +72,9 @@ Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
 
 | Workflow | Quand | Contenu |
 |---|---|---|
-| `ci.yml` | PR vers `v2` + push sur `v2` | Job **Lint** : `composer audit`, lint YAML/conteneur (bloquants), lint Twig + ESLint (informatifs : dette existante), PHPStan (baseline). Job **Tests** : mapping Doctrine, schéma + fixtures, PHPUnit (Project + Smoke) sur MariaDB 10.8, build Vite |
+| `ci.yml` | PR vers `v2` + push sur `v2` | Job **Lint** : `composer audit`, lint YAML/conteneur (bloquants), lint Twig + ESLint (informatifs : dette existante), PHPStan (aucune erreur). Job **Tests** : mapping Doctrine, schéma + fixtures, PHPUnit (Project + Smoke) sur MariaDB 10.8, build Vite |
 
-- **Baseline PHPStan** : `phpstan-baseline.neon` (niveau 6, ~1940 erreurs historiques). La CI refuse toute NOUVELLE
-  erreur. Les erreurs corrigées mais encore listées sont tolérées (`reportUnmatchedIgnoredErrors: false`). Après avoir corrigé des erreurs : `php vendor/bin/phpstan analyse -c phpstan.dist.neon --generate-baseline=phpstan-baseline.neon`
-  (la baseline ne doit que rétrécir). `phpstan.neon` local est ignoré par git : la CI utilise `phpstan.dist.neon`.
+- **PHPStan** : `phpstan.dist.neon` (niveau 6, `src/`), 0 erreur, pas de baseline. Détails : `docs/ops/ci-cd.md`.
 - En local, la base de test est `<base>_test` (suffixe Doctrine) : créer le schéma une fois avec
   `APP_ENV=test php bin/console doctrine:schema:create` (droits `CREATE` requis sur cette base).
 - Reprise (`config/packages/reprise.yaml`, `when@test`) est en `strict_mode: false` : les tests n'exigent pas
