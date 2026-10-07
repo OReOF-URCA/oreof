@@ -1,0 +1,112 @@
+name: CI
+
+# Intégration continue : rapide (objectif < 8 min), exécutée sur chaque PR et chaque push
+# des branches d'intégration. Appelable par d'autres workflows (déploiement).
+on:
+  pull_request:
+    branches: [v2, v2-dev, v2-dev-pol]
+  push:
+    branches: [v2, v2-dev, v2-dev-pol]
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: PHP (lint, PHPStan, PHPUnit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      db:
+        image: mariadb:10.8
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    env:
+      APP_ENV: test
+      APP_SECRET: ci-secret-not-used-in-production
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/oreof?serverVersion=mariadb-10.8.0&charset=utf8mb4
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, iconv, zip, intl, pdo_mysql, ldap, mbstring, xml, gd, fileinfo, libxml
+          tools: composer:v2
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Composer validate + install
+        run: |
+          composer validate --no-check-publish
+          composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+      - name: Composer audit (failles connues)
+        run: composer audit --locked
+
+      - name: Lint YAML / conteneur
+        run: |
+          php bin/console lint:yaml config translations --parse-tags
+          php bin/console lint:container
+
+      # Dette existante (4 erreurs : badgeStep inconnu, balises vides) : informatif tant que non corrigé.
+      - name: Lint Twig (informatif)
+        continue-on-error: true
+        run: php bin/console lint:twig templates
+
+      - name: PHPStan (baseline, aucune NOUVELLE erreur)
+        run: |
+          APP_ENV=dev php bin/console cache:warmup
+          php -d memory_limit=-1 vendor/bin/phpstan analyse -c phpstan.dist.neon --no-progress
+
+      - name: Base de test
+        run: |
+          php bin/console doctrine:database:create --if-not-exists
+          php bin/console doctrine:schema:create --no-interaction
+
+      - name: PHPUnit
+        run: vendor/bin/phpunit
+
+  front:
+    name: Front (ESLint, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # 96 erreurs existantes (no-undef, no-unused-vars) : informatif tant que la dette n'est pas résorbée.
+      - name: ESLint (informatif)
+        continue-on-error: true
+        run: npm run lint
+
+      - name: Build Vite
+        run: npm run build

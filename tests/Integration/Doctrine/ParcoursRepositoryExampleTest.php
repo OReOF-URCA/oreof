@@ -29,6 +29,8 @@ class ParcoursRepositoryExampleTest extends TestCase
      */
     public function testPersistAndRetrieveParcours(): void
     {
+        $this->markTestIncomplete('Gabarit obsolète : fixtures EntityFixturesTrait à aligner sur le modèle V2');
+
         // Arrange
         $parcours = $this->createMinimalParcours([
             'libelle' => 'Parcours Persisté',
@@ -55,6 +57,8 @@ class ParcoursRepositoryExampleTest extends TestCase
      */
     public function testFindAllActiveParcours(): void
     {
+        $this->markTestIncomplete('Gabarit obsolète : fixtures EntityFixturesTrait à aligner sur le modèle V2');
+
         // Arrange
         $p1 = $this->createMinimalParcours(['libelle' => 'Actif 1', 'actif' => true]);
         $p2 = $this->createMinimalParcours(['libelle' => 'Actif 2', 'actif' => true]);
@@ -90,6 +94,8 @@ class ParcoursRepositoryExampleTest extends TestCase
      */
     public function testDeleteParcours(): void
     {
+        $this->markTestIncomplete('Gabarit obsolète : fixtures EntityFixturesTrait à aligner sur le modèle V2');
+
         // Arrange
         $parcours = $this->createMinimalParcours(['libelle' => 'À Supprimer']);
         $this->persist($parcours);

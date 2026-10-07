@@ -1,7 +1,7 @@
 # Tests PHP — ORéOF v2
 
 Quand lire : écrire ou lancer des tests PHPUnit.
-À mettre à jour si : `tests/Support/`, `tests/Fixtures/`, arborescence `tests/`, `phpunit.xml.dist`, cibles `test*` du `../Makefile`, CI.
+À mettre à jour si : `tests/Support/`, `tests/Fixtures/`, arborescence `tests/`, `phpunit.xml.dist`, `phpstan.dist.neon`, `phpstan-baseline.neon`, cibles `test*` du `../Makefile`, `.github/workflows/`.
 
 ## Lancer
 
@@ -50,4 +50,19 @@ Les fichiers `*ExampleTest.php` sont des **gabarits** (`markTestIncomplete('À i
 3. Fonctionnel : routes `/parcours`, exports PDF/Excel, authentification.
 
 Objectifs : global 70 % min / 80 % cible ; `Service` et `TypeDiplome` 70/85 ; `Entity` 60/80 ; `DTO` 80/95 ;
-`Controller` 40/60. Pas encore de CI de tests (`.github/workflows/` ne contient que `release-please.yml`).
+`Controller` 40/60. 
+## CI (GitHub Actions)
+
+| Workflow | Quand | Contenu |
+|---|---|---|
+| `ci.yml` | PR + push sur `v2`, `v2-dev`, `v2-dev-pol` | `composer audit`, lint YAML/conteneur (bloquants), lint Twig + ESLint (informatifs : dette existante), PHPStan (baseline), PHPUnit sur MariaDB 10.8, build Vite |
+| `release-check.yml` | manuel, lundi 02h UTC, appelable | PHPUnit PHP 8.4 + 8.5 avec couverture, mapping Doctrine, PHPStan niveau 7 (informatif), build prod `--no-dev`, `npm audit` |
+
+- **Baseline PHPStan** : `phpstan-baseline.neon` (niveau 6, ~1940 erreurs historiques). La CI refuse toute NOUVELLE
+  erreur. Après avoir corrigé des erreurs : `php vendor/bin/phpstan analyse -c phpstan.dist.neon --generate-baseline=phpstan-baseline.neon`
+  (la baseline ne doit que rétrécir). `phpstan.neon` local est ignoré par git : la CI utilise `phpstan.dist.neon`.
+- En local, la base de test est `<base>_test` (suffixe Doctrine) : créer le schéma une fois avec
+  `APP_ENV=test php bin/console doctrine:schema:create` (droits `CREATE` requis sur cette base).
+- Les formulaires n'ont pas de CSRF en env `test` (`framework.form.csrf_protection` dans `when@test`).
+- Le gabarit `ParcoursRepositoryExampleTest` et `ParcoursControllerExampleTest::testListParcoursPageIsSuccessful`
+  sont marqués incomplets (fixtures obsolètes / authentification manquante).
