@@ -72,7 +72,7 @@ Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
 
 | Workflow | Quand | Contenu |
 |---|---|---|
-| `ci.yml` | PR + push sur `v2`, `v2-dev`, `v2-dev-pol` | `composer audit`, lint YAML/conteneur (bloquants), lint Twig + ESLint (informatifs : dette existante), PHPStan (baseline), schéma + fixtures, PHPUnit (Project + Smoke) sur MariaDB 10.8, build Vite |
+| `ci.yml` | PR vers `v2` + push sur `v2` | `composer audit`, lint YAML/conteneur (bloquants), lint Twig + ESLint (informatifs : dette existante), PHPStan (baseline), schéma + fixtures, PHPUnit (Project + Smoke) sur MariaDB 10.8, build Vite |
 | `release-check.yml` | manuel, lundi 02h UTC, appelable | PHPUnit PHP 8.4 + 8.5 avec couverture, mapping Doctrine, PHPStan niveau 7 (informatif), build prod `--no-dev`, `npm audit` |
 
 - **Baseline PHPStan** : `phpstan-baseline.neon` (niveau 6, ~1940 erreurs historiques). La CI refuse toute NOUVELLE

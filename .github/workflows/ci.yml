@@ -1,12 +1,13 @@
 name: CI
 
-# Intégration continue : rapide (objectif < 8 min), exécutée sur chaque PR et chaque push
-# des branches d'intégration. Appelable par d'autres workflows (déploiement).
+# Intégration continue : rapide (objectif < 8 min), exécutée sur chaque PR vers v2 et chaque push
+# sur v2. Les autres branches (v2-dev, v2-dev-pol…) ne sont vérifiées qu'à leur fusion dans v2.
+# Appelable par d'autres workflows (déploiement).
 on:
   pull_request:
-    branches: [v2, v2-dev, v2-dev-pol]
+    branches: [v2]
   push:
-    branches: [v2, v2-dev, v2-dev-pol]
+    branches: [v2]
   workflow_call:
 
 concurrency:

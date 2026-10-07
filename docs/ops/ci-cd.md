@@ -12,7 +12,7 @@ Légende de statut : **En place** = fonctionne dans le dépôt. **Cible** = déc
 | Branche | Rôle |
 |---|---|
 | `v2` | Branche principale V2 : cible des PR, base des releases (tags `vX.Y.Z` posés par release-please) |
-| `v2-dev`, `v2-dev-pol` | Branches d'autres développeurs ; pas de branche de dev dédiée à ce stade. À conserver. Pas d'analyse préalable de leur contenu : les recoupements avec la CI se règlent à la fusion, la CI s'y applique |
+| `v2-dev`, `v2-dev-pol` | Branches d'autres développeurs ; pas de branche de dev dédiée à ce stade. À conserver. Pas d'analyse préalable de leur contenu et pas de CI sur ces branches : les vérifications s'appliquent à leur fusion dans `v2` (PR vers `v2`) |
 | `main` | Lignée V1, divergente (voir `docs/architecture/migration-v2.md`) ; hors périmètre de cette CI |
 | `feat/*`, `fix/*`, `ci/*` | Branches de travail, PR directement vers `v2` |
 
@@ -24,7 +24,7 @@ Légende de statut : **En place** = fonctionne dans le dépôt. **Cible** = déc
 
 | Fichier | Déclencheur | Contenu |
 |---|---|---|
-| `ci.yml` | PR et push sur `v2`, `v2-dev`, `v2-dev-pol` ; appelable | `composer validate` + `composer audit`, lint YAML et conteneur (bloquants), lint Twig et ESLint (informatifs), PHPStan avec baseline, schéma + fixtures de test, PHPUnit (suites Project et Smoke) sur MariaDB 10.8, build Vite |
+| `ci.yml` | PR vers `v2` et push sur `v2` ; appelable | `composer validate` + `composer audit`, lint YAML et conteneur (bloquants), lint Twig et ESLint (informatifs), PHPStan avec baseline, schéma + fixtures de test, PHPUnit (suites Project et Smoke) sur MariaDB 10.8, build Vite |
 | `release-check.yml` | manuel, lundi 02h UTC, appelable | Vérification profonde, **hors hotfix** : PHPUnit PHP 8.4 et 8.5 avec couverture, mapping Doctrine, PHPStan niveau 7 (informatif), build `--no-dev` + `cache:warmup` prod, `npm audit` (informatif) |
 | `release-please.yml` | push sur `v2` et `main` | PR de release, changelog, version dans `composer.json` |
 | `dependabot.yml` | hebdomadaire (actions : mensuel) | PR composer, npm, github-actions vers `v2` |
