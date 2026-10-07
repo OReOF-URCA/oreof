@@ -53,6 +53,7 @@ check requis). Version de MariaDB figée à **10.8** (celle de la stack ; ne pas
 | ESLint | 96 erreurs (`no-undef`, `no-unused-vars`) | résorber puis retirer `continue-on-error` dans `ci.yml` |
 | `npm audit` | `source-map-js` (high) | `npm audit fix`, puis retirer `continue-on-error` dans `release-check.yml` |
 | Couverture | aucun seuil | mesurer le premier run de `release-check.yml`, fixer un seuil qui ne fait que monter |
+| `composer.lock` périmé à chaque release | release-please écrit `version` dans `composer.json` sans mettre à jour le `content-hash` du lock : `composer validate` échoue après chaque release | rafraîchir avec `composer update --lock --no-install --no-scripts` (hash seul), ou automatiser dans `release-please.yml`, ou retirer `composer.json` des `extra-files` de `release-please-config.json` (la version affichée vient de `package.json`) |
 | Smoke test des routes | 65 routes GET en échec toléré (`tests/Smoke/known-failures.txt`) : templates manquants (`communs/form_theme.html.twig`, `fiche_matiere/index.html.twig`), variables Twig absentes, services externes (Gotenberg, ACS) | corriger les routes et vider la liste |
 | Tests | 20 incomplets, 1 ignoré (`ParcoursCopyDataTest` exige le parcours 405 de production) | écrire les tests prioritaires de `docs/testing/README.md` |
 
