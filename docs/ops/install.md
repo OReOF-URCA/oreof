@@ -50,7 +50,7 @@ composer dump-env prod   # optionnel
 php bin/console messenger:consume async_export async_email async_mccc_backup --time-limit=3600 --memory-limit=256M --env=prod
 ```
 
-Déploiement : tag de release → dépendances + build → secrets → migrations → cache → redémarrage PHP-FPM/serveur web et
+Déploiement cible (releases + bascule atomique, heures creuses) : `docs/ops/ci-cd.md`. Déploiement manuel actuel : tag de release → dépendances + build → secrets → migrations → cache → redémarrage PHP-FPM/serveur web et
 workers → contrôle de `var/log/` et de l'application.
 
 ## Dépannage

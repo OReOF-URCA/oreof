@@ -138,3 +138,6 @@ assets/icons
 /node_modules/
 /public/build/
 ###< symfony/reprise ###
+
+### PHPUnit cache ###
+/.phpunit.cache/

@@ -1,0 +1,176 @@
+name: CI
+
+# Un seul workflow, deux parties, même chemin pour toute fusion dans v2 (hotfix compris) :
+#   - Lint  : qualité statique (composer, YAML/conteneur, Twig, PHPStan, ESLint)
+#   - Tests : vérification (mapping Doctrine, PHPUnit Project + Smoke sur MariaDB, build Vite)
+# Les autres branches (v2-dev, v2-dev-pol…) ne sont vérifiées qu'à leur fusion dans v2.
+# Appelable par d'autres workflows (déploiement).
+on:
+  pull_request:
+    branches: [v2]
+  push:
+    branches: [v2]
+  workflow_call:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  APP_ENV: test
+  APP_SECRET: ci-secret-not-used-in-production
+  DATABASE_URL: mysql://root:root@127.0.0.1:3306/oreof?serverVersion=mariadb-10.8.0&charset=utf8mb4
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      db:
+        image: mariadb:10.8
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, iconv, zip, intl, pdo_mysql, ldap, mbstring, xml, gd, fileinfo, libxml
+          tools: composer:v2
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Composer validate + install
+        run: |
+          composer validate --no-check-publish
+          composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+      - name: Composer audit (failles connues)
+        run: composer audit --locked
+
+      - name: Lint YAML / conteneur
+        run: |
+          php bin/console lint:yaml config translations --parse-tags
+          php bin/console lint:container
+
+      # Dette existante (4 erreurs : badgeStep inconnu, balises vides) : informatif tant que non corrigé.
+      - name: Lint Twig (informatif)
+        continue-on-error: true
+        run: php bin/console lint:twig templates
+
+      # PHPStan charge le kernel (tests/object-manager.php) et l'extension Doctrine interroge la base :
+      # il faut le schéma (sans données) en env dev, comme en local.
+      # En env dev, .env ne définit pas ces variables (elles viennent de .env.local ou de docker-compose en local) :
+      # valeurs factices, uniquement pour que le conteneur se construise.
+      - name: PHPStan
+        env:
+          MAILER_DSN: null://null
+          APP_HOSTNAME: localhost
+          EXPORT_API_KEY: ci
+          CAS_CLIENT_SERVICE_NAME: https://localhost
+          CAS_CONTEXT: /cas
+          CAS_HOST: localhost
+          CAS_PORT: '443'
+          PARCOURS_COPY_DATABASE_URL: ${{ env.DATABASE_URL }}
+          WSDL_APOGEE_PRODUCTION: http://localhost/wsdl
+          WSDL_APOTEST: http://localhost/wsdl
+        run: |
+          export APP_ENV=dev
+          php bin/console doctrine:database:create --if-not-exists
+          php bin/console doctrine:schema:create --no-interaction
+          php bin/console cache:warmup
+          php -d memory_limit=-1 vendor/bin/phpstan analyse -c phpstan.dist.neon --no-progress
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # vendor/ doit exister avant npm ci (paquets Symfony UX en liens `file:vendor/...`).
+      - run: npm ci
+
+      # 96 erreurs existantes (no-undef, no-unused-vars) : informatif tant que la dette n'est pas résorbée.
+      - name: ESLint (informatif)
+        continue-on-error: true
+        run: npm run lint
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      db:
+        image: mariadb:10.8
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: ctype, iconv, zip, intl, pdo_mysql, ldap, mbstring, xml, gd, fileinfo, libxml
+          tools: composer:v2
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Composer install
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
+
+      - name: Mapping Doctrine valide
+        run: php bin/console doctrine:schema:validate --skip-sync
+
+      - name: Base de test (schéma + fixtures)
+        run: |
+          php bin/console doctrine:database:create --if-not-exists
+          php bin/console doctrine:schema:create --no-interaction
+          php bin/console doctrine:fixtures:load --group=test --no-interaction
+
+      # Suites Project + Smoke (smoke test de toutes les routes GET, tolérances : tests/Smoke/known-failures.txt)
+      - name: PHPUnit
+        run: vendor/bin/phpunit
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Build Vite
+        run: |
+          npm ci
+          npm run build

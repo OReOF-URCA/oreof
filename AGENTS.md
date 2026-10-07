@@ -46,6 +46,7 @@ Icons, Chart.js). Métier universitaire : offre de formation, maquettes, parcour
 | Écrire/lancer des tests | `docs/testing/README.md` |
 | Commande `app:*` | `docs/ops/command.md` |
 | Installation, déploiement | `docs/ops/install.md` |
+| CI/CD, workflows GitHub, release, hotfix | `docs/ops/ci-cd.md` |
 
 Index complet : `docs/README.md`.
 

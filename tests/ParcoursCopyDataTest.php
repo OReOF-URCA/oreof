@@ -27,6 +27,9 @@ class ParcoursCopyDataTest extends KernelTestCase
         
         // retrieve data
         $parcours = $this->entityManager->getRepository(Parcours::class)->findOneById(405);
+        if (null === $parcours) {
+            $this->markTestSkipped('Parcours 405 absent de la base de test (données de production requises).');
+        }
         $dtoBefore = $this->parcoursCopyData->getDTOForParcours($parcours);
         // perform copy
         $this->parcoursCopyData->copyDataForParcoursFromDTO($parcours);

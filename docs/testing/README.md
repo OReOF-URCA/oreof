@@ -1,7 +1,7 @@
 # Tests PHP — ORéOF v2
 
 Quand lire : écrire ou lancer des tests PHPUnit.
-À mettre à jour si : `tests/Support/`, `tests/Fixtures/`, arborescence `tests/`, `phpunit.xml.dist`, cibles `test*` du `../Makefile`, CI.
+À mettre à jour si : `tests/Support/`, `tests/Fixtures/`, `tests/Smoke/`, `src/DataFixtures/Test/`, `.env.test`, arborescence `tests/`, `phpunit.xml.dist`, scripts composer (`test`, `analyse`, `check`), `phpstan.dist.neon`, `config/packages/reprise.yaml`, cibles `test*` du `../Makefile`, `.github/workflows/`.
 
 ## Lancer
 
@@ -14,7 +14,10 @@ Docker requis ; le Makefile est dans `../` et cible v1 par défaut → toujours 
 | Ciblé | `make cli APP=v2` puis `php bin/phpunit tests/Unit/Service/XTest.php` |
 | Options utiles | `--testdox`, `--stop-on-failure`, `--filter testNom` |
 
-Suite unique « Project Test Suite » (`phpunit.xml.dist`) : `tests/` + `packages/workflow-operations-bundle/tests`.
+Deux suites (`phpunit.xml.dist`) : `Smoke` (`tests/Smoke`) et `Project` (`tests/` hors Smoke +
+`packages/workflow-operations-bundle/tests`). `vendor/bin/phpunit` lance les deux ; composer : `test`, `test:smoke`,
+`analyse`, `lint:container`, `check` (conteneur + PHPStan + tests). L'environnement de test lit `.env.test`
+(`APP_SECRET`, `MAILER_DSN=null://null`, `MESSENGER_TRANSPORT_DSN=sync://`) ; `DATABASE_URL` de l'environnement l'emporte.
 
 ## Organisation
 
@@ -24,9 +27,21 @@ Suite unique « Project Test Suite » (`phpunit.xml.dist`) : `tests/` + `package
 | `tests/Integration/` (`Doctrine`, `Workflow`) | persistance, relations, transitions | `App\Tests\Support\TestCase` + traits |
 | `tests/Functional/` (`Controller`, `Security`) | routes HTTP, droits, CSRF | `WebTestCase` |
 | `tests/Workflow/` | configuration et formulaires des workflows | `PHPUnit` ou `KernelTestCase` |
+| `tests/Smoke/` | `KernelBootTest` + `RouteSmokeTest` : appelle toutes les routes GET générables, échoue sur 404/5xx | `KernelTestCase` / `WebTestCase` |
 | `tests/*.php` | tests historiques (`ParcoursCopyDataTest`, `VolumeHoraireParcoursTest`) | — |
 
 Les fichiers `*ExampleTest.php` sont des **gabarits** (`markTestIncomplete('À impléter')`) : copier, renommer, adapter.
+
+## Smoke test des routes
+
+- Données : `src/DataFixtures/Test/FunctionalTestFixtures.php` (groupe `test`, utilisateur `admin-test`, campagne par
+  défaut). `tests/Support/RouteParameterResolver.php` déduit les paramètres de route depuis les fixtures.
+- Préparer la base : `APP_ENV=test php bin/console doctrine:schema:create` puis
+  `APP_ENV=test php bin/console doctrine:fixtures:load --group=test`. Certaines routes GET modifient les données :
+  **recharger les fixtures avant chaque exécution locale** (la CI repart d'une base vierge).
+- `tests/Smoke/known-failures.txt` : routes déjà en échec (bugs réels ou limites des données de test : templates
+  manquants, services externes, ids absents). Elles sont tolérées ; **toute autre route cassée fait échouer le test**.
+  La liste ne doit que rétrécir : retirer la ligne dès qu'une route est corrigée.
 
 ## Helpers (`tests/Support/`, `tests/Fixtures/`)
 
@@ -50,4 +65,20 @@ Les fichiers `*ExampleTest.php` sont des **gabarits** (`markTestIncomplete('À i
 3. Fonctionnel : routes `/parcours`, exports PDF/Excel, authentification.
 
 Objectifs : global 70 % min / 80 % cible ; `Service` et `TypeDiplome` 70/85 ; `Entity` 60/80 ; `DTO` 80/95 ;
-`Controller` 40/60. Pas encore de CI de tests (`.github/workflows/` ne contient que `release-please.yml`).
+`Controller` 40/60. 
+## CI (GitHub Actions)
+
+Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
+
+| Workflow | Quand | Contenu |
+|---|---|---|
+| `ci.yml` | PR vers `v2` + push sur `v2` | Job **Lint** : `composer audit`, lint YAML/conteneur (bloquants), lint Twig + ESLint (informatifs : dette existante), PHPStan (aucune erreur). Job **Tests** : mapping Doctrine, schéma + fixtures, PHPUnit (Project + Smoke) sur MariaDB 10.8, build Vite |
+
+- **PHPStan** : `phpstan.dist.neon` (niveau 6, `src/`), 0 erreur, pas de baseline. Détails : `docs/ops/ci-cd.md`.
+- En local, la base de test est `<base>_test` (suffixe Doctrine) : créer le schéma une fois avec
+  `APP_ENV=test php bin/console doctrine:schema:create` (droits `CREATE` requis sur cette base).
+- Reprise (`config/packages/reprise.yaml`, `when@test`) est en `strict_mode: false` : les tests n'exigent pas
+  `public/build/entrypoints.json` (la CI PHP ne construit pas les assets).
+- Les formulaires n'ont pas de CSRF en env `test` (`framework.form.csrf_protection` dans `when@test`).
+- Le gabarit `ParcoursRepositoryExampleTest` et `ParcoursControllerExampleTest::testListParcoursPageIsSuccessful`
+  sont marqués incomplets (fixtures obsolètes / authentification manquante).
