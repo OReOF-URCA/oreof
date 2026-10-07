@@ -1,6 +1,7 @@
-# Routes GET dont le smoke test échoue déjà (bugs ou limites des données de test).
-# RouteSmokeTest tolère ces routes et échoue sur toute AUTRE route cassée.
-# Cette liste ne doit que rétrécir : retirer une ligne dès que la route est corrigée.
+# Routes GET qui présentent encore une anomalie réelle ou une fixture/contexte de test insuffisant.
+# RouteSmokeTest tolère ces échecs mais échoue sur toute nouvelle régression.
+# Une route qui recommence à passer fait désormais échouer la CI afin d'obliger à nettoyer cette dette.
+# Les exclusions légitimes sont dans excluded-routes.txt ; cette liste-ci doit tendre vers zéro.
 api_site_web_v2_parcours_maquette_validee_cfvu
 app_administration_profils_change_droit
 app_administration_profils_liste
@@ -9,11 +10,8 @@ app_codification
 app_codification_liste_inter
 app_codification_parcours_export
 app_codification_wizard
-app_commentaire_export
-app_competence_export_bcc
 app_competence_export_croise
 app_composante_export
-app_conseils_documents_download
 app_element_constitutif_mccc_but
 app_element_constitutif_new
 app_element_constitutif_new_enfant
@@ -31,7 +29,6 @@ app_formation_synchronisation
 app_formation_synchronisation_acs
 app_formation_synchronisation_mccc
 app_formulaire_generique_new
-app_notification_lu
 app_parcours_ec
 app_parcours_ec_update
 app_parcours_export
@@ -50,7 +47,6 @@ app_type_diplome_new
 app_user_profil_add
 app_validation_demande_reouverture_cloture
 app_validation_demande_reouverture_cloture_mention
-datatable_export
 fiche_matiere_export_all
 fiche_matiere_valide_update
 parcours_ec_ajouter_ec_ue
@@ -65,4 +61,3 @@ parcours_v2_competences_reset
 parcours_v2_semestre
 parcours_v2_semestre_validation
 parcours_v2_voir
-ux_datatables_ajax_data
