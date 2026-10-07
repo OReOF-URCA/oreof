@@ -37,7 +37,7 @@
         "datatables.net-select-bs5": "^4.0.1",
         "datatables.net-select-dt": "^4.0.1",
         "eslint": "^10.3.0",
-        "eslint-plugin-cypress": "^6.4.0",
+        "eslint-plugin-cypress": "^7.0.2",
         "jszip": "^3.10.0",
         "lightningcss": "^1.32.0",
         "lucide": "^1.25.0",
