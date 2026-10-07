@@ -80,10 +80,11 @@ jobs:
         continue-on-error: true
         run: php -d memory_limit=-1 vendor/bin/phpstan analyse -c phpstan.dist.neon --no-progress --level=7 --error-format=raw | wc -l
 
-      - name: Base de test
+      - name: Base de test (schéma + fixtures)
         run: |
           php bin/console doctrine:database:create --if-not-exists
           php bin/console doctrine:schema:create --no-interaction
+          php bin/console doctrine:fixtures:load --group=test --no-interaction
 
       # TODO : ajouter un seuil de couverture (voir docs/testing/README.md : 70 % min) une fois la
       # valeur actuelle mesurée ici, puis ne le faire que monter.

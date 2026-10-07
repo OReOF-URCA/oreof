@@ -2,7 +2,7 @@
 
 Quand lire : modifier la CI, préparer ou déployer une release, traiter un hotfix, préparer le serveur.
 À mettre à jour si : `.github/workflows/`, `.github/dependabot.yml`, `phpstan.dist.neon`, `phpstan-baseline.neon`,
-`release-please-config.json`, `config/packages/framework.yaml` (`when@test`), tout futur dossier `deploy/`.
+`release-please-config.json`, `config/packages/framework.yaml` (`when@test`), `tests/Smoke/`, tout futur dossier `deploy/`.
 
 Légende de statut : **En place** = fonctionne dans le dépôt. **Cible** = décidé mais **non implémenté**.
 **Bloqué** = attend un accès serveur ou un droit GitHub.
@@ -24,12 +24,16 @@ Légende de statut : **En place** = fonctionne dans le dépôt. **Cible** = déc
 
 | Fichier | Déclencheur | Contenu |
 |---|---|---|
-| `ci.yml` | PR et push sur `v2`, `v2-dev`, `v2-dev-pol` ; appelable | `composer validate` + `composer audit`, lint YAML et conteneur (bloquants), lint Twig et ESLint (informatifs), PHPStan avec baseline, PHPUnit sur MariaDB 10.8, build Vite |
+| `ci.yml` | PR et push sur `v2`, `v2-dev`, `v2-dev-pol` ; appelable | `composer validate` + `composer audit`, lint YAML et conteneur (bloquants), lint Twig et ESLint (informatifs), PHPStan avec baseline, schéma + fixtures de test, PHPUnit (suites Project et Smoke) sur MariaDB 10.8, build Vite |
 | `release-check.yml` | manuel, lundi 02h UTC, appelable | Vérification profonde, **hors hotfix** : PHPUnit PHP 8.4 et 8.5 avec couverture, mapping Doctrine, PHPStan niveau 7 (informatif), build `--no-dev` + `cache:warmup` prod, `npm audit` (informatif) |
 | `release-please.yml` | push sur `v2` et `main` | PR de release, changelog, version dans `composer.json` |
 | `dependabot.yml` | hebdomadaire (actions : mensuel) | PR composer, npm, github-actions vers `v2` |
 
 Détails des tests et de la baseline : `docs/testing/README.md`.
+
+Origine : la branche `test/php-test-stack` (PR #184, smoke tests des routes, fixtures, `.env.test`, scripts composer) a
+été fusionnée dans `ci/cd`. Son workflow `php-tests.yml` est supprimé au profit de `ci.yml` (une seule CI, un seul
+check requis). Version de MariaDB figée à **10.8** (celle de la stack ; ne pas la changer sans validation du lead dev).
 
 ### Baseline PHPStan
 
@@ -46,6 +50,7 @@ Détails des tests et de la baseline : `docs/testing/README.md`.
 | ESLint | 96 erreurs (`no-undef`, `no-unused-vars`) | résorber puis retirer `continue-on-error` dans `ci.yml` |
 | `npm audit` | `source-map-js` (high) | `npm audit fix`, puis retirer `continue-on-error` dans `release-check.yml` |
 | Couverture | aucun seuil | mesurer le premier run de `release-check.yml`, fixer un seuil qui ne fait que monter |
+| Smoke test des routes | 65 routes GET en échec toléré (`tests/Smoke/known-failures.txt`) : templates manquants (`communs/form_theme.html.twig`, `fiche_matiere/index.html.twig`), variables Twig absentes, services externes (Gotenberg, ACS) | corriger les routes et vider la liste |
 | Tests | 20 incomplets, 1 ignoré (`ParcoursCopyDataTest` exige le parcours 405 de production) | écrire les tests prioritaires de `docs/testing/README.md` |
 
 ## Cible de déploiement (non implémenté)
@@ -105,7 +110,7 @@ verrouiller la table, à tester en pré-production sur une copie de la base.
 
 | # | Tâche | Statut |
 |---|---|---|
-| 1 | CI de base, baseline PHPStan, Dependabot | En place (branche `ci/cd`, PR à ouvrir vers `v2`) |
+| 1 | CI de base, baseline PHPStan, Dependabot, smoke tests des routes (fusion de la PR #184) | En place (branche `ci/cd`, PR à ouvrir vers `v2`, puis fermer la PR #184) |
 | 2 | Première exécution réelle sur GitHub, corrections éventuelles | À faire |
 | 3 | Protection de branche sur `v2` (CI verte obligatoire) | Bloqué : droits admin du dépôt |
 | 4 | Workflow `commitlint` sur les PR | À faire |

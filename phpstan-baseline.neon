@@ -11323,6 +11323,18 @@ parameters:
 			path: tests/ParcoursCopyDataTest.php
 
 		-
+			message: '#^Call to static method PHPUnit\\Framework\\Assert\:\:assertNotNull\(\) with Symfony\\Component\\DependencyInjection\\Container will always evaluate to true\.$#'
+			identifier: staticMethod.alreadyNarrowedType
+			count: 1
+			path: tests/Smoke/KernelBootTest.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Entity\\AnneeUniversitaire\|App\\Entity\\CampagneCollecte\|App\\Entity\\ChangeRf\|App\\Entity\\Composante\|App\\Entity\\DpeParcours\|App\\Entity\\ElementConstitutif\|App\\Entity\\FicheMatiere\|App\\Entity\\Formation\|App\\Entity\\NatureUeEc\|App\\Entity\\Parcours\|App\\Entity\\Profil\|App\\Entity\\Semestre\|App\\Entity\\SemestreParcours\|App\\Entity\\TypeDiplome\|App\\Entity\\TypeEc\|App\\Entity\\Ue\|App\\Entity\\User and ''getId'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: tests/Support/RouteParameterResolver.php
+
+		-
 			message: '#^Method App\\Tests\\Support\\TestCase\:\:createEntity\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

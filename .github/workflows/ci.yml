@@ -80,11 +80,13 @@ jobs:
           APP_ENV=dev php bin/console cache:warmup
           php -d memory_limit=-1 vendor/bin/phpstan analyse -c phpstan.dist.neon --no-progress
 
-      - name: Base de test
+      - name: Base de test (schéma + fixtures)
         run: |
           php bin/console doctrine:database:create --if-not-exists
           php bin/console doctrine:schema:create --no-interaction
+          php bin/console doctrine:fixtures:load --group=test --no-interaction
 
+      # Suites Project + Smoke (smoke test de toutes les routes GET, tolérances : tests/Smoke/known-failures.txt)
       - name: PHPUnit
         run: vendor/bin/phpunit
 
