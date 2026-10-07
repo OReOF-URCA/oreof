@@ -1809,13 +1809,13 @@ datatables.net-fixedcolumns@6.1.0:
   dependencies:
     datatables.net "^3.1"
 
-datatables.net-fixedheader-bs5@^5.0.0:
-  version "5.1.0"
-  resolved "https://registry.npmjs.org/datatables.net-fixedheader-bs5/-/datatables.net-fixedheader-bs5-5.1.0.tgz"
-  integrity sha512-7X1fAQmKW0q9LyAYMWq90c6ZY6gVcqBb/fK6xf1fr/J/BP3sl8o+mwaYYRfzV986wGdDUA+UWguwgi0brb+qnw==
+datatables.net-fixedheader-bs5@^5.1.2:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/datatables.net-fixedheader-bs5/-/datatables.net-fixedheader-bs5-5.1.2.tgz#1a3141a297ce8f83724da4fc6a0a44169fcc4c4f"
+  integrity sha512-qp3ZtrbbzqzHp9hopJK8OOcbiS13DMWNu0JHlNIxbRtSjHL6ynNNynh7VYGvITIOZ/VekZ6VdMzmHQ8zT93RWA==
   dependencies:
     datatables.net-bs5 "^3.1"
-    datatables.net-fixedheader "5.1.0"
+    datatables.net-fixedheader "5.1.2"
 
 datatables.net-fixedheader-dt@^5.0.0:
   version "5.1.0"
@@ -1829,6 +1829,13 @@ datatables.net-fixedheader@5.1.0:
   version "5.1.0"
   resolved "https://registry.npmjs.org/datatables.net-fixedheader/-/datatables.net-fixedheader-5.1.0.tgz"
   integrity sha512-8iN+gNAWJ1RT1MhzNe46wknN5Z7Z/SQgCIVAkuubj/R5TS/KVz2/IXHj6XVtVRkSqZZH/Bhabsfk6BMb2AnYNA==
+  dependencies:
+    datatables.net "^3.1"
+
+datatables.net-fixedheader@5.1.2:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/datatables.net-fixedheader/-/datatables.net-fixedheader-5.1.2.tgz#b0ff71c8360ca64bf96fdb786030bbffecb320d7"
+  integrity sha512-ggx73+MUAuVbm1OCCK1SjwUL1ShwNTZXnxyT/R0jMTf/3lrQSOFd/lzeB388qZtKdVElOOs2Y6tpFHtsGYKeag==
   dependencies:
     datatables.net "^3.1"
 
