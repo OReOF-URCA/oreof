@@ -12,7 +12,7 @@ Légende de statut : **En place** = fonctionne dans le dépôt. **Cible** = déc
 | Branche | Rôle |
 |---|---|
 | `v2` | Branche principale V2 : cible des PR, base des releases (tags `vX.Y.Z` posés par release-please) |
-| `v2-dev`, `v2-dev-pol` | Branches d'autres développeurs ; pas de branche de dev dédiée à ce stade. À conserver |
+| `v2-dev`, `v2-dev-pol` | Branches d'autres développeurs ; pas de branche de dev dédiée à ce stade. À conserver. Pas d'analyse préalable de leur contenu : les recoupements avec la CI se règlent à la fusion, la CI s'y applique |
 | `main` | Lignée V1, divergente (voir `docs/architecture/migration-v2.md`) ; hors périmètre de cette CI |
 | `feat/*`, `fix/*`, `ci/*` | Branches de travail, PR directement vers `v2` |
 
@@ -115,7 +115,7 @@ verrouiller la table, à tester en pré-production sur une copie de la base.
 | # | Tâche | Statut |
 |---|---|---|
 | 1 | CI de base, baseline PHPStan, Dependabot, smoke tests des routes (fusion de la PR #184) | En place (branche `ci/cd`, PR à ouvrir vers `v2`, puis fermer la PR #184) |
-| 2 | Première exécution réelle sur GitHub, corrections éventuelles | À faire |
+| 2 | Première exécution réelle sur GitHub, corrections éventuelles | Fait (PR #220 verte : Node 24, healthcheck MariaDB, composer avant npm, `composer.lock`, Reprise `strict_mode: false` en test) |
 | 3 | Protection de branche sur `v2` (CI verte obligatoire) | Bloqué : droits admin du dépôt |
 | 4 | Workflow `commitlint` sur les PR | À faire |
 | 5 | PAT ou GitHub App pour release-please (déclenche `release-check.yml` sur la PR de release) | Bloqué : droits admin |
