@@ -1,0 +1,508 @@
+{# Template PDF pour la fiche EC / Matière #}
+<style>
+    .pdf-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #1f2937;
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
+    .pdf-header-card {
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-left: 4px solid #0284c7;
+        border-radius: 4px;
+        padding: 10px 14px;
+        margin-bottom: 16px;
+    }
+
+    .pdf-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 3px 0;
+    }
+
+    .pdf-subtitle {
+        font-size: 12px;
+        font-style: italic;
+        color: #475569;
+        margin: 0 0 6px 0;
+    }
+
+    .pdf-meta-badges {
+        margin-top: 6px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .pdf-badge {
+        display: inline-block;
+        padding: 2px 7px;
+        font-size: 10px;
+        font-weight: 600;
+        border-radius: 3px;
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+
+    .pdf-badge-gray {
+        background-color: #f1f5f9;
+        color: #475569;
+        border-color: #cbd5e1;
+    }
+
+    .pdf-badge-warning {
+        background-color: #fef3c7;
+        color: #92400e;
+        border-color: #fde68a;
+    }
+
+    .pdf-section {
+        margin-bottom: 14px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .pdf-section-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #0369a1;
+        border-bottom: 1.5px solid #0284c7;
+        padding-bottom: 3px;
+        margin: 0 0 8px 0;
+    }
+
+    .pdf-grid-2 {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .pdf-col {
+        display: table-cell;
+        width: 50%;
+        vertical-align: top;
+        padding-right: 10px;
+    }
+
+    .pdf-col:last-child {
+        padding-right: 0;
+        padding-left: 10px;
+    }
+
+    .pdf-dl {
+        margin: 0;
+        padding: 0;
+    }
+
+    .pdf-dl dt {
+        font-weight: 600;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-top: 5px;
+        margin-bottom: 1px;
+    }
+
+    .pdf-dl dt:first-child {
+        margin-top: 0;
+    }
+
+    .pdf-dl dd {
+        margin-left: 0;
+        margin-bottom: 4px;
+        font-size: 11px;
+        color: #1e293b;
+    }
+
+    .pdf-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10.5px;
+        margin-top: 4px;
+    }
+
+    .pdf-table th, .pdf-table td {
+        border: 1px solid #cbd5e1;
+        padding: 5px 8px;
+        text-align: center;
+    }
+
+    .pdf-table th {
+        background-color: #f1f5f9;
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .pdf-table th.text-left, .pdf-table td.text-left {
+        text-align: left;
+    }
+
+    .pdf-table tr.total-row {
+        background-color: #f8fafc;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .pdf-content-box {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 6px;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .pdf-content-box p {
+        margin: 0 0 6px 0;
+    }
+
+    .pdf-content-box p:last-child {
+        margin-bottom: 0;
+    }
+
+    .pdf-list {
+        margin: 2px 0 4px 0;
+        padding-left: 18px;
+    }
+
+    .pdf-list li {
+        margin-bottom: 2px;
+    }
+
+    .pdf-bcc-item {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        padding: 6px 10px;
+        margin-bottom: 6px;
+    }
+
+    .pdf-bcc-title {
+        font-weight: 600;
+        font-size: 11px;
+        color: #0f172a;
+        margin-bottom: 3px;
+    }
+
+    .pdf-alert-info {
+        background-color: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-left: 3px solid #0284c7;
+        color: #0369a1;
+        padding: 6px 10px;
+        border-radius: 3px;
+        font-size: 10px;
+        margin-bottom: 8px;
+    }
+</style>
+
+<div class="pdf-container">
+    {# En-tête / Identité principale #}
+    <div class="pdf-header-card">
+        <h1 class="pdf-title">{{ ficheMatiere.libelle }}</h1>
+        {% if ficheMatiere.libelleAnglais %}
+            <p class="pdf-subtitle">{{ ficheMatiere.libelleAnglais }}</p>
+        {% endif %}
+        <div class="pdf-meta-badges">
+            {% if ficheMatiere.codeApogee %}
+                <span class="pdf-badge">Apogée : {{ ficheMatiere.codeApogee }}</span>
+            {% endif %}
+            {% if ficheMatiere.ects is defined and ficheMatiere.ects is not null %}
+                <span class="pdf-badge">{{ ficheMatiere.ects }} ECTS</span>
+            {% endif %}
+            {% if ficheMatiere.enseignementMutualise or (ficheMatiere.ficheMatiereParcours is defined and ficheMatiere.ficheMatiereParcours|length > 0) %}
+                <span class="pdf-badge pdf-badge-warning">Enseignement mutualisé</span>
+            {% endif %}
+            {% if ficheMatiere.horsDiplome %}
+                <span class="pdf-badge pdf-badge-gray">Fiche hors diplôme</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# 1. Informations générales & Rattachage #}
+    <div class="pdf-section">
+        <h2 class="pdf-section-title">1. Informations générales & Rapprochement</h2>
+        <div class="pdf-grid-2">
+            <div class="pdf-col">
+                <dl class="pdf-dl">
+                    <dt>Type de diplôme</dt>
+                    <dd>
+                        {% if ficheMatiere.horsDiplome == false %}
+                            {{ typeDiplome != null ? typeDiplome|typeDiplome : 'Non défini' }}
+                        {% else %}
+                            Hors diplôme
+                        {% endif %}
+                    </dd>
+
+                    <dt>Formation / Mention</dt>
+                    <dd>{{ formation != null ? formation.displayLong : 'Non rattaché' }}</dd>
+
+                    <dt>Parcours porteur</dt>
+                    <dd>
+                        {% if ficheMatiere.parcours != null %}
+                            {% if ficheMatiere.parcours.isParcoursDefaut %}
+                                Mention sans parcours
+                            {% else %}
+                                {{ ficheMatiere.parcours.libelle }}
+                            {% endif %}
+                        {% else %}
+                            Non précisé
+                        {% endif %}
+                    </dd>
+
+                    {% if formation != null and formation.composantePorteuse != null %}
+                        <dt>Composante porteuse</dt>
+                        <dd>{{ formation.composantePorteuse.libelle }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+
+            <div class="pdf-col">
+                <dl class="pdf-dl">
+                    <dt>Responsable de l'enseignement</dt>
+                    <dd>
+                        {% if ficheMatiere.responsableFicheMatiere != null %}
+                            <strong>{{ ficheMatiere.responsableFicheMatiere.display }}</strong>
+                            {% if ficheMatiere.responsableFicheMatiere.email %}
+                                <br><span style="color: #64748b; font-size: 10px;">{{ ficheMatiere.responsableFicheMatiere.email }}</span>
+                            {% endif %}
+                        {% elseif ficheMatiere.parcours != null %}
+                            {% if ficheMatiere.parcours.isParcoursDefaut and ficheMatiere.parcours.formation != null and ficheMatiere.parcours.formation.responsableMention != null %}
+                                <strong>{{ ficheMatiere.parcours.formation.responsableMention.display }}</strong> (mention)
+                                {% if ficheMatiere.parcours.formation.responsableMention.email %}
+                                    <br><span style="color: #64748b; font-size: 10px;">{{ ficheMatiere.parcours.formation.responsableMention.email }}</span>
+                                {% endif %}
+                            {% elseif ficheMatiere.parcours.respParcours != null %}
+                                <strong>{{ ficheMatiere.parcours.respParcours.display }}</strong> (parcours)
+                                {% if ficheMatiere.parcours.respParcours.email %}
+                                    <br><span style="color: #64748b; font-size: 10px;">{{ ficheMatiere.parcours.respParcours.email }}</span>
+                                {% endif %}
+                            {% else %}
+                                Non renseigné
+                            {% endif %}
+                        {% else %}
+                            Non renseigné
+                        {% endif %}
+                    </dd>
+
+                    <dt>Langue(s) d'enseignement</dt>
+                    <dd>
+                        {% if ficheMatiere.langueDispense|length > 0 %}
+                            {{ ficheMatiere.langueDispense|map(l => l.libelle)|join(', ') }}
+                        {% else %}
+                            Français
+                        {% endif %}
+                    </dd>
+
+                    <dt>Langue(s) des supports de cours</dt>
+                    <dd>
+                        {% if ficheMatiere.langueSupport|length > 0 %}
+                            {{ ficheMatiere.langueSupport|map(l => l.libelle)|join(', ') }}
+                        {% else %}
+                            Français
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    {# 2. Présentation & Objectifs #}
+    {% if ficheMatiere.description or ficheMatiere.objectifs or (ficheMatiere.prerequis is defined and ficheMatiere.prerequis) %}
+        <div class="pdf-section">
+            <h2 class="pdf-section-title">2. Objectifs & Contenu pédagogique</h2>
+            
+            {% if ficheMatiere.description %}
+                <dl class="pdf-dl">
+                    <dt>Description de l'enseignement</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ ficheMatiere.description|raw }}
+                </div>
+            {% endif %}
+
+            {% if ficheMatiere.objectifs %}
+                <dl class="pdf-dl" style="margin-top: 8px;">
+                    <dt>Objectifs de l'enseignement</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ ficheMatiere.objectifs|raw }}
+                </div>
+            {% endif %}
+
+            {% if ficheMatiere.prerequis is defined and ficheMatiere.prerequis %}
+                <dl class="pdf-dl" style="margin-top: 8px;">
+                    <dt>Pré-requis recommandés</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ ficheMatiere.prerequis|raw }}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {# 3. Volumes horaires #}
+    <div class="pdf-section">
+        <h2 class="pdf-section-title">3. Volumes horaires</h2>
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th class="text-left" style="width: 25%;">Modalité</th>
+                    <th style="width: 15%;">CM</th>
+                    <th style="width: 15%;">TD</th>
+                    <th style="width: 15%;">TP</th>
+                    <th style="width: 15%;">Autonomie (TE)</th>
+                    <th style="width: 15%;">Total encadré</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="text-left"><strong>Présentiel</strong></td>
+                    <td>{{ ficheMatiere.volumeCmPresentiel }} h</td>
+                    <td>{{ ficheMatiere.volumeTdPresentiel }} h</td>
+                    <td>{{ ficheMatiere.volumeTpPresentiel }} h</td>
+                    <td rowspan="2" style="vertical-align: middle; background-color: #f8fafc;">
+                        <strong>{{ ficheMatiere.volumeTe }} h</strong>
+                    </td>
+                    <td><strong>{{ ficheMatiere.volumeCmPresentiel + ficheMatiere.volumeTdPresentiel + ficheMatiere.volumeTpPresentiel }} h</strong></td>
+                </tr>
+                <tr>
+                    <td class="text-left"><strong>Distanciel</strong></td>
+                    <td>{{ ficheMatiere.volumeCmDistanciel }} h</td>
+                    <td>{{ ficheMatiere.volumeTdDistanciel }} h</td>
+                    <td>{{ ficheMatiere.volumeTpDistanciel }} h</td>
+                    <td><strong>{{ ficheMatiere.volumeCmDistanciel + ficheMatiere.volumeTdDistanciel + ficheMatiere.volumeTpDistanciel }} h</strong></td>
+                </tr>
+                <tr class="total-row">
+                    <td class="text-left"><strong>Total général</strong></td>
+                    <td><strong>{{ ficheMatiere.volumeCmPresentiel + ficheMatiere.volumeCmDistanciel }} h</strong></td>
+                    <td><strong>{{ ficheMatiere.volumeTdPresentiel + ficheMatiere.volumeTdDistanciel }} h</strong></td>
+                    <td><strong>{{ ficheMatiere.volumeTpPresentiel + ficheMatiere.volumeTpDistanciel }} h</strong></td>
+                    <td><strong>{{ ficheMatiere.volumeTe }} h</strong></td>
+                    <td>
+                        <strong style="color: #0284c7;">
+                            {{ ficheMatiere.volumeCmPresentiel + ficheMatiere.volumeCmDistanciel + ficheMatiere.volumeTdPresentiel + ficheMatiere.volumeTdDistanciel + ficheMatiere.volumeTpPresentiel + ficheMatiere.volumeTpDistanciel }} h
+                        </strong>
+                        {% if ficheMatiere.volumeTe > 0 %}
+                            <br><span style="font-size: 9px; font-weight: normal; color: #64748b;">(+ {{ ficheMatiere.volumeTe }}h TE)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    {# 4. Modalités de contrôle des connaissances (MCCC) #}
+    <div class="pdf-section">
+        <h2 class="pdf-section-title">4. Modalités de contrôle des connaissances (MCCC)</h2>
+        <div class="pdf-grid-2">
+            <div class="pdf-col">
+                <dl class="pdf-dl">
+                    <dt>Crédits ECTS</dt>
+                    <dd><strong>{{ ficheMatiere.ects ?? 0 }} ECTS</strong></dd>
+                </dl>
+            </div>
+            <div class="pdf-col">
+                <dl class="pdf-dl">
+                    <dt>Régime d'évaluation</dt>
+                    <dd>
+                        {% if typeMccc == 'cci' %}
+                            <strong>Contrôle Continu Intégral (CCi)</strong>
+                        {% elseif typeMccc == 'cc' %}
+                            <strong>Contrôle Continu (CC)</strong>
+                        {% elseif typeMccc == 'ct' %}
+                            <strong>Contrôle Terminal (CT)</strong>
+                        {% elseif typeMccc == 'cc_ct' %}
+                            <strong>Mixte : Contrôle Continu & Contrôle Terminal</strong>
+                        {% else %}
+                            {{ typeMccc|default('Non précisé')|upper }}
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        {% if ficheMatiere.quitus ?? false %}
+            <div class="pdf-alert-info">
+                <strong>Cet enseignement donne lieu à un quitus.</strong>
+                {% if ficheMatiere.quitusText %}
+                    <br>{{ ficheMatiere.quitusText }}
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if mcccs is defined and mcccs|length > 0 %}
+            {% if templateForm is defined and templateForm matches '/^licence/' %}
+                {{ include('typeDiplome/licence/mccc-non-editable/_show.html.twig', {
+                    mcccs: mcccs,
+                    hasDisplayComparaison: false,
+                    isFromVersioning: 'false'
+                }) }}
+            {% elseif templateForm is defined and templateForm matches '/^but/' %}
+                {{ include('typeDiplome/but/mccc-non-editable/but.html.twig', {
+                    mcccs: mcccs
+                }) }}
+            {% else %}
+                {{ include('typeDiplome/licence/mccc-non-editable/licence.html.twig', {
+                    mcccs: mcccs,
+                    typeMccc: typeMccc,
+                    isFromVersioning: 'false'
+                }) }}
+            {% endif %}
+        {% endif %}
+    </div>
+
+    {# 5. Compétences & BCC #}
+    {% if bccs is defined and bccs|length > 0 %}
+        <div class="pdf-section">
+            <h2 class="pdf-section-title">5. Compétences & Blocs associés</h2>
+            {% for bloc in bccs %}
+                <div class="pdf-bcc-item">
+                    <div class="pdf-bcc-title">{{ bloc.bcc.display }}</div>
+                    {% if bloc.competences|length > 0 %}
+                        <ul class="pdf-list">
+                            {% for comp in bloc.competences %}
+                                <li>{{ comp.display }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <span style="color: #64748b; font-style: italic; font-size: 10px;">Aucune compétence spécifique rattachée.</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# 6. Mutualisation & Parcours associés #}
+    {% if ficheMatiere.enseignementMutualise or (ficheMatiere.ficheMatiereParcours is defined and ficheMatiere.ficheMatiereParcours|length > 0) %}
+        <div class="pdf-section">
+            <h2 class="pdf-section-title">6. Formations & Parcours partageant l'enseignement</h2>
+            <ul class="pdf-list">
+                {% for fmp in ficheMatiere.ficheMatiereParcours %}
+                    {% if fmp.parcours != null and fmp.parcours.formation != null %}
+                        <li>
+                            <strong>{{ fmp.parcours.formation.displayLong }}</strong>
+                            {% if fmp.parcours.isParcoursDefaut %}
+                                (Mention sans parcours)
+                            {% else %}
+                                — Parcours : {{ fmp.parcours.libelle }}
+                            {% endif %}
+                            {% if fmp.parcours.formation.composantePorteuse != null %}
+                                <span style="color: #64748b;">({{ fmp.parcours.formation.composantePorteuse.libelle }})</span>
+                            {% endif %}
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li style="color: #64748b; font-style: italic;">Enseignement mutualisé (aucun parcours rattaché pour l'instant).</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</div>
