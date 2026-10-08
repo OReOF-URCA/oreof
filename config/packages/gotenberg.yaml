@@ -8,6 +8,7 @@ framework:
 
 sensiolabs_gotenberg:
     http_client: 'gotenberg.client'
+    version: '8.2'
 #    default_options:
 #        pdf:
 #            html:
