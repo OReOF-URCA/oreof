@@ -14,6 +14,7 @@ use App\Classes\GetDpeParcours;
 use App\Classes\GetHistorique;
 use App\Entity\CampagneCollecte;
 use App\Enums\RegimeInscriptionEnum;
+use App\Enums\TypeParcoursEnum;
 use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
@@ -66,6 +67,8 @@ class ExportRegime implements ExportInterface
             $this->excelWriter->writeCellXY(20 + $i, 1, $regime->value);
             $i++;
         }
+        $this->excelWriter->writeCellXY(24, 1, 'Identifiant');
+        $this->excelWriter->writeCellXY(25, 1, 'Type du Parcours');
 
         $ligne = 2;
         foreach ($formations as $formation) {
@@ -107,6 +110,10 @@ class ExportRegime implements ExportInterface
                         ]);
                     }
                     $i++;
+                }
+                $this->excelWriter->writeCellXY(24, $ligne, $parcours->getId());
+                if($parcours->getTypeParcours() !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+                    $this->excelWriter->writeCellXY(25, $ligne, $parcours->getTypeParcours()->libelle());
                 }
 
                 $this->excelWriter->getColumnsAutoSize('A', 'Z');
