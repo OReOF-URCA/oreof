@@ -7,7 +7,7 @@
                    id="filtre_crud"
                    class="form-control" placeholder="Saisir les premières lettres..."
                    aria-label="Rechercher"
-                    {{ stimulus_action('crud', 'rechercher', 'keydown.enter') }}
+                    {{ stimulus_action('crud', 'rechercher', 'input') }}
                    aria-describedby="filtre_label">
             <button class="btn btn-outline-secondary" type="button" id="button-addon2"
                     {{ stimulus_action('crud', 'effaceFiltre', 'click') }}
