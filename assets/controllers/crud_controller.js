@@ -8,7 +8,6 @@
 
 import { Controller } from '@hotwired/stimulus'
 import { Modal } from 'bootstrap'
-import { useDebounce } from 'stimulus-use'
 import callOut from '../js/callOut'
 import updateUrl from '../js/updateUrl'
 
@@ -21,15 +20,11 @@ export default class extends Controller {
     storageKey: { type: String, default: 'crud_state' }, // Clé pour localStorage
   }
 
-  static debounces = ['rechercher']
-
   fields = {}
 
   scrollPosition = 0
 
   connect() {
-    useDebounce(this, { wait: 500 })
-
     // Restaurer l'état depuis localStorage si disponible
     const savedState = this.getSavedState()
     if (savedState) {

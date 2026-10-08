@@ -49,8 +49,8 @@
                         type="text"
                         class="w-full rounded-lg border border-secondary-300 bg-white py-2 pl-9 pr-3 text-sm text-secondary-700 shadow-sm outline-none transition placeholder:text-secondary-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder:text-secondary-400"
                         placeholder="Rechercher..."
-                        data-model="debounce(100)|globalSearch"
-                        data-action="live#update"
+                        data-model="norender|globalSearch"
+                        data-action="live#update keydown.enter->live#$render"
                 >
             </div>
 
