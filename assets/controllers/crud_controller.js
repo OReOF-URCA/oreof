@@ -183,7 +183,14 @@ export default class extends Controller {
     const requestId = (this.requestId = (this.requestId ?? 0) + 1)
 
     if (oldPanel) {
-      this._panelSiblings(oldPanel).forEach((el) => el.classList.add('opacity-50', 'pointer-events-none', 'transition-opacity'))
+      // Loader sous le panneau à la place du tableau
+      let next = oldPanel.nextSibling
+      while (next) {
+        const following = next.nextSibling
+        next.remove()
+        next = following
+      }
+      oldPanel.insertAdjacentHTML('afterend', window.da.loaderStimulus)
     } else {
       this.listeTarget.innerHTML = window.da.loaderStimulus
     }
@@ -217,10 +224,6 @@ export default class extends Controller {
     }
 
     window.scrollTo(0, this.scrollPosition)
-  }
-
-  _panelSiblings(panel) {
-    return [...panel.parentElement.children].filter((el) => el !== panel)
   }
 
   // Remplace tout le contenu autour du panneau existant (résumé, tableau...) sans toucher au panneau
