@@ -1,7 +1,155 @@
 <turbo-frame id="tab-content">
-    {{ include('fiche_matiere_v2/tabs/_header.html.twig', {tabKey: 'localisation'}) }}
+    {{ include('fiche_matiere_v2/tabs/_header.html.twig', {tabKey: 'volumes_horaires'}) }}
 
     <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar">
+        {% if isHd %}
+            {% form_theme form 'communs/form_theme_v2.html.twig' %}
+            {{ form_start(form, {
+                attr: {
+                    id: 'tab_form_volumes_horaires',
+                    'data-controller': 'autosave',
+                    'data-autosave-url-value': path('fiche_matiere_v2_tab_autosave', { id: fiche_matiere.id, tabKey: 'volumes_horaires' }),
+                    'data-action': 'change->autosave#queue'
+                }
+            }) }}
 
+            <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 p-5 shadow-sm space-y-5">
+                <div>
+                    <h3 class="text-base font-bold text-secondary-800 dark:text-secondary-100 mb-2">Répartition des heures</h3>
+                    <div class="flex items-center gap-2 mb-4">
+                        <input type="checkbox"
+                               id="volumesHorairesImpose"
+                               name="volumesHorairesImpose"
+                               {% if fiche_matiere.volumesHorairesImpose == true %}checked{% endif %}
+                               class="rounded border-secondary-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                        >
+                        <label for="volumesHorairesImpose" class="text-sm font-medium text-secondary-700 dark:text-secondary-200">
+                            {{ 'mccc.but.labels.volumesHorairesImpose'|trans({}, 'form') }}
+                            <i class="fal fa-question-circle ms-1 text-secondary-400"
+                               data-controller="tooltip"
+                               data-tooltip-placement-value="bottom"
+                               title="{{ 'mccc.but.helps.volumesHorairesImpose'|trans({}, 'help') }}"></i>
+                        </label>
+                    </div>
+
+                    <h4 class="text-xs font-bold text-secondary-500 uppercase tracking-wider mb-3">Enseignement présentiel</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>{{ form_row(form.volumeCmPresentiel) }}</div>
+                        <div>{{ form_row(form.volumeTdPresentiel) }}</div>
+                        <div>{{ form_row(form.volumeTpPresentiel) }}</div>
+                    </div>
+
+                    <h4 class="text-xs font-bold text-secondary-500 uppercase tracking-wider mb-3">Enseignement distanciel</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>{{ form_row(form.volumeCmDistanciel) }}</div>
+                        <div>{{ form_row(form.volumeTdDistanciel) }}</div>
+                        <div>{{ form_row(form.volumeTpDistanciel) }}</div>
+                    </div>
+
+                    <h4 class="text-xs font-bold text-secondary-500 uppercase tracking-wider mb-3">Travail en autonomie</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>{{ form_row(form.volumeTe) }}</div>
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-secondary-100 dark:border-secondary-700">
+                    <h3 class="text-base font-bold text-secondary-800 dark:text-secondary-100 mb-2">Crédits ECTS</h3>
+                    <div class="flex items-center gap-2 mb-4">
+                        <input type="checkbox"
+                               id="ectsImpose"
+                               name="ectsImpose"
+                               {% if fiche_matiere.ectsImpose == true %}checked{% endif %}
+                               class="rounded border-secondary-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                        >
+                        <label for="ectsImpose" class="text-sm font-medium text-secondary-700 dark:text-secondary-200">
+                            {{ 'mccc.but.labels.ectsImpose'|trans({}, 'form') }}
+                            <i class="fal fa-question-circle ms-1 text-secondary-400"
+                               data-controller="tooltip"
+                               data-tooltip-placement-value="bottom"
+                               title="{{ 'mccc.but.helps.ectsImpose'|trans({}, 'help') }}"></i>
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>{{ form_row(form.ects) }}</div>
+                    </div>
+                </div>
+            </div>
+
+            {{ form_end(form) }}
+
+        {% elseif isBut %}
+            {% form_theme form 'communs/form_theme_v2.html.twig' %}
+            {{ form_start(form, {
+                attr: {
+                    id: 'tab_form_volumes_horaires',
+                    'data-controller': 'autosave',
+                    'data-autosave-url-value': path('fiche_matiere_v2_tab_autosave', { id: fiche_matiere.id, tabKey: 'volumes_horaires' }),
+                    'data-action': 'change->autosave#queue'
+                }
+            }) }}
+
+            <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 p-5 shadow-sm space-y-4">
+                <h3 class="text-base font-bold text-secondary-800 dark:text-secondary-100 mb-2">Répartition des heures</h3>
+
+                <div class="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox"
+                               id="sansHeures"
+                               name="sansHeures"
+                               {% if fiche_matiere.sansHeures == true %}checked{% endif %}
+                               class="rounded border-secondary-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                        >
+                        <span class="text-sm font-medium text-secondary-700 dark:text-secondary-200">
+                            {{ 'mccc.but.labels.sansHeures'|trans({}, 'form') }}
+                            <i class="fal fa-question-circle ms-1 text-secondary-400"
+                               data-controller="tooltip"
+                               data-tooltip-placement-value="bottom"
+                               title="{{ 'mccc.but.helps.sansHeures'|trans({}, 'help') }}"></i>
+                        </span>
+                    </label>
+
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox"
+                               id="volumesHorairesImpose"
+                               name="volumesHorairesImpose"
+                               {% if fiche_matiere.volumesHorairesImpose == true %}checked{% endif %}
+                               class="rounded border-secondary-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                        >
+                        <span class="text-sm font-medium text-secondary-700 dark:text-secondary-200">
+                            {{ 'mccc.but.labels.volumesHorairesImpose'|trans({}, 'form') }}
+                            <i class="fal fa-question-circle ms-1 text-secondary-400"
+                               data-controller="tooltip"
+                               data-tooltip-placement-value="bottom"
+                               title="{{ 'mccc.but.helps.volumesHorairesImpose'|trans({}, 'help') }}"></i>
+                        </span>
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>{{ form_row(form.volumeCmPresentiel) }}</div>
+                    <div>{{ form_row(form.volumeTdPresentiel) }}</div>
+                    <div>{{ form_row(form.volumeTpPresentiel) }}</div>
+                </div>
+
+                {% if fiche_matiere.typeMatiere == 'sae' and form.volumeTe is defined %}
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                        <div>{{ form_row(form.volumeTe) }}</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {{ form_end(form) }}
+
+        {% else %}
+            <div class="space-y-4">
+                <twig:alerte type="info">Les volumes horaires indiqués sur cette fiche matière sont fournis à titre indicatif. Par défaut, ils s'appliquent à tous les EC qui utilisent cette fiche matière.<br><br>Les données peuvent être modifiées à partir de l'onglet <strong>structure de la maquette</strong> du parcours <strong> {{ ecProprietaire != null and ecProprietaire.parcours != null ? ecProprietaire.parcours.display : '-' }} | {{ ecProprietaire != null and ecProprietaire.parcours != null and ecProprietaire.parcours.formation != null ? ecProprietaire.parcours.formation.displayLong : '-' }} </strong> (EC <strong>{{ ecProprietaire != null ? ecProprietaire.display : '-' }} {% if ecProprietaire != null and ecProprietaire.ue != null %}({{ ecProprietaire.ue.display }}){% endif %}</strong>).<br><br>
+<strong>Attention</strong> : En cas de mutualisation de la fiche matière, toute modification de la part du parcours porteur aura un impact sur l'ensemble des EC qui utilisent cette fiche. Toutefois, chaque parcours utilisateur peut y apporter des adaptations spécifiques propres à sa formation via son propre onglet Structure de la maquette."</twig:alerte>
+
+                <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 p-5 shadow-sm">
+                    <h3 class="text-base font-bold text-secondary-800 dark:text-secondary-100 mb-4">Volumes horaires</h3>
+                    {{ include('typeDiplome/licence/ec/_structure.html.twig') }}
+                </div>
+            </div>
+        {% endif %}
     </div>
 </turbo-frame>

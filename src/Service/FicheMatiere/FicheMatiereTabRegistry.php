@@ -17,7 +17,7 @@ use App\Form\FicheMatiereStep4Type;
 
 final class FicheMatiereTabRegistry
 {
-    public const TABS = ['identite', 'presentation', 'volumes_horaires', 'mccc', 'mutualisation'];
+    public const TABS = ['identite', 'mutualisation', 'presentation', 'competences', 'volumes_horaires', 'mccc'];
 
     public static function assertTab(string $tabKey): void
     {
@@ -30,10 +30,11 @@ final class FicheMatiereTabRegistry
     {
         return match ($tabKey) {
             'identite' => FicheMatiereStep1Type::class,
+            'mutualisation' => FicheMatiereStep1bType::class,
             'presentation' => FicheMatiereStep2Type::class,
+            'competences' => FicheMatiereStep3Type::class,
             'volumes_horaires' => FicheMatiereStep4Type::class,
             'mccc' => FicheMatiereStep3Type::class,
-            'mutualisation' => FicheMatiereStep1bType::class,
             default => throw new \InvalidArgumentException('Unknown tab: ' . $tabKey),
         };
     }

@@ -1,0 +1,106 @@
+<turbo-frame id="tab-content">
+    {{ include('fiche_matiere_v2/tabs/_header.html.twig', {tabKey: 'competences'}) }}
+
+    <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar">
+        {% if isBut == false %}
+            <div class="mb-4">
+                <twig:alerte type="info" message="Les compétences ci-dessous sont celles du parcours porteur de la fiche EC/matière." />
+            </div>
+        {% endif %}
+
+        {% form_theme form 'communs/form_theme_v2.html.twig' %}
+        {{ form_start(form, {
+            attr: {
+                id: 'tab_form_competences',
+                'data-controller': 'autosave',
+                'data-autosave-url-value': path('fiche_matiere_v2_tab_autosave', { id: fiche_matiere.id, tabKey: 'competences' }),
+                'data-action': 'change->autosave#queue'
+            }
+        }) }}
+
+        <div class="space-y-4">
+            {% if isBut %}
+                {% for bcc in bccs %}
+                    <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 p-5 shadow-sm">
+                        <div class="flex items-center justify-between pb-3 border-b border-secondary-100 dark:border-secondary-700">
+                            <div class="font-bold text-base text-secondary-800 dark:text-secondary-100 flex items-center gap-2">
+                                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary-50 text-primary-600 font-bold text-xs">
+                                    {{ bcc.numero ?? loop.index }}
+                                </span>
+                                {{ bcc.display }}
+                            </div>
+                        </div>
+                        <div class="mt-4 space-y-4">
+                            {% for niveau in bcc.butNiveaux %}
+                                <div class="space-y-2">
+                                    {% if bcc.butNiveaux|length > 1 %}
+                                        <h4 class="text-xs font-bold text-secondary-500 uppercase tracking-wider">
+                                            B.U.T. {{ niveau.ordre }} · {{ niveau.libelle }}
+                                        </h4>
+                                    {% endif %}
+                                    <div class="grid grid-cols-1 gap-2">
+                                        {% for ac in niveau.butApprentissageCritiques %}
+                                            <label class="flex items-start gap-3 p-3 rounded-lg border border-secondary-100 dark:border-secondary-700 hover:bg-secondary-50 dark:hover:bg-secondary-700/50 cursor-pointer transition">
+                                                <input type="checkbox"
+                                                       name="fiche_matiere_step3[competences][]"
+                                                       value="{{ ac.id }}"
+                                                       id="ac_{{ ac.id }}"
+                                                       {% if ecComps[ac.id] is defined %}checked{% endif %}
+                                                       class="mt-1 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                                                >
+                                                <span class="text-sm text-secondary-700 dark:text-secondary-200 leading-snug">
+                                                    <strong class="text-primary-700 dark:text-primary-400 font-semibold">{{ ac.code }}</strong> - {{ ac.libelle }}
+                                                </span>
+                                            </label>
+                                        {% else %}
+                                            <p class="text-xs text-secondary-400 italic">Aucun apprentissage critique pour ce niveau.</p>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <p class="text-xs text-secondary-400 italic">Aucun niveau défini pour cette compétence.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <twig:alerte type="warning" message="fiche_matiere.alerte.no_bcc" />
+                {% endfor %}
+            {% else %}
+                {% for bcc in bccs %}
+                    <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 p-5 shadow-sm">
+                        <div class="flex items-center justify-between pb-3 border-b border-secondary-100 dark:border-secondary-700">
+                            <div class="font-bold text-base text-secondary-800 dark:text-secondary-100 flex items-center gap-2">
+                                <span class="inline-flex items-center justify-center px-2 py-0.5 rounded bg-primary-50 text-primary-600 font-bold text-xs">
+                                    {{ bcc.code ?? ('BCC ' ~ loop.index) }}
+                                </span>
+                                {{ bcc.display }}
+                            </div>
+                        </div>
+                        <div class="mt-4 grid grid-cols-1 gap-2">
+                            {% for comp in bcc.competences %}
+                                <label class="flex items-start gap-3 p-3 rounded-lg border border-secondary-100 dark:border-secondary-700 hover:bg-secondary-50 dark:hover:bg-secondary-700/50 cursor-pointer transition">
+                                    <input type="checkbox"
+                                           name="fiche_matiere_step3[competences][]"
+                                           value="{{ comp.id }}"
+                                           id="competence_{{ comp.id }}"
+                                           {% if ecComps[comp.id] is defined %}checked{% endif %}
+                                           class="mt-1 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 h-4 w-4"
+                                    >
+                                    <span class="text-sm text-secondary-700 dark:text-secondary-200 leading-snug">
+                                        {{ comp.display }}
+                                    </span>
+                                </label>
+                            {% else %}
+                                <p class="text-xs text-secondary-400 italic">Aucune compétence définie pour ce bloc.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <twig:alerte type="warning" message="fiche_matiere.alerte.no_bcc" />
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</turbo-frame>

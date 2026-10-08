@@ -1128,6 +1128,21 @@ class FicheMatiere implements McccCompletionCheckerInterface
         return $this;
     }
 
+    public function isModifiable(): bool
+    {
+        if ($this->etatFiche === null || $this->etatFiche === []) {
+            return true;
+        }
+
+        return array_key_exists('en_cours_redaction', $this->etatFiche)
+            || in_array('en_cours_redaction', $this->etatFiche, true);
+    }
+
+    public function isOuverte(): bool
+    {
+        return $this->isModifiable();
+    }
+
     public function getLanguesSupportsArray(): array
     {
         $langues = [];

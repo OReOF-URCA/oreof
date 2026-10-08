@@ -92,12 +92,13 @@
 
 {% block bouton_header %}
     <div class="flex flex-wrap gap-3">
-        {% if
+        {% if is_granted('EDIT_FICHE_MATIERE', ficheMatiere) or ((
             is_granted('EDIT', {route: 'app_fiche_matiere', subject: ficheMatiere})
             or is_granted('EDIT', {route: 'app_fiche_matiere_hd', subject: 'etablissement'})
             or is_granted('EDIT', {route: 'app_fiche_matiere', subject: 'formation'})
             or is_granted('EDIT', {route: 'app_fiche_matiere', subject: 'parcours'})
-            or is_granted('ROLE_ADMIN') %}
+            or is_granted('ROLE_ADMIN')
+        ) and ficheMatiere.isModifiable) %}
             <twig:Button
                     label="Modifier"
                     variant="warning"

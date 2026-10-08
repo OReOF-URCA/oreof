@@ -16,10 +16,10 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/fiche-matiere/v2', name: 'fiche_matiere_v2_')]
-#[IsGranted('ROLE_ADMIN')]
 final class FicheMatiereTabController extends AbstractController
 {
     #[Route('/{id}/tab/{tabKey}/autosave', name: 'tab_autosave', methods: ['POST'])]
+    #[IsGranted('EDIT_FICHE_MATIERE', 'fiche_matiere')]
     public function autosave(
         Request                          $request,
         FicheMatiere                     $fiche_matiere,
@@ -64,6 +64,7 @@ final class FicheMatiereTabController extends AbstractController
     }
 
     #[Route('/{id}/tab/{tabKey}/done', name: 'tab_done', methods: ['POST'])]
+    #[IsGranted('EDIT_FICHE_MATIERE', 'fiche_matiere')]
     public function done(
         Request                          $request,
         FicheMatiere                     $fiche_matiere,

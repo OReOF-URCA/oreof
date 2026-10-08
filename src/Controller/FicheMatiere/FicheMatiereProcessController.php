@@ -30,7 +30,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Workflow\WorkflowInterface;
 
 #[Route('/fiche-matiere/v2/process', name: 'fiche_matiere_process')]
-#[IsGranted('ROLE_ADMIN')]
 class FicheMatiereProcessController extends BaseController
 {
     public function __construct(

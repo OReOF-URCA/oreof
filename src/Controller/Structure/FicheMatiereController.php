@@ -14,7 +14,7 @@ use App\DataTable\FicheMatiereHorsDiplomeDataTable;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/structure/fiche-matiere', name: 'structure_fiche_matiere_')]
+#[Route('/fiches-matiere', name: 'structure_fiche_matiere_')]
 class FicheMatiereController extends BaseController
 {
     #[Route('/', name: 'index', methods: ['GET', 'POST'])]

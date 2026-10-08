@@ -10,20 +10,20 @@
 namespace App\Service\FicheMatiere;
 
 use App\Entity\FicheMatiere;
-use App\Repository\ComposanteRepository;
+use App\Repository\ButApprentissageCritiqueRepository;
+use App\Repository\CompetenceRepository;
 use App\Repository\LangueRepository;
-use App\Repository\RythmeFicheMatiereRepository;
 use App\Repository\UserRepository;
-use App\Repository\VilleRepository;
 use App\Service\AbstractFieldUpdater;
 
 final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
 {
     public function __construct(
-        private readonly UserRepository   $userRepo,
-        private readonly LangueRepository $langueRepo,
-    )
-    {
+        private readonly UserRepository                     $userRepo,
+        private readonly LangueRepository                   $langueRepo,
+        private readonly CompetenceRepository               $competenceRepo,
+        private readonly ButApprentissageCritiqueRepository $butApprentissageCritiqueRepo,
+    ) {
     }
 
     public function applyForTab(FicheMatiere $formation, string $tabKey, string $field, mixed $value): void
@@ -55,13 +55,24 @@ final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
                 'fiche_matiere_step2[description]',
                 'fiche_matiere_step2[objectifs]',
                 'fiche_matiere_step2[langueDispense][]',
-                'fiche_matiere_step2[langueSupport][]'
+                'fiche_matiere_step2[langueSupport][]',
             ],
             'mutualisation' => [
-                'fiche_matiere_step1b[enseignementMutualise]'
+                'fiche_matiere_step1b[enseignementMutualise]',
+            ],
+            'competences' => [
+                'fiche_matiere_step3[competences][]',
+                'ec[competences][]',
             ],
             'volumes_horaires' => [
+                'sansHeures',
                 'volumesHorairesImpose',
+                'ectsImpose',
+                'mcccImpose',
+                'fiche_matiere_step4[volumeCmPresentiel]',
+                'fiche_matiere_step4[volumeTdPresentiel]',
+                'fiche_matiere_step4[volumeTpPresentiel]',
+                'fiche_matiere_step4[volumeTe]',
                 'fiche_matiere_step4_hd[volumeCmPresentiel]',
                 'fiche_matiere_step4_hd[volumeTdPresentiel]',
                 'fiche_matiere_step4_hd[volumeTpPresentiel]',
@@ -69,8 +80,12 @@ final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
                 'fiche_matiere_step4_hd[volumeTdDistanciel]',
                 'fiche_matiere_step4_hd[volumeTpDistanciel]',
                 'fiche_matiere_step4_hd[volumeTe]',
+                'fiche_matiere_step4_hd[ects]',
+                'fiche_matiere_step4_hd[volumesHorairesImpose]',
+                'fiche_matiere_step4_hd[ectsImpose]',
+                'fiche_matiere_step4_hd[mcccImpose]',
             ],
-            'mccc' => []
+            'mccc' => [],
         ];
     }
 
@@ -91,7 +106,6 @@ final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
             'fiche_matiere_step1[libelleAnglais]' => function (FicheMatiere $p, $v): void {
                 $p->setLibelleAnglais($this->toString($v));
             },
-
 
             // ----------------- STEP 2 (présentation) -----------------
             'fiche_matiere_step2[description]' => function (FicheMatiere $p, $v): void {
@@ -119,15 +133,77 @@ final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
                 );
             },
 
-
             // ----------------- STEP 3 (Mutualisation) -----------------
             'fiche_matiere_step1b[enseignementMutualise]' => function (FicheMatiere $p, $v): void {
                 $p->setEnseignementMutualise($this->toBoolOrNull($v));
             },
 
+            // ----------------- Compétences -----------------
+            'fiche_matiere_step3[competences][]' => function (FicheMatiere $f, $v): void {
+                $isBut = $f->getParcours()?->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT';
+                if ($isBut) {
+                    $this->syncCollection(
+                        $f->getApprentissagesCritiques(),
+                        $this->butApprentissageCritiqueRepo,
+                        $v,
+                        fn($item) => $f->addApprentissagesCritique($item),
+                        fn($item) => $f->removeApprentissagesCritique($item)
+                    );
+                } else {
+                    $this->syncCollection(
+                        $f->getCompetences(),
+                        $this->competenceRepo,
+                        $v,
+                        fn($item) => $f->addCompetence($item),
+                        fn($item) => $f->removeCompetence($item)
+                    );
+                }
+            },
+            'ec[competences][]' => function (FicheMatiere $f, $v): void {
+                $isBut = $f->getParcours()?->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT';
+                if ($isBut) {
+                    $this->syncCollection(
+                        $f->getApprentissagesCritiques(),
+                        $this->butApprentissageCritiqueRepo,
+                        $v,
+                        fn($item) => $f->addApprentissagesCritique($item),
+                        fn($item) => $f->removeApprentissagesCritique($item)
+                    );
+                } else {
+                    $this->syncCollection(
+                        $f->getCompetences(),
+                        $this->competenceRepo,
+                        $v,
+                        fn($item) => $f->addCompetence($item),
+                        fn($item) => $f->removeCompetence($item)
+                    );
+                }
+            },
+
             // ----------------- STEP 4 (Volumes horaires) -----------------
+            'sansHeures' => function (FicheMatiere $p, $v): void {
+                $p->setSansHeures($this->toBoolOrNull($v));
+            },
             'volumesHorairesImpose' => function (FicheMatiere $p, $v): void {
                 $p->setVolumesHorairesImpose($this->toBoolOrNull($v));
+            },
+            'ectsImpose' => function (FicheMatiere $p, $v): void {
+                $p->setEctsImpose($this->toBoolOrNull($v));
+            },
+            'mcccImpose' => function (FicheMatiere $p, $v): void {
+                $p->setMcccImpose($this->toBoolOrNull($v));
+            },
+            'fiche_matiere_step4[volumeCmPresentiel]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeCmPresentiel($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4[volumeTdPresentiel]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeTdPresentiel($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4[volumeTpPresentiel]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeTpPresentiel($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4[volumeTe]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumeTe($this->toFloatOrNull($v));
             },
             'fiche_matiere_step4_hd[volumeCmPresentiel]' => function (FicheMatiere $p, $v): void {
                 $p->setVolumeCmPresentiel($this->toFloatOrNull($v));
@@ -149,6 +225,18 @@ final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
             },
             'fiche_matiere_step4_hd[volumeTe]' => function (FicheMatiere $p, $v): void {
                 $p->setVolumeTe($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4_hd[ects]' => function (FicheMatiere $p, $v): void {
+                $p->setEcts($this->toFloatOrNull($v));
+            },
+            'fiche_matiere_step4_hd[volumesHorairesImpose]' => function (FicheMatiere $p, $v): void {
+                $p->setVolumesHorairesImpose($this->toBoolOrNull($v));
+            },
+            'fiche_matiere_step4_hd[ectsImpose]' => function (FicheMatiere $p, $v): void {
+                $p->setEctsImpose($this->toBoolOrNull($v));
+            },
+            'fiche_matiere_step4_hd[mcccImpose]' => function (FicheMatiere $p, $v): void {
+                $p->setMcccImpose($this->toBoolOrNull($v));
             },
         ];
     }

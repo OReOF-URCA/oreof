@@ -49,7 +49,7 @@ use App\DTO\TranslatableKey;
 #[Route('/fiche/matiere')]
 class FicheMatiereController extends BaseController
 {
-    #[Route('/new', name: 'app_fiche_matiere_new', methods: ['GET', 'POST'])]
+    #[Route('/creer', name: 'app_fiche_matiere_new', methods: ['GET', 'POST'])]
     public function new(
         TurboStreamResponseFactory $turboStream,
         UeRepository $ueRepository,
@@ -104,65 +104,65 @@ class FicheMatiereController extends BaseController
         );
     }
 
-    #[Route('/{slug}', name: 'app_fiche_matiere_show', methods: ['GET'])]
-    public function show(
-        ElementConstitutifRepository $elementConstitutifRepository,
-        FicheMatiereMutualisableRepository $ficheMatiereMutualisableRepository,
-        #[MapEntity(mapping: ['slug' => 'slug'])]
-        FicheMatiere                 $ficheMatiere,
-        VersioningFicheMatiere       $ficheMatiereVersioningService,
-        TypeDiplomeRepository        $typeDiplomeRepository,
-    ): Response {
+    // #[Route('/{slug}', name: 'app_fiche_matiere_show', methods: ['GET'])]
+    // public function show(
+    //     ElementConstitutifRepository $elementConstitutifRepository,
+    //     FicheMatiereMutualisableRepository $ficheMatiereMutualisableRepository,
+    //     #[MapEntity(mapping: ['slug' => 'slug'])]
+    //     FicheMatiere                 $ficheMatiere,
+    //     VersioningFicheMatiere       $ficheMatiereVersioningService,
+    //     TypeDiplomeRepository        $typeDiplomeRepository,
+    // ): Response {
 
-        $bccs = [];
-        foreach ($ficheMatiere->getCompetences() as $competence) {
-            if (!array_key_exists($competence->getBlocCompetence()?->getId(), $bccs)) {
-                $bccs[$competence->getBlocCompetence()?->getId()]['bcc'] = $competence->getBlocCompetence();
-                $bccs[$competence->getBlocCompetence()?->getId()]['competences'] = [];
-            }
-            $bccs[$competence->getBlocCompetence()?->getId()]['competences'][] = $competence;
-        }
+    //     $bccs = [];
+    //     foreach ($ficheMatiere->getCompetences() as $competence) {
+    //         if (!array_key_exists($competence->getBlocCompetence()?->getId(), $bccs)) {
+    //             $bccs[$competence->getBlocCompetence()?->getId()]['bcc'] = $competence->getBlocCompetence();
+    //             $bccs[$competence->getBlocCompetence()?->getId()]['competences'] = [];
+    //         }
+    //         $bccs[$competence->getBlocCompetence()?->getId()]['competences'][] = $competence;
+    //     }
 
-        $formation = $ficheMatiere->getParcours()?->getFormation();
-        if ($formation !== null) {
-            $typeDiplome = $formation->getTypeDiplome();
-        } else {
-            $typeDiplome = $typeDiplomeRepository->findOneBy(['libelle_court' => 'L']);
-        }
+    //     $formation = $ficheMatiere->getParcours()?->getFormation();
+    //     if ($formation !== null) {
+    //         $typeDiplome = $formation->getTypeDiplome();
+    //     } else {
+    //         $typeDiplome = $typeDiplomeRepository->findOneBy(['libelle_court' => 'L']);
+    //     }
 
-        if ($typeDiplome === null) {
-            throw new TypeDiplomeNotFoundException();
-        }
+    //     if ($typeDiplome === null) {
+    //         throw new TypeDiplomeNotFoundException();
+    //     }
 
-        $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
+    //     $typeD = $this->typeDiplomeResolver->fromTypeDiplome($typeDiplome);
 
-        $cssDiff = DiffHelper::getStyleSheet();
-        $textDifferences = $ficheMatiereVersioningService
-            ->getStringDifferencesWithBetweenFicheMatiereAndLastVersion($ficheMatiere);
+    //     $cssDiff = DiffHelper::getStyleSheet();
+    //     $textDifferences = $ficheMatiereVersioningService
+    //         ->getStringDifferencesWithBetweenFicheMatiereAndLastVersion($ficheMatiere);
 
-        $ficheMatiereParcours = $ficheMatiereMutualisableRepository->findByFicheMatieres($ficheMatiere);
-        $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiere);
+    //     $ficheMatiereParcours = $ficheMatiereMutualisableRepository->findByFicheMatieres($ficheMatiere);
+    //     $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiere);
 
-        if (!$typeD instanceof McccDisplayInterface) {
-            throw new \RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
-        }
+    //     if (!$typeD instanceof McccDisplayInterface) {
+    //         throw new \RuntimeException('Ce type de diplôme ne prend pas en charge cet affichage MCCC.');
+    //     }
 
-        return $this->render('fiche_matiere/show.html.twig', [
-            'ficheMatiere' => $ficheMatiere,
-            'ficheMatiereParcours' => $ficheMatiereParcours,
-            'ecParcours' => $ecParcours,
-            'formation' => $formation,
-            'typeEpreuves' => $typeD->getTypeEpreuves(),
-            'typeD' => $typeD,
-            'typeDiplome' => $typeDiplome,
-            'ects' => $ficheMatiere->getEcts(),
-            'mcccs' => $typeD->getDisplayMccc($typeD->getMcccs($ficheMatiere), $ficheMatiere->getTypeMccc() ?? ''),
-            'bccs' => $bccs,
-            'typeMccc' => $ficheMatiere->getTypeMccc(),
-            'stringDifferences' => $textDifferences,
-            'cssDiff' => $cssDiff
-        ]);
-    }
+    //     return $this->render('fiche_matiere/show.html.twig', [
+    //         'ficheMatiere' => $ficheMatiere,
+    //         'ficheMatiereParcours' => $ficheMatiereParcours,
+    //         'ecParcours' => $ecParcours,
+    //         'formation' => $formation,
+    //         'typeEpreuves' => $typeD->getTypeEpreuves(),
+    //         'typeD' => $typeD,
+    //         'typeDiplome' => $typeDiplome,
+    //         'ects' => $ficheMatiere->getEcts(),
+    //         'mcccs' => $typeD->getDisplayMccc($typeD->getMcccs($ficheMatiere), $ficheMatiere->getTypeMccc() ?? ''),
+    //         'bccs' => $bccs,
+    //         'typeMccc' => $ficheMatiere->getTypeMccc(),
+    //         'stringDifferences' => $textDifferences,
+    //         'cssDiff' => $cssDiff
+    //     ]);
+    // }
 
     #[Route('/{elementConstitutif}/show-parcours', name: 'app_fiche_matiere_detail_parcours', methods: ['GET'])]
     public function showParcours(
@@ -191,61 +191,61 @@ class FicheMatiereController extends BaseController
         ]);
     }
 
-    #[Route('/{slug}/edit', name: 'app_fiche_matiere_edit', methods: ['GET', 'POST'])]
-    public function edit(
-        Request $request,
-        #[MapEntity(mapping: ['slug' => 'slug'])]
-        FicheMatiere $ficheMatiere,
-        FicheMatiereState $ficheMatiereState,
-    ): Response {
-        //todo: a revoir...
-        if (!($this->isGranted(
-                'EDIT',
-            [
-                'route' => 'app_fiche_matiere',
-                'subject' => $ficheMatiere,
-            ]
-            ) || $this->isGranted(
-                'EDIT',
-                [
-                    'route' => 'app_fiche_matiere',
-                    'subject' => $ficheMatiere->getParcours(),
-                ]
-            )
-            || $this->isGranted(
-                'EDIT',
-                [
-                    'route' => 'app_fiche_matiere',
-                    'subject' => $ficheMatiere->getParcours()?->getFormation(),
-                ]
-            ))) {
-            return $this->redirectToRoute('fiche_matiere_v2_voir', ['slug' => $ficheMatiere->getSlug()]);
-        }
+    // #[Route('/{slug}/modifier', name: 'app_fiche_matiere_edit', methods: ['GET', 'POST'])]
+    // public function edit(
+    //     Request $request,
+    //     #[MapEntity(mapping: ['slug' => 'slug'])]
+    //     FicheMatiere $ficheMatiere,
+    //     FicheMatiereState $ficheMatiereState,
+    // ): Response {
+    //     //todo: a revoir...
+    //     if (!($this->isGranted(
+    //             'EDIT',
+    //         [
+    //             'route' => 'app_fiche_matiere',
+    //             'subject' => $ficheMatiere,
+    //         ]
+    //         ) || $this->isGranted(
+    //             'EDIT',
+    //             [
+    //                 'route' => 'app_fiche_matiere',
+    //                 'subject' => $ficheMatiere->getParcours(),
+    //             ]
+    //         )
+    //         || $this->isGranted(
+    //             'EDIT',
+    //             [
+    //                 'route' => 'app_fiche_matiere',
+    //                 'subject' => $ficheMatiere->getParcours()?->getFormation(),
+    //             ]
+    //         ))) {
+    //         return $this->redirectToRoute('fiche_matiere_v2_voir', ['slug' => $ficheMatiere->getSlug()]);
+    //     }
 
-        if ($ficheMatiere->getParcours() !== null) {
-            $dpeParcours = GetDpeParcours::getFromParcours($ficheMatiere->getParcours());
-        } else {
-            $dpeParcours = null;
-        }
+    //     if ($ficheMatiere->getParcours() !== null) {
+    //         $dpeParcours = GetDpeParcours::getFromParcours($ficheMatiere->getParcours());
+    //     } else {
+    //         $dpeParcours = null;
+    //     }
 
-        $ficheMatiereState->setFicheMatiere($ficheMatiere);
+    //     $ficheMatiereState->setFicheMatiere($ficheMatiere);
 
-        $referer = $request->headers->get('referer');
+    //     $referer = $request->headers->get('referer');
 
-        if ($referer === null || false === str_contains($referer, 'parcours')) {
-            $source = 'liste';
-        } else {
-            $source = 'parcours';
-            $link = $referer.'?step=4';
-        }
-        return $this->render('fiche_matiere/edit.html.twig', [
-            'fiche_matiere' => $ficheMatiere,
-            'ficheMatiereState' => $ficheMatiereState,
-            'source' => $source,
-            'dpeParcours' => $dpeParcours,
-            'link' => $link ?? null,
-        ]);
-    }
+    //     if ($referer === null || false === str_contains($referer, 'parcours')) {
+    //         $source = 'liste';
+    //     } else {
+    //         $source = 'parcours';
+    //         $link = $referer.'?step=4';
+    //     }
+    //     return $this->render('fiche_matiere/edit.html.twig', [
+    //         'fiche_matiere' => $ficheMatiere,
+    //         'ficheMatiereState' => $ficheMatiereState,
+    //         'source' => $source,
+    //         'dpeParcours' => $dpeParcours,
+    //         'link' => $link ?? null,
+    //     ]);
+    // }
 
     #[Route('/{slug}/dupliquer', name: 'app_fiche_matiere_dupliquer', methods: ['POST', 'GET'])]
     public function dupliquer(

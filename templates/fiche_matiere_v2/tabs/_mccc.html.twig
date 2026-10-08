@@ -1,5 +1,30 @@
 <turbo-frame id="tab-content">
     {{ include('fiche_matiere_v2/tabs/_header.html.twig', {tabKey: 'mccc'}) }}
 
+    <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar">
+        {% if isBut %}
+            <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 p-5 shadow-sm space-y-4">
+                <h3 class="text-base font-bold text-secondary-800 dark:text-secondary-100 mb-2">Modalités de contrôle des connaissances et des compétences</h3>
+                {{ include('typeDiplome/but/mccc-non-editable/but.html.twig') }}
+            </div>
+        {% elseif isHd %}
+            <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 p-5 shadow-sm space-y-4">
+                <h3 class="text-base font-bold text-secondary-800 dark:text-secondary-100 mb-2">Modalités de contrôle des connaissances</h3>
+                {% if fiche_matiere.typeMccc is not empty %}
+                    {{ include('typeDiplome/licence/ec/_mccc.html.twig') }}
+                {% else %}
+                    <twig:alerte type="info" message="Aucune modalité MCCC définie pour cette fiche matière hors diplôme." />
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="space-y-4">
+                <twig:alerte type="info">
+                             Les MCCC et ECTS indiqués sur cette fiche matière sont fournis à titre indicatif. Par défaut, ils s'appliquent à tous les EC qui utilisent cette fiche matière.<br><br>Les données peuvent être modifiées à partir de l'onglet <strong>structure de la maquette</strong> du parcours <strong> {{ ecProprietaire != null and ecProprietaire.parcours != null ? ecProprietaire.parcours.display : '-' }} | {{ ecProprietaire != null and ecProprietaire.parcours != null and ecProprietaire.parcours.formation != null ? ecProprietaire.parcours.formation.displayLong : '-' }} </strong> (EC <strong>{{ ecProprietaire != null ? ecProprietaire.display : '-' }} {% if ecProprietaire != null and ecProprietaire.ue != null %}({{ ecProprietaire.ue.display }}){% endif %}</strong>).</twig:alerte>
 
+                <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 p-5 shadow-sm space-y-4">
+                    {{ include('typeDiplome/licence/ec/_mccc.html.twig') }}
+                </div>
+            </div>
+        {% endif %}
+    </div>
 </turbo-frame>
