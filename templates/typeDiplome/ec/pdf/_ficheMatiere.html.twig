@@ -438,25 +438,12 @@
             </div>
         {% endif %}
 
-        {% if mcccs is defined and mcccs|length > 0 %}
-            {% if templateForm is defined and templateForm matches '/^licence/' %}
-                {{ include('typeDiplome/licence/mccc-non-editable/_show.html.twig', {
-                    mcccs: mcccs,
-                    hasDisplayComparaison: false,
-                    isFromVersioning: 'false'
-                }) }}
-            {% elseif templateForm is defined and templateForm matches '/^but/' %}
-                {{ include('typeDiplome/but/mccc-non-editable/but.html.twig', {
-                    mcccs: mcccs
-                }) }}
-            {% else %}
-                {{ include('typeDiplome/licence/mccc-non-editable/licence.html.twig', {
-                    mcccs: mcccs,
-                    typeMccc: typeMccc,
-                    isFromVersioning: 'false'
-                }) }}
-            {% endif %}
-        {% endif %}
+        {{ include('typeDiplome/ec/pdf/_mccc.html.twig', {
+            mcccs: mcccs,
+            typeMccc: typeMccc,
+            templateForm: templateForm|default(''),
+            typeEpreuves: typeEpreuves|default([])
+        }) }}
     </div>
 
     {# 5. Compétences & BCC #}
