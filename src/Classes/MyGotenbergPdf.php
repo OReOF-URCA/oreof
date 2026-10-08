@@ -128,23 +128,23 @@ class MyGotenbergPdf
             $formation = $parcours->getFormation();
 
             if (array_key_exists('titre', $context)) {
-                return $formation->getDisplayLong()
-                    . '<br> Parcours : ' . $parcours->getDisplay()
-                    . '<br>' . $context['titre'];
+                return ($formation ? $formation->getDisplayLong() . ' &bull; ' : '')
+                    . 'Parcours : ' . $parcours->getDisplay()
+                    . ' &bull; ' . $context['titre'];
             }
 
-            return $formation->getDisplayLong()
-                . '<br> Parcours : ' . $parcours->getDisplay();
+            return ($formation ? $formation->getDisplayLong() . ' &bull; ' : '')
+                . 'Parcours : ' . $parcours->getDisplay();
         }
 
         if (array_key_exists('titre', $context)) {
-            return $context['titre'];
+            return (string) $context['titre'];
         }
 
         return '';
     }
 
-    private function getHeader(string $titre = '', array $context = []): array // On récupère une liste des variables, et non plus la page en elle-même
+    private function getHeader(string $titre = '', array $context = []): array
     {
         if ($this->options['withTemplate']) {
             if (array_key_exists('composante', $context)
@@ -159,17 +159,22 @@ class MyGotenbergPdf
             $imagePath = $this->basePath . '/images/logo_urca.png';
         }
 
+        $imageContent = (is_file($imagePath) && is_readable($imagePath))
+            ? base64_encode(file_get_contents($imagePath))
+            : '';
+
         return [
             'baseUrl'      => $this->basePath,
             'titre'        => $titre,
-            'image'        => base64_encode(file_get_contents($imagePath)),
+            'image'        => $imageContent,
             'withTemplate' => $this->options['withTemplate'],
         ];
-
     }
 
-    private function getFooter(array $context = []): array // On récupère une liste des variables, et non plus la page en elle-même
+    private function getFooter(array $context = []): array
     {
+        $imageContent = '';
+
         if ($this->options['withTemplate']) {
             if (array_key_exists('composante', $context)
                 && $context['composante'] !== null
@@ -180,12 +185,14 @@ class MyGotenbergPdf
                 $imagePath = $this->basePath . '/images/vague_urca.jpg';
             }
 
-            return array_merge($this->options, [
-                'image' => base64_encode(file_get_contents($imagePath)),
-            ]);
+            if (is_file($imagePath) && is_readable($imagePath)) {
+                $imageContent = base64_encode(file_get_contents($imagePath));
+            }
         }
 
-        return $this->options;
-
+        return array_merge($this->options, [
+            'image' => $imageContent,
+            'final' => $context['final'] ?? false,
+        ]);
     }
 }

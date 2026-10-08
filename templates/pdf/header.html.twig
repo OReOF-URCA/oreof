@@ -1,87 +1,104 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Header PDF</title>
     <style>
-
-        #class_logo {
-            float: left;
-            width: 20%;
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        #class_logo img {
-            height: 1cm;
-        }
-
-        #class_titre {
-            float: right;
-            width: 80%;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 8.5px;
+            color: #475569;
+            width: 100%;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         {% if withTemplate is defined and withTemplate == true %}
         header {
-            /*-webkit-print-color-adjust: exact;*/
             margin: 0;
             top: 0;
             width: 100%;
-            height: 3cm;
+            height: 2.8cm;
             left: 0;
             right: 0;
-            color: white;
             text-align: right;
-            font-size: 10px;
         }
 
         #class_vague {
             margin: 0;
             padding: 0;
-            position: fixed;
-            right: 0;
+            width: 100%;
             text-align: right;
-
         }
 
         #class_vague img {
-            height: 100%;
-            width: 21cm;
+            height: 2.8cm;
+            max-width: 100%;
+            object-fit: cover;
         }
-
-
         {% else %}
-
         header {
-            margin: 0;
-            bottom: 0;
+            display: table;
             width: 100%;
-            left: 0;
-            padding: 0.2cm;
-            background-color: #03a9f4;
-            color: white;
-            text-align: center;
-            font-size: 10px;
+            table-layout: fixed;
+            padding: 0 1.2cm 4px 1.2cm;
+            border-bottom: 1px solid #e2e8f0;
         }
 
+        .header-logo-cell {
+            display: table-cell;
+            width: 25%;
+            vertical-align: middle;
+            text-align: left;
+        }
+
+        .header-logo-cell img {
+            height: 0.9cm;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .header-title-cell {
+            display: table-cell;
+            width: 75%;
+            vertical-align: middle;
+            text-align: right;
+            padding-left: 10px;
+        }
+
+        .header-title-cell h1 {
+            font-size: 8.5px;
+            font-weight: 600;
+            color: #334155;
+            line-height: 1.35;
+            margin: 0;
+        }
         {% endif %}
     </style>
 </head>
 <body>
 <header>
-    {% if withTemplate is defined and withTemplate == true %}
+    {% if withTemplate is defined and withTemplate == true and image is defined and image is not empty %}
         <div id="class_vague">
             <img src="data:image/jpeg;base64,{{ image }}" alt="logo">
         </div>
     {% else %}
-        <div id="class_logo">
-            <img src="data:image/jpeg;base64,{{ image }}" alt="logo">
+        <div class="header-logo-cell">
+            {% if image is defined and image is not empty %}
+                <img src="data:image/png;base64,{{ image }}" alt="URCA">
+            {% endif %}
         </div>
-        <div id="class_titre">
+        <div class="header-title-cell">
             <h1>{{ titre|raw }}</h1>
         </div>
     {% endif %}
 </header>
 </body>
 </html>
+

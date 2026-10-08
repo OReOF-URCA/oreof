@@ -2,96 +2,127 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Footer PDF</title>
     <style>
-        * {
-            font-family: "DejaVu Sans", serif;
-            padding: 0;
+        *, *::before, *::after {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 8px;
+            color: #64748b;
+            width: 100%;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         {% if withTemplate is defined and withTemplate == true %}
         footer {
-            /*-webkit-print-color-adjust: exact;*/
             margin: 0;
             bottom: 0;
             width: 100%;
-            height: 3.5cm;
+            height: 3.2cm;
             left: 0;
             right: 0;
-            padding: 0.2cm;
-            color: white;
             text-align: right;
-            font-size: 10px;
         }
 
         #class_vague {
             margin: 0;
             padding: 0;
-            position: fixed;
-            right: 0;
+            width: 100%;
             text-align: right;
-
         }
 
         #class_vague img {
-            height: 100%;
-            width: 21cm;
+            height: 3.2cm;
+            max-width: 100%;
+            object-fit: cover;
         }
-
-        /*#adresse_vague {*/
-        /*    color: black;*/
-        /*    position: fixed;*/
-        /*    right: 3cm;*/
-        /*    bottom: 0.5cm;*/
-        /*    width: 19cm;*/
-        /*    text-align: right;*/
-        /*    font-size: 10px;*/
-        /*}*/
-
-
         {% else %}
-
         footer {
-            margin: 0;
-            bottom: 0;
+            display: table;
             width: 100%;
-            left: 0;
-            padding: 0.2cm;
-            color: white;
-            text-align: center;
-            font-size: 10px;
+            table-layout: fixed;
+            padding: 4px 1.2cm 0 1.2cm;
+            border-top: 1px solid #e2e8f0;
         }
 
+        .footer-col-left {
+            display: table-cell;
+            width: 35%;
+            vertical-align: middle;
+            text-align: left;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .footer-col-center {
+            display: table-cell;
+            width: 45%;
+            vertical-align: middle;
+            text-align: center;
+            color: #64748b;
+            font-size: 7.5px;
+        }
+
+        .footer-col-right {
+            display: table-cell;
+            width: 20%;
+            vertical-align: middle;
+            text-align: right;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .footer-tag {
+            display: inline-block;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 7px;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .footer-tag-valid {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .footer-tag-prov {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
         {% endif %}
     </style>
 </head>
 <body>
 <footer>
-    {% block footer %}
-        {% if withTemplate is defined and withTemplate == true %}
-            <div id="class_vague">
-                <img src="data:image/jpeg;base64,{{ image }}" alt="logo">
-            </div>
-{#            <div id="adresse_vague">#}
-{#                {{ composante.libelle }}<br>#}
-{#                {{ composante.adresse.adresse1 }}<br>#}
-{#                {{ composante.adresse.adresse2 }}<br>#}
-{#                {{ composante.adresse.codePostal }} {{ composante.adresse.ville }}<br>#}
-{#                {{ composante.urlSite }}<br>#}
-{#                {{ composante.mailContact }}#}
-{#            </div>#}
-        {% else %}
-            <p><span class="pageNumber"></span> of <span class="totalPages"></span></p>
-            <p>Document généré le {{ 'now'|date('d/m/Y H:i') }} depuis
-                ORéOF
-                - {% if final is defined and final == true %}Document voté le ... {% else %}Document provisoire non validé en CFVU{% endif %}</p>
-            <p>Université de Reims Champagne-Ardenne</p>
-        {% endif %}
-    {% endblock %}
+    {% if withTemplate is defined and withTemplate == true and image is defined and image is not empty %}
+        <div id="class_vague">
+            <img src="data:image/jpeg;base64,{{ image }}" alt="footer">
+        </div>
+    {% else %}
+        <div class="footer-col-left">
+            Université de Reims Champagne-Ardenne &bull; ORéOF
+        </div>
+        <div class="footer-col-center">
+            Généré le {{ 'now'|date('d/m/Y à H:i') }}
+            &bull;
+            {% if final is defined and final == true %}
+                <span class="footer-tag footer-tag-valid">Document validé</span>
+            {% else %}
+                <span class="footer-tag footer-tag-prov">Provisoire non validé</span>
+            {% endif %}
+        </div>
+        <div class="footer-col-right">
+            Page <span class="pageNumber"></span> / <span class="totalPages"></span>
+        </div>
+    {% endif %}
 </footer>
 </body>
 </html>
+
