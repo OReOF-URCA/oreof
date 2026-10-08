@@ -195,7 +195,7 @@ export default class extends Controller {
       }
       oldPanel.insertAdjacentHTML(
         'afterend',
-        `<div data-crud-loader style="min-height: ${Math.max(height, 400)}px">${window.da.loaderStimulus}</div>`,
+        `<div data-crud-loader class="flex items-center justify-center" style="min-height: ${Math.max(height, 400)}px"><div style="transform: scale(1.4)">${window.da.loaderStimulus}</div></div>`,
       )
     } else {
       this.listeTarget.innerHTML = window.da.loaderStimulus
