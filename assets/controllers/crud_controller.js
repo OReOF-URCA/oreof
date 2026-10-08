@@ -113,7 +113,8 @@ export default class extends Controller {
     }
 
     localStorage.removeItem(this.storageKeyValue)
-    this._updateListe(this.fields)
+    // Les filtres sont remis à zéro : on recharge aussi le panneau
+    this._updateListe(this.fields, { keepPanel: false })
   }
 
   delete(event) {
@@ -169,7 +170,7 @@ export default class extends Controller {
     }
   }
 
-  async _updateListe(params) {
+  async _updateListe(params, { keepPanel = true } = {}) {
     this.scrollPosition = window.scrollY
     const activeElement = document.activeElement
     const activeId = activeElement?.id
@@ -177,10 +178,33 @@ export default class extends Controller {
     const selectionStart = isSearchInput ? activeElement.selectionStart : null
     const selectionEnd = isSearchInput ? activeElement.selectionEnd : null
 
+    // Le panneau recherche/filtres reste en place pendant le rechargement
+    const oldPanel = keepPanel ? this.listeTarget.querySelector('[data-crud-panel]') : null
+    const requestId = (this.requestId = (this.requestId ?? 0) + 1)
+
+    if (oldPanel) {
+      this._panelSiblings(oldPanel).forEach((el) => el.classList.add('opacity-50', 'pointer-events-none', 'transition-opacity'))
+    } else {
+      this.listeTarget.innerHTML = window.da.loaderStimulus
+    }
+
     const _params = new URLSearchParams(params)
-    this.listeTarget.innerHTML = window.da.loaderStimulus
     const response = await fetch(`${this.urlValue}?${_params.toString()}`)
-    this.listeTarget.innerHTML = await response.text()
+    const html = await response.text()
+    // Une réponse plus récente a été demandée entre-temps : on ignore celle-ci
+    if (requestId !== this.requestId) {
+      return
+    }
+
+    const template = document.createElement('template')
+    template.innerHTML = html
+    const newPanel = template.content.querySelector('[data-crud-panel]')
+
+    if (oldPanel && newPanel && oldPanel.isConnected) {
+      this._swapAroundPanel(oldPanel, newPanel)
+    } else {
+      this.listeTarget.innerHTML = html
+    }
 
     if (isSearchInput && activeId) {
       const refreshedInput = document.getElementById(activeId)
@@ -193,6 +217,52 @@ export default class extends Controller {
     }
 
     window.scrollTo(0, this.scrollPosition)
+  }
+
+  _panelSiblings(panel) {
+    return [...panel.parentElement.children].filter((el) => el !== panel)
+  }
+
+  // Remplace tout le contenu autour du panneau existant (résumé, tableau...) sans toucher au panneau
+  _swapAroundPanel(oldPanel, newPanel) {
+    const oldParent = oldPanel.parentElement
+    const newParent = newPanel.parentElement
+    let before = true
+    const oldBefore = []
+    const oldAfter = []
+    ;[...oldParent.childNodes].forEach((node) => {
+      if (node === oldPanel) {
+        before = false
+      } else if (before) {
+        oldBefore.push(node)
+      } else {
+        oldAfter.push(node)
+      }
+    })
+    before = true
+    const newBefore = []
+    const newAfter = []
+    ;[...newParent.childNodes].forEach((node) => {
+      if (node === newPanel) {
+        before = false
+      } else if (before) {
+        newBefore.push(node)
+      } else {
+        newAfter.push(node)
+      }
+    })
+
+    oldBefore.forEach((node) => node.remove())
+    oldAfter.forEach((node) => node.remove())
+    newBefore.forEach((node) => oldParent.insertBefore(node, oldPanel))
+    newAfter.forEach((node) => oldParent.appendChild(node))
+
+    // Met à jour le compteur de filtres actifs du bouton « Filtres »
+    const oldToggle = oldPanel.querySelector('[data-crud-panel-toggle]')
+    const newToggle = newPanel.querySelector('[data-crud-panel-toggle]')
+    if (oldToggle && newToggle) {
+      oldToggle.innerHTML = newToggle.innerHTML
+    }
   }
 
   sort(event) {
