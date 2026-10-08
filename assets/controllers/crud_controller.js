@@ -183,8 +183,8 @@ export default class extends Controller {
     const requestId = (this.requestId = (this.requestId ?? 0) + 1)
 
     if (oldPanel) {
-      // Loader sous le panneau à la place du tableau, à la hauteur du contenu remplacé
-      // (évite que la page raccourcisse et que le header se replie)
+      // Loader sous le panneau à la place du tableau, à la hauteur du contenu remplacé, plafonnée
+      // (évite que la page raccourcisse brutalement et que le header se replie)
       let height = 0
       let next = oldPanel.nextSibling
       while (next) {
@@ -193,9 +193,11 @@ export default class extends Controller {
         next.remove()
         next = following
       }
+      // Plafonné : la liste complète peut être très haute
+      const minHeight = Math.max(400, Math.min(height, Math.round(window.innerHeight * 0.6)))
       oldPanel.insertAdjacentHTML(
         'afterend',
-        `<div data-crud-loader class="flex items-center justify-center" style="min-height: ${Math.max(height, 400)}px"><div style="transform: scale(1.4)">${window.da.loaderStimulus}</div></div>`,
+        `<div data-crud-loader class="flex items-center justify-center" style="min-height: ${minHeight}px"><div style="transform: scale(1.4)">${window.da.loaderStimulus}</div></div>`,
       )
     } else {
       this.listeTarget.innerHTML = window.da.loaderStimulus
