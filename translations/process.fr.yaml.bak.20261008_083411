@@ -1,18 +1,9 @@
 autorisation_saisie: 'Autorisation de saisie'
 brouillon: brouillon
-btn:
-    fiche_matiere:
-        demande:
-            cloture: 'Clore et soumettre les modifications'
-            reouverture: 'Confirmer la réouverture'
-    validation:
-        fiche:
-            fiche_matiere.demande.reouverture.alerte: 'La fiche matière sera réouverte et pourra être modifiée. Il faudra ensuite la clôturer pour valider et publier les modifications.'
-            valider_fiche_compo: 'Valider et soumettre la fiche matière'
-            valider_fiche_compo.title: 'Valider et soumettre la fiche matière'
 btn.changeRf.validation.soumis_cfvu.valide: 'Valider CFVU et effectuer le changement'
 btn.changeRf.validation.soumis_conseil.valide: 'Valider et transmettre au SES'
 btn.changeRf.validation.soumis_ses.valide: 'Valider et transmettre à la CFVU'
+btn.change_rf.valide: 'Valider le changement de responsable'
 btn.demande.non.ouverture: 'Valider la demande de non ouverture du parcours'
 btn.demande.reouverture.cloture: 'Clore et soumettre les modifications'
 btn.demande.reouverture.cloture.sans_cfvu.ses: 'Clore et annuler les modifications'
@@ -21,6 +12,8 @@ btn.demande.reouverture.modification: 'Demander la réouverture du projet DPE'
 btn.demande.switch.modification: 'Confirmer le changement de demande de DPE'
 btn.deposer.valide: 'Déposer la pièce'
 btn.en_cours_redaction.parcours.valide.en_cours_redaction: 'Valider le parcours et transmette au responsable de formation'
+btn.fiche_matiere.demande.cloture: 'Clore et soumettre les modifications'
+btn.fiche_matiere.demande.reouverture: 'Confirmer la réouverture'
 btn.formation.valide: 'Valider la formation'
 btn.relecture.avant_publication: 'Valider pour publication'
 btn.relecture.avant_publication.valide: 'Valider pour publication'
@@ -32,6 +25,7 @@ btn.validation.cfvu.valide: 'Valider la formation'
 btn.validation.cfvu.valide.soumis_cfvu: 'Valider et soumettre à la CFVU'
 btn.validation.changeRf.reserver_cfvu: 'Emettre des réserves'
 btn.validation.changeRf.reserver_ses: 'Emettre des réserves'
+btn.validation.changeRf.suppression: 'Supprimer la demande de changement de responsable'
 btn.validation.changeRf.valider_cfvu_attente_pv: 'Valider CFVU sous réserve de PV'
 btn.validation.changeRf.valider_cfvu_avec_pv: 'Valider CFVU et effectuer le changement'
 btn.validation.changeRf.valider_conseil: 'Valider et transmettre au SES'
@@ -41,7 +35,10 @@ btn.validation.dpe.reserve: 'Emettre des réserves'
 btn.validation.dpe.valide: 'Valider la formation'
 btn.validation.dpe.valide.soumis_dpe_composante: 'Valider et transmettre au responsable DPE'
 btn.validation.en_cours_redaction_ss_cfvu.valide: 'Valider et transmettre au SES'
+btn.validation.fiche.fiche_matiere.demande.reouverture.alerte: 'La fiche matière sera réouverte et pourra être modifiée. Il faudra ensuite la clôturer pour valider et publier les modifications.'
 btn.validation.fiche.reserver_fiche_ses: 'Emettre des réserves'
+btn.validation.fiche.valider_fiche_compo: 'Valider et soumettre la fiche matière'
+btn.validation.fiche.valider_fiche_compo.title: 'Valider et soumettre la fiche matière'
 btn.validation.fiche.valider_fiche_ses: 'Validation SES pour publication'
 btn.validation.fiche_matiere.ses.refuse: 'Refuser les fiches EC/matière'
 btn.validation.fiche_matiere.ses.reserve: 'Emettre des réserves sur les fiches EC/matière'
@@ -113,11 +110,6 @@ btn.validation.soumis_conseil.reserve: 'Emettre des réserves'
 btn.validation.soumis_conseil.valide: 'Valider et transmettre la formation'
 btn.validation.soumis_conseil.valide.soumis_conseil: 'Valider et soumettre au conseil de composante'
 btn.validation.soumis_parcours.valide.soumis_parcours: 'Valider le parcours'
-changeRf:
-    valide:
-        soumis_conseil:
-            flash:
-                success: 'Demande de changement de responsable de formation validée par le conseil de composante'
 changeRf.attente_pv: changeRf.attente_pv
 changeRf.soumis_cfvu: changeRf.soumis_cfvu
 changeRf.soumis_conseil: changeRf.soumis_conseil
@@ -141,9 +133,13 @@ changeRf.valide.soumis_cfvu.flash.success: 'Demande de changement de responsable
 changeRf.valide.soumis_conseil.flash.success: 'Demande de changement de responsable de formation validée par le conseil de composante'
 changeRf.valide.soumis_ses.flash.success: 'Demande de changement de responsable de formation validée par le SES'
 changeRf.verification_pv: changeRf.verification_pv
+cloture: cloture
 demande.non.ouverture.alerte: 'Vous pouvez demander la non ouverture du parcours. Cette demande sera transmise au SES puis en CFVU avec votre argumentaire.'
+demande.non.ouverture.argumentaire.help: "Détaillez l'argumentaire justifiant la non-ouverture."
 demande.non.ouverture.argumentaire.label: 'Argumentaire de la demande de non ouverture du parcours'
+demande.non.ouverture.confirmation.help: 'Confirmez votre demande de non-ouverture.'
 demande.non.ouverture.confirmation.label: 'Je confirme la demande de non ouverture du parcours %parcours%'
+demande.non.ouverture.help: 'Précisez la raison pour laquelle vous demandez la non-ouverture.'
 demande.non.ouverture.label: 'Confirmer la demande de non ouverture du parcours'
 demande.reouverture: 'Demander la réouverture du DPE'
 demande.reouverture.alerte: 'La demande de réouverture permet la réouverture des onglets du formulaire de saisie. Les demandes doivent être argumentées afin de déterminer si les modifications de maquette/MCCC impliquent un passage en conseil de composantes, en CFVU ou peuvent être appliquées directement.'
@@ -168,6 +164,7 @@ demande.reouverture.mention.alerte: 'La demande de réouverture permet la réouv
 demande.reouverture.mention.annuler: 'Annuler la demande de réouverture de la mention'
 demande.reouverture.mention.clore: 'Valider et soumettre la formation'
 demande.reouverture.mention.clore.title: 'Valider et soumettre la formation'
+demande.reouverture.mention.help: 'Précisez la raison pour laquelle vous demandez la réouverture de la mention.'
 demande.reouverture.mention.label: 'Précisez quelle(s) modification(s) vous souhaitez apporter à la formation'
 demande.reouverture.mention.modification.mccc.texte.help: "Les modifications apportées à la formation (modification d'un parcours, ajout d'un parcours,...) nécessitent un passage en CFVU"
 demande.reouverture.mention.modification.mccc.texte.label: 'Modifications des parcours de la mention, de sa structure et des textes descriptifs.'
@@ -220,13 +217,18 @@ fiche_matiere.demande.cloture.commentaire.help: ''
 fiche_matiere.demande.cloture.commentaire.label: 'Commentaire obligatoire exposant les raisons des modifications :'
 fiche_matiere.demande.cloture.help: 'Confirmer la demande de réouverture et soumettre les modifications pour vérification et publication.'
 fiche_matiere.demande.cloture.label: 'Je confirme la clôture et soumets les modifications'
+fiche_matiere.demande.clotureu.help: 'Indiquez le motif de la demande de clôture de la fiche matière.'
 fiche_matiere.demande.reouverture.help: 'Confirmer la demande de réouverture.'
 fiche_matiere.demande.reouverture.label: 'Je confirme la demande de réouverture'
 fiche_matiere.demande.reouverture.ses.alerte: 'Vous avez demandé la réouverture de la fiche EC/matière pour y apporter des modifications.'
 fiche_matiere.publie: 'Fiche EC/Matière publiée'
+fiche_matiere.validation.fiche_matiere.btn-active: fiche_matiere.validation.fiche_matiere.btn-active
 fiche_matiere.validation.fiche_matiere.btn-muted: fiche_matiere.validation.fiche_matiere.btn-muted
+fiche_matiere.validation.fiche_matiere.btn-pending: fiche_matiere.validation.fiche_matiere.btn-pending
 fiche_matiere.validation.fiche_matiere.publication.btn-muted: fiche_matiere.validation.fiche_matiere.publication.btn-muted
+fiche_matiere.validation.fiche_matiere.publication.btn-pending: fiche_matiere.validation.fiche_matiere.publication.btn-pending
 fiche_matiere.validation.fiche_matiere.ses.btn-muted: fiche_matiere.validation.fiche_matiere.ses.btn-muted
+fiche_matiere.validation.fiche_matiere.ses.btn-pending: fiche_matiere.validation.fiche_matiere.ses.btn-pending
 formation.edit.valide.cfvu.flash.success: 'Modification enregistrée pour la validation par la CFVU'
 formation.refuse.cfvu.flash.success: 'Formation refusée par la CFVU'
 formation.refuse.soumis_dpe_composante.flash.success: 'Parcours/formation refusé par le responsable DPE'
@@ -269,11 +271,6 @@ formation.valide.formation.flash.success: 'Validation de la formation pour trans
 formation.valide.publication.flash.success: 'Validation de la formation pour publication'
 formation.valide.ses.flash.success: 'Validation de la formation par le SES'
 formation.valide.soumis_dpe_composante.flash.success: 'Validation de la formation pour passage en Conseil de composante'
-historique:
-    fiche_matiere:
-        rouvrir_fiche_matiere: 'Demande de réouverture de la fiche EC/matière'
-    relecture:
-        avant_publication: 'Relecture avant publication. Visé pour publication le %date%'
 historique.: historique.
 historique.changeRf.validation.soumis_cfvu: 'Validation demande changement RF par la CFVU du %date%'
 historique.changeRf.validation.soumis_conseil: 'Validation demande changement RF par le conseil de composante du %date%'
@@ -286,9 +283,11 @@ historique.de.validation.formation.title: 'Historique des validations de la form
 historique.de.validation.parcours.infobulle: 'Historique de validation'
 historique.de.validation.parcours.title: 'Historique des validations du parcours'
 historique.en_cours_redaction.parcours: 'Modification en cours'
+historique.fiche_matiere.rouvrir_fiche_matiere: 'Demande de réouverture de la fiche EC/matière'
 historique.force_admin.badge: 'Forçage administrateur'
 historique.laisserPasser.soumis_conseil: 'Laissez-passer demandé.'
 historique.publie: 'Publié le %date%'
+historique.relecture.avant_publication: 'Relecture avant publication. Visé pour publication le %date%'
 historique.soumis.cfvu: 'Validation de la CFVU du %date%'
 historique.validation.cfvu: 'Validation de la CFVU du %date%'
 historique.validation.cloture_ses_ss_cfvu: 'Demande de réouverture clôturée le %date%'
@@ -308,6 +307,7 @@ modal_description.refuser_definitif_cfvu.refuser: modal_description.refuser_defi
 modal_description.refuser_revoir_cfvu.reserver: modal_description.refuser_revoir_cfvu.reserver
 modal_description.reouvrir_avant_publie.reouvrir: modal_description.reouvrir_avant_publie.reouvrir
 modal_description.valider_cfvu.valider: modal_description.valider_cfvu.valider
+modal_description.valider_fiche_compo.valider: modal_description.valider_fiche_compo.valider
 modal_description.valider_parcours.valider: modal_description.valider_parcours.valider
 modal_description.valider_publication.valider: modal_description.valider_publication.valider
 modal_description.valider_reserve_central_cfvu.valider: modal_description.valider_reserve_central_cfvu.valider
@@ -385,13 +385,11 @@ refuse_conseil: 'Refus Conseil composante'
 refuse_definitif_cfvu: 'Refus définitif CFVU'
 refuse_dpe_composante: 'Refus DPE composante'
 refuse_rf: 'Refus RF'
-relecture:
-    avant_publication:
-        timeline: Publication
 relecture.avant_publication: 'Relecture avant publication'
 relecture.avant_publication.btn-info: 'Parcours transmis pour relecture avant publication'
 relecture.avant_publication.btn-muted: 'Publication indisponible'
 relecture.avant_publication.btn-success: 'Parcours validé pour publication'
+relecture.avant_publication.timeline: Publication
 relecture.avant_publication.valide.alerte: 'Indiquer la date de publication du DPE'
 reserve.soumis.cfvu.argumentaire.label: 'Motif(s) du refus :'
 reserve.soumis.cfvu.helps.projet.a.revoir.label: 'Projet de DPE à revoir pour nouveau passage en CFVU'
@@ -416,15 +414,17 @@ reserve.validation.soumis_conseil.argumentaire.label: 'Argumentaire :'
 reserve.validation.soumis_conseil.date.label: 'Date du conseil de composante'
 reserve.validation.soumis_conseil.helps.argumentaire.help: ''
 reserve.validation.soumis_conseil.helps.date.help: ''
-soumis:
-    cfvu:
-        timeline: 'Validation par la CFVU'
+reserver_ses: reserver_ses
+ses.change_etat.alerte: "La modification de l'état aura un impact direct sur la visibilité du dossier."
+ses.change_ouverture.alerte: "La modification de l'ouverture impactera la saisie des maquettes."
+ses.commentaires.alerte: 'Attention : un commentaire SES a été émis sur ce dossier.'
 soumis.cfvu: 'Soumis CFVU'
 soumis.cfvu.btn-danger: 'Parcours refusé par la CFVU'
 soumis.cfvu.btn-info: 'Parcours soumis à la CFVU'
 soumis.cfvu.btn-muted: 'CFVU indisponible'
 soumis.cfvu.btn-success: 'Parcours validé par la CFVU'
 soumis.cfvu.btn-warning: 'Réserves sur le parcours émises par la CFVU'
+soumis.cfvu.timeline: 'Validation par la CFVU'
 soumis.cfvu.valide.cas.acceptation.directe.soumis_cfvu: 'Validation du projet DPE "formation"'
 soumis.cfvu.valide.cas.acceptation.non.directe.soumis_cfvu: 'Validation du projet DPE "formation" SOUS RESERVE :'
 soumis.cfvu.valide.cas.sous.reserve.conseil.soumis_cfvu: 'Validation CFVU - sous réserve de validation en Conseil de composante'
@@ -448,11 +448,8 @@ supprimer.historique: "Supprimer de l'historique"
 tacite_reconduction: 'Tacite reconduction'
 tacite_reconduction.parcours: 'Tacite reconduction du parcours'
 tacite_reconduction.parcours.valide.alerte: 'La validation de la tacite reconduction du parcours permet sa transmission au SES.'
-title:
-    validation:
-        fiche:
-            valider_fiche_compo: 'Soumettre la fiche matière'
 title.validation.fiche.reserver_fiche_ses: 'Emettre des réserves sur la fiche matière'
+title.validation.fiche.valider_fiche_compo: 'Soumettre la fiche matière'
 title.validation.parcours.refuser_conseil: 'Refuser les modifications'
 title.validation.parcours.reserver_conseil: 'Emettre des réserves sur le parcours'
 title.validation.parcours.valider_conseil: 'Valider le parcours par le conseil de composante'
@@ -467,19 +464,6 @@ transmettre: transmettre
 transmis.parcours.formation: 'Parcours transmis'
 transmis_pour_publication: 'Validé pour publication'
 transmis_ses: 'Soumis central'
-validation:
-    fiche_matiere:
-        valide:
-            fiche:
-                alerte: 'Vérifier et soumettre la fiche matière pour publication'
-    soumis_conseil:
-        valide:
-            laisserPasser:
-                soumis_conseil: 'Demande de laissez-passer, le conseil de composante ne pouvant avoir lieu avant le passage en CFVU.'
-    valider:
-        fiche:
-            valider_fiche_compo:
-                title: 'Validation de la fiche matière'
 validation.attente_pv: 'Attente PV'
 validation.autorisation_saisie: 'Autorisation de saisie'
 validation.cfvu: 'Validé CFVU'
@@ -505,6 +489,7 @@ validation.change_rf.btn-success: 'Pas de demande de change de responsable de fo
 validation.change_rf.btn-warning: 'Une ou plusieurs demande de change de responsable de formation avec des réserves'
 validation.change_rf.info: 'Demande de changement de responsable de formation'
 validation.change_rf.success: 'Demande de changement de responsable de formation validée'
+validation.change_rf.warning: validation.change_rf.warning
 validation.cloture_ses_ss_cfvu: 'Valider la clôture de la demande de réouverture'
 validation.conseil.btn-danger: 'Parcours refusé par le conseil de composante'
 validation.conseil.btn-info: 'Parcours soumis au conseil de composante'
@@ -554,6 +539,7 @@ validation.fiche_matiere.success: 'Fiche EC/matière validée'
 validation.fiche_matiere.valide.alerte: |-
     La validation de la fiche EC/matière permet sa transmission au central en vue de la publication. Après transmission, la fiche "EC/matière" ne sera plus modifiable. 
      La fiche EC/matière n'est publiable que si elle est complète.
+validation.fiche_matiere.valide.fiche.alerte: 'Vérifier et soumettre la fiche matière pour publication'
 validation.fiche_matiere.valide.impossible.en_cours_redaction: 'La validation de la fiche EC/matière est impossible. Les informations de cette fiche sont incomplètes/erronées.'
 validation.formation: 'Formation validée'
 validation.formation.btn-danger: 'Formation refusée'
@@ -566,6 +552,7 @@ validation.formation.info: 'Formation en attente de validation'
 validation.formation.muted: validation.formation.muted
 validation.formation.reserve.autorisation_saisie: validation.formation.reserve.autorisation_saisie
 validation.formation.reserve.en_cours_redaction: validation.formation.reserve.en_cours_redaction
+validation.formation.success: validation.formation.success
 validation.formation.valide.alerte: 'La validation de la formation permet la transmission du projet DPE "formation" au responsable DPE de la composante pour visa. Après validation, le projet DPE "formation" ne sera plus modifiable.'
 validation.formation.valide.autorisation_saisie: validation.formation.valide.autorisation_saisie
 validation.formation.valide.en_cours_redaction: 'La validation de la formation permet la transmission du projet DPE "formation" au responsable DPE de votre composante pour visa en vue du passage en conseil de composante.  Après validation, la fiche "formation" ne sera plus modifiable.'
@@ -666,6 +653,7 @@ validation.soumis_conseil.refuse.alerte: 'Le projet DPE "formation" reste non mo
 validation.soumis_conseil.reserve.alerte: 'Le projet DPE "formation" est de nouveau modifiable. Il devra être retravaillé en vue d’une nouvelle présentation.'
 validation.soumis_conseil.timeline: 'Validation par le Conseil de composante'
 validation.soumis_conseil.valide.alerte: 'Après transmission pour passage en CFVU, le projet DPE "formation" n''est plus modifiable par la composante.'
+validation.soumis_conseil.valide.laisserPasser.soumis_conseil: 'Demande de laissez-passer, le conseil de composante ne pouvant avoir lieu avant le passage en CFVU.'
 validation.soumis_conseil.valide.soumis_conseil: validation.conseil.valide.soumis_conseil
 validation.soumis_conseil_reserve: 'Soumis Conseil avec réserves (PV ou modifications), sans CFVU'
 validation.soumis_dpe_composante_reserve_cfvu: 'Retour DPE composante suite réserves CFVU'
@@ -677,6 +665,7 @@ validation.valider.changeRf.reserver_ses.title: 'Emettre des réserves sur la de
 validation.valider.changeRf.valider_conseil.title: 'Validation de la demande de changement de responsable de formation par le conseil de composante'
 validation.valider.changeRf.valider_ses.title: 'Validation de la demande de changement de responsable de formation par le SES'
 validation.valider.fiche.reserver_fiche_ses.title: 'Emettre des réserves sur la fiche matière'
+validation.valider.fiche.valider_fiche_compo.title: 'Validation de la fiche matière'
 validation.valider.fiche.valider_fiche_ses.title: 'Validation SES pour publication'
 validation.valider.fiche_matiere: 'Soumettre la fiche EC/matière'
 validation.valider.fiche_matiere.title: 'Valider et soumettre la fiche EC/matière'
@@ -742,14 +731,11 @@ validation.valider.transmis_ses: validation.valider.transmis_ses
 validation.valider.transmis_ses.title: validation.valider.transmis_ses.title
 validation.valider.valide_pour_publication: 'Valider pour publication'
 validation.verification_pv: 'Vérification PV'
-valide:
-    change_rf:
-        attente:
-            fichier:
-                label: 'Pièce justifiant la demande de changement de responsable de formation (PV, relevé de décision, délibération) :'
-        date:
-            conseil_composante:
-                label: 'Date du conseil de composante'
+valide.change_rf.attente.date.label: "Date de prise d'effet"
+valide.change_rf.attente.fichier.label: 'Pièce justifiant la demande de changement de responsable de formation (PV, relevé de décision, délibération) :'
+valide.change_rf.attente.helps.date.help: 'Indiquez la date à laquelle le changement de responsable prend effet.'
+valide.change_rf.attente.helps.fichier.help: 'Joindre un document justificatif (ex: arrêté, décision du conseil).'
+valide.change_rf.date.conseil_composante.label: 'Date du conseil de composante'
 valide.change_rf.date.valider_cfvu_attente_pv.label: 'Date de la CFVU'
 valide.change_rf.date.valider_cfvu_avec_pv.label: 'Date de la CFVU'
 valide.change_rf.date.valider_conseil.label: 'Date du conseil de composante'
@@ -791,60 +777,6 @@ verifier.la.saisie.parcours.infobulle: 'Vérifier les informations saisies dans 
 verifier.la.saisie.parcours.title: 'Vérification de la fiche parcours'
 voir.le.pv: 'Voir le PV'
 voir.le.pv.infobulle: 'Voir la pièce justifiant la validation par le Conseil de composante (PV, Relevé de décisions, délibération)'
-workflow:
-    validation:
-        error:
-            but.competences.missing: 'Les blocs de compétences sont obligatoires pour un BUT.'
-            cfvu.debouches.missing: 'Les débouchés professionnels doivent être renseignés pour la CFVU.'
-            cfvu.ects.mismatch: 'Le total ECTS (%actual%) ne correspond pas au total attendu (%expected%).'
-            cfvu.fiches.not_validated: '%count% fiches matières ne sont pas validées. Toutes les fiches doivent être validées pour la CFVU.'
-            cfvu.fiches.pending_ses: '%count% fiches matières sont en attente de validation par le SES.'
-            cfvu.mccc.incomplete: "%count% EC sur %total% n'ont pas de MCCC définies. Toutes les MCCC doivent être renseignées pour la CFVU."
-            cfvu.niveau_entree.missing: "Le niveau d'entrée de la formation doit être défini."
-            cfvu.niveau_sortie.missing: 'Le niveau de sortie de la formation doit être défini.'
-            cfvu.objectifs_formation.missing: 'Les objectifs de la formation doivent être renseignés.'
-            cfvu.remplissage.insufficient: 'Le taux de remplissage est insuffisant pour la CFVU. Minimum requis : %min%%, actuel : %current%%.'
-            composante.missing: "La composante porteuse de la formation n'est pas définie."
-            conseil.contenu_formation.empty: 'Le contenu de la formation doit être renseigné avant le passage en conseil.'
-            conseil.fiches.not_validated: '%count% fiches matières sur %total% ne sont pas validées (%percentage%%).'
-            conseil.mccc.incomplete: "%count% EC sur %total% n'ont pas de MCCC définies (%percentage%%). Les MCCC doivent être complètes avant le conseil."
-            formation.missing: 'La formation associée est manquante.'
-            lp.stage.duration.insufficient: "Le stage doit être d'au moins 420 heures (12 semaines) pour une LP. Actuel : %hours%h."
-            lp.stage.required: 'Le stage est obligatoire pour une Licence Professionnelle.'
-            parcours.libelle.empty: 'Le libellé du parcours est obligatoire.'
-            parcours.missing: 'Le parcours associé est manquant.'
-            parcours.objectifs.empty: 'Les objectifs du parcours doivent être renseignés.'
-            parcours.regime_inscription.empty: "Le régime d'inscription doit être défini."
-            parcours.responsable.missing: 'Le responsable du parcours doit être défini.'
-            remplissage.insufficient: 'Le taux de remplissage du parcours est insuffisant. Minimum requis : %min%%, actuel : %current%%.'
-            structure.semestres.empty: "Aucun semestre n'est défini pour ce parcours."
-            type_diplome.missing: "Le type de diplôme n'est pas défini."
-        warning:
-            cfvu.codes_rome.missing: "Les codes ROME ne sont pas renseignés. Ils sont utiles pour l'orientation des étudiants."
-            cfvu.conseil.not_passed: 'Vérifiez que le parcours a bien été validé par le service central (SES).'
-            cfvu.ects.slight_mismatch: 'Le total ECTS (%actual%) diffère légèrement du total attendu (%expected%).'
-            cfvu.niveau_francais.missing: "Le niveau de français requis n'est pas défini."
-            cfvu.remplissage.not_complete: "Le parcours n'est pas complètement rempli (%current%%). Complétez toutes les informations pour une présentation optimale en CFVU."
-            cfvu.rncp.missing: 'Le code RNCP devrait être renseigné pour ce diplôme.'
-            conseil.descriptif.empty: "Le descriptif de présentation (haut de page) n'est pas renseigné."
-            conseil.fiches.empty: "Aucune fiche matière n'est associée à ce parcours."
-            conseil.fiches.incomplete: '%count% fiches matières ne sont pas complètes.'
-            conseil.fiches.partially_validated: '%count% fiches matières sur %total% ne sont pas encore validées.'
-            conseil.mccc.partial: "%count% EC sur %total% n'ont pas de MCCC définies."
-            conseil.modalites_admission.empty: "Les modalités d'admission ne sont pas renseignées."
-            conseil.previous_step.not_completed: 'Assurez-vous que la validation DPE composante a bien été effectuée.'
-            conseil.resultats_attendus.empty: 'Les résultats attendus ne sont pas renseignés.'
-            licence.competences.empty: 'Les blocs de compétences ne sont pas définis pour cette Licence.'
-            lp.alternance.recommended: "L'alternance est recommandée pour une Licence Professionnelle."
-            master.poursuites_etudes.empty: "Les poursuites d'études ne sont pas renseignées."
-            master.rncp.missing: 'Le code RNCP devrait être renseigné pour un Master.'
-            parcours.contenu.empty: "Le contenu de la formation n'est pas renseigné."
-            parcours.debouches.empty: 'Les débouchés du parcours ne sont pas renseignés.'
-            parcours.localisation.empty: "La localisation du parcours n'est pas définie."
-            parcours.modalites_enseignement.empty: "Les modalités d'enseignement ne sont pas définies."
-            parcours.prerequis.empty: 'Les prérequis du parcours ne sont pas renseignés.'
-            remplissage.incomplete: "Le parcours n'est pas complètement rempli (%current%%). Il est recommandé de compléter toutes les informations."
-            structure.semestre.ues.empty: 'Le semestre %semestre% ne contient aucune UE.'
 workflow.autoriser.menu.description: workflow.autoriser.menu.description
 workflow.autoriser.menu.label: workflow.autoriser.menu.label
 workflow.publier.menu.description: workflow.publier.menu.description
@@ -864,6 +796,31 @@ workflow.rouvrir_fiche_matiere.menu.description: workflow.rouvrir_fiche_matiere.
 workflow.rouvrir_fiche_matiere.menu.label: workflow.rouvrir_fiche_matiere.menu.label
 workflow.validation.cfvu: 'Validation de la formation par la CFVU'
 workflow.validation.dpe: 'Validation de la formation par le responsable DPE'
+workflow.validation.error.but.competences.missing: 'Les blocs de compétences sont obligatoires pour un BUT.'
+workflow.validation.error.cfvu.debouches.missing: 'Les débouchés professionnels doivent être renseignés pour la CFVU.'
+workflow.validation.error.cfvu.ects.mismatch: 'Le total ECTS (%actual%) ne correspond pas au total attendu (%expected%).'
+workflow.validation.error.cfvu.fiches.not_validated: '%count% fiches matières ne sont pas validées. Toutes les fiches doivent être validées pour la CFVU.'
+workflow.validation.error.cfvu.fiches.pending_ses: '%count% fiches matières sont en attente de validation par le SES.'
+workflow.validation.error.cfvu.mccc.incomplete: "%count% EC sur %total% n'ont pas de MCCC définies. Toutes les MCCC doivent être renseignées pour la CFVU."
+workflow.validation.error.cfvu.niveau_entree.missing: "Le niveau d'entrée de la formation doit être défini."
+workflow.validation.error.cfvu.niveau_sortie.missing: 'Le niveau de sortie de la formation doit être défini.'
+workflow.validation.error.cfvu.objectifs_formation.missing: 'Les objectifs de la formation doivent être renseignés.'
+workflow.validation.error.cfvu.remplissage.insufficient: 'Le taux de remplissage est insuffisant pour la CFVU. Minimum requis : %min%%, actuel : %current%%.'
+workflow.validation.error.composante.missing: "La composante porteuse de la formation n'est pas définie."
+workflow.validation.error.conseil.contenu_formation.empty: 'Le contenu de la formation doit être renseigné avant le passage en conseil.'
+workflow.validation.error.conseil.fiches.not_validated: '%count% fiches matières sur %total% ne sont pas validées (%percentage%%).'
+workflow.validation.error.conseil.mccc.incomplete: "%count% EC sur %total% n'ont pas de MCCC définies (%percentage%%). Les MCCC doivent être complètes avant le conseil."
+workflow.validation.error.formation.missing: 'La formation associée est manquante.'
+workflow.validation.error.lp.stage.duration.insufficient: "Le stage doit être d'au moins 420 heures (12 semaines) pour une LP. Actuel : %hours%h."
+workflow.validation.error.lp.stage.required: 'Le stage est obligatoire pour une Licence Professionnelle.'
+workflow.validation.error.parcours.libelle.empty: 'Le libellé du parcours est obligatoire.'
+workflow.validation.error.parcours.missing: 'Le parcours associé est manquant.'
+workflow.validation.error.parcours.objectifs.empty: 'Les objectifs du parcours doivent être renseignés.'
+workflow.validation.error.parcours.regime_inscription.empty: "Le régime d'inscription doit être défini."
+workflow.validation.error.parcours.responsable.missing: 'Le responsable du parcours doit être défini.'
+workflow.validation.error.remplissage.insufficient: 'Le taux de remplissage du parcours est insuffisant. Minimum requis : %min%%, actuel : %current%%.'
+workflow.validation.error.structure.semestres.empty: "Aucun semestre n'est défini pour ce parcours."
+workflow.validation.error.type_diplome.missing: "Le type de diplôme n'est pas défini."
 workflow.validation.fiche_matiere: 'Validation de la fiche EC/matière'
 workflow.validation.formation: 'Validation de la formation par le responsable de formation'
 workflow.validation.parcours: 'Validation du parcours par le rédacteur (= transmission)'
@@ -871,20 +828,47 @@ workflow.validation.parcours_rf: 'Validation du parcours par le responsable de f
 workflow.validation.publication: 'Validation du DPE pour publication'
 workflow.validation.ses: 'Validation du SES'
 workflow.validation.soumis_conseil: 'Validation de la formation par le conseil de composante'
-workflow.valider_cfvu.dateConseil.label: workflow.valider_cfvu.dateConseil.label
-workflow.valider_cfvu.menu.description: workflow.valider_cfvu.menu.description
-workflow.valider_cfvu.menu.label: workflow.valider_cfvu.menu.label
-workflow.valider_parcours.menu.description: workflow.valider_parcours.menu.description
-workflow.valider_parcours.menu.label: workflow.valider_parcours.menu.label
-workflow.valider_publication.datePublication.label: workflow.valider_publication.datePublication.label
-workflow.valider_publication.menu.description: workflow.valider_publication.menu.description
-workflow.valider_publication.menu.label: workflow.valider_publication.menu.label
-workflow.valider_reserve_central_cfvu.menu.description: workflow.valider_reserve_central_cfvu.menu.description
-workflow.valider_reserve_central_cfvu.menu.label: workflow.valider_reserve_central_cfvu.menu.label
-workflow.valider_reserve_cfvu.argumentaire.label: workflow.valider_reserve_cfvu.argumentaire.label
-workflow.valider_reserve_cfvu.dateCfvu.label: workflow.valider_reserve_cfvu.dateCfvu.label
-workflow.valider_reserve_cfvu.menu.description: workflow.valider_reserve_cfvu.menu.description
-workflow.valider_reserve_cfvu.menu.label: workflow.valider_reserve_cfvu.menu.label
-workflow.valider_reserve_conseil_cfvu.menu.description: workflow.valider_reserve_conseil_cfvu.menu.description
-workflow.valider_reserve_conseil_cfvu.menu.label: workflow.valider_reserve_conseil_cfvu.menu.label
+workflow.validation.warning.cfvu.codes_rome.missing: "Les codes ROME ne sont pas renseignés. Ils sont utiles pour l'orientation des étudiants."
+workflow.validation.warning.cfvu.conseil.not_passed: 'Vérifiez que le parcours a bien été validé par le service central (SES).'
+workflow.validation.warning.cfvu.ects.slight_mismatch: 'Le total ECTS (%actual%) diffère légèrement du total attendu (%expected%).'
+workflow.validation.warning.cfvu.niveau_francais.missing: "Le niveau de français requis n'est pas défini."
+workflow.validation.warning.cfvu.remplissage.not_complete: "Le parcours n'est pas complètement rempli (%current%%). Complétez toutes les informations pour une présentation optimale en CFVU."
+workflow.validation.warning.cfvu.rncp.missing: 'Le code RNCP devrait être renseigné pour ce diplôme.'
+workflow.validation.warning.conseil.descriptif.empty: "Le descriptif de présentation (haut de page) n'est pas renseigné."
+workflow.validation.warning.conseil.fiches.empty: "Aucune fiche matière n'est associée à ce parcours."
+workflow.validation.warning.conseil.fiches.incomplete: '%count% fiches matières ne sont pas complètes.'
+workflow.validation.warning.conseil.fiches.partially_validated: '%count% fiches matières sur %total% ne sont pas encore validées.'
+workflow.validation.warning.conseil.mccc.partial: "%count% EC sur %total% n'ont pas de MCCC définies."
+workflow.validation.warning.conseil.modalites_admission.empty: "Les modalités d'admission ne sont pas renseignées."
+workflow.validation.warning.conseil.previous_step.not_completed: 'Assurez-vous que la validation DPE composante a bien été effectuée.'
+workflow.validation.warning.conseil.resultats_attendus.empty: 'Les résultats attendus ne sont pas renseignés.'
+workflow.validation.warning.licence.competences.empty: 'Les blocs de compétences ne sont pas définis pour cette Licence.'
+workflow.validation.warning.lp.alternance.recommended: "L'alternance est recommandée pour une Licence Professionnelle."
+workflow.validation.warning.master.poursuites_etudes.empty: "Les poursuites d'études ne sont pas renseignées."
+workflow.validation.warning.master.rncp.missing: 'Le code RNCP devrait être renseigné pour un Master.'
+workflow.validation.warning.parcours.contenu.empty: "Le contenu de la formation n'est pas renseigné."
+workflow.validation.warning.parcours.debouches.empty: 'Les débouchés du parcours ne sont pas renseignés.'
+workflow.validation.warning.parcours.localisation.empty: "La localisation du parcours n'est pas définie."
+workflow.validation.warning.parcours.modalites_enseignement.empty: "Les modalités d'enseignement ne sont pas définies."
+workflow.validation.warning.parcours.prerequis.empty: 'Les prérequis du parcours ne sont pas renseignés.'
+workflow.validation.warning.remplissage.incomplete: "Le parcours n'est pas complètement rempli (%current%%). Il est recommandé de compléter toutes les informations."
+workflow.validation.warning.structure.semestre.ues.empty: 'Le semestre %semestre% ne contient aucune UE.'
+workflow.valider_cfvu.dateConseil.label: 'Date du conseil / CFVU'
+workflow.valider_cfvu.menu.description: 'Valider le dossier en CFVU'
+workflow.valider_cfvu.menu.label: 'Validation CFVU'
+workflow.valider_fiche_compo.menu.description: workflow.valider_fiche_compo.menu.description
+workflow.valider_fiche_compo.menu.label: workflow.valider_fiche_compo.menu.label
+workflow.valider_parcours.menu.description: 'Valider le parcours'
+workflow.valider_parcours.menu.label: 'Validation du parcours'
+workflow.valider_publication.datePublication.label: 'Date de publication'
+workflow.valider_publication.menu.description: 'Publier le dossier'
+workflow.valider_publication.menu.label: Publication
+workflow.valider_reserve_central_cfvu.menu.description: 'Valider avec réserve en commission centrale'
+workflow.valider_reserve_central_cfvu.menu.label: 'Validation sous réserve (Centrale)'
+workflow.valider_reserve_cfvu.argumentaire.label: 'Argumentaire de la réserve'
+workflow.valider_reserve_cfvu.dateCfvu.label: 'Date de la CFVU'
+workflow.valider_reserve_cfvu.menu.description: 'Valider avec réserve en CFVU'
+workflow.valider_reserve_cfvu.menu.label: 'Validation sous réserve (CFVU)'
+workflow.valider_reserve_conseil_cfvu.menu.description: 'Valider avec réserve en conseil'
+workflow.valider_reserve_conseil_cfvu.menu.label: 'Validation sous réserve (Conseil)'
 

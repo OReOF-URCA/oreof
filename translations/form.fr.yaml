@@ -349,6 +349,7 @@ fiche_matiere_step1.labels.responsableEc: "Responsable de l'enseignement"
 fiche_matiere_step1.labels.responsableFicheMatiere: "Référent de l'enseignement"
 fiche_matiere_step1.labels.sigle: "Sigle de l'enseignement"
 fiche_matiere_step1.labels.typeMatiere.label: 'Type de "matière" pour les BUT'
+fiche_matiere_step1b.labels.enseignementMutualise.label: fiche_matiere_step1b.labels.enseignementMutualise.label
 fiche_matiere_step2.labels.description: "Description de l'enseignement"
 fiche_matiere_step2.labels.langueDispense.label: 'Enseignement dispensé en :'
 fiche_matiere_step2.labels.langueSupport.label: 'Support de cours en :'
@@ -488,21 +489,21 @@ parcours_step5.labels.adresses.label.__name__.label: parcours_step5.labels.adres
 parcours_step5.labels.composanteInscription: "Composante d'inscription"
 parcours_step5.labels.composanteInscription.label: "Régime(s) d'inscription"
 parcours_step5.labels.contacts: 'Contacts de la formation/du parcours'
-parcours_step5.labels.contacts.0.denomination: 'Dénomination'
-parcours_step5.labels.contacts.0.email: 'Email'
-parcours_step5.labels.contacts.0.nom: 'Nom'
-parcours_step5.labels.contacts.0.prenom: 'Prénom'
-parcours_step5.labels.contacts.0.telephone: 'Téléphone'
-parcours_step5.labels.contacts.__name__.denomination: 'Dénomination'
-parcours_step5.labels.contacts.__name__.email: 'Email'
-parcours_step5.labels.contacts.__name__.nom: 'Nom'
-parcours_step5.labels.contacts.__name__.prenom: 'Prénom'
-parcours_step5.labels.contacts.__name__.telephone: 'Téléphone'
+parcours_step5.labels.contacts.0.denomination: Dénomination
+parcours_step5.labels.contacts.0.email: Email
+parcours_step5.labels.contacts.0.nom: Nom
+parcours_step5.labels.contacts.0.prenom: Prénom
+parcours_step5.labels.contacts.0.telephone: Téléphone
+parcours_step5.labels.contacts.__name__.denomination: Dénomination
+parcours_step5.labels.contacts.__name__.email: Email
+parcours_step5.labels.contacts.__name__.nom: Nom
+parcours_step5.labels.contacts.__name__.prenom: Prénom
+parcours_step5.labels.contacts.__name__.telephone: Téléphone
 parcours_step5.labels.contacts.label: 'Contacts de la formation/du parcours'
 parcours_step5.labels.contacts.label.0.label: parcours_step5.labels.contacts.label.0.label
 parcours_step5.labels.contacts.label.0.label.adresse.label: parcours_step5.labels.contacts.label.0.label.adresse.label
 parcours_step5.labels.contacts.label.__name__.label: parcours_step5.labels.contacts.label.__name__.label
-parcours_step5.labels.contacts.label.__name__.label.adresse.label: 'Adresse'
+parcours_step5.labels.contacts.label.__name__.label.adresse.label: Adresse
 parcours_step5.labels.coordSecretariat: 'Coordonnées du secrétariat pédagogique'
 parcours_step5.labels.modalitesAdmission: parcours_step5.labels.modalitesAdmission
 parcours_step5.labels.modalitesAlternance: "Précisez les modalités de l'alternance"

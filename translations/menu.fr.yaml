@@ -1,4 +1,8 @@
+' English for Banking and Finance 1': ' English for Banking and Finance 1'
+' Lecture series in English 1': ' Lecture series in English 1'
+'Accompagnement des transformations des organisations sanitaires et sociales': 'Accompagnement des transformations des organisations sanitaires et sociales'
 'Créer une formation': 'Créer une formation'
+Modifier: Modifier
 'UFR Sciences Economiques, Sociales et de Gestion': 'UFR Sciences Economiques, Sociales et de Gestion'
 breadcrumb.home: Accueil
 menu.admin.consulter_offre: "Consulter l'offre de formation"
@@ -40,7 +44,7 @@ menu.config.help: 'Configurations des aides'
 menu.config.langues: Langues
 menu.config.mentions: Mentions
 menu.config.menu_config_globale: 'Configuration globale'
-menu.config.menu_developpement: 'Développement'
+menu.config.menu_developpement: Développement
 menu.config.menu_etablissement: 'Configuration établissement'
 menu.config.nature_ue: 'Nature des UE/EC'
 menu.config.notifications: 'Notifications et mails'
@@ -83,9 +87,7 @@ menu.tableau_de_bord: 'Tableau de bord'
 page.admin_styleguide_index.description: "Consulter le styleguide d'interface."
 page.api_site_web_documentation.description: "Contrats de l'API de publication de l'offre vers le site web."
 page.app_actualite_index.description: 'Gérer les actualités ORéOF.'
-page.app_actualite_index.title: Actualités
-page.app_admin_duplication_campagne_index.description: page.app_admin_duplication_campagne_index.description
-page.app_admin_pilotage_campagne_index.description: 'Tableau de bord et pilotage de la campagne de collecte.'
+page.app_admin_duplication_campagne_index.description: "Assistant de duplication des maquettes pour une nouvelle campagne de collecte."
 page.app_admin_statistiques_visites_index.description: 'Suivre les connexions et les pages vues à partir des journaux.'
 page.app_admin_versioning_index.description: 'Contrôler les fichiers JSON de versioning par campagne.'
 page.app_admin_workflow_index.description: 'Visualiser et analyser la cartographie des transitions de workflows.'

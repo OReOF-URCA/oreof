@@ -17,6 +17,7 @@
 2028: '2028'
 2029: '2029'
 2030: '2030'
+'A-Z, 0-9': 'A-Z, 0-9'
 'A1 (Utilisateur élémentaire débutant)': 'A1 (Utilisateur élémentaire débutant)'
 'A2 (Utilisateur élémentaire intermédiaire)': 'A2 (Utilisateur élémentaire intermédiaire)'
 Adresse: Adresse
@@ -25,13 +26,26 @@ Adresse: Adresse
 'Adresse email': 'Adresse email'
 'Adresse mail de contact de la composante': 'Adresse mail de contact de la composante'
 Année: 'Année de collecte'
+'Année 1': 'Année 1'
+'Année 2': 'Année 2'
+'Année 3': 'Année 3'
 'Année Universitaire': 'Année Universitaire'
+'Années concernées': 'Années concernées'
+App\\TypeDiplome\\Handler\\ButHandler: App\\TypeDiplome\\Handler\\ButHandler
+App\\TypeDiplome\\Handler\\DaeuHandler: App\\TypeDiplome\\Handler\\DaeuHandler
+App\\TypeDiplome\\Handler\\DuHandler: App\\TypeDiplome\\Handler\\DuHandler
+App\\TypeDiplome\\Handler\\M2EHandler: App\\TypeDiplome\\Handler\\M2EHandler
+App\\TypeDiplome\\Handler\\UniversityHandler: App\\TypeDiplome\\Handler\\UniversityHandler
+App\\TypeDiplome\\NonClassique\\NonClassiqueHandler: App\\TypeDiplome\\NonClassique\\NonClassiqueHandler
 'Après la 1ère année de licence "Sciences pour la Santé" - Accès santé': 'Après la 1ère année de licence "Sciences pour la Santé" - Accès santé'
+Aucun: Aucun
 Autre: Autre
 'Autre mention': Autre
 'Autre téléphone de la composante': 'Autre téléphone de la composante'
 'B1 (Utilisateur indépendant)': 'B1 (Utilisateur indépendant)'
 'B2 (Utilisateur indépendant avancé)': 'B2 (Utilisateur indépendant avancé)'
+Blanc: Blanc
+Bleu: Bleu
 'C1 (Utilisateur expérimenté autonome)': 'C1 (Utilisateur expérimenté autonome)'
 'C2 (Utilisateur expérimenté maîtrise)': 'C2 (Utilisateur expérimenté maîtrise)'
 CC: CC
@@ -41,6 +55,7 @@ CT: CT
 "Calendrier d'inscription": "Calendrier d'inscription"
 'Calendrier universitaire': 'Calendrier universitaire'
 'Campagne de collecte DPE active ?': 'La campagne de collecte des projets de DPE est-elle active ?'
+'Capacité obligatoire pour les années': 'Capacité obligatoire pour les années'
 Charleville-Mézières: Charleville-Mézières
 Chaumont: Chaumont
 'Choisir dans la liste ou choisir "+" pour ajouter un nouveau directeur': 'Choisir dans la liste ou choisir "+" pour ajouter un nouveau directeur'
@@ -57,6 +72,7 @@ Chaumont: Chaumont
 'Choisissez une ville': '-'
 'Châlons en Champagne': 'Châlons en Champagne'
 Civilité: Civilité
+'Clôture de la collecte': 'Clôture de la collecte'
 'Co-Responsable du parcours': 'Co-Responsable du parcours'
 'Co-responsable du parcours': 'Co-responsable du parcours'
 'Code Apogée': 'Code Apogée'
@@ -71,10 +87,13 @@ Composante: Composante
 "Composante d'inscription": "Composante d'inscription"
 "Composante d'inscription et où se déroulent les cours": "Composante d'inscription et où se déroulent les cours"
 "Composante d'inscription uniquement": "Composante d'inscription uniquement"
+'Configuration de la plateforme': 'Configuration de la plateforme'
 'Contrôle continu': 'Contrôle continu'
 'Contrôle continu & contrôle terminal': 'Contrôle continu & contrôle terminal'
 'Contrôle continu intégral': 'Contrôle continu intégral'
 'Contrôle terminal': 'Contrôle terminal'
+Couleur: Couleur
+'Couleur de la campagne': 'Couleur de la campagne'
 "Date d'ouverture de la campagne de collecte DPE": "Date d'ouverture de la campagne de collecte DPE"
 "Date d'ouverture du DPE": "Date d'ouverture de la campagne de collecte des projets de DPE"
 'Date de clôture de la campagne de collecte DPE': 'Date de clôture de la campagne de collecte DPE'
@@ -82,11 +101,16 @@ Composante: Composante
 'Date de la CFVU': 'Date prévue de passage des projets de DPE en CFVU'
 'Date de publication': 'Date de publication des DPE'
 'Date limite de transmission des dossiers': 'Date limite de transmission des projets de DPE'
+'Dates de la campagne de collecte': 'Dates de la campagne de collecte'
+'Demandes de modification / DPE (création, réouverture)': 'Demandes de modification / DPE (création, réouverture)'
+'Descriptifs & Fiches matières (objectifs, contenus, compétences)': 'Descriptifs & Fiches matières (objectifs, contenus, compétences)'
 'Devenir des diplômés': 'Devenir des diplômés'
 'Directeur de composante': 'Directeur de composante'
 Disciplinaire: Disciplinaire
+Domaine(s): Domaine(s)
 'Droit à la 2nde chance': 'Droit à la 2nde chance'
 Droits: Rôle
+'Définition des champs': 'Définition des champs'
 'Dénomination du contact': 'Dénomination du contact'
 'EC obligatoire': 'EC obligatoire'
 'EC à choix libre': 'EC à choix libre'
@@ -96,6 +120,8 @@ Email: Email
 'Email du responsable du parcours': 'Email du responsable du parcours'
 'En distanciel': 'En distanciel'
 'En présentiel': 'En présentiel'
+'Entrez le libellé de la mention': 'Entrez le libellé de la mention'
+'Entrez le sigle (optionnel)': 'Entrez le sigle (optionnel)'
 "Envoyer un email de conformation à l'utilisateur": "Envoyer un email de conformation à l'utilisateur"
 Etablissement: Etablissement
 Etbalissement: Etablissement
@@ -108,6 +134,10 @@ FI: 'Formation initiale'
 FI_APPRENTISSAGE: 'Formation initiale en apprentissage'
 'Fiche matière obligatoire': 'Fiche matière obligatoire'
 Formation: Formation
+'Formation accréditée': 'Formation accréditée'
+'Formation non-accréditée': 'Formation non-accréditée'
+"Global (1 seul fichier pour tout l'établissement)": "Global (1 seul fichier pour tout l'établissement)"
+Gris: Gris
 Hybride: Hybride
 Hébergement: Hébergement
 'Indiquez les droits accordés': 'Indiquez le rôle accordé'
@@ -117,6 +147,7 @@ Hébergement: Hébergement
 'Informations diverses': 'Informations diverses'
 'Informations pratiques': 'Informations pratiques'
 'Insertion professionnelle': 'Insertion professionnelle'
+Jaune: Jaune
 'Libelle de la fiche matière': 'Libelle de la fiche matière'
 Libellé: Libellé
 'Libellé Année Universitaire': 'Année universitaire concernée par les projets de DPE'
@@ -128,28 +159,40 @@ Libellé: Libellé
 'Licence - Accès santé 3ème année (L.As 3)': 'Licence - Accès santé 3ème année (L.As 3)'
 Login: Login
 Madame: Madame
+'Maquettes & Structures (semestres, UE, EC, volumes horaires)': 'Maquettes & Structures (semestres, UE, EC, volumes horaires)'
 Mention: Mention
 'Mise en situation professionnelle': 'Mise en situation professionnelle'
 "Modalités d'admission": "Modalités d'admission"
+'Modalités de Contrôle des Connaissances (MCCC)': 'Modalités de Contrôle des Connaissances (MCCC)'
 "Modalités de l'alternance": "Modalités de l'alternance"
+"Mode d'export par défaut": "Mode d'export par défaut"
 Monsieur: Monsieur
 Mémoire: Mémoire
 NORMAL: NORMAL
 "Nature de l'élément": "Nature de l'élément"
+Noir: Noir
 Nom: Nom
 'Nom du nouveau type…': 'Nom du nouveau type…'
+"Nombre d'ECTS par semestre (laisser vide si pas de quota fixe)": "Nombre d'ECTS par semestre (laisser vide si pas de quota fixe)"
 Non: Non
 None: Aucun
 'Numéro SIRET': 'Numéro SIRET'
 "Numéro d'activité": "Numéro d'activité"
+'Offre de formation (saisie, modification, validation)': 'Offre de formation (saisie, modification, validation)'
 Oui: Oui
 'Outils et Langages (transversale)': 'Outils et Langages (transversale)'
 Ouverture: Ouverture
+'Ouverture de la collecte': 'Ouverture de la collecte'
 PROJET: PROJET
+'Par type de diplôme (1 fichier par type de diplôme)': 'Par type de diplôme (1 fichier par type de diplôme)'
+'Passage au CFVU': 'Passage au CFVU'
+Plateforme: Plateforme
 'Pour en savoir plus sur ce type de formation': 'Pour en savoir plus sur ce type de formation'
+Prenom: Prenom
 Prénom: Prénom
 'Prérequis obligatoires': 'Prérequis obligatoires'
 'Présentation des formations': 'Présentation des formations'
+Publication: Publication
 ROLE_ADMIN: ROLE_ADMIN
 ROLE_SES: ROLE_SES
 ROLE_VP: ROLE_VP
@@ -158,6 +201,7 @@ Renforcement: Renforcement
 'Responsable "DPE" de la composante': 'Responsable DPE de la composante'
 'Responsable du parcours': 'Responsable du parcours'
 Restauration: Restauration
+Rouge: Rouge
 SES: SES
 STAGE: STAGE
 'Sans niveau spécifique': 'Sans niveau spécifique'
@@ -169,6 +213,8 @@ STAGE: STAGE
 'Semestre 6': 'Semestre 6'
 Sigle: Sigle
 Stage: Stage
+'Sélectionnez un type de diplôme': 'Sélectionnez un type de diplôme'
+'Sélectionnez une plateforme': 'Sélectionnez une plateforme'
 'TER – travail d’étude et de recherche': 'TER (travail d’étude et de recherche)'
 TYPE_PARCOURS_ALTERNANCE: 'Parcours en alternance uniquement'
 TYPE_PARCOURS_CLASSIQUE: 'Parcours Classique'
@@ -181,11 +227,14 @@ TYPE_PARCOURS_LAS23: 'Parcours LAS2 ou 3'
 'Texte affiché si le parcours est une LAS1-2 ou 3, avec les règles pour accéder à la LAS3': 'Texte affiché si le parcours est une LAS1-2 ou 3, avec les règles pour accéder à la LAS3'
 'Texte affiché si le parcours est une LAS2 ou 3, avec les règles pour accéder à la LAS2': 'Texte affiché si le parcours est une LAS2 ou 3, avec les règles pour accéder à la LAS2'
 'Tous les éléments': 'Tous les éléments'
+'Transmission SES': 'Transmission SES'
 Transport: Transport
 Troyes: Troyes
 "Type d'EC": "Type d'EC"
 'Type de MCCC': 'Type de MCCC'
+'Type de date (Flag)': 'Type de date (Flag)'
 'Type de diplôme': 'Type de diplôme'
+'Type de formation': 'Type de formation'
 "Type(s) de diplôme proposant ce type d'EC": "Type(s) de diplôme proposant ce type d'EC"
 "Type(s) de diplôme proposant ce type d'UE": "Type(s) de diplôme proposant ce type d'UE"
 "Type(s) de diplôme proposant ce type d'épreuve": "Type(s) de diplôme proposant ce type d'épreuve"
@@ -210,6 +259,8 @@ Téléphone: Téléphone
 'Utilisateur élémentaire débutant (A1)': 'Utilisateur élémentaire débutant (A1)'
 'Utilisateur élémentaire intermédiaire': 'Utilisateur élémentaire intermédiaire'
 'Utilisateur élémentaire intermédiaire (A2)': 'Utilisateur élémentaire intermédiaire (A2)'
+'Utilise les ECTS': 'Utilise les ECTS'
+Vert: Vert
 'Veuillez choisir la localisation du parcours': '-'
 Ville: Ville
 actualite.labels.affiche: 'Actualité publiée ?'
@@ -437,21 +488,21 @@ parcours_step5.labels.adresses.label.__name__.label: parcours_step5.labels.adres
 parcours_step5.labels.composanteInscription: "Composante d'inscription"
 parcours_step5.labels.composanteInscription.label: "Régime(s) d'inscription"
 parcours_step5.labels.contacts: 'Contacts de la formation/du parcours'
-parcours_step5.labels.contacts.0.denomination: parcours_step5.labels.contacts.0.denomination
-parcours_step5.labels.contacts.0.email: parcours_step5.labels.contacts.0.email
-parcours_step5.labels.contacts.0.nom: parcours_step5.labels.contacts.0.nom
-parcours_step5.labels.contacts.0.prenom: parcours_step5.labels.contacts.0.prenom
-parcours_step5.labels.contacts.0.telephone: parcours_step5.labels.contacts.0.telephone
-parcours_step5.labels.contacts.__name__.denomination: parcours_step5.labels.contacts.__name__.denomination
-parcours_step5.labels.contacts.__name__.email: parcours_step5.labels.contacts.__name__.email
-parcours_step5.labels.contacts.__name__.nom: parcours_step5.labels.contacts.__name__.nom
-parcours_step5.labels.contacts.__name__.prenom: parcours_step5.labels.contacts.__name__.prenom
-parcours_step5.labels.contacts.__name__.telephone: parcours_step5.labels.contacts.__name__.telephone
-parcours_step5.labels.contacts.label: parcours_step5.labels.contacts.label
+parcours_step5.labels.contacts.0.denomination: 'Dénomination'
+parcours_step5.labels.contacts.0.email: 'Email'
+parcours_step5.labels.contacts.0.nom: 'Nom'
+parcours_step5.labels.contacts.0.prenom: 'Prénom'
+parcours_step5.labels.contacts.0.telephone: 'Téléphone'
+parcours_step5.labels.contacts.__name__.denomination: 'Dénomination'
+parcours_step5.labels.contacts.__name__.email: 'Email'
+parcours_step5.labels.contacts.__name__.nom: 'Nom'
+parcours_step5.labels.contacts.__name__.prenom: 'Prénom'
+parcours_step5.labels.contacts.__name__.telephone: 'Téléphone'
+parcours_step5.labels.contacts.label: 'Contacts de la formation/du parcours'
 parcours_step5.labels.contacts.label.0.label: parcours_step5.labels.contacts.label.0.label
 parcours_step5.labels.contacts.label.0.label.adresse.label: parcours_step5.labels.contacts.label.0.label.adresse.label
 parcours_step5.labels.contacts.label.__name__.label: parcours_step5.labels.contacts.label.__name__.label
-parcours_step5.labels.contacts.label.__name__.label.adresse.label: parcours_step5.labels.contacts.label.__name__.label.adresse.label
+parcours_step5.labels.contacts.label.__name__.label.adresse.label: 'Adresse'
 parcours_step5.labels.coordSecretariat: 'Coordonnées du secrétariat pédagogique'
 parcours_step5.labels.modalitesAdmission: parcours_step5.labels.modalitesAdmission
 parcours_step5.labels.modalitesAlternance: "Précisez les modalités de l'alternance"
@@ -464,12 +515,15 @@ parcours_step6.labels.poursuitesEtudes: "Poursuites d'études envisageables"
 parcours_step7.labels.codeRNCP: 'Code RNCP du parcours, si spécifique'
 parcours_step7.labels.codeRome: 'Code(s) ROME'
 parcours_step7.labels.debouches: Débouchés
-parcours_step7.labels.descriptifBasPage: parcours_step7.labels.descriptifBasPage
-parcours_step7.labels.descriptifHautPage: parcours_step7.labels.descriptifHautPage
-parcours_step7.labels.descriptifHautPageAutomatique: parcours_step7.labels.descriptifHautPageAutomatique
+parcours_step7.labels.descriptifBasPage: 'Descriptif bas page sur le site institutionnel'
+parcours_step7.labels.descriptifHautPage: 'Descriptif haut page sur le site institutionnel'
+parcours_step7.labels.descriptifHautPageAutomatique: 'Descriptif haut page sur le site institutionnel, généré automatiquement'
 parcours_step7.labels.poursuitesEtudes: "Poursuites d'études envisageables"
 parcours_step8.labels.coordSecretariat: 'Coordonnées du secrétariat'
 parcours_step8.labels.respParcours: 'Responsable du parcours'
+plateforme_admission.labels.active.label: 'Plateforme active ?'
+plateforme_admission.labels.code: 'Code de la plateforme'
+plateforme_admission.labels.libelle: 'Libellé de la plateforme'
 profil.labels.centre.label: 'Centre(s) pour ce profil'
 profil.labels.code: 'Code du profil'
 profil.labels.libelle: 'Libellé du profil'
@@ -504,6 +558,17 @@ semestre.raccrocher.label: 'Précisez le semestre à raccrocher'
 semestre.reutilise.label: 'Précisez le semestre à raccrocher'
 semestre.type_semestre.label: 'Le semestre est-il mutualisé ?'
 test: test
+timeline.date: 'Date de fin / Échéance'
+timeline.date.help: "Date marquant la fin de cette étape ou l'échéance"
+timeline.dateDebut: 'Date de début'
+timeline.dateDebut.help: "Date marquant le début de cette période (optionnel, sinon l'étape précédente sert de repère)"
+timeline.description: "Description de l'étape"
+timeline.heure: 'Heure limite'
+timeline.icone: Icône
+timeline.inTimeline: 'Afficher dans la timeline'
+timeline.libelle: "Libellé de l'étape"
+timeline.modulesActifs.help: "Cochez les parties de l'application ouvertes à la modification durant cette étape. Hors de cette période, ces modules passeront automatiquement en consultation seule pour les utilisateurs non-administrateurs."
+timeline.modulesActifs.label: 'Modules / Fonctionnalités ouvertes à la saisie'
 type_diplome:
     labels:
         ectsObligatoireSurEc:

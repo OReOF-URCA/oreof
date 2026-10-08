@@ -87,9 +87,7 @@ mention:
 mention.edit.title: 'Modifier la mention'
 mention.new.title: 'Ajouter une mention'
 mention.show.title: 'Détails de la mention'
-modal_submit.publier.valider: "Publier"
-modal_submit.valider_fiche_compo.valider: "Valider (Composante)"
-modal_submit.valider_fiche_ses.valider: "Valider et transmettre (SES)"
+modal_submit.valider_fiche_compo.valider: modal_submit.valider_fiche_compo.valider
 nature_ue_ec:
     edit:
         title: "Modifier la nature d'UE/EC"

@@ -1,10 +1,14 @@
 '-': '-'
+'Adresse email URCA': 'Adresse email URCA'
+'Adresse email valide': 'Adresse email valide'
 'Boîte postale, bâtiment, ...': 'Boîte postale, bâtiment, ...'
 "Cochez les années où la saisie d'une capacité est obligatoire (si décoché, la capacité reste optionnelle)": "Cochez les années où la saisie d'une capacité est obligatoire (si décoché, la capacité reste optionnelle)"
 'Décoché : les formations/parcours créés via le formulaire générique sont initialisés sans passage en CFVU.': 'Décoché : les formations/parcours créés via le formulaire générique sont initialisés sans passage en CFVU.'
+"Définit si l'export dans le ZIP global et l'export principal se font en un seul fichier ou découpés par type de diplôme": "Définit si l'export dans le ZIP global et l'export principal se font en un seul fichier ou découpés par type de diplôme"
 'Indiquer la composante porteuse du projet, qui aura en charge le dépôt de la demande de création de la formation': 'Indiquer la composante porteuse du projet, qui aura en charge le dépôt de la demande de création de la formation'
 'Indiquez en 3000 caractères maximum les périodes et leurs durées en centre ou en entreprise.': 'Indiquez en 3000 caractères maximum les périodes et leurs durées en centre ou en entreprise.'
 "Le sigle est la dénomination courte de la composante, s'il existe.": "Le sigle est la dénomination courte de la composante, s'il existe."
+"Le sigle est la dénomination courte de la mention, s'il existe.": "Le sigle est la dénomination courte de la mention, s'il existe."
 'Numéro, rue, ...': 'Numéro, rue, ...'
 'Optionnel, sigle/code ou appelation courte du parcours': 'Optionnel, sigle/code ou appelation courte du parcours'
 'Personne responsable de la validation des DPE des formations de la composante': 'Personne responsable de la validation des DPE des formations de la composante'
@@ -13,6 +17,14 @@
 'Si la mention existe, veuillez la sélectionner dans la liste déroulante': ''
 'Si la mention n''existe pas, veuillez la créer dans la section "Autre mention"': ''
 'Sélectionnez les années pour lesquelles cette plateforme est utilisée': 'Sélectionnez les années pour lesquelles cette plateforme est utilisée'
+'Un seul caractère (lettre ou chiffre)': 'Un seul caractère (lettre ou chiffre)'
+__name__.helps: __name__.helps
+__name__.helps.description: __name__.helps.description
+__name__.helps.flag: __name__.helps.flag
+__name__.helps.heure: __name__.helps.heure
+__name__.helps.icone: __name__.helps.icone
+__name__.helps.inTimeline.help: __name__.helps.inTimeline.help
+__name__.helps.libelle: __name__.helps.libelle
 actualite.helps.affiche.help: actualite.helps.affiche.help
 actualite.helps.datePublication.help: actualite.helps.datePublication.help
 actualite.helps.texte: actualite.helps.texte
@@ -31,6 +43,7 @@ bug_report.helps.message: 'Indiquez une description détaillée du bug rencontr�
 bug_report.helps.title: 'Indiquez un titre court et explicite pour votre rapport de bug.'
 campagne_collecte.helps.anneeUniversitaire: campagne_collecte.helps.anneeUniversitaire
 campagne_collecte.helps.codeApogee: 'Code Apogée de la campagne de collecte'
+campagne_collecte.helps.couleur: campagne_collecte.helps.couleur
 campagne_collecte.helps.dateCfvu: campagne_collecte.helps.dateCfvu
 campagne_collecte.helps.dateClotureDpe: campagne_collecte.helps.dateClotureDpe
 campagne_collecte.helps.dateOuvertureDpe: campagne_collecte.helps.dateOuvertureDpe
@@ -38,6 +51,63 @@ campagne_collecte.helps.datePublication: campagne_collecte.helps.datePublication
 campagne_collecte.helps.dateTransmissionSes: campagne_collecte.helps.dateTransmissionSes
 campagne_collecte.helps.defaut.help: campagne_collecte.helps.defaut.help
 campagne_collecte.helps.libelle: campagne_collecte.helps.libelle
+campagne_collecte.helps.timelineDates.0.description: campagne_collecte.helps.timelineDates.0.description
+campagne_collecte.helps.timelineDates.0.flag: campagne_collecte.helps.timelineDates.0.flag
+campagne_collecte.helps.timelineDates.0.heure: campagne_collecte.helps.timelineDates.0.heure
+campagne_collecte.helps.timelineDates.0.icone: campagne_collecte.helps.timelineDates.0.icone
+campagne_collecte.helps.timelineDates.0.libelle: campagne_collecte.helps.timelineDates.0.libelle
+campagne_collecte.helps.timelineDates.1.description: campagne_collecte.helps.timelineDates.1.description
+campagne_collecte.helps.timelineDates.1.flag: campagne_collecte.helps.timelineDates.1.flag
+campagne_collecte.helps.timelineDates.1.heure: campagne_collecte.helps.timelineDates.1.heure
+campagne_collecte.helps.timelineDates.1.icone: campagne_collecte.helps.timelineDates.1.icone
+campagne_collecte.helps.timelineDates.1.libelle: campagne_collecte.helps.timelineDates.1.libelle
+campagne_collecte.helps.timelineDates.2.description: campagne_collecte.helps.timelineDates.2.description
+campagne_collecte.helps.timelineDates.2.flag: campagne_collecte.helps.timelineDates.2.flag
+campagne_collecte.helps.timelineDates.2.heure: campagne_collecte.helps.timelineDates.2.heure
+campagne_collecte.helps.timelineDates.2.icone: campagne_collecte.helps.timelineDates.2.icone
+campagne_collecte.helps.timelineDates.2.libelle: campagne_collecte.helps.timelineDates.2.libelle
+campagne_collecte.helps.timelineDates.3.description: campagne_collecte.helps.timelineDates.3.description
+campagne_collecte.helps.timelineDates.3.flag: campagne_collecte.helps.timelineDates.3.flag
+campagne_collecte.helps.timelineDates.3.heure: campagne_collecte.helps.timelineDates.3.heure
+campagne_collecte.helps.timelineDates.3.icone: campagne_collecte.helps.timelineDates.3.icone
+campagne_collecte.helps.timelineDates.3.libelle: campagne_collecte.helps.timelineDates.3.libelle
+campagne_collecte.helps.timelineDates.4.description: campagne_collecte.helps.timelineDates.4.description
+campagne_collecte.helps.timelineDates.4.flag: campagne_collecte.helps.timelineDates.4.flag
+campagne_collecte.helps.timelineDates.4.heure: campagne_collecte.helps.timelineDates.4.heure
+campagne_collecte.helps.timelineDates.4.icone: campagne_collecte.helps.timelineDates.4.icone
+campagne_collecte.helps.timelineDates.4.libelle: campagne_collecte.helps.timelineDates.4.libelle
+campagne_collecte.helps.timelineDates.5.description: campagne_collecte.helps.timelineDates.5.description
+campagne_collecte.helps.timelineDates.5.flag: campagne_collecte.helps.timelineDates.5.flag
+campagne_collecte.helps.timelineDates.5.heure: campagne_collecte.helps.timelineDates.5.heure
+campagne_collecte.helps.timelineDates.5.icone: campagne_collecte.helps.timelineDates.5.icone
+campagne_collecte.helps.timelineDates.5.libelle: campagne_collecte.helps.timelineDates.5.libelle
+campagne_collecte.helps.timelineDates.6.description: campagne_collecte.helps.timelineDates.6.description
+campagne_collecte.helps.timelineDates.6.flag: campagne_collecte.helps.timelineDates.6.flag
+campagne_collecte.helps.timelineDates.6.heure: campagne_collecte.helps.timelineDates.6.heure
+campagne_collecte.helps.timelineDates.6.icone: campagne_collecte.helps.timelineDates.6.icone
+campagne_collecte.helps.timelineDates.6.libelle: campagne_collecte.helps.timelineDates.6.libelle
+campagne_collecte.helps.timelineDates.__name__.description: campagne_collecte.helps.timelineDates.__name__.description
+campagne_collecte.helps.timelineDates.__name__.flag: campagne_collecte.helps.timelineDates.__name__.flag
+campagne_collecte.helps.timelineDates.__name__.heure: campagne_collecte.helps.timelineDates.__name__.heure
+campagne_collecte.helps.timelineDates.__name__.icone: campagne_collecte.helps.timelineDates.__name__.icone
+campagne_collecte.helps.timelineDates.__name__.libelle: campagne_collecte.helps.timelineDates.__name__.libelle
+campagne_collecte.helps.timelineDates.help.0.help: campagne_collecte.helps.timelineDates.help.0.help
+campagne_collecte.helps.timelineDates.help.0.help.inTimeline.help: campagne_collecte.helps.timelineDates.help.0.help.inTimeline.help
+campagne_collecte.helps.timelineDates.help.1.help: campagne_collecte.helps.timelineDates.help.1.help
+campagne_collecte.helps.timelineDates.help.1.help.inTimeline.help: campagne_collecte.helps.timelineDates.help.1.help.inTimeline.help
+campagne_collecte.helps.timelineDates.help.2.help: campagne_collecte.helps.timelineDates.help.2.help
+campagne_collecte.helps.timelineDates.help.2.help.inTimeline.help: campagne_collecte.helps.timelineDates.help.2.help.inTimeline.help
+campagne_collecte.helps.timelineDates.help.3.help: campagne_collecte.helps.timelineDates.help.3.help
+campagne_collecte.helps.timelineDates.help.3.help.inTimeline.help: campagne_collecte.helps.timelineDates.help.3.help.inTimeline.help
+campagne_collecte.helps.timelineDates.help.4.help: campagne_collecte.helps.timelineDates.help.4.help
+campagne_collecte.helps.timelineDates.help.4.help.inTimeline.help: campagne_collecte.helps.timelineDates.help.4.help.inTimeline.help
+campagne_collecte.helps.timelineDates.help.5.help: campagne_collecte.helps.timelineDates.help.5.help
+campagne_collecte.helps.timelineDates.help.5.help.inTimeline.help: campagne_collecte.helps.timelineDates.help.5.help.inTimeline.help
+campagne_collecte.helps.timelineDates.help.6.help: campagne_collecte.helps.timelineDates.help.6.help
+campagne_collecte.helps.timelineDates.help.6.help.inTimeline.help: campagne_collecte.helps.timelineDates.help.6.help.inTimeline.help
+campagne_collecte.helps.timelineDates.help.__name__.help: campagne_collecte.helps.timelineDates.help.__name__.help
+campagne_collecte.helps.timelineDates.help.__name__.help.inTimeline.help: campagne_collecte.helps.timelineDates.help.__name__.help.inTimeline.help
+campagnecollecte.timelineDates.help: campagnecollecte.timelineDates.help
 change_rf_formation.helps.commentaire: 'Indiquez, si besoin, un commentaire pour expliquer la modification'
 change_rf_formation.helps.user: change_rf_formation.helps.user
 competence.helps.libelle: "Le libellé de la compétence doit commencer par un verbe d'action, et ne doit pas dépasser 255 caractères. Doit être cohérente avec la fiche RNCP du diplôme."
@@ -281,6 +351,9 @@ mention.helps.domaine: ''
 mention.helps.libelle: 'Indiquez le libellé exact de la mention/spécialité.'
 mention.helps.sigle: 'Le cas échéant, indiquez le sigle/code utilisé pour cette mention/spécialité.'
 mention.helps.typeDiplome: ''
+mention_dto.helps.domaines: 'Vous pouvez indiquer 1 ou plusieurs domaines'
+mention_dto.helps.libelle: ''
+mention_dto.helps.typeDiplomeId: ''
 nature_ue_ec.helps.choix.help: "Indiquez le type d'UE."
 nature_ue_ec.helps.libelle: "Indiquez le libellé exact de la nature d'UE/EC."
 nature_ue_ec.helps.libre.help: nature_ue_ec.helps.libre.help
@@ -391,6 +464,12 @@ parcours_step7.helps.descriptifHautPageAutomatique: parcours_step7.helps.descrip
 parcours_step7.helps.poursuitesEtudes: ''
 parcours_step8.helps.coordSecretariat: 'Indiquez les coordonnées postales et téléphoniques du secrétariat ainsi que son adresse mail générique.'
 parcours_step8.helps.respParcours: 'Indiquez le responsable de parcours.'
+plateforme_admission.helps.active.help: plateforme_admission.helps.active.help
+plateforme_admission.helps.code: plateforme_admission.helps.code
+plateforme_admission.helps.color.help: plateforme_admission.helps.color.help
+plateforme_admission.helps.configuration: plateforme_admission.helps.configuration
+plateforme_admission.helps.definitionChamps: plateforme_admission.helps.definitionChamps
+plateforme_admission.helps.libelle: plateforme_admission.helps.libelle
 profil.helps.centre.help: 'Préciser quelles sont les centres qui peuvent utiliser ce profil'
 profil.helps.code: 'Indiquez le code du profil. Le code commence par ROLE_ et est suivi du nom du profil.'
 profil.helps.libelle: 'Indiquez le libellé exact du profil.'
@@ -415,6 +494,9 @@ semestre.position.helps: semestre.position.helps
 semestre.raccrocher.helps: 'Sélectionnez le semestre mutualisé que vous souhaitez raccrocher à votre maquette.'
 semestre.reutilise.helps: semestre.reutilise.helps
 semestre.type_semestre.helps: semestre.type_semestre.helps
+timeline.date.help: timeline.date.help
+timeline.dateDebut.help: timeline.dateDebut.help
+timeline.modulesActifs.help: timeline.modulesActifs.help
 type_diplome.helps.ModeleMcc: 'Indiquez si le diplôme est cadré par un modèle prédéfini de MCC (ex. BUT).'
 type_diplome.helps.classique.help: type_diplome.helps.classique.help
 type_diplome.helps.codeApogee: 'Code Apogée du type de diplôme.'
@@ -487,6 +569,8 @@ user.helps.telFixe: ''
 user.helps.telPortable: ''
 user.helps.username: "Indiquez le login URCA de l'utilisateur."
 user_add.helps.email: "Indiquez un email valide de l'utilisateur à ajouter pour récupérer ses informations."
+user_hors_urca.helps.nom: user_hors_urca.helps.nom
+user_hors_urca.helps.prenom: user_hors_urca.helps.prenom
 user_ldap.helps.centreDemande: "Définissez le périmètre d’action et/ou de visualisation de l'utilisateur."
 user_ldap.helps.email: ''
 user_ldap.helps.role.help: "Définissez le rôle de l'utilisateur (et donc ses droits d'accès)."
