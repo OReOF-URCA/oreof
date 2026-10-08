@@ -183,14 +183,20 @@ export default class extends Controller {
     const requestId = (this.requestId = (this.requestId ?? 0) + 1)
 
     if (oldPanel) {
-      // Loader sous le panneau à la place du tableau
+      // Loader sous le panneau à la place du tableau, à la hauteur du contenu remplacé
+      // (évite que la page raccourcisse et que le header se replie)
+      let height = 0
       let next = oldPanel.nextSibling
       while (next) {
         const following = next.nextSibling
+        height += next.offsetHeight ?? 0
         next.remove()
         next = following
       }
-      oldPanel.insertAdjacentHTML('afterend', window.da.loaderStimulus)
+      oldPanel.insertAdjacentHTML(
+        'afterend',
+        `<div data-crud-loader style="min-height: ${Math.max(height, 400)}px">${window.da.loaderStimulus}</div>`,
+      )
     } else {
       this.listeTarget.innerHTML = window.da.loaderStimulus
     }
@@ -207,13 +213,16 @@ export default class extends Controller {
     template.innerHTML = html
     const newPanel = template.content.querySelector('[data-crud-panel]')
 
-    if (oldPanel && newPanel && oldPanel.isConnected) {
+    const keptPanel = Boolean(oldPanel && newPanel && oldPanel.isConnected)
+    if (keptPanel) {
       this._swapAroundPanel(oldPanel, newPanel)
     } else {
       this.listeTarget.innerHTML = html
     }
 
-    if (isSearchInput && activeId) {
+    // Si le panneau est conservé, le champ n'a pas été recréé : ne pas toucher au focus ni au curseur
+    // (sinon le curseur revient à la position d'avant les dernières frappes)
+    if (isSearchInput && activeId && !keptPanel) {
       const refreshedInput = document.getElementById(activeId)
       if (refreshedInput) {
         refreshedInput.focus()
@@ -223,7 +232,9 @@ export default class extends Controller {
       }
     }
 
-    window.scrollTo(0, this.scrollPosition)
+    if (!keptPanel) {
+      window.scrollTo(0, this.scrollPosition)
+    }
   }
 
   // Remplace tout le contenu autour du panneau existant (résumé, tableau...) sans toucher au panneau
