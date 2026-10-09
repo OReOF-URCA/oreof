@@ -1,7 +1,7 @@
 # Conventions UI (Tailwind + Twig Components)
 
 Quand lire : toute création/modification de template Twig, CSS ou composant UI, et toute migration Bootstrap → Tailwind.
-À mettre à jour si : `src/Twig/Components/UI/`, `templates/components/_ui/`, `templates/admin/styleguide/`, `templates/base.html.twig` (en-tête de page), `translations/header.fr.yaml`, `assets/controllers/page_header_controller.js`, `assets/js/chartTheme.js`, classes `app-*` ou tokens de `assets/styles/app.css`.
+À mettre à jour si : `src/Twig/Components/UI/`, `templates/components/_ui/`, `templates/admin/styleguide/`, `templates/base.html.twig` (en-tête de page), `translations/header.fr.yaml`, `assets/controllers/page_header_controller.js`, `assets/js/chartTheme.js`, classes `app-*` ou tokens de `assets/styles/app.css`, `assets/styles/_timeline.scss`, `templates/default/_timeLine.html.twig`.
 
 ## Sources de vérité
 
@@ -31,7 +31,7 @@ Quand lire : toute création/modification de template Twig, CSS ou composant UI,
   Mieux : utiliser directement `<twig:Badge>` / `<twig:Button>`.
 - Migrer un écran/composant entier, jamais classe par classe ; conserver `stimulus_*`, `data-turbo-*`, `aria-*`.
 - Motif répété → classe dans `app.css` via `@layer components` + `@apply` ; réutiliser `app-btn*`, `app-tabs`,
-  `app-section-*`, `app-alert*`, `app-progress*`, `app-modal*`.
+  `app-section-*`, `app-alert*`, `app-progress*`, `app-modal*`, `app-timeline*`.
 - Tom Select : ne pas réactiver ses CSS par défaut (désactivés dans `assets/controllers.json`) ; vérifier focus,
   disabled, multi, dropdown, dark.
 - Select de **filtre** (liste déroulante qui relance une liste) : pas de `<select>` natif (popup OS illisible en
@@ -61,6 +61,8 @@ Quand lire : toute création/modification de template Twig, CSS ou composant UI,
 | `{{ component('alerte', {type, message}) }}` | messages info/succès/alerte |
 | `<twig:PageHeader>` | `titleKey`/`title`, `descriptionKey`/`description`, `translationParams`, `translationDomain` (`header`), `breadcrumb` (true), `sticky` (true), bloc/prop `actions` — voir « En-tête de page » |
 | `Card`, `DeleteButton`, `Dot`, `IconBox`, `Select`, `Spinner`, `dropdown_actions` | voir la classe PHP et le styleguide |
+
+Timeline de campagne (tableau de bord, fiche campagne) : partial `templates/default/_timeLine.html.twig` (`include`, variable optionnelle `campagne`), rendu 100 % serveur, styles `app-timeline*` dans `assets/styles/_timeline.scss` (étapes `--completed|--current|--upcoming`, `--tl-progress` 0–1 pilote le remplissage du trait).
 
 Composants métier (badges ECTS/heures/MCCC, headers formation/parcours, `RemplissageProgress`…) : `src/Twig/Components/`.
 
