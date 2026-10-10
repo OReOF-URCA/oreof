@@ -2,6 +2,53 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/OReOF-URCA/oreof/compare/v2.1.4...v2.2.0) (2026-10-10)
+
+
+### Features
+
+* Changement de RF sur la bonne année selon la date de prise de fonction ([0671786](https://github.com/OReOF-URCA/oreof/commit/06717860cdc87a6d8ee78b4d8e0eb57c1df47213))
+* fiches BUT et M2E + Améliorations page offre ([e2ad4be](https://github.com/OReOF-URCA/oreof/commit/e2ad4bed3350184ecb712246cec70bffeab337a0))
+* header-footer PDF ([3849a96](https://github.com/OReOF-URCA/oreof/commit/3849a96e08a98b452cf2be6e6e65e00b5201b5c0))
+* MCCC sur fiche matière ([43bf704](https://github.com/OReOF-URCA/oreof/commit/43bf704a587bee3c4a8ae3d0f4916b6bd6d32f64))
+* modernisation base-pdf ([2daef02](https://github.com/OReOF-URCA/oreof/commit/2daef02b1b6d4775f42e02af12eefc58e85fb756))
+* page fiche matière ([90740f6](https://github.com/OReOF-URCA/oreof/commit/90740f630ab8ec35622df632f20a4faec0332d6b))
+* refonte de la timeline de campagne du tableau de bord ([0c266d2](https://github.com/OReOF-URCA/oreof/commit/0c266d21c96e8d88fd535d4325ea43161c727c72))
+* refonte de la timeline de campagne du tableau de bord ([ccc47a6](https://github.com/OReOF-URCA/oreof/commit/ccc47a6a2a03e1cab1d8d8fb14d0d408632a0b2e))
+* refonte PDF fiche matière ([d43847a](https://github.com/OReOF-URCA/oreof/commit/d43847a19f7639414ad26c863a409cde7a01faf2))
+* refonte PDF, refonte compétences BUT ou autres, structure BUT ou autre. ([b247c02](https://github.com/OReOF-URCA/oreof/commit/b247c02c6b298ceaf229921c75ced5c9ccd78ad4))
+* verifications revues sur l'offre + select sur année + filtre hors accréditation ([4a0c9c8](https://github.com/OReOF-URCA/oreof/commit/4a0c9c85a0480732ba5b114d6b9afb0490fb8b1e))
+
+
+### Bug Fixes
+
+* acces aux parcours en edit/delete ([17c24c8](https://github.com/OReOF-URCA/oreof/commit/17c24c8df3481d4300898aa8740b5ab1f50190d3))
+* **ci:** use release-please branch directly ([f23adcc](https://github.com/OReOF-URCA/oreof/commit/f23adcc6f67e076e2b78411b0ac26f2fdc4c8cb9))
+* commande de recopie des droits + menu ([162c124](https://github.com/OReOF-URCA/oreof/commit/162c124265d567014c69c6ed33edd654190c54c2))
+* curseur de recherche stable et loader à hauteur du contenu remplacé ([8de036e](https://github.com/OReOF-URCA/oreof/commit/8de036ede4f693074a6b7231c4bcbdf3f1ae8021))
+* doctrine config ([6f4a378](https://github.com/OReOF-URCA/oreof/commit/6f4a3785135d4a075c1aa2f6cbc4a1841f07229d))
+* eslint partie front ([15f3536](https://github.com/OReOF-URCA/oreof/commit/15f35367ce5c4b9acbb0f95ddce9036ee807dd26))
+* **formation:** select du type de diplome en Tom Select ([3a75388](https://github.com/OReOF-URCA/oreof/commit/3a75388139ef0049024352dcf162c35c000c1847))
+* gotneberg version ([b1520c4](https://github.com/OReOF-URCA/oreof/commit/b1520c468a7310c5dcff80851da2e7d8b9fd4bf5))
+* hauteur du loader plafonnée à 60% de la fenêtre ([ba857a6](https://github.com/OReOF-URCA/oreof/commit/ba857a695e6be86df43937d177d3ea9268402161))
+* le panneau recherche/filtres reste affiché pendant le rechargement de la liste ([ac0dacc](https://github.com/OReOF-URCA/oreof/commit/ac0daccd11ee8f26eff3a160afc9d045271c60fc))
+* lint + phpstan ([4a31909](https://github.com/OReOF-URCA/oreof/commit/4a3190987b84393a393040af447dc869c271580e))
+* loader affiché sous le panneau recherche/filtres pendant le rechargement ([7406f06](https://github.com/OReOF-URCA/oreof/commit/7406f06f50b618581bcb5dcfc9172b7d2cae2e76))
+* loader centré et légèrement agrandi ([345bb45](https://github.com/OReOF-URCA/oreof/commit/345bb45edc675219eb2cc6d1fb6dd798d3d3b2f4))
+* ordre de la timeline ([c2eddd9](https://github.com/OReOF-URCA/oreof/commit/c2eddd99246a80a3ead23a3fbd41b651f6801da9))
+* pages vues des statistiques de visites = consultations humaines ([cd23199](https://github.com/OReOF-URCA/oreof/commit/cd23199b5a1746bdcc32b7443518cec6ada8c0af))
+* pages vues des statistiques de visites = consultations humaines ([fd822ab](https://github.com/OReOF-URCA/oreof/commit/fd822ab4f9a1988f9eed0312d42b3373990db4b4))
+* PDF MCCC Route ([d95e5e0](https://github.com/OReOF-URCA/oreof/commit/d95e5e0718c17d598ebc3392d9d0364c3bdb4dea))
+* PDF MCCC Route ([8b3ae57](https://github.com/OReOF-URCA/oreof/commit/8b3ae578855bf8c6b2f174e3ea7f1c7603c10b58))
+* recherche des listes (panneau conservé, loader) et datatables ([71ade4e](https://github.com/OReOF-URCA/oreof/commit/71ade4e6ad6ec3cfdaaa5adc4c12e1261de11728))
+* recherche globale des datatables à colonnes template ([7b86fbf](https://github.com/OReOF-URCA/oreof/commit/7b86fbfa9cc9409d0fa3862ae60bda024e9f6498))
+* recherche rapide validée avec Entrée au lieu de chaque frappe ([364f3bd](https://github.com/OReOF-URCA/oreof/commit/364f3bdba3feaaf8570600ba439e96359a27d471))
+* texte campagne ([f567eba](https://github.com/OReOF-URCA/oreof/commit/f567eba2f1ff12222e74433db5a75598a3dfb252))
+* traductions manquantes ([8f74baf](https://github.com/OReOF-URCA/oreof/commit/8f74bafbe8baa78a2649a9faea36fc05effc0949))
+* **ui:** champs de formulaire a longues listes en autocomplete (Tom Select) ([6ac3275](https://github.com/OReOF-URCA/oreof/commit/6ac3275e0e8d090b0c69910a206fb72d8acf2513))
+* **ui:** select natifs des modales et listes longues passes en Tom Select ([397ed35](https://github.com/OReOF-URCA/oreof/commit/397ed3592fdb5edea4bff35e7e1d3fa5b9614349))
+* version gotenberg ([f32bce5](https://github.com/OReOF-URCA/oreof/commit/f32bce54c0b88c08373175c10f571f921e02dfd1))
+
 ## [2.1.4](https://github.com/OReOF-URCA/oreof/compare/v2.1.3...v2.1.4) (2026-10-05)
 
 
