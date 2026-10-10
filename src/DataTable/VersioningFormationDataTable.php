@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataTable;
 
+use App\DataTable\Column\SearchableTemplateColumn;
 use App\Entity\CampagneCollecte;
 use App\Entity\Composante;
 use App\Entity\Formation;
@@ -11,7 +12,6 @@ use App\Entity\FormationVersioning;
 use App\Entity\TypeDiplome;
 use Doctrine\ORM\QueryBuilder;
 use Pentiminax\UX\DataTables\Attribute\AsDataTable;
-use Pentiminax\UX\DataTables\Column\TemplateColumn;
 use Pentiminax\UX\DataTables\Column\TextColumn;
 use Pentiminax\UX\DataTables\Enum\ActionsAlignment;
 use Pentiminax\UX\DataTables\Enum\Icon;
@@ -92,20 +92,20 @@ final class VersioningFormationDataTable extends AbstractAppDataTable
     {
         return [
             TextColumn::new('id', 'ID')->setOrderable(true),
-            TemplateColumn::new('libelle', 'Formation')
+            SearchableTemplateColumn::new('libelle', 'Formation')
                 ->setField('sigle')
                 ->setSearchField('sigle')
                 ->setOrderable(true)
                 ->setTemplate('admin/versioning/column/_formation_libelle.html.twig'),
-            TemplateColumn::new('campagne', 'Campagne')
+            SearchableTemplateColumn::new('campagne', 'Campagne')
                 ->setTemplate('admin/versioning/column/_formation_campagne.html.twig'),
-            TemplateColumn::new('composante', 'Composante & Diplôme')
+            SearchableTemplateColumn::new('composante', 'Composante & Diplôme')
                 ->setTemplate('admin/versioning/column/_formation_composante.html.twig'),
-            TemplateColumn::new('status', 'Statut Versioning')
+            SearchableTemplateColumn::new('status', 'Statut Versioning')
                 ->setTemplate('admin/versioning/column/_formation_status.html.twig'),
-            TemplateColumn::new('derniereVersion', 'Dernière version')
+            SearchableTemplateColumn::new('derniereVersion', 'Dernière version')
                 ->setTemplate('admin/versioning/column/_formation_derniere_version.html.twig'),
-            TemplateColumn::new('fichiers', 'Fichiers JSON')
+            SearchableTemplateColumn::new('fichiers', 'Fichiers JSON')
                 ->setTemplate('admin/versioning/column/_formation_files.html.twig'),
         ];
     }
