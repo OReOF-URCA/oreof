@@ -1,10 +1,20 @@
 monolog:
+    channels: [visit]
     handlers:
         main:
             type: rotating_file
             max_files: 365
             path: "%kernel.logs_dir%/%kernel.environment%.all.log"
             level: info
+            buffer_size: 50
+            channels: ["!visit"]
+        # Pages vues humaines (App\EventSubscriber\VisitLogSubscriber), lues par VisitorStatsService
+        visit:
+            type: rotating_file
+            max_files: 365
+            path: "%kernel.logs_dir%/%kernel.environment%.visit.log"
+            level: info
+            channels: [visit]
             buffer_size: 50
         login:
             type: rotating_file
