@@ -1,8 +1,6 @@
-{% extends 'pdf/base-pdf-wk.html.twig' %}
+{% extends 'pdf/base-pdf.html.twig' %}
 
 {% block content %}
-    <div class="row">
-        {{ include('typeDiplome/formation/common/_licence.html.twig', {print:true}) }}
-        {# todo: ajouter les fiches en option ? #}
-    </div>
+    {{ include('typeDiplome/formation/pdf/_formation.html.twig') }}
 {% endblock %}
+

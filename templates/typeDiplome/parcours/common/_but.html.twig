@@ -50,7 +50,8 @@
         <h3 class="small-title">Compétences Acquises</h3>
         <div class="card mb-5">
             <div class="card-body">
-                {{ include('typeDiplome/formation/_competences_but.html.twig', {parcours:parcours}) }}
+                {% set typeD = typeD ?? type_diplome_handler(parcours) %}
+                {{ include(typeD.competencesTemplate, {parcours: parcours}) }}
 
             </div>
         </div>

@@ -1196,9 +1196,12 @@ class Formation
         //synthèse des états des parcours de la formation
         $etatParcours = [];
         foreach ($this->getParcours() as $parcours) {
-            $etatParcours[] = $parcours->getDpeParcours()->first()?->getEtatValidation();
+            $etat = ($parcours->getDpeParcours()->first() ?: null)?->getEtatValidation();
+            if ($etat !== null) {
+                $etatParcours[] = $etat;
+            }
         }
-        return array_merge(...$etatParcours);
+        return count($etatParcours) > 0 ? array_merge(...$etatParcours) : [];
     }
 
     public function getEtatReconduction(): ?TypeModificationDpeEnum

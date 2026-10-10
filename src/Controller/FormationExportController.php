@@ -40,8 +40,7 @@ class FormationExportController extends AbstractController
         #[MapEntity(mapping: ['slug' => 'slug'])]
         Formation $formation,
         TypeDiplomeResolver $typeDiplomeResolver,
-    ): Response
-    {
+    ): Response {
         $typeDiplome = $formation->getTypeDiplome();
 
         if ($typeDiplome === null) {
@@ -55,11 +54,16 @@ class FormationExportController extends AbstractController
             $tParcours[$parcours->getId()] = $typeD->calcul($parcours);
         }
 
-        return $this->myPdf->render('pdf/formation.html.twig', [
-            'formation' => $formation,
-            'typeDiplome' => $typeDiplome,
-            'titre' => 'Détails de la formation '.$formation->getDisplay(),
-            'tParcours' => $tParcours,
-        ], 'Formation_' . $formation->getDisplay());
+        return $this->myPdf->render(
+            'pdf/formation.html.twig',
+            [
+                'formation' => $formation,
+                'typeDiplome' => $typeDiplome,
+                'typeDiplomeHandler' => $typeD,
+                'titre' => 'Formation ' . $formation->getDisplay(),
+                'tParcours' => $tParcours,
+            ],
+            'dpe_formation_' . $formation->getDisplay()
+        );
     }
 }

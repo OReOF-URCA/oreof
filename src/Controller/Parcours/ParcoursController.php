@@ -51,19 +51,14 @@ class ParcoursController extends BaseController
         Parcours                   $parcours
     ): Response
     {
-        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
-        $subjectDpe = $dpeParcours ?? $parcours;
-        if (
-            !(
-                $this->isGranted('EDIT', ['route' => 'app_parcours', 'subject' => $subjectDpe]) ||
-                $this->isGranted('EDIT', ['route' => 'app_composante', 'subject' => $subjectDpe]) ||
-                $this->isGranted('EDIT', ['route' => 'app_etablissement', 'subject' => $subjectDpe]) ||
-                ($parcours->getFormation() !== null && $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $parcours->getFormation()])) ||
-                $this->isGranted('ROLE_ADMIN')
-            )
-            || ($dpeParcours !== null && !Access::isOuvert($dpeParcours))
-        ) {
-            return $this->redirectToRoute('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+        if (!$this->isGranted('EDIT', $parcours)) {
+            $this->addFlash('danger', 'Le parcours est verrouillé ou vous n\'avez pas les droits de modification.');
+
+            $url = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+            $response = $this->redirect($url);
+            $response->headers->set('Turbo-Location', $url);
+
+            return $response;
         }
 
         if ($parcours->getFormation() !== null) {
@@ -196,6 +191,16 @@ class ParcoursController extends BaseController
         BreadcrumbService $breadcrumb
     ): Response
     {
+        if (!$this->isGranted('EDIT', $parcours)) {
+            $this->addFlash('danger', 'Le parcours est verrouillé ou vous n\'avez pas les droits de modification.');
+
+            $url = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+            $response = $this->redirect($url);
+            $response->headers->set('Turbo-Location', $url);
+
+            return $response;
+        }
+
         if ($parcours->getFormation() !== null) {
             $breadcrumb->add(
                 $parcours->getFormation()->getDisplay(),
@@ -228,6 +233,16 @@ class ParcoursController extends BaseController
         BreadcrumbService           $breadcrumb
     ): Response
     {
+        if (!$this->isGranted('EDIT', $parcours)) {
+            $this->addFlash('danger', 'Le parcours est verrouillé ou vous n\'avez pas les droits de modification.');
+
+            $url = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+            $response = $this->redirect($url);
+            $response->headers->set('Turbo-Location', $url);
+
+            return $response;
+        }
+
         if ($parcours->getFormation() !== null) {
             $breadcrumb->add(
                 $parcours->getFormation()->getDisplay(),
@@ -324,6 +339,16 @@ class ParcoursController extends BaseController
         BreadcrumbService          $breadcrumb
     ): Response
     {
+        if (!$this->isGranted('EDIT', $parcours)) {
+            $this->addFlash('danger', 'Le parcours est verrouillé ou vous n\'avez pas les droits de modification.');
+
+            $url = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+            $response = $this->redirect($url);
+            $response->headers->set('Turbo-Location', $url);
+
+            return $response;
+        }
+
         if ($parcours->getFormation() !== null) {
             $breadcrumb->add(
                 $parcours->getFormation()->getDisplay(),
@@ -415,4 +440,5 @@ class ParcoursController extends BaseController
             'dto' => $dto
         ]));
     }
+
 }

@@ -49,10 +49,14 @@ class FicheMatiereController extends BaseController
         $breadcrumb->add($ficheMatiere->getLibelle());
         $breadcrumb->add('Modifier');
 
-        if (!$ficheMatiere->isModifiable()) {
+        if (!$this->isGranted('EDIT', $ficheMatiere)) {
             $this->addFlash('danger', 'La fiche matière est verrouillée et ne peut pas être modifiée.');
 
-            return $this->redirectToRoute('fiche_matiere_v2_voir', ['slug' => $ficheMatiere->getSlug()]);
+            $url = $this->generateUrl('fiche_matiere_v2_voir', ['slug' => $ficheMatiere->getSlug()]);
+            $response = $this->redirect($url);
+            $response->headers->set('Turbo-Location', $url);
+
+            return $response;
         }
 
         $tabStates = $statesRepo->indexByTabKey($ficheMatiere);
@@ -170,6 +174,16 @@ class FicheMatiereController extends BaseController
         string                         $tab,
         Request                        $request
     ): Response {
+        if (!$this->isGranted('EDIT', $ficheMatiere)) {
+            $this->addFlash('danger', 'La fiche matière est verrouillée et ne peut pas être modifiée.');
+
+            $url = $this->generateUrl('fiche_matiere_v2_voir', ['slug' => $ficheMatiere->getSlug()]);
+            $response = $this->redirect($url);
+            $response->headers->set('Turbo-Location', $url);
+
+            return $response;
+        }
+
         $referer = $request->headers->get('referer');
 
         if ($referer === null || false === str_contains($referer, 'parcours')) {

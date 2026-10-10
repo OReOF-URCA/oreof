@@ -65,7 +65,7 @@
                     'secondary': 'text-secondary-700 hover:bg-secondary-50 focus-visible:bg-secondary-50 dark:text-secondary-200 dark:hover:bg-secondary-800 dark:focus-visible:bg-secondary-800',
                 }[semanticColor] %}
                 {% set itemExtraClasses = 'w-full h-auto px-4 py-2.5 rounded-md border-0 shadow-none justify-start text-left focus:ring-0 focus:ring-offset-0 ' ~ itemToneClasses %}
-                {% set itemDataAction = hasConfirm ? 'click->dropdown#confirm' : '' %}
+                {% set itemDataAction = hasConfirm ? 'click->dropdown#confirm' : (item.dataAction ?? '') %}
                 {% set itemConfirmValue = hasConfirm ? item.confirm|e('html_attr') : '' %}
                 {% set itemTurboFrame = turboFrame != null ? turboFrame : '' %}
 

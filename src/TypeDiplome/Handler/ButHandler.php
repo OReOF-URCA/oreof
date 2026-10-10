@@ -49,10 +49,16 @@ final class ButHandler extends AbstractTypeDiplomeHandler implements McccDisplay
     public const TEMPLATE_FOLDER = 'but';
     public const SOURCE = 'but';
     public const TEMPLATE_FORM_MCCC = 'but.html.twig';
+    public const TEMPLATE_COMPETENCES = 'typeDiplome/but/affiche/_competences.html.twig';
 
     public function getMcccTemplate(): string
     {
         return self::TEMPLATE_FORM_MCCC;
+    }
+
+    public function getCompetencesTemplate(): string
+    {
+        return self::TEMPLATE_COMPETENCES;
     }
 
     private array $typeEpreuves = [

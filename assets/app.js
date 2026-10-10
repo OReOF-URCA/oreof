@@ -38,6 +38,7 @@ import 'trix/dist/trix.css'
 
 import callOut from './js/callOut'
 import './styles/_timeline.scss'
+import './styles/_but.scss'
 
 import 'datatables.net-dt/css/dataTables.dataTables.min.css'
 import '@pentiminax/ux-datatables/dist/styles/datatables-base-style.css'

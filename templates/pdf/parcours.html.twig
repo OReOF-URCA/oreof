@@ -1,8 +1,6 @@
 {% extends 'pdf/base-pdf.html.twig' %}
 
 {% block content %}
-    <div class="row">
-        {{ include('typeDiplome/parcours/common/_licence.html.twig', {print:true}) }}
-        {# todo: ajouter les fiches ? #}
-    </div>
+    {{ include('typeDiplome/parcours/pdf/_parcours.html.twig') }}
 {% endblock %}
+

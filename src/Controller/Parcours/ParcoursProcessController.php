@@ -219,7 +219,7 @@ class ParcoursProcessController extends BaseController
 
         if ($form->isSubmitted()) {
             // Blocage “report”
-            if ($view->mode === 'report' && $view->canSubmit === false) {
+            if ($view?->mode === 'report' && $view?->canSubmit === false) {
                 $message = implode(' ', array_column($view->messages, 'message'));
 
                 return $turboStream->stream('parcours_v2/turbo/apply_error.stream.html.twig', [
@@ -304,7 +304,7 @@ class ParcoursProcessController extends BaseController
             '_ui/_footer_submit_cancel.html.twig',
             [
                 'submitLabel' => 'modal_submit.' . $transition . '.' . $metaDto->type,
-                'submitDisabled' => ($view->mode === 'report' && $view->canSubmit === false),
+                'submitDisabled' => ($view?->mode === 'report' && $view?->canSubmit === false),
             ]
         );
 

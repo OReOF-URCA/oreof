@@ -1,6 +1,45 @@
-<div class="space-y-6" {{ stimulus_controller('structure--affichage') }}>
+<div class="space-y-8" {{ stimulus_controller('structure--affichage') }}>
 	{% set presentiel = parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 0 or parcours.modalitesEnseignement.value == 1) %}
 	{% set distanciel = parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 2 or parcours.modalitesEnseignement.value == 1) %}
+
+	{% if isVersioning is not defined or isVersioning == false %}
+		{% if (print is not defined or print == false) %}
+			<div class="flex flex-wrap items-center justify-end gap-2"
+				 {{ stimulus_controller('linkjs') }}
+			>
+				<twig:Button
+					type="button"
+					variant="secondary"
+					size="sm"
+					icon="ph:eye-slash-bold"
+					label="Masquer les EC"
+					dataAction="structure--affichage#toggleEc"
+				/>
+
+				{{ component('dropdown_actions', {
+					label: 'Fiches EC/matières',
+					help: 'Exports des fiches matières',
+					icon: 'icon:download',
+					labelSrOnly: false,
+					items: [
+						{
+							label: 'Version complète (toutes les fiches dans 1 pdf)',
+							icon: 'teenyicons:pdf-outline',
+							url: path('fiche_matiere_export_all', {parcours: parcours.id})
+						},
+						{
+							label: 'Version zip (1 pdf par fiche)',
+							icon: 'teenyicons:zip-outline',
+							url: path('fiche_matiere_export_zip', {parcours: parcours.id}),
+							dataAction: 'click->linkjs#openLink'
+						}
+					]
+				}) }}
+
+				{{ include('btn/export_mccc.html.twig') }}
+			</div>
+		{% endif %}
+	{% endif %}
 
 	{% if (print is not defined or print == false) and diffStructure is defined and diffStructure != null %}
 		<div class="rounded-2xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
@@ -31,5 +70,80 @@
 		{{ include('typeDiplome/licence/structure/v2/_structure_annee.html.twig', {annee:annee}) }}
 	{% endfor %}
 
-	{# todo:  bilan formation #}
+	{# Bilan global de la formation #}
+	<section class="overflow-hidden rounded-2xl border border-secondary-200 bg-surface shadow-xs dark:border-secondary-700">
+		<div class="flex flex-wrap items-center justify-between gap-4 border-b border-secondary-200 bg-secondary-50/70 px-6 py-4 dark:border-secondary-700 dark:bg-secondary-800/40">
+			<div class="flex items-center gap-3">
+				<span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-600 font-bold text-white shadow-xs">
+					{{ ux_icon('ph:chart-bar-bold', {class: 'w-5 h-5'}) }}
+				</span>
+				<div>
+					<h3 class="text-lg font-bold text-secondary-900 dark:text-white">Bilan global de la formation</h3>
+					<p class="text-xs text-secondary-500 dark:text-secondary-400">Synthèse des volumes horaires et crédits ECTS sur l'ensemble du cursus</p>
+				</div>
+			</div>
+			<twig:Badge
+				:label="dto.heuresEctsFormation.sommeFormationEcts ~ ' ECTS au total'"
+				variant="primary"
+				size="md"
+				icon="ph:certificate-bold"
+			/>
+		</div>
+
+		<div class="p-6">
+			<div class="grid grid-cols-2 gap-3 sm:grid-cols-3 {% if distanciel or dto.heuresEctsFormation.sommeFormationTotalDist > 0 %}lg:grid-cols-7{% else %}lg:grid-cols-6{% endif %}">
+				<twig:Kpi
+					title="Total ECTS"
+					:value="dto.heuresEctsFormation.sommeFormationEcts"
+					unit="ECTS"
+					variant="primary"
+					icon="ph:certificate-bold"
+				/>
+				<twig:Kpi
+					title="Présentiel"
+					:value="dto.heuresEctsFormation.sommeFormationTotalPres|filtreHeures"
+					unit="h"
+					variant="secondary"
+					icon="ph:clock-bold"
+				/>
+				<twig:Kpi
+					title="Total CM"
+					:value="dto.heuresEctsFormation.sommeFormationCmPres|filtreHeures"
+					unit="h"
+					variant="info"
+					icon="ph:chalkboard-teacher-bold"
+				/>
+				<twig:Kpi
+					title="Total TD"
+					:value="dto.heuresEctsFormation.sommeFormationTdPres|filtreHeures"
+					unit="h"
+					variant="info"
+					icon="ph:users-three-bold"
+				/>
+				<twig:Kpi
+					title="Total TP"
+					:value="dto.heuresEctsFormation.sommeFormationTpPres|filtreHeures"
+					unit="h"
+					variant="info"
+					icon="ph:desktop-bold"
+				/>
+				{% if distanciel or dto.heuresEctsFormation.sommeFormationTotalDist > 0 %}
+					<twig:Kpi
+						title="Distanciel"
+						:value="dto.heuresEctsFormation.sommeFormationTotalDist|filtreHeures"
+						unit="h"
+						variant="warning"
+						icon="ph:laptop-bold"
+					/>
+				{% endif %}
+				<twig:Kpi
+					title="Autonomie (TE)"
+					:value="dto.heuresEctsFormation.sommeFormationTePres|filtreHeures"
+					unit="h"
+					variant="warning"
+					icon="ph:user-bold"
+				/>
+			</div>
+		</div>
+	</section>
 </div>

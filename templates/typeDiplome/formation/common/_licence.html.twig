@@ -67,7 +67,8 @@
                         zone: 'competences',
                     }) }}
                     {% endif %}
-                    {{ include('typeDiplome/formation/_competences.html.twig', {parcours:formation.parcours[0]}) }}
+                    {% set typeD = typeD ?? type_diplome_handler(formation) %}
+                    {{ include(typeD.competencesTemplate, {parcours: formation.parcours[0]}) }}
                 </div>
             </div>
         </section>
@@ -236,7 +237,8 @@
                                 zone: 'competences_'~ parcours.id,
                             }) }}
                             {% endif %}
-                            {{ include('typeDiplome/formation/_competences.html.twig', {parcours:parcours}) }}
+                            {% set typeD = typeD ?? type_diplome_handler(parcours) %}
+                            {{ include(typeD.competencesTemplate, {parcours: parcours}) }}
 
                         </div>
                     </div>

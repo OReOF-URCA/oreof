@@ -1,136 +1,193 @@
 /*!
- * Copyright (c) 2023. | David Annebicque | ORéOF  - All Rights Reserved
- * @file /Users/davidannebicque/Sites/oreof/assets/styles/_but.scss
- * @author davidannebicque
- * @project oreof
- * @lastUpdate 04/06/2023 19:59
+ * Copyright (c) 2023. | David Annebicque | ORéOF - All Rights Reserved
+ * @file assets/styles/_but.scss
  */
-
-// Copyright (c) 2021. | David Annebicque | IUT de Troyes  - All Rights Reserved
-// @file /Users/davidannebicque/htdocs/intranetV3/assets/css/apc.scss
-// @author davidannebicque
-// @project intranetV3
-// @lastUpdate 05/03/2021 11:11
 @use "sass:map";
 
 $colorsApc: (
-        c1:rgb(184, 9, 5),
-        c2: rgb(237, 140, 81),
-        c3: rgb(239, 186, 17),
-        c4: rgb(140, 200, 80),
-        c5: rgb(10, 33, 94),
-        c6: rgb(15, 15, 15)
+    c1: rgb(184, 9, 5),
+    c2: rgb(237, 140, 81),
+    c3: rgb(239, 186, 17),
+    c4: rgb(140, 200, 80),
+    c5: rgb(10, 33, 94),
+    c6: rgb(15, 15, 15)
 );
 
 $colorsParcours: (
-        p1:rgb(96,125,139),
-        p2: rgb(255,64,129),
-        p3: rgb(81,45,168),
-        p4: rgb(121,85,72),
-        p5: rgb(0,150,136),
-        p6: rgb(48,63,159)
+    p1: rgb(96, 125, 139),
+    p2: rgb(255, 64, 129),
+    p3: rgb(81, 45, 168),
+    p4: rgb(121, 85, 72),
+    p5: rgb(0, 150, 136),
+    p6: rgb(48, 63, 159)
 );
 
 $colorsApcLight: (
-        c1:rgb(231, 211, 211),
-        c2: rgb(243, 225, 209),
-        c3: rgb(244, 231, 182),
-        c4: rgb(225, 230, 214),
-        c5: rgb(202, 216, 235),
-        c6: rgb(213, 209, 189)
+    c1: rgb(231, 211, 211),
+    c2: rgb(243, 225, 209),
+    c3: rgb(244, 231, 182),
+    c4: rgb(225, 230, 214),
+    c5: rgb(202, 216, 235),
+    c6: rgb(213, 209, 189)
 );
 
 $colorsApcMedium: (
-        c1:rgb(238, 148, 148),
-        c2: rgb(237, 160, 114),
-        c3: rgb(242, 215, 104),
-        c4: rgb(173, 213, 130),
-        c5: rgb(137, 173, 217),
-        c6: rgb(169, 160, 116)
+    c1: rgb(238, 148, 148),
+    c2: rgb(237, 160, 114),
+    c3: rgb(242, 215, 104),
+    c4: rgb(173, 213, 130),
+    c5: rgb(137, 173, 217),
+    c6: rgb(169, 160, 116)
 );
-//todo: gérer la déclinaison de couleur. Le jaune à 50% disparait ? définir les 3 nuances dans 3 tableaux
-.comp {
+
+/* =========================================================================
+   Layout Structure Référentiel BUT
+   ========================================================================= */
+
+.but-ref-container {
+  width: 100%;
+}
+
+/* Ligne générique 2 colonnes (gauche: 25%, droite: 100% de l'espace restant) */
+.but-ref-row {
   display: flex;
-  justify-content: center;
-  align-content: center;
-  flex-direction: column; /* column | row */
-  font-size: 24px;
-  text-align: center;
+  align-items: stretch;
+  gap: 1.25rem;
+  width: 100%;
 }
 
-.situationpro {
-  height: 100%;
-  font-size: 18px;
-  text-align: right;
-}
-
-.titreniveau {
-  text-align: center;
-  font-size: 20px;
-}
-
-.titreac {
-  text-align: center;
-  font-size: 20px;
-}
-
-.niveauliste {
-  height: 100%;
-}
-
-.niveaucourt {
-  text-align: center;
-  font-size: 18px;
-}
-
-.competencelongue {
-  padding-left: 0px;
-}
-
-.situationliste {
-  padding-left: 0px;
-  padding-right: -15px;
-}
-
-.niveaulong {
-  text-align: center;
-  font-size: 16px;
-}
-
-
-.d-flex {
-  display: flex !important;
-}
-
-.ms-3 {
-  margin-left: 1rem !important;
-}
-
-.col-flex-3 {
-  flex: 0 0 auto;
+.but-ref-col-left {
+  flex: 0 0 25%;
   width: 25%;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
 }
 
-.col-flex-6 {
-  flex: 0 0 auto;
-  width: 50%;
+.but-ref-col-right {
+  flex: 1 1 0%;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.col-flex-9 {
-  flex: 0 0 auto;
-  width: 75%;
+/* Ligne d'en-tête de compétence (3 blocs: court 25%, long 35%, composantes reste 100%) */
+.but-ref-header-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1.25rem;
+  width: 100%;
 }
 
-.niveau {
-
+.but-ref-comp-court {
+  flex: 0 0 25%;
+  width: 25%;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 1.25rem;
 }
+
+.but-ref-comp-long {
+  flex: 0 0 35%;
+  width: 35%;
+  display: flex;
+  align-items: center;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.but-ref-comp-composantes {
+  flex: 1 1 0%;
+  width: 100%;
+  min-width: 0;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Titres Situations professionnelles */
+.but-ref-situation-label {
+  justify-content: center;
+  text-align: right;
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.but-ref-situation-content {
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  justify-content: center;
+}
+
+/* Titres section Niveaux & AC */
+.but-ref-titles-row {
+  display: flex;
+  gap: 1.25rem;
+  width: 100%;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.but-ref-title-left {
+  flex: 0 0 25%;
+  width: 25%;
+  min-width: 180px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.but-ref-title-right {
+  flex: 1 1 0%;
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Ligne d'un niveau B.U.T. */
+.but-ref-niveau-badge {
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.but-ref-ac-content {
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* =========================================================================
+   Couleurs APC dynamiques (c1 à c6)
+   ========================================================================= */
 
 @each $color-key, $color-value in $colorsParcours {
   .badge.badge-parcours-#{$color-key} {
     background-color: $color-value;
     color: white;
   }
-
   .border-#{$color-key} {
     border: 1px solid $color-value;
   }
@@ -139,18 +196,22 @@ $colorsApcMedium: (
 @each $color-key, $color-value in $colorsApcMedium {
   .niveau2#{$color-key} {
     background-color: $color-value;
+    color: #0f172a;
+    border-radius: 0.75rem;
   }
-
 }
 
 @each $color-key, $color-value in $colorsApcLight {
   .situationliste#{$color-key} {
     background-color: $color-value;
+    color: #0f172a;
+    border-radius: 0.75rem;
   }
-
 
   .niveau1#{$color-key} {
     background-color: $color-value;
+    color: #0f172a;
+    border-radius: 0.75rem;
   }
 }
 
@@ -158,7 +219,7 @@ $colorsApcMedium: (
   .competence#{$color-key} {
     background-color: $color-value;
     color: white;
-    height: 100%;
+    border-radius: 0.75rem;
   }
 
   th.bg_#{$color-key} {
@@ -172,16 +233,16 @@ $colorsApcMedium: (
   }
 
   .composantesessentielles#{$color-key} {
-    border: 4px solid $color-value;
+    border: 3px solid $color-value;
     background-color: white;
-    color: $color-value;
-    margin-left: -15px;
+    color: #0f172a;
+    border-radius: 0.75rem;
   }
 
   .competencelongue#{$color-key} {
     background-color: $color-value;
     color: white;
-    height: 100%;
+    border-radius: 0.75rem;
   }
 
   .situation#{$color-key} {
@@ -191,6 +252,7 @@ $colorsApcMedium: (
   .niveau3#{$color-key} {
     background-color: $color-value;
     color: white;
+    border-radius: 0.75rem;
   }
 
   .badge-#{$color-key} {
@@ -198,4 +260,3 @@ $colorsApcMedium: (
     color: white;
   }
 }
-

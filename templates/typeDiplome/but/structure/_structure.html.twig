@@ -1,136 +1,271 @@
-<div class="row"
-        {{ stimulus_controller('structure--affichage') }}
+{#
+Structure du parcours BUT (Maquette matricielle APC)
+UI v2 / Tailwind CSS
+#}
+<div class="space-y-8"
+     {{ stimulus_controller('structure--affichage') }}
 >
     {% if isVersioning is not defined or isVersioning == false %}
         {% if (print is not defined or print == false) %}
-            <div class="col-sm-12 text-end mb-2 pe-40px">
-                <div class="btn-group">
-                    <button type="button"
-                            class="btn btn-sm btn-outline-info btn-icon w-sm-auto mx-2 mb-1"
-                            {{ stimulus_action('structure--affichage', 'toggleEc') }}
-                    >
-                        <i class="fal fa-eye-slash"></i> Masquer les EC
-                    </button>
-                </div>
-                <div class="btn-group">
-                    <button type="button"
-                            class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="{{ iconDownload }}"></i> Fiches EC/matières
-                    </button>
-                    <div class="dropdown-menu" style="">
-                        <a class="dropdown-item" href="{{ path('fiche_matiere_export_all', {parcours:parcours.id}) }}">
-                            Version complète (toutes les fiches dans 1 pdf)
-                        </a>
-                        <a 
-                            {{ stimulus_controller('linkjs') }}
-                            {{ stimulus_action('linkjs', 'openLink') }}
-                            class="dropdown-item" 
-                            href="{{ path('fiche_matiere_export_zip', {parcours:parcours.id}) }}"
-                        >
-                            Version zip (1 pdf par fiche)
-                        </a>
-                    </div>
-                </div>
+            <div class="flex flex-wrap items-center justify-end gap-2"
+                 {{ stimulus_controller('linkjs') }}
+            >
+                <twig:Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    icon="ph:eye-slash-bold"
+                    label="Masquer les EC"
+                    dataAction="structure--affichage#toggleEc"
+                />
+
+                {{ component('dropdown_actions', {
+                    label: 'Fiches EC/matières',
+                    help: 'Exports des fiches matières',
+                    icon: 'icon:download',
+                    labelSrOnly: false,
+                    items: [
+                        {
+                            label: 'Version complète (toutes les fiches dans 1 pdf)',
+                            icon: 'teenyicons:pdf-outline',
+                            url: path('fiche_matiere_export_all', {parcours: parcours.id})
+                        },
+                        {
+                            label: 'Version zip (1 pdf par fiche)',
+                            icon: 'teenyicons:zip-outline',
+                            url: path('fiche_matiere_export_zip', {parcours: parcours.id}),
+                            dataAction: 'click->linkjs#openLink'
+                        }
+                    ]
+                }) }}
 
                 {{ include('btn/export_mccc.html.twig') }}
             </div>
         {% endif %}
     {% endif %}
-    <div class="col-sm-12">
+
+    <div class="space-y-8">
         {% for ordre, semestre in dto.semestres %}
-            <table class="table table-striped table-hover">
-                <tr>
-                    <th
-                            class="border-left-semestre-{{ ordre }}"
-                            colspan="{{ 10 + semestre.ues|length }}">{{ semestre.semestre.display }} {% if semestre.raccroche == true %}
-                            <i class="fal fa-link"></i>{% endif %}</th>
-                </tr>
+            <section class="overflow-hidden rounded-2xl border border-secondary-200 bg-surface shadow-xs dark:border-secondary-700">
+                {# En-tête de semestre #}
+                <div class="flex flex-wrap items-center justify-between gap-4 border-b border-secondary-200 bg-secondary-50/70 px-6 py-4 dark:border-secondary-700 dark:bg-secondary-800/40">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-600 font-bold text-white shadow-xs">
+                            S{{ ordre }}
+                        </span>
+                        <div>
+                            <h3 class="flex items-center gap-2 text-lg font-bold text-secondary-900 dark:text-white">
+                                {{ semestre.semestre.display }}
+                                {% if semestre.raccroche == true %}
+                                    <span class="inline-flex items-center gap-1 rounded-md bg-secondary-100 px-2 py-0.5 text-xs font-medium text-secondary-600 dark:bg-secondary-700 dark:text-secondary-300" title="Semestre raccroché">
+                                        {{ ux_icon('ph:link-simple-bold', {class: 'w-3.5 h-3.5 text-primary-500'}) }}
+                                        Raccroché
+                                    </span>
+                                {% endif %}
+                            </h3>
+                            <p class="text-xs text-secondary-500 dark:text-secondary-400">Structure matricielle des enseignements et compétences APC</p>
+                        </div>
+                    </div>
 
-                <tr class="border-left-semestre-{{ ordre }}">
-                    <th></th>
-                    <th>MCCC</th>
-                    <th>Total</th>
-                    <th>CM</th>
-                    <th>TD</th>
-                    <th>TP</th>
-                    <th>Te</th>
-                    {% for ue in semestre.ues %}
-                        <td class="bg_c{{ ue.ue.ordre }}">{{ ue.ue.libelle }}</td>
-                    {% endfor %}
-                </tr>
-                {% if isVersioning is not defined or isVersioning == false %}
-                    {% set ecArray = getElementsConstitutifs(semestre) %}
-                {% else %}
-                    {% set ecArray = getElementsConstitutifsVersioning(semestre) %}
-                {% endif %}
-                {% for ec in ecArray %}
-                    <tr class="border-left-semestre-{{ ordre }}">
-                        <th>{{ ec.ec.elementConstitutif.code }} - {{ ec.ec.elementConstitutif.display }}</th>
-                        <td>{{ component('badge_mccc', {
-                                elementConstitutif: ec.ec.elementConstitutif,
-                                parcours: parcours,
-                                deplacer: false,
-                                editable: false,
-                                indexEc: ec.ec.elementConstitutif.ordre,
-                                isVersioning: isVersioning ?? false,
-                                parcoursVersioning: parcoursVersioning ?? null
-                            }) }}
-                        </td>
-                        <td class="text-center">{{ ec.ec.heuresEctsEc.sommeEcTotalPres|filtreHeures }}</td>
-                        <td class="text-center">{{ ec.ec.heuresEctsEc.cmPres|filtreHeures }}</td>
-                        <td class="text-center">{{ ec.ec.heuresEctsEc.tdPres|filtreHeures }}</td>
-                        <td class="text-center">{{ ec.ec.heuresEctsEc.tpPres|filtreHeures }}</td>
-                        <td class="text-center">{{ ec.ec.heuresEctsEc.tePres|filtreHeures }}</td>
-                        {% for ue in semestre.ues %}
-                            {% if isVersioning is not defined or isVersioning == false %}
-                                <td class="text-center">{{ ec['ues'][ue.ue.id] is defined ? ec['ues'][ue.ue.id]|badgeCoeff : '-' }}</td>
-                            {% else %}
-                                <td class="text-center">{{ ec['ues'][ue.ue.getDeserializedId()] is defined ? ec['ues'][ue.ue.getDeserializedId()]|badgeCoeff : '-' }}</td>
-                            {% endif %}
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-                <tr>
-                    <th class="border-left-semestre-{{ ordre }} text-end">Total Semestre {{ ordre }}</th>
-                    <th class="text-center">{{ semestre.heuresEctsSemestre.sommeSemestreEcts|badgeEctsSemestre }}</th>
-                    <th class="text-center">{{ semestre.heuresEctsSemestre.sommeSemestreTotalPres|filtreHeures }}</th>
-                    <th class="text-center">{{ semestre.heuresEctsSemestre.sommeSemestreCmPres|filtreHeures }}</th>
-                    <th class="text-center">{{ semestre.heuresEctsSemestre.sommeSemestreTdPres|filtreHeures }}</th>
-                    <th class="text-center">{{ semestre.heuresEctsSemestre.sommeSemestreTpPres|filtreHeures }}</th>
-                    <th class="text-center">{{ semestre.heuresEctsSemestre.sommeSemestreTePres|filtreHeures }}</th>
-                    {% for ue in semestre.ues %}
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        {% set semEcts = semestre.heuresEctsSemestre.sommeSemestreEcts %}
+                        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold {% if semEcts == 30 %}bg-success-100 text-success-800 dark:bg-success-900/40 dark:text-success-300{% else %}bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300{% endif %}">
+                            {{ ux_icon('ph:certificate-bold', {class: 'w-3.5 h-3.5'}) }}
+                            {{ semEcts }} ECTS
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 rounded-full bg-secondary-100 px-3 py-1 text-xs font-semibold text-secondary-700 dark:bg-secondary-800 dark:text-secondary-300">
+                            {{ ux_icon('ph:clock-bold', {class: 'w-3.5 h-3.5'}) }}
+                            {{ semestre.heuresEctsSemestre.sommeSemestreTotalPres|filtreHeures }} h présentielles
+                        </span>
+                    </div>
+                </div>
+
+                {# Tableau matriciel #}
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-left text-sm">
+                        <thead>
+                            <tr class="border-b border-secondary-200 bg-secondary-50/50 text-xs font-semibold uppercase tracking-wider text-secondary-600 dark:border-secondary-700 dark:bg-secondary-800/30 dark:text-secondary-400">
+                                <th scope="col" class="min-w-[280px] px-4 py-3">Élément constitutif (Ressource / SAÉ)</th>
+                                <th scope="col" class="min-w-[70px] px-3 py-3 text-center">MCCC</th>
+                                <th scope="col" class="min-w-[70px] bg-secondary-100/50 px-3 py-3 text-center font-bold text-secondary-900 dark:bg-secondary-700/30 dark:text-white">Total</th>
+                                <th scope="col" class="min-w-[60px] px-2.5 py-3 text-center">CM</th>
+                                <th scope="col" class="min-w-[60px] px-2.5 py-3 text-center">TD</th>
+                                <th scope="col" class="min-w-[60px] px-2.5 py-3 text-center">TP</th>
+                                <th scope="col" class="min-w-[60px] px-2.5 py-3 text-center">TE</th>
+                                {% for ue in semestre.ues %}
+                                    <th scope="col" class="min-w-[120px] px-3 py-3 text-center font-bold text-white shadow-2xs bg_c{{ ue.ue.ordre }}">
+                                        {{ ue.ue.libelle }}
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+
                         {% if isVersioning is not defined or isVersioning == false %}
-                            <td class="text-center">{{ ue.ue.ects|badgeEcts }}</td>
+                            {% set ecArray = getElementsConstitutifs(semestre) %}
                         {% else %}
-                            <td class="text-center">{{ ue.heuresEctsUe.sommeUeEcts|badgeEcts }}</td>
+                            {% set ecArray = getElementsConstitutifsVersioning(semestre) %}
                         {% endif %}
-                    {% endfor %}
-                </tr>
-            </table>
-        {% endfor %}
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th colspan="3"></th>
-                <th>ECTS</th>
-                <th>Total heures</th>
-                <th>Total CM</th>
-                <th>Total TD</th>
-                <th>Total TP</th>
-                <th>Total TE</th>
 
-            </tr>
-            </thead>
-            <tr>
-                <th colspan="3" class="text-end">Total formation</th>
-                <th>{{ dto.heuresEctsFormation.sommeFormationEcts }}</th>
-                <th>{{ dto.heuresEctsFormation.sommeFormationTotalPres }}</th>
-                <th>{{ dto.heuresEctsFormation.sommeFormationCmPres }}</th>
-                <th>{{ dto.heuresEctsFormation.sommeFormationTdPres }}</th>
-                <th>{{ dto.heuresEctsFormation.sommeFormationTpPres }}</th>
-                <th>{{ dto.heuresEctsFormation.sommeFormationTePres }}</th>
-            </tr>
-        </table>
+                        <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800/70">
+                            {% for ec in ecArray %}
+                                <tr class="ec transition-colors hover:bg-secondary-50/80 dark:hover:bg-secondary-800/40">
+                                    <td class="px-4 py-2.5 font-medium text-secondary-900 dark:text-secondary-100">
+                                        <div class="flex items-baseline gap-2">
+                                            <span class="shrink-0 font-bold text-primary-600 dark:text-primary-400">
+                                                {{ ec.ec.elementConstitutif.code }}
+                                            </span>
+                                            <span>{{ ec.ec.elementConstitutif.display }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-2.5 text-center">
+                                        {{ component('badge_mccc', {
+                                            elementConstitutif: ec.ec.elementConstitutif,
+                                            parcours: parcours,
+                                            deplacer: false,
+                                            editable: false,
+                                            indexEc: ec.ec.elementConstitutif.ordre,
+                                            isVersioning: isVersioning ?? false,
+                                            parcoursVersioning: parcoursVersioning ?? null
+                                        }) }}
+                                    </td>
+                                    <td class="whitespace-nowrap bg-secondary-50/40 px-3 py-2.5 text-center font-bold text-secondary-900 dark:bg-secondary-800/20 dark:text-white">
+                                        {{ ec.ec.heuresEctsEc.sommeEcTotalPres|filtreHeures }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-2.5 py-2.5 text-center text-secondary-600 dark:text-secondary-300">
+                                        {{ ec.ec.heuresEctsEc.cmPres|filtreHeures }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-2.5 py-2.5 text-center text-secondary-600 dark:text-secondary-300">
+                                        {{ ec.ec.heuresEctsEc.tdPres|filtreHeures }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-2.5 py-2.5 text-center text-secondary-600 dark:text-secondary-300">
+                                        {{ ec.ec.heuresEctsEc.tpPres|filtreHeures }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-2.5 py-2.5 text-center text-secondary-500 dark:text-secondary-400">
+                                        {{ ec.ec.heuresEctsEc.tePres|filtreHeures }}
+                                    </td>
+                                    {% for ue in semestre.ues %}
+                                        <td class="whitespace-nowrap px-3 py-2.5 text-center">
+                                            {% set ueId = (isVersioning is not defined or isVersioning == false) ? ue.ue.id : ue.ue.getDeserializedId() %}
+                                            {% if ec['ues'][ueId] is defined and ec['ues'][ueId] is not null and ec['ues'][ueId] != '' %}
+                                                <span class="inline-flex items-center rounded-full bg-primary-100 px-2 py-0.5 text-xs font-semibold text-primary-800 shadow-2xs dark:bg-primary-900/50 dark:text-primary-300">
+                                                    Coeff. {{ ec['ues'][ueId] }}
+                                                </span>
+                                            {% else %}
+                                                <span class="font-light text-secondary-300 dark:text-secondary-600">—</span>
+                                            {% endif %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                        {# Total Semestre #}
+                        <tfoot class="border-t-2 border-secondary-200 bg-secondary-100/70 font-semibold text-secondary-900 dark:border-secondary-700 dark:bg-secondary-800/60 dark:text-white">
+                            <tr>
+                                <td class="px-4 py-3 text-right text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-200">
+                                    Total Semestre {{ ordre }}
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-3 text-center">
+                                    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold {% if semEcts == 30 %}bg-success-100 text-success-800 dark:bg-success-900/40 dark:text-success-300{% else %}bg-warning-100 text-warning-800 dark:bg-warning-900/40 dark:text-warning-300{% endif %}">
+                                        {{ semEcts }} ECTS
+                                    </span>
+                                </td>
+                                <td class="whitespace-nowrap bg-secondary-200/60 px-3 py-3 text-center font-black text-secondary-900 dark:bg-secondary-700/50 dark:text-white">
+                                    {{ semestre.heuresEctsSemestre.sommeSemestreTotalPres|filtreHeures }}
+                                </td>
+                                <td class="whitespace-nowrap px-2.5 py-3 text-center">
+                                    {{ semestre.heuresEctsSemestre.sommeSemestreCmPres|filtreHeures }}
+                                </td>
+                                <td class="whitespace-nowrap px-2.5 py-3 text-center">
+                                    {{ semestre.heuresEctsSemestre.sommeSemestreTdPres|filtreHeures }}
+                                </td>
+                                <td class="whitespace-nowrap px-2.5 py-3 text-center">
+                                    {{ semestre.heuresEctsSemestre.sommeSemestreTpPres|filtreHeures }}
+                                </td>
+                                <td class="whitespace-nowrap px-2.5 py-3 text-center text-secondary-500 dark:text-secondary-400">
+                                    {{ semestre.heuresEctsSemestre.sommeSemestreTePres|filtreHeures }}
+                                </td>
+                                {% for ue in semestre.ues %}
+                                    <td class="whitespace-nowrap px-3 py-3 text-center">
+                                        {% set ueEcts = (isVersioning is not defined or isVersioning == false) ? ue.ue.ects : ue.heuresEctsUe.sommeUeEcts %}
+                                        <span class="inline-flex items-center rounded-full bg-info-100 px-2.5 py-0.5 text-xs font-bold text-info-800 dark:bg-info-900/40 dark:text-info-300">
+                                            {{ ueEcts }} ECTS
+                                        </span>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </section>
+        {% endfor %}
+
+        {# Bilan global de la formation #}
+        <section class="overflow-hidden rounded-2xl border border-secondary-200 bg-surface shadow-xs dark:border-secondary-700">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-secondary-200 bg-secondary-50/70 px-6 py-4 dark:border-secondary-700 dark:bg-secondary-800/40">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-600 font-bold text-white shadow-xs">
+                        {{ ux_icon('ph:chart-bar-bold', {class: 'w-5 h-5'}) }}
+                    </span>
+                    <div>
+                        <h3 class="text-lg font-bold text-secondary-900 dark:text-white">Bilan global de la formation</h3>
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400">Synthèse des volumes horaires et crédits ECTS sur l'ensemble du cursus</p>
+                    </div>
+                </div>
+                <twig:Badge
+                    :label="dto.heuresEctsFormation.sommeFormationEcts ~ ' ECTS au total'"
+                    variant="primary"
+                    size="md"
+                    icon="ph:certificate-bold"
+                />
+            </div>
+
+            <div class="p-6">
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                    <twig:Kpi
+                        title="Total ECTS"
+                        :value="dto.heuresEctsFormation.sommeFormationEcts"
+                        unit="ECTS"
+                        variant="primary"
+                        icon="ph:certificate-bold"
+                    />
+                    <twig:Kpi
+                        title="Présentiel"
+                        :value="dto.heuresEctsFormation.sommeFormationTotalPres|filtreHeures"
+                        unit="h"
+                        variant="secondary"
+                        icon="ph:clock-bold"
+                    />
+                    <twig:Kpi
+                        title="Total CM"
+                        :value="dto.heuresEctsFormation.sommeFormationCmPres|filtreHeures"
+                        unit="h"
+                        variant="info"
+                        icon="ph:chalkboard-teacher-bold"
+                    />
+                    <twig:Kpi
+                        title="Total TD"
+                        :value="dto.heuresEctsFormation.sommeFormationTdPres|filtreHeures"
+                        unit="h"
+                        variant="info"
+                        icon="ph:users-three-bold"
+                    />
+                    <twig:Kpi
+                        title="Total TP"
+                        :value="dto.heuresEctsFormation.sommeFormationTpPres|filtreHeures"
+                        unit="h"
+                        variant="info"
+                        icon="ph:desktop-bold"
+                    />
+                    <twig:Kpi
+                        title="Autonomie (TE)"
+                        :value="dto.heuresEctsFormation.sommeFormationTePres|filtreHeures"
+                        unit="h"
+                        variant="warning"
+                        icon="ph:user-bold"
+                    />
+                </div>
+            </div>
+        </section>
     </div>
 </div>

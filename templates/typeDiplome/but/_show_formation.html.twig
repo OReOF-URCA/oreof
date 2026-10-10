@@ -54,7 +54,7 @@
                 color: 'indigo'
             }) }}
             <div class="mt-4">
-                {{ render(controller('App\\Controller\\BlocCompetenceController::afficheBUTReferentiel', { 'parcours': formation.parcours[0] })) }}
+                {{ include(typeD.competencesTemplate, {parcours: formation.parcours[0]}) }}
             </div>
         </section>
 
@@ -199,7 +199,7 @@
                     color: color
                 }) }}
                 <div class="mt-4">
-                    {{ render(controller('App\\Controller\\BlocCompetenceController::afficheBUTReferentiel', { 'parcours': parcours })) }}
+                    {{ include(typeD.competencesTemplate, {parcours: parcours}) }}
                 </div>
             </section>
 

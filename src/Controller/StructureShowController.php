@@ -28,7 +28,11 @@ class StructureShowController extends AbstractController
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getTypeDiplome());
         $dto = $typeD->calcul($parcours);
 
-        $structureDifferencesParcours = $versioningParcours->getStructureDifferencesBetweenParcoursAndLastCfvu($parcours);
+        $structureDifferencesParcours = null;
+        try {
+            $structureDifferencesParcours = $versioningParcours->getStructureDifferencesBetweenParcoursAndLastCfvu($parcours);
+        } catch (\Throwable) {
+        }
         if ($structureDifferencesParcours !== null) {
             $diffStructure = $versioningStructure->setDto($structureDifferencesParcours, $dto)->calculDiff();
         }
@@ -39,7 +43,11 @@ class StructureShowController extends AbstractController
             $dtoAnneePrecedente = null;
 
             if ($version !== null) {
-                $dtoAnneePrecedente = $versioningParcours->loadParcoursFromVersion($version)['dto'] ?? null;
+                try {
+                    $dtoAnneePrecedente = $versioningParcours->loadParcoursFromVersion($version)['dto'] ?? null;
+                } catch (\Throwable) {
+                    $dtoAnneePrecedente = null;
+                }
             }
             if($dtoAnneePrecedente !== null){
                 $diffStructureCampagnePrecedente = (new VersioningStructure())->setDto($dtoAnneePrecedente, $dto)->calculDiff();
@@ -69,7 +77,11 @@ class StructureShowController extends AbstractController
         $typeD = $this->typeDiplomeResolver->fromTypeDiplome($parcours->getTypeDiplome());
         $dto = $typeD->calcul($parcours);
 
-        $structureDifferencesParcours = $versioningParcours->getStructureDifferencesBetweenParcoursAndLastVersion($parcours);
+        $structureDifferencesParcours = null;
+        try {
+            $structureDifferencesParcours = $versioningParcours->getStructureDifferencesBetweenParcoursAndLastVersion($parcours);
+        } catch (\Throwable) {
+        }
         if ($structureDifferencesParcours !== null) {
             $diffStructure = $versioningStructure->setDto($structureDifferencesParcours, $dto)->calculDiff();
         }

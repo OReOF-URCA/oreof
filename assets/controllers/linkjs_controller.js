@@ -12,7 +12,12 @@ import JsonResponse from '../js/JsonResponse'
 export default class extends Controller {
   openLink(event) {
     event.preventDefault()
-    const url = event.target.getAttribute('href')
+    const target = event.currentTarget || event.target.closest('a') || event.target
+    const url = target?.getAttribute('href')
+
+    if (!url) {
+      return
+    }
 
     fetch(url)
       .then((response) => {

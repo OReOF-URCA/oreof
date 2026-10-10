@@ -54,7 +54,7 @@
                 color: 'indigo'
             }) }}
             <div class="mt-4">
-                {{ include('typeDiplome/licence/affiche/_competences.html.twig', {parcours:formation.parcours[0]}) }}
+                {{ include(typeD.competencesTemplate, {parcours: formation.parcours[0]}) }}
             </div>
         </section>
 
@@ -199,7 +199,7 @@
                     color: color
                 }) }}
                 <div class="mt-4">
-                    {{ include('typeDiplome/licence/affiche/_competences.html.twig', {parcours:parcours}) }}
+                    {{ include(typeD.competencesTemplate, {parcours: parcours}) }}
                 </div>
             </section>
 

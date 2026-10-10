@@ -1536,9 +1536,9 @@ class Parcours
     public function getCodeDiplome(?int $annee): ?string
     {
         if ($annee === null) {
-            return $this->getSemestreParcours()->first()?->getCodeApogeeDiplome();
+            return ($this->getSemestreParcours()->first() ?: null)?->getCodeApogeeDiplome();
         }
-        return $this->getSemestrePourAnnee($annee)?->first()?->getCodeApogeeDiplome();
+        return ($this->getSemestrePourAnnee($annee)?->first() ?: null)?->getCodeApogeeDiplome();
     }
 
     public function getSemestrePourAnnee(int $annee): ?Collection
@@ -1556,21 +1556,20 @@ class Parcours
 
     public function getCodeEtape(int $annee): ?string
     {
-        return $this->getSemestrePourAnnee($annee)?->first()?->getCodeApogeeEtapeAnnee();
+        return ($this->getSemestrePourAnnee($annee)?->first() ?: null)?->getCodeApogeeEtapeAnnee();
     }
 
     public function getCodeVersionDiplome(?int $annee): ?string
     {
         if ($annee === null) {
-            return $this->getSemestreParcours()->first()?->getCodeApogeeVersionDiplome();
+            return ($this->getSemestreParcours()->first() ?: null)?->getCodeApogeeVersionDiplome();
         }
-        return $this->getSemestrePourAnnee($annee)?->first()?->getCodeApogeeVersionDiplome();
+        return ($this->getSemestrePourAnnee($annee)?->first() ?: null)?->getCodeApogeeVersionDiplome();
     }
 
     public function getCodeVersionEtape(int $annee): ?string
     {
-        return $this->getSemestrePourAnnee($annee)?->first()?->getCodeApogeeEtapeVersion();
-
+        return ($this->getSemestrePourAnnee($annee)?->first() ?: null)?->getCodeApogeeEtapeVersion();
     }
 
     public function getCodeApogeeNumeroVersion(): ?string
@@ -1653,12 +1652,12 @@ class Parcours
 
     public function etatDpeParcours() : array
     {
-        return $this->dpeParcours->first()?->getEtatValidation();
+        return ($this->dpeParcours->first() ?: null)?->getEtatValidation() ?? [];
     }
 
     public function hasReouverture() : bool
     {
-        return in_array($this->dpeParcours->first()?->getEtatReconduction(), [
+        return in_array(($this->dpeParcours->first() ?: null)?->getEtatReconduction(), [
             TypeModificationDpeEnum::MODIFICATION_TEXTE,
             TypeModificationDpeEnum::MODIFICATION_MCCC,
             TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE,
@@ -1667,7 +1666,7 @@ class Parcours
 
     public function withCfvu() : bool
     {
-        return $this->dpeParcours->first()?->withCfvu();
+        return ($this->dpeParcours->first() ?: null)?->withCfvu() ?? false;
     }
 
     public function getParcoursOrigineCopie(): ?self
@@ -2047,7 +2046,7 @@ class Parcours
 
     public function isOuvert(): bool
     {
-        return !$this->getDpeParcours()->first()?->isNonOuvert();
+        return !(($this->getDpeParcours()->first() ?: null)?->isNonOuvert() ?? false);
     }
 
     public function getDpeParcoursPourCampagne(CampagneCollecte $campagne): ?DpeParcours

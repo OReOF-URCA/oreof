@@ -1,0 +1,743 @@
+{# Template PDF pour le parcours / DPE #}
+<style>
+    .pdf-container {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: #1f2937;
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
+    .pdf-header-card {
+        background-color: #f8fafc;
+        border: 1px solid #cbd5e1;
+        border-left: 4px solid #0284c7;
+        border-radius: 4px;
+        padding: 10px 14px;
+        margin-bottom: 16px;
+    }
+
+    .pdf-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 3px 0;
+    }
+
+    .pdf-subtitle {
+        font-size: 12px;
+        font-style: italic;
+        color: #475569;
+        margin: 0 0 6px 0;
+    }
+
+    .pdf-meta-badges {
+        margin-top: 6px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .pdf-badge {
+        display: inline-block;
+        padding: 2px 7px;
+        font-size: 10px;
+        font-weight: 600;
+        border-radius: 3px;
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+
+    .pdf-badge-gray {
+        background-color: #f1f5f9;
+        color: #475569;
+        border-color: #cbd5e1;
+    }
+
+    .pdf-badge-warning {
+        background-color: #fef3c7;
+        color: #92400e;
+        border-color: #fde68a;
+    }
+
+    .pdf-badge-success {
+        background-color: #dcfce7;
+        color: #166534;
+        border-color: #bbf7d0;
+    }
+
+    .pdf-section {
+        margin-bottom: 14px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .pdf-section-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #0369a1;
+        border-bottom: 1.5px solid #0284c7;
+        padding-bottom: 3px;
+        margin: 0 0 8px 0;
+    }
+
+    .pdf-grid-2 {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    .pdf-col {
+        display: table-cell;
+        width: 50%;
+        vertical-align: top;
+        padding-right: 10px;
+    }
+
+    .pdf-col:last-child {
+        padding-right: 0;
+        padding-left: 10px;
+    }
+
+    .pdf-dl {
+        margin: 0;
+        padding: 0;
+    }
+
+    .pdf-dl dt {
+        font-weight: 600;
+        font-size: 10px;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-top: 5px;
+        margin-bottom: 1px;
+    }
+
+    .pdf-dl dt:first-child {
+        margin-top: 0;
+    }
+
+    .pdf-dl dd {
+        margin-left: 0;
+        margin-bottom: 4px;
+        font-size: 11px;
+        color: #1e293b;
+    }
+
+    .pdf-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10px;
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+
+    .pdf-table th, .pdf-table td {
+        border: 1px solid #cbd5e1;
+        padding: 4px 6px;
+        text-align: center;
+    }
+
+    .pdf-table th {
+        background-color: #f1f5f9;
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .pdf-table th.text-left, .pdf-table td.text-left {
+        text-align: left;
+    }
+
+    .pdf-table tr.total-row {
+        background-color: #f8fafc;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .pdf-content-box {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 6px;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .pdf-content-box p {
+        margin: 0 0 6px 0;
+    }
+
+    .pdf-content-box p:last-child {
+        margin-bottom: 0;
+    }
+
+    .pdf-list {
+        margin: 2px 0 4px 0;
+        padding-left: 18px;
+    }
+
+    .pdf-list li {
+        margin-bottom: 2px;
+    }
+
+    .pdf-bcc-item {
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        padding: 6px 10px;
+        margin-bottom: 6px;
+    }
+
+    .pdf-bcc-title {
+        font-weight: 600;
+        font-size: 11px;
+        color: #0f172a;
+        margin-bottom: 3px;
+    }
+
+    .pdf-alert-info {
+        background-color: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-left: 3px solid #0284c7;
+        color: #0369a1;
+        padding: 6px 10px;
+        border-radius: 3px;
+        font-size: 10px;
+        margin-bottom: 8px;
+    }
+</style>
+
+<div class="pdf-container">
+    {# En-tête principal du parcours #}
+    <div class="pdf-header-card">
+        <h1 class="pdf-title">
+            {% if parcours.isParcoursDefaut %}
+                {{ formation != null ? formation.display : parcours.libelle }}
+            {% else %}
+                Parcours {{ parcours.libelle }}
+            {% endif %}
+        </h1>
+        {% if formation != null %}
+            <p class="pdf-subtitle">
+                {{ formation.displayLong }}
+                {% if parcours.isParcoursDefaut %}
+                    <span style="font-style: normal; color: #64748b;">(Mention sans parcours)</span>
+                {% endif %}
+            </p>
+        {% endif %}
+        <div class="pdf-meta-badges">
+            {% if typeDiplome is defined and typeDiplome is not null %}
+                <span class="pdf-badge">{{ typeDiplome|typeDiplome }}</span>
+            {% endif %}
+            {% if parcours.typeParcours %}
+                <span class="pdf-badge pdf-badge-warning">{{ parcours.typeParcours.libelle }}</span>
+            {% endif %}
+            {% if parcours.codeApogee %}
+                <span class="pdf-badge pdf-badge-gray">Apogée : {{ parcours.codeApogee }}</span>
+            {% endif %}
+            {% if parcours.codeRNCP or (formation != null and formation.codeRNCP) %}
+                <span class="pdf-badge pdf-badge-success">RNCP : {{ parcours.codeRNCP|default(formation.codeRNCP) }}</span>
+            {% endif %}
+            {% if formation != null and formation.composantePorteuse != null %}
+                <span class="pdf-badge pdf-badge-gray">{{ formation.composantePorteuse.libelle }}</span>
+            {% endif %}
+            {% if isVersioning is defined and isVersioning %}
+                <span class="pdf-badge pdf-badge-warning">Version archivée (CFVU)</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# 1. Informations générales & Responsables #}
+    <div class="pdf-section">
+        <h2 class="pdf-section-title">1. Informations générales & Responsables</h2>
+        <div class="pdf-grid-2">
+            <div class="pdf-col">
+                <dl class="pdf-dl">
+                    <dt>Type de diplôme</dt>
+                    <dd>{{ typeDiplome != null ? typeDiplome|typeDiplome : 'Non défini' }}</dd>
+
+                    <dt>Formation / Mention</dt>
+                    <dd>{{ formation != null ? formation.display : 'Non définie' }}</dd>
+
+                    {% if not parcours.isParcoursDefaut %}
+                        <dt>Intitulé du parcours</dt>
+                        <dd>{{ parcours.libelle }}</dd>
+                    {% endif %}
+
+                    {% if formation != null and formation.domaines|length > 0 %}
+                        <dt>Domaine(s)</dt>
+                        <dd>
+                            {% for domaine in formation.domaines %}
+                                {{ domaine.libelle }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </dd>
+                    {% endif %}
+
+                    {% if formation != null and formation.composantePorteuse != null %}
+                        <dt>Composante porteuse</dt>
+                        <dd>{{ formation.composantePorteuse.libelle }}</dd>
+                    {% endif %}
+
+                    {% if parcours.capaciteAccueil is defined and parcours.capaciteAccueil > 0 %}
+                        <dt>Capacité d'accueil</dt>
+                        <dd>{{ parcours.capaciteAccueil }} places</dd>
+                    {% elseif formation != null and formation.capaciteAccueil is defined and formation.capaciteAccueil > 0 %}
+                        <dt>Capacité d'accueil</dt>
+                        <dd>{{ formation.capaciteAccueil }} places</dd>
+                    {% endif %}
+                </dl>
+            </div>
+
+            <div class="pdf-col">
+                <dl class="pdf-dl">
+                    {% if not parcours.isParcoursDefaut and parcours.respParcours != null %}
+                        <dt>Responsable du parcours</dt>
+                        <dd>
+                            <strong>{{ parcours.respParcours.display }}</strong>
+                            {% if parcours.respParcours.email %}
+                                <br><span style="color: #64748b; font-size: 10px;">{{ parcours.respParcours.email }}</span>
+                            {% endif %}
+                        </dd>
+                    {% endif %}
+
+                    {% if not parcours.isParcoursDefaut and parcours.coResponsable != null %}
+                        <dt>Co-responsable du parcours</dt>
+                        <dd>
+                            <strong>{{ parcours.coResponsable.display }}</strong>
+                            {% if parcours.coResponsable.email %}
+                                <br><span style="color: #64748b; font-size: 10px;">{{ parcours.coResponsable.email }}</span>
+                            {% endif %}
+                        </dd>
+                    {% endif %}
+
+                    {% if formation != null and formation.responsableMention != null %}
+                        <dt>Responsable de formation (mention)</dt>
+                        <dd>
+                            <strong>{{ formation.responsableMention.display }}</strong>
+                            {% if formation.responsableMention.email %}
+                                <br><span style="color: #64748b; font-size: 10px;">{{ formation.responsableMention.email }}</span>
+                            {% endif %}
+                        </dd>
+                    {% endif %}
+
+                    {% if formation != null and formation.coResponsable != null %}
+                        <dt>Co-responsable de formation (mention)</dt>
+                        <dd>
+                            <strong>{{ formation.coResponsable.display }}</strong>
+                            {% if formation.coResponsable.email %}
+                                <br><span style="color: #64748b; font-size: 10px;">{{ formation.coResponsable.email }}</span>
+                            {% endif %}
+                        </dd>
+                    {% endif %}
+
+                    {% if parcours.rythmeFormation != null %}
+                        <dt>Rythme de formation</dt>
+                        <dd>{{ parcours.rythmeFormation.libelle }}</dd>
+                    {% elseif formation != null and formation.rythmeFormation != null %}
+                        <dt>Rythme de formation</dt>
+                        <dd>{{ formation.rythmeFormation.libelle }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    {# 2. Localisation & Inscription #}
+    <div class="pdf-section">
+        <h2 class="pdf-section-title">2. Localisation & Inscription</h2>
+        <div class="pdf-grid-2">
+            <div class="pdf-col">
+                <dl class="pdf-dl">
+                    <dt>Localisation</dt>
+                    <dd>
+                        {% if parcours.localisation != null %}
+                            {{ parcours.localisation.libelle }}
+                        {% elseif parcours.ville != null %}
+                            {{ parcours.ville.libelle }}
+                        {% elseif formation != null and formation.localisationMention|length > 0 %}
+                            {% for ville in formation.localisationMention %}
+                                {{ ville.libelle }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            Non renseignée
+                        {% endif %}
+                    </dd>
+
+                    <dt>Régime(s) d'inscription</dt>
+                    <dd>
+                        {% if parcours.regimeInscription|length > 0 %}
+                            <ul class="pdf-list">
+                                {% for regime in parcours.regimeInscription %}
+                                    <li>{{ regime.value }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% elseif formation != null and formation.regimeInscription|length > 0 %}
+                            <ul class="pdf-list">
+                                {% for regime in formation.regimeInscription %}
+                                    <li>{{ regime.value }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if parcours.displayRegimeInscription %}
+                            <div style="margin-top: 4px;">{{ parcours.displayRegimeInscription|raw }}</div>
+                        {% elseif formation != null and formation.regimeInscriptionTexte %}
+                            <div style="margin-top: 4px;">{{ formation.regimeInscriptionTexte|raw }}</div>
+                        {% endif %}
+                    </dd>
+
+                    {% if parcours.modalitesAlternance or (formation != null and formation.modalitesAlternance) %}
+                        <dt>Modalités de l'alternance</dt>
+                        <dd>{{ (parcours.modalitesAlternance|default(formation.modalitesAlternance))|raw }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+
+            <div class="pdf-col">
+                <dl class="pdf-dl">
+                    <dt>Composante(s) d'inscription</dt>
+                    <dd>
+                        {% if parcours.composanteInscription != null %}
+                            <div class="pdf-content-box">
+                                <strong>{{ parcours.composanteInscription.libelle }}</strong>
+                                {% if parcours.composanteInscription.adresse != null %}
+                                    <br><span style="color: #64748b; font-size: 10px;">{{ parcours.composanteInscription.adresse.display|raw }}</span>
+                                {% endif %}
+                                {% if parcours.composanteInscription.telStandard %}
+                                    <br><span style="font-size: 10px;">Tél. : {{ parcours.composanteInscription.telStandard|tel_format }}</span>
+                                {% endif %}
+                                {% if parcours.composanteInscription.mailContact %}
+                                    <br><span style="font-size: 10px; color: #0284c7;">{{ parcours.composanteInscription.mailContact }}</span>
+                                {% endif %}
+                            </div>
+                        {% elseif formation != null and formation.composantesInscription|length > 0 %}
+                            {% for comp in formation.composantesInscription %}
+                                <div class="pdf-content-box" style="margin-bottom: 4px;">
+                                    <strong>{{ comp.libelle }}</strong>
+                                    {% if comp.adresse != null %}
+                                        <br><span style="color: #64748b; font-size: 10px;">{{ comp.adresse.display|raw }}</span>
+                                    {% endif %}
+                                    {% if comp.telStandard %}
+                                        <br><span style="font-size: 10px;">Tél. : {{ comp.telStandard|tel_format }}</span>
+                                    {% endif %}
+                                    {% if comp.mailContact %}
+                                        <br><span style="font-size: 10px; color: #0284c7;">{{ comp.mailContact }}</span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            Non renseignée
+                        {% endif %}
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    {# 3. Présentation & Objectifs #}
+    {% if parcours.objectifsParcours or parcours.contenuFormation or parcours.resultatsAttendus or parcours.motsCles or (formation != null and formation.objectifsFormation) %}
+        <div class="pdf-section">
+            <h2 class="pdf-section-title">3. Présentation & Objectifs</h2>
+
+            {% if parcours.objectifsParcours %}
+                <dl class="pdf-dl">
+                    <dt>Objectifs du parcours</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ parcours.objectifsParcours|printTexte }}
+                </div>
+            {% elseif formation != null and formation.objectifsFormation %}
+                <dl class="pdf-dl">
+                    <dt>Objectifs de la formation</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ formation.objectifsFormation|raw }}
+                </div>
+            {% endif %}
+
+            {% if parcours.contenuFormation %}
+                <dl class="pdf-dl" style="margin-top: 6px;">
+                    <dt>Organisation / Contenu de la formation</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ parcours.contenuFormation|printTexte }}
+                </div>
+            {% elseif formation != null and formation.contenuFormation %}
+                <dl class="pdf-dl" style="margin-top: 6px;">
+                    <dt>Contenu de la formation</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ formation.contenuFormation|raw }}
+                </div>
+            {% endif %}
+
+            {% if parcours.resultatsAttendus %}
+                <dl class="pdf-dl" style="margin-top: 6px;">
+                    <dt>Résultats attendus</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ parcours.resultatsAttendus|printTexte }}
+                </div>
+            {% elseif formation != null and formation.resultatsAttendus %}
+                <dl class="pdf-dl" style="margin-top: 6px;">
+                    <dt>Résultats attendus</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ formation.resultatsAttendus|raw }}
+                </div>
+            {% endif %}
+
+            {% if parcours.motsCles %}
+                <dl class="pdf-dl" style="margin-top: 6px;">
+                    <dt>Mots clés</dt>
+                    <dd>{{ parcours.motsCles|printTexte }}</dd>
+                </dl>
+            {% endif %}
+
+            {% if parcours.rythmeFormationTexte %}
+                <dl class="pdf-dl" style="margin-top: 6px;">
+                    <dt>Précisions sur le rythme de formation</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ parcours.rythmeFormationTexte|printTexte }}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {# 4. Modalités & Descriptif pédagogique #}
+    {% if parcours.modalitesEnseignement != null or parcours.hasStage or parcours.hasProjet or parcours.hasMemoire or parcours.hasSituationPro %}
+        <div class="pdf-section">
+            <h2 class="pdf-section-title">4. Modalités & Descriptif pédagogique</h2>
+            <div class="pdf-grid-2">
+                <div class="pdf-col">
+                    <dl class="pdf-dl">
+                        {% if parcours.modalitesEnseignement != null %}
+                            <dt>Modalités d'enseignement</dt>
+                            <dd>{{ parcours.modalitesEnseignement.libelle }}</dd>
+                        {% endif %}
+
+                        {% if parcours.hasStage %}
+                            <dt>Stage(s)</dt>
+                            <dd>
+                                Oui ({{ parcours.nbHeuresStages ?? 0 }} h)
+                                {% if parcours.stageText %}
+                                    <div style="font-size: 10px; color: #475569; margin-top: 2px;">{{ parcours.stageText|printTexte }}</div>
+                                {% endif %}
+                            </dd>
+                        {% endif %}
+
+                        {% if parcours.hasProjet %}
+                            <dt>Projet(s) tutoré(s)</dt>
+                            <dd>
+                                Oui ({{ parcours.nbHeuresProjet ?? 0 }} h)
+                                {% if parcours.projetText %}
+                                    <div style="font-size: 10px; color: #475569; margin-top: 2px;">{{ parcours.projetText|printTexte }}</div>
+                                {% endif %}
+                            </dd>
+                        {% endif %}
+                    </dl>
+                </div>
+
+                <div class="pdf-col">
+                    <dl class="pdf-dl">
+                        {% if parcours.hasMemoire %}
+                            <dt>Mémoire</dt>
+                            <dd>
+                                Oui
+                                {% if parcours.memoireText %}
+                                    <div style="font-size: 10px; color: #475569; margin-top: 2px;">{{ parcours.memoireText|printTexte }}</div>
+                                {% endif %}
+                            </dd>
+                        {% endif %}
+
+                        {% if parcours.hasSituationPro %}
+                            <dt>Situation professionnelle</dt>
+                            <dd>
+                                Oui ({{ parcours.nbHeuresSituationPro ?? 0 }} h)
+                                {% if parcours.situationProText %}
+                                    <div style="font-size: 10px; color: #475569; margin-top: 2px;">{{ parcours.situationProText|printTexte }}</div>
+                                {% endif %}
+                            </dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# 5. Compétences & Blocs (BCC) #}
+    {% if parcours.blocCompetences|length > 0 %}
+        <div class="pdf-section">
+            <h2 class="pdf-section-title">5. Compétences acquises & Blocs (BCC)</h2>
+            {% for bc in parcours.blocCompetences %}
+                <div class="pdf-bcc-item">
+                    <div class="pdf-bcc-title">{{ bc.display }}</div>
+                    {% if bc.competences|length > 0 %}
+                        <ul class="pdf-list">
+                            {% for comp in bc.competences %}
+                                <li>{{ comp.display }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <span style="color: #64748b; font-style: italic; font-size: 10px;">Aucune compétence spécifique rattachée.</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# 6. Structure & Maquette du parcours #}
+    {% if dto is defined and dto is not null and dto.semestres|length > 0 %}
+        <div class="pdf-section">
+            <h2 class="pdf-section-title">6. Structure & Maquette du parcours</h2>
+            <table class="pdf-table">
+                <thead>
+                    <tr>
+                        <th class="text-left" style="width: 40%;">Intitulé / Élément</th>
+                        <th style="width: 10%;">Code</th>
+                        <th style="width: 8%;">CM</th>
+                        <th style="width: 8%;">TD</th>
+                        <th style="width: 8%;">TP</th>
+                        <th style="width: 8%;">Dist.</th>
+                        <th style="width: 8%;">TE</th>
+                        <th style="width: 10%;">ECTS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ordre, sem in dto.semestres|filter(s => s.semestre.nonDispense == false) %}
+                        <tr style="background-color: #e2e8f0; font-weight: bold;">
+                            <td colspan="2" class="text-left">Semestre {{ sem.ordre }}{% if sem.semestre.codeApogee %} ({{ sem.semestre.codeApogee }}){% endif %}</td>
+                            <td>{{ sem.heuresEctsSemestre.sommeSemestreCmPres ?? 0 }} h</td>
+                            <td>{{ sem.heuresEctsSemestre.sommeSemestreTdPres ?? 0 }} h</td>
+                            <td>{{ sem.heuresEctsSemestre.sommeSemestreTpPres ?? 0 }} h</td>
+                            <td>{{ sem.heuresEctsSemestre.sommeSemestreTotalDist() ?? 0 }} h</td>
+                            <td>{{ sem.heuresEctsSemestre.sommeSemestreTePres ?? 0 }} h</td>
+                            <td><strong>{{ sem.heuresEctsSemestre.sommeSemestreEcts ?? 0 }}</strong></td>
+                        </tr>
+                        {% for ordUe, ue in sem.ues %}
+                            <tr style="background-color: #f1f5f9; font-weight: 600;">
+                                <td class="text-left" style="padding-left: 12px;">{{ ue.ue ? ue.ue.libelle : ue.display }}</td>
+                                <td>{{ ue.ue ? ue.ue.codeApogee : '' }}</td>
+                                <td>{{ ue.heuresEctsUe.sommeUeCmPres ?? 0 }} h</td>
+                                <td>{{ ue.heuresEctsUe.sommeUeTdPres ?? 0 }} h</td>
+                                <td>{{ ue.heuresEctsUe.sommeUeTpPres ?? 0 }} h</td>
+                                <td>{{ ue.heuresEctsUe.sommeUeTotalDist() ?? 0 }} h</td>
+                                <td>{{ ue.heuresEctsUe.sommeUeTePres ?? 0 }} h</td>
+                                <td><strong>{{ ue.heuresEctsUe.sommeUeEcts ?? 0 }}</strong></td>
+                            </tr>
+                            {% for ordEc, ec in ue.elementConstitutifs %}
+                                <tr>
+                                    <td class="text-left" style="padding-left: 24px;">{{ ec.elementConstitutif.libelle }}</td>
+                                    <td style="color: #64748b; font-size: 9px;">{{ ec.elementConstitutif.codeApogee }}</td>
+                                    <td>{{ ec.heuresEctsEc.cmPres }} h</td>
+                                    <td>{{ ec.heuresEctsEc.tdPres }} h</td>
+                                    <td>{{ ec.heuresEctsEc.tpPres }} h</td>
+                                    <td>{{ ec.heuresEctsEc.sommeEcTotalDist() }} h</td>
+                                    <td>{{ ec.heuresEctsEc.tePres }} h</td>
+                                    <td>{{ ec.heuresEctsEc.ects }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endfor %}
+                    {% if dto.heuresEctsFormation is defined and dto.heuresEctsFormation is not null %}
+                        <tr class="total-row">
+                            <td colspan="2" class="text-left"><strong>Total Parcours</strong></td>
+                            <td><strong>{{ dto.heuresEctsFormation.sommeFormationCmPres }} h</strong></td>
+                            <td><strong>{{ dto.heuresEctsFormation.sommeFormationTdPres }} h</strong></td>
+                            <td><strong>{{ dto.heuresEctsFormation.sommeFormationTpPres }} h</strong></td>
+                            <td><strong>{{ dto.heuresEctsFormation.sommeFormationTotalDist() }} h</strong></td>
+                            <td><strong>{{ dto.heuresEctsFormation.sommeFormationTePres }} h</strong></td>
+                            <td><strong style="color: #0284c7;">{{ dto.heuresEctsFormation.sommeFormationEcts }} ECTS</strong></td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    {# 7. Admission & Prérequis #}
+    {% if parcours.niveauFrancais or parcours.prerequis %}
+        <div class="pdf-section">
+            <h2 class="pdf-section-title">7. Admission & Prérequis</h2>
+            <dl class="pdf-dl">
+                {% if parcours.niveauFrancais %}
+                    <dt>Niveau de français requis</dt>
+                    <dd>{{ parcours.niveauFrancais.libelle }}</dd>
+                {% endif %}
+
+                {% if parcours.prerequis %}
+                    <dt>Prérequis recommandés</dt>
+                    <dd>
+                        <div class="pdf-content-box">
+                            {{ parcours.prerequis|raw }}
+                        </div>
+                    </dd>
+                {% endif %}
+            </dl>
+        </div>
+    {% endif %}
+
+    {# 8. Et après... (Débouchés & Poursuites) #}
+    {% if parcours.poursuitesEtudes or parcours.debouches or parcours.codesRome|length > 0 %}
+        <div class="pdf-section">
+            <h2 class="pdf-section-title">8. Et après... (Débouchés & Poursuites)</h2>
+            {% if parcours.poursuitesEtudes %}
+                <dl class="pdf-dl">
+                    <dt>Poursuites d'études envisageables</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ parcours.poursuitesEtudes|raw }}
+                </div>
+            {% endif %}
+
+            {% if parcours.debouches %}
+                <dl class="pdf-dl" style="margin-top: 6px;">
+                    <dt>Débouchés professionnels</dt>
+                </dl>
+                <div class="pdf-content-box">
+                    {{ parcours.debouches|raw }}
+                </div>
+            {% endif %}
+
+            {% if parcours.codesRome|length > 0 %}
+                <dl class="pdf-dl" style="margin-top: 6px;">
+                    <dt>Codes ROME associés</dt>
+                    <dd>
+                        {% for code in parcours.codesRome %}
+                            <span class="pdf-badge pdf-badge-gray">{{ code.code }}</span>
+                        {% endfor %}
+                    </dd>
+                </dl>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {# 9. Contacts pédagogiques #}
+    {% if parcours.contacts|length > 0 %}
+        <div class="pdf-section">
+            <h2 class="pdf-section-title">9. Contacts pédagogiques & Secrétariat</h2>
+            <div class="pdf-grid-2">
+                {% for contact in parcours.contacts %}
+                    <div class="pdf-col" style="margin-bottom: 6px;">
+                        <div class="pdf-content-box">
+                            <strong style="color: #0369a1;">{{ contact.denomination }}</strong><br>
+                            {{ contact.display }}
+                            {% if contact.telephone %}
+                                <br><span style="font-size: 10px;">Tél. : {{ contact.telephone|tel_format }}</span>
+                            {% endif %}
+                            {% if contact.email %}
+                                <br><span style="font-size: 10px; color: #0284c7;">{{ contact.email }}</span>
+                            {% endif %}
+                            {% if contact.adresse != null %}
+                                <br><span style="color: #64748b; font-size: 10px;">{{ contact.adresse.display|raw }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>

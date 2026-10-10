@@ -12,12 +12,15 @@ use Symfony\Component\HttpFoundation\Response;
 interface TypeDiplomeHandlerInterface extends TypeDiplomeMcccInterface, StructureInterface, McccInterface, DiplomeExportInterface
 {
     public const TEMPLATE_FOLDER = 'licence';
+    public const TEMPLATE_COMPETENCES = 'typeDiplome/licence/affiche/_competences.html.twig';
 
     public function getStructureCompetences(Parcours $parcours): array;
 
     public function getTypeEpreuves(): array;
 
     public function getTemplateFolder(): string;
+
+    public function getCompetencesTemplate(): string;
 
     public function getValidator(): ValideParcoursInterface;
 
