@@ -1,0 +1,46 @@
+<div class="col">
+    <section class="scroll-section" id="identite_formation">
+        <h3 class="small-title">Identité de la formation </h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ component('commentaire', {
+                    commentaires: formation.commentaires,
+                    id: formation.id,
+                    type: 'formation',
+                    zone: 'identite_formation',
+                }) }}
+                {{ include('formation/legacy/_identiteFormation.html.twig') }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="localisation">
+        <h3 class="small-title">Localisation</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {{ component('commentaire', {
+                    commentaires: formation.commentaires,
+                    id: formation.id,
+                    type: 'formation',
+                    zone: 'localisation',
+                }) }}
+                {{ include('formation/legacy/_localisationFormation.html.twig') }}
+            </div>
+        </div>
+    </section>
+
+        <section class="scroll-section" id="presentation">
+            <h3 class="small-title">Présentation</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'presentation',
+                    }) }}
+                    {{ include('formation/legacy/_presentationFormation.html.twig', {hasParcours:true}) }}
+                </div>
+            </div>
+        </section>
+</div>

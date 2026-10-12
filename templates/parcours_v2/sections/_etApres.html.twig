@@ -1,0 +1,40 @@
+{% set dtClass = 'text-[11px] font-black uppercase tracking-wide text-primary-500 dark:text-primary-300' %}
+{% set ddClass = 'mt-2 text-sm leading-relaxed text-secondary-700 dark:text-secondary-400' %}
+{% set blockClass = 'rounded-xl border border-secondary-200 dark:border-secondary-700 bg-bg p-4' %}
+
+<div class="space-y-4">
+    <dl class="space-y-4">
+        <div class="{{ blockClass }}">
+            <dt class="{{ dtClass }}">Poursuites d'études envisageables</dt>
+            <dd class="{{ ddClass }}">{{ parcours.poursuitesEtudes|raw }}</dd>
+        </div>
+        {% if stringDifferencesParcours.poursuiteEtudesParcours is defined %}
+            {{ include('communs/_comparaison_versioning_no_button.html.twig', {
+                textDifferences: stringDifferencesParcours.poursuiteEtudesParcours,
+                idCollapse: 'diffGlobalParcours'
+            }) }}
+        {% endif %}
+
+        <div class="{{ blockClass }}">
+            <dt class="{{ dtClass }}">Débouchés</dt>
+            <dd class="{{ ddClass }}">{{ parcours.debouches|raw }}</dd>
+        </div>
+        {% if stringDifferencesParcours.debouchesTextParcours is defined %}
+            {{ include('communs/_comparaison_versioning_no_button.html.twig', {
+                textDifferences: stringDifferencesParcours.debouchesTextParcours,
+                idCollapse: 'diffGlobalParcours'
+            }) }}
+        {% endif %}
+
+        <div class="{{ blockClass }}">
+            <dt class="{{ dtClass }}">Code ROME</dt>
+            <dd class="mt-1 flex flex-wrap gap-2">
+                {% for code in parcours.codesRome %}
+                    <span class="inline-flex items-center rounded-full bg-primary-100 dark:bg-primary-800 px-2.5 py-1 text-xs font-bold text-primary-700 dark:text-primary-400">{{ code.code }}</span>
+                {% else %}
+                    <span class="text-sm text-secondary-500">Aucun code ROME.</span>
+                {% endfor %}
+            </dd>
+        </div>
+    </dl>
+</div>

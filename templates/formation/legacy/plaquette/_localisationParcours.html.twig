@@ -1,0 +1,28 @@
+<p><strong>Localisation du parcours</strong>
+    : {{ parcours.localisation != null ? parcours.localisation.libelle : 'Erreur' }}
+</p>
+<div><strong>Régime(s) d'inscription</strong> :
+    <ul>
+        {% for regime in parcours.regimeInscription %}
+            <li>{{ regime.value }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<p><strong>Modalités de l'alternance</strong> : {{ parcours.modalitesAlternance|raw }}</p>
+
+<div><strong>Inscription</strong> :
+    {% if parcours.composanteInscription != null %}
+        <dl>
+            <dt>Composante {{ parcours.composanteInscription.libelle }} :</dt>
+            <dd>{{ parcours.composanteInscription.adresse != null ? parcours.composanteInscription.adresse.display|raw : 'Erreur' }}
+                <br>
+                Téléphone
+                : {{ parcours.composanteInscription.telStandard|tel_format }} {% if parcours.composanteInscription.telComplementaire != null %}ou {{ parcours.composanteInscription.telComplementaire|tel_format }}{% endif %}
+                <br>
+                Email : {{ parcours.composanteInscription.mailContact|mailto }}<br>
+                Site web :{{ parcours.composanteInscription.urlSite|open_url }}</dd>
+        </dl>
+    {% endif %}
+</div>
+

@@ -1,0 +1,29 @@
+<div class="row">
+    <p><strong> Localisation(s) de la mention/spécialité</strong>
+        : {% for ville in formation.localisationMention %}{{ ville.libelle }}{% if not loop.last %}, {% endif %}{% endfor %}
+    </p>
+
+    <div><strong>Régime(s) d'inscription</strong> :
+        <ul>
+            {% for regime in formation.regimeInscription %}
+                <li>{{ regime.value }}</li>
+            {% endfor %}
+        </ul>
+        {{ formation.regimeInscriptionTexte }}
+    </div>
+    <p><strong>Modalités de l'alternance</strong> : {{ formation.modalitesAlternance|raw }}</p>
+
+    <div><strong>Composante(s) d'inscription</strong> :
+        {% for composante in formation.composantesInscription %}
+            <dl>
+                <dt>Composante {{ composante.libelle }} :</dt>
+                <dd>{{ composante.adresse != null ? composante.adresse.display|raw : 'Erreur' }}<br>
+                    Téléphone
+                    : {{ composante.telStandard|tel_format }} {% if composante.telComplementaire != null %}ou {{ composante
+                    .telComplementaire|tel_format }}{% endif %}<br>
+                    Email : {{ composante.mailContact|mailto }}<br>
+                    Site web :{{ composante.urlSite|open_url }}</dd>
+            </dl>
+        {% endfor %}
+    </div>
+</div>

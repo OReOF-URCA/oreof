@@ -15,6 +15,7 @@ use App\DataTable\EtablissementDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\Adresse;
 use App\Entity\Etablissement;
+use App\Form\EtablissementApiKeysType;
 use App\Form\EtablissementType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\EtablissementRepository;
@@ -112,6 +113,10 @@ class EtablissementController extends BaseController
                 'format' => 'html',
                 'empty_text' => 'Non renseigné',
             ])
+            ->addField('apiPlatformsList', [
+                'label' => 'APIs tierces configurées',
+                'empty_text' => 'Aucune API configurée',
+            ])
             ->build();
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -156,6 +161,37 @@ class EtablissementController extends BaseController
             'etablissement' => $etablissement,
             'form' => $form->createView(),
             'titre' => "Modification d'un établissement"
+        ]);
+    }
+
+    #[Route('/{id}/api-keys', name: 'app_etablissement_api_keys', methods: ['GET', 'POST'])]
+    #[Breadcrumb(menuKey: 'administration.etablissement')]
+    #[Breadcrumb(label: 'APIs tierces')]
+    public function apiKeys(
+        Request                 $request,
+        Etablissement           $etablissement,
+        EtablissementRepository $etablissementRepository
+    ): Response {
+        $form = $this->createForm(
+            EtablissementApiKeysType::class,
+            $etablissement,
+            [
+                'action' => $this->generateUrl('app_etablissement_api_keys', ['id' => $etablissement->getId()]),
+            ]
+        );
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $etablissementRepository->save($etablissement, true);
+
+            $this->addFlashBag('success', 'Configuration des clés d\'API tierces enregistrée avec succès.');
+            return $this->redirectToRoute('app_etablissement_api_keys', ['id' => $etablissement->getId()]);
+        }
+
+        return $this->render('config/etablissement/api_keys.html.twig', [
+            'etablissement' => $etablissement,
+            'form' => $form->createView(),
+            'titre' => 'APIs tierces — ' . $etablissement->getLibelle(),
         ]);
     }
 

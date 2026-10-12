@@ -1,0 +1,17 @@
+<div class="row">
+    <div class="col-12">
+        <p  class="text-justify">
+            <strong>Poursuites d'études envisageables</strong> :
+            {{ parcours.poursuitesEtudes|raw }}
+        </p>
+
+        <p  class="text-justify"><strong>Débouchés</strong> : {{ parcours.debouches|raw }}</p>
+
+{#        <strong>Code ROME</strong>#}
+{#        <p>#}
+{#            {% for code in parcours.codesRome %}#}
+{#                {{ code.code }}{% if not loop.last %}, {% endif %}#}
+{#            {% endfor %}#}
+{#        </p>#}
+    </div>
+</div>

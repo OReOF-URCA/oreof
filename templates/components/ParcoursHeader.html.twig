@@ -241,7 +241,7 @@
                                              {{ stimulus_controller('tooltip') }}
                                              title="{{ module_status('dpe').message }}">
                                             <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary-100 text-secondary-400 dark:bg-secondary-800">
-                                                <i class="fas {{ option.metadata.button_icon }} text-xs"></i>
+                                                <i class="fas {{ option.metadata.button_icon|default('fa-check') }} text-xs"></i>
                                             </span>
                                             <span class="min-w-0">
                                                 <span class="block font-semibold text-secondary-500 dark:text-secondary-400">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>
@@ -252,9 +252,9 @@
                                         <a class="flex items-start gap-3 rounded-xl px-3 py-3 text-sm text-secondary-700 transition {{ itemStyle.hover }} dark:text-secondary-200"
                                            data-action="click->modalturbo#open"
                                            data-turbo="true"
-                                           href="{{ path('parcours_process_apply', {type: option.metadata.type, dpeParcours: dpeParcours.id, transition: key }) }}">
+                                           href="{{ path('parcours_process_apply', {type: option.metadata.type|default('valider'), dpeParcours: dpeParcours.id, transition: key }) }}">
                                             <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full {{ itemStyle.badge }}">
-                                                <i class="fas {{ option.metadata.button_icon }} text-xs"></i>
+                                                <i class="fas {{ option.metadata.button_icon|default('fa-check') }} text-xs"></i>
                                             </span>
                                             <span class="min-w-0">
                                                 <span class="block font-semibold {{ itemStyle.title }}">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>

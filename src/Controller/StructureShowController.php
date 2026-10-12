@@ -10,10 +10,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
+use Twig\Environment;
+
 class StructureShowController extends AbstractController
 {
-    public function __construct(protected TypeDiplomeResolver $typeDiplomeResolver)
-    {
+    public function __construct(
+        protected TypeDiplomeResolver $typeDiplomeResolver,
+        protected Environment $twig
+    ) {
     }
 
     #[Route('/structure/parcours/show/', name: 'app_structure_parcours_show')]
@@ -86,7 +90,12 @@ class StructureShowController extends AbstractController
             $diffStructure = $versioningStructure->setDto($structureDifferencesParcours, $dto)->calculDiff();
         }
 
-        return $this->render('typeDiplome/' . $typeD->getTemplateFolder() . '/structure/v2/_structure.html.twig', [
+        $templateV2 = 'typeDiplome/' . $typeD->getTemplateFolder() . '/structure/v2/_structure.html.twig';
+        $template = $this->twig->getLoader()->exists($templateV2)
+            ? $templateV2
+            : 'typeDiplome/' . $typeD->getTemplateFolder() . '/structure/_structure.html.twig';
+
+        return $this->render($template, [
             'parcours' => $parcours,
             'typeDiplome' => $parcours->getTypeDiplome(),
             'diffStructure' => $diffStructure ?? null,

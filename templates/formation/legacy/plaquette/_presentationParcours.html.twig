@@ -1,0 +1,22 @@
+<div class="row">
+    <div class="col-sm-12">
+        <p class="text-justify"><strong>Organisation de la formation</strong> :
+            {{ parcours.contenuFormation|printTexte }}
+        </p>
+
+        <p class="text-justify"><strong>Objectifs du parcours</strong> :
+            {{ parcours.objectifsParcours|printTexte }}
+        </p>
+
+        <p class="text-justify"><strong>Résultats attendus du parcours</strong> :
+            {{ parcours.resultatsAttendus|printTexte }}
+        </p>
+
+{#        <p class="text-justify"><strong>Rythme de formation</strong> :#}
+{#            {{ parcours.rythmeFormation != null ? parcours.rythmeFormation.libelle : 'Non précisé' }}#}
+{#        </p>#}
+
+{#        <p class="text-justify"><strong>Précisions sur le rythme de formation</strong> :#}
+{#            {{ parcours.rythmeFormationTexte|printTexte }}</p>#}
+    </div>
+</div>

@@ -1,0 +1,35 @@
+<div class="col-12">
+    <dl>
+        {% if formation.isHasParcours == false and formation.parcours|length == 1 %}
+            <p><strong>Responsable de formation</strong>
+                : {{ parcours.formation.responsableMention != null ? parcours.formation.responsableMention.display : 'Non concerné' }}
+            </p>
+            <p><strong>Co-responsable de formation</strong>
+                : {{ parcours.formation.coResponsable != null ? parcours.formation.coResponsable.display : 'Non concerné' }}
+            </p>
+        {% else %}
+            <p><strong>Responsable du parcours</strong>
+                : {{ parcours.respParcours != null ? parcours.respParcours.display : 'Non concerné' }}</p>
+            <p><strong>Email</strong>
+                : {{ parcours.respParcours != null ? parcours.respParcours.email : 'Non concerné' }}</p>
+            {% if parcours.coResponsable != null %}
+                <p><strong>Co-responsable du parcours</strong>
+                    : {{ parcours.coResponsable != null ? parcours.coResponsable.display : 'Non concerné' }}</p>
+                <p><strong>Email</strong>
+                    : {{ parcours.coResponsable != null ? parcours.coResponsable.email : 'Non concerné' }}</p>
+            {% endif %}
+        {% endif %}
+        <p><strong>Coordonnées secrétariat</strong> : {{ parcours.coordSecretariat|raw }}</p>
+    </dl>
+    <div class="row">
+        {% for contact in parcours.contacts %}
+            <div class="col-4">
+                <strong>{{ contact.denomination }}</strong>
+                <p>{{ contact.display }}</p>
+                <p>{{ contact.telephone|tel_format }}</p>
+                <p>{{ contact.email|mailto }}</p>
+                <p>{{ contact.adresse != null ? contact.adresse.display|raw : 'Pas d\'adresse' }}</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>

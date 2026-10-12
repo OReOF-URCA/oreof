@@ -237,7 +237,10 @@
                 </section>
             {% endif %}
 
-            {{ include('typeDiplome/'~constant('TEMPLATE_FOLDER', typeD)~'/_show_parcours.html.twig') }}
+            {{ include([
+                'typeDiplome/' ~ constant('TEMPLATE_FOLDER', typeD) ~ '/_show_parcours.html.twig',
+                'parcours_v2/_show_parcours.html.twig'
+            ]) }}
         </div>
     </div>
 {% endblock %}

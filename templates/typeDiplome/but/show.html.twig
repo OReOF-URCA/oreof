@@ -3,7 +3,7 @@
         <h3 class="small-title">Identité de la formation</h3>
         <div class="card mb-5">
             <div class="card-body">
-                {{ include('typeDiplome/formation/_identiteFormation.html.twig') }}
+                {{ include('formation/legacy/_identiteFormation.html.twig') }}
             </div>
         </div>
     </section>
@@ -12,7 +12,7 @@
         <h3 class="small-title">Présentation formation {{ parcours.formation.display }}</h3>
         <div class="card mb-5">
             <div class="card-body">
-                {{ include('typeDiplome/formation/_presentationFormation.html.twig') }}
+                {{ include('formation/legacy/_presentationFormation.html.twig') }}
 
             </div>
         </div>
@@ -22,7 +22,7 @@
         <h3 class="small-title">Présentation du parcours {{ parcours.libelle }}</h3>
         <div class="card mb-5">
             <div class="card-body">
-                {{ include('typeDiplome/formation/_presentationParcours.html.twig', {parcours:parcours}) }}
+                {{ include('formation/legacy/_presentationParcours.html.twig', {parcours:parcours}) }}
             </div>
         </div>
     </section>
@@ -31,7 +31,7 @@
         <h3 class="small-title">Descriptif du parcours</h3>
         <div class="card mb-5">
             <div class="card-body">
-                {{ include('typeDiplome/formation/_descriptifParcours.html.twig', {parcours:parcours}) }}
+                {{ include('formation/legacy/_descriptifParcours.html.twig', {parcours:parcours}) }}
             </div>
         </div>
     </section>
@@ -40,7 +40,7 @@
         <h3 class="small-title">Localisation du parcours</h3>
         <div class="card mb-5">
             <div class="card-body">
-                {{ include('typeDiplome/formation/_localisationParcours.html.twig', {parcours:parcours}) }}
+                {{ include('formation/legacy/_localisationParcours.html.twig', {parcours:parcours}) }}
 
             </div>
         </div>
@@ -92,7 +92,7 @@
         <h3 class="small-title">Admission</h3>
         <div class="card mb-5">
             <div class="card-body">
-                {{ include('typeDiplome/formation/_admission.html.twig', {parcours:parcours}) }}
+                {{ include('formation/legacy/_admission.html.twig', {parcours:parcours}) }}
             </div>
         </div>
     </section>
@@ -101,7 +101,7 @@
         <h3 class="small-title">Inscription</h3>
         <div class="card mb-5">
             <div class="card-body">
-                {{ include('typeDiplome/formation/_inscription.html.twig', {parcours:parcours}) }}
+                {{ include('formation/legacy/_inscription.html.twig', {parcours:parcours}) }}
             </div>
         </div>
     </section>
@@ -110,7 +110,7 @@
         <h3 class="small-title"> Et après...</h3>
         <div class="card mb-5">
             <div class="card-body">
-                {{ include('typeDiplome/formation/_etApres.html.twig', {parcours:parcours}) }}
+                {{ include('formation/legacy/_etApres.html.twig', {parcours:parcours}) }}
             </div>
         </div>
     </section>
@@ -119,7 +119,7 @@
         <h3 class="small-title">Contacts pédagogiques</h3>
         <div class="card mb-5">
             <div class="card-body">
-                {{ include('typeDiplome/formation/_contacts.html.twig', {parcours:parcours}) }}
+                {{ include('formation/legacy/_contacts.html.twig', {parcours:parcours}) }}
             </div>
         </div>
     </section>

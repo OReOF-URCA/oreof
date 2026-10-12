@@ -180,7 +180,10 @@
             </div>
         </aside>
         <div class="ps-3 flex-1 overflow-y-auto flex flex-col pt-0">
-            {{ include('typeDiplome/'~constant('TEMPLATE_FOLDER', typeD)~'/_show_formation.html.twig') }}
+            {{ include([
+                'typeDiplome/' ~ constant('TEMPLATE_FOLDER', typeD) ~ '/_show_formation.html.twig',
+                'formation_v2/_show_formation.html.twig'
+            ]) }}
         </div>
     </div>
 {% endblock %}

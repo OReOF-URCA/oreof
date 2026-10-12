@@ -26,6 +26,7 @@ use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\ParcoursTabStateRepository;
 use App\Repository\ValidationIssueRepository;
 use App\Service\LheoXML;
+use App\Service\Parcours\ParcoursAccessExplainer;
 use App\Service\Validation\SemesterValidationRefresher;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
@@ -48,11 +49,13 @@ class ParcoursController extends BaseController
         ParcoursTabStateRepository $statesRepo,
         TypeDiplomeResolver        $typeDiplomeResolver,
         BreadcrumbService          $breadcrumb,
+        ParcoursAccessExplainer    $accessExplainer,
         Parcours                   $parcours
     ): Response
     {
         if (!$this->isGranted('EDIT', $parcours)) {
-            $this->addFlash('danger', 'Le parcours est verrouillé ou vous n\'avez pas les droits de modification.');
+            $reason = $accessExplainer->explainEditDenial($parcours);
+            $this->addFlash('danger', $reason);
 
             $url = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
             $response = $this->redirect($url);

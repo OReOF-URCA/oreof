@@ -1,0 +1,193 @@
+{# Template PDF pour les MCCC d'une fiche EC / matière #}
+<style>
+    .pdf-mccc-session-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: #334155;
+        margin: 6px 0 3px 0;
+    }
+
+    .pdf-table-mccc {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 10px;
+        margin-top: 3px;
+        margin-bottom: 8px;
+    }
+
+    .pdf-table-mccc th {
+        background-color: #f1f5f9;
+        color: #334155;
+        font-weight: 600;
+        border: 1px solid #cbd5e1;
+        padding: 5px 6px;
+        text-align: center;
+        font-size: 9.5px;
+    }
+
+    .pdf-table-mccc td {
+        border: 1px solid #cbd5e1;
+        padding: 6px 8px;
+        text-align: center;
+        vertical-align: middle;
+        background-color: #ffffff;
+        font-size: 10.5px;
+    }
+
+    .pdf-table-mccc td.text-left {
+        text-align: left;
+    }
+
+    .pdf-table-mccc th.text-left {
+        text-align: left;
+    }
+
+    .pdf-table-mccc tr.group-header th {
+        background-color: #e2e8f0;
+        color: #0f172a;
+        font-weight: 700;
+        text-align: left;
+        padding: 4px 8px;
+    }
+</style>
+
+{% if templateForm is defined and templateForm matches '/^but/' %}
+    {# Rendu BUT #}
+    {% set types = ["Ressources", "SAÉ"] %}
+    <table class="pdf-table-mccc">
+        <thead>
+            <tr>
+                <th class="text-left" style="width: 50%;">Type d'épreuve</th>
+                <th style="width: 25%;">Coefficient / Pourcentage</th>
+                <th style="width: 25%;">Nombre d'épreuves</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for type in types %}
+                <tr class="group-header">
+                    <th colspan="3">{{ type }}</th>
+                </tr>
+                {% if typeEpreuves is defined and typeEpreuves[type == 'Ressources' ? 'ressource' : 'sae'] is defined %}
+                    {% for typeE in typeEpreuves[type == 'Ressources' ? 'ressource' : 'sae'] %}
+                        <tr>
+                            <td class="text-left">{{ typeE|trans({}, 'but') }}</td>
+                            <td>
+                                {% if mcccs[typeE] is defined and mcccs[typeE].pourcentage != 0.0 %}
+                                    <strong>{{ mcccs[typeE].pourcentage }} %</strong>
+                                {% else %}
+                                    <span style="color: #94a3b8;">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if mcccs[typeE] is defined and mcccs[typeE].nbEpreuves != 0 %}
+                                    {{ mcccs[typeE].nbEpreuves }}
+                                {% else %}
+                                    <span style="color: #94a3b8;">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    {# Rendu standard (Licence, Master, M2E, etc.) #}
+    {% if mcccs is defined and mcccs is iterable and mcccs|length > 0 %}
+        {# 1ère Session #}
+        <div class="pdf-mccc-session-title">1ʳᵉ Session</div>
+        <table class="pdf-table-mccc">
+            <thead>
+                <tr>
+                    <th style="width: 33.33%;">Contrôle Continu Intégral (CCi)</th>
+                    <th style="width: 33.33%;">Contrôle Continu (CC)</th>
+                    <th style="width: 33.33%;">Contrôle Terminal (CT)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        {% if mcccs.COL_MCCC_CCI is defined and mcccs.COL_MCCC_CCI is not empty %}
+                            <strong>{{ mcccs.COL_MCCC_CCI }}</strong>
+                        {% else %}
+                            <span style="color: #94a3b8;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if mcccs.COL_MCCC_CC is defined and mcccs.COL_MCCC_CC is not empty %}
+                            <strong>{{ mcccs.COL_MCCC_CC }}</strong>
+                        {% else %}
+                            <span style="color: #94a3b8;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if mcccs.COL_MCCC_CT is defined and mcccs.COL_MCCC_CT is not empty %}
+                            <strong>{{ mcccs.COL_MCCC_CT }}</strong>
+                        {% else %}
+                            <span style="color: #94a3b8;">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        {# 2nde chance (affichée si le régime n'est pas CCi exclusif ou si des colonnes de 2nde chance sont renseignées) #}
+        {% if typeMccc|default('') != 'cci' and (
+            (mcccs.COL_MCCC_SECONDE_CHANCE_CC_SANS_TP is defined and mcccs.COL_MCCC_SECONDE_CHANCE_CC_SANS_TP is not empty) or
+            (mcccs.COL_MCCC_SECONDE_CHANCE_CC_AVEC_TP is defined and mcccs.COL_MCCC_SECONDE_CHANCE_CC_AVEC_TP is not empty) or
+            (mcccs.COL_MCCC_SECONDE_CHANCE_CC_SUP_10 is defined and mcccs.COL_MCCC_SECONDE_CHANCE_CC_SUP_10 is not empty) or
+            (mcccs.COL_MCCC_SECONDE_CHANCE_CT is defined and mcccs.COL_MCCC_SECONDE_CHANCE_CT is not empty)
+        ) %}
+            <div class="pdf-mccc-session-title">2nde chance (hors CCi)</div>
+            <table class="pdf-table-mccc">
+                <thead>
+                    <tr>
+                        <th colspan="2">Si CC &lt; 10 en 1ère session</th>
+                        <th rowspan="2" style="vertical-align: middle;">Si CC &ge; 10 en 1ère session</th>
+                        <th rowspan="2" style="vertical-align: middle;">Cas 100% CT en 1ère session</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 25%;">Sans TP</th>
+                        <th style="width: 25%;">Avec TP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            {% if mcccs.COL_MCCC_SECONDE_CHANCE_CC_SANS_TP is defined and mcccs.COL_MCCC_SECONDE_CHANCE_CC_SANS_TP is not empty %}
+                                <strong>{{ mcccs.COL_MCCC_SECONDE_CHANCE_CC_SANS_TP }}</strong>
+                            {% else %}
+                                <span style="color: #94a3b8;">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if mcccs.COL_MCCC_SECONDE_CHANCE_CC_AVEC_TP is defined and mcccs.COL_MCCC_SECONDE_CHANCE_CC_AVEC_TP is not empty %}
+                                <strong>{{ mcccs.COL_MCCC_SECONDE_CHANCE_CC_AVEC_TP }}</strong>
+                            {% else %}
+                                <span style="color: #94a3b8;">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if mcccs.COL_MCCC_SECONDE_CHANCE_CC_SUP_10 is defined and mcccs.COL_MCCC_SECONDE_CHANCE_CC_SUP_10 is not empty %}
+                                <strong>{{ mcccs.COL_MCCC_SECONDE_CHANCE_CC_SUP_10 }}</strong>
+                            {% else %}
+                                <span style="color: #94a3b8;">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if mcccs.COL_MCCC_SECONDE_CHANCE_CT is defined and mcccs.COL_MCCC_SECONDE_CHANCE_CT is not empty %}
+                                <strong>{{ mcccs.COL_MCCC_SECONDE_CHANCE_CT }}</strong>
+                            {% else %}
+                                <span style="color: #94a3b8;">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endif %}
+    {% else %}
+        <p style="color: #64748b; font-style: italic; font-size: 10px; margin: 4px 0;">Aucune modalité d'évaluation détaillée n'a été saisie.</p>
+    {% endif %}
+{% endif %}

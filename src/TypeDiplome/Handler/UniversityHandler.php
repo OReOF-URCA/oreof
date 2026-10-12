@@ -61,9 +61,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 #[AutoconfigureTag('app.type_diplome_handler', ['code' => 'DEFAULT'])]
 class UniversityHandler extends AbstractTypeDiplomeHandler implements McccDisplayInterface
 {
-    public const TEMPLATE_FOLDER = 'licence';
-    public const SOURCE = 'licence';
-    public const TEMPLATE_FORM_MCCC = 'licence.html.twig';
+    public const TEMPLATE_FOLDER = 'default';
+    public const SOURCE = 'default';
+    public const TEMPLATE_FORM_MCCC = 'default.html.twig';
 
     public function getMcccTemplate(): string
     {

@@ -2064,4 +2064,22 @@ class Parcours
     {
         return $this->getDpeParcoursPourCampagne($campagne)?->isOuvert() ?? true;
     }
+
+    public function getEtablissement(): ?Etablissement
+    {
+        return $this->getFormation()?->getComposantePorteuse()?->getEtablissement();
+    }
+
+    public function hasRomeApi(): bool
+    {
+        return $this->getEtablissement()?->hasRomeApi() ?? false;
+    }
+
+    /**
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getRomeApiConfiguration(): ?array
+    {
+        return $this->getEtablissement()?->getRomeApiConfiguration();
+    }
 }

@@ -67,6 +67,7 @@ ux_icons:
     icon:clock: 'ph:clock-light'
     icon:lock: 'ph:lock-bold'
     icon:unlock: 'ph:lock-open-bold'
+    icon:key: 'ph:key-light'
     icon:eye: 'ph:eye-light'
     icon:eye-slash: 'ph:eye-slash-light'
     icon:phone: 'ph:phone-light'

@@ -172,7 +172,7 @@
                 <h2 class="section-title"><span class="icon">{{ section_icons[key]|default('FR') }}</span><span class="label">{{ key|trans({}, 'communication') }}</span></h2>
                 <div class="rubrique-card">
                     <div class="rubrique-content two-columns">
-                        {{ include('typeDiplome/formation/plaquette/_'~key~'.html.twig') }}
+                        {{ include('pdf/plaquette/_'~key~'.html.twig') }}
                     </div>
                 </div>
                 {#            <hr class="hr-plaquette"> #}
@@ -189,7 +189,7 @@
                     <h3 class="section-title"><span class="icon">{{ section_icons[key]|default('PC') }}</span><span class="label">{{ key|trans({}, 'communication') }}</span></h3>
                     <div class="rubrique-card">
                         <div class="rubrique-content two-columns">
-                            {{ include('typeDiplome/formation/plaquette/_'~key~'.html.twig') }}
+                            {{ include('pdf/plaquette/_'~key~'.html.twig') }}
                         </div>
                     </div>
                     <hr class="hr-plaquette">
