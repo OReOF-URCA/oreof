@@ -46,21 +46,21 @@
                     <div class="col-5">
                         <h5 class="titre-section">Mention / Spécialité</h5>
                         <p class="card-text">
-                            {{ formation.display() ?? 'Non renseigné' }}
+                            {{ formation ? formation.display() : 'Non renseigné' }}
                         </p>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-5">
                         <h5 class="titre-section">Parcours porteur</h5>
-                            {{ fiche_matiere.parcours.libelle ?? '' }}
+                            {{ fiche_matiere.parcours ? fiche_matiere.parcours.libelle : (parcours is defined and parcours ? parcours.libelle : '') }}
                         <p class="card-text">
                         </p>
                     </div>
                     <div class="col-5">
                         <h5 class="titre-section">Composante porteuse</h5>
                         <p class="card-text">
-                            {{ formation.composantePorteuse.libelle ?? 'Non renseigné' }}
+                            {{ formation and formation.composantePorteuse ? formation.composantePorteuse.libelle : 'Non renseigné' }}
                         </p>
                     </div>
                 </div>

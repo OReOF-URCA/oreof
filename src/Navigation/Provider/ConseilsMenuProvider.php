@@ -61,3 +61,4 @@ final readonly class ConseilsMenuProvider implements MenuProviderInterface
         ];
     }
 }
+

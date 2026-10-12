@@ -132,7 +132,19 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
 
         $children = [];
 
+        $composantes = [];
         foreach ($user->getComposanteResponsableDpe() as $composante) {
+            $composantes[$composante->getId()] = $composante;
+        }
+        if (method_exists($user, 'getUserProfils')) {
+            foreach ($user->getUserProfils() as $userProfil) {
+                if ($userProfil->getComposante() !== null) {
+                    $composantes[$userProfil->getComposante()->getId()] = $userProfil->getComposante();
+                }
+            }
+        }
+
+        foreach ($composantes as $composante) {
             if (!$this->authorizationChecker->isGranted('SHOW', [
                 'route' => 'app_composante',
                 'subject' => $composante,

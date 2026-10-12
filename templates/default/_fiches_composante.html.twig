@@ -57,14 +57,15 @@
                         </td>
 
                         <td class="px-4 py-3 text-right">
-                            <a
+                            <twig:Button
                                     href="{{ path('fiche_matiere_valide_formation', {formation: formation.id}) }}"
-                                    class="app-btn app-btn-success"
-                                    title="Voir les fiches"
-                            >
-                                <i class="fas fa-check"></i>
-                                <span>Voir les fiches</span>
-                            </a>
+                                    variant="success"
+                                    size="sm"
+                                    icon="icon:check"
+                                    label="Voir les fiches"
+                                    tooltip="Voir les fiches"
+                                    data-turbo-frame="_top"
+                            />
                         </td>
                     </tr>
                 {% else %}

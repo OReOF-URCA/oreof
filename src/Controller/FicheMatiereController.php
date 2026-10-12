@@ -340,17 +340,20 @@ class FicheMatiereController extends BaseController
             throw $this->createNotFoundException('Fiche matière non trouvée pour cet élément constitutif.');
         }
 
-        $isBUT = $ficheMatiere->getParcours()?->getTypeDiplome()?->getLibelleCourt() === 'BUT';
+        $formation = $ficheMatiere->getParcours()?->getFormation() ?? $parcours->getFormation();
+        $typeDiplome = $formation?->getTypeDiplome() ?? $parcours->getTypeDiplome();
+        $isBUT = $typeDiplome?->getLibelleCourt() === 'BUT';
         $structureEC = new StructureEc($ec, $parcours, $isBUT, true, false);
 
         return $this->render('fiche_matiere/maquette_iframe.html.twig', [
             'fiche_matiere' => $ficheMatiere,
-            'typeDiplome' => $ficheMatiere->getParcours()?->getFormation()?->getTypeDiplome(),
-            'formation' => $ficheMatiere->getParcours()?->getFormation(),
+            'typeDiplome' => $typeDiplome,
+            'formation' => $formation,
+            'parcours' => $parcours,
             'maquetteOrigineURL' => $this->generateUrl('app_parcours_maquette_iframe', ['parcours' => $parcours->getId()]),
             'heuresEctsEc' => $structureEC->heuresEctsEc,
             'ects' => $ects,
-            'isBUT' => $isBUT
+            'isBUT' => $isBUT,
         ]);
     }
 
@@ -368,15 +371,28 @@ class FicheMatiereController extends BaseController
         float $ects,
         EntityManagerInterface $entityManager
     ) : Response {
-        $ficheMatiere = $entityManager->getRepository(FicheMatiere::class)->findOneBySlug($slug);
+        $ficheMatiere = $entityManager->getRepository(FicheMatiere::class)->findOneBy(['slug' => $slug]);
+        if (null === $ficheMatiere && is_numeric($slug)) {
+            $ficheMatiere = $entityManager->getRepository(FicheMatiere::class)->find((int) $slug);
+        }
+
+        if (null === $ficheMatiere) {
+            throw $this->createNotFoundException(sprintf('Fiche matière non trouvée pour "%s".', $slug));
+        }
+
+        $formation = $ficheMatiere->getParcours()?->getFormation() ?? $parcours->getFormation();
+        $typeDiplome = $formation?->getTypeDiplome() ?? $parcours->getTypeDiplome();
+        $isBUT = $typeDiplome?->getLibelleCourt() === 'BUT';
 
         return $this->render('fiche_matiere/maquette_iframe.html.twig', [
             'fiche_matiere' => $ficheMatiere,
-            'typeDiplome' => $ficheMatiere->getParcours()?->getFormation()?->getTypeDiplome(),
-            'formation' => $ficheMatiere->getParcours()?->getFormation(),
+            'typeDiplome' => $typeDiplome,
+            'formation' => $formation,
+            'parcours' => $parcours,
             'maquetteOrigineURL' => $this->generateUrl('app_parcours_maquette_iframe', ['parcours' => $parcours->getId()]),
             // $parcours ? $this->generateUrl('app_versioning_parcours_maquette_iframe', ['parcours' => $parcours->getId()]) : "#",
             'ects' => $ects,
+            'isBUT' => $isBUT,
             'heuresEctsEc' => [
                 'volCmPres' => $volCmPres,
                 'volTdPres' => $volTdPres,
@@ -384,9 +400,9 @@ class FicheMatiereController extends BaseController
                 'volCmDist' => $volCmDist,
                 'volTdDist' => $volTdDist,
                 'volTpDist' => $volTpDist,
-                'volTe' => $volTe
+                'volTe' => $volTe,
             ],
-            'isVersioning' => true
+            'isVersioning' => true,
         ]);
     }
 

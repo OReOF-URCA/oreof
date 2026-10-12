@@ -126,8 +126,7 @@ class RessourceVoterTest extends TestCase
         $this->userProfilRepository->method('findBy')->with(['user' => $user])->willReturn([$userProfil]);
 
         $this->profilDroitsRepository->method('hasDroit')
-            ->with($profil, 'edit', 'app_parcours')
-            ->willReturn(true);
+            ->willReturnCallback(fn($p, $droit, $r) => $droit === 'edit');
 
         $this->dpeParcoursWorkflow->method('can')
             ->willReturnCallback(fn($subject, $transition) => $transition === 'valider_parcours');
@@ -162,4 +161,48 @@ class RessourceVoterTest extends TestCase
         // Accessing parcours B should be denied
         $this->assertSame(VoterInterface::ACCESS_DENIED, $this->voter->vote($token, $parcoursB, ['EDIT']));
     }
+
+    public function testResponsableDpeCanManageEditAndShowHisComposante(): void
+    {
+        $user = $this->createMock(User::class);
+        $user->method('getId')->willReturn(10);
+
+        $token = $this->createMock(TokenInterface::class);
+        $token->method('getUser')->willReturn($user);
+        $this->security->method('isGranted')->with('ROLE_ADMIN')->willReturn(false);
+
+        $composanteA = new Composante();
+        $composanteB = new Composante();
+
+        $profil = new Profil();
+        $profil->setCentre(CentreGestionEnum::CENTRE_GESTION_COMPOSANTE);
+
+        $userProfil = new UserProfil();
+        $userProfil->setUser($user);
+        $userProfil->setProfil($profil);
+        $userProfil->setComposante($composanteA);
+
+        $this->userProfilRepository->method('findBy')->with(['user' => $user])->willReturn([$userProfil]);
+
+        // Le profil a uniquement 'manage' sur app_composante
+        $this->profilDroitsRepository->method('hasDroit')
+            ->willReturnCallback(function (Profil $p, string $droit, string $route) use ($profil) {
+                return $p === $profil && $droit === 'manage' && $route === 'app_composante';
+            });
+
+        // 1. Accès générique 'composante' pour le menu
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, ['route' => 'app_composante', 'subject' => 'composante'], ['SHOW']));
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, ['route' => 'app_composante', 'subject' => 'composante'], ['EDIT']));
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, ['route' => 'app_composante', 'subject' => 'composante'], ['MANAGE']));
+
+        // 2. Accès sur son instance composante A
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, ['route' => 'app_composante', 'subject' => $composanteA], ['SHOW']));
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, ['route' => 'app_composante', 'subject' => $composanteA], ['EDIT']));
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, ['route' => 'app_composante', 'subject' => $composanteA], ['MANAGE']));
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, $composanteA, ['SHOW']));
+
+        // 3. Accès sur une autre composante B refusé
+        $this->assertSame(VoterInterface::ACCESS_DENIED, $this->voter->vote($token, ['route' => 'app_composante', 'subject' => $composanteB], ['SHOW']));
+    }
 }
+

@@ -113,10 +113,19 @@ class RessourceVoter extends Voter
     {
         // Exemple de hiérarchie : MANAGE > EDIT > SHOW
         return match (strtoupper($attribute)) {
-            PermissionEnum::SHOW->value => [PermissionEnum::MANAGE->value, PermissionEnum::SHOW->value, PermissionEnum::EDIT->value],
-            PermissionEnum::EDIT->value => [PermissionEnum::MANAGE->value, PermissionEnum::EDIT->value],
-            PermissionEnum::MANAGE->value => [PermissionEnum::MANAGE->value],
-            default => [$attribute],
+            PermissionEnum::SHOW->name, PermissionEnum::SHOW->value => [
+                PermissionEnum::MANAGE->value,
+                PermissionEnum::EDIT->value,
+                PermissionEnum::SHOW->value,
+            ],
+            PermissionEnum::EDIT->name, PermissionEnum::EDIT->value => [
+                PermissionEnum::MANAGE->value,
+                PermissionEnum::EDIT->value,
+            ],
+            PermissionEnum::MANAGE->name, PermissionEnum::MANAGE->value => [
+                PermissionEnum::MANAGE->value,
+            ],
+            default => [strtolower($attribute)],
         };
     }
 
@@ -160,7 +169,7 @@ class RessourceVoter extends Voter
         foreach ($userProfils as $userProfil) {
             $profile = $userProfil->getProfil();
             foreach ($attributesToCheck as $attr) {
-                if ($this->profilDroitsRepository->hasDroit($profile, $attr, $route) && $this->checkScope($userProfil, $object, $attr)) {
+                if ($this->profilDroitsRepository->hasDroit($profile, $attr, $route) && $this->checkScope($userProfil, $object, $attribute)) {
                     return true;
                 }
             }
@@ -188,7 +197,8 @@ class RessourceVoter extends Voter
         }
 
         if ($object instanceof Composante) {
-            return $userProfil->getComposante() === $object;
+            return $userProfil->getComposante() === $object
+                || ($object->getEtablissement() !== null && $object->getEtablissement() === $userProfil->getEtablissement());
         }
 
         if ($object instanceof Formation) {
@@ -209,7 +219,9 @@ class RessourceVoter extends Voter
     private function checkComposante(UserProfil $userProfil, mixed $object, string $attribute): bool
     {
         if ($object instanceof Composante) {
-            return $userProfil->getComposante() === $object;
+            return $userProfil->getComposante() === $object
+                || $object->getResponsableDpe()?->getId() === $userProfil->getUser()?->getId()
+                || ($userProfil->getUser() !== null && $userProfil->getUser()->getComposanteResponsableDpe()->contains($object));
         }
 
         if ($object instanceof Formation) {
@@ -243,7 +255,8 @@ class RessourceVoter extends Voter
             $inScope = match ($userProfil->getProfil()?->getCentre()) {
                 CentreGestionEnum::CENTRE_GESTION_PARCOURS => $userProfil->getParcours() === $parcours,
                 CentreGestionEnum::CENTRE_GESTION_FORMATION => $userProfil->getFormation() === $parcours?->getFormation(),
-                CentreGestionEnum::CENTRE_GESTION_COMPOSANTE => $userProfil->getComposante() === $parcours?->getFormation()?->getComposantePorteuse(),
+                CentreGestionEnum::CENTRE_GESTION_COMPOSANTE => $userProfil->getComposante() === $parcours?->getFormation()?->getComposantePorteuse()
+                    || $parcours?->getFormation()?->getComposantePorteuse()?->getResponsableDpe()?->getId() === $userId,
                 CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT => true,
                 default => false,
             };
@@ -267,9 +280,11 @@ class RessourceVoter extends Voter
     private function checkFormation(UserProfil $userProfil, mixed $object, string $attribute): bool
     {
         if ($object instanceof Formation) {
+            $userId = $userProfil->getUser()?->getId();
             $inScope = match ($userProfil->getProfil()?->getCentre()) {
                 CentreGestionEnum::CENTRE_GESTION_FORMATION => $userProfil->getFormation() === $object,
-                CentreGestionEnum::CENTRE_GESTION_COMPOSANTE => $userProfil->getComposante() === $object->getComposantePorteuse(),
+                CentreGestionEnum::CENTRE_GESTION_COMPOSANTE => $userProfil->getComposante() === $object->getComposantePorteuse()
+                    || $object->getComposantePorteuse()?->getResponsableDpe()?->getId() === $userId,
                 CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT => true,
                 CentreGestionEnum::CENTRE_GESTION_PARCOURS => $object->isHasParcours() === false && $userProfil->getParcours()?->getFormation() === $object,
                 default => false,
