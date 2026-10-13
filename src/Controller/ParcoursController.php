@@ -304,102 +304,25 @@ class ParcoursController extends BaseController
         return JsonReponse::error('Modalite de recopie inconnue');
     }
 
-    /**
-     * @throws JsonException
-     */
     #[Route('/supprimer/{id}', name: 'app_parcours_delete', methods: ['GET'])]
     public function delete(
-        Request  $request,
         Parcours $parcour,
-    ): Response
-    {
-
-        $csrf = $request->query->get('csrf');
-
-
-        if (!$this->isCsrfTokenValid('delete' . $parcour->getId(), $csrf)) {
-            throw $this->createAccessDeniedException('Token CSRF invalide');
-        }
-
-        // on affiche une page de confirmation indiquant tous les liens avec le parcours et les impacts de sa suppression
-        return $this->render('parcours/delete.html.twig', [
-            'dpeParcours' => GetDpeParcours::getFromParcours($parcour),
-            'parcours' => $parcour,
-            'formation' => $parcour->getFormation(),
-        ]);
-
-    }
-
-
-    /**
-     * @throws JsonException
-     */
-    #[Route('/{id}/confirmation', name: 'app_parcours_delete_confirm', methods: ['GET'])]
-    public function deleteConfirmation(
-        ElementConstitutifRepository $elementConstitutifRepository,
-        EntityManagerInterface       $entityManager,
-        Request                      $request,
-        Parcours                     $parcour,
-        ParcoursRepository           $parcoursRepository
     ): Response {
-        if ($this->isCsrfTokenValid('delete' . $parcour->getId(), JsonRequest::getValueFromRequest($request, 'csrf'))) {
-            foreach ($parcour->getSemestreParcours() as $sp) {
-                $entityManager->remove($sp);
-            }
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-            foreach ($parcour->getSemestreParcours() as $semestreParcour) {
-                $sem = $semestreParcour->getSemestre();
-                if ($sem !== null && $sem->isTroncCommun() === false) {
-                    //todo: supprimer le tronc commun s'il n'est plus utilisé
-                    foreach ($sem->getUes() as $ue) {
-                        foreach ($ue->getElementConstitutifs() as $ec) {
-                            $entityManager->remove($ec);
-                        }
-                        $entityManager->remove($ue);
-                    }
-                    //todo: supprimer le semestre s'il n'est plus utilisé
-                    $entityManager->remove($sem);
-                    $entityManager->remove($semestreParcour);
-                }
-
-                foreach ($parcour->getFicheMatieres() as $ficheMatiere) {
-                    //todo: gérer si la fiche est mutualisée
-                    $entityManager->remove($ficheMatiere);
-                }
-            }
-
-            $ecs = $elementConstitutifRepository->findByParcours($parcour);
-            foreach ($ecs as $ec) {
-                foreach ($ec->getEcEnfants() as $ece) {
-                    $entityManager->remove($ece);
-                }
-
-                $entityManager->remove($ec);
-            }
-
-            foreach ($parcour->getFicheMatiereParcours() as $ficheMatiereParcour) {
-                $entityManager->remove($ficheMatiereParcour);
-            }
-
-            foreach ($parcour->getSemestreMutualisables() as $semestreMutualisable) {
-                $entityManager->remove($semestreMutualisable);
-            }
-
-            foreach ($parcour->getUeMutualisables() as $ueMutualisable) {
-                $entityManager->remove($ueMutualisable);
-            }
-
-            foreach ($parcour->getDpeParcours() as $dpe) {
-                $entityManager->remove($dpe);
-            }
-
-            $parcoursRepository->remove($parcour, true);
-
-            return JsonReponse::success('Parcours supprimé avec succès');
-        }
-
-        return JsonReponse::error('Erreur lors de la suppression du parcours');
+        return $this->redirectToRoute('parcours_v2_supprimer', ['parcours' => $parcour->getId()]);
     }
+
+    #[Route('/{id}/confirmation', name: 'app_parcours_delete_confirm', methods: ['GET', 'POST'])]
+    public function deleteConfirmation(
+        Parcours $parcour,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        return $this->redirectToRoute('parcours_v2_supprimer', ['parcours' => $parcour->getId()]);
+    }
+
+
 
     #[Route('/{parcours}/maquette_iframe', name: 'app_parcours_maquette_iframe')]
     public function getMaquetteIframe(

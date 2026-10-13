@@ -53,6 +53,19 @@
             label="Retour à la formation"
             tooltip="Retour à la formation"
     />
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <twig:Button
+                href="{{ path('parcours_v2_supprimer', {parcours: parcours.id}) }}"
+                variant="danger"
+                :soft="false"
+                :outline="true"
+                icon="icon:trash"
+                label="Supprimer définitivement"
+                tooltip="Supprimer définitivement ce parcours (Admin)"
+                dataAction="click->modalturbo#open"
+        />
+    {% endif %}
 {% endblock %}
 
 {% block content %}

@@ -1,6 +1,12 @@
 {% extends 'base.html.twig' %}
 
 {% block bouton_header %}
+    <twig:Button href="{{ composante ? path('offre_v2_statistiques_composante', { composante: composante.id }) : path('offre_v2_statistiques') }}"
+                 variant="secondary" class="mr-2"
+                 icon="icon:chart">
+        Statistiques & Synthèse
+    </twig:Button>
+
     {% if is_granted('ROLE_ADMIN') %}
         <twig:Button href="{{ path('app_formation_new', { redirect: composante ? 'app_offre_composante_index' : 'app_offre_index', composante: composante ? composante.id : null }) }}"
                      variant="success" class="mr-2">
@@ -28,6 +34,23 @@
 
 {% block content %}
     <turbo-frame id="offre_table">
+        <!-- Navigation par onglets -->
+        <div class="mb-4 border-b border-secondary-200 dark:border-secondary-700">
+            <nav class="-mb-px flex space-x-6" aria-label="Sections de l'offre">
+                <a href="{{ composante ? path('app_offre_composante_index', {composante: composante.id}) : path('app_offre_index') }}"
+                   class="inline-flex items-center gap-2 border-b-2 border-primary-500 pb-3 text-sm font-semibold text-primary-600 dark:text-primary-400">
+                    <twig:UX:Icon name="icon:layers" class="h-4 w-4" />
+                    Tableau de l'offre
+                </a>
+                <a href="{{ composante ? path('offre_v2_statistiques_composante', {composante: composante.id}) : path('offre_v2_statistiques') }}"
+                   data-turbo-frame="_top"
+                   class="inline-flex items-center gap-2 border-b-2 border-transparent pb-3 text-sm font-medium text-secondary-500 hover:border-secondary-300 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-secondary-200">
+                    <twig:UX:Icon name="icon:chart" class="h-4 w-4" />
+                    Statistiques & Synthèse des places
+                </a>
+            </nav>
+        </div>
+
         {% set moduleStatus = module_status('offre_formation', campagne) %}
         {% set timelineStep = campagne ? campagne.timelineDateForModule('offre_formation') : null %}
         {% set dateDebut = timelineStep ? (timelineStep.dateDebut ?? timelineStep.date) : (campagne ? campagne.dateOuvertureDpe : null) %}

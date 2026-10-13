@@ -87,6 +87,8 @@ ux_icons:
     icon:bell: 'ph:bell-light'
     icon:envelope: 'ph:envelope-light'
     icon:pencil-ruler: 'ph:pencil-ruler-duotone'
+    icon:chart: 'ph:chart-bar-light'
+    icon:chart-pie: 'ph:chart-pie-light'
 
     # Marques
     icon:github: 'simple-icons:github'

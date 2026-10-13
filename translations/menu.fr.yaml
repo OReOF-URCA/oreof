@@ -10,6 +10,7 @@ menu.admin.controle_lheo: 'Controle LHEO'
 menu.admin.dpe_ouverts: 'DPE ouverts'
 menu.admin.exports: Exports
 menu.admin.gestion_offre: "Gestion de l'offre et capacités"
+menu.admin.statistiques_offre: "Statistiques et synthèse de l'offre"
 menu.admin.gestion_offre_old: "Gestion de l'offre et capacités"
 menu.admin.impersonation.user: "Impersonation d'un utilisateur"
 menu.admin.logs.applicatifs: "Logs de l'application"

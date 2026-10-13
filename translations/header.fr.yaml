@@ -103,6 +103,8 @@ app_offre_index.description: 'Synthèse de l’offre de formation. Ouverture, pl
 app_offre_index.title: 'Synthèse de l’offre de formation'
 app_parcours_bcc_but.title: 'BCC pour le parcours %libelle%'
 app_parcours_delete.title: 'Suppression du parcours : %display%'
+parcours_v2_supprimer.description: 'Supprimer définitivement un parcours créé par erreur (Action réservée aux administrateurs).'
+parcours_v2_supprimer.title: 'Suppression définitive : %display%'
 app_parcours_export_xml_lheo.title: 'Erreur LHEO'
 app_parcours_export_xml_lheo_v2.title: 'Erreur LHEO'
 app_parcours_index.title: 'Détails des parcours'

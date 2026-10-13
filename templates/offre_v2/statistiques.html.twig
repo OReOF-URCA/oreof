@@ -1,0 +1,629 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques et synthèse des places — Offre de formation{% endblock %}
+
+{% block bouton_header %}
+    <twig:Button href="{{ composante ? path('app_offre_composante_index', { composante: composante.id }) : path('app_offre_index') }}"
+                 variant="secondary"
+                 icon="icon:layers"
+                 class="mr-2">
+        Tableau de l'offre
+    </twig:Button>
+
+    <twig:Button href="{{ composante ? path('offre_v2_statistiques_composante_export', filters|merge({ composante: composante.id })) : path('offre_v2_statistiques_export', filters) }}"
+                 variant="primary"
+                 icon="icon:download">
+        Exporter en CSV
+    </twig:Button>
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-6">
+        <!-- Navigation par onglets -->
+        <div class="border-b border-secondary-200 dark:border-secondary-700">
+            <nav class="-mb-px flex space-x-6" aria-label="Sections de l'offre">
+                <a href="{{ composante ? path('app_offre_composante_index', {composante: composante.id}) : path('app_offre_index') }}"
+                   class="inline-flex items-center gap-2 border-b-2 border-transparent pb-3 text-sm font-medium text-secondary-500 hover:border-secondary-300 hover:text-secondary-700 dark:text-secondary-400 dark:hover:text-secondary-200">
+                    <twig:UX:Icon name="icon:layers" class="h-4 w-4" />
+                    Tableau de l'offre
+                </a>
+                <a href="{{ composante ? path('offre_v2_statistiques_composante', {composante: composante.id}) : path('offre_v2_statistiques') }}"
+                   class="inline-flex items-center gap-2 border-b-2 border-primary-500 pb-3 text-sm font-semibold text-primary-600 dark:text-primary-400">
+                    <twig:UX:Icon name="icon:chart" class="h-4 w-4" />
+                    Statistiques & Synthèse des places
+                </a>
+            </nav>
+        </div>
+
+        <!-- Filtres -->
+        <div class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-xs dark:border-secondary-700 dark:bg-secondary-800">
+            <form method="get"
+                  action="{{ composante ? path('offre_v2_statistiques_composante', {composante: composante.id}) : path('offre_v2_statistiques') }}"
+                  class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 items-end">
+                
+                {% if not composante %}
+                    <div>
+                        <label for="filter-comp" class="block text-xs font-semibold text-secondary-700 dark:text-secondary-300 mb-1">
+                            Composante
+                        </label>
+                        <select id="filter-comp" name="comp" class="w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm text-secondary-900 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100">
+                            <option value="">Toutes les composantes</option>
+                            {% for c in allComposantes %}
+                                <option value="{{ c.id }}" {% if filters.comp == c.id %}selected{% endif %}>
+                                    {{ c.libelle }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+
+                <div>
+                    <label for="filter-type" class="block text-xs font-semibold text-secondary-700 dark:text-secondary-300 mb-1">
+                        Type de diplôme
+                    </label>
+                    <select id="filter-type" name="type" class="w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm text-secondary-900 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100">
+                        <option value="">Tous les types</option>
+                        {% for td in allTypesDiplome %}
+                            <option value="{{ td.id }}" {% if filters.type == td.id %}selected{% endif %}>
+                                {{ td.libelleCourt }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filter-plateforme" class="block text-xs font-semibold text-secondary-700 dark:text-secondary-300 mb-1">
+                        Plateforme
+                    </label>
+                    <select id="filter-plateforme" name="plateforme" class="w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm text-secondary-900 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100">
+                        <option value="">Toutes les plateformes</option>
+                        {% for p in allPlateformes %}
+                            <option value="{{ p.id }}" {% if filters.plateforme == p.id %}selected{% endif %}>
+                                {{ p.libelle }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filter-statut" class="block text-xs font-semibold text-secondary-700 dark:text-secondary-300 mb-1">
+                        Statut des parcours
+                    </label>
+                    <select id="filter-statut" name="statut" class="w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm text-secondary-900 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100">
+                        <option value="ouvert" {% if filters.statut == 'ouvert' %}selected{% endif %}>Parcours ouverts uniquement</option>
+                        <option value="tous" {% if filters.statut == 'tous' %}selected{% endif %}>Tous les parcours</option>
+                        <option value="non_ouvert" {% if filters.statut == 'non_ouvert' %}selected{% endif %}>Parcours non ouverts</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filter-q" class="block text-xs font-semibold text-secondary-700 dark:text-secondary-300 mb-1">
+                        Recherche libre
+                    </label>
+                    <input type="text" id="filter-q" name="q" value="{{ filters.q }}"
+                           placeholder="Mention, parcours..."
+                           class="w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm text-secondary-900 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-100 placeholder:text-secondary-400">
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-700 focus:outline-hidden focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:bg-primary-700 dark:hover:bg-primary-600 transition-colors w-full sm:w-auto">
+                        <twig:UX:Icon name="icon:filter" class="h-4 w-4" />
+                        Filtrer
+                    </button>
+                    {% if filters.comp or filters.type or filters.plateforme or filters.statut != 'ouvert' or filters.q %}
+                        <a href="{{ composante ? path('offre_v2_statistiques_composante', {composante: composante.id}) : path('offre_v2_statistiques') }}"
+                           class="inline-flex items-center justify-center rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm font-medium text-secondary-700 hover:bg-secondary-50 focus:outline-hidden dark:border-secondary-600 dark:bg-secondary-700 dark:text-secondary-200 dark:hover:bg-secondary-600"
+                           title="Réinitialiser les filtres">
+                            <twig:UX:Icon name="icon:refresh" class="h-4 w-4" />
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- Indicateurs clés KPI -->
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <twig:Kpi
+                title="Capacité globale"
+                value="{{ kpi.totalCapacite }}"
+                unit="places"
+                variant="primary"
+                icon="icon:users"
+                help="Nombre total de places d'accueil cumulées (avec dédoublonnage strict des années en tronc commun)."
+            />
+
+            <twig:Kpi
+                title="Places 1ère année"
+                value="{{ kpi.totalNiveau1 }}"
+                unit="places"
+                variant="info"
+                icon="icon:graduation"
+                help="Capacité totale des années 1 (L1, BUT 1, DEUST 1...), représentative des places ouvertes pour l'admission post-bac."
+            />
+
+            <twig:Kpi
+                title="Places Master"
+                value="{{ kpi.totalMaster }}"
+                unit="places"
+                variant="default"
+                icon="icon:award"
+                help="Capacité cumulée sur les années de Master (M1 et M2)."
+            />
+
+            <twig:Kpi
+                title="Places Alternance"
+                value="{{ kpi.totalAlternance }}"
+                unit="places"
+                variant="success"
+                icon="icon:wrench"
+                help="Places déclarées pour les formations et parcours en apprentissage ou alternance via les plateformes."
+            />
+
+            <twig:Kpi
+                title="Formations"
+                value="{{ kpi.totalFormations }}"
+                unit="mentions"
+                variant="secondary"
+                icon="icon:book-open"
+                help="Nombre de mentions ou formations concernées par la sélection courante."
+            />
+
+            <twig:Kpi
+                title="Parcours ouverts"
+                value="{{ kpi.totalParcoursOuverts }}"
+                unit="/ {{ kpi.totalParcours }}"
+                variant="{{ kpi.totalParcoursOuverts > 0 ? 'success' : 'secondary' }}"
+                icon="icon:check-circle"
+                help="Nombre de parcours ouverts par rapport au total des parcours recensés pour cette campagne."
+            />
+        </div>
+
+        <!-- Section Graphiques -->
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <!-- Graphique 1 : Places par Niveau (L1, L2, BUT1...) -->
+            <section class="rounded-xl border border-secondary-200 bg-surface p-5 shadow-xs dark:border-secondary-700 dark:bg-secondary-800">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                            <twig:UX:Icon name="icon:chart" class="h-5 w-5 text-primary-500" />
+                            Nombre de places par année d'études
+                        </h2>
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                            Ventilation synthétique par niveau (L1, L2, L3, BUT 1, BUT 2, BUT 3, LP, M1, M2...)
+                        </p>
+                    </div>
+                </div>
+                <div class="h-64">
+                    {{ render_chart(charts.chartNiveaux, {'aria-label': 'Répartition des capacités par niveau d\'études', role: 'img'}) }}
+                </div>
+            </section>
+
+            <!-- Graphique 2 : Répartition par Plateforme d'admission -->
+            <section class="rounded-xl border border-secondary-200 bg-surface p-5 shadow-xs dark:border-secondary-700 dark:bg-secondary-800">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                            <twig:UX:Icon name="icon:chart-pie" class="h-5 w-5 text-secondary-500" />
+                            Places déclarées par plateforme d'admission
+                        </h2>
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                            Comparatif des capacités globales déclarées (Parcoursup, Mon Master, eCandidat...)
+                        </p>
+                    </div>
+                </div>
+                <div class="h-64">
+                    {{ render_chart(charts.chartPlateformes, {'aria-label': 'Répartition des places par plateforme d\'admission', role: 'img'}) }}
+                </div>
+            </section>
+
+            <!-- Graphique 3 : Répartition par Type de Diplôme -->
+            <section class="rounded-xl border border-secondary-200 bg-surface p-5 shadow-xs dark:border-secondary-700 dark:bg-secondary-800">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                            <twig:UX:Icon name="icon:graduation" class="h-5 w-5 text-info-500" />
+                            Capacité par type de diplôme
+                        </h2>
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                            Total des places cumulées par filière (Licence, BUT, Master, Licence Pro...)
+                        </p>
+                    </div>
+                </div>
+                <div class="h-64">
+                    {{ render_chart(charts.chartTypesDiplome, {'aria-label': 'Capacité par type de diplôme', role: 'img'}) }}
+                </div>
+            </section>
+
+            <!-- Graphique 4 : Répartition par Composante (si applicable) -->
+            {% if not composante and parComposante|length > 1 %}
+                <section class="rounded-xl border border-secondary-200 bg-surface p-5 shadow-xs dark:border-secondary-700 dark:bg-secondary-800">
+                    <div class="mb-4 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                                <twig:UX:Icon name="icon:school" class="h-5 w-5 text-success-500" />
+                                Capacité par composante
+                            </h2>
+                            <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                                Répartition des capacités d'accueil par faculté, IUT ou institut
+                            </p>
+                        </div>
+                    </div>
+                    <div class="h-64">
+                        {{ render_chart(charts.chartComposantes, {'aria-label': 'Capacité par composante', role: 'img'}) }}
+                    </div>
+                </section>
+            {% endif %}
+        </div>
+
+        <!-- Tableaux Synthétiques Chiffrés -->
+        <div class="space-y-6">
+            <!-- 1. Tableau synthétique par Année d'études (BUT1, L1...) -->
+            <section class="rounded-xl border border-secondary-200 bg-surface shadow-xs dark:border-secondary-700 dark:bg-secondary-800 overflow-hidden">
+                <div class="border-b border-secondary-200 px-5 py-4 dark:border-secondary-700 flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                            <twig:UX:Icon name="icon:layers" class="h-5 w-5 text-primary-500" />
+                            Synthèse chiffrée par année d'études
+                        </h2>
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                            Nombre de formations, parcours, capacité totale et ventilation par plateforme
+                        </p>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-secondary-100 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-300">
+                        {{ parNiveau|length }} niveaux recensés
+                    </span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-secondary-700 dark:text-secondary-300">
+                        <thead class="bg-secondary-50 text-xs uppercase font-semibold text-secondary-600 dark:bg-secondary-700/50 dark:text-secondary-300 border-b border-secondary-200 dark:border-secondary-700">
+                            <tr>
+                                <th scope="col" class="px-5 py-3">Niveau</th>
+                                <th scope="col" class="px-4 py-3">Cycle / Diplôme</th>
+                                <th scope="col" class="px-4 py-3 text-center">Formations</th>
+                                <th scope="col" class="px-4 py-3 text-center">Parcours</th>
+                                <th scope="col" class="px-4 py-3 text-right">Capacité totale</th>
+                                <th scope="col" class="px-4 py-3 text-right">Au recrutement</th>
+                                <th scope="col" class="px-4 py-3 text-right">% Offre</th>
+                                <th scope="col" class="px-5 py-3">Places par plateforme</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                            {% for niveau in parNiveau %}
+                                <tr class="hover:bg-secondary-50/70 transition-colors dark:hover:bg-secondary-700/40">
+                                    <td class="px-5 py-3.5 font-bold text-secondary-900 dark:text-secondary-100">
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold
+                                            {% if niveau.cycle == 'Licence' %}bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300
+                                            {% elseif niveau.cycle == 'BUT' %}bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300
+                                            {% elseif niveau.cycle == 'Master' %}bg-pink-100 text-pink-800 dark:bg-pink-900/40 dark:text-pink-300
+                                            {% elseif niveau.cycle == 'Licence Pro' %}bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300
+                                            {% else %}bg-secondary-100 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200{% endif %}">
+                                            {{ niveau.code }}
+                                        </span>
+                                        <span class="ml-2 text-xs font-normal text-secondary-500 dark:text-secondary-400">
+                                            {{ niveau.libelle }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3.5">
+                                        <span class="font-medium text-secondary-800 dark:text-secondary-200">
+                                            {{ niveau.typeDiplomeLibelleCourt }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-center font-medium">
+                                        {{ niveau.nbFormations }}
+                                    </td>
+                                    <td class="px-4 py-3.5 text-center font-medium">
+                                        {{ niveau.nbParcours }}
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-secondary-900 dark:text-secondary-100">
+                                        {{ niveau.capaciteTotale|number_format(0, ',', ' ') }}
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right font-medium text-secondary-600 dark:text-secondary-400">
+                                        {{ niveau.capaciteRecrutement|number_format(0, ',', ' ') }}
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <span class="text-xs font-semibold">{{ niveau.pourcentage }}%</span>
+                                            <div class="w-12 h-1.5 bg-secondary-200 dark:bg-secondary-700 rounded-full overflow-hidden">
+                                                <div class="h-full bg-primary-500 rounded-full" style="width: {{ niveau.pourcentage }}%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-3.5">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            {% if niveau.plateformes is empty %}
+                                                <span class="text-xs text-secondary-400 italic">Aucune plateforme</span>
+                                            {% else %}
+                                                {% for platCode, places in niveau.plateformes %}
+                                                    <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium border border-secondary-200 bg-surface dark:border-secondary-700 dark:bg-secondary-700">
+                                                        <span class="font-semibold text-secondary-800 dark:text-secondary-200">{{ platCode }} :</span>
+                                                        <span class="font-bold text-primary-600 dark:text-primary-400">{{ places|number_format(0, ',', ' ') }}</span>
+                                                    </span>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="px-5 py-8 text-center text-secondary-500 italic">
+                                        Aucune donnée ne correspond aux critères de filtre sélectionnés.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        {% if parNiveau|length > 0 %}
+                            <tfoot class="bg-secondary-100/70 font-bold text-secondary-900 dark:bg-secondary-700 dark:text-secondary-100 border-t-2 border-secondary-300 dark:border-secondary-600">
+                                <tr>
+                                    <td class="px-5 py-3">Total cumulé</td>
+                                    <td class="px-4 py-3">&nbsp;</td>
+                                    <td class="px-4 py-3 text-center">{{ kpi.totalFormations }}</td>
+                                    <td class="px-4 py-3 text-center">{{ kpi.totalParcours }}</td>
+                                    <td class="px-4 py-3 text-right">{{ kpi.totalCapacite|number_format(0, ',', ' ') }}</td>
+                                    <td class="px-4 py-3 text-right">—</td>
+                                    <td class="px-4 py-3 text-right">100%</td>
+                                    <td class="px-5 py-3">&nbsp;</td>
+                                </tr>
+                            </tfoot>
+                        {% endif %}
+                    </table>
+                </div>
+            </section>
+
+            <!-- 2. Tableau synthétique par Plateforme d'admission -->
+            <section class="rounded-xl border border-secondary-200 bg-surface shadow-xs dark:border-secondary-700 dark:bg-secondary-800 overflow-hidden">
+                <div class="border-b border-secondary-200 px-5 py-4 dark:border-secondary-700 flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                            <twig:UX:Icon name="icon:globe" class="h-5 w-5 text-indigo-500" />
+                            Synthèse par plateforme d'admission
+                        </h2>
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                            Places déclarées par plateforme (Globale, Formation Initiale, Alternance, Spécifique)
+                        </p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-secondary-700 dark:text-secondary-300">
+                        <thead class="bg-secondary-50 text-xs uppercase font-semibold text-secondary-600 dark:bg-secondary-700/50 dark:text-secondary-300 border-b border-secondary-200 dark:border-secondary-700">
+                            <tr>
+                                <th scope="col" class="px-5 py-3">Plateforme</th>
+                                <th scope="col" class="px-4 py-3 text-center">Formations</th>
+                                <th scope="col" class="px-4 py-3 text-center">Années paramétrées</th>
+                                <th scope="col" class="px-4 py-3 text-right">Capacité globale</th>
+                                <th scope="col" class="px-4 py-3 text-right">Formation Initiale</th>
+                                <th scope="col" class="px-4 py-3 text-right">Alternance</th>
+                                <th scope="col" class="px-4 py-3 text-right">Spécifique</th>
+                                <th scope="col" class="px-5 py-3 text-right">% Offre</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                            {% for plat in parPlateforme %}
+                                <tr class="hover:bg-secondary-50/70 transition-colors dark:hover:bg-secondary-700/40">
+                                    <td class="px-5 py-3.5 font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                                        <twig:Badge :variant="plat.color" :label="plat.code" />
+                                        <span>{{ plat.libelle }}</span>
+                                    </td>
+                                    <td class="px-4 py-3.5 text-center font-medium">{{ plat.nbFormations }}</td>
+                                    <td class="px-4 py-3.5 text-center font-medium">{{ plat.nbAnnees }}</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-secondary-900 dark:text-secondary-100">
+                                        {{ plat.capaciteGlobale|number_format(0, ',', ' ') }}
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right font-medium text-secondary-600 dark:text-secondary-400">
+                                        {{ plat.capaciteFi|number_format(0, ',', ' ') }}
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right font-semibold text-success-600 dark:text-success-400">
+                                        {{ plat.capaciteAlternance|number_format(0, ',', ' ') }}
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right font-medium text-secondary-600 dark:text-secondary-400">
+                                        {{ plat.capaciteSpecifique|number_format(0, ',', ' ') }}
+                                    </td>
+                                    <td class="px-5 py-3.5 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <span class="text-xs font-semibold">{{ plat.pourcentage }}%</span>
+                                            <div class="w-12 h-1.5 bg-secondary-200 dark:bg-secondary-700 rounded-full overflow-hidden">
+                                                <div class="h-full bg-indigo-500 rounded-full" style="width: {{ plat.pourcentage }}%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="px-5 py-8 text-center text-secondary-500 italic">
+                                        Aucune plateforme d'admission n'est active.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 3. Tableau synthétique par Type de Diplôme -->
+            <section class="rounded-xl border border-secondary-200 bg-surface shadow-xs dark:border-secondary-700 dark:bg-secondary-800 overflow-hidden">
+                <div class="border-b border-secondary-200 px-5 py-4 dark:border-secondary-700 flex items-center justify-between flex-wrap gap-2">
+                    <div>
+                        <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                            <twig:UX:Icon name="icon:graduation" class="h-5 w-5 text-sky-500" />
+                            Synthèse par type de diplôme
+                        </h2>
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                            Volume de places par filière universitaire
+                        </p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-secondary-700 dark:text-secondary-300">
+                        <thead class="bg-secondary-50 text-xs uppercase font-semibold text-secondary-600 dark:bg-secondary-700/50 dark:text-secondary-300 border-b border-secondary-200 dark:border-secondary-700">
+                            <tr>
+                                <th scope="col" class="px-5 py-3">Type de diplôme</th>
+                                <th scope="col" class="px-4 py-3 text-center">Formations</th>
+                                <th scope="col" class="px-4 py-3 text-center">Parcours</th>
+                                <th scope="col" class="px-4 py-3 text-right">Capacité totale</th>
+                                <th scope="col" class="px-4 py-3 text-right">Places 1ère année</th>
+                                <th scope="col" class="px-4 py-3 text-right">% Offre</th>
+                                <th scope="col" class="px-5 py-3">Ventilation par niveau</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                            {% for td in parTypeDiplome %}
+                                <tr class="hover:bg-secondary-50/70 transition-colors dark:hover:bg-secondary-700/40">
+                                    <td class="px-5 py-3.5 font-bold text-secondary-900 dark:text-secondary-100">
+                                        {{ td.libelle }}
+                                        {% if td.libelleCourt %}
+                                            <span class="text-xs font-medium text-secondary-500 dark:text-secondary-400">({{ td.libelleCourt }})</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3.5 text-center font-medium">{{ td.nbFormations }}</td>
+                                    <td class="px-4 py-3.5 text-center font-medium">{{ td.nbParcours }}</td>
+                                    <td class="px-4 py-3.5 text-right font-bold text-secondary-900 dark:text-secondary-100">
+                                        {{ td.capaciteTotale|number_format(0, ',', ' ') }}
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right font-semibold text-info-600 dark:text-info-400">
+                                        {{ td.capaciteNiveau1|number_format(0, ',', ' ') }}
+                                    </td>
+                                    <td class="px-4 py-3.5 text-right">
+                                        <span class="text-xs font-semibold">{{ td.pourcentage }}%</span>
+                                    </td>
+                                    <td class="px-5 py-3.5">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            {% for niveauCode, cap in td.niveaux %}
+                                                <span class="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium bg-secondary-100 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200">
+                                                    <span class="font-bold">{{ niveauCode }} :</span>
+                                                    <span>{{ cap|number_format(0, ',', ' ') }} pl.</span>
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 4. Tableau synthétique par Composante (si vue globale) -->
+            {% if not composante and parComposante|length > 0 %}
+                <section class="rounded-xl border border-secondary-200 bg-surface shadow-xs dark:border-secondary-700 dark:bg-secondary-800 overflow-hidden">
+                    <div class="border-b border-secondary-200 px-5 py-4 dark:border-secondary-700 flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                            <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                                <twig:UX:Icon name="icon:school" class="h-5 w-5 text-emerald-500" />
+                                Synthèse par composante
+                            </h2>
+                            <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                                Répartition des places par composante porteuse
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-secondary-700 dark:text-secondary-300">
+                            <thead class="bg-secondary-50 text-xs uppercase font-semibold text-secondary-600 dark:bg-secondary-700/50 dark:text-secondary-300 border-b border-secondary-200 dark:border-secondary-700">
+                                <tr>
+                                    <th scope="col" class="px-5 py-3">Composante</th>
+                                    <th scope="col" class="px-4 py-3 text-center">Formations</th>
+                                    <th scope="col" class="px-4 py-3 text-center">Parcours</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Capacité totale</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Places 1ère année</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Places Master</th>
+                                    <th scope="col" class="px-4 py-3 text-right">Alternance</th>
+                                    <th scope="col" class="px-5 py-3 text-right">% Offre</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                                {% for comp in parComposante %}
+                                    <tr class="hover:bg-secondary-50/70 transition-colors dark:hover:bg-secondary-700/40">
+                                        <td class="px-5 py-3.5 font-bold text-secondary-900 dark:text-secondary-100">
+                                            {{ comp.libelle }}
+                                        </td>
+                                        <td class="px-4 py-3.5 text-center font-medium">{{ comp.nbFormations }}</td>
+                                        <td class="px-4 py-3.5 text-center font-medium">{{ comp.nbParcours }}</td>
+                                        <td class="px-4 py-3.5 text-right font-bold text-secondary-900 dark:text-secondary-100">
+                                            {{ comp.capaciteTotale|number_format(0, ',', ' ') }}
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right font-medium text-info-600 dark:text-info-400">
+                                            {{ comp.capaciteNiveau1|number_format(0, ',', ' ') }}
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right font-medium text-pink-600 dark:text-pink-400">
+                                            {{ comp.capaciteMaster|number_format(0, ',', ' ') }}
+                                        </td>
+                                        <td class="px-4 py-3.5 text-right font-semibold text-success-600 dark:text-success-400">
+                                            {{ comp.capaciteAlternance|number_format(0, ',', ' ') }}
+                                        </td>
+                                        <td class="px-5 py-3.5 text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                <span class="text-xs font-semibold">{{ comp.pourcentage }}%</span>
+                                                <div class="w-12 h-1.5 bg-secondary-200 dark:bg-secondary-700 rounded-full overflow-hidden">
+                                                    <div class="h-full bg-emerald-500 rounded-full" style="width: {{ comp.pourcentage }}%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            {% endif %}
+
+            <!-- 5. Tableau détaillé déroulant (Accordéon) -->
+            <details class="rounded-xl border border-secondary-200 bg-surface shadow-xs dark:border-secondary-700 dark:bg-secondary-800">
+                <summary class="cursor-pointer px-5 py-4 text-sm font-semibold text-secondary-900 dark:text-secondary-100 hover:bg-secondary-50/50 dark:hover:bg-secondary-700/50 flex items-center justify-between">
+                    <span class="flex items-center gap-2">
+                        <twig:UX:Icon name="mdi:list-box" class="h-4 w-4 text-primary-500" />
+                        Détail par formation et parcours ({{ detailLignes|length }} entrées)
+                    </span>
+                    <span class="text-xs font-normal text-secondary-500">Cliquer pour afficher / masquer</span>
+                </summary>
+                <div class="border-t border-secondary-200 dark:border-secondary-700 overflow-x-auto max-h-[500px]">
+                    <table class="w-full text-left text-xs text-secondary-700 dark:text-secondary-300">
+                        <thead class="sticky top-0 bg-secondary-100/90 backdrop-blur-xs text-[11px] uppercase font-semibold text-secondary-600 dark:bg-secondary-700 dark:text-secondary-300">
+                            <tr>
+                                <th class="px-4 py-2.5">Composante</th>
+                                <th class="px-4 py-2.5">Diplôme</th>
+                                <th class="px-4 py-2.5">Formation</th>
+                                <th class="px-4 py-2.5">Parcours</th>
+                                <th class="px-3 py-2.5 text-center">Niveau</th>
+                                <th class="px-3 py-2.5 text-right">Capacité brute</th>
+                                <th class="px-3 py-2.5 text-right">Capacité comptée</th>
+                                <th class="px-3 py-2.5 text-center">Recrutement</th>
+                                <th class="px-4 py-2.5">Plateformes</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-secondary-100 dark:divide-secondary-700/60 font-medium">
+                            {% for row in detailLignes %}
+                                <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-700/30">
+                                    <td class="px-4 py-2">{{ row.composante }}</td>
+                                    <td class="px-4 py-2">{{ row.typeDiplome }}</td>
+                                    <td class="px-4 py-2 font-semibold text-secondary-900 dark:text-secondary-100">{{ row.formation }}</td>
+                                    <td class="px-4 py-2">{{ row.parcours }}</td>
+                                    <td class="px-3 py-2 text-center">
+                                        <span class="font-bold">{{ row.niveau }}</span>
+                                        {% if row.isTc %}
+                                            <span class="text-[10px] text-primary-600 font-semibold">(TC)</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-2 text-right text-secondary-500">{{ row.capaciteAccueil }}</td>
+                                    <td class="px-3 py-2 text-right font-bold text-secondary-900 dark:text-secondary-100">{{ row.capaciteComptee }}</td>
+                                    <td class="px-3 py-2 text-center">
+                                        {% if row.isRecrutement %}
+                                            <span class="text-success-600 font-bold">Oui</span>
+                                        {% else %}
+                                            <span class="text-secondary-400">Non</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-2 text-secondary-600 dark:text-secondary-400">
+                                        {{ row.plateformes ?: '—' }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        </div>
+    </div>
+{% endblock %}

@@ -67,11 +67,10 @@
                                     label="Supprimer"
                                     variant="danger"
                                     icon="icon:delete"
-                                    href="{{ path('app_parcours_delete',{id: parcour.id,
-                                        csrf: csrf_token('delete' ~ parcour.id)
-                                    }) }}"
-                                    tooltip="Supprimer le parcours"
+                                    href="{{ path('parcours_v2_supprimer', {parcours: parcour.id}) }}"
+                                    tooltip="Supprimer définitivement ce parcours (Admin)"
                                     size="sm"
+                                    dataAction="click->modalturbo#open"
                             />
                         {% endif %}
 

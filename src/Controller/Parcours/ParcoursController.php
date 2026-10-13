@@ -27,6 +27,7 @@ use App\Repository\ParcoursTabStateRepository;
 use App\Repository\ValidationIssueRepository;
 use App\Service\LheoXML;
 use App\Service\Parcours\ParcoursAccessExplainer;
+use App\Service\Parcours\ParcoursDeleteService;
 use App\Service\Validation\SemesterValidationRefresher;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
@@ -444,4 +445,133 @@ class ParcoursController extends BaseController
         ]));
     }
 
+    #[Route('/{parcours}/supprimer', name: 'supprimer', methods: ['GET'])]
+    public function supprimer(
+        Parcours $parcours,
+        Request $request,
+        ParcoursDeleteService $deleteService,
+        BreadcrumbService $breadcrumb,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $formation = $parcours->getFormation();
+        if ($formation !== null) {
+            $breadcrumb->add(
+                $formation->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $formation->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Suppression définitive');
+
+        $analysis = $deleteService->analyze($parcours);
+
+        $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string)$request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
+
+        if ($isTurbo) {
+            return $turboStream->streamOpenModalFromTemplates(
+                'Supprimer définitivement le parcours',
+                $parcours->getLibelle(),
+                'parcours_v2/_modal_delete.html.twig',
+                [
+                    'parcours' => $parcours,
+                    'formation' => $formation,
+                    'analysis' => $analysis,
+                ],
+                'parcours_v2/_modal_delete_footer.html.twig',
+                [
+                    'parcours' => $parcours,
+                ]
+            );
+        }
+
+        return $this->render('parcours_v2/supprimer.html.twig', [
+            'parcours' => $parcours,
+            'formation' => $formation,
+            'analysis' => $analysis,
+        ]);
+    }
+
+    #[Route('/{parcours}/supprimer', name: 'supprimer_post', methods: ['POST'])]
+    public function supprimerPost(
+        Parcours $parcours,
+        Request $request,
+        ParcoursDeleteService $deleteService,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string)$request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
+
+        $csrfToken = (string)$request->request->get('_token', $request->request->get('csrf_token', ''));
+        if (!$this->isCsrfTokenValid('parcours_delete_' . $parcours->getId(), $csrfToken)) {
+            if ($isTurbo) {
+                return $turboStream->streamToastError('Token CSRF invalide ou expiré.');
+            }
+            $this->addFlash('danger', 'Token CSRF invalide ou expiré.');
+            return $this->redirectToRoute('parcours_v2_supprimer', ['parcours' => $parcours->getId()]);
+        }
+
+        $analysis = $deleteService->analyze($parcours);
+        $confirmationText = trim((string)$request->request->get('confirmation_text', ''));
+        $expectedText = trim($parcours->getLibelle() ?? '');
+
+        if (mb_strtoupper($confirmationText) !== mb_strtoupper($expectedText) && mb_strtoupper($confirmationText) !== 'SUPPRIMER') {
+            $msg = sprintf('Le texte saisi (« %s ») ne correspond pas au libellé du parcours (« %s ») ou à « SUPPRIMER ». La suppression a été annulée.', $confirmationText, $expectedText);
+            if ($isTurbo) {
+                return $turboStream->streamToastError($msg);
+            }
+            $this->addFlash('danger', $msg);
+            return $this->redirectToRoute('parcours_v2_supprimer', ['parcours' => $parcours->getId()]);
+        }
+
+        $force = (bool)$request->request->get('force', false);
+        if ($analysis->hasSharedDependencies() && !$force) {
+            $msg = 'Des dépendances partagées ont été détectées. Vous devez cocher la confirmation explicite de forçage pour supprimer ce parcours.';
+            if ($isTurbo) {
+                return $turboStream->streamToastError($msg);
+            }
+            $this->addFlash('danger', $msg);
+            return $this->redirectToRoute('parcours_v2_supprimer', ['parcours' => $parcours->getId()]);
+        }
+
+        $formation = $parcours->getFormation();
+        $formationSlug = $formation?->getSlug();
+        $libelle = $parcours->getLibelle();
+        $parcoursId = $parcours->getId();
+
+        $deleteService->delete($parcours, $force);
+
+        $flashMsg = sprintf('Le parcours « %s » a été définitivement supprimé.', $libelle);
+        $this->addFlash('success', $flashMsg);
+
+        $referer = (string)$request->headers->get('referer', '');
+        if ($formationSlug !== null && str_contains($referer, '/offre/')) {
+            $redirectUrl = $this->generateUrl('offre_v2_configurer', ['slug' => $formationSlug]);
+        } elseif ($formationSlug !== null) {
+            $redirectUrl = $this->generateUrl('formation_v2_voir', ['slug' => $formationSlug]);
+        } else {
+            $redirectUrl = $this->generateUrl('offre_v2_index');
+        }
+
+        if ($isTurbo) {
+            return $turboStream->stream('parcours_v2/turbo/delete_success.stream.html.twig', [
+                'redirectUrl' => $redirectUrl,
+                'parcoursId' => $parcoursId,
+                'toastMessage' => $flashMsg,
+            ]);
+        }
+
+        return $this->redirect($redirectUrl);
+    }
 }

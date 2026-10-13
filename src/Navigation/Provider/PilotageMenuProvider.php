@@ -76,6 +76,12 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 ),
 
                 MenuItem::link(
+                    'pilotage.statistiques_offre',
+                    'menu.admin.statistiques_offre',
+                    'offre_v2_statistiques',
+                ),
+
+                MenuItem::link(
                     'pilotage.dpe_ouverts',
                     'menu.admin.dpe_ouverts',
                     'app_demande_dpe',
