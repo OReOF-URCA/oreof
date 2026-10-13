@@ -38,6 +38,7 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 | `app:recopie-profils` | recopie les profils utilisateurs d'une campagne vers une autre | `[annee-depart]`, `[annee-arrivee]`, `--annee-depart=`, `--annee-arrivee=`, `--dry-run`, `--force` |
 | `app:recopie-domaine` | recopie les domaines | — |
 | `app:translations:import-missing` | importe les traductions manquantes, reformate `translations/*.yaml` | `--translations-dir`, `--simulate`, `--overwrite`, `--format`, `--no-backup` |
+| `app:parcours:fix-coherence-ouverture` | corrige les incohérences d'ouverture parcours / années (dry-run par défaut) | `--campagne=2027-2028`, `--apply`, `--action=all\|fermer-annees\|fermer-parcours` |
 | `app:workflow:check-metadata-completeness` | contrôle les metadata des workflows | — |
 
 ## Publication / exports / versioning

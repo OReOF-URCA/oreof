@@ -301,9 +301,9 @@
 
                     {% for compName, compGroup in groupedFormations %}
                     {# Un tbody par composante : data-collapsed (posé par offre-table) masque ses lignes enfants. #}
-                    <tbody class="group divide-y" data-offre-table-target="composante">
+                    <tbody class="group" data-offre-table-target="composante">
                         <!-- Group Composante -->
-                        <tr class="bg-secondary-100 transition-colors border-t border-secondary-200 dark:border-secondary-700 dark:bg-secondary-800">
+                        <tr class="bg-secondary-200/70 transition-colors border-t border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700/80">
                             <td colspan="3" class="px-4 py-3 font-semibold text-secondary-700 dark:text-secondary-100">
                                 <button type="button"
                                         class="group/toggle flex w-full items-center gap-2 text-left cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-primary-500"
@@ -351,7 +351,7 @@
                                                          data-turbo-frame="_top"
                                                          data-action="click->modalturbo#open"
                                                          title="{{ transition.metadata.label|default(transition.name) }}"
-                                            />
+                                             />
                                         {% endfor %}
                                     </div>
                                 {% endif %}
@@ -361,9 +361,10 @@
                         {% for forma in compGroup.formations %}
                             {% set formation = forma.formation %}
                             {% set formationOuverte = forma.isOuverte %}
-                            <tr class="hover:bg-secondary-50 transition-all duration-150 group-data-[collapsed]:hidden">
+                            <!-- Ligne Mention (Formation) -->
+                            <tr class="bg-secondary-100/80 hover:bg-secondary-100 transition-all duration-150 border-t border-secondary-200 group-data-[collapsed]:hidden dark:bg-secondary-800/80 dark:hover:bg-secondary-800 dark:border-secondary-700">
                                 <td class="px-4 py-3">
-                                    <div class="font-medium text-secondary-900 dark:text-secondary-100">
+                                    <div class="font-semibold text-secondary-900 dark:text-secondary-100">
                                         {{ formation.display }}
                                         {% if forma.anomalies|length > 0 %}
                                             <span class="inline-flex items-center text-danger-600 ml-1 cursor-help animate-pulse dark:text-danger-400" title="{{ forma.anomalies|join('\n') }}">⚠️</span>
@@ -384,7 +385,7 @@
                                     {{ formation.composantePorteuse ? formation.composantePorteuse.libelle : '' }}
                                 </td>
 
-                                <td class="px-4 py-3 text-secondary-400">({{ forma.parcoursData|length }} parcours)</td>
+                                <td class="px-4 py-3 text-secondary-500 font-medium">({{ forma.parcoursData|length }} parcours)</td>
                                 <td class="px-4 py-3">
                                     <twig:Badge variant="{{ formationOuverte ? 'success' : 'danger' }}" label="{{ formationOuverte ? 'Oui' : 'Non' }}" />
                                 </td>
@@ -400,7 +401,7 @@
                                         {% endif %}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-right font-semibold text-secondary-800 dark:text-secondary-100">{{ forma.capacite }}</td>
+                                <td class="px-4 py-3 text-right font-bold text-secondary-900 dark:text-secondary-100">{{ forma.capacite }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-1.5 flex-wrap items-center">
                                         {{ include('offre_v2/_etat_offre_badge.html.twig', {etat: forma.etatValidation|keys|first}) }}<br>
@@ -452,7 +453,7 @@
                                 {% set isParcoursOuvert = pd.isOuvert %}
                                 {% set dpeParc = pd.dpeParcours %}
                                 {# Lignes d'années chargées à la demande (offre-table → offre_v2_annees_parcours), insérées après cette ligne. #}
-                                <tr id="offre-parcours-{{ parcours.id }}" class="bg-secondary-50/50 hover:bg-secondary-100/80 transition-colors border-t border-secondary-100 group-data-[collapsed]:hidden dark:bg-secondary-800/50">
+                                <tr id="offre-parcours-{{ parcours.id }}" class="bg-surface hover:bg-secondary-50/70 transition-colors group-data-[collapsed]:hidden dark:bg-surface dark:hover:bg-secondary-800/40">
                                     <td>&nbsp;</td>
                                     <td class="px-4 py-3 text-secondary-500 font-medium">
                                         {{ pd.composanteLibelle }}
