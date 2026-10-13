@@ -9,6 +9,7 @@
 # Options :
 #   --assets, -a         Forcer la recompilation des assets avec Vite (npm run build)
 #   --no-assets          Ignorer la compilation des assets Vite
+#   --migrations, -m     Exécuter les migrations Doctrine (inactif par défaut)
 #   --no-migrations      Ne pas exécuter les migrations Doctrine
 #   --no-pull            Ne pas effectuer de 'git pull'
 #   --branch=<nom>       Spécifier la branche Git (défaut : v2)
@@ -33,7 +34,7 @@ log_error()   { echo -e "${RED}${BOLD}✖${NC} ${RED}$1${NC}"; }
 # --- 1. Paramètres par défaut & Parsing des arguments ---
 BRANCH="${BRANCH:-v2}"
 BUILD_ASSETS=""      # auto-détecté si vide
-RUN_MIGRATIONS=true
+RUN_MIGRATIONS=false # inactif par défaut, activable avec --migrations ou -m
 DO_GIT_PULL=true
 PHP_BIN="${PHP_BIN:-php}"
 COMPOSER_BIN="${COMPOSER_BIN:-composer}"
@@ -45,6 +46,7 @@ Utilisation : $(basename "$0") [OPTIONS]
 Options :
   -a, --assets          Forcer la compilation des assets Vite (npm ci/install + npm run build)
   --no-assets           Ignorer systématiquement la compilation des assets
+  -m, --migrations      Exécuter les migrations Doctrine (inactif par défaut)
   --no-migrations       Ne pas exécuter les migrations Doctrine
   --no-pull             Ne pas exécuter git pull
   --branch=<nom>        Branche cible pour git pull (défaut: v2)
@@ -65,6 +67,9 @@ for arg in "$@"; do
             ;;
         --no-assets)
             BUILD_ASSETS=false
+            ;;
+        --migrations|-m)
+            RUN_MIGRATIONS=true
             ;;
         --no-migrations)
             RUN_MIGRATIONS=false
@@ -225,7 +230,7 @@ if [ "$RUN_MIGRATIONS" = true ]; then
     }
     log_success "Base de données à jour."
 else
-    log_info "Migrations sautées (--no-migrations)."
+    log_info "Migrations sautées (inactif par défaut, utilisez --migrations ou -m pour exécuter)."
 fi
 
 # --- 8. Gestion du cache Symfony (Nettoyage & Warmup) ---
