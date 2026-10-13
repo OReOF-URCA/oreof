@@ -630,7 +630,7 @@
                             </tr>
                             {% for ordEc, ec in ue.elementConstitutifs %}
                                 <tr>
-                                    <td class="text-left" style="padding-left: 24px;">{{ ec.elementConstitutif.libelle }}</td>
+                                    <td class="text-left" style="padding-left: 24px;">{{ ec.elementConstitutif.ficheMatiere ? ec.elementConstitutif.ficheMatiere.libelle : (ec.elementConstitutif.display != 'Aucun libellé' ? ec.elementConstitutif.display : (ec.elementConstitutif.libelle ?? '')) }}</td>
                                     <td style="color: #64748b; font-size: 9px;">{{ ec.elementConstitutif.codeApogee }}</td>
                                     <td>{{ ec.heuresEctsEc.cmPres }} h</td>
                                     <td>{{ ec.heuresEctsEc.tdPres }} h</td>

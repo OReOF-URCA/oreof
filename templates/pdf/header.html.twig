@@ -90,13 +90,16 @@
         </div>
     {% else %}
         <div class="header-logo-cell">
-            {% if image is defined and image is not empty %}
+            {% if logoComposante is defined and logoComposante is not empty %}
+                <img src="data:image/png;base64,{{ logoComposante }}" alt="Logo composante">
+            {% elseif image is defined and image is not empty %}
                 <img src="data:image/png;base64,{{ image }}" alt="URCA">
             {% endif %}
         </div>
         <div class="header-title-cell">
             <h1>{{ titre|raw }}</h1>
         </div>
+
     {% endif %}
 </header>
 </body>

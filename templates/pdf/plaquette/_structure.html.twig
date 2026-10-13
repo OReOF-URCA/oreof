@@ -1,0 +1,160 @@
+{# Template PDF pour la maquette / structure du parcours dans la plaquette #}
+{% set isBut = typeDiplome is defined and typeDiplome is not null and typeDiplome.libelleCourt|upper == 'BUT' %}
+
+{% if dto is defined and dto is not null and dto.semestres|length > 0 %}
+    {% if isBut %}
+        {# ── Affichage Maquette BUT (APC matricielle) ────────────────────────── #}
+        {% for ordre, sem in dto.semestres|filter(s => s.semestre.nonDispense == false) %}
+            {% set ecArray = getElementsConstitutifs(sem) %}
+            <div style="margin-bottom: 12px; page-break-inside: avoid; break-inside: avoid;">
+                <div style="background-color: #f1f5f9; font-weight: bold; font-size: 10px; padding: 5px 8px; border: 1px solid #cbd5e1; border-bottom: none; border-radius: 4px 4px 0 0; color: #0f172a;">
+                    Semestre {{ sem.ordre }}{% if sem.semestre.codeApogee %} ({{ sem.semestre.codeApogee }}){% endif %} - {{ sem.semestre.display }}
+                </div>
+                <table class="pdf-table" style="margin-top: 0; margin-bottom: 0;">
+                    <thead>
+                        <tr>
+                            <th class="text-left" style="width: 40%;">Élément constitutif (Ressource / SAÉ)</th>
+                            <th style="width: 8%;">Total</th>
+                            <th style="width: 7%;">CM</th>
+                            <th style="width: 7%;">TD</th>
+                            <th style="width: 7%;">TP</th>
+                            <th style="width: 7%;">TE</th>
+                            {% for ue in sem.ues %}
+                                <th style="font-size: 8px; min-width: 35px;" title="{{ ue.ue.libelle|default(ue.display) }}">
+                                    {{ ue.ue.libelle|default(ue.display)|slice(0, 8) }}
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ec in ecArray %}
+                            {% set ecObj = ec.ec.elementConstitutif %}
+                            {% set libelleFiche = ecObj.ficheMatiere ? ecObj.ficheMatiere.libelle : (ecObj.display != 'Aucun libellé' ? ecObj.display : (ecObj.libelle ?? '')) %}
+                            <tr>
+                                <td class="text-left" style="padding: 4px 6px; color: #0f172a; font-size: 9px; line-height: 1.35;">
+                                    {% if ecObj.code %}
+                                        <span style="font-weight: 700; color: #660800; margin-right: 3px;">{{ ecObj.code }}</span>
+                                    {% endif %}
+                                    <span style="font-weight: 500;">{{ libelleFiche }}</span>
+                                    {% if ecObj.codeApogee %}
+                                        <span style="color: #64748b; font-size: 8px; margin-left: 2px;">({{ ecObj.codeApogee }})</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ ec.ec.heuresEctsEc.sommeEcTotalPres|filtreHeures }}</strong></td>
+                                <td>{{ ec.ec.heuresEctsEc.cmPres|filtreHeures }}</td>
+                                <td>{{ ec.ec.heuresEctsEc.tdPres|filtreHeures }}</td>
+                                <td>{{ ec.ec.heuresEctsEc.tpPres|filtreHeures }}</td>
+                                <td>{{ ec.ec.heuresEctsEc.tePres|filtreHeures }}</td>
+                                {% for ue in sem.ues %}
+                                    <td>
+                                        {% set ueId = ue.ue.id %}
+                                        {% if ec['ues'][ueId] is defined and ec['ues'][ueId] is not null and ec['ues'][ueId] != '' %}
+                                            <span style="font-size: 8.5px; font-weight: 600; color: #0f172a;">Coeff. {{ ec['ues'][ueId] }}</span>
+                                        {% else %}
+                                            <span style="color: #94a3b8;">—</span>
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                        <tr class="total-row" style="background-color: #f8fafc;">
+                            <td class="text-left"><strong>Total Semestre {{ sem.ordre }}</strong></td>
+                            <td><strong>{{ sem.heuresEctsSemestre.sommeSemestreTotalPres|filtreHeures }}</strong></td>
+                            <td>{{ sem.heuresEctsSemestre.sommeSemestreCmPres|filtreHeures }}</td>
+                            <td>{{ sem.heuresEctsSemestre.sommeSemestreTdPres|filtreHeures }}</td>
+                            <td>{{ sem.heuresEctsSemestre.sommeSemestreTpPres|filtreHeures }}</td>
+                            <td>{{ sem.heuresEctsSemestre.sommeSemestreTePres|filtreHeures }}</td>
+                            <td colspan="{{ sem.ues|length }}" style="font-weight: bold; color: #660800;">
+                                {{ sem.heuresEctsSemestre.sommeSemestreEcts ?? 0 }} ECTS
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    {% else %}
+        {# ── Affichage Maquette Classique (Licence, Master, etc. comme dans le PDF de parcours) ── #}
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th class="text-left" style="width: 44%;">Intitulé / Élément</th>
+                    <th style="width: 10%;">Code</th>
+                    <th style="width: 7%;">CM</th>
+                    <th style="width: 7%;">TD</th>
+                    <th style="width: 7%;">TP</th>
+                    <th style="width: 7%;">Dist.</th>
+                    <th style="width: 8%;">TE</th>
+                    <th style="width: 10%;">ECTS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ordre, sem in dto.semestres|filter(s => s.semestre.nonDispense == false) %}
+                    <tr style="background-color: #e2e8f0; font-weight: bold; color: #0f172a;">
+                        <td colspan="2" class="text-left" style="font-size: 10px; padding: 5px 6px;">
+                            Semestre {{ sem.ordre }}{% if sem.semestre.codeApogee %} ({{ sem.semestre.codeApogee }}){% endif %}
+                        </td>
+                        <td>{{ sem.heuresEctsSemestre.sommeSemestreCmPres ?? 0 }} h</td>
+                        <td>{{ sem.heuresEctsSemestre.sommeSemestreTdPres ?? 0 }} h</td>
+                        <td>{{ sem.heuresEctsSemestre.sommeSemestreTpPres ?? 0 }} h</td>
+                        <td>{{ sem.heuresEctsSemestre.sommeSemestreTotalDist() ?? 0 }} h</td>
+                        <td>{{ sem.heuresEctsSemestre.sommeSemestreTePres ?? 0 }} h</td>
+                        <td><strong>{{ sem.heuresEctsSemestre.sommeSemestreEcts ?? 0 }}</strong></td>
+                    </tr>
+                    {% for ordUe, ue in sem.ues %}
+                        <tr style="background-color: #f1f5f9; font-weight: 600; color: #334155;">
+                            <td class="text-left" style="padding-left: 10px;">
+                                {{ ue.ue ? (ue.ue.libelle ?? ue.display) : ue.display }}
+                            </td>
+                            <td style="color: #64748b; font-size: 8.5px;">{{ ue.ue ? ue.ue.codeApogee : '' }}</td>
+                            <td>{{ ue.heuresEctsUe.sommeUeCmPres ?? 0 }} h</td>
+                            <td>{{ ue.heuresEctsUe.sommeUeTdPres ?? 0 }} h</td>
+                            <td>{{ ue.heuresEctsUe.sommeUeTpPres ?? 0 }} h</td>
+                            <td>{{ ue.heuresEctsUe.sommeUeTotalDist() ?? 0 }} h</td>
+                            <td>{{ ue.heuresEctsUe.sommeUeTePres ?? 0 }} h</td>
+                            <td><strong>{{ ue.heuresEctsUe.sommeUeEcts ?? 0 }}</strong></td>
+                        </tr>
+                        {% for ordEc, ec in ue.elementConstitutifs %}
+                            {% set ecObj = ec.elementConstitutif %}
+                            {% set libelleFiche = ecObj.ficheMatiere ? ecObj.ficheMatiere.libelle : (ecObj.display != 'Aucun libellé' ? ecObj.display : (ecObj.libelle ?? '')) %}
+                            <tr>
+                                <td class="text-left" style="padding-left: 20px; color: #0f172a; font-size: 9.5px; line-height: 1.35;">
+                                    {% if ecObj.code %}
+                                        <span style="font-weight: 600; color: #660800; margin-right: 3px;">{{ ecObj.code }}</span>
+                                    {% endif %}
+                                    <span style="font-weight: 500;">{{ libelleFiche }}</span>
+                                    {% if ecObj.codeApogee and ecObj.codeApogee != ecObj.code %}
+                                        <span style="color: #64748b; font-size: 8px; margin-left: 2px;">({{ ecObj.codeApogee }})</span>
+                                    {% endif %}
+                                </td>
+                                <td style="color: #475569; font-size: 8.5px; font-weight: 500;">{{ ecObj.codeApogee|default(ecObj.code) }}</td>
+                                <td>{{ ec.heuresEctsEc.cmPres }} h</td>
+                                <td>{{ ec.heuresEctsEc.tdPres }} h</td>
+                                <td>{{ ec.heuresEctsEc.tpPres }} h</td>
+                                <td>{{ ec.heuresEctsEc.sommeEcTotalDist() }} h</td>
+                                <td>{{ ec.heuresEctsEc.tePres }} h</td>
+                                <td><strong>{{ ec.heuresEctsEc.ects }}</strong></td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                {% endfor %}
+                {% if dto.heuresEctsFormation is defined and dto.heuresEctsFormation is not null %}
+                    <tr class="total-row" style="background-color: #f8fafc;">
+                        <td colspan="2" class="text-left" style="font-size: 10px; padding: 5px 6px;">
+                            <strong>Total Parcours</strong>
+                        </td>
+                        <td><strong>{{ dto.heuresEctsFormation.sommeFormationCmPres }} h</strong></td>
+                        <td><strong>{{ dto.heuresEctsFormation.sommeFormationTdPres }} h</strong></td>
+                        <td><strong>{{ dto.heuresEctsFormation.sommeFormationTpPres }} h</strong></td>
+                        <td><strong>{{ dto.heuresEctsFormation.sommeFormationTotalDist() }} h</strong></td>
+                        <td><strong>{{ dto.heuresEctsFormation.sommeFormationTePres }} h</strong></td>
+                        <td><strong style="color: #660800;">{{ dto.heuresEctsFormation.sommeFormationEcts }} ECTS</strong></td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    {% endif %}
+{% else %}
+    <p style="font-style: italic; font-size: 10px; color: #64748b; margin: 4px 0;">
+        Aucune maquette configurée pour ce parcours.
+    </p>
+{% endif %}

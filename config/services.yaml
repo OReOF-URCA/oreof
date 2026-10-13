@@ -148,8 +148,13 @@ services:
             max_size: 10485760
           logos:
             target_dir: '%kernel.project_dir%/public/uploads/logos'
-            allowed_extensions: [ 'png', 'jpg', 'jpeg' ]
-            allowed_mime_types: [ 'image/png', 'image/jpeg' ]
+            allowed_extensions: [ 'png', 'jpg', 'jpeg', 'webp', 'svg' ]
+            allowed_mime_types: [ 'image/png', 'image/jpeg', 'image/webp', 'image/svg+xml' ]
+            max_size: 10485760
+          plaquettes:
+            target_dir: '%kernel.project_dir%/public/uploads/plaquettes'
+            allowed_extensions: [ 'png', 'jpg', 'jpeg', 'webp' ]
+            allowed_mime_types: [ 'image/png', 'image/jpeg', 'image/webp' ]
             max_size: 10485760
           help_images:
             target_dir: '%kernel.project_dir%/public/uploads/help_images'

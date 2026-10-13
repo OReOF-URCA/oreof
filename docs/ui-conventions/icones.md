@@ -53,7 +53,7 @@ Cible = alias existant, sinon icône Phosphor à utiliser directement (ou à dé
 | `fal fa-floppy-disk` | `icon:save` |
 | `fal fa-magnifying-glass` / `fal fa-search` | `icon:search` |
 | `fas fa-filter` | `icon:filter` |
-| `fas fa-trash` | `ph:trash-light` |
+| `fas fa-trash` | `icon:delete` / `icon:trash` |
 | `fas fa-download` | `icon:download` |
 | `fas fa-print` | `icon:print` |
 | `fal fa-send` | `ph:paper-plane-tilt-light` |

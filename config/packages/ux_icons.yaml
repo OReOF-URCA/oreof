@@ -38,6 +38,7 @@ ux_icons:
     icon:edit: 'ph:pencil-light'
     icon:duplicate: 'ph:copy-bold'
     icon:delete: 'ph:trash-light'
+    icon:trash: 'ph:trash-light'
     icon:print: 'ph:printer-light'
     icon:download: 'ph:download-simple-light'
     icon:upload: 'ph:upload-light'

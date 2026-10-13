@@ -21,6 +21,24 @@ use Symfony\Component\Serializer\Attribute\MaxDepth;
 #[ORM\Entity(repositoryClass: ComposanteRepository::class)]
 class Composante
 {
+    public const RUBRIQUES_FORMATION = [
+        'identiteFormation' => 1,
+        'localisationFormation' => 2,
+        'presentationFormation' => 3,
+    ];
+
+    public const RUBRIQUES_PARCOURS = [
+        'presentationParcours' => 1,
+        'descriptifParcours' => 2,
+        'localisationParcours' => 3,
+        'competences' => 4,
+        'structure' => 5,
+        'admission' => 6,
+        'inscription' => 7,
+        'etApres' => 8,
+        'contacts' => 9,
+    ];
+
     public const RUBRIQUES = [
         'identiteFormation' => 1,
         'localisationFormation' => 2,
@@ -35,6 +53,7 @@ class Composante
         'etApres' => 11,
         'contacts' => 12,
     ];
+
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -116,6 +135,9 @@ class Composante
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $footerPlaquette = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $logo = null;
 
     /**
      * @var Collection<int, UserProfil>
@@ -441,14 +463,66 @@ class Composante
         return $this;
     }
 
+    public function getPlaquetteRubriquesFormation(): array
+    {
+        $storage = $this->plaquette_rubriques ?? [];
+        if (isset($storage['formation']) && is_array($storage['formation'])) {
+            $rubriques = array_merge(self::RUBRIQUES_FORMATION, $storage['formation']);
+        } else {
+            // Rétro-compatibilité avec l'ancien format plat
+            $rubriques = [];
+            foreach (self::RUBRIQUES_FORMATION as $key => $defaultPos) {
+                $rubriques[$key] = array_key_exists($key, $storage) ? $storage[$key] : $defaultPos;
+            }
+        }
+
+        asort($rubriques);
+        return $rubriques;
+    }
+
+    public function setPlaquetteRubriquesFormation(array $rubriques): static
+    {
+        $storage = $this->plaquette_rubriques ?? [];
+        $storage['formation'] = $rubriques;
+        $this->plaquette_rubriques = $storage;
+
+        return $this;
+    }
+
+    public function getPlaquetteRubriquesParcours(): array
+    {
+        $storage = $this->plaquette_rubriques ?? [];
+        if (isset($storage['parcours']) && is_array($storage['parcours'])) {
+            $rubriques = array_merge(self::RUBRIQUES_PARCOURS, $storage['parcours']);
+        } else {
+            // Rétro-compatibilité avec l'ancien format plat
+            $rubriques = [];
+            foreach (self::RUBRIQUES_PARCOURS as $key => $defaultPos) {
+                $rubriques[$key] = array_key_exists($key, $storage) ? $storage[$key] : $defaultPos;
+            }
+        }
+
+        asort($rubriques);
+        return $rubriques;
+    }
+
+    public function setPlaquetteRubriquesParcours(array $rubriques): static
+    {
+        $storage = $this->plaquette_rubriques ?? [];
+        $storage['parcours'] = $rubriques;
+        $this->plaquette_rubriques = $storage;
+
+        return $this;
+    }
+
+
     public function getPlaquetteRubriques(): ?array
     {
-        $rubriques = $this->plaquette_rubriques ?? [];
-        $rubriques = array_merge(self::RUBRIQUES, $rubriques);
-        //trier selon les valeurs
-        asort($rubriques);
+        // Renvoie l'ensemble des rubriques fusionnées pour préserver la rétro-compatibilité
+        $formation = $this->getPlaquetteRubriquesFormation();
+        $parcours = $this->getPlaquetteRubriquesParcours();
 
-        return $rubriques;
+        return array_merge($formation, $parcours);
     }
 
     public function setPlaquetteRubriques(?array $plaquette_rubriques): static
@@ -457,6 +531,19 @@ class Composante
 
         return $this;
     }
+
+    public function getLogo(): ?string
+    {
+        return $this->logo;
+    }
+
+    public function setLogo(?string $logo): static
+    {
+        $this->logo = $logo;
+
+        return $this;
+    }
+
 
     public function getHeaderPlaquette(): ?string
     {

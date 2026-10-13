@@ -51,7 +51,8 @@ php bin/console messenger:consume async_export async_email async_mccc_backup --t
 ```
 
 Déploiement cible (releases + bascule atomique, heures creuses) : `docs/ops/ci-cd.md`. Déploiement manuel actuel : tag de release → dépendances + build → secrets → migrations → cache → redémarrage PHP-FPM/serveur web et
-workers → contrôle de `var/log/` et de l'application.
+workers → contrôle de `var/log/` et de l'application. Un script `update.sh` (situé dans le dossier parent ou à la racine) automatise ces étapes de mise à jour et la configuration des permissions.
+
 
 ## Dépannage
 
