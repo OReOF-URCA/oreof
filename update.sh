@@ -12,11 +12,16 @@
 #   --migrations, -m     Exécuter les migrations Doctrine (inactif par défaut)
 #   --no-migrations      Ne pas exécuter les migrations Doctrine
 #   --no-pull            Ne pas effectuer de 'git pull'
-#   --branch=<nom>       Spécifier la branche Git (défaut : v2)
+#   --branch=<nom>, -b   Spécifier la branche Git (défaut : v2)
+#   --user=<nom>, -u     Utilisateur propriétaire des fichiers (défaut : auto-détecté ou www-data, jamais root)
+#   --group=<nom>, -g    Groupe propriétaire des fichiers (défaut : groupe web, ex: www-data)
 #   --help, -h           Afficher cette aide
 # ==============================================================================
 
 set -o pipefail
+
+# Définir un umask garantissant les droits en écriture pour le groupe (0002 -> 775 / 664)
+umask 0002
 
 # Couleurs pour l'affichage
 GREEN='\033[0;32m'
@@ -38,6 +43,8 @@ RUN_MIGRATIONS=false # inactif par défaut, activable avec --migrations ou -m
 DO_GIT_PULL=true
 PHP_BIN="${PHP_BIN:-php}"
 COMPOSER_BIN="${COMPOSER_BIN:-composer}"
+APP_USER="${APP_USER:-}"
+APP_GROUP="${APP_GROUP:-}"
 
 show_help() {
     cat <<EOF
@@ -49,42 +56,73 @@ Options :
   -m, --migrations      Exécuter les migrations Doctrine (inactif par défaut)
   --no-migrations       Ne pas exécuter les migrations Doctrine
   --no-pull             Ne pas exécuter git pull
-  --branch=<nom>        Branche cible pour git pull (défaut: v2)
+  -b, --branch=<nom>    Branche cible pour git pull (défaut: v2)
+  -u, --user=<nom>      Utilisateur propriétaire des fichiers (défaut: auto-détecté ou www-data, jamais root)
+  -g, --group=<nom>     Groupe propriétaire des fichiers (défaut: groupe web www-data)
   -h, --help            Afficher ce message d'aide
 
 Variables d'environnement optionnelles :
   PHP_BIN               Chemin vers le binaire PHP (défaut: php)
   COMPOSER_BIN          Chemin vers composer (défaut: composer)
   PROJECT_DIR           Chemin vers la racine du projet ORéOF
+  APP_USER              Utilisateur propriétaire des fichiers (défaut: auto-détecté ou www-data)
+  APP_GROUP             Groupe propriétaire des fichiers (défaut: groupe web www-data)
 EOF
     exit 0
 }
 
-for arg in "$@"; do
-    case "$arg" in
+while [ $# -gt 0 ]; do
+    case "$1" in
         --assets|-a)
             BUILD_ASSETS=true
+            shift
             ;;
         --no-assets)
             BUILD_ASSETS=false
+            shift
             ;;
         --migrations|-m)
             RUN_MIGRATIONS=true
+            shift
             ;;
         --no-migrations)
             RUN_MIGRATIONS=false
+            shift
             ;;
         --no-pull)
             DO_GIT_PULL=false
+            shift
             ;;
         --branch=*)
-            BRANCH="${arg#*=}"
+            BRANCH="${1#*=}"
+            shift
+            ;;
+        -b|--branch)
+            BRANCH="$2"
+            shift 2
+            ;;
+        --user=*)
+            APP_USER="${1#*=}"
+            shift
+            ;;
+        -u|--user)
+            APP_USER="$2"
+            shift 2
+            ;;
+        --group=*)
+            APP_GROUP="${1#*=}"
+            shift
+            ;;
+        -g|--group)
+            APP_GROUP="$2"
+            shift 2
             ;;
         --help|-h)
             show_help
             ;;
         *)
-            log_warn "Option inconnue ignorée : $arg"
+            log_warn "Option inconnue ignorée : $1"
+            shift
             ;;
     esac
 done
@@ -116,15 +154,8 @@ fi
 log_info "Répertoire du projet ciblé : $TARGET_DIR"
 cd "$TARGET_DIR" || { log_error "Impossible d'accéder à $TARGET_DIR"; exit 1; }
 
-# --- 3. Détection des utilisateurs (CLI & Web) et sudo ---
-# Utilisateur réel exécutant le script (gère les cas où le script est lancé avec sudo)
-if [ -n "$SUDO_USER" ]; then
-    CURRENT_USER="$SUDO_USER"
-else
-    CURRENT_USER="$(id -un)"
-fi
-
-# Utilisateur du serveur web (Ubuntu/Debian: www-data, CentOS/RHEL: nginx ou apache)
+# --- 3. Détection des utilisateurs (CLI, Web et Propriétaire cible) ---
+# Utilisateur du serveur web (Ubuntu/Debian: www-data, CentOS/RHEL: nginx ou apache, macOS: _www)
 HTTPD_USER="www-data"
 for user_candidate in www-data nginx apache _www; do
     if id "$user_candidate" >/dev/null 2>&1; then
@@ -133,16 +164,67 @@ for user_candidate in www-data nginx apache _www; do
     fi
 done
 
+# Détection du groupe du serveur web
+HTTPD_GROUP="$HTTPD_USER"
+if ! id -g "$HTTPD_GROUP" >/dev/null 2>&1 && ! getent group "$HTTPD_GROUP" >/dev/null 2>&1; then
+    HTTPD_GROUP="$(id -gn "$HTTPD_USER" 2>/dev/null || echo "$HTTPD_USER")"
+fi
+
+# Détermination de l'utilisateur propriétaire de l'application (TARGET_USER) :
+# RÈGLE ABSOLUE : TARGET_USER ne doit JAMAIS être 'root' pour une application web.
+if [ -n "$APP_USER" ]; then
+    TARGET_USER="$APP_USER"
+elif [ -n "$SUDO_USER" ] && [ "$SUDO_USER" != "root" ]; then
+    TARGET_USER="$SUDO_USER"
+else
+    # Détecter le propriétaire actuel du répertoire du projet
+    DIR_OWNER="$(stat -c '%U' "$TARGET_DIR" 2>/dev/null || stat -f '%Su' "$TARGET_DIR" 2>/dev/null)"
+    if [ -n "$DIR_OWNER" ] && [ "$DIR_OWNER" != "root" ] && id "$DIR_OWNER" >/dev/null 2>&1; then
+        TARGET_USER="$DIR_OWNER"
+    elif [ "$(id -un)" != "root" ]; then
+        TARGET_USER="$(id -un)"
+    else
+        # Si exécuté sous root et sans autre indication, utiliser l'utilisateur web (ex: www-data)
+        TARGET_USER="$HTTPD_USER"
+    fi
+fi
+
+# Sécurité formelle : ne JAMAIS autoriser root comme propriétaire de l'application
+if [ "$TARGET_USER" = "root" ]; then
+    TARGET_USER="$HTTPD_USER"
+fi
+
+# Détermination du groupe propriétaire de l'application (TARGET_GROUP) :
+if [ -n "$APP_GROUP" ]; then
+    TARGET_GROUP="$APP_GROUP"
+else
+    TARGET_GROUP="$HTTPD_GROUP"
+fi
+
+if [ "$TARGET_GROUP" = "root" ]; then
+    TARGET_GROUP="$HTTPD_GROUP"
+fi
+
 # Déterminer si sudo est nécessaire/disponible pour ajuster les permissions
 SUDO_CMD=""
 if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then
     SUDO_CMD="sudo"
 fi
 
+# Si exécuté en root, autoriser Composer à tourner en super-utilisateur
+if [ "$(id -u)" -eq 0 ]; then
+    export COMPOSER_ALLOW_SUPERUSER=1
+fi
+
+log_info "Propriétaire cible des fichiers : ${BOLD}$TARGET_USER${NC} (groupe: ${BOLD}$TARGET_GROUP${NC}, serveur web: ${BOLD}$HTTPD_USER${NC})"
+
 # --- 4. Git Pull ---
 PREV_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "")
 
 if [ "$DO_GIT_PULL" = true ]; then
+    # Éviter l'erreur "fatal: detected dubious ownership in repository" si l'utilisateur courant diffère du propriétaire
+    git config --global --add safe.directory "$TARGET_DIR" 2>/dev/null || true
+
     log_info "Récupération des modifications Git (branche : $BRANCH)..."
     git fetch origin "$BRANCH" || { log_error "Échec du git fetch"; exit 1; }
     git pull origin "$BRANCH" || { log_error "Échec du git pull"; exit 1; }
@@ -252,14 +334,15 @@ log_success "Cache de production réchauffé."
 
 # --- 9. Réglage robuste des droits et permissions ---
 # Les erreurs serveur 500 après mise à jour sont généralement dues au fait
-# que les fichiers créés en CLI par l'utilisateur courant ne sont pas inscriptibles
-# par l'utilisateur du serveur web (www-data).
-log_info "Configuration des permissions et ACLs pour $HTTPD_USER..."
+# que les fichiers créés en CLI ne sont pas inscriptibles par l'utilisateur du serveur web ($HTTPD_USER),
+# ou ont été assignés par erreur à root.
+log_info "Configuration des permissions et propriété pour $TARGET_USER:$TARGET_GROUP (web: $HTTPD_USER)..."
 
 WRITABLE_DIRS=(
     "var"
     "var/cache"
     "var/log"
+    "var/sessions"
     "public/uploads"
     "public/mccc-export"
     "public/temp"
@@ -277,30 +360,61 @@ for dir in "${WRITABLE_DIRS[@]}"; do
     fi
 done
 
-# 1. Utilisation des ACLs (méthode officielle et recommandée par Symfony)
-if command -v setfacl >/dev/null 2>&1; then
-    # Appliquer récursivement (-R) sur les fichiers existants
-    setfacl -R -m u:"$HTTPD_USER":rwX -m u:"$CURRENT_USER":rwX var public/uploads 2>/dev/null || \
-    $SUDO_CMD setfacl -R -m u:"$HTTPD_USER":rwX -m u:"$CURRENT_USER":rwX var public/uploads 2>/dev/null || true
+# 1. Rétablissement de la propriété : JAMAIS root
+# Si le script tourne sous root ou avec sudo, réassigner les dossiers/fichiers créés
+if [ "$(id -u)" -eq 0 ] || [ -n "$SUDO_CMD" ]; then
+    # Réassigner les répertoires inscriptibles et générés
+    for dir in "${WRITABLE_DIRS[@]}"; do
+        if [ -d "$dir" ]; then
+            $SUDO_CMD chown -R "$TARGET_USER":"$TARGET_GROUP" "$dir" 2>/dev/null || true
+        fi
+    done
 
-    # Définir les ACLs par défaut (-dR) pour les futurs fichiers créés par Symfony ou la CLI
-    setfacl -dR -m u:"$HTTPD_USER":rwX -m u:"$CURRENT_USER":rwX var public/uploads 2>/dev/null || \
-    $SUDO_CMD setfacl -dR -m u:"$HTTPD_USER":rwX -m u:"$CURRENT_USER":rwX var public/uploads 2>/dev/null || true
+    if [ -d "public/build" ]; then
+        $SUDO_CMD chown -R "$TARGET_USER":"$TARGET_GROUP" public/build 2>/dev/null || true
+    fi
+
+    if [ -d "vendor" ]; then
+        $SUDO_CMD chown -R "$TARGET_USER":"$TARGET_GROUP" vendor 2>/dev/null || true
+    fi
+
+    # Réassigner la racine du projet (fichiers mis à jour par git pull)
+    $SUDO_CMD chown -R "$TARGET_USER":"$TARGET_GROUP" . 2>/dev/null || true
 fi
 
-# 2. Groupe propriétaire et droits de lecture/écriture
-$SUDO_CMD chown -R "$CURRENT_USER":"$HTTPD_USER" var 2>/dev/null || \
-$SUDO_CMD chown -R :"$HTTPD_USER" var 2>/dev/null || true
+# 2. Utilisation des ACLs (méthode officielle et recommandée par Symfony)
+if command -v setfacl >/dev/null 2>&1; then
+    for dir in "${WRITABLE_DIRS[@]}"; do
+        if [ -d "$dir" ]; then
+            if [ "$TARGET_USER" != "$HTTPD_USER" ]; then
+                setfacl -R -m u:"$HTTPD_USER":rwX -m u:"$TARGET_USER":rwX "$dir" 2>/dev/null || \
+                $SUDO_CMD setfacl -R -m u:"$HTTPD_USER":rwX -m u:"$TARGET_USER":rwX "$dir" 2>/dev/null || true
 
-# Droits 775/777 sur var/ et les dossiers de cache/log
-chmod -R 775 var 2>/dev/null || $SUDO_CMD chmod -R 775 var 2>/dev/null || true
-chmod -R 777 var/cache var/log 2>/dev/null || $SUDO_CMD chmod -R 777 var/cache var/log 2>/dev/null || true
+                setfacl -dR -m u:"$HTTPD_USER":rwX -m u:"$TARGET_USER":rwX "$dir" 2>/dev/null || \
+                $SUDO_CMD setfacl -dR -m u:"$HTTPD_USER":rwX -m u:"$TARGET_USER":rwX "$dir" 2>/dev/null || true
+            else
+                setfacl -R -m u:"$HTTPD_USER":rwX "$dir" 2>/dev/null || \
+                $SUDO_CMD setfacl -R -m u:"$HTTPD_USER":rwX "$dir" 2>/dev/null || true
 
+                setfacl -dR -m u:"$HTTPD_USER":rwX "$dir" 2>/dev/null || \
+                $SUDO_CMD setfacl -dR -m u:"$HTTPD_USER":rwX "$dir" 2>/dev/null || true
+            fi
+        fi
+    done
+fi
+
+# 3. Permissions chmod : 775 sur tous les répertoires inscriptibles
 for dir in "${WRITABLE_DIRS[@]}"; do
-    chmod -R 775 "$dir" 2>/dev/null || $SUDO_CMD chmod -R 775 "$dir" 2>/dev/null || true
+    if [ -d "$dir" ]; then
+        chmod -R 775 "$dir" 2>/dev/null || $SUDO_CMD chmod -R 775 "$dir" 2>/dev/null || true
+    fi
 done
 
-log_success "Permissions configurées avec succès."
+# Droits 777 sur var/cache et var/log en dernier pour garantir le bon fonctionnement
+# même sans ACLs lorsque l'utilisateur web ($HTTPD_USER) et CLI ($TARGET_USER) diffèrent
+chmod -R 777 var/cache var/log 2>/dev/null || $SUDO_CMD chmod -R 777 var/cache var/log 2>/dev/null || true
+
+log_success "Permissions et propriété configurées avec succès."
 
 # --- 10. Relance des workers Messenger ---
 log_info "Arrêt gracieux des workers Messenger..."
