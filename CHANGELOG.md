@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/OReOF-URCA/oreof/compare/v2.2.0...v2.3.0) (2026-10-13)
+
+
+### Features
+
+* Commende pour gérer les incohérences entre années/parcours ouvertes/fermées ([8e39ef8](https://github.com/OReOF-URCA/oreof/commit/8e39ef8630aa48b697d8b21eb6d9d3e88e825552))
+* gestion des années dans l'offre de formation ([ecdc8f6](https://github.com/OReOF-URCA/oreof/commit/ecdc8f69cf773d36cd0da9bbc6d3627e45ffe359))
+* Plaquette et édition/configuration ([238500a](https://github.com/OReOF-URCA/oreof/commit/238500abd95b86c730d713175dcefde5feabf0b5))
+* statistique et supprssion de parcours ([e74aa42](https://github.com/OReOF-URCA/oreof/commit/e74aa42316681384aec652c2937ef0202c99f053))
+
+
+### Bug Fixes
+
+* commande update ([6b829fb](https://github.com/OReOF-URCA/oreof/commit/6b829fb02e1210657855e5c1f276e34a0a1b574d))
+* droit / fiche matière ([ea70a2b](https://github.com/OReOF-URCA/oreof/commit/ea70a2b1ea777e8ac054e607d8c13f7e0a208eb9))
+
 ## [2.2.0](https://github.com/OReOF-URCA/oreof/compare/v2.1.4...v2.2.0) (2026-10-12)
 
 
