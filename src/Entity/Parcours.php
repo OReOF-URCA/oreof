@@ -307,6 +307,7 @@ class Parcours
      * @var Collection<int, Annee>
      */
     #[ORM\OneToMany(mappedBy: 'parcours', targetEntity: Annee::class)]
+    #[ORM\OrderBy(['ordre' => 'ASC'])]
     private Collection $annees;
 
     #[Groups('parcours_json_versioning')]
@@ -2082,4 +2083,66 @@ class Parcours
     {
         return $this->getEtablissement()?->getRomeApiConfiguration();
     }
+
+    /**
+     * Retourne la liste des ordres d'années théoriques/autorisés pour ce parcours
+     * selon ses bornes de semestres et le type de diplôme.
+     *
+     * Exemple : BUT (semestres 1 à 6) => [1, 2, 3]
+     *           Master (semestres 1 à 4) => [1, 2]
+     *           DAEU (semestres 1 à 2) => [1]
+     *
+     * @return list<int>
+     */
+    public function getOrdresAnneesPossibles(): array
+    {
+        $semestreDebut = $this->getSemestreDebut() ?? 1;
+        $semestreFin = $this->getSemestreFin();
+
+        if ($semestreFin === null || $semestreFin <= 0) {
+            $semestreFin = $this->getFormation()?->getTypeDiplome()?->getSemestreFin();
+        }
+        if ($semestreFin === null || $semestreFin <= 0) {
+            $semestreFin = 6;
+        }
+
+        $anneeMin = max(1, (int) ceil($semestreDebut / 2));
+        $anneeMax = max($anneeMin, (int) ceil($semestreFin / 2));
+
+        return range($anneeMin, $anneeMax);
+    }
+
+    /**
+     * Retourne la liste des ordres d'années autorisés qui n'ont pas encore été créés dans ce parcours.
+     *
+     * @return list<int>
+     */
+    public function getOrdresAnneesDisponibles(): array
+    {
+        $existants = [];
+        foreach ($this->getAnnees() as $annee) {
+            if ($annee->getOrdre() !== null) {
+                $existants[] = $annee->getOrdre();
+            }
+        }
+
+        return array_values(array_diff($this->getOrdresAnneesPossibles(), $existants));
+    }
+
+    /**
+     * Indique s'il reste au moins une année autorisée non encore créée pour ce parcours.
+     */
+    public function hasAnneesDisponibles(): bool
+    {
+        return !empty($this->getOrdresAnneesDisponibles());
+    }
+
+    /**
+     * Indique si un ordre d'année est valide/cohérent pour ce parcours.
+     */
+    public function isOrdreAnneeValide(int $ordre): bool
+    {
+        return in_array($ordre, $this->getOrdresAnneesPossibles(), true);
+    }
 }
+

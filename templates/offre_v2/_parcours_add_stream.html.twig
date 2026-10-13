@@ -2,8 +2,9 @@
     <template>
         <script>
             if (window.Turbo && typeof window.Turbo.visit === 'function') {
-                window.Turbo.visit("{{ path('offre_v2_configurer', {slug: formation.slug}) }}", { action: 'replace' });
+                window.Turbo.visit("{{ path('offre_v2_configurer', {slug: formation.slug}) }}#parcours-{{ parcours.id }}", { action: 'replace' });
             } else {
+                window.location.hash = 'parcours-{{ parcours.id }}';
                 window.location.reload();
             }
         </script>

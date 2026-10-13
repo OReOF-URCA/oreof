@@ -678,21 +678,37 @@ class Formation
         return $res;
     }
 
+    /**
+     * @return list<int>
+     */
+    public function getOrdresAnneesPossibles(): array
+    {
+        $typeDiplome = $this->getTypeDiplome();
+        if ($typeDiplome !== null) {
+            return $typeDiplome->getOrdresAnneesPossibles();
+        }
+
+        $semestreDebut = $this->getSemestreDebut() ?? 1;
+        $anneeMin = max(1, (int) ceil($semestreDebut / 2));
+        $anneeMax = max($anneeMin, 3);
+
+        return range($anneeMin, $anneeMax);
+    }
+
     public function getAnneesOrdres(): array
     {
+        $ordresPossibles = $this->getOrdresAnneesPossibles();
         $ordres = [];
         foreach ($this->getParcours() as $parcours) {
             foreach ($parcours->getAnnees() as $annee) {
-                if ($annee->getOrdre() !== null && !in_array($annee->getOrdre(), $ordres, true)) {
-                    $ordres[] = $annee->getOrdre();
+                $ordre = $annee->getOrdre();
+                if ($ordre !== null && in_array($ordre, $ordresPossibles, true) && !in_array($ordre, $ordres, true)) {
+                    $ordres[] = $ordre;
                 }
             }
         }
         if (empty($ordres)) {
-            $nbAnnees = (int)ceil(($this->getTypeDiplome()?->getSemestreFin() ?? 6) / 2);
-            for ($i = 1; $i <= max(1, $nbAnnees); $i++) {
-                $ordres[] = $i;
-            }
+            $ordres = $ordresPossibles;
         }
         sort($ordres);
 

@@ -1,0 +1,18 @@
+<turbo-stream action="append" target="flash_toasts">
+    <template>
+        <script>
+            if (window.Turbo && typeof window.Turbo.visit === 'function') {
+                window.Turbo.visit("{{ path('offre_v2_configurer', {slug: formation.slug}) }}#parcours-{{ parcours.id }}", { action: 'replace' });
+            } else {
+                window.location.hash = 'parcours-{{ parcours.id }}';
+                window.location.reload();
+            }
+        </script>
+    </template>
+</turbo-stream>
+
+{{ include('_ui/_toast.stream.html.twig', {
+    message: toastMessage|default('Opération effectuée avec succès.'),
+    closeModal: true,
+    toast_type: 'success'
+}) }}
