@@ -10,6 +10,7 @@
 namespace App\Classes\Export;
 
 use App\Classes\Excel\ExcelWriter;
+use App\Enums\TypeParcoursEnum;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
@@ -45,9 +46,11 @@ class ExportResponsable
         $this->excelWriter->writeCellXY(6, 1, 'Co. Resp. Formation');
         $this->excelWriter->writeCellXY(7, 1, 'Resp. Parcours');
         $this->excelWriter->writeCellXY(8, 1, 'Co. Resp. Parcours');
+        $this->excelWriter->writeCellXY(9, 1, 'Identifiant du Parcours');
+        $this->excelWriter->writeCellXY(10, 1, 'Type du Parcours');
 
 
-        $ligne = 1;
+        $ligne = 2;
         foreach ($formations as $idFormation) {
             $dpeParcours = $this->dpeParcoursRepository->find($idFormation);
             if ($dpeParcours !== null) {
@@ -62,6 +65,10 @@ class ExportResponsable
                     $this->excelWriter->writeCellXY(6, $ligne, $formation->getCoResponsable()?->getDisplay());
                     $this->excelWriter->writeCellXY(7, $ligne, $parcours->getRespParcours()?->getDisplay());
                     $this->excelWriter->writeCellXY(8, $ligne, $parcours->getRespParcours()?->getDisplay());
+                    $this->excelWriter->writeCellXY(9, $ligne, $parcours->getId());
+                    if($parcours->getTypeParcours() !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+                        $this->excelWriter->writeCellXY(10, $ligne, $parcours->getTypeParcours()->libelle());
+                    }
                     $ligne++;
                 }
             }
