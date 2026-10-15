@@ -12,7 +12,9 @@ namespace App\Classes\Export;
 use App\Classes\Excel\ExcelWriter;
 use App\DTO\StructureEc;
 use App\DTO\StructureUe;
+use App\Entity\Parcours;
 use App\Entity\SemestreParcours;
+use App\Enums\TypeParcoursEnum;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
@@ -27,6 +29,8 @@ class ExportFiabilisation
     private string $dir;
     private int $ligne = 2;
     private array $data;
+
+    private Parcours|null $parcours = null;
 
     public function __construct(
         protected TypeDiplomeResolver $typeDiplomeResolver,
@@ -65,12 +69,15 @@ class ExportFiabilisation
         $this->excelWriter->writeCellXY('P', 1, 'Type EC');
         $this->excelWriter->writeCellXY('Q', 1, 'MATI/MATM');
         $this->excelWriter->writeCellXY('R', 1, 'ECTS');
+        $this->excelWriter->writeCellXY('S', 1, 'Identifiant du Parcours');
+        $this->excelWriter->writeCellXY('T', 1, 'Type du Parcours');
 
         $this->ligne = 2;
         foreach ($formations as $idFormation) {
             $dpeParcours = $this->dpeParcoursRepository->find($idFormation);
             if ($dpeParcours !== null) {
                 $parcours = $dpeParcours->getParcours();
+                $this->parcours = $dpeParcours->getParcours();
                 $formation = $dpeParcours->getParcours()?->getFormation();
                 if ($formation !== null && $parcours !== null) {
                     $typeD = $this->typeDiplomeResolver->fromFormation($formation);
@@ -100,7 +107,7 @@ class ExportFiabilisation
                             }
                         }
 
-                        $this->excelWriter->getColumnsAutoSize('A', 'Q');
+                        $this->excelWriter->getColumnsAutoSize('A', 'T');
                     }
                     //}
                 }
@@ -149,6 +156,12 @@ class ExportFiabilisation
 
             $this->excelWriter->writeCellXY(17, $this->ligne, $ec->elementConstitutif->getFicheMatiere()?->getTypeApogee() ?? '-');
             $this->excelWriter->writeCellXY(18, $this->ligne, $ec->heuresEctsEc->ects);
+            $this->excelWriter->writeCellXY(19, $this->ligne, $this->parcours?->getId() ?? "");
+            if($this->parcours instanceof Parcours) {
+                if($this->parcours->getTypeParcours() !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+                    $this->excelWriter->writeCellXY(20, $this->ligne, $this->parcours->getTypeParcours()->libelle());
+                }
+            }
             $this->ligne++;
         }
     }
