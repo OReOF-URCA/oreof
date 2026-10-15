@@ -16,6 +16,7 @@ use App\DTO\StructureUe;
 use App\Entity\DpeParcours;
 use App\Entity\Historique;
 use App\Entity\SemestreParcours;
+use App\Enums\TypeParcoursEnum;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
@@ -69,6 +70,8 @@ class ExportCap
         $this->excelWriter->writeCellXY(16, 1, 'Semestre');
         $this->excelWriter->writeCellXY(17, 1, 'Etat DPE');
         $this->excelWriter->writeCellXY(18, 1, 'Date CFVU');
+        $this->excelWriter->writeCellXY(19, 1, 'Identifiant du Parcours');
+        $this->excelWriter->writeCellXY(20, 1, 'Type du Parcours');
 
         $this->ligne = 2;
         foreach ($formations as $idFormation) {
@@ -106,7 +109,7 @@ class ExportCap
                             }
                         }
 
-                        $this->excelWriter->getColumnsAutoSize('A', 'P');
+                        $this->excelWriter->getColumnsAutoSize('A', 'T');
                     }
                 }
             }
@@ -154,6 +157,12 @@ class ExportCap
                 $this->excelWriter->writeCellXY(17, $this->ligne, '-');
             }
             $this->excelWriter->writeCellXY(18, $this->ligne, $this->historique?->getDate()?->format('d/m/Y') ?? '-');
+            $this->excelWriter->writeCellXY(19, $this->ligne, $this->dpeParcours->getParcours()?->getId() ?? "");
+            if($this->dpeParcours->getParcours()) {
+                if($this->dpeParcours->getParcours()->getTypeParcours() !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+                    $this->excelWriter->writeCellXY(20, $this->ligne, $this->dpeParcours->getParcours()->getTypeParcours()->libelle());
+                }
+            }
             $this->ligne++;
         }
     }
