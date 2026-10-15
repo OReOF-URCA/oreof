@@ -13,6 +13,7 @@ use App\Classes\Excel\ExcelWriter;
 use App\Classes\GetHistorique;
 use App\Entity\CampagneCollecte;
 use App\Entity\ElementConstitutif;
+use App\Enums\TypeParcoursEnum;
 use App\Repository\ElementConstitutifRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
@@ -52,6 +53,8 @@ class ExportEc implements ExportInterface
         $this->excelWriter->writeCellXY(10, 1, 'Fiche EC/matière');
         $this->excelWriter->writeCellXY(11, 1, 'Type EC');
         $this->excelWriter->writeCellXY(12, 1, 'Référent');
+        $this->excelWriter->writeCellXY(13, 1, 'Identifiant du Parcours');
+        $this->excelWriter->writeCellXY(14, 1, 'Type du Parcours');
 
         $ligne = 2;
         /** @var ElementConstitutif $ec */
@@ -72,9 +75,14 @@ class ExportEc implements ExportInterface
             $this->excelWriter->writeCellXY(9, $ligne, $ec->getLibelle());
             $this->excelWriter->writeCellXY(10, $ligne, $ec->getFicheMatiere()?->getLibelle());
             $this->excelWriter->writeCellXY(11, $ligne, $ec->getTypeEc()?->getType()->value);
-            $this->excelWriter->writeCellXY(12, $ligne, $ec->getFicheMatiere()->getResponsableFicheMatiere() !== null ? $ec->getFicheMatiere()->getResponsableFicheMatiere()->getDisplay() : 'Non défini - RP ou RF');
-
-            $this->excelWriter->getColumnsAutoSize('A', 'M');
+            $this->excelWriter->writeCellXY(12, $ligne, $ec->getFicheMatiere()?->getResponsableFicheMatiere() !== null ? $ec->getFicheMatiere()->getResponsableFicheMatiere()->getDisplay() : 'Non défini - RP ou RF');
+            $this->excelWriter->writeCellXY(13, $ligne, $ec->getParcours()?->getId() ?? "");
+            if($ec->getParcours()) {
+                if($ec->getParcours()->getTypeParcours() !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE){
+                    $this->excelWriter->writeCellXY(14, $ligne, $ec->getParcours()->getTypeParcours()->libelle());
+                }
+            }
+            $this->excelWriter->getColumnsAutoSize('A', 'N');
             $ligne++;
         }
 
