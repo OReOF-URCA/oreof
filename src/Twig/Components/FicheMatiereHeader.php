@@ -5,6 +5,9 @@ namespace App\Twig\Components;
 use App\Classes\ValidationProcessFicheMatiere;
 use App\Entity\FicheMatiere;
 use App\Repository\HistoriqueFicheMatiereRepository;
+use Dannebicque\WorkflowOperationsBundle\Model\OperationBlocker;
+use Dannebicque\WorkflowOperationsBundle\Model\OperationStatus;
+use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Workflow\WorkflowInterface;
@@ -43,6 +46,7 @@ final class FicheMatiereHeader
     public function __construct(
         private readonly HistoriqueFicheMatiereRepository $historiqueFicheMatiereRepository,
         private readonly ValidationProcessFicheMatiere    $validationProcess,
+        private readonly WorkflowOperationInspector       $operationInspector,
         private readonly EntityManagerInterface           $em,
         #[Target('fiche')]
         protected WorkflowInterface                       $ficheWorkflow
@@ -61,7 +65,38 @@ final class FicheMatiereHeader
         $this->init();
         $this->getHistorique();
         $this->processSteps = $this->validationProcess->getProcess();
-        $this->validationOptions = $this->validationProcess->getOptionsForStep($this->ficheMatiere);
+        $this->validationOptions = $this->getVisibleValidationOptions();
+    }
+
+    private function getVisibleValidationOptions(): array
+    {
+        if ($this->ficheMatiere === null) {
+            return [];
+        }
+
+        $options = $this->validationProcess->getOptionsForStep($this->ficheMatiere);
+
+        foreach ($options as $transition => &$option) {
+            $inspection = $this->operationInspector->inspect(
+                $this->ficheWorkflow,
+                $this->ficheMatiere,
+                $transition,
+            );
+
+            if (in_array($inspection->status, [OperationStatus::Forbidden, OperationStatus::Unavailable], true)) {
+                unset($options[$transition]);
+                continue;
+            }
+
+            $option['operation_status'] = $inspection->status->value;
+            $option['blocking_count'] = count(array_filter(
+                $inspection->blockers->all(),
+                static fn (OperationBlocker $blocker): bool => $blocker->isBlocking(),
+            ));
+        }
+        unset($option);
+
+        return $options;
     }
 
     private function init(): void

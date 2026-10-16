@@ -33,6 +33,11 @@ abstract class AbstractTypeDiplomeHandler implements TypeDiplomeHandlerInterface
         return 'formation/_new_form.html.twig';
     }
 
+    public function getCompetencesTemplate(): string
+    {
+        return TypeDiplomeHandlerInterface::TEMPLATE_COMPETENCES;
+    }
+
     public function getFormationFormOptions(array $context): array
     {
         $formation = new Formation($context['campagne']);

@@ -23,7 +23,11 @@ final readonly class DpeReopeningOperationHandler implements OperationHandlerInt
 {
     private const SUPPORTED_TRANSITIONS = [
         'reouvrir_sans_cfvu',
+        'reouvrir_tacite_sans_cfvu',
         'reouvrir_avant_publie',
+        'reouvrir_tacite',
+        'reouvrir_tacite_mccc',
+        'reouvrir_mccc',
     ];
 
     public function __construct(private EntityManagerInterface $entityManager)
@@ -61,10 +65,13 @@ final readonly class DpeReopeningOperationHandler implements OperationHandlerInt
         }
 
         $argumentaire = trim((string) ($context->input['argumentaire'] ?? ''));
-        $sansCfvu = 'reouvrir_sans_cfvu' === $operation->transitionName;
-        $niveauModification = $sansCfvu
-            ? TypeModificationDpeEnum::MODIFICATION_TEXTE
-            : TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE;
+        $sansCfvu = in_array($operation->transitionName, ['reouvrir_sans_cfvu', 'reouvrir_tacite_sans_cfvu'], true);
+        $mcccOnly = in_array($operation->transitionName, ['reouvrir_mccc', 'reouvrir_tacite_mccc'], true);
+        $niveauModification = match (true) {
+            $sansCfvu => TypeModificationDpeEnum::MODIFICATION_TEXTE,
+            $mcccOnly => TypeModificationDpeEnum::MODIFICATION_MCCC,
+            default => TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE,
+        };
 
         $demande = new DpeDemande();
         $demande->setFormation($formation);

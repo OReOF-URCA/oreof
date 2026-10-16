@@ -32,9 +32,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 final class DaeuHandler extends AbstractTypeDiplomeHandler
 {
 
-    public const TEMPLATE_FOLDER = 'licence'; //todo: a remplacer
-    public const SOURCE = 'licence'; //todo: a remplacer
-    public const TEMPLATE_FORM_MCCC = 'licence.html.twig'; //todo: a remplacer
+    public const TEMPLATE_FOLDER = 'default'; //todo: a remplacer
+    public const SOURCE = 'default'; //todo: a remplacer
+    public const TEMPLATE_FORM_MCCC = 'default.html.twig'; //todo: a remplacer
 
     public function getMcccTemplate(): string
     {

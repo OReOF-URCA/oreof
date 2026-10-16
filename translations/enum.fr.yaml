@@ -15,6 +15,6 @@ licence: Licence
 licence_professionnelle: 'Licence professionnelle'
 master: Master
 master_meef: 'Master MEEF'
-parcours_step5.labels.regimeInscription: parcours_step5.labels.regimeInscription
+parcours_step5.labels.regimeInscription: "Régime d'inscription"
 parcours_step5.labels.regimeInscription.label: "Régime(s) d'inscription"
 

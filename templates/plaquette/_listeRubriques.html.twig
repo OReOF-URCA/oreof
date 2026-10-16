@@ -1,71 +1,172 @@
-<div>
-    <button class="btn btn-outline-warning btn-sm"  {{ stimulus_action('plaquette', 'reset', 'click') }}>
-        <i class="fal fa-undo"></i> Réinitialiser l'ordre des rubriques
-    </button>
+<div class="space-y-8" {{ stimulus_controller('plaquette-rubriques', {
+    urlReorder: path('app_plaquette_rubriques_reorder', {composante: composante.id}),
+    urlRefresh: path('app_plaquette_rubriques', {composante: composante.id})
+}) }}>
+
+    {# ── Section 1 : Rubriques Formation ──────────────────────────────── #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-secondary-100 pb-4 dark:border-secondary-800">
+            <div>
+                <h3 class="text-base font-bold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-100 text-xs font-bold text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300">
+                        1
+                    </span>
+                    Rubriques de la formation
+                </h3>
+                <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
+                    Ces rubriques s'affichent dans l'en-tête de la plaquette et concernent la mention globale. Glissez-déposez pour réordonner.
+                </p>
+            </div>
+            <button type="button"
+                    class="app-btn app-btn-neutral text-xs"
+                    data-action="click->plaquette-rubriques#reset"
+                    data-section="formation"
+                    title="Rétablir l'ordre initial">
+                <twig:UX:Icon name="icon:refresh" class="h-3.5 w-3.5"/>
+                <span>Réinitialiser</span>
+            </button>
+        </div>
+
+        <ul class="divide-y divide-secondary-100 pt-3 dark:divide-secondary-800"
+            data-plaquette-rubriques-target="listFormation"
+            data-section="formation">
+            {% for key, position in rubriquesFormation %}
+                {% set isVisible = position is not null %}
+                <li class="group flex items-center justify-between gap-3 py-3 px-3 rounded-xl transition hover:bg-secondary-50 dark:hover:bg-secondary-800/50 {{ not isVisible ? 'opacity-60 bg-secondary-50/50 dark:bg-secondary-950/20' : '' }}"
+                    data-sortable-item
+                    data-id="{{ key }}"
+                    data-section="formation"
+                    data-visible="{{ isVisible ? '1' : '0' }}">
+                    <div class="flex items-center gap-3">
+                        {# Poignée de glisser-déposer #}
+                        <button type="button"
+                                class="cursor-grab active:cursor-grabbing text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-200"
+                                data-sortable-handle
+                                title="Glisser pour réorganiser">
+                            <twig:UX:Icon name="icon:arrows-up-down-left-right" class="h-4 w-4"/>
+                        </button>
+
+                        {# Badge de position #}
+                        {% if isVisible %}
+                            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
+                                  data-position-badge>
+                                {{ position }}
+                            </span>
+                        {% else %}
+                            <span class="flex h-6 px-2 items-center justify-center rounded-full bg-secondary-200 text-[11px] font-medium text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400"
+                                  data-position-badge>
+                                Masqué
+                            </span>
+                        {% endif %}
+
+                        <span class="text-sm font-semibold text-secondary-800 dark:text-secondary-200">
+                            {{ key|trans({}, 'communication') }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        {# Bouton Masquer / Afficher #}
+                        <button type="button"
+                                class="app-btn {{ isVisible ? 'app-btn-neutral text-secondary-500' : 'app-btn-primary' }} text-xs py-1 px-2.5"
+                                data-action="click->plaquette-rubriques#toggle"
+                                data-section="formation"
+                                data-rubrique="{{ key }}"
+                                title="{{ isVisible ? 'Masquer cette rubrique' : 'Afficher cette rubrique' }}">
+                            {% if isVisible %}
+                                <twig:UX:Icon name="icon:eye-slash" class="h-3.5 w-3.5"/>
+                                <span>Masquer</span>
+                            {% else %}
+                                <twig:UX:Icon name="icon:eye" class="h-3.5 w-3.5"/>
+                                <span>Afficher</span>
+                            {% endif %}
+                        </button>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    {# ── Section 2 : Rubriques Parcours ────────────────────────────────── #}
+    <div class="rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-secondary-100 pb-4 dark:border-secondary-800">
+            <div>
+                <h3 class="text-base font-bold text-secondary-900 dark:text-secondary-100 flex items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-100 text-xs font-bold text-cyan-700 dark:bg-cyan-950/50 dark:text-cyan-300">
+                        2
+                    </span>
+                    Rubriques des parcours
+                </h3>
+                <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-1">
+                    Ces rubriques sont répétées pour chaque parcours de formation (compétences, admission, structure...). Glissez-déposez pour définir leur ordre d'apparition.
+                </p>
+            </div>
+            <button type="button"
+                    class="app-btn app-btn-neutral text-xs"
+                    data-action="click->plaquette-rubriques#reset"
+                    data-section="parcours"
+                    title="Rétablir l'ordre initial">
+                <twig:UX:Icon name="icon:refresh" class="h-3.5 w-3.5"/>
+                <span>Réinitialiser</span>
+            </button>
+        </div>
+
+        <ul class="divide-y divide-secondary-100 pt-3 dark:divide-secondary-800"
+            data-plaquette-rubriques-target="listParcours"
+            data-section="parcours">
+            {% for key, position in rubriquesParcours %}
+                {% set isVisible = position is not null %}
+                <li class="group flex items-center justify-between gap-3 py-3 px-3 rounded-xl transition hover:bg-secondary-50 dark:hover:bg-secondary-800/50 {{ not isVisible ? 'opacity-60 bg-secondary-50/50 dark:bg-secondary-950/20' : '' }}"
+                    data-sortable-item
+                    data-id="{{ key }}"
+                    data-section="parcours"
+                    data-visible="{{ isVisible ? '1' : '0' }}">
+                    <div class="flex items-center gap-3">
+                        {# Poignée de glisser-déposer #}
+                        <button type="button"
+                                class="cursor-grab active:cursor-grabbing text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-200"
+                                data-sortable-handle
+                                title="Glisser pour réorganiser">
+                            <twig:UX:Icon name="icon:arrows-up-down-left-right" class="h-4 w-4"/>
+                        </button>
+
+                        {# Badge de position #}
+                        {% if isVisible %}
+                            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-100 text-xs font-bold text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300"
+                                  data-position-badge>
+                                {{ position }}
+                            </span>
+                        {% else %}
+                            <span class="flex h-6 px-2 items-center justify-center rounded-full bg-secondary-200 text-[11px] font-medium text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400"
+                                  data-position-badge>
+                                Masqué
+                            </span>
+                        {% endif %}
+
+                        <span class="text-sm font-semibold text-secondary-800 dark:text-secondary-200">
+                            {{ key|trans({}, 'communication') }}
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        {# Bouton Masquer / Afficher #}
+                        <button type="button"
+                                class="app-btn {{ isVisible ? 'app-btn-neutral text-secondary-500' : 'app-btn-primary' }} text-xs py-1 px-2.5"
+                                data-action="click->plaquette-rubriques#toggle"
+                                data-section="parcours"
+                                data-rubrique="{{ key }}"
+                                title="{{ isVisible ? 'Masquer cette rubrique' : 'Afficher cette rubrique' }}">
+                            {% if isVisible %}
+                                <twig:UX:Icon name="icon:eye-slash" class="h-3.5 w-3.5"/>
+                                <span>Masquer</span>
+                            {% else %}
+                                <twig:UX:Icon name="icon:eye" class="h-3.5 w-3.5"/>
+                                <span>Afficher</span>
+                            {% endif %}
+                        </button>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
 </div>
-
-<ul class="list-group pt-1 pb-1 sortable">
-    {% set place = 1 %}
-    {% for key, rubrique in rubriques|filter(rubrique => rubrique != null) %}
-        <li class="list-group-item d-flex justify-content-between">
-            <div>
-                <strong>{{ rubrique }}</strong> - {{ key|trans({}, 'communication') }}
-            </div>
-            <div>&nbsp;</div>
-            <div>
-{#                {% if rubrique == null %}#}
-{#                <button class="btn btn-success btn-sm"#}
-{#                        {{ stimulus_action('plaquette', 'show', 'click', {rubrique: key, place: loop.index }) }}#}
-{#                        title="Afficher la rubrique"#}
-{#                ><i class="fal fa-eye"></i></button>#}
-{#                {% else %}#}
-                    <button class="btn btn-danger btn-sm"
-                            {{ stimulus_action('plaquette', 'hide', 'click', {rubrique: key }) }}
-                            title="Masquer la rubrique"
-                    ><i class="fal fa-eye-slash"></i></button>
-{#                    {% endif %}#}
-
-                <button class="btn btn-info btn-sm" {% if loop.first %}disabled{% endif %}
-                        {{ stimulus_action('plaquette', 'up', 'click', {rubrique: key }) }}
-                ><i class="fal fa-up"></i></button>
-                <button class="btn btn-info btn-sm" {% if loop.last %}disabled{% endif %}
-                        {{ stimulus_action('plaquette', 'down', 'click', {rubrique: key }) }}
-                ><i class="fal fa-down"></i></button>
-            </div>
-        </li>
-        {% set place = place + 1 %}
-    {% endfor %}
-</ul>
-
-<ul class="list-group pt-1 pb-1 sortable">
-    {% for key, rubrique in rubriques|filter(rubrique => rubrique == null) %}
-        <li class="list-group-item d-flex justify-content-between">
-            <div>
-                <strong>
-                    {{ rubrique == null ? 'Non affiché' : rubrique }}</strong> - {{ key|trans({}, 'communication') }}
-            </div>
-            <div>&nbsp;</div>
-            <div>
-{#                {% if rubrique == null %}#}
-                    <button class="btn btn-success btn-sm"
-                            {{ stimulus_action('plaquette', 'show', 'click', {rubrique: key, place: place }) }}
-                            title="Afficher la rubrique"
-                    ><i class="fal fa-eye"></i></button>
-{#                {% else %}#}
-{#                    <button class="btn btn-danger btn-sm"#}
-{#                            {{ stimulus_action('plaquette', 'hide', 'click', {rubrique: key }) }}#}
-{#                            title="Masquer la rubrique"#}
-{#                    ><i class="fal fa-eye-slash"></i></button>#}
-{#                {% endif %}#}
-
-{#                <button class="btn btn-info btn-sm" {% if loop.first %}disabled{% endif %}#}
-{#                        {{ stimulus_action('plaquette', 'up', 'click', {rubrique: key }) }}#}
-{#                ><i class="fal fa-up"></i></button>#}
-{#                <button class="btn btn-info btn-sm" {% if loop.last %}disabled{% endif %}#}
-{#                        {{ stimulus_action('plaquette', 'down', 'click', {rubrique: key }) }}#}
-{#                ><i class="fal fa-down"></i></button>#}
-            </div>
-        </li>
-        {% set place = place + 1 %}
-    {% endfor %}
-</ul>

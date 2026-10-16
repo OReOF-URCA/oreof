@@ -130,6 +130,14 @@ framework:
         initialiser:
           from: 'initialisation_dpe'
           to: 'autorisation_saisie'
+          metadata:
+            recipients: [ 'DPE' ]
+            titre: 'Initialisation de la saisie'
+            button_class: 'success'
+            button_icon: 'ph:play'
+            type: valider
+            form:
+              fields: [ ]
         autoriser:
           from: 'autorisation_saisie'
           to: 'en_cours_redaction'
@@ -478,6 +486,7 @@ framework:
             button_icon: 'ph:check'
         reouvrir_tacite:
           from: 'tacite_reconduction'
+          to: 'en_cours_redaction'
           metadata:
             type: reouvrir
             button_class: 'warning'

@@ -1,0 +1,36 @@
+{# todo: par parcours uniquement ? #}
+<div class="row">
+    <div class="col-6">
+        <dl>
+            <dt>Localisation(s) de la mention/spécialité</dt>
+            <dd>
+                {% for ville in formation.localisationMention %}{{ ville.libelle }}{% if not loop.last %}, {% endif %}{% endfor %}
+            </dd>
+            <dt>Régime(s) d'inscription</dt>
+            <dd>
+                {{ formation.regimeInscriptionTexte|raw }}
+            </dd>
+            <dt>Modalités de l'alternance</dt>
+            <dd>
+                {{ formation.modalitesAlternance|raw }}
+            </dd>
+        </dl>
+    </div>
+    <div class="col-6">
+        {% for composante in formation.composantesInscription %}
+            <dl>
+                <dt>Composante d'inscription</dt>
+                <dd>{{ composante.libelle }}</dd>
+                <dt>Adresse</dt>
+                <dd>{{ composante.adresse != null ? composante.adresse.display|raw : 'Erreur'}}</dd>
+                <dt>Téléphone</dt>
+                <dd>{{ composante.telStandard|tel_format }} {% if composante.telComplementaire != null %}ou {{ composante
+                    .telComplementaire|tel_format }}{% endif %}</dd>
+                <dt>Email</dt>
+                <dd>{{ composante.mailContact|mailto }}</dd>
+                <dt>Site web</dt>
+                <dd>{{ composante.urlSite|open_url }}</dd>
+            </dl>
+        {% endfor %}
+    </div>
+</div>

@@ -113,7 +113,8 @@ export default class extends Controller {
     }
 
     localStorage.removeItem(this.storageKeyValue)
-    this._updateListe(this.fields)
+    // Les filtres sont remis à zéro : on recharge aussi le panneau
+    this._updateListe(this.fields, { keepPanel: false })
   }
 
   delete(event) {
@@ -169,7 +170,7 @@ export default class extends Controller {
     }
   }
 
-  async _updateListe(params) {
+  async _updateListe(params, { keepPanel = true } = {}) {
     this.scrollPosition = window.scrollY
     const activeElement = document.activeElement
     const activeId = activeElement?.id
@@ -177,12 +178,53 @@ export default class extends Controller {
     const selectionStart = isSearchInput ? activeElement.selectionStart : null
     const selectionEnd = isSearchInput ? activeElement.selectionEnd : null
 
-    const _params = new URLSearchParams(params)
-    this.listeTarget.innerHTML = window.da.loaderStimulus
-    const response = await fetch(`${this.urlValue}?${_params.toString()}`)
-    this.listeTarget.innerHTML = await response.text()
+    // Le panneau recherche/filtres reste en place pendant le rechargement
+    const oldPanel = keepPanel ? this.listeTarget.querySelector('[data-crud-panel]') : null
+    const requestId = (this.requestId = (this.requestId ?? 0) + 1)
 
-    if (isSearchInput && activeId) {
+    if (oldPanel) {
+      // Loader sous le panneau à la place du tableau, à la hauteur du contenu remplacé, plafonnée
+      // (évite que la page raccourcisse brutalement et que le header se replie)
+      let height = 0
+      let next = oldPanel.nextSibling
+      while (next) {
+        const following = next.nextSibling
+        height += next.offsetHeight ?? 0
+        next.remove()
+        next = following
+      }
+      // Plafonné : la liste complète peut être très haute
+      const minHeight = Math.max(400, Math.min(height, Math.round(window.innerHeight * 0.6)))
+      oldPanel.insertAdjacentHTML(
+        'afterend',
+        `<div data-crud-loader class="flex items-center justify-center" style="min-height: ${minHeight}px"><div style="transform: scale(1.4)">${window.da.loaderStimulus}</div></div>`,
+      )
+    } else {
+      this.listeTarget.innerHTML = window.da.loaderStimulus
+    }
+
+    const _params = new URLSearchParams(params)
+    const response = await fetch(`${this.urlValue}?${_params.toString()}`)
+    const html = await response.text()
+    // Une réponse plus récente a été demandée entre-temps : on ignore celle-ci
+    if (requestId !== this.requestId) {
+      return
+    }
+
+    const template = document.createElement('template')
+    template.innerHTML = html
+    const newPanel = template.content.querySelector('[data-crud-panel]')
+
+    const keptPanel = Boolean(oldPanel && newPanel && oldPanel.isConnected)
+    if (keptPanel) {
+      this._swapAroundPanel(oldPanel, newPanel)
+    } else {
+      this.listeTarget.innerHTML = html
+    }
+
+    // Si le panneau est conservé, le champ n'a pas été recréé : ne pas toucher au focus ni au curseur
+    // (sinon le curseur revient à la position d'avant les dernières frappes)
+    if (isSearchInput && activeId && !keptPanel) {
       const refreshedInput = document.getElementById(activeId)
       if (refreshedInput) {
         refreshedInput.focus()
@@ -192,7 +234,51 @@ export default class extends Controller {
       }
     }
 
-    window.scrollTo(0, this.scrollPosition)
+    if (!keptPanel) {
+      window.scrollTo(0, this.scrollPosition)
+    }
+  }
+
+  // Remplace tout le contenu autour du panneau existant (résumé, tableau...) sans toucher au panneau
+  _swapAroundPanel(oldPanel, newPanel) {
+    const oldParent = oldPanel.parentElement
+    const newParent = newPanel.parentElement
+    let before = true
+    const oldBefore = []
+    const oldAfter = []
+    ;[...oldParent.childNodes].forEach((node) => {
+      if (node === oldPanel) {
+        before = false
+      } else if (before) {
+        oldBefore.push(node)
+      } else {
+        oldAfter.push(node)
+      }
+    })
+    before = true
+    const newBefore = []
+    const newAfter = []
+    ;[...newParent.childNodes].forEach((node) => {
+      if (node === newPanel) {
+        before = false
+      } else if (before) {
+        newBefore.push(node)
+      } else {
+        newAfter.push(node)
+      }
+    })
+
+    oldBefore.forEach((node) => node.remove())
+    oldAfter.forEach((node) => node.remove())
+    newBefore.forEach((node) => oldParent.insertBefore(node, oldPanel))
+    newAfter.forEach((node) => oldParent.appendChild(node))
+
+    // Met à jour le compteur de filtres actifs du bouton « Filtres »
+    const oldToggle = oldPanel.querySelector('[data-crud-panel-toggle]')
+    const newToggle = newPanel.querySelector('[data-crud-panel-toggle]')
+    if (oldToggle && newToggle) {
+      oldToggle.innerHTML = newToggle.innerHTML
+    }
   }
 
   sort(event) {

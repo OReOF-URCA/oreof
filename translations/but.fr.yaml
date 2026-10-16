@@ -11,8 +11,8 @@ iut_portfolio: Portfolio
 iut_rapport: Rapport
 iut_soutenance: Soutenance
 livrable: Livrable
-mccc_but.helps.nombre.help: mccc_but.helps.nombre.help
-mccc_but.helps.pourcentage.help: mccc_but.helps.pourcentage.help
+mccc_but.helps.nombre.help: "Indiquez le nombre d'épreuves prévues."
+mccc_but.helps.pourcentage.help: "Indiquez le coefficient ou pourcentage de l'épreuve."
 oral: Oral
 portfolio: Portfolio
 rapport: Rapport

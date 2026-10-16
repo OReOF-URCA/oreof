@@ -81,5 +81,32 @@
                 Indique les régimes d'inscription proposés pour ce parcours (Formation Initiale, Apprentissage, Formation Continue...).
             </p>
         </div>
+
+        {# Années à initialiser pour le parcours (ajout uniquement) #}
+        {% if isAdd|default(false) and anneesOrdres is defined and anneesOrdres is not empty %}
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-2">
+                    Années à créer dans ce parcours
+                </label>
+                <div class="flex items-center gap-2.5 flex-wrap">
+                    {% for anneeOrdre in anneesOrdres %}
+                        <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-secondary-200 bg-white hover:bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-900 dark:hover:bg-secondary-800/60 transition cursor-pointer">
+                            <input type="checkbox"
+                                   name="anneesOrdres[]"
+                                   value="{{ anneeOrdre }}"
+                                   checked
+                                   class="h-4 w-4 rounded border-secondary-300 text-indigo-600 focus:ring-indigo-500 dark:border-secondary-600 dark:bg-secondary-900 cursor-pointer"
+                            >
+                            <span class="text-sm font-medium text-secondary-900 dark:text-secondary-100">
+                                {{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ anneeOrdre }}
+                            </span>
+                        </label>
+                    {% endfor %}
+                </div>
+                <p class="mt-1.5 text-xs text-secondary-500 dark:text-secondary-400">
+                    Sélectionnez les années à créer pour saisir leurs capacités d'accueil sur la page configurer. Vous pourrez en ajouter ou en supprimer ultérieurement.
+                </p>
+            </div>
+        {% endif %}
     </form>
 </div>

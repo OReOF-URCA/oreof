@@ -1,152 +1,110 @@
-<!-- Stats Start -->
+{# Timeline de la campagne de collecte : étapes passées / en cours / à venir. Rendu 100 % serveur (pas de JS).
+   Styles : assets/styles/_timeline.scss (classes `app-timeline*`). Variable `campagne` optionnelle. #}
 {% set currentCampagne = campagne|default(user_data.campagneCollecte) %}
 
 {% if currentCampagne is not null and currentCampagne.timelineDates is not empty %}
-<section class="space-y-4 timeline-container">
-    <div class="flex items-center justify-between">
-        <h2 class="text-xl font-black tracking-tight text-text">
-            Processus de la campagne de collecte des projets de DPE
-            <span class="text-base font-semibold text-secondary">({{ currentCampagne.libelle }})</span>
-        </h2>
-    </div>
+    {% set steps = currentCampagne.timelineDates|filter(event => event.inTimeline == true)|merge([]) %}
+    {% set today = 'today'|date('U') %}
 
-    <div class="overflow-x-auto pb-4">
-        <div class="timeline min-w-[700px]">
-            <div class="progress-line"></div>
-            <div class="today-marker"></div>
-            {% set hasCurrent = false %}
-            {% for event in currentCampagne.timelineDates|filter(event => event.inTimeline == true) %}
-                <div class="timeline-step
-                {% if 'now'|date('U') > event.date|date('U') %}completed
-                {% else %}
-                    {% if not hasCurrent %}current
-                    {% set hasCurrent = true %}
+    {# Premier passage : état de chaque étape (terminée si sa date de fin est passée) et index de l'étape en cours. #}
+    {% set states = [] %}
+    {% set currentIndex = -1 %}
+    {% for event in steps %}
+        {% if event.date|date('U') < today %}
+            {% set states = states|merge(['completed']) %}
+        {% elseif currentIndex < 0 %}
+            {% set currentIndex = loop.index0 %}
+            {% set states = states|merge(['current']) %}
+        {% else %}
+            {% set states = states|merge(['upcoming']) %}
+        {% endif %}
+    {% endfor %}
+    {% set total = steps|length %}
+    {% set completedCount = currentIndex < 0 ? total : currentIndex %}
+    {% set percent = total > 0 ? (completedCount / total * 100)|round : 0 %}
+
+    <section class="app-timeline-panel" aria-labelledby="timeline-title">
+        <header class="flex flex-wrap items-start justify-between gap-x-6 gap-y-3">
+            <div class="min-w-0 space-y-1">
+                <h2 id="timeline-title" class="text-lg font-bold tracking-tight text-text">
+                    Processus de la campagne de collecte des projets de DPE
+                </h2>
+                <div class="flex flex-wrap items-center gap-2">
+                    <twig:Badge :label="currentCampagne.libelle" variant="primary" icon="icon:calendar" />
+                    {% if currentIndex < 0 %}
+                        <twig:Badge label="Campagne terminée" variant="success" icon="icon:check-circle" />
+                    {% elseif completedCount == 0 %}
+                        <twig:Badge label="Campagne à venir" variant="secondary" icon="icon:clock" />
+                    {% else %}
+                        <twig:Badge label="Campagne en cours" variant="info" icon="icon:clock" />
                     {% endif %}
-                {% endif %}" data-end-date="{{ event.date|date('Y-m-d') }}">
-                    <div class="step-icon" tabindex="0">
-                        <twig:UX:Icon :name="event.icone|default('icon:clock')" class="w-7 h-7"/>
-                    </div>
-                    <div class="step-content">
-                        <div class="step-label">{{ event.libelle }}</div>
-                        <div class="step-dates">
-                            {% if event.dateDebut != null %}
-                                <span class="step-date">Début: {{ event.dateDebut|date('d/m/Y') }}</span>
-                            {% endif %}
-                            <span class="step-date">Fin: {{ event.date|date('d/m/Y') }} {{ event.heure != null ? event.heure|date('H:i'): '' }}</span>
-                        </div>
-                    </div>
                 </div>
+            </div>
+
+            <div class="app-progress w-full sm:w-56" role="group" aria-label="Avancement de la campagne">
+                <div class="app-progress-header">
+                    <span class="app-progress-label">Étapes terminées</span>
+                    <span class="app-progress-value">{{ completedCount }} / {{ total }}</span>
+                </div>
+                <div class="app-progress-track app-progress-track--info"
+                     role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ percent }}"
+                     aria-label="{{ percent }} % des étapes terminées">
+                    <span class="app-progress-bar app-progress-bar--info" style="width: {{ percent }}%"></span>
+                </div>
+            </div>
+        </header>
+
+        <ol class="app-timeline" style="--tl-steps: {{ total }}">
+            {% for event in steps %}
+                {% set state = states[loop.index0] %}
+                {% set endTs = event.date|date('U') %}
+                {% set daysLeft = ((endTs - today) / 86400)|round %}
+
+                {# Part du segment « cette étape → suivante » déjà écoulée (0 à 1) #}
+                {% set progress = 0 %}
+                {% if not loop.last %}
+                    {% if states[loop.index] == 'completed' %}
+                        {% set progress = 1 %}
+                    {% elseif state == 'completed' %}
+                        {% set span = steps[loop.index].date|date('U') - endTs %}
+                        {% set progress = span > 0 ? min(1, max(0, (today - endTs) / span)) : 0 %}
+                    {% endif %}
+                {% endif %}
+
+                <li class="app-timeline-step app-timeline-step--{{ state }}"
+                    style="--tl-progress: {{ progress|round(3) }}"
+                    {% if state == 'current' %}aria-current="step"{% endif %}
+                    {% if event.description %}title="{{ event.description|striptags|slice(0, 200) }}"{% endif %}>
+                    <span class="app-timeline-icon">
+                        <twig:UX:Icon :name="event.icone|default('icon:clock')" class="h-5 w-5" aria-hidden="true"/>
+                        {% if state == 'completed' %}
+                            <span class="app-timeline-check">
+                                <twig:UX:Icon name="icon:check" class="h-2.5 w-2.5" aria-hidden="true"/>
+                            </span>
+                        {% endif %}
+                    </span>
+
+                    <div class="app-timeline-body">
+                        {% if state == 'current' %}
+                            <twig:Badge label="En cours" variant="primary" extraClass="mb-1" />
+                        {% endif %}
+                        <div class="app-timeline-label">{{ event.libelle }}</div>
+                        <div class="app-timeline-dates">
+                            {% if event.dateDebut != null %}
+                                <span>Début : {{ event.dateDebut|date('d/m/Y') }}</span>
+                            {% endif %}
+                            <span>Fin : {{ event.date|date('d/m/Y') }}{{ event.heure != null ? ' ' ~ event.heure|date('H:i') : '' }}</span>
+                        </div>
+                        {% if state == 'current' %}
+                            <div class="app-timeline-remaining">
+                                {% if daysLeft <= 0 %}Se termine aujourd'hui{% elseif daysLeft == 1 %}Se termine demain{% else %}Se termine dans {{ daysLeft }} jours{% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </li>
             {% endfor %}
-        </div>
-
-        <script>
-          (function () {
-            function updateTimelineElements(container) {
-              if (!container) return
-              const timeline = container.querySelector('.timeline')
-              if (!timeline) return
-              const progressLine = timeline.querySelector('.progress-line')
-              const todayMarker = timeline.querySelector('.today-marker')
-              const steps = timeline.querySelectorAll('.timeline-step')
-
-              if (steps.length === 0) return
-
-              const currentIndex = Array.from(steps).findIndex(step => step.classList.contains('current'))
-
-              if (currentIndex >= 0 && steps.length > 1 && progressLine) {
-                const progressPercent = (currentIndex / (steps.length - 1)) * 100
-                progressLine.style.width = progressPercent + '%'
-              } else if (currentIndex < 0 && progressLine) {
-                const allCompleted = Array.from(steps).every(step => step.classList.contains('completed'))
-                if (allCompleted) {
-                  progressLine.style.width = '100%'
-                }
-              }
-
-              if (!todayMarker) return
-
-              const today = new Date()
-              today.setHours(0, 0, 0, 0)
-
-              const stepsData = Array.from(steps).map((step, index) => {
-                const endDate = step.getAttribute('data-end-date')
-                const rect = step.getBoundingClientRect()
-                const timelineRect = timeline.getBoundingClientRect()
-                const positionPercent = timelineRect.width > 0
-                  ? ((rect.left + rect.width / 2 - timelineRect.left) / timelineRect.width) * 100
-                  : 0
-
-                return {
-                  endDate: endDate ? new Date(endDate) : null,
-                  positionPercent: positionPercent,
-                  index: index
-                }
-              }).filter(data => data.endDate !== null)
-
-              if (stepsData.length === 0) return
-
-              const firstDate = stepsData[0].endDate
-              const lastDate = stepsData[stepsData.length - 1].endDate
-
-              if (today < firstDate || today > lastDate) {
-                todayMarker.style.display = 'none'
-                return
-              }
-
-              todayMarker.style.display = 'block'
-
-              let beforeStep = null
-              let afterStep = null
-
-              for (let i = 0; i < stepsData.length - 1; i++) {
-                if (today >= stepsData[i].endDate && today <= stepsData[i + 1].endDate) {
-                  beforeStep = stepsData[i]
-                  afterStep = stepsData[i + 1]
-                  break
-                }
-              }
-
-              if (!beforeStep && today <= stepsData[0].endDate) {
-                const firstStepDate = stepsData[0].endDate
-                const daysDiff = (today - firstDate) / (1000 * 60 * 60 * 24)
-                const totalDays = (firstStepDate - firstDate) / (1000 * 60 * 60 * 24) || 1
-                const ratio = daysDiff / totalDays
-                todayMarker.style.left = (stepsData[0].positionPercent * ratio) + '%'
-                return
-              }
-
-              if (beforeStep && afterStep) {
-                const totalDuration = afterStep.endDate - beforeStep.endDate || 1
-                const elapsedDuration = today - beforeStep.endDate
-                const ratio = elapsedDuration / totalDuration
-
-                const startPos = beforeStep.positionPercent
-                const endPos = afterStep.positionPercent
-                const markerPosition = startPos + (endPos - startPos) * ratio
-
-                todayMarker.style.left = markerPosition + '%'
-              }
-            }
-
-            function initAll() {
-              document.querySelectorAll('.timeline-container').forEach(updateTimelineElements)
-            }
-
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', initAll)
-            } else {
-              initAll()
-            }
-
-            document.addEventListener('turbo:load', initAll)
-            document.addEventListener('turbo:render', initAll)
-            window.addEventListener('resize', initAll)
-          })()
-        </script>
-    </div>
-</section>
+        </ol>
+    </section>
 {% else %}
-<twig:alerte type="warning" message="Aucune campagne de collecte en cours. Veuillez la configurer." />
-    
+    <twig:alerte type="warning" message="Aucune campagne de collecte en cours. Veuillez la configurer." />
 {% endif %}
-<!-- Stats Start -->

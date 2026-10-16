@@ -1,26 +1,370 @@
 {% extends 'base.html.twig' %}
 
-{% block content %}
-    {{ component('alerte', {
-        type: 'help',
-        message: 'Vous pouvez réorganiser les rubriques en les déplaçant dans la liste ci-dessous. Vous pouvez masquer une rubrique en cliquant sur l\'oeil barré. Les modifcations sont enregistrées automatiquement. Les plaquettes de la composante seront générées selon cette configuration. Le téléchargement d\'une plaquette est réalisable à partir de la fiche descriptive de la formation.'
-    }) }}
-
-    <h2 class="small-title">Choix et ordre des rubriques</h2>
-    <div class="card" {{ stimulus_controller('plaquette', {
-        urlRubriques: path('app_plaquette_rubriques', {composante: composante.id}),
-        urlSauvegarde: path('app_plaquette_sauvegarde', {composante: composante.id}),
-    }) }}>
-        <div class="card-title"></div>
-        <div class="card-body" {{ stimulus_target('plaquette', 'listeRubriques') }}>
-
-        </div>
-    </div>
-
-{% endblock %}
-
 {% set header_title = 'app_plaquette.title'|trans({'%libelle%': composante.libelle}, 'header') %}
+{% set header_description = 'app_plaquette.description'|trans({}, 'header') %}
 
 {% block bouton_header %}
+    <div class="flex flex-wrap items-center gap-3">
+        {% if allComposantes is not empty and allComposantes|length > 1 %}
+            <div class="flex items-center gap-2">
+                <label for="changeComposante" class="text-xs font-medium text-secondary-500">Changer :</label>
+                <select id="changeComposante"
+                        class="rounded-xl border border-secondary-200 bg-white px-3 py-1.5 text-xs text-secondary-800 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100"
+                        onchange="if(this.value) window.location.href = this.value;">
+                    {% for comp in allComposantes %}
+                        <option value="{{ path('app_plaquette', {composante: comp.id}) }}" {% if comp.id == composante.id %}selected{% endif %}>
+                            {{ comp.libelle }} ({{ comp.sigle }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
 
+        <twig:Button
+            href="{{ path('app_composante', {composante: composante.id}) }}"
+            variant="secondary"
+            icon="icon:arrow-left"
+            label="Retour à la composante"
+        />
+    </div>
+{% endblock %}
+
+{% block content %}
+<div class="app-tabs space-y-6" {{ stimulus_controller('tabs', { rememberHash: true }) }}>
+
+    {# ── Barre des onglets (style app-tabs comme default/index) ── #}
+    <div class="app-tabs-list" role="tablist" aria-label="Gestion de la plaquette">
+        <button type="button"
+                id="tab-rubriques"
+                class="app-tab gap-2 cursor-pointer app-tab-active active"
+                role="tab"
+                aria-selected="true"
+                aria-controls="panel-rubriques"
+                tabindex="0"
+                data-tabs-target="tab"
+                data-action="click->tabs#change"
+                data-tab-id="rubriques">
+            <twig:UX:Icon name="icon:sort" class="size-4" />
+            <span>Rubriques de la plaquette</span>
+        </button>
+
+        <button type="button"
+                id="tab-charte"
+                class="app-tab gap-2 cursor-pointer"
+                role="tab"
+                aria-selected="false"
+                aria-controls="panel-charte"
+                tabindex="-1"
+                data-tabs-target="tab"
+                data-action="click->tabs#change"
+                data-tab-id="charte">
+            <twig:UX:Icon name="icon:pencil-ruler" class="size-4" />
+            <span>Charte graphique</span>
+        </button>
+
+        <button type="button"
+                id="tab-apercu"
+                class="app-tab gap-2 cursor-pointer"
+                role="tab"
+                aria-selected="false"
+                aria-controls="panel-apercu"
+                tabindex="-1"
+                data-tabs-target="tab"
+                data-action="click->tabs#change"
+                data-tab-id="apercu">
+            <twig:UX:Icon name="icon:eye" class="size-4" />
+            <span>Aperçu en direct</span>
+        </button>
+    </div>
+
+    {# ════════════ PANNEAU 1 : RUBRIQUES ════════════ #}
+    <div id="panel-rubriques"
+         data-tabs-target="panel"
+         data-panel-id="rubriques"
+         role="tabpanel"
+         aria-labelledby="tab-rubriques"
+         class="space-y-6">
+        {{ component('alerte', {
+            type: 'info',
+            message: 'Organisez les rubriques de vos plaquettes en les faisant glisser de haut en bas (Drag & Drop). Vous pouvez également masquer une rubrique non souhaitée via le bouton dédié. Les modifications sont enregistrées en temps réel.'
+        }) }}
+
+        {{ include('plaquette/_listeRubriques.html.twig') }}
+    </div>
+
+    {# ════════════ PANNEAU 2 : CHARTE GRAPHIQUE ════════════ #}
+    <div id="panel-charte"
+         data-tabs-target="panel"
+         data-panel-id="charte"
+         role="tabpanel"
+         aria-labelledby="tab-charte"
+         class="space-y-6 hidden">
+            {{ component('alerte', {
+                type: 'info',
+                message: 'Définissez les éléments graphiques spécifiques à votre composante. Si aucun fichier n\'est téléversé, les visuels institutionnels de l\'Université de Reims Champagne-Ardenne sont appliqués par défaut.'
+            }) }}
+
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+                {# 1. En-tête (Header) #}
+                <div class="flex flex-col justify-between rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-secondary-100 pb-3 dark:border-secondary-800">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-secondary-800 dark:text-secondary-200 flex items-center gap-2">
+                                <twig:UX:Icon name="icon:upload" class="h-4 w-4 text-indigo-500"/>
+                                Bannière d'en-tête (Header)
+                            </h3>
+                            {% if composante.headerPlaquette %}
+                                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                    Personnalisé
+                                </span>
+                            {% else %}
+                                <span class="rounded-full bg-secondary-100 px-2 py-0.5 text-[11px] font-semibold text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">
+                                    Par défaut
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        {# Aperçu du visuel #}
+                        <div class="overflow-hidden rounded-xl border border-secondary-200 bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-950">
+                            {% if composante.headerPlaquette %}
+                                <img src="{{ asset('uploads/plaquettes/' ~ composante.headerPlaquette) }}"
+                                     alt="Header plaquette"
+                                     class="h-32 w-full object-cover">
+                            {% else %}
+                                <img src="{{ asset('images/header.jpg') }}"
+                                     alt="Header par défaut"
+                                     class="h-32 w-full object-cover opacity-80">
+                            {% endif %}
+                        </div>
+
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400">
+                            Bannière supérieure du PDF. Format conseillé : <strong>1200 × 250 px</strong> (JPEG, PNG ou WebP, max 10 Mo).
+                        </p>
+                    </div>
+
+                    <div class="mt-5 space-y-2 pt-4 border-t border-secondary-100 dark:border-secondary-800">
+                        <form action="{{ path('app_plaquette_charte_upload', {composante: composante.id}) }}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="type" value="header">
+                            <label class="app-btn app-btn-primary w-full justify-center text-xs cursor-pointer">
+                                <twig:UX:Icon name="icon:upload" class="h-3.5 w-3.5"/>
+                                <span>{{ composante.headerPlaquette ? 'Remplacer l’en-tête' : 'Téléverser un en-tête' }}</span>
+                                <input type="file" name="file" accept="image/*" class="sr-only" onchange="this.form.submit()">
+                            </label>
+                        </form>
+
+                        {% if composante.headerPlaquette %}
+                            <form action="{{ path('app_plaquette_charte_reset', {composante: composante.id, type: 'header'}) }}" method="post" onsubmit="return confirm('Réinitialiser l’en-tête vers le visuel par défaut ?');">
+                                <button type="submit" class="app-btn app-btn-neutral w-full justify-center text-xs text-rose-600 dark:text-rose-400">
+                                    <twig:UX:Icon name="icon:refresh" class="h-3.5 w-3.5"/>
+                                    <span>Rétablir l’en-tête par défaut</span>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# 2. Pied de page (Footer) #}
+                <div class="flex flex-col justify-between rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-secondary-100 pb-3 dark:border-secondary-800">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-secondary-800 dark:text-secondary-200 flex items-center gap-2">
+                                <twig:UX:Icon name="icon:upload" class="h-4 w-4 text-cyan-500"/>
+                                Pied de page (Footer)
+                            </h3>
+                            {% if composante.footerPlaquette %}
+                                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                    Personnalisé
+                                </span>
+                            {% else %}
+                                <span class="rounded-full bg-secondary-100 px-2 py-0.5 text-[11px] font-semibold text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">
+                                    Par défaut
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        {# Aperçu du visuel #}
+                        <div class="overflow-hidden rounded-xl border border-secondary-200 bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-950">
+                            {% if composante.footerPlaquette %}
+                                <img src="{{ asset('uploads/plaquettes/' ~ composante.footerPlaquette) }}"
+                                     alt="Footer plaquette"
+                                     class="h-32 w-full object-cover">
+                            {% else %}
+                                <img src="{{ asset('images/vague_urca.jpg') }}"
+                                     alt="Footer par défaut"
+                                     class="h-32 w-full object-cover opacity-80">
+                            {% endif %}
+                        </div>
+
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400">
+                            Bandeau inférieur de bas de page. Format conseillé : <strong>1200 × 150 px</strong> (JPEG, PNG ou WebP, max 10 Mo).
+                        </p>
+                    </div>
+
+                    <div class="mt-5 space-y-2 pt-4 border-t border-secondary-100 dark:border-secondary-800">
+                        <form action="{{ path('app_plaquette_charte_upload', {composante: composante.id}) }}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="type" value="footer">
+                            <label class="app-btn app-btn-primary w-full justify-center text-xs cursor-pointer">
+                                <twig:UX:Icon name="icon:upload" class="h-3.5 w-3.5"/>
+                                <span>{{ composante.footerPlaquette ? 'Remplacer le pied de page' : 'Téléverser un pied de page' }}</span>
+                                <input type="file" name="file" accept="image/*" class="sr-only" onchange="this.form.submit()">
+                            </label>
+                        </form>
+
+                        {% if composante.footerPlaquette %}
+                            <form action="{{ path('app_plaquette_charte_reset', {composante: composante.id, type: 'footer'}) }}" method="post" onsubmit="return confirm('Réinitialiser le pied de page vers le visuel par défaut ?');">
+                                <button type="submit" class="app-btn app-btn-neutral w-full justify-center text-xs text-rose-600 dark:text-rose-400">
+                                    <twig:UX:Icon name="icon:refresh" class="h-3.5 w-3.5"/>
+                                    <span>Rétablir le pied de page par défaut</span>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# 3. Logo / Icône de la composante #}
+                <div class="flex flex-col justify-between rounded-2xl border border-secondary-200 bg-white p-5 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between border-b border-secondary-100 pb-3 dark:border-secondary-800">
+                            <h3 class="text-sm font-bold uppercase tracking-wider text-secondary-800 dark:text-secondary-200 flex items-center gap-2">
+                                <twig:UX:Icon name="icon:upload" class="h-4 w-4 text-emerald-500"/>
+                                Logo / Icône composante
+                            </h3>
+                            {% if composante.logo %}
+                                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                    Défini
+                                </span>
+                            {% else %}
+                                <span class="rounded-full bg-secondary-100 px-2 py-0.5 text-[11px] font-semibold text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">
+                                    Non défini
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        {# Aperçu du logo #}
+                        <div class="flex h-32 w-full items-center justify-center overflow-hidden rounded-xl border border-secondary-200 bg-secondary-50 p-3 dark:border-secondary-700 dark:bg-secondary-950">
+                            {% if composante.logo %}
+                                <img src="{{ asset('uploads/logos/' ~ composante.logo) }}"
+                                     alt="Logo composante"
+                                     class="max-h-full max-w-full object-contain">
+                            {% else %}
+                                <div class="text-center text-secondary-400">
+                                    <span class="text-2xl font-black text-secondary-500">{{ composante.sigle|upper|slice(0,2) }}</span>
+                                    <p class="text-[11px] mt-1">Logo URCA utilisé par défaut</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400">
+                            Apparaît en filigrane et dans l'en-tête de la plaquette. Format conseillé : <strong>carré ou détouré</strong> (PNG avec transparence ou SVG).
+                        </p>
+                    </div>
+
+                    <div class="mt-5 space-y-2 pt-4 border-t border-secondary-100 dark:border-secondary-800">
+                        <form action="{{ path('app_plaquette_charte_upload', {composante: composante.id}) }}" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="type" value="logo">
+                            <label class="app-btn app-btn-primary w-full justify-center text-xs cursor-pointer">
+                                <twig:UX:Icon name="icon:upload" class="h-3.5 w-3.5"/>
+                                <span>{{ composante.logo ? 'Remplacer le logo' : 'Téléverser un logo' }}</span>
+                                <input type="file" name="file" accept="image/*" class="sr-only" onchange="this.form.submit()">
+                            </label>
+                        </form>
+
+                        {% if composante.logo %}
+                            <form action="{{ path('app_plaquette_charte_reset', {composante: composante.id, type: 'logo'}) }}" method="post" onsubmit="return confirm('Supprimer le logo de la composante ?');">
+                                <button type="submit" class="app-btn app-btn-neutral w-full justify-center text-xs text-rose-600 dark:text-rose-400">
+                                    <twig:UX:Icon name="icon:trash" class="h-3.5 w-3.5"/>
+                                    <span>Supprimer le logo</span>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        {# ════════════ PANNEAU 3 : APERÇU EN DIRECT ════════════ #}
+        <div id="panel-apercu"
+             data-tabs-target="panel"
+             data-panel-id="apercu"
+             role="tabpanel"
+             aria-labelledby="tab-apercu"
+             class="space-y-6 hidden"
+             {{ stimulus_controller('plaquette-preview', {
+                 urlPreview: path('app_plaquette_apercu', {formation: '__ID__'}),
+                 urlDownload: path('app_plaquette_formation_export', {slug: '__SLUG__'})
+             }) }}>
+
+            {# Barre de contrôle de l'aperçu #}
+            <div class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+                <div class="flex flex-1 flex-wrap items-center gap-3 min-w-[280px]">
+                    <label for="formationPreviewSelect" class="text-xs font-bold uppercase tracking-wider text-secondary-600 dark:text-secondary-400 shrink-0">
+                        Formation :
+                    </label>
+                    <select id="formationPreviewSelect"
+                            data-plaquette-preview-target="select"
+                            data-action="change->plaquette-preview#change"
+                            class="flex-1 min-w-[220px] rounded-xl border border-secondary-200 bg-secondary-50/50 px-3 py-2 text-sm text-secondary-800 shadow-sm focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-200 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100">
+                        {% if formations is empty %}
+                            <option value="">Aucune formation rattachée à cette composante</option>
+                        {% else %}
+                            {% for formation in formations %}
+                                <option value="{{ formation.id }}" data-slug="{{ formation.slug }}">
+                                    [{{ formation.typeDiplome.libelleCourt }}] {{ formation.display }}
+                                </option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="button"
+                            class="app-btn app-btn-neutral text-xs"
+                            data-action="click->plaquette-preview#change"
+                            title="Actualiser le rendu du PDF">
+                        <twig:UX:Icon name="icon:refresh" class="h-3.5 w-3.5"/>
+                        <span>Actualiser</span>
+                    </button>
+
+                    <a href="#"
+                       target="_blank"
+                       data-plaquette-preview-target="downloadBtn"
+                       class="app-btn app-btn-success text-xs hidden"
+                       title="Télécharger la plaquette finale">
+                        <twig:UX:Icon name="icon:download" class="h-3.5 w-3.5"/>
+                        <span>Télécharger le PDF</span>
+                    </a>
+                </div>
+            </div>
+
+            {# Cadre visualiseur A4 de l'iframe #}
+            <div class="relative min-h-[750px] w-full rounded-2xl border border-secondary-200 bg-secondary-100/50 p-4 shadow-inner dark:border-secondary-800 dark:bg-secondary-950/50">
+
+                {# Indicateur de chargement #}
+                <div data-plaquette-preview-target="loader"
+                     class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 backdrop-blur-[2px] rounded-2xl dark:bg-secondary-900/80">
+                    <twig:Spinner size="lg" variant="primary" label="Génération de la plaquette en cours..."/>
+                    <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-2">Compilation du PDF avec Gotenberg...</p>
+                </div>
+
+                {# Placeholder si pas de formation #}
+                <div data-plaquette-preview-target="placeholder"
+                     class="hidden flex flex-col items-center justify-center py-24 text-center text-secondary-400">
+                    <twig:UX:Icon name="icon:inbox" class="h-12 w-12 mb-3 opacity-40"/>
+                    <p class="text-sm font-semibold">Aucune formation sélectionnée pour l'aperçu.</p>
+                </div>
+
+                {# Iframe du PDF #}
+                <div class="mx-auto max-w-5xl overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/5 dark:bg-secondary-900">
+                    <iframe data-plaquette-preview-target="iframe"
+                            data-action="load->plaquette-preview#iframeLoaded"
+                            class="h-[750px] w-full border-0"
+                            title="Aperçu de la plaquette PDF"></iframe>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
 {% endblock %}

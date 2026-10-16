@@ -1,0 +1,337 @@
+<div class="col">
+    <section class="scroll-section" id="identite_formation">
+        <h3 class="small-title">Identité de la formation </h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {% if (print is not defined or print == false) %}
+                {{ component('commentaire', {
+                    commentaires: formation.commentaires,
+                    id: formation.id,
+                    type: 'formation',
+                    zone: 'identite_formation',
+                }) }}
+                {% endif %}
+                {{ include('formation/legacy/_identiteFormation.html.twig') }}
+            </div>
+        </div>
+    </section>
+
+    <section class="scroll-section" id="localisation">
+        <h3 class="small-title">Localisation</h3>
+        <div class="card mb-5">
+            <div class="card-body">
+                {% if (print is not defined or print == false) %}
+                {{ component('commentaire', {
+                    commentaires: formation.commentaires,
+                    id: formation.id,
+                    type: 'formation',
+                    zone: 'localisation',
+                }) }}
+                {% endif %}
+                {{ include('formation/legacy/_localisationFormation.html.twig') }}
+            </div>
+        </div>
+    </section>
+
+
+    {% if formation.isHasParcours == false and formation.parcours|length == 1 %}
+        {% set stringDifferencesParcours = stringDifferencesParcoursDefaut %}
+        {% set stringDifferencesParcoursCampagne = stringDifferencesParcoursDefautCampagne %}
+
+        <section class="scroll-section" id="presentation">
+            <h3 class="small-title">Présentation</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if (print is not defined or print == false) %}
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'presentation',
+                    }) }}
+                    {% endif %}
+                    {{ include('formation/legacy/_presentationFormation.html.twig', {hasParcours:true}) }}
+                </div>
+            </div>
+        </section>
+
+        <section class="scroll-section" id="competences">
+            <h3 class="small-title">Compétences acquises</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if (print is not defined or print == false) %}
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'competences',
+                    }) }}
+                    {% endif %}
+                    {% set typeD = typeD ?? type_diplome_handler(formation) %}
+                    {{ include(typeD.competencesTemplate, {parcours: formation.parcours[0]}) }}
+                </div>
+            </div>
+        </section>
+
+        <section class="scroll-section" id="structure">
+            <h3 class="small-title">Structure</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if (print is not defined or print == false) %}
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'structure',
+                    }) }}
+                    {% endif %}
+                    {{ render(controller('App\\Controller\\StructureShowController::parcoursShow', {
+                        parcours: formation.parcours[0].id,
+                        hasLastVersion: hasLastVersion ?? false,
+                    })) }}
+
+                </div>
+            </div>
+        </section>
+
+        <section class="scroll-section" id="admission">
+            <h3 class="small-title">Admission</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if (print is not defined or print == false) %}
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'admission',
+                    }) }}
+                    {% endif %}
+                    {{ include('formation/legacy/_admission.html.twig', {parcours:formation.parcours[0]}) }}
+
+                </div>
+            </div>
+        </section>
+
+        <section class="scroll-section" id="et_apres">
+            <h3 class="small-title">Et après ?</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if (print is not defined or print == false) %}
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'et_apres',
+                    }) }}
+                    {% endif %}
+                    {{ include('formation/legacy/_etApres.html.twig', {parcours:formation.parcours[0]}) }}
+
+                </div>
+            </div>
+        </section>
+
+        <section class="scroll-section" id="contacts">
+            <h3 class="small-title">Contacts pédagogiques</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if (print is not defined or print == false) %}
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'contacts',
+                    }) }}
+                    {% endif %}
+                    {{ include('formation/legacy/_contacts.html.twig', {parcours:formation.parcours[0]}) }}
+
+                </div>
+            </div>
+        </section>
+
+    {% else %}
+        <section class="scroll-section" id="presentation">
+            <h3 class="small-title">Présentation</h3>
+            <div class="card mb-5">
+                <div class="card-body">
+                    {% if (print is not defined or print == false) %}
+                    {{ component('commentaire', {
+                        commentaires: formation.commentaires,
+                        id: formation.id,
+                        type: 'formation',
+                        zone: 'presentation',
+                    }) }}
+                    {% endif %}
+                    {{ include('formation/legacy/_presentationFormation.html.twig', {hasParcours:true}) }}
+                </div>
+            </div>
+        </section>
+        {% for parcours in formation.parcours %}
+            {% set stringDifferencesParcours = versioningParcours.getDifferencesBetweenParcoursAndLastVersion(parcours) ?? [] %}
+            {% set stringDifferencesParcoursCampagne = versioningParcours.getDifferencesBetweenParcoursAndLastVersion(parcours, true) ?? [] %}
+
+            <div>
+                <h2>Parcours {{ parcours.libelle }}</h2>
+            </div>
+
+            <div class="border-left-parcours border-left-parcours-{{ loop.index }} ">
+                <section class="scroll-section" id="presentation_{{ parcours.id }}">
+                    <h3 class="small-title">Présentation</h3>
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            {% if (print is not defined or print == false) %}
+                            {{ component('commentaire', {
+                                commentaires: parcours.commentaires,
+                                id: parcours.id,
+                                type: 'parcours',
+                                zone: 'presentation_'~ parcours.id,
+                            }) }}
+                            {% endif %}
+                            {{ include('formation/legacy/_presentationParcours.html.twig', { parcours:parcours } ) }}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="scroll-section" id="descriptif_{{ parcours.id }}">
+                    <h3 class="small-title">Descriptif du parcours</h3>
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            {% if (print is not defined or print == false) %}
+                            {{ component('commentaire', {
+                                commentaires: parcours.commentaires,
+                                id: parcours.id,
+                                type: 'parcours',
+                                zone: 'descriptif_'~ parcours.id,
+                            }) }}
+                            {% endif %}
+                            {{ include('formation/legacy/_descriptifParcours.html.twig', { parcours:parcours } ) }}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="scroll-section" id="localisation_{{ parcours.id }}">
+                    <h3 class="small-title">Localisation</h3>
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            {% if (print is not defined or print == false) %}
+                            {{ component('commentaire', {
+                                commentaires: parcours.commentaires,
+                                id: parcours.id,
+                                type: 'parcours',
+                                zone: 'localisation_'~ parcours.id,
+                            }) }}
+                            {% endif %}
+                            {{ include('formation/legacy/_localisationParcours.html.twig', { parcours:parcours }) }}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="scroll-section" id="competences_{{ parcours.id }}">
+                    <h3 class="small-title">Compétences Acquises</h3>
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            {% if (print is not defined or print == false) %}
+                            {{ component('commentaire', {
+                                commentaires: parcours.commentaires,
+                                id: parcours.id,
+                                type: 'parcours',
+                                zone: 'competences_'~ parcours.id,
+                            }) }}
+                            {% endif %}
+                            {% set typeD = typeD ?? type_diplome_handler(parcours) %}
+                            {{ include(typeD.competencesTemplate, {parcours: parcours}) }}
+
+                        </div>
+                    </div>
+                </section>
+
+                <section class="scroll-section" id="structure_{{ parcours.id }}">
+                    <h3 class="small-title">Structure</h3>
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            {% if (print is not defined or print == false) %}
+                            {{ component('commentaire', {
+                                commentaires: parcours.commentaires,
+                                id: parcours.id,
+                                type: 'parcours',
+                                zone: 'structure_'~ parcours.id,
+                            }) }}
+                            {% endif %}
+                            {{ render(controller('App\\Controller\\StructureShowController::parcoursShow', {
+                                parcours: parcours.id,
+                                hasLastVersion: hasLastVersion ?? false,
+                            })) }}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="scroll-section" id="admission_{{ parcours.id }}">
+                    <h3 class="small-title">Admission</h3>
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            {% if (print is not defined or print == false) %}
+                            {{ component('commentaire', {
+                                commentaires: parcours.commentaires,
+                                id: parcours.id,
+                                type: 'parcours',
+                                zone: 'admission_'~ parcours.id,
+                            }) }}
+                            {% endif %}
+                            {{ include('formation/legacy/_admission.html.twig', { parcours:parcours } ) }}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="scroll-section" id="inscription_{{ parcours.id }}">
+                    <h3 class="small-title">Inscription</h3>
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            {% if (print is not defined or print == false) %}
+                            {{ component('commentaire', {
+                                commentaires: parcours.commentaires,
+                                id: parcours.id,
+                                type: 'parcours',
+                                zone: 'inscription_'~ parcours.id,
+                            }) }}
+                            {% endif %}
+                            {{ include('formation/legacy/_inscription.html.twig', {parcours:parcours}) }}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="scroll-section" id="et_apres_{{ parcours.id }}">
+                    <h3 class="small-title"> Et après...</h3>
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            {% if (print is not defined or print == false) %}
+                            {{ component('commentaire', {
+                                commentaires: parcours.commentaires,
+                                id: parcours.id,
+                                type: 'parcours',
+                                zone: 'et_apres_'~ parcours.id,
+                            }) }}
+                            {% endif %}
+                            {{ include('formation/legacy/_etApres.html.twig', { parcours:parcours } ) }}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="scroll-section" id="contacts_{{ parcours.id }}">
+                    <h3 class="small-title">Contacts pédagogiques</h3>
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            {% if (print is not defined or print == false) %}
+                            {{ component('commentaire', {
+                                commentaires: parcours.commentaires,
+                                id: parcours.id,
+                                type: 'parcours',
+                                zone: 'contacts_'~ parcours.id,
+                            }) }}
+                            {% endif %}
+                            {{ include('formation/legacy/_contacts.html.twig', { parcours:parcours } ) }}
+                        </div>
+                    </div>
+                </section>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>

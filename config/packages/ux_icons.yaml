@@ -38,6 +38,7 @@ ux_icons:
     icon:edit: 'ph:pencil-light'
     icon:duplicate: 'ph:copy-bold'
     icon:delete: 'ph:trash-light'
+    icon:trash: 'ph:trash-light'
     icon:print: 'ph:printer-light'
     icon:download: 'ph:download-simple-light'
     icon:upload: 'ph:upload-light'
@@ -67,6 +68,7 @@ ux_icons:
     icon:clock: 'ph:clock-light'
     icon:lock: 'ph:lock-bold'
     icon:unlock: 'ph:lock-open-bold'
+    icon:key: 'ph:key-light'
     icon:eye: 'ph:eye-light'
     icon:eye-slash: 'ph:eye-slash-light'
     icon:phone: 'ph:phone-light'
@@ -85,6 +87,8 @@ ux_icons:
     icon:bell: 'ph:bell-light'
     icon:envelope: 'ph:envelope-light'
     icon:pencil-ruler: 'ph:pencil-ruler-duotone'
+    icon:chart: 'ph:chart-bar-light'
+    icon:chart-pie: 'ph:chart-pie-light'
 
     # Marques
     icon:github: 'simple-icons:github'

@@ -190,6 +190,7 @@ final class MigrateV2Command extends Command
         $this->addColumn($sql, 'plateforme_admission', 'mode_export', "VARCHAR(30) NOT NULL DEFAULT 'global'");
         $this->addColumn($sql, 'plateforme_admission_parametre', 'remarques', 'LONGTEXT DEFAULT NULL');
         $this->addColumn($sql, 'etablissement', 'email_oreof', 'VARCHAR(255) DEFAULT NULL');
+        $this->addColumn($sql, 'etablissement', 'api_keys', 'JSON DEFAULT NULL');
         $this->addColumn($sql, 'parcours', 'duree_parcours', 'DOUBLE PRECISION DEFAULT NULL');
         $this->addColumn($sql, 'parcours', 'duree_parcours_unite', 'VARCHAR(20) DEFAULT NULL');
         $this->addColumn($sql, 'type_diplome', 'classique', 'TINYINT(1) NOT NULL DEFAULT 1');

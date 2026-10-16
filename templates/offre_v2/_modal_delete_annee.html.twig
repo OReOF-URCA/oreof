@@ -1,0 +1,22 @@
+<div class="p-1 space-y-4">
+    <div class="rounded-xl border border-danger-200 bg-danger-50/70 p-4 dark:border-danger-700 dark:bg-danger-900/30">
+        <div class="flex items-start gap-3">
+            <span class="text-xl shrink-0">⚠️</span>
+            <div class="space-y-1 text-sm text-danger-900 dark:text-danger-200">
+                <div class="font-bold">Confirmation de suppression</div>
+                <p>
+                    Êtes-vous sûr de vouloir supprimer l'année <strong>{{ typeDiplome ? typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}</strong> du parcours <strong>« {{ parcours.libelle }} »</strong> ?
+                </p>
+                <p class="text-xs text-danger-700 dark:text-danger-300">
+                    Cette action supprimera également les capacités d'accueil et les configurations de plateformes associées à cette année pour ce parcours. Cette suppression est irréversible.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-xl border border-secondary-200 bg-secondary-50/50 p-3.5 dark:border-secondary-700 dark:bg-secondary-800/40 text-xs text-secondary-600 dark:text-secondary-300 space-y-1">
+        <div><strong>Formation :</strong> {{ formation.displayLong }}</div>
+        <div><strong>Parcours :</strong> {{ parcours.libelle }} (parcours nouvellement créé)</div>
+        <div><strong>Année à supprimer :</strong> {{ typeDiplome ? typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}</div>
+    </div>
+</div>

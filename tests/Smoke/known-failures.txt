@@ -8,7 +8,6 @@ app_administration_profils_liste
 app_campagne_collecte_liste
 app_codification
 app_codification_liste_inter
-app_codification_parcours_export
 app_codification_wizard
 app_competence_export_croise
 app_composante_export

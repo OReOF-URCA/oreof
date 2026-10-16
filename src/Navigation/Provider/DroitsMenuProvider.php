@@ -24,7 +24,7 @@ final readonly class DroitsMenuProvider implements MenuProviderInterface
     {
         if (
             !$this->authorizationChecker->isGranted('ROLE_ADMIN')
-            && !$this->authorizationChecker->isGranted('EDIT', [
+            && !$this->authorizationChecker->isGranted('MANAGE', [
                 'route' => 'app_composante',
                 'subject' => 'composante',
             ])

@@ -51,7 +51,18 @@ php bin/console messenger:consume async_export async_email async_mccc_backup --t
 ```
 
 Déploiement cible (releases + bascule atomique, heures creuses) : `docs/ops/ci-cd.md`. Déploiement manuel actuel : tag de release → dépendances + build → secrets → migrations → cache → redémarrage PHP-FPM/serveur web et
-workers → contrôle de `var/log/` et de l'application.
+workers → contrôle de `var/log/` et de l'application. Un script `update.sh` (situé dans le dossier parent ou à la racine) automatise ces étapes de mise à jour et la configuration robuste des permissions (ACLs, chown/chmod) :
+
+```bash
+./update.sh [OPTIONS]
+# Options principales :
+#   -m, --migrations    Exécuter les migrations Doctrine
+#   -a, --assets        Forcer la compilation des assets Vite
+#   -u, --user=<nom>    Utilisateur propriétaire des fichiers (défaut : auto-détecté ou www-data, jamais root)
+#   -g, --group=<nom>   Groupe propriétaire des fichiers (défaut : groupe web www-data)
+#   -b, --branch=<nom>  Branche cible pour git pull (défaut : v2)
+```
+
 
 ## Dépannage
 

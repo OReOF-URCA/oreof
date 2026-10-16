@@ -47,29 +47,14 @@ class FormationController extends BaseController
         Formation                   $formation
     ): Response
     {
-        if (
-            !(
-                $this->isGranted('EDIT', ['route' => 'app_formation', 'subject' => $formation]) ||
-                $this->isGranted('EDIT', ['route' => 'app_composante', 'subject' => $formation]) ||
-                $this->isGranted('EDIT', ['route' => 'app_etablissement', 'subject' => $formation]) ||
-                $this->isGranted('ROLE_ADMIN')
-            )
-            || !Access::isOuvert($formation)
-        ) {
-            $firstParcours = $formation->getParcours()->first() ?: null;
-            if ($formation->isHasParcours() === false && count($formation->getParcours()) === 1 && $firstParcours instanceof Parcours) {
-                if (!$this->isGranted(
-                    'EDIT',
-                    [
-                        'route' => 'app_parcours',
-                        'subject' => $firstParcours,
-                    ]
-                )) {
-                    return $this->redirectToRoute('formation_v2_voir', ['slug' => $formation->getSlug()]);
-                }
-            } else {
-                return $this->redirectToRoute('formation_v2_voir', ['slug' => $formation->getSlug()]);
-            }
+        if (!$this->isGranted('EDIT', $formation)) {
+            $this->addFlash('danger', 'La formation est verrouillée ou vous n\'avez pas les droits de modification.');
+
+            $url = $this->generateUrl('formation_v2_voir', ['slug' => $formation->getSlug()]);
+            $response = $this->redirect($url);
+            $response->headers->set('Turbo-Location', $url);
+
+            return $response;
         }
         
 
@@ -322,6 +307,16 @@ class FormationController extends BaseController
         BreadcrumbService           $breadcrumb,
     ): Response
     {
+        if (!$this->isGranted('EDIT', $formation)) {
+            $this->addFlash('danger', 'La formation est verrouillée ou vous n\'avez pas les droits de modification.');
+
+            $url = $this->generateUrl('formation_v2_voir', ['slug' => $formation->getSlug()]);
+            $response = $this->redirect($url);
+            $response->headers->set('Turbo-Location', $url);
+
+            return $response;
+        }
+
         $breadcrumb->add(
             $formation->getDisplay(),
             'formation_v2_voir',
@@ -388,4 +383,5 @@ class FormationController extends BaseController
             'tab' => $tabView
         ]));
     }
+
 }

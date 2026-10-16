@@ -30,7 +30,6 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Workflow\WorkflowInterface;
 
 #[Route('/fiche-matiere/v2/process', name: 'fiche_matiere_process')]
-#[IsGranted('ROLE_ADMIN')]
 class FicheMatiereProcessController extends BaseController
 {
     public function __construct(
@@ -61,7 +60,7 @@ class FicheMatiereProcessController extends BaseController
 
         $view = $this->transitionModalViewBuilder->build($transition, $ficheMatiere, $rawMeta);
 
-        if ($view->mode === 'report') {
+        if ($view?->mode === 'report') {
             $formId = $metaDto->form !== null ? $metaDto->form->formId : 'modal_form';
             $form = $this->metaDrivenFormFactory->createEmpty($formId);
         } else {
@@ -76,7 +75,7 @@ class FicheMatiereProcessController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            if ($view->mode === 'report' && $view->canSubmit === false) {
+            if ($view?->mode === 'report' && $view?->canSubmit === false) {
                 $message = implode(' ', array_column($view->messages, 'message'));
 
                 return $turboStream->stream('fiche_matiere_v2/turbo/apply_error.stream.html.twig', [

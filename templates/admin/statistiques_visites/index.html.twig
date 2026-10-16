@@ -12,17 +12,28 @@
     <div class="space-y-6">
         <p class="text-sm text-secondary-500 dark:text-secondary-400">
             Du {{ from|date('d/m/Y') }} au {{ to|date('d/m/Y') }} —
-            source : journaux <code>{{ environment }}.auth-*.log</code> (connexions) et
-            <code>{{ environment }}.all-*.log</code> (pages vues : requêtes GET, hors profiler et composants Live).
+            source : journaux <code>{{ environment }}.auth-*.log</code> (connexions),
+            <code>{{ environment }}.visit-*.log</code> (pages vues : utilisateurs connectés, pages HTML, hors fragments,
+            exports, API et robots) et <code>{{ environment }}.all-*.log</code> (appels exports/API).
         </p>
 
-        <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {% if totals.estimatedDays > 0 %}
+            <div class="rounded-lg border border-warning-300 bg-warning-50 px-4 py-3 text-sm text-warning-700 dark:border-warning-700 dark:bg-warning-900/30 dark:text-warning-300" role="note">
+                <strong>{{ totals.estimatedDays }} jour(s) estimé(s)</strong> (marqués <span aria-hidden="true">≈</span> dans le tableau) :
+                antérieurs au suivi des pages vues, ils sont reconstitués depuis les requêtes brutes. Les exports, API et iframes
+                sont retirés, mais les robots et visiteurs non connectés peuvent encore gonfler ces chiffres.
+            </div>
+        {% endif %}
+
+        <div class="grid grid-cols-2 gap-3 lg:grid-cols-5">
             <twig:Kpi title="Connexions" :value="totals.logins" variant="primary" icon="icon:login"
                       description="Authentifications réussies"/>
             <twig:Kpi title="Utilisateurs uniques" :value="totals.uniqueUsers" variant="success" icon="icon:users"
                       description="Comptes connectés sur la période"/>
             <twig:Kpi title="Pages vues" :value="totals.pageViews" variant="info" icon="icon:eye"
                       :description="totals.activeDays ~ ' jour(s) d\'activité'"/>
+            <twig:Kpi title="Exports et API" :value="totals.machineHits" variant="warning" icon="icon:download"
+                      description="PDF, JSON, XML, iframes : hors pages vues"/>
             <twig:Kpi title="Pages vues / jour actif"
                       :value="totals.activeDays > 0 ? (totals.pageViews / totals.activeDays)|round : 0"
                       variant="secondary" icon="icon:calendar" description="Moyenne sur les jours d'activité"/>
@@ -52,6 +63,7 @@
                     <tr>
                         <th class="py-2 text-left font-semibold">Date</th>
                         <th class="py-2 text-right font-semibold">Pages vues</th>
+                        <th class="py-2 text-right font-semibold">Exports et API</th>
                         <th class="py-2 text-right font-semibold">Connexions</th>
                         <th class="py-2 text-right font-semibold">Utilisateurs uniques</th>
                     </tr>
@@ -60,7 +72,10 @@
                     {% for date, day in stats.days|reverse(true) %}
                         <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800/60">
                             <td class="py-1.5 text-text">{{ date|date('d/m/Y') }}</td>
-                            <td class="py-1.5 text-right tabular-nums text-text">{{ day.pageViews|number_format(0, ',', ' ') }}</td>
+                            <td class="py-1.5 text-right tabular-nums text-text">
+                                {% if day.estimated %}<span title="Estimation (jour sans suivi des pages vues)">≈ </span>{% endif %}{{ day.pageViews|number_format(0, ',', ' ') }}
+                            </td>
+                            <td class="py-1.5 text-right tabular-nums text-secondary-500 dark:text-secondary-400">{{ day.machineHits|number_format(0, ',', ' ') }}</td>
                             <td class="py-1.5 text-right tabular-nums text-text">{{ day.logins }}</td>
                             <td class="py-1.5 text-right tabular-nums text-text">{{ day.uniqueUsers }}</td>
                         </tr>
@@ -133,5 +148,35 @@
                 {% endif %}
             </section>
         </div>
+
+        {# Exports, API et iframes : consommés par des scripts ou des sites tiers, pas des visites #}
+        <section class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700">
+            <h2 class="mb-1 text-sm font-semibold text-text">Exports et appels machine les plus sollicités</h2>
+            <p class="mb-3 text-xs text-secondary-500 dark:text-secondary-400">
+                Routes d'export (PDF, JSON, XML), d'API et d'iframes, souvent publiques : appelées par des scripts, des sites tiers ou des téléchargements.
+            </p>
+            {% if stats.topMachineRoutes is empty %}
+                <p class="text-sm text-secondary-400">Aucun appel sur la période.</p>
+            {% else %}
+                <div class="overflow-x-auto">
+                    <table class="table w-full text-sm">
+                        <thead class="text-[11px] uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                        <tr>
+                            <th class="py-2 text-left font-semibold">Route</th>
+                            <th class="py-2 text-right font-semibold">Appels</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                        {% for route, count in stats.topMachineRoutes %}
+                            <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800/60">
+                                <td class="py-1.5 pr-2 font-mono text-xs text-text">{{ route }}</td>
+                                <td class="py-1.5 text-right tabular-nums text-text">{{ count|number_format(0, ',', ' ') }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </section>
     </div>
 {% endblock %}

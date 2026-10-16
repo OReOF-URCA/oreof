@@ -103,6 +103,10 @@ SQL;
             $sql['Ajout type_diplome_plateforme_admission.annees_capacite_specifique'] = "ALTER TABLE type_diplome_plateforme_admission ADD annees_capacite_specifique JSON DEFAULT NULL COMMENT '(DC2Type:json)'";
         }
 
+        if ($this->tableExists('etablissement') && !$this->columnExists('etablissement', 'api_keys')) {
+            $sql['Ajout etablissement.api_keys'] = 'ALTER TABLE etablissement ADD api_keys JSON DEFAULT NULL';
+        }
+
         if ($this->tableExists('etablissement_information') && !$this->columnExists('etablissement_information', 'tarif_inscription')) {
             $sql['Ajout etablissement_information.tarif_inscription'] = 'ALTER TABLE etablissement_information ADD tarif_inscription LONGTEXT DEFAULT NULL';
         }

@@ -1,0 +1,17 @@
+{% if formation.hasParcours == false %}
+    <div class="row">
+        {# todo: ne doit pas être là? #}
+        <div class="col-sm-12">
+            <p  class="text-justify"><strong>Contenu de la formation</strong> : {{ formation.contenuFormation|raw }}</p>
+            <p  class="text-justify"><strong>Résultats attendus de la formation</strong> : {{ formation.resultatsAttendus|raw }}</p>
+            <p  class="text-justify"><strong>Rythme de formation</strong> : {{ formation.rythmeFormation != null ? formation.rythmeFormation.libelle : 'Non précisé' }}</p>
+            <p class="text-justify"><strong>Précisions sur le rythme de formation</strong> : {{ formation.rythmeFormationTexte|raw }}</p>
+        </div>
+    </div>
+{% else %}
+    <div class="row">
+        <div class="col-sm-12">
+            <p class="text-justify"><strong>Organisation et objectifs de la formation</strong> : {{ formation.objectifsFormation|raw }}</p>
+        </div>
+    </div>
+{% endif %}

@@ -11,7 +11,9 @@ namespace App\Classes;
 
 use App\Entity\Parcours;
 use App\Utils\Tools;
+use Sensiolabs\GotenbergBundle\Builder\BuilderFileInterface;
 use Sensiolabs\GotenbergBundle\Builder\Pdf\HtmlPdfBuilder;
+use Sensiolabs\GotenbergBundle\Debug\Builder\TraceableBuilder;
 use Sensiolabs\GotenbergBundle\Enumeration\EmulatedMediaType;
 use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
 use Sensiolabs\GotenbergBundle\Processor\FileProcessor;
@@ -40,15 +42,22 @@ class MyGotenbergPdf
 
     public function render(string $template, array $context = [], string $name = 'fichier', array $options = []): Response
     {
-        return $this->buildBuilder($template, $context, $name, $options)
+        $result = $this->buildBuilder($template, $context, $name, $options)
             ->fileName($this->valideName($name))
-            ->generate()
-            ->stream()
-        ;
+            ->generate();
 
+        if (array_key_exists('attachment', $this->options) && $this->options['attachment'] === false) {
+            $result->setDisposition(\Symfony\Component\HttpFoundation\HeaderUtils::DISPOSITION_INLINE);
+        }
+
+        return $result->stream();
     }
 
-    private function buildBuilder(string $template, array $context, string $name, array $options): HtmlPdfBuilder
+
+    /**
+     * @return HtmlPdfBuilder
+     */
+    private function buildBuilder(string $template, array $context, string $name, array $options): object
     {
         $resolver = new OptionsResolver();
         $this->configureOptions($resolver);
@@ -128,64 +137,99 @@ class MyGotenbergPdf
             $formation = $parcours->getFormation();
 
             if (array_key_exists('titre', $context)) {
-                return $formation->getDisplayLong()
-                    . '<br> Parcours : ' . $parcours->getDisplay()
-                    . '<br>' . $context['titre'];
+                return ($formation ? $formation->getDisplayLong() . ' &bull; ' : '')
+                    . 'Parcours : ' . $parcours->getDisplay()
+                    . ' &bull; ' . $context['titre'];
             }
 
-            return $formation->getDisplayLong()
-                . '<br> Parcours : ' . $parcours->getDisplay();
+            return ($formation ? $formation->getDisplayLong() . ' &bull; ' : '')
+                . 'Parcours : ' . $parcours->getDisplay();
         }
 
         if (array_key_exists('titre', $context)) {
-            return $context['titre'];
+            return (string) $context['titre'];
         }
 
         return '';
     }
 
-    private function getHeader(string $titre = '', array $context = []): array // On récupère une liste des variables, et non plus la page en elle-même
+    private function resolveImagePath(?string $filename, string $fallback): string
     {
-        if ($this->options['withTemplate']) {
-            if (array_key_exists('composante', $context)
-                && $context['composante'] !== null
-                && $context['composante']->getHeaderPlaquette() !== null
-            ) {
-                $imagePath = $this->basePath . '/images/' . $context['composante']->getHeaderPlaquette();
-            } else {
-                $imagePath = $this->basePath . '/images/header.jpg';
+        if ($filename !== null && $filename !== '') {
+            $candidates = [
+                $this->basePath . '/uploads/plaquettes/' . $filename,
+                $this->basePath . '/uploads/logos/' . $filename,
+                $this->basePath . '/images/' . $filename,
+            ];
+            foreach ($candidates as $candidate) {
+                if (is_file($candidate) && is_readable($candidate)) {
+                    return $candidate;
+                }
             }
+        }
+
+        if ($fallback === '') {
+            return '';
+        }
+
+        return $this->basePath . '/images/' . $fallback;
+    }
+
+    private function getHeader(string $titre = '', array $context = []): array
+    {
+        $logoComposanteContent = '';
+        if (array_key_exists('composante', $context)
+            && $context['composante'] !== null
+            && method_exists($context['composante'], 'getLogo')
+            && $context['composante']->getLogo() !== null
+        ) {
+            $logoPath = $this->resolveImagePath($context['composante']->getLogo(), '');
+            if ($logoPath !== '' && is_file($logoPath) && is_readable($logoPath)) {
+                $logoComposanteContent = base64_encode(file_get_contents($logoPath));
+            }
+        }
+
+        if ($this->options['withTemplate']) {
+            $headerFile = (array_key_exists('composante', $context) && $context['composante'] !== null)
+                ? $context['composante']->getHeaderPlaquette()
+                : null;
+            $imagePath = $this->resolveImagePath($headerFile, 'header.jpg');
         } else {
             $imagePath = $this->basePath . '/images/logo_urca.png';
         }
 
-        return [
-            'baseUrl'      => $this->basePath,
-            'titre'        => $titre,
-            'image'        => base64_encode(file_get_contents($imagePath)),
-            'withTemplate' => $this->options['withTemplate'],
-        ];
+        $imageContent = (is_file($imagePath) && is_readable($imagePath))
+            ? base64_encode(file_get_contents($imagePath))
+            : '';
 
+        return [
+            'baseUrl'        => $this->basePath,
+            'titre'          => $titre,
+            'image'          => $imageContent,
+            'logoComposante' => $logoComposanteContent,
+            'withTemplate'   => $this->options['withTemplate'],
+        ];
     }
 
-    private function getFooter(array $context = []): array // On récupère une liste des variables, et non plus la page en elle-même
+    private function getFooter(array $context = []): array
     {
-        if ($this->options['withTemplate']) {
-            if (array_key_exists('composante', $context)
-                && $context['composante'] !== null
-                && $context['composante']->getFooterPlaquette() !== null
-            ) {
-                $imagePath = $this->basePath . '/images/' . $context['composante']->getFooterPlaquette();
-            } else {
-                $imagePath = $this->basePath . '/images/vague_urca.jpg';
-            }
+        $imageContent = '';
 
-            return array_merge($this->options, [
-                'image' => base64_encode(file_get_contents($imagePath)),
-            ]);
+        if ($this->options['withTemplate']) {
+            $footerFile = (array_key_exists('composante', $context) && $context['composante'] !== null)
+                ? $context['composante']->getFooterPlaquette()
+                : null;
+            $imagePath = $this->resolveImagePath($footerFile, 'vague_urca.jpg');
+
+            if (is_file($imagePath) && is_readable($imagePath)) {
+                $imageContent = base64_encode(file_get_contents($imagePath));
+            }
         }
 
-        return $this->options;
-
+        return array_merge($this->options, [
+            'image' => $imageContent,
+            'final' => $context['final'] ?? false,
+        ]);
     }
 }
+

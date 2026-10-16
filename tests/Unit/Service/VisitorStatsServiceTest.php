@@ -55,16 +55,16 @@ class VisitorStatsServiceTest extends TestCase
 
         self::assertSame(['2025-10-01', '2025-10-02'], array_keys($stats['days']));
         self::assertSame(
-            ['logins' => 3, 'uniqueUsers' => 2, 'pageViews' => 1],
+            ['logins' => 3, 'uniqueUsers' => 2, 'pageViews' => 1, 'machineHits' => 0, 'estimated' => true],
             $stats['days']['2025-10-01']
         );
         self::assertSame(
-            ['logins' => 0, 'uniqueUsers' => 0, 'pageViews' => 0],
+            ['logins' => 0, 'uniqueUsers' => 0, 'pageViews' => 0, 'machineHits' => 0, 'estimated' => false],
             $stats['days']['2025-10-02']
         );
 
         self::assertSame(
-            ['logins' => 3, 'uniqueUsers' => 2, 'pageViews' => 1, 'activeDays' => 1],
+            ['logins' => 3, 'uniqueUsers' => 2, 'pageViews' => 1, 'machineHits' => 0, 'estimatedDays' => 1, 'activeDays' => 1],
             $stats['totals']
         );
 
@@ -95,6 +95,62 @@ class VisitorStatsServiceTest extends TestCase
         self::assertSame(1, $stats['totals']['activeDays']);
     }
 
+    public function testLegacyDaySeparatesMachineRoutesAndAuthFlow(): void
+    {
+        $line = static fn (string $route, string $uri): string => sprintf(
+            '[2025-10-01T07:10:57.736757+00:00] request.INFO: Matched route "%1$s". {"route":"%1$s","route_parameters":{"_route":"%1$s"},"request_uri":"%2$s","method":"GET"} []',
+            $route,
+            $uri
+        );
+
+        $this->writeAllLog('2025-10-01', [
+            $line('app_fiche_matiere_show', 'http://localhost:8821/fiche/matiere/abc'),
+            $line('app_export_index', 'http://localhost:8821/export/'),
+            $line('app_parcours_export_json_urca', 'http://localhost:8821/parcours/1/export-json-urca'),
+            $line('app_parcours_mccc_export', 'http://localhost:8821/parcours/mccc/export/1.pdf'),
+            $line('app_parcours_maquette_iframe', 'http://localhost:8821/parcours/1/maquette_iframe'),
+            $line('some_api_route', 'http://localhost:8821/api/site/web/formations'),
+            $line('app_login', 'http://localhost:8821/connexion'),
+            $line('cas_return', 'http://localhost:8821/sso/cas/return'),
+        ]);
+
+        $stats = $this->createService()->getStats(new \DateTimeImmutable('2025-10-01'), new \DateTimeImmutable('2025-10-01'));
+
+        self::assertSame(2, $stats['totals']['pageViews']);
+        self::assertSame(['app_fiche_matiere_show' => 1, 'app_export_index' => 1], $stats['topRoutes']);
+        self::assertSame(4, $stats['totals']['machineHits']);
+        self::assertSame(1, $stats['topMachineRoutes']['app_parcours_export_json_urca']);
+        self::assertArrayHasKey('some_api_route', $stats['topMachineRoutes']);
+    }
+
+    public function testVisitLogIsAuthoritativeAndOverridesRequestLog(): void
+    {
+        $this->writeVisitLog('2025-10-01', [
+            '[2025-10-01T07:10:57.736757+00:00] visit.INFO: Page vue {"route":"app_homepage","user":"alice"} []',
+            '[2025-10-01T13:00:00.000000+00:00] visit.INFO: Page vue {"route":"app_homepage","user":"bob"} []',
+            '[2025-10-01T13:05:00.000000+00:00] visit.INFO: Page vue {"route":"app_parcours_show","user":"alice"} []',
+            'ligne invalide',
+        ]);
+        // Le log all (robots inclus) ne compte plus comme pages vues, seuls les exports sont conservés à part
+        $this->writeAllLog('2025-10-01', [
+            '[2025-10-01T07:10:57.736757+00:00] request.INFO: Matched route "app_fiche_matiere_show". {"route":"app_fiche_matiere_show","request_uri":"http://localhost:8821/fiche/matiere/abc","method":"GET"} []',
+            '[2025-10-01T07:10:58.000000+00:00] request.INFO: Matched route "app_parcours_export". {"route":"app_parcours_export","request_uri":"http://localhost:8821/parcours/1/export-pdf","method":"GET"} []',
+        ]);
+
+        $stats = $this->createService()->getStats(new \DateTimeImmutable('2025-10-01'), new \DateTimeImmutable('2025-10-01'));
+
+        self::assertSame(
+            ['logins' => 0, 'uniqueUsers' => 2, 'pageViews' => 3, 'machineHits' => 1, 'estimated' => false],
+            $stats['days']['2025-10-01']
+        );
+        self::assertSame(['app_homepage' => 2, 'app_parcours_show' => 1], $stats['topRoutes']);
+        self::assertSame(['app_parcours_export' => 1], $stats['topMachineRoutes']);
+        self::assertSame(0, $stats['totals']['estimatedDays']);
+        self::assertSame(1, $stats['hours'][9]);
+        self::assertSame(2, $stats['hours'][15]);
+        self::assertSame(2, $stats['totals']['uniqueUsers']);
+    }
+
     private function createService(): VisitorStatsService
     {
         return new VisitorStatsService($this->logsDir, 'test', new ArrayAdapter());
@@ -114,5 +170,13 @@ class VisitorStatsServiceTest extends TestCase
     private function writeAllLog(string $date, array $lines): void
     {
         file_put_contents($this->logsDir . '/test.all-' . $date . '.log', implode("\n", $lines) . "\n");
+    }
+
+    /**
+     * @param array<int, string> $lines
+     */
+    private function writeVisitLog(string $date, array $lines): void
+    {
+        file_put_contents($this->logsDir . '/test.visit-' . $date . '.log', implode("\n", $lines) . "\n");
     }
 }

@@ -12,6 +12,7 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 | `app:migrate:v2:cleanup` | suppressions destructives post-validation V2 | `--apply --confirm-backup` |
 | `app:semestre:migrate-tronc-commun` | semestres tronc commun → semestres mutualisés (campagne courante) | `--apply`, `--campaign`, `--formation`, `--porteur`, `--mapping-file`, `--allow-cross-formation`, `--output` |
 | `app:parcours-copy-data` | recopie heures/ECTS/MCCC vers les fiches matières | voir `docs/ops/recopie-fiche-matiere.md` |
+| `app:parcours:delete` | suppression définitive d'un parcours (erreurs de création/recopie) avec analyse préalable d'impact | `id`, `--force`, `--dry-run` |
 
 ## Campagnes / années
 
@@ -38,6 +39,7 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 | `app:recopie-profils` | recopie les profils utilisateurs d'une campagne vers une autre | `[annee-depart]`, `[annee-arrivee]`, `--annee-depart=`, `--annee-arrivee=`, `--dry-run`, `--force` |
 | `app:recopie-domaine` | recopie les domaines | — |
 | `app:translations:import-missing` | importe les traductions manquantes, reformate `translations/*.yaml` | `--translations-dir`, `--simulate`, `--overwrite`, `--format`, `--no-backup` |
+| `app:parcours:fix-coherence-ouverture` | corrige les incohérences d'ouverture parcours / années (dry-run par défaut) | `--campagne=2027-2028`, `--apply`, `--action=all\|fermer-annees\|fermer-parcours` |
 | `app:workflow:check-metadata-completeness` | contrôle les metadata des workflows | — |
 
 ## Publication / exports / versioning

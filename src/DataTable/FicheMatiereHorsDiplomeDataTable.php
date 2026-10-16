@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\DataTable;
 
+use App\DataTable\Column\SearchableTemplateColumn;
 use App\Entity\ElementConstitutif;
 use App\Entity\FicheMatiere;
 use App\Entity\User;
 use Doctrine\ORM\QueryBuilder;
 use Pentiminax\UX\DataTables\Attribute\AsDataTable;
-use Pentiminax\UX\DataTables\Column\TemplateColumn;
 use Pentiminax\UX\DataTables\DataTableRequest\DataTableRequest;
 use Pentiminax\UX\DataTables\Filter\ChoiceFilter;
 use Pentiminax\UX\DataTables\Filter\TernaryFilter;
@@ -78,23 +78,23 @@ final class FicheMatiereHorsDiplomeDataTable extends FicheMatiereDataTable
     public function configureColumns(): iterable
     {
         return [
-            TemplateColumn::new('libelle', 'Fiche matière')
+            SearchableTemplateColumn::new('libelle', 'Fiche matière')
                 ->setField('libelle')
                 ->setSearchField('libelle')
                 ->setOrderable(true)
                 ->setSearchable(true)
                 ->setTemplate('structure/fiche_matiere/_column_libelle.html.twig'),
-            TemplateColumn::new('etatFiche', 'État')
+            SearchableTemplateColumn::new('etatFiche', 'État')
                 ->setTemplate('structure/fiche_matiere/_column_etat.html.twig'),
-            TemplateColumn::new('utilise', 'Utilisé ?')
+            SearchableTemplateColumn::new('utilise', 'Utilisé ?')
                 ->setTemplate('structure/fiche_matiere/_column_utilise.html.twig'),
-            TemplateColumn::new('responsableFicheMatiere', 'Référent')
+            SearchableTemplateColumn::new('responsableFicheMatiere', 'Référent')
                 ->setField('responsableFicheMatiere.nom')
                 ->setSearchField('responsableFicheMatiere.nom')
                 ->setOrderable(true)
                 ->setSearchable(true)
                 ->setTemplate('structure/fiche_matiere/_column_referent.html.twig'),
-            TemplateColumn::new('remplissage', 'Remplissage')
+            SearchableTemplateColumn::new('remplissage', 'Remplissage')
                 ->setTemplate('structure/fiche_matiere/_column_remplissage.html.twig'),
         ];
     }

@@ -1,18 +1,25 @@
-<ul class="nav nav-pills responsive-tabs nav-justified" role="tablist">
-    {% for competence in competences %}
-        <li class="nav-item" role="presentation">
-            <button class="nav-link {% if loop.first %}active{% endif %}"
-                    data-bs-toggle="tab"
-                    data-bs-target="#competence_{{ competence.id }}"
-                    role="tab" aria-selected="false" type="button">{{ competence.nomCourt }}</button>
-        </li>
-    {% endfor %}
-</ul>
+<div class="app-tabs" data-controller="tabs" data-tabs-active-tab-class="app-tab-active active" data-tabs-remember-hash-value="false">
+    <div class="app-tabs-list flex-wrap gap-1.5" role="tablist" aria-label="Compétences du parcours">
+        {% for competence in competences %}
+            <button type="button"
+                    class="app-tab {% if loop.first %}app-tab-active active{% endif %}"
+                    role="tab"
+                    data-tabs-target="tab"
+                    data-action="tabs#change"
+                    data-tab-id="competence_{{ competence.id }}_{{ parcours.id }}"
+                    aria-selected="{{ loop.first ? 'true' : 'false' }}">
+                {{ competence.nomCourt }}
+            </button>
+        {% endfor %}
+    </div>
 
-<div class="tab-content">
-    {% for competence in competences %}
-        <div class="tab-pane {% if loop.first %}fade active show{% endif %}" id="competence_{{ competence.id }}">
-            {{ include('typeDiplome/but/_competence.html.twig') }}
-        </div>
-    {% endfor %}
+    <div class="mt-6">
+        {% for competence in competences %}
+            <div data-tabs-target="panel"
+                 data-panel-id="competence_{{ competence.id }}_{{ parcours.id }}"
+                 class="{% if not loop.first %}hidden{% endif %}">
+                {{ include('typeDiplome/but/_competence.html.twig') }}
+            </div>
+        {% endfor %}
+    </div>
 </div>

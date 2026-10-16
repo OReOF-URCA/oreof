@@ -591,18 +591,24 @@ class VersioningParcours
         $lastVersion = count($lastVersion) > 0 ? $lastVersion[0] : null;
 
         if($lastVersion) {
-            $fileDTO = file_get_contents(
-                __DIR__ . "/../../versioning_json/parcours/"
+            $filePath = __DIR__ . "/../../versioning_json/parcours/"
                 . "{$lastVersion->getParcours()->getId()}/"
-                . "{$lastVersion->getDtoFileName()}.json"
-            );
+                . "{$lastVersion->getDtoFileName()}.json";
 
-            $dto = $this->serializer->deserialize($fileDTO, StructureParcours::class, 'json');
-            //            if ($parcours ->getId() === 405) {
-            //                dd($dto);
-            //            }
+            if (!file_exists($filePath)) {
+                return null;
+            }
 
-            return $dto;
+            $fileDTO = file_get_contents($filePath);
+            if ($fileDTO === false) {
+                return null;
+            }
+
+            try {
+                return $this->serializer->deserialize($fileDTO, StructureParcours::class, 'json');
+            } catch (\Throwable) {
+                return null;
+            }
         }
 
         return null;
@@ -620,13 +626,24 @@ class VersioningParcours
         }
 
         if ($lastVersion) {
-            $fileDTO = file_get_contents(
-                __DIR__ . "/../../versioning_json/parcours/"
+            $filePath = __DIR__ . "/../../versioning_json/parcours/"
                 . "{$lastVersion->getParcours()->getId()}/"
-                . "{$lastVersion->getDtoFileName()}.json"
-            );
+                . "{$lastVersion->getDtoFileName()}.json";
 
-            return $this->serializer->deserialize($fileDTO, StructureParcours::class, 'json');
+            if (!file_exists($filePath)) {
+                return null;
+            }
+
+            $fileDTO = file_get_contents($filePath);
+            if ($fileDTO === false) {
+                return null;
+            }
+
+            try {
+                return $this->serializer->deserialize($fileDTO, StructureParcours::class, 'json');
+            } catch (\Throwable) {
+                return null;
+            }
         }
 
         return null;

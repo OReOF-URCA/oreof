@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DataTable;
 
 use App\Classes\DataUserSession;
+use App\DataTable\Column\SearchableTemplateColumn;
 use App\Entity\Composante;
 use App\Entity\Formation;
 use App\Entity\HistoriqueParcours;
@@ -12,7 +13,6 @@ use App\Entity\Parcours;
 use Doctrine\ORM\QueryBuilder;
 use Pentiminax\UX\DataTables\Attribute\AsDataTable;
 use Pentiminax\UX\DataTables\Column\DateColumn;
-use Pentiminax\UX\DataTables\Column\TemplateColumn;
 use Pentiminax\UX\DataTables\Column\TextColumn;
 use Pentiminax\UX\DataTables\DataTableRequest\DataTableRequest;
 use Pentiminax\UX\DataTables\Filter\ChoiceFilter;
@@ -119,11 +119,11 @@ final class ConseilDocumentsDpeParcoursDataTable extends AbstractAppDataTable
                 ->setSearchField('parcours.formation.composantePorteuse.libelle')
                 ->setOrderable(true)
                 ->setSearchable(true),
-            TemplateColumn::new('formation', 'Formation')
+            SearchableTemplateColumn::new('formation', 'Formation')
                 ->setField('parcours.formation.libelle')
                 ->setSearchField('parcours.formation.libelle')
                 ->setTemplate('conseils/documents/_datatable_formation.html.twig'),
-            TemplateColumn::new('parcours', 'Parcours')
+            SearchableTemplateColumn::new('parcours', 'Parcours')
                 ->setField('parcours.libelle')
                 ->setSearchField('parcours.libelle')
                 ->setTemplate('conseils/documents/_datatable_parcours.html.twig'),
@@ -133,9 +133,9 @@ final class ConseilDocumentsDpeParcoursDataTable extends AbstractAppDataTable
             DateColumn::new('created', 'Date de création')
                 ->setFormat('d/m/Y H:i')
                 ->setOrderable(true),
-            TemplateColumn::new('pv', 'PV')
+            SearchableTemplateColumn::new('pv', 'PV')
                 ->setTemplate('conseils/documents/_datatable_pv.html.twig'),
-            TemplateColumn::new('justification', 'Justificatif')
+            SearchableTemplateColumn::new('justification', 'Justificatif')
                 ->setTemplate('conseils/documents/_datatable_justification.html.twig'),
         ];
     }

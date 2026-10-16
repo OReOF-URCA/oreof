@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\DataTable;
 
+use App\DataTable\Column\SearchableTemplateColumn;
 use App\Entity\CampagneCollecte;
 use App\Entity\Composante;
 use App\Entity\FicheMatiere;
 use App\Entity\FicheMatiereVersioning;
 use Doctrine\ORM\QueryBuilder;
 use Pentiminax\UX\DataTables\Attribute\AsDataTable;
-use Pentiminax\UX\DataTables\Column\TemplateColumn;
 use Pentiminax\UX\DataTables\Column\TextColumn;
 use Pentiminax\UX\DataTables\Enum\ActionsAlignment;
 use Pentiminax\UX\DataTables\Enum\Icon;
@@ -82,20 +82,20 @@ final class VersioningFicheMatiereDataTable extends AbstractAppDataTable
     {
         return [
             TextColumn::new('id', 'ID')->setOrderable(true),
-            TemplateColumn::new('libelle', 'Fiche Matière')
+            SearchableTemplateColumn::new('libelle', 'Fiche Matière')
                 ->setField('libelle')
                 ->setSearchField('libelle')
                 ->setOrderable(true)
                 ->setTemplate('admin/versioning/column/_fiche_libelle.html.twig'),
-            TemplateColumn::new('campagne', 'Campagne')
+            SearchableTemplateColumn::new('campagne', 'Campagne')
                 ->setTemplate('admin/versioning/column/_fiche_campagne.html.twig'),
-            TemplateColumn::new('composante', 'Composante')
+            SearchableTemplateColumn::new('composante', 'Composante')
                 ->setTemplate('admin/versioning/column/_fiche_composante.html.twig'),
-            TemplateColumn::new('status', 'Statut')
+            SearchableTemplateColumn::new('status', 'Statut')
                 ->setTemplate('admin/versioning/column/_fiche_status.html.twig'),
-            TemplateColumn::new('derniereVersion', 'Dernière version')
+            SearchableTemplateColumn::new('derniereVersion', 'Dernière version')
                 ->setTemplate('admin/versioning/column/_fiche_derniere_version.html.twig'),
-            TemplateColumn::new('fichiers', 'Fichiers JSON')
+            SearchableTemplateColumn::new('fichiers', 'Fichiers JSON')
                 ->setTemplate('admin/versioning/column/_fiche_files.html.twig'),
         ];
     }

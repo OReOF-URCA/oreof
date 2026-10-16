@@ -1,0 +1,39 @@
+<div class="row">
+    <div class="col-sm-12">
+        <p  class="text-justify"><strong>Modalités d'enseignement</strong>
+            : {{ parcours.modalitesEnseignement != null ? parcours.modalitesEnseignement.libelle : 'Erreur' }}</p>
+
+        {% if typeDiplome.hasStage %}
+            <p><strong>Stage(s)</strong> : {% if parcours.hasStage == true %}
+                    Oui ({{ parcours.nbHeuresStages }} heures). {{ parcours.stageText|printTexte }}
+                {% else %}
+                    Non
+                {% endif %}
+            </p>
+        {% endif %}
+        {% if typeDiplome.hasProjet %}
+            <p><strong>Projet(s) tutoré(s)</strong> : {% if parcours.hasProjet == true %}
+                    Oui ({{ parcours.nbHeuresProjet }} heures). {{ parcours.projetText|printTexte }}
+                {% else %}
+                    Non
+                {% endif %}
+            </p>
+        {% endif %}
+        {% if typeDiplome.hasMemoire %}
+            <p><strong>TER/Mémoire</strong> : {% if parcours.hasMemoire == true %}
+                    Oui. {{ parcours.memoireText|printTexte }}
+                {% else %}
+                    Non
+                {% endif %}
+            </p>
+        {% endif %}
+        {% if typeDiplome.hasSituationPro %}
+            <p><strong>Situation professionnelle</strong> : {% if parcours.hasSituationPro == true %}
+                    Oui ({{ parcours.nbHeuresSituationPro }} heures).
+                {% else %}
+                    Non
+                {% endif %}
+            </p>
+        {% endif %}
+    </div>
+</div>

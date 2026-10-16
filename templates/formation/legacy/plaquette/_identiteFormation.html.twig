@@ -1,0 +1,12 @@
+<div class="row">
+    <div class="col-sm-12">
+        <p><strong>Composante porteuse</strong> : {{ formation.composantePorteuse != null ? formation.composantePorteuse.libelle : 'erreur' }}</p>
+        <p><strong>Inscription au RNCP</strong> : {{ formation.inRncp == true ? formation.codeRncp : 'Non inscrit' }}</p>
+    </div>
+    <div class="col-12">
+        <p><strong>Responsable de la formation</strong> : {{ formation.responsableMention != null ? formation.responsableMention.display : 'erreur' }}</p>
+        <p><strong>Email</strong> : {{ formation.responsableMention != null ? formation.responsableMention.email : 'erreur' }}</p>
+    </div>
+</div>
+
+

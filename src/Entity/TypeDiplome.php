@@ -599,6 +599,20 @@ class TypeDiplome
         return (int) ceil($semestres / 2);
     }
 
+    /**
+     * @return list<int>
+     */
+    public function getOrdresAnneesPossibles(): array
+    {
+        $semestreDebut = $this->semestreDebut ?? 1;
+        $semestreFin = $this->semestreFin ?? ($this->getNbAnnee() > 0 ? $this->getNbAnnee() * 2 : 6);
+
+        $anneeMin = max(1, (int) ceil($semestreDebut / 2));
+        $anneeMax = max($anneeMin, (int) ceil($semestreFin / 2));
+
+        return range($anneeMin, $anneeMax);
+    }
+
     public function isCodifIntermediaire(): ?bool
     {
         return $this->codifIntermediaire ?? false;

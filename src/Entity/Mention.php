@@ -169,4 +169,16 @@ class Mention
 
         return $this;
     }
+
+    /**
+     * Pour rétro-compatibilité désérialisation JSON (anciens versionings parcours).
+     */
+    public function setDomaine(?Domaine $domaine): static
+    {
+        if ($domaine !== null) {
+            $this->addDomaine($domaine);
+        }
+
+        return $this;
+    }
 }

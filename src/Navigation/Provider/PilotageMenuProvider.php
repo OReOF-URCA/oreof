@@ -76,6 +76,12 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 ),
 
                 MenuItem::link(
+                    'pilotage.statistiques_offre',
+                    'menu.admin.statistiques_offre',
+                    'offre_v2_statistiques',
+                ),
+
+                MenuItem::link(
                     'pilotage.dpe_ouverts',
                     'menu.admin.dpe_ouverts',
                     'app_demande_dpe',
@@ -132,7 +138,19 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
 
         $children = [];
 
+        $composantes = [];
         foreach ($user->getComposanteResponsableDpe() as $composante) {
+            $composantes[$composante->getId()] = $composante;
+        }
+        if (method_exists($user, 'getUserProfils')) {
+            foreach ($user->getUserProfils() as $userProfil) {
+                if ($userProfil->getComposante() !== null) {
+                    $composantes[$userProfil->getComposante()->getId()] = $userProfil->getComposante();
+                }
+            }
+        }
+
+        foreach ($composantes as $composante) {
             if (!$this->authorizationChecker->isGranted('SHOW', [
                 'route' => 'app_composante',
                 'subject' => $composante,

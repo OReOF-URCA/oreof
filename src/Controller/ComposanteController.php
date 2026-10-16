@@ -12,7 +12,12 @@ use App\Repository\ParcoursVersioningRepository;
 use App\Service\VersioningParcours;
 use DateTime;
 use Swaggest\JsonDiff\JsonDiff;
+use App\Service\SecureUploadService;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -30,6 +35,58 @@ class ComposanteController extends BaseController
             'composante' => $composante,
         ]);
     }
+
+    #[Route('/composante/{composante<\d+>}/logo', name: 'app_composante_logo', methods: ['POST'])]
+    public function uploadLogo(
+        Request $request,
+        Composante $composante,
+        SecureUploadService $secureUploadService,
+        EntityManagerInterface $em,
+    ): RedirectResponse {
+        $file = $request->files->get('logo');
+        if ($file instanceof UploadedFile) {
+            try {
+                $metadata = $secureUploadService->upload($file, 'logos');
+                $composante->setLogo($metadata->getStoredFilename());
+                $em->flush();
+
+                $this->addFlash('toast', [
+                    'type' => 'success',
+                    'text' => 'Le logo de la composante a été mis à jour avec succès.',
+                ]);
+            } catch (\Throwable $e) {
+                $this->addFlash('toast', [
+                    'type' => 'danger',
+                    'text' => 'Erreur lors du téléversement du logo : ' . $e->getMessage(),
+                ]);
+            }
+        }
+
+        return $this->redirectToRoute('app_composante', ['composante' => $composante->getId()]);
+    }
+
+    #[Route('/composante/{composante<\d+>}/logo/supprimer', name: 'app_composante_logo_delete', methods: ['POST'])]
+    public function deleteLogo(
+        Composante $composante,
+        EntityManagerInterface $em,
+        Filesystem $filesystem,
+    ): RedirectResponse {
+        if ($composante->getLogo()) {
+            $filePath = $this->getParameter('kernel.project_dir') . '/public/uploads/logos/' . $composante->getLogo();
+            if ($filesystem->exists($filePath)) {
+                $filesystem->remove($filePath);
+            }
+            $composante->setLogo(null);
+            $em->flush();
+            $this->addFlash('toast', [
+                'type' => 'success',
+                'text' => 'Le logo de la composante a été supprimé.',
+            ]);
+        }
+
+        return $this->redirectToRoute('app_composante', ['composante' => $composante->getId()]);
+    }
+
 
     #[IsGranted("ROLE_PDF_DOWNLOADER")]
     #[Route('/composante/{composante_id}/synthese_modification/pdf', 'export_pdf_synthese_modification_composante')]

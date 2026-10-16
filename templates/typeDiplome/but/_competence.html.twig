@@ -1,66 +1,61 @@
-<div class="d-flex align-items-stretch mt-3">
-    <div class="col-3 competence ">
-        <div class="p-3 comp competencec{{ competence.numero }}">
+<div class="but-ref-container">
+    {# En-tête : Nom court, Libellé long, Composantes essentielles #}
+    <div class="but-ref-header-row mt-4">
+        <div class="but-ref-comp-court competencec{{ competence.numero }}">
             {{ competence.nomCourt }}
         </div>
-    </div>
-    <div class="col-3 competencelongue  ms-3">
-        <div class="p-3 competencelonguec{{ competence.numero }}">
+        <div class="but-ref-comp-long competencelonguec{{ competence.numero }}">
             {{ competence.libelle }}
         </div>
-    </div>
-    <div class="col-6 composantesessentiellesc{{ competence.numero }}">
-        <ul>
-            {% for composante in competence.composantes %}
-                <li>{{ composante }}</li>
-            {% endfor %}
-        </ul>
-
-    </div>
-</div>
-
-{# Situtations professionnelles #}
-<div class="d-flex align-items-stretch mt-3">
-    <div class="col-3">
-        <div class="p-3 situationpro situationc{{ competence.numero }}">Situations professionnelles</div>
-    </div>
-    <div class="col-9 ms-3 situationliste">
-        <div class="p-3 situationlistec{{ competence.numero }}">
-            {% for situation in competence.situations %}
-                <p>{{ situation }}</p>
-            {% endfor %}
+        <div class="but-ref-comp-composantes composantesessentiellesc{{ competence.numero }}">
+            <ul class="list-disc list-inside space-y-1.5 text-sm leading-relaxed">
+                {% for composante in competence.composantes %}
+                    <li>{{ composante }}</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
-</div>
 
-{# Niveaux #}
-<div class="d-flex align-items-stretch mt-3">
-    <div class="col-3">
-        <div class="p-3 titreniveau">Niveaux</div>
-    </div>
-    <div class="col-9 ms-3">
-        <div class="p-3 titreac">Apprentissages critiques
+    {# Situations professionnelles #}
+    <div class="but-ref-row mt-6">
+        <div class="but-ref-col-left but-ref-situation-label situationc{{ competence.numero }}">
+            Situations professionnelles
         </div>
-    </div>
-</div>
-
-{% for niveau in competence.butNiveaux %}
-    <div class="d-flex align-items-stretch mt-3">
-        <div class="col-flex-3 niveau  niveau{{ niveau.ordre }}c{{ competence.numero }}">
-            <div class="p-3 niveaucourt ">
-                B.U.T. {{ niveau.ordre }}</div>
-            <div class="p-3 niveaulong">{{ niveau.libelle }}
-            </div>
-        </div>
-        <div class="col-flex-9 ms-3" style="padding-right:15px;">
-            <div class="p-3 niveauliste niveau{{ niveau.ordre }}c{{ competence.numero }}">
-                <ul>
-                    {% for ac in niveau.butApprentissageCritiques %}
-                        <li>{{ ac.code }} | {{ ac.libelle }}</li>
-                    {% endfor %}
-                </ul>
+        <div class="but-ref-col-right but-ref-situation-content situationlistec{{ competence.numero }}">
+            <div class="space-y-1.5 text-sm leading-relaxed">
+                {% for situation in competence.situations %}
+                    <p>{{ situation }}</p>
+                {% endfor %}
             </div>
         </div>
     </div>
-{% endfor %}
 
+    {# Titres Niveaux & Apprentissages critiques #}
+    <div class="but-ref-titles-row">
+        <div class="but-ref-title-left text-secondary-700 dark:text-secondary-300">
+            Niveaux
+        </div>
+        <div class="but-ref-title-right text-secondary-700 dark:text-secondary-300">
+            Apprentissages critiques
+        </div>
+    </div>
+
+    {# Lignes des Niveaux et Apprentissages critiques #}
+    <div class="space-y-3">
+        {% for niveau in competence.butNiveaux %}
+            <div class="but-ref-row">
+                <div class="but-ref-col-left but-ref-niveau-badge niveau{{ niveau.ordre }}c{{ competence.numero }}">
+                    <div class="font-bold text-base">B.U.T. {{ niveau.ordre }}</div>
+                    <div class="text-xs mt-1.5 font-medium leading-snug">{{ niveau.libelle }}</div>
+                </div>
+                <div class="but-ref-col-right but-ref-ac-content niveau{{ niveau.ordre }}c{{ competence.numero }}">
+                    <ul class="list-disc list-inside space-y-1.5 text-sm leading-relaxed">
+                        {% for ac in niveau.butApprentissageCritiques %}
+                            <li><strong class="font-semibold">{{ ac.code }}</strong> | {{ ac.libelle }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>

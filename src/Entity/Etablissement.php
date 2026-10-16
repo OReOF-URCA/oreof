@@ -12,6 +12,7 @@ namespace App\Entity;
 use App\Repository\EtablissementRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -59,6 +60,14 @@ class Etablissement
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $emailOreof = null;
+
+    /**
+     * Clés et configurations des API tierces (plateforme, URL, login, clé API).
+     *
+     * @var array<int, array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}>|null
+     */
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $apiKeys = [];
 
     /**
      * @var Collection<int, UserProfil>
@@ -312,5 +321,95 @@ class Etablissement
         }
 
         return $this;
+    }
+
+    /**
+     * @return array<int, array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}>
+     */
+    public function getApiKeys(): array
+    {
+        return $this->apiKeys ?? [];
+    }
+
+    /**
+     * @param array<int, array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}>|null $apiKeys
+     */
+    public function setApiKeys(?array $apiKeys): static
+    {
+        if ($apiKeys === null) {
+            $this->apiKeys = [];
+
+            return $this;
+        }
+
+        $filtered = [];
+        foreach ($apiKeys as $entry) {
+            if (!is_array($entry)) {
+                continue;
+            }
+            $plateforme = trim((string) ($entry['plateforme'] ?? ''));
+            $url = trim((string) ($entry['url'] ?? ''));
+            $apiKey = trim((string) ($entry['apiKey'] ?? ''));
+            $login = isset($entry['login']) && trim((string) $entry['login']) !== '' ? trim((string) $entry['login']) : null;
+
+            if ($plateforme !== '' || $url !== '' || $apiKey !== '') {
+                $filtered[] = [
+                    'plateforme' => $plateforme,
+                    'url' => $url,
+                    'login' => $login,
+                    'apiKey' => $apiKey,
+                ];
+            }
+        }
+
+        $this->apiKeys = $filtered;
+
+        return $this;
+    }
+
+    /**
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getApiKeyForPlatform(string $platform): ?array
+    {
+        foreach ($this->getApiKeys() as $config) {
+            if (strcasecmp((string) ($config['plateforme'] ?? ''), $platform) === 0) {
+                return $config;
+            }
+        }
+
+        return null;
+    }
+
+    public function getApiPlatformsList(): string
+    {
+        $platforms = array_filter(array_column($this->getApiKeys(), 'plateforme'));
+
+        return !empty($platforms) ? implode(', ', $platforms) : '';
+    }
+
+    /**
+     * Retourne la configuration de l'API ROME si présente dans l'établissement.
+     *
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getRomeApiConfiguration(): ?array
+    {
+        foreach ($this->getApiKeys() as $config) {
+            $platform = (string) ($config['plateforme'] ?? '');
+            if (stripos($platform, 'rome') !== false
+                || stripos($platform, 'francetravail') !== false
+                || stripos($platform, 'france travail') !== false
+            ) {
+                return $config;
+            }
+        }
+
+        return null;
+    }
+
+    public function hasRomeApi(): bool
+    {
+        return $this->getRomeApiConfiguration() !== null;
     }
 }

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\DataTable;
 
+use App\DataTable\Column\SearchableTemplateColumn;
 use App\Entity\CampagneCollecte;
 use App\Entity\Composante;
 use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
 use Doctrine\ORM\QueryBuilder;
 use Pentiminax\UX\DataTables\Attribute\AsDataTable;
-use Pentiminax\UX\DataTables\Column\TemplateColumn;
 use Pentiminax\UX\DataTables\Column\TextColumn;
 use Pentiminax\UX\DataTables\Enum\ActionsAlignment;
 use Pentiminax\UX\DataTables\Enum\Icon;
@@ -83,20 +83,20 @@ final class VersioningParcoursDataTable extends AbstractAppDataTable
     {
         return [
             TextColumn::new('id', 'ID')->setOrderable(true),
-            TemplateColumn::new('libelle', 'Parcours')
+            SearchableTemplateColumn::new('libelle', 'Parcours')
                 ->setField('libelle')
                 ->setSearchField('libelle')
                 ->setOrderable(true)
                 ->setTemplate('admin/versioning/column/_parcours_libelle.html.twig'),
-            TemplateColumn::new('campagne', 'Campagne')
+            SearchableTemplateColumn::new('campagne', 'Campagne')
                 ->setTemplate('admin/versioning/column/_parcours_campagne.html.twig'),
-            TemplateColumn::new('formation', 'Formation')
+            SearchableTemplateColumn::new('formation', 'Formation')
                 ->setTemplate('admin/versioning/column/_parcours_formation.html.twig'),
-            TemplateColumn::new('status', 'Statut')
+            SearchableTemplateColumn::new('status', 'Statut')
                 ->setTemplate('admin/versioning/column/_parcours_status.html.twig'),
-            TemplateColumn::new('derniereVersion', 'Dernière version')
+            SearchableTemplateColumn::new('derniereVersion', 'Dernière version')
                 ->setTemplate('admin/versioning/column/_parcours_derniere_version.html.twig'),
-            TemplateColumn::new('fichiers', 'Fichiers JSON (Parcours / DTO)')
+            SearchableTemplateColumn::new('fichiers', 'Fichiers JSON (Parcours / DTO)')
                 ->setTemplate('admin/versioning/column/_parcours_files.html.twig'),
         ];
     }

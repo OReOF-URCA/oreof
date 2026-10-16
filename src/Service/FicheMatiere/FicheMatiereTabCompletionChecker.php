@@ -28,6 +28,7 @@ class FicheMatiereTabCompletionChecker extends AbstractChecker
             'identite' => $this->identiteIssues($p),
             'presentation' => $this->presentationIssues($p),
             'mutualisation' => $this->mutualisationIssues($p),
+            'competences' => $this->competencesIssues($p),
             'volumes_horaires' => $this->volumesHorairesIssues($p),
             'mccc' => $this->mcccIssues($p),
             default => [],
@@ -46,7 +47,7 @@ class FicheMatiereTabCompletionChecker extends AbstractChecker
             $issues[] = new TabIssue('fiche_matiere_step1[libelle]', 'Libellé', 'Vous devez renseigner un libellé pour la fiche matière.');
         }
         if (!$this->filled($p->getLibelleAnglais())) {
-            $issues[] = new TabIssue('fiche_matiere_step1[libelleAnglais]', 'Libellé en anglais', 'Vous devez décrirele libellé en anglais.');
+            $issues[] = new TabIssue('fiche_matiere_step1[libelleAnglais]', 'Libellé en anglais', 'Vous devez décrire le libellé en anglais.');
         }
 
         return $issues;
@@ -78,6 +79,28 @@ class FicheMatiereTabCompletionChecker extends AbstractChecker
     {
         $issues = [];
 
+        if ($p->isEnseignementMutualise() === null) {
+            $issues[] = new TabIssue('fiche_matiere_step1b[enseignementMutualise]', 'Enseignement mutualisé', 'Vous devez indiquer si l\'enseignement est mutualisé ou non.');
+        }
+
+        return $issues;
+    }
+
+    private function competencesIssues(FicheMatiere $p): array
+    {
+        $issues = [];
+        $isBut = $p->getParcours()?->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT';
+
+        if ($isBut) {
+            if ($p->getApprentissagesCritiques()->count() === 0) {
+                $issues[] = new TabIssue('fiche_matiere_step3[apprentissagesCritiques]', 'Apprentissages critiques', 'Vous devez renseigner au moins un apprentissage critique.');
+            }
+        } else {
+            if ($p->getCompetences()->count() === 0) {
+                $issues[] = new TabIssue('fiche_matiere_step3[competences]', 'Compétences', 'Vous devez renseigner au moins une compétence.');
+            }
+        }
+
         return $issues;
     }
 
@@ -85,19 +108,20 @@ class FicheMatiereTabCompletionChecker extends AbstractChecker
     {
         $issues = [];
 
-        if ($f->isSansHeures() === null) {
-            $issues[] = new TabIssue('fiche_matiere_step4[horaires]', 'Volume horaire avec/sans heure', 'Vous devez précisez si la fiche à des heures ou non.');
-        }
+        if ($f->isHorsDiplome() || $f->getParcours()?->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT') {
+            if ($f->isSansHeures() === null) {
+                $issues[] = new TabIssue('fiche_matiere_step4[horaires]', 'Volume horaire avec/sans heure', 'Vous devez préciser si la fiche a des heures ou non.');
+            }
 
-        // vérifier que la somme des heures de la fiche est > 0
-        if ($f->getTotalHeures() <= 0 && $f->isSansHeures() === false) {
-            $issues[] = new TabIssue('fiche_matiere_step4[horaires]', 'Volume horaire', 'Vous devez précisez un volume horaire > 0 au total.');
-        }
+            // vérifier que la somme des heures de la fiche est > 0
+            if ($f->getTotalHeures() <= 0 && $f->isSansHeures() === false) {
+                $issues[] = new TabIssue('fiche_matiere_step4[horaires]', 'Volume horaire', 'Vous devez préciser un volume horaire > 0 au total.');
+            }
 
-        if ($f->getTotalHeures() > 0 && $f->isSansHeures() === true) {
-            $issues[] = new TabIssue('fiche_matiere_step4[horaires]', 'Volume horaire incohérent', 'Vous avez indiqué une fiche matière sans heures, mais avec un volume horaire > 0.');
+            if ($f->getTotalHeures() > 0 && $f->isSansHeures() === true) {
+                $issues[] = new TabIssue('fiche_matiere_step4[horaires]', 'Volume horaire incohérent', 'Vous avez indiqué une fiche matière sans heures, mais avec un volume horaire > 0.');
+            }
         }
-
 
         return $issues;
     }
@@ -106,15 +130,6 @@ class FicheMatiereTabCompletionChecker extends AbstractChecker
     private function mcccIssues(FicheMatiere $p): array
     {
         $issues = [];
-
-        if (!$this->filled($p->isEnseignementMutualise())) {
-            $issues[] = new TabIssue('fiche_matiere_step1b[enseignementMutualise]', 'Enseignement mutualisé', 'Vous devez indiquer si l\'enseignement est mutualisé ou non.');
-        }
-
-        if ($p->isEnseignementMutualise() === true) {
-            $issues[] = new TabIssue('fiche_matiere_step1b[enseignementMutualise]', 'Fiche matière mutualisée', 'Vous avec indiqué que la fiche matière est mutualisée, devez renseigner au moins un parcours pour la mutualisation.');
-        }
-
 
         return $issues;
     }

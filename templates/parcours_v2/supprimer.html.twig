@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    Suppression définitive du parcours : <strong>{{ parcours.libelle }}</strong>
+{% endset %}
+
+{% block bouton_header %}
+    <twig:Button
+        href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}"
+        variant="secondary"
+        icon="icon:arrow-left"
+        label="Annuler et retourner au parcours"
+        tooltip="Annuler et retourner à la fiche du parcours"
+    />
+{% endblock %}
+
+{% block content %}
+    <div class="mx-auto max-w-4xl space-y-6">
+
+        {# 1. Bannière d'avertissement principale #}
+        <div class="rounded-xl border border-danger-200 bg-danger-50 p-5 shadow-xs dark:border-danger-800 dark:bg-danger-900/30">
+            <div class="flex items-start gap-4">
+                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-danger-100 text-danger-700 dark:bg-danger-800 dark:text-danger-200">
+                    <twig:UX:Icon name="icon:warning" class="h-6 w-6" />
+                </div>
+                <div class="space-y-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="text-base font-bold text-danger-900 dark:text-danger-100">
+                            Suppression définitive et irréversible
+                        </h2>
+                        <twig:Badge variant="danger" size="sm" label="Réservé Administrateurs" />
+                    </div>
+                    <p class="text-sm text-danger-800 dark:text-danger-200 leading-relaxed">
+                        Vous vous apprêtez à supprimer définitivement le parcours
+                        <strong class="font-semibold underline">{{ parcours.display }}</strong>
+                        de la formation
+                        <strong>{{ formation ? formation.displayLong : 'Non rattachée' }}</strong>.
+                    </p>
+                    <p class="text-xs text-danger-700 dark:text-danger-300">
+                        Cette action est strictement réservée aux <strong>erreurs de création ou de recopie</strong>. Elle détruira irrémédiablement l'ensemble des données propres à ce parcours.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {# 2. Diagnostic des dépendances partagées #}
+        {% if analysis.hasSharedDependencies %}
+            <div class="rounded-xl border border-danger-200 bg-surface p-6 shadow-xs dark:border-danger-800">
+                <div class="flex items-center gap-2 pb-3 border-b border-danger-100 dark:border-danger-900">
+                    <twig:UX:Icon name="icon:warning" class="h-5 w-5 text-danger-600 dark:text-danger-400" />
+                    <h3 class="text-base font-bold text-danger-800 dark:text-danger-300">
+                        Dépendances partagées détectées ({{ analysis.sharedDependenciesCount }})
+                    </h3>
+                </div>
+                <p class="mt-2 text-xs text-secondary-500 dark:text-secondary-400">
+                    Certains éléments associés à ce parcours sont réutilisés ailleurs ou constituent des données officielles. Veuillez examiner attentivement les impacts ci-dessous :
+                </p>
+
+                <div class="mt-4 space-y-3">
+                    {% for dep in analysis.sharedDependencies %}
+                        <div class="rounded-xl border p-4 {{ dep.severity == 'danger' ? 'border-danger-200 bg-danger-50 dark:border-danger-800 dark:bg-danger-900/20' : 'border-warning-200 bg-warning-50 dark:border-warning-800 dark:bg-warning-900/20' }}">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <twig:Badge variant="{{ dep.severity }}" size="sm" label="{{ dep.titre }}" />
+                                    </div>
+                                    <p class="text-sm text-text dark:text-secondary-200">
+                                        {{ dep.description }}
+                                    </p>
+                                    {% if dep.details is defined and dep.details|length > 0 %}
+                                        <ul class="mt-2 list-disc list-inside space-y-0.5 text-xs text-secondary-600 dark:text-secondary-400">
+                                            {% for detail in dep.details %}
+                                                <li>{{ detail }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <div class="rounded-xl border border-success-200 bg-success-50 p-5 shadow-xs dark:border-success-800 dark:bg-success-900/30">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success-100 text-success-700 dark:bg-success-800 dark:text-success-200">
+                        <twig:UX:Icon name="icon:check" class="h-5 w-5" />
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-success-900 dark:text-success-100">
+                            Aucune dépendance partagée
+                        </h3>
+                        <p class="text-xs text-success-800 dark:text-success-200">
+                            Ce parcours est isolé (aucun semestre, UE ou fiche partagée avec un autre parcours). La suppression peut être effectuée en toute sécurité.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if analysis.isSeulParcoursDeLaFormation %}
+            <div class="rounded-xl border border-warning-200 bg-warning-50 p-4 shadow-xs dark:border-warning-800 dark:bg-warning-900/30">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-warning-100 text-warning-700 dark:bg-warning-800 dark:text-warning-200">
+                        <twig:UX:Icon name="icon:warning" class="h-4 w-4" />
+                    </div>
+                    <p class="text-xs text-warning-800 dark:text-warning-200">
+                        <strong>Attention :</strong> Ce parcours est actuellement le seul rattaché à la formation. Sa suppression laissera la formation sans aucun parcours.
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if analysis.isParcoursDefaut %}
+            <div class="rounded-xl border border-warning-200 bg-warning-50 p-4 shadow-xs dark:border-warning-800 dark:bg-warning-900/30">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-warning-100 text-warning-700 dark:bg-warning-800 dark:text-warning-200">
+                        <twig:UX:Icon name="icon:warning" class="h-4 w-4" />
+                    </div>
+                    <p class="text-xs text-warning-800 dark:text-warning-200">
+                        <strong>Attention :</strong> Ce parcours est configuré comme le parcours par défaut de cette formation.
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+
+        {# 3. Résumé des éléments internes qui seront supprimés #}
+        <div class="rounded-xl border border-secondary-200 bg-surface p-6 shadow-xs dark:border-secondary-700">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-4">
+                Éléments internes qui seront supprimés en cascade
+            </h3>
+            <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div class="rounded-xl bg-secondary-50 p-3.5 dark:bg-secondary-800/60">
+                    <div class="text-xs text-secondary-500 dark:text-secondary-400">Années</div>
+                    <div class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.internalElementsCount.annees|default(0) }}</div>
+                </div>
+                <div class="rounded-xl bg-secondary-50 p-3.5 dark:bg-secondary-800/60">
+                    <div class="text-xs text-secondary-500 dark:text-secondary-400">Semestres</div>
+                    <div class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.internalElementsCount.semestres_parcours|default(0) }}</div>
+                </div>
+                <div class="rounded-xl bg-secondary-50 p-3.5 dark:bg-secondary-800/60">
+                    <div class="text-xs text-secondary-500 dark:text-secondary-400">Éléments constitutifs</div>
+                    <div class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.internalElementsCount.elements_constitutifs|default(0) }}</div>
+                </div>
+                <div class="rounded-xl bg-secondary-50 p-3.5 dark:bg-secondary-800/60">
+                    <div class="text-xs text-secondary-500 dark:text-secondary-400">Fiches matières</div>
+                    <div class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.internalElementsCount.fiches_matieres|default(0) }}</div>
+                </div>
+                <div class="rounded-xl bg-secondary-50 p-3.5 dark:bg-secondary-800/60">
+                    <div class="text-xs text-secondary-500 dark:text-secondary-400">Blocs compétences</div>
+                    <div class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.internalElementsCount.blocs_competences|default(0) }}</div>
+                </div>
+                <div class="rounded-xl bg-secondary-50 p-3.5 dark:bg-secondary-800/60">
+                    <div class="text-xs text-secondary-500 dark:text-secondary-400">Contacts</div>
+                    <div class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.internalElementsCount.contacts|default(0) }}</div>
+                </div>
+                <div class="rounded-xl bg-secondary-50 p-3.5 dark:bg-secondary-800/60">
+                    <div class="text-xs text-secondary-500 dark:text-secondary-400">DPE Parcours</div>
+                    <div class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.internalElementsCount.dpe_parcours|default(0) }}</div>
+                </div>
+                <div class="rounded-xl bg-secondary-50 p-3.5 dark:bg-secondary-800/60">
+                    <div class="text-xs text-secondary-500 dark:text-secondary-400">Versions sauvegardées</div>
+                    <div class="text-xl font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.internalElementsCount.versions|default(0) }}</div>
+                </div>
+            </div>
+        </div>
+
+        {# 4. Formulaire de confirmation et soumission #}
+        <div class="rounded-xl border-2 border-danger-300 bg-surface p-6 shadow-xs dark:border-danger-700">
+            <h3 class="text-base font-bold text-danger-700 dark:text-danger-300 mb-2">
+                Confirmation de la suppression définitive
+            </h3>
+            <p class="text-xs text-secondary-500 dark:text-secondary-400 mb-4">
+                Pour empêcher toute erreur involontaire, veuillez confirmer explicitement votre décision.
+            </p>
+
+            <form action="{{ path('parcours_v2_supprimer_post', {parcours: parcours.id}) }}" method="POST" class="space-y-4">
+                <input type="hidden" name="_token" value="{{ csrf_token('parcours_delete_' ~ parcours.id) }}">
+
+                {% if analysis.hasSharedDependencies %}
+                    <div class="rounded-xl bg-danger-50 p-4 border border-danger-200 dark:bg-danger-900/30 dark:border-danger-800">
+                        <label class="flex items-start gap-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                name="force"
+                                value="1"
+                                required
+                                class="mt-0.5 h-4 w-4 rounded border-danger-300 text-danger-600 focus:ring-danger-500 cursor-pointer"
+                            >
+                            <span class="text-xs font-semibold text-danger-900 dark:text-danger-200">
+                                Je confirme avoir pris connaissance des dépendances partagées listées ci-dessus et je souhaite forcer la suppression définitive de ce parcours.
+                            </span>
+                        </label>
+                    </div>
+                {% endif %}
+
+                <div>
+                    <label for="confirmation_text" class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
+                        Saisissez le libellé du parcours ou « SUPPRIMER » pour valider :
+                    </label>
+                    <div class="text-xs text-secondary-500 dark:text-secondary-400 mb-2">
+                        Texte attendu : <code class="rounded bg-secondary-100 px-1.5 py-0.5 font-mono font-bold text-danger-700 dark:bg-secondary-800 dark:text-danger-300">{{ parcours.libelle }}</code> ou <code class="rounded bg-secondary-100 px-1.5 py-0.5 font-mono font-bold text-danger-700 dark:bg-secondary-800 dark:text-danger-300">SUPPRIMER</code>
+                    </div>
+                    <input
+                        type="text"
+                        name="confirmation_text"
+                        id="confirmation_text"
+                        required
+                        autocomplete="off"
+                        placeholder="{{ parcours.libelle }}"
+                        class="w-full rounded-xl border border-secondary-300 bg-white px-4 py-2.5 text-sm text-secondary-900 placeholder:text-secondary-400 focus:border-danger-500 focus:ring-2 focus:ring-danger-500/20 dark:border-secondary-600 dark:bg-secondary-900 dark:text-secondary-100"
+                    >
+                </div>
+
+                <div class="pt-4 border-t border-secondary-200 dark:border-secondary-700 flex flex-wrap items-center justify-between gap-3">
+                    <twig:Button
+                        href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}"
+                        variant="secondary"
+                        label="Annuler"
+                    />
+
+                    <twig:Button
+                        type="submit"
+                        variant="danger"
+                        :soft="false"
+                        icon="icon:trash"
+                        label="Confirmer la suppression définitive"
+                    />
+                </div>
+            </form>
+        </div>
+
+    </div>
+{% endblock %}

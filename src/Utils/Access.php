@@ -41,7 +41,15 @@ abstract class Access {
     public static function isOuvert(Parcours|Formation|DpeParcours $entity): bool
     {
         if ($entity instanceof DpeParcours) {
-            return in_array($entity->getEtatReconduction()->value, [
+            $places = array_keys($entity->getEtatValidation());
+            $currentPlace = $places[0] ?? null;
+            if (in_array($currentPlace, ['en_cours_redaction', 'en_cours_redaction_ss_cfvu'], true)) {
+                return true;
+            }
+
+            return in_array($entity->getEtatReconduction()?->value, [
+                TypeModificationDpeEnum::OUVERT->value,
+                TypeModificationDpeEnum::CREATION->value,
                 TypeModificationDpeEnum::MODIFICATION->value,
                 TypeModificationDpeEnum::MODIFICATION_TEXTE->value,
                 TypeModificationDpeEnum::MODIFICATION_INTITULE->value,
@@ -54,19 +62,14 @@ abstract class Access {
         if ($entity instanceof Parcours) {
             $dpeParcours = GetDpeParcours::getFromParcours($entity);
             if ($dpeParcours !== null) {
-                return in_array($dpeParcours->getEtatReconduction()->value, [
-                    TypeModificationDpeEnum::MODIFICATION->value,
-                    TypeModificationDpeEnum::MODIFICATION_TEXTE->value,
-                    TypeModificationDpeEnum::MODIFICATION_INTITULE->value,
-                    TypeModificationDpeEnum::MODIFICATION_PARCOURS->value,
-                    TypeModificationDpeEnum::MODIFICATION_MCCC->value,
-                    TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE->value,
-                ], true);
+                return self::isOuvert($dpeParcours);
             }
         }
 
         if ($entity instanceof Formation) {
-            return in_array($entity->getEtatReconduction()->value, [
+            return in_array($entity->getEtatReconduction()?->value, [
+                TypeModificationDpeEnum::OUVERT->value,
+                TypeModificationDpeEnum::CREATION->value,
                 TypeModificationDpeEnum::MODIFICATION->value,
                 TypeModificationDpeEnum::MODIFICATION_TEXTE->value,
                 TypeModificationDpeEnum::MODIFICATION_INTITULE->value,

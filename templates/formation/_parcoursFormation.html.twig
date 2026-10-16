@@ -120,7 +120,8 @@
                                                         label: 'Supprimer',
                                                         icon: 'icon:delete',
                                                         color: 'danger',
-                                                        url: path('app_parcours_delete', {'id': parcours.id, csrf: csrf_token('delete' ~ parcours.id)}),
+                                                        url: path('parcours_v2_supprimer', {'parcours': parcours.id}),
+                                                        modal: true,
                                                         disabled: not is_granted('ROLE_ADMIN')
                                                     }
                                                 ]

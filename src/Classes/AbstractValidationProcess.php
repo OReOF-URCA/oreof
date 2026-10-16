@@ -173,6 +173,9 @@ abstract class AbstractValidationProcess
         if (!isset($resolved['label']) || $resolved['label'] === '') {
             $resolved['label'] = $transitionName;
         }
+        if (empty($resolved['type']) || !is_string($resolved['type'])) {
+            $resolved['type'] = 'valider';
+        }
 
         return $resolved;
     }

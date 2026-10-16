@@ -1,116 +1,346 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <title>{% block title %}PDF{% endblock %}</title>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PDF{% endblock %}</title>
     <style>
-        body {
-            font-family: "DejaVu Sans", serif;
-            font-size: 12px;
+        *, *::before, *::after {
+            box-sizing: border-box;
         }
 
-        /*@page {*/
-        /*    margin: 0cm 0cm;*/
-        /*}*/
+        html, body {
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "DejaVu Sans", sans-serif;
+            font-size: 11.5px;
+            line-height: 1.45;
+            color: #1f2937;
+            background-color: #ffffff;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            color: #0f172a;
+            font-weight: 700;
+            line-height: 1.25;
+            margin-top: 0;
+        }
 
         h1 {
             font-size: 1.5em;
-            margin: 0 0 20px;
+            margin-bottom: 14px;
+            color: #0f172a;
         }
 
         h2 {
-            font-size: 1.3em;
-            margin: 0;
-            border-bottom: 1px solid black;
-
+            font-size: 1.25em;
+            color: #0369a1;
+            border-bottom: 1.5px solid #0284c7;
+            padding-bottom: 3px;
+            margin-top: 18px;
+            margin-bottom: 10px;
+            break-after: avoid;
+            page-break-after: avoid;
         }
 
         h3 {
-            padding-top:10px;
-            font-size: 1.2em;
-            margin: 0;
-            border-bottom: 1px solid black;
+            font-size: 1.1em;
+            color: #334155;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 2px;
+            margin-top: 14px;
+            margin-bottom: 8px;
+            break-after: avoid;
+            page-break-after: avoid;
         }
 
-        /** Define now the real margins of every page in the PDF **/
-        /*body {*/
-        /*    margin-top: 1.5cm;*/
-        /*    margin-left: 2cm;*/
-        /*    margin-right: 2cm;*/
-        /*    margin-bottom: 1.5cm;*/
-        /*}*/
-
-        .table {
-            border-collapse: collapse;
-            width: 100%;
+        h4 {
+            font-size: 1em;
+            color: #475569;
+            margin-top: 10px;
+            margin-bottom: 6px;
         }
 
-        .table, .table th, .table td {
-            border: 1px solid black;
-            padding: 2px;
+        p {
+            margin-top: 0;
+            margin-bottom: 8px;
         }
 
-        .page_break {
-            page-break-before: always;
+        small, .text-sm {
+            font-size: 0.875em;
         }
 
-        dt {
-            font-weight: bold;
+        .text-muted {
+            color: #64748b;
         }
 
         .text-center {
             text-align: center;
         }
 
-        .mt-2 {
-            margin-top: 20px;
+        .text-left {
+            text-align: left;
         }
 
-        .mt-3 {
-            margin-top: 35px;
+        .text-right {
+            text-align: right;
         }
 
-        #class_logo {
-            float: left;
-            width: 20%;
+        .font-bold {
+            font-weight: 700;
         }
 
-        #class_logo img {
-            height: 1.4cm;
+        .font-semibold {
+            font-weight: 600;
         }
 
-        #class_titre {
-            float: right;
-            width: 80%;
+        .italic {
+            font-style: italic;
         }
 
+        /* Tables */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10.5px;
+            margin-top: 6px;
+            margin-bottom: 12px;
+            page-break-inside: auto;
+        }
+
+        .table th, .table td {
+            border: 1px solid #cbd5e1;
+            padding: 5px 8px;
+            vertical-align: middle;
+        }
+
+        .table th {
+            background-color: #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .table th.text-left, .table td.text-left {
+            text-align: left;
+        }
+
+        .table th.text-right, .table td.text-right {
+            text-align: right;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f8fafc;
+        }
+
+        .table tr.total-row, .table tr.font-bold {
+            background-color: #f1f5f9;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .table-bordered {
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Definition Lists */
+        dl {
+            margin: 0 0 10px 0;
+        }
+
+        dt {
+            font-weight: 600;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #64748b;
+            margin-top: 6px;
+            margin-bottom: 2px;
+        }
+
+        dt:first-child {
+            margin-top: 0;
+        }
+
+        dd {
+            margin-left: 0;
+            margin-bottom: 6px;
+            color: #1e293b;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-top: 0;
+            margin-bottom: 8px;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 3px;
+        }
+
+        .list-unstyled {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        /* Layout & Grid helpers */
+        .row {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .col-12 {
+            width: 100%;
+            display: block;
+        }
+
+        .col-6 {
+            display: table-cell;
+            width: 50%;
+            vertical-align: top;
+            padding-right: 8px;
+        }
+
+        .col-6:last-child {
+            padding-right: 0;
+            padding-left: 8px;
+        }
+
+        .col-4 {
+            display: table-cell;
+            width: 33.33%;
+            vertical-align: top;
+            padding-right: 8px;
+        }
+
+        .col-4:last-child {
+            padding-right: 0;
+        }
+
+        /* Spacing utilities */
+        .mt-1 { margin-top: 4px; }
+        .mt-2 { margin-top: 8px; }
+        .mt-3 { margin-top: 16px; }
+        .mt-4 { margin-top: 24px; }
+        .mb-1 { margin-bottom: 4px; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-3 { margin-bottom: 16px; }
+        .mb-4 { margin-bottom: 24px; }
+
+        /* Cards & Boxes */
+        .card, .box {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+        }
+
+        .card-header {
+            font-weight: 700;
+            color: #0369a1;
+            margin-bottom: 6px;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 7px;
+            font-size: 9.5px;
+            font-weight: 600;
+            border-radius: 3px;
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        .badge-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+
+        .badge-success {
+            background-color: #dcfce7;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .badge-gray {
+            background-color: #f1f5f9;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        /* Alerts */
+        .alert, .alert-info {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-left: 3px solid #0284c7;
+            color: #0369a1;
+            padding: 8px 12px;
+            border-radius: 3px;
+            font-size: 10.5px;
+            margin-bottom: 10px;
+        }
+
+        .alert-warning {
+            background-color: #fffbeb;
+            border: 1px solid #fde68a;
+            border-left: 3px solid #f59e0b;
+            color: #92400e;
+        }
+
+        /* Page breaks */
+        .page_break, .page-break {
+            page-break-before: always;
+            break-before: page;
+        }
+
+        .no-break, .pdf-section {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Diffs */
         .diff-new {
             font-weight: bold;
+            color: #15803d;
+            background-color: #f0fdf4;
+            padding: 1px 3px;
+            border-radius: 2px;
         }
 
         .diff-original {
             font-style: italic;
-        }
-
-        .border {
-            border: 1px solid black;
-            padding: 5px;
+            color: #b91c1c;
+            text-decoration: line-through;
+            background-color: #fef2f2;
+            padding: 1px 3px;
+            border-radius: 2px;
         }
 
         .d-print-none {
-            display: none;
+            display: none !important;
         }
     </style>
+    {% block stylesheets %}{% endblock %}
 </head>
 
 <body>
-
 <main>
     {% block content %}
-
     {% endblock %}
 </main>
-
 </body>
 </html>
+
