@@ -384,6 +384,7 @@ class FormationController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
+            // TODO FORM-AUDIT-S01: valider le contrat mention/autre puis rétablir isValid() avant les effets de bord ; voir docs/testing/audit-form-feedback.md.
             $savedMention = $formation->getMention();
             $savedMentionTexte = $formation->getMentionTexte();
 

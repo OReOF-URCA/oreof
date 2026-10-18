@@ -550,6 +550,7 @@ class ElementConstitutifController extends BaseController
 
         $form->handleRequest($request);
         if ($form->isSubmitted()) {
+            // TODO FORM-AUDIT-S02: ajouter la validation des heures/DTO avant flush et événements, avec réponse compatible client ; voir docs/testing/audit-form-feedback.md.
             $originalHeuresToText = $this->heuresToTexte($getElement->getFicheMatiereHeures());
             $ecStep4 = $request->request->all('ec_step4');
             if (array_key_exists('heuresEnfantsIdentiques', $ecStep4)) {
@@ -645,6 +646,7 @@ class ElementConstitutifController extends BaseController
         ]);
         $form->handleRequest($request);
         if ($form->isSubmitted()) {
+            // TODO FORM-AUDIT-S03: contrôler isValid() et définir le retour de validation pour la modale BUT ; voir docs/testing/audit-form-feedback.md.
             $ficheMatiereRepository->save($ficheMatiere, true);
 
             return $this->json(true);

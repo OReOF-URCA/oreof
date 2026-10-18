@@ -139,7 +139,8 @@ export default class extends Controller {
 
   async genereStructurePasParcours () {
     if (confirm('Voulez-vous vraiment recopier générer la structure de la formation ? ')) {
-      await saveData(this.urlGenereStructureValue)
+      const result = await saveData(this.urlGenereStructureValue)
+      if (result === false || result?.success === false || result?.error?.length) return
       callOut('Structure générée.', 'success')
       // todo: afficher le lien pour afficher le parcours par défaut
       // rediriger vers le parcours par défaut
@@ -152,8 +153,10 @@ export default class extends Controller {
   }
 
   async _save (options) {
-    await saveData(this.urlValue, options).then(async () => {
+    return saveData(this.urlValue, options).then(async (data) => {
+      if (data === false || data?.success === false || data?.error?.length) return false
       await updateEtatOnglet(this.urlValue, 'onglet3', 'formation')
+      return data
     })
   }
 }

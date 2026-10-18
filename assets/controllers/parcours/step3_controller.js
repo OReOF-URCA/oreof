@@ -87,14 +87,15 @@ export default class extends Controller {
     this._updateListe()
   }
 
-  recopieBcc() {
+  async recopieBcc() {
     const elt = document.getElementById('parcoursSource')
     const nameParcours = elt.options[elt.selectedIndex].text
     if (confirm(`Voulez-vous vraiment recopier les BCC du parcours "${nameParcours}" ? `)) {
-      this._save({
+      const result = await this._save({
         action: 'recopieBcc',
         value: document.getElementById('parcoursSource').value,
       })
+      if (result === false) return
       callOut('Recopie effectuée.', 'success')
       this._updateListe()
     }
@@ -104,7 +105,8 @@ export default class extends Controller {
     if (confirm('Voulez-vous vraiment supprimer les BCC et les compétences du parcours ? ')) {
       this._save({
         action: 'resetBcc',
-      }).then(() => {
+      }).then((result) => {
+        if (result === false) return
         callOut('Réinitialisation des BCC effectuée.', 'success')
         this._updateListe()
       })
@@ -125,8 +127,10 @@ export default class extends Controller {
   }
 
   async _save(options) {
-    await saveData(this.urlValue, options).then(async () => {
+    return saveData(this.urlValue, options).then(async (data) => {
+      if (data === false || data?.success === false || data?.error?.length) return false
       await updateEtatOnglet(this.urlValue, 'onglet3', 'parcours')
+      return data
     })
   }
 }
