@@ -102,11 +102,23 @@ class ApiJsonExport
                         $checkIsValidCurrentYearParcours = count($lastVersion) > 0 && $lheoV2->isValidLHEO($parcours);
                     }
                     if ($checkIsValidCurrentYearParcours) {
-                        $lastVersionData = $this->versioningParcours->loadParcoursFromVersion($lastVersion[0]);
+                        $lastVersionData = null;
+                        if ($this->versioningParcours->versionFilesExist($lastVersion[0])) {
+                            try {
+                                $lastVersionData = $this->versioningParcours->loadParcoursFromVersion($lastVersion[0]);
+                            } catch (\Throwable) {
+                                $lastVersionData = null;
+                            }
+                        }
+
+                        $libelle = $lastVersionData !== null && isset($lastVersionData['parcours'])
+                            ? $lastVersionData['parcours']->getDisplay()
+                            : $parcours->getDisplay();
+
                         $parcoursData = [
                             'id_old' => $parcours->getParcoursOrigineCopie()?->getId(),
                             'id' => $parcours->getId(),
-                            'libelle' => $lastVersionData['parcours']->getDisplay(),
+                            'libelle' => $libelle,
                             'url' => $isV2
                                 ? $urlPrefix . $this->router->generate('api_site_web_v2_parcours_cfvu_valid',
                                     ['parcours' => $lastVersion[0]->getParcours()->getId()])

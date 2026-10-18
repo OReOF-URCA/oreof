@@ -7,6 +7,7 @@ use App\DTO\StructureEc;
 use App\DTO\StructureParcours;
 use App\DTO\StructureUe;
 use App\Entity\FicheMatiere;
+use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
 use App\Enums\TypeModificationDpeEnum;
@@ -98,9 +99,25 @@ class ParcoursExportV2 {
             $hasDisplaySemestre = false;
         }
 
+        $actualParcours = $targetParcours ?? $parcours;
+        $actualFormation = $actualParcours->getFormation();
+
+        $uuidParcours = $this->getUuidForParcours($actualParcours);
+        $uuidFormation = $this->getUuidForFormation($actualFormation);
+        $idOldParcours = $actualParcours->getParcoursOrigineCopie()?->getId();
+        $idOldFormation = $actualFormation?->getFormationOrigineCopie()?->getId();
+
         $data = [
             'id' => $parcours->getId(),
+            'uuid' => $uuidParcours,
+            'uuid_parcours' => $uuidParcours,
+            'id_precedent' => $idOldParcours,
+            'id_old' => $idOldParcours,
             'formationId' => $parcours->getFormation()?->getId(),
+            'formationUuid' => $uuidFormation,
+            'uuid_formation' => $uuidFormation,
+            'formation_id_precedent' => $idOldFormation,
+            'formation_id_old' => $idOldFormation,
             'formation' => $parcours->getFormation()?->getDisplay(),
             'parcours' => $parcours->isParcoursDefaut() ? '' : $parcours->getLibelle(),
             'typeDiplome' => $typeDiplome->getLibelle(),
@@ -144,17 +161,13 @@ class ParcoursExportV2 {
             $data['formationId'] = $formation_id;
         }
 
-        if($parcours->getId() !== null){
-           $data['path'] = $this->router->generate(
-                'api_site_web_v2_parcours_maquette',
-                ['parcours' => $parcours->getId()],
-                UrlGeneratorInterface::ABSOLUTE_URL
-           );
-        }
         if($hasDisplaySemestre){
             foreach ($dto->semestres as $ordre => $sem) {
                 if ($sem->semestre->isNonDispense() === false) {
                     $semestre = [
+                        'id' => $sem->semestre->getId(),
+                        'typeNiveau' => 'semestre',
+                        'libelleNiveau' => 'Semestre ' . ($ordre),
                         'ordre' => $ordre,
                         'volumes' => [
                             'CM' => [
@@ -172,10 +185,13 @@ class ParcoursExportV2 {
                             'autonomie' => $sem->heuresEctsSemestre->sommeSemestreTePres
                         ],
                         'ects' => $sem->heuresEctsSemestre->sommeSemestreEcts,
-                        'ues' => []
+                        'niveau2' => []
                     ];
                     foreach ($sem->ues as $ue) {
                         $tUe = [
+                            'id' => $ue->ue?->getId(),
+                            'typeNiveau' => 'ue',
+                            'libelleNiveau' => $ue->display,
                             'ordre' => $ue->ordre(),
                             'libelleOrdre' => $ue->display,
                             'libelle' => $ue->ue->getLibelle() ?? $ue->display,
@@ -204,10 +220,13 @@ class ParcoursExportV2 {
                             $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
                         } elseif ($ue->ue->getNatureUeEc()?->isChoix() || count($ue->uesEnfants()) > 0) {
                             $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
-                            $tUe['UesEnfants'] = [];
+                            $tUe['niveau3'] = [];
                             $nb = 0;
                             foreach ($ue->uesEnfants() as $ueEnfant) {
                                 $tUeEnfant = [
+                                    'id' => $ueEnfant->ue?->getId(),
+                                    'typeNiveau' => 'ue',
+                                    'libelleNiveau' => $ueEnfant->display,
                                     'ordre' => $ueEnfant->ordre(),
                                     'libelleOrdre' => $ueEnfant->display,
                                     'libelle' => $ueEnfant->ue->getLibelle() ?? $ueEnfant->display,
@@ -235,7 +254,7 @@ class ParcoursExportV2 {
 
                                 $nb++;
                                 $tUe['nbChoix'] = $nb;
-                                $tUeEnfant['ec'] = $this->getEcFromUe($ueEnfant, 1, $isVersioning);
+                                $tUeEnfant['niveau4'] = $this->getEcFromUe($ueEnfant, 3, $isVersioning);
 
                                 /**
                                  * UE enfant dans une UE enfant
@@ -249,9 +268,12 @@ class ParcoursExportV2 {
                                 elseif($ueEnfant->ue->getNatureUeEc()?->isChoix() || count($ueEnfant->uesEnfants()) > 0){
                                     $nbDeuxiemeNiveau = 0;
                                     $tUeEnfant['description_libre_choix'] = $ueEnfant->ue->getDescriptionUeLibre();
-                                    $tUeEnfant['UesEnfants'] = [];
+                                    $tUeEnfant['niveau4'] = [];
                                     foreach($ueEnfant->uesEnfants() as $ueEnfantDeuxiemeNiveau){
                                         $tUeEnfantDeuxiemeNiveau = [
+                                            'id' => $ueEnfantDeuxiemeNiveau->ue?->getId(),
+                                            'typeNiveau' => 'ue',
+                                            'libelleNiveau' => $ueEnfantDeuxiemeNiveau->display,
                                             'ordre' => $ueEnfantDeuxiemeNiveau->ordre(),
                                             'libelleOrdre' => $ueEnfantDeuxiemeNiveau->display,
                                             'libelle' => $ueEnfantDeuxiemeNiveau->ue->getLibelle() ?? $ueEnfantDeuxiemeNiveau->display,
@@ -279,23 +301,23 @@ class ParcoursExportV2 {
 
                                         $nbDeuxiemeNiveau++;
                                         $tUeEnfant['nbChoix'] = $nbDeuxiemeNiveau;
-                                        $tUeEnfantDeuxiemeNiveau['ec'] = $this->getEcFromUe($ueEnfantDeuxiemeNiveau, 2, $isVersioning);
-                                        $tUeEnfant['UesEnfants'][] = $tUeEnfantDeuxiemeNiveau;
+                                        $tUeEnfantDeuxiemeNiveau['niveau5'] = $this->getEcFromUe($ueEnfantDeuxiemeNiveau, 4, $isVersioning);
+                                        $tUeEnfant['niveau4'][] = $tUeEnfantDeuxiemeNiveau;
                                     }
                                 }
 
-                                $tUe['UesEnfants'][] = $tUeEnfant;
+                                $tUe['niveau3'][] = $tUeEnfant;
                             }
                         } else {
                             $tUe['ects'] = $ue->heuresEctsUe->sommeUeEcts;
-                            $tUe['ec'] = $this->getEcFromUe($ue, 0, $isVersioning);
+                            $tUe['niveau3'] = $this->getEcFromUe($ue, 2, $isVersioning);
                         }
-                        $semestre['ues'][] = $tUe;
+                        $semestre['niveau2'][] = $tUe;
                     }
                     if($isVersioning){
-                        usort($semestre['ues'], fn($ueA, $ueB) => $ueA['ordre'] <=> $ueB['ordre']);
+                        usort($semestre['niveau2'], fn($ueA, $ueB) => $ueA['ordre'] <=> $ueB['ordre']);
                     }
-                    $data['semestres'][] = $semestre;
+                    $data['niveau1'][] = $semestre;
                 }
             }
         }
@@ -310,6 +332,7 @@ class ParcoursExportV2 {
             if ($ec->elementConstitutif->getNatureUeEc()?->isLibre()) {
                 $tEcs['description_libre_choix'] =  $ec->elementConstitutif->getTexteEcLibre();
             } elseif ($ec->elementConstitutif->getNatureUeEc()?->isChoix() || count($ec->elementsConstitutifsEnfants) > 0) {
+                $tEc['id'] = $ec->elementConstitutif->getId();
                 $tEc['typeNiveau'] = 'ec';
                 $tEc['ordre'] = $ec->elementConstitutif->getOrdre();
                 $tEc['numero'] = $ec->elementConstitutif->getCode();
@@ -384,6 +407,7 @@ class ParcoursExportV2 {
         }
 
         return [
+            'id' => $isEcFromBD ? $elementConstitutif->getId() : $ec->elementConstitutif->getId(),
             'typeNiveau' => 'ec',
             'libelleNiveau' => $ec->elementConstitutif->getCode() . ' - ' . $libelle,
             'ordre' => $ec->elementConstitutif->getOrdre(),
@@ -425,5 +449,39 @@ class ParcoursExportV2 {
                 'autonomie'=> $ec->heuresEctsEc->tePres
             ],
         ];
+    }
+
+    /**
+     * Identifiant stable de la version d'origine racine (toute première version sans copie en amont)
+     */
+    private function getUuidForParcours(Parcours $parcours): ?int
+    {
+        $oldest = $parcours;
+        $visited = [];
+        while ($oldest->getParcoursOrigineCopie() !== null && !isset($visited[$oldest->getId()])) {
+            $visited[$oldest->getId()] = true;
+            $oldest = $oldest->getParcoursOrigineCopie();
+        }
+
+        return $oldest->getId();
+    }
+
+    /**
+     * Identifiant stable de la formation d'origine racine (toute première version sans copie en amont)
+     */
+    private function getUuidForFormation(?Formation $formation): ?int
+    {
+        if ($formation === null) {
+            return null;
+        }
+
+        $oldest = $formation;
+        $visited = [];
+        while ($oldest->getFormationOrigineCopie() !== null && !isset($visited[$oldest->getId()])) {
+            $visited[$oldest->getId()] = true;
+            $oldest = $oldest->getFormationOrigineCopie();
+        }
+
+        return $oldest->getId();
     }
 }

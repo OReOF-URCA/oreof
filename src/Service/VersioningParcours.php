@@ -109,26 +109,53 @@ class VersioningParcours
         }
     }
 
+    public function versionFilesExist(ParcoursVersioning $parcours_versioning): bool
+    {
+        $parcoursId = $parcours_versioning->getParcours()?->getId();
+        if ($parcoursId === null) {
+            return false;
+        }
+
+        $baseDir = __DIR__ . "/../../versioning_json/parcours/{$parcoursId}/";
+        $parcoursPath = $baseDir . "{$parcours_versioning->getParcoursFileName()}.json";
+        $dtoPath = $baseDir . "{$parcours_versioning->getDtoFileName()}.json";
+
+        return file_exists($parcoursPath) && file_exists($dtoPath);
+    }
+
     public function loadParcoursFromVersion(ParcoursVersioning $parcours_versioning): array
     {
-        $fileParcours = file_get_contents(
-            __DIR__ . "/../../versioning_json/parcours/"
-                                    . "{$parcours_versioning->getParcours()->getId()}/"
-                                    . "{$parcours_versioning->getParcoursFileName()}.json"
-        );
-        $fileDTO = file_get_contents(
-            __DIR__ . "/../../versioning_json/parcours/"
-                                    . "{$parcours_versioning->getParcours()->getId()}/"
-                                    . "{$parcours_versioning->getDtoFileName()}.json"
-        );
+        $parcoursId = $parcours_versioning->getParcours()?->getId();
+        $parcoursPath = __DIR__ . "/../../versioning_json/parcours/{$parcoursId}/{$parcours_versioning->getParcoursFileName()}.json";
+        $dtoPath = __DIR__ . "/../../versioning_json/parcours/{$parcoursId}/{$parcours_versioning->getDtoFileName()}.json";
+
+        if (!file_exists($parcoursPath) || !file_exists($dtoPath)) {
+            throw new \RuntimeException(sprintf(
+                'Fichier(s) de version introuvable(s) pour le parcours #%d (%s, %s).',
+                $parcoursId ?? 0,
+                basename($parcoursPath),
+                basename($dtoPath)
+            ));
+        }
+
+        $fileParcours = file_get_contents($parcoursPath);
+        $fileDTO = file_get_contents($dtoPath);
+
+        if ($fileParcours === false || $fileDTO === false) {
+            throw new \RuntimeException(sprintf(
+                'Impossible de lire les fichiers de version pour le parcours #%d.',
+                $parcoursId ?? 0
+            ));
+        }
+
         $parcours = $this->serializer->deserialize($fileParcours, Parcours::class, 'json');
         $dto = $this->serializer->deserialize($fileDTO, StructureParcours::class, 'json');
-        $dateVersion = $parcours_versioning->getVersionTimestamp()->format('d-m-Y à H:i');
+        $dateVersion = $parcours_versioning->getVersionTimestamp()?->format('d-m-Y à H:i') ?? '';
 
         return [
             'parcours' => $parcours,
             'dto' => $dto,
-            'dateVersion' => $dateVersion
+            'dateVersion' => $dateVersion,
         ];
     }
 
@@ -169,12 +196,18 @@ class VersioningParcours
             else {
                 // Données du parcours en JSON
                 $lastVersion = $this->getLastVersion($parcours);
+                if ($lastVersion === null || !$this->versionFilesExist($lastVersion)) {
+                    return $this->textDifferences;
+                }
                 $fileParcours = file_get_contents(
                     __DIR__ . "/../../versioning_json/parcours/"
                     . "{$lastVersion->getParcours()?->getId()}/"
                     . "{$lastVersion->getParcoursFileName()}.json"
                 );
-                $lastVersion = $this->serializer->deserialize($fileParcours, Parcours::class, 'json');
+                $lastVersion = $fileParcours !== false ? $this->serializer->deserialize($fileParcours, Parcours::class, 'json') : null;
+                if ($lastVersion === null) {
+                    return $this->textDifferences;
+                }
             }
             // Configuration du calcul des différences
             $rendererName = 'Combined';
@@ -660,11 +693,15 @@ class VersioningParcours
             return null;
         }
 
-        $fileDTO = file_get_contents(
-            __DIR__ . "/../../versioning_json/parcours/"
-            . "{$lastVersion->getParcours()->getId()}/"
-            . "{$lastVersion->getDtoFileName()}.json"
-        );
+        $filePath = __DIR__ . "/../../versioning_json/parcours/"
+            . "{$lastVersion->getParcours()?->getId()}/"
+            . "{$lastVersion->getDtoFileName()}.json";
+
+        if (!file_exists($filePath)) {
+            return null;
+        }
+
+        $fileDTO = file_get_contents($filePath);
 
         return $fileDTO !== false ? $fileDTO : null;
     }

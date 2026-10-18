@@ -14,7 +14,9 @@ use App\Controller\BaseController;
 use App\Entity\Annee;
 use App\Entity\Parcours;
 use App\Entity\SemestreParcours;
+use App\DTO\ParcoursDuplicationConfig;
 use App\Enums\ValidationStatusEnum;
+use App\Form\ParcoursDuplicationType;
 use App\Form\ParcoursStep1Type;
 use App\Form\ParcoursStep2Type;
 use App\Form\ParcoursStep3Type;
@@ -28,6 +30,7 @@ use App\Repository\ValidationIssueRepository;
 use App\Service\LheoXML;
 use App\Service\Parcours\ParcoursAccessExplainer;
 use App\Service\Parcours\ParcoursDeleteService;
+use App\Service\Parcours\ParcoursDuplicationService;
 use App\Service\Validation\SemesterValidationRefresher;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
@@ -568,6 +571,187 @@ class ParcoursController extends BaseController
             return $turboStream->stream('parcours_v2/turbo/delete_success.stream.html.twig', [
                 'redirectUrl' => $redirectUrl,
                 'parcoursId' => $parcoursId,
+                'toastMessage' => $flashMsg,
+            ]);
+        }
+
+        return $this->redirect($redirectUrl);
+    }
+
+    #[Route('/{parcours}/dupliquer', name: 'dupliquer', methods: ['GET'])]
+    public function dupliquer(
+        Parcours $parcours,
+        Request $request,
+        ParcoursDuplicationService $duplicationService,
+        ParcoursAccessExplainer $accessExplainer,
+        BreadcrumbService $breadcrumb,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        if (!$this->isGranted('EDIT', $parcours) && !$this->isGranted('ROLE_ADMIN')) {
+            $reason = $accessExplainer->explainEditDenial($parcours);
+            $this->addFlash('danger', $reason);
+            return $this->redirectToRoute('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+        }
+
+        $formation = $parcours->getFormation();
+        if ($formation !== null) {
+            $breadcrumb->add(
+                $formation->getDisplay(),
+                'formation_v2_voir',
+                ['slug' => $formation->getSlug()]
+            );
+        }
+        $breadcrumb->add(
+            $parcours->getDisplay(),
+            'parcours_v2_voir',
+            ['parcours' => $parcours->getId()]
+        );
+        $breadcrumb->add('Dupliquer le parcours');
+
+        $from = (string) $request->query->get('from', '');
+
+        $analysis = $duplicationService->analyze($parcours);
+
+        $config = new ParcoursDuplicationConfig();
+        $config->nouveauLibelle = sprintf('%s (copie)', (string) $parcours->getLibelle());
+        if ($parcours->getSigle() !== null && trim($parcours->getSigle()) !== '') {
+            $config->nouveauSigle = sprintf('%s-C', trim($parcours->getSigle()));
+        }
+
+        $form = $this->createForm(ParcoursDuplicationType::class, $config, [
+            'action' => $this->generateUrl('parcours_v2_dupliquer_post', array_filter([
+                'parcours' => $parcours->getId(),
+                'from' => $from !== '' ? $from : null,
+            ])),
+        ]);
+
+        $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string) $request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
+
+        if ($isTurbo) {
+            return $turboStream->streamOpenModalFromTemplates(
+                'Dupliquer le parcours',
+                $parcours->getLibelle(),
+                'parcours_v2/_modal_dupliquer.html.twig',
+                [
+                    'parcours' => $parcours,
+                    'formation' => $formation,
+                    'analysis' => $analysis,
+                    'form' => $form->createView(),
+                    'from' => $from,
+                ],
+                'parcours_v2/_modal_dupliquer_footer.html.twig',
+                [
+                    'parcours' => $parcours,
+                ]
+            );
+        }
+
+        return $this->render('parcours_v2/dupliquer.html.twig', [
+            'parcours' => $parcours,
+            'formation' => $formation,
+            'analysis' => $analysis,
+            'form' => $form->createView(),
+            'from' => $from,
+        ]);
+    }
+
+    #[Route('/{parcours}/dupliquer', name: 'dupliquer_post', methods: ['POST'])]
+    public function dupliquerPost(
+        Parcours $parcours,
+        Request $request,
+        ParcoursDuplicationService $duplicationService,
+        ParcoursAccessExplainer $accessExplainer,
+        TurboStreamResponseFactory $turboStream,
+        EntityManagerInterface $entityManager,
+    ): Response {
+        if (!$this->isGranted('EDIT', $parcours) && !$this->isGranted('ROLE_ADMIN')) {
+            $reason = $accessExplainer->explainEditDenial($parcours);
+            $this->addFlash('danger', $reason);
+            return $this->redirectToRoute('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+        }
+
+        $from = (string) ($request->query->get('from') ?? $request->request->get('from', ''));
+
+        $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string) $request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
+
+        $config = new ParcoursDuplicationConfig();
+        $form = $this->createForm(ParcoursDuplicationType::class, $config);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            $errorMessage = 'Les données du formulaire sont invalides.';
+            foreach ($form->getErrors(true) as $error) {
+                $errorMessage = $error->getMessage();
+                break;
+            }
+
+            if ($isTurbo) {
+                return $turboStream->streamToastError($errorMessage);
+            }
+            $this->addFlash('danger', $errorMessage);
+            return $this->redirectToRoute('parcours_v2_dupliquer', array_filter([
+                'parcours' => $parcours->getId(),
+                'from' => $from !== '' ? $from : null,
+            ]));
+        }
+
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException('Utilisateur non connecté.');
+        }
+
+        $campagneCollecte = $this->getCampagneCollecte();
+        $result = $duplicationService->duplicate($parcours, $config, $user, $campagneCollecte);
+
+        if (!$result->success || $result->nouveauParcours === null) {
+            $err = $result->errorMessage ?? 'Une erreur est survenue lors de la duplication.';
+            if ($isTurbo) {
+                return $turboStream->streamToastError($err);
+            }
+            $this->addFlash('danger', $err);
+            return $this->redirectToRoute('parcours_v2_dupliquer', array_filter([
+                'parcours' => $parcours->getId(),
+                'from' => $from !== '' ? $from : null,
+            ]));
+        }
+
+        $flashMsg = sprintf(
+            'Le parcours « %s » a été dupliqué avec succès (%d semestres, %d UEs, %d ECs, %d fiches matières).',
+            (string) $result->nouveauParcours->getLibelle(),
+            $result->createdCounts['semestres'] ?? 0,
+            $result->createdCounts['ues'] ?? 0,
+            $result->createdCounts['ecs'] ?? 0,
+            $result->createdCounts['fiches_matieres'] ?? 0
+        );
+        $this->addFlash('success', $flashMsg);
+
+        // Si la duplication a été déclenchée depuis la liste des parcours de la formation
+        $formation = $result->nouveauParcours->getFormation();
+        if ($from === 'formation_detail' && $isTurbo && $formation !== null) {
+            $entityManager->refresh($formation);
+            $parcourss = $formation->getParcours();
+            $dpesParcours = [];
+            foreach ($parcourss as $p) {
+                $dpesParcours[$p->getId()] = \App\Classes\GetDpeParcours::getFromParcours($p);
+            }
+
+            return $turboStream->stream('parcours_v2/turbo/duplication_formation_success.stream.html.twig', [
+                'formation' => $formation,
+                'parcours' => $parcourss,
+                'dpesParcours' => $dpesParcours,
+                'toastMessage' => $flashMsg,
+            ]);
+        }
+
+        $redirectUrl = $this->generateUrl('parcours_v2_voir', ['parcours' => $result->nouveauParcours->getId()]);
+
+        if ($isTurbo) {
+            return $turboStream->stream('parcours_v2/turbo/duplication_success.stream.html.twig', [
+                'redirectUrl' => $redirectUrl,
                 'toastMessage' => $flashMsg,
             ]);
         }
