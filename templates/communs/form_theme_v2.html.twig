@@ -733,3 +733,9 @@
         </details>
     </div>
 {% endblock %}
+
+{# A summary is rendered inside the form, including when the form is returned in a modal stream. #}
+{% block form_start %}
+    {{ parent() }}
+    {{ include('communs/_form_error_summary.html.twig', {errorForm: form}, with_context: false) }}
+{% endblock %}

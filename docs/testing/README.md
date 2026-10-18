@@ -82,3 +82,15 @@ Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
 - Les formulaires n'ont pas de CSRF en env `test` (`framework.form.csrf_protection` dans `when@test`).
 - Le gabarit `ParcoursRepositoryExampleTest` et `ParcoursControllerExampleTest::testListParcoursPageIsSuccessful`
   sont marqués incomplets (fixtures obsolètes / authentification manquante).
+
+## Retours de formulaire
+
+- `node --test tests/javascript/form-feedback.test.mjs` : erreurs JSON applicatives, statuts HTTP, streams
+  invalides, confirmation explicite et message local réseau sans suppression de la saisie.
+- `tests/Unit/Utils/TurboStreamResponseFactoryTest.php` : statut 422 pour formulaire invalide, maintien de 200 pour
+  formulaire valide et priorité d’un statut explicite. Tests unitaires sans base de données.
+
+Vérification navigateur : formulaire standard et modale avec erreurs globales/champs, synthèse et liens clavier,
+Tom Select et onglets, saisie conservée, réponse 422, erreur réseau, retour 403/session expirée, confirmation serveur,
+modales legacy, toast danger dans la modale et pause des autres toasts au focus. Le marquage HTTP ne remplace pas
+une validation métier côté serveur.

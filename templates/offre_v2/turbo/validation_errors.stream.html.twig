@@ -1,6 +1,6 @@
 <turbo-stream action="update" target="offre_validation_errors">
     <template>
-        <div role="alert" class="rounded-xl bg-surface shadow-lg">
+        <div data-controller="form-errors" data-form-error-summary tabindex="-1" role="region" aria-label="Points à corriger" class="rounded-xl bg-surface shadow-lg">
         <twig:alerte type="danger">
             <p class="text-sm font-semibold">{{ title }}</p>
             <ul class="mt-1 list-disc space-y-0.5 pl-4 text-xs">

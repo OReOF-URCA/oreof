@@ -10,6 +10,7 @@ import { Controller } from '@hotwired/stimulus'
 import { Modal } from 'bootstrap'
 
 import JsonResponse from '../js/JsonResponse'
+import callOut from '../js/callOut'
 
 export default class extends Controller {
   static targets = ['modal', 'modalBody', 'modalTitle', 'size', 'btnClose', 'liste']
@@ -68,19 +69,18 @@ export default class extends Controller {
     event.preventDefault()
 
     const form = event.currentTarget.closest('form') || this.element.getElementsByTagName('form')[0]
-    if (!this._validForm(form)) {
-      console.log('form invalide')
-      return
-    }
+    if (!form || !form.reportValidity()) return
 
     fetch(form.action, {
       method: form.method,
       body: new FormData(form),
     })
-      .then((response) => {
-        JsonResponse(response)
+      .then(async (response) => {
+        const result = await JsonResponse(response)
+        return response.ok && result.success === true
       })
-      .then(async () => {
+      .then(async (success) => {
+        if (!success) return
         this.modal.hide()
         document.querySelectorAll('.modal-backdrop').forEach((e) => {
           e.remove()
@@ -94,6 +94,9 @@ export default class extends Controller {
         }
 
         this.dispatch(this.nomEvenement, { detail: this.details })
+      })
+      .catch(() => {
+        callOut('Impossible de confirmer l’enregistrement. Vérifiez les données avant de renvoyer le formulaire.', 'danger')
       })
   }
 
