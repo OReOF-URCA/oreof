@@ -82,3 +82,13 @@ Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
 - Les formulaires n'ont pas de CSRF en env `test` (`framework.form.csrf_protection` dans `when@test`).
 - Le gabarit `ParcoursRepositoryExampleTest` et `ParcoursControllerExampleTest::testListParcoursPageIsSuccessful`
   sont marqués incomplets (fixtures obsolètes / authentification manquante).
+
+## Régressions clavier de navigation et filtres
+
+Lancer `node --test tests/javascript/navigation-filters.test.mjs` (runner Node natif, aucune dépendance ajoutée).
+Les scénarios isolés couvrent le dépliage, les attributs ARIA, les transitions de focus, Échap, le tactile, le
+maintien au survol avec focus clavier et l’état des filtres au montage. Ils ne remplacent pas un test navigateur.
+
+À vérifier dans l’application : Tab depuis le lien d’évitement ; lien de section puis bouton de déploiement ;
+Entrée/Espace/Échap ; navigation dans les méga-menus ; menus compte et campagne ; tactile ; filtres des listes
+formations/fiches matières, avec recherche AJAX, compteur, reset, thème sombre et en-tête sticky.

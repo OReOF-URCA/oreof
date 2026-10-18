@@ -162,3 +162,16 @@ avec `aria-current="page"` ; onglets, dropdowns, tableaux et progress bars utili
 - [ ] Hover, disabled et dark mode traités ; tableaux responsives
 - [ ] Accessibilité (`label`, `aria-label`, contraste) ; pas de markup de debug
 - [ ] `npm run dev` OK
+
+### Filtres repliables
+
+`components/filter_panel.html.twig` utilise un bouton `Button` (`data-crud-panel-toggle`) avec `aria-expanded`
+et `aria-controls`, relié au bloc de champs identifié par `fieldsId`. Le contrôleur `filter-panel` synchronise
+cet état avec la visibilité (`hidden`), sans checkbox masquée. Les filtres actifs ouvrent le panneau au rendu initial.
+
+Les blocs `actions` redéfinis dans `formation/_liste.html.twig` et `formation/_fichesListe.html.twig` utilisent
+les mêmes attributs et variables (`toggleId`, `fieldsId`, `isOpen`). Garder ces hooks lors d’une surcharge.
+Le CRUD conserve le panneau pendant les rechargements AJAX ; l’ouverture choisie et les IDs restent stables,
+seul le contenu du bouton (compteur) est rafraîchi par `_swapAroundPanel`.
+
+Navigation principale et lien d’évitement : voir `docs/composants/navigation.md`.

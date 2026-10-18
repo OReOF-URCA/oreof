@@ -1,29 +1,32 @@
+{% set disclosureId = 'nav-disclosure-' ~ random() %}
 <div class="relative h-full flex items-center" data-controller="navbar-dropdown" data-turbo-prefetch="false"
-     data-action="mouseenter->navbar-dropdown#open mouseleave->navbar-dropdown#close click@window->navbar-dropdown#close">
+     data-action="pointerenter->navbar-dropdown#open pointerleave->navbar-dropdown#close click@window->navbar-dropdown#close focusin->navbar-dropdown#focusIn focusout->navbar-dropdown#focusOut keydown->navbar-dropdown#keydown">
     {% if item.route %}
         <a href="{{ path(item.route, item.routeParams) }}"
            data-turbo-prefetch="false"
-           class="topbar-link">
+           class="topbar-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500">
             {{ item.label|trans({}, 'menu') }}
-            {% if item.children is not empty %}
-                <svg class="ml-1 w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 9l-7 7-7-7"></path>
-                </svg>
-            {% endif %}
         </a>
-    {% else %}
-        <span class="topbar-link cursor-default">
-            {{ item.label|trans({}, 'menu') }}
-            {% if item.children is not empty %}
-                <svg class="ml-1 w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 9l-7 7-7-7"></path>
-                </svg>
-            {% endif %}
-        </span>
+    {% endif %}
+    {% if item.children is not empty %}
+        <twig:Button type="button" variant="secondary" size="sm"
+                     extraClass="topbar-link !border-transparent !bg-transparent !shadow-none !px-1.5"
+                     dataAction="click->navbar-dropdown#toggle"
+                     data-navbar-dropdown-target="trigger"
+                     aria-expanded="false"
+                     aria-controls="{{ disclosureId }}"
+                     aria-label="Afficher ou masquer les liens : {{ item.label|trans({}, 'menu') }}">
+            {% if not item.route %}{{ item.label|trans({}, 'menu') }}{% endif %}
+            <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </twig:Button>
+    {% elseif not item.route %}
+        <span class="topbar-link">{{ item.label|trans({}, 'menu') }}</span>
     {% endif %}
 
     {% if item.children is not empty %}
-        <div data-navbar-dropdown-target="content"
+        <div id="{{ disclosureId }}" data-navbar-dropdown-target="content"
              class="hidden absolute left-0 top-full pt-1 w-48 z-50">
             <div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-lg shadow-xl py-2">
                 {% for child in item.children %}
