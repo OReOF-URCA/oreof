@@ -1,0 +1,9 @@
+{# Adapté du Breadcrumb du kit Symfony UX Toolkit shadcn ; voir docs/composants/navigation.md. #}
+<nav data-slot="breadcrumb"
+    {{ attributes.defaults({
+        'aria-label': "Fil d’Ariane",
+        class: 'pt-0',
+    }) }}
+>
+    {%- block content %}{% endblock -%}
+</nav>

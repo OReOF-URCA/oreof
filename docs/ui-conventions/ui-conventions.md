@@ -60,6 +60,7 @@ Quand lire : toute création/modification de template Twig, CSS ou composant UI,
 | `<twig:Kpi>` | `title`*, `value`*, `total`, `unit`, `percent` (affiche une jauge), `variant` (+`default`), `icon`, `description`, `href`, `extraClass` |
 | `{{ component('alerte', {type, message}) }}` | messages info/succès/alerte |
 | `<twig:PageHeader>` | `titleKey`/`title`, `descriptionKey`/`description`, `translationParams`, `translationDomain` (`header`), `breadcrumb` (true), `sticky` (true), bloc/prop `actions` — voir « En-tête de page » |
+| `Breadcrumb` et `Breadcrumb:*` | Rendu du fil d’Ariane adapté du kit shadcn ; voir `docs/composants/navigation.md` |
 | `Card`, `DeleteButton`, `Dot`, `IconBox`, `Select`, `Spinner`, `dropdown_actions` | voir la classe PHP et le styleguide |
 
 Timeline de campagne (tableau de bord, fiche campagne) : partial `templates/default/_timeLine.html.twig` (`include`, variable optionnelle `campagne`), rendu 100 % serveur, styles `app-timeline*` dans `assets/styles/_timeline.scss` (étapes `--completed|--current|--upcoming`, `--tl-progress` 0–1 pilote le remplissage du trait).

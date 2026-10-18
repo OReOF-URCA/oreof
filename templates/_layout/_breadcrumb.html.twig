@@ -1,32 +1,32 @@
 {% set items = breadcrumbs() %}
 
 {% if items|length > 1 %}
-    <nav aria-label="Fil d'Ariane" class="pt-0">
-        <ol class="flex flex-wrap items-center gap-1.5 text-sm group-data-[stuck=true]:gap-1 group-data-[stuck=true]:text-xs">
+    <twig:Breadcrumb>
+        <twig:Breadcrumb:List>
             {% for item in items %}
-                <li class="flex items-center gap-2">
-                    {% if not loop.first %}
-                        <span class="text-secondary-400">/</span>
-                    {% endif %}
+                {% if not loop.first %}
+                    <twig:Breadcrumb:Separator />
+                {% endif %}
 
-                    {% if not loop.last and item.route %}
-                        <a
-                                href="{{ path(item.route, item.routeParams) }}"
-                                class="inline-flex items-center gap-1 rounded-md px-2 py-1 text-secondary-500 group-data-[stuck=true]:px-1.5 group-data-[stuck=true]:py-0.5 transition hover:bg-secondary-100 hover:text-secondary-700 dark:text-secondary-400 dark:hover:bg-secondary-800 dark:hover:text-secondary-200"
-                        >
+                <twig:Breadcrumb:Item>
+                    {% if loop.last %}
+                        <twig:Breadcrumb:Page>
+                            {{ item.label|trans({}, 'menu') }}
+                        </twig:Breadcrumb:Page>
+                    {% elseif item.route %}
+                        <twig:Breadcrumb:Link href="{{ path(item.route, item.routeParams) }}">
                             {% if item.icon %}
-                                <twig:UX:Icon :name="item.icon" class="h-4 w-4 group-data-[stuck=true]:h-3.5 group-data-[stuck=true]:w-3.5" aria-hidden="true"/>
+                                <twig:UX:Icon :name="item.icon" class="h-4 w-4 group-data-[stuck=true]:h-3.5 group-data-[stuck=true]:w-3.5" aria-hidden="true" />
                             {% endif %}
                             {{ item.label|trans({}, 'menu') }}
-                        </a>
+                        </twig:Breadcrumb:Link>
                     {% else %}
-                        <span class="rounded-md bg-secondary-100 px-2 py-1 font-semibold group-data-[stuck=true]:px-1.5 group-data-[stuck=true]:py-0.5 text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200"
-                              aria-current="page">
+                        <span class="rounded-md px-2 py-1 text-secondary-500 group-data-[stuck=true]:px-1.5 group-data-[stuck=true]:py-0.5 dark:text-secondary-400">
                             {{ item.label|trans({}, 'menu') }}
                         </span>
                     {% endif %}
-                </li>
+                </twig:Breadcrumb:Item>
             {% endfor %}
-        </ol>
-    </nav>
+        </twig:Breadcrumb:List>
+    </twig:Breadcrumb>
 {% endif %}

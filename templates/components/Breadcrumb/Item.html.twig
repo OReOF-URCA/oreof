@@ -1,0 +1,9 @@
+{# Adapté du Breadcrumb du kit Symfony UX Toolkit shadcn ; voir docs/composants/navigation.md. #}
+<li data-slot="breadcrumb-item"
+    {{ attributes.defaults({
+        
+        class: 'inline-flex min-w-0 items-center gap-2',
+    }) }}
+>
+    {%- block content %}{% endblock -%}
+</li>

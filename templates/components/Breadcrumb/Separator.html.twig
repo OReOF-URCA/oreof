@@ -1,0 +1,9 @@
+{# Adapté du Breadcrumb du kit Symfony UX Toolkit shadcn ; voir docs/composants/navigation.md. #}
+<li data-slot="breadcrumb-separator" role="presentation" aria-hidden="true"
+    {{ attributes.defaults({
+        
+        class: 'text-secondary-400',
+    }) }}
+>
+    {%- block content %}/{% endblock -%}
+</li>

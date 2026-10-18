@@ -1,0 +1,9 @@
+{# Adapté du Breadcrumb du kit Symfony UX Toolkit shadcn ; voir docs/composants/navigation.md. #}
+<a data-slot="breadcrumb-link"
+    {{ attributes.defaults({
+        
+        class: 'inline-flex items-center gap-1 rounded-md px-2 py-1 text-secondary-500 group-data-[stuck=true]:px-1.5 group-data-[stuck=true]:py-0.5 transition hover:bg-secondary-100 hover:text-secondary-700 dark:text-secondary-400 dark:hover:bg-secondary-800 dark:hover:text-secondary-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500',
+    }) }}
+>
+    {%- block content %}{% endblock -%}
+</a>

@@ -1,7 +1,7 @@
 # Navigation : menus, pages de section, breadcrumbs
 
 Quand lire : ajout/modification d'une page accessible depuis la navigation, d'un menu ou d'un breadcrumb.
-À mettre à jour si : `src/Navigation/` (API `MenuItem`, providers, breadcrumbs), `templates/_layout/_topbar.html.twig`, `templates/_layout/menu/`, tag `app.menu_provider`, positions des sections.
+À mettre à jour si : `src/Navigation/` (API `MenuItem`, providers, breadcrumbs), `templates/_layout/_topbar.html.twig`, `templates/_layout/menu/`, tag `app.menu_provider`, positions des sections, `templates/_layout/_breadcrumb.html.twig`, composants `Breadcrumb` (PHP/Twig).
 
 Principe : l'arbre de menus est la **source unique** de la navigation. Toute page navigable est déclarée dans un
 provider → topbar, page de section et breadcrumb sont générés automatiquement. Pas de liens de menu codés en Twig.
@@ -61,3 +61,28 @@ Chaque grand domaine a une section avec route `app_section_<key>` ; le contrôle
   paramètres `label`, `route`, `menuKey`, `parentRoute`).
 - Niveau dynamique (entité) : injecter `App\Navigation\Breadcrumb\Breadcrumb` puis
   `$breadcrumb->add($formation->getDisplay(), 'formation_v2_voir', ['id' => $formation->getId()])`.
+
+### Rendu Twig : kit shadcn adapté
+
+`templates/_layout/_breadcrumb.html.twig` consomme toujours `breadcrumbs()` : le resolver, les attributs des
+contrôleurs, les paramètres de route et les traductions du domaine `menu` restent la source des éléments.
+Le fil est masqué s’il ne contient que l’accueil.
+
+Le rendu utilise les composants `Breadcrumb`, `Breadcrumb:List`, `Breadcrumb:Item`, `Breadcrumb:Link`,
+`Breadcrumb:Page` et `Breadcrumb:Separator`, avec classes PHP dans `src/Twig/Components/UI/` et templates dans
+`templates/components/Breadcrumb.html.twig` et `templates/components/Breadcrumb/`.
+
+Source : [installation manuelle du kit Symfony UX Toolkit shadcn](https://ux.symfony.com/toolkit/kits/shadcn/components/breadcrumb).
+Les templates sont copiés et adaptés au projet, pas installés comme bibliothèque : structure composée et
+`data-slot` du kit, palette sémantique ORéOF, séparateur `/`, mode sombre `data-theme` et variantes sticky conservés.
+Les classes sont fournies via `attributes.defaults()` (fusion native des classes Twig Component) ; pas de filtre
+`tailwind_classes`, de CSS global shadcn ni de dépendance JS/animation pour ce composant statique.
+Les mises à jour du kit doivent être comparées et reportées manuellement. Éviter les utilitaires contradictoires
+lorsqu’on ajoute une classe à un composant ; modifier son template pour changer ses valeurs par défaut.
+
+Accessibilité : navigation nommée, séparateurs décoratifs masqués, liens avec focus visible ; seule la dernière
+entrée porte `aria-current="page"`. Une entrée intermédiaire sans route reste du texte, sans état de page courante.
+Le composant `Page` utilise un `span` natif sans rôle de lien désactivé.
+
+Vérification visuelle : contrôler une page avec plusieurs niveaux (dont un niveau sans route), un libellé long
+sur mobile, puis les thèmes clair/sombre et l’en-tête avant/après passage en sticky. Parcourir les liens au clavier.

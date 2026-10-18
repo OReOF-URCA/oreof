@@ -1,0 +1,9 @@
+{# Adapté du Breadcrumb du kit Symfony UX Toolkit shadcn ; voir docs/composants/navigation.md. #}
+<span data-slot="breadcrumb-page" aria-current="page"
+    {{ attributes.defaults({
+        
+        class: 'rounded-md bg-secondary-100 px-2 py-1 font-semibold group-data-[stuck=true]:px-1.5 group-data-[stuck=true]:py-0.5 text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200',
+    }) }}
+>
+    {%- block content %}{% endblock -%}
+</span>
