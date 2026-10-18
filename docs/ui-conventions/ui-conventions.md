@@ -162,3 +162,26 @@ avec `aria-current="page"` ; onglets, dropdowns, tableaux et progress bars utili
 - [ ] Hover, disabled et dark mode traités ; tableaux responsives
 - [ ] Accessibilité (`label`, `aria-label`, contraste) ; pas de markup de debug
 - [ ] `npm run dev` OK
+
+### Aides et erreurs de formulaire
+
+Le rendu Symfony reste centralisé dans `templates/communs/form_theme_v2.html.twig` :
+- Les labels simples pointent vers l’ID du champ ; le label de création inline pointe vers le select d’entité.
+- Les lignes standard, checkbox et création inline associent au widget uniquement les aides effectivement rendues
+  (`<id>_help`) et les erreurs présentes (`<id>_errors`), en conservant les descriptions fournies par l’appelant.
+  Un champ avec erreurs reçoit `aria-invalid="true"`. Les choix développés transmettent les descriptions aux options.
+- La résolution des clés d’aide (dont celles du workflow) est commune ; le domaine `help` est conservé.
+- Les erreurs sont lisibles en clair/sombre, sans capitales forcées. Les checkbox n’imbriquent plus deux labels.
+  L’éditeur Trix possède l’ID attendu par son label et reçoit les attributs du widget.
+
+Les composants hors Symfony Form (`Select`, formulaire de recherche) relient aussi leur aide via `aria-describedby`.
+Un widget personnalisé qui n’utilise pas le rendu standard doit propager les attributs reçus vers son contrôle
+ou son groupe accessible ; cette PR ne constitue pas une validation exhaustive de tous les widgets spécialisés.
+
+### Statuts de sauvegarde des capacités
+
+`offre_v2/configurer.html.twig` utilise une zone `role="status"` / `aria-live="polite"` atomique : état initial,
+modifications en attente, enregistrement, succès ou échec. Les messages restent visibles jusqu’à l’état suivant.
+En cas d’erreur, un bouton « Réessayer » relance la sauvegarde ; la saisie seule n’efface pas l’erreur affichée.
+Le contrôleur `autosave_capacites` compare la révision envoyée à la saisie courante avant d’annoncer un succès.
+Les messages du serveur sont insérés comme texte. Les écouteurs sont retirés à la déconnexion Stimulus.
