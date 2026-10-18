@@ -14,6 +14,7 @@ use App\TypeDiplome\TypeDiplomeResolver;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -39,8 +40,13 @@ final class PublicationController extends AbstractController
         Parcours $parcours,
         ParcoursExportV2 $parcoursExport,
         VersioningParcours $versioningParcours,
-        ParcoursVersioningRepository $parcoursVersioningRepository,
-    ): JsonResponse {
+        ParcoursVersioningRepository $parcoursVersioningRepository, 
+    ): RedirectResponse|JsonResponse {
+
+        //todo: temporairement en attendant de régler le soucis des json de CFVU
+        return $this->redirectToRoute('api_site_web_v2_parcours_maquette', ['parcours' => $parcours->getId()]);
+
+
         $versions = $parcoursVersioningRepository->findLastCfvuVersion($parcours);
 
         if ($versions === []) {
@@ -180,8 +186,7 @@ final class PublicationController extends AbstractController
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'fiche-pdf' => $this->generateUrl('app_parcours_export_pdf_versioning', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'maquette-pdf' => $this->generateUrl('app_parcours_mccc_export_cfvu_valid', ['parcours' => $parcoursVersion->getParcours()->getId(), 'format' => 'simplifie'], UrlGeneratorInterface::ABSOLUTE_URL),
-           // 'maquette-json' => $this->generateUrl('api_site_web_v2_parcours_maquette_validee_cfvu', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
-            'maquette-json' => $this->generateUrl('api_site_web_v2_parcours_maquette', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+            'maquette-json' => $this->generateUrl('api_site_web_v2_parcours_maquette_validee_cfvu', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'logos-parcours' => $logosParcours,
         ];
 
