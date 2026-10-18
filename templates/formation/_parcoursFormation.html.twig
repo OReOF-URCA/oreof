@@ -117,6 +117,15 @@
                                                         help: not (canEdit and canAccess) ? (not canAccess ? 'Vous n\'avez pas les droits pour modifier ce parcours' : 'Modification non autorisée : le DPE du parcours doit être ouvert.') : null
                                                     },
                                                     {
+                                                        label: 'Dupliquer',
+                                                        icon: 'icon:duplicate',
+                                                        color: 'primary',
+                                                        url: path('parcours_v2_dupliquer', {'parcours': parcours.id, 'from': 'formation_detail'}),
+                                                        modal: true,
+                                                        disabled: not (canEdit and canAccess),
+                                                        help: not (canEdit and canAccess) ? 'Vous n\'avez pas les droits pour dupliquer ce parcours' : null
+                                                    },
+                                                    {
                                                         label: 'Supprimer',
                                                         icon: 'icon:delete',
                                                         color: 'danger',

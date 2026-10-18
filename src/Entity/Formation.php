@@ -199,7 +199,7 @@ class Formation
     private ?TypeModificationDpeEnum $etatReconduction = null;
 
     /** @var Formation $formationOrigineCopie Référence la formation d'origine, depuis la copie */
-    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist'])]
     private ?self $formationOrigineCopie = null;
 
     /** @var Formation $formationCopieAnneeUniversitaire Référence la formation copiée, depuis celle d'origine */

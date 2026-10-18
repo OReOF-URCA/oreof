@@ -1,0 +1,92 @@
+{% form_theme form 'communs/form_theme_v2.html.twig' %}
+
+<div class="space-y-4 text-text">
+
+    {# 1. Bannière d'information #}
+    <div class="rounded-xl border border-primary-200 bg-primary-50 p-4 dark:border-primary-800 dark:bg-primary-950/40">
+        <div class="flex items-start gap-3">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/60 dark:text-primary-300">
+                <twig:UX:Icon name="icon:duplicate" class="h-5 w-5" />
+            </div>
+            <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-2">
+                    <h3 class="text-sm font-bold text-primary-950 dark:text-primary-100">
+                        Duplication du parcours
+                    </h3>
+                    <twig:Badge variant="info" size="sm" label="Copie intégrale" />
+                </div>
+                <p class="text-xs text-primary-800 dark:text-primary-200 leading-relaxed">
+                    Vous vous apprêtez à dupliquer le parcours <strong>« {{ parcours.libelle }} »</strong> au sein de la mention
+                    <strong>{{ formation ? formation.displayLong : 'Non rattachée' }}</strong>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    {# 2. Compteurs synthétiques de la maquette #}
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        <div class="rounded-xl border border-secondary-200 bg-surface p-2.5 text-center shadow-xs dark:border-secondary-700">
+            <span class="block text-xs text-secondary-500 dark:text-secondary-400">Semestres</span>
+            <span class="text-lg font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.nbSemestres }}</span>
+        </div>
+        <div class="rounded-xl border border-secondary-200 bg-surface p-2.5 text-center shadow-xs dark:border-secondary-700">
+            <span class="block text-xs text-secondary-500 dark:text-secondary-400">UEs</span>
+            <span class="text-lg font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.nbUes }}</span>
+        </div>
+        <div class="rounded-xl border border-secondary-200 bg-surface p-2.5 text-center shadow-xs dark:border-secondary-700">
+            <span class="block text-xs text-secondary-500 dark:text-secondary-400">Éléments (EC)</span>
+            <span class="text-lg font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.nbEcs }}</span>
+        </div>
+        <div class="rounded-xl border border-secondary-200 bg-surface p-2.5 text-center shadow-xs dark:border-secondary-700">
+            <span class="block text-xs text-secondary-500 dark:text-secondary-400">Fiches matières</span>
+            <span class="text-lg font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.nbFichesMatieres }}</span>
+        </div>
+    </div>
+
+    {# 3. Avertissements sur dépendances / mutualisations le cas échéant #}
+    {% if analysis.hasWarnings %}
+        <div class="space-y-2">
+            {% for warning in analysis.warnings %}
+                <div class="rounded-xl border border-warning-200 bg-warning-50 p-3 text-xs dark:border-warning-800 dark:bg-warning-900/30">
+                    <div class="flex items-start gap-2.5 text-warning-900 dark:text-warning-100">
+                        <twig:UX:Icon name="icon:warning" class="h-4 w-4 shrink-0 text-warning-600 dark:text-warning-400 mt-0.5" />
+                        <div>
+                            <span class="font-semibold">{{ warning.titre }} :</span>
+                            <span>{{ warning.description }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# 4. Formulaire de configuration avec le thème V2 #}
+    <form id="modal_dupliquer_form" action="{{ path('parcours_v2_dupliquer_post', {parcours: parcours.id, from: from|default(null)}) }}" method="post" class="space-y-4 pt-1">
+        {{ form_row(form._token) }}
+
+        {{ form_row(form.nouveauLibelle) }}
+
+        {{ form_row(form.nouveauSigle) }}
+
+        <div class="rounded-xl border border-secondary-200 bg-secondary-50/50 p-4 dark:border-secondary-700 dark:bg-secondary-800/30 space-y-3">
+            <span class="block text-xs font-bold text-secondary-800 dark:text-secondary-200 uppercase tracking-wide">Options de recopie</span>
+
+            {{ form_row(form.dupliquerFichesMatieres) }}
+            {{ form_row(form.dupliquerContacts) }}
+            {{ form_row(form.conserverResponsables) }}
+        </div>
+
+        {# 5. Informations sur ce qui repart à zéro #}
+        <div class="rounded-xl border border-secondary-200 bg-surface p-3 text-xs dark:border-secondary-700">
+            <span class="block font-semibold text-secondary-900 dark:text-secondary-100 mb-1.5 flex items-center gap-1.5">
+                <twig:UX:Icon name="icon:info" class="h-3.5 w-3.5 text-secondary-500" />
+                Rappel sur le nouveau parcours
+            </span>
+            <ul class="list-disc list-inside space-y-1 text-secondary-600 dark:text-secondary-400 text-[11px]">
+                <li>Le statut sera réinitialisé (En cours de rédaction) et la version <strong>0.1</strong>.</li>
+                <li>Les validations officielles antérieures (CFVU) et l'historique d'audit ne sont pas transférés.</li>
+                <li>Le parcours d'origine reste inchangé et ne sera pas affecté par vos futures modifications.</li>
+            </ul>
+        </div>
+    </form>
+</div>

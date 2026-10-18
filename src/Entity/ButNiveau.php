@@ -37,7 +37,7 @@ class ButNiveau
     #[ORM\ManyToOne(inversedBy: 'butNiveaux')]
     private ?ButCompetence $competence = null;
 
-    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist'])]
     private ?self $butNiveauOrigineCopie = null;
 
     public function __construct()

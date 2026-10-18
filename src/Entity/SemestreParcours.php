@@ -59,7 +59,7 @@ class SemestreParcours
     #[Groups('parcours_json_versioning')]
     private ?bool $isOuvert = true;
 
-    #[ORM\ManyToOne(inversedBy: 'parcoursSemestre')]
+    #[ORM\ManyToOne(inversedBy: 'parcoursSemestre', cascade: ['persist'])]
     private ?Annee $annee = null;
 
     public function __construct(?Semestre $semestre, ?Parcours $parcours)

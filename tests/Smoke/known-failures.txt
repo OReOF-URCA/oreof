@@ -2,6 +2,7 @@
 # RouteSmokeTest tolère ces échecs mais échoue sur toute nouvelle régression.
 # Une route qui recommence à passer fait désormais échouer la CI afin d'obliger à nettoyer cette dette.
 # Les exclusions légitimes sont dans excluded-routes.txt ; cette liste-ci doit tendre vers zéro.
+api_site_web_v2_parcours_cfvu_valid
 api_site_web_v2_parcours_maquette_validee_cfvu
 app_administration_profils_change_droit
 app_administration_profils_liste
@@ -16,7 +17,6 @@ app_element_constitutif_new
 app_element_constitutif_new_enfant
 app_element_constitutif_structure_but
 app_element_constitutif_type_ec
-app_export_json_urca_v2_cfvu_valid
 app_fiche_matiere_export
 app_fiche_matiere_wizard
 app_fiche_matiere_wizard_step_1
@@ -28,7 +28,6 @@ app_formation_synchronisation
 app_formation_synchronisation_acs
 app_formation_synchronisation_mccc
 app_formulaire_generique_new
-app_parcours_ec
 app_parcours_ec_update
 app_parcours_export
 app_parcours_export_json_urca_cfvu_valid

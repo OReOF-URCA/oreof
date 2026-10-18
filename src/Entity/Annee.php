@@ -36,8 +36,8 @@ class Annee
     #[ORM\Column]
     private ?bool $isOuvert = true;
 
-    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist'])]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?self $anneeOrigineCopie = null;
 
     /** @var Annee $anneeCopieAnneeUniversitaire Référence l'élément copié, depuis l'année d'origine */
@@ -333,6 +333,11 @@ class Annee
         $this->regimeInscription = array_values(array_unique($t));
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('Annee #%s (ordre: %s)', $this->id ?? 'new', $this->ordre ?? '?');
     }
 }
 
