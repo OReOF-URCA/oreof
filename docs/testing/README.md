@@ -82,3 +82,9 @@ Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
 - Les formulaires n'ont pas de CSRF en env `test` (`framework.form.csrf_protection` dans `when@test`).
 - Le gabarit `ParcoursRepositoryExampleTest` et `ParcoursControllerExampleTest::testListParcoursPageIsSuccessful`
   sont marqués incomplets (fixtures obsolètes / authentification manquante).
+
+## Régressions clavier JavaScript
+
+`node --test tests/javascript/ui-accessibility.test.mjs` lance les scénarios des contrôleurs dropdown, tabs et
+modalturbo avec le runner natif Node (sans dépendance supplémentaire). Ces tests isolent les décisions clavier
+et le nettoyage ; ils ne remplacent pas une vérification DOM, Stimulus/Turbo et navigateur avec Tom Select.

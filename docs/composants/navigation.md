@@ -61,3 +61,7 @@ Chaque grand domaine a une section avec route `app_section_<key>` ; le contrôle
   paramètres `label`, `route`, `menuKey`, `parentRoute`).
 - Niveau dynamique (entité) : injecter `App\Navigation\Breadcrumb\Breadcrumb` puis
   `$breadcrumb->add($formation->getDisplay(), 'formation_v2_voir', ['id' => $formation->getId()])`.
+
+Le rendu reste dans `templates/_layout/_breadcrumb.html.twig`, sans dépendance à shadcn. Seule la dernière
+entrée porte `aria-current="page"` ; les séparateurs sont masqués aux technologies d’assistance et les liens
+possèdent un focus visible.
