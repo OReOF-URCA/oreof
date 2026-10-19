@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+<main class="container py-4">
+<h1>{{ referentiel.libelle }}</h1>
+{% if referentiel.administrable %}<a href="{{ path('admin_referentiel_edit', {id: referentiel.id}) }}">Modifier le référentiel</a>{% endif %}
+{% if referentiel.extensible %}<a href="{{ path('admin_referentiel_add_value', {id: referentiel.id}) }}">Ajouter une valeur</a>{% endif %}
+<table class="table"><caption>Valeurs du référentiel</caption><thead><tr><th scope="col">Code</th><th scope="col">Libellé</th><th scope="col">Statut</th><th scope="col">Action</th></tr></thead><tbody>
+{% for valeur in valeurs %}
+<tr><td>{{ valeur.code }}</td><td>{{ valeur.libelle }}</td><td>{{ valeur.actif ? 'Active' : 'Inactive' }}</td><td>{% if referentiel.administrable %}<a href="{{ path('admin_referentiel_edit_value', {id: valeur.id}) }}">Modifier</a>{% endif %}</td></tr>
+{% else %}<tr><td colspan="4">Aucune valeur.</td></tr>{% endfor %}
+</tbody></table>
+</main>
+{% endblock %}
