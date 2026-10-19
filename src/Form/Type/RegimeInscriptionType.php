@@ -37,9 +37,23 @@ final class RegimeInscriptionType extends AbstractType
                     }
                 }
 
+                // Include inactive values already assigned to this record, so
+                // opening and saving an existing form never silently loses them.
+                $data = $options['data'] ?? null;
+                if (is_array($data)) {
+                    foreach ($data as $item) {
+                        $key = \App\Referentiel\RegimeInscription::key($item);
+                        $values[$key] ??= $this->referentiels->label('regime_inscription', $key) ?? $key;
+                    }
+                }
+
                 $choices = [];
                 foreach ($values as $key => $label) {
-                    $choices[$label] = (string) $key;
+                    $display = $label;
+                    if (array_key_exists($display, $choices)) {
+                        $display .= ' (' . $key . ')';
+                    }
+                    $choices[$display] = (string) $key;
                 }
 
                 return $choices;
