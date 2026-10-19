@@ -100,8 +100,12 @@
 </head>
 <body
         class="min-h-screen"
-        data-controller="modalturbo frame-loader navigation-palette"
+        data-controller="modalturbo frame-loader navigation-palette form-feedback"
 >
+<a href="#main-content" data-turbo="false"
+   class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[10000] focus:rounded-lg focus:bg-surface focus:px-4 focus:py-3 focus:text-text focus:shadow-lg focus:outline-2 focus:outline-primary-500">
+    Aller au contenu
+</a>
 <template id="global-loader-stimulus" hidden>
     <div class="flex justify-center py-6">
         <twig:Spinner size="md" variant="secondary" label="Chargement..."/>
@@ -147,7 +151,7 @@
                 :sticky="header_sticky|default(true)"
         />
     {% endblock %}
-    <main class="flex-1">
+    <main id="main-content" tabindex="-1" class="flex-1 scroll-mt-[calc(var(--page-header-offset,var(--topbar-height,4rem))+1rem)]">
         <!-- messages flash (Tailwind) -->
         {# read and display all flash messages #}
         {% for label, messages in app.flashes %}

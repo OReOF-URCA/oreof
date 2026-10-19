@@ -11,6 +11,7 @@ namespace App\Utils;
 
 use App\DTO\TranslatableKey;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Form\FormView;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 
@@ -87,10 +88,29 @@ final class TurboStreamResponseFactory
         int     $status = 200
     ): Response
     {
+        // Invalid forms are validation failures, even when their markup is returned as a Turbo Stream.
+        if ($status === Response::HTTP_OK && $this->hasInvalidForm($bodyContext)) {
+            $status = Response::HTTP_UNPROCESSABLE_ENTITY;
+        }
         $bodyHtml = $this->twig->render($bodyTemplate, $bodyContext);
         $footerHtml = $this->twig->render($footerTemplate, $footerContext);
 
         return $this->streamOpenModal($title, $subtitle, $bodyHtml, $footerHtml, $status);
+    }
+
+    /** @param array<mixed> $context */
+    private function hasInvalidForm(array $context): bool
+    {
+        foreach ($context as $value) {
+            if ($value instanceof FormView && ($value->vars['valid'] ?? true) === false) {
+                return true;
+            }
+            if (is_array($value) && $this->hasInvalidForm($value)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function translateText(TranslatableKey|string $title): string

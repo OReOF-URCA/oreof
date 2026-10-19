@@ -65,7 +65,8 @@
                 aria-live="polite"
                 class="max-w-md w-full rounded-xl border-y border-r {{ border }} border-l-4 {{ left_border }} {{ bg }} shadow-lg p-4 flex items-start gap-3.5 transform transition-all duration-300 ease-out translate-x-full opacity-0 backdrop-blur-md"
                 data-controller="toast"
-                data-toast-timeout-value="{{ timeout ?? 3500 }}"
+                data-toast-type="{{ toast_type }}"
+                data-toast-timeout-value="{{ timeout ?? (toast_type == 'danger' ? 0 : 3500) }}"
         >
             <!-- Icon -->
             <div class="flex-shrink-0 mt-0.5 {{ icon_color }}">
