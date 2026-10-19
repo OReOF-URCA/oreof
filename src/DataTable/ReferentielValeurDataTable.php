@@ -59,7 +59,7 @@ final class ReferentielValeurDataTable extends AbstractAppDataTable
             TextColumn::new('libelle', 'Libellé'),
             TextColumn::new('legacyValue', 'Valeur historique'),
             NumberColumn::new('ordre', 'Ordre'),
-            new YesNoBadgeColumn('actif', 'Actif'),
+            YesNoBadgeColumn::new('actif', 'Actif'),
         ];
     }
 
