@@ -92,3 +92,9 @@ maintien au survol avec focus clavier et l’état des filtres au montage. Ils n
 À vérifier dans l’application : Tab depuis le lien d’évitement ; lien de section puis bouton de déploiement ;
 Entrée/Espace/Échap ; navigation dans les méga-menus ; menus compte et campagne ; tactile ; filtres des listes
 formations/fiches matières, avec recherche AJAX, compteur, reset, thème sombre et en-tête sticky.
+
+## Régressions clavier JavaScript
+
+`node --test tests/javascript/ui-accessibility.test.mjs` lance les scénarios des contrôleurs dropdown, tabs et
+modalturbo avec le runner natif Node (sans dépendance supplémentaire). Ces tests isolent les décisions clavier
+et le nettoyage ; ils ne remplacent pas une vérification DOM, Stimulus/Turbo et navigateur avec Tom Select.

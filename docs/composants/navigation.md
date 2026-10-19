@@ -75,3 +75,7 @@ Les menus compte et campagne utilisent le même contrôleur et possèdent aussi 
 
 `base.html.twig` propose en premier lien « Aller au contenu », visible au focus, vers `main#main-content`
 avec `tabindex="-1"`. La marge de défilement tient compte de l’en-tête sticky via `--page-header-offset`.
+
+Le rendu reste dans `templates/_layout/_breadcrumb.html.twig`, sans dépendance à shadcn. Seule la dernière
+entrée porte `aria-current="page"` ; les séparateurs sont masqués aux technologies d’assistance et les liens
+possèdent un focus visible.
