@@ -746,7 +746,7 @@ class Parcours
 
     public function setRegimeInscription(?array $regimeInscription): self
     {
-        $this->regimeInscription = $regimeInscription;
+        $this->regimeInscription = $regimeInscription === null ? [] : \App\Referentiel\RegimeInscription::normalize($regimeInscription);
 
         return $this;
     }
