@@ -1,13 +1,45 @@
 {% extends 'base.html.twig' %}
+{% set header_title = referentiel.libelle %}
+{% set header_description = 'Valeurs et paramètres du référentiel ' ~ referentiel.code %}
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ path('admin_referentiel_index') }}">Référentiels</twig:Button>
+    {% if referentiel.administrable %}
+        <twig:Button variant="secondary" href="{{ path('admin_referentiel_edit', {id: referentiel.id}) }}">Modifier</twig:Button>
+    {% endif %}
+    {% if referentiel.extensible %}
+        <twig:Button variant="success" icon="icon:add" href="{{ path('admin_referentiel_add_value', {id: referentiel.id}) }}">Ajouter une valeur</twig:Button>
+    {% endif %}
+{% endblock %}
 {% block content %}
-<main class="container py-4">
-<h1>{{ referentiel.libelle }}</h1>
-{% if referentiel.administrable %}<a href="{{ path('admin_referentiel_edit', {id: referentiel.id}) }}">Modifier le référentiel</a>{% endif %}
-{% if referentiel.extensible %}<a href="{{ path('admin_referentiel_add_value', {id: referentiel.id}) }}">Ajouter une valeur</a>{% endif %}
-<table class="table"><caption>Valeurs du référentiel</caption><thead><tr><th scope="col">Code</th><th scope="col">Libellé</th><th scope="col">Statut</th><th scope="col">Action</th></tr></thead><tbody>
-{% for valeur in valeurs %}
-<tr><td>{{ valeur.code }}</td><td>{{ valeur.libelle }}</td><td>{{ valeur.actif ? 'Active' : 'Inactive' }}</td><td>{% if referentiel.administrable %}<a href="{{ path('admin_referentiel_edit_value', {id: valeur.id}) }}">Modifier</a>{% endif %}</td></tr>
-{% else %}<tr><td colspan="4">Aucune valeur.</td></tr>{% endfor %}
-</tbody></table>
-</main>
+<div class="space-y-6">
+    <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-900 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <caption class="sr-only">Valeurs de {{ referentiel.libelle }}</caption>
+                <thead class="bg-secondary-50 dark:bg-secondary-800"><tr>
+                    <th scope="col" class="px-4 py-3 text-left text-sm font-semibold">Code</th>
+                    <th scope="col" class="px-4 py-3 text-left text-sm font-semibold">Libellé</th>
+                    <th scope="col" class="px-4 py-3 text-left text-sm font-semibold">Statut</th>
+                    <th scope="col" class="px-4 py-3 text-right text-sm font-semibold">Actions</th>
+                </tr></thead>
+                <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                {% for valeur in valeurs %}
+                    <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                        <td class="px-4 py-3 font-mono text-sm">{{ valeur.code }}</td>
+                        <td class="px-4 py-3">{{ valeur.libelle }}</td>
+                        <td class="px-4 py-3">{{ valeur.actif ? 'Active' : 'Inactive' }}</td>
+                        <td class="px-4 py-3 text-right">
+                            {% if referentiel.administrable %}
+                                <twig:Button variant="secondary" size="sm" href="{{ path('admin_referentiel_edit_value', {id: valeur.id}) }}">Modifier</twig:Button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4" class="px-4 py-8 text-center text-secondary-500">Aucune valeur.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}
