@@ -1,11 +1,39 @@
 {% extends 'base.html.twig' %}
+{% set header_title = 'Référentiels' %}
+{% set header_description = 'Gestion des listes de valeurs utilisées dans ORéOF.' %}
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ path('app_section_administration') }}">Administration</twig:Button>
+{% endblock %}
 {% block content %}
-<main class="container py-4">
-<h1>Référentiels</h1>
-<ul>
-{% for referentiel in referentiels %}
-<li><a href="{{ path('admin_referentiel_valeurs', {id: referentiel.id}) }}">{{ referentiel.libelle }}</a></li>
-{% else %}<li>Aucun référentiel disponible.</li>{% endfor %}
-</ul>
-</main>
+<div class="space-y-6">
+    <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-900 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <caption class="sr-only">Référentiels disponibles</caption>
+                <thead class="bg-secondary-50 dark:bg-secondary-800">
+                <tr>
+                    <th scope="col" class="px-4 py-3 text-left text-sm font-semibold">Référentiel</th>
+                    <th scope="col" class="px-4 py-3 text-left text-sm font-semibold">Code</th>
+                    <th scope="col" class="px-4 py-3 text-left text-sm font-semibold">Gestion</th>
+                    <th scope="col" class="px-4 py-3 text-right text-sm font-semibold">Actions</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                {% for referentiel in referentiels %}
+                    <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                        <td class="px-4 py-3 font-medium">{{ referentiel.libelle }}</td>
+                        <td class="px-4 py-3 font-mono text-sm">{{ referentiel.code }}</td>
+                        <td class="px-4 py-3 text-sm">{{ referentiel.administrable ? 'Administrable' : 'Protégé' }}</td>
+                        <td class="px-4 py-3 text-right">
+                            <twig:Button variant="secondary" size="sm" href="{{ path('admin_referentiel_valeurs', {id: referentiel.id}) }}">Voir les valeurs</twig:Button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="4" class="px-4 py-8 text-center text-secondary-500">Aucun référentiel disponible. Exécutez la commande d'import.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}
