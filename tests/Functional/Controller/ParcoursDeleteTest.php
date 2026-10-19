@@ -98,7 +98,7 @@ final class ParcoursDeleteTest extends WebTestCase
         $crawler = $client->request('GET', '/parcours/v2/' . $parcours->getId() . '/supprimer');
 
         $this->assertResponseIsSuccessful();
-        $this->assertSelectorTextContains('h2', 'Suppression définitive et irréversible');
+        $this->assertSelectorTextContains('h3', 'Suppression définitive et irréversible');
         $this->assertSelectorExists('form[action="/parcours/v2/' . $parcours->getId() . '/supprimer"]');
         $this->assertSelectorExists('input#confirmation_text');
     }
