@@ -9,6 +9,8 @@
 
 namespace App\Form;
 
+
+use App\Form\Type\LegacyReferentielEnumType;
 use App\Entity\Composante;
 use App\Entity\Parcours;
 use App\Enums\NiveauLangueEnum;
@@ -48,8 +50,9 @@ class ParcoursStep5Type extends AbstractType
                 },
                 'autocomplete' => true,
             ])
-            ->add('regimeInscription', EnumType::class, [
-                'class' => RegimeInscriptionEnum::class,
+            ->add('regimeInscription', LegacyReferentielEnumType::class, [
+                'enum_class' => RegimeInscriptionEnum::class,
+                'referentiel' => 'regime_inscription',
                 'translation_domain' => 'enum',
                 'multiple' => true,
                 'expanded' => true,
