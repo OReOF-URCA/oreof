@@ -73,18 +73,22 @@ bouton pour valider/invalide les étapes successives #}
             />
 
             {% if collapsible|default(false) %}
-                <label data-crud-panel-toggle for="{{ toggleId }}"
-                       class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-secondary-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-600 shadow-sm transition hover:border-secondary-300 hover:text-secondary-900 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500 dark:hover:text-white"
+                <twig:Button type="button" variant="secondary" size="sm"
+                           data-crud-panel-toggle id="{{ toggleId }}"
+                           dataAction="click->filter-panel#toggle"
+                           aria-expanded="{{ isOpen ? 'true' : 'false' }}"
+                           aria-controls="{{ fieldsId }}"
+                       extraClass="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-secondary-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-600 shadow-sm transition hover:border-secondary-300 hover:text-secondary-900 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500 dark:hover:text-white"
                        title="Afficher/masquer les filtres"
                        aria-label="Afficher ou masquer les filtres">
-                    {{ ux_icon('icon:filter', {class: 'h-4 w-4'}) }}
+                    {{ ux_icon('icon:filter', {class: 'h-4 w-4', 'aria-hidden': 'true'}) }}
                     Filtres
                     {% if activeFilters > 0 %}
                         <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-primary-600 px-1.5 py-0.5 text-[10px] font-bold text-white dark:bg-primary-500">
                             {{ activeFilters }}
                         </span>
                     {% endif %}
-                </label>
+                </twig:Button>
             {% else %}
                 <span class="inline-flex items-center gap-2 rounded-lg border border-secondary-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-600 shadow-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200">
                     {{ ux_icon('icon:filter', {class: 'h-4 w-4'}) }}
