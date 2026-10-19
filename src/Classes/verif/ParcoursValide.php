@@ -165,10 +165,10 @@ class ParcoursValide extends AbstractValide
 
         if ($this->parcours->isParcoursDefaut() === false) {
             $this->etat['composanteInscription'] = $this->parcours->getComposanteInscription() !== null ? self::COMPLET : self::VIDE;
-            $this->etat['regimeInscription'] = count($this->parcours->getRegimeInscription()) > 0 ? self::COMPLET : self::VIDE;
+            $this->etat['regimeInscription'] = count($this->parcours->getRegimeInscriptionValues()) > 0 ? self::COMPLET : self::VIDE;
             $this->etat['modaliteAlternance'] = self::NON_CONCERNE;
-            foreach ($this->parcours->getRegimeInscription() as $regimeInscription) {
-                if ($regimeInscription !== RegimeInscriptionEnum::FI && $regimeInscription !== RegimeInscriptionEnum::FC) {
+            foreach ($this->parcours->getRegimeInscriptionValues() as $regimeInscription) {
+                if (!in_array($regimeInscription, [RegimeInscriptionEnum::FI->value, RegimeInscriptionEnum::FC->value], true)) {
                     $this->etat['modaliteAlternance'] = $this->nonVide($this->parcours->getModalitesAlternance());
                     $this->etat['regimeInscription'] = $this->etat['modaliteAlternance'] === self::COMPLET ? self::COMPLET : self::INCOMPLET;
                 }
