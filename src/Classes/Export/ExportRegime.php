@@ -63,9 +63,12 @@ class ExportRegime implements ExportInterface
         $this->excelWriter->writeCellXY(17, 1, 'Co. Resp. Parcours Login');
         $this->excelWriter->writeCellXY(18, 1, 'RNCP');
         $this->excelWriter->writeCellXY(19, 1, 'Validation CFVU');
-        $regimes = $this->referentiels->choices('regime_inscription');
+        $regimes = [];
         foreach (RegimeInscriptionEnum::cases() as $case) {
-            $regimes[$case->value] ??= $case->value;
+            $regimes[$case->value] = $this->referentiels->label('regime_inscription', $case->value) ?? $case->value;
+        }
+        foreach ($this->referentiels->choices('regime_inscription') as $key => $label) {
+            $regimes[$key] ??= $label;
         }
         $i = 0;
         foreach ($regimes as $label) {
