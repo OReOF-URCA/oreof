@@ -29,10 +29,9 @@ final class RegimeInscriptionRules
                 }
                 continue;
             }
-            if ($entry === null && !in_array($key, [RegimeInscriptionEnum::FI->value, RegimeInscriptionEnum::FC->value], true)) {
-                return true;
-            }
-            if ($entry !== null && !in_array($key, [RegimeInscriptionEnum::FI->value, RegimeInscriptionEnum::FC->value], true)) {
+            // Legacy default: FI and FC do not require alternance details.
+            // New entries default to requiring them unless explicitly disabled.
+            if (!in_array($key, [RegimeInscriptionEnum::FI->value, RegimeInscriptionEnum::FC->value], true)) {
                 return true;
             }
         }
