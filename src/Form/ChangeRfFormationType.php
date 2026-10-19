@@ -4,7 +4,6 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\Enums\TypeRfEnum;
-use App\Form\Type\EntityWithAddType;
 use App\Form\Type\InlineCreateEntitySelectType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
