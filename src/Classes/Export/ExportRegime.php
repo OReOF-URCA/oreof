@@ -14,6 +14,7 @@ use App\Classes\GetDpeParcours;
 use App\Classes\GetHistorique;
 use App\Entity\CampagneCollecte;
 use App\Enums\RegimeInscriptionEnum;
+use App\Referentiel\ReferentielManager;
 use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
@@ -31,6 +32,7 @@ class ExportRegime implements ExportInterface
         protected ExcelWriter         $excelWriter,
         ProjectDirProvider            $projectDirProvider,
         protected FormationRepository $formationRepository,
+        private readonly ReferentielManager $referentiels,
     ) {
         $this->dir = $projectDirProvider->getProjectDir() . '/public/temp/';
     }
@@ -61,9 +63,13 @@ class ExportRegime implements ExportInterface
         $this->excelWriter->writeCellXY(17, 1, 'Co. Resp. Parcours Login');
         $this->excelWriter->writeCellXY(18, 1, 'RNCP');
         $this->excelWriter->writeCellXY(19, 1, 'Validation CFVU');
+        $regimes = $this->referentiels->choices('regime_inscription');
+        foreach (RegimeInscriptionEnum::cases() as $case) {
+            $regimes[$case->value] ??= $case->value;
+        }
         $i = 0;
-        foreach (RegimeInscriptionEnum::cases() as $regime) {
-            $this->excelWriter->writeCellXY(20 + $i, 1, $regime->value);
+        foreach ($regimes as $label) {
+            $this->excelWriter->writeCellXY(20 + $i, 1, $label);
             $i++;
         }
 
@@ -100,8 +106,8 @@ class ExportRegime implements ExportInterface
                 $this->excelWriter->writeCellXY(18, $ligne, $formation->getCodeRNCP());
                 $this->excelWriter->writeCellXY(19, $ligne, $this->getHistorique->getHistoriqueParcoursLastStep($dpeParcours, 'cfvu')?->getDate()?->format('d/m/Y') ?? 'Non validé');
                 $i = 0;
-                foreach (RegimeInscriptionEnum::cases() as $regime) {
-                    if (in_array($regime, $parcours->getRegimeInscription())) {
+                foreach (array_keys($regimes) as $regimeKey) {
+                    if (in_array($regimeKey, $parcours->getRegimeInscriptionValues(), true)) {
                         $this->excelWriter->writeCellXY(20 + $i, $ligne, 'X', [
                             'style' => 'HORIZONTAL_CENTER'
                         ]);
