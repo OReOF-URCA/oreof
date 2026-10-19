@@ -1,0 +1,15 @@
+{% set isChecked = annee.hasRegimeInscription(regVal) %}
+<label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs cursor-pointer transition select-none
+                                {{ isChecked 
+                                    ? 'bg-primary-50 border-primary-300 text-primary-900 shadow-xs dark:bg-primary-900/50 dark:border-primary-600 dark:text-primary-200 font-semibold' 
+                                    : 'bg-surface border-secondary-200 text-secondary-600 hover:bg-secondary-100/60 dark:bg-secondary-800 dark:border-secondary-700 dark:text-secondary-300 dark:hover:bg-secondary-700 font-medium' }}">
+                                <input type="checkbox"
+                                       name="annee_{{ annee.id }}_regimeInscription[]"
+                                       value="{{ regVal }}"
+                                       data-tc-field="regime_{{ regVal }}"
+                                       {{ isChecked ? 'checked' : '' }}
+                                       {{ not can_edit ? 'disabled' : '' }}
+                                       class="h-3.5 w-3.5 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 dark:border-secondary-600 dark:bg-secondary-900 cursor-pointer">
+                                <span>{{ regLabel }}</span>
+                            </label>
+                        
