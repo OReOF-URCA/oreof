@@ -2,6 +2,38 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/OReOF-URCA/oreof/compare/v2.2.0...v2.3.0) (2026-10-19)
+
+
+### Features
+
+* Commende pour gérer les incohérences entre années/parcours ouvertes/fermées ([8e39ef8](https://github.com/OReOF-URCA/oreof/commit/8e39ef8630aa48b697d8b21eb6d9d3e88e825552))
+* duplication/suppression parcours ([537e4df](https://github.com/OReOF-URCA/oreof/commit/537e4df2819600ffbaa9b29c6149d09cfb4c3bb4))
+* export API v2 ([b7634ff](https://github.com/OReOF-URCA/oreof/commit/b7634ffe1525fd2bcc15fbe1cc2861fa734b4dd3))
+* gestion des années dans l'offre de formation ([ecdc8f6](https://github.com/OReOF-URCA/oreof/commit/ecdc8f69cf773d36cd0da9bbc6d3627e45ffe359))
+* Plaquette et édition/configuration ([238500a](https://github.com/OReOF-URCA/oreof/commit/238500abd95b86c730d713175dcefde5feabf0b5))
+* statistique et supprssion de parcours ([e74aa42](https://github.com/OReOF-URCA/oreof/commit/e74aa42316681384aec652c2937ef0202c99f053))
+
+
+### Bug Fixes
+
+* **a11y:** aides et erreurs dans form_theme_v2, retours de sauvegarde ([1ebc4fb](https://github.com/OReOF-URCA/oreof/commit/1ebc4fbb35cfa4e26d196fcb0566feb86416991c))
+* **a11y:** corriger menus, onglets, modales et breadcrumb sans shadcn ([e906ad9](https://github.com/OReOF-URCA/oreof/commit/e906ad91989c2c4362e9e52d7263fe4a3741571d))
+* **a11y:** improve form theme associations and autosave feedback ([bf4fb0a](https://github.com/OReOF-URCA/oreof/commit/bf4fb0a353f3c591b1c8d2de2887c0aac26cdfa9))
+* **a11y:** improve navigation disclosures, skip link and filters ([0dce6ee](https://github.com/OReOF-URCA/oreof/commit/0dce6ee7f958c841af9318f8a2b55ad455cf15c7))
+* **a11y:** navigation clavier, lien d’évitement et filtres accessibles ([d1a1480](https://github.com/OReOF-URCA/oreof/commit/d1a14805005d0168b2cd3f03dd1cd5cfef0234c3))
+* **a11y:** repair keyboard navigation and modal focus without shadcn ([07e6951](https://github.com/OReOF-URCA/oreof/commit/07e6951c2a1c48b8ca8d0c6fc77aea4fd40eec1c))
+* **ci:** content-hash composer.lock et sélecteur du test de suppression ([4abe9a1](https://github.com/OReOF-URCA/oreof/commit/4abe9a19aecac14275417254d6dbdf1fd06d7f9c))
+* **ci:** content-hash composer.lock et sélecteur du test de suppression ([1068b28](https://github.com/OReOF-URCA/oreof/commit/1068b281ead3b1539e71b2673dedeb54a3598961))
+* commande update ([6b829fb](https://github.com/OReOF-URCA/oreof/commit/6b829fb02e1210657855e5c1f276e34a0a1b574d))
+* droit / fiche matière ([ea70a2b](https://github.com/OReOF-URCA/oreof/commit/ea70a2b1ea777e8ac054e607d8c13f7e0a208eb9))
+* form_theme et help ([ada147d](https://github.com/OReOF-URCA/oreof/commit/ada147d69f31a7532462287fb719b0f2069b44b7))
+* **forms:** audit de couverture et suppression des faux succès de sauvegarde ([8c08c52](https://github.com/OReOF-URCA/oreof/commit/8c08c5208f0ba53a0bf710652900e5ae3d450aa0))
+* **forms:** audit feedback coverage and prevent false save confirmations ([8edcab5](https://github.com/OReOF-URCA/oreof/commit/8edcab51470364e35371f9ff5b495c7dcbf112f3))
+* **forms:** généraliser les erreurs de validation et fiabiliser les retours en modale ([a4311d7](https://github.com/OReOF-URCA/oreof/commit/a4311d793cc62a04c0db149cea6dc68ed71f4e8e))
+* **forms:** generalize validation summaries and reliable modal feedback ([3010544](https://github.com/OReOF-URCA/oreof/commit/3010544914183fc61da663d7a0885eb7835d059d))
+* redirect en attendant json ([d7659d3](https://github.com/OReOF-URCA/oreof/commit/d7659d3c2e07d20966a9d02c5e2e2f3f52df47e0))
+
 ## [2.2.0](https://github.com/OReOF-URCA/oreof/compare/v2.1.4...v2.2.0) (2026-10-12)
 
 
