@@ -163,6 +163,33 @@ avec `aria-current="page"` ; onglets, dropdowns, tableaux et progress bars utili
 - [ ] Accessibilité (`label`, `aria-label`, contraste) ; pas de markup de debug
 - [ ] `npm run dev` OK
 
+### Retours de formulaire et modales
+
+Le thème `communs/form_theme_v2.html.twig` rend une synthèse des erreurs à l’ouverture du formulaire (`form_start`)
+via `communs/_form_error_summary.html.twig`. Les erreurs globales et imbriquées restent visibles près de la saisie ;
+les erreurs de champs proposent un lien. Le contrôleur `form-errors` place le focus sur la synthèse lorsqu’elle
+est insérée (page ou modale), puis permet de rejoindre un contrôle, y compris Tom Select et un panneau `tabs`.
+Les widgets spécialisés sans contrôle identifiable restent à adapter au cas par cas.
+
+`form-feedback` sur le body suit les soumissions Turbo : état `aria-busy` restauré après traitement et message
+local persistant si la réponse échoue sans synthèse. Aucun succès générique n’est inventé : les confirmations
+restent celles du serveur. En cas d’erreur réseau, ne pas réessayer automatiquement un POST : le serveur peut
+l’avoir traité. La saisie reste présente ; inviter à vérifier l’état avant un nouvel envoi.
+
+`TurboStreamResponseFactory::streamOpenModalFromTemplates` retourne 422 si un `FormView` invalide est trouvé dans
+le contexte, tant qu’aucun autre statut n’a été demandé. Les réponses restent des Turbo Streams et la modale ne
+se ferme pas. Les erreurs métier des formulaires non Symfony peuvent utiliser `data-form-error-summary` et
+`data-controller="form-errors"` sur leur panneau d’erreurs (exemple : validation de l’offre).
+
+`handleToastResponse` expose `success` en plus de `handled`/`format`. Un HTTP en erreur, un JSON `success:false`
+ou un stream portant les marqueurs d’erreur ne confirme jamais un succès. L’ancien gestionnaire de modales attend
+ce résultat avant de fermer. Un nouvel endpoint doit retourner un vrai statut d’erreur et une synthèse explicite.
+
+Les toasts danger restent affichés jusqu’à fermeture (`timeout: 0`, surcharge explicite possible). Dans une modale
+active, ils sont déplacés dans `modal_body` pour rester perceptibles et accessibles malgré l’arrière-plan inactif.
+Les autres toasts suspendent leur délai au survol et au focus. Une erreur de champ doit figurer dans le formulaire,
+pas uniquement dans un toast.
+
 ### Aides et erreurs de formulaire
 
 Le rendu Symfony reste centralisé dans `templates/communs/form_theme_v2.html.twig` :

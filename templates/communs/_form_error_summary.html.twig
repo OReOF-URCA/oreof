@@ -1,0 +1,29 @@
+{% macro items(field) %}
+    {% import _self as summary %}
+    {% import 'communs/form_theme_v2.html.twig' as labels %}
+    {% for error in field.vars.errors %}
+        <li>
+            {% if field.parent is not null %}
+                {% set fieldLabel = field.vars.label is not empty ? field.vars.label : labels.form_parent_name(field)|trim %}
+                <a href="#{{ field.vars.id }}" data-field-id="{{ field.vars.id }}"
+                   class="underline focus-visible:outline-2 focus-visible:outline-offset-2">
+                    {{ field.vars.translation_domain is same as(false) ? fieldLabel : fieldLabel|trans(field.vars.label_translation_parameters, field.vars.translation_domain) }} : {{ error.message }}
+                </a>
+            {% else %}
+                {{ error.message }}
+            {% endif %}
+        </li>
+    {% endfor %}
+    {% for child in field %}{{ summary.items(child) }}{% endfor %}
+{% endmacro %}
+{% import _self as summary %}
+{% set errors = summary.items(errorForm)|trim %}
+{% if errors != '' %}
+    <div data-controller="form-errors" data-form-error-summary tabindex="-1"
+         role="region" aria-label="Erreurs du formulaire"
+         data-action="click->form-errors#focusField"
+         class="mb-4 rounded-xl border border-danger-400 bg-danger-50 p-4 text-danger-900 dark:border-danger-600 dark:bg-danger-950 dark:text-danger-100 scroll-mt-[calc(var(--page-header-offset,4rem)+1rem)]">
+        <p class="font-semibold">Enregistrement impossible. Corrigez les points suivants :</p>
+        <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">{{ errors|raw }}</ul>
+    </div>
+{% endif %}
