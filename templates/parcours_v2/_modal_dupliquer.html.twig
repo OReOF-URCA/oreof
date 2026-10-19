@@ -62,7 +62,7 @@
 
     {# 4. Formulaire de configuration avec le thème V2 #}
     <form id="modal_dupliquer_form" action="{{ path('parcours_v2_dupliquer_post', {parcours: parcours.id, from: from|default(null)}) }}" method="post" class="space-y-4 pt-1">
-        {{ form_row(form._token) }}
+        {% if form._token is defined %}{{ form_row(form._token) }}{% endif %}
 
         {{ form_row(form.nouveauLibelle) }}
 

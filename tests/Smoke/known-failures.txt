@@ -3,7 +3,6 @@
 # Une route qui recommence à passer fait désormais échouer la CI afin d'obliger à nettoyer cette dette.
 # Les exclusions légitimes sont dans excluded-routes.txt ; cette liste-ci doit tendre vers zéro.
 api_site_web_v2_parcours_cfvu_valid
-api_site_web_v2_parcours_maquette_validee_cfvu
 app_administration_profils_change_droit
 app_administration_profils_liste
 app_campagne_collecte_liste

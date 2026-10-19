@@ -14,7 +14,6 @@ use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
-use App\Repository\TypeDiplomePlateformeAdmissionRepository;
 use App\Repository\TypeDiplomeRepository;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
@@ -46,7 +45,6 @@ final class OffreStatistiquesService
         private readonly AnneeRepository                          $anneeRepository,
         private readonly PlateformeAdmissionRepository            $plateformeAdmissionRepository,
         private readonly PlateformeAdmissionParametreRepository   $plateformeParamRepository,
-        private readonly TypeDiplomePlateformeAdmissionRepository $typeDiplomePlateformeAdmissionRepository,
         private readonly ComposanteRepository                     $composanteRepository,
         private readonly TypeDiplomeRepository                    $typeDiplomeRepository,
         private readonly ChartBuilderInterface                    $chartBuilder,
