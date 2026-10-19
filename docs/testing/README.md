@@ -83,6 +83,12 @@ Vue d'ensemble, branches et déploiement : `docs/ops/ci-cd.md`.
 - Le gabarit `ParcoursRepositoryExampleTest` et `ParcoursControllerExampleTest::testListParcoursPageIsSuccessful`
   sont marqués incomplets (fixtures obsolètes / authentification manquante).
 
+## Audit des formulaires et retours
+
+Voir `audit-form-feedback.md` pour les constats, corrections et points métier restant à traiter (FORM-AUDIT).
+Lancer `node --test tests/javascript/save-data.test.mjs` pour vérifier le contrat du helper saveData et la protection
+d’un indicateur d’étape après échec. Les inventaires statiques ne prouvent pas le montage de chaque contrôleur.
+
 ## Retours de formulaire
 
 - `node --test tests/javascript/form-feedback.test.mjs` : erreurs JSON applicatives, statuts HTTP, streams

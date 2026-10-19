@@ -24,12 +24,23 @@ export default class extends Controller {
       }),
     }
 
-    await fetch(this.urlValue, body).then((response) => response.json()).then((data) => {
-      if (data === true) {
-        callOut('Sauvegarde effectuée', 'success')
-      } else {
-        callOut('Erreur lors de la sauvegarde', 'danger')
+    const input = event.target
+    const previous = !input.checked
+    input.disabled = true
+    try {
+      const response = await fetch(this.urlValue, body)
+      const data = await response.json()
+      if (!response.ok || data !== true) {
+        input.checked = previous
+        callOut('La préférence n’a pas été enregistrée. La valeur précédente est rétablie.', 'danger')
+        return
       }
-    })
+      callOut('Sauvegarde effectuée', 'success')
+    } catch {
+      input.checked = previous
+      callOut('Impossible de confirmer la sauvegarde. Rechargez les préférences pour vérifier leur état.', 'danger')
+    } finally {
+      input.disabled = false
+    }
   }
 }

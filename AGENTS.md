@@ -43,6 +43,7 @@ Icons, Chart.js). Métier universitaire : offre de formation, maquettes, parcour
 | Champs JSON configurables (`JsonConfigType`, `DynamicFieldsType`) | `docs/formulaires/README.md` |
 | Entité, colonne, migration, bascule V2 | `docs/architecture/migration-v2.md` |
 | Refonte structure/validation/rendu de maquette | `docs/architecture/maquette-modulaire.md` |
+| Audit des formulaires, retours usagers, callOut | `docs/testing/audit-form-feedback.md` |
 | Écrire/lancer des tests | `docs/testing/README.md` |
 | Commande `app:*` | `docs/ops/command.md` |
 | Installation, déploiement | `docs/ops/install.md` |

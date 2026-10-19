@@ -163,6 +163,14 @@ avec `aria-current="page"` ; onglets, dropdowns, tableaux et progress bars utili
 - [ ] Accessibilité (`label`, `aria-label`, contraste) ; pas de markup de debug
 - [ ] `npm run dev` OK
 
+### Contrat du helper de saisie legacy
+
+`assets/js/saveData.js` reste utilisé dans v2 et affiche ses messages via callOut/Toast. Il renvoie les données JSON
+en cas de succès, false en cas d’échec HTTP/applicatif/réseau ; un rapport métier `error[]` est conservé pour les
+consommateurs existants mais n’annonce pas un succès. Les wrappers `_save` propagent le résultat et ne recalculent
+pas les indicateurs si le helper signale un échec. Un appelant indirect doit aussi vérifier ce résultat avant de
+fermer, rafraîchir ou rediriger. Voir `docs/testing/audit-form-feedback.md` pour les chemins restant à migrer.
+
 ### Retours de formulaire et modales
 
 Le thème `communs/form_theme_v2.html.twig` rend une synthèse des erreurs à l’ouverture du formulaire (`form_start`)

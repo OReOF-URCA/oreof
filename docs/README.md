@@ -14,6 +14,7 @@ Point d'entrée agents : `AGENTS.md` (racine). Chaque fichier ci-dessous est aut
 | `formulaires/guide-mode-assistant.md` | Guide utilisateur final du mode assistant | doc/aide utilisateur |
 | `architecture/migration-v2.md` | Commande `app:migrate:v2`, étapes, décisions de reprise | schéma BDD, bascule main → V2 |
 | `architecture/maquette-modulaire.md` | Architecture cible maquette par profils de diplôme (non implémentée) | refonte structure/validation/rendu |
+| `testing/audit-form-feedback.md` | Audit des validations, retours usagers, usages callOut et points FORM-AUDIT | poursuivre les corrections de formulaires et fetch |
 | `testing/README.md` | Organisation des tests, helpers, commandes, priorités | écrire/lancer des tests |
 | `ops/install.md` | Installation dev (Docker) et prod | installation, déploiement |
 | `ops/ci-cd.md` | CI GitHub Actions, PHPStan, modèle de branches, déploiement cible (heures creuses, quasi sans coupure), tâches restantes | modifier la CI, préparer une release ou un hotfix |
