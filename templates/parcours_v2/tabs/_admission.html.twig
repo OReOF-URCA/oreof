@@ -30,26 +30,13 @@
             </div>
         </div>
 
-        {# todo: a revoir pour meilleure intégration #}
-        <div>
-            {{ 'parcours_step5.labels.contacts'|trans({}, 'form') }}
-            <i class="fal fa-question-circle ms-1"
-               data-controller="tooltip"
-               data-tooltip-placement-value="bottom"
-               aria-label="{{ 'parcours_step5.helps.contacts.help'|trans({}, 'help') }}"
-               data-bs-original-title="{{ 'parcours_step5.helps.contacts.help'|trans({}, 'help') }}"></i>
-        </div>
-        <div class="mt-2"
-                {# todo: appel modal à adapter à V2 #}
-                {{ stimulus_controller('crud', {
-                    url: path('app_parcours_contacts', {parcours:parcours.id})
-                }) }}
-             data-action="base:refreshListe@window->crud#refreshListe">
-            <div {{ stimulus_target('crud', 'liste') }}>
-            </div>
-        </div>
-
         {{ form_end(form) }}
+
+        <section id="parcours_contacts_section" class="mt-8 mb-6 rounded-xl border border-secondary-200 bg-surface p-5 shadow-xs dark:border-secondary-700">
+            {{ include('parcours_contact/_header.html.twig', { parcours: parcours, contacts: parcours.contacts }) }}
+
+            {{ include('parcours_contact/_liste.html.twig', { parcours: parcours, contacts: parcours.contacts }) }}
+        </section>
     </div>
 
 </turbo-frame>

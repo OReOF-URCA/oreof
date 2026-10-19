@@ -7,6 +7,7 @@ use App\Entity\Parcours;
 use App\Form\ContactType;
 use App\Repository\ContactRepository;
 use App\Utils\JsonRequest;
+use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use JsonException;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,7 +29,8 @@ class ParcoursContactController extends BaseController
     public function new(
         EntityManagerInterface $entityManager,
         Request $request,
-        Parcours $parcours
+        Parcours $parcours,
+        TurboStreamResponseFactory $turboStreamResponseFactory
     ): Response
     {
         $contact = new Contact();
@@ -55,10 +57,32 @@ class ParcoursContactController extends BaseController
             $entityManager->persist($contact);
             $entityManager->flush();
 
+            if (str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')) {
+                return $turboStreamResponseFactory->appendStreams(
+                    $turboStreamResponseFactory->streamToastSuccess('Contact ajouté avec succès', true)->getContent(),
+                    $this->renderView('parcours_contact/turbo/update_contacts_list.stream.html.twig', [
+                        'parcours' => $parcours,
+                        'contacts' => $parcours->getContacts(),
+                    ])
+                );
+            }
+
             return $this->json(true);
         }
 
-        //todo: modal à adapter à V2
+        if (str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html') || $request->isXmlHttpRequest()) {
+            return $turboStreamResponseFactory->streamOpenModalFromTemplates(
+                'Ajouter un contact',
+                'Coordonnées du secrétariat ou contact pour la formation',
+                '_ui/_modal_new_generic.html.twig',
+                [
+                    'contact' => $contact,
+                    'form' => $form->createView(),
+                ],
+                '_ui/_footer_submit_cancel.html.twig'
+            );
+        }
+
         return $this->render('parcours_contact/new.html.twig', [
             'contact' => $contact,
             'form' => $form->createView(),
@@ -70,9 +94,11 @@ class ParcoursContactController extends BaseController
         EntityManagerInterface $entityManager,
         Request $request,
         Contact $contact,
-        ContactRepository $contactRepository
+        ContactRepository $contactRepository,
+        TurboStreamResponseFactory $turboStreamResponseFactory
     ): Response
     {
+        $parcours = $contact->getParcours();
         $form = $this->createForm(ContactType::class, $contact, [
             'action' => $this->generateUrl('app_parcours_contact_edit', ['id' => $contact->getId()]),
         ]);
@@ -81,7 +107,30 @@ class ParcoursContactController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
+            if (str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')) {
+                return $turboStreamResponseFactory->appendStreams(
+                    $turboStreamResponseFactory->streamToastSuccess('Contact modifié avec succès', true)->getContent(),
+                    $this->renderView('parcours_contact/turbo/update_contacts_list.stream.html.twig', [
+                        'parcours' => $parcours,
+                        'contacts' => $parcours?->getContacts() ?? [],
+                    ])
+                );
+            }
+
             return $this->json(true);
+        }
+
+        if (str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html') || $request->isXmlHttpRequest()) {
+            return $turboStreamResponseFactory->streamOpenModalFromTemplates(
+                'Modifier le contact',
+                $contact->getDenomination(),
+                '_ui/_modal_new_generic.html.twig',
+                [
+                    'contact' => $contact,
+                    'form' => $form->createView(),
+                ],
+                '_ui/_footer_submit_cancel.html.twig'
+            );
         }
 
         return $this->render('parcours_contact/new.html.twig', [
@@ -90,20 +139,34 @@ class ParcoursContactController extends BaseController
         ]);
     }
 
-    #[Route('/{id}/duplicate', name: 'app_parcours_contact_duplicate', methods: ['GET'])]
+    #[Route('/{id}/duplicate', name: 'app_parcours_contact_duplicate', methods: ['GET', 'POST'])]
     public function duplicate(
         EntityManagerInterface $entityManager,
-        Contact $contact
+        Request $request,
+        Contact $contact,
+        TurboStreamResponseFactory $turboStreamResponseFactory
     ): Response {
-        //cloner un objet contact qui dispose d'une relation (adresse), duplique aussi la relation
-        //il faut donc cloner l'adresse et la setter sur le nouveau contact
+        $parcours = $contact->getParcours();
         $contactNew = clone $contact;
-        $adresseNew = clone $contact->getAdresse();
+        $adresse = $contact->getAdresse();
+        $adresseNew = $adresse !== null ? clone $adresse : null;
 
         $contactNew->setDenomination($contact->getDenomination() . ' - Copie');
-        $contactNew->setAdresse($adresseNew);
+        if ($adresseNew !== null) {
+            $contactNew->setAdresse($adresseNew);
+        }
         $entityManager->persist($contactNew);
         $entityManager->flush();
+
+        if (str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')) {
+            return $turboStreamResponseFactory->appendStreams(
+                $turboStreamResponseFactory->streamToastSuccess('Contact dupliqué avec succès')->getContent(),
+                $this->renderView('parcours_contact/turbo/update_contacts_list.stream.html.twig', [
+                    'parcours' => $parcours,
+                    'contacts' => $parcours?->getContacts() ?? [],
+                ])
+            );
+        }
 
         return $this->json(true);
     }
@@ -111,15 +174,21 @@ class ParcoursContactController extends BaseController
     /**
      * @throws JsonException
      */
-    #[Route('/{id}', name: 'app_parcours_contact_delete', methods: ['DELETE'])]
+    #[Route('/{id}', name: 'app_parcours_contact_delete', methods: ['POST', 'DELETE'])]
     public function delete(
         EntityManagerInterface $entityManager,
         Request $request,
         Contact $contact,
+        TurboStreamResponseFactory $turboStreamResponseFactory
     ): Response {
+        $parcours = $contact->getParcours();
+        $token = $request->request->get('_token')
+            ?? $request->request->get('csrf')
+            ?? JsonRequest::getValueFromRequest($request, 'csrf');
+
         if ($this->isCsrfTokenValid(
             'delete' . $contact->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
+            (string)$token
         )) {
             $adresse = $contact->getAdresse();
             $adresse?->setAdresseOrigineCopie(null);
@@ -132,7 +201,21 @@ class ParcoursContactController extends BaseController
                 $entityManager->flush();
             }
 
+            if (str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')) {
+                return $turboStreamResponseFactory->appendStreams(
+                    $turboStreamResponseFactory->streamToastSuccess('Contact supprimé avec succès')->getContent(),
+                    $this->renderView('parcours_contact/turbo/update_contacts_list.stream.html.twig', [
+                        'parcours' => $parcours,
+                        'contacts' => $parcours?->getContacts() ?? [],
+                    ])
+                );
+            }
+
             return $this->json(true);
+        }
+
+        if (str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')) {
+            return $turboStreamResponseFactory->streamToastError('Jeton CSRF invalide');
         }
 
         return $this->json(false);

@@ -87,6 +87,11 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                         label: 'menu.config.langues',
                         route: 'app_langue_index',
                     )->inColumn('menu.config.menu_config_globale'),
+                    MenuItem::link(
+                        key: 'administration.referentiels',
+                        label: 'menu.config.referentiels',
+                        route: 'admin_referentiel_index',
+                    )->inColumn('menu.config.menu_config_globale'),
 
                     MenuItem::link(
                         key: 'administration.rythme_formation',

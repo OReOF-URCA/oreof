@@ -1,0 +1,11 @@
+<turbo-stream action="replace" target="parcours_contacts_header">
+    <template>
+        {{ include('parcours_contact/_header.html.twig', { parcours: parcours, contacts: contacts }) }}
+    </template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="parcours_contacts_list">
+    <template>
+        {{ include('parcours_contact/_liste.html.twig', { parcours: parcours, contacts: contacts }) }}
+    </template>
+</turbo-stream>
