@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\DataTable\ReferentielDataTable;
-use App\DataTable\ReferentielValeurDataTable;
 use App\DTO\TranslatableKey;
 use App\Entity\Referentiel;
 use App\Entity\ReferentielValeur;
@@ -30,9 +29,12 @@ final class ReferentielAdminController extends AbstractController
     }
 
     #[Route('/{id}/valeurs', name: 'valeurs', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
-    public function valeurs(Referentiel $referentiel, ReferentielValeurDataTable $table): Response
+    public function valeurs(Referentiel $referentiel, EntityManagerInterface $em): Response
     {
-        return $this->render('referentiel/valeurs.html.twig', ['referentiel' => $referentiel, 'table' => $table]);
+        return $this->render('referentiel/valeurs.html.twig', [
+            'referentiel' => $referentiel,
+            'valeurs' => $em->getRepository(ReferentielValeur::class)->findBy(['referentiel' => $referentiel], ['ordre' => 'ASC']),
+        ]);
     }
 
     #[Route('/{id}/modifier', name: 'edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
