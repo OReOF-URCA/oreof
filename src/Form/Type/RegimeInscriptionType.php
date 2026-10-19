@@ -9,6 +9,7 @@ use App\Referentiel\ReferentielManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\OptionsResolver\Options;
 
 /**
  * Uses the persisted enum backed values for historical records and stable
@@ -28,7 +29,7 @@ final class RegimeInscriptionType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'choices' => function (): array {
+            'choices' => function (Options $options): array {
                 $values = $this->referentiels->choices('regime_inscription');
                 if ($values === []) {
                     foreach (RegimeInscriptionEnum::cases() as $case) {
