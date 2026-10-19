@@ -42,6 +42,9 @@ final class ImportReferentielsCommand extends Command
             $value = (new ReferentielValeur())->setReferentiel($referentiel)
                 ->setCode($valueCode)->setLegacyValue((string) $case->value)
                 ->setLibelle($label)->setOrdre($index)->setSysteme(true);
+            if ($code === 'regime_inscription') {
+                $value->setConfig(['requires_alternance_details' => !in_array($case, [RegimeInscriptionEnum::FI, RegimeInscriptionEnum::FC], true)]);
+            }
             $this->em->persist($value);
         }
     }
