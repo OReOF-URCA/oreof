@@ -89,7 +89,7 @@ final class FormationFieldUpdater extends AbstractFieldUpdater
                 );
             },
             'formation_step1[regimeInscription][]' => function (Formation $p, $v) {
-                $p->setRegimeInscription($this->toEnumArray(RegimeInscriptionEnum::class, $v));
+                $p->setRegimeInscription(\App\Referentiel\RegimeInscription::normalize((array) $v));
             },
             'formation_step1[modalitesAlternance]' => function (Formation $p, $v) {
                 $p->setModalitesAlternance($this->toString($v));
