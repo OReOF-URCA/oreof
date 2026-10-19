@@ -9,6 +9,8 @@
 
 namespace App\Form;
 
+
+use App\Form\Type\LegacyReferentielEnumType;
 use App\Entity\ElementConstitutif;
 use App\Enums\ModaliteEnseignementEnum;
 use App\Form\Type\FloatType;
@@ -24,15 +26,10 @@ class EcStep4Type extends AbstractType
         $isModal = $options['isModal'];
 
         if ($options['modalite'] === null || $options['modalite'] === ModaliteEnseignementEnum::HYBRIDE || $options['modalite'] === ModaliteEnseignementEnum::NON_DEFINI) {
-            $builder->add('modaliteEnseignement', EnumType::class, [
-                'class' => ModaliteEnseignementEnum::class,
-                'choice_label' => fn (ModaliteEnseignementEnum $choice) => match ($choice) {
-                    ModaliteEnseignementEnum::NON_DEFINI => 'Choisir une modalité',
-                    ModaliteEnseignementEnum::PRESENTIELLE => 'En présentiel',
-                    ModaliteEnseignementEnum::DISTANCIELLE => 'En distanciel',
-                    ModaliteEnseignementEnum::HYBRIDE => 'Hybride',
-                },
-                'expanded' => false,
+            $builder->add('modaliteEnseignement', LegacyReferentielEnumType::class, [
+                'enum_class' => ModaliteEnseignementEnum::class,
+                'referentiel' => 'modalite_enseignement',
+                                'expanded' => false,
                 'attr' => ['data-action' => !$isModal ? 'change->ec--structure#saveModaliteEnseignement' : 'change->ec--structureparcours#changeModalite'],
             ]);
         }
