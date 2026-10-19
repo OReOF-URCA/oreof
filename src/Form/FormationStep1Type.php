@@ -9,6 +9,8 @@
 
 namespace App\Form;
 
+
+use App\Form\Type\LegacyReferentielEnumType;
 use App\Entity\Composante;
 use App\Entity\Formation;
 use App\Entity\User;
@@ -93,9 +95,10 @@ class FormationStep1Type extends AbstractType
                 },
                 'attr' => ['data-action' => 'change->formation--step6#changeComposanteInscription']
             ])
-            ->add('regimeInscription', EnumType::class, [
+            ->add('regimeInscription', LegacyReferentielEnumType::class, [
                 'help' => 'Régime d\'inscription',
-                'class' => RegimeInscriptionEnum::class,
+                'enum_class' => RegimeInscriptionEnum::class,
+                'referentiel' => 'regime_inscription',
                 'translation_domain' => 'form',
                 'multiple' => true,
                 'expanded' => true,
