@@ -27,7 +27,7 @@
              ] | json_encode | e("html_attr") }}'>
             {{ form_row(form.regimeInscription) }} {# Contient les targets "trigger" #}
 
-            <div data-conditional-field-target="container">
+            <div data-conditional-field-target="container" class="hidden" hidden>
                 {{ form_row(form.modalitesAlternance) }}
             </div>
         </div>
