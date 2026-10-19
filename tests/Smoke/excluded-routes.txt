@@ -9,3 +9,4 @@ ux_datatables_ajax_data | ajax | Endpoint technique AJAX du composant DataTable,
 app_conseils_documents_download | request-context | Téléchargement dépendant des filtres/processus sélectionnés dans la requête
 app_commentaire_export | external-service | Génération PDF nécessitant Gotenberg
 app_competence_export_bcc | external-service | Génération PDF nécessitant Gotenberg
+app_plaquette_apercu | external-service | Génération PDF nécessitant Gotenberg

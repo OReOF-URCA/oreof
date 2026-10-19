@@ -15,7 +15,6 @@ use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
-use App\Repository\TypeDiplomePlateformeAdmissionRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\Offre\OffreStatistiquesService;
 use PHPUnit\Framework\TestCase;
@@ -33,7 +32,6 @@ final class OffreStatistiquesServiceTest extends TestCase
         $anneeRepo = $this->createStub(AnneeRepository::class);
         $plateformeRepo = $this->createStub(PlateformeAdmissionRepository::class);
         $plateformeParamRepo = $this->createStub(PlateformeAdmissionParametreRepository::class);
-        $typeDiplomePlateformeRepo = $this->createStub(TypeDiplomePlateformeAdmissionRepository::class);
         $composanteRepo = $this->createStub(ComposanteRepository::class);
         $typeDiplomeRepo = $this->createStub(TypeDiplomeRepository::class);
         $chartBuilder = $this->createStub(ChartBuilderInterface::class);
@@ -47,7 +45,6 @@ final class OffreStatistiquesServiceTest extends TestCase
             $anneeRepo,
             $plateformeRepo,
             $plateformeParamRepo,
-            $typeDiplomePlateformeRepo,
             $composanteRepo,
             $typeDiplomeRepo,
             $chartBuilder
@@ -206,7 +203,6 @@ final class OffreStatistiquesServiceTest extends TestCase
         $plateformeParamRepo = $this->createStub(PlateformeAdmissionParametreRepository::class);
         $plateformeParamRepo->method('findByCampagneIndexedByAnnee')->willReturn([]);
 
-        $typeDiplomePlateformeRepo = $this->createStub(TypeDiplomePlateformeAdmissionRepository::class);
         $composanteRepo = $this->createStub(ComposanteRepository::class);
         $typeDiplomeRepo = $this->createStub(TypeDiplomeRepository::class);
         $chartBuilder = $this->createStub(ChartBuilderInterface::class);
@@ -218,7 +214,6 @@ final class OffreStatistiquesServiceTest extends TestCase
             $anneeRepo,
             $plateformeRepo,
             $plateformeParamRepo,
-            $typeDiplomePlateformeRepo,
             $composanteRepo,
             $typeDiplomeRepo,
             $chartBuilder

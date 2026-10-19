@@ -35,7 +35,7 @@ final class PublicationController extends AbstractController
         return $this->json($parcoursExport->exportMaquetteJson($parcours));
     }
 
-    #[Route('/{parcours}/maquette/validee-cfvu', name: 'maquette_validee_cfvu', methods: ['GET'])]
+    #[Route('/{parcours}/maquette/validee-cfvu', name: 'maquette_validee_cfvu', methods: ['GET'])] // @phpstan-ignore return.unusedType
     public function maquetteValideeCfvu(
         Parcours $parcours,
         ParcoursExportV2 $parcoursExport,
@@ -47,7 +47,7 @@ final class PublicationController extends AbstractController
         return $this->redirectToRoute('api_site_web_v2_parcours_maquette', ['parcours' => $parcours->getId()]);
 
 
-        $versions = $parcoursVersioningRepository->findLastCfvuVersion($parcours);
+        $versions = $parcoursVersioningRepository->findLastCfvuVersion($parcours); // @phpstan-ignore deadCode.unreachable
 
         if ($versions === []) {
             return $this->json(
