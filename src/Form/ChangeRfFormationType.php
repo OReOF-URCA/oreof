@@ -29,7 +29,6 @@ class ChangeRfFormationType extends AbstractType
                 },
             ])
             ->add('user', InlineCreateEntitySelectType::class, [
-                'help' => '',
                 'class' => User::class,
                 'choice_label' => 'display',
                 'query_builder' => function ($er) {

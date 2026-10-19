@@ -54,7 +54,7 @@
     <div class="space-y-2 group mb-4">
         {{ form_label(form) }}
         {{ form_widget(form, {attr: widgetAttr}) }}
-        {{ helpContent }}
+        {{ helpContent|raw }}
         {{ form_errors(form) }}
     </div>
 {% endblock form_row %}
@@ -149,40 +149,17 @@
     {% endif %}
 {% endblock choice_widget_collapsed %}
 
-{# {% block textarea_auto_save_row %} #}
-{#    {%- set widget_attr = {} -%} #}
-{#    {%- if help is not empty -%} #}
-{#        {%- set widget_attr = {attr: {'aria-describedby': id ~"_help"}} -%} #}
-{#    {%- endif -%} #}
-{#    <div{% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %} {{ stimulus_controller('textarea', { #}
-{#        'maxLength': maxLength, #}
-{#    }) }} #}
-{#            class="mt-3"> #}
-{#        {{- form_label(form) -}} #}
-{#        {{- form_errors(form) -}} #}
-{#        {{- form_widget(form, widget_attr) -}} #}
-{#        {%- if help is not empty -%} #}
-{#            {%- set help_attr = help_attr|merge({class: (help_attr.class|default('') ~ ' text-small')|trim}) -%} #}
-{#            <div id="{{ id }}_help"{% with { attr: help_attr } %}{{ block('attributes') }}{% endwith %}> #}
-{#                <span {{ stimulus_target('textarea', 'texte') }} class="text-secondary"></span> #}
-{#            </div> #}
-{#        {%- endif -%} #}
-{#    </div> #}
-{# {% endblock %} #}
-
 {# --- AIDE (HELP) --- #}
 {% block form_help %}
-
-
     {% import _self as macros %}
-    {% set help = macros.resolved_help_key(form, help, help_translation_parameters)|trim %}
+    {% set helpContent = macros.resolved_help_content(form, help, help_translation_parameters, translation_domain, help_html|default(false)) %}
 
-    {% if help is defined and help|trim|trans({}, 'help') != '' %}
+    {% if helpContent is not empty and helpContent|trim != '' %}
         <p id="{{ id }}_help" class="text-xs text-secondary-600 dark:text-secondary-300 italic mt-1 pl-1 flex items-start gap-2">
             <span class="flex-shrink-0 w-5 h-5 bg-secondary-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
                 <twig:UX:Icon name="icon:info" aria-hidden="true"/>
             </span>
-            <span>{{ help|trim|trans({}, 'help')|raw }}</span>
+            <span>{{ helpContent|raw }}</span>
         </p>
     {% endif %}
 {% endblock form_help %}
@@ -270,19 +247,6 @@
 
 {# --- GROUPES D'OPTIONS (checkbox/radio) --- #}
 
-{# {% block choice_widget_expanded %} #}
-{#    #}{# Container principal qui aligne les groupes Oui et Non #}
-{#    <div {{ block('widget_container_attributes') }} class="flex flex-row items-center gap-6"> #}
-{#        {%- for child in form %} #}
-{#            #}{# Container individuel pour CHAQUE radio (ex: le bouton + le mot "Oui") #}
-{#            <div class="flex items-center gap-2"> #}
-{#                {{- form_widget(child) -}} #}
-{#                {{- form_label(child) -}} #}
-{#            </div> #}
-{#        {% endfor -%} #}
-{#    </div> #}
-{# {% endblock choice_widget_expanded %} #}
-
 {% block choice_widget_expanded %}
     {# On récupère le nombre de colonnes, par défaut 1 si non défini #}
     {% set cols = attr.columns|default(4) %}
@@ -359,35 +323,6 @@
     </div>
 {% endblock %}
 
-{# {% block inline_create_entity_select_widget %} #}
-{#    <div class="field-group space-y-2" data-controller="inline-create"> #}
-{#        <div class="flex justify-between items-center"> #}
-{#            <label class="text-[10px] font-black text-secondary-400 uppercase tracking-widest"> #}
-{#                {{ form.vars.label ?: 'Sélection' }} #}
-{#            </label> #}
-
-{#            <button type="button" #}
-{#                    data-action="click->inline-create#toggleNewField" #}
-{#                    class="text-[10px] font-black text-indigo-600 hover:underline"> #}
-{#                + Créer nouveau #}
-{#            </button> #}
-{#        </div> #}
-
-{#        {{ form_widget(form.entity, { #}
-{#            attr: { #}
-{#                class: 'select-field w-full p-4 bg-white border border-secondary-200 rounded-2xl font-semibold appearance-none cursor-pointer focus:ring-4 focus:ring-indigo-50', #}
-{#                'data-inline-create-target': 'select' #}
-{#            } #}
-{#        }) }} #}
-
-{#        {{ form_widget(form.new, { #}
-{#            attr: { #}
-{#                class: 'input-field hidden w-full p-4 bg-emerald-50 border border-emerald-200 rounded-2xl font-semibold outline-none' #}
-{#            } #}
-{#        }) }} #}
-{#    </div> #}
-{# {% endblock %} #}
-
 
 {% block inline_create_entity_select_row %}
     {% set helpContent = form_help(form) %}
@@ -425,7 +360,7 @@
 
             })
         }) }}
-        {{ helpContent }}
+        {{ helpContent|raw }}
         {{ form_errors(form) }}
     </div>
 {% endblock %}
@@ -442,78 +377,6 @@
     >
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-{{ columns|default(3) }} gap-4">
-            {#            {% for child in form %} #}
-            {#                {% set subtitle = child.vars.attr['data-card-subtitle'] ?? '' %} #}
-            {#                {% set icon = child.vars.attr['data-card-icon'] ?? '' %} #}
-            {#                {% set isDisabled = (child.vars.attr['disabled'] ?? false) ? true : false %} #}
-            {#                {% set childId = child.vars.id %} #}
-
-
-            {#                <label for="{{ childId }}" class="relative flex flex-col p-4 bg-white border border-secondary-200 rounded-sm cursor-pointer shadow-sm hover:border-indigo-300 transition-all group"> #}
-
-            {#                    {{ form_widget(child, { #}
-            {#                    id: childId, #}
-            {#                    attr: { #}
-            {#                    class: 'sr-only peer', #}
-            {#                    name: full_name, #}
-            {#                    'data-action': on_change_action ?: 'change->cards-choice#changed' #}
-            {#                    } #}
-            {#                    }) }} #}
-
-            {#                    #}{# Cet élément devient le "fond" qui réagit au peer #}
-            {#                    <div class="absolute inset-0 border border-transparent rounded-sm peer-checked:border-indigo-600 peer-checked:ring-2 peer-checked:ring-indigo-100 pointer-events-none transition-all"></div> #}
-
-            {#                    <div class="relative z-10"> #}{# On met le contenu dans un z-index pour rester au dessus du fond #}
-            {#                        <div class="flex justify-between items-start mb-2"> #}
-            {#            <span class="w-10 h-10 bg-secondary-50 text-secondary-600 rounded-sm flex items-center justify-center peer-checked:group-[]:bg-indigo-600 peer-checked:group-[]:text-white transition-colors mr-3 p-1"> #}
-            {#                {% if icon %} #}
-            {#                    <i class="{{ icon }} text-xl" aria-hidden="true"></i> #}
-            {#                {% endif %} #}
-            {#            </span> #}
-
-            {#            <div class="h-4 w-4 rounded-full border-2 border-secondary-300 peer-checked:group-[]:border-indigo-600 peer-checked:group-[]:bg-indigo-600 flex items-center justify-center transition-all"> #}
-            {#                <div class="h-1.5 w-1.5 rounded-full bg-white opacity-0 peer-checked:group-[]:opacity-100 transition-opacity"></div> #}
-            {#            </div> #}
-            {#        </div> #}
-
-            {#        <span class="font-bold text-secondary-900 leading-tight block">{{ child.vars.label|trans }}</span> #}
-
-            {#        {% if subtitle %} #}
-            {#            <span class="text-xs text-secondary-500 leading-tight mt-1 block"> #}
-            {#                {{ subtitle|trans }} #}
-            {#            </span> #}
-            {#        {% endif %} #}
-            {#    </div> #}
-            {# </label> #}
-
-            {#                <label for="{{ childId }}" class="relative flex flex-col p-4 bg-white border border-secondary-200 rounded-sm cursor-pointer shadow-sm hover:border-indigo-300 transition-all has-[:checked]:border-indigo-600 has-[:checked]:ring-2 has-[:checked]:ring-indigo-100 group"> #}
-            {#                    {{ form_widget(child, #}{# } #}
-            {#                        attr: #}{# } #}
-            {#                            class: 'sr-only', #}
-            {#                            'data-action': on_change_action ?: 'change->cards-choice#changed' #}
-            {#                        } #}
-            {#                    }) }} #}
-            {#                    <input type="radio" name="mccc_type" value="ct" class="sr-only"> #}
-            {#                    <div class="flex justify-between items-start mb-2"> #}
-            {#                        <span class="w-10 h-10 bg-secondary-50 text-secondary-600 rounded-sm flex items-center justify-center group-has-[:checked]:bg-indigo-600 group-has-[:checked]:text-white transition-colors mr-3 p-1"> #}
-            {#                            {% if icon %} #}
-            {#                                <i class="{{ icon }} text-xl" aria-hidden="true"></i> #}
-            {#                            {% endif %} #}
-            {#                        </span> #}
-            {#                        <div class="h-4 w-4 rounded-full border-2 border-secondary-300 group-has-[:checked]:border-indigo-600 group-has-[:checked]:bg-indigo-600 flex items-center justify-center"> #}
-            {#                            <div class="h-1.5 w-1.5 rounded-full bg-white"></div> #}
-            {#                        </div> #}
-            {#                    </div> #}
-            {#                    <span class="font-bold text-secondary-900">{{ child.vars.label }}</span> #}
-            {#                    <span class="text-xs text-secondary-500 leading-tight"> #}
-            {#                         {% if subtitle %} #}
-            {#                            {{ subtitle }} #}
-            {#                        {% endif %} #}
-            {#                    </span> #}
-            {#                </label> #}
-            {#            {% endfor %} #}
-
-
             {% for child in form %}
                 {% set subtitle = child.vars.attr['data-card-subtitle'] ?? '' %}
                 {% set icon = child.vars.attr['data-card-icon'] ?? '' %}
@@ -557,50 +420,6 @@
                     </label>
                 </div>
             {% endfor %}
-            {# todo: a reprendre pour le bon rendu CSS avec le picto et le checked coché... : https://gemini.google.com/share/854a0d72406c #}
-            {#                {% for child in form %} #}
-            {#                    {% set subtitle = child.vars.attr['data-card-subtitle'] ?? '' %} #}
-            {#                    {% set icon = child.vars.attr['data-card-icon'] ?? '' %} #}
-            {#                    {% set childId = child.vars.id %} #}
-
-            {#                    #}{# On place le 'group' ici pour qu'il soit UNIQUE à chaque carte #}
-            {#                    <label for="{{ childId }}" class="group relative flex flex-col p-4 bg-white border-2 border-secondary-200 rounded-lg cursor-pointer transition-all #}
-            {#        has-[:checked]:border-indigo-600 has-[:checked]:ring-4 has-[:checked]:ring-indigo-50"> #}
-
-            {#                        {{ form_widget(child, { #}
-            {#                            id: childId, #}
-            {#                            attr: { #}
-            {#                                class: 'sr-only', #}
-            {#                                name: full_name, #}
-            {#                                'data-action': on_change_action ?: 'change->cards-choice#changed' #}
-            {#                            } #}
-            {#                        }) }} #}
-
-            {#                        <div class="flex justify-between items-start mb-3"> #}
-            {#                            #}{# ICI : On dit à la div de l'icône de ne regarder QUE si son propre parent direct est coché #}
-            {#                            <div class="w-10 h-10 rounded-md flex items-center justify-center transition-colors #}
-            {#                bg-secondary-100 text-secondary-500 #}
-            {#                group-has-[:checked]:bg-indigo-600 group-has-[:checked]:text-white"> #}
-
-            {#                                {% if icon %} #}
-            {#                                    <i class="{{ icon }} text-lg"></i> #}
-            {#                                {% endif %} #}
-            {#                            </div> #}
-
-            {#                            #}{# IDEM pour le cercle radio #}
-            {#                            <div class="h-5 w-5 rounded-full border-2 border-secondary-300 flex items-center justify-center transition-all #}
-            {#                group-has-[:checked]:border-indigo-600 group-has-[:checked]:bg-indigo-600"> #}
-            {#                                <div class="h-2 w-2 rounded-full bg-white opacity-0 group-has-[:checked]:opacity-100 transition-opacity"></div> #}
-            {#                            </div> #}
-            {#                        </div> #}
-
-            {#                        <span class="font-bold text-secondary-900 leading-tight">{{ child.vars.label|trans }}</span> #}
-
-            {#                        {% if subtitle %} #}
-            {#                            <span class="text-xs text-secondary-500 mt-1 italic">{{ subtitle|trans }}</span> #}
-            {#                        {% endif %} #}
-            {#                    </label> #}
-            {#                {% endfor %} #}
         </div>
 
         {% if form.vars.help %}
@@ -635,7 +454,7 @@
             {{ form_label(form) }}
         </div>
     </div>
-    {{ helpContent }}
+    {{ helpContent|raw }}
 {% endblock %}
 
 {# Widget pour le type JsonConfig #}
@@ -772,11 +591,50 @@
 
 {% macro resolved_help_key(form, help, parameters) %}
     {%- import _self as macros -%}
-    {%- if help is not empty -%}
+    {%- if help is not empty and help != '-' -%}
         {{- help -}}
     {%- elseif parameters['%transition%']|default(null) and parameters['%field%']|default(null) -%}
         {{- 'workflow.' ~ parameters['%transition%'] ~ '.' ~ parameters['%field%'] ~ '.help' -}}
     {%- else -%}
         {{- macros.form_parent_help_name(form) -}}
     {%- endif -%}
+{% endmacro %}
+
+{% macro resolved_help_content(form, help, parameters, translation_domain, help_html) %}
+    {%- apply spaceless -%}
+        {%- import _self as macros -%}
+        {%- if help is same as(false) -%}
+            {# Aide explicitement désactivée #}
+        {%- elseif help is not empty and help != '-' -%}
+            {%- if translation_domain is same as(false) -%}
+                {{- help_html ? help|raw : help -}}
+            {%- else -%}
+                {{- help|trans(parameters|default({}), translation_domain|default('help'))|raw -}}
+            {%- endif -%}
+        {%- elseif parameters['%transition%']|default(null) and parameters['%field%']|default(null) -%}
+            {%- set wf_key = 'workflow.' ~ parameters['%transition%'] ~ '.' ~ parameters['%field%'] ~ '.help' -%}
+            {%- set wf_trans = wf_key|trans(parameters|default({}), 'help') -%}
+            {%- if wf_trans != wf_key and wf_trans|trim != '' -%}
+                {{- wf_trans|raw -}}
+            {%- endif -%}
+        {%- else -%}
+            {%- set key1 = (macros.form_parent_help_name(form) ~ '')|trim -%}
+            {%- set trans1 = key1 != '' ? key1|trans(parameters|default({}), 'help') : '' -%}
+            {%- if trans1 != key1 and trans1|trim != '' -%}
+                {{- trans1|raw -}}
+            {%- elseif key1 ends with '.help' -%}
+                {%- set key2 = key1|slice(0, -5) -%}
+                {%- set trans2 = key2 != '' ? key2|trans(parameters|default({}), 'help') : '' -%}
+                {%- if trans2 != key2 and trans2|trim != '' -%}
+                    {{- trans2|raw -}}
+                {%- endif -%}
+            {%- else -%}
+                {%- set key3 = key1 ~ '.help' -%}
+                {%- set trans3 = key1 != '' ? key3|trans(parameters|default({}), 'help') : '' -%}
+                {%- if trans3 != key3 and trans3|trim != '' -%}
+                    {{- trans3|raw -}}
+                {%- endif -%}
+            {%- endif -%}
+        {%- endif -%}
+    {%- endapply -%}
 {% endmacro %}
