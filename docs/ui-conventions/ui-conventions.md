@@ -189,3 +189,60 @@ Les toasts danger restent affichés jusqu’à fermeture (`timeout: 0`, surcharg
 active, ils sont déplacés dans `modal_body` pour rester perceptibles et accessibles malgré l’arrière-plan inactif.
 Les autres toasts suspendent leur délai au survol et au focus. Une erreur de champ doit figurer dans le formulaire,
 pas uniquement dans un toast.
+
+### Aides et erreurs de formulaire
+
+Le rendu Symfony reste centralisé dans `templates/communs/form_theme_v2.html.twig` :
+- Les labels simples pointent vers l’ID du champ ; le label de création inline pointe vers le select d’entité.
+- Les lignes standard, checkbox et création inline associent au widget uniquement les aides effectivement rendues
+  (`<id>_help`) et les erreurs présentes (`<id>_errors`), en conservant les descriptions fournies par l’appelant.
+  Un champ avec erreurs reçoit `aria-invalid="true"`. Les choix développés transmettent les descriptions aux options.
+- La résolution des clés d’aide (dont celles du workflow) est commune ; le domaine `help` est conservé.
+- Les erreurs sont lisibles en clair/sombre, sans capitales forcées. Les checkbox n’imbriquent plus deux labels.
+  L’éditeur Trix possède l’ID attendu par son label et reçoit les attributs du widget.
+
+Les composants hors Symfony Form (`Select`, formulaire de recherche) relient aussi leur aide via `aria-describedby`.
+Un widget personnalisé qui n’utilise pas le rendu standard doit propager les attributs reçus vers son contrôle
+ou son groupe accessible ; cette PR ne constitue pas une validation exhaustive de tous les widgets spécialisés.
+
+### Statuts de sauvegarde des capacités
+
+`offre_v2/configurer.html.twig` utilise une zone `role="status"` / `aria-live="polite"` atomique : état initial,
+modifications en attente, enregistrement, succès ou échec. Les messages restent visibles jusqu’à l’état suivant.
+En cas d’erreur, un bouton « Réessayer » relance la sauvegarde ; la saisie seule n’efface pas l’erreur affichée.
+Le contrôleur `autosave_capacites` compare la révision envoyée à la saisie courante avant d’annoncer un succès.
+Les messages du serveur sont insérés comme texte. Les écouteurs sont retirés à la déconnexion Stimulus.
+
+### Filtres repliables
+
+`components/filter_panel.html.twig` utilise un bouton `Button` (`data-crud-panel-toggle`) avec `aria-expanded`
+et `aria-controls`, relié au bloc de champs identifié par `fieldsId`. Le contrôleur `filter-panel` synchronise
+cet état avec la visibilité (`hidden`), sans checkbox masquée. Les filtres actifs ouvrent le panneau au rendu initial.
+
+Les blocs `actions` redéfinis dans `formation/_liste.html.twig` et `formation/_fichesListe.html.twig` utilisent
+les mêmes attributs et variables (`toggleId`, `fieldsId`, `isOpen`). Garder ces hooks lors d’une surcharge.
+Le CRUD conserve le panneau pendant les rechargements AJAX ; l’ouverture choisie et les IDs restent stables,
+seul le contenu du bouton (compteur) est rafraîchi par `_swapAroundPanel`.
+
+Navigation principale et lien d’évitement : voir `docs/composants/navigation.md`.
+
+### Navigation clavier des composants existants
+
+- `dropdown_actions` / contrôleur `dropdown` : ouverture au clic ou avec Haut/Bas, focus sur la première/dernière
+  action, déplacement Haut/Bas et Début/Fin (actions désactivées ignorées), Échap ferme et rend le focus au bouton.
+  Tab reprend la navigation depuis le déclencheur malgré le menu déplacé dans `body`. Les IDs et `aria-controls`
+  sont reliés au montage. Le positionnement, les formulaires POST/CSRF et les hooks Turbo restent inchangés.
+- `tabs` : Gauche/Droite (sens RTL respecté), Début/Fin ; Haut/Bas pour un `tablist` avec
+  `aria-orientation="vertical"`. L’activation au clavier conserve le comportement de fragment d’URL existant.
+  Les touches provenant des champs des panneaux ne changent pas d’onglet.
+- Modale Turbo (`templates/_ui/modal_wrapper.html.twig`, `modalturbo_controller.js`) : dialogue nommé par
+  `modal_title`, focus initial sur le wrapper, Tab/Shift+Tab confinés et arrière-plan `inert` pendant l’ouverture.
+  La fermeture restaure le focus (bouton du menu si ouverture depuis une action), l’état inert et le verrouillage
+  du défilement antérieurs ; elle annule aussi le chargement en cours. Échap ferme d’abord une liste Tom Select
+  ouverte ; les menus d’actions consomment Échap avant la modale. Les popups possédés par la modale peuvent rester
+  dans `body` : pas de migration vers `<dialog>`. Les IDs de fragments et l’événement `modal:close` sont conservés.
+- Breadcrumb : le séparateur est décoratif (`aria-hidden`) ; seul le dernier niveau porte `aria-current="page"`,
+  y compris si d’autres niveaux ne possèdent pas de route. Les liens ont un focus visible.
+
+Vérifier sur l’application : clavier dans une liste avec actions et POST, modale ouverte depuis un menu, formulaires
+avec Tom Select et retour du focus après fermeture ; navigation Turbo et thèmes clair/sombre.

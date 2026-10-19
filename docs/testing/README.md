@@ -94,3 +94,29 @@ Vérification navigateur : formulaire standard et modale avec erreurs globales/c
 Tom Select et onglets, saisie conservée, réponse 422, erreur réseau, retour 403/session expirée, confirmation serveur,
 modales legacy, toast danger dans la modale et pause des autres toasts au focus. Le marquage HTTP ne remplace pas
 une validation métier côté serveur.
+
+## Régressions de sauvegarde automatique
+
+`node --test tests/javascript/autosave-capacites.test.mjs` couvre les statuts, les messages serveur traités comme
+texte, la réponse à une ancienne révision, le succès courant, l’échec avec retry et la déconnexion avec réponse tardive.
+Tests isolés sans dépendance ajoutée ; ils ne valident pas le rendu Twig ni les annonces d’un lecteur d’écran.
+
+Vérifier dans l’application : labels cliquables, aides/erreurs reliées dans le thème v2 (texte, select, checkbox,
+choix développés, création inline, Trix), descriptions personnalisées conservées ; sauvegarde lente pendant saisie,
+réponse JSON/Turbo Stream, coupure réseau puis Réessayer, navigation Turbo et thèmes clair/sombre.
+
+## Régressions clavier de navigation et filtres
+
+Lancer `node --test tests/javascript/navigation-filters.test.mjs` (runner Node natif, aucune dépendance ajoutée).
+Les scénarios isolés couvrent le dépliage, les attributs ARIA, les transitions de focus, Échap, le tactile, le
+maintien au survol avec focus clavier et l’état des filtres au montage. Ils ne remplacent pas un test navigateur.
+
+À vérifier dans l’application : Tab depuis le lien d’évitement ; lien de section puis bouton de déploiement ;
+Entrée/Espace/Échap ; navigation dans les méga-menus ; menus compte et campagne ; tactile ; filtres des listes
+formations/fiches matières, avec recherche AJAX, compteur, reset, thème sombre et en-tête sticky.
+
+## Régressions clavier JavaScript
+
+`node --test tests/javascript/ui-accessibility.test.mjs` lance les scénarios des contrôleurs dropdown, tabs et
+modalturbo avec le runner natif Node (sans dépendance supplémentaire). Ces tests isolent les décisions clavier
+et le nettoyage ; ils ne remplacent pas une vérification DOM, Stimulus/Turbo et navigateur avec Tom Select.

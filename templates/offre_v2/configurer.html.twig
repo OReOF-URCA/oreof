@@ -154,10 +154,13 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <div data-autosave-capacites-target="status" class="text-xs font-semibold flex items-center gap-1 opacity-0 transition-opacity duration-300">
+                    <div data-autosave-capacites-target="status" role="status" aria-live="polite" aria-atomic="true" class="text-xs font-semibold flex items-center gap-1">
                     </div>
 
                     {% if can_edit %}
+                        <twig:Button type="button" variant="danger" size="sm" label="Réessayer"
+                                     extraClass="hidden" data-autosave-capacites-target="retry"
+                                     dataAction="click->autosave-capacites#retry" />
                         <button type="submit" class="rounded-lg border border-secondary-200 px-3 py-1.5 text-xs font-medium hover:bg-secondary-50 cursor-pointer dark:border-secondary-700 dark:bg-secondary-900 dark:hover:border-secondary-300 dark:hover:text-secondary-100">
                             Sauvegarder en brouillon
                         </button>
