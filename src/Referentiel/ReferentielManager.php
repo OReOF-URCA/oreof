@@ -36,6 +36,23 @@ final class ReferentielManager
         return $referentiel === null ? null : $this->em->getRepository(ReferentielValeur::class)->findOneBy(['referentiel' => $referentiel, 'legacyValue' => (string) $value]);
     }
 
+    /**
+     * Persisted values for legacy regimes are the original enum backed values.
+     * Custom regimes use their stable referential code.
+     *
+     * @return array<string, string> persisted key => display label
+     */
+    public function choices(string $referentielCode): array
+    {
+        $choices = [];
+        foreach ($this->getValeurs($referentielCode) as $value) {
+            $key = $value->getLegacyValue() ?? $value->getCode();
+            $choices[$key] = $value->getLibelle();
+        }
+
+        return $choices;
+    }
+
     public function label(string $referentielCode, string|int|null $value): ?string
     {
         if ($value === null) { return null; }
