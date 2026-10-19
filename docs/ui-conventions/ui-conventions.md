@@ -162,3 +162,24 @@ avec `aria-current="page"` ; onglets, dropdowns, tableaux et progress bars utili
 - [ ] Hover, disabled et dark mode traités ; tableaux responsives
 - [ ] Accessibilité (`label`, `aria-label`, contraste) ; pas de markup de debug
 - [ ] `npm run dev` OK
+
+### Navigation clavier des composants existants
+
+- `dropdown_actions` / contrôleur `dropdown` : ouverture au clic ou avec Haut/Bas, focus sur la première/dernière
+  action, déplacement Haut/Bas et Début/Fin (actions désactivées ignorées), Échap ferme et rend le focus au bouton.
+  Tab reprend la navigation depuis le déclencheur malgré le menu déplacé dans `body`. Les IDs et `aria-controls`
+  sont reliés au montage. Le positionnement, les formulaires POST/CSRF et les hooks Turbo restent inchangés.
+- `tabs` : Gauche/Droite (sens RTL respecté), Début/Fin ; Haut/Bas pour un `tablist` avec
+  `aria-orientation="vertical"`. L’activation au clavier conserve le comportement de fragment d’URL existant.
+  Les touches provenant des champs des panneaux ne changent pas d’onglet.
+- Modale Turbo (`templates/_ui/modal_wrapper.html.twig`, `modalturbo_controller.js`) : dialogue nommé par
+  `modal_title`, focus initial sur le wrapper, Tab/Shift+Tab confinés et arrière-plan `inert` pendant l’ouverture.
+  La fermeture restaure le focus (bouton du menu si ouverture depuis une action), l’état inert et le verrouillage
+  du défilement antérieurs ; elle annule aussi le chargement en cours. Échap ferme d’abord une liste Tom Select
+  ouverte ; les menus d’actions consomment Échap avant la modale. Les popups possédés par la modale peuvent rester
+  dans `body` : pas de migration vers `<dialog>`. Les IDs de fragments et l’événement `modal:close` sont conservés.
+- Breadcrumb : le séparateur est décoratif (`aria-hidden`) ; seul le dernier niveau porte `aria-current="page"`,
+  y compris si d’autres niveaux ne possèdent pas de route. Les liens ont un focus visible.
+
+Vérifier sur l’application : clavier dans une liste avec actions et POST, modale ouverte depuis un menu, formulaires
+avec Tom Select et retour du focus après fermeture ; navigation Turbo et thèmes clair/sombre.
