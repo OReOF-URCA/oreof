@@ -25,7 +25,11 @@ final class RegimeInscription
         return array_values(array_unique(array_map(self::key(...), $values)));
     }
 
-    /** @return list<RegimeInscriptionEnum> */
+    /**
+     * @deprecated Compatibility adapter: custom referential keys are discarded.
+     *             Use normalize() or entity getRegimeInscriptionValues() instead.
+     * @return list<RegimeInscriptionEnum>
+     */
     public static function legacyCases(array $values): array
     {
         $cases = [];
