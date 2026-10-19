@@ -36,7 +36,12 @@ final class RegimeInscriptionType extends AbstractType
                     }
                 }
 
-                return array_flip($values);
+                $choices = [];
+                foreach ($values as $key => $label) {
+                    $choices[$label . ' [' . $key . ']'] = (string) $key;
+                }
+
+                return $choices;
             },
             'choice_translation_domain' => false,
             'multiple' => true,
