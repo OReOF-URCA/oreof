@@ -1,10 +1,17 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Controller;
 
+use App\DataTable\ReferentielDataTable;
+use App\DataTable\ReferentielValeurDataTable;
+use App\DTO\TranslatableKey;
 use App\Entity\Referentiel;
 use App\Entity\ReferentielValeur;
 use App\Form\Referentiel\ReferentielType;
 use App\Form\Referentiel\ReferentielValeurType;
+use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,62 +23,94 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 final class ReferentielAdminController extends AbstractController
 {
-    #[Route('', name: 'index', methods: ['GET'])]
-    public function index(EntityManagerInterface $em): Response
+    #[Route('', name: 'index', methods: ['GET', 'POST'])]
+    public function index(ReferentielDataTable $table): Response
     {
-        return $this->render('referentiel/index.html.twig', [
-            'referentiels' => $em->getRepository(Referentiel::class)->findBy([], ['libelle' => 'ASC']),
-        ]);
+        return $this->render('referentiel/index.html.twig', ['table' => $table]);
     }
 
-    #[Route('/{id}/valeurs', name: 'valeurs', requirements: ['id' => '\\d+'], methods: ['GET'])]
-    public function valeurs(Referentiel $referentiel, EntityManagerInterface $em): Response
+    #[Route('/{id}/valeurs', name: 'valeurs', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
+    public function valeurs(Referentiel $referentiel, ReferentielValeurDataTable $table): Response
     {
-        return $this->render('referentiel/valeurs.html.twig', [
-            'referentiel' => $referentiel,
-            'valeurs' => $em->getRepository(ReferentielValeur::class)->findBy(['referentiel' => $referentiel], ['ordre' => 'ASC']),
-        ]);
+        return $this->render('referentiel/valeurs.html.twig', ['referentiel' => $referentiel, 'table' => $table]);
     }
 
-    #[Route('/{id}/modifier', name: 'edit', requirements: ['id' => '\\d+'])]
-    public function edit(Referentiel $referentiel, Request $request, EntityManagerInterface $em): Response
+    #[Route('/{id}/modifier', name: 'edit', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
+    public function edit(Referentiel $referentiel, Request $request, EntityManagerInterface $em, TurboStreamResponseFactory $turboStream): Response
     {
-        if (!$referentiel->isAdministrable()) { throw $this->createAccessDeniedException(); }
-        $form = $this->createForm(ReferentielType::class, $referentiel);
+        if (!$referentiel->isAdministrable()) {
+            throw $this->createAccessDeniedException();
+        }
+        $form = $this->createForm(ReferentielType::class, $referentiel, [
+            'action' => $this->generateUrl('admin_referentiel_edit', ['id' => $referentiel->getId()]),
+        ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-            return $this->redirectToRoute('admin_referentiel_index');
+            return $turboStream->streamToastSuccess('Référentiel modifié avec succès', true);
         }
-        return $this->render('referentiel/form.html.twig', ['form' => $form, 'titre' => 'Modifier le référentiel']);
+
+        return $turboStream->streamOpenModalFromTemplates(
+            new TranslatableKey('Modifier le référentiel', [], 'modal'),
+            'Référentiel : ' . $referentiel->getLibelle(),
+            '_ui/_modal_new_generic.html.twig',
+            ['form' => $form->createView()],
+            '_ui/_footer_submit_cancel.html.twig',
+            []
+        );
     }
 
-    #[Route('/{id}/ajouter', name: 'add_value', requirements: ['id' => '\\d+'])]
-    public function addValue(Referentiel $referentiel, Request $request, EntityManagerInterface $em): Response
+    #[Route('/{id}/ajouter', name: 'add_value', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
+    public function addValue(Referentiel $referentiel, Request $request, EntityManagerInterface $em, TurboStreamResponseFactory $turboStream): Response
     {
-        if (!$referentiel->isExtensible()) { throw $this->createAccessDeniedException(); }
+        if (!$referentiel->isExtensible()) {
+            throw $this->createAccessDeniedException();
+        }
         $valeur = (new ReferentielValeur())->setReferentiel($referentiel);
-        $form = $this->createForm(ReferentielValeurType::class, $valeur, ['allow_code' => true]);
+        $form = $this->createForm(ReferentielValeurType::class, $valeur, [
+            'allow_code' => true,
+            'action' => $this->generateUrl('admin_referentiel_add_value', ['id' => $referentiel->getId()]),
+        ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($valeur);
             $em->flush();
-            return $this->redirectToRoute('admin_referentiel_valeurs', ['id' => $referentiel->getId()]);
+            return $turboStream->streamToastSuccess('Valeur ajoutée avec succès', true);
         }
-        return $this->render('referentiel/form.html.twig', ['form' => $form, 'titre' => 'Ajouter une valeur']);
+
+        return $turboStream->streamOpenModalFromTemplates(
+            new TranslatableKey('Ajouter une valeur', [], 'modal'),
+            'Référentiel : ' . $referentiel->getLibelle(),
+            '_ui/_modal_new_generic.html.twig',
+            ['form' => $form->createView()],
+            '_ui/_footer_submit_cancel.html.twig',
+            []
+        );
     }
 
-    #[Route('/valeur/{id}/modifier', name: 'edit_value', requirements: ['id' => '\\d+'])]
-    public function editValue(ReferentielValeur $valeur, Request $request, EntityManagerInterface $em): Response
+    #[Route('/valeur/{id}/modifier', name: 'edit_value', requirements: ['id' => '\\d+'], methods: ['GET', 'POST'])]
+    public function editValue(ReferentielValeur $valeur, Request $request, EntityManagerInterface $em, TurboStreamResponseFactory $turboStream): Response
     {
         $referentiel = $valeur->getReferentiel();
-        if (!$referentiel?->isAdministrable()) { throw $this->createAccessDeniedException(); }
-        $form = $this->createForm(ReferentielValeurType::class, $valeur);
+        if (!$referentiel?->isAdministrable()) {
+            throw $this->createAccessDeniedException();
+        }
+        $form = $this->createForm(ReferentielValeurType::class, $valeur, [
+            'action' => $this->generateUrl('admin_referentiel_edit_value', ['id' => $valeur->getId()]),
+        ]);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-            return $this->redirectToRoute('admin_referentiel_valeurs', ['id' => $referentiel->getId()]);
+            return $turboStream->streamToastSuccess('Valeur modifiée avec succès', true);
         }
-        return $this->render('referentiel/form.html.twig', ['form' => $form, 'titre' => 'Modifier une valeur']);
+
+        return $turboStream->streamOpenModalFromTemplates(
+            new TranslatableKey('Modifier une valeur', [], 'modal'),
+            'Référentiel : ' . $referentiel->getLibelle(),
+            '_ui/_modal_new_generic.html.twig',
+            ['form' => $form->createView()],
+            '_ui/_footer_submit_cancel.html.twig',
+            []
+        );
     }
 }
