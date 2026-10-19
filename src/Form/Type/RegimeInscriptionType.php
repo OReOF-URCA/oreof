@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Form\Type;
+
+use App\Enums\RegimeInscriptionEnum;
+use App\Referentiel\ReferentielManager;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+/**
+ * Uses the persisted enum backed values for historical records and stable
+ * referential codes for new values. The model contains strings, not enums.
+ */
+final class RegimeInscriptionType extends AbstractType
+{
+    public function __construct(private readonly ReferentielManager $referentiels)
+    {
+    }
+
+    public function getParent(): string
+    {
+        return ChoiceType::class;
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'choices' => function (): array {
+                $values = $this->referentiels->choices('regime_inscription');
+                if ($values === []) {
+                    foreach (RegimeInscriptionEnum::cases() as $case) {
+                        $values[$case->value] = $case->value;
+                    }
+                }
+
+                return array_flip($values);
+            },
+            'choice_translation_domain' => false,
+            'multiple' => true,
+            'expanded' => true,
+        ]);
+    }
+}
