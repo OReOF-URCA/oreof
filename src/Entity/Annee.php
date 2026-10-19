@@ -303,7 +303,7 @@ class Annee
     public function getRegimeInscriptionValues(): array
     {
         $regimes = $this->getRegimeInscription();
-        return array_map(static fn(\App\Enums\RegimeInscriptionEnum $r) => $r->value, $regimes);
+        return \App\Referentiel\RegimeInscription::normalize($this->regimeInscription ?: ($this->getParcours()?->getRegimeInscriptionValues() ?? []));
     }
 
     public function hasRegimeInscription(string|\App\Enums\RegimeInscriptionEnum $regime): bool
