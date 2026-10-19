@@ -38,7 +38,7 @@ final class RegimeInscriptionType extends AbstractType
 
                 $choices = [];
                 foreach ($values as $key => $label) {
-                    $choices[$label . ' [' . $key . ']'] = (string) $key;
+                    $choices[$label] = (string) $key;
                 }
 
                 return $choices;
