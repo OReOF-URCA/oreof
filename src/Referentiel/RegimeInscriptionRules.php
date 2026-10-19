@@ -29,7 +29,10 @@ final class RegimeInscriptionRules
                 }
                 continue;
             }
-            if (!in_array($key, [RegimeInscriptionEnum::FI->value, RegimeInscriptionEnum::FC->value], true)) {
+            if ($entry === null && !in_array($key, [RegimeInscriptionEnum::FI->value, RegimeInscriptionEnum::FC->value], true)) {
+                return true;
+            }
+            if ($entry !== null && !in_array($key, [RegimeInscriptionEnum::FI->value, RegimeInscriptionEnum::FC->value], true)) {
                 return true;
             }
         }
