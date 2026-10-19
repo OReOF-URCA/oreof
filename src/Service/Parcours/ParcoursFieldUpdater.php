@@ -107,7 +107,7 @@ final class ParcoursFieldUpdater extends AbstractFieldUpdater
             },
             // regimeInscription[] : array de valeurs (checkboxes)
             'parcours_step5[regimeInscription][]' => function (Parcours $p, $v) {
-                $p->setRegimeInscription($this->toEnumArray(RegimeInscriptionEnum::class, $v));
+                $p->setRegimeInscription(\App\Referentiel\RegimeInscription::normalize((array) $v));
             },
             'parcours_step5[modalitesAlternance]' => fn(Parcours $p, $v) => $p->setModalitesAlternance($this->toString($v)),
             'parcours_step5[coordSecretariat]' => fn(Parcours $p, $v) => $p->setCoordSecretariat($this->toString($v)),
