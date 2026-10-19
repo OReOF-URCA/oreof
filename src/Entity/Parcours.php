@@ -744,6 +744,17 @@ class Parcours
         return $t;
     }
 
+    /** @return list<string> */
+    public function getRegimeInscriptionValues(): array
+    {
+        $values = $this->regimeInscription;
+        if (($values === null || $values === []) && $this->getFormation() !== null) {
+            return $this->getFormation()->getRegimeInscriptionValues();
+        }
+
+        return \App\Referentiel\RegimeInscription::normalize($values ?? []);
+    }
+
     public function setRegimeInscription(?array $regimeInscription): self
     {
         $this->regimeInscription = $regimeInscription === null ? [] : \App\Referentiel\RegimeInscription::normalize($regimeInscription);
