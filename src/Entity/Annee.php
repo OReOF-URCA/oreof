@@ -330,7 +330,7 @@ class Annee
                 $t[] = $value;
             }
         }
-        $this->regimeInscription = array_values(array_unique($t));
+        $this->regimeInscription = \App\Referentiel\RegimeInscription::normalize($t);
 
         return $this;
     }
