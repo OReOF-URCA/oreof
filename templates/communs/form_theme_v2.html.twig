@@ -38,21 +38,35 @@
 
 {# --- LIGNE DE FORMULAIRE (ROW) --- #}
 {% block form_row %}
+    {% set helpContent = form_help(form) %}
+    {% set widgetAttr = attr %}
+    {% set descriptions = widgetAttr['aria-describedby']|default('')|split(' ') %}
+    {% if helpContent|trim != '' and (id ~ '_help') not in descriptions %}
+        {% set descriptions = descriptions|merge([id ~ '_help']) %}
+    {% endif %}
+    {% if errors|length > 0 %}
+        {% if (id ~ '_errors') not in descriptions %}{% set descriptions = descriptions|merge([id ~ '_errors']) %}{% endif %}
+        {% set widgetAttr = widgetAttr|merge({'aria-invalid': 'true'}) %}
+    {% endif %}
+    {% if descriptions|join(' ')|trim != '' %}
+        {% set widgetAttr = widgetAttr|merge({'aria-describedby': descriptions|join(' ')|trim}) %}
+    {% endif %}
     <div class="space-y-2 group mb-4">
         {{ form_label(form) }}
-        {{ form_widget(form) }}
-        {{ form_help(form) }}
+        {{ form_widget(form, {attr: widgetAttr}) }}
+        {{ helpContent }}
         {{ form_errors(form) }}
     </div>
 {% endblock form_row %}
 
 {% block trix_widget %}
     <input id="trix-input-{{ trixId }}" value="{{ value }}" type="hidden" name="{{ full_name }}">
-    <trix-editor input="trix-input-{{ trixId }}"></trix-editor>
+    <trix-editor id="{{ id }}" input="trix-input-{{ trixId }}"{% with {attr: attr} %} {{ block('attributes') }}{% endwith %}></trix-editor>
 {% endblock %}
 
 {# --- LABEL --- #}
 {% block form_label %}
+    {% if not compound %}{% set label_attr = label_attr|merge({'for': id}) %}{% endif %}
     {% if label is not same as(false) %}
         <div class="flex justify-between items-center mb-1">
             <label {% with { attr: label_attr|merge({ class: 'text-[12px] font-black text-secondary-500 group-focus-within:text-indigo-500 transition-colors uppercase' }) } %}{{ block('attributes') }}{% endwith %}>
@@ -64,6 +78,7 @@
 {% endblock form_label %}
 
 {% block form_label_inline_create_entity_select %}
+    {% set label_attr = label_attr|merge({'for': form.entity.vars.id}) %}
     {% if label is not same as(false) %}
         <div class="flex items-center mb-1 gap-2 w-full">
             <div class="flex items-center gap-2 min-w-0">
@@ -159,22 +174,13 @@
 {% block form_help %}
 
 
-    {%- if help is empty -%}
-        {%- set t = help_translation_parameters['%transition%'] ?? null -%}
-        {%- set f = help_translation_parameters['%field%'] ?? null -%}
-
-        {%- if t and f -%}
-            {%- set help = 'workflow.' ~ t ~ '.' ~ f ~ '.help' -%}
-        {% else %}
-            {% import _self as macros %}
-            {% set help = macros.form_parent_help_name(form) %}
-        {%- endif -%}
-    {%- endif -%}
+    {% import _self as macros %}
+    {% set help = macros.resolved_help_key(form, help, help_translation_parameters)|trim %}
 
     {% if help is defined and help|trim|trans({}, 'help') != '' %}
-        <p class="text-[11px] text-secondary-400 italic mt-1 pl-1 flex items-start gap-2">
+        <p id="{{ id }}_help" class="text-xs text-secondary-600 dark:text-secondary-300 italic mt-1 pl-1 flex items-start gap-2">
             <span class="flex-shrink-0 w-5 h-5 bg-secondary-200 text-secondary-500 flex items-center justify-center text-[10px] rounded-full">
-                <twig:UX:Icon name="icon:info"/>
+                <twig:UX:Icon name="icon:info" aria-hidden="true"/>
             </span>
             <span>{{ help|trim|trans({}, 'help')|raw }}</span>
         </p>
@@ -184,10 +190,10 @@
 {# --- ERREURS --- #}
 {% block form_errors %}
     {% if errors|length > 0 %}
-        <div class="mt-2 space-y-1">
+        <div id="{{ id }}_errors" class="mt-2 space-y-1">
             {% for error in errors %}
-                <p class="text-[10px] font-bold text-red-500 uppercase flex items-center gap-1">
-                    <span class="w-1 h-1 bg-red-500 rounded-full"></span>
+                <p class="text-sm font-semibold text-danger-700 dark:text-danger-300 flex items-center gap-1">
+                    <span class="w-1 h-1 bg-danger-500 rounded-full" aria-hidden="true"></span>
                     {{ error.message }}
                 </p>
             {% endfor %}
@@ -295,7 +301,11 @@
         {%- for child in form %}
             <div class="flex items-center gap-2">
                 {{- form_widget(child, {
-                    'attr': {'class': 'focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300'}
+                    'attr': child.vars.attr|merge({
+                        'class': 'focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300',
+                        'aria-describedby': (child.vars.attr['aria-describedby']|default('') ~ ' ' ~ attr['aria-describedby']|default(''))|trim,
+                        'aria-invalid': attr['aria-invalid']|default('false')
+                    })
                 }) -}}
                 {{- form_label(child, null, {
                     'label_attr': {'for': child.vars.id, 'class': 'text-sm font-medium text-gray-700'}
@@ -380,29 +390,42 @@
 
 
 {% block inline_create_entity_select_row %}
+    {% set helpContent = form_help(form) %}
+    {% set widgetAttr = attr %}
+    {% set descriptions = widgetAttr['aria-describedby']|default('')|split(' ') %}
+    {% if helpContent|trim != '' and (id ~ '_help') not in descriptions %}
+        {% set descriptions = descriptions|merge([id ~ '_help']) %}
+    {% endif %}
+    {% if errors|length > 0 %}
+        {% if (id ~ '_errors') not in descriptions %}{% set descriptions = descriptions|merge([id ~ '_errors']) %}{% endif %}
+        {% set widgetAttr = widgetAttr|merge({'aria-invalid': 'true'}) %}
+    {% endif %}
+    {% if descriptions|join(' ')|trim != '' %}
+        {% set widgetAttr = widgetAttr|merge({'aria-describedby': descriptions|join(' ')|trim}) %}
+    {% endif %}
     <div class="field-group space-y-2 group mb-4" data-controller="inline-create">
         <div class="flex justify-between items-center">
             {{ block('form_label_inline_create_entity_select') }}
         </div>
 
         {{ form_widget(form.entity, {
-            attr: {
+            attr: widgetAttr|merge({
                 class: 'select-field w-full p-4 bg-white border border-secondary-200 rounded-2xl font-semibold appearance-none cursor-pointer focus:ring-4 focus:ring-indigo-50',
                 'data-inline-create-target': 'select',
                 'data-inline-create-original-required': form.entity.vars.required ? '1' : '0'
 
-            }
+            })
         }) }}
 
         {{ form_widget(form.new, {
-            attr: {
+            attr: widgetAttr|merge({
                 class: 'input-field hidden w-full p-4 bg-emerald-50 border border-emerald-200 rounded-2xl font-semibold outline-none',
                 'data-inline-create-target': 'newInput',
                 'data-inline-create-original-required': form.entity.vars.required ? '1' : '0'
 
-            }
+            })
         }) }}
-        {{ form_help(form) }}
+        {{ helpContent }}
         {{ form_errors(form) }}
     </div>
 {% endblock %}
@@ -587,19 +610,32 @@
 {% endblock %}
 
 {% block checkbox_row %}
+    {% set helpContent = form_help(form) %}
+    {% set widgetAttr = attr %}
+    {% set descriptions = widgetAttr['aria-describedby']|default('')|split(' ') %}
+    {% if helpContent|trim != '' and (id ~ '_help') not in descriptions %}
+        {% set descriptions = descriptions|merge([id ~ '_help']) %}
+    {% endif %}
+    {% if errors|length > 0 %}
+        {% if (id ~ '_errors') not in descriptions %}{% set descriptions = descriptions|merge([id ~ '_errors']) %}{% endif %}
+        {% set widgetAttr = widgetAttr|merge({'aria-invalid': 'true'}) %}
+    {% endif %}
+    {% if descriptions|join(' ')|trim != '' %}
+        {% set widgetAttr = widgetAttr|merge({'aria-describedby': descriptions|join(' ')|trim}) %}
+    {% endif %}
     <div>
         {{ form_errors(form) }}
 
-        <label class="flex items-start gap-3 cursor-pointer">
+        <div class="flex items-start gap-3">
             {{ form_widget(form, {
-                attr: {
+                attr: widgetAttr|merge({
                     class: 'mt-1 h-4 w-4 rounded border-gray-300 dark:border-secondary-600 dark:bg-secondary-900 dark:checked:bg-indigo-600 dark:checked:border-indigo-600'
-                }
+                })
             }) }}
             {{ form_label(form) }}
-        </label>
+        </div>
     </div>
-    {{ form_help(form) }}
+    {{ helpContent }}
 {% endblock %}
 
 {# Widget pour le type JsonConfig #}
@@ -733,3 +769,14 @@
         </details>
     </div>
 {% endblock %}
+
+{% macro resolved_help_key(form, help, parameters) %}
+    {%- import _self as macros -%}
+    {%- if help is not empty -%}
+        {{- help -}}
+    {%- elseif parameters['%transition%']|default(null) and parameters['%field%']|default(null) -%}
+        {{- 'workflow.' ~ parameters['%transition%'] ~ '.' ~ parameters['%field%'] ~ '.help' -}}
+    {%- else -%}
+        {{- macros.form_parent_help_name(form) -}}
+    {%- endif -%}
+{% endmacro %}

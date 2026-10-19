@@ -6,30 +6,42 @@ export default class extends Controller {
     url: String
   }
 
-  static targets = ['status']
+  static targets = ['status', 'retry']
 
   connect() {
     this.timeout = null
     this.saving = false
     this.pendingSave = false
     this.pendingManual = false
-    this.fadeTimeout = null
+    this.connected = true
+    this.revision = 0
     this.previousValues = {}
 
-    // Bind events
-    this.element.addEventListener('input', this.onInput.bind(this))
-    this.element.addEventListener('change', this.onChange.bind(this))
-    this.element.addEventListener('submit', this.onSubmit.bind(this))
-    this.element.addEventListener('focusin', this.onFocusIn.bind(this))
-
-    // Initial status - hidden
-    this.setStatus('saved', 'Modifications enregistrées')
+    this.listeners = {
+      input: this.onInput.bind(this),
+      change: this.onChange.bind(this),
+      submit: this.onSubmit.bind(this),
+      focusin: this.onFocusIn.bind(this)
+    }
+    for (const [name, handler] of Object.entries(this.listeners)) this.element.addEventListener(name, handler)
+    this.setStatus('idle', 'Aucune modification en attente')
   }
 
   disconnect() {
-    if (this.timeout) clearTimeout(this.timeout)
+    this.connected = false
+    clearTimeout(this.timeout)
     this.pendingSave = false
-    if (this.fadeTimeout) clearTimeout(this.fadeTimeout)
+    for (const [name, handler] of Object.entries(this.listeners)) this.element.removeEventListener(name, handler)
+  }
+
+  retry() {
+    clearTimeout(this.timeout)
+    return this.save(true)
+  }
+
+  markSaved(revision) {
+    if (revision === this.revision) this.setStatus('saved', 'Modifications enregistrées')
+    else this.setStatus('typing', 'Modifications en attente d’enregistrement')
   }
 
   onFocusIn(event) {
@@ -98,6 +110,7 @@ export default class extends Controller {
   }
 
   onInput(event) {
+    this.revision += 1
     this.syncTroncCommun(event.target)
 
     if (event.target.name && event.target.name.startsWith('annee_') && event.target.name.endsWith('_capaciteAccueil')) {
@@ -110,7 +123,7 @@ export default class extends Controller {
 
     // Only debounce text and number fields
     if (event.target.type === 'number' || event.target.type === 'text') {
-      this.setStatus('typing', 'Modifications en cours...')
+      if (this.statusState !== 'error') this.setStatus('typing', 'Modifications en attente d’enregistrement')
       clearTimeout(this.timeout)
       this.timeout = setTimeout(() => {
         this.save()
@@ -119,6 +132,7 @@ export default class extends Controller {
   }
 
   onChange(event) {
+    this.revision += 1
     this.syncTroncCommun(event.target)
 
     const name = event.target.name
@@ -232,12 +246,14 @@ export default class extends Controller {
   // et une requête plus ancienne pouvait finir après la suivante et réécrire d'anciennes valeurs.
   // Les modifications faites pendant un enregistrement partent ensuite en un seul envoi (état le plus récent).
   async save(isManual = false) {
+    if (!this.connected) return
     if (this.saving) {
       this.pendingSave = true
       this.pendingManual = this.pendingManual || isManual
       return
     }
     this.saving = true
+    const revision = this.revision
 
     this.setStatus('saving', 'Enregistrement en cours...')
 
@@ -253,8 +269,10 @@ export default class extends Controller {
         body: formData
       })
 
+      if (!this.connected) return
       if (!response.ok) {
         const message = await this.errorMessage(response)
+        if (!this.connected) return
         this.setStatus('error', message)
         callOut(message, 'danger')
         return
@@ -264,33 +282,36 @@ export default class extends Controller {
       if (contentType.includes('text/vnd.turbo-stream.html')) {
         const html = await response.text()
         const { renderStreamMessage } = await import('@hotwired/turbo')
+        if (!this.connected) return
         renderStreamMessage(html)
         
-        this.setStatus('saved', 'Brouillon enregistré automatiquement')
-        if (isManual) {
+        this.markSaved(revision)
+        if (isManual && revision === this.revision) {
           callOut('Brouillon enregistré avec succès.', 'success')
         }
       } else {
         const data = await response.json()
+        if (!this.connected) return
         if (data.success) {
-          this.setStatus('saved', 'Brouillon enregistré automatiquement')
-          if (isManual) {
+          this.markSaved(revision)
+          if (isManual && revision === this.revision) {
             callOut(data.message || 'Brouillon enregistré avec succès.', 'success')
           }
         } else {
           this.setStatus('error', data.message || 'Erreur lors de l\'enregistrement.')
-          if (isManual) {
+          if (isManual && revision === this.revision) {
             callOut(data.message || 'Erreur lors de l\'enregistrement.', 'error')
           }
         }
       }
     } catch (error) {
+      if (!this.connected) return
       console.error('Autosave error:', error)
       this.setStatus('error', 'Erreur de connexion.')
       callOut('Impossible de sauvegarder le brouillon. Vérifiez votre connexion.', 'danger')
     } finally {
       this.saving = false
-      if (this.pendingSave) {
+      if (this.connected && this.pendingSave) {
         const manual = this.pendingManual
         this.pendingSave = false
         this.pendingManual = false
@@ -315,61 +336,18 @@ export default class extends Controller {
   }
 
   setStatus(state, message) {
+    if (!this.connected) return
+    this.statusState = state
+    if (this.hasRetryTarget) this.retryTarget.classList.toggle('hidden', state !== 'error')
     if (!this.hasStatusTarget) return
-
     const target = this.statusTarget
-    target.classList.remove('opacity-0')
-    target.classList.add('opacity-100')
-
-    // Reset classes
-    target.className = 'text-sm font-semibold flex items-center gap-1.5 transition-all duration-300'
-
-    let iconHtml = ''
-    switch (state) {
-      case 'saved':
-        target.classList.add('text-success-600', 'dark:text-success-400')
-        iconHtml = `
-          <svg class="w-4 h-4 text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
-          </svg>
-        `
-        // Auto-fade status after 3 seconds to keep UI clean
-        clearTimeout(this.fadeTimeout)
-        this.fadeTimeout = setTimeout(() => {
-          target.classList.remove('opacity-100')
-          target.classList.add('opacity-0')
-        }, 3000)
-        break
-
-      case 'saving':
-        target.classList.add('text-primary-600', 'dark:text-primary-400')
-        iconHtml = `
-          <svg class="w-4 h-4 text-primary-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-        `
-        break
-
-      case 'typing':
-        target.classList.add('text-secondary-500', 'dark:text-secondary-400')
-        iconHtml = `
-          <svg class="w-4 h-4 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-          </svg>
-        `
-        break
-
-      case 'error':
-        target.classList.add('text-danger-600', 'dark:text-danger-400')
-        iconHtml = `
-          <svg class="w-4 h-4 text-danger-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-          </svg>
-        `
-        break
-    }
-
-    target.innerHTML = `${iconHtml}<span>${message}</span>`
+    target.dataset.state = state
+    target.className = 'text-sm font-semibold flex items-center gap-1.5'
+    const tone = state === 'error' ? ['text-danger-700', 'dark:text-danger-300']
+      : state === 'saved' ? ['text-success-700', 'dark:text-success-300']
+        : ['text-secondary-600', 'dark:text-secondary-300']
+    target.classList.add(...tone)
+    // Server messages are text, never HTML. Statuses stay visible until the next state.
+    target.textContent = message
   }
 }
