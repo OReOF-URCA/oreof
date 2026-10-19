@@ -37,7 +37,18 @@ final class ImportReferentielsCommand extends Command
         foreach ($cases as $index => $case) {
             $valueCode = strtolower($case->name);
             $value = $this->em->getRepository(ReferentielValeur::class)->findOneBy(['referentiel' => $referentiel, 'code' => $valueCode]);
-            if ($value !== null) { continue; }
+            if ($value !== null) {
+                // Preserve administrator overrides and never reactivate disabled entries.
+                // Only backfill the metadata introduced by this migration.
+                if ($code === 'regime_inscription') {
+                    $config = $value->getConfig();
+                    if (!array_key_exists('requires_alternance_details', $config)) {
+                        $config['requires_alternance_details'] = !in_array($case, [RegimeInscriptionEnum::FI, RegimeInscriptionEnum::FC], true);
+                        $value->setConfig($config);
+                    }
+                }
+                continue;
+            }
             $label = method_exists($case, 'libelle') ? $case->libelle() : (string) $case->value;
             $value = (new ReferentielValeur())->setReferentiel($referentiel)
                 ->setCode($valueCode)->setLegacyValue((string) $case->value)
