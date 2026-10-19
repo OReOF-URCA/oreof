@@ -3428,16 +3428,16 @@
         },
         {
             "name": "pentiminax/ux-datatables",
-            "version": "v1.1.1",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pentiminax/ux-datatables.git",
-                "reference": "8eadecfae42eb7e1aeb93ee9d2477fa86944b815"
+                "reference": "381fdc7b875702e454d13ea3bf29dc460f757bbc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pentiminax/ux-datatables/zipball/8eadecfae42eb7e1aeb93ee9d2477fa86944b815",
-                "reference": "8eadecfae42eb7e1aeb93ee9d2477fa86944b815",
+                "url": "https://api.github.com/repos/pentiminax/ux-datatables/zipball/381fdc7b875702e454d13ea3bf29dc460f757bbc",
+                "reference": "381fdc7b875702e454d13ea3bf29dc460f757bbc",
                 "shasum": ""
             },
             "require": {
@@ -3449,6 +3449,7 @@
                 "symfony/property-access": "^7.0 || ^8.0",
                 "symfony/security-bundle": "^7.0 || ^8.0",
                 "symfony/security-csrf": "^7.0 || ^8.0",
+                "symfony/serializer": "^7.0 || ^8.0",
                 "symfony/stimulus-bundle": "^2.0 || ^3.0"
             },
             "conflict": {
@@ -3519,9 +3520,9 @@
             ],
             "support": {
                 "issues": "https://github.com/pentiminax/ux-datatables/issues",
-                "source": "https://github.com/pentiminax/ux-datatables/tree/v1.1.1"
+                "source": "https://github.com/pentiminax/ux-datatables/tree/v1.2.0"
             },
-            "time": "2026-10-01T13:15:35+00:00"
+            "time": "2026-10-11T17:36:24+00:00"
         },
         {
             "name": "php-http/discovery",
@@ -9586,16 +9587,16 @@
         },
         {
             "name": "symfony/serializer",
-            "version": "v8.1.8",
+            "version": "v8.1.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/serializer.git",
-                "reference": "df54c4fe859d945eb633d2c5e6a410ce535f21e4"
+                "reference": "bc6f84d67225d7a25d56af6d4bd52e9e34997a96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/serializer/zipball/df54c4fe859d945eb633d2c5e6a410ce535f21e4",
-                "reference": "df54c4fe859d945eb633d2c5e6a410ce535f21e4",
+                "url": "https://api.github.com/repos/symfony/serializer/zipball/bc6f84d67225d7a25d56af6d4bd52e9e34997a96",
+                "reference": "bc6f84d67225d7a25d56af6d4bd52e9e34997a96",
                 "shasum": ""
             },
             "require": {
@@ -9661,7 +9662,7 @@
             "description": "Handles serializing and deserializing data structures, including object graphs, into array structures or other formats like XML and JSON.",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/serializer/tree/v8.1.8"
+                "source": "https://github.com/symfony/serializer/tree/v8.1.9"
             },
             "funding": [
                 {
@@ -9681,7 +9682,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-09-28T09:40:25+00:00"
+            "time": "2026-10-12T19:11:16+00:00"
         },
         {
             "name": "symfony/service-contracts",
