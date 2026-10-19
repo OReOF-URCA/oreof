@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.1](https://github.com/OReOF-URCA/oreof/compare/v2.3.0...v2.3.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* **ci:** erreurs PHPStan, tests unitaires et smoke ([1ac4bb5](https://github.com/OReOF-URCA/oreof/commit/1ac4bb5b8f12995c08000ad8f536cdce9dc07130))
+* **ci:** rafraîchit le content-hash de composer.lock ([dd510b7](https://github.com/OReOF-URCA/oreof/commit/dd510b75c367d2b24af45179cd0fb0b3af9a360d))
+* **deps:** symfony/expression-language 8.1.9 (CVE-2026-109449) ([318a3db](https://github.com/OReOF-URCA/oreof/commit/318a3dba74670ec9e449a43565de0f14c8bc708a))
+* **deps:** symfony/expression-language 8.1.9 (CVE-2026-109449) ([949ebd1](https://github.com/OReOF-URCA/oreof/commit/949ebd1bb8e91755e1b4cb2cc4089fc203a15577))
+* update compose.lock et config ([b7df8b2](https://github.com/OReOF-URCA/oreof/commit/b7df8b2f67fea3a192d06e8a303f6435e1d86a35))
+
 ## [2.3.0](https://github.com/OReOF-URCA/oreof/compare/v2.2.0...v2.3.0) (2026-10-19)
 
 
