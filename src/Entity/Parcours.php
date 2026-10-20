@@ -617,6 +617,7 @@ class Parcours
     public function setModalitesEnseignement(?ModaliteEnseignementEnum $modalitesEnseignement): self
     {
         $this->modalitesEnseignement = $modalitesEnseignement;
+        $this->modalitesEnseignementReferentiel = $modalitesEnseignement === null ? null : (string) $modalitesEnseignement->value;
 
         return $this;
     }
