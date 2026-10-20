@@ -604,6 +604,10 @@ class FicheMatiere implements McccCompletionCheckerInterface
         return $this;
     }
 
+    /**
+     * @deprecated Compatibility accessor: custom referential modalities cannot
+     *             be represented by this enum. Use getModaliteEnseignementValue().
+     */
     public function getModaliteEnseignement(): ?ModaliteEnseignementEnum
     {
         return $this->modaliteEnseignement ?? ModaliteEnseignementEnum::NON_DEFINI;
