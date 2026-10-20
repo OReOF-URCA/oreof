@@ -75,7 +75,7 @@ final class ParcoursFieldUpdater extends AbstractFieldUpdater
             // ----------------- STEP 2 (descriptif) -----------------
             // EnumType : si ton setter attend un enum, adapte via toEnum()
             'parcours_step2[modalitesEnseignement]' => function (Parcours $p, $v) {
-                $p->setModalitesEnseignement($this->toEnumOrNull(ModaliteEnseignementEnum::class, $v));
+                $p->setModalitesEnseignementValue($v === '' || $v === null ? null : (string) $v);
             },
             // YesNoType -> bool|null
             'parcours_step2[hasStage]' => fn(Parcours $p, $v) => $p->setHasStage($this->toBoolOrNull($v)),
