@@ -9,6 +9,8 @@
 
 namespace App\Form;
 
+
+use App\Form\Type\ModaliteEnseignementType;
 use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
 use App\Enums\ModaliteEnseignementEnum;
@@ -28,16 +30,11 @@ class ParcoursStep2Type extends AbstractType
         $typeDiplome = $options['typeDiplome'];
 
         $builder
-            ->add('modalitesEnseignement', EnumType::class, [
+            ->add('modalitesEnseignement', ModaliteEnseignementType::class, [
                 //http://lheo.gouv.fr/2.3/lheo/dict-modalites-enseignement.html#dict-modalites-enseignement
-                'class' => ModaliteEnseignementEnum::class,
-                'choice_label' => fn (ModaliteEnseignementEnum $choice) => match ($choice) {
-                    ModaliteEnseignementEnum::NON_DEFINI => 'Choisissez une modalité d\'enseignement',
-                    ModaliteEnseignementEnum::PRESENTIELLE => 'En présentiel',
-                    ModaliteEnseignementEnum::DISTANCIELLE => 'En distanciel',
-                    ModaliteEnseignementEnum::HYBRIDE => 'Hybride',
-                },
-                'expanded' => false,
+                                'expanded' => false,
+                'getter' => static fn ($entity): ?string => $entity->getModalitesEnseignementValue(),
+                'setter' => static function ($entity, ?string $value): void { $entity->setModalitesEnseignementValue($value); },
             ]);
 
         if ($typeDiplome->isHasStage() === true) {

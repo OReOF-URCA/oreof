@@ -9,6 +9,8 @@
 
 namespace App\Form;
 
+
+use App\Form\Type\LegacyReferentielEnumType;
 use App\Entity\Composante;
 use App\Entity\Formation;
 use App\Entity\User;
@@ -93,10 +95,10 @@ class FormationStep1Type extends AbstractType
                 },
                 'attr' => ['data-action' => 'change->formation--step6#changeComposanteInscription']
             ])
-            ->add('regimeInscription', EnumType::class, [
-                'help' => 'Régime d\'inscription',
-                'class' => RegimeInscriptionEnum::class,
+            ->add('regimeInscription', \App\Form\Type\RegimeInscriptionType::class, [
                 'translation_domain' => 'form',
+                'getter' => static fn ($entity): array => $entity->getRegimeInscriptionValues(),
+                'setter' => static function ($entity, array $values): void { $entity->setRegimeInscription($values); },
                 'multiple' => true,
                 'expanded' => true,
                 'attr' => ['data-action' => 'change->formation--step1#changeRegimeInscription']

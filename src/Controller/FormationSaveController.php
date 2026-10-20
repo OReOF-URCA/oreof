@@ -133,7 +133,7 @@ class FormationSaveController extends BaseController
                 return $updateEntity->saveField(
                     $formation,
                     'modalitesEnseignement',
-                    ModaliteEnseignementEnum::from($data['value'])
+                    \App\Referentiel\ModaliteEnseignement::legacyCase((string) $data['value'])
                 );
 
             case 'rythmeFormation':

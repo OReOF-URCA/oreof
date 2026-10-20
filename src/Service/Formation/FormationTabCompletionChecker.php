@@ -11,11 +11,13 @@ namespace App\Service\Formation;
 
 use App\DTO\TabIssue;
 use App\Entity\Formation;
-use App\Enums\RegimeInscriptionEnum;
+use App\Referentiel\RegimeInscriptionRules;
 use App\Service\AbstractChecker;
 
 class FormationTabCompletionChecker extends AbstractChecker
 {
+    public function __construct(private readonly RegimeInscriptionRules $regimeRules) {}
+
     public function isTabComplete(Formation $p, string $tabKey): bool
     {
         return count($this->getTabIssues($p, $tabKey)) === 0;
@@ -73,13 +75,13 @@ class FormationTabCompletionChecker extends AbstractChecker
             $issues[] = new TabIssue('formation_step1[composantesInscription]', 'Composante d\'inscription', 'Vous devez renseigner au moins une composante d\'inscription.');
         }
 
-        if (count($f->getRegimeInscription()) === 0) {
+        if (count($f->getRegimeInscriptionValues()) === 0) {
             $issues[] = new TabIssue('formation_step1[regimeInscription]', 'Régime d\'inscription', 'Au moins un régime d\'inscription est obligatoire.');
         }
 
         //selon le type de régime, texte obligatoire
 
-        if ($this->filled($f->getModalitesAlternance()) === false && (in_array(RegimeInscriptionEnum::FC_CONTRAT_PRO, $f->getRegimeInscription(), true) || in_array(RegimeInscriptionEnum::FI_APPRENTISSAGE, $f->getRegimeInscription(), true))) {
+        if ($this->filled($f->getModalitesAlternance()) === false && ($this->regimeRules->requiresAlternanceDetails($f->getRegimeInscriptionValues()))) {
             $issues[] = new TabIssue('formation_step1[modalitesAlternance]', 'Modalités d\'alternance', 'Vous avez indiquez FC en contrat pro ou FI en apprentissage, vous devez préciser les modalités.');
         }
 

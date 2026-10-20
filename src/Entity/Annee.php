@@ -270,6 +270,11 @@ class Annee
     /**
      * @return list<\App\Enums\RegimeInscriptionEnum>
      */
+    /**
+     * @deprecated Returns only legacy enum cases and drops custom referential values.
+     *             Use getRegimeInscriptionValues() for all new consumers.
+     * @return list<\App\Enums\RegimeInscriptionEnum>
+     */
     public function getRegimeInscription(): array
     {
         if ($this->regimeInscription !== null && count($this->regimeInscription) === 0) {
@@ -303,7 +308,7 @@ class Annee
     public function getRegimeInscriptionValues(): array
     {
         $regimes = $this->getRegimeInscription();
-        return array_map(static fn(\App\Enums\RegimeInscriptionEnum $r) => $r->value, $regimes);
+        return \App\Referentiel\RegimeInscription::normalize($this->regimeInscription ?: ($this->getParcours()?->getRegimeInscriptionValues() ?? []));
     }
 
     public function hasRegimeInscription(string|\App\Enums\RegimeInscriptionEnum $regime): bool
@@ -330,7 +335,7 @@ class Annee
                 $t[] = $value;
             }
         }
-        $this->regimeInscription = array_values(array_unique($t));
+        $this->regimeInscription = \App\Referentiel\RegimeInscription::normalize($t);
 
         return $this;
     }

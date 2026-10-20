@@ -109,6 +109,10 @@ class Parcours
     #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: ModaliteEnseignementEnum::class)]
     private ?ModaliteEnseignementEnum $modalitesEnseignement = ModaliteEnseignementEnum::NON_DEFINI;
 
+    /** Canonical referential key (nullable until backfilled from the legacy column). */
+    #[ORM\Column(name: 'modalitesEnseignement_referentiel', length: 100, nullable: true)]
+    private ?string $modalitesEnseignementReferentiel = null;
+
     #[Groups('parcours_json_versioning')]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $prerequis = null;
@@ -578,6 +582,37 @@ class Parcours
         return $this;
     }
 
+    /**
+     * Stable persisted key, ready for configurable referential values.
+     * The legacy enum accessor remains unchanged for existing consumers.
+     */
+    public function getModalitesEnseignementValue(): ?string
+    {
+        if ($this->modalitesEnseignementReferentiel !== null) {
+            return $this->modalitesEnseignementReferentiel;
+        }
+
+        return $this->modalitesEnseignement === null
+            ? null
+            : \App\Referentiel\ModaliteEnseignement::key($this->modalitesEnseignement);
+    }
+
+    /**
+     * Write a configurable key without losing the existing legacy column.
+     * The legacy enum is only updated when the key has an exact enum match.
+     */
+    public function setModalitesEnseignementValue(?string $key): self
+    {
+        $this->modalitesEnseignementReferentiel = $key;
+        $this->modalitesEnseignement = $key === null ? null : \App\Referentiel\ModaliteEnseignement::legacyCase($key);
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Compatibility accessor: custom referential modalities cannot
+     *             be represented by this enum. Use getModalitesEnseignementValue().
+     */
     public function getModalitesEnseignement(): ?ModaliteEnseignementEnum
     {
         return $this->modalitesEnseignement;
@@ -586,6 +621,7 @@ class Parcours
     public function setModalitesEnseignement(?ModaliteEnseignementEnum $modalitesEnseignement): self
     {
         $this->modalitesEnseignement = $modalitesEnseignement;
+        $this->modalitesEnseignementReferentiel = $modalitesEnseignement === null ? null : (string) $modalitesEnseignement->value;
 
         return $this;
     }
@@ -716,6 +752,11 @@ class Parcours
         return $this;
     }
 
+    /**
+     * @deprecated Returns only legacy enum cases and drops custom referential values.
+     *             Use getRegimeInscriptionValues() for all new consumers.
+     * @return list<\App\Enums\RegimeInscriptionEnum>
+     */
     public function getRegimeInscription(): array
     {
         if ($this->regimeInscription !== null && count($this->regimeInscription) === 0) {
@@ -744,9 +785,20 @@ class Parcours
         return $t;
     }
 
+    /** @return list<string> */
+    public function getRegimeInscriptionValues(): array
+    {
+        $values = $this->regimeInscription;
+        if (($values === null || $values === []) && $this->getFormation() !== null) {
+            return $this->getFormation()->getRegimeInscriptionValues();
+        }
+
+        return \App\Referentiel\RegimeInscription::normalize($values ?? []);
+    }
+
     public function setRegimeInscription(?array $regimeInscription): self
     {
-        $this->regimeInscription = $regimeInscription;
+        $this->regimeInscription = $regimeInscription === null ? [] : \App\Referentiel\RegimeInscription::normalize($regimeInscription);
 
         return $this;
     }

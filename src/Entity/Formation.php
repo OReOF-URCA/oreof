@@ -516,6 +516,11 @@ class Formation
         return $texte;
     }
 
+    /**
+     * @deprecated Returns only legacy enum cases and drops custom referential values.
+     *             Use getRegimeInscriptionValues() for all new consumers.
+     * @return list<\App\Enums\RegimeInscriptionEnum>
+     */
     public function getRegimeInscription(): array
     {
         if ($this->regimeInscription === null) {
@@ -537,9 +542,20 @@ class Formation
         return $t;
     }
 
+    /** @return list<string> */
+    public function getRegimeInscriptionValues(): array
+    {
+        $values = $this->regimeInscription;
+        if (($values === null || $values === []) && false) {
+            return $this->getFormation()->getRegimeInscriptionValues();
+        }
+
+        return \App\Referentiel\RegimeInscription::normalize($values ?? []);
+    }
+
     public function setRegimeInscription(?array $regimeInscription): self
     {
-        $this->regimeInscription = $regimeInscription;
+        $this->regimeInscription = $regimeInscription === null ? [] : \App\Referentiel\RegimeInscription::normalize($regimeInscription);
 
         return $this;
     }

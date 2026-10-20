@@ -443,8 +443,8 @@ final class FormulaireGeneriqueController extends BaseController
                 'hasSituationPro' => $parcours->setHasSituationPro((bool)(int)$value),
                 default => null,
             },
-            'modalitesEnseignement' => $parcours->setModalitesEnseignement(
-                $value !== '' ? \App\Enums\ModaliteEnseignementEnum::from((int)$value) : null
+            'modalitesEnseignement' => $parcours->setModalitesEnseignementValue(
+                $value === '' || $value === null ? null : (string) $value
             ),
             'niveauFrancais' => $parcours->setNiveauFrancais(
                 $value !== '' ? \App\Enums\NiveauLangueEnum::from($value) : null

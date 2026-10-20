@@ -123,13 +123,8 @@ class ParcoursSaveController extends BaseController
 
                 return $this->json(true);
             case 'modalitesEnseignement':
-                $rep = $updateEntity->saveField(
-                    $parcours,
-                    'modalitesEnseignement',
-                    ModaliteEnseignementEnum::from($data['value'])
-                );
-
-                return $this->json($rep);
+                $parcours->setModalitesEnseignementValue((string) $data['value']);
+                return $updateEntity->saveField($parcours, 'modalitesEnseignementReferentiel', $parcours->getModalitesEnseignementValue());
             case 'rythmeFormation':
                 $rythme = $rythmeFormationRepository->find($data['value']);
                 $rep = $updateEntity->saveField($parcours, 'rythmeFormation', $rythme);

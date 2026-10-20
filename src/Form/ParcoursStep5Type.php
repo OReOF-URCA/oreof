@@ -9,6 +9,8 @@
 
 namespace App\Form;
 
+
+use App\Form\Type\LegacyReferentielEnumType;
 use App\Entity\Composante;
 use App\Entity\Parcours;
 use App\Enums\NiveauLangueEnum;
@@ -48,9 +50,10 @@ class ParcoursStep5Type extends AbstractType
                 },
                 'autocomplete' => true,
             ])
-            ->add('regimeInscription', EnumType::class, [
-                'class' => RegimeInscriptionEnum::class,
+            ->add('regimeInscription', \App\Form\Type\RegimeInscriptionType::class, [
                 'translation_domain' => 'enum',
+                'getter' => static fn ($entity): array => $entity->getRegimeInscriptionValues(),
+                'setter' => static function ($entity, array $values): void { $entity->setRegimeInscription($values); },
                 'multiple' => true,
                 'expanded' => true,
                 'choice_attr' => function ($choice) {

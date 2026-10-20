@@ -13,6 +13,7 @@ use App\Classes\Excel\ExcelWriter;
 use App\Classes\GetHistorique;
 use App\Entity\CampagneCollecte;
 use App\Enums\RegimeInscriptionEnum;
+use App\Referentiel\ReferentielManager;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
@@ -32,6 +33,7 @@ class ExportSynthese
         protected DpeParcoursRepository $dpeParcoursRepository,
         protected GetHistorique         $getHistorique,
         protected FormationRepository $formationRepository,
+        private readonly ReferentielManager $referentiels,
     ) {
         $this->dir = $projectDirProvider->getProjectDir() . '/public/temp/';
     }
@@ -125,9 +127,17 @@ class ExportSynthese
         $this->excelWriter->writeCellXY(36, 1, 'Type de parcours');
         $this->excelWriter->writeCellXY(37, 1, 'Dernier Histo.');
 
+        // Keep the four historical columns at their original positions.
+        $regimes = [];
+        foreach (RegimeInscriptionEnum::cases() as $case) {
+            $regimes[$case->value] = $this->referentiels->label('regime_inscription', $case->value) ?? $case->value;
+        }
+        foreach ($this->referentiels->choices('regime_inscription') as $key => $label) {
+            $regimes[$key] ??= $label;
+        }
         $i = 0;
-        foreach (RegimeInscriptionEnum::cases() as $regime) {
-            $this->excelWriter->writeCellXY(38 + $i, 1, $regime->value);
+        foreach ($regimes as $label) {
+            $this->excelWriter->writeCellXY(38 + $i, 1, $label);
             $i++;
         }
 
@@ -166,8 +176,8 @@ class ExportSynthese
             $this->excelWriter->writeCellXY(13, $ligne, $formation->getResultatsAttendus());
             $this->excelWriter->writeCellXY(14, $ligne, $formation->getRythmeFormationTexte());
             $i = 0;
-            foreach (RegimeInscriptionEnum::cases() as $regime) {
-                if (in_array($regime, $formation->getRegimeInscription())) {
+            foreach (array_keys($regimes) as $regimeKey) {
+                if (in_array($regimeKey, $formation->getRegimeInscriptionValues(), true)) {
                     $this->excelWriter->writeCellXY(38 + $i, $ligne, 'X', [
                         'style' => 'HORIZONTAL_CENTER'
                     ]);
@@ -214,8 +224,8 @@ class ExportSynthese
 
 
                     $i = 0;
-                    foreach (RegimeInscriptionEnum::cases() as $regime) {
-                        if (in_array($regime, $parcours->getRegimeInscription())) {
+                    foreach (array_keys($regimes) as $regimeKey) {
+                        if (in_array($regimeKey, $parcours->getRegimeInscriptionValues(), true)) {
                             $this->excelWriter->writeCellXY(38 + $i, $ligne, 'X', [
                                 'style' => 'HORIZONTAL_CENTER'
                             ]);

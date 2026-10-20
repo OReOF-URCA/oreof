@@ -9,6 +9,8 @@
 
 namespace App\Form;
 
+
+use App\Form\Type\ModaliteEnseignementType;
 use App\Entity\ElementConstitutif;
 use App\Enums\ModaliteEnseignementEnum;
 use App\Form\Type\FloatType;
@@ -23,16 +25,11 @@ class EcStep4Type extends AbstractType
     {
         $isModal = $options['isModal'];
 
-        if ($options['modalite'] === null || $options['modalite'] === ModaliteEnseignementEnum::HYBRIDE || $options['modalite'] === ModaliteEnseignementEnum::NON_DEFINI) {
-            $builder->add('modaliteEnseignement', EnumType::class, [
-                'class' => ModaliteEnseignementEnum::class,
-                'choice_label' => fn (ModaliteEnseignementEnum $choice) => match ($choice) {
-                    ModaliteEnseignementEnum::NON_DEFINI => 'Choisir une modalité',
-                    ModaliteEnseignementEnum::PRESENTIELLE => 'En présentiel',
-                    ModaliteEnseignementEnum::DISTANCIELLE => 'En distanciel',
-                    ModaliteEnseignementEnum::HYBRIDE => 'Hybride',
-                },
-                'expanded' => false,
+        if ($options['modalite'] === null || \App\Referentiel\ModaliteEnseignement::key($options['modalite']) === (string) ModaliteEnseignementEnum::HYBRIDE->value || \App\Referentiel\ModaliteEnseignement::key($options['modalite']) === (string) ModaliteEnseignementEnum::NON_DEFINI->value) {
+            $builder->add('modaliteEnseignement', ModaliteEnseignementType::class, [
+                                'expanded' => false,
+                'getter' => static fn ($entity): ?string => $entity->getModaliteEnseignementValue(),
+                'setter' => static function ($entity, ?string $value): void { $entity->setModaliteEnseignementValue($value); },
                 'attr' => ['data-action' => !$isModal ? 'change->ec--structure#saveModaliteEnseignement' : 'change->ec--structureparcours#changeModalite'],
             ]);
         }
