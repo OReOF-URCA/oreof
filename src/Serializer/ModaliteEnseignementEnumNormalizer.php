@@ -5,6 +5,10 @@ namespace App\Serializer;
 use App\Enums\ModaliteEnseignementEnum;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
+/**
+ * @deprecated Legacy enum-only denormalizer. Use canonical referential keys for
+ *             new payloads; this adapter cannot represent custom modalities.
+ */
 class ModaliteEnseignementEnumNormalizer implements DenormalizerInterface
 {
     public function supportsDenormalization($data, string $type, ?string $format = null, array $context = []): bool
@@ -22,7 +26,8 @@ class ModaliteEnseignementEnumNormalizer implements DenormalizerInterface
             $data = $data['value'] ?? null;
         }
 
-        return ModaliteEnseignementEnum::tryFrom($data) ?? ModaliteEnseignementEnum::NON_DEFINI;
+        return \App\Referentiel\ModaliteEnseignement::legacyCase(is_int($data) || is_string($data) ? $data : null)
+            ?? ModaliteEnseignementEnum::NON_DEFINI;
     }
 
     public function getSupportedTypes(?string $format): array
