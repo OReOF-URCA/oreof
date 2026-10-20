@@ -252,6 +252,7 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     public function setModaliteEnseignement(?ModaliteEnseignementEnum $modaliteEnseignement): self
     {
         $this->modaliteEnseignement = $modaliteEnseignement;
+        $this->modaliteEnseignementReferentiel = $modaliteEnseignement === null ? null : (string) $modaliteEnseignement->value;
 
         return $this;
     }
