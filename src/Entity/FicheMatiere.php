@@ -573,6 +573,17 @@ class FicheMatiere implements McccCompletionCheckerInterface
         return $this;
     }
 
+    /**
+     * Stable persisted key, ready for configurable referential values.
+     * The legacy enum accessor remains unchanged for existing consumers.
+     */
+    public function getModaliteEnseignementValue(): ?string
+    {
+        return $this->modaliteEnseignement === null
+            ? null
+            : \App\Referentiel\ModaliteEnseignement::key($this->modaliteEnseignement);
+    }
+
     public function getModaliteEnseignement(): ?ModaliteEnseignementEnum
     {
         return $this->modaliteEnseignement ?? ModaliteEnseignementEnum::NON_DEFINI;
