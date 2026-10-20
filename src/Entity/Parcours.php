@@ -578,6 +578,17 @@ class Parcours
         return $this;
     }
 
+    /**
+     * Stable persisted key, ready for configurable referential values.
+     * The legacy enum accessor remains unchanged for existing consumers.
+     */
+    public function getModalitesEnseignementValue(): ?string
+    {
+        return $this->modalitesEnseignement === null
+            ? null
+            : \App\Referentiel\ModaliteEnseignement::key($this->modalitesEnseignement);
+    }
+
     public function getModalitesEnseignement(): ?ModaliteEnseignementEnum
     {
         return $this->modalitesEnseignement;
