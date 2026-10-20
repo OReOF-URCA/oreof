@@ -109,6 +109,10 @@ class Parcours
     #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: ModaliteEnseignementEnum::class)]
     private ?ModaliteEnseignementEnum $modalitesEnseignement = ModaliteEnseignementEnum::NON_DEFINI;
 
+    /** Canonical referential key (nullable until backfilled from the legacy column). */
+    #[ORM\Column(name: 'modalitesEnseignement_referentiel', length: 100, nullable: true)]
+    private ?string $modalitesEnseignementReferentiel = null;
+
     #[Groups('parcours_json_versioning')]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $prerequis = null;
@@ -584,9 +588,25 @@ class Parcours
      */
     public function getModalitesEnseignementValue(): ?string
     {
+        if ($this->modalitesEnseignementReferentiel !== null) {
+            return $this->modalitesEnseignementReferentiel;
+        }
+
         return $this->modalitesEnseignement === null
             ? null
             : \App\Referentiel\ModaliteEnseignement::key($this->modalitesEnseignement);
+    }
+
+    /**
+     * Write a configurable key without losing the existing legacy column.
+     * The legacy enum is only updated when the key has an exact enum match.
+     */
+    public function setModalitesEnseignementValue(?string $key): self
+    {
+        $this->modalitesEnseignementReferentiel = $key;
+        $this->modalitesEnseignement = $key === null ? null : \App\Referentiel\ModaliteEnseignement::legacyCase($key);
+
+        return $this;
     }
 
     public function getModalitesEnseignement(): ?ModaliteEnseignementEnum
