@@ -25,7 +25,7 @@ class EcStep4Type extends AbstractType
     {
         $isModal = $options['isModal'];
 
-        if ($options['modalite'] === null || $options['modalite'] === ModaliteEnseignementEnum::HYBRIDE || $options['modalite'] === ModaliteEnseignementEnum::NON_DEFINI) {
+        if ($options['modalite'] === null || \App\Referentiel\ModaliteEnseignement::key($options['modalite']) === (string) ModaliteEnseignementEnum::HYBRIDE->value || \App\Referentiel\ModaliteEnseignement::key($options['modalite']) === (string) ModaliteEnseignementEnum::NON_DEFINI->value) {
             $builder->add('modaliteEnseignement', ModaliteEnseignementType::class, [
                                 'expanded' => false,
                 'getter' => static fn ($entity): ?string => $entity->getModaliteEnseignementValue(),
