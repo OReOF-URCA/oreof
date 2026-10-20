@@ -609,6 +609,10 @@ class Parcours
         return $this;
     }
 
+    /**
+     * @deprecated Compatibility accessor: custom referential modalities cannot
+     *             be represented by this enum. Use getModalitesEnseignementValue().
+     */
     public function getModalitesEnseignement(): ?ModaliteEnseignementEnum
     {
         return $this->modalitesEnseignement;
