@@ -21,6 +21,10 @@ final class ModaliteEnseignement
             : (string) $value;
     }
 
+    /**
+     * Returns a historical enum only when the key matches exactly.
+     * Custom codes are never cast to integers.
+     */
     public static function legacyCase(string|int|ModaliteEnseignementEnum|null $value): ?ModaliteEnseignementEnum
     {
         if ($value === null) {
