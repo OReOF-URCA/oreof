@@ -41,6 +41,10 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     #[ORM\Column(length: 30, nullable: true, enumType: ModaliteEnseignementEnum::class)]
     private ?ModaliteEnseignementEnum $modaliteEnseignement = null;
 
+    /** Canonical referential key (nullable until backfilled from the legacy column). */
+    #[ORM\Column(name: 'modaliteEnseignement_referentiel', length: 100, nullable: true)]
+    private ?string $modaliteEnseignementReferentiel = null;
+
     #[ORM\Column(nullable: true)]
     private ?float $ects;
 
@@ -219,9 +223,25 @@ class ElementConstitutif implements McccCompletionCheckerInterface
      */
     public function getModaliteEnseignementValue(): ?string
     {
+        if ($this->modaliteEnseignementReferentiel !== null) {
+            return $this->modaliteEnseignementReferentiel;
+        }
+
         return $this->modaliteEnseignement === null
             ? null
             : \App\Referentiel\ModaliteEnseignement::key($this->modaliteEnseignement);
+    }
+
+    /**
+     * Write a configurable key without losing the existing legacy column.
+     * The legacy enum is only updated when the key has an exact enum match.
+     */
+    public function setModaliteEnseignementValue(?string $key): self
+    {
+        $this->modaliteEnseignementReferentiel = $key;
+        $this->modaliteEnseignement = $key === null ? null : \App\Referentiel\ModaliteEnseignement::legacyCase($key);
+
+        return $this;
     }
 
     public function getModaliteEnseignement(): ?ModaliteEnseignementEnum
