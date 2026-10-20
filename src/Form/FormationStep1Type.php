@@ -96,7 +96,6 @@ class FormationStep1Type extends AbstractType
                 'attr' => ['data-action' => 'change->formation--step6#changeComposanteInscription']
             ])
             ->add('regimeInscription', \App\Form\Type\RegimeInscriptionType::class, [
-                'help => 'Régime d\'inscription',
                 'translation_domain' => 'form',
                 'getter' => static fn ($entity): array => $entity->getRegimeInscriptionValues(),
                 'setter' => static function ($entity, array $values): void { $entity->setRegimeInscription($values); },
