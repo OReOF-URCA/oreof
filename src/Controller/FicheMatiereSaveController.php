@@ -97,12 +97,8 @@ class FicheMatiereSaveController extends BaseController
 
                 return $updateEntity->saveField($ficheMatiere, 'responsableFicheMatiere', $responsableFicheMatiere);
             case 'modalitesEnseignement':
-                return $updateEntity->saveField(
-                    $ficheMatiere,
-                    'modaliteEnseignement',
-                    ModaliteEnseignementEnum::from($data['value'])
-                );
-
+                $ficheMatiere->setModaliteEnseignementValue((string) $data['value']);
+                return $updateEntity->saveField($ficheMatiere, 'modaliteEnseignementReferentiel', $ficheMatiere->getModaliteEnseignementValue());
             case 'int':
                 return $updateEntity->saveField($ficheMatiere, $data['field'], (int)$data['value']);
             case 'removeBcc':
