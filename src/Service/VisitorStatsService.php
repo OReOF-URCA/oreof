@@ -9,6 +9,7 @@ use Symfony\Contracts\Cache\CacheInterface;
  * @phpstan-type Day array{
  *     logins: int,
  *     users: array<string, int>,
+ *     lastLogins: array<string, int>,
  *     visitors: array<string, true>,
  *     pageViews: int,
  *     routes: array<string, int>,
@@ -80,6 +81,8 @@ final class VisitorStatsService
      *     topRoutes: array<string, int>,
      *     topMachineRoutes: array<string, int>,
      *     topUsers: array<string, int>,
+     *     recentUsers: array<string, int>,
+     *     lastLogins: array<string, int>,
      *     hours: array<int, int>
      * }
      */
@@ -96,6 +99,7 @@ final class VisitorStatsService
         $days = [];
         $totals = ['logins' => 0, 'uniqueUsers' => 0, 'pageViews' => 0, 'machineHits' => 0, 'estimatedDays' => 0, 'activeDays' => 0];
         $allUsers = [];
+        $allLastLogins = [];
         $allVisitors = [];
         $allRoutes = [];
         $allMachineRoutes = [];
@@ -138,6 +142,10 @@ final class VisitorStatsService
                 $allUsers[$username] = ($allUsers[$username] ?? 0) + $count;
             }
 
+            foreach ($day['lastLogins'] as $username => $timestamp) {
+                $allLastLogins[$username] = max($allLastLogins[$username] ?? 0, $timestamp);
+            }
+
             foreach ($day['routes'] as $route => $count) {
                 $allRoutes[$route] = ($allRoutes[$route] ?? 0) + $count;
             }
@@ -155,12 +163,22 @@ final class VisitorStatsService
 
         $totals['uniqueUsers'] = count($allUsers + $allVisitors);
 
+        // Connexion la plus récente d'abord ; les utilisateurs affichés sont ceux du top, pas toute la période
+        arsort($allLastLogins);
+        $recentUsers = [];
+        foreach (array_slice($allLastLogins, 0, self::TOP_USERS_LIMIT, true) as $username => $timestamp) {
+            $recentUsers[$username] = $allUsers[$username];
+        }
+        $topUsers = $this->takeTop($allUsers, self::TOP_USERS_LIMIT);
+
         return [
             'days' => $days,
             'totals' => $totals,
             'topRoutes' => $this->takeTop($allRoutes, self::TOP_ROUTES_LIMIT),
             'topMachineRoutes' => $this->takeTop($allMachineRoutes, self::TOP_ROUTES_LIMIT),
-            'topUsers' => $this->takeTop($allUsers, self::TOP_USERS_LIMIT),
+            'topUsers' => $topUsers,
+            'recentUsers' => $recentUsers,
+            'lastLogins' => array_intersect_key($allLastLogins, $topUsers + $recentUsers),
             'hours' => $allHours,
         ];
     }
@@ -175,6 +193,7 @@ final class VisitorStatsService
         $day = [
             'logins' => 0,
             'users' => [],
+            'lastLogins' => [],
             'visitors' => [],
             'pageViews' => 0,
             'routes' => [],
@@ -210,7 +229,7 @@ final class VisitorStatsService
         }
 
         $cacheKey = sprintf(
-            'visitor_stats_v2_%s_%s_%s',
+            'visitor_stats_v3_%s_%s_%s',
             $this->environment,
             $date,
             md5(
@@ -256,6 +275,11 @@ final class VisitorStatsService
             $username = $matches[1];
             ++$day['logins'];
             $day['users'][$username] = ($day['users'][$username] ?? 0) + 1;
+
+            $timestamp = $this->extractTimestamp($line);
+            if ($timestamp !== null) {
+                $day['lastLogins'][$username] = max($day['lastLogins'][$username] ?? 0, $timestamp);
+            }
         }
 
         fclose($handle);
@@ -368,6 +392,22 @@ final class VisitorStatsService
         $hour = $this->extractHour($line);
         if ($hour !== null) {
             $day['hours'][$hour] = ($day['hours'][$hour] ?? 0) + 1;
+        }
+    }
+
+    /**
+     * Timestamp Unix du début de ligne Monolog.
+     */
+    private function extractTimestamp(string $line): ?int
+    {
+        if (preg_match(self::TIMESTAMP_PATTERN, $line, $matches) !== 1) {
+            return null;
+        }
+
+        try {
+            return (new \DateTimeImmutable($matches[1]))->getTimestamp();
+        } catch (\Exception) {
+            return null;
         }
     }
 

@@ -72,6 +72,14 @@ class VisitorStatsServiceTest extends TestCase
         self::assertSame(2, $stats['topUsers']['admin']);
         self::assertSame(1, $stats['topUsers']['bob']);
 
+        // bob s'est connecté après admin (14:02 contre 09:11)
+        self::assertSame('bob', array_key_first($stats['recentUsers']));
+        self::assertSame(2, $stats['recentUsers']['admin']);
+        self::assertSame(
+            (new \DateTimeImmutable('2025-10-01T14:02:03+00:00'))->getTimestamp(),
+            $stats['lastLogins']['bob']
+        );
+
         self::assertSame(['app_homepage' => 1], $stats['topRoutes']);
 
         self::assertCount(24, $stats['hours']);
