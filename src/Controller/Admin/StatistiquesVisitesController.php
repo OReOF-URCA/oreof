@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Repository\UserProfilRepository;
 use App\Repository\UserRepository;
 use App\Service\VisitorStatsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,6 +30,7 @@ class StatistiquesVisitesController extends AbstractController
         Request $request,
         VisitorStatsService $visitorStats,
         UserRepository $userRepository,
+        UserProfilRepository $userProfilRepository,
         ChartBuilderInterface $chartBuilder,
     ): Response
     {
@@ -46,6 +48,7 @@ class StatistiquesVisitesController extends AbstractController
         $from = $to->modify(sprintf('-%d days', $periode - 1));
         $stats = $visitorStats->getStats($from, $to);
         $utilisateurs = 'recent' === $tri ? $stats['recentUsers'] : $stats['topUsers'];
+        $identifiants = array_map('strval', array_keys($utilisateurs));
 
         return $this->render('admin/statistiques_visites/index.html.twig', [
             'stats' => $stats,
@@ -53,7 +56,8 @@ class StatistiquesVisitesController extends AbstractController
             'periodes' => self::PERIODES,
             'tri' => $tri,
             'utilisateurs' => $utilisateurs,
-            'noms' => $userRepository->findNamesByUsernames(array_map('strval', array_keys($utilisateurs))),
+            'noms' => $userRepository->findNamesByUsernames($identifiants),
+            'affectations' => $userProfilRepository->findAffectationsByUsernames($identifiants),
             'from' => $from,
             'to' => $to,
             'chartPagesVues' => $this->chart(
