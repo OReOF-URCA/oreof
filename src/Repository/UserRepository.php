@@ -34,6 +34,34 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         parent::__construct($registry, User::class);
     }
 
+    /**
+     * Nom et prénom des identifiants donnés, en une seule requête.
+     *
+     * @param list<string> $usernames
+     *
+     * @return array<string, array{nom: ?string, prenom: ?string}>
+     */
+    public function findNamesByUsernames(array $usernames): array
+    {
+        if ($usernames === []) {
+            return [];
+        }
+
+        $rows = $this->createQueryBuilder('u')
+            ->select('u.username, u.nom, u.prenom')
+            ->where('u.username IN (:usernames)')
+            ->setParameter('usernames', $usernames)
+            ->getQuery()
+            ->getArrayResult();
+
+        $names = [];
+        foreach ($rows as $row) {
+            $names[$row['username']] = ['nom' => $row['nom'], 'prenom' => $row['prenom']];
+        }
+
+        return $names;
+    }
+
     public function findAll(): array
     {
         return $this->findBy([

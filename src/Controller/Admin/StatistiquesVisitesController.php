@@ -2,6 +2,7 @@
 
 namespace App\Controller\Admin;
 
+use App\Repository\UserRepository;
 use App\Service\VisitorStatsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,10 +21,14 @@ class StatistiquesVisitesController extends AbstractController
 
     private const PERIODE_DEFAUT = 30;
 
+    /** Tris du tableau des utilisateurs : nombre de connexions ou connexion la plus récente */
+    private const TRIS = ['connexions', 'recent'];
+
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(
         Request $request,
         VisitorStatsService $visitorStats,
+        UserRepository $userRepository,
         ChartBuilderInterface $chartBuilder,
     ): Response
     {
@@ -32,14 +37,23 @@ class StatistiquesVisitesController extends AbstractController
             $periode = self::PERIODE_DEFAUT;
         }
 
+        $tri = $request->query->getString('tri', self::TRIS[0]);
+        if (!in_array($tri, self::TRIS, true)) {
+            $tri = self::TRIS[0];
+        }
+
         $to = new \DateTimeImmutable('today');
         $from = $to->modify(sprintf('-%d days', $periode - 1));
         $stats = $visitorStats->getStats($from, $to);
+        $utilisateurs = 'recent' === $tri ? $stats['recentUsers'] : $stats['topUsers'];
 
         return $this->render('admin/statistiques_visites/index.html.twig', [
             'stats' => $stats,
             'periode' => $periode,
             'periodes' => self::PERIODES,
+            'tri' => $tri,
+            'utilisateurs' => $utilisateurs,
+            'noms' => $userRepository->findNamesByUsernames(array_map('strval', array_keys($utilisateurs))),
             'from' => $from,
             'to' => $to,
             'chartPagesVues' => $this->chart(

@@ -123,8 +123,16 @@
 
             {# Utilisateurs les plus actifs #}
             <section class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700">
-                <h2 class="mb-3 text-sm font-semibold text-text">Utilisateurs les plus connectés</h2>
-                {% if stats.topUsers is empty %}
+                <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+                    <h2 class="text-sm font-semibold text-text">Utilisateurs les plus connectés</h2>
+                    <div class="flex gap-1">
+                        <twig:Button label="Plus de connexions" variant="primary" size="sm" :soft="tri != 'connexions'"
+                                     href="{{ path('app_admin_statistiques_visites_index', {periode: periode, tri: 'connexions'}) }}"/>
+                        <twig:Button label="Plus récentes" variant="primary" size="sm" :soft="tri != 'recent'"
+                                     href="{{ path('app_admin_statistiques_visites_index', {periode: periode, tri: 'recent'}) }}"/>
+                    </div>
+                </div>
+                {% if utilisateurs is empty %}
                     <p class="text-sm text-secondary-400">Aucune connexion sur la période.</p>
                 {% else %}
                     <div class="overflow-x-auto">
@@ -132,14 +140,19 @@
                             <thead class="text-[11px] uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
                             <tr>
                                 <th class="py-2 text-left font-semibold">Identifiant</th>
+                                <th class="py-2 text-left font-semibold">Nom</th>
                                 <th class="py-2 text-right font-semibold">Connexions</th>
+                                <th class="py-2 text-right font-semibold">Dernière</th>
                             </tr>
                             </thead>
                             <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
-                            {% for username, count in stats.topUsers %}
+                            {% for username, count in utilisateurs %}
+                                {% set identite = noms[username] is defined ? (noms[username].prenom|default('') ~ ' ' ~ noms[username].nom|default(''))|trim|title : '' %}
                                 <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800/60">
                                     <td class="max-w-0 truncate py-1.5 pr-2 text-text" title="{{ username }}">{{ username }}</td>
+                                    <td class="max-w-0 truncate py-1.5 pr-2 text-text" title="{{ identite }}">{{ identite ?: '—' }}</td>
                                     <td class="py-1.5 text-right tabular-nums text-text">{{ count }}</td>
+                                    <td class="py-1.5 text-right tabular-nums text-secondary-500 dark:text-secondary-400">{{ stats.lastLogins[username] is defined ? stats.lastLogins[username]|date('d/m/Y H:i', 'Europe/Paris') : '—' }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
