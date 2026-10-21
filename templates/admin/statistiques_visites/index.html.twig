@@ -141,8 +141,11 @@
                             <tr>
                                 <th class="py-2 text-left font-semibold">Identifiant</th>
                                 <th class="py-2 text-left font-semibold">Nom</th>
-                                <th class="py-2 text-right font-semibold">Connexions</th>
-                                <th class="py-2 text-right font-semibold">Dernière</th>
+                                {% if tri == 'recent' %}
+                                    <th class="py-2 text-right font-semibold">Dernière</th>
+                                {% else %}
+                                    <th class="py-2 text-right font-semibold">Connexions</th>
+                                {% endif %}
                             </tr>
                             </thead>
                             <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
@@ -151,8 +154,11 @@
                                 <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800/60">
                                     <td class="max-w-0 truncate py-1.5 pr-2 text-text" title="{{ username }}">{{ username }}</td>
                                     <td class="max-w-0 truncate py-1.5 pr-2 text-text" title="{{ identite }}">{{ identite ?: '—' }}</td>
-                                    <td class="py-1.5 text-right tabular-nums text-text">{{ count }}</td>
-                                    <td class="py-1.5 text-right tabular-nums text-secondary-500 dark:text-secondary-400">{{ stats.lastLogins[username] is defined ? stats.lastLogins[username]|date('d/m/Y H:i', 'Europe/Paris') : '—' }}</td>
+                                    {% if tri == 'recent' %}
+                                        <td class="py-1.5 text-right tabular-nums text-secondary-500 dark:text-secondary-400">{{ stats.lastLogins[username] is defined ? stats.lastLogins[username]|date('d/m/Y H:i', 'Europe/Paris') : '—' }}</td>
+                                    {% else %}
+                                        <td class="py-1.5 text-right tabular-nums text-text">{{ count }}</td>
+                                    {% endif %}
                                 </tr>
                             {% endfor %}
                             </tbody>
