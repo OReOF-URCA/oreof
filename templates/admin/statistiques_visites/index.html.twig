@@ -152,8 +152,8 @@
                             {% for username, count in utilisateurs %}
                                 {% set identite = noms[username] is defined ? (noms[username].prenom|default('') ~ ' ' ~ noms[username].nom|default(''))|trim|title : '' %}
                                 <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800/60">
-                                    <td class="max-w-0 truncate py-1.5 pr-2 text-text" title="{{ username }}">{{ username }}</td>
-                                    <td class="max-w-0 truncate py-1.5 pr-2 text-text" title="{{ identite }}">{{ identite ?: '—' }}</td>
+                                    <td class="whitespace-nowrap py-1.5 pr-3 text-text" title="{{ username }}">{{ username }}</td>
+                                    <td class="w-full py-1.5 pr-3 text-text" title="{{ identite }}">{{ identite ?: '—' }}</td>
                                     {% if tri == 'recent' %}
                                         <td class="py-1.5 text-right tabular-nums text-secondary-500 dark:text-secondary-400">{{ stats.lastLogins[username] is defined ? stats.lastLogins[username]|date('d/m/Y H:i', 'Europe/Paris') : '—' }}</td>
                                     {% else %}
