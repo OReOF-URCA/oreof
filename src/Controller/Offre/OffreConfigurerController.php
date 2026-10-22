@@ -232,6 +232,20 @@ final class OffreConfigurerController extends BaseController
                     }
                 }
 
+                // Case « pas de capacité d'accueil » : l'année est ouverte sans capacité à saisir
+                if (!$isParcoursClosed && $request->request->has('annee_' . $anneeId . '_sansCapacite_present')) {
+                    $hasCapacite = !$request->request->has('annee_' . $anneeId . '_sansCapacite');
+                    if ($annee->hasCapacite() !== $hasCapacite) {
+                        $annee->setHasCapacite($hasCapacite);
+                        $changedYears[$anneeId] = true;
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                    }
+                    if (!$hasCapacite && $annee->getCapaciteAccueil() !== 0) {
+                        $annee->setCapaciteAccueil(0);
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                    }
+                }
+
                 $regimeKey = 'annee_' . $anneeId . '_regimeInscription';
                 $oldRegimes = $annee->getRegimeInscriptionValues();
                 if ($request->request->has($regimeKey)) {
@@ -370,6 +384,10 @@ final class OffreConfigurerController extends BaseController
                 }
                 if ($targetAnnee->getCapaciteAccueil() !== $sourceAnnee->getCapaciteAccueil()) {
                     $targetAnnee->setCapaciteAccueil($sourceAnnee->getCapaciteAccueil());
+                    $changed = true;
+                }
+                if ($targetAnnee->hasCapacite() !== $sourceAnnee->hasCapacite()) {
+                    $targetAnnee->setHasCapacite((bool) $sourceAnnee->hasCapacite());
                     $changed = true;
                 }
                 if ($targetAnnee->getRegimeInscriptionValues() !== $sourceAnnee->getRegimeInscriptionValues()) {
