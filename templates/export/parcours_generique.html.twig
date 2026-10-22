@@ -1,0 +1,544 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="{{ asset('export-parcours/parcours_generique.css') }}">
+{% endblock %}
+
+{% block header %}
+    Outil d'export des parcours
+{% endblock %}
+
+{% block content %}
+    <div 
+        {{ stimulus_controller('export-generique--parcours-search', {
+                'searchUrl': path('app_parcours_export_generique_search_by_name'),
+                'campagneCollecte': campagneCollecte,
+                'downloadParcoursPdfUrl': path('app_parcours_export_generique_download_pdf'),
+                'downloadParcoursXlsxUrl': path('app_parcours_export_generique_xlsx'),
+                'downloadFicheMatiereXslxUrl': path('fiche_matiere_export_generique_xlsx'),
+                'downloadFicheMatierePdfUrl': path('fiche_matiere_export_generique_pdf')
+            }) 
+        }}
+        class="row justify-content-center"
+    >
+        <div class="col-10">
+            <form 
+                {{ stimulus_target('export-generique--parcours-search', 'searchForm') }}
+                method="get"
+            >
+                <div class="row justify-content-center">
+                    <div class="col-3 col-lg-2 mb-3 mb-lg-0 text-center">
+                        <span class="badge rounded-pill text-white fw-bold bg-warning fs-6">
+                            {{ periodeAnnee }}
+                        </span>
+                    </div>
+                    <div class="col-lg-6 col-md-8 col-sm-10">
+                        <div class="row">
+                            <div class="input-group">
+                                <span class="input-group-text bg-primary text-white">
+                                    Recherche de parcours
+                                </span>
+                                <input 
+                                    {{ stimulus_target('export-generique--parcours-search', 'searchInput') }}
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="Composante, parcours, sigle, type de diplôme..."
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div 
+                        {{ stimulus_action(
+                            'export-generique--parcours-search', 
+                            'loadResultList',
+                            'click'
+                            ) 
+                        }}
+                        class="col-1 text-center mt-2 mt-md-0"
+                    >
+                        <span class="badge bg-primary text-light px-3 py-2 rounded" id="searchButton">
+                            <i class="fa-light fa-magnifying-glass fs-6"></i>
+                        </span>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-3">
+                    <div class="col-12 text-center">
+                        <span 
+                            {{ stimulus_target('export-generique--parcours-search', 'selectAllParcoursButton') }}
+                            {{ stimulus_action('export-generique--parcours-search', 'selectAllParcours', 'click') }}
+                            class="badgeSearchAction badge rounded-pill text-bg-success fw-bold text-white mx-1"
+                        >
+                            Sélectionner tous les parcours de cette année
+                        </span>
+                        <span 
+                            {{ stimulus_target('export-generique--parcours-search', 'emptySearchListButton') }}
+                            {{ stimulus_action('export-generique--parcours-search', 'emptyResultListEvent', 'click') }}
+                            class="badgeSearchAction badge rounded-pill text-white fw-bold text-bg-info mx-1 d-none"
+                        >
+                            Cacher la liste de recherche
+                        </span>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-4">
+                    <div 
+                        {{ stimulus_target('export-generique--parcours-search', 'loadingIcon') }}
+                        class="col-12 text-center d-none"
+                    >
+                        <i class="fa-duotone fa-solid fa-spinner loading-icon"></i>
+                    </div>
+                    <div 
+                        {{ stimulus_target('export-generique--parcours-search', 'searchResult') }}
+                        class="col-lg-8 col-md-9 col-sm-10 result-scrollbar"
+                        id="searchResultNode"
+                    >
+
+                    </div>
+                </div>
+                <div 
+                    {{ stimulus_target('export-generique--parcours-search', 'selectedParcours') }}
+                    class="row justify-content-center mt-3 mb-3"
+                >
+
+                </div>
+
+                <div class="row justify-content-center">
+                    <div class="col-8 text-center">
+                        <h4 class="text-primary mb-2">
+                            Données à exporter
+                        </h4>
+                        <span 
+                            {{ stimulus_target('export-generique--parcours-search', 'displayDataParcours') }}
+                            {{ stimulus_action('export-generique--parcours-search', 'displayParcoursChoices', 'click') }}
+                            class="btn btn-sm btn-primary mt-3 mt-lg-0"
+                        >
+                            Parcours
+                        </span>
+                        <span 
+                            {{ stimulus_target('export-generique--parcours-search', 'displayDataFicheMatiere') }}
+                            {{ stimulus_action('export-generique--parcours-search', 'displayFicheMatiereChoices', 'click') }}
+                            class="btn btn-sm btn-primary mt-3 mt-lg-0 ms-md-3"
+                        >
+                            Fiches matières
+                        </span>
+                        <span
+                            {{ stimulus_target('export-generique--parcours-search', 'displayDataExportTemplate') }}
+                            {{ stimulus_action('export-generique--parcours-search', 'displayExportTemplateChoices', 'click') }}
+                            class="btn btn-sm btn-primary mt-3 mt-lg-0 ms-md-3"
+                        >
+                            Format d'export prédéfini
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="row justify-content-center">
+                        <div class="col-sm-12 col-md-8 col-lg-6 d-none" id="parcoursSelectData">
+                            <div class="row justify-content-center mt-4">
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span 
+                                        data-export-field="respParcours"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Responsable(s) du parcours
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span 
+                                        data-export-field="respFormation"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Responsable(s) de la formation
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span 
+                                        data-export-field="resultatsAttendusParcours"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Résultats attendus du parcours
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span 
+                                        data-export-field="objectifsParcours"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Objectifs du parcours
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span 
+                                        data-export-field="objectifsFormation"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Objectifs de la formation
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="competencesAcquises"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Compétences Acquises
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="poursuiteEtudes"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Poursuites d'études
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="contenuParcours"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Contenu du parcours
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="contenuFormation"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Contenu de la formation
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="debouchesParcours"
+                                        class="textDivFieldChoice"
+                                    >   
+                                        Débouchés
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="localisationParcours"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Localisation du parcours
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="contactsPedagogiques"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Contacts pédagogiques
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="identiteFormation"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Identité de la formation
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="rythmeFormation"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Rythme de formation
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="informationsInscription"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Inscription
+                                    </span>
+                                
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="admissionParcours"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Admission
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="codesRome"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Codes ROME
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="stageInfos"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Stage
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="memoireInfos"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Mémoire
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="projetInfos"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Projet
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="modalitesEnseignement"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Modalités d'enseignement
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="typeDiplome"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Type Diplôme
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="composantePorteuse"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Composante porteuse
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="semestresOuverts"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Semestres ouverts
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="niveauEntree"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Niveau d'entrée
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 divFieldChoice">
+                                    <span
+                                        data-export-field="niveauSortie"
+                                        class="textDivFieldChoice"
+                                    >
+                                        Niveau de sortie
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-sm-12 col-md-8 col-lg-6 d-none" id="ficheMatiereSelectData">
+                            <div class="row justify-content-center mt-4">
+                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                    <span
+                                        data-export-fm-field="fmId"
+                                        class="fmTextDivFieldChoice"
+                                    >
+                                        Identifiant
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                    <span
+                                        data-export-fm-field="fmLibelle"
+                                        class="fmTextDivFieldChoice"
+                                    >
+                                        Libellé
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                    <span
+                                        data-export-fm-field="fmReferent"
+                                        class="fmTextDivFieldChoice"
+                                    >
+                                        Référent
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                    <span
+                                        data-export-fm-field="fmParcoursPorteur"
+                                        class="fmTextDivFieldChoice"
+                                    >
+                                        Parcours porteur
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                    <span
+                                        data-export-fm-field="fmFormation"
+                                        class="fmTextDivFieldChoice"
+                                    >
+                                        Formation
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                    <span
+                                        data-export-fm-field="fmNbUtilisee"
+                                        class="fmTextDivFieldChoice"
+                                    >
+                                        Nb. utilisations
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                    <span
+                                        data-export-fm-field="fmIsComplet"
+                                        class="fmTextDivFieldChoice"
+                                    >
+                                        Complet
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-sm-12 col-md-8 col-lg-6 d-none" id="exportTemplateData">
+                            <div class="row justify-content-center mt-4">
+                                <div class="col-auto mt-2 exportTemplateChoice">
+                                    <span
+                                        data-export-template="templateSEIP"
+                                        class="textDivExportTemplateData"
+                                    >
+                                        SEIP
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 exportTemplateChoice">
+                                    <span
+                                        data-export-template="templateFicheParcours"
+                                        class="textDivExportTemplateData"
+                                    >
+                                        Fiche Parcours
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 exportTemplateChoice">
+                                    <span
+                                        data-export-template="templateResponsables"
+                                        class="textDivExportTemplateData"
+                                    >
+                                        Responsables
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 exportTemplateChoice">
+                                    <span
+                                        data-export-template="templateSemestresOuverts"
+                                        class="textDivExportTemplateData"
+                                    >
+                                        Semestres ouverts
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 exportTemplateChoice">
+                                    <span
+                                        data-export-template="templateExportRegime"
+                                        class="textDivExportTemplateData"
+                                    >
+                                        Export régime
+                                    </span>                                
+                                </div>
+                                <div class="col-auto mt-2 exportTemplateChoice">
+                                    <span
+                                        data-export-template="templateExportCapApogee"
+                                        class="textDivExportTemplateData"
+                                        {{ stimulus_controller('tooltip', { placement: 'top' } )}}
+                                        title="Cet export n'est disponible qu'au format Excel (Xlsx)"
+                                    >
+                                        Export Fiabilisation APOGEE
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 exportTemplateChoice">
+                                    <span
+                                        data-export-template="templateExportListeFicheMatiere"
+                                        class="textDivExportTemplateData"
+                                    >
+                                        Liste Fiches Matières
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 exportTemplateChoice">
+                                    <span
+                                        data-export-template="templateExportCARIF"
+                                        class="textDivExportTemplateData"
+                                    >
+                                        Export CARIF
+                                    </span>
+                                </div>
+                                <div class="col-auto mt-2 exportTemplateChoice">
+                                    <span
+                                        data-export-template="templateExportCFVU"
+                                        class="textDivExportTemplateData"
+                                    >
+                                        Export CFVU
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-5">
+                    <div class="col-12">
+                        <div
+                            {{ stimulus_target('export-generique--parcours-search', 'needParcoursSelect') }} 
+                            class="col col-auto text-center d-none mb-5"
+                        >
+                            <span class="fw-bold text-danger">
+                                Vous devez choisir au moins un parcours
+                            <span>
+                        </div>
+                        <div 
+                            {{ stimulus_target('export-generique--parcours-search', 'needDataSelect') }}
+                            class="col col-auto text-center mt-2 mb-5 d-none"
+                        >
+                            <span class="fw-bold text-danger">
+                                Vous devez choisir un type de donnée à exporter
+                            </span>
+                        </div>
+                    </div>                    
+                    <div class="row justify-content-center">
+                        <div class="col-xs-9 col-sm-6 col-md-5 col-lg-4 col-xl-3 text-center">
+                            <span 
+                                {{ stimulus_action('export-generique--parcours-search', 'sendExportRequest', 'click', {'type': 'pdf'}) }}
+                                class="btn btn-success" 
+                                id="downloadExport"
+                            >
+                                Télécharger l'export (PDF)
+                            </span>
+                        </div>
+                        <div class="col-xs-9 col-sm-6 col-md-5 col-lg-4 col-xl-3 text-center mt-3 mt-sm-0">
+                            <span 
+                                {{ stimulus_action('export-generique--parcours-search', 'sendExportRequest', 'click', {'type': 'xlsx'}) }}
+                                class="btn btn-success ms-0 ms-lg-3" 
+                            >
+                                Télécharger l'export (Xlsx)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center my-2">
+                        <div class="col-4 col-sm-3 col-md-2 col-lg-1 text-center">
+                            <i 
+                                {{ stimulus_controller('tooltip', { placement: 'bottom' }) }}
+                                title="S'il y a plus de 50 parcours sélectionnés, l'export vous sera envoyé par e-mail"
+                                class="fa-solid fa-circle-info bg-info text-white rounded fs-3"
+                            ></i>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

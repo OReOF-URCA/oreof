@@ -1,0 +1,116 @@
+{% extends 'pdf/base-pdf.html.twig' %}
+
+
+{% block content %}
+    {% for p in parcoursData %}
+    {% set sectionHeader = [] %}
+    <dl>
+        <h1>{{ p.libelleLong }}</h1>
+        {% for v in p.valueExport %}
+            {% if v.fieldName in p["headersSectionPdf"]|keys %}
+                {% if p["headersSectionPdf"][v.fieldName]["libelle"] not in sectionHeader %}
+                    <br>
+                    <h2>
+                        {{ p["headersSectionPdf"][v.fieldName]["content"] }}
+                    </h2>
+                    <br>
+                    {% set sectionHeader = sectionHeader|merge([p["headersSectionPdf"][v.fieldName]["libelle"]]) %}
+                {% endif %}
+            {% endif %}
+            {% if v.type == 'longtext' %}
+                <div class="col-12">
+                    <dt>{{ v.libelle }}</dt>
+                    <dd>{{ v.value|raw }}</dd>
+                </div>
+            {% elseif v.type == 'list' %}
+                <ul>
+                    {% for listElement in v.value %}
+                        {% if listElement.content != null %}
+                        <li>
+                            <b>{{ listElement.libelle}} : </b>
+                            {{ listElement.content }}
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            {% elseif v.type == 'array_list' %}
+                <dt>{{ v.libelle }}</dt>
+                <dd>
+                    <ul>
+                        {% for listItem in v.value %}
+                            <li>{{ listItem }}</li>
+                        {% endfor %}
+                    </ul>
+                </dd>
+            {% elseif v.type == 'nested_list' %}
+                <dd>
+                    <ul>
+                        {% for elt in v.value %}
+                            <li>
+                                {{ elt.nested_libelle }}
+                                <ul>
+                                {% for nestV in elt.nested_value %}
+                                    <li>
+                                        {{ nestV }}
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </dd>
+            {% elseif v.type == 'full_block' %}
+                {{ v.libelle|length > 0 ? "<br><h2>#{v.libelle}</h2>"|raw : ""}}
+                <br>
+                {% for elt in v.value %}
+                    {% if elt.type ?? 'none' == 'list_enum' %}
+                        <dt>
+                            {{ elt.libelle }}
+                        </dt>
+                        <dd>
+                            <ul>
+                                {% for listElement in elt.content %}
+                                    <li>
+                                        {{ listElement.value }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </dd>
+                    {% elseif elt.type ?? 'none' == 'list' %}
+                        <dt>
+                            {{ elt.libelle }}
+                        </dt>
+                        <dd>
+                            <ul>
+                                {% for listElt in elt.content %}
+                                    <li>
+                                        {{ listElt }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </dd>
+                    {% elseif elt.type ?? 'none' == 'nested_content_array' %}
+                        {% for nb in elt.content %}
+                            {% for i in elt.header_content %}
+                                <dt>
+                                    {{ i }}
+                                </dt>
+                                <dd>
+                                    {{ nb[loop.index0]|raw }}
+                                </dd>
+                            {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                        <dt>
+                            {{ elt.libelle }}
+                        </dt>
+                        <div class="col-12">
+                            <dd>{{ elt.content|raw }}</dd>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    </dl><br><br>
+    {% endfor %}
+{% endblock %}
