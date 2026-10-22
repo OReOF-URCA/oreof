@@ -30,7 +30,8 @@
 } 
 
 .divFieldChoice, .fmDivFieldChoice, .exportTemplateChoice {
-    min-height: 3.5em;
+    min-height: 1.75em;
+    justify-content: center;
 }
 
 .result-scrollbar {
@@ -39,7 +40,7 @@
 }
 
 .textDivFieldChoice, .fmTextDivFieldChoice, .textDivExportTemplateData {
-    padding: .65em;
+    padding: .25em;
     border-radius: 0.5em;
     border-color: black;
     border-style: solid;

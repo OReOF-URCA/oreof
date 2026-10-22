@@ -20,29 +20,30 @@
                 'downloadFicheMatierePdfUrl': path('fiche_matiere_export_generique_pdf')
             }) 
         }}
-        class="row justify-content-center"
+        class="flex flex-row justify-center"
     >
-        <div class="col-10">
+        <div class="flex flex-10 justify-center">
             <form 
                 {{ stimulus_target('export-generique--parcours-search', 'searchForm') }}
                 method="get"
+                class="w-full"
             >
-                <div class="row justify-content-center">
-                    <div class="col-3 col-lg-2 mb-3 mb-lg-0 text-center">
-                        <span class="badge rounded-pill text-white fw-bold bg-warning fs-6">
+                <div class="flex flex-row justify-center">
+                    <div class="flex-3 lg:flex-2 mb-2 lg:mb-0 text-center">
+                        <span class="text-gray-50 font-bold bg-yellow-300 text-lg">
                             {{ periodeAnnee }}
                         </span>
                     </div>
-                    <div class="col-lg-6 col-md-8 col-sm-10">
-                        <div class="row">
-                            <div class="input-group">
-                                <span class="input-group-text bg-primary text-white">
+                    <div class="lg:flex-1/2 md:flex-8 sm:flex-10">
+                        <div class="flex flex-row">
+                            <div class="flex lg:flex-6 md:flex-8 sm:flex-10">
+                                <span class="bg-blue-400 text-white">
                                     Recherche de parcours
                                 </span>
                                 <input 
                                     {{ stimulus_target('export-generique--parcours-search', 'searchInput') }}
                                     type="text" 
-                                    class="form-control" 
+                                    class="" 
                                     placeholder="Composante, parcours, sigle, type de diplôme..."
                                 >
                             </div>
@@ -55,41 +56,41 @@
                             'click'
                             ) 
                         }}
-                        class="col-1 text-center mt-2 mt-md-0"
+                        class="flex-1 text-center mt-2 md:mt-0"
                     >
-                        <span class="badge bg-primary text-light px-3 py-2 rounded" id="searchButton">
-                            <i class="fa-light fa-magnifying-glass fs-6"></i>
+                        <span class="bg-blue-600 text-gray-50 px-3 py-2 rounded-md" id="searchButton">
+                            <i class="fa-light fa-magnifying-glass text-2xl"></i>
                         </span>
                     </div>
                 </div>
-                <div class="row justify-content-center mt-3">
-                    <div class="col-12 text-center">
+                <div class="flex flex-row justify-center mt-3">
+                    <div class="flex-12 text-center">
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'selectAllParcoursButton') }}
                             {{ stimulus_action('export-generique--parcours-search', 'selectAllParcours', 'click') }}
-                            class="badgeSearchAction badge rounded-pill text-bg-success fw-bold text-white mx-1"
+                            class="badgeSearchAction font-bold text-white mx-1"
                         >
                             Sélectionner tous les parcours de cette année
                         </span>
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'emptySearchListButton') }}
                             {{ stimulus_action('export-generique--parcours-search', 'emptyResultListEvent', 'click') }}
-                            class="badgeSearchAction badge rounded-pill text-white fw-bold text-bg-info mx-1 d-none"
+                            class="badgeSearchAction text-white font-bold mx-1 hidden"
                         >
                             Cacher la liste de recherche
                         </span>
                     </div>
                 </div>
-                <div class="row justify-content-center mt-4">
+                <div class="flex flex-row justify-center mt-4">
                     <div 
                         {{ stimulus_target('export-generique--parcours-search', 'loadingIcon') }}
-                        class="col-12 text-center d-none"
+                        class="flex-12 text-center hidden"
                     >
                         <i class="fa-duotone fa-solid fa-spinner loading-icon"></i>
                     </div>
                     <div 
                         {{ stimulus_target('export-generique--parcours-search', 'searchResult') }}
-                        class="col-lg-8 col-md-9 col-sm-10 result-scrollbar"
+                        class="lg:flex-8 md:flex-9 sm:flex-0 result-scrollbar"
                         id="searchResultNode"
                     >
 
@@ -97,45 +98,45 @@
                 </div>
                 <div 
                     {{ stimulus_target('export-generique--parcours-search', 'selectedParcours') }}
-                    class="row justify-content-center mt-3 mb-3"
+                    class="flex flex-row justify-center mt-3 mb-3"
                 >
 
                 </div>
 
-                <div class="row justify-content-center">
-                    <div class="col-8 text-center">
+                <div class="flex flex-row justify-center">
+                    <div class="flex-8 text-center">
                         <h4 class="text-primary mb-2">
                             Données à exporter
                         </h4>
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'displayDataParcours') }}
                             {{ stimulus_action('export-generique--parcours-search', 'displayParcoursChoices', 'click') }}
-                            class="btn btn-sm btn-primary mt-3 mt-lg-0"
+                            class="btn btn-blue mt-3 mt-lg-0"
                         >
                             Parcours
                         </span>
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'displayDataFicheMatiere') }}
                             {{ stimulus_action('export-generique--parcours-search', 'displayFicheMatiereChoices', 'click') }}
-                            class="btn btn-sm btn-primary mt-3 mt-lg-0 ms-md-3"
+                            class="btn btn-blue mt-3 mt-lg-0 md:ml-3"
                         >
                             Fiches matières
                         </span>
                         <span
                             {{ stimulus_target('export-generique--parcours-search', 'displayDataExportTemplate') }}
                             {{ stimulus_action('export-generique--parcours-search', 'displayExportTemplateChoices', 'click') }}
-                            class="btn btn-sm btn-primary mt-3 mt-lg-0 ms-md-3"
+                            class="btn btn-blue mt-3 mt-lg-0 md:ml-3"
                         >
                             Format d'export prédéfini
                         </span>
                     </div>
                 </div>
 
-                <div class="col-12">
-                    <div class="row justify-content-center">
-                        <div class="col-sm-12 col-md-8 col-lg-6 d-none" id="parcoursSelectData">
-                            <div class="row justify-content-center mt-4">
-                                <div class="col-auto mt-2 divFieldChoice">
+                <div class="flex-12">
+                    <div class="flex flex-row justify-center">
+                        <div class="flex sm:flex-2 md:flex-8 lg:flex-6 justify-center hidden" id="parcoursSelectData">
+                            <div class="flex flex-row flex-wrap sm:w-5/6 lg:w-4/6 justify-center mt-4">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span 
                                         data-export-field="respParcours"
                                         class="textDivFieldChoice"
@@ -143,7 +144,7 @@
                                         Responsable(s) du parcours
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span 
                                         data-export-field="respFormation"
                                         class="textDivFieldChoice"
@@ -151,7 +152,7 @@
                                         Responsable(s) de la formation
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span 
                                         data-export-field="resultatsAttendusParcours"
                                         class="textDivFieldChoice"
@@ -159,7 +160,7 @@
                                         Résultats attendus du parcours
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span 
                                         data-export-field="objectifsParcours"
                                         class="textDivFieldChoice"
@@ -167,7 +168,7 @@
                                         Objectifs du parcours
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span 
                                         data-export-field="objectifsFormation"
                                         class="textDivFieldChoice"
@@ -175,7 +176,7 @@
                                         Objectifs de la formation
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="competencesAcquises"
                                         class="textDivFieldChoice"
@@ -183,7 +184,7 @@
                                         Compétences Acquises
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="poursuiteEtudes"
                                         class="textDivFieldChoice"
@@ -191,7 +192,7 @@
                                         Poursuites d'études
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="contenuParcours"
                                         class="textDivFieldChoice"
@@ -199,7 +200,7 @@
                                         Contenu du parcours
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="contenuFormation"
                                         class="textDivFieldChoice"
@@ -207,7 +208,7 @@
                                         Contenu de la formation
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="debouchesParcours"
                                         class="textDivFieldChoice"
@@ -215,7 +216,7 @@
                                         Débouchés
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="localisationParcours"
                                         class="textDivFieldChoice"
@@ -223,7 +224,7 @@
                                         Localisation du parcours
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="contactsPedagogiques"
                                         class="textDivFieldChoice"
@@ -231,7 +232,7 @@
                                         Contacts pédagogiques
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="identiteFormation"
                                         class="textDivFieldChoice"
@@ -239,7 +240,7 @@
                                         Identité de la formation
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="rythmeFormation"
                                         class="textDivFieldChoice"
@@ -247,7 +248,7 @@
                                         Rythme de formation
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="informationsInscription"
                                         class="textDivFieldChoice"
@@ -256,7 +257,7 @@
                                     </span>
                                 
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="admissionParcours"
                                         class="textDivFieldChoice"
@@ -264,7 +265,7 @@
                                         Admission
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="codesRome"
                                         class="textDivFieldChoice"
@@ -272,7 +273,7 @@
                                         Codes ROME
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="stageInfos"
                                         class="textDivFieldChoice"
@@ -280,7 +281,7 @@
                                         Stage
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="memoireInfos"
                                         class="textDivFieldChoice"
@@ -288,7 +289,7 @@
                                         Mémoire
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="projetInfos"
                                         class="textDivFieldChoice"
@@ -296,7 +297,7 @@
                                         Projet
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="modalitesEnseignement"
                                         class="textDivFieldChoice"
@@ -304,7 +305,7 @@
                                         Modalités d'enseignement
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="typeDiplome"
                                         class="textDivFieldChoice"
@@ -312,7 +313,7 @@
                                         Type Diplôme
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="composantePorteuse"
                                         class="textDivFieldChoice"
@@ -320,7 +321,7 @@
                                         Composante porteuse
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="semestresOuverts"
                                         class="textDivFieldChoice"
@@ -328,7 +329,7 @@
                                         Semestres ouverts
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="niveauEntree"
                                         class="textDivFieldChoice"
@@ -336,7 +337,7 @@
                                         Niveau d'entrée
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 divFieldChoice">
+                                <div class="flex flex-auto mt-2 divFieldChoice">
                                     <span
                                         data-export-field="niveauSortie"
                                         class="textDivFieldChoice"
@@ -347,10 +348,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row justify-content-center">
-                        <div class="col-sm-12 col-md-8 col-lg-6 d-none" id="ficheMatiereSelectData">
-                            <div class="row justify-content-center mt-4">
-                                <div class="col-auto mt-2 fmDivFieldChoice">
+                    <div class="flex flex-row justify-center">
+                        <div class="flex sm:flex-2 md:flex-8 lg:flex-6 justify-center hidden" id="ficheMatiereSelectData">
+                            <div class="flex flex-row flex-wrap sm:w-5/6 lg:w-3/6 justify-center mt-4">
+                                <div class="flex flex-auto mt-2 fmDivFieldChoice">
                                     <span
                                         data-export-fm-field="fmId"
                                         class="fmTextDivFieldChoice"
@@ -358,7 +359,7 @@
                                         Identifiant
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                <div class="flex flex-auto mt-2 fmDivFieldChoice">
                                     <span
                                         data-export-fm-field="fmLibelle"
                                         class="fmTextDivFieldChoice"
@@ -366,7 +367,7 @@
                                         Libellé
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                <div class="flex flex-auto mt-2 fmDivFieldChoice">
                                     <span
                                         data-export-fm-field="fmReferent"
                                         class="fmTextDivFieldChoice"
@@ -374,7 +375,7 @@
                                         Référent
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                <div class="flex flex-auto mt-2 fmDivFieldChoice">
                                     <span
                                         data-export-fm-field="fmParcoursPorteur"
                                         class="fmTextDivFieldChoice"
@@ -382,7 +383,7 @@
                                         Parcours porteur
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                <div class="flex flex-auto mt-2 fmDivFieldChoice">
                                     <span
                                         data-export-fm-field="fmFormation"
                                         class="fmTextDivFieldChoice"
@@ -390,7 +391,7 @@
                                         Formation
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                <div class="flex flex-auto mt-2 fmDivFieldChoice">
                                     <span
                                         data-export-fm-field="fmNbUtilisee"
                                         class="fmTextDivFieldChoice"
@@ -398,7 +399,7 @@
                                         Nb. utilisations
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 fmDivFieldChoice">
+                                <div class="flex flex-auto mt-2 fmDivFieldChoice">
                                     <span
                                         data-export-fm-field="fmIsComplet"
                                         class="fmTextDivFieldChoice"
@@ -409,10 +410,10 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row justify-content-center">
-                        <div class="col-sm-12 col-md-8 col-lg-6 d-none" id="exportTemplateData">
-                            <div class="row justify-content-center mt-4">
-                                <div class="col-auto mt-2 exportTemplateChoice">
+                    <div class="flex flex-row justify-center">
+                        <div class="flex sm:flex-2 md:flex-8 lg:flex-6 justify-center hidden" id="exportTemplateData">
+                            <div class="flex flex-row flex-wrap sm:w-5/6 lg:w-3/6 justify-center mt-4">
+                                <div class="flex flex-auto mt-2 exportTemplateChoice">
                                     <span
                                         data-export-template="templateSEIP"
                                         class="textDivExportTemplateData"
@@ -420,7 +421,7 @@
                                         SEIP
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 exportTemplateChoice">
+                                <div class="flex flex-auto mt-2 exportTemplateChoice">
                                     <span
                                         data-export-template="templateFicheParcours"
                                         class="textDivExportTemplateData"
@@ -428,7 +429,7 @@
                                         Fiche Parcours
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 exportTemplateChoice">
+                                <div class="flex flex-auto mt-2 exportTemplateChoice">
                                     <span
                                         data-export-template="templateResponsables"
                                         class="textDivExportTemplateData"
@@ -436,7 +437,7 @@
                                         Responsables
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 exportTemplateChoice">
+                                <div class="flex flex-auto mt-2 exportTemplateChoice">
                                     <span
                                         data-export-template="templateSemestresOuverts"
                                         class="textDivExportTemplateData"
@@ -444,7 +445,7 @@
                                         Semestres ouverts
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 exportTemplateChoice">
+                                <div class="flex flex-auto mt-2 exportTemplateChoice">
                                     <span
                                         data-export-template="templateExportRegime"
                                         class="textDivExportTemplateData"
@@ -452,7 +453,7 @@
                                         Export régime
                                     </span>                                
                                 </div>
-                                <div class="col-auto mt-2 exportTemplateChoice">
+                                <div class="flex flex-auto mt-2 exportTemplateChoice">
                                     <span
                                         data-export-template="templateExportCapApogee"
                                         class="textDivExportTemplateData"
@@ -462,7 +463,7 @@
                                         Export Fiabilisation APOGEE
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 exportTemplateChoice">
+                                <div class="flex flex-auto mt-2 exportTemplateChoice">
                                     <span
                                         data-export-template="templateExportListeFicheMatiere"
                                         class="textDivExportTemplateData"
@@ -470,7 +471,7 @@
                                         Liste Fiches Matières
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 exportTemplateChoice">
+                                <div class="flex flex-auto mt-2 exportTemplateChoice">
                                     <span
                                         data-export-template="templateExportCARIF"
                                         class="textDivExportTemplateData"
@@ -478,7 +479,7 @@
                                         Export CARIF
                                     </span>
                                 </div>
-                                <div class="col-auto mt-2 exportTemplateChoice">
+                                <div class="flex flex-auto mt-2 exportTemplateChoice">
                                     <span
                                         data-export-template="templateExportCFVU"
                                         class="textDivExportTemplateData"
@@ -490,50 +491,50 @@
                         </div>
                     </div>
                 </div>
-                <div class="row justify-content-center mt-5">
-                    <div class="col-12">
+                <div class="flex flex-col justify-center mt-5">
+                    <div class="flex flex-row sm:flex-6 md:flex-5 lg:flex-4 xl:flex-3 justify-center">
                         <div
                             {{ stimulus_target('export-generique--parcours-search', 'needParcoursSelect') }} 
-                            class="col col-auto text-center d-none mb-5"
+                            class="flex flex-auto text-center hidden mb-5"
                         >
-                            <span class="fw-bold text-danger">
+                            <span class="fw-bold text-red-500">
                                 Vous devez choisir au moins un parcours
                             <span>
                         </div>
                         <div 
                             {{ stimulus_target('export-generique--parcours-search', 'needDataSelect') }}
-                            class="col col-auto text-center mt-2 mb-5 d-none"
+                            class="flex flex-auto text-center mt-2 mb-5 hidden"
                         >
-                            <span class="fw-bold text-danger">
+                            <span class="fw-bold text-red-500">
                                 Vous devez choisir un type de donnée à exporter
                             </span>
                         </div>
                     </div>                    
-                    <div class="row justify-content-center">
-                        <div class="col-xs-9 col-sm-6 col-md-5 col-lg-4 col-xl-3 text-center">
+                    <div class="flex flex-row justify-center">
+                        <div class="sm:flex-5 md:flex-4 lg:flex-3 xl:flex-2 text-center mt-1">
                             <span 
                                 {{ stimulus_action('export-generique--parcours-search', 'sendExportRequest', 'click', {'type': 'pdf'}) }}
-                                class="btn btn-success" 
+                                class="btn btn-green" 
                                 id="downloadExport"
                             >
                                 Télécharger l'export (PDF)
                             </span>
                         </div>
-                        <div class="col-xs-9 col-sm-6 col-md-5 col-lg-4 col-xl-3 text-center mt-3 mt-sm-0">
+                        <div class="sm:flex-5 md:flex-4 lg:flex-3 xl:flex-2 text-center mt-1">
                             <span 
                                 {{ stimulus_action('export-generique--parcours-search', 'sendExportRequest', 'click', {'type': 'xlsx'}) }}
-                                class="btn btn-success ms-0 ms-lg-3" 
+                                class="btn btn-green ms-0 lg:ml-3" 
                             >
                                 Télécharger l'export (Xlsx)
                             </span>
                         </div>
                     </div>
-                    <div class="row justify-content-center my-2">
-                        <div class="col-4 col-sm-3 col-md-2 col-lg-1 text-center">
+                    <div class="flex flex-row justify-center my-2">
+                        <div class="flex-4 sm:flex-3 md:flex-2 lg:flex-1 text-center">
                             <i 
                                 {{ stimulus_controller('tooltip', { placement: 'bottom' }) }}
                                 title="S'il y a plus de 50 parcours sélectionnés, l'export vous sera envoyé par e-mail"
-                                class="fa-solid fa-circle-info bg-info text-white rounded fs-3"
+                                class="fa-solid fa-circle-info bg-blue text-white rounded text-xl"
                             ></i>
                         </div>
                     </div>

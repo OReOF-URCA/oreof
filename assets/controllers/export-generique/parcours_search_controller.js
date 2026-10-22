@@ -140,8 +140,8 @@ export default class extends Controller {
 
             url += `&withFieldSorting=${this._withFieldSorting ? 'true' : 'false'}`;
             url += `&withHeader=${this._withDefaultHeader ? 'true' : 'false'}`
-            this.needDataSelectTarget.classList.add('d-none');
-            this.needParcoursSelectTarget.classList.add('d-none');
+            this.needDataSelectTarget.classList.add('hidden');
+            this.needParcoursSelectTarget.classList.add('hidden');
 
             if(parcoursIdArray[0] === 'all' || parcoursIdArray.length > 50){
                 targetNewTab = "_self";
@@ -157,16 +157,16 @@ export default class extends Controller {
         }
         else {
             if(!isParcoursSelected){
-                this.needParcoursSelectTarget.classList.remove('d-none');
+                this.needParcoursSelectTarget.classList.remove('hidden');
             }
             else {
-                this.needParcoursSelectTarget.classList.add('d-none');
+                this.needParcoursSelectTarget.classList.add('hidden');
             }
             if(!isDataSelected){
-                this.needDataSelectTarget.classList.remove('d-none');
+                this.needDataSelectTarget.classList.remove('hidden');
             }
             else {
-                this.needDataSelectTarget.classList.add('d-none');
+                this.needDataSelectTarget.classList.add('hidden');
             }
         }
         
@@ -175,11 +175,11 @@ export default class extends Controller {
     async loadResultList(){
         if(this.searchInputTarget.value.length >= this._minLength){    
             this.emptyResultList();
-            this.loadingIconTarget.classList.remove('d-none');
+            this.loadingIconTarget.classList.remove('hidden');
             let searchResult = await this.fetchResults(this.searchInputTarget.value);
             this.createResultList(searchResult);
-            this.loadingIconTarget.classList.add('d-none');
-            this.emptySearchListButtonTarget.classList.remove('d-none');
+            this.loadingIconTarget.classList.add('hidden');
+            this.emptySearchListButtonTarget.classList.remove('hidden');
         } else {
 
         }
@@ -220,9 +220,9 @@ export default class extends Controller {
 
     emptyResultListEvent(){
         this.emptyResultList();
-        this.emptySearchListButtonTarget.classList.add('d-none');
+        this.emptySearchListButtonTarget.classList.add('hidden');
         if(this._selectedParcours['all'] !== true){
-            this.selectAllParcoursButtonTarget.classList.remove('d-none');
+            this.selectAllParcoursButtonTarget.classList.remove('hidden');
         }
     }
 
@@ -234,11 +234,11 @@ export default class extends Controller {
         textDiv.classList.add('text-center', 'text-primary');
         textDiv.textContent = "Tous les parcours ont été sélectionnés";
         row.appendChild(textDiv);
-        this.selectAllParcoursButtonTarget.classList.add('d-none');
+        this.selectAllParcoursButtonTarget.classList.add('hidden');
         this.selectedParcoursTarget.appendChild(row);
 
         document.querySelectorAll('.badgeSelectedDiv').forEach(div => div.remove());
-        this.needParcoursSelectTarget.classList.add('d-none');
+        this.needParcoursSelectTarget.classList.add('hidden');
         this._selectedParcours = {'all': true};
     }
 
@@ -436,18 +436,18 @@ export default class extends Controller {
     displayNeedDataSelected() {
         // Affiche un message si aucune donnée sélectionnée
         if(Object.keys(this._selectedFields).length > 0){
-            this.needDataSelectTarget.classList.add('d-none');
+            this.needDataSelectTarget.classList.add('hidden');
         } else {
-            this.needDataSelectTarget.classList.remove('d-none');
+            this.needDataSelectTarget.classList.remove('hidden');
         }
     }
 
     displayNeedParcoursSelected() {
         // Affiche un message si aucun parcours sélectionné
         if(Object.keys(this._selectedParcours).length > 0){
-            this.needParcoursSelectTarget.classList.add('d-none');
+            this.needParcoursSelectTarget.classList.add('hidden');
         }else {
-            this.needParcoursSelectTarget.classList.remove('d-none');
+            this.needParcoursSelectTarget.classList.remove('hidden');
         } 
     }
 
@@ -485,10 +485,10 @@ export default class extends Controller {
         ['#parcoursSelectData', '#ficheMatiereSelectData', '#exportTemplateData']
             .forEach(selector => {
                 if(selector === selectedChoice){
-                    document.querySelector(selector).classList.toggle('d-none');
+                    document.querySelector(selector).classList.toggle('hidden');
                 }
                 else {
-                    document.querySelector(selector).classList.add('d-none');
+                    document.querySelector(selector).classList.add('hidden');
                 }
             });
     }
