@@ -45,7 +45,10 @@ class OffreConfigurerSansCapaciteTest extends WebTestCase
         $this->assertResponseIsSuccessful();
         $champs['_token'] = (string) $crawler->filter('input[name="_token"]')->first()->attr('value');
 
-        $client->request('POST', sprintf('/offre/%s/configurer/sauvegarder', $formation->getSlug()), $champs);
+        // Comme l'autosave : réponse en Turbo Stream (sinon redirection vers la page)
+        $client->request('POST', sprintf('/offre/%s/configurer/sauvegarder', $formation->getSlug()), $champs, [], [
+            'HTTP_ACCEPT' => 'text/vnd.turbo-stream.html',
+        ]);
     }
 
     public function testCasePasDeCapaciteEnregistreeEtCapaciteRemiseAZero(): void
