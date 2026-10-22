@@ -14,7 +14,6 @@ use App\Enums\TypeModificationDpeEnum;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class OffreConfigurerSansCapaciteTest extends WebTestCase
 {
@@ -41,10 +40,10 @@ class OffreConfigurerSansCapaciteTest extends WebTestCase
      */
     private function sauvegarder(KernelBrowser $client, Formation $formation, array $champs): void
     {
-        static::getContainer()->get('request_stack')->push($client->getRequest());
-        /** @var CsrfTokenManagerInterface $tokenManager */
-        $tokenManager = static::getContainer()->get('security.csrf.token_manager');
-        $champs['_token'] = (string) $tokenManager->getToken('offre_v2_configurer_' . $formation->getId());
+        // Jeton lu sur la page de configuration : il est lié à la session du client
+        $crawler = $client->request('GET', sprintf('/offre/%s/configurer', $formation->getSlug()));
+        $this->assertResponseIsSuccessful();
+        $champs['_token'] = (string) $crawler->filter('input[name="_token"]')->first()->attr('value');
 
         $client->request('POST', sprintf('/offre/%s/configurer/sauvegarder', $formation->getSlug()), $champs);
     }
@@ -88,7 +87,6 @@ class OffreConfigurerSansCapaciteTest extends WebTestCase
         $em->flush();
 
         $anneeId = $annee->getId();
-        $client->request('GET', '/');
 
         // Case cochée : pas de capacité, la capacité saisie est ignorée
         $this->sauvegarder($client, $formation, [
