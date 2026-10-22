@@ -31,6 +31,7 @@ framework:
             'App\Message\GenerateDpeMcccBackup': async_mccc_backup
             'App\Message\ChangeRfWorkflowNotification': async_email
             'App\Message\WorkflowEmailNotification': async_email
+            'App\Message\ExportGenerique': async_export
 
 # when@test:
 #    framework:
