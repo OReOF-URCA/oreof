@@ -557,4 +557,23 @@ class FicheMatiereRepository extends ServiceEntityRepository
             ->orderBy('fm.libelle', 'ASC');
     }
 
+    public function findByParcoursRangeForExport(array $parcoursIdArray, CampagneCollecte $campagneCollecte){
+        $qb = $this->createQueryBuilder('f');
+
+        $qb = $qb
+            ->leftJoin('f.parcours', 'p')
+            ->leftJoin('f.ficheMatiereParcours', 'ficheMutu')
+            ->leftJoin('ficheMutu.parcours', 'ficheMutuParcours')
+            ->where('f.campagneCollecte = :campagneCollecte')
+            ->andWhere(
+                $qb->expr()->orX(
+                    $qb->expr()->in('p.id', $parcoursIdArray),
+                    $qb->expr()->in('ficheMutuParcours.id', $parcoursIdArray)
+                )
+            )
+            ->setParameter('campagneCollecte', $campagneCollecte)
+            ->orderBy('f.libelle', 'ASC');
+
+        return $qb->getQuery()->getResult();
+    }
 }

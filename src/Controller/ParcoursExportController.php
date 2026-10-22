@@ -9,17 +9,27 @@
 
 namespace App\Controller;
 
+use App\Classes\DataUserSession;
 use App\Classes\MyGotenbergPdf;
+use App\Entity\CampagneCollecte;
+use App\Entity\Composante;
 use App\Entity\Parcours;
+use App\Message\ExportGenerique;
 use App\Repository\ParcoursVersioningRepository;
+use App\Service\ExportGeneriqueParcours;
 use App\Service\ParcoursExport;
 use App\Service\VersioningParcours;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\TypeDiplome\TypeDiplomeResolver;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -171,5 +181,130 @@ class ParcoursExportController extends AbstractController
         ParcoursExport $parcoursExport,
     ): Response {
         return $this->json($parcoursExport->exportMaquetteJson($parcours));
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/parcours/export/generique', name: 'app_parcours_export_generique')]
+    public function exportGenerique(
+        DataUserSession $dataUserSession
+    ){
+        return $this->render('export/parcours_generique.html.twig', [
+            'campagneCollecte' => $dataUserSession->getCampagneCollecte()->getId(),
+            'periodeAnnee' => $dataUserSession->getCampagneCollecte()->getLibelle()
+        ]);
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/parcours/export/generique/search_by_name', name: 'app_parcours_export_generique_search_by_name')]
+    public function searchByName(
+        EntityManagerInterface $em
+    ) : Response {
+        $request = Request::createFromGlobals();
+        $inputText = $request->query->get('inputText', '');
+        $campagne = $request->query->get(
+            'campagneCollecte', 
+            $em->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => 1])->getId()
+        );
+        // Minimum de caractères pour la recherche
+        if(mb_strlen($inputText) >= 4){
+            $searchResults = $em->getRepository(Parcours::class)->findAllByDisplayName($inputText, $campagne);
+            $composanteResult = $em->getRepository(Composante::class)->findParcoursByComposanteName($inputText, $campagne);
+
+            return new JsonResponse(array_merge($composanteResult, $searchResults));
+        }
+
+        else {
+            return new JsonResponse([]);
+        }
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/parcours/export/generique/pdf', name: 'app_parcours_export_generique_download_pdf')]
+    public function getExportGeneriquePdf(
+        ExportGeneriqueParcours $exportParcoursGenerique,
+        Request $request,
+        MessageBusInterface $bus
+    ) : Response {
+        $parcoursIdArray = $request->query->all()['id'] ?? [];
+        if(count($parcoursIdArray) > 50 || (($parcoursIdArray[0] ?? 'none') === 'all')){
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $bus->dispatch(new ExportGenerique(
+                ['type' => 'parcours', 'format' => 'pdf'],
+                $request->query->all()['id'] ?? [],
+                $request->query->all()['val'] ?? [],
+                $request->query->get('campagne', 2),
+                $request->query->get('withFieldSorting', "true"),
+                $user->getEmail(),
+                $request->query->get('withHeader', 'true'),
+                $request->query->get('predefinedTemplate', 'false'),
+                $request->query->get('templateName', null)
+            ));
+
+            $this->addFlash('toast', [
+                'type' => 'success',
+                'text' => 'Votre demande a bien été prise en compte. Le fichier vous sera envoyé par email.',
+                'title' => 'Succès'
+            ]);
+            return $this->redirectToRoute('app_homepage');
+        }
+
+        [$response, $name] = $exportParcoursGenerique->generatePdf($request);
+
+        return new Response(
+            $response,
+            200,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment;filename="' . $name . '.pdf"',
+            ]
+        );
+    }
+
+    #[IsGranted('ROLE_ADMIN')]
+    #[Route('/parcours/export/generique/xlsx', name: 'app_parcours_export_generique_xlsx')]
+    public function getExportGeneriqueXlsx(
+        ExportGeneriqueParcours $exportParcoursGenerique,
+        Request $request,
+        MessageBusInterface $bus
+    ){
+        $parcoursIdArray = $request->query->all()['id'] ?? [];
+
+        // S'il y a plus de 50 parcours, on envoie par email
+        if(count($parcoursIdArray) > 50 || (($parcoursIdArray[0] ?? 'none') === 'all')){
+            /** @var \App\Entity\User $user */
+            $user = $this->getUser();
+            $bus->dispatch(
+                new ExportGenerique(
+                    ['type' => 'parcours', 'format' => 'xlsx'],
+                    $request->query->all()['id'] ?? [],
+                    $request->query->all()['val'] ?? [],
+                    $request->query->get('campagne', 2),
+                    $request->query->get('withFieldSorting', "true"),
+                    $user->getEmail(),
+                    $request->query->get('withHeader', 'true'),
+                    $request->query->get('predefinedTemplate', 'false'),
+                    $request->query->get('templateName', null)
+                )
+            );
+
+            $this->addFlash('toast', [
+                'type' => 'success',
+                'text' => 'Votre demande a bien été prise en compte. Le fichier vous sera envoyé par email.',
+                'title' => 'Succès'
+            ]);
+            return $this->redirectToRoute('app_homepage');
+        }
+
+        [$file, $filename] = $exportParcoursGenerique->generateXlsxSpreadsheet($request);
+
+        return new Response(
+            $file,
+            200,
+            [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment;filename="' . $filename . '.xlsx"',
+            ]
+        );
     }
 }

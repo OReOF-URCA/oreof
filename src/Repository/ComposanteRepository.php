@@ -77,4 +77,35 @@ class ComposanteRepository extends ServiceEntityRepository
         $qb->select('c.id, c.libelle, c.sigle');
         return $qb->getQuery()->getResult();
     }
+
+    public function findParcoursByComposanteName(string $compoName, int $campagneCollecte) {
+        $qb = $this->createQueryBuilder('comp');
+
+        $qb = $qb->select("comp.libelle AS comp_libelle, p.id AS parcours_id")
+            ->innerJoin('comp.formations', 'f')
+            ->innerJoin('f.parcours', 'p')
+            ->innerJoin('p.dpeParcours', 'dpe')
+            ->where($qb->expr()->like('UPPER(comp.libelle)', 'UPPER(:compoName)'))
+            ->andWhere('dpe.campagneCollecte = :campagneCollecte')
+            ->setParameter(':compoName', '%' . $compoName . '%')
+            ->setParameter(':campagneCollecte', $campagneCollecte);
+
+        $result = [];
+
+        foreach($qb->getQuery()->getResult() as $row){
+            if(isset($result[$row['comp_libelle']]) === false){
+                $result[$row['comp_libelle']] = [];
+            }
+            $result[$row['comp_libelle']][] = $row['parcours_id'];
+        }
+
+        $mapFunction = fn($key, $val) : array => [
+            'libelle' => $key, 
+            'id' => $val, 
+            'typeParcours' => null,
+            'valueType' => 'array'
+        ];
+
+        return array_map($mapFunction, array_keys($result), array_values($result));
+    }
 }

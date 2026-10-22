@@ -416,4 +416,108 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findAllByDisplayName(string $displayName, int $campagneCollecteId){
+        $result = $this->createQueryBuilder('p');
+
+        $patternLibelle = $result->expr()->concat(
+            'td.libelle', 
+            $result->expr()->literal(' - '),
+            'm.libelle',
+            $result->expr()->literal(' '),
+            $result->expr()->literal('('),
+            "COALESCE(f.sigle, '')",
+            $result->expr()->literal(')'),
+            $result->expr()->literal(' - '),
+            'p.libelle', 
+            $result->expr()->literal(' '),
+            $result->expr()->literal('('),
+            "COALESCE(p.sigle, '')", 
+            $result->expr()->literal(')'),
+        );
+
+        $patternLibelleUpper = $result->expr()->concat(
+            'UPPER(td.libelle)', 
+            $result->expr()->literal(' - '),
+            'UPPER(m.libelle)',
+            $result->expr()->literal(' '),
+            $result->expr()->literal('('),
+            "UPPER(COALESCE(f.sigle, ''))",
+            $result->expr()->literal(')'),
+            $result->expr()->literal(' - '),
+            'UPPER(p.libelle)', 
+            $result->expr()->literal(' '),
+            $result->expr()->literal('('),
+            "UPPER(COALESCE(p.sigle, ''))", 
+            $result->expr()->literal(')'),
+        );
+
+        $result = $result
+            ->select('DISTINCT p.id AS id, p.typeParcours AS typeParcours')
+            ->addSelect($patternLibelle . ' AS libelle')
+            ->join('p.formation', 'f')
+            ->join('f.typeDiplome', 'td')
+            ->join('f.mention', 'm')
+            ->join('p.dpeParcours', 'dpe')
+            ->where($result->expr()->like($patternLibelleUpper, 'UPPER(:displayName)'))
+            ->andWhere('dpe.campagneCollecte = :campagneCollecte')
+            ->setParameter(':displayName', '%' . $displayName . '%')
+            ->setParameter(':campagneCollecte', $campagneCollecteId)
+            ->orderBy('libelle', 'ASC');
+
+
+        return $result->getQuery()->getResult();
+
+    }
+
+    public function findByIdAndCampagneCollecte(array|string $idArray, int $idCampagne){
+        $qb = $this->createQueryBuilder('p');
+
+        $qb = $qb->select('p.id AS parcours_id')
+            ->join('p.dpeParcours', 'dpe')
+            ->join('dpe.campagneCollecte', 'campagne')
+            ->where('campagne.id = :idCampagne')
+            ->setParameter(':idCampagne', $idCampagne);
+
+        if($idArray === 'all'){
+            $qb = $qb->andWhere(
+                $qb->expr()->like('p.id', ':wildcardAll')
+            )->setParameter(':wildcardAll', '%');
+        }
+        elseif (is_array($idArray)){
+            $qb = $qb->andWhere(
+                $qb->expr()->in('p.id', ':idArray')
+            )->setParameter(':idArray', $idArray);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findMaxNumberOfComposanteForRange(array|string $idArray, int $idCampagne){
+        $qb = $this->createQueryBuilder('p')
+            ->select('COUNT(DISTINCT comp.id)')
+            ->join('p.formation', 'f')
+            ->join('f.composantesInscription', 'comp')
+            ->join('p.dpeParcours', 'dpe')
+            ->join('dpe.campagneCollecte', 'campagne')
+            ->where('campagne.id = :idCampagne')
+            ->groupBy('p.id')
+            ->setParameter(':idCampagne', $idCampagne);
+
+        if($idArray === 'all'){
+            $qb = $qb->andWhere(
+                $qb->expr()->like('p.id', ':wildcardAll')
+            )->setParameter(':wildcardAll', '%');
+        }
+        elseif (is_array($idArray)){
+            $qb = $qb->andWhere(
+                $qb->expr()->in('p.id', ':idArray')
+            )->setParameter(':idArray', $idArray);
+        }
+
+        return max(
+            array_merge(...$qb->getQuery()->getResult())
+        );
+
+    }
 }
