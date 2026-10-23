@@ -65,19 +65,19 @@
                         
                     </div>
                 </div>
-                <div class="flex flex-row justify-center mt-3">
+                <div class="flex flex-row justify-center my-8">
                     <div class="flex-12 text-center">
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'selectAllParcoursButton') }}
                             {{ stimulus_action('export-generique--parcours-search', 'selectAllParcours', 'click') }}
-                            class="badgeSearchAction font-bold text-black dark:text-white mx-1"
+                            class="badgeSearchAction px-2.5 py-1.5 rounded-lg bg-sky-500 text-white dark:bg-purple-700 mx-1"
                         >
                             Sélectionner tous les parcours de cette année
                         </span>
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'emptySearchListButton') }}
                             {{ stimulus_action('export-generique--parcours-search', 'emptyResultListEvent', 'click') }}
-                            class="badgeSearchAction text-black dark:text-white font-bold mx-1 hidden"
+                            class="badgeSearchAction px-2.5 py-1.5 rounded-lg bg-sky-500 text-white dark:bg-purple-700 mx-1 hidden"
                         >
                             Cacher la liste de recherche
                         </span>
@@ -105,7 +105,7 @@
 
                 </div>
 
-                <div class="flex flex-row justify-center">
+                <div class="flex flex-row justify-center mt-8">
                     <div class="flex-8 text-center">
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'displayDataParcours') }}

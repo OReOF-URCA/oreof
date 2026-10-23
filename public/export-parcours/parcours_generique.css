@@ -23,6 +23,7 @@
 
 .badgeSelectedDiv {
     font-size: 1.25em;
+    margin-left: .75em;
 }
 
 .badge i.fa-xmark:hover {
