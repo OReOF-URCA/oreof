@@ -84,9 +84,9 @@
                 <div class="flex flex-col justify-center mt-4">
                     <div 
                         {{ stimulus_target('export-generique--parcours-search', 'loadingIcon') }}
-                        class="flex-12 text-center hidden"
+                        class="flex flex-col w-14 h-14 self-center hidden"
                     >
-                        <i class="fa-duotone fa-solid fa-spinner loading-icon"></i>
+                        <twig:UX:icon name="icon:refresh" class="loading-icon text-blue-500" />
                     </div>
                     <div 
                         {{ stimulus_target('export-generique--parcours-search', 'searchResult') }}
