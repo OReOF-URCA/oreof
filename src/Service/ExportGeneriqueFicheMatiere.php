@@ -10,6 +10,8 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
+use Sensiolabs\GotenbergBundle\Processor\FileProcessor;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -18,7 +20,7 @@ class ExportGeneriqueFicheMatiere {
 
     public function __construct(
         private EntityManagerInterface $em,
-        private MyGotenbergPdf $myPdf,
+        private GotenbergPdfInterface $pdfGenerator,
         private Filesystem $fs,
     ){
 
@@ -70,18 +72,25 @@ class ExportGeneriqueFicheMatiere {
         $dateNow = new DateTime();
         $dateFormat = $dateNow->format("d-m-Y_H-i");
         $filename = "Export-Generique-Fiche-Matiere-{$dateFormat}";
+        $dirPath = __DIR__ . "/../../public/temp/";
 
-        $pdfContent = $this->myPdf->render('export/export_parcours_generique.html.twig', [
-            'parcoursData' => $dataStructure,
-            'titre' => 'Export des données des fiches matières'
-        ], $filename);
+        $pdfContent = $this->pdfGenerator
+            ->html()
+            ->content('export/export_parcours_generique.html.twig', [
+                'parcoursData' => $dataStructure,
+                'titre' => 'Export des données des fiches matières'
+            ])
+            ->fileName($filename)
+            ->generate()
+            ->processor(new FileProcessor($this->fs, $dirPath))
+            ->process();
 
-        $tmpFile = $this->fs->tempnam(__DIR__ . "/../../public/temp/", 'export_generique');
-        $this->fs->appendToFile($tmpFile, $pdfContent);
-        $exportContent = file_get_contents($tmpFile);
-        $this->fs->remove($tmpFile);
+        $finalPdf = file_get_contents($dirPath . $filename . ".pdf");
+        if($this->fs->exists($dirPath . $filename . ".pdf")) {
+            $this->fs->remove($dirPath . $filename . ".pdf");
+        }
 
-        return [$exportContent, $filename];
+        return [$finalPdf, $filename];
     }
 
     public function generateXlsxSpreadsheet(
