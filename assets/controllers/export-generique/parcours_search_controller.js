@@ -288,8 +288,9 @@ export default class extends Controller {
         textDiv.textContent = name;
         textDiv.dataset.parcoursId = id;
         textDiv.dataset.parcoursLibelle = name;
-        let crossIcon = document.createElement('i');
-        crossIcon.classList.add('fa-regular', 'fa-xmark', 'text-white', 'ms-3');
+        let crossIcon = document.querySelector('#crossIcon').cloneNode(true);
+        crossIcon.classList.remove('hidden');
+        crossIcon.classList.add('ml-3');
         crossIcon.addEventListener('click', e => {
             this.removeSelectedItemBadge(id)
             this.displayNeedParcoursSelected();  
@@ -421,6 +422,7 @@ export default class extends Controller {
         let libelleType = { 
             las1: 'Accès santé',
             las23: 'Accès santé',
+            las123: 'Accès santé',
             cpi: 'CPI',
             alternance: 'En alternance'
         };
