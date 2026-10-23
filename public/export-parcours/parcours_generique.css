@@ -67,3 +67,9 @@
         padding: .45em;
     }
 }
+
+html[data-theme="dark"] {
+    .textDivFieldChoice, .fmTextDivFieldChoice, .textDivExportTemplateData {
+        border-color: lightgrey;
+    }
+}
