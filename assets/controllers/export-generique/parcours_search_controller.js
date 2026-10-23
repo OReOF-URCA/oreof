@@ -284,7 +284,7 @@ export default class extends Controller {
         let badgeDiv = document.createElement('div');
         badgeDiv.classList.add('col-auto', 'my-2', 'badgeSelectedDiv');
         let textDiv = document.createElement('span');
-        textDiv.classList.add('badge', 'rounded-pill', 'fw-bold', 'text-white', 'bg-primary');
+        textDiv.classList.add('badge', 'item-pill', 'fw-bold', 'text-white', 'bg-primary');
         textDiv.textContent = name;
         textDiv.dataset.parcoursId = id;
         textDiv.dataset.parcoursLibelle = name;
@@ -305,7 +305,7 @@ export default class extends Controller {
         if(id.length >= 2){
             document.querySelectorAll('.badgeSelectedDiv')
                 .forEach(badge => {
-                    if(badge.querySelector('.badge.rounded-pill').dataset.parcoursId === `${id.join(',')}`){
+                    if(badge.querySelector('.badge.item-pill').dataset.parcoursId === `${id.join(',')}`){
                         badge.remove();
                         id.forEach(id => delete this._selectedParcours[`${id}`]);
                     }
@@ -314,7 +314,7 @@ export default class extends Controller {
         else if(this._selectedParcours[`${id}`] !== undefined) {
             document.querySelectorAll('.badgeSelectedDiv')
                 .forEach(badgeDiv => {
-                    if(badgeDiv.querySelector('.badge.rounded-pill').dataset.parcoursId === `${id}`){
+                    if(badgeDiv.querySelector('.badge.item-pill').dataset.parcoursId === `${id}`){
                         badgeDiv.remove();
                         delete this._selectedParcours[`${id}`];
                     }
@@ -325,7 +325,7 @@ export default class extends Controller {
 
     createListenerForParcoursFieldChoice(node){
         node.addEventListener('click', (event) => {
-            let badgeClassList = ['bg-info', 'text-white'];
+            let badgeClassList = ['bg-gray-700', 'text-white'];
             // Données du parcours
             if(this._typeExport === 'fiche_matiere'){
                 this._selectedFields = {};
@@ -357,7 +357,7 @@ export default class extends Controller {
 
     createListenerForFicheMatiereFieldChoice(node){
         node.addEventListener('click', (event) => {
-            let badgeClassList = ['bg-info', 'text-white'];
+            let badgeClassList = ['bg-gray-700', 'text-white'];
             // Données des fiches matières
             if(this._typeExport === 'parcours'){
                 this._selectedFields = {};
@@ -389,7 +389,7 @@ export default class extends Controller {
 
     createListenerForExportTemplateFieldChoice(node){
         node.addEventListener('click', event => {
-            let badgeClassList = ['bg-info', 'text-white'];
+            let badgeClassList = ['bg-gray-700', 'text-white'];
             // Données des parcours
             if(this._typeExport === 'parcours'){
                 this._selectedFields = {};
@@ -455,17 +455,17 @@ export default class extends Controller {
 
     deselectAllParcoursButton() {
         document.querySelectorAll('.textDivFieldChoice')
-            .forEach(e => e.classList.remove(...['bg-info', 'text-white']));
+            .forEach(e => e.classList.remove(...['bg-gray-700', 'text-white']));
     }
 
     deselectAllFicheMatiereButton() {
         document.querySelectorAll('.fmTextDivFieldChoice')
-            .forEach(e => e.classList.remove(...['bg-info', 'text-white']));
+            .forEach(e => e.classList.remove(...['bg-gray-700', 'text-white']));
     }
 
     deselectAllTemplateExportButton(){
         document.querySelectorAll('.textDivExportTemplateData')
-            .forEach(e => e.classList.remove(...['bg-info', 'text-white']));
+            .forEach(e => e.classList.remove(...['bg-gray-700', 'text-white']));
     }
 
     displayFicheMatiereChoices() {

@@ -32,11 +32,6 @@
                 class="w-full"
             >
                 <div class="flex flex-row justify-center">
-                    <div class="flex w-2/12 mb-2 justify-center">
-                        <span class="self-center h-3/4 p-1 text-black font-bold bg-orange-300 text-lg rounded">
-                            {{ periodeAnnee }}
-                        </span>
-                    </div>
                     <div class="flex w-10/12 lg:w-9/12 xl:w-8/12">
                         <div class="flex flex-row w-full justify-center">
                             <!-- 
@@ -47,25 +42,25 @@
                             <input 
                                 {{ stimulus_target('export-generique--parcours-search', 'searchInput') }}
                                 type="text" 
-                                class="rounded-3xl w-9/12 p-3.5 border-2 dark:placeholder-white dark:border-white placeholder-gray-700 border-blue-300 mr-8 ml-2 h-14 self-center"
+                                class="rounded-3xl w-9/12 px-3.5 border-2 dark:placeholder-white dark:border-white placeholder-gray-700 border-blue-300 mr-0.5 ml-2 h-14 self-center"
                                 placeholder="Rechercher : composante, parcours, sigle, type de diplôme..."
                             >
+                            <div 
+                                {{ stimulus_action(
+                                    'export-generique--parcours-search', 
+                                    'loadResultList',
+                                    'click'
+                                    ) 
+                                }}
+                                class="flex flex-col justify-center text-center mt-2 md:mt-0"
+                            >
+                                <!-- Icône Rechercher -->
+                                <span class="h-4/6 bg-blue-600 text-gray-50 px-3.5 py-2.5 rounded-full" id="searchButton">
+                                    <twig:UX:icon name="icon:search" class="w-5 h-5" />
+                                </span>
+                                
+                            </div>
                         </div>
-                    </div>
-                    <div 
-                        {{ stimulus_action(
-                            'export-generique--parcours-search', 
-                            'loadResultList',
-                            'click'
-                            ) 
-                        }}
-                        class="flex flex-col justify-center text-center mt-2 md:mt-0"
-                    >
-                        <!-- Icône Rechercher -->
-                        <span class="h-4/6 bg-blue-600 text-gray-50 p-1.5 rounded-xl" id="searchButton">
-                            <twig:UX:icon name="icon:search" class="w-5 h-5" />
-                        </span>
-                        
                     </div>
                 </div>
                 <div class="flex flex-row justify-center my-8">
@@ -73,14 +68,14 @@
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'selectAllParcoursButton') }}
                             {{ stimulus_action('export-generique--parcours-search', 'selectAllParcours', 'click') }}
-                            class="badgeSearchAction my-3 lg:mt-0 px-1.5 py-1 rounded-lg bg-sky-500 text-white dark:bg-purple-700 mx-1"
+                            class="badgeSearchAction my-3 lg:mt-0 px-1.5 py-1 rounded-lg hover:bg-blue-500 bg-blue-700 text-white dark:bg-purple-700 mx-1"
                         >
                             Sélectionner tous les parcours
                         </span>
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'emptySearchListButton') }}
                             {{ stimulus_action('export-generique--parcours-search', 'emptyResultListEvent', 'click') }}
-                            class="badgeSearchAction my-3 lg:mt-0 px-1.5 py-1 rounded-lg bg-sky-500 text-white dark:bg-purple-700 mx-1 hidden"
+                            class="badgeSearchAction my-3 lg:mt-0 px-1.5 py-1 rounded-lg hover:bg-blue-500 bg-blue-700 text-white dark:bg-purple-700 mx-1 hidden"
                         >
                             Cacher la liste de recherche
                         </span>
@@ -516,7 +511,7 @@
                         <div class="flex justify-center mt-1 mx-2">
                             <span 
                                 {{ stimulus_action('export-generique--parcours-search', 'sendExportRequest', 'click', {'type': 'pdf'}) }}
-                                class="bg-blue-800 hover:bg-blue-400 text-white py-0.5 px-2.5 border border-gray-600 rounded-lg cursor-pointer text-center" 
+                                class="bg-purple-700 hover:bg-purple-400 text-white py-0.5 px-2.5 border border-gray-600 rounded-lg cursor-pointer text-center" 
                                 id="downloadExport"
                             >
                                 Télécharger l'export (PDF)
@@ -525,7 +520,7 @@
                         <div class="flex justify-center mt-1 mx-2">
                             <span 
                                 {{ stimulus_action('export-generique--parcours-search', 'sendExportRequest', 'click', {'type': 'xlsx'}) }}
-                                class="bg-blue-800 hover:bg-blue-400 text-white py-0.5 px-2.5 border border-gray-600 rounded-lg cursor-pointer text-center" 
+                                class="bg-purple-700 hover:bg-purple-400 text-white py-0.5 px-2.5 border border-gray-600 rounded-lg cursor-pointer text-center" 
                             >
                                 Télécharger l'export (Xlsx)
                             </span>
