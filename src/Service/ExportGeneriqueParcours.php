@@ -4,7 +4,6 @@ namespace App\Service;
 
 use App\Classes\GetDpeParcours;
 use App\Classes\GetHistorique;
-use App\Classes\MyGotenbergPdf;
 use App\DTO\StructureEc;
 use App\DTO\StructureUe;
 use App\Entity\CampagneCollecte;
@@ -18,6 +17,8 @@ use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Sensiolabs\GotenbergBundle\GotenbergPdfInterface;
+use Sensiolabs\GotenbergBundle\Processor\FileProcessor;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -26,7 +27,7 @@ class ExportGeneriqueParcours {
 
     public function __construct(
         private EntityManagerInterface $em,
-        private MyGotenbergPdf $myPdf,
+        private GotenbergPdfInterface $pdfGenerator,
         private Filesystem $fs,
         private GetHistorique $getHistorique,
         private TypeDiplomeResolver $typeDiplomeR
@@ -130,20 +131,25 @@ class ExportGeneriqueParcours {
 
         $dateNow = new DateTime();
         $dateFormat = $dateNow->format("d-m-Y_H-i");
-
         $fileName = "Export-Generique-Parcours-{$dateFormat}";
-        
-        $tmpFile = $this->fs->tempnam(__DIR__ . '/../../public/temp/', 'export_generique');
-        $pdfContent = $this->myPdf->render('export/export_parcours_generique.html.twig', [
-            'parcoursData' => $dataStructure,
-            'titre' => 'Export des données de parcours'
-        ], $fileName);
+        $dirPath = __DIR__ . "/../../public/temp/";
 
-        $this->fs->appendToFile($tmpFile, $pdfContent);
-        $exportContent = file_get_contents($tmpFile);
-        $this->fs->remove($tmpFile);
+        $pdfContent = $this->pdfGenerator
+            ->html()
+            ->content('export/export_parcours_generique.html.twig', [
+                'parcoursData' => $dataStructure,
+                'titre' => 'Export des données de parcours'
+            ])
+            ->fileName($fileName)
+            ->generate()
+            ->processor(new FileProcessor($this->fs, $dirPath))
+            ->process();
 
-        return [$exportContent, $fileName];
+        $finalPdf = file_get_contents($dirPath . $fileName . ".pdf");
+        if($this->fs->exists($dirPath . $fileName. ".pdf")) {
+            $this->fs->remove($dirPath . $fileName . ".pdf");
+        }
+        return [$finalPdf, $fileName];
     }
 
     public function generateXlsxSpreadsheet(
