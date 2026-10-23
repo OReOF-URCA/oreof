@@ -13,6 +13,13 @@
 
     <i id="crossIcon" class="hidden cursor-pointer"><twig:UX:icon name="icon:close" class="w-5 h-5" /></i>
 
+    <div class="flex flex-row justify-center my-7 lg:justify-start">
+        <div class="flex w-2/12 mb-2 justify-center">
+            <span class="self-center p-1.5 text-black font-bold bg-green-500 text-sm rounded">
+                {{ periodeAnnee }}
+            </span>
+        </div>
+    </div>
     <div 
         {{ stimulus_controller('export-generique--parcours-search', {
                 'searchUrl': path('app_parcours_export_generique_search_by_name'),
