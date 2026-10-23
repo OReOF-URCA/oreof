@@ -88,6 +88,11 @@
                     >
                         <twig:UX:icon name="icon:refresh" class="loading-icon text-blue-500" />
                     </div>
+                    <div {{ stimulus_target('export-generique--parcours-search', 'fetchError') }}
+                        class="flex flex-col self-center text-red-500 hidden"
+                    >
+
+                    </div>
                     <div 
                         {{ stimulus_target('export-generique--parcours-search', 'searchResult') }}
                         class="self-center w-5/6 lg:w-4/6 result-scrollbar"

@@ -2,6 +2,10 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
     
+    _noResultsFound = "Aucun résultat trouvé pour cette recherche";
+
+    _minimumLength = "La recherche doit faire au moins 4 caractères";
+
     static targets = [
         'displayDataParcours',
         'displayDataFicheMatiere',
@@ -14,7 +18,8 @@ export default class extends Controller {
         'selectAllParcoursButton',
         'loadingIcon',
         'needParcoursSelect',
-        'needDataSelect'
+        'needDataSelect',
+        'fetchError'
     ];
 
     static values = {
@@ -173,15 +178,25 @@ export default class extends Controller {
     }
 
     async loadResultList(){
+        this.fetchErrorTarget.classList.add('hidden');
         if(this.searchInputTarget.value.length >= this._minLength){    
             this.emptyResultList();
             this.loadingIconTarget.classList.remove('hidden');
             let searchResult = await this.fetchResults(this.searchInputTarget.value);
-            this.createResultList(searchResult);
-            this.loadingIconTarget.classList.add('hidden');
-            this.emptySearchListButtonTarget.classList.remove('hidden');
+            if(searchResult.length > 0) {
+                this.createResultList(searchResult);
+                this.loadingIconTarget.classList.add('hidden');
+                this.emptySearchListButtonTarget.classList.remove('hidden');
+            }
+            else {
+                this.fetchErrorTarget.textContent = this._noResultsFound;
+                this.fetchErrorTarget.classList.remove('hidden');
+                this.loadingIconTarget.classList.add('hidden');
+            }
         } else {
-
+            this.fetchErrorTarget.textContent = this._minimumLength;
+            this.fetchErrorTarget.classList.remove('hidden');
+            this.loadingIconTarget.classList.add('hidden');
         }
     }
 
