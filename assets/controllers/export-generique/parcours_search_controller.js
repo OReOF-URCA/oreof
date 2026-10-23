@@ -197,7 +197,7 @@ export default class extends Controller {
         let row = document.createElement('div');
         row.classList.add('row', 'my-1');
         let textDiv = document.createElement('div');
-        textDiv.classList.add('resultSearchNode');
+        textDiv.classList.add('resultSearchNode', 'p-1.5', 'rounded-lg');
         textDiv.dataset.parcoursId = resultId;
         let infoLibelle = this.displayTypeParcoursLibelle(typeParcours);
         if(infoLibelle.length > 0){

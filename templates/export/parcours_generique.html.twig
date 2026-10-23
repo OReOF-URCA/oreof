@@ -36,14 +36,16 @@
                     </div>
                     <div class="flex w-10/12 lg:w-9/12 xl:w-8/12">
                         <div class="flex flex-row w-full justify-center">
+                            <!-- 
                             <span class="h-1/2 py-0.5 px-1 self-center text-center text-white rounded bg-blue-400 dark:border-white border-blue-300">
                                 Recherche de parcours
                             </span>
+                            -->
                             <input 
                                 {{ stimulus_target('export-generique--parcours-search', 'searchInput') }}
                                 type="text" 
-                                class="rounded-lg w-8/12 p-1.5 border-2 dark:placeholder-white dark:border-white placeholder-gray-700 border-blue-600 mr-8 ml-2 h-14 self-center"
-                                placeholder="Composante, parcours, sigle, type de diplôme..."
+                                class="rounded-lg w-8/12 p-1.5 border-2 dark:placeholder-white dark:border-white placeholder-gray-700 border-blue-300 mr-8 ml-2 h-14 self-center"
+                                placeholder="Rechercher : composante, parcours, sigle, type de diplôme..."
                             >
                         </div>
                     </div>
@@ -56,9 +58,11 @@
                         }}
                         class="flex w-1/12 text-center mt-2 md:mt-0"
                     >
+                        <!-- Icône Rechercher -->
                         <span class="bg-blue-600 text-gray-50 px-3 py-2 rounded-md" id="searchButton">
                             <i class="fa-light fa-magnifying-glass text-2xl"></i>
                         </span>
+                        
                     </div>
                 </div>
                 <div class="flex flex-row justify-center mt-3">
@@ -96,7 +100,7 @@
                 </div>
                 <div 
                     {{ stimulus_target('export-generique--parcours-search', 'selectedParcours') }}
-                    class="flex flex-row justify-center mt-3 mb-3"
+                    class="flex flex-row flex-wrap justify-center mt-3 mb-3"
                 >
 
                 </div>
