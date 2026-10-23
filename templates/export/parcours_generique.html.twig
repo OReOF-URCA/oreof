@@ -110,21 +110,21 @@
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'displayDataParcours') }}
                             {{ stimulus_action('export-generique--parcours-search', 'displayParcoursChoices', 'click') }}
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-0.5 px-1.5 border border-blue-700 rounded cursor-pointer"
+                            class="bg-blue-500 hover:bg-blue-700 text-white py-1.5 px-2.5 border border-blue-700 rounded-lg cursor-pointer"
                         >
                             Export des Parcours
                         </span>
                         <span 
                             {{ stimulus_target('export-generique--parcours-search', 'displayDataFicheMatiere') }}
                             {{ stimulus_action('export-generique--parcours-search', 'displayFicheMatiereChoices', 'click') }}
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-0.5 px-1.5 border border-blue-700 rounded md:ml-3 cursor-pointer"
+                            class="bg-blue-500 hover:bg-blue-700 text-white py-1.5 px-2.5 border border-blue-700 rounded-lg md:ml-3 cursor-pointer"
                         >
                             Export des Fiches matières
                         </span>
                         <span
                             {{ stimulus_target('export-generique--parcours-search', 'displayDataExportTemplate') }}
                             {{ stimulus_action('export-generique--parcours-search', 'displayExportTemplateChoices', 'click') }}
-                            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-0.5 px-1.5 border border-blue-700 rounded md:ml-3 cursor-pointer"
+                            class="bg-blue-500 hover:bg-blue-700 text-white py-1.5 px-2.5 border border-blue-700 rounded-lg md:ml-3 cursor-pointer"
                         >
                             Format d'export prédéfini
                         </span>
@@ -513,7 +513,7 @@
                         <div class="flex justify-center mt-1 mx-2">
                             <span 
                                 {{ stimulus_action('export-generique--parcours-search', 'sendExportRequest', 'click', {'type': 'pdf'}) }}
-                                class="bg-blue-800 hover:bg-blue-400 text-white font-bold py-0.5 px-1.5 border border-blue-200 rounded cursor-pointer" 
+                                class="bg-blue-800 hover:bg-blue-400 text-white py-0.5 px-2.5 border border-gray-600 rounded-lg cursor-pointer" 
                                 id="downloadExport"
                             >
                                 Télécharger l'export (PDF)
@@ -522,7 +522,7 @@
                         <div class="flex justify-center mt-1 mx-2">
                             <span 
                                 {{ stimulus_action('export-generique--parcours-search', 'sendExportRequest', 'click', {'type': 'xlsx'}) }}
-                                class="bg-blue-800 hover:bg-blue-400 text-white font-bold py-0.5 px-1.5 border border-blue-200 rounded cursor-pointer" 
+                                class="bg-blue-800 hover:bg-blue-400 text-white py-0.5 px-2.5 border border-gray-600 rounded-lg cursor-pointer" 
                             >
                                 Télécharger l'export (Xlsx)
                             </span>
