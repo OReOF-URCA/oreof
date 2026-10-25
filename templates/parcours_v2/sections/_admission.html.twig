@@ -6,7 +6,7 @@
     <dl class="space-y-4">
         <div class="{{ blockClass }}">
             <dt class="{{ dtClass }}">Niveau de français requis</dt>
-            <dd class="{{ ddClass }}">{{ parcours.niveauFrancais != null ? parcours.niveauFrancais.libelle : 'Non précisé' }}</dd>
+            <dd class="{{ ddClass }}">{{ referentiel_label('niveau_langue', parcours.niveauFrancaisValue) ?? (parcours.niveauFrancais != null ? parcours.niveauFrancais.libelle : 'Non précisé') }}</dd>
         </div>
 
         <div class="{{ blockClass }}">

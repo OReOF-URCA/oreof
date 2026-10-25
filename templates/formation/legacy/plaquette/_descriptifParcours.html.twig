@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-sm-12">
         <p  class="text-justify"><strong>Modalités d'enseignement</strong>
-            : {{ parcours.modalitesEnseignement != null ? parcours.modalitesEnseignement.libelle : 'Erreur' }}</p>
+            : {{ referentiel_label('modalite_enseignement', parcours.modalitesEnseignementValue) ?? (parcours.modalitesEnseignement != null ? parcours.modalitesEnseignement.libelle : 'Erreur') }}</p>
 
         {% if typeDiplome.hasStage %}
             <p><strong>Stage(s)</strong> : {% if parcours.hasStage == true %}

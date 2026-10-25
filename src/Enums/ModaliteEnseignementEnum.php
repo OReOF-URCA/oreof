@@ -9,6 +9,9 @@
 
 namespace App\Enums;
 
+/** 
+ *  @deprecated
+ */
 enum ModaliteEnseignementEnum: int
 {
     case NON_DEFINI = 99;

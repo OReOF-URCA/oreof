@@ -14,6 +14,11 @@ use App\Enums\ModaliteEnseignementEnum;
  */
 final class ModaliteEnseignement
 {
+    public const PRESENTIELLE = '0';
+    public const HYBRIDE = '1';
+    public const DISTANCIELLE = '2';
+    public const NON_DEFINI = '99';
+
     public static function key(string|int|ModaliteEnseignementEnum $value): string
     {
         return $value instanceof ModaliteEnseignementEnum

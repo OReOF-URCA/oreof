@@ -12,9 +12,21 @@ use App\Enums\RegimeInscriptionEnum;
  */
 final class RegimeInscription
 {
+    public const FI = 'Formation Initiale';
+    public const FI_APPRENTISSAGE = 'Formation Initiale en apprentissage';
+    public const FC = 'Formation Continue';
+    public const FC_CONTRAT_PRO = 'Formation Continue Contrat Professionnalisation';
+
     public static function key(string|RegimeInscriptionEnum $value): string
     {
         return $value instanceof RegimeInscriptionEnum ? $value->value : $value;
+    }
+
+    public static function isAlternance(string|RegimeInscriptionEnum $value): bool
+    {
+        $key = self::key($value);
+
+        return !in_array($key, [self::FI, self::FC, 'fi', 'fc'], true);
     }
 
     /** @param array<array-key, string|RegimeInscriptionEnum> $values

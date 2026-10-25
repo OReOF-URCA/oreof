@@ -9,6 +9,9 @@
 
 namespace App\Enums;
 
+/**
+ * @deprecated Use referential 'niveau_langue' and App\Referentiel\NiveauLangue instead.
+ */
 enum NiveauLangueEnum: string
 {
     case  A1 = 'A1';

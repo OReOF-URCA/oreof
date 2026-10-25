@@ -5,8 +5,6 @@ namespace App\Service\Parcours;
 use App\Classes\LdapImporter;
 use App\Entity\Parcours;
 use App\Entity\User;
-use App\Enums\ModaliteEnseignementEnum;
-use App\Enums\NiveauLangueEnum;
 use App\Enums\RegimeInscriptionEnum;
 use App\Events\AddCentreParcoursEvent;
 use App\Repository\ProfilRepository;
@@ -99,7 +97,7 @@ final class ParcoursFieldUpdater extends AbstractFieldUpdater
 
             // ----------------- STEP 5 (admission) -----------------
             'parcours_step5[niveauFrancais]' => function (Parcours $p, $v) {
-                $p->setNiveauFrancais($this->toEnumOrNull(NiveauLangueEnum::class, $v));
+                $p->setNiveauFrancaisValue($v !== null && $v !== '' ? (string) $v : null);
             },
             'parcours_step5[prerequis]' => fn(Parcours $p, $v) => $p->setPrerequis($this->toString($v)),
             'parcours_step5[composanteInscription]' => function (Parcours $p, $v) {

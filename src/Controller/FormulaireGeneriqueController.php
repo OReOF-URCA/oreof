@@ -140,8 +140,8 @@ final class FormulaireGeneriqueController extends BaseController
                     // Mono (case décochée) → affichage sans parcours ; multi (case cochée) → avec parcours.
                     $formation->setHasParcours($plusieursParcours);
                     $formation->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_PARCOURS);
-                    $formation->setNiveauEntree($data['niveauEntree']);
-                    $formation->setNiveauSortie($data['niveauSortie']);
+                    $formation->setNiveauEntreeValue($data['niveauEntree'] ?? null);
+                    $formation->setNiveauSortieValue($data['niveauSortie'] ?? null);
                     if (!empty($data['localisationMention'])) {
                         foreach ($data['localisationMention'] as $ville) {
                             $formation->addLocalisationMention($ville);
@@ -188,7 +188,7 @@ final class FormulaireGeneriqueController extends BaseController
                 $parcours->setCoResponsable($coRespParcours);
                 $parcours->setModalitesEnseignement(null);
                 $parcours->setDureeParcours($data['dureeParcours'] ?? null);
-                $parcours->setDureeParcoursUnite($data['dureeParcoursUnite'] ?? null);
+                $parcours->setDureeParcoursUniteValue($data['dureeParcoursUnite'] ?? null);
 
                 if ($estMono) {
                     // Pas de composante porteuse pour les formations non classiques
@@ -412,8 +412,8 @@ final class FormulaireGeneriqueController extends BaseController
                 'nbHeuresSituationPro' => $parcours->setNbHeuresSituationPro($value !== '' ? (float)$value : null),
                 default => null,
             },
-            'dureeParcoursUnite' => $parcours->setDureeParcoursUnite(
-                $value !== '' ? \App\Enums\DureeParcoursUniteEnum::from($value) : null
+            'dureeParcoursUnite' => $parcours->setDureeParcoursUniteValue(
+                $value !== '' ? $value : null
             ),
             'textarea' => match ($field) {
                 'contenuFormation' => $parcours->setContenuFormation($value),
@@ -446,8 +446,8 @@ final class FormulaireGeneriqueController extends BaseController
             'modalitesEnseignement' => $parcours->setModalitesEnseignementValue(
                 $value === '' || $value === null ? null : (string) $value
             ),
-            'niveauFrancais' => $parcours->setNiveauFrancais(
-                $value !== '' ? \App\Enums\NiveauLangueEnum::from($value) : null
+            'niveauFrancais' => $parcours->setNiveauFrancaisValue(
+                $value !== '' ? $value : null
             ),
             'typeParcours' => $parcours->setTypeParcours(
                 $value !== '' ? \App\Enums\TypeParcoursEnum::from($value) : null

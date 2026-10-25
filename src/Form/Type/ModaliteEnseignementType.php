@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\Form\Type;
 
 use App\Enums\ModaliteEnseignementEnum;
+use App\Referentiel\ModaliteEnseignement;
 use App\Referentiel\ReferentielManager;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -23,6 +27,34 @@ final class ModaliteEnseignementType extends AbstractType
         return ChoiceType::class;
     }
 
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        // When an entity already has an inactive value assigned, ensure it remains in choices.
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
+            $data = $event->getData();
+            if ($data === null || $data === '') {
+                return;
+            }
+
+            $key = ModaliteEnseignement::key($data);
+            $form = $event->getForm();
+            $config = $form->getConfig();
+            $choices = $config->getOption('choices') ?? [];
+
+            if (!in_array($key, $choices, true)) {
+                $label = $this->referentiels->label('modalite_enseignement', $key) ?? $key;
+                $newChoices = $choices;
+                $newChoices[$label] = $key;
+                $parent = $form->getParent();
+                if ($parent !== null) {
+                    $parentOptions = $config->getOptions();
+                    $parentOptions['choices'] = $newChoices;
+                    $parent->add($form->getName(), static::class, $parentOptions);
+                }
+            }
+        });
+    }
+
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
@@ -34,10 +66,11 @@ final class ModaliteEnseignementType extends AbstractType
                     }
                 }
 
-                // Inactive values must remain readable when already selected.
-                foreach ($this->referentiels->getValeurs('modalite_enseignement', true) as $value) {
-                    $key = $value->getLegacyValue() ?? $value->getCode();
-                    $values[$key] ??= $value->getLibelle();
+                // Inactive values already assigned to this record must remain selectable.
+                $data = $options['data'] ?? null;
+                if ($data !== null && $data !== '') {
+                    $key = ModaliteEnseignement::key($data);
+                    $values[$key] ??= $this->referentiels->label('modalite_enseignement', $key) ?? $key;
                 }
 
                 $choices = [];

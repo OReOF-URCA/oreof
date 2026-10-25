@@ -12,7 +12,6 @@
     }) }}
 
     <div {{ stimulus_controller('formation--step3', {
-        url: path('app_formation_save', {formation:formation.id}),
         urlReload: path('formation_v2_modifier', {slug:formation.slug}),
         urlGenereStructure: path('app_formation_genere_structure_pas_parcours', {formation:formation.id}),
         urlListeParcours: path('app_formation_liste_parcours', {formation:formation.id}),

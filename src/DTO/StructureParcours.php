@@ -32,6 +32,8 @@ class StructureParcours
 
     public ?float $dureeParcours = null;
     public ?DureeParcoursUniteEnum $dureeParcoursUnite = null;
+    #[Groups(['DTO_json_versioning'])]
+    public ?string $dureeParcoursUniteValue = null;
 
     public function __construct(
         private bool $withEcts = true,

@@ -62,11 +62,11 @@
             <h3 class="small-title">Durée du parcours</h3>
             <div class="card mb-5">
                 <div class="card-body">
-                    {% if parcours.dureeParcours is not null and parcours.dureeParcoursUnite is not null %}
+                    {% if parcours.dureeParcours is not null and (parcours.dureeParcoursUniteValue is not null or parcours.dureeParcoursUnite is not null) %}
                         <p>
                             <strong>Durée :</strong>
                             {{ parcours.dureeParcours }}
-                            {{ parcours.dureeParcoursUnite.libelle() }}
+                            {{ referentiel_label('duree_parcours_unite', parcours.dureeParcoursUniteValue) ?? (parcours.dureeParcoursUnite ? parcours.dureeParcoursUnite.libelle() : parcours.dureeParcoursUniteValue) }}
                         </p>
                     {% else %}
                         <p class="text-muted">Durée non renseignée.</p>

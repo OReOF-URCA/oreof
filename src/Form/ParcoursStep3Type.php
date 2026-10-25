@@ -11,13 +11,8 @@ namespace App\Form;
 
 use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
-use App\Enums\ModaliteEnseignementEnum;
-use App\Form\Type\TextareaAutoSaveType;
-use App\Form\Type\YesNoType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EnumType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 

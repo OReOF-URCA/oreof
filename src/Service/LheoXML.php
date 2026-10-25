@@ -89,8 +89,9 @@ class LheoXML
 
         // Niveau d'entree
         $niveauEntree = -1;
-        if ($niveau = $parcours->getFormation()?->getNiveauEntree()) {
-            $niveauEntree = $niveau->value;
+        if (($niveauVal = $parcours->getFormation()?->getNiveauEntreeValue()) !== null) {
+            $legacy = \App\Referentiel\NiveauFormation::legacyCase($niveauVal);
+            $niveauEntree = $legacy !== null ? $legacy->value : (is_numeric($niveauVal) ? (int) $niveauVal : -1);
         }
 
         // Adresses de la composante d'inscription
