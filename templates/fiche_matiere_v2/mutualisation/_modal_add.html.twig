@@ -1,0 +1,51 @@
+<div {{ stimulus_controller('fichematiere--mutualise', {
+    url: path('fiche_matiere_v2_mutualisation_ajax', {id: ficheMatiere.id})
+}) }}>
+    <div class="row">
+        <div class="col-12">
+            <label for="composante">Choisir une composante</label>
+            <select
+                    class="form-select"
+                    id="composante"
+                    name="composante"
+                    {{ stimulus_action('fichematiere--mutualise', 'changeComposante') }}
+                    {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
+            >
+                <option value="0">Choisir une composante</option>
+                {% for composante in composantes %}
+                    <option value="{{ composante.id }}">{{ composante.libelle }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <label for="formation">Choisir une mention/spécialité</label>
+            <select class="form-select" id="formation" name="formation"
+                    {{ stimulus_action('fichematiere--mutualise', 'changeFormation') }}
+                    {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
+            >
+                <option value="">Choisir d'abord une composante</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <label for="parcours">Choisir un parcours</label>
+            <select class="form-select" id="parcours" name="parcours"
+                    {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
+            >
+                <option value="">Choisir d'abord une mention/spécialité</option>
+            </select>
+        </div>
+    </div>
+    {{ component('alerte', {
+        type:'info',
+        message: 'Vous pouvez choisir "Mutualiser avec tous les parcours de la mention" pour mutualiser avec tous les parcours de la mention. Vous pouvez aussi choisir la composante pour mutualiser avec toutes les mentions et parcours automatiquement.'
+    }) }}
+
+    <button class="btn btn-success mt-2" data-action="fichematiere--mutualise#ajouter base#modalClose"
+            data-bs-dismiss="modal">
+        Ajouter
+    </button>
+</div>
