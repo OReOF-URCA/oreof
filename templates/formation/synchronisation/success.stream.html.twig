@@ -1,0 +1,18 @@
+{# templates/formation/synchronisation/success.stream.html.twig #}
+<turbo-stream action="append" target="flash_toasts">
+    <template>
+        <script>
+            if (window.Turbo && typeof window.Turbo.visit === 'function') {
+                window.Turbo.visit("{{ redirectUrl|raw }}", { action: 'advance' });
+            } else {
+                window.location.href = "{{ redirectUrl|raw }}";
+            }
+        </script>
+    </template>
+</turbo-stream>
+
+{{ include('_ui/_toast.stream.html.twig', {
+    message: toastMessage,
+    closeModal: true,
+    toast_type: success|default(true) ? 'success' : 'danger'
+}) }}
