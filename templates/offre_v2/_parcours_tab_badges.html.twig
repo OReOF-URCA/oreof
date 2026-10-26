@@ -1,0 +1,28 @@
+{# Badge type de parcours #}
+{% set typeParcours = parcours.typeParcours %}
+{% if typeParcours and typeParcours.value != 'classique' %}
+    <twig:Badge
+        variant="{{ typeParcours.color }}"
+        size="sm"
+        label="{{ typeParcours.libelle }}"
+    />
+{% endif %}
+
+{# Badge statut fermé #}
+{% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
+{% set categorieOuverture = dpe and dpe.etatReconduction ? dpe.etatReconduction.categorieOuverture.value : 'OUVERT' %}
+{% set isParcoursFerme = categorieOuverture != 'OUVERT' %}
+{% if isParcoursFerme %}
+    <twig:Badge
+        variant="danger"
+        size="sm"
+        label="Fermé"
+    />
+{% endif %}
+
+{# Indicateur anomalies #}
+{% if statP and statP.anomalies|length > 0 %}
+    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-warning-500 text-white shadow-xs" title="{{ statP.anomalies|length }} anomalie(s)">
+        {{ statP.anomalies|length }}
+    </span>
+{% endif %}

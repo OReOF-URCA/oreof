@@ -205,10 +205,6 @@
                 <div class="app-tabs-list flex-wrap overflow-visible gap-1.5" role="tablist" aria-label="Parcours de la formation">
                     {% for parcours in formation.parcours %}
                         {% set statP = tabStatistiques['parcours'][parcours.id] ?? null %}
-                        {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
-                        {% set categorieOuverture = dpe and dpe.etatReconduction ? dpe.etatReconduction.categorieOuverture.value : 'OUVERT' %}
-                        {% set isParcoursFerme = categorieOuverture != 'OUVERT' %}
-
                         <button type="button"
                                 id="tab-parcours-{{ parcours.id }}"
                                 class="app-tab gap-2 cursor-pointer {% if loop.first %}app-tab-active active{% endif %}"
@@ -221,17 +217,14 @@
                                 data-tab-id="parcours-{{ parcours.id }}"
                         >
                             <twig:UX:Icon name="icon:layers" class="size-4" />
-                            <span>{{ parcours.libelle }}</span>
-                            {% if isParcoursFerme %}
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-danger-100 text-danger-700 dark:bg-danger-900/60 dark:text-danger-300">
-                                    Fermé
-                                </span>
-                            {% endif %}
-                            {% if statP and statP.anomalies|length > 0 %}
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-warning-500 text-white shadow-xs" title="{{ statP.anomalies|length }} anomalie(s)">
-                                    {{ statP.anomalies|length }}
-                                </span>
-                            {% endif %}
+                            <span id="tab-parcours-{{ parcours.id }}-libelle">{{ parcours.libelle }}</span>
+                            <span id="tab-parcours-{{ parcours.id }}-badges" class="inline-flex items-center gap-1.5">
+                                {{ include('offre_v2/_parcours_tab_badges.html.twig', {
+                                    parcours: parcours,
+                                    statP: statP,
+                                    campagne: campagne
+                                }) }}
+                            </span>
                         </button>
                     {% endfor %}
                 </div>

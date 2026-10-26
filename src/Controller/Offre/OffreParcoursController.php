@@ -18,6 +18,7 @@ use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
 use App\Service\Offre\RemplissageSuspension;
 use App\Service\Parcours\GenereStructureParcours;
+use App\Service\Validation\OffreValidationService;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -241,6 +242,7 @@ final class OffreParcoursController extends BaseController
         EntityManagerInterface $em,
         TurboStreamResponseFactory $turboStream,
         RemplissageSuspension $remplissageSuspension,
+        OffreValidationService $offreValidationService,
     ): Response {
         $this->denyAccessUnlessCanConfigurerOffre($parcours->getFormation());
 
@@ -330,10 +332,13 @@ final class OffreParcoursController extends BaseController
         $isBrouillon = $dpeFormation === null || array_key_exists('brouillon', $dpeFormation->getEtatValidation());
         $canEdit = $isSesOrAdmin || $isBrouillon;
 
+        $anomalies = $offreValidationService->getAnomaliesParcours($parcours, $campagne);
+
         return $turboStream->stream('offre_v2/_parcours_save_stream.html.twig', [
             'parcours' => $parcours,
             'campagne' => $campagne,
             'can_edit' => $canEdit,
+            'statP' => ['anomalies' => $anomalies],
         ]);
     }
 

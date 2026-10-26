@@ -141,6 +141,17 @@
             </span>
         </template>
     </turbo-stream>
+    <turbo-stream action="replace" target="tab-parcours-{{ parcours.id }}-badges">
+        <template>
+            <span id="tab-parcours-{{ parcours.id }}-badges" class="inline-flex items-center gap-1.5">
+                {{ include('offre_v2/_parcours_tab_badges.html.twig', {
+                    parcours: parcours,
+                    statP: statParcours,
+                    campagne: campagne
+                }) }}
+            </span>
+        </template>
+    </turbo-stream>
 {% endfor %}
 
 {% for parcours in formation.parcours %}
