@@ -76,4 +76,29 @@ class FormThemeV2HelpTest extends KernelTestCase
         // 4. disabled field should not render help
         $this->assertStringNotContainsString('id="change_rf_formation_disabledField_help"', $html);
     }
+
+    public function testInlineCreateEntitySelectTypeWithAutocomplete(): void
+    {
+        $form = $this->formFactory->createNamedBuilder('test_autocomplete_form', FormType::class)
+            ->add('user', \App\Form\Type\InlineCreateEntitySelectType::class, [
+                'class' => \App\Entity\User::class,
+                'choice_label' => 'email',
+                'autocomplete' => true,
+            ])
+            ->getForm();
+
+        $view = $form->createView();
+
+        $template = $this->twig->createTemplate('
+            {% form_theme form "communs/form_theme_v2.html.twig" %}
+            {{ form_row(form.user) }}
+        ');
+
+        $html = $template->render(['form' => $view]);
+
+        $this->assertStringContainsString('data-controller="inline-create"', $html);
+        $this->assertStringContainsString('symfony--ux-autocomplete--autocomplete', $html);
+        $this->assertStringContainsString('data-inline-create-target="select"', $html);
+        $this->assertStringContainsString('data-inline-create-target="newInput"', $html);
+    }
 }

@@ -2,7 +2,7 @@
 
 Quand lire : champ de configuration JSON, champs spécifiques par plateforme d'admission, ou nouveau type de formulaire
 personnalisé.
-À mettre à jour si : `src/Form/Type/{JsonConfigType,DynamicFieldsType}.php`, `JsonToKeyValueTransformer`, widget `json_config_widget`, `json-config_controller.js`, formulaires `PlateformeAdmission*Type`.
+À mettre à jour si : `src/Form/Type/{JsonConfigType,DynamicFieldsType,InlineCreateEntitySelectType}.php`, `JsonToKeyValueTransformer`, widget `json_config_widget`, contrôleurs `{json-config,inline_create}_controller.js`, formulaires `PlateformeAdmission*Type`.
 
 ## Flux
 
@@ -62,8 +62,23 @@ Actions Stimulus : `switchToWizard`, `loadWizardFromJson`, `addWizardRow`, `remo
 Clés : explicites en snake_case (`url_inscription`, pas `url1`) ; toujours un `help` ; `min`/`max` sur les nombres ;
 `required` seulement si réellement obligatoire. Exemples par plateforme : `exemples-plateformes.md`.
 
-## Nouveau type de formulaire personnalisé
+## `InlineCreateEntitySelectType`
 
-Classe dans `src/Form/Type/` (`buildForm`, `buildView` pour passer des options à la vue, `configureOptions`), bloc
-`<prefix>_widget` dans le form theme, contrôleur Stimulus `assets/controllers/<nom>_controller.js`, test
-`TypeTestCase`, puis ajouter une section ici.
+Sélecteur d'entité avec bouton permettant de basculer en mode création à la volée (*inline create*).
+
+| Rôle | Fichier |
+|---|---|
+| Type (`inline_create_entity_select`) | `src/Form/Type/InlineCreateEntitySelectType.php` |
+| Thème de rendu (row & label) | `templates/communs/form_theme_v2.html.twig` (`inline_create_entity_select_row`, `form_label_inline_create_entity_select`) |
+| Contrôleur Stimulus | `assets/controllers/inline_create_controller.js` |
+
+Options principales :
+- `class` (requis) : FQCN de l'entité (ex. `User::class`).
+- `autocomplete` (défaut `false`) : active Symfony UX Autocomplete (`true` ou nom de classe `AutocompleteField`).
+- `create` : callable pour instancier et configurer l'entité si création demandée.
+- `find_existing` : callable pour éviter les doublons lors de la saisie.
+- `ldap_check` : valide l'existence dans le LDAP si `User`.
+- `new_placeholder` : texte placeholder pour le champ de création.
+
+Le contrôleur Stimulus (`inline-create`) prend automatiquement en charge la bascule d'affichage et l'état actif/inactif (y compris avec le conteneur `.ts-wrapper` de Tom Select).
+

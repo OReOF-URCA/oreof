@@ -343,13 +343,20 @@
             {{ block('form_label_inline_create_entity_select') }}
         </div>
 
-        {{ form_widget(form.entity, {
-            attr: widgetAttr|merge({
-                class: 'select-field w-full p-4 bg-white border border-secondary-200 rounded-2xl font-semibold appearance-none cursor-pointer focus:ring-4 focus:ring-indigo-50',
-                'data-inline-create-target': 'select',
-                'data-inline-create-original-required': form.entity.vars.required ? '1' : '0'
+        {% set entityAttr = form.entity.vars.attr|default({})|merge(widgetAttr) %}
+        {% if form.entity.vars.attr['data-controller'] is defined and form.entity.vars.attr['data-controller'] not in entityAttr['data-controller']|default('') %}
+            {% set entityAttr = entityAttr|merge({
+                'data-controller': (entityAttr['data-controller']|default('') ~ ' ' ~ form.entity.vars.attr['data-controller'])|trim
+            }) %}
+        {% endif %}
+        {% set entityAttr = entityAttr|merge({
+            class: (entityAttr.class|default('') ~ ' select-field w-full p-4 bg-white border border-secondary-200 rounded-2xl font-semibold appearance-none cursor-pointer focus:ring-4 focus:ring-indigo-50')|trim,
+            'data-inline-create-target': 'select',
+            'data-inline-create-original-required': form.entity.vars.required ? '1' : '0'
+        }) %}
 
-            })
+        {{ form_widget(form.entity, {
+            attr: entityAttr
         }) }}
 
         {{ form_widget(form.new, {

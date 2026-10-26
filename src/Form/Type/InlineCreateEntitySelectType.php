@@ -31,14 +31,20 @@ final class InlineCreateEntitySelectType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $entityOptions = [
+            'class' => $options['class'],
+            'choice_label' => $options['choice_label'],
+            'placeholder' => $options['placeholder'],
+            'required' => $options['required'],
+            'query_builder' => $options['query_builder'], // callable|null (Doctrine attend callable(repo): QB)
+        ];
+
+        if ($options['autocomplete']) {
+            $entityOptions['autocomplete'] = $options['autocomplete'];
+        }
+
         $builder
-            ->add('entity', EntityType::class, [
-                'class' => $options['class'],
-                'choice_label' => $options['choice_label'],
-                'placeholder' => $options['placeholder'],
-                'required' => $options['required'],
-                'query_builder' => $options['query_builder'], // callable|null (Doctrine attend callable(repo): QB)
-            ]);
+            ->add('entity', EntityType::class, $entityOptions);
 
         if ($options['ldap_check']) {
             $builder->add('new', TextType::class, [
@@ -128,6 +134,7 @@ final class InlineCreateEntitySelectType extends AbstractType
             'query_builder' => null,
             'find_existing' => null,
             'label' => false,
+            'autocomplete' => true,
         ]);
 
         $resolver->setAllowedTypes('class', 'string');
@@ -136,6 +143,7 @@ final class InlineCreateEntitySelectType extends AbstractType
         $resolver->setAllowedTypes('query_builder', ['null', 'callable']);
         $resolver->setAllowedTypes('create', ['null', 'callable']);
         $resolver->setAllowedTypes('find_existing', ['null', 'callable']);
+        $resolver->setAllowedTypes('autocomplete', ['bool', 'string']);
 
         $resolver->setNormalizer('choice_label', static function (Options $options, mixed $value): string|callable {
             if ($value === 'id' && is_a($options['class'], User::class, true)) {
