@@ -10,12 +10,11 @@
 namespace App\Form;
 
 
-use App\Form\Type\LegacyReferentielEnumType;
+use App\Form\Type\ModaliteEnseignementType;
 use App\Entity\ElementConstitutif;
 use App\Enums\ModaliteEnseignementEnum;
 use App\Form\Type\FloatType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -24,12 +23,13 @@ class EcStep4Type extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $isModal = $options['isModal'];
+        $modaliteKey = $options['modalite'] !== null ? \App\Referentiel\ModaliteEnseignement::key($options['modalite']) : null;
 
-        if ($options['modalite'] === null || $options['modalite'] === ModaliteEnseignementEnum::HYBRIDE || $options['modalite'] === ModaliteEnseignementEnum::NON_DEFINI) {
-            $builder->add('modaliteEnseignement', LegacyReferentielEnumType::class, [
-                'enum_class' => ModaliteEnseignementEnum::class,
-                'referentiel' => 'modalite_enseignement',
-                                'expanded' => false,
+        if ($modaliteKey === null || in_array($modaliteKey, [(string) ModaliteEnseignementEnum::HYBRIDE->value, 'hybride', (string) ModaliteEnseignementEnum::NON_DEFINI->value, 'non_defini'], true)) {
+            $builder->add('modaliteEnseignement', ModaliteEnseignementType::class, [
+                'expanded' => false,
+                'getter' => static fn ($entity): ?string => $entity->getModaliteEnseignementValue(),
+                'setter' => static function ($entity, ?string $value): void { $entity->setModaliteEnseignementValue($value); },
                 'attr' => ['data-action' => !$isModal ? 'change->ec--structure#saveModaliteEnseignement' : 'change->ec--structureparcours#changeModalite'],
             ]);
         }

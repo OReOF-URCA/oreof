@@ -40,7 +40,7 @@
             <h3 class="small-title">Durée du parcours</h3>
             <div class="card mb-5">
                 <div class="card-body">
-                    <p>{{ parcours.dureeParcours }} {{ parcours.dureeParcoursUnite ? parcours.dureeParcoursUnite.libelle() : '' }}</p>
+                    <p>{{ parcours.dureeParcours }} {{ referentiel_label('duree_parcours_unite', parcours.dureeParcoursUniteValue) ?? (parcours.dureeParcoursUnite ? parcours.dureeParcoursUnite.libelle() : '') }}</p>
                 </div>
             </div>
         </section>

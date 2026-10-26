@@ -3,9 +3,12 @@
 // src/Form/Type/InlineCreateEntitySelectType.php
 namespace App\Form\Type;
 
+use App\Classes\AddUser;
+use App\Entity\User;
 use App\Validator\Constraints\LdapEmailExists;
 use App\Validator\Constraints\LdapEmailExistsValidator;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
@@ -13,26 +16,35 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\EmailValidator;
 
 final class InlineCreateEntitySelectType extends AbstractType
 {
-    public function __construct(private readonly EntityManagerInterface $em)
-    {
+    public function __construct(
+        private readonly EntityManagerInterface $em,
+        private readonly ?AddUser $addUser = null,
+    ) {
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $entityOptions = [
+            'class' => $options['class'],
+            'choice_label' => $options['choice_label'],
+            'placeholder' => $options['placeholder'],
+            'required' => $options['required'],
+            'query_builder' => $options['query_builder'], // callable|null (Doctrine attend callable(repo): QB)
+        ];
+
+        if ($options['autocomplete']) {
+            $entityOptions['autocomplete'] = $options['autocomplete'];
+        }
+
         $builder
-            ->add('entity', EntityType::class, [
-                'class' => $options['class'],
-                'choice_label' => $options['choice_label'],
-                'placeholder' => $options['placeholder'],
-                'required' => $options['required'],
-                'query_builder' => $options['query_builder'], // callable|null (Doctrine attend callable(repo): QB)
-            ]);
+            ->add('entity', EntityType::class, $entityOptions);
 
         if ($options['ldap_check']) {
             $builder->add('new', TextType::class, [
@@ -122,6 +134,7 @@ final class InlineCreateEntitySelectType extends AbstractType
             'query_builder' => null,
             'find_existing' => null,
             'label' => false,
+            'autocomplete' => true,
         ]);
 
         $resolver->setAllowedTypes('class', 'string');
@@ -130,6 +143,72 @@ final class InlineCreateEntitySelectType extends AbstractType
         $resolver->setAllowedTypes('query_builder', ['null', 'callable']);
         $resolver->setAllowedTypes('create', ['null', 'callable']);
         $resolver->setAllowedTypes('find_existing', ['null', 'callable']);
+        $resolver->setAllowedTypes('autocomplete', ['bool', 'string']);
+
+        $resolver->setNormalizer('choice_label', static function (Options $options, mixed $value): string|callable {
+            if ($value === 'id' && is_a($options['class'], User::class, true)) {
+                return 'display';
+            }
+            return $value;
+        });
+
+        $resolver->setNormalizer('placeholder', static function (Options $options, mixed $value): string {
+            if ($value === 'Choisir…' && is_a($options['class'], User::class, true)) {
+                return 'Choisir dans la liste ou choisir "+ Créer nouveau" pour ajouter un utilisateur';
+            }
+            return $value;
+        });
+
+        $resolver->setNormalizer('ldap_check', static function (Options $options, mixed $value): bool {
+            if ($value === false && is_a($options['class'], User::class, true)) {
+                return true;
+            }
+            return $value;
+        });
+
+        $resolver->setNormalizer('new_placeholder', static function (Options $options, mixed $value): string {
+            if ($value === 'Nom du nouveau…' && is_a($options['class'], User::class, true)) {
+                return 'Email de l\'utilisateur…';
+            }
+            return $value;
+        });
+
+        $resolver->setNormalizer('query_builder', static function (Options $options, mixed $value): ?callable {
+            if ($value === null && is_a($options['class'], User::class, true)) {
+                return static fn (EntityRepository $er) => $er->createQueryBuilder('u')
+                    ->orderBy('u.nom', 'ASC')
+                    ->addOrderBy('u.prenom', 'ASC');
+            }
+            return $value;
+        });
+
+        $resolver->setNormalizer('find_existing', static function (Options $options, mixed $value): ?callable {
+            if ($value === null && is_a($options['class'], User::class, true)) {
+                return static fn (string $label, $scope, EntityManagerInterface $em) => $em->getRepository(User::class)->createQueryBuilder('t')
+                    ->andWhere('LOWER(t.email) = LOWER(:l)')
+                    ->setParameter('l', $label)
+                    ->getQuery()
+                    ->getOneOrNullResult();
+            }
+            return $value;
+        });
+
+        $resolver->setNormalizer('create', function (Options $options, mixed $value): ?callable {
+            if ($value === null && is_a($options['class'], User::class, true)) {
+                return function (string $label, $scope = null, ?EntityManagerInterface $em = null): User {
+                    if ($this->addUser !== null) {
+                        $user = $this->addUser->addUser($label);
+                        if ($user !== null) {
+                            return $user;
+                        }
+                    }
+                    $e = new User();
+                    $e->setEmail($label);
+                    return $e;
+                };
+            }
+            return $value;
+        });
     }
 
     public function getBlockPrefix(): string

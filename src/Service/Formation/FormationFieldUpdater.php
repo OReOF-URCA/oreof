@@ -3,6 +3,7 @@
 namespace App\Service\Formation;
 
 use App\Entity\Formation;
+use App\Entity\Parcours;
 use App\Enums\RegimeInscriptionEnum;
 use App\Repository\ComposanteRepository;
 use App\Repository\RythmeFormationRepository;
@@ -113,7 +114,25 @@ final class FormationFieldUpdater extends AbstractFieldUpdater
             },
 
             // ----------------- STEP 3 (Structure maquette) -----------------
-
+            'formation_step3[hasParcours]' => function (Formation $f, $v) {
+                $hasParcours = $this->toBoolOrNull($v);
+                if ($hasParcours === false) {
+                    if (\count($f->getParcours()) > 1) {
+                        throw new \LogicException("Il y a plus d'un parcours");
+                    }
+                    $premierParcours = $f->getParcours()->first();
+                    if ($premierParcours instanceof Parcours) {
+                        $premierParcours->setLibelle(Parcours::PARCOURS_DEFAUT);
+                    }
+                } elseif ($hasParcours === true) {
+                    foreach ($f->getParcours() as $parcours) {
+                        if ($parcours->isParcoursDefaut()) {
+                            $parcours->setLibelle('[A renomer] ' . $parcours->getLibelle());
+                        }
+                    }
+                }
+                $f->setHasParcours($hasParcours);
+            },
         ];
     }
 }

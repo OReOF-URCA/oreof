@@ -29,10 +29,14 @@
                 </h3>
             </div>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>{{ form_row(form.domaine) }}</div>
+                <div>{{ form_row(form.domaine, {
+                    attr: stimulus_controller('symfony/ux-autocomplete/autocomplete')|stimulus_action('formation', 'changeDomaine', 'change').toArray()
+                }) }}</div>
                 <div>{{ form_row(form.codeMentionApogee) }}</div>
                 {% if form.composantePorteuse is defined %}
-                    <div class="md:col-span-2">{{ form_row(form.composantePorteuse) }}</div>
+                    <div class="md:col-span-2">{{ form_row(form.composantePorteuse, {
+                        attr: stimulus_controller('symfony/ux-autocomplete/autocomplete').toArray()
+                    }) }}</div>
                 {% endif %}
             </div>
         </div>
@@ -46,7 +50,9 @@
                 </h3>
             </div>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>{{ form_row(form.mention) }}</div>
+                <div>{{ form_row(form.mention, {
+                    attr: stimulus_controller('symfony/ux-autocomplete/autocomplete')|stimulus_action('formation', 'changeMention', 'change').toArray()
+                }) }}</div>
                 <div>{{ form_row(form.mentionTexte) }}</div>
             </div>
         </div>
@@ -60,10 +66,15 @@
                 </h3>
             </div>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div>{{ form_row(form.niveauEntree) }}</div>
-                <div>{{ form_row(form.niveauSortie) }}</div>
-                <div>{{ form_row(form.inRncp) }}</div>
-                <div>{{ form_row(form.codeRNCP) }}</div>
+                <div>{{ form_row(form.niveauEntree, {
+                    attr: stimulus_controller('symfony/ux-autocomplete/autocomplete').toArray()
+                }) }}</div>
+                <div>{{ form_row(form.niveauSortie, {
+                    attr: stimulus_controller('symfony/ux-autocomplete/autocomplete').toArray()
+                }) }}</div>
+                <div class="md:col-span-2">
+                    <twig:RncpField :form="form.codeRNCP" :inRncpField="form.inRncp" />
+                </div>
             </div>
         </div>
 

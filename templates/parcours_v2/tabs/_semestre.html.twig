@@ -161,8 +161,8 @@
                 {% if semestre.raccroche == true %}
                     {{ include('typeDiplome/'~constant('TEMPLATE_FOLDER', typeD)~'/structure/v2/_structure_semestre.html.twig', {
                         ordre:semestreParcours.ordre,
-                        presentiel: parcours.modalitesEnseignement.value == 0 or parcours.modalitesEnseignement.value == 1,
-                        distanciel: parcours.modalitesEnseignement.value == 2 or parcours.modalitesEnseignement.value == 1,
+                        presentiel: parcours.modalitesEnseignementValue in ['0', '1', 'presentielle', 'hybride'],
+                        distanciel: parcours.modalitesEnseignementValue in ['2', '1', 'distancielle', 'hybride'],
                         diffSemestre: null}) }}
                 {% else %}
                 <div

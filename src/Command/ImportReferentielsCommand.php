@@ -3,7 +3,10 @@ namespace App\Command;
 
 use App\Entity\Referentiel;
 use App\Entity\ReferentielValeur;
+use App\Enums\DureeParcoursUniteEnum;
 use App\Enums\ModaliteEnseignementEnum;
+use App\Enums\NiveauFormationEnum;
+use App\Enums\NiveauLangueEnum;
 use App\Enums\RegimeInscriptionEnum;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,6 +23,9 @@ final class ImportReferentielsCommand extends Command
     {
         $this->import('modalite_enseignement', 'Modalité d’enseignement', ModaliteEnseignementEnum::cases(), true);
         $this->import('regime_inscription', 'Régime d’inscription', RegimeInscriptionEnum::cases(), true);
+        $this->import('duree_parcours_unite', 'Unité de durée de parcours', DureeParcoursUniteEnum::cases(), true);
+        $this->import('niveau_langue', 'Niveau de langue (CECRL)', NiveauLangueEnum::cases(), true);
+        $this->import('niveau_formation', 'Niveau de formation', NiveauFormationEnum::cases(), true);
         $this->em->flush();
         $output->writeln('<info>Référentiels synchronisés.</info>');
         return Command::SUCCESS;

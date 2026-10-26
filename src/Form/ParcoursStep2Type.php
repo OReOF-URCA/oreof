@@ -10,14 +10,12 @@
 namespace App\Form;
 
 
-use App\Form\Type\LegacyReferentielEnumType;
 use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
-use App\Enums\ModaliteEnseignementEnum;
+use App\Form\Type\ModaliteEnseignementType;
 use App\Form\Type\TextareaAutoSaveType;
 use App\Form\Type\YesNoType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -30,11 +28,11 @@ class ParcoursStep2Type extends AbstractType
         $typeDiplome = $options['typeDiplome'];
 
         $builder
-            ->add('modalitesEnseignement', LegacyReferentielEnumType::class, [
+            ->add('modalitesEnseignement', ModaliteEnseignementType::class, [
                 //http://lheo.gouv.fr/2.3/lheo/dict-modalites-enseignement.html#dict-modalites-enseignement
-                'enum_class' => ModaliteEnseignementEnum::class,
-                'referentiel' => 'modalite_enseignement',
                                 'expanded' => false,
+                'getter' => static fn ($entity): ?string => $entity->getModalitesEnseignementValue(),
+                'setter' => static function ($entity, ?string $value): void { $entity->setModalitesEnseignementValue($value); },
             ]);
 
         if ($typeDiplome->isHasStage() === true) {

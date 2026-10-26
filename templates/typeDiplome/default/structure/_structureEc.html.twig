@@ -156,7 +156,7 @@
         {% endif %}
     {% endif %}
 
-    {% if parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 1) %}
+    {% if parcours.modalitesEnseignementValue in ['1', 'hybride'] or (parcours.modalitesEnseignement != null and parcours.modalitesEnseignement.value == 1) %}
         <td>
             <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.sommeEcTotalPresDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ec.heuresEctsEc.sommeEcTotalPresDist|filtreHeures }}</span>

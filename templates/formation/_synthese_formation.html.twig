@@ -61,7 +61,7 @@
                            data-bs-placement="bottom"
                            title="Récupérer MCCC de la formation depuis XLSX"
                         >
-                            <i class="fa-l fa-group-arrows-rotate"></i>
+                            <twig:UX:Icon name="mdi:file-excel" class="w-3.5 h-3.5"/>
                         </a>
 
                         <a href="{{ path('app_formation_synchronisation_acs',{'formation': formation.id}) }}"
@@ -70,18 +70,21 @@
                            data-bs-placement="bottom"
                            title="Synchro AC"
                         >
-                            <i class="fal fa-users-between-lines"></i>
+                            <twig:UX:Icon name="mdi:account-group" class="w-3.5 h-3.5"/>
                         </a>
 
-                        {#                        <a href="{{ path('app_formation_synchronisation',{'formation': formation.id}) }}" #}
-                        {#                           class="btn btn-sm btn-icon btn-icon-only btn-outline-danger ms-1" #}
-                        {#                           data-bs-toggle="tooltip" #}
-                        {#                           data-bs-placement="bottom" #}
-                        {#                           title="Initialiser la formation depuis ORéBUT" #}
-                        {#                        > #}
-                        {#                            <i class="fal fa-rotate"></i> #}
-                        {#                        </a> #}
+                        <a href="{{ path('app_formation_synchronisation_orebut_modal',{'formation': formation.id}) }}"
+                           class="btn btn-sm btn-icon btn-icon-only btn-outline-danger ms-1"
+                           data-bs-toggle="tooltip"
+                           data-bs-placement="bottom"
+                           data-turbo="true"
+                           data-action="click->modalturbo#open"
+                           title="Synchroniser la formation depuis ORéBUT"
+                        >
+                            <twig:UX:Icon name="mdi:sync" class="w-3.5 h-3.5"/>
+                        </a>
                     {% endif %}
+
                 {% endif %}
             </div>
         </div>

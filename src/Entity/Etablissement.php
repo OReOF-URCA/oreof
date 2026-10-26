@@ -408,8 +408,77 @@ class Etablissement
         return null;
     }
 
+    public const DEFAULT_OREBUT_API_URL = 'https://orebut.iut.fr/api';
+
     public function hasRomeApi(): bool
     {
         return $this->getRomeApiConfiguration() !== null;
     }
+
+    /**
+     * Retourne la configuration de l'API ORéBUT si présente dans l'établissement.
+     *
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getOrebutApiConfiguration(): ?array
+    {
+        foreach ($this->getApiKeys() as $config) {
+            $platform = (string) ($config['plateforme'] ?? '');
+            if (stripos($platform, 'orebut') !== false || stripos($platform, 'orébut') !== false) {
+                return $config;
+            }
+        }
+
+        return null;
+    }
+
+    public function hasOrebutApi(): bool
+    {
+        return $this->getOrebutApiConfiguration() !== null;
+    }
+
+    public const DEFAULT_APPRENTISSAGE_API_URL = 'https://api.apprentissage.beta.gouv.fr/api';
+
+    public function getOrebutApiUrl(): string
+    {
+        $config = $this->getOrebutApiConfiguration();
+        $url = !empty($config['url']) ? trim((string) $config['url']) : self::DEFAULT_OREBUT_API_URL;
+
+        return rtrim($url, '/');
+    }
+
+    /**
+     * Retourne la configuration de l'API RNCP / Apprentissage si présente dans l'établissement.
+     *
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getRncpApiConfiguration(): ?array
+    {
+        foreach ($this->getApiKeys() as $config) {
+            $platform = (string) ($config['plateforme'] ?? '');
+            if (stripos($platform, 'rncp') !== false
+                || stripos($platform, 'apprentissage') !== false
+                || stripos($platform, 'france competences') !== false
+                || stripos($platform, 'france compétences') !== false
+            ) {
+                return $config;
+            }
+        }
+
+        return null;
+    }
+
+    public function hasRncpApi(): bool
+    {
+        return $this->getRncpApiConfiguration() !== null;
+    }
+
+    public function getRncpApiUrl(): string
+    {
+        $config = $this->getRncpApiConfiguration();
+        $url = !empty($config['url']) ? trim((string) $config['url']) : self::DEFAULT_APPRENTISSAGE_API_URL;
+
+        return rtrim($url, '/');
+    }
 }
+

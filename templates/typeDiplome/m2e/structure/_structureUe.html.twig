@@ -43,7 +43,7 @@
         {% endif %}
     {% endif %}
 
-    {% if parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 1) %}
+    {% if parcours.modalitesEnseignementValue in ['1', 'hybride'] or (parcours.modalitesEnseignement != null and parcours.modalitesEnseignement.value == 1) %}
         <th>Total</th>
     {% endif %}
 </tr>
@@ -83,7 +83,7 @@
                 <th>Total Dis.</th>
             {% endif %}
 
-            {% if parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 1) %}
+            {% if parcours.modalitesEnseignementValue in ['1', 'hybride'] or (parcours.modalitesEnseignement != null and parcours.modalitesEnseignement.value == 1) %}
                 <th>Total</th>
             {% endif %}
         </tr>
@@ -172,7 +172,7 @@
         </th>
     {% endif %}
 
-    {% if parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 1) %}
+    {% if parcours.modalitesEnseignementValue in ['1', 'hybride'] or (parcours.modalitesEnseignement != null and parcours.modalitesEnseignement.value == 1) %}
         <th>
             <span class="show_versioning d-none d-print-none">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalPresDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTotalPresDist|filtreHeures }}</span>

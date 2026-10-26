@@ -1,22 +1,26 @@
 # Icônes : FontAwesome Pro → Symfony UX Icons
 
+Catalogue officiel : **https://ux.symfony.com/icons**
+
 Quand lire : remplacement d'un `<i class="fa…">` ou choix d'une icône dans un template.
-À mettre à jour si : `config/packages/ux_icons.yaml` (alias ajouté/renommé/supprimé) ou fin de migration FontAwesome.
+À mettre à jour si : `config/packages/ux_icons.yaml` (alias ajouté/renommé/supprimé) ou directives sur les sets d'icônes.
 
-## Règles
+## Règles & Priorités
 
-- Source de vérité des alias : `config/packages/ux_icons.yaml` (`aliases:`). `ignore_not_found: false` → **un alias
-  inexistant lève une exception au rendu** : vérifier qu'il existe avant de l'utiliser.
-- Priorité : alias sémantique `icon:*` s'il existe ; sinon nom Phosphor direct (`ph:*-light` par défaut, `-bold` pour
-  l'emphase) ; sinon ajouter l'alias dans `ux_icons.yaml`. Autres sets disponibles localement : `assets/icons/`.
-- **Tout `icon:*` utilisé doit être déclaré dans `ux_icons.yaml`**, sinon UX Icons le cherche sur iconify.design sous
-  le préfixe `icon` et lève « Icon not found » (cas de `/aide` en pré-prod). `assets/icons/` est ignoré par git : les
-  cibles `ph:*` sont récupérées depuis iconify à la volée ; vérifier que le nom existe
-  (`node_modules/@iconify-json/ph/icons.json`).
-- Usage : `<twig:UX:Icon name="icon:save" class="w-4 h-4" />` (taille/couleur via classes Tailwind).
-- Variantes d'alias existantes : `icon:{danger,info,question,success,warning}:bold`.
-- FontAwesome n'est plus importé dans les assets (`assets/app.js`, `assets/styles/`) : les `fa-*` encore présents dans `templates/` ne s'affichent plus
-  et sont à migrer (`grep -rn 'class="fa' templates/`).
+- **Catalogue de référence** : Rechercher les icônes sur **https://ux.symfony.com/icons**.
+- **Sets prioritaires** :
+  1. **MDI** (`mdi:*`, ex: `mdi:routes`, `mdi:certificate`, `mdi:book-open-page-variant`, `mdi:sync`, `mdi:api`…)
+  2. **Phosphor** (`ph:*`, ex: `ph:*-light` par défaut, `ph:*-bold` pour l'emphase, ex: `ph:house-light`, `ph:trash-light`…)
+  3. D'autres sets d'Iconify (`simple-icons:*` pour les logos/marques, `material-symbols:*`) peuvent être utilisés si besoin.
+- **Alias sémantiques (`icon:*`)** :
+  - Définis dans `config/packages/ux_icons.yaml` (`aliases:`).
+  - ⚠️ **Règle absolue** : `ignore_not_found: false` est actif en développement → **utiliser un `icon:*` non déclaré dans `ux_icons.yaml` lève immédiatement une exception 500** ! Ne jamais inventer un alias sémantique `icon:xyz` au vol (ex: `icon:direction`, `icon:alert`, `icon:book` n'existent pas et font planter).
+  - Si un alias sémantique n'est pas déjà configuré dans `ux_icons.yaml`, **utiliser directement le nom du catalogue (ex: `mdi:routes`, `mdi:alert-circle`)**, ou ajouter l'alias explicitement dans `ux_icons.yaml`.
+- **Usage en template** :
+  - Composant Twig : `<twig:UX:Icon name="mdi:sync" class="w-4 h-4" />`
+  - Fonction Twig : `{{ ux_icon('mdi:sync', {class: 'w-4 h-4'}) }}`
+  - Dimensions et couleurs gérées via Tailwind (`w-4 h-4 text-primary-600`…).
+- **Legacy FontAwesome** : FontAwesome n'est plus importé dans les assets (`assets/app.js`, `assets/styles/`) : les `<i class="fa…">` résiduels ne s'affichent plus et doivent être migrés systématiquement en `<twig:UX:Icon>`.
 
 ## Alias définis hors correspondance FA
 

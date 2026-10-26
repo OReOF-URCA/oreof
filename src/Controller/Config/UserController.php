@@ -85,18 +85,10 @@ class UserController extends BaseController
             }
 
             $user->setIsEnable(true);
-            if ($dpe === false) {
-                $user->setIsValideAdministration(true);
-                $user->setDateValideAdministration(new DateTime());
+            $user->setIsValideAdministration(true);
+            $user->setDateValideAdministration(new DateTime());
 
-                $myMailer->initEmail();
-                $myMailer->setTemplate(
-                    'mails/user/acces_ajoute.txt.twig',
-                    ['user' => $user]
-                );
-            } else {
-                $admins = $userRepository->findByRole('ROLE_ADMIN');
-
+            if ($dpe) {
                 $currentUser = $this->getUser();
                 if (!$currentUser instanceof User) {
                     throw $this->createAccessDeniedException();
@@ -107,30 +99,17 @@ class UserController extends BaseController
                 $user->setComposanteDemande($composanteResponsableDpe !== false ? $composanteResponsableDpe : null);
                 $user->setDateDemande(new DateTime());
                 $user->setDateValideDpe(new DateTime());
-
-                foreach ($admins as $admin) {
-                    $myMailer->initEmail();
-                    $myMailer->setTemplate(
-                        'mails/user/ajout_oreof_dpe.txt.twig',
-                        [
-                            'user' => $user,
-                            'dpe' => $currentUser,
-                        ]
-                    );
-                    $myMailer->sendMessage([$admin->getEmail()], '[ORéOF] Nouvel ajout d\'un utilisateur par un DPE');
-                }
-                $myMailer->initEmail();
-                $myMailer->setTemplate(
-                    'mails/user/ajout_oreof.txt.twig',
-                    ['user' => $user, 'dpe' => $currentUser]
-                );
             }
+
+            $myMailer->initEmail();
+            $myMailer->setTemplate(
+                'mails/user/acces_ajoute.txt.twig',
+                ['user' => $user]
+            );
             $myMailer->sendMessage([$user->getEmail()], '[ORéOF] Accès ORéOF');
             $userRepository->save($user, true);
 
-            if ($dpe) {
-                return $turboStream->streamToastSuccess("L'utilisateur a été ajouté avec succès, il est en attente de validation par le SES", true);
-            }
+            $profils = $dpe ? $profilRepository->findByDpe() : $profilRepository->findAll();
 
             return $turboStream->streamOpenModalFromTemplates(
                 new TranslatableKey('user.gestion_profil.title', [], 'modal'),
@@ -138,7 +117,7 @@ class UserController extends BaseController
                 'user_profils/_gestion_profils.html.twig',
                 [
                     'user' => $user,
-                    'profils' => $profilRepository->findAll(),
+                    'profils' => $profils,
                 ],
                 '_ui/_footer_cancel.html.twig',
                 []

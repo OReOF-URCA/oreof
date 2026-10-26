@@ -108,7 +108,7 @@ class ElementConstitutifController extends BaseController
         $elementConstitutif->setFicheMatiere(null);
         $elementConstitutif->setParcours($parcours);
 
-        $elementConstitutif->setModaliteEnseignement($parcours->getModalitesEnseignement());
+        $elementConstitutif->setModaliteEnseignementValue($parcours->getModalitesEnseignementValue());
         $elementConstitutif->setUe($ue);
         $typeDiplome = $parcours->getFormation()?->getTypeDiplome();
 
@@ -171,7 +171,7 @@ class ElementConstitutifController extends BaseController
                     $nextSousEc = $ecOrdre->getOrdreEnfantSuivant($elementConstitutif);
                     $ec->setEcParent($elementConstitutif);
                     $ec->setParcours($parcours);
-                    $ec->setModaliteEnseignement($parcours->getModalitesEnseignement());
+                    $ec->setModaliteEnseignementValue($parcours->getModalitesEnseignementValue());
                     $ec->setUe($ue);
                     $ec->setNatureUeEc($natureEc);
 
@@ -231,7 +231,7 @@ class ElementConstitutifController extends BaseController
         $elementConstitutif = new ElementConstitutif();
         $elementConstitutif->setParcours($parcours);
 
-        $elementConstitutif->setModaliteEnseignement($parcours->getModalitesEnseignement());
+        $elementConstitutif->setModaliteEnseignementValue($parcours->getModalitesEnseignementValue());
         $elementConstitutif->setUe($ue);
         $typeDiplome = $parcours->getFormation()?->getTypeDiplome();
 
@@ -422,7 +422,7 @@ class ElementConstitutifController extends BaseController
                         $nextSousEc = $ecOrdre->getOrdreEnfantSuivant($elementConstitutif);
                         $ec->setEcParent($elementConstitutif);
                         $ec->setParcours($parcours);
-                        $ec->setModaliteEnseignement($parcours->getModalitesEnseignement());
+                        $ec->setModaliteEnseignementValue($parcours->getModalitesEnseignementValue());
                         $ec->setUe($elementConstitutif->getUe());
                         $ec->setNatureUeEc($natureEc);
                         $ec->setFicheMatiere($ficheMatiere);
@@ -538,7 +538,7 @@ class ElementConstitutifController extends BaseController
         $form = $this->createForm(EcStep4Type::class, $ecHeures, [
             'isModal' => true,
             'data_class' => $ecHeures::class,
-            'modalite' => $parcours->getModalitesEnseignement(),
+            'modalite' => $parcours->getModalitesEnseignementValue(),
             'action' => $this->generateUrl(
                 'app_element_constitutif_structure',
                 [
@@ -613,7 +613,7 @@ class ElementConstitutifController extends BaseController
             'editable' => $editable,
             'parcours' => $parcours,
             'isParcoursProprietaire' => $isParcoursProprietaire,
-            'modalite' => $parcours->getModalitesEnseignement()
+            'modalite' => $parcours->getModalitesEnseignementValue()
         ]);
     }
 
@@ -627,7 +627,7 @@ class ElementConstitutifController extends BaseController
 
         return $this->render('element_constitutif/_structureEcNonEditable.html.twig', [
             'ec' => $ec->getFicheMatiereHeures(),
-            'modalite' => $elementConstitutif->getParcours()?->getModalitesEnseignement(),
+            'modalite' => $elementConstitutif->getParcours()?->getModalitesEnseignementValue(),
             'ects' => $ects
         ]);
     }

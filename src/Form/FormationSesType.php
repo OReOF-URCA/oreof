@@ -14,13 +14,12 @@ use App\Entity\Domaine;
 use App\Entity\Formation;
 use App\Entity\TypeDiplome;
 use App\Entity\User;
-use App\Enums\NiveauFormationEnum;
 use App\Form\Type\InlineCreateEntitySelectType;
+use App\Form\Type\NiveauFormationType;
 use App\Form\Type\YesNoType;
 use App\Repository\DomaineRepository;
 use App\Repository\MentionRepository;
 use App\Repository\TypeDiplomeRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -96,17 +95,13 @@ class FormationSesType extends AbstractType
                 'required' => false,
                 'help' => 'Code de la mention dans Apogée'
             ])
-            ->add('niveauEntree', EnumType::class, [
-                'class' => NiveauFormationEnum::class,
-                'choice_label' => static function (NiveauFormationEnum $choice): string {
-                    return $choice->libelle();
-                },
+            ->add('niveauEntree', NiveauFormationType::class, [
+                'getter' => static fn (Formation $entity): ?string => $entity->getNiveauEntreeValue(),
+                'setter' => static function (Formation $entity, ?string $value): void { $entity->setNiveauEntreeValue($value); },
             ])
-            ->add('niveauSortie', EnumType::class, [
-                'class' => NiveauFormationEnum::class,
-                'choice_label' => static function (NiveauFormationEnum $choice): string {
-                    return $choice->libelle();
-                },
+            ->add('niveauSortie', NiveauFormationType::class, [
+                'getter' => static fn (Formation $entity): ?string => $entity->getNiveauSortieValue(),
+                'setter' => static function (Formation $entity, ?string $value): void { $entity->setNiveauSortieValue($value); },
             ])
             ->add('inRncp', YesNoType::class, [
                 'attr' => ['data-action' => 'change->formation#changeInscriptionRNCP']
@@ -116,58 +111,16 @@ class FormationSesType extends AbstractType
                 'attr' => ['maxlength' => 10],
             ])
             ->add('responsableMention', InlineCreateEntitySelectType::class, [
-                'help' => '',
                 'class' => User::class,
-                'choice_label' => 'display',
-                'query_builder' => function ($er) {
-                    return $er->createQueryBuilder('u')
-                        ->orderBy('u.nom', 'ASC')
-                        ->addOrderBy('u.prenom', 'ASC');
-                },
-                'placeholder' => 'Choisir dans la liste ou choisir "+ Créer nouveau" pour ajouter un utilisateur',
+                'label' => 'Responsable de la mention',
                 'new_placeholder' => 'Email du responsable de la mention',
                 'required' => true,
-                'label' => 'Responsable de la mention',
-                'ldap_check' => true,
-                'find_existing' => function (string $label, $scope, EntityManagerInterface $em) {
-                    return $em->getRepository(User::class)->createQueryBuilder('t')
-                        ->andWhere('LOWER(t.email) = LOWER(:l)')
-                        ->setParameter('l', $label)
-                        ->getQuery()
-                        ->getOneOrNullResult();
-                },
-                'create' => function (string $label, EntityManagerInterface $em) {
-                    $e = new User();
-                    $e->setEmail($label);
-                    return $e;
-                },
             ])
             ->add('coResponsable', InlineCreateEntitySelectType::class, [
-                'help' => '',
                 'class' => User::class,
-                'choice_label' => 'display',
-                'query_builder' => function ($er) {
-                    return $er->createQueryBuilder('u')
-                        ->orderBy('u.nom', 'ASC')
-                        ->addOrderBy('u.prenom', 'ASC');
-                },
-                'placeholder' => 'Choisir dans la liste ou choisir "+ Créer nouveau" pour ajouter un utilisateur',
+                'label' => 'Co-Responsable de la mention',
                 'new_placeholder' => 'Email du co-responsable de la mention',
                 'required' => false,
-                'label' => 'Co-Responsable de la mention',
-                'ldap_check' => true,
-                'find_existing' => function (string $label, $scope, EntityManagerInterface $em) {
-                    return $em->getRepository(User::class)->createQueryBuilder('t')
-                        ->andWhere('LOWER(t.email) = LOWER(:l)')
-                        ->setParameter('l', $label)
-                        ->getQuery()
-                        ->getOneOrNullResult();
-                },
-                'create' => function (string $label, EntityManagerInterface $em) {
-                    $e = new User();
-                    $e->setEmail($label);
-                    return $e;
-                },
             ])
             ->addEventListener(
                 FormEvents::PRE_SET_DATA,

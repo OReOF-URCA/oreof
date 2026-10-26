@@ -1,0 +1,84 @@
+{# templates/components/rncp_field.html.twig #}
+<div class="space-y-4"
+     data-controller="rncp"
+     data-rncp-verify-url-value="{{ verifyUrl }}"
+     data-rncp-search-url-value="{{ searchUrl }}"
+     {% if parcoursId %}data-rncp-parcours-id-value="{{ parcoursId }}"{% endif %}
+     {% if formationId %}data-rncp-formation-id-value="{{ formationId }}"{% endif %}
+     {% if etablissementId %}data-rncp-etablissement-id-value="{{ etablissementId }}"{% endif %}
+>
+    {% if inRncpField is defined and inRncpField is not null %}
+        <div class="mb-2" data-action="change->rncp#onInRncpChange">
+            {{ form_row(inRncpField) }}
+        </div>
+    {% endif %}
+
+    <div data-rncp-target="container" class="transition-opacity duration-200">
+        <div class="space-y-2 group mb-2">
+            <div class="flex items-center justify-between mb-1">
+                <label class="text-[12px] font-black text-secondary-500 uppercase flex items-center gap-1.5">
+                    <twig:UX:Icon name="mdi:award" class="size-3.5 text-primary-600 dark:text-primary-400" />
+                    <span>{{ label }}</span>
+                </label>
+                <div class="flex items-center gap-2">
+                    <span data-rncp-target="loader" class="hidden text-[11px] text-secondary-400 italic animate-pulse">
+                        Vérification...
+                    </span>
+                    <span data-rncp-target="badge" class="hidden"></span>
+                </div>
+            </div>
+
+            {% if form is defined and form is not null %}
+                {{ form_widget(form, {
+                    attr: {
+                        'data-rncp-target': 'input',
+                        'data-action': 'input->rncp#onInput change->rncp#onChange',
+                        'placeholder': 'Ex : RNCP34436',
+                        'class': 'font-mono uppercase tracking-wider',
+                        'maxlength': '12'
+                    }
+                }) }}
+                {{ form_errors(form) }}
+            {% else %}
+                <input type="text"
+                       data-rncp-target="input"
+                       data-action="input->rncp#onInput change->rncp#onChange"
+                       value="{{ initialCode|default('') }}"
+                       placeholder="Ex : RNCP34436"
+                       class="w-full p-2 bg-secondary-50 text-secondary-800 border border-secondary-200 rounded-sm font-bold font-mono uppercase tracking-wider dark:bg-secondary-900 dark:text-secondary-100 dark:border-secondary-700"
+                       maxlength="12"
+                />
+            {% endif %}
+
+            {% if help %}
+                <p class="text-xs text-secondary-500 dark:text-secondary-400 italic mt-1 flex items-center gap-1.5">
+                    <twig:UX:Icon name="icon:info" class="size-3 text-secondary-400 shrink-0" />
+                    <span>{{ help }}</span>
+                </p>
+            {% endif %}
+        </div>
+
+        <!-- Fiche retournée par l'API France Compétences -->
+        <div data-rncp-target="card" class="hidden mt-2 p-3 rounded-lg border border-secondary-200 bg-secondary-50/70 dark:border-secondary-700 dark:bg-secondary-800/40 text-xs">
+            <div class="flex items-start gap-2.5">
+                <div class="mt-0.5 p-1 rounded-md bg-primary-100 text-primary-700 dark:bg-primary-950 dark:text-primary-300 shrink-0">
+                    <twig:UX:Icon name="mdi:award" class="size-4" />
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div data-rncp-target="title" class="font-bold text-secondary-900 dark:text-secondary-100 text-xs leading-snug"></div>
+                    <div data-rncp-target="meta" class="text-[11px] text-secondary-600 dark:text-secondary-400 mt-1"></div>
+                    <div class="mt-2 pt-1.5 border-t border-secondary-200/60 dark:border-secondary-700/60">
+                        <a data-rncp-target="link"
+                           href="#"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="inline-flex items-center gap-1 font-semibold text-[11px] text-primary-600 hover:text-primary-700 hover:underline dark:text-primary-400 cursor-pointer">
+                            <twig:UX:Icon name="mdi:external-link" class="size-3 shrink-0" />
+                            <span>Consulter la fiche officielle sur France Compétences</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

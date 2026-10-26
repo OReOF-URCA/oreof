@@ -5,7 +5,7 @@ use App\Entity\Referentiel;
 use App\Entity\ReferentielValeur;
 use Doctrine\ORM\EntityManagerInterface;
 
-final class ReferentielManager
+class ReferentielManager
 {
     public function __construct(private readonly EntityManagerInterface $em) {}
 

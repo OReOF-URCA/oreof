@@ -109,6 +109,11 @@ class Parcours
     #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: ModaliteEnseignementEnum::class)]
     private ?ModaliteEnseignementEnum $modalitesEnseignement = ModaliteEnseignementEnum::NON_DEFINI;
 
+    /** Canonical referential key (nullable until backfilled from the legacy column). */
+    #[Groups(['parcours_json_versioning', 'DTO_json_versioning'])]
+    #[ORM\Column(name: 'modalitesEnseignement_referentiel', length: 100, nullable: true)]
+    private ?string $modalitesEnseignementReferentiel = null;
+
     #[Groups('parcours_json_versioning')]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $prerequis = null;
@@ -280,6 +285,10 @@ class Parcours
     #[Groups('parcours_json_versioning')]
     private ?NiveauLangueEnum $niveauFrancais;
 
+    #[ORM\Column(name: 'niveau_francais_referentiel', length: 20, nullable: true)]
+    #[Groups(['parcours_json_versioning', 'DTO_json_versioning'])]
+    private ?string $niveauFrancaisReferentiel = null;
+
     /** @var Parcours $parcoursOrigineCopie Référence le parcours d'origine, depuis la copie */
     #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist'])]
     private ?self $parcoursOrigineCopie = null;
@@ -320,6 +329,10 @@ class Parcours
     #[ORM\Column(length: 20, nullable: true, enumType: DureeParcoursUniteEnum::class)]
     private ?DureeParcoursUniteEnum $dureeParcoursUnite = null;
 
+    #[ORM\Column(name: 'duree_parcours_unite_referentiel', length: 50, nullable: true)]
+    #[Groups(['parcours_json_versioning', 'DTO_json_versioning'])]
+    private ?string $dureeParcoursUniteReferentiel = null;
+
     /**
      * @var Collection<int, ChangeParcours>
      */
@@ -347,7 +360,7 @@ class Parcours
     #[ORM\OneToMany(mappedBy: 'parcoursCible', targetEntity: ParcoursRamification::class)]
     private Collection $parcoursCibleRamifications;
 
-    public function __construct(?Formation $formation)
+    public function __construct(?Formation $formation = null)
     {
         $this->formation = $formation;
         $this->blocCompetences = new ArrayCollection();
@@ -369,6 +382,7 @@ class Parcours
         $this->contacts = new ArrayCollection();
         $this->dpeParcours = new ArrayCollection();
         $this->niveauFrancais = NiveauLangueEnum::B2;
+        $this->niveauFrancaisReferentiel = 'B2';
         $this->userProfils = new ArrayCollection();
         $this->annees = new ArrayCollection();
         $this->changeParcours = new ArrayCollection();
@@ -578,14 +592,54 @@ class Parcours
         return $this;
     }
 
+    /**
+     * Stable persisted key, ready for configurable referential values.
+     * The legacy enum accessor remains unchanged for existing consumers.
+     */
+    public function getModalitesEnseignementValue(): ?string
+    {
+        if ($this->modalitesEnseignementReferentiel !== null) {
+            return $this->modalitesEnseignementReferentiel;
+        }
+
+        return $this->modalitesEnseignement === null
+            ? null
+            : \App\Referentiel\ModaliteEnseignement::key($this->modalitesEnseignement);
+    }
+
+    /**
+     * Write a configurable key without losing the existing legacy column.
+     * The legacy enum is only updated when the key has an exact enum match.
+     */
+    public function setModalitesEnseignementValue(?string $key): self
+    {
+        $this->modalitesEnseignementReferentiel = $key;
+        $this->modalitesEnseignement = $key === null ? null : \App\Referentiel\ModaliteEnseignement::legacyCase($key);
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Use getModalitesEnseignementValue() instead. Returns null for custom referential values.
+     */
     public function getModalitesEnseignement(): ?ModaliteEnseignementEnum
     {
+        if ($this->modalitesEnseignementReferentiel !== null) {
+            return \App\Referentiel\ModaliteEnseignement::legacyCase($this->modalitesEnseignementReferentiel);
+        }
+
         return $this->modalitesEnseignement;
     }
 
+    /**
+     * @deprecated Use setModalitesEnseignementValue() instead.
+     */
     public function setModalitesEnseignement(?ModaliteEnseignementEnum $modalitesEnseignement): self
     {
         $this->modalitesEnseignement = $modalitesEnseignement;
+        if ($modalitesEnseignement !== null || \App\Referentiel\ModaliteEnseignement::legacyCase($this->modalitesEnseignementReferentiel) !== null) {
+            $this->modalitesEnseignementReferentiel = $modalitesEnseignement === null ? null : (string) $modalitesEnseignement->value;
+        }
 
         return $this;
     }
@@ -716,6 +770,11 @@ class Parcours
         return $this;
     }
 
+    /**
+     * @deprecated Returns only legacy enum cases and drops custom referential values.
+     *             Use getRegimeInscriptionValues() for all new consumers.
+     * @return list<\App\Enums\RegimeInscriptionEnum>
+     */
     public function getRegimeInscription(): array
     {
         if ($this->regimeInscription !== null && count($this->regimeInscription) === 0) {
@@ -1650,14 +1709,44 @@ class Parcours
         return $this;
     }
 
+    public function getNiveauFrancaisValue(): ?string
+    {
+        if ($this->niveauFrancaisReferentiel !== null) {
+            return $this->niveauFrancaisReferentiel;
+        }
+
+        return $this->niveauFrancais !== null ? $this->niveauFrancais->value : 'B2';
+    }
+
+    public function setNiveauFrancaisValue(?string $key): self
+    {
+        $this->niveauFrancaisReferentiel = $key;
+        $this->niveauFrancais = $key === null ? null : \App\Referentiel\NiveauLangue::legacyCase($key);
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Use getNiveauFrancaisValue() instead. Returns null for custom referential values.
+     */
     public function getNiveauFrancais(): ?NiveauLangueEnum
     {
+        if ($this->niveauFrancaisReferentiel !== null) {
+            return \App\Referentiel\NiveauLangue::legacyCase($this->niveauFrancaisReferentiel);
+        }
+
         return $this->niveauFrancais ?? NiveauLangueEnum::B2;
     }
 
+    /**
+     * @deprecated Use setNiveauFrancaisValue() instead.
+     */
     public function setNiveauFrancais(?NiveauLangueEnum $niveauFrancais): static
     {
         $this->niveauFrancais = $niveauFrancais;
+        if ($niveauFrancais !== null || \App\Referentiel\NiveauLangue::legacyCase($this->niveauFrancaisReferentiel) !== null) {
+            $this->niveauFrancaisReferentiel = $niveauFrancais?->value;
+        }
 
         return $this;
     }
@@ -1869,14 +1958,45 @@ class Parcours
         return $this;
     }
 
+    public function getDureeParcoursUniteValue(): ?string
+    {
+        if ($this->dureeParcoursUniteReferentiel !== null) {
+            return $this->dureeParcoursUniteReferentiel;
+        }
+
+        return $this->dureeParcoursUnite?->value;
+    }
+
+    public function setDureeParcoursUniteValue(?string $key): self
+    {
+        $this->dureeParcoursUniteReferentiel = $key;
+        $this->dureeParcoursUnite = $key === null ? null : \App\Referentiel\DureeParcoursUnite::legacyCase($key);
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Use getDureeParcoursUniteValue() instead. Returns null for custom referential values.
+     */
     public function getDureeParcoursUnite(): ?DureeParcoursUniteEnum
     {
+        if ($this->dureeParcoursUniteReferentiel !== null) {
+            return \App\Referentiel\DureeParcoursUnite::legacyCase($this->dureeParcoursUniteReferentiel);
+        }
+
         return $this->dureeParcoursUnite;
     }
 
+    /**
+     * @deprecated Use setDureeParcoursUniteValue() instead.
+     */
     public function setDureeParcoursUnite(?DureeParcoursUniteEnum $dureeParcoursUnite): static
     {
         $this->dureeParcoursUnite = $dureeParcoursUnite;
+        if ($dureeParcoursUnite !== null || \App\Referentiel\DureeParcoursUnite::legacyCase($this->dureeParcoursUniteReferentiel) !== null) {
+            $this->dureeParcoursUniteReferentiel = $dureeParcoursUnite?->value;
+        }
+
         return $this;
     }
 
@@ -2094,6 +2214,43 @@ class Parcours
     {
         return $this->getEtablissement()?->getRomeApiConfiguration();
     }
+
+    public function hasOrebutApi(): bool
+    {
+        return $this->getEtablissement()?->hasOrebutApi() ?? false;
+    }
+
+    /**
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getOrebutApiConfiguration(): ?array
+    {
+        return $this->getEtablissement()?->getOrebutApiConfiguration();
+    }
+
+    public function getOrebutApiUrl(): string
+    {
+        return $this->getEtablissement()?->getOrebutApiUrl() ?? Etablissement::DEFAULT_OREBUT_API_URL;
+    }
+
+    /**
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getRncpApiConfiguration(): ?array
+    {
+        return $this->getEtablissement()?->getRncpApiConfiguration();
+    }
+
+    public function hasRncpApi(): bool
+    {
+        return $this->getEtablissement()?->hasRncpApi() ?? false;
+    }
+
+    public function getRncpApiUrl(): string
+    {
+        return $this->getEtablissement()?->getRncpApiUrl() ?? Etablissement::DEFAULT_APPRENTISSAGE_API_URL;
+    }
+
 
     /**
      * Retourne la liste des ordres d'années théoriques/autorisés pour ce parcours

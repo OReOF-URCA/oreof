@@ -12,6 +12,8 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
+ * @deprecated Use ModaliteEnseignementType or a dedicated string-key referential field
+ *             once the underlying entity property supports configurable values.
  * Transitional choice field: displays configurable labels while preserving
  * the existing backed-enum entity property, API payload and database format.
  *

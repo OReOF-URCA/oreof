@@ -64,9 +64,17 @@ class Formation
     #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: NiveauFormationEnum::class)]
     private ?NiveauFormationEnum $niveauEntree = null;
 
+    #[ORM\Column(name: 'niveau_entree_referentiel', length: 50, nullable: true)]
+    #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
+    private ?string $niveauEntreeReferentiel = null;
+
     #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
     #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: NiveauFormationEnum::class)]
     private ?NiveauFormationEnum $niveauSortie = null;
+
+    #[ORM\Column(name: 'niveau_sortie_referentiel', length: 50, nullable: true)]
+    #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
+    private ?string $niveauSortieReferentiel = null;
 
     #[ORM\Column]
     #[Groups(['formation:read', 'formation_json_versioning'])]
@@ -238,7 +246,7 @@ class Formation
     #[ORM\OneToMany(mappedBy: 'formation', targetEntity: FormationTabState::class, orphanRemoval: true)]
     private Collection $formationTabStates;
 
-    public function __construct(?CampagneCollecte $anneeUniversitaire)
+    public function __construct(?CampagneCollecte $anneeUniversitaire = null)
     {
         $this->dpe = $anneeUniversitaire;
         $this->localisationMention = new ArrayCollection();
@@ -324,6 +332,48 @@ class Formation
         return $this;
     }
 
+    public function getEtablissement(): ?Etablissement
+    {
+        return $this->composantePorteuse?->getEtablissement();
+    }
+
+    /**
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getOrebutApiConfiguration(): ?array
+    {
+        return $this->getEtablissement()?->getOrebutApiConfiguration();
+    }
+
+    public function hasOrebutApi(): bool
+    {
+        return $this->getEtablissement()?->hasOrebutApi() ?? false;
+    }
+
+    public function getOrebutApiUrl(): string
+    {
+        return $this->getEtablissement()?->getOrebutApiUrl() ?? Etablissement::DEFAULT_OREBUT_API_URL;
+    }
+
+    /**
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getRncpApiConfiguration(): ?array
+    {
+        return $this->getEtablissement()?->getRncpApiConfiguration();
+    }
+
+    public function hasRncpApi(): bool
+    {
+        return $this->getEtablissement()?->hasRncpApi() ?? false;
+    }
+
+    public function getRncpApiUrl(): string
+    {
+        return $this->getEtablissement()?->getRncpApiUrl() ?? Etablissement::DEFAULT_APPRENTISSAGE_API_URL;
+    }
+
+
     public function getDpe(): ?CampagneCollecte
     {
         return $this->dpe;
@@ -360,26 +410,86 @@ class Formation
         return $this;
     }
 
-    public function getNiveauEntree(): ?NiveauFormationEnum
+    public function getNiveauEntreeValue(): ?string
     {
-        return $this->niveauEntree;
+        if ($this->niveauEntreeReferentiel !== null) {
+            return $this->niveauEntreeReferentiel;
+        }
+
+        return $this->niveauEntree !== null ? (string) $this->niveauEntree->value : null;
     }
 
-    public function setNiveauEntree(?NiveauFormationEnum $niveauEntree): self
+    public function setNiveauEntreeValue(?string $key): self
     {
-        $this->niveauEntree = $niveauEntree;
+        $this->niveauEntreeReferentiel = $key;
+        $this->niveauEntree = $key === null ? null : \App\Referentiel\NiveauFormation::legacyCase($key);
 
         return $this;
     }
 
+    /**
+     * @deprecated Use getNiveauEntreeValue() instead. Returns null for custom referential values.
+     */
+    public function getNiveauEntree(): ?NiveauFormationEnum
+    {
+        if ($this->niveauEntreeReferentiel !== null) {
+            return \App\Referentiel\NiveauFormation::legacyCase($this->niveauEntreeReferentiel);
+        }
+
+        return $this->niveauEntree;
+    }
+
+    /**
+     * @deprecated Use setNiveauEntreeValue() instead.
+     */
+    public function setNiveauEntree(?NiveauFormationEnum $niveauEntree): self
+    {
+        $this->niveauEntree = $niveauEntree;
+        if ($niveauEntree !== null || \App\Referentiel\NiveauFormation::legacyCase($this->niveauEntreeReferentiel) !== null) {
+            $this->niveauEntreeReferentiel = $niveauEntree !== null ? (string) $niveauEntree->value : null;
+        }
+
+        return $this;
+    }
+
+    public function getNiveauSortieValue(): ?string
+    {
+        if ($this->niveauSortieReferentiel !== null) {
+            return $this->niveauSortieReferentiel;
+        }
+
+        return $this->niveauSortie !== null ? (string) $this->niveauSortie->value : null;
+    }
+
+    public function setNiveauSortieValue(?string $key): self
+    {
+        $this->niveauSortieReferentiel = $key;
+        $this->niveauSortie = $key === null ? null : \App\Referentiel\NiveauFormation::legacyCase($key);
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Use getNiveauSortieValue() instead. Returns null for custom referential values.
+     */
     public function getNiveauSortie(): ?NiveauFormationEnum
     {
+        if ($this->niveauSortieReferentiel !== null) {
+            return \App\Referentiel\NiveauFormation::legacyCase($this->niveauSortieReferentiel);
+        }
+
         return $this->niveauSortie;
     }
 
+    /**
+     * @deprecated Use setNiveauSortieValue() instead.
+     */
     public function setNiveauSortie(?NiveauFormationEnum $niveauSortie): self
     {
         $this->niveauSortie = $niveauSortie;
+        if ($niveauSortie !== null || \App\Referentiel\NiveauFormation::legacyCase($this->niveauSortieReferentiel) !== null) {
+            $this->niveauSortieReferentiel = $niveauSortie !== null ? (string) $niveauSortie->value : null;
+        }
 
         return $this;
     }
@@ -516,6 +626,11 @@ class Formation
         return $texte;
     }
 
+    /**
+     * @deprecated Returns only legacy enum cases and drops custom referential values.
+     *             Use getRegimeInscriptionValues() for all new consumers.
+     * @return list<\App\Enums\RegimeInscriptionEnum>
+     */
     public function getRegimeInscription(): array
     {
         if ($this->regimeInscription === null) {
@@ -540,12 +655,7 @@ class Formation
     /** @return list<string> */
     public function getRegimeInscriptionValues(): array
     {
-        $values = $this->regimeInscription;
-        if (($values === null || $values === []) && false) {
-            return $this->getFormation()->getRegimeInscriptionValues();
-        }
-
-        return \App\Referentiel\RegimeInscription::normalize($values ?? []);
+        return \App\Referentiel\RegimeInscription::normalize($this->regimeInscription ?? []);
     }
 
     public function setRegimeInscription(?array $regimeInscription): self

@@ -33,7 +33,8 @@ class VersioningFicheMatiere {
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        private readonly ?\App\Referentiel\ReferentielManager $referentiels = null,
     ){
         $this->entityManager = $entityManager;
         $this->filesystem = $filesystem;
@@ -81,8 +82,10 @@ class VersioningFicheMatiere {
             $ficheMatiereVersioning->setVersionValide(true);
         }
 
-        $modaliteEnseignement = $ficheMatiere->getModaliteEnseignement();
-        $modaliteEnseignementLibelle = $modaliteEnseignement?->libelle();
+        $modaliteValue = $ficheMatiere->getModaliteEnseignementValue();
+        $modaliteEnseignementLibelle = $modaliteValue !== null
+            ? ($this->referentiels?->label('modalite_enseignement', $modaliteValue) ?? $ficheMatiere->getModaliteEnseignement()?->libelle() ?? $modaliteValue)
+            : null;
 
         // Serialization
         $ficheMatiereJson = $this->serializer->serialize($ficheMatiere, 'json', [

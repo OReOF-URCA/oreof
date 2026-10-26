@@ -64,7 +64,7 @@
     {% endif %}
 
     {# Total Mixte #}
-    {% if parcours.modalitesEnseignement != null and parcours.modalitesEnseignement.value == 1 %}
+    {% if parcours.modalitesEnseignementValue in ['1', 'hybride'] or (parcours.modalitesEnseignement != null and parcours.modalitesEnseignement.value == 1) %}
         <td class="px-4 py-3 text-right tabular-nums font-black text-secondary-900 dark:text-white whitespace-nowrap">
             <span class="show_versioning d-none d-print-none">{{ diffUe ? diffUe.heuresEctsUe.sommeUeTotalPresDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ue.heuresEctsUe.sommeUeTotalPresDist|filtreHeures }}</span>

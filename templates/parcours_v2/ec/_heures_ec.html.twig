@@ -71,7 +71,7 @@
 
             {% set disabled = (ec.heuresSpecifiques == false and isParcoursProprietaire == false) or (ec.ficheMatiere != null and ec.ficheMatiere.volumesHorairesImpose) %}
 
-            {% if ec.parcours.modalitesEnseignement == null %}
+            {% if ec.parcours.modalitesEnseignementValue == null and ec.parcours.modalitesEnseignement == null %}
                 <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4">
                     <div class="flex items-start gap-3">
                         <i class="fas fa-exclamation-triangle text-red-600 mt-0.5 flex-shrink-0"></i>
@@ -84,13 +84,13 @@
                 </div>
             {% else %}
 
-                {% if (ec.parcours.modalitesEnseignement != null and ec.parcours.modalitesEnseignement.value == 1) or ec.modaliteEnseignement == null %}
+                {% if (ec.parcours.modalitesEnseignementValue in ['1', 'hybride'] or (ec.parcours.modalitesEnseignement != null and ec.parcours.modalitesEnseignement.value == 1)) or ec.modaliteEnseignementValue == null %}
                     <div class="mb-1">
                         {{ form_row(form.modaliteEnseignement, {disabled: ec.heuresSpecifiques == false}) }}
                     </div>
                 {% endif %}
 
-                {% if parcours.modalitesEnseignement == null %}
+                {% if parcours.modalitesEnseignementValue == null and parcours.modalitesEnseignement == null %}
                     <div class="mb-5">
                         {{ form_row(form.modaliteEnseignement) }}
                     </div>
@@ -116,8 +116,8 @@
                 {% set disabled = disabled or ec.sansHeure %}
 
                 <div id="bloc_presentiel"
-                     class="{% if modalite != null and modalite.value != 2 %}block{% else %}hidden{% endif %}"
-                     aria-hidden="{% if modalite != null and modalite.value == 2 %}true{% else %}false{% endif %}">
+                     class="{% if modalite != null and (modalite not in ['2', 'distancielle']) and (modalite.value is not defined or modalite.value != 2) %}block{% else %}hidden{% endif %}"
+                     aria-hidden="{% if modalite != null and ((modalite in ['2', 'distancielle']) or (modalite.value is defined and modalite.value == 2)) %}true{% else %}false{% endif %}">
                     <div class="bg-white rounded-lg border border-gray-200 p-4 hover:border-indigo-300 transition-colors">
                         <div class="flex items-center gap-2 mb-3">
                             <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
@@ -136,8 +136,8 @@
                 </div>
 
                 <div id="bloc_distanciel"
-                     class="{% if modalite != null and modalite.value != 0 %}block{% else %}hidden{% endif %}"
-                     aria-hidden="{% if modalite != null and modalite.value == 0 %}true{% else %}false{% endif %}">
+                     class="{% if modalite != null and (modalite not in ['0', 'presentielle']) and (modalite.value is not defined or modalite.value != 0) %}block{% else %}hidden{% endif %}"
+                     aria-hidden="{% if modalite != null and ((modalite in ['0', 'presentielle']) or (modalite.value is defined and modalite.value == 0)) %}true{% else %}false{% endif %}">
                     <div class="bg-white rounded-lg border border-gray-200 p-4 hover:border-indigo-300 transition-colors">
                         <div class="flex items-center gap-2 mb-3">
                             <div class="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center flex-shrink-0">

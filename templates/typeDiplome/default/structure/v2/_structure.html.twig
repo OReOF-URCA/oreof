@@ -1,6 +1,6 @@
 <div class="space-y-8" {{ stimulus_controller('structure--affichage') }}>
-	{% set presentiel = parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 0 or parcours.modalitesEnseignement.value == 1) %}
-	{% set distanciel = parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 2 or parcours.modalitesEnseignement.value == 1) %}
+	{% set presentiel = parcours.modalitesEnseignementValue in ['0', '1', 'presentielle', 'hybride'] or (parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 0 or parcours.modalitesEnseignement.value == 1)) %}
+	{% set distanciel = parcours.modalitesEnseignementValue in ['2', '1', 'distancielle', 'hybride'] or (parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 2 or parcours.modalitesEnseignement.value == 1)) %}
 
 	{% if isVersioning is not defined or isVersioning == false %}
 		{% if (print is not defined or print == false) %}

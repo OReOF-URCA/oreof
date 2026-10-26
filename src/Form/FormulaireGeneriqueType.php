@@ -7,9 +7,9 @@ use App\Entity\RythmeFormation;
 use App\Entity\TypeDiplome;
 use App\Entity\User;
 use App\Entity\Ville;
-use App\Enums\NiveauFormationEnum;
-use App\Enums\DureeParcoursUniteEnum;
 use App\Enums\RegimeInscriptionEnum;
+use App\Form\Type\DureeParcoursUniteType;
+use App\Form\Type\NiveauFormationType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -73,15 +73,11 @@ class FormulaireGeneriqueType extends AbstractType
                 'required' => true,
                 'mapped' => false,
             ])
-            ->add('niveauEntree', EnumType::class, [
-                'class' => NiveauFormationEnum::class,
+            ->add('niveauEntree', NiveauFormationType::class, [
                 'label' => 'Niveau d\'entrée',
-                'choice_label' => fn(NiveauFormationEnum $c) => $c->libelle(),
             ])
-            ->add('niveauSortie', EnumType::class, [
-                'class' => NiveauFormationEnum::class,
+            ->add('niveauSortie', NiveauFormationType::class, [
                 'label' => 'Niveau de sortie',
-                'choice_label' => fn(NiveauFormationEnum $c) => $c->libelle(),
             ])
             ->add('responsableMention', $respMentionType, $respMentionOptions)
             ->add('coResponsableMention', $coRespMentionType, $coRespMentionOptions)
@@ -116,12 +112,10 @@ class FormulaireGeneriqueType extends AbstractType
                     'data-formulaire-generique--creation-target' => 'dureeInput',
                 ],
             ])
-            ->add('dureeParcoursUnite', EnumType::class, [
-                'class' => DureeParcoursUniteEnum::class,
+            ->add('dureeParcoursUnite', DureeParcoursUniteType::class, [
                 'label' => 'Unité de durée',
                 'required' => true,
                 'placeholder' => 'Choisissez une unité',
-                'choice_label' => fn(DureeParcoursUniteEnum $c) => $c->libelle(),
             ])
 
             ->add('formationExistante', HiddenType::class, [
