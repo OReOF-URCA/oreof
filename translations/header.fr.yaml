@@ -103,8 +103,6 @@ app_offre_index.description: 'Synthèse de l’offre de formation. Ouverture, pl
 app_offre_index.title: 'Synthèse de l’offre de formation'
 app_parcours_bcc_but.title: 'BCC pour le parcours %libelle%'
 app_parcours_delete.title: 'Suppression du parcours : %display%'
-parcours_v2_supprimer.description: 'Supprimer définitivement un parcours créé par erreur (Action réservée aux administrateurs).'
-parcours_v2_supprimer.title: 'Suppression définitive : %display%'
 app_parcours_export_xml_lheo.title: 'Erreur LHEO'
 app_parcours_export_xml_lheo_v2.title: 'Erreur LHEO'
 app_parcours_index.title: 'Détails des parcours'
@@ -176,6 +174,8 @@ fiche_matiere_valide_parcours.title: 'Fiches EC/matières — %libelle%'
 formation_v2_voir.title: 'Détail de la formation : %display%'
 offre_v2_configurer.description: "Paramètrer les plateformes d'admissions, les capacités et les ouvertures."
 offre_v2_configurer.title: 'Configurer la formation : %formation%'
+parcours_v2_supprimer.description: 'Supprimer définitivement un parcours créé par erreur (Action réservée aux administrateurs).'
+parcours_v2_supprimer.title: 'Suppression définitive : %display%'
 structure_composante_index.description: "Détail de l'offre de formation par composante"
 structure_composante_index.title: "Gestion de l'offre de formation"
 structure_fiche_matiere_index.description: 'Liste des fiches EC/matières associées à une mention / spécialité'
@@ -183,25 +183,31 @@ structure_fiche_matiere_index.title: 'Détails des fiches EC/matière'
 structure_fiche_matiere_index_hd.description: 'Liste des fiches EC/matières non associées à une mention / spécialité et accessibles à toutes les formations'
 structure_fiche_matiere_index_hd.title: 'Détails des fiches EC/matières "hors diplômes"'
 structure_formation_index.title: 'Gestion des formations'
+texte_help.fiche_matiere.competences.header: 'Indiquez les compétences et apprentissages critiques visés'
 texte_help.fiche_matiere.identite.header: "Indiquez les éléments d'identification de la fiche matière"
-texte_help.fiche_matiere.mutualisation.header: "Indiquez les éléments de mutualisation de la fiche matière"
-texte_help.fiche_matiere.presentation.header: "Indiquez les éléments descriptifs et les objectifs de la fiche matière"
-texte_help.fiche_matiere.competences.header: "Indiquez les compétences et apprentissages critiques visés"
-texte_help.fiche_matiere.volumes_horaires.header: "Indiquez les volumes horaires de la fiche matière"
-texte_help.fiche_matiere.mccc.header: "Modalités de contrôle des connaissances et des compétences"
-titre.fiche_matiere.identite.header: "Identité de la fiche matière"
-titre.fiche_matiere.mutualisation.header: "Mutualisation de la fiche matière"
-titre.fiche_matiere.presentation.header: "Présentation et objectifs"
-titre.fiche_matiere.competences.header: "Compétences"
-titre.fiche_matiere.volumes_horaires.header: "Volumes horaires"
-titre.fiche_matiere.mccc.header: "MCCC"
+texte_help.fiche_matiere.mccc.header: 'Modalités de contrôle des connaissances et des compétences'
+texte_help.fiche_matiere.mutualisation.header: 'Indiquez les éléments de mutualisation de la fiche matière'
+texte_help.fiche_matiere.presentation.header: 'Indiquez les éléments descriptifs et les objectifs de la fiche matière'
+texte_help.fiche_matiere.volumes_horaires.header: 'Indiquez les volumes horaires de la fiche matière'
+texte_help.formation.localisation.header: "Informations sur la localisation et l'organisation de la formation"
+texte_help.formation.presentation.header: 'Informations générales de la formation'
+texte_help.formation.structure.header: 'Structure de la formation en terme de parcours'
+titre.fiche_matiere.competences.header: Compétences
+titre.fiche_matiere.identite.header: 'Identité de la fiche matière'
+titre.fiche_matiere.mccc.header: MCCC
+titre.fiche_matiere.mutualisation.header: 'Mutualisation de la fiche matière'
+titre.fiche_matiere.presentation.header: 'Présentation et objectifs'
+titre.fiche_matiere.volumes_horaires.header: 'Volumes horaires'
+titre.formation.localisation.header: 'Localisation et organisation'
+titre.formation.presentation.header: 'Présentation de la formation'
+titre.formation.structure.header: 'Structure de la formation'
 titre.parcours.admission.header: "Modalités d'admission et inscription"
-titre.parcours.configuration.header: "Configuration du parcours"
-titre.parcours.descriptif.header: "Descriptif et organisation des études"
+titre.parcours.configuration.header: 'Configuration du parcours'
+titre.parcours.descriptif.header: 'Descriptif et organisation des études'
 titre.parcours.et_apres.header: "Et après ? Poursuites d'études & débouchés"
-titre.parcours.maquette.header: "Structure de la maquette"
-titre.parcours.presentation.header: "Présentation du parcours"
-titre.parcours.presentation_formation.header: "Présentation de la formation"
+titre.parcours.maquette.header: 'Structure de la maquette'
+titre.parcours.presentation.header: 'Présentation du parcours'
+titre.parcours.presentation_formation.header: 'Présentation de la formation'
 tpl.admin.duplication.index.description: "Création guidée d'une nouvelle année universitaire et duplication de la maquette de formation (Formations, Parcours, DPE, Compétences, Fiches Matières, UEs et MCCC) avec reconduction tacite et gestion des collisions d'URLs."
 tpl.admin.duplication.index.title: 'Assistant de Bascule & Duplication de Campagne'
 tpl.admin.duplication.result.description: 'Bilan complet de la création de la nouvelle campagne et de la duplication des maquettes de formation.'
@@ -234,4 +240,3 @@ translations_edit.description: "Modifier et personnaliser les textes de l'applic
 translations_edit.title: 'Fichier : %filename%'
 translations_index.description: "Gérer les traductions et textes de l'application."
 translations_index.title: Traductions
-

@@ -137,17 +137,7 @@
                     {{ ux_icon('icon:chevron-up', {class: 'h-4 w-4 data-toggle-icon rotate-180 transition-transform duration-200'}) }}
                 </button>
 
-                {% if is_granted('ROLE_ADMIN') and formation.typeDiplome is defined and formation.typeDiplome.libelleCourt == 'BUT' %}
-                    <a href="{{ path('app_formation_synchronisation_orebut_modal', {formation: formation.id}) }}"
-                       data-turbo="true"
-                       data-action="click->modalturbo#open"
-                       class="{{ quickBtnPrimary }}"
-                       {{ stimulus_controller('tooltip') }}
-                       title="Synchroniser les maquettes avec le programme national ORéBUT">
-                        {{ ux_icon('mdi:sync', {class: 'h-4 w-4'}) }}
-                        <span>Synchro ORéBUT</span>
-                    </a>
-                {% endif %}
+
 
                 {% if is_granted('ROLE_ADMIN') %}
                     <button class="{{ quickBtnSecondary }}"

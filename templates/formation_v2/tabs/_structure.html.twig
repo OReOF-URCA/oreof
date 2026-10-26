@@ -19,60 +19,6 @@
     }) }}
             data-action="base:parcoursAdded@window->formation--step3#_refreshListe"
     >
-
-        {#    {% if typeDiplome.isDebutSemestreFlexible %} #}
-        {#        todo: déplacé dans parcours #}
-        {#        <fieldset class="mb-3"> #}
-        {#            <label class="col-form-label required" for="formation_semestreDebut"> #}
-        {#                {{ 'formation_step3.labels.semestreDebut'|trans({}, 'form') }} #}
-        {#                <i class="fal fa-question-circle ms-1" #}
-        {#                   data-controller="tooltip" #}
-        {#                   data-tooltip-placement-value="bottom" #}
-        {#                   aria-label="{{ 'formation_step3.helps.semestreDebut.help'|trans({}, 'help') }}" #}
-        {#                   data-bs-original-title="{{ 'formation_step3.helps.semestreDebut.help'|trans({}, 'help') }}"></i> #}
-        {#            </label> #}
-        {#            <div> #}
-        {#                <select class="form-select" #}
-        {#                        name="formation_semestreDebut" #}
-        {#                        id="formation_semestreDebut" #}
-        {#                        required="required" #}
-        {#                        data-semestreDebut="{{ formation.semestreDebut }}" #}
-        {#                        {{ stimulus_action('formation--step3', 'changeSemestreDebut', 'change') }}> #}
-        {#                    <option value="">{{ 'formation_step3.labels.semestreDebut.option.vide'|trans({}, 'form') }}</option> #}
-        {#                    {% for i in 1..6 %} #}
-        {#                        <option value="{{ i }}" {% if formation.semestreDebut == i %}selected{% endif %}> #}
-        {#                            Semestre {{ i }}</option> #}
-        {#                    {% endfor %} #}
-        {#                </select> #}
-        {#            </div> #}
-        {#        </fieldset> #}
-        {#    {% endif %} #}
-
-
-        {#    <fieldset class="mb-3"> #}
-        {#        <legend class="col-form-label required"> #}
-        {#            {{ 'formation_step3.labels.hasParcours'|trans({}, 'form') }} #}
-        {#            <i class="fal fa-question-circle ms-1" #}
-        {#               data-controller="tooltip" #}
-        {#               data-tooltip-placement-value="bottom" #}
-        {#               aria-label="{{ 'formation_step3.helps.hasParcours.help'|trans({}, 'help') }}" #}
-        {#               data-bs-original-title="{{ 'formation_step3.helps.hasParcours.help'|trans({}, 'help') }}"></i> #}
-        {#        </legend> #}
-        {#        <div> #}
-        {#            <div class="form-check"> #}
-        {#                <input type="radio" id="formation_parcours_1" name="formation_parcours" required="required" #}
-        {#                       {% if formation.hasParcours == true %}checked{% endif %} #}
-        {#                        {% if formation.parcours|length > 1 %}disabled{% endif %} #}
-        {#                       class="form-check-input" value="1" {{ stimulus_action('formation--step3', 'changeHasParcours', 'click') }}> #}
-        {#                <label class="form-check-label" for="formation_parcours_1">Oui</label></div> #}
-        {#            <div class="form-check"> #}
-        {#                <input type="radio" id="formation_parcours_0" name="formation_parcours" required="required" #}
-        {#                       {% if formation.hasParcours is same as(false) %}checked{% endif %} #}
-        {#                        {% if formation.parcours|length > 1 %}disabled{% endif %} #}
-        {#                       class="form-check-input" value="0" {{ stimulus_action('formation--step3', 'changeHasParcours', 'click') }}> #}
-        {#                <label class="form-check-label" for="formation_parcours_0">Non</label></div> #}
-        {#        </div> #}
-        {#    </fieldset> #}
         {{ form_row(form.hasParcours) }}
 
         {% if formation.parcours|length > 1 %}

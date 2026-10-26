@@ -22,7 +22,7 @@ class ParcoursStateController extends BaseController
         $valideParcours = new ParcoursValide($parcours, $typeDiplome);
 
         return $turboStream->streamOpenModalFromTemplates(
-            new TranslatableKey('verifier.saisie.parcours.titre'),
+            new TranslatableKey('verifier.saisie.parcours.titre', ['%libelle%' => $parcours->getDisplay()]),
             new TranslatableKey('verifier.saisie.parcours.description'),
             'parcours_state/_index.html.twig',
             [

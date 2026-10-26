@@ -232,3 +232,6 @@ plateforme:
     capacite_specifique: "Spécifique"
     remarques: "Remarques / Précisions (EEF)"
 
+verifier.saisie.parcours.titre: 'Vérification de la saisie — %libelle%'
+verifier.saisie.parcours.description: 'Synthèse des points de contrôle et état de complétude du parcours.'
+

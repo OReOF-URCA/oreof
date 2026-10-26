@@ -269,10 +269,7 @@ actualite.labels.texte: "Texte de l'actualité"
 actualite.labels.titre: "Titre de l'actualité"
 bloc_competence.labels.libelle: 'Libellé du bloc de compétences'
 but: 'Bachelor Universitaire de Technologie'
-change_rf_formation:
-    labels:
-        typeRf:
-            label: 'la demande concerne le responsable ou Co-Responsale de la formation'
+change_rf_formation.labels.typeRf.label: 'la demande concerne le responsable ou Co-Responsale de la formation'
 competence.labels.libelle: 'Libellé de la compétence'
 composante.labels.composanteParent: 'Composante parente'
 contact.labels.adresse.label: 'Adresse du contact'
@@ -397,11 +394,9 @@ formation_step2.labels.objectifsFormation: 'Objectif de la formation'
 formation_step2.labels.resultatsAttendus: 'Résultats attendus de la formation'
 formation_step2.labels.rythmeFormation: 'Rythme de la formation'
 formation_step2.labels.rythmeFormationTexte: 'Si besoin, précisez le rythme de formation'
-formation_step3:
-    labels:
-        hasParcours:
-            warning: "Cette formation comporte plusieurs parcours. Vous devez en supprimer et n'en garder qu'un seul qui sera transformé en parcours par défaut si vous souhaitez l'utiliser et définir cette formation comme étant \"sans parcours\"."
 formation_step3.labels.hasParcours: 'La formation propose-t-elle un(des) parcours ?'
+formation_step3.labels.hasParcours.label: 'La formation a-t-elle des parcours ?'
+formation_step3.labels.hasParcours.warning: "Cette formation comporte plusieurs parcours. Vous devez en supprimer et n'en garder qu'un seul qui sera transformé en parcours par défaut si vous souhaitez l'utiliser et définir cette formation comme étant \"sans parcours\"."
 formation_step3.labels.libelleParcours: 'Précisez le libellé de chaque parcours'
 formation_step3.labels.semestreDebut: 'Semestre de début de la formation'
 formation_step3.labels.semestreDebut.option.vide: '-'
@@ -570,26 +565,19 @@ timeline.inTimeline: 'Afficher dans la timeline'
 timeline.libelle: "Libellé de l'étape"
 timeline.modulesActifs.help: "Cochez les parties de l'application ouvertes à la modification durant cette étape. Hors de cette période, ces modules passeront automatiquement en consultation seule pour les utilisateurs non-administrateurs."
 timeline.modulesActifs.label: 'Modules / Fonctionnalités ouvertes à la saisie'
-type_diplome:
-    labels:
-        ectsObligatoireSurEc:
-            label: 'Les ECTS sont-ils obligatoires sur les EC ?'
-        hasMemoire:
-            label: 'La formation prévoit-elle un TER/Mémoire de recherche ?'
-        hasProjet:
-            label: 'La formation prévoit-elle un projet tutoré ?'
-        hasSituationPro:
-            label: 'La formation prévoit-elle de la mise en situation professionnelle ?'
-        hasStage:
-            label: 'La formation prévoit-elle un stage ?'
 type_diplome.labels.ModeleMcc: 'Modèle de MCC prédéfini'
 type_diplome.labels.codeApogee: 'Code Apogée'
 type_diplome.labels.controleAssiduite.label: "Le contrôle d'assiduité est-il la modalité d'évaluation ?"
 type_diplome.labels.debutSemestreFlexible: 'Le semestre de début de formation est flexible'
+type_diplome.labels.ectsObligatoireSurEc.label: 'Les ECTS sont-ils obligatoires sur les EC ?'
 type_diplome.labels.hasMemoire: 'Le diplôme prévoit un/des mémoire(s)/TER'
+type_diplome.labels.hasMemoire.label: 'La formation prévoit-elle un TER/Mémoire de recherche ?'
 type_diplome.labels.hasProjet: 'Le diplôme prévoit un/des projet tutoré(s)'
+type_diplome.labels.hasProjet.label: 'La formation prévoit-elle un projet tutoré ?'
 type_diplome.labels.hasSituationPro: 'Le diplôme prévoit de la mise en situation professionnelle'
+type_diplome.labels.hasSituationPro.label: 'La formation prévoit-elle de la mise en situation professionnelle ?'
 type_diplome.labels.hasStage: 'Le diplôme prévoit un/des stage(s)'
+type_diplome.labels.hasStage.label: 'La formation prévoit-elle un stage ?'
 type_diplome.labels.libelle: 'Libellé long'
 type_diplome.labels.libelle_court: 'Libellé court'
 type_diplome.labels.mcccObligatoireSurEc.label: 'Les MCCC sont-ils obligatoires sur les EC ?'
@@ -626,4 +614,3 @@ ue.raccrocher.label: "Précisez l'UE à raccrocher"
 ue.semestre.dupliquer.label: "Choisir le semestre dans lequel dupliquer le'UE"
 user.add_missing.email.label: "Indiquer l'email URCA de l'utilisateur à ajouter"
 user_ldap.labels.centreDemande: 'Centre de gestion'
-

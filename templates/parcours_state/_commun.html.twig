@@ -1,163 +1,168 @@
 {% set sectionTitleClass = sectionTitleClass|default('border-y border-secondary-200 bg-secondary-100/90 px-4 py-3.5 text-left text-sm font-extrabold tracking-wide text-secondary-700 dark:border-secondary-700 dark:bg-secondary-800/80 dark:text-secondary-100') %}
-{% set dataRowClass = dataRowClass|default('border-b border-secondary-200 dark:border-secondary-700') %}
-{% set labelCellClass = labelCellClass|default('px-4 py-4 align-top font-medium leading-relaxed text-secondary-700 dark:text-secondary-200') %}
-{% set valueCellClass = valueCellClass|default('px-4 py-4 align-top leading-relaxed text-secondary-700 dark:text-secondary-200') %}
-{% set subLabelCellClass = subLabelCellClass|default('px-4 py-3.5 pl-8 align-top leading-relaxed text-secondary-600 dark:text-secondary-300') %}
-{% set deepSubLabelCellClass = deepSubLabelCellClass|default('px-4 py-3.5 pl-12 align-top leading-relaxed text-secondary-600 dark:text-secondary-300') %}
-{% set choiceBadgeClass = choiceBadgeClass|default('ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200') %}
+{% set dataRowClass = dataRowClass|default('border-b border-secondary-200 dark:border-secondary-700 hover:bg-secondary-50/50 dark:hover:bg-secondary-800/20 transition-colors') %}
+{% set labelCellClass = labelCellClass|default('px-4 py-3.5 align-top font-medium leading-relaxed text-secondary-700 dark:text-secondary-200') %}
+{% set valueCellClass = valueCellClass|default('px-4 py-3.5 align-top leading-relaxed text-secondary-700 dark:text-secondary-200') %}
+{% set subLabelCellClass = subLabelCellClass|default('px-4 py-3 pl-8 align-top text-xs leading-relaxed text-secondary-600 dark:text-secondary-300') %}
+{% set deepSubLabelCellClass = deepSubLabelCellClass|default('px-4 py-3 pl-12 align-top text-xs leading-relaxed text-secondary-600 dark:text-secondary-300') %}
+{% set choiceBadgeClass = choiceBadgeClass|default('ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200') %}
 
-<tr>
-    <th colspan="2" class="{{ sectionTitleClass }}">Descriptif</th>
+<tr data-parcours-state-filter-target="section">
+    <th colspan="2" class="{{ sectionTitleClass }}">Descriptif & Organisation</th>
 </tr>
-<tr class="{{ dataRowClass }}">
+<tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.modalitesEnseignement }}">
     <td class="{{ labelCellClass }}">Modalités d'enseignements</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.modalitesEnseignement|badgeValideDto }) }}</td>
+    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.modalitesEnseignement|badgeValideDto" size="sm" /></td>
 </tr>
-<tr class="{{ dataRowClass }}">
+<tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.stage }}">
     <td class="{{ labelCellClass }}">Stage</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.stage|badgeValideDto }) }}</td>
+    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.stage|badgeValideDto" size="sm" /></td>
 </tr>
 {% if typeDiplome.hasStage %}
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.stageModalite }}">
         <td class="{{ subLabelCellClass }}">Modalités du stage</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.stageModalite|badgeValideDto }) }}</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.stageModalite|badgeValideDto" size="sm" /></td>
     </tr>
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.stageHeures }}">
         <td class="{{ subLabelCellClass }}">Heures de stage</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.stageHeures|badgeValideDto }) }}</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.stageHeures|badgeValideDto" size="sm" /></td>
     </tr>
 {% endif %}
 
-<tr class="{{ dataRowClass }}">
+<tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.projet }}">
     <td class="{{ labelCellClass }}">Projet</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.projet|badgeValideDto }) }}</td>
+    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.projet|badgeValideDto" size="sm" /></td>
 </tr>
 {% if typeDiplome.hasProjet %}
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.projetModalite }}">
         <td class="{{ subLabelCellClass }}">Modalités du projet</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.projetModalite|badgeValideDto }) }}</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.projetModalite|badgeValideDto" size="sm" /></td>
     </tr>
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.projetHeures }}">
         <td class="{{ subLabelCellClass }}">Heures de projet</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.projetHeures|badgeValideDto }) }}</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.projetHeures|badgeValideDto" size="sm" /></td>
     </tr>
 {% endif %}
 
-<tr class="{{ dataRowClass }}">
+<tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.situationPro }}">
     <td class="{{ labelCellClass }}">Situation Professionnelle</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.situationPro|badgeValideDto }) }}</td>
+    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.situationPro|badgeValideDto" size="sm" /></td>
 </tr>
 {% if typeDiplome.hasSituationPro %}
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.situationProModalite }}">
         <td class="{{ subLabelCellClass }}">Modalités de la situation professionnelle</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.situationProModalite|badgeValideDto }) }}</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.situationProModalite|badgeValideDto" size="sm" /></td>
     </tr>
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.situationProHeures }}">
         <td class="{{ subLabelCellClass }}">Heures de la situation professionnelle</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.situationProHeures|badgeValideDto }) }}</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.situationProHeures|badgeValideDto" size="sm" /></td>
     </tr>
 {% endif %}
-<tr class="{{ dataRowClass }}">
+<tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.memoire }}">
     <td class="{{ labelCellClass }}">Mémoire TER</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.memoire|badgeValideDto }) }}</td>
+    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.memoire|badgeValideDto" size="sm" /></td>
 </tr>
 {% if typeDiplome.hasMemoire %}
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.memoireModalite }}">
         <td class="{{ subLabelCellClass }}">Modalités du mémoire TER</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.memoireModalite|badgeValideDto }) }}</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.memoireModalite|badgeValideDto" size="sm" /></td>
     </tr>
 {% endif %}
+
 {% if typeDiplome.classique %}
-<tr>
-    <th colspan="2" class="{{ sectionTitleClass }}">Compétences</th>
-</tr>
-<tr class="{{ dataRowClass }}">
-    <td class="{{ labelCellClass }}">Référentiel de compétences</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.competences|badgeValideDto }) }}</td>
-</tr>
-{% for bcc in valide.bccs %}
-    <tr class="{{ dataRowClass }}">
-        <td class="{{ subLabelCellClass }}">{{ bcc.texte }}</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: bcc.etat|badgeValideDto }) }}</td>
+    <tr data-parcours-state-filter-target="section">
+        <th colspan="2" class="{{ sectionTitleClass }}">Compétences</th>
     </tr>
-{% endfor %}
-<tr>
-    <th colspan="2" class="{{ sectionTitleClass }}">Structure de la maquette</th>
-</tr>
-<tr class="{{ dataRowClass }}">
-    <td class="{{ labelCellClass }}">Structure</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.structure.global|badgeValideDto }) }}</td>
-</tr>
-{% for key, semestre in valide.etat.structure.semestres %}
-    <tr class="{{ dataRowClass }}">
-        <td class="px-4 py-3.5 pl-6 align-top font-semibold leading-relaxed text-secondary-700 dark:text-secondary-200">
-            Semestre {{ key }}</td>
-        <td class="{{ valueCellClass }}">
-            {{ semestre.erreur|displayErreurs }}
-            {{ component('Badge', { dto: semestre.global|badgeValideDto }) }}</td>
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.competences }}">
+        <td class="{{ labelCellClass }}">Référentiel de compétences</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.competences|badgeValideDto" size="sm" /></td>
     </tr>
-    {% for keyUe, ue in semestre.ues %}
-        {% if ue.ue is defined %}
-            <tr class="{{ dataRowClass }}">
-                <td class="{{ subLabelCellClass }}">{{ ue.ue.display(parcours) }} {% if ue.enfants is defined %}<span
-                        class="{{ choiceBadgeClass }}">UE à choix</span>{% endif %}</td>
-                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: ue.global|badgeValideDto }) }}</td>
-            </tr>
-        {% endif %}
-        {% if ue.enfants is defined %}
-            {% for keyUee, uee in ue.enfants %}
-                <tr class="{{ dataRowClass }}">
-                    <td class="{{ deepSubLabelCellClass }}"><span
-                                class="{{ choiceBadgeClass }}">Choix</span> {{ uee.ue.display(parcours) }}</td>
-                    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: uee.global|badgeValideDto }) }}</td>
-                </tr>
-                {{ include('parcours_state/_ec.html.twig', {ecs: uee.ecs}) }}
-            {% endfor %}
-        {% else %}
-            {% if ue.ecs is defined %}
-                {{ include('parcours_state/_ec.html.twig', {ecs: ue.ecs}) }}
-            {% endif %}
-        {% endif %}
+    {% for bcc in valide.bccs %}
+        <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ bcc.etat }}">
+            <td class="{{ subLabelCellClass }}">{{ bcc.texte }}</td>
+            <td class="{{ valueCellClass }}"><twig:Badge :dto="bcc.etat|badgeValideDto" size="sm" /></td>
+        </tr>
     {% endfor %}
-{% endfor %}
+
+    <tr data-parcours-state-filter-target="section">
+        <th colspan="2" class="{{ sectionTitleClass }}">Structure de la maquette</th>
+    </tr>
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.structure.global|default('') }}">
+        <td class="{{ labelCellClass }}">Structure globale</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.structure.global|badgeValideDto" size="sm" /></td>
+    </tr>
+    {% for key, semestre in valide.etat.structure.semestres %}
+        <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ semestre.global }}">
+            <td class="px-4 py-3 pl-6 align-top font-semibold leading-relaxed text-secondary-700 dark:text-secondary-200">
+                Semestre {{ key }}</td>
+            <td class="{{ valueCellClass }}">
+                {{ semestre.erreur|displayErreurs }}
+                <twig:Badge :dto="semestre.global|badgeValideDto" size="sm" />
+            </td>
+        </tr>
+        {% for keyUe, ue in semestre.ues %}
+            {% if ue.ue is defined %}
+                <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ ue.global }}">
+                    <td class="{{ subLabelCellClass }}">{{ ue.ue.display(parcours) }} {% if ue.enfants is defined %}<span
+                            class="{{ choiceBadgeClass }}">UE à choix</span>{% endif %}</td>
+                    <td class="{{ valueCellClass }}"><twig:Badge :dto="ue.global|badgeValideDto" size="sm" /></td>
+                </tr>
+            {% endif %}
+            {% if ue.enfants is defined %}
+                {% for keyUee, uee in ue.enfants %}
+                    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ uee.global }}">
+                        <td class="{{ deepSubLabelCellClass }}"><span
+                                    class="{{ choiceBadgeClass }}">Choix</span> {{ uee.ue.display(parcours) }}</td>
+                        <td class="{{ valueCellClass }}"><twig:Badge :dto="uee.global|badgeValideDto" size="sm" /></td>
+                    </tr>
+                    {{ include('parcours_state/_ec.html.twig', {ecs: uee.ecs}) }}
+                {% endfor %}
+            {% else %}
+                {% if ue.ecs is defined %}
+                    {{ include('parcours_state/_ec.html.twig', {ecs: ue.ecs}) }}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
 {% endif %}
-<tr>
+
+<tr data-parcours-state-filter-target="section">
     <th colspan="2" class="{{ sectionTitleClass }}">Admission & inscription</th>
 </tr>
-<tr class="{{ dataRowClass }}">
+<tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.preRequis }}">
     <td class="{{ labelCellClass }}">Prérequis recommandés</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.preRequis|badgeValideDto }) }}</td>
+    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.preRequis|badgeValideDto" size="sm" /></td>
 </tr>
 {% if parcours.parcoursDefaut == false %}
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.composanteInscription }}">
         <td class="{{ labelCellClass }}">Composante inscription</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.composanteInscription|badgeValideDto }) }}</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.composanteInscription|badgeValideDto" size="sm" /></td>
     </tr>
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.regimeInscription }}">
         <td class="{{ labelCellClass }}">Régime d'inscription</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.regimeInscription|badgeValideDto }) }}</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.regimeInscription|badgeValideDto" size="sm" /></td>
     </tr>
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.modaliteAlternance }}">
         <td class="{{ labelCellClass }}">Modalité de l'alternance (le cas échéant)</td>
-        <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.modaliteAlternance|badgeValideDto }) }}</td>
+        <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.modaliteAlternance|badgeValideDto" size="sm" /></td>
     </tr>
 {% endif %}
-<tr class="{{ dataRowClass }}">
+<tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.coordSecretariat }}">
     <td class="{{ labelCellClass }}">Coordonnées du secrétariat pédagogique</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.coordSecretariat|badgeValideDto }) }}</td>
+    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.coordSecretariat|badgeValideDto" size="sm" /></td>
 </tr>
-<tr>
+
+<tr data-parcours-state-filter-target="section">
     <th colspan="2" class="{{ sectionTitleClass }}">Et après...</th>
 </tr>
-<tr class="{{ dataRowClass }}">
+<tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.poursuitesEtudes }}">
     <td class="{{ labelCellClass }}">Poursuites d'études envisageables</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.poursuitesEtudes|badgeValideDto }) }}</td>
+    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.poursuitesEtudes|badgeValideDto" size="sm" /></td>
 </tr>
-<tr class="{{ dataRowClass }}">
+<tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.debouches }}">
     <td class="{{ labelCellClass }}">Débouchés</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.debouches|badgeValideDto }) }}</td>
+    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.debouches|badgeValideDto" size="sm" /></td>
 </tr>
-<tr class="{{ dataRowClass }}">
-    <td class="{{ labelCellClass }}">Codes romes</td>
-    <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.codeRome|badgeValideDto }) }}</td>
+<tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.codeRome }}">
+    <td class="{{ labelCellClass }}">Codes ROME</td>
+    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.codeRome|badgeValideDto" size="sm" /></td>
 </tr>
