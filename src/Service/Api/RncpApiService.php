@@ -150,7 +150,7 @@ class RncpApiService
 
                     if ($response->getStatusCode() === 200) {
                         $data = $response->toArray(false);
-                        $certItem = is_array($data) && isset($data[0]) ? $data[0] : (is_array($data) && isset($data['identifiant']) ? $data : null);
+                        $certItem = isset($data[0]) && is_array($data[0]) ? $data[0] : (isset($data['identifiant']) ? $data : null);
 
                         if ($certItem !== null) {
                             $intitule = $certItem['intitule']['rncp']
