@@ -314,12 +314,10 @@
                                                                     <span> Réinitialiser un semestre</span>
                                                                 </button>
                                                             </li>
-
                                                         </ul>
                                                     </div>
                                                 </div>
-                                                <div class="col-4">{# todo: boutons non centrés dans la
-                                            ligne #}
+                                                <div class="col-4 d-flex align-items-center">
 
                                                     {% if
                                                         (is_granted('EDIT', {route: 'app_formation', subject: parcours.formation})) or

@@ -82,7 +82,6 @@
     {% if label is not same as(false) %}
         <div class="flex items-center mb-1 gap-2 w-full">
             <div class="flex items-center gap-2 min-w-0">
-                {# todo: gérer le label translate comme les autres champs #}
                 <label
                         {% with { attr: label_attr|merge({
                             class: 'text-[12px] font-black text-secondary-500 group-focus-within:text-indigo-500 transition-colors uppercase'

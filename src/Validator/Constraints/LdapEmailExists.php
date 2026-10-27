@@ -4,7 +4,10 @@ namespace App\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 
-//todo: pas utile ?
+/**
+ * Contrainte validant qu'un compte existe dans le LDAP pour l'adresse email renseignée.
+ * Utilisée notamment par InlineCreateEntitySelectType lors de l'ajout inline d'un utilisateur.
+ */
 #[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::TARGET_PARAMETER)]
 final class LdapEmailExists extends Constraint
 {

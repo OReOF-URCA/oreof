@@ -3,7 +3,7 @@
 {% block content %}
     <p>Bonjour,</p>
 
-    <p>La demande de changement de {% if demande.typeRf.value == 'RF' %}responsable{% else %}co-responsable{% endif%} de votre formation <strong>{{ formation.displayLong }}</strong> a été validée par la CFVU {{ dateCfvu|date('d/m/Y') }}. Le PV étant manquant, la demande est en attente jusqu'au dépôt de ce dernier. Vous pouvez le déposer depuis ORéOF {# todo: lien #}.</p>
+    <p>La demande de changement de {% if demande.typeRf.value == 'RF' %}responsable{% else %}co-responsable{% endif%} de votre formation <strong>{{ formation.displayLong }}</strong> a été validée par la CFVU {{ dateCfvu|date('d/m/Y') }}. Le PV étant manquant, la demande est en attente jusqu'au dépôt de ce dernier. Vous pouvez le déposer depuis ORéOF en <a href="{{ url('formation_v2_modifier', {'slug': formation.slug}) }}">accédant à votre formation</a>.</p>
 
     <p>Rappel de la demande : remplacement de <strong>{{ demande.ancienResponsable != null ? demande.ancienResponsable.display : 'Pas de responsable' }}</strong> par <strong>{{ demande.nouveauResponsable != null ? demande.nouveauResponsable.display : 'Pas de responsable' }}</strong>.
     </p>
