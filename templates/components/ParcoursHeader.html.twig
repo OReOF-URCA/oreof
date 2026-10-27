@@ -580,6 +580,15 @@
                                     <span>Gérer codification</span>
                                 </button>
                             </div>
+                            <div>
+                                <a class="{{ quickBtnWarning }} w-full"
+                                   data-action="click->modalturbo#open"
+                                   data-turbo="true"
+                                   href="{{ path('parcours_ses_deplacer', { parcours: parcours.id }) }}">
+                                    {{ ux_icon('ph:arrows-left-right-light', {class: 'h-4 w-4'}) }}
+                                    <span>Déplacer de formation</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
