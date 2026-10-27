@@ -231,11 +231,14 @@ class UserGestionController extends BaseController
 
                         return $this->json(true);
                     }
-                    return $this->json('Une erreur est survenue !', 500);
             }
         }
 
-        return $this->render('user/add.html.twig', ['form' => $form->createView(),]);
+        return $this->render(
+            'user/add.html.twig',
+            ['form' => $form->createView()],
+            new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK)
+        );
     }
 //
 //    #[
@@ -287,7 +290,9 @@ class UserGestionController extends BaseController
     #[Route('/valid/dpe/{user}', name: 'app_user_gestion_valid_dpe')]
     public function validDpe(User $user): Response
     {
-        // $this->denyAccessUnlessGranted('CAN_EDIT_CENTRE');//todo: faire sur manage composante
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('MANAGE', ['route' => 'app_composante', 'subject' => 'composante'])) {
+            throw $this->createAccessDeniedException();
+        }
         if (count($user->getUserProfils()) > 0) {
             $user->setDateValideDpe(new DateTime());
             $user->setIsValidDpe(true);

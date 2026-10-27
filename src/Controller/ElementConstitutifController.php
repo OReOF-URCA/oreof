@@ -549,8 +549,7 @@ class ElementConstitutifController extends BaseController
         ]);
 
         $form->handleRequest($request);
-        if ($form->isSubmitted()) {
-            // TODO FORM-AUDIT-S02: ajouter la validation des heures/DTO avant flush et événements, avec réponse compatible client ; voir docs/testing/audit-form-feedback.md.
+        if ($form->isSubmitted() && $form->isValid()) {
             $originalHeuresToText = $this->heuresToTexte($getElement->getFicheMatiereHeures());
             $ecStep4 = $request->request->all('ec_step4');
             if (array_key_exists('heuresEnfantsIdentiques', $ecStep4)) {
@@ -614,7 +613,7 @@ class ElementConstitutifController extends BaseController
             'parcours' => $parcours,
             'isParcoursProprietaire' => $isParcoursProprietaire,
             'modalite' => $parcours->getModalitesEnseignementValue()
-        ]);
+        ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
     #[Route('/{id}/structure-ec-non-editable', name: 'app_element_constitutif_structure_non_editable', methods: ['GET', 'POST'])]
@@ -645,8 +644,7 @@ class ElementConstitutifController extends BaseController
             ),
         ]);
         $form->handleRequest($request);
-        if ($form->isSubmitted()) {
-            // TODO FORM-AUDIT-S03: contrôler isValid() et définir le retour de validation pour la modale BUT ; voir docs/testing/audit-form-feedback.md.
+        if ($form->isSubmitted() && $form->isValid()) {
             $ficheMatiereRepository->save($ficheMatiere, true);
 
             return $this->json(true);
@@ -655,7 +653,7 @@ class ElementConstitutifController extends BaseController
         return $this->render('element_constitutif/_structureEcModalBut.html.twig', [
             'ficheMatiere' => $ficheMatiere,
             'form' => $form->createView(),
-        ]);
+        ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
     #[Route('/{id}/{ue}/deplacer/{sens}', name: 'app_element_constitutif_deplacer', methods: ['GET'])]

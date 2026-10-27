@@ -18,6 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class TypeUeType extends AbstractType
 {
@@ -26,6 +27,12 @@ class TypeUeType extends AbstractType
         $builder
             ->add('libelle', TextType::class, [
                 'label' => 'Libellé',
+                'required' => true,
+                'attr' => ['maxlength' => 255],
+                'constraints' => [
+                    new Assert\NotBlank(message: 'Le libellé est obligatoire.'),
+                    new Assert\Length(max: 255),
+                ],
             ])
             ->add('type', EnumType::class, [
                 'help' => 'Type UE',
@@ -33,6 +40,10 @@ class TypeUeType extends AbstractType
                 'translation_domain' => 'form',
                 'multiple' => false,
                 'expanded' => true,
+                'required' => true,
+                'constraints' => [
+                    new Assert\NotNull(message: 'Le type est obligatoire.'),
+                ],
             ])
             ->add('typeDiplomes', EntityType::class, [
                 'class' => TypeDiplome::class,

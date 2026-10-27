@@ -15,14 +15,14 @@ Les inventaires ci-dessous sont des pistes de lecture, pas une preuve d’exécu
 | FIX-02 | Consommateurs `saveData` formation, fiche matière, EC, parcours | Les indicateurs d’étape pouvaient être recalculés après un échec ; le résultat des wrappers était perdu. | Corrigé sur les appels directs inventoriés : garde avant recalcul, propagation de la réponse, protection du reload multi-parcours et de la génération/recopie BCC. Les callbacks indirects restent à vérifier. |
 | FIX-03 | `Config/ComposanteController::new/edit` | `isValid()` commenté, sauvegarde et création de comptes/rôles possibles sur formulaire invalide. | Corrigé : validation Symfony avant les effets de bord. Tester la création manuelle des utilisateurs et les erreurs du formulaire. |
 | FIX-04 | `notification_liste_controller.js::change` | Pas de catch ni de contrôle HTTP ; état visuel optimiste conservé après refus. | Corrigé : contrôle HTTP/JSON, blocage temporaire du contrôle, restauration et message d’incertitude réseau. |
+| FORM-AUDIT-S01 | `FormationController::editModal` | Rétablissement du garde `isValid()` avant persistance et événements rôle, avec retour HTTP 422 en cas d'erreur. | Corrigé |
+| FORM-AUDIT-S02 | `ElementConstitutifController::structureEc` | Rétablissement du garde `isValid()` avant flush/événements MCCC, avec réponse HTTP 422 sur formulaire invalide. | Corrigé |
+| FORM-AUDIT-S03 | `ElementConstitutifController::structureBut` | Contrôle `isValid()` avant enregistrement et retour HTTP 422 en cas d'échec de validation. | Corrigé |
 
 ## Points serveur restant à traiter
 
 | Référence | Emplacement | Risque / action attendue |
 |---|---|---|
-| FORM-AUDIT-S01 | `FormationController::editModal` (bloc `$savedMention`) | Persistance et événements après isSubmitted sans isValid. Le traitement mention/autre modifie les données : clarifier cette normalisation et les contraintes avant de rétablir le garde. TODO dans le code. |
-| FORM-AUDIT-S02 | `ElementConstitutifController` (bloc `$originalHeuresToText`) | Heures et DTO appliqués puis flush/événements sans validation du formulaire. Vérifier les règles par diplôme, les champs sansHeure/heuresEnfantsIdentiques et le contrat client JSON avant correction. TODO dans le code. |
-| FORM-AUDIT-S03 | `ElementConstitutifController::structureBut` | Sauvegarde sans isValid. Définir le rendu invalide de cette modale et adapter le client, puis activer le garde. TODO dans le code. |
 | FORM-AUDIT-S04 | `PvConseilController` | isValid présent, mais une validation invalide devient une erreur JSON 500 générique via JsonReponse::error. Préférer 422 avec erreurs exploitables après revue du client. |
 | FORM-AUDIT-S05 | `FormationResponsableController`, `ParcoursProcessController`, `FicheMatiereProcessController`, `CampagneDuplicationController` | Les blocs isSubmitted seuls ne sont pas des preuves de défaut : des gardes isValid imbriqués existent. Tester séparément erreurs métier, formulaires invalides et maintien de la modale. |
 

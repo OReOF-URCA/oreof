@@ -383,8 +383,7 @@ class FormationController extends BaseController
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            // TODO FORM-AUDIT-S01: valider le contrat mention/autre puis rétablir isValid() avant les effets de bord ; voir docs/testing/audit-form-feedback.md.
+        if ($form->isSubmitted() && $form->isValid()) {
             $savedMention = $formation->getMention();
             $savedMentionTexte = $formation->getMentionTexte();
 
@@ -428,8 +427,8 @@ class FormationController extends BaseController
 
         return $this->render('formation/editModal.html.twig', [
             'formation' => $formation,
-            'form' => $form->createView()
-        ]);
+            'form' => $form->createView(),
+        ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
     #[Route('/api', name: 'app_formation_api', methods: ['GET'])]

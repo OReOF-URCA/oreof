@@ -14,6 +14,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class LangueType extends AbstractType
 {
@@ -22,13 +23,28 @@ class LangueType extends AbstractType
         $builder
             ->add('libelle', TextType::class, [
                 'label' => 'Libellé',
+                'required' => true,
+                'attr' => ['maxlength' => 255],
+                'constraints' => [
+                    new Assert\NotBlank(message: 'Le libellé est obligatoire.'),
+                    new Assert\Length(max: 255),
+                ],
             ])
             ->add('codeIso', TextType::class, [
                 'label' => 'Code ISO',
+                'required' => true,
                 'help_html' => true,
                 'help' => '2 caractères, selon la norme ISO 693-1. <a href="https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1" target="_blank">Liste des codes ISO 639-1</a>',
                 'attr' => [
                     'maxlength' => 2,
+                ],
+                'constraints' => [
+                    new Assert\NotBlank(message: 'Le code ISO est obligatoire.'),
+                    new Assert\Length(
+                        min: 2,
+                        max: 2,
+                        exactMessage: 'Le code ISO doit comporter exactement {{ limit }} caractères.'
+                    ),
                 ],
             ])
         ;
