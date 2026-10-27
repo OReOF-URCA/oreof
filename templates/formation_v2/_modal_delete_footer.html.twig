@@ -1,0 +1,21 @@
+<div class="app-modal-footer-actions">
+    <button type="button"
+            class="app-modal-footer-btn app-modal-footer-btn--secondary"
+            data-action="modalturbo#close">
+        Annuler
+    </button>
+
+    {% if analysis.canDelete %}
+        <button type="submit"
+                class="app-modal-footer-btn app-modal-footer-btn--danger"
+                form="modal_form">
+            Supprimer définitivement
+        </button>
+    {% else %}
+        <button type="button"
+                disabled
+                class="app-modal-footer-btn app-modal-footer-btn--danger opacity-50 cursor-not-allowed">
+            Suppression bloquée
+        </button>
+    {% endif %}
+</div>

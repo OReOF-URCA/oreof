@@ -13,6 +13,7 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 | `app:semestre:migrate-tronc-commun` | semestres tronc commun → semestres mutualisés (campagne courante) | `--apply`, `--campaign`, `--formation`, `--porteur`, `--mapping-file`, `--allow-cross-formation`, `--output` |
 | `app:parcours-copy-data` | recopie heures/ECTS/MCCC vers les fiches matières | voir `docs/ops/recopie-fiche-matiere.md` |
 | `app:parcours:delete` | suppression définitive d'un parcours (erreurs de création/recopie) avec analyse préalable d'impact | `id`, `--force`, `--dry-run` |
+| `app:formation:delete` | suppression définitive d'une formation (si pas de parcours ou parcours par défaut) avec analyse préalable d'impact | `id`, `--force`, `--dry-run` |
 
 ## Campagnes / années
 

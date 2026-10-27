@@ -153,12 +153,12 @@
                                             </a>
                                         {% endif %}
                                         {% if is_granted('ROLE_ADMIN') %}
-                                            <button {{ stimulus_action('crud', 'delete', 'click', {
-                                                url:path('app_formation_delete',{'id': formation.id}),
-                                                csrf: csrf_token('delete' ~ formation.id)
-                                            }) }} class="btn btn-outline-danger btn-sm">
+                                            <a href="{{ path('formation_v2_supprimer', {'formation': formation.id}) }}"
+                                               data-action="click->modalturbo#open"
+                                               class="btn btn-outline-danger btn-sm"
+                                               title="Supprimer définitivement la formation">
                                                 <i class="{{ iconDelete }}"></i>
-                                            </button>
+                                            </a>
                                         {% endif %}
                                     </div>
                                 </div>

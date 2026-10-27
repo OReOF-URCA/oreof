@@ -1,11 +1,48 @@
+{% if formation is defined and formation is not null %}
+    <turbo-stream action="replace" target="parcours_{{ formation.id }}">
+        <template>
+            {{ include('formation/_parcoursFormation.html.twig', {
+                formation: formation,
+                parcours: formation.parcours,
+                dpesParcours: dpesParcours|default({})
+            }) }}
+        </template>
+    </turbo-stream>
+
+    <turbo-stream action="replace" target="formation_parcours_count_{{ formation.id }}">
+        <template>
+            <div class="text-xs text-secondary-500 dark:text-secondary-400" id="formation_parcours_count_{{ formation.id }}">
+                <span class="inline-flex rounded-full border border-info-300 bg-info-50 px-2.5 py-0.5 font-semibold text-info-700 dark:border-info-700 dark:bg-info-950/30 dark:text-info-300">
+                    {{ formation.typeDiplome|typeDiplome }}
+                </span>
+                {% if formation.parcours|length > 0 %}
+                    <span class="ml-2 text-xs">{{ formation.parcours|length }} parcours</span>
+                {% else %}
+                    <span class="ml-2 text-xs italic text-secondary-400">Aucun parcours</span>
+                {% endif %}
+            </div>
+        </template>
+    </turbo-stream>
+{% endif %}
+
 <turbo-stream action="append" target="flash_toasts">
     <template>
         <script>
+            {% if formation is defined and formation is not null %}
+            if (!document.getElementById("parcours_{{ formation.id }}")) {
+                if (window.Turbo && typeof window.Turbo.visit === 'function') {
+                    window.Turbo.visit("{{ redirectUrl }}", { action: 'replace' });
+                } else {
+                    window.location.href = "{{ redirectUrl }}";
+                }
+            }
+            {% else %}
             if (window.Turbo && typeof window.Turbo.visit === 'function') {
                 window.Turbo.visit("{{ redirectUrl }}", { action: 'replace' });
             } else {
                 window.location.href = "{{ redirectUrl }}";
             }
+            {% endif %}
         </script>
     </template>
 </turbo-stream>

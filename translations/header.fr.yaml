@@ -172,6 +172,8 @@ fiche_matiere_export_all.title: '&nbsp;'
 fiche_matiere_valide_formation.title: 'Fiches EC/matières — %displayLong%'
 fiche_matiere_valide_parcours.title: 'Fiches EC/matières — %libelle%'
 formation_v2_voir.title: 'Détail de la formation : %display%'
+formation_v2_supprimer.description: 'Supprimer définitivement une formation créée par erreur (Action réservée aux administrateurs).'
+formation_v2_supprimer.title: 'Suppression définitive : %display%'
 offre_v2_configurer.description: "Paramètrer les plateformes d'admissions, les capacités et les ouvertures."
 offre_v2_configurer.title: 'Configurer la formation : %formation%'
 parcours_v2_supprimer.description: 'Supprimer définitivement un parcours créé par erreur (Action réservée aux administrateurs).'

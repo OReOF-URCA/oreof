@@ -1,0 +1,17 @@
+<turbo-stream action="append" target="flash_toasts">
+    <template>
+        <script>
+            if (window.Turbo && typeof window.Turbo.visit === 'function') {
+                window.Turbo.visit("{{ redirectUrl }}", { action: 'replace' });
+            } else {
+                window.location.href = "{{ redirectUrl }}";
+            }
+        </script>
+    </template>
+</turbo-stream>
+
+{{ include('_ui/_toast.stream.html.twig', {
+    message: toastMessage|default('La formation a été définitivement supprimée.'),
+    closeModal: true,
+    toast_type: 'success'
+}) }}

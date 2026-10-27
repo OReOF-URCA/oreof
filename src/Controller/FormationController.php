@@ -569,56 +569,14 @@ class FormationController extends BaseController
     //     ]);
     // }
 
-    #[Route('/{id}', name: 'app_formation_delete', methods: ['DELETE'])]
+    #[Route('/supprimer/{id}', name: 'app_formation_delete', methods: ['GET', 'DELETE'])]
+    #[Route('/{id}', methods: ['GET', 'DELETE'])]
     public function delete(
-        EntityManagerInterface $entityManager,
-        Request                $request,
-        Formation              $formation,
-        FormationRepository    $formationRepository
+        Formation $formation,
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $formation->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
-            foreach ($formation->getParcours() as $parcours) {
-                foreach ($parcours->getBlocCompetences() as $blocs) {
-                    $entityManager->remove($blocs);
-                }
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-                foreach ($parcours->getSemestreParcours() as $semestreParcour) {
-                    $semestre = $semestreParcour->getSemestre();
-                    if ($semestre !== null) {
-                        foreach ($semestre->getUes() as $ue) {
-                            foreach ($ue->getElementConstitutifs() as $ec) {
-                                $entityManager->remove($ec);
-                            }
-                            if ($semestre->isTroncCommun() === false) {
-                                $entityManager->remove($ue);
-                            }
-                        }
-                        if ($semestre->isTroncCommun() === false) {
-                            $entityManager->remove($semestre);
-                        }
-                    }
-
-                    $entityManager->remove($semestreParcour);
-                }
-
-                foreach ($parcours->getFicheMatiereParcours() as $fiche) {
-                    $entityManager->remove($fiche);
-                }
-                $entityManager->flush();
-                $entityManager->remove($parcours);
-            }
-            foreach ($formation->getBlocCompetences() as $blocs) {
-                $entityManager->remove($blocs);
-            }
-            $formationRepository->remove($formation, true);
-
-            return $this->json(true);
-        }
-
-        return $this->json(false);
+        return $this->redirectToRoute('formation_v2_supprimer', ['formation' => $formation->getId()]);
     }
 
     #[Route('/{slug}/maquette_iframe', name: 'app_formation_maquette_iframe')]

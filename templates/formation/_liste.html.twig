@@ -223,49 +223,65 @@
                 {% for formation in formations %}
                     {% set remplissage = params['remplissage']|default('all') %}
                     {% if remplissage == '100' and formation.remplissage.calcul == 100 or remplissage == '0' and formation.remplissage.calcul < 100 or remplissage == 'all' %}
-                        <tr class="align-top hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40">
+                        <tr id="formation_row_{{ formation.id }}" class="align-top hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40">
                             {# Colonne Formation (cliquable = action rapide pour voir détails) #}
                             <td class="px-4 py-3">
                                 <div class="space-y-1">
-                                    <button type="button"
-                                            class="group inline-flex w-full items-center justify-between gap-2 text-left"
-                                            aria-expanded="false"
-                                            data-formation-toggle-id="{{ formation.id }}"
-                                            {{ stimulus_action('structure--formation', 'afficherParcours', 'click', {formation:formation.id}) }}>
-                                        <span class="font-semibold text-secondary-900 group-hover:text-primary-600 dark:text-white dark:group-hover:text-primary-400">
-                                            {% if formation.mention != null or formation.mentionTexte != null %}
-                                                {{ formation.display }}
-                                            {% else %}
-                                                <span class="inline-flex rounded-full border border-danger-300 bg-danger-50 px-2 py-0.5 text-xs font-semibold text-danger-700 dark:border-danger-700 dark:bg-danger-950/30 dark:text-danger-300">Non définie</span>
-                                            {% endif %}
-                                        </span>
-                                        <span data-formation-toggle-icon
-                                              class="text-secondary-400 transition-transform duration-200">
-                                            {{ ux_icon('icon:chevron-right', {class: 'h-3 w-3'}) }}
-                                        </span>
-                                    </button>
+                                    {% if formation.parcours|length > 0 %}
+                                        <button type="button"
+                                                class="group inline-flex w-full items-center justify-between gap-2 text-left cursor-pointer"
+                                                aria-expanded="false"
+                                                data-formation-toggle-id="{{ formation.id }}"
+                                                {{ stimulus_action('structure--formation', 'afficherParcours', 'click', {formation:formation.id}) }}>
+                                            <span class="font-semibold text-secondary-900 group-hover:text-primary-600 dark:text-white dark:group-hover:text-primary-400">
+                                                {% if formation.mention != null or formation.mentionTexte != null %}
+                                                    {{ formation.display }}
+                                                {% else %}
+                                                    <span class="inline-flex rounded-full border border-danger-300 bg-danger-50 px-2 py-0.5 text-xs font-semibold text-danger-700 dark:border-danger-700 dark:bg-danger-950/30 dark:text-danger-300">Non définie</span>
+                                                {% endif %}
+                                            </span>
+                                            <span data-formation-toggle-icon
+                                                  class="text-secondary-400 transition-transform duration-200">
+                                                {{ ux_icon('icon:chevron-right', {class: 'h-3 w-3'}) }}
+                                            </span>
+                                        </button>
+                                    {% else %}
+                                        <div class="inline-flex w-full items-center justify-between gap-2 text-left">
+                                            <span class="font-semibold text-secondary-900 dark:text-white">
+                                                {% if formation.mention != null or formation.mentionTexte != null %}
+                                                    {{ formation.display }}
+                                                {% else %}
+                                                    <span class="inline-flex rounded-full border border-danger-300 bg-danger-50 px-2 py-0.5 text-xs font-semibold text-danger-700 dark:border-danger-700 dark:bg-danger-950/30 dark:text-danger-300">Non définie</span>
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    {% endif %}
 
-                                    <div class="text-xs text-secondary-500 dark:text-secondary-400">
+                                    <div class="text-xs text-secondary-500 dark:text-secondary-400" id="formation_parcours_count_{{ formation.id }}">
                                         <span class="inline-flex rounded-full border border-info-300 bg-info-50 px-2.5 py-0.5 font-semibold text-info-700 dark:border-info-700 dark:bg-info-950/30 dark:text-info-300">
                                             {{ formation.typeDiplome|typeDiplome }}
                                         </span>
                                         {% if formation.parcours|length > 0 %}
                                             <span class="ml-2 text-xs">{{ formation.parcours|length }} parcours</span>
+                                        {% else %}
+                                            <span class="ml-2 text-xs italic text-secondary-400">Aucun parcours</span>
                                         {% endif %}
                                     </div>
 
-                                    <button type="button"
-                                            class="inline-flex items-center gap-1 rounded-md border border-primary-200 bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 shadow-sm transition-colors duration-150 cursor-pointer hover:border-primary-300 hover:bg-primary-100 hover:text-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-300 dark:border-primary-700 dark:bg-primary-900 dark:bg-opacity-25 dark:text-primary-200 dark:hover:border-primary-500 dark:hover:bg-primary-900 dark:hover:bg-opacity-35 dark:hover:text-white"
-                                            aria-expanded="false"
-                                            data-formation-toggle-id="{{ formation.id }}"
-                                            data-open-label="Masquer les parcours"
-                                            data-closed-label="Voir les parcours"
-                                            {{ stimulus_action('structure--formation', 'afficherParcours', 'click', {formation:formation.id}) }}>
-                                        <span data-formation-toggle-icon class="transition-transform duration-200">
-                                            {{ ux_icon('icon:chevron-right', {class: 'h-3.5 w-3.5'}) }}
-                                        </span>
-                                        <span data-formation-toggle-label>Voir les parcours</span>
-                                    </button>
+                                    {% if formation.parcours|length > 0 %}
+                                        <button type="button"
+                                                class="inline-flex items-center gap-1 rounded-md border border-primary-200 bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 shadow-sm transition-colors duration-150 cursor-pointer hover:border-primary-300 hover:bg-primary-100 hover:text-primary-800 focus:outline-none focus:ring-2 focus:ring-primary-300 dark:border-primary-700 dark:bg-primary-900 dark:bg-opacity-25 dark:text-primary-200 dark:hover:border-primary-500 dark:hover:bg-primary-900 dark:hover:bg-opacity-35 dark:hover:text-white"
+                                                aria-expanded="false"
+                                                data-formation-toggle-id="{{ formation.id }}"
+                                                data-open-label="Masquer les parcours"
+                                                data-closed-label="Voir les parcours"
+                                                {{ stimulus_action('structure--formation', 'afficherParcours', 'click', {formation:formation.id}) }}>
+                                            <span data-formation-toggle-icon class="transition-transform duration-200">
+                                                {{ ux_icon('icon:chevron-right', {class: 'h-3.5 w-3.5'}) }}
+                                            </span>
+                                            <span data-formation-toggle-label>Voir les parcours</span>
+                                        </button>
+                                    {% endif %}
                                 </div>
                             </td>
 
@@ -302,7 +318,9 @@
                                         or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
                                         or is_granted('ROLE_ADMIN')) %}
 
-                                    {% set canEdit = (formation.hasParcours == true and isOuvert(formation)) or (formation.hasParcours == false and formation.parcours[0] and isOuvert(formation.parcours[0].dpeParcours[0])) %}
+                                    {% set firstParcours = formation.parcours|first %}
+                                    {% set firstDpe = firstParcours ? (firstParcours.dpeParcours|first) : null %}
+                                    {% set canEdit = (formation.hasParcours == true and isOuvert(formation)) or (firstDpe and isOuvert(firstDpe)) %}
                                     <div class="flex items-center justify-end gap-2">
                                         <twig:Button
                                                 href="{{ path('formation_v2_voir',{'slug': formation.slug}) }}"
@@ -339,8 +357,8 @@
                                                     icon: 'icon:delete',
                                                     color: 'danger',
                                                     modal: true,
-                                                    url:path('app_formation_delete',{'id': formation.id}),
-                                                    csrf: csrf_token('delete' ~ formation.id),
+                                                    url: path('formation_v2_supprimer', {'formation': formation.id}),
+                                                    csrf: csrf_token('formation_delete_' ~ formation.id),
                                                     disabled: not is_granted('ROLE_ADMIN'),
                                                     help: not is_granted('ROLE_ADMIN') ? 'Suppression réservée aux administrateurs.' : null}
                                             ]
