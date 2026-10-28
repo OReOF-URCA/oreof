@@ -364,7 +364,7 @@
                                                          :soft="false"
                                                          :variant="transition.metadata.btn|default('') == 'success' ? 'success' : (transition.metadata.btn|default('') == 'warning' ? 'warning' : 'primary')"
                                                          :icon="transition.metadata.icon|default('')"
-                                                         :label="transition.metadata.label|default(transition.name)"
+                                                         :label="transition.metadata.label|default(transition.name)|trans({}, 'process')"
                                                          href="{{ path('offre_v2_composante_valider', {
                                                              composante: compGroup.composante.id,
                                                              transition: transition.name
@@ -373,7 +373,7 @@
                                                          data-turbo-stream="true"
                                                          data-turbo-frame="_top"
                                                          data-action="click->modalturbo#open"
-                                                         title="{{ transition.metadata.label|default(transition.name) }}"
+                                                         title="{{ transition.metadata.label|default(transition.name)|trans({}, 'process') }}"
                                              />
                                         {% endfor %}
                                     </div>
