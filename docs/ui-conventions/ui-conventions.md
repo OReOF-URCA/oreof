@@ -91,6 +91,8 @@ Grilles : cartes `grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3` ; KPI `g
 `base.html.twig` affiche l'en-tête (titre, description, boutons, fil d'Ariane) via `<twig:PageHeader>` : **ne pas recréer
 cet en-tête dans une page**. Il est sticky par défaut sous la topbar ; une fois collé (`data-stuck="true"`, contrôleur
 Stimulus `page-header`) la description est masquée et le titre réduit ; actions et fil d'Ariane restent.
+Sur une page trop courte pour absorber la hauteur perdue (défilement restant sous le seuil), l'en-tête reste collé mais
+n'est pas réduit, pour éviter une oscillation.
 
 - Titre/description = **clés de traduction**, domaine `header` (`translations/header.fr.yaml`), résolues par route :
   `<route>.title` / `<route>.description` (repli : `page.<route>.*` du domaine `menu`, puis nom de route). Une page
