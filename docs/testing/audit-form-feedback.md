@@ -84,8 +84,6 @@ Le garde de validation peut être imbriqué ; ce tableau ne classe pas chaque oc
 | `src/Controller/Config/EtablissementController.php` | `new` | 53 | `if ($form->isSubmitted() && $form->isValid()) {` |
 | `src/Controller/Config/EtablissementController.php` | `edit` | 152 | `if ($form->isSubmitted() && $form->isValid()) {` |
 | `src/Controller/Config/EtablissementController.php` | `apiKeys` | 184 | `if ($form->isSubmitted() && $form->isValid()) {` |
-| `src/Controller/Config/LangueController.php` | `new` | 53 | `if ($form->isSubmitted() && $form->isValid()) {` |
-| `src/Controller/Config/LangueController.php` | `edit` | 108 | `if ($form->isSubmitted() && $form->isValid()) {` |
 | `src/Controller/Config/MentionController.php` | `new` | 106 | `if ($form->isSubmitted() && $form->isValid()) {` |
 | `src/Controller/Config/MentionController.php` | `edit` | 205 | `if ($form->isSubmitted() && $form->isValid()) {` |
 | `src/Controller/Config/NatureUeEcController.php` | `new` | 52 | `if ($form->isSubmitted() && $form->isValid()) {` |

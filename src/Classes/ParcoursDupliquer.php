@@ -167,13 +167,8 @@ class ParcoursDupliquer
                     $newFiche->setSlug($newFiche->getSlug() . '-' . $date->format('YmdHis'));
                     $newFiche->setParcours($newParcours);
 
-                    foreach ($ec->getFicheMatiere()->getLangueDispense() as $langue) {
-                        $newFiche->addLangueDispense($langue);
-                    }
-
-                    foreach ($ec->getFicheMatiere()->getLangueSupport() as $langue) {
-                        $newFiche->addLangueSupport($langue);
-                    }
+                    $newFiche->setLangueDispense($ec->getFicheMatiere()->getLangueDispense());
+                    $newFiche->setLangueSupport($ec->getFicheMatiere()->getLangueSupport());
 
                     $newEc->setFicheMatiere($newFiche);
                     $this->entityManager->persist($newFiche);
@@ -222,13 +217,8 @@ class ParcoursDupliquer
                         $newFiche->setSlug($newFiche->getSlug() . '-' . $date->format('YmdHis'));
                         $newFiche->setParcours($newParcours);
 
-                        foreach ($ece->getFicheMatiere()->getLangueDispense() as $langue) {
-                            $newFiche->addLangueDispense($langue);
-                        }
-
-                        foreach ($ece->getFicheMatiere()->getLangueSupport() as $langue) {
-                            $newFiche->addLangueSupport($langue);
-                        }
+                        $newFiche->setLangueDispense($ece->getFicheMatiere()->getLangueDispense());
+                        $newFiche->setLangueSupport($ece->getFicheMatiere()->getLangueSupport());
 
                         $newEce->setFicheMatiere($newFiche);
                         $this->entityManager->persist($newFiche);

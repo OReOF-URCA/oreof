@@ -19,7 +19,6 @@ use App\Entity\ElementConstitutif;
 use App\Entity\FicheMatiere;
 use App\Entity\FicheMatiereMutualisable;
 use App\Entity\Formation;
-use App\Entity\Langue;
 use App\Entity\Mccc;
 use App\Entity\NatureUeEc;
 use App\Entity\Parcours;
@@ -33,7 +32,6 @@ use App\Referentiel\ModaliteEnseignement;
 use App\Referentiel\RegimeInscription;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereRepository;
-use App\Repository\LangueRepository;
 use App\Repository\NatureUeEcRepository;
 use App\Repository\TypeEcRepository;
 use App\Repository\TypeUeRepository;
@@ -59,12 +57,10 @@ class But
     private ?NatureUeEc $natureEc = null;
     private ?NatureUeEc $natureUe = null;
     private ?TypeUe $typeUe = null;
-    private ?Langue $francais = null;
     private string $baseDir;
     private ?CampagneCollecte $campagneCollecte = null;
 
     public function __construct(
-        LangueRepository $langueRepository,
         TypeEcRepository $typeEcRepository,
         TypeUeRepository $typeUeRepository,
         NatureUeEcRepository $natureUeEcRepository,
@@ -79,7 +75,6 @@ class But
         $this->natureEc = $natureUeEcRepository->findOneBy(['libelle' => 'EC obligatoire']);
         $this->natureUe = $natureUeEcRepository->findOneBy(['libelle' => 'UE Obligatoire']);
         $this->typeUe = $typeUeRepository->findOneBy(['libelle' => 'Disciplinaire']);
-        $this->francais = $langueRepository->findOneBy(['codeIso' => 'fr']);
         $this->baseDir = $this->kernel->getProjectDir() . '/public';
     }
 
@@ -619,10 +614,8 @@ class But
 
             $fm->setLibelle((string) ($res['libelle'] ?? $codeMatiere));
             $fm->setDescription((string) ($res['description'] ?? ''));
-            if ($this->francais !== null) {
-                $fm->addLangueDispense($this->francais);
-                $fm->addLangueSupport($this->francais);
-            }
+            $fm->addLangueDispense('fr');
+            $fm->addLangueSupport('fr');
             if ($this->campagneCollecte !== null) {
                 $fm->setCampagneCollecte($this->campagneCollecte);
             }
@@ -663,10 +656,8 @@ class But
             $fm->setLibelle((string) ($sae['libelle'] ?? $codeMatiere));
             $fm->setDescription((string) ($sae['description'] ?? ''));
             $fm->setObjectifs((string) ($sae['objectifs'] ?? ''));
-            if ($this->francais !== null) {
-                $fm->addLangueDispense($this->francais);
-                $fm->addLangueSupport($this->francais);
-            }
+            $fm->addLangueDispense('fr');
+            $fm->addLangueSupport('fr');
             if ($this->campagneCollecte !== null) {
                 $fm->setCampagneCollecte($this->campagneCollecte);
             }

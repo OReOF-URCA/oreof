@@ -16,7 +16,6 @@ use App\Enums\EtatRemplissageEnum;
 use App\Enums\ModaliteEnseignementEnum;
 use App\Repository\ButApprentissageCritiqueRepository;
 use App\Repository\CompetenceRepository;
-use App\Repository\LangueRepository;
 use App\Repository\UserRepository;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\Utils\JsonRequest;
@@ -40,7 +39,6 @@ class FicheMatiereSaveController extends BaseController
     //     EntityManagerInterface $entityManager,
     //     CompetenceRepository   $competenceRepository,
     //     UserRepository         $userRepository,
-    //     LangueRepository       $langueRepository,
     //     UpdateEntity           $updateEntity,
     //     Request                $request,
     //     FicheMatiere           $ficheMatiere

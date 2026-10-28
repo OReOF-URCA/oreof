@@ -20,6 +20,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Intl\Languages;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -100,14 +101,12 @@ class FicheMatiere implements McccCompletionCheckerInterface
     private ?User $responsableFicheMatiere = null;
 
     #[Groups(['fiche_matiere_versioning'])]
-    #[ORM\ManyToMany(targetEntity: Langue::class, inversedBy: 'ficheMatieres', cascade: ['persist'])]
-    #[ORM\JoinTable(name: 'fiche_matiere_langue_dispense')]
-    private Collection $langueDispense;
+    #[ORM\Column(type: Types::JSON)]
+    private array $langueDispense = [];
 
     #[Groups(['fiche_matiere_versioning'])]
-    #[ORM\ManyToMany(targetEntity: Langue::class, inversedBy: 'languesSupportsFicheMatieres', cascade: ['persist'])]
-    #[ORM\JoinTable(name: 'fiche_matiere_langue_support')]
-    private Collection $langueSupport;
+    #[ORM\Column(type: Types::JSON)]
+    private array $langueSupport = [];
 
     #[ORM\Column]
     #[Groups(['fiche_matiere:read'])]
@@ -254,8 +253,8 @@ class FicheMatiere implements McccCompletionCheckerInterface
     {
         $this->mcccs = new ArrayCollection();
         $this->competences = new ArrayCollection();
-        $this->langueDispense = new ArrayCollection();
-        $this->langueSupport = new ArrayCollection();
+        $this->langueDispense = ['fr'];
+        $this->langueSupport = ['fr'];
 
         for ($i = 1; $i <= 5; $i++) {
             $this->etatSteps[$i] = false;
@@ -384,13 +383,13 @@ class FicheMatiere implements McccCompletionCheckerInterface
         //calcul un remplissage de l'entité en fonction des champs obligatoires
         $remplissage = new Remplissage();
 
-        if ($this->langueDispense->isEmpty() === false) {
+        if (count($this->langueDispense) > 0) {
             $remplissage->add();
         } else {
             $remplissage->add(0);
         }
 
-        if ($this->langueSupport->isEmpty() === false) {
+        if (count($this->langueSupport) > 0) {
             $remplissage->add();
         } else {
             $remplissage->add(0);
@@ -477,49 +476,71 @@ class FicheMatiere implements McccCompletionCheckerInterface
     }
 
     /**
-     * @return Collection<int, Langue>
+     * @return string[]
      */
-    public function getLangueDispense(): Collection
+    public function getLangueDispense(): array
     {
-        return $this->langueDispense;
+        return empty($this->langueDispense) ? ['fr'] : $this->langueDispense;
     }
 
-    public function addLangueDispense(Langue $langueDispense): self
+    /**
+     * @param string[] $langueDispense
+     */
+    public function setLangueDispense(array $langueDispense): self
     {
-        if (!$this->langueDispense->contains($langueDispense)) {
-            $this->langueDispense->add($langueDispense);
+        $filtered = array_values(array_unique(array_filter($langueDispense)));
+        $this->langueDispense = empty($filtered) ? ['fr'] : $filtered;
+
+        return $this;
+    }
+
+    public function addLangueDispense(string $langueDispense): self
+    {
+        if (!in_array($langueDispense, $this->langueDispense, true)) {
+            $this->langueDispense[] = $langueDispense;
         }
 
         return $this;
     }
 
-    public function removeLangueDispense(Langue $langueDispense): self
+    public function removeLangueDispense(string $langueDispense): self
     {
-        $this->langueDispense->removeElement($langueDispense);
+        $this->langueDispense = array_values(array_diff($this->langueDispense, [$langueDispense]));
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Langue>
+     * @return string[]
      */
-    public function getLangueSupport(): Collection
+    public function getLangueSupport(): array
     {
-        return $this->langueSupport;
+        return empty($this->langueSupport) ? ['fr'] : $this->langueSupport;
     }
 
-    public function addLangueSupport(Langue $langueSupport): self
+    /**
+     * @param string[] $langueSupport
+     */
+    public function setLangueSupport(array $langueSupport): self
     {
-        if (!$this->langueSupport->contains($langueSupport)) {
-            $this->langueSupport->add($langueSupport);
+        $filtered = array_values(array_unique(array_filter($langueSupport)));
+        $this->langueSupport = empty($filtered) ? ['fr'] : $filtered;
+
+        return $this;
+    }
+
+    public function addLangueSupport(string $langueSupport): self
+    {
+        if (!in_array($langueSupport, $this->langueSupport, true)) {
+            $this->langueSupport[] = $langueSupport;
         }
 
         return $this;
     }
 
-    public function removeLangueSupport(Langue $langueSupport): self
+    public function removeLangueSupport(string $langueSupport): self
     {
-        $this->langueSupport->removeElement($langueSupport);
+        $this->langueSupport = array_values(array_diff($this->langueSupport, [$langueSupport]));
 
         return $this;
     }
@@ -1188,24 +1209,26 @@ class FicheMatiere implements McccCompletionCheckerInterface
         return $this->isModifiable();
     }
 
-    public function getLanguesSupportsArray(): array
+    /**
+     * @return string[]
+     */
+    public function getLanguesSupportsArray(string $locale = 'fr'): array
     {
-        $langues = [];
-        foreach ($this->getLangueSupport() as $langue) {
-            $langues[] = $langue->getLibelle();
-        }
-
-        return $langues;
+        return array_map(
+            static fn(string $code): string => Languages::exists($code) ? Languages::getName($code, $locale) : $code,
+            $this->langueSupport
+        );
     }
 
-    public function getLanguesDispenseArray(): array
+    /**
+     * @return string[]
+     */
+    public function getLanguesDispenseArray(string $locale = 'fr'): array
     {
-        $langues = [];
-        foreach ($this->getLangueDispense() as $langue) {
-            $langues[] = $langue->getLibelle();
-        }
-
-        return $langues;
+        return array_map(
+            static fn(string $code): string => Languages::exists($code) ? Languages::getName($code, $locale) : $code,
+            $this->langueDispense
+        );
     }
 
     public function getCodeApogee(): ?string

@@ -196,18 +196,12 @@ class VersioningFicheMatiere {
                             "<p class=\"list-item\">"
                             . implode(
                                 "</p><p class=\"list-item\">",
-                                array_map(
-                                    fn ($langue) => $langue->getLibelle(),
-                                    $lastVersion->getLangueDispense()->toArray()
-                                )
+                                $lastVersion->getLanguesDispenseArray()
                             ) . "</p>",
                             "<p class=\"list-item\">"
                             . implode(
                                 "</p><p class=\"list-item\">",
-                                array_map(
-                                    fn ($langue) => $langue->getLibelle(),
-                                    $ficheMatiere->getLangueDispense()->toArray()
-                                )
+                                $ficheMatiere->getLanguesDispenseArray()
                             ) . "</p>",
                             $rendererName,
                             $differOptions,
@@ -221,18 +215,12 @@ class VersioningFicheMatiere {
                             "<p class=\"list-item\">"
                             . implode(
                                 "</p><p class=\"list-item\">",
-                                array_map(
-                                    fn ($langue) => $langue->getLibelle(),
-                                    $lastVersion->getLangueSupport()->toArray()
-                                )
+                                $lastVersion->getLanguesSupportsArray()
                             ) . "</p>",
                             "<p class=\"list-item\">"
                             . implode(
                                 "</p><p class=\"list-item\">",
-                                array_map(
-                                    fn ($langue) => $langue->getLibelle(),
-                                    $ficheMatiere->getLangueSupport()->toArray()
-                                )
+                                $ficheMatiere->getLanguesSupportsArray()
                             ) . "</p>",
                             $rendererName,
                             $differOptions,

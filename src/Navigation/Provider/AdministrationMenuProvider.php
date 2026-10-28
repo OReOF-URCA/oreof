@@ -82,11 +82,7 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                         route: 'app_type_epreuve_index',
                     )->inColumn('menu.config.offre_formation'),
 
-                    MenuItem::link(
-                        key: 'administration.langues',
-                        label: 'menu.config.langues',
-                        route: 'app_langue_index',
-                    )->inColumn('menu.config.menu_config_globale'),
+
                     MenuItem::link(
                         key: 'administration.referentiels',
                         label: 'menu.config.referentiels',

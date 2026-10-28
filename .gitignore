@@ -94,9 +94,6 @@ config/packages/property_info.yaml
 versioning_json.zip
 git
 
-###> Database Migrations (auto-generated) ###
-migrations/Version*.php
-
 ###> Uploads & Temporary Files ###
 /public/uploads/help_images/
 /public/uploads/

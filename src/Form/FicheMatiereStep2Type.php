@@ -1,21 +1,20 @@
 <?php
 /*
- * Copyright (c) 2023. | David Annebicque | ORéOF  - All Rights Reserved
+ * Copyright (c) 2026. | David Annebicque | ORéOF  - All Rights Reserved
  * @file /Users/davidannebicque/Sites/oreof/src/Form/FicheMatiereStep2Type.php
  * @author davidannebicque
  * @project oreof
- * @lastUpdate 05/03/2023 16:15
  */
 
 namespace App\Form;
 
 use App\Entity\FicheMatiere;
-use App\Entity\Langue;
 use App\Form\Type\TextareaAutoSaveType;
-use App\Repository\LangueRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\LanguageType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FicheMatiereStep2Type extends AbstractType
@@ -23,35 +22,42 @@ class FicheMatiereStep2Type extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-
             ->add('description', TextareaAutoSaveType::class, [
                 'attr' => ['maxlength' => 3000, 'rows' => 20],
             ])
             ->add('objectifs', TextareaAutoSaveType::class, [
                 'attr' => ['maxlength' => 3000, 'rows' => 20],
             ])
-            ->add('langueDispense', EntityType::class, [
-                'class' => Langue::class,
-                'query_builder' => function (LangueRepository $lr) {
-                    return $lr->createQueryBuilder('l')
-                        ->orderBy('l.libelle', 'ASC');
-                },
-                'choice_label' => 'libelle',
-                'expanded' => true,
+            ->add('langueDispense', LanguageType::class, [
+                'label' => 'Langue(s) des cours',
+                'autocomplete' => true,
                 'multiple' => true,
+                'choice_translation_locale' => 'fr',
                 'required' => true,
+                'placeholder' => 'Rechercher une langue...',
             ])
-            ->add('langueSupport', EntityType::class, [
-                'class' => Langue::class,
-                'choice_label' => 'libelle',
-                'query_builder' => function (LangueRepository $lr) {
-                    return $lr->createQueryBuilder('l')
-                        ->orderBy('l.libelle', 'ASC');
-                },
-                'expanded' => true,
+            ->add('langueSupport', LanguageType::class, [
+                'label' => 'Langue(s) des supports',
+                'autocomplete' => true,
                 'multiple' => true,
+                'choice_translation_locale' => 'fr',
                 'required' => true,
+                'placeholder' => 'Rechercher une langue...',
             ])
+            ->addEventListener(FormEvents::PRE_SET_DATA, static function (FormEvent $event): void {
+                $data = $event->getData();
+                if (!$data instanceof FicheMatiere) {
+                    return;
+                }
+
+                if (empty($data->getLangueDispense())) {
+                    $data->setLangueDispense(['fr']);
+                }
+
+                if (empty($data->getLangueSupport())) {
+                    $data->setLangueSupport(['fr']);
+                }
+            })
         ;
     }
 
@@ -59,7 +65,7 @@ class FicheMatiereStep2Type extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => FicheMatiere::class,
-            'translation_domain' => 'form'
+            'translation_domain' => 'form',
         ]);
     }
 }

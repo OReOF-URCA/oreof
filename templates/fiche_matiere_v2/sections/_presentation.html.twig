@@ -33,8 +33,8 @@
                 <dt class="{{ dtClass }}">Enseignement dispensé en</dt>
                 <dd class="mt-2 text-sm text-secondary-700">
                     <ul class="list-disc space-y-1 pl-5">
-                    {% for langue in ficheMatiere.langueDispense %}
-                        <li>{{ langue.libelle }}</li>
+                    {% for code in ficheMatiere.langueDispense %}
+                        <li>{{ code|language_name('fr')|capitalize }}</li>
                     {% else %}
                         <li>Non renseigné</li>
                     {% endfor %}
@@ -56,8 +56,8 @@
                 <dt class="{{ dtClass }}">Support de cours en</dt>
                 <dd class="mt-2 text-sm text-secondary-700">
                     <ul class="list-disc space-y-1 pl-5">
-                    {% for langue in ficheMatiere.langueSupport %}
-                        <li>{{ langue.libelle }}</li>
+                    {% for code in ficheMatiere.langueSupport %}
+                        <li>{{ code|language_name('fr')|capitalize }}</li>
                     {% else %}
                         <li>Non renseigné</li>
                     {% endfor %}

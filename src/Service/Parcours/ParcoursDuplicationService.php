@@ -528,13 +528,8 @@ final class ParcoursDuplicationService
                         $newFiche->setResponsableFicheMatiere(null);
                     }
 
-                    foreach ($oldFiche->getLangueDispense() as $langue) {
-                        $newFiche->addLangueDispense($langue);
-                    }
-
-                    foreach ($oldFiche->getLangueSupport() as $langue) {
-                        $newFiche->addLangueSupport($langue);
-                    }
+                    $newFiche->setLangueDispense($oldFiche->getLangueDispense());
+                    $newFiche->setLangueSupport($oldFiche->getLangueSupport());
 
                     // MCCC de la fiche matière
                     foreach ($oldFiche->getMcccs() as $oldFmMccc) {

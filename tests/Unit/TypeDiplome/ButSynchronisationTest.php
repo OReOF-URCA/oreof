@@ -6,14 +6,12 @@ namespace App\Tests\Unit\TypeDiplome;
 
 use App\Entity\CampagneCollecte;
 use App\Entity\Formation;
-use App\Entity\Langue;
 use App\Entity\NatureUeEc;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeEc;
 use App\Entity\TypeUe;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereRepository;
-use App\Repository\LangueRepository;
 use App\Repository\NatureUeEcRepository;
 use App\Repository\TypeEcRepository;
 use App\Repository\TypeUeRepository;
@@ -31,17 +29,12 @@ class ButSynchronisationTest extends TestCase
         ?EntityManagerInterface $em = null,
         ?FicheMatiereRepository $fmRepo = null,
     ): But {
-        $langueRepo = $this->createStub(LangueRepository::class);
         $typeEcRepo = $this->createStub(TypeEcRepository::class);
         $typeUeRepo = $this->createStub(TypeUeRepository::class);
         $natureUeEcRepo = $this->createStub(NatureUeEcRepository::class);
         $ecRepo = $this->createStub(ElementConstitutifRepository::class);
         $kernel = $this->createStub(KernelInterface::class);
         $kernel->method('getProjectDir')->willReturn('/tmp');
-
-        $langue = new Langue();
-        $langue->setCodeIso('fr');
-        $langueRepo->method('findOneBy')->willReturn($langue);
 
         $typeEcRessource = new TypeEc();
         $typeEcRessource->setLibelle('Ressource');
@@ -68,7 +61,6 @@ class ButSynchronisationTest extends TestCase
 
 
         return new But(
-            $langueRepo,
             $typeEcRepo,
             $typeUeRepo,
             $natureUeEcRepo,

@@ -39,8 +39,8 @@ class FicheMatiereValide extends AbstractValide
         if (!$this->tailleMinimum($this->ficheMatiere->getObjectifs(), 12) || $this->etat['objectifs'] === self::VIDE) {
             $this->erreurs['objectifs'][] = 'Les objectifs de la matière doivent faire au moins 12 caractères';
         }
-        $this->etat['langueDispense'] = $this->ficheMatiere->getLangueDispense()->count() > 0 ? self::COMPLET : self::VIDE;
-        $this->etat['langueSupport'] = $this->ficheMatiere->getLangueSupport()->count() > 0 ? self::COMPLET : self::VIDE;
+        $this->etat['langueDispense'] = count($this->ficheMatiere->getLangueDispense()) > 0 ? self::COMPLET : self::VIDE;
+        $this->etat['langueSupport'] = count($this->ficheMatiere->getLangueSupport()) > 0 ? self::COMPLET : self::VIDE;
 
         return $this;
     }

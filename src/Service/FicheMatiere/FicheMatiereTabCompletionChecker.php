@@ -64,11 +64,11 @@ class FicheMatiereTabCompletionChecker extends AbstractChecker
             $issues[] = new TabIssue('fiche_matiere_step2[objectifs]', 'Objectifs de la fiche matière', 'Vous devez renseigner les objectifs.');
         }
 
-        if ($p->getLangueSupport()->count() === 0) {
+        if (count($p->getLangueSupport()) === 0) {
             $issues[] = new TabIssue('fiche_matiere_step2[langueSupport][]', 'Langue des supports', 'Vous devez renseigner au moins une langue pour les supports.');
         }
 
-        if ($p->getLangueDispense()->count() === 0) {
+        if (count($p->getLangueDispense()) === 0) {
             $issues[] = new TabIssue('fiche_matiere_step2[langueDispense][]', 'Langue des cours', 'Vous devez renseigner au moins une langue pour les cours.');
         }
 
