@@ -1216,7 +1216,6 @@ final class OffreAnnexesExportService
                     'capacite_fi_n' => $capFiN,
                     'capacite_alt_n' => $capAltN,
                     'capacite_spe_n' => $capSpeN,
-                    'mentions_conseillees' => 'Licences recommandées pour la mention',
                     'remarques' => $param?->getRemarques() ?? '',
                 ];
             }

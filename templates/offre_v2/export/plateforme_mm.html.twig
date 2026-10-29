@@ -4,7 +4,6 @@
             <th data-xls-colspan="6" data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Formation</th>
             <th data-xls-colspan="5" data-xls-bg-color="#2F5597" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Capacités d'accueil {{ annee_n_1 }}</th>
             <th data-xls-colspan="5" data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Capacités d'accueil {{ annee_n }}</th>
-            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Mentions conseillées</th>
             <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Remarques</th>
         </tr>
         <tr>
@@ -27,7 +26,6 @@
             <th data-xls-bg-color="#B4C6E7" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Alternance (B)</th>
             <th data-xls-bg-color="#B4C6E7" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="right">Redoublants / EEF (C)</th>
             
-            <th data-xls-bg-color="#D9E1F2" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Mentions de Licence conseillées</th>
             <th data-xls-bg-color="#D9E1F2" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Remarques</th>
         </tr>
     </thead>
@@ -65,12 +63,11 @@
                 <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_alt_n }}</td>
                 <td data-xls-border="thin" data-xls-align="right" data-xls-type="number">{{ row.capacite_spe_n }}</td>
                 
-                <td data-xls-border="thin" data-xls-align="left">{{ row.mentions_conseillees }}</td>
                 <td data-xls-border="thin" data-xls-align="left">{{ row.remarques }}</td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="18" data-xls-align="center">Aucune donnée disponible</td>
+                <td colspan="17" data-xls-align="center">Aucune donnée disponible</td>
             </tr>
         {% endfor %}
     </tbody>
