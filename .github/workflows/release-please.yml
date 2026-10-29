@@ -27,10 +27,23 @@ jobs:
           target-branch: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # La branche de release n'existe que si une PR de release est ouverte (créée ou mise à jour
+      # par ce run) : juste après son merge elle est supprimée et `git fetch` échouerait.
       - name: Set Release Please branch
         id: release-pr
+        env:
+          RELEASE_PR: ${{ steps.release.outputs.pr }}
         run: |
-          echo "branch=release-please--branches--${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          if [ -z "$RELEASE_PR" ]; then
+            echo "Aucune PR de release ouverte, rien à enrichir."
+            exit 0
+          fi
+          branch="release-please--branches--${GITHUB_REF_NAME}"
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          else
+            echo "Branche $branch absente, rien à enrichir."
+          fi
 
       - name: Checkout Release Please branch
         if: steps.release-pr.outputs.branch != ''
