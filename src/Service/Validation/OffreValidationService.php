@@ -179,6 +179,25 @@ final class OffreValidationService
                             );
                         }
 
+                        // MonMaster : la capacité globale saisie doit valoir T = A (classique) + B (alternance) + C (spécifique)
+                        $sommeDetail = ($capaciteFi ?? 0) + ($capaciteAlternance ?? 0) + ($capaciteSpecifique ?? 0);
+                        if ($param->isActive()
+                            && in_array(strtolower($plateforme?->getCode() ?? ''), ['mm', 'monmaster'], true)
+                            && !$hasNegativeCapacite
+                            && $capaciteGlobale !== null
+                            && $sommeDetail > 0
+                            && $capaciteGlobale !== $sommeDetail
+                        ) {
+                            $anomalies[] = sprintf(
+                                '%s (Année %d) : capacité globale %s (%d) différente de classique + alternance + spécifique (%d).',
+                                $sujet,
+                                $anneeOrdre,
+                                $platLibelle,
+                                $capaciteGlobale,
+                                $sommeDetail
+                            );
+                        }
+
                         if ($param->isActive()) {
                             // Contrôle 1 : Plateforme active sans capacité (somme <= 0) alors que la capacité est obligatoire
                             if ($isCapaciteRequise && $sommeCapacites <= 0 && !$hasNegativeCapacite) {

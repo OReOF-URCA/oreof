@@ -966,6 +966,10 @@ final class OffreAnnexesExportService
         array $paramsN1ByAnnee,
     ): array {
         $rows = [];
+        /** @var array<string, list<string>> $tcParcours */
+        $tcParcours = [];
+        /** @var array<string, list<string>> $tcLieux */
+        $tcLieux = [];
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
             $formation = $parcours?->getFormation();
@@ -1019,21 +1023,47 @@ final class OffreAnnexesExportService
                     }
                 }
 
-                $capaciteN = ($param && $param->isActive() && $param->getCapaciteGlobale() !== null)
-                    ? $param->getCapaciteGlobale()
-                    : $annee->getCapaciteAccueil();
+                // N data : un parcours/une année fermé(e) ou non intégré(e) à Parcoursup n'a pas de capacité N
+                $isPsupN = $this->isIntegrationPlateforme($param, $dpePar->isOuvert() && $annee->isOuvert());
+                $capaciteN = 0;
+                if ($isPsupN) {
+                    $capaciteN = ($param && $param->getCapaciteGlobale() !== null)
+                        ? $param->getCapaciteGlobale()
+                        : $annee->getCapaciteAccueil();
+                }
 
                 // N-1 Data
                 $n1 = $this->resolveN1Data($parcours, $ordre, $psupPlatform, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee);
+                $isPsupN1 = $n1['hasN1'] && $this->isIntegrationPlateforme($n1['paramN1'], $n1['isOuvertN1']);
+
+                // Ni ouvert en N ni en N-1 sur Parcoursup : rien à présenter
+                if (!$isPsupN && !$isPsupN1) {
+                    continue;
+                }
+
                 $capaciteN1 = '';
                 if ($n1['hasN1']) {
                     $capaciteN1 = ($n1['paramN1'] && $n1['paramN1']->isActive() && $n1['paramN1']->getCapaciteGlobale() !== null)
                         ? $n1['paramN1']->getCapaciteGlobale()
                         : ($n1['anneeN1']?->getCapaciteAccueil() ?? '');
                 }
+
+                // Année en tronc commun : capacité partagée par tous les parcours, une seule ligne par mention
+                $tcKey = null;
+                if ($ordre !== null && $formation->getParcours()->count() > 1 && $formation->isAnneeTroncCommun($ordre)) {
+                    $tcKey = sprintf('tc-%d-%d', (int) $formation->getId(), $ordre);
+                    if (isset($rows[$tcKey])) {
+                        $tcParcours[$tcKey][] = (string) $parcours->getLibelle();
+                        $tcLieux[$tcKey][] = $ville;
+                        continue;
+                    }
+                    $tcParcours[$tcKey] = [(string) $parcours->getLibelle()];
+                    $tcLieux[$tcKey] = [$ville];
+                }
+
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
-                $rows[] = [
+                $row = [
                     'composante' => $compLibelle,
                     'diplome' => $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle(),
                     'mention' => $diffs['mention'],
@@ -1046,8 +1076,22 @@ final class OffreAnnexesExportService
                     'capacite_n' => $capaciteN,
                     'remarques' => $param?->getRemarques() ?? '',
                 ];
+
+                if ($tcKey !== null) {
+                    $rows[$tcKey] = $row;
+                } else {
+                    $rows[] = $row;
+                }
             }
         }
+
+        foreach ($tcParcours as $tcKey => $libelles) {
+            if (count($libelles) > 1) {
+                $rows[$tcKey]['parcours'] = 'Tronc commun : ' . implode(' / ', $libelles);
+                $rows[$tcKey]['lieu'] = implode(' / ', array_unique($tcLieux[$tcKey]));
+            }
+        }
+        $rows = array_values($rows);
 
         usort($rows, static fn($a, $b) => strcmp(
             ($a['composante']) . ($a['diplome']) . ($a['mention']) . ($a['parcours']),
