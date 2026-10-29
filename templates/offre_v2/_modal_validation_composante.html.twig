@@ -11,8 +11,7 @@
 
     <!-- Alerte informative -->
     <twig:alerte type="{{ isRefuse ? 'warning' : 'info' }}">
-        <h4 class="font-bold text-sm">{{ meta.label|default(transition) }}</h4>
-        <p class="mt-1 text-xs opacity-90">
+        <p class="text-xs opacity-90">
             {% if isRefuse %}
                 Sélectionnez les formations et parcours à renvoyer pour modifications et indiquez le motif ci-dessous.
             {% else %}
