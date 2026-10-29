@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.4.1](https://github.com/OReOF-URCA/oreof/compare/v2.4.0...v2.4.1) (2026-10-29)
+
+
+### Bug Fixes
+
+* **ci:** débloquer Lint, Tests et Release Please sur v2 ([c4d7793](https://github.com/OReOF-URCA/oreof/commit/c4d779345980df92aa8233a71e5802818af63711))
+* **ci:** débloquer Lint, Tests et Release Please sur v2 ([b7c0d3d](https://github.com/OReOF-URCA/oreof/commit/b7c0d3da9bd391b9041528637c13047b1850dbe2))
+* **offre:** anomalies de capacité obligatoire incohérentes avec la page Configurer ([a027668](https://github.com/OReOF-URCA/oreof/commit/a027668f3a323d806f8d56e8cd9b17b1255171fb))
+* **offre:** export Parcoursup filtré et tronc commun regroupé, contrôle T=A+B+C MonMaster ([fc7a82a](https://github.com/OReOF-URCA/oreof/commit/fc7a82afd586b7bd96d5c4376bd28b5ab727e87b))
+* **offre:** export Parcoursup filtré, tronc commun regroupé et contrôle T=A+B+C MonMaster ([a3d869c](https://github.com/OReOF-URCA/oreof/commit/a3d869c84960192e622126bb19caf346be0a6fee))
+* **offre:** résoudre la capacité obligatoire comme la page Configurer ([53fd273](https://github.com/OReOF-URCA/oreof/commit/53fd2730b2f5cc9df0ff41841ea5adaea6ca35c8))
+* **offre:** retirer le titre redondant du bandeau de la modale de validation composante ([fa33e51](https://github.com/OReOF-URCA/oreof/commit/fa33e517b2a0bfe9d763a15aa7c78b3d60654367))
+* **offre:** traduction du titre de la modale de validation composante ([46e3cfa](https://github.com/OReOF-URCA/oreof/commit/46e3cfab713924a048e4ec130b35e476252d566e))
+* **offre:** traduire le label de transition dans la modale de validation composante ([c0afea1](https://github.com/OReOF-URCA/oreof/commit/c0afea1b74ec9448c933490d82eed9f84cca2d61))
+
 ## [2.4.0](https://github.com/OReOF-URCA/oreof/compare/v2.3.0...v2.4.0) (2026-10-27)
 
 
