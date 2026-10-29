@@ -65,26 +65,17 @@
     </template>
 </turbo-stream>
 
-<turbo-stream action="replace" target="configurer_tronc_commun_block">
+<turbo-stream action="replace" target="configurer_mutualisation_block">
     <template>
-        <div id="configurer_tronc_commun_block">
-            <p class="text-xs text-secondary-600 dark:text-secondary-300 mb-3">
-                Cochez les années communes à l'ensemble des parcours de cette mention / formation. Lorsqu'une année est déclarée en tronc commun, ses capacités d'accueil, régimes d'inscription et plateformes de recrutement sont automatiquement synchronisés entre les parcours.
-            </p>
-            <div class="flex items-center gap-2.5 flex-wrap">
-                {% for anneeOrdre in formation.anneesOrdres %}
-                    {% set isTc = formation.isAnneeTroncCommun(anneeOrdre) %}
-                    <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border {{ isTc ? 'bg-primary-600 border-primary-600 text-white shadow-xs font-semibold' : 'bg-surface border-secondary-300 dark:border-secondary-700 text-secondary-700 dark:text-secondary-100 hover:bg-secondary-50 font-medium' }} transition-colors cursor-pointer text-xs select-none">
-                        <input type="checkbox"
-                               name="tronc_commun_annee_{{ anneeOrdre }}"
-                               value="1"
-                               {{ isTc ? 'checked' : '' }}
-                               class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400">
-                        <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ anneeOrdre }} (Tronc commun)</span>
-                    </label>
-                {% endfor %}
-            </div>
-        </div>
+        {{ include('offre_v2/_configurer_mutualisation_block.html.twig', {
+            formation: formation,
+            typeDiplome: formation.typeDiplome,
+            can_edit: true,
+            portailsCampagne: portailsCampagne|default([]),
+            formationsCampagneData: formationsCampagneData|default([]),
+            formationsCampagneObjets: formationsCampagneObjets|default([]),
+            active_tab: active_mutualisation_tab|default('troncs-communs')
+        }) }}
     </template>
 </turbo-stream>
 
@@ -216,7 +207,8 @@
                         'formation': formation,
                         'typeDiplome': typeDiplome,
                         'comparaison': comparaison,
-                        'plateformes': plateformes
+                        'plateformes': plateformes,
+                        'portailsCampagne': portailsCampagne|default([])
                     }) }}
                 </template>
             </turbo-stream>

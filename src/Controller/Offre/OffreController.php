@@ -18,6 +18,8 @@ use App\Repository\TypeDiplomeRepository;
 use App\Service\Validation\OffreValidationService;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb as BreadcrumbAttribute;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -27,6 +29,7 @@ final class OffreController extends BaseController
 {
     #[Route('/offrev2', name: 'app_offre_index')]
     #[Route('/offre/composante/{composante}', name: 'app_offre_composante_index')]
+    #[BreadcrumbAttribute(menuKey: 'pilotage.gestion_offre')]
     public function index(
         Request                                  $request,
         FormationRepository                      $formationRepository,
@@ -42,7 +45,11 @@ final class OffreController extends BaseController
         EntityManagerInterface                   $em,
         WorkflowInterface                        $dpeFormationWorkflow,
         ?Composante                              $composante = null,
+        ?BreadcrumbService                       $breadcrumb = null,
     ): Response {
+        if ($composante !== null && $breadcrumb !== null) {
+            $breadcrumb->add($composante->getLibelle() ?? 'Composante');
+        }
         if ($composante !== null) {
             if (!$this->isGranted('ROLE_ADMIN')) {
                 $this->denyAccessUnlessGranted('MANAGE', [
@@ -183,17 +190,38 @@ final class OffreController extends BaseController
             if ($formationCapacite <= 0) {
                 // Calcul en mémoire depuis les données préchargées (0 requête supplémentaire)
                 $tcAnneesCounted = [];
+                $portailsCounted = [];
                 $formationCapacite = 0;
+                $formation = $row['formation'];
                 foreach ($row['parcoursData'] as $pd) {
                     if (!$pd['isOuvert']) {
                         continue;
                     }
+                    $parcours = $pd['parcours'];
                     foreach ($pd['annees'] as $annee) {
                         if (!$annee->isOuvert()) {
                             continue;
                         }
                         $ordre = $annee->getOrdre();
-                        if ($ordre !== null && $row['formation']->isAnneeTroncCommun($ordre)) {
+                        if ($ordre === null) {
+                            continue;
+                        }
+                        $portail = $annee->getPortail();
+                        if ($portail !== null && $portail->getId() !== null) {
+                            if (!isset($portailsCounted[$portail->getId()])) {
+                                $formationCapacite += $annee->getCapaciteAccueil();
+                                $portailsCounted[$portail->getId()] = true;
+                            }
+                            continue;
+                        }
+                        $tc = $formation->getTroncCommunForParcours($parcours, $ordre);
+                        if ($tc !== null) {
+                            $tcKey = $tc['id'] . '_' . $ordre;
+                            if (!isset($tcAnneesCounted[$tcKey])) {
+                                $formationCapacite += $annee->getCapaciteAccueil();
+                                $tcAnneesCounted[$tcKey] = true;
+                            }
+                        } elseif ($formation->isAnneeTroncCommun($ordre, $parcours)) {
                             if (!isset($tcAnneesCounted[$ordre])) {
                                 $formationCapacite += $annee->getCapaciteAccueil();
                                 $tcAnneesCounted[$ordre] = true;

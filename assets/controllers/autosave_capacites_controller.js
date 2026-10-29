@@ -24,6 +24,25 @@ export default class extends Controller {
       focusin: this.onFocusIn.bind(this)
     }
     for (const [name, handler] of Object.entries(this.listeners)) this.element.addEventListener(name, handler)
+
+    this.boundBeforeStreamRender = (event) => {
+      const stream = event.target
+      const targetId = stream.getAttribute('target')
+      if (!targetId) return
+
+      const existingEl = document.getElementById(targetId)
+      const wasOpen = (existingEl && existingEl.querySelector('details')?.open) || (this.openContainerIds && this.openContainerIds.has(targetId))
+
+      if (wasOpen) {
+        const newDetails = stream.templateElement?.content?.querySelector('details')
+        if (newDetails) {
+          newDetails.setAttribute('open', '')
+          newDetails.open = true
+        }
+      }
+    }
+    document.addEventListener('turbo:before-stream-render', this.boundBeforeStreamRender)
+
     this.setStatus('idle', 'Aucune modification en attente')
   }
 
@@ -32,6 +51,9 @@ export default class extends Controller {
     clearTimeout(this.timeout)
     this.pendingSave = false
     for (const [name, handler] of Object.entries(this.listeners)) this.element.removeEventListener(name, handler)
+    if (this.boundBeforeStreamRender) {
+      document.removeEventListener('turbo:before-stream-render', this.boundBeforeStreamRender)
+    }
   }
 
   retry() {
@@ -86,13 +108,25 @@ export default class extends Controller {
   syncTroncCommun(target) {
     if (!target) return
     const container = target.closest('[data-annee-ordre]')
-    if (!container || container.dataset.isTroncCommun !== '1') return
+    if (!container) return
 
-    const ordre = container.dataset.anneeOrdre
+    const syncGroup = container.dataset.syncGroup
+    const isLegacyTc = container.dataset.isTroncCommun === '1'
+    if (!syncGroup && !isLegacyTc) return
+
     const tcField = target.dataset.tcField
-    if (!ordre || !tcField) return
+    if (!tcField) return
 
-    const otherContainers = this.element.querySelectorAll(`[data-annee-ordre="${ordre}"][data-is-tronc-commun="1"]`)
+    let otherContainers = []
+    if (syncGroup) {
+      otherContainers = this.element.querySelectorAll(`[data-sync-group="${syncGroup}"]`)
+    } else {
+      const ordre = container.dataset.anneeOrdre
+      if (ordre) {
+        otherContainers = this.element.querySelectorAll(`[data-annee-ordre="${ordre}"][data-is-tronc-commun="1"]`)
+      }
+    }
+
     otherContainers.forEach(otherContainer => {
       if (otherContainer === container) return
       const otherInput = otherContainer.querySelector(`[data-tc-field="${tcField}"]`)
@@ -110,6 +144,11 @@ export default class extends Controller {
   }
 
   onInput(event) {
+    // Le bloc de mutualisation (Troncs Communs et Portails) dispose de son propre bouton de sauvegarde explicite
+    if (event.target.closest('#configurer_mutualisation_block') || event.target.closest('[data-controller="mutualisation"]')) {
+      return
+    }
+
     this.revision += 1
     this.syncTroncCommun(event.target)
 
@@ -132,6 +171,11 @@ export default class extends Controller {
   }
 
   onChange(event) {
+    // Le bloc de mutualisation (Troncs Communs et Portails) dispose de son propre bouton de sauvegarde explicite
+    if (event.target.closest('#configurer_mutualisation_block') || event.target.closest('[data-controller="mutualisation"]')) {
+      return
+    }
+
     this.revision += 1
     this.syncTroncCommun(event.target)
 
@@ -216,6 +260,7 @@ export default class extends Controller {
       if (name) {
         this.previousValues[name] = value
       }
+
       clearTimeout(this.timeout)
       this.save()
     }
@@ -281,9 +326,59 @@ export default class extends Controller {
       const contentType = response.headers.get('content-type') || ''
       if (contentType.includes('text/vnd.turbo-stream.html')) {
         const html = await response.text()
+        const activeEl = document.activeElement
+        const activeName = activeEl ? activeEl.getAttribute('name') : null
+        const activeId = activeEl ? activeEl.id : null
+        const selectionStart = activeEl && 'selectionStart' in activeEl ? activeEl.selectionStart : null
+        const selectionEnd = activeEl && 'selectionEnd' in activeEl ? activeEl.selectionEnd : null
+
+        this.openContainerIds = new Set()
+        this.element.querySelectorAll('div[id^="annee_"][id$="_container"]').forEach(container => {
+          const details = container.querySelector('details')
+          if (details && details.open) {
+            this.openContainerIds.add(container.id)
+          }
+        })
+        if (activeEl) {
+          const activeContainer = activeEl.closest('div[id^="annee_"][id$="_container"]')
+          if (activeContainer) {
+            this.openContainerIds.add(activeContainer.id)
+          }
+        }
+
         const { renderStreamMessage } = await import('@hotwired/turbo')
         if (!this.connected) return
-        renderStreamMessage(html)
+        await renderStreamMessage(html)
+
+        if (this.openContainerIds) {
+          this.openContainerIds.forEach(containerId => {
+            const container = document.getElementById(containerId)
+            if (container) {
+              const details = container.querySelector('details')
+              if (details && !details.open) {
+                details.open = true
+              }
+            }
+          })
+        }
+
+        if (activeName || activeId) {
+          try {
+            const newEl = activeId ? document.getElementById(activeId) : (activeName ? document.querySelector(`[name="${CSS.escape(activeName)}"]`) : null)
+            if (newEl) {
+              const parentDetails = newEl.closest('details')
+              if (parentDetails && !parentDetails.open) {
+                parentDetails.open = true
+              }
+              if (typeof newEl.focus === 'function') {
+                newEl.focus()
+                if (selectionStart !== null && selectionEnd !== null && typeof newEl.setSelectionRange === 'function') {
+                  newEl.setSelectionRange(selectionStart, selectionEnd)
+                }
+              }
+            }
+          } catch (e) {}
+        }
         
         this.markSaved(revision)
         if (isManual && revision === this.revision) {

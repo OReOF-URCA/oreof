@@ -236,6 +236,117 @@ final class OffreStatistiquesServiceTest extends TestCase
         self::assertSame(45, $parNiveau['L2']['capaciteTotale']);
     }
 
+    public function testStatsWithPortailInterFormations(): void
+    {
+        $campagne = new CampagneCollecte();
+        $this->setId($campagne, 1);
+        $campagne->setLibelle('2026-2027');
+
+        $composante = new Composante();
+        $this->setId($composante, 10);
+        $composante->setLibelle('UFR Sciences');
+
+        $typeDiplome = new TypeDiplome();
+        $typeDiplome->setLibelle('Licence');
+        $typeDiplome->setLibelleCourt('LICENCE');
+
+        $portail = new \App\Entity\Portail();
+        $this->setId($portail, 50);
+        $portail->setLibelle('Portail Sciences');
+        $portail->setCampagne($campagne);
+
+        // Formation 1: Licence Mathématiques
+        $f1 = new Formation($campagne);
+        $this->setId($f1, 100);
+        $f1->setComposantePorteuse($composante);
+        $f1->setTypeDiplome($typeDiplome);
+
+        $p1 = new Parcours($f1);
+        $this->setId($p1, 101);
+        $p1->setLibelle('Parcours Math');
+        $f1->addParcour($p1);
+
+        $a1 = new \App\Entity\Annee();
+        $this->setId($a1, 301);
+        $a1->setOrdre(1);
+        $a1->setIsOuvert(true);
+        $a1->setCapaciteAccueil(100);
+        $a1->setPortail($portail);
+        $a1->setParcours($p1);
+        $portail->addAnnee($a1);
+
+        // Formation 2: Licence Physique
+        $f2 = new Formation($campagne);
+        $this->setId($f2, 200);
+        $f2->setComposantePorteuse($composante);
+        $f2->setTypeDiplome($typeDiplome);
+
+        $p2 = new Parcours($f2);
+        $this->setId($p2, 201);
+        $p2->setLibelle('Parcours Physique');
+        $f2->addParcour($p2);
+
+        $a2 = new \App\Entity\Annee();
+        $this->setId($a2, 401);
+        $a2->setOrdre(1);
+        $a2->setIsOuvert(true);
+        $a2->setCapaciteAccueil(100);
+        $a2->setPortail($portail);
+        $a2->setParcours($p2);
+        $portail->addAnnee($a2);
+
+        $dpe1 = new \App\Entity\DpeParcours();
+        $this->setId($dpe1, 501);
+        $dpe1->setParcours($p1);
+
+        $dpe2 = new \App\Entity\DpeParcours();
+        $this->setId($dpe2, 502);
+        $dpe2->setParcours($p2);
+
+        $formationRepo = $this->createStub(FormationRepository::class);
+        $formationRepo->method('findByCampagneWithRelations')->willReturn([$f1, $f2]);
+
+        $dpeParcoursRepo = $this->createStub(DpeParcoursRepository::class);
+        $dpeParcoursRepo->method('findByCampagneCollecte')->willReturn([$dpe1, $dpe2]);
+
+        $anneeRepo = $this->createStub(AnneeRepository::class);
+        $anneeRepo->method('findByCampagneIndexedByParcours')->willReturn([
+            101 => [$a1],
+            201 => [$a2],
+        ]);
+
+        $plateformeRepo = $this->createStub(PlateformeAdmissionRepository::class);
+        $plateformeRepo->method('findBy')->willReturn([]);
+
+        $plateformeParamRepo = $this->createStub(PlateformeAdmissionParametreRepository::class);
+        $plateformeParamRepo->method('findByCampagneIndexedByAnnee')->willReturn([]);
+
+        $composanteRepo = $this->createStub(ComposanteRepository::class);
+        $typeDiplomeRepo = $this->createStub(TypeDiplomeRepository::class);
+        $chartBuilder = $this->createStub(ChartBuilderInterface::class);
+        $chartBuilder->method('createChart')->willReturn(new Chart(Chart::TYPE_BAR));
+
+        $service = new OffreStatistiquesService(
+            $formationRepo,
+            $dpeParcoursRepo,
+            $anneeRepo,
+            $plateformeRepo,
+            $plateformeParamRepo,
+            $composanteRepo,
+            $typeDiplomeRepo,
+            $chartBuilder
+        );
+
+        $stats = $service->getStats($campagne);
+
+        // Capacité globale : 100 (le portail est dédoublonné entre les 2 formations)
+        // Au lieu de 100 + 100 = 200
+        self::assertSame(100, $stats['kpi']['totalCapacite']);
+        self::assertSame(100, $stats['kpi']['totalNiveau1']);
+        self::assertSame(2, $stats['kpi']['totalFormations']);
+        self::assertSame(2, $stats['kpi']['totalParcours']);
+    }
+
     private function setId(object $entity, int $id): void
     {
         $ref = new \ReflectionProperty($entity, 'id');

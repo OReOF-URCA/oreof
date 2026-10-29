@@ -61,6 +61,10 @@ class Annee
     #[ORM\OneToMany(targetEntity: PlateformeAdmissionParametre::class, mappedBy: 'annee')]
     private Collection $admissionPlateformeParametres;
 
+    #[ORM\ManyToOne(targetEntity: Portail::class, inversedBy: 'annees')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?Portail $portail = null;
+
     public function __construct()
     {
         $this->parcoursSemestre = new ArrayCollection();
@@ -336,6 +340,31 @@ class Annee
             }
         }
         $this->regimeInscription = \App\Referentiel\RegimeInscription::normalize($t);
+
+        return $this;
+    }
+
+    public function getPortail(): ?Portail
+    {
+        return $this->portail;
+    }
+
+    public function setPortail(?Portail $portail): static
+    {
+        if ($this->portail === $portail) {
+            return $this;
+        }
+
+        $oldPortail = $this->portail;
+        $this->portail = $portail;
+
+        if ($oldPortail !== null) {
+            $oldPortail->removeAnnee($this);
+        }
+
+        if ($portail !== null && !$portail->getAnnees()->contains($this)) {
+            $portail->addAnnee($this);
+        }
 
         return $this;
     }
