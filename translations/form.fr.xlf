@@ -490,7 +490,7 @@
     <unit id="u9u9IYf" name="parcours_step5.labels.prerequis">
       <segment>
         <source>parcours_step5.labels.prerequis</source>
-        <target>Prérequis recommandés</target>
+        <target>Prérequis recommandés (diplômes conseillés)</target>
       </segment>
     </unit>
     <unit id="BhDUiOe" name="parcours_step7.labels.poursuitesEtudes">

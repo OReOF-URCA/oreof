@@ -503,7 +503,7 @@ parcours_step5.labels.coordSecretariat: 'Coordonnées du secrétariat pédagogiq
 parcours_step5.labels.modalitesAdmission: parcours_step5.labels.modalitesAdmission
 parcours_step5.labels.modalitesAlternance: "Précisez les modalités de l'alternance"
 parcours_step5.labels.niveauFrancais: 'Niveau de français requis'
-parcours_step5.labels.prerequis: 'Prérequis recommandés'
+parcours_step5.labels.prerequis: 'Prérequis recommandés (diplômes conseillés)'
 parcours_step5.labels.regimeInscription.label: "Régime(s) d'inscription"
 parcours_step6.labels.codeRome: 'Code(s) ROME'
 parcours_step6.labels.debouches: Débouchés

@@ -200,7 +200,7 @@
                                             <th class="px-4 py-3">{{ ('plateforme.' ~ pCode ~ '.capacite_classique')|trans|default(('plateforme.' ~ pCode ~ '.classique')|trans|default('Classique')) }}</th>
                                             <th class="px-4 py-3">{{ ('plateforme.' ~ pCode ~ '.capacite_alternance')|trans|default(('plateforme.' ~ pCode ~ '.alternance')|trans|default('Alternance')) }}</th>
                                             {% if isCapaciteSpecifique %}
-                                                <th class="px-4 py-3">{{ ('plateforme.' ~ pCode ~ '.capacite_specifique')|trans|default(('plateforme.' ~ pCode ~ '.specifique')|trans|default('Spécifique')) }}</th>
+                                                <th class="px-4 py-3">{{ ('plateforme.' ~ pCode ~ '.capacite_specifique')|trans|default(('plateforme.' ~ pCode ~ '.specifique')|trans|default('Spécifique')) }}{% set precisionSpecifique = ('plateforme.' ~ pCode ~ '.capacite_specifique_precision')|trans %}{% if precisionSpecifique != 'plateforme.' ~ pCode ~ '.capacite_specifique_precision' %}<br><span class="normal-case font-normal">{{ precisionSpecifique }}</span>{% endif %}</th>
                                             {% endif %}
                                             {% if hasChamps %}
                                                 <th class="px-4 py-3">{{ ('plateforme.' ~ pCode ~ '.champs_specifiques')|trans|default('Champs spécifiques') }}</th>
@@ -471,7 +471,7 @@
                                             <th class="px-4 py-3">{{ ('plateforme.' ~ pCode ~ '.capacite_classique')|trans|default(('plateforme.' ~ pCode ~ '.classique')|trans|default('Classique')) }}</th>
                                             <th class="px-4 py-3">{{ ('plateforme.' ~ pCode ~ '.capacite_alternance')|trans|default(('plateforme.' ~ pCode ~ '.alternance')|trans|default('Alternance')) }}</th>
                                             {% if isCapaciteSpecifique %}
-                                                <th class="px-4 py-3">{{ ('plateforme.' ~ pCode ~ '.capacite_specifique')|trans|default(('plateforme.' ~ pCode ~ '.specifique')|trans|default('Spécifique')) }}</th>
+                                                <th class="px-4 py-3">{{ ('plateforme.' ~ pCode ~ '.capacite_specifique')|trans|default(('plateforme.' ~ pCode ~ '.specifique')|trans|default('Spécifique')) }}{% set precisionSpecifique = ('plateforme.' ~ pCode ~ '.capacite_specifique_precision')|trans %}{% if precisionSpecifique != 'plateforme.' ~ pCode ~ '.capacite_specifique_precision' %}<br><span class="normal-case font-normal">{{ precisionSpecifique }}</span>{% endif %}</th>
                                             {% endif %}
                                             {% if hasChamps %}
                                                 <th class="px-4 py-3">{{ ('plateforme.' ~ pCode ~ '.champs_specifiques')|trans|default('Champs spécifiques') }}</th>
