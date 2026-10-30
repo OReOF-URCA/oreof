@@ -94,6 +94,12 @@ export default class extends Controller {
 
                 if (!selectMention) return;
 
+                const currentVal = selectMention.value;
+                const ts = selectMention.tomselect;
+                if (ts) {
+                    ts.clearOptions();
+                }
+
                 selectMention.innerHTML = '';
 
                 // Add default choices if needed
@@ -114,11 +120,10 @@ export default class extends Controller {
                 autreOpt.text = 'Autre mention';
                 selectMention.add(autreOpt, null);
 
-                const targetValue = selectedMention == null ? '' : selectedMention;
+                const targetValue = (selectedMention != null && selectedMention !== '') ? selectedMention : (currentVal || '');
                 selectMention.value = targetValue;
 
                 // Sync TomSelect if it exists
-                const ts = selectMention.tomselect;
                 if (ts) {
                     ts.sync();
                     ts.setValue(targetValue);

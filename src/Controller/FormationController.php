@@ -39,6 +39,7 @@ use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
 use App\Utils\Access;
 use App\Utils\JsonRequest;
+use App\Utils\TurboStreamResponseFactory;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -368,6 +369,7 @@ class FormationController extends BaseController
     }
 
     #[Route('/edit/formation/{slug}', name: 'app_formation_edit_modal', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function editModal(
         ProfilRepository $profilRepository,
         EventDispatcherInterface $eventDispatcher,
@@ -375,31 +377,30 @@ class FormationController extends BaseController
         MentionRepository        $mentionRepository,
         Request                  $request,
         FormationRepository      $formationRepository,
+        TurboStreamResponseFactory $turboStream,
         #[MapEntity(mapping: ['slug' => 'slug'])]
         Formation                $formation
     ): Response {
+        if ($formation->getDomaine() === null && $formation->getMention()?->getDomaines()?->first() !== null) {
+            $formation->setDomaine($formation->getMention()->getDomaines()->first());
+        }
+
         $form = $this->createForm(FormationSesType::class, $formation, [
             'action' => $this->generateUrl('app_formation_edit_modal', ['slug' => $formation->getSlug()]),
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $savedMention = $formation->getMention();
-            $savedMentionTexte = $formation->getMentionTexte();
-
-            if (array_key_exists(
-                    'mention',
-                    $request->request->all()['formation_ses']
-                ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre')
-            {
-                $mention = $mentionRepository->find($request->request->all()['formation_ses']['mention']);
-                $formation->setMentionTexte(null);
-                $formation->setMention($mention);
-            }
-            else
-            {
-                $formation->setMention($savedMention);
-                $formation->setMentionTexte($savedMentionTexte);
+            $formationSesData = $request->request->all('formation_ses');
+            $mentionId = $formationSesData['mention'] ?? null;
+            if ($mentionId !== null && $mentionId !== '' && $mentionId !== 'autre') {
+                $mention = $mentionRepository->find($mentionId);
+                if ($mention !== null) {
+                    $formation->setMentionTexte(null);
+                    $formation->setMention($mention);
+                }
+            } elseif ($mentionId === 'autre') {
+                $formation->setMention(null);
             }
 
             $uow = $entityManager->getUnitOfWork();
@@ -408,27 +409,60 @@ class FormationController extends BaseController
 
             if (isset($changeSet['responsableMention'])) {
                 $profil = $profilRepository->findOneBy(['code' => 'ROLE_RESP_FORMATION']);
-                if ($profil === null) {
-                    throw new Exception('Profil ROLE_RESP_FORMATION non trouvé');
-                }
-                // retirer l'ancien resp des centres et droits et envoyer mail
-                $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][0], $profil, $this->getCampagneCollecte());
-                $eventDispatcher->dispatch($event, AddCentreFormationEvent::REMOVE_CENTRE_FORMATION);
+                if ($profil !== null) {
+                    if ($changeSet['responsableMention'][0] !== null) {
+                        $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][0], $profil, $this->getCampagneCollecte());
+                        $eventDispatcher->dispatch($event, AddCentreFormationEvent::REMOVE_CENTRE_FORMATION);
+                    }
 
-                // ajouter le nouveau resp, ajouter centre et droits et envoyer mail
-                $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][1], $profil, $this->getCampagneCollecte());
-                $eventDispatcher->dispatch($event, AddCentreFormationEvent::ADD_CENTRE_FORMATION);
+                    if ($changeSet['responsableMention'][1] !== null) {
+                        $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][1], $profil, $this->getCampagneCollecte());
+                        $eventDispatcher->dispatch($event, AddCentreFormationEvent::ADD_CENTRE_FORMATION);
+                    }
+                }
             }
 
             $formationRepository->save($formation, true);
 
-            return $this->redirectToRoute('formation_v2_modifier', ['slug' => $formation->getSlug()]);
+            $this->addFlash('toast', [
+                'type' => 'success',
+                'text' => 'Les informations de la formation ont été mises à jour.',
+                'title' => 'Succès',
+            ]);
+
+            $referer = (string) $request->headers->get('referer', '');
+            $targetRoute = str_contains($referer, '/voir') ? 'formation_v2_voir' : 'formation_v2_modifier';
+
+            return $this->redirectToRoute($targetRoute, ['slug' => $formation->getSlug()]);
         }
 
-        return $this->render('formation/editModal.html.twig', [
+        $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string) $request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
+
+        if ($isTurbo) {
+            return $turboStream->streamOpenModalFromTemplates(
+                'Modifier la formation',
+                $formation->getDisplayLong() ?: $formation->getDisplay(),
+                'formation/_new_form.html.twig',
+                [
+                    'formation' => $formation,
+                    'form' => $form->createView(),
+                    'is_modal' => true,
+                ],
+                '_ui/_footer_submit_cancel.html.twig',
+                [
+                    'submitLabel' => 'Enregistrer',
+                ],
+                $form->isSubmitted() && !$form->isValid() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK
+            );
+        }
+
+        return $this->render('formation/edit.html.twig', [
             'formation' => $formation,
             'form' => $form->createView(),
-        ], new Response(status: $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+            'is_modal' => false,
+        ], new Response(status: $form->isSubmitted() && !$form->isValid() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
     #[Route('/api', name: 'app_formation_api', methods: ['GET'])]

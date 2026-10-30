@@ -210,6 +210,10 @@ Le rendu Symfony reste centralisé dans `templates/communs/form_theme_v2.html.tw
 - La résolution des clés d’aide (dont celles du workflow) est commune ; le domaine `help` est conservé.
 - Les erreurs sont lisibles en clair/sombre, sans capitales forcées. Les checkbox n’imbriquent plus deux labels.
   L’éditeur Trix possède l’ID attendu par son label et reçoit les attributs du widget.
+- Pour les champs `textarea` et `trix-editor`, si un attribut `maxlength` est défini (dans `attr.maxlength` ou `maxLength`),
+  un compteur de caractères s'affiche automatiquement sous le champ (`X / MAX caractères`), géré par le contrôleur
+  Stimulus `char-count` : coloration d'avertissement à 90 %, passage en rouge avec mention « (limite atteinte) » et blocage
+  effectif de la saisie clavier et du collage au-delà de la limite. Sans `maxlength`, aucun compteur n'est affiché.
 
 Les composants hors Symfony Form (`Select`, formulaire de recherche) relient aussi leur aide via `aria-describedby`.
 Un widget personnalisé qui n’utilise pas le rendu standard doit propager les attributs reçus vers son contrôle

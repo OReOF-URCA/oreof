@@ -126,36 +126,41 @@ class FormationSesType extends AbstractType
                 FormEvents::PRE_SET_DATA,
                 function (FormEvent $event) {
                     $formation = $event->getData();
-                    if ($formation instanceof Formation && $formation->getDomaine() !== null && $formation->getTypeDiplome() !== null) {
-                        $form = $event->getForm();
-                        $mentions = $this->mentionRepository->findByDomaineAndTypeDiplome(
-                            $formation->getDomaine(),
-                            $formation->getTypeDiplome()
-                        );
-                        $tabMentions = [
-                            'Choisir une mention' => '',
-                        ];
-                        foreach ($mentions as $mention) {
-                            $tabMentions[$mention->getLibelle()] = (string)$mention->getId();
+                    if ($formation instanceof Formation) {
+                        if ($formation->getDomaine() === null && $formation->getMention()?->getDomaines()?->first() !== null) {
+                            $formation->setDomaine($formation->getMention()->getDomaines()->first());
                         }
-                        $tabMentions['Autre mention'] = 'autre';
+                        if ($formation->getDomaine() !== null && $formation->getTypeDiplome() !== null) {
+                            $form = $event->getForm();
+                            $mentions = $this->mentionRepository->findByDomaineAndTypeDiplome(
+                                $formation->getDomaine(),
+                                $formation->getTypeDiplome()
+                            );
+                            $tabMentions = [
+                                'Choisir une mention' => '',
+                            ];
+                            foreach ($mentions as $mention) {
+                                $tabMentions[$mention->getLibelle()] = (string)$mention->getId();
+                            }
+                            $tabMentions['Autre mention'] = 'autre';
 
-                        $initialValue = '';
-                        if ($formation->getMention() !== null) {
-                            $initialValue = (string)$formation->getMention()->getId();
-                        } elseif ($formation->getMentionTexte() !== null && $formation->getMentionTexte() !== '') {
-                            $initialValue = 'autre';
+                            $initialValue = '';
+                            if ($formation->getMention() !== null) {
+                                $initialValue = (string)$formation->getMention()->getId();
+                            } elseif ($formation->getMentionTexte() !== null && $formation->getMentionTexte() !== '') {
+                                $initialValue = 'autre';
+                            }
+
+                            $form->add('mention', ChoiceType::class, [
+                                'attr' => ['data-action' => 'change->formation#changeMention'],
+                                'choices' => $tabMentions,
+                                'label' => 'Mention',
+                                'required' => false,
+                                'mapped' => false,
+                                'data' => $initialValue,
+                                'help' => 'Si la mention n\'existe pas, veuillez la créer dans la section "Autre mention"'
+                            ]);
                         }
-
-                        $form->add('mention', ChoiceType::class, [
-                            'attr' => ['data-action' => 'change->formation#changeMention'],
-                            'choices' => $tabMentions,
-                            'label' => 'Mention',
-                            'required' => false,
-                            'mapped' => false,
-                            'data' => $initialValue,
-                            'help' => 'Si la mention n\'existe pas, veuillez la créer dans la section "Autre mention"'
-                        ]);
                     }
                 }
             )

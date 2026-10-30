@@ -1,7 +1,9 @@
 {% form_theme form 'communs/form_theme_v2.html.twig' %}
 
+{% set apiUrl = formation is defined and formation and formation.mention ? path('app_formation_api', {mention: formation.mention.id}) : path('app_formation_api') %}
+
 <div {{ stimulus_controller('formation', {
-    url: path('app_formation_api'),
+    url: apiUrl,
 }) }}>
     {{ form_start(form, { attr: { id: (is_modal|default(false) ? 'modal_form' : '') } }) }}
     
@@ -22,11 +24,21 @@
     <div class="space-y-6 text-secondary-800 dark:text-secondary-100">
         <!-- Section 1: Rattachement institutionnel -->
         <div class="rounded-xl border border-secondary-100 bg-secondary-50/50 p-4 dark:border-secondary-800 dark:bg-secondary-800/30">
-            <div class="flex items-center gap-2 mb-3 pb-2 border-b border-secondary-200 dark:border-secondary-700">
-                <twig:UX:Icon name="icon:school" class="size-4 text-primary-600 dark:text-primary-400" />
-                <h3 class="text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300">
-                    Rattachement institutionnel & Domaine
-                </h3>
+            <div class="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-secondary-200 dark:border-secondary-700">
+                <div class="flex items-center gap-2">
+                    <twig:UX:Icon name="icon:school" class="size-4 text-primary-600 dark:text-primary-400" />
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300">
+                        Rattachement institutionnel & Domaine
+                    </h3>
+                </div>
+                {% if formation is defined and formation and formation.typeDiplome %}
+                    <twig:Badge
+                        variant="primary"
+                        :label="formation.typeDiplome.libelleCourt"
+                        :pill="true"
+                        size="sm"
+                    />
+                {% endif %}
             </div>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>{{ form_row(form.domaine, {
@@ -73,7 +85,7 @@
                     attr: stimulus_controller('symfony/ux-autocomplete/autocomplete').toArray()
                 }) }}</div>
                 <div class="md:col-span-2">
-                    <twig:RncpField :form="form.codeRNCP" :inRncpField="form.inRncp" />
+                    <twig:RncpField :form="form.codeRNCP" :inRncpField="form.inRncp" :formationId="formation.id|default(null)" />
                 </div>
             </div>
         </div>
@@ -96,7 +108,7 @@
     {% if is_modal is not defined or not is_modal %}
         <div class="mt-6 pt-4 border-t border-secondary-200 dark:border-secondary-700 flex items-center justify-between">
             <twig:Button
-                    href="{{ path('app_offre_index') }}"
+                    href="{{ cancel_url|default(path('app_offre_index')) }}"
                     variant="secondary"
                     :soft="true"
                     icon="icon:arrow-left"
@@ -107,7 +119,7 @@
                     variant="success"
                     :soft="false"
                     icon="icon:save"
-                    label="Enregistrer la formation"
+                    label="{{ submit_label|default('Enregistrer la formation') }}"
             />
         </div>
     {% endif %}
