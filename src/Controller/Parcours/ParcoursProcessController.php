@@ -15,6 +15,7 @@ use App\Entity\DpeParcours;
 use App\Entity\User;
 use App\Events\HistoriqueParcoursEvent;
 use App\Service\SecureUploadService;
+use App\DTO\TranslatableKey;
 use App\Utils\TurboStreamResponseFactory;
 use App\Workflow\Form\MetaDrivenFormFactory;
 use App\Workflow\Metadata\WorkflowMetaMapper;
@@ -291,7 +292,7 @@ class ParcoursProcessController extends BaseController
 
 // rendu modal
         return $turboStream->streamOpenModalFromTemplates(
-            'modal_title.' . $transition . '.' . $metaDto->type,
+            new TranslatableKey('modal_title.' . $transition . '.' . $metaDto->type, [], 'modal'),
             'Parcours : ' . $dpeParcours->getParcours()?->getDisplay(),
             $metaDto->viewTemplate ?? 'parcours_v2/process/_apply.html.twig',
             [

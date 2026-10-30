@@ -664,7 +664,7 @@
     <unit id="zuzFgsz" name="parcours_step1.labels.objectifsParcours">
       <segment>
         <source>parcours_step1.labels.objectifsParcours</source>
-        <target>Objectif du parcours</target>
+        <target>Objectifs du parcours</target>
       </segment>
     </unit>
     <unit id="XehQJtK" name="Troyes">
