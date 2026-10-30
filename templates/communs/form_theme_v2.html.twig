@@ -60,8 +60,22 @@
 {% endblock form_row %}
 
 {% block trix_widget %}
-    <input id="trix-input-{{ trixId }}" value="{{ value }}" type="hidden" name="{{ full_name }}">
-    <trix-editor id="{{ id }}" input="trix-input-{{ trixId }}"{% with {attr: attr} %} {{ block('attributes') }}{% endwith %}></trix-editor>
+    {% set maxlength = attr.maxlength|default(attr['maxlength']|default(maxLength|default(form.vars.attr.maxlength|default(null)))) %}
+    {% if maxlength is defined and maxlength is not empty and maxlength > 0 %}
+        <div {{ stimulus_controller('char-count', { max: maxlength }) }} class="w-full">
+            <input id="trix-input-{{ trixId }}" value="{{ value }}" type="hidden" name="{{ full_name }}">
+            <trix-editor id="{{ id }}" input="trix-input-{{ trixId }}"{% with {attr: attr} %} {{ block('attributes') }}{% endwith %}></trix-editor>
+            <div class="mt-1 flex justify-end">
+                <span class="text-xs text-secondary-500 dark:text-secondary-400 font-mono transition-colors" data-char-count-target="counter">
+                    <span data-char-count-target="current">{{ value|default('')|length }}</span> / {{ maxlength }} caractères
+                    <span data-char-count-target="limitBadge" class="hidden text-danger-600 dark:text-danger-400 font-semibold ml-1">(limite atteinte)</span>
+                </span>
+            </div>
+        </div>
+    {% else %}
+        <input id="trix-input-{{ trixId }}" value="{{ value }}" type="hidden" name="{{ full_name }}">
+        <trix-editor id="{{ id }}" input="trix-input-{{ trixId }}"{% with {attr: attr} %} {{ block('attributes') }}{% endwith %}></trix-editor>
+    {% endif %}
 {% endblock %}
 
 {# --- LABEL --- #}
@@ -120,8 +134,21 @@
 
 {# --- TEXTAREA --- #}
 {% block textarea_widget %}
+    {% set maxlength = attr.maxlength|default(attr['maxlength']|default(maxLength|default(form.vars.attr.maxlength|default(null)))) %}
     {% set attr = attr|merge({ class: attr.class|default('') ~ ' w-full p-2 bg-secondary-50 text-secondary-800 border border-secondary-200 rounded-sm font-medium focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm min-h-[150px] placeholder:text-secondary-400 dark:bg-secondary-900 dark:text-secondary-100 dark:border-secondary-700 dark:placeholder:text-secondary-500' }) %}
-    {{ parent() }}
+    {% if maxlength is defined and maxlength is not empty and maxlength > 0 %}
+        <div {{ stimulus_controller('char-count', { max: maxlength }) }} class="w-full">
+            {{ parent() }}
+            <div class="mt-1 flex justify-end">
+                <span class="text-xs text-secondary-500 dark:text-secondary-400 font-mono transition-colors" data-char-count-target="counter">
+                    <span data-char-count-target="current">{{ value|default('')|length }}</span> / {{ maxlength }} caractères
+                    <span data-char-count-target="limitBadge" class="hidden text-danger-600 dark:text-danger-400 font-semibold ml-1">(limite atteinte)</span>
+                </span>
+            </div>
+        </div>
+    {% else %}
+        {{ parent() }}
+    {% endif %}
 {% endblock textarea_widget %}
 
 {# --- SELECT --- #}
