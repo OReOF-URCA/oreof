@@ -161,6 +161,8 @@ final class OffreConfigurerController extends BaseController
 
         $changedYears = [];
         $modifiedAnneesByOrdre = [];
+        $modifiedAnnees = [];
+        $parametresCharges = [];
 
         // Paramètres de plateforme existants des années de la formation, en une requête : [anneeId][plateformeId]
         $annees = [];
@@ -234,6 +236,18 @@ final class OffreConfigurerController extends BaseController
 
         $activePortailEntities = [];
 
+        // Un portail relie des formations : chaque année rattachée/détachée doit appartenir à une formation
+        // que l'utilisateur a le droit de configurer.
+        $droitsFormation = [];
+        $peutModifierFormation = function (?Formation $f) use (&$droitsFormation): bool {
+            if ($f === null) {
+                return false;
+            }
+
+            return $droitsFormation[$f->getId()] ??= $this->canConfigurerOffre($f);
+        };
+        $peutModifierAnnee = fn (Annee $a): bool => $peutModifierFormation($a->getParcours()?->getFormation());
+
         // Gestion de la suppression de portails
         $portailsSupprimes = $request->request->all('portails_supprimes');
         foreach ($portailsSupprimes as $pId) {
@@ -241,14 +255,23 @@ final class OffreConfigurerController extends BaseController
             if ($pId > 0) {
                 $pEntity = $em->getRepository(Portail::class)->find($pId);
                 if ($pEntity !== null && $pEntity->getCampagne() === $campagne) {
-                    foreach ($pEntity->getAnnees() as $a) {
+                    // Le portail n'est supprimé que si toutes ses années relèvent de formations modifiables
+                    // par l'utilisateur ; sinon on détache seulement les années autorisées.
+                    $suppressionComplete = true;
+                    foreach ($pEntity->getAnnees()->toArray() as $a) {
+                        if (!$peutModifierAnnee($a)) {
+                            $suppressionComplete = false;
+                            continue;
+                        }
                         $a->setPortail(null);
                         $em->persist($a);
                         if ($a->getId() !== null) {
                             $changedYears[$a->getId()] = true;
                         }
                     }
-                    $em->remove($pEntity);
+                    if ($suppressionComplete) {
+                        $em->remove($pEntity);
+                    }
                 }
             }
         }
@@ -268,6 +291,9 @@ final class OffreConfigurerController extends BaseController
                     $portail = null;
                     if (is_numeric($portailKey) && (int)$portailKey > 0) {
                         $portail = $em->getRepository(Portail::class)->find((int)$portailKey);
+                        if ($portail !== null && $portail->getCampagne() !== $campagne) {
+                            continue;
+                        }
                     }
                     if ($portail === null) {
                         $portail = new Portail();
@@ -284,6 +310,13 @@ final class OffreConfigurerController extends BaseController
                         if ($formation->getId() !== null && !in_array($formation->getId(), $presentFormationIds, true)) {
                             $presentFormationIds[] = (int)$formation->getId();
                         }
+                        // Formations déjà dans le portail mais non modifiables par l'utilisateur : conservées telles quelles.
+                        $presentFormationIds = array_values(array_filter(
+                            $presentFormationIds,
+                            fn (int $fId): bool => $fId === $formation->getId()
+                                || $peutModifierFormation($em->getRepository(Formation::class)->find($fId))
+                                || in_array($fId, $portail->getFormationsIds(), true)
+                        ));
 
                         $portail->setFormationsIds($presentFormationIds);
 
@@ -293,6 +326,9 @@ final class OffreConfigurerController extends BaseController
                                 continue;
                             }
                             $annee = $em->getRepository(Annee::class)->find($anneeId);
+                            if ($annee !== null && !$peutModifierAnnee($annee)) {
+                                continue;
+                            }
                             if ($annee !== null && $annee->getPortail() !== $portail) {
                                 $annee->setPortail($portail);
                                 $em->persist($annee);
@@ -308,7 +344,7 @@ final class OffreConfigurerController extends BaseController
                             }
                             if (!in_array($existingAnneeId, $selectedAnneeIds, true)) {
                                 $anneeFormationId = $existingAnnee->getParcours()?->getFormation()?->getId();
-                                if ($anneeFormationId !== null && in_array($anneeFormationId, $presentFormationIds, true)) {
+                                if ($anneeFormationId !== null && in_array($anneeFormationId, $presentFormationIds, true) && $peutModifierAnnee($existingAnnee)) {
                                     $existingAnnee->setPortail(null);
                                     $em->persist($existingAnnee);
                                     $changedYears[$existingAnneeId] = true;
@@ -327,7 +363,7 @@ final class OffreConfigurerController extends BaseController
                                     continue;
                                 }
                                 $targetFormation = $em->getRepository(Formation::class)->find($fId);
-                                if ($targetFormation === null) {
+                                if ($targetFormation === null || !$peutModifierFormation($targetFormation)) {
                                     continue;
                                 }
 
@@ -504,20 +540,20 @@ final class OffreConfigurerController extends BaseController
                 if ($oldIsOuvert !== $newIsOuvert || $trackOpenClosedChanged) {
                     $changedYears[$anneeId] = true;
                     $annee->setIsOuvert($newIsOuvert);
-                    $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                    $modifiedAnneesByOrdre[$annee->getOrdre()] = $modifiedAnnees[$annee->getId()] = $annee;
                 }
                 
                 $oldCapacite = $annee->getCapaciteAccueil();
                 if ($isParcoursClosed) {
                     $annee->setCapaciteAccueil(0);
                     if ($oldCapacite !== 0) {
-                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $modifiedAnnees[$annee->getId()] = $annee;
                     }
                 } elseif ($request->request->has($capaciteAccueilKey)) {
                     $newCap = (int)$request->request->get($capaciteAccueilKey);
                     $annee->setCapaciteAccueil($newCap);
                     if ($oldCapacite !== $newCap) {
-                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $modifiedAnnees[$annee->getId()] = $annee;
                     }
                 }
 
@@ -527,11 +563,11 @@ final class OffreConfigurerController extends BaseController
                     if ($annee->hasCapacite() !== $hasCapacite) {
                         $annee->setHasCapacite($hasCapacite);
                         $changedYears[$anneeId] = true;
-                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $modifiedAnnees[$annee->getId()] = $annee;
                     }
                     if (!$hasCapacite && $annee->getCapaciteAccueil() !== 0) {
                         $annee->setCapaciteAccueil(0);
-                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $modifiedAnnees[$annee->getId()] = $annee;
                     }
                 }
 
@@ -541,12 +577,12 @@ final class OffreConfigurerController extends BaseController
                     $newRegimes = (array)$request->request->all($regimeKey);
                     $annee->setRegimeInscription($newRegimes);
                     if ($oldRegimes !== $annee->getRegimeInscriptionValues()) {
-                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $modifiedAnnees[$annee->getId()] = $annee;
                     }
                 } elseif ($request->request->has('annee_' . $anneeId . '_regime_present')) {
                     $annee->setRegimeInscription([]);
                     if ($oldRegimes !== []) {
-                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                        $modifiedAnneesByOrdre[$annee->getOrdre()] = $modifiedAnnees[$annee->getId()] = $annee;
                     }
                 }
                 
@@ -630,7 +666,7 @@ final class OffreConfigurerController extends BaseController
                                     || $oldParamSpe !== $parametre->getCapaciteSpecifique()
                                     || $oldParamRem !== $parametre->getRemarques()
                                 ) {
-                                    $modifiedAnneesByOrdre[$annee->getOrdre()] = $annee;
+                                    $modifiedAnneesByOrdre[$annee->getOrdre()] = $modifiedAnnees[$annee->getId()] = $annee;
                                 }
                                 
                                 $em->persist($parametre);
@@ -685,10 +721,15 @@ final class OffreConfigurerController extends BaseController
                     }
                     if ($this->synchroniserDonneesAnnee($sourceAnnee, $targetAnnee, $campagne, $parametresParAnnee, $formation->getTypeDiplome(), $em)) {
                         $changedYears[$targetAnnee->getId()] = true;
+                        $modifiedAnnees[$targetAnnee->getId()] = $targetAnnee;
                     }
                 }
             }
         }
+
+        // Les portails créés dans cette requête n'ont pas encore d'identifiant : on les enregistre avant de synchroniser.
+        $remplissageSuspension->suspendre();
+        $em->flush();
 
         // Synchronisation des données des années en portail
         $portailsSynchronises = [];
@@ -712,11 +753,16 @@ final class OffreConfigurerController extends BaseController
                 continue;
             }
 
+            // Les années d'autres formations n'ont pas leurs paramètres de plateforme chargés : sans cela,
+            // la synchronisation recréerait des doublons.
+            $this->chargerParametresPlateforme($membres->toArray(), $campagne, $plateformeParamRepo, $parametresParAnnee, $parametresCharges);
+
             // Trouver l'année source pour la synchronisation du portail :
             // 1. Priorité aux années dont les capacités/plateformes ont été modifiées dans cette requête
+            // (directement, ou par propagation du tronc commun)
             $sourceAnnee = null;
             foreach ($membres as $ma) {
-                if ($ma->getId() !== null && isset($modifiedAnneesByOrdre[$ma->getOrdre()]) && $ma->getParcours()?->getFormation()?->getId() === $formation->getId()) {
+                if ($ma->getId() !== null && isset($modifiedAnnees[$ma->getId()]) && $ma->getParcours()?->getFormation()?->getId() === $formation->getId()) {
                     $sourceAnnee = $ma;
                     break;
                 }
@@ -768,6 +814,8 @@ final class OffreConfigurerController extends BaseController
                             $changedYears[$targetId] = true;
                         }
                     }
+                    // Les années en tronc commun avec la cible (dans sa propre formation) suivent la cible.
+                    $this->propagerTroncCommun($targetAnnee, $formation, $campagne, $plateformeParamRepo, $parametresParAnnee, $parametresCharges, $changedYears, $em);
                 }
             }
         }
@@ -828,6 +876,92 @@ final class OffreConfigurerController extends BaseController
 
         $this->addFlashBag(Constantes::FLASHBAG_SUCCESS, 'Le brouillon a été enregistré avec succès.');
         return $this->redirectToRoute('offre_v2_configurer', ['slug' => $formation->getSlug()]);
+    }
+
+    /**
+     * Charge les paramètres de plateforme des années données (une requête) sans doublonner ceux déjà connus.
+     *
+     * @param list<Annee> $annees
+     * @param array<int, array<int, PlateformeAdmissionParametre>> $parametresParAnnee
+     * @param array<int, true> $parametresCharges
+     */
+    private function chargerParametresPlateforme(
+        array $annees,
+        CampagneCollecte $campagne,
+        PlateformeAdmissionParametreRepository $plateformeParamRepo,
+        array &$parametresParAnnee,
+        array &$parametresCharges
+    ): void {
+        $aCharger = [];
+        foreach ($annees as $annee) {
+            $id = $annee->getId();
+            if ($id !== null && !isset($parametresCharges[$id]) && !isset($parametresParAnnee[$id])) {
+                $aCharger[] = $annee;
+            }
+            if ($id !== null) {
+                $parametresCharges[$id] = true;
+            }
+        }
+        if ($aCharger === []) {
+            return;
+        }
+        foreach ($plateformeParamRepo->findBy(['annee' => $aCharger, 'campagne' => $campagne]) as $param) {
+            if ($param->getAnnee() !== null && $param->getPlateforme() !== null) {
+                $parametresParAnnee[$param->getAnnee()->getId()][$param->getPlateforme()->getId()] = $param;
+            }
+        }
+    }
+
+    /**
+     * Recopie les données de $source sur les autres années du tronc commun qui la contient (dans sa formation).
+     *
+     * @param array<int, array<int, PlateformeAdmissionParametre>> $parametresParAnnee
+     * @param array<int, true> $parametresCharges
+     * @param array<int, true> $changedYears
+     */
+    private function propagerTroncCommun(
+        Annee $source,
+        Formation $formationCourante,
+        CampagneCollecte $campagne,
+        PlateformeAdmissionParametreRepository $plateformeParamRepo,
+        array &$parametresParAnnee,
+        array &$parametresCharges,
+        array &$changedYears,
+        EntityManagerInterface $em
+    ): void {
+        $parcoursSource = $source->getParcours();
+        $formationSource = $parcoursSource?->getFormation();
+        if ($parcoursSource === null || $formationSource === null) {
+            return;
+        }
+
+        foreach ($formationSource->getTroncsCommuns() as $tc) {
+            $tcParcours = $tc['parcours'] ?? [];
+            if (!in_array($parcoursSource->getId(), $tcParcours, true) || !in_array($source->getOrdre(), $tc['annees'] ?? [], true)) {
+                continue;
+            }
+
+            $groupe = [];
+            foreach ($formationSource->getParcours() as $p) {
+                if (!in_array($p->getId(), $tcParcours, true)) {
+                    continue;
+                }
+                foreach ($p->getAnnees() as $a) {
+                    if ($a->getOrdre() === $source->getOrdre() && $a->getId() !== $source->getId()) {
+                        $groupe[] = $a;
+                    }
+                }
+            }
+            $this->chargerParametresPlateforme($groupe, $campagne, $plateformeParamRepo, $parametresParAnnee, $parametresCharges);
+
+            foreach ($groupe as $cible) {
+                if ($this->synchroniserDonneesAnnee($source, $cible, $campagne, $parametresParAnnee, $formationSource->getTypeDiplome(), $em)
+                    && $formationSource->getId() === $formationCourante->getId()
+                    && $cible->getId() !== null) {
+                    $changedYears[$cible->getId()] = true;
+                }
+            }
+        }
     }
 
     private function synchroniserDonneesAnnee(
