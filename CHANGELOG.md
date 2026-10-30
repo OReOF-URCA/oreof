@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/OReOF-URCA/oreof/compare/v2.4.1...v2.5.0) (2026-10-30)
+
+
+### Features
+
+* Compteur de caractères ([9d9c844](https://github.com/OReOF-URCA/oreof/commit/9d9c8446dd9b45eedd1bdd257f212bc52e5aa2dc))
+* edit formation ([03582a4](https://github.com/OReOF-URCA/oreof/commit/03582a49fbf5cd20cb60ed01212371452255c84b))
+* gestion portail et TC ([785c3c8](https://github.com/OReOF-URCA/oreof/commit/785c3c8808b843f23f684c7c2e2d581684ea1850))
+* Remplacement de l'entité langue par symfony/intl et simplification du code associé ([779e2c9](https://github.com/OReOF-URCA/oreof/commit/779e2c949060244e3a728a66cad7a0d0c40cc1ef))
+
+
+### Bug Fixes
+
+* filtre sur offre accréditée ([d0d59b9](https://github.com/OReOF-URCA/oreof/commit/d0d59b9132f38efb496f60172aaf26008d1449ad))
+* formulaire + asserts ([3cc5cef](https://github.com/OReOF-URCA/oreof/commit/3cc5cefbe5bfb46635c393fa42745b37637fee94))
+* **offre:** synchronisation des portails et contrôle d'accès ([e3d94eb](https://github.com/OReOF-URCA/oreof/commit/e3d94eb173d9a4cd65c8f6b58076e3a25c63eefa))
+* **offre:** synchronisation des portails et contrôle d'accès ([fbc16d4](https://github.com/OReOF-URCA/oreof/commit/fbc16d497ef7cd095f86a2e9ac2d6f93e7c19a2d))
+* todos, traitement ([80717c1](https://github.com/OReOF-URCA/oreof/commit/80717c188979f93166794280bb4683e55fead2a5))
+* traitement tids ([c5c5126](https://github.com/OReOF-URCA/oreof/commit/c5c51268db7db128e1959192c3cf2b0126d89efb))
+* **workflow:** traductions manquantes des workflows parcours et fiche matière ([1059e58](https://github.com/OReOF-URCA/oreof/commit/1059e5869cdc1c480f0077aa3087a8d5b511195d))
+* **workflow:** traductions manquantes des workflows parcours et fiche matière ([dfe7742](https://github.com/OReOF-URCA/oreof/commit/dfe774253c88918c9d40547a50107b33f47ce7c5))
+
 ## [2.4.1](https://github.com/OReOF-URCA/oreof/compare/v2.4.0...v2.4.1) (2026-10-29)
 
 
