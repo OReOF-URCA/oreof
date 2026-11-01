@@ -37,35 +37,40 @@ final readonly class DroitsMenuProvider implements MenuProviderInterface
                 key: 'droits',
                 label: 'menu.menu_droits',
                 route: 'app_section_droits',
-                icon: 'shield-check',
+                icon: 'mdi:shield-account-outline',
                 children: [
                     MenuItem::link(
                         key: 'droits.en_attente',
                         label: 'menu.droits.en_attente',
                         route: 'app_user_profil_attente',
+                        icon: 'mdi:account-clock-outline',
                     ),
 
                     MenuItem::link(
                         key: 'droits.affectation_profils',
                         label: 'menu.droits.affectation_profils',
                         route: 'app_user_profil_index',
+                        icon: 'mdi:account-cog-outline',
                     ),
 
                     MenuItem::link(
                         key: 'droits.repertoire',
                         label: 'menu.droits.repertoire',
                         route: 'app_user_repertoire',
+                        icon: 'mdi:contacts-outline',
                     )->requiresRole('ROLE_ADMIN'),
 
                     MenuItem::link(
                         key: 'droits.profils',
                         label: 'menu.droits.profils',
                         route: 'app_administration_profils_index',
+                        icon: 'mdi:account-key-outline',
                     )->requiresRole('ROLE_ADMIN'),
                     MenuItem::link(
-                        'pilotage.impersonation',
-                        'menu.admin.impersonation.user',
-                        'app_impersonation_list',
+                        key: 'pilotage.impersonation',
+                        label: 'menu.admin.impersonation.user',
+                        route: 'app_impersonation_list',
+                        icon: 'mdi:incognito',
                     )->requiresRole('ROLE_ADMIN'),
                 ],
             )->withPosition(40),

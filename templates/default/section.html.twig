@@ -34,9 +34,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {% for child in children %}
                         <a href="{{ path(child.route, child.routeParams) }}"
-                           class="block p-6 bg-white rounded-2xl border border-secondary-200 shadow-sm hover:shadow-md transition dark:bg-secondary-900 dark:border-secondary-700">
+                           class="group block p-6 bg-white rounded-2xl border border-secondary-200 shadow-sm hover:shadow-md hover:border-primary-300 transition dark:bg-secondary-900 dark:border-secondary-700 dark:hover:border-primary-700">
                             <div class="flex items-center mb-4">
-                                <div class="p-3 bg-primary-50 rounded-lg dark:bg-primary-900/20">
+                                <div class="p-3 bg-primary-50 rounded-xl text-primary-600 group-hover:bg-primary-100 group-hover:text-primary-700 dark:bg-primary-900/20 dark:text-primary-400 dark:group-hover:bg-primary-900/40 dark:group-hover:text-primary-300 transition-colors">
                                     {% if child.icon is defined and child.icon != null %}
                                         <twig:UX:Icon :name="child.icon" class="h-7 w-7"/>
                                     {% else %}
