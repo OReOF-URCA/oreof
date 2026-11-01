@@ -387,10 +387,23 @@
                             <!-- Ligne Mention (Formation) -->
                             <tr class="bg-secondary-100/80 hover:bg-secondary-100 transition-all duration-150 border-t border-secondary-200 group-data-[collapsed]:hidden dark:bg-secondary-800/80 dark:hover:bg-secondary-800 dark:border-secondary-700">
                                 <td class="px-4 py-3">
-                                    <div class="font-semibold text-secondary-900 dark:text-secondary-100">
-                                        {{ formation.display }}
+                                    <div class="font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-1.5 flex-wrap">
+                                        <span>{{ formation.display }}</span>
                                         {% if forma.anomalies|length > 0 %}
-                                            <span class="inline-flex items-center text-danger-600 ml-1 cursor-help animate-pulse dark:text-danger-400" title="{{ forma.anomalies|join('\n') }}">⚠️</span>
+                                            <a href="{{ path('offre_v2_formation_synthese_modal', { formation: formation.id }) }}"
+                                               data-turbo="true"
+                                               data-turbo-stream="true"
+                                               data-action="click->modalturbo#open"
+                                               class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold bg-danger-100 text-danger-800 border border-danger-200 hover:bg-danger-200 transition-colors dark:bg-danger-900/40 dark:text-danger-300 dark:border-danger-700 cursor-pointer"
+                                               title="{{ forma.anomalies|length }} point(s) à vérifier : cliquer pour voir le détail"
+                                            >
+                                                <twig:UX:Icon name="icon:warning" class="size-3" />
+                                                <span>{{ forma.anomalies|length }} alerte{{ forma.anomalies|length > 1 ? 's' : '' }}</span>
+                                            </a>
+                                        {% else %}
+                                            <span class="inline-flex items-center gap-0.5 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-success-50 text-success-700 border border-success-200/80 dark:bg-success-900/30 dark:text-success-300 dark:border-success-700" title="Aucune anomalie détectée">
+                                                ✓ Conforme
+                                            </span>
                                         {% endif %}
                                     </div>
                                     <div class="text-xs text-secondary-500 flex items-center gap-1.5 flex-wrap mt-0.5">
@@ -462,12 +475,26 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    <twig:Button variant="primary" class="mr-2"
-                                                 href="{{ path('offre_v2_configurer', { slug: formation.slug }) }}"
-                                                 data-turbo-frame="_top"
-                                    >
-                                        Configurer
-                                    </twig:Button>
+                                    <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                        <twig:Button variant="success"
+                                                     size="sm"
+                                                     href="{{ path('offre_v2_formation_synthese_modal', { formation: formation.id }) }}"
+                                                     data-turbo="true"
+                                                     data-turbo-stream="true"
+                                                     data-action="click->modalturbo#open"
+                                                     icon="ph:check"
+                                                     title="Aperçu rapide et contrôle des informations saisies"
+                                        >
+                                            Vérification
+                                        </twig:Button>
+                                        <twig:Button variant="primary"
+                                                     size="sm"
+                                                     href="{{ path('offre_v2_configurer', { slug: formation.slug }) }}"
+                                                     data-turbo-frame="_top"
+                                        >
+                                            Configurer
+                                        </twig:Button>
+                                    </div>
                                 </td>
                             </tr>
                             {% for parcoursId, pd in forma.parcoursData %}
@@ -504,7 +531,13 @@
                                             <span class="text-xs font-normal text-secondary-400">({{ pd.annees|length }} année{{ pd.annees|length > 1 ? 's' : '' }})</span>
                                             {% set parcAnomalies = forma.parcoursAnomalies[parcours.id]|default([]) %}
                                             {% if parcAnomalies|length > 0 %}
-                                                <span class="inline-flex items-center text-danger-600 ml-1 cursor-help animate-pulse dark:text-danger-400" title="{{ parcAnomalies|join('\n') }}">⚠️</span>
+                                                <a href="{{ path('offre_v2_formation_synthese_modal', { formation: formation.id }) }}"
+                                                   data-turbo="true"
+                                                   data-turbo-stream="true"
+                                                   data-action="click->modalturbo#open"
+                                                   class="inline-flex items-center text-danger-600 hover:text-danger-800 ml-1 cursor-pointer dark:text-danger-400"
+                                                   title="{{ parcAnomalies|join('\n') }} (Cliquer pour voir la synthèse)"
+                                                >⚠️</a>
                                             {% endif %}
                                         </div>
                                     </td>

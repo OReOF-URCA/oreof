@@ -5,6 +5,8 @@ namespace App\Controller\Offre;
 use App\Controller\BaseController;
 use App\Entity\Composante;
 use App\Entity\DpeFormation;
+use App\Entity\DpeParcours;
+use App\Entity\Formation;
 use App\Repository\AnneeRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DocumentConseilRepository;
@@ -27,6 +29,8 @@ use Symfony\Component\Workflow\WorkflowInterface;
 
 final class OffreController extends BaseController
 {
+    use OffreAccessTrait;
+
     #[Route('/offrev2', name: 'app_offre_index')]
     #[Route('/offre/composante/{composante}', name: 'app_offre_composante_index')]
     #[BreadcrumbAttribute(menuKey: 'pilotage.gestion_offre')]
@@ -566,5 +570,133 @@ final class OffreController extends BaseController
             'lignes' => $lignes,
             'tpaByTypeDiplome' => $typeDiplomePlateformeAdmissionRepository->findByCampagneIndexedByTypeDiplome($campagne),
         ]);
+    }
+
+    /**
+     * Modale d'aperçu rapide et de contrôle des informations saisies pour une formation.
+     */
+    #[Route('/offre/formation/{formation}/synthese-modal', name: 'offre_v2_formation_synthese_modal', methods: ['GET'])]
+    public function syntheseModal(
+        Formation $formation,
+        OffreValidationService $offreValidationService,
+        EntityManagerInterface $em,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $this->denyAccessUnlessCanConfigurerOffre($formation);
+        $campagne = $this->getCampagneCollecte();
+
+        $dpeFormation = $em->getRepository(DpeFormation::class)->findOneBy([
+            'formation' => $formation,
+            'campagneCollecte' => $campagne,
+        ]);
+
+        $anomaliesMessages = $offreValidationService->getAnomaliesMessagesFormation($formation, $campagne);
+
+        $dpeParcoursMap = [];
+        $parcoursList = $formation->getParcours()->toArray();
+        if ($parcoursList !== []) {
+            $dpeParcoursEntities = $em->getRepository(DpeParcours::class)->findBy([
+                'parcours' => $parcoursList,
+                'campagneCollecte' => $campagne,
+            ]);
+            foreach ($dpeParcoursEntities as $dp) {
+                if ($dp->getParcours() !== null) {
+                    $dpeParcoursMap[$dp->getParcours()->getId()] = $dp;
+                }
+            }
+        }
+
+        // Structure détaillée des parcours et années
+        $parcoursDetails = [];
+        $portailsMap = [];
+
+        foreach ($formation->getParcours() as $parcours) {
+            $pId = $parcours->getId();
+            $dpePar = $dpeParcoursMap[$pId] ?? null;
+            $isParcoursOuvert = $dpePar?->isOuvert() ?? false;
+
+            $anneesList = [];
+            $parcoursCapacite = 0;
+
+            foreach ($parcours->getAnnees() as $annee) {
+                $isAnneeOuverte = $annee->isOuvert();
+                $anneeCapacite = $annee->getCapaciteAccueil();
+                if ($isAnneeOuverte) {
+                    $parcoursCapacite += $anneeCapacite;
+                }
+
+                $plateformesActives = [];
+                foreach ($annee->getAdmissionPlateformeParametres() as $param) {
+                    if ($param->getCampagne() === $campagne && $param->isActive() && $param->getPlateforme() !== null) {
+                        $plateformesActives[] = [
+                            'plateforme' => $param->getPlateforme(),
+                            'capaciteSpecifique' => $param->getCapacite(),
+                        ];
+                    }
+                }
+
+                $portail = $annee->getPortail();
+                if ($portail !== null && $portail->getId() !== null) {
+                    $portailsMap[$portail->getId()] = $portail;
+                }
+
+                $anneesList[] = [
+                    'annee' => $annee,
+                    'isOuverte' => $isAnneeOuverte,
+                    'capacite' => $anneeCapacite,
+                    'plateformes' => $plateformesActives,
+                    'portail' => $portail,
+                    'isTroncCommun' => $formation->isAnneeTroncCommun($annee->getOrdre() ?? 0, $parcours),
+                ];
+            }
+
+            $anomaliesParcours = $offreValidationService->getAnomaliesParcours($parcours, $campagne, $dpePar);
+
+            $parcoursDetails[] = [
+                'parcours' => $parcours,
+                'dpeParcours' => $dpePar,
+                'isOuvert' => $isParcoursOuvert,
+                'capacite' => $parcoursCapacite,
+                'annees' => $anneesList,
+                'anomalies' => $anomaliesParcours,
+            ];
+        }
+
+        $formationCapacite = $formation->getCapaciteAccueil();
+        if ($formationCapacite <= 0) {
+            $formationCapacite = $formation->getCapacite();
+        }
+
+        $pvDocs = [];
+        $noteDocs = [];
+        foreach ($formation->getDocumentConseils() as $doc) {
+            if ($doc->getType() === 'pv') {
+                $pvDocs[] = $doc;
+            } elseif ($doc->getType() === 'note_explicative') {
+                $noteDocs[] = $doc;
+            }
+        }
+
+        return $turboStream->streamOpenModalFromTemplates(
+            'Synthèse de l\'offre — ' . $formation->getDisplayLong(),
+            $formation->getComposantePorteuse()?->getLibelle() ?? 'Offre de formation',
+            'offre_v2/_modal_formation_synthese.html.twig',
+            [
+                'formation' => $formation,
+                'campagne' => $campagne,
+                'dpeFormation' => $dpeFormation,
+                'anomaliesMessages' => $anomaliesMessages,
+                'parcoursDetails' => $parcoursDetails,
+                'formationCapacite' => $formationCapacite,
+                'pvDocs' => $pvDocs,
+                'noteDocs' => $noteDocs,
+                'troncsCommuns' => $formation->getTroncsCommuns(),
+                'portails' => array_values($portailsMap),
+            ],
+            'offre_v2/_modal_formation_synthese_footer.html.twig',
+            [
+                'formation' => $formation,
+            ]
+        );
     }
 }
