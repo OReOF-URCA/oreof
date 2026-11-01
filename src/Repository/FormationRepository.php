@@ -208,6 +208,10 @@ class FormationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @param array<string, mixed> $options
+     * @return array<int, Formation>
+     */
     public function findBySearchAndCfvu(
         string|null      $q,
         CampagneCollecte $campagneCollecte,
@@ -217,42 +221,39 @@ class FormationRepository extends ServiceEntityRepository
         $sort = $options['sort'] ?? 'typeDiplome';
         $direction = $options['direction'] ?? 'ASC';
 
+        $filtres = [$sort => $direction];
         $query = $this->createQueryBuilder('f')
-            ->innerJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id')
-            ->leftJoin('f.dpeParcours', 'p')
+            ->innerJoin('f.dpeParcours', 'p', 'WITH', 'p.campagneCollecte = :campagneCollecte')
+            ->leftJoin('p.parcours', 'parcours')
             ->addSelect('p')
-            ->where('p.campagneCollecte = :campagneCollecte')
+            ->leftJoin('f.mention', 'm')
             ->setParameter('campagneCollecte', $campagneCollecte)
-            ->andWhere('m.libelle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q ')
-            ->andWhere("JSON_CONTAINS(p.etatValidation, :etatDpe) = 1")
-            ->setParameter('etatDpe', json_encode(['soumis_cfvu' => 1]))
-            ->setParameter('q', '%' . $q . '%')
-            ->orderBy('f.' . $sort, $direction);
+            ->andWhere('JSON_CONTAINS(p.etatValidation, :etatDpe) = 1')
+            ->setParameter('etatDpe', json_encode(['soumis_cfvu' => 1]));
 
-        if (array_key_exists('typeDiplome', $options) && null !== $options['typeDiplome']) {
+        if ($q !== null && trim($q) !== '') {
+            $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
+                ->setParameter('q', '%' . trim($q) . '%');
+        }
+
+        if (array_key_exists('typeDiplome', $options) && null !== $options['typeDiplome'] && '' !== $options['typeDiplome']) {
             $query->andWhere('f.typeDiplome = :typeDiplome')
                 ->setParameter('typeDiplome', $options['typeDiplome']);
         }
 
-        if (array_key_exists('mention', $options) && null !== $options['mention']) {
+        if (array_key_exists('mention', $options) && null !== $options['mention'] && '' !== $options['mention']) {
             $query->andWhere('f.mention = :mention')
                 ->setParameter('mention', $options['mention']);
         }
 
-        if (array_key_exists('composantePorteuse', $options) && null !== $options['composantePorteuse']) {
-            $query->andWhere('f.composantePorteuse = :composante')
-                ->setParameter('composante', $options['composantePorteuse']);
+        if (array_key_exists('composantePorteuse', $options) && null !== $options['composantePorteuse'] && '' !== $options['composantePorteuse']) {
+            $query->andWhere('f.composantePorteuse = :composantePorteuse')
+                ->setParameter('composantePorteuse', $options['composantePorteuse']);
         }
 
-        if ($sort === 'mention') {
-            $query->addOrderBy(
-                'CASE
-                            WHEN f.mention IS NOT NULL THEN m.libelle
-                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
-                            ELSE f.mentionTexte
-                            END',
-                $direction
-            );
+        if (array_key_exists('responsable', $options) && null !== $options['responsable'] && '' !== $options['responsable']) {
+            $query->andWhere('f.responsableMention = :responsable OR f.coResponsable = :responsable OR parcours.respParcours = :responsable OR parcours.coResponsable = :responsable')
+                ->setParameter('responsable', $options['responsable']);
         }
 
         if ($composante !== null) {
@@ -260,8 +261,103 @@ class FormationRepository extends ServiceEntityRepository
                 ->setParameter('composante', $composante);
         }
 
-        return $query->getQuery()
-            ->getResult();
+        $query->orderBy('f.' . $sort, $direction);
+
+        if (isset($filtres['mention'])) {
+            $query->addOrderBy(
+                'CASE
+                            WHEN f.mention IS NOT NULL THEN m.libelle
+                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
+                            ELSE f.mentionTexte
+                            END',
+                $filtres['mention']
+            );
+        }
+
+        $results = $query->getQuery()->getResult();
+        $dedup = [];
+        foreach ($results as $f) {
+            $dedup[$f->getId()] = $f;
+        }
+
+        return array_values($dedup);
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     * @param array<int, Composante> $accessibleComposantes
+     * @return array<int, Formation>
+     */
+    public function findBySearchAndConseilComposante(
+        string|null      $q,
+        CampagneCollecte $campagneCollecte,
+        array            $options = [],
+        array            $accessibleComposantes = [],
+    ): array {
+        if (empty($accessibleComposantes)) {
+            return [];
+        }
+
+        $sort = $options['sort'] ?? 'typeDiplome';
+        $direction = $options['direction'] ?? 'ASC';
+
+        $filtres = [$sort => $direction];
+        $query = $this->createQueryBuilder('f')
+            ->innerJoin('f.dpeParcours', 'p', 'WITH', 'p.campagneCollecte = :campagneCollecte')
+            ->leftJoin('p.parcours', 'parcours')
+            ->addSelect('p')
+            ->leftJoin('f.mention', 'm')
+            ->setParameter('campagneCollecte', $campagneCollecte)
+            ->andWhere('f.composantePorteuse IN (:accessibleComposantes)')
+            ->setParameter('accessibleComposantes', $accessibleComposantes)
+            ->andWhere('JSON_CONTAINS(p.etatValidation, :etatDpe) = 1')
+            ->setParameter('etatDpe', json_encode(['soumis_conseil' => 1]));
+
+        if ($q !== null && trim($q) !== '') {
+            $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
+                ->setParameter('q', '%' . trim($q) . '%');
+        }
+
+        if (array_key_exists('typeDiplome', $options) && null !== $options['typeDiplome'] && '' !== $options['typeDiplome']) {
+            $query->andWhere('f.typeDiplome = :typeDiplome')
+                ->setParameter('typeDiplome', $options['typeDiplome']);
+        }
+
+        if (array_key_exists('mention', $options) && null !== $options['mention'] && '' !== $options['mention']) {
+            $query->andWhere('f.mention = :mention')
+                ->setParameter('mention', $options['mention']);
+        }
+
+        if (array_key_exists('composantePorteuse', $options) && null !== $options['composantePorteuse'] && '' !== $options['composantePorteuse']) {
+            $query->andWhere('f.composantePorteuse = :composantePorteuse')
+                ->setParameter('composantePorteuse', $options['composantePorteuse']);
+        }
+
+        if (array_key_exists('responsable', $options) && null !== $options['responsable'] && '' !== $options['responsable']) {
+            $query->andWhere('f.responsableMention = :responsable OR f.coResponsable = :responsable OR parcours.respParcours = :responsable OR parcours.coResponsable = :responsable')
+                ->setParameter('responsable', $options['responsable']);
+        }
+
+        $query->orderBy('f.' . $sort, $direction);
+
+        if (isset($filtres['mention'])) {
+            $query->addOrderBy(
+                'CASE
+                            WHEN f.mention IS NOT NULL THEN m.libelle
+                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
+                            ELSE f.mentionTexte
+                            END',
+                $filtres['mention']
+            );
+        }
+
+        $results = $query->getQuery()->getResult();
+        $dedup = [];
+        foreach ($results as $f) {
+            $dedup[$f->getId()] = $f;
+        }
+
+        return array_values($dedup);
     }
 
     public function findByResponsableOuCoResponsable(User $user, CampagneCollecte $campagneCollecte, array $sorts = []): array

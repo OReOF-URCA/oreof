@@ -23,12 +23,28 @@ class DefaultController extends BaseController
 {
     #[Route('/', name: 'app_homepage')]
     public function index(
-        Request $request
+        Request $request,
+        ComposanteRepository $composanteRepository,
     ): Response {
+        $step = $request->query->get('step', 'formation');
+        $canAccessCfvu = $this->canAccessCfvu();
+        $authorizedComposantes = $this->getAuthorizedComposantes($composanteRepository);
+        $canAccessConseilComposante = count($authorizedComposantes) > 0;
+
+        if ($step === 'cfvu' && !$canAccessCfvu) {
+            $step = 'formation';
+        }
+        if ($step === 'conseil_composante' && !$canAccessConseilComposante) {
+            $step = 'formation';
+        }
+
         return $this->render(
             'default/index.html.twig',
             [
-                'step' => $request->query->get('step', 'formation'),
+                'step' => $step,
+                'canAccessCfvu' => $canAccessCfvu,
+                'canAccessConseilComposante' => $canAccessConseilComposante,
+                'singleComposante' => count($authorizedComposantes) === 1 ? $authorizedComposantes[0] : null,
             ]
         );
     }
@@ -74,13 +90,24 @@ class DefaultController extends BaseController
     ): Response {
         $step = $request->query->get('step', 'formation');
 
-        $canAccessCfvu = $this->isGranted('MANAGE', ['route' => 'app_etablissement', 'subject' => 'etablissement']);
+        $canAccessCfvu = $this->canAccessCfvu();
+        $authorizedComposantes = $this->getAuthorizedComposantes($composanteRepository);
+        $canAccessConseilComposante = count($authorizedComposantes) > 0;
+
         if ($step === 'cfvu' && !$canAccessCfvu) {
+            $step = 'formation';
+        }
+        if ($step === 'conseil_composante' && !$canAccessConseilComposante) {
             $step = 'formation';
         }
 
         $template = 'default/_formation.html.twig';
-        $context = ['step' => $step];
+        $context = [
+            'step' => $step,
+            'canAccessCfvu' => $canAccessCfvu,
+            'canAccessConseilComposante' => $canAccessConseilComposante,
+            'singleComposante' => count($authorizedComposantes) === 1 ? $authorizedComposantes[0] : null,
+        ];
 
         switch ($step) {
             case 'fiche':
@@ -98,10 +125,14 @@ class DefaultController extends BaseController
                 $template = 'default/_cfvu.html.twig';
                 break;
 
+            case 'conseil_composante':
+                $template = 'default/_conseil_composante.html.twig';
+                break;
+
             case 'formation':
             default:
-            $template = 'default/_formation.html.twig';
-            break;
+                $template = 'default/_formation.html.twig';
+                break;
         }
 
         $accept = $request->headers->get('Accept', '');

@@ -3,7 +3,7 @@
 }) }}>
     {% set sort = params.sort is defined ? params.sort : 'typeDiplome' %}
     {% set direction = params.direction is defined ? params.direction : 'asc' %}
-    {% set isGranted = is_granted('ROLE_ADMIN') or is_granted('SHOW', {route: 'app_etablissement', subject: 'etablissement'}) or isCfvu %}
+    {% set isGranted = is_granted('ROLE_ADMIN') or is_granted('SHOW', {route: 'app_etablissement', subject: 'etablissement'}) or isCfvu|default(false) or isConseilComposante|default(false) %}
 
     {# Compter les filtres actifs #}
     {% set activeFilters = 0 %}
@@ -28,9 +28,19 @@
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="rounded-2xl border border-info-200 bg-info-50 px-4 py-3 text-sm text-info-900 dark:border-info-800 dark:bg-info-950/30 dark:text-info-100">
                 <div class="flex flex-wrap items-center gap-2">
-                    <span><strong>{{ nbFormations }}</strong> formation{{ nbFormations > 1 ? 's' : '' }} trouvée{{ nbFormations > 1 ? 's' : '' }}</span>
-                    <span class="text-xs opacity-75">•</span>
-                    <span><strong>{{ nbParcours }}</strong> parcours</span>
+                    {% if isCfvu|default(false) %}
+                        <span><strong>{{ nbFormations }}</strong> formation{{ nbFormations > 1 ? 's' : '' }} soumise{{ nbFormations > 1 ? 's' : '' }} à la CFVU</span>
+                        <span class="text-xs opacity-75">•</span>
+                        <span><strong>{{ nbParcours }}</strong> parcours</span>
+                    {% elseif isConseilComposante|default(false) %}
+                        <span><strong>{{ nbFormations }}</strong> formation{{ nbFormations > 1 ? 's' : '' }} soumise{{ nbFormations > 1 ? 's' : '' }} au conseil de composante</span>
+                        <span class="text-xs opacity-75">•</span>
+                        <span><strong>{{ nbParcours }}</strong> parcours</span>
+                    {% else %}
+                        <span><strong>{{ nbFormations }}</strong> formation{{ nbFormations > 1 ? 's' : '' }} trouvée{{ nbFormations > 1 ? 's' : '' }}</span>
+                        <span class="text-xs opacity-75">•</span>
+                        <span><strong>{{ nbParcours }}</strong> parcours</span>
+                    {% endif %}
 
                     {% if activeFilters > 0 %}
                         <span class="text-xs opacity-75">•</span>
@@ -121,20 +131,29 @@
                     </select>
                 </div>
 
-                <div>
-                    <label for="filter-composante"
-                           class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Composante</label>
-                    <select id="filter-composante"
-                            class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
-                            {{ stimulus_action('crud', 'filter', 'change', {'field': 'composantePorteuse'}) }}
-                            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
-                        <option value="">Toutes les composantes</option>
-                        {% for composante in composantes %}
-                            <option value="{{ composante.id }}"
-                                    {% if params['composantePorteuse'] is defined and params['composantePorteuse'] == composante.id %}selected{% endif %}>{{ composante.libelle }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                {% if composantes|length > 1 %}
+                    <div>
+                        <label for="filter-composante"
+                               class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Composante</label>
+                        <select id="filter-composante"
+                                class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
+                                {{ stimulus_action('crud', 'filter', 'change', {'field': 'composantePorteuse'}) }}
+                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                            <option value="">Toutes les composantes</option>
+                            {% for composante in composantes %}
+                                <option value="{{ composante.id }}"
+                                        {% if params['composantePorteuse'] is defined and params['composantePorteuse'] == composante.id %}selected{% endif %}>{{ composante.libelle }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% elseif composantes|length == 1 and isConseilComposante|default(false) %}
+                    <div>
+                        <span class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Composante</span>
+                        <div class="rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2 text-xs font-medium text-secondary-800 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
+                            {{ composantes|first.libelle }}
+                        </div>
+                    </div>
+                {% endif %}
 
                 <div>
                     <label for="filter-type_formation"
@@ -167,7 +186,7 @@
                     </select>
                 </div>
 
-                {% if not isCfvu %}
+                {% if not (isCfvu|default(false) or isConseilComposante|default(false)) %}
                     <div>
                         <label for="filter-remplissage"
                                class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Remplissage</label>

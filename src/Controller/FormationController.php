@@ -73,27 +73,123 @@ class FormationController extends BaseController
 
     #[Route('/liste-cfvu', name: 'app_formation_liste_cfvu', methods: ['GET'])]
     public function listeCfvu(
-        DpeParcoursRepository $dpeParcoursRepository,
-    ): Response
-    {
-        $allparcours = [];
-        if ($this->isGranted('SHOW', ['route' => 'app_etablissement', 'subject' => 'etablissement'])) {
-            $allparcours = $dpeParcoursRepository->findByCampagneAndTypeValidation($this->getCampagneCollecte(), 'soumis_cfvu');
+        UserRepository        $userRepository,
+        FormationRepository   $formationRepository,
+        MentionRepository     $mentionRepository,
+        ComposanteRepository  $composanteRepository,
+        TypeDiplomeRepository $typeDiplomeRepository,
+        MentionProcess        $validationProcess,
+        Request               $request,
+    ): Response {
+        if (!$this->canAccessCfvu()) {
+            throw $this->createAccessDeniedException('Accès réservé aux membres de la CFVU et administrateurs.');
         }
 
-        $nbParcours = count($allparcours);
-        $tFormations = [];
-        foreach ($allparcours as $parcours) {
-            $tFormations[] = $parcours->getParcours()?->getFormation()?->getId();
-        }
-        $nbFormations = count(array_unique($tFormations));
+        $campagne = $this->getCampagneCollecte();
+        $params = $request->query->all();
 
-        return $this->render('validation/_liste.html.twig', [
+        $tFormations = $formationRepository->findBySearchAndCfvu(
+            $params['q'] ?? null,
+            $campagne,
+            $params
+        );
+
+        $nbFormations = count($tFormations);
+        $nbParcours = 0;
+        foreach ($tFormations as $formation) {
+            foreach ($formation->getParcours() as $parcours) {
+                $dpeP = $parcours->getDpeParcoursPourCampagne($campagne);
+                if ($dpeP !== null && array_key_first($dpeP->getEtatValidation()) === 'soumis_cfvu') {
+                    $nbParcours++;
+                }
+            }
+        }
+
+        return $this->render('formation/_liste.html.twig', [
             'nbFormations' => $nbFormations,
             'nbParcours' => $nbParcours,
-            'allparcours' => $allparcours,
-            'etape' => 'cfvu',
+            'responsables' => $userRepository->findUserWithResponsabilites(),
+            'formations' => $tFormations,
+            'mentions' => $mentionRepository->findBy([], ['libelle' => 'ASC']),
+            'composantes' => $composanteRepository->findPorteuse(),
+            'typeDiplomes' => $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']),
+            'params' => $params,
             'isCfvu' => true,
+            'isConseilComposante' => false,
+            'process' => $validationProcess->getProcess(),
+        ]);
+    }
+
+    #[Route('/liste-conseil-composante', name: 'app_formation_liste_conseil_composante', methods: ['GET'])]
+    public function listeConseilComposante(
+        UserRepository        $userRepository,
+        FormationRepository   $formationRepository,
+        MentionRepository     $mentionRepository,
+        ComposanteRepository  $composanteRepository,
+        TypeDiplomeRepository $typeDiplomeRepository,
+        MentionProcess        $validationProcess,
+        Request               $request,
+    ): Response {
+        if (!$this->canAccessConseilComposante($composanteRepository)) {
+            throw $this->createAccessDeniedException('Accès réservé aux membres des conseils de composante.');
+        }
+
+        $user = $this->getUser();
+        $campagne = $this->getCampagneCollecte();
+        $params = $request->query->all();
+
+        $accessibleComposantes = $this->getAuthorizedComposantes($composanteRepository);
+        if (empty($accessibleComposantes)) {
+            throw $this->createAccessDeniedException('Accès réservé aux membres autorisés d\'une composante.');
+        }
+
+        // Si l'utilisateur a choisi une composante, s'assurer qu'elle fait bien partie des composantes autorisées
+        if (!empty($params['composantePorteuse'])) {
+            $requestedId = (int) $params['composantePorteuse'];
+            $isAuthorized = false;
+            foreach ($accessibleComposantes as $c) {
+                if ($c->getId() === $requestedId) {
+                    $isAuthorized = true;
+                    break;
+                }
+            }
+            if (!$isAuthorized) {
+                throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé sur cette composante.');
+            }
+        } elseif (count($accessibleComposantes) === 1) {
+            $params['composantePorteuse'] = (string) $accessibleComposantes[0]->getId();
+        }
+
+        $tFormations = $formationRepository->findBySearchAndConseilComposante(
+            $params['q'] ?? null,
+            $campagne,
+            $params,
+            $accessibleComposantes
+        );
+
+        $nbFormations = count($tFormations);
+        $nbParcours = 0;
+        foreach ($tFormations as $formation) {
+            foreach ($formation->getParcours() as $parcours) {
+                $dpeP = $parcours->getDpeParcoursPourCampagne($campagne);
+                if ($dpeP !== null && array_key_first($dpeP->getEtatValidation()) === 'soumis_conseil') {
+                    $nbParcours++;
+                }
+            }
+        }
+
+        return $this->render('formation/_liste.html.twig', [
+            'nbFormations' => $nbFormations,
+            'nbParcours' => $nbParcours,
+            'responsables' => $userRepository->findUserWithResponsabilites(),
+            'formations' => $tFormations,
+            'mentions' => $mentionRepository->findBy([], ['libelle' => 'ASC']),
+            'composantes' => $accessibleComposantes,
+            'typeDiplomes' => $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']),
+            'params' => $params,
+            'isCfvu' => false,
+            'isConseilComposante' => true,
+            'process' => $validationProcess->getProcess(),
         ]);
     }
 
@@ -149,6 +245,7 @@ class FormationController extends BaseController
             'typeDiplomes' => $typeDiplomes,
             'params' => $request->query->all(),
             'isCfvu' => false,
+            'isConseilComposante' => false,
             'process' => $validationProcess->getProcess()
         ]);
     }
@@ -239,6 +336,7 @@ class FormationController extends BaseController
             'typeDiplomes' => $typeDiplomes,
             'params' => $request->query->all(),
             'isCfvu' => false,
+            'isConseilComposante' => false,
             'stats' => $stats
         ]);
     }
@@ -274,6 +372,7 @@ class FormationController extends BaseController
             'nbParcours' => $nbParcours,
             'params' => $request->query->all(),
             'isCfvu' => false,
+            'isConseilComposante' => false,
             'composantes' => $composanteRepository->findPorteuse(),
             'typeDiplomes' => $typeDiplomeRepository->findAll(),
             'mentions' => $mentionRepository->findAll(),
