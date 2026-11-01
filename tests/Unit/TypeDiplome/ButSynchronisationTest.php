@@ -10,6 +10,8 @@ use App\Entity\NatureUeEc;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeEc;
 use App\Entity\TypeUe;
+use App\Enums\EtatDpeEnum;
+use App\Repository\CampagneCollecteRepository;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereRepository;
 use App\Repository\NatureUeEcRepository;
@@ -58,7 +60,7 @@ class ButSynchronisationTest extends TestCase
 
         $em = $em ?? $this->createStub(EntityManagerInterface::class);
         $fmRepo = $fmRepo ?? $this->createStub(FicheMatiereRepository::class);
-
+        $campagneRepo = $this->createStub(CampagneCollecteRepository::class);
 
         return new But(
             $typeEcRepo,
@@ -68,6 +70,7 @@ class ButSynchronisationTest extends TestCase
             $ecRepo,
             $fmRepo,
             $orebutApiService,
+            $campagneRepo,
             $kernel,
         );
     }
@@ -195,6 +198,9 @@ class ButSynchronisationTest extends TestCase
         $dpe = $parcours->getDpeParcours()->first();
         $this->assertNotNull($dpe);
         $this->assertSame(['en_cours_redaction' => 1], $dpe->getEtatValidation());
+        $demande = $parcours->getDpeDemandes()->first();
+        $this->assertNotNull($demande);
+        $this->assertSame(EtatDpeEnum::en_cours_redaction, $demande->getEtatDemande());
     }
 
     public function testSyncMaquetteRessourcesAndSaesSuccess(): void

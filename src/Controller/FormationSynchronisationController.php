@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Classes\DataUserSession;
 use App\Entity\Formation;
 use App\Repository\FicheMatiereRepository;
 use App\Service\Api\OrebutApiService;
@@ -30,6 +31,7 @@ class FormationSynchronisationController extends AbstractController
         But $butSynchronisation,
         OrebutApiService $orebutApiService,
         TurboStreamResponseFactory $turboStreamResponseFactory,
+        DataUserSession $dataUserSession,
     ): Response {
         $typeD = $formation->getTypeDiplome();
         if ($typeD === null || strtoupper(trim($typeD->getLibelleCourt())) !== 'BUT') {
@@ -78,7 +80,9 @@ class FormationSynchronisationController extends AbstractController
             );
 
             $dpeParcours = $formation->getDpeParcours()->first();
-            $campagneCollecte = $dpeParcours ? $dpeParcours->getCampagneCollecte() : $formation->getDpe();
+            $campagneCollecte = $dataUserSession->getCampagneCollecte()
+                ?? ($dpeParcours ? $dpeParcours->getCampagneCollecte() : null)
+                ?? $formation->getDpe();
 
             $result = $butSynchronisation->synchroniserWithOptions($formation, $campagneCollecte, $options);
             $flashMsg = $result->success ? $result->getSummary() : ('La synchronisation a échoué : ' . implode(' ', $result->errors));

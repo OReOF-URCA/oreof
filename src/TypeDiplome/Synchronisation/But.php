@@ -14,6 +14,7 @@ use App\Entity\ButApprentissageCritique;
 use App\Entity\ButCompetence;
 use App\Entity\ButNiveau;
 use App\Entity\CampagneCollecte;
+use App\Entity\DpeDemande;
 use App\Entity\DpeParcours;
 use App\Entity\ElementConstitutif;
 use App\Entity\FicheMatiere;
@@ -28,8 +29,10 @@ use App\Entity\TypeEc;
 use App\Entity\TypeUe;
 use App\Entity\Ue;
 use App\Enums\EtatDpeEnum;
+use App\Enums\TypeModificationDpeEnum;
 use App\Referentiel\ModaliteEnseignement;
 use App\Referentiel\RegimeInscription;
+use App\Repository\CampagneCollecteRepository;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereRepository;
 use App\Repository\NatureUeEcRepository;
@@ -68,6 +71,7 @@ class But
         protected ElementConstitutifRepository $elementConstitutifRepository,
         protected FicheMatiereRepository $ficheMatiereRepository,
         protected OrebutApiService $orebutApiService,
+        protected CampagneCollecteRepository $campagneCollecteRepository,
         private KernelInterface $kernel,
     ) {
         $this->typeEcRessource = $typeEcRepository->findOneBy(['libelle' => 'Ressource']);
@@ -99,7 +103,7 @@ class But
     ): ButSyncResult {
         $result = new ButSyncResult();
         $this->formation = $formation;
-        $this->campagneCollecte = $campagneCollecte;
+        $this->campagneCollecte = $campagneCollecte ?? $this->campagneCollecteRepository->findOneBy(['defaut' => true]);
         $this->listeParcours = [];
         $this->listeAcs = [];
         $this->structure = [];
@@ -227,22 +231,60 @@ class But
                 $state['3'] = true;
                 $parcours->setEtatSteps($state);
 
-                if ($this->campagneCollecte !== null) {
-                    $dpe = new DpeParcours();
-                    $dpe->setParcours($parcours);
-                    $dpe->setFormation($this->formation);
-                    $dpe->setCampagneCollecte($this->campagneCollecte);
-                    $dpe->setVersion('0.1');
-                    $dpe->setEtatValidation([EtatDpeEnum::en_cours_redaction->value => 1]);
-                    $parcours->addDpeParcour($dpe);
-                    $this->entityManager->persist($dpe);
-                }
-
                 $this->formation->addParcour($parcours);
                 $this->entityManager->persist($parcours);
                 $result->parcoursCreated++;
             } else {
                 $result->parcoursUpdated++;
+            }
+
+            // Toujours s'assurer que le DPE du parcours est initialisé et en cours de rédaction
+            if ($this->campagneCollecte !== null) {
+                $dpe = null;
+                foreach ($parcours->getDpeParcours() as $existingDpe) {
+                    if ($existingDpe->getCampagneCollecte() === $this->campagneCollecte) {
+                        $dpe = $existingDpe;
+                        break;
+                    }
+                }
+
+                if ($dpe === null) {
+                    $dpe = new DpeParcours();
+                    $dpe->setParcours($parcours);
+                    $dpe->setFormation($this->formation);
+                    $dpe->setCampagneCollecte($this->campagneCollecte);
+                    $dpe->setVersion('0.1');
+                    $dpe->setEtatReconduction(TypeModificationDpeEnum::CREATION);
+                    $parcours->addDpeParcour($dpe);
+                    $this->entityManager->persist($dpe);
+                }
+
+                $dpe->setEtatValidation([EtatDpeEnum::en_cours_redaction->value => 1]);
+
+                // S'assurer qu'une DpeDemande existe également à l'état en_cours_redaction
+                $demande = null;
+                foreach ($parcours->getDpeDemandes() as $existingDemande) {
+                    if ($existingDemande->getCampagneCollecte() === $this->campagneCollecte) {
+                        $demande = $existingDemande;
+                        break;
+                    }
+                }
+
+                if ($demande === null) {
+                    $demande = new DpeDemande();
+                    $demande->setParcours($parcours);
+                    $demande->setFormation($this->formation);
+                    $demande->setCampagneCollecte($this->campagneCollecte);
+                    $demande->setNiveauDemande('P');
+                    $demande->setNiveauModification(TypeModificationDpeEnum::CREATION);
+                    $demande->setArgumentaireDemande('Importation du parcours national B.U.T. (ORéBUT)');
+                    $demande->setDateDemande(new \DateTime());
+                    $parcours->addDpeDemande($demande);
+                    $this->formation->addDpeDemande($demande);
+                    $this->entityManager->persist($demande);
+                }
+
+                $demande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
             }
 
             $parcours->setLibelle((string) ($parcoursData['libelle'] ?? $parcours->getLibelle()));
