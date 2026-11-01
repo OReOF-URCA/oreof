@@ -268,12 +268,51 @@ final class OffreController extends BaseController
             $composantesList = $composanteRepository->findBy([], ['libelle' => 'ASC']);
         }
 
-        // Lire les filtres de la requête
-        $q = trim((string)$request->query->get('q', ''));
-        $comp = $composante !== null ? (string)$composante->getId() : (string)$request->query->get('comp', '');
-        $type = (string)$request->query->get('type', '');
-        $plateforme = (string)$request->query->get('plateforme', '');
-        $statut = (string)$request->query->get('statut', '');
+        // Gestion de la persistance des filtres (session + paramètres de requête)
+        $session = $request->getSession();
+        $campagneId = $campagne->getId() ?? 0;
+        $sessionKey = sprintf('offre_filters_%d_%s', $campagneId, $composante !== null ? 'comp_' . $composante->getId() : 'all');
+
+        if ($request->query->getBoolean('reset')) {
+            $session->remove($sessionKey);
+            $q = '';
+            $comp = $composante !== null ? (string)$composante->getId() : '';
+            $type = '';
+            $plateforme = '';
+            $statut = '';
+        } elseif ($request->query->has('q') || $request->query->has('comp') || $request->query->has('type') || $request->query->has('plateforme') || $request->query->has('statut')) {
+            $q = trim((string)$request->query->get('q', ''));
+            $comp = $composante !== null ? (string)$composante->getId() : (string)$request->query->get('comp', '');
+            $type = (string)$request->query->get('type', '');
+            $plateforme = (string)$request->query->get('plateforme', '');
+            $statut = (string)$request->query->get('statut', '');
+
+            $hasActiveFilters = $q !== ''
+                || ($composante === null && $comp !== '')
+                || $type !== ''
+                || $plateforme !== ''
+                || $statut !== '';
+
+            if ($hasActiveFilters) {
+                $session->set($sessionKey, [
+                    'q' => $q,
+                    'comp' => $comp,
+                    'type' => $type,
+                    'plateforme' => $plateforme,
+                    'statut' => $statut,
+                ]);
+            } else {
+                $session->remove($sessionKey);
+            }
+        } else {
+            /** @var array{q?: string, comp?: string, type?: string, plateforme?: string, statut?: string} $savedFilters */
+            $savedFilters = $session->get($sessionKey, []);
+            $q = trim((string)($savedFilters['q'] ?? ''));
+            $comp = $composante !== null ? (string)$composante->getId() : (string)($savedFilters['comp'] ?? '');
+            $type = (string)($savedFilters['type'] ?? '');
+            $plateforme = (string)($savedFilters['plateforme'] ?? '');
+            $statut = (string)($savedFilters['statut'] ?? '');
+        }
 
         // Appliquer les filtres côté PHP sur le tableau tFormations
         if ($q || $comp || $type || $plateforme || $statut) {

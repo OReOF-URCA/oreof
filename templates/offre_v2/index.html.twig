@@ -139,7 +139,7 @@
         {% endif %}
         
         {% set formUrl = composante ? path('app_offre_composante_index', {composante: composante.id}) : path('app_offre_index') %}
-        <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" class="space-y-6"
+        <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" data-turbo-action="replace" class="space-y-6"
               data-controller="auto-submit">
             <!-- KPI -->
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
@@ -266,7 +266,8 @@
                     </div>
 
                     <div class="md:col-span-1">
-                        <a href="{{ formUrl }}" data-turbo-frame="offre_table" class="inline-flex items-center justify-center rounded-lg border border-danger-200 bg-danger-50 hover:bg-danger-100 px-3 py-2 text-sm font-semibold text-danger-700 transition-colors w-full text-center dark:border-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
+                        {% set resetUrl = composante ? path('app_offre_composante_index', {composante: composante.id, reset: 1}) : path('app_offre_index', {reset: 1}) %}
+                        <a href="{{ resetUrl }}" data-turbo-frame="offre_table" data-turbo-action="replace" class="inline-flex items-center justify-center rounded-lg border border-danger-200 bg-danger-50 hover:bg-danger-100 px-3 py-2 text-sm font-semibold text-danger-700 transition-colors w-full text-center dark:border-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
                             Effacer
                         </a>
                     </div>
