@@ -190,14 +190,13 @@ final class OffreConfigurerController extends BaseController
                     }
                     $tAnnees = array_values(array_unique(array_map('intval', $raw['annees'] ?? [])));
                     $tParcours = array_values(array_unique(array_map('intval', $raw['parcours'] ?? [])));
-                    if (!empty($tAnnees) && !empty($tParcours)) {
-                        $cleanedTcs[] = [
-                            'id' => !empty($raw['id']) ? (string)$raw['id'] : 'tc_' . uniqid(),
-                            'nom' => !empty($raw['nom']) ? (string)$raw['nom'] : 'Tronc commun ' . (count($cleanedTcs) + 1),
-                            'annees' => $tAnnees,
-                            'parcours' => $tParcours,
-                        ];
-                    }
+                    $nom = !empty($raw['nom']) ? trim((string)$raw['nom']) : 'Tronc commun ' . (count($cleanedTcs) + 1);
+                    $cleanedTcs[] = [
+                        'id' => !empty($raw['id']) ? (string)$raw['id'] : 'tc_' . uniqid(),
+                        'nom' => $nom,
+                        'annees' => $tAnnees,
+                        'parcours' => $tParcours,
+                    ];
                 }
                 $formation->setTroncsCommuns($cleanedTcs);
                 $em->persist($formation);
@@ -304,19 +303,9 @@ final class OffreConfigurerController extends BaseController
                     $activePortailEntities[] = $portail;
 
                     // Nouvelle structure directe : portails[id][annees][] = [anneeId, ...]
-                    if (isset($pData['annees']) || isset($pData['formations_presentes'])) {
+                    if (isset($pData['configured']) || isset($pData['annees']) || isset($pData['formations_presentes']) || array_key_exists('libelle', $pData)) {
                         $selectedAnneeIds = array_map('intval', (array)($pData['annees'] ?? []));
                         $presentFormationIds = array_map('intval', (array)($pData['formations_presentes'] ?? []));
-                        if ($formation->getId() !== null && !in_array($formation->getId(), $presentFormationIds, true)) {
-                            $presentFormationIds[] = (int)$formation->getId();
-                        }
-                        // Formations déjà dans le portail mais non modifiables par l'utilisateur : conservées telles quelles.
-                        $presentFormationIds = array_values(array_filter(
-                            $presentFormationIds,
-                            fn (int $fId): bool => $fId === $formation->getId()
-                                || $peutModifierFormation($em->getRepository(Formation::class)->find($fId))
-                                || in_array($fId, $portail->getFormationsIds(), true)
-                        ));
 
                         $portail->setFormationsIds($presentFormationIds);
 
@@ -326,9 +315,6 @@ final class OffreConfigurerController extends BaseController
                                 continue;
                             }
                             $annee = $em->getRepository(Annee::class)->find($anneeId);
-                            if ($annee !== null && !$peutModifierAnnee($annee)) {
-                                continue;
-                            }
                             if ($annee !== null && $annee->getPortail() !== $portail) {
                                 $annee->setPortail($portail);
                                 $em->persist($annee);
@@ -336,19 +322,16 @@ final class OffreConfigurerController extends BaseController
                             }
                         }
 
-                        // 2. Détachement des années décochées pour les formations présentes dans ce portail
+                        // 2. Détachement des années décochées ou appartenant à des formations retirées du portail
                         foreach ($portail->getAnnees()->toArray() as $existingAnnee) {
                             $existingAnneeId = $existingAnnee->getId();
                             if ($existingAnneeId === null) {
                                 continue;
                             }
                             if (!in_array($existingAnneeId, $selectedAnneeIds, true)) {
-                                $anneeFormationId = $existingAnnee->getParcours()?->getFormation()?->getId();
-                                if ($anneeFormationId !== null && in_array($anneeFormationId, $presentFormationIds, true) && $peutModifierAnnee($existingAnnee)) {
-                                    $existingAnnee->setPortail(null);
-                                    $em->persist($existingAnnee);
-                                    $changedYears[$existingAnneeId] = true;
-                                }
+                                $existingAnnee->setPortail(null);
+                                $em->persist($existingAnnee);
+                                $changedYears[$existingAnneeId] = true;
                             }
                         }
                     } else {

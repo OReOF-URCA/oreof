@@ -7,6 +7,21 @@
 {% set isTcActive = active_tab == 'troncs-communs' %}
 {% set isPortailsActive = active_tab == 'portails' %}
 
+{% set anyPortailHasDifferentDiplomes = false %}
+{% for p in portails %}
+    {% set pStructures = p.getFormationsStructure(formationsCampagneObjets|default([])) %}
+    {% set pTypes = [] %}
+    {% for ps in pStructures %}
+        {% set ptd = ps.formation.typeDiplome ? ps.formation.typeDiplome.libelleCourt : '' %}
+        {% if ptd and ptd not in pTypes %}
+            {% set pTypes = pTypes|merge([ptd]) %}
+        {% endif %}
+    {% endfor %}
+    {% if pTypes|length > 1 %}
+        {% set anyPortailHasDifferentDiplomes = true %}
+    {% endif %}
+{% endfor %}
+
 <div id="configurer_mutualisation_block"
      data-controller="mutualisation"
      data-mutualisation-next-index-value="{{ troncsCommuns|length + 1 }}"
@@ -15,6 +30,7 @@
 >
     <input type="hidden" name="has_tronc_commun_config" value="1">
     <input type="hidden" name="has_portail_config" value="1">
+    <input type="hidden" name="troncs_communs_cleared" value="1">
     <input type="hidden" name="active_mutualisation_tab" data-mutualisation-target="activeTabInput" value="{{ active_tab }}">
 
     <!-- Vue repliée (mode compact pour la lisibilité) -->
@@ -42,6 +58,12 @@
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-secondary-200 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200">
                                     <twig:UX:Icon name="ph:circles-three-bold" class="size-3" />
                                     <span>{{ portails|length }} portail{{ portails|length > 1 ? 's' : '' }}</span>
+                                </span>
+                            {% endif %}
+                            {% if anyPortailHasDifferentDiplomes %}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-warning-100 text-warning-800 dark:bg-warning-900/40 dark:text-warning-300 border border-warning-200 dark:border-warning-700">
+                                    <twig:UX:Icon name="ph:warning-bold" class="size-3" />
+                                    <span>Diplômes différents</span>
                                 </span>
                             {% endif %}
                         {% endif %}
@@ -110,6 +132,11 @@
                     {% if portails is not empty %}
                         <span class="inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-secondary-200 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200">
                             {{ portails|length }}
+                        </span>
+                    {% endif %}
+                    {% if anyPortailHasDifferentDiplomes %}
+                        <span class="inline-flex items-center" title="Un ou plusieurs portails regroupent des formations aux types de diplôme différents">
+                            <twig:UX:Icon name="ph:warning-bold" class="size-3.5 text-warning-500" />
                         </span>
                     {% endif %}
                 </button>
@@ -305,13 +332,27 @@
         <div data-mutualisation-target="portailsList" class="space-y-4">
             {% for portail in portails %}
                 {% set fStructures = portail.getFormationsStructure(formationsCampagneObjets|default([])) %}
+                {% set isCurrentFormationInPortail = false %}
+                {% set portailTypesDiplomes = [] %}
+                {% for fs in fStructures %}
+                    {% if fs.formation.id == formation.id %}
+                        {% set isCurrentFormationInPortail = true %}
+                    {% endif %}
+                    {% set tdLib = fs.formation.typeDiplome ? fs.formation.typeDiplome.libelleCourt : '' %}
+                    {% if tdLib and tdLib not in portailTypesDiplomes %}
+                        {% set portailTypesDiplomes = portailTypesDiplomes|merge([tdLib]) %}
+                    {% endif %}
+                {% endfor %}
+                {% set hasMultipleDiplomes = portailTypesDiplomes|length > 1 %}
 
                 <div class="rounded-xl border border-secondary-200 bg-surface dark:bg-secondary-800/30 dark:border-secondary-700 p-4 shadow-xs"
                      data-portail-card="true"
                      data-portail-id="{{ portail.id }}"
                 >
-                    <div class="flex items-center justify-between border-b border-secondary-100 dark:border-secondary-700/60 pb-3 mb-3 flex-wrap gap-2">
-                        <div class="flex items-center gap-2 flex-1 min-w-[260px]">
+                    <input type="hidden" name="portails[{{ portail.id }}][configured]" value="1">
+                    <!-- En-tête de la carte portail (toujours visible) -->
+                    <div class="flex items-center justify-between border-b border-secondary-100 dark:border-secondary-700/60 pb-3 flex-wrap gap-2">
+                        <div class="flex items-center gap-2 flex-1 min-w-[260px] flex-wrap">
                             <span class="inline-flex items-center justify-center size-6 rounded-md bg-secondary-100 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-200 text-xs font-bold shrink-0">
                                 <twig:UX:Icon name="ph:circles-three-bold" class="size-3.5" />
                             </span>
@@ -321,123 +362,87 @@
                                    placeholder="ex: Portail Éco-Gestion"
                                    data-action="input->mutualisation#notifyDirty"
                                    {{ not can_edit ? 'disabled' : '' }}
-                                   class="rounded-lg border border-secondary-200 dark:border-secondary-600 bg-surface dark:bg-secondary-900 px-2.5 py-1 text-xs font-semibold text-secondary-900 dark:text-secondary-100 focus:ring-1 focus:ring-primary-500 w-full max-w-md"
+                                   class="rounded-lg border border-secondary-200 dark:border-secondary-600 bg-surface dark:bg-secondary-900 px-2.5 py-1 text-xs font-semibold text-secondary-900 dark:text-secondary-100 focus:ring-1 focus:ring-primary-500 w-full max-w-xs"
                             >
+
+                            <!-- Badge nombre de formations -->
+                            <span data-portail-count-badge="true" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-secondary-100 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-200">
+                                <twig:UX:Icon name="ph:buildings-bold" class="size-3" />
+                                <span data-portail-count-text="true">{{ fStructures|length }} formation{{ fStructures|length > 1 ? 's' : '' }}</span>
+                            </span>
+
+                            <!-- Badge avertissement types de diplômes différents -->
+                            <span data-portail-warning-badge="true"
+                                  class="{{ hasMultipleDiplomes ? 'inline-flex' : 'hidden' }} items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-warning-100 text-warning-800 dark:bg-warning-900/40 dark:text-warning-300 border border-warning-300 dark:border-warning-700"
+                                  title="Ce portail contient des formations aux types de diplôme différents : {{ portailTypesDiplomes|join(', ') }}"
+                            >
+                                <twig:UX:Icon name="ph:warning-bold" class="size-3.5 text-warning-600 dark:text-warning-400" />
+                                <span>Diplômes différents (<span data-portail-warning-badge-types="true">{{ portailTypesDiplomes|join(', ') }}</span>)</span>
+                            </span>
                         </div>
 
-                        {% if can_edit %}
+                        <div class="flex items-center gap-2">
+                            <!-- Bouton Déplier / Replier (replié par défaut) -->
                             <button type="button"
-                                    class="inline-flex items-center gap-1 text-xs text-danger-600 hover:text-danger-800 hover:bg-danger-50 dark:hover:bg-danger-900/30 px-2 py-1 rounded-md transition-colors cursor-pointer"
-                                    data-action="click->mutualisation#removePortail"
-                                    title="Supprimer ce portail"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface hover:bg-secondary-50 dark:bg-secondary-900 dark:hover:bg-secondary-800 text-xs font-semibold text-secondary-700 dark:text-secondary-200 transition-colors cursor-pointer"
+                                    data-action="click->mutualisation#togglePortailCardCollapse"
+                                    data-portail-toggle-btn="true"
                             >
-                                <twig:UX:Icon name="icon:trash" class="size-3.5" />
-                                <span>Supprimer le portail</span>
+                                <twig:UX:Icon name="icon:chevron-down" class="size-3.5 transition-transform duration-200" data-portail-chevron="true" />
+                                <span data-portail-toggle-text="true">Déplier</span>
                             </button>
-                        {% endif %}
+
+                            {% if can_edit %}
+                                <button type="button"
+                                        class="inline-flex items-center gap-1 text-xs text-danger-600 hover:text-danger-800 hover:bg-danger-50 dark:hover:bg-danger-900/30 px-2 py-1.5 rounded-md transition-colors cursor-pointer"
+                                        data-action="click->mutualisation#removePortail"
+                                        title="Supprimer ce portail"
+                                >
+                                    <twig:UX:Icon name="icon:trash" class="size-3.5" />
+                                    <span>Supprimer</span>
+                                </button>
+                            {% endif %}
+                        </div>
                     </div>
 
-                    <!-- Formations intégrées dans ce portail -->
-                    <div class="space-y-3" data-portail-formations="true">
-                        <!-- Formation courante (toujours en premier dans ce portail) -->
-                        <div class="rounded-lg border border-secondary-200 dark:border-secondary-700/80 bg-secondary-50/40 dark:bg-secondary-900/30 p-3.5"
-                             data-formation-card="true"
-                             data-formation-id="{{ formation.id }}"
+                    <!-- Corps dépliable du portail (replié par défaut) -->
+                    <div data-portail-body="true" class="hidden space-y-4 pt-3 border-t border-secondary-100 dark:border-secondary-700/60 mt-3">
+                        <!-- Alerte warning si types de diplômes différents -->
+                        <div data-portail-warning-banner="true"
+                             class="{{ hasMultipleDiplomes ? 'flex' : 'hidden' }} rounded-lg border border-warning-200 bg-warning-50/80 dark:border-warning-800/60 dark:bg-warning-900/30 p-3 text-xs text-warning-800 dark:text-warning-200 items-start gap-2.5"
                         >
-                            <input type="hidden" name="portails[{{ portail.id }}][formations_presentes][]" value="{{ formation.id }}">
-
-                            <div class="flex items-center justify-between border-b border-secondary-200 dark:border-secondary-700/60 pb-2 mb-2.5 flex-wrap gap-2">
-                                <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
-                                        {{ typeDiplome.libelleCourt|default('Diplôme') }}
-                                    </span>
-                                    <span class="text-xs font-bold text-secondary-900 dark:text-secondary-100">
-                                        {{ formation.displayLong }}
-                                    </span>
-                                    <span class="text-[11px] text-secondary-500 dark:text-secondary-400">
-                                        ({{ formation.composantePorteuse ? formation.composantePorteuse.libelle : 'Sans composante' }})
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Parcours et années concernés pour la formation courante -->
+                            <twig:UX:Icon name="ph:warning-bold" class="size-4 shrink-0 text-warning-600 dark:text-warning-400 mt-0.5" />
                             <div>
-                                <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
-                                    <label class="text-xs font-semibold text-secondary-700 dark:text-secondary-300">
-                                        Parcours et années intégrés au portail :
-                                    </label>
-                                    {% if can_edit %}
-                                        <div class="inline-flex items-center gap-2 text-[11px] text-primary-600 dark:text-primary-400 flex-wrap">
-                                            {% for ordre in formation.anneesOrdres %}
-                                                <button type="button"
-                                                        class="hover:underline cursor-pointer"
-                                                        data-action="click->mutualisation#selectAnneeForAllParcours"
-                                                        data-annee-ordre="{{ ordre }}"
-                                                >
-                                                    + Toute l'Année {{ ordre }}
-                                                </button>
-                                                <span>•</span>
-                                            {% endfor %}
-                                            <button type="button" class="hover:underline cursor-pointer" data-action="click->mutualisation#selectAllPortailParcours">Tout cocher</button>
-                                            <span>•</span>
-                                            <button type="button" class="hover:underline cursor-pointer" data-action="click->mutualisation#deselectAllPortailParcours">Tout décocher</button>
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="space-y-1.5">
-                                    {% for p in formation.parcours %}
-                                        {% set tpBadge = p.typeParcours|badgeTypeParcours %}
-                                        <div class="flex items-center justify-between gap-3 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700/60 bg-surface dark:bg-secondary-900/40">
-                                            <div class="flex items-center gap-1.5 flex-1 min-w-[180px]">
-                                                <span class="text-xs font-medium text-secondary-900 dark:text-secondary-100">{{ p.libelle }}</span>
-                                                {% if tpBadge is not null %}
-                                                    <twig:Badge :dto="tpBadge" size="xs" />
-                                                {% endif %}
-                                            </div>
-                                            <div class="flex items-center gap-2 flex-wrap">
-                                                {% for a in p.annees %}
-                                                    {% set isChecked = a.portail and a.portail.id == portail.id %}
-                                                    <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium cursor-pointer transition-colors {{ isChecked ? 'bg-primary-50 border-primary-300 text-primary-800 dark:bg-primary-900/30 dark:border-primary-700 dark:text-primary-300' : 'bg-surface border-secondary-200 text-secondary-600 hover:bg-secondary-50 dark:bg-secondary-900 dark:border-secondary-700 dark:text-secondary-400' }}">
-                                                        <input type="checkbox"
-                                                               name="portails[{{ portail.id }}][annees][]"
-                                                               value="{{ a.id }}"
-                                                               data-annee-ordre="{{ a.ordre }}"
-                                                               data-action="change->mutualisation#toggleCheckboxStyle"
-                                                               {{ isChecked ? 'checked' : '' }}
-                                                               {{ not can_edit ? 'disabled' : '' }}
-                                                               class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400"
-                                                        >
-                                                        <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ a.ordre }}</span>
-                                                    </label>
-                                                {% endfor %}
-                                            </div>
-                                        </div>
-                                    {% endfor %}
-                                </div>
+                                <strong>Attention — Types de diplôme différents :</strong>
+                                <span>Ce portail regroupe des formations de types de diplôme distincts (<span data-portail-warning-banner-types="true">{{ portailTypesDiplomes|join(', ') }}</span>). Vérifiez la cohérence des règles d'admission, de capacité et de calendrier.</span>
                             </div>
                         </div>
 
-                        <!-- Autres formations déjà enregistrées dans ce portail -->
-                        {% for fs in fStructures %}
-                            {% if fs.formation.id != formation.id %}
-                                {% set otherF = fs.formation %}
+                        <!-- Formations intégrées dans ce portail -->
+                        <div class="space-y-3" data-portail-formations="true">
+                            <p data-portail-formations-empty="true" class="{{ (fStructures is empty and not isCurrentFormationInPortail) ? '' : 'hidden' }} text-xs text-secondary-500 dark:text-secondary-400 italic py-2">
+                                Aucune formation n'est actuellement rattachée à ce portail. Utilisez le sélecteur ci-dessous pour en ajouter une.
+                            </p>
+
+                            {% if isCurrentFormationInPortail %}
+                                <!-- Formation courante -->
                                 <div class="rounded-lg border border-secondary-200 dark:border-secondary-700/80 bg-secondary-50/40 dark:bg-secondary-900/30 p-3.5"
                                      data-formation-card="true"
-                                     data-formation-id="{{ otherF.id }}"
+                                     data-formation-id="{{ formation.id }}"
+                                     data-type-diplome="{{ typeDiplome.libelleCourt|default('Diplôme') }}"
                                 >
-                                    <input type="hidden" name="portails[{{ portail.id }}][formations_presentes][]" value="{{ otherF.id }}">
+                                    <input type="hidden" name="portails[{{ portail.id }}][formations_presentes][]" value="{{ formation.id }}">
 
                                     <div class="flex items-center justify-between border-b border-secondary-200 dark:border-secondary-700/60 pb-2 mb-2.5 flex-wrap gap-2">
                                         <div class="flex items-center gap-2">
                                             <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
-                                                {{ otherF.typeDiplome.libelleCourt|default('Diplôme') }}
+                                                {{ typeDiplome.libelleCourt|default('Diplôme') }}
                                             </span>
                                             <span class="text-xs font-bold text-secondary-900 dark:text-secondary-100">
-                                                {{ otherF.displayLong }}
+                                                {{ formation.displayLong }}
                                             </span>
                                             <span class="text-[11px] text-secondary-500 dark:text-secondary-400">
-                                                ({{ otherF.composantePorteuse ? otherF.composantePorteuse.libelle : 'Sans composante' }})
+                                                ({{ formation.composantePorteuse ? formation.composantePorteuse.libelle : 'Sans composante' }})
                                             </span>
                                         </div>
 
@@ -453,6 +458,7 @@
                                         {% endif %}
                                     </div>
 
+                                    <!-- Parcours et années concernés pour la formation courante -->
                                     <div>
                                         <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
                                             <label class="text-xs font-semibold text-secondary-700 dark:text-secondary-300">
@@ -460,7 +466,7 @@
                                             </label>
                                             {% if can_edit %}
                                                 <div class="inline-flex items-center gap-2 text-[11px] text-primary-600 dark:text-primary-400 flex-wrap">
-                                                    {% for ordre in otherF.anneesOrdres %}
+                                                    {% for ordre in formation.anneesOrdres %}
                                                         <button type="button"
                                                                 class="hover:underline cursor-pointer"
                                                                 data-action="click->mutualisation#selectAnneeForAllParcours"
@@ -478,7 +484,7 @@
                                         </div>
 
                                         <div class="space-y-1.5">
-                                            {% for p in otherF.parcours %}
+                                            {% for p in formation.parcours %}
                                                 {% set tpBadge = p.typeParcours|badgeTypeParcours %}
                                                 <div class="flex items-center justify-between gap-3 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700/60 bg-surface dark:bg-secondary-900/40">
                                                     <div class="flex items-center gap-1.5 flex-1 min-w-[180px]">
@@ -500,7 +506,7 @@
                                                                        {{ not can_edit ? 'disabled' : '' }}
                                                                        class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400"
                                                                 >
-                                                                <span>{{ otherF.typeDiplome.libelleCourt|default('Année') }} {{ a.ordre }}</span>
+                                                                <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ a.ordre }}</span>
                                                             </label>
                                                         {% endfor %}
                                                     </div>
@@ -510,37 +516,130 @@
                                     </div>
                                 </div>
                             {% endif %}
-                        {% endfor %}
-                    </div>
 
-                    <!-- Sélecteur pour ajouter une autre formation à ce portail -->
-                    {% if can_edit %}
-                        <div class="pt-3 border-t border-secondary-200 dark:border-secondary-700/60 flex items-center gap-2 flex-wrap mt-3">
-                            <label class="text-xs font-semibold text-secondary-700 dark:text-secondary-300">
-                                Ajouter une autre formation à ce portail :
-                            </label>
-                            <div class="flex-1 min-w-[240px] max-w-md">
-                                <select class="w-full text-xs"
-                                        data-add-formation-select="true"
-                                        {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
-                                >
-                                    <option value="">Sélectionner une formation de la campagne...</option>
-                                    {% for f in formationsCampagneData|default([]) %}
-                                        {% if f.id != formation.id %}
-                                            <option value="{{ f.id }}">{{ f.libelle }} ({{ f.composante }})</option>
-                                        {% endif %}
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <button type="button"
-                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary-100 hover:bg-secondary-200 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200 text-xs font-medium cursor-pointer transition-colors"
-                                    data-action="click->mutualisation#addFormationToPortail"
-                            >
-                                <twig:UX:Icon name="ph:plus-bold" class="size-3" />
-                                <span>Ajouter cette formation</span>
-                            </button>
+                            <!-- Autres formations déjà enregistrées dans ce portail -->
+                            {% for fs in fStructures %}
+                                {% if fs.formation.id != formation.id %}
+                                    {% set otherF = fs.formation %}
+                                    <div class="rounded-lg border border-secondary-200 dark:border-secondary-700/80 bg-secondary-50/40 dark:bg-secondary-900/30 p-3.5"
+                                         data-formation-card="true"
+                                         data-formation-id="{{ otherF.id }}"
+                                         data-type-diplome="{{ otherF.typeDiplome ? otherF.typeDiplome.libelleCourt : 'Diplôme' }}"
+                                    >
+                                        <input type="hidden" name="portails[{{ portail.id }}][formations_presentes][]" value="{{ otherF.id }}">
+
+                                        <div class="flex items-center justify-between border-b border-secondary-200 dark:border-secondary-700/60 pb-2 mb-2.5 flex-wrap gap-2">
+                                            <div class="flex items-center gap-2">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
+                                                    {{ otherF.typeDiplome.libelleCourt|default('Diplôme') }}
+                                                </span>
+                                                <span class="text-xs font-bold text-secondary-900 dark:text-secondary-100">
+                                                    {{ otherF.displayLong }}
+                                                </span>
+                                                <span class="text-[11px] text-secondary-500 dark:text-secondary-400">
+                                                    ({{ otherF.composantePorteuse ? otherF.composantePorteuse.libelle : 'Sans composante' }})
+                                                </span>
+                                            </div>
+
+                                            {% if can_edit %}
+                                                <button type="button"
+                                                        class="inline-flex items-center gap-1 text-xs text-danger-600 hover:text-danger-800 hover:bg-danger-50 dark:hover:bg-danger-900/30 px-2 py-0.5 rounded transition-colors cursor-pointer"
+                                                        data-action="click->mutualisation#removeFormationFromPortail"
+                                                        title="Retirer cette formation du portail"
+                                                >
+                                                    <twig:UX:Icon name="icon:trash" class="size-3" />
+                                                    <span>Retirer de ce portail</span>
+                                                </button>
+                                            {% endif %}
+                                        </div>
+
+                                        <div>
+                                            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                                                <label class="text-xs font-semibold text-secondary-700 dark:text-secondary-300">
+                                                    Parcours et années intégrés au portail :
+                                                </label>
+                                                {% if can_edit %}
+                                                    <div class="inline-flex items-center gap-2 text-[11px] text-primary-600 dark:text-primary-400 flex-wrap">
+                                                        {% for ordre in otherF.anneesOrdres %}
+                                                            <button type="button"
+                                                                    class="hover:underline cursor-pointer"
+                                                                    data-action="click->mutualisation#selectAnneeForAllParcours"
+                                                                    data-annee-ordre="{{ ordre }}"
+                                                            >
+                                                                + Toute l'Année {{ ordre }}
+                                                            </button>
+                                                            <span>•</span>
+                                                        {% endfor %}
+                                                        <button type="button" class="hover:underline cursor-pointer" data-action="click->mutualisation#selectAllPortailParcours">Tout cocher</button>
+                                                        <span>•</span>
+                                                        <button type="button" class="hover:underline cursor-pointer" data-action="click->mutualisation#deselectAllPortailParcours">Tout décocher</button>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="space-y-1.5">
+                                                {% for p in otherF.parcours %}
+                                                    {% set tpBadge = p.typeParcours|badgeTypeParcours %}
+                                                    <div class="flex items-center justify-between gap-3 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700/60 bg-surface dark:bg-secondary-900/40">
+                                                        <div class="flex items-center gap-1.5 flex-1 min-w-[180px]">
+                                                            <span class="text-xs font-medium text-secondary-900 dark:text-secondary-100">{{ p.libelle }}</span>
+                                                            {% if tpBadge is not null %}
+                                                                <twig:Badge :dto="tpBadge" size="xs" />
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="flex items-center gap-2 flex-wrap">
+                                                            {% for a in p.annees %}
+                                                                {% set isChecked = a.portail and a.portail.id == portail.id %}
+                                                                <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium cursor-pointer transition-colors {{ isChecked ? 'bg-primary-50 border-primary-300 text-primary-800 dark:bg-primary-900/30 dark:border-primary-700 dark:text-primary-300' : 'bg-surface border-secondary-200 text-secondary-600 hover:bg-secondary-50 dark:bg-secondary-900 dark:border-secondary-700 dark:text-secondary-400' }}">
+                                                                    <input type="checkbox"
+                                                                           name="portails[{{ portail.id }}][annees][]"
+                                                                           value="{{ a.id }}"
+                                                                           data-annee-ordre="{{ a.ordre }}"
+                                                                           data-action="change->mutualisation#toggleCheckboxStyle"
+                                                                           {{ isChecked ? 'checked' : '' }}
+                                                                           {{ not can_edit ? 'disabled' : '' }}
+                                                                           class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400"
+                                                                    >
+                                                                    <span>{{ otherF.typeDiplome.libelleCourt|default('Année') }} {{ a.ordre }}</span>
+                                                                </label>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
                         </div>
-                    {% endif %}
+
+                        <!-- Sélecteur pour ajouter une autre formation à ce portail -->
+                        {% if can_edit %}
+                            <div class="pt-3 border-t border-secondary-200 dark:border-secondary-700/60 flex items-center gap-2 flex-wrap mt-3">
+                                <label class="text-xs font-semibold text-secondary-700 dark:text-secondary-300">
+                                    Ajouter une autre formation à ce portail :
+                                </label>
+                                <div class="flex-1 min-w-[240px] max-w-md">
+                                    <select class="w-full text-xs"
+                                            data-add-formation-select="true"
+                                            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
+                                    >
+                                        <option value="">Sélectionner une formation de la campagne...</option>
+                                        {% for f in formationsCampagneData|default([]) %}
+                                            <option value="{{ f.id }}">{{ f.libelle }} ({{ f.composante }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="button"
+                                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary-100 hover:bg-secondary-200 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200 text-xs font-medium cursor-pointer transition-colors"
+                                        data-action="click->mutualisation#addFormationToPortail"
+                                >
+                                    <twig:UX:Icon name="ph:plus-bold" class="size-3" />
+                                    <span>Ajouter cette formation</span>
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             {% endfor %}
         </div>
@@ -596,6 +695,7 @@
                            name="troncs_communs[__INDEX__][nom]"
                            value="Tronc commun __NUM__"
                            placeholder="Nom du tronc commun"
+                           data-action="input->mutualisation#notifyDirty"
                            class="rounded-lg border border-secondary-200 dark:border-secondary-600 bg-surface dark:bg-secondary-900 px-2.5 py-1 text-xs font-semibold text-secondary-900 dark:text-secondary-100 focus:ring-1 focus:ring-primary-500 w-full max-w-xs"
                     >
                     <input type="hidden" name="troncs_communs[__INDEX__][id]" value="tc___INDEX__">
@@ -670,8 +770,9 @@
              data-portail-card="true"
              data-portail-id="__PORTAIL_ID__"
         >
-            <div class="flex items-center justify-between border-b border-secondary-100 dark:border-secondary-700/60 pb-3 mb-3 flex-wrap gap-2">
-                <div class="flex items-center gap-2 flex-1 min-w-[260px]">
+            <input type="hidden" name="portails[__PORTAIL_ID__][configured]" value="1">
+            <div class="flex items-center justify-between border-b border-secondary-100 dark:border-secondary-700/60 pb-3 flex-wrap gap-2">
+                <div class="flex items-center gap-2 flex-1 min-w-[260px] flex-wrap">
                     <span class="inline-flex items-center justify-center size-6 rounded-md bg-secondary-100 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-200 text-xs font-bold shrink-0">
                         <twig:UX:Icon name="ph:circles-three-bold" class="size-3.5" />
                     </span>
@@ -680,123 +781,175 @@
                            value="Portail Éco-Gestion"
                            placeholder="ex: Portail Éco-Gestion"
                            data-action="input->mutualisation#notifyDirty"
-                           class="rounded-lg border border-secondary-200 dark:border-secondary-600 bg-surface dark:bg-secondary-900 px-2.5 py-1 text-xs font-semibold text-secondary-900 dark:text-secondary-100 focus:ring-1 focus:ring-primary-500 w-full max-w-md"
+                           class="rounded-lg border border-secondary-200 dark:border-secondary-600 bg-surface dark:bg-secondary-900 px-2.5 py-1 text-xs font-semibold text-secondary-900 dark:text-secondary-100 focus:ring-1 focus:ring-primary-500 w-full max-w-xs"
                     >
+
+                    <!-- Badge nombre de formations -->
+                    <span data-portail-count-badge="true" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-secondary-100 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-200">
+                        <twig:UX:Icon name="ph:buildings-bold" class="size-3" />
+                        <span data-portail-count-text="true">1 formation</span>
+                    </span>
+
+                    <!-- Badge avertissement types de diplômes différents -->
+                    <span data-portail-warning-badge="true"
+                          class="hidden items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-warning-100 text-warning-800 dark:bg-warning-900/40 dark:text-warning-300 border border-warning-300 dark:border-warning-700"
+                    >
+                        <twig:UX:Icon name="ph:warning-bold" class="size-3.5 text-warning-600 dark:text-warning-400" />
+                        <span>Diplômes différents (<span data-portail-warning-badge-types="true"></span>)</span>
+                    </span>
                 </div>
 
-                <button type="button"
-                        class="inline-flex items-center gap-1 text-xs text-danger-600 hover:text-danger-800 hover:bg-danger-50 dark:hover:bg-danger-900/30 px-2 py-1 rounded-md transition-colors cursor-pointer"
-                        data-action="click->mutualisation#removePortail"
-                        title="Supprimer ce portail"
-                >
-                    <twig:UX:Icon name="icon:trash" class="size-3.5" />
-                    <span>Supprimer le portail</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <!-- Bouton Déplier / Replier (nouveau portail : ouvert par défaut) -->
+                    <button type="button"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface hover:bg-secondary-50 dark:bg-secondary-900 dark:hover:bg-secondary-800 text-xs font-semibold text-secondary-700 dark:text-secondary-200 transition-colors cursor-pointer"
+                            data-action="click->mutualisation#togglePortailCardCollapse"
+                            data-portail-toggle-btn="true"
+                    >
+                        <twig:UX:Icon name="icon:chevron-down" class="size-3.5 transition-transform duration-200 rotate-180" data-portail-chevron="true" />
+                        <span data-portail-toggle-text="true">Replier</span>
+                    </button>
+
+                    <button type="button"
+                            class="inline-flex items-center gap-1 text-xs text-danger-600 hover:text-danger-800 hover:bg-danger-50 dark:hover:bg-danger-900/30 px-2 py-1.5 rounded-md transition-colors cursor-pointer"
+                            data-action="click->mutualisation#removePortail"
+                            title="Supprimer ce portail"
+                    >
+                        <twig:UX:Icon name="icon:trash" class="size-3.5" />
+                        <span>Supprimer</span>
+                    </button>
+                </div>
             </div>
 
-            <!-- Formations intégrées dans ce portail -->
-            <div class="space-y-3" data-portail-formations="true">
-                <div class="rounded-lg border border-secondary-200 dark:border-secondary-700/80 bg-secondary-50/40 dark:bg-secondary-900/30 p-3.5"
-                     data-formation-card="true"
-                     data-formation-id="{{ formation.id }}"
+            <!-- Corps dépliable du portail (ouvert pour un nouveau portail) -->
+            <div data-portail-body="true" class="space-y-4 pt-3 border-t border-secondary-100 dark:border-secondary-700/60 mt-3">
+                <!-- Alerte warning -->
+                <div data-portail-warning-banner="true"
+                     class="hidden rounded-lg border border-warning-200 bg-warning-50/80 dark:border-warning-800/60 dark:bg-warning-900/30 p-3 text-xs text-warning-800 dark:text-warning-200 items-start gap-2.5"
                 >
-                    <input type="hidden" name="portails[__PORTAIL_ID__][formations_presentes][]" value="{{ formation.id }}">
-
-                    <div class="flex items-center justify-between border-b border-secondary-200 dark:border-secondary-700/60 pb-2 mb-2.5 flex-wrap gap-2">
-                        <div class="flex items-center gap-2">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
-                                {{ typeDiplome.libelleCourt|default('Diplôme') }}
-                            </span>
-                            <span class="text-xs font-bold text-secondary-900 dark:text-secondary-100">
-                                {{ formation.displayLong }}
-                            </span>
-                            <span class="text-[11px] text-secondary-500 dark:text-secondary-400">
-                                ({{ formation.composantePorteuse ? formation.composantePorteuse.libelle : 'Sans composante' }})
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Parcours et années pour la formation courante -->
+                    <twig:UX:Icon name="ph:warning-bold" class="size-4 shrink-0 text-warning-600 dark:text-warning-400 mt-0.5" />
                     <div>
-                        <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
-                            <label class="text-xs font-semibold text-secondary-700 dark:text-secondary-300">
-                                Parcours et années intégrés au portail :
-                            </label>
-                            <div class="inline-flex items-center gap-2 text-[11px] text-primary-600 dark:text-primary-400 flex-wrap">
-                                {% for ordre in formation.anneesOrdres %}
-                                    <button type="button"
-                                            class="hover:underline cursor-pointer"
-                                            data-action="click->mutualisation#selectAnneeForAllParcours"
-                                            data-annee-ordre="{{ ordre }}"
-                                    >
-                                        + Toute l'Année {{ ordre }}
-                                    </button>
+                        <strong>Attention — Types de diplôme différents :</strong>
+                        <span>Ce portail regroupe des formations de types de diplôme distincts (<span data-portail-warning-banner-types="true"></span>). Vérifiez la cohérence des règles d'admission, de capacité et de calendrier.</span>
+                    </div>
+                </div>
+
+                <!-- Formations intégrées dans ce portail -->
+                <div class="space-y-3" data-portail-formations="true">
+                    <p data-portail-formations-empty="true" class="hidden text-xs text-secondary-500 dark:text-secondary-400 italic py-2">
+                        Aucune formation n'est actuellement rattachée à ce portail. Utilisez le sélecteur ci-dessous pour en ajouter une.
+                    </p>
+
+                    <div class="rounded-lg border border-secondary-200 dark:border-secondary-700/80 bg-secondary-50/40 dark:bg-secondary-900/30 p-3.5"
+                         data-formation-card="true"
+                         data-formation-id="{{ formation.id }}"
+                         data-type-diplome="{{ typeDiplome.libelleCourt|default('Diplôme') }}"
+                    >
+                        <input type="hidden" name="portails[__PORTAIL_ID__][formations_presentes][]" value="{{ formation.id }}">
+
+                        <div class="flex items-center justify-between border-b border-secondary-200 dark:border-secondary-700/60 pb-2 mb-2.5 flex-wrap gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
+                                    {{ typeDiplome.libelleCourt|default('Diplôme') }}
+                                </span>
+                                <span class="text-xs font-bold text-secondary-900 dark:text-secondary-100">
+                                    {{ formation.displayLong }}
+                                </span>
+                                <span class="text-[11px] text-secondary-500 dark:text-secondary-400">
+                                    ({{ formation.composantePorteuse ? formation.composantePorteuse.libelle : 'Sans composante' }})
+                                </span>
+                            </div>
+
+                            <button type="button"
+                                    class="inline-flex items-center gap-1 text-xs text-danger-600 hover:text-danger-800 hover:bg-danger-50 dark:hover:bg-danger-900/30 px-2 py-0.5 rounded transition-colors cursor-pointer"
+                                    data-action="click->mutualisation#removeFormationFromPortail"
+                                    title="Retirer cette formation du portail"
+                            >
+                                <twig:UX:Icon name="icon:trash" class="size-3" />
+                                <span>Retirer de ce portail</span>
+                            </button>
+                        </div>
+
+                        <!-- Parcours et années pour la formation courante -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2 flex-wrap gap-2">
+                                <label class="text-xs font-semibold text-secondary-700 dark:text-secondary-300">
+                                    Parcours et années intégrés au portail :
+                                </label>
+                                <div class="inline-flex items-center gap-2 text-[11px] text-primary-600 dark:text-primary-400 flex-wrap">
+                                    {% for ordre in formation.anneesOrdres %}
+                                        <button type="button"
+                                                class="hover:underline cursor-pointer"
+                                                data-action="click->mutualisation#selectAnneeForAllParcours"
+                                                data-annee-ordre="{{ ordre }}"
+                                        >
+                                            + Toute l'Année {{ ordre }}
+                                        </button>
+                                        <span>•</span>
+                                    {% endfor %}
+                                    <button type="button" class="hover:underline cursor-pointer" data-action="click->mutualisation#selectAllPortailParcours">Tout cocher</button>
                                     <span>•</span>
+                                    <button type="button" class="hover:underline cursor-pointer" data-action="click->mutualisation#deselectAllPortailParcours">Tout décocher</button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5">
+                                {% for p in formation.parcours %}
+                                    {% set tpBadge = p.typeParcours|badgeTypeParcours %}
+                                    <div class="flex items-center justify-between gap-3 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700/60 bg-surface dark:bg-secondary-900/40">
+                                        <div class="flex items-center gap-1.5 flex-1 min-w-[180px]">
+                                            <span class="text-xs font-medium text-secondary-900 dark:text-secondary-100">{{ p.libelle }}</span>
+                                            {% if tpBadge is not null %}
+                                                <twig:Badge :dto="tpBadge" size="xs" />
+                                            {% endif %}
+                                        </div>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            {% for a in p.annees %}
+                                                {% set isDefaultChecked = (a.ordre == 1) %}
+                                                <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium cursor-pointer transition-colors {{ isDefaultChecked ? 'bg-primary-50 border-primary-300 text-primary-800 dark:bg-primary-900/30 dark:border-primary-700 dark:text-primary-300' : 'bg-surface border-secondary-200 text-secondary-600 hover:bg-secondary-50 dark:bg-secondary-900 dark:border-secondary-700 dark:text-secondary-400' }}">
+                                                    <input type="checkbox"
+                                                           name="portails[__PORTAIL_ID__][annees][]"
+                                                           value="{{ a.id }}"
+                                                           data-annee-ordre="{{ a.ordre }}"
+                                                           data-action="change->mutualisation#toggleCheckboxStyle"
+                                                           {{ isDefaultChecked ? 'checked' : '' }}
+                                                           class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400"
+                                                    >
+                                                    <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ a.ordre }}</span>
+                                                </label>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
                                 {% endfor %}
-                                <button type="button" class="hover:underline cursor-pointer" data-action="click->mutualisation#selectAllPortailParcours">Tout cocher</button>
-                                <span>•</span>
-                                <button type="button" class="hover:underline cursor-pointer" data-action="click->mutualisation#deselectAllPortailParcours">Tout décocher</button>
                             </div>
                         </div>
-
-                        <div class="space-y-1.5">
-                            {% for p in formation.parcours %}
-                                {% set tpBadge = p.typeParcours|badgeTypeParcours %}
-                                <div class="flex items-center justify-between gap-3 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700/60 bg-surface dark:bg-secondary-900/40">
-                                    <div class="flex items-center gap-1.5 flex-1 min-w-[180px]">
-                                        <span class="text-xs font-medium text-secondary-900 dark:text-secondary-100">{{ p.libelle }}</span>
-                                        {% if tpBadge is not null %}
-                                            <twig:Badge :dto="tpBadge" size="xs" />
-                                        {% endif %}
-                                    </div>
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        {% for a in p.annees %}
-                                            {% set isDefaultChecked = (a.ordre == 1) %}
-                                            <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium cursor-pointer transition-colors {{ isDefaultChecked ? 'bg-primary-50 border-primary-300 text-primary-800 dark:bg-primary-900/30 dark:border-primary-700 dark:text-primary-300' : 'bg-surface border-secondary-200 text-secondary-600 hover:bg-secondary-50 dark:bg-secondary-900 dark:border-secondary-700 dark:text-secondary-400' }}">
-                                                <input type="checkbox"
-                                                       name="portails[__PORTAIL_ID__][annees][]"
-                                                       value="{{ a.id }}"
-                                                       data-annee-ordre="{{ a.ordre }}"
-                                                       data-action="change->mutualisation#toggleCheckboxStyle"
-                                                       {{ isDefaultChecked ? 'checked' : '' }}
-                                                       class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400"
-                                                >
-                                                <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ a.ordre }}</span>
-                                            </label>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Sélecteur pour ajouter une autre formation à ce portail -->
-            <div class="pt-3 border-t border-secondary-200 dark:border-secondary-700/60 flex items-center gap-2 flex-wrap mt-3">
-                <label class="text-xs font-semibold text-secondary-700 dark:text-secondary-300">
-                    Ajouter une autre formation à ce portail :
-                </label>
-                <div class="flex-1 min-w-[240px] max-w-md">
-                    <select class="w-full text-xs"
-                            data-add-formation-select="true"
-                            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
-                    >
-                        <option value="">Sélectionner une formation de la campagne...</option>
-                        {% for f in formationsCampagneData|default([]) %}
-                            {% if f.id != formation.id %}
+                <!-- Sélecteur pour ajouter une autre formation à ce portail -->
+                <div class="pt-3 border-t border-secondary-200 dark:border-secondary-700/60 flex items-center gap-2 flex-wrap mt-3">
+                    <label class="text-xs font-semibold text-secondary-700 dark:text-secondary-300">
+                        Ajouter une autre formation à ce portail :
+                    </label>
+                    <div class="flex-1 min-w-[240px] max-w-md">
+                        <select class="w-full text-xs"
+                                data-add-formation-select="true"
+                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
+                        >
+                            <option value="">Sélectionner une formation de la campagne...</option>
+                            {% for f in formationsCampagneData|default([]) %}
                                 <option value="{{ f.id }}">{{ f.libelle }} ({{ f.composante }})</option>
-                            {% endif %}
-                        {% endfor %}
-                    </select>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="button"
+                            class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary-100 hover:bg-secondary-200 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200 text-xs font-medium cursor-pointer transition-colors"
+                            data-action="click->mutualisation#addFormationToPortail"
+                    >
+                        <twig:UX:Icon name="ph:plus-bold" class="size-3" />
+                        <span>Ajouter cette formation</span>
+                    </button>
                 </div>
-                <button type="button"
-                        class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-secondary-100 hover:bg-secondary-200 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200 text-xs font-medium cursor-pointer transition-colors"
-                        data-action="click->mutualisation#addFormationToPortail"
-                >
-                    <twig:UX:Icon name="ph:plus-bold" class="size-3" />
-                    <span>Ajouter cette formation</span>
-                </button>
             </div>
         </div>
     </template>

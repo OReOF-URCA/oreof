@@ -48,14 +48,41 @@ export default class extends Controller {
       if (saved) {
         tab = saved
       }
-    } catch (e) {}
+    } catch {
+      /* ignore */
+    }
 
     this.applyTab(tab)
 
     try {
       const isCollapsed = sessionStorage.getItem('mutualisation_collapsed_' + this.currentFormationIdValue) === '1'
       this.applyCollapse(isCollapsed)
-    } catch (e) {}
+    } catch {
+      /* ignore */
+    }
+
+    // Restaurer l'état déplié/replié de chaque carte portail
+    const unfoldedIds = new Set(this.getUnfoldedPortailIds().map(String))
+    if (this.hasPortailsListTarget) {
+      this.portailsListTarget.querySelectorAll('[data-portail-card]').forEach(card => {
+        const id = String(card.dataset.portailId || '')
+        const body = card.querySelector('[data-portail-body]')
+        const toggleText = card.querySelector('[data-portail-toggle-text]')
+        const chevron = card.querySelector('[data-portail-chevron]')
+
+        const shouldBeUnfolded = unfoldedIds.has(id) || id.startsWith('new_')
+        if (body) {
+          body.classList.toggle('hidden', !shouldBeUnfolded)
+        }
+        if (toggleText) {
+          toggleText.textContent = shouldBeUnfolded ? 'Replier' : 'Déplier'
+        }
+        if (chevron) {
+          chevron.classList.toggle('rotate-180', shouldBeUnfolded)
+        }
+        this.updatePortailState(card)
+      })
+    }
 
     try {
       if (sessionStorage.getItem('mutualisation_just_saved_' + this.currentFormationIdValue) === '1') {
@@ -63,7 +90,9 @@ export default class extends Controller {
         this.setSaveStatus('success', '✓ Enregistré avec succès')
         setTimeout(() => this.setSaveStatus('idle', ''), 3000)
       }
-    } catch (e) {}
+    } catch {
+      /* ignore */
+    }
   }
 
   toggleCollapse() {
@@ -71,7 +100,9 @@ export default class extends Controller {
     const nextState = !isCurrentlyCollapsed
     try {
       sessionStorage.setItem('mutualisation_collapsed_' + this.currentFormationIdValue, nextState ? '1' : '0')
-    } catch (e) {}
+    } catch {
+      /* ignore */
+    }
     this.applyCollapse(nextState)
   }
 
@@ -100,7 +131,9 @@ export default class extends Controller {
     this.currentActiveTab = targetTab
     try {
       sessionStorage.setItem('mutualisation_active_tab_' + this.currentFormationIdValue, targetTab)
-    } catch (e) {}
+    } catch {
+      /* ignore */
+    }
 
     if (this.hasActiveTabInputTarget) {
       this.activeTabInputTarget.value = targetTab
@@ -139,7 +172,13 @@ export default class extends Controller {
 
     this.troncsCommunsListTarget.appendChild(newCard)
     this.updateEmptyState()
-    this.notifyDirty()
+
+    // Amener la nouvelle carte en vue et donner le focus
+    newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    const nomInput = newCard.querySelector('input[type="text"]')
+    if (nomInput) {
+      nomInput.focus()
+    }
   }
 
   removeTroncCommun(event) {
@@ -201,6 +240,112 @@ export default class extends Controller {
 
   // --- PORTAILS ---
 
+  getUnfoldedPortailIds() {
+    try {
+      const raw = sessionStorage.getItem('mutualisation_unfolded_portails_' + this.currentFormationIdValue)
+      return raw ? JSON.parse(raw) : []
+    } catch {
+      return []
+    }
+  }
+
+  setPortailUnfolded(portailId, unfolded) {
+    if (!portailId) return
+    try {
+      const key = 'mutualisation_unfolded_portails_' + this.currentFormationIdValue
+      const ids = new Set(this.getUnfoldedPortailIds().map(String))
+      if (unfolded) {
+        ids.add(String(portailId))
+      } else {
+        ids.delete(String(portailId))
+      }
+      sessionStorage.setItem(key, JSON.stringify(Array.from(ids)))
+    } catch {
+      /* ignore */
+    }
+  }
+
+  togglePortailCardCollapse(event) {
+    const card = event.currentTarget.closest('[data-portail-card]')
+    if (!card) return
+
+    const portailId = card.dataset.portailId
+    const body = card.querySelector('[data-portail-body]')
+    if (!body) return
+
+    const isCurrentlyHidden = body.classList.contains('hidden')
+    body.classList.toggle('hidden', !isCurrentlyHidden)
+
+    const toggleText = card.querySelector('[data-portail-toggle-text]')
+    const chevron = card.querySelector('[data-portail-chevron]')
+
+    if (toggleText) {
+      toggleText.textContent = isCurrentlyHidden ? 'Replier' : 'Déplier'
+    }
+
+    if (chevron) {
+      chevron.classList.toggle('rotate-180', isCurrentlyHidden)
+    }
+
+    if (portailId) {
+      this.setPortailUnfolded(portailId, isCurrentlyHidden)
+    }
+  }
+
+  updatePortailState(card) {
+    if (!card) return
+
+    const formationCards = card.querySelectorAll('[data-formation-card]')
+    const count = formationCards.length
+
+    // 1. Mettre à jour le texte du badge de comptage
+    const countText = card.querySelector('[data-portail-count-text]')
+    if (countText) {
+      countText.textContent = `${count} formation${count > 1 ? 's' : ''}`
+    }
+
+    // 2. Mettre à jour l'état vide
+    const emptyMsg = card.querySelector('[data-portail-formations-empty]')
+    if (emptyMsg) {
+      emptyMsg.classList.toggle('hidden', count > 0)
+    }
+
+    // 3. Détecter les types de diplôme distincts
+    const types = Array.from(formationCards)
+      .map(el => (el.dataset.typeDiplome || '').trim())
+      .filter(t => t.length > 0)
+    const uniqueTypes = Array.from(new Set(types))
+    const hasMultiple = uniqueTypes.length > 1
+    const typesStr = uniqueTypes.join(', ')
+
+    // 4. Mettre à jour le badge d'avertissement dans l'en-tête
+    const warningBadge = card.querySelector('[data-portail-warning-badge]')
+    const warningBadgeTypes = card.querySelector('[data-portail-warning-badge-types]')
+    if (warningBadge) {
+      warningBadge.classList.toggle('hidden', !hasMultiple)
+      warningBadge.classList.toggle('inline-flex', hasMultiple)
+      if (hasMultiple) {
+        warningBadge.setAttribute('title', `Ce portail contient des formations aux types de diplôme différents : ${typesStr}`)
+      } else {
+        warningBadge.removeAttribute('title')
+      }
+    }
+    if (warningBadgeTypes) {
+      warningBadgeTypes.textContent = hasMultiple ? typesStr : ''
+    }
+
+    // 5. Mettre à jour la bannière d'avertissement dans le corps
+    const warningBanner = card.querySelector('[data-portail-warning-banner]')
+    const warningBannerTypes = card.querySelector('[data-portail-warning-banner-types]')
+    if (warningBanner) {
+      warningBanner.classList.toggle('hidden', !hasMultiple)
+      warningBanner.classList.toggle('flex', hasMultiple)
+    }
+    if (warningBannerTypes) {
+      warningBannerTypes.textContent = hasMultiple ? typesStr : ''
+    }
+  }
+
   addPortail() {
     this.applyTab('portails')
     const template = this.hasPortailTemplateTarget ? this.portailTemplateTarget : null
@@ -217,6 +362,8 @@ export default class extends Controller {
       this.portailsListTarget.appendChild(newCard)
     }
 
+    this.setPortailUnfolded(portailId, true)
+    this.updatePortailState(newCard)
     this.updatePortailsEmptyState()
     this.notifyDirty()
   }
@@ -226,14 +373,17 @@ export default class extends Controller {
     if (!card) return
 
     const portailId = card.dataset.portailId
-    if (portailId && !portailId.startsWith('new_')) {
-      const form = this.element.closest('form')
-      if (form) {
-        const hidden = document.createElement('input')
-        hidden.type = 'hidden'
-        hidden.name = 'portails_supprimes[]'
-        hidden.value = portailId
-        form.appendChild(hidden)
+    if (portailId) {
+      this.setPortailUnfolded(portailId, false)
+      if (!portailId.startsWith('new_')) {
+        const form = this.element.closest('form')
+        if (form) {
+          const hidden = document.createElement('input')
+          hidden.type = 'hidden'
+          hidden.name = 'portails_supprimes[]'
+          hidden.value = portailId
+          form.appendChild(hidden)
+        }
       }
     }
 
@@ -284,6 +434,7 @@ export default class extends Controller {
       select.value = ''
     }
 
+    this.updatePortailState(card)
     this.notifyDirty()
   }
 
@@ -291,7 +442,13 @@ export default class extends Controller {
     const fCard = event.currentTarget.closest('[data-formation-card]')
     if (!fCard) return
 
+    const portailCard = fCard.closest('[data-portail-card]')
     fCard.remove()
+
+    if (portailCard) {
+      this.updatePortailState(portailCard)
+    }
+
     this.notifyDirty()
   }
 
@@ -431,6 +588,7 @@ export default class extends Controller {
       <div class="rounded-lg border border-secondary-200 dark:border-secondary-700/80 bg-secondary-50/40 dark:bg-secondary-900/30 p-3.5"
            data-formation-card="true"
            data-formation-id="${formation.id}"
+           data-type-diplome="${escapeHtml(formation.typeDiplome || '')}"
       >
         <input type="hidden" name="portails[${escapeHtml(portailId)}][formations_presentes][]" value="${formation.id}">
 
@@ -483,7 +641,7 @@ export default class extends Controller {
     clearTimeout(this.autoSaveTimeout)
     this.autoSaveTimeout = setTimeout(() => {
       this.saveMutualisation()
-    }, 800)
+    }, 1200)
   }
 
   async saveMutualisation(event) {
@@ -526,7 +684,9 @@ export default class extends Controller {
       if (response.ok) {
         try {
           sessionStorage.setItem('mutualisation_just_saved_' + this.currentFormationIdValue, '1')
-        } catch (e) {}
+        } catch {
+          /* ignore */
+        }
 
         const text = await response.text()
         if (window.Turbo && typeof window.Turbo.renderStreamMessage === 'function') {
@@ -539,7 +699,9 @@ export default class extends Controller {
               if (selectionStart !== null && selectionEnd !== null) {
                 try {
                   restoredInput.setSelectionRange(selectionStart, selectionEnd)
-                } catch (e) {}
+                } catch {
+                  /* ignore */
+                }
               }
             }
           }
@@ -550,7 +712,7 @@ export default class extends Controller {
       } else {
         this.setSaveStatus('error', 'Erreur lors de l’enregistrement')
       }
-    } catch (err) {
+    } catch {
       this.setSaveStatus('error', 'Erreur réseau lors de l’enregistrement')
     }
   }
