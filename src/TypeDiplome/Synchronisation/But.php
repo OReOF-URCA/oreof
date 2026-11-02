@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace App\TypeDiplome\Synchronisation;
 
+use App\Entity\Annee;
 use App\Entity\ButApprentissageCritique;
 use App\Entity\ButCompetence;
 use App\Entity\ButNiveau;
@@ -289,6 +290,8 @@ class But
 
             $parcours->setLibelle((string) ($parcoursData['libelle'] ?? $parcours->getLibelle()));
             $parcours->setSigle($code);
+            $parcours->setSemestreDebut(1);
+            $parcours->setSemestreFin(6);
             if (!empty($parcoursData['textePresentation'])) {
                 $parcours->setContenuFormation((string) $parcoursData['textePresentation']);
             }
@@ -316,6 +319,9 @@ class But
                     'ues' => $this->indexUesForSemestre($semestre),
                 ];
             }
+
+            // S'assurer que les 3 années (BUT1, BUT2, BUT3) existent et sont rattachées aux semestres
+            $this->ensureAnneesAndSemestresParcours($parcours);
         }
     }
 
@@ -357,6 +363,12 @@ class But
         foreach ($parcours->getSemestreParcours() as $sp) {
             $s = $sp->getSemestre();
             if ($s !== null && !$s->isTroncCommun() && $sp->getOrdre() === $ordre) {
+                $anneeOrdre = (int) ceil($ordre / 2);
+                $annee = $this->findOrCreateAnnee($parcours, $anneeOrdre);
+                if ($sp->getAnnee() === null || $sp->getAnnee() !== $annee) {
+                    $sp->setAnnee($annee);
+                    $annee->addParcoursSemestre($sp);
+                }
                 return $s;
             }
         }
@@ -369,8 +381,13 @@ class But
         $sp = new SemestreParcours($semestre, $parcours);
         $sp->setOrdre($ordre);
         $sp->setPorteur(true);
+        $anneeOrdre = (int) ceil($ordre / 2);
+        $annee = $this->findOrCreateAnnee($parcours, $anneeOrdre);
+        $sp->setAnnee($annee);
+        $annee->addParcoursSemestre($sp);
         $this->entityManager->persist($sp);
         $semestre->addSemestreParcour($sp);
+        $parcours->addSemestreParcour($sp);
 
         return $semestre;
     }
@@ -379,6 +396,12 @@ class But
     {
         foreach ($parcours->getSemestreParcours() as $sp) {
             if ($sp->getSemestre() === $semestre && $sp->getOrdre() === $ordre) {
+                $anneeOrdre = (int) ceil($ordre / 2);
+                $annee = $this->findOrCreateAnnee($parcours, $anneeOrdre);
+                if ($sp->getAnnee() === null || $sp->getAnnee() !== $annee) {
+                    $sp->setAnnee($annee);
+                    $annee->addParcoursSemestre($sp);
+                }
                 return;
             }
         }
@@ -386,8 +409,58 @@ class But
         $sp = new SemestreParcours($semestre, $parcours);
         $sp->setOrdre($ordre);
         $sp->setPorteur(true);
+        $anneeOrdre = (int) ceil($ordre / 2);
+        $annee = $this->findOrCreateAnnee($parcours, $anneeOrdre);
+        $sp->setAnnee($annee);
+        $annee->addParcoursSemestre($sp);
         $this->entityManager->persist($sp);
         $semestre->addSemestreParcour($sp);
+        $parcours->addSemestreParcour($sp);
+    }
+
+    private function findOrCreateAnnee(Parcours $parcours, int $ordre): Annee
+    {
+        foreach ($parcours->getAnnees() as $annee) {
+            if ($annee->getOrdre() === $ordre) {
+                return $annee;
+            }
+        }
+
+        $annee = new Annee();
+        $annee->setParcours($parcours);
+        $annee->setOrdre($ordre);
+        $annee->setIsOuvert(true);
+        $annee->setCapaciteAccueil(0);
+        $annee->setHasCapacite(true);
+        $annee->setIsProposeRecrutement(true);
+        $annee->setRegimeInscription($parcours->getRegimeInscription());
+        $this->entityManager->persist($annee);
+        $parcours->addAnnee($annee);
+
+        return $annee;
+    }
+
+    private function ensureAnneesAndSemestresParcours(Parcours $parcours): void
+    {
+        $annees = [];
+        for ($a = 1; $a <= 3; $a++) {
+            $annees[$a] = $this->findOrCreateAnnee($parcours, $a);
+        }
+
+        foreach ($parcours->getSemestreParcours() as $sp) {
+            $sOrdre = (int) $sp->getOrdre();
+            if ($sOrdre >= 1 && $sOrdre <= 6) {
+                $anneeOrdre = (int) ceil($sOrdre / 2);
+                $annee = $annees[$anneeOrdre] ?? null;
+                if ($annee !== null && ($sp->getAnnee() === null || $sp->getAnnee() !== $annee)) {
+                    $sp->setAnnee($annee);
+                    $annee->addParcoursSemestre($sp);
+                }
+            }
+            if (!$parcours->getSemestreParcours()->contains($sp)) {
+                $parcours->addSemestreParcour($sp);
+            }
+        }
     }
 
     /**
@@ -415,6 +488,9 @@ class But
             if ($selectedCodes !== null && !empty($selectedCodes) && !in_array($sigle, $selectedCodes, true)) {
                 continue;
             }
+
+            // S'assurer que les années et semestres sont cohérents
+            $this->ensureAnneesAndSemestresParcours($parcours);
 
             $key = $parcours->getId() ?? $parcours->getSigle() ?? uniqid('p_', true);
             $this->listeParcours[$key] = $parcours;

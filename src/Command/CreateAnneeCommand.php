@@ -36,36 +36,53 @@ class CreateAnneeCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $semestresParcours = $this->semestreparcoursRepository->findBy([], [
-            'parcours' => 'ASC',
-            'ordre' => 'ASC',
-        ]);
-        $tabAnnee = [];
-        foreach ($semestresParcours as $semestreParcours) {
-            //si ordre impair on ajoute l'année, si ordre pair on récupère l'année n-1. Il faut stocker les années dans le parcours
-            $ordreSemestre = (int)$semestreParcours->getOrdre();
+        $parcoursRepo = $this->entityManager->getRepository(\App\Entity\Parcours::class);
+        $allParcours = $parcoursRepo->findAll();
+        $createdCount = 0;
+        $linkedCount = 0;
 
-            // calcul de l'ordre de l'année : (1|2)->1, (3|4)->2, ...
-            $ordreAnnee = intdiv($ordreSemestre + 1, 2);
-
-            if ($semestreParcours->getOrdre() % 2 !== 0) {
-                $annee = new Annee();
-                $annee->setParcours($semestreParcours->getParcours());
-                $annee->setOrdre($ordreAnnee);
-                $annee->setCodeApogeeEtapeAnnee($semestreParcours->getCodeApogeeEtapeAnnee());
-                $annee->setCodeApogeeEtapeVersion($semestreParcours->getCodeApogeeEtapeVersion());
-                $tabAnnee[$semestreParcours->getParcours()?->getId()][$semestreParcours->getOrdre()] = $annee;
-                $this->entityManager->persist($annee);
-            } else {
-                $annee = $tabAnnee[$semestreParcours->getParcours()?->getId()][$semestreParcours->getOrdre() - 1];
+        foreach ($allParcours as $parcours) {
+            $existingAnnees = [];
+            foreach ($parcours->getAnnees() as $a) {
+                $existingAnnees[$a->getOrdre()] = $a;
             }
 
-            $annee->addParcoursSemestre($semestreParcours);
+            foreach ($parcours->getSemestreParcours() as $sp) {
+                $ordreSemestre = (int) $sp->getOrdre();
+                if ($ordreSemestre <= 0) {
+                    continue;
+                }
+                $ordreAnnee = intdiv($ordreSemestre + 1, 2);
+
+                if (!isset($existingAnnees[$ordreAnnee])) {
+                    $annee = new Annee();
+                    $annee->setParcours($parcours);
+                    $annee->setOrdre($ordreAnnee);
+                    $annee->setIsOuvert(true);
+                    $annee->setCapaciteAccueil(0);
+                    $annee->setHasCapacite(true);
+                    $annee->setIsProposeRecrutement(true);
+                    $annee->setRegimeInscription($parcours->getRegimeInscription());
+                    $annee->setCodeApogeeEtapeAnnee($sp->getCodeApogeeEtapeAnnee());
+                    $annee->setCodeApogeeEtapeVersion($sp->getCodeApogeeEtapeVersion());
+                    $this->entityManager->persist($annee);
+                    $parcours->addAnnee($annee);
+                    $existingAnnees[$ordreAnnee] = $annee;
+                    $createdCount++;
+                }
+
+                $annee = $existingAnnees[$ordreAnnee];
+                if ($sp->getAnnee() !== $annee) {
+                    $sp->setAnnee($annee);
+                    $annee->addParcoursSemestre($sp);
+                    $linkedCount++;
+                }
+            }
         }
 
         $this->entityManager->flush();
 
-        $io->success('Années créées.');
+        $io->success(sprintf('Années créées : %d, semestres liés : %d.', $createdCount, $linkedCount));
 
         return Command::SUCCESS;
     }

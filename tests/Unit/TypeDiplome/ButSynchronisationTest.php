@@ -201,6 +201,18 @@ class ButSynchronisationTest extends TestCase
         $demande = $parcours->getDpeDemandes()->first();
         $this->assertNotNull($demande);
         $this->assertSame(EtatDpeEnum::en_cours_redaction, $demande->getEtatDemande());
+
+        $this->assertSame(1, $parcours->getSemestreDebut());
+        $this->assertSame(6, $parcours->getSemestreFin());
+        $this->assertCount(3, $parcours->getAnnees());
+        $anneesOrdres = array_map(fn($a) => $a->getOrdre(), $parcours->getAnnees()->toArray());
+        sort($anneesOrdres);
+        $this->assertSame([1, 2, 3], $anneesOrdres);
+
+        foreach ($parcours->getSemestreParcours() as $sp) {
+            $this->assertNotNull($sp->getAnnee());
+            $this->assertSame((int) ceil($sp->getOrdre() / 2), $sp->getAnnee()->getOrdre());
+        }
     }
 
     public function testSyncMaquetteRessourcesAndSaesSuccess(): void
