@@ -495,6 +495,37 @@
                                         >
                                             Configurer
                                         </twig:Button>
+                                        {{ component('dropdown_actions', {
+                                            label: 'Actions',
+                                            labelSrOnly: true,
+                                            help: 'Actions pour la formation',
+                                            icon: 'icon:ellipsis-vertical',
+                                            items: [
+                                                {
+                                                    label: 'Voir la fiche',
+                                                    icon: 'icon:info',
+                                                    url: path('formation_v2_voir', {slug: formation.slug}),
+                                                    target: '_blank'
+                                                },
+                                                {
+                                                    label: 'Modifier',
+                                                    icon: 'ph:arrows-left-right-light',
+                                                    url: path('app_formation_edit_modal', {slug: formation.slug}),
+                                                    modal: true,
+                                                    disabled: not is_granted('ROLE_ADMIN'),
+                                                    help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : null
+                                                },
+                                                {
+                                                    label: 'Supprimer',
+                                                    icon: 'icon:delete',
+                                                    color: 'danger',
+                                                    url: path('formation_v2_supprimer', {formation: formation.id}),
+                                                    modal: true,
+                                                    disabled: not is_granted('ROLE_ADMIN'),
+                                                    help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : null
+                                                }
+                                            ]
+                                        }) }}
                                     </div>
                                 </td>
                             </tr>
@@ -581,7 +612,41 @@
                                             {% endif %}
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3">&nbsp;</td>
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                            {{ component('dropdown_actions', {
+                                                label: 'Actions',
+                                                labelSrOnly: true,
+                                                help: 'Actions pour le parcours',
+                                                icon: 'icon:ellipsis-vertical',
+                                                items: [
+                                                    {
+                                                        label: 'Voir la fiche',
+                                                        icon: 'icon:info',
+                                                        url: path('parcours_v2_voir', {parcours: parcours.id}),
+                                                        target: '_blank'
+                                                    },
+                                                    {
+                                                        label: 'Déplacer',
+                                                        icon: 'ph:arrows-left-right-light',
+                                                        url: path('parcours_ses_deplacer', {parcours: parcours.id}),
+                                                        modal: true,
+                                                        disabled: not is_granted('ROLE_ADMIN'),
+                                                        help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : null
+                                                    },
+                                                    {
+                                                        label: 'Supprimer',
+                                                        icon: 'icon:delete',
+                                                        color: 'danger',
+                                                        url: path('parcours_v2_supprimer', {parcours: parcours.id}),
+                                                        modal: true,
+                                                        disabled: not is_granted('ROLE_ADMIN'),
+                                                        help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : null
+                                                    }
+                                                ]
+                                            }) }}
+                                        </div>
+                                    </td>
                                 </tr>
                             {% endfor %}
                         {% endfor %}
