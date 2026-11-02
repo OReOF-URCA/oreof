@@ -164,9 +164,10 @@ export default class extends Controller {
     if (event.target.type === 'number' || event.target.type === 'text') {
       if (this.statusState !== 'error') this.setStatus('typing', 'Modifications en attente d’enregistrement')
       clearTimeout(this.timeout)
+      const delay = event.target.type === 'text' ? 1000 : 700
       this.timeout = setTimeout(() => {
         this.save()
-      }, 700)
+      }, delay)
     }
   }
 
@@ -255,7 +256,13 @@ export default class extends Controller {
       }
     }
 
-    // 3. For check boxes and other selects
+    // 3. For check boxes and other selects, or direct change on text/number
+    if (event.target.type === 'number' || event.target.type === 'text') {
+      clearTimeout(this.timeout)
+      this.save()
+      return
+    }
+
     if (event.target.type === 'checkbox' || event.target.tagName === 'SELECT') {
       if (name) {
         this.previousValues[name] = value
@@ -303,6 +310,7 @@ export default class extends Controller {
     this.setStatus('saving', 'Enregistrement en cours...')
 
     const formData = new FormData(this.element)
+    formData.append('is_autosave_capacites', '1')
 
     try {
       const response = await fetch(this.urlValue, {
@@ -326,60 +334,11 @@ export default class extends Controller {
       const contentType = response.headers.get('content-type') || ''
       if (contentType.includes('text/vnd.turbo-stream.html')) {
         const html = await response.text()
-        const activeEl = document.activeElement
-        const activeName = activeEl ? activeEl.getAttribute('name') : null
-        const activeId = activeEl ? activeEl.id : null
-        const selectionStart = activeEl && 'selectionStart' in activeEl ? activeEl.selectionStart : null
-        const selectionEnd = activeEl && 'selectionEnd' in activeEl ? activeEl.selectionEnd : null
-
-        this.openContainerIds = new Set()
-        this.element.querySelectorAll('div[id^="annee_"][id$="_container"]').forEach(container => {
-          const details = container.querySelector('details')
-          if (details && details.open) {
-            this.openContainerIds.add(container.id)
-          }
-        })
-        if (activeEl) {
-          const activeContainer = activeEl.closest('div[id^="annee_"][id$="_container"]')
-          if (activeContainer) {
-            this.openContainerIds.add(activeContainer.id)
-          }
-        }
 
         const { renderStreamMessage } = await import('@hotwired/turbo')
         if (!this.connected) return
         await renderStreamMessage(html)
 
-        if (this.openContainerIds) {
-          this.openContainerIds.forEach(containerId => {
-            const container = document.getElementById(containerId)
-            if (container) {
-              const details = container.querySelector('details')
-              if (details && !details.open) {
-                details.open = true
-              }
-            }
-          })
-        }
-
-        if (activeName || activeId) {
-          try {
-            const newEl = activeId ? document.getElementById(activeId) : (activeName ? document.querySelector(`[name="${CSS.escape(activeName)}"]`) : null)
-            if (newEl) {
-              const parentDetails = newEl.closest('details')
-              if (parentDetails && !parentDetails.open) {
-                parentDetails.open = true
-              }
-              if (typeof newEl.focus === 'function') {
-                newEl.focus()
-                if (selectionStart !== null && selectionEnd !== null && typeof newEl.setSelectionRange === 'function') {
-                  newEl.setSelectionRange(selectionStart, selectionEnd)
-                }
-              }
-            }
-          } catch (e) {}
-        }
-        
         this.markSaved(revision)
         if (isManual && revision === this.revision) {
           callOut('Brouillon enregistré avec succès.', 'success')

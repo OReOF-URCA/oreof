@@ -65,19 +65,21 @@
     </template>
 </turbo-stream>
 
-<turbo-stream action="replace" target="configurer_mutualisation_block">
-    <template>
-        {{ include('offre_v2/_configurer_mutualisation_block.html.twig', {
-            formation: formation,
-            typeDiplome: formation.typeDiplome,
-            can_edit: true,
-            portailsCampagne: portailsCampagne|default([]),
-            formationsCampagneData: formationsCampagneData|default([]),
-            formationsCampagneObjets: formationsCampagneObjets|default([]),
-            active_tab: active_mutualisation_tab|default('troncs-communs')
-        }) }}
-    </template>
-</turbo-stream>
+{% if is_mutualisation_update|default(false) %}
+    <turbo-stream action="replace" target="configurer_mutualisation_block">
+        <template>
+            {{ include('offre_v2/_configurer_mutualisation_block.html.twig', {
+                formation: formation,
+                typeDiplome: formation.typeDiplome,
+                can_edit: true,
+                portailsCampagne: portailsCampagne|default([]),
+                formationsCampagneData: formationsCampagneData|default([]),
+                formationsCampagneObjets: formationsCampagneObjets|default([]),
+                active_tab: active_mutualisation_tab|default('troncs-communs')
+            }) }}
+        </template>
+    </turbo-stream>
+{% endif %}
 
 {% for parcours in formation.parcours %}
     {% set statParcours = tabStatistiques['parcours'][parcours.id] %}
@@ -184,8 +186,8 @@
     {% endfor %}
 {% endfor %}
 
-{% if changedYears is defined %}
-    {% for anneeId, _ in changedYears %}
+{% if structureChangedYears is defined and structureChangedYears is not empty %}
+    {% for anneeId, _ in structureChangedYears %}
         {# Trouver l'année correspondante dans la formation/parcours #}
         {% set matchedAnnee = null %}
         {% set matchedParcours = null %}

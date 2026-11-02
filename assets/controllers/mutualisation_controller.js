@@ -671,6 +671,7 @@ export default class extends Controller {
       if (this.currentActiveTab) {
         formData.set('active_mutualisation_tab', this.currentActiveTab)
       }
+      formData.set('action_mutualisation', '1')
 
       const response = await fetch(url, {
         method: 'POST',
