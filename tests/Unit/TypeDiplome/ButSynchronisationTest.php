@@ -378,5 +378,185 @@ class ButSynchronisationTest extends TestCase
         $this->assertCount(1, $formation->getParcours());
         $this->assertSame('A', $formation->getParcours()->first()->getSigle());
     }
+
+    public function testFichesMatieresNeSontPasPartageesEntreFormationsDifferentes(): void
+    {
+        $apiService = $this->createMock(OrebutApiService::class);
+        $apiService->method('getDepartement')
+            ->willReturn([
+                'sigle' => 'gmp',
+                'libelle' => 'Génie Mécanique et Productique',
+                'typeStructure' => 'type2',
+                'apcParcours' => [
+                    ['id' => 10, 'code' => 'GMP-P1', 'libelle' => 'Parcours P1'],
+                ],
+            ]);
+
+        $apiService->method('getRessources')
+            ->willReturn([
+                [
+                    'codeMatiere' => 'R1.01',
+                    'libelle' => 'Mécanique',
+                    'semestre' => ['ordreLmd' => 1],
+                    'apcRessourceParcours' => [],
+                    'apcRessourceCompetences' => [],
+                ],
+            ]);
+
+        $apiService->method('getSaes')->willReturn([]);
+
+        $persistedFiches = [];
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->method('persist')->willReturnCallback(function ($entity) use (&$persistedFiches) {
+            if ($entity instanceof \App\Entity\FicheMatiere) {
+                $persistedFiches[] = $entity;
+            }
+        });
+
+        $service = $this->createService($apiService, $em);
+
+        $typeBut = new TypeDiplome();
+        $typeBut->setLibelleCourt('BUT');
+
+        // Formation 1 (ex: GMP Reims)
+        $formation1 = new Formation(null);
+        $formation1->setTypeDiplome($typeBut);
+        $formation1->setSigle('GMP');
+
+        // Formation 2 (ex: GMP Troyes)
+        $formation2 = new Formation(null);
+        $formation2->setTypeDiplome($typeBut);
+        $formation2->setSigle('GMP');
+
+        $campagne = new CampagneCollecte();
+        $options = new ButSyncOptions(
+            syncParcours: true,
+            syncCompetences: false,
+            syncMaquette: true,
+            annee: 2021,
+        );
+
+        // Synchro formation 1
+        $service->synchroniserWithOptions($formation1, $campagne, $options);
+        $this->assertCount(1, $persistedFiches);
+        $fiche1 = $persistedFiches[0];
+        $this->assertSame($formation1->getParcours()->first(), $fiche1->getParcours());
+
+        // Synchro formation 2
+        $service->synchroniserWithOptions($formation2, $campagne, $options);
+        // Une nouvelle fiche matière distincte DOIT être créée pour la formation 2
+        $this->assertCount(2, $persistedFiches);
+        $fiche2 = $persistedFiches[1];
+        $this->assertNotSame($fiche1, $fiche2);
+        $this->assertSame($formation2->getParcours()->first(), $fiche2->getParcours());
+    }
+
+    public function testRelancerSynchronisationReattacheLesEcsALaBonneFicheSansDoublon(): void
+    {
+        $apiService = $this->createMock(OrebutApiService::class);
+        $apiService->method('getDepartement')
+            ->willReturn([
+                'sigle' => 'gmp',
+                'libelle' => 'Génie Mécanique et Productique',
+                'typeStructure' => 'type2',
+                'apcParcours' => [
+                    ['id' => 10, 'code' => 'GMP-P1', 'libelle' => 'Parcours P1'],
+                ],
+            ]);
+
+        $apiService->method('getRessources')
+            ->willReturn([
+                [
+                    'codeMatiere' => 'R1.01',
+                    'libelle' => 'Mécanique',
+                    'semestre' => ['ordreLmd' => 1],
+                    'apcRessourceParcours' => [],
+                    'apcRessourceCompetences' => [
+                        [
+                            'competence' => ['id' => 1, 'numero' => 1],
+                            'coefficient' => 1.5,
+                        ],
+                    ],
+                ],
+            ]);
+
+        $apiService->method('getSaes')->willReturn([]);
+
+        $typeBut = new TypeDiplome();
+        $typeBut->setLibelleCourt('BUT');
+
+        $foreignFormation = new Formation(null);
+        $foreignFormation->setTypeDiplome($typeBut);
+        $foreignFormation->setSigle('INFO');
+        $foreignParcours = new \App\Entity\Parcours($foreignFormation);
+        $foreignFormation->addParcour($foreignParcours);
+
+        // Fiche étrangère d'une autre formation (ex: INFO) avec le même code R1.01
+        $foreignFiche = new \App\Entity\FicheMatiere();
+        $foreignFiche->setSigle('R1.01');
+        $foreignFiche->setTypeMatiere(\App\Entity\FicheMatiere::TYPE_MATIERE_RESSOURCE);
+        $foreignFiche->setParcours($foreignParcours);
+
+        // Notre formation GMP
+        $formation = new Formation(null);
+        $formation->setTypeDiplome($typeBut);
+        $formation->setSigle('GMP');
+
+        $parcours = new \App\Entity\Parcours($formation);
+        $parcours->setSigle('GMP-P1');
+        $formation->addParcour($parcours);
+
+        // Une mutualisation erronée pointant vers la fiche étrangère
+        $staleMutu = new \App\Entity\FicheMatiereMutualisable();
+        $staleMutu->setFicheMatiere($foreignFiche);
+        $staleMutu->setParcours($parcours);
+        $parcours->addFicheMatiereParcour($staleMutu);
+        $foreignFiche->addFicheMatiereParcour($staleMutu);
+
+        // Semestre et UE de notre formation
+        $semestre = new \App\Entity\Semestre();
+        $semestre->setOrdre(1);
+        $sp = new \App\Entity\SemestreParcours($semestre, $parcours);
+        $parcours->addSemestreParcour($sp);
+
+        $ue = new \App\Entity\Ue();
+        $ue->setOrdre(1);
+        $semestre->addUe($ue);
+
+        // Un EC existant qui pointait vers la fiche étrangère
+        $existingEc = new \App\Entity\ElementConstitutif();
+        $existingEc->setUe($ue);
+        $existingEc->setParcours($parcours);
+        $existingEc->setFicheMatiere($foreignFiche);
+        $ue->addElementConstitutif($existingEc);
+
+        $removedEntities = [];
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->method('remove')->willReturnCallback(function ($entity) use (&$removedEntities) {
+            $removedEntities[] = $entity;
+        });
+
+        $service = $this->createService($apiService, $em);
+        $campagne = new CampagneCollecte();
+        $options = new ButSyncOptions(
+            syncParcours: false,
+            syncCompetences: false,
+            syncMaquette: true,
+            annee: 2021,
+        );
+
+        $result = $service->synchroniserWithOptions($formation, $campagne, $options);
+
+        $this->assertTrue($result->success);
+        // La mutualisation vers la fiche étrangère a été supprimée
+        $this->assertContains($staleMutu, $removedEntities);
+        // Aucun doublon d'EC créé
+        $this->assertSame(0, $result->ecsCount);
+        $this->assertCount(1, $ue->getElementConstitutifs());
+        // L'EC existant a été ré-attaché à la nouvelle fiche propre à notre formation
+        $this->assertNotSame($foreignFiche, $existingEc->getFicheMatiere());
+        $this->assertSame('R1.01', $existingEc->getFicheMatiere()->getSigle());
+        $this->assertSame($parcours, $existingEc->getFicheMatiere()->getParcours());
+    }
 }
 

@@ -115,6 +115,13 @@ class But
         $this->structure = [];
         $this->ficheMatiereCache = [];
 
+        // Pré-remplir le cache des fiches matières existantes UNIQUEMENT pour les parcours de cette formation
+        foreach ($formation->getParcours() as $p) {
+            foreach ($p->getFicheMatieres() as $f) {
+                $this->cacheFicheMatiere($f);
+            }
+        }
+
         $typeD = $formation->getTypeDiplome();
         if ($typeD === null || strtoupper(trim($typeD->getLibelleCourt())) !== 'BUT') {
             return $result->addError('Cette formation n\'est pas un Bachelor Universitaire de Technologie (B.U.T.).');
@@ -162,6 +169,9 @@ class But
 
         // 3. Synchronisation de la maquette (Ressources & SAÉ)
         if ($options->syncMaquette) {
+            // Nettoyer les éventuelles mutualisations résiduelles pointant vers une autre formation
+            $this->cleanupForeignMutualisations();
+
             // Make sure structure is populated
             if (empty($this->structure)) {
                 $this->indexExistingParcoursAndStructure($options->selectedParcoursCodes);
@@ -817,19 +827,7 @@ class But
             return $this->ficheMatiereCache[$typeMatiere][$sigleKey];
         }
 
-        if ($this->campagneCollecte !== null) {
-            $fm = $this->ficheMatiereRepository->findOneBy([
-                'sigle' => $sigle,
-                'campagneCollecte' => $this->campagneCollecte,
-                'typeMatiere' => $typeMatiere,
-            ]);
-            if ($fm !== null) {
-                $this->ficheMatiereCache[$typeMatiere][$sigleKey] = $fm;
-                return $fm;
-            }
-        }
-
-        // Check across parcours of this formation
+        // Recherche strictement limitée aux parcours de cette formation (aucune mutualisation inter-diplômes)
         foreach ($this->formation->getParcours() as $p) {
             foreach ($p->getFicheMatieres() as $f) {
                 if ($f->getTypeMatiere() === $typeMatiere && strcasecmp((string) $f->getSigle(), $sigle) === 0) {
@@ -1033,10 +1031,31 @@ class But
         }
     }
 
+    private function cleanupForeignMutualisations(): void
+    {
+        foreach ($this->formation->getParcours() as $parcours) {
+            foreach ($parcours->getFicheMatiereParcours()->toArray() as $fmp) {
+                $fm = $fmp->getFicheMatiere();
+                if ($fm !== null && $fm->getParcours() !== null && $fm->getParcours()->getFormation() !== $this->formation) {
+                    $parcours->removeFicheMatiereParcour($fmp);
+                    $fm->removeFicheMatiereParcour($fmp);
+                    $this->entityManager->remove($fmp);
+                }
+            }
+        }
+    }
+
     private function findExistingEc(Ue $ue, FicheMatiere $fm, ?Parcours $parcours): ?ElementConstitutif
     {
         foreach ($ue->getElementConstitutifs() as $ec) {
-            if ($ec->getFicheMatiere() === $fm && ($parcours === null || $ec->getParcours() === $parcours)) {
+            $ecFm = $ec->getFicheMatiere();
+            $matchesFm = ($ecFm === $fm)
+                || ($ecFm !== null && strcasecmp((string) $ecFm->getSigle(), (string) $fm->getSigle()) === 0 && $ecFm->getTypeMatiere() === $fm->getTypeMatiere());
+
+            if ($matchesFm && ($parcours === null || $ec->getParcours() === $parcours)) {
+                if ($ecFm !== $fm) {
+                    $ec->setFicheMatiere($fm);
+                }
                 return $ec;
             }
         }

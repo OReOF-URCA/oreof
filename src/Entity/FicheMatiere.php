@@ -100,10 +100,16 @@ class FicheMatiere implements McccCompletionCheckerInterface
     #[Groups(['fiche_matiere:read', 'fiche_matiere_versioning'])]
     private ?User $responsableFicheMatiere = null;
 
+    /**
+     * @var array<string|array<string, mixed>>
+     */
     #[Groups(['fiche_matiere_versioning'])]
     #[ORM\Column(type: Types::JSON)]
     private array $langueDispense = [];
 
+    /**
+     * @var array<string|array<string, mixed>>
+     */
     #[Groups(['fiche_matiere_versioning'])]
     #[ORM\Column(type: Types::JSON)]
     private array $langueSupport = [];
@@ -484,28 +490,37 @@ class FicheMatiere implements McccCompletionCheckerInterface
     }
 
     /**
-     * @param string[] $langueDispense
+     * @param array<string|array<string, mixed>> $langueDispense
      */
     public function setLangueDispense(array $langueDispense): self
     {
-        $filtered = array_values(array_unique(array_filter($langueDispense)));
-        $this->langueDispense = empty($filtered) ? ['fr'] : $filtered;
+        $this->langueDispense = self::normalizeLangueArray($langueDispense);
 
         return $this;
     }
 
-    public function addLangueDispense(string $langueDispense): self
+    /**
+     * @param string|array<string, mixed> $langueDispense
+     */
+    public function addLangueDispense(string|array $langueDispense): self
     {
-        if (!in_array($langueDispense, $this->langueDispense, true)) {
-            $this->langueDispense[] = $langueDispense;
+        $code = self::normalizeLangueCode($langueDispense);
+        if ($code !== null && !in_array($code, $this->langueDispense, true)) {
+            $this->langueDispense[] = $code;
         }
 
         return $this;
     }
 
-    public function removeLangueDispense(string $langueDispense): self
+    /**
+     * @param string|array<string, mixed> $langueDispense
+     */
+    public function removeLangueDispense(string|array $langueDispense): self
     {
-        $this->langueDispense = array_values(array_diff($this->langueDispense, [$langueDispense]));
+        $code = self::normalizeLangueCode($langueDispense);
+        if ($code !== null) {
+            $this->langueDispense = array_values(array_diff($this->langueDispense, [$code]));
+        }
 
         return $this;
     }
@@ -519,30 +534,97 @@ class FicheMatiere implements McccCompletionCheckerInterface
     }
 
     /**
-     * @param string[] $langueSupport
+     * @param array<string|array<string, mixed>> $langueSupport
      */
     public function setLangueSupport(array $langueSupport): self
     {
-        $filtered = array_values(array_unique(array_filter($langueSupport)));
-        $this->langueSupport = empty($filtered) ? ['fr'] : $filtered;
+        $this->langueSupport = self::normalizeLangueArray($langueSupport);
 
         return $this;
     }
 
-    public function addLangueSupport(string $langueSupport): self
+    /**
+     * @param string|array<string, mixed> $langueSupport
+     */
+    public function addLangueSupport(string|array $langueSupport): self
     {
-        if (!in_array($langueSupport, $this->langueSupport, true)) {
-            $this->langueSupport[] = $langueSupport;
+        $code = self::normalizeLangueCode($langueSupport);
+        if ($code !== null && !in_array($code, $this->langueSupport, true)) {
+            $this->langueSupport[] = $code;
         }
 
         return $this;
     }
 
-    public function removeLangueSupport(string $langueSupport): self
+    /**
+     * @param string|array<string, mixed> $langueSupport
+     */
+    public function removeLangueSupport(string|array $langueSupport): self
     {
-        $this->langueSupport = array_values(array_diff($this->langueSupport, [$langueSupport]));
+        $code = self::normalizeLangueCode($langueSupport);
+        if ($code !== null) {
+            $this->langueSupport = array_values(array_diff($this->langueSupport, [$code]));
+        }
 
         return $this;
+    }
+
+    /**
+     * @param string|array<string, mixed> $langue
+     */
+    public static function normalizeLangueCode(string|array $langue): ?string
+    {
+        if (is_string($langue)) {
+            $clean = strtolower(trim($langue));
+            return $clean !== '' ? $clean : null;
+        }
+
+        if (isset($langue['codeIso']) && is_string($langue['codeIso']) && trim($langue['codeIso']) !== '') {
+            $code = strtolower(trim($langue['codeIso']));
+            return match ($code) {
+                'ch' => 'zh',
+                'fs' => 'fr',
+                default => $code,
+            };
+        }
+
+        if (isset($langue['libelle']) && is_string($langue['libelle'])) {
+            $libelle = mb_strtolower(trim($langue['libelle']));
+            return match ($libelle) {
+                'anglais' => 'en',
+                'espagnol' => 'es',
+                'allemand' => 'de',
+                'italien' => 'it',
+                'portugais' => 'pt',
+                'russe' => 'ru',
+                'chinois' => 'zh',
+                'néerlandais', 'neerlandais' => 'nl',
+                'grec ancien' => 'el',
+                'latin' => 'la',
+                default => 'fr',
+            };
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<string|array<string, mixed>> $langues
+     * @return string[]
+     */
+    public static function normalizeLangueArray(array $langues): array
+    {
+        $result = [];
+        foreach ($langues as $langue) {
+            $code = self::normalizeLangueCode($langue);
+            if ($code !== null) {
+                $result[] = $code;
+            }
+        }
+
+        $filtered = array_values(array_unique(array_filter($result)));
+
+        return empty($filtered) ? ['fr'] : $filtered;
     }
 
     public function getEtatSteps(): array
