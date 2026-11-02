@@ -41,6 +41,9 @@ class FormationSynchronisationController extends AbstractController
         $detectedSigle = $butSynchronisation->resolveSigle($formation);
 
         if ($request->isMethod('POST')) {
+            @ini_set('memory_limit', '1024M');
+            @set_time_limit(300);
+
             $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
                 || str_contains((string) $request->headers->get('Accept'), 'text/vnd.turbo-stream.html');
             $redirectUrl = $this->generateUrl('formation_v2_modifier', ['slug' => $formation->getSlug()]);
@@ -84,18 +87,24 @@ class FormationSynchronisationController extends AbstractController
                 ?? ($dpeParcours ? $dpeParcours->getCampagneCollecte() : null)
                 ?? $formation->getDpe();
 
-            $result = $butSynchronisation->synchroniserWithOptions($formation, $campagneCollecte, $options);
-            $flashMsg = $result->success ? $result->getSummary() : ('La synchronisation a échoué : ' . implode(' ', $result->errors));
+            try {
+                $result = $butSynchronisation->synchroniserWithOptions($formation, $campagneCollecte, $options);
+                $isSuccess = $result->success;
+                $flashMsg = $result->success ? $result->getSummary() : ('La synchronisation a échoué : ' . implode(' ', $result->errors));
+            } catch (\Throwable $e) {
+                $isSuccess = false;
+                $flashMsg = 'Erreur lors de la synchronisation : ' . $e->getMessage();
+            }
 
             if ($isTurbo) {
                 return $turboStreamResponseFactory->stream('formation/synchronisation/success.stream.html.twig', [
                     'redirectUrl' => $redirectUrl,
                     'toastMessage' => $flashMsg,
-                    'success' => $result->success,
+                    'success' => $isSuccess,
                 ]);
             }
 
-            $this->addFlash($result->success ? 'success' : 'danger', $flashMsg);
+            $this->addFlash($isSuccess ? 'success' : 'danger', $flashMsg);
 
             return $this->redirectToRoute('formation_v2_modifier', [
                 'slug' => $formation->getSlug(),

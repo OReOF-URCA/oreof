@@ -55,6 +55,8 @@ class But
     protected array $listeAcs = [];
     /** @var array<int|string, array<int, array{semestre: Semestre, ues: array<int, Ue>}>> */
     protected array $structure = [];
+    /** @var array<string, array<string, FicheMatiere>> */
+    private array $ficheMatiereCache = [];
 
     private ?TypeEc $typeEcRessource = null;
     private ?TypeEc $typeEcSae = null;
@@ -102,12 +104,16 @@ class But
         ?CampagneCollecte $campagneCollecte,
         ButSyncOptions $options,
     ): ButSyncResult {
+        @ini_set('memory_limit', '1024M');
+        @set_time_limit(300);
+
         $result = new ButSyncResult();
         $this->formation = $formation;
         $this->campagneCollecte = $campagneCollecte ?? $this->campagneCollecteRepository->findOneBy(['defaut' => true]);
         $this->listeParcours = [];
         $this->listeAcs = [];
         $this->structure = [];
+        $this->ficheMatiereCache = [];
 
         $typeD = $formation->getTypeDiplome();
         if ($typeD === null || strtoupper(trim($typeD->getLibelleCourt())) !== 'BUT') {
@@ -140,6 +146,7 @@ class But
         // 1. Synchronisation des parcours
         if ($options->syncParcours) {
             $this->syncParcours($deptData, $options, $result);
+            $this->entityManager->flush();
         } else {
             // Index existing parcours and their semestres/UEs in $this->structure
             $this->indexExistingParcoursAndStructure($options->selectedParcoursCodes);
@@ -150,6 +157,7 @@ class But
             $competencesData = $this->orebutApiService->getCompetences($sigle, $formation, $options->annee);
             $this->syncCompetences($competencesData, $result);
             $this->syncDeclinaisonsParcours($deptData, $options, $result);
+            $this->entityManager->flush();
         }
 
         // 3. Synchronisation de la maquette (Ressources & SAÉ)
@@ -161,12 +169,13 @@ class But
 
             $ressourcesData = $this->orebutApiService->getRessources($sigle, $formation, $options->annee);
             $this->syncRessources($ressourcesData, $result);
+            $this->entityManager->flush();
 
             $saesData = $this->orebutApiService->getSaes($sigle, $formation, $options->annee);
             $this->syncSaes($saesData, $result);
+            $this->entityManager->flush();
         }
 
-        $this->entityManager->flush();
         $result->addMessage($result->getSummary());
 
         return $result;
@@ -447,7 +456,7 @@ class But
             $annees[$a] = $this->findOrCreateAnnee($parcours, $a);
         }
 
-        foreach ($parcours->getSemestreParcours() as $sp) {
+        foreach ($parcours->getSemestreParcours()->toArray() as $sp) {
             $sOrdre = (int) $sp->getOrdre();
             if ($sOrdre >= 1 && $sOrdre <= 6) {
                 $anneeOrdre = (int) ceil($sOrdre / 2);
@@ -456,9 +465,6 @@ class But
                     $sp->setAnnee($annee);
                     $annee->addParcoursSemestre($sp);
                 }
-            }
-            if (!$parcours->getSemestreParcours()->contains($sp)) {
-                $parcours->addSemestreParcour($sp);
             }
         }
     }
@@ -728,6 +734,7 @@ class But
                 $fm = new FicheMatiere();
                 $fm->setTypeMatiere(FicheMatiere::TYPE_MATIERE_RESSOURCE);
                 $fm->setSigle($codeMatiere);
+                $this->cacheFicheMatiere($fm);
             }
 
             $fm->setLibelle((string) ($res['libelle'] ?? $codeMatiere));
@@ -769,6 +776,7 @@ class But
                 $fm = new FicheMatiere();
                 $fm->setTypeMatiere(FicheMatiere::TYPE_MATIERE_SAE);
                 $fm->setSigle($codeMatiere);
+                $this->cacheFicheMatiere($fm);
             }
 
             $fm->setLibelle((string) ($sae['libelle'] ?? $codeMatiere));
@@ -793,8 +801,22 @@ class But
         }
     }
 
+    private function cacheFicheMatiere(FicheMatiere $fm): void
+    {
+        $sigle = strtoupper(trim((string) $fm->getSigle()));
+        $type = (string) $fm->getTypeMatiere();
+        if ($sigle !== '' && $type !== '') {
+            $this->ficheMatiereCache[$type][$sigle] = $fm;
+        }
+    }
+
     private function findExistingFicheMatiere(string $sigle, string $typeMatiere): ?FicheMatiere
     {
+        $sigleKey = strtoupper(trim($sigle));
+        if (isset($this->ficheMatiereCache[$typeMatiere][$sigleKey])) {
+            return $this->ficheMatiereCache[$typeMatiere][$sigleKey];
+        }
+
         if ($this->campagneCollecte !== null) {
             $fm = $this->ficheMatiereRepository->findOneBy([
                 'sigle' => $sigle,
@@ -802,6 +824,7 @@ class But
                 'typeMatiere' => $typeMatiere,
             ]);
             if ($fm !== null) {
+                $this->ficheMatiereCache[$typeMatiere][$sigleKey] = $fm;
                 return $fm;
             }
         }
@@ -810,6 +833,7 @@ class But
         foreach ($this->formation->getParcours() as $p) {
             foreach ($p->getFicheMatieres() as $f) {
                 if ($f->getTypeMatiere() === $typeMatiere && strcasecmp((string) $f->getSigle(), $sigle) === 0) {
+                    $this->ficheMatiereCache[$typeMatiere][$sigleKey] = $f;
                     return $f;
                 }
             }
