@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = referentiel.libelle %}
+{% set header_description = 'Gestion des valeurs du référentiel ' ~ referentiel.code %}
+
+{% block content %}
+    {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
+{% endblock %}
+
+{% block bouton_header %}
+    <a href="{{ path('admin_referentiel_index') }}" class="btn border border-secondary-300 bg-secondary-50 text-secondary-700 hover:bg-secondary-100 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200">
+        <twig:UX:Icon name="icon:arrow-left" class="h-4 w-4"/>
+        <span>Référentiels</span>
+    </a>
+    {% if referentiel.extensible %}
+        <a data-action="click->modalturbo#open" data-turbo="true"
+           href="{{ path('admin_referentiel_add_value', {id: referentiel.id}) }}"
+           class="btn border border-success-300 bg-success-50 text-success-700 hover:bg-success-100 dark:border-success-500 dark:bg-success-900 dark:text-success-300">
+            <twig:UX:Icon name="icon:add" class="h-4 w-4"/>
+            <span>Ajouter une valeur</span>
+        </a>
+    {% endif %}
+{% endblock %}

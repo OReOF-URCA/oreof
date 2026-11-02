@@ -1,0 +1,16 @@
+{# templates/formation/synchronisation/_modal_orebut_footer.html.twig #}
+<div class="flex items-center justify-end gap-3 w-full">
+    <button type="button"
+            class="app-modal-footer-btn app-modal-footer-btn--secondary"
+            data-action="modalturbo#close">
+        {{ 'annuler'|trans({}, 'common')|default('Annuler') }}
+    </button>
+
+    <button type="submit"
+            form="form-sync-orebut"
+            data-turbo-frame="_top"
+            class="app-modal-footer-btn app-modal-footer-btn--primary flex items-center gap-2">
+        <twig:UX:Icon name="mdi:sync" class="h-4 w-4"/>
+        <span>Lancer la synchronisation</span>
+    </button>
+</div>

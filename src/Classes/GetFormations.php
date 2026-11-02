@@ -169,6 +169,15 @@ readonly class GetFormations
         $direction = strtolower($options['direction'] ?? 'asc');
         $q = $options['q'] ?? null;
 
+        if ($isCfvu) {
+            $formations = $this->formationRepository->findBySearchAndCfvu($q, $campagneCollecte, $options);
+            $tFormations = [];
+            foreach ($formations as $formation) {
+                $tFormations[(int) $formation->getId()] = $formation;
+            }
+            return $tFormations;
+        }
+
         if ($this->isEtablissement()) {
             $formations = $this->formationRepository->findBySearch($q, $campagneCollecte, $options);
             $tFormations = [];

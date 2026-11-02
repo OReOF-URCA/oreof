@@ -9,6 +9,12 @@
 
 namespace App\Enums;
 
+/**
+ * @deprecated Use the administrable 'regime_inscription' referential via
+ *             App\Referentiel\ReferentielManager. Keep this enum only for
+ *             historical persisted keys and transitional integrations.
+ *             Do not add new cases; create referential values instead.
+ */
 enum RegimeInscriptionEnum: string
 {
     case FI = 'Formation Initiale';

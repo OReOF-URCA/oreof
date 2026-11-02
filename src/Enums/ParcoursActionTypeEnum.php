@@ -10,7 +10,11 @@
 // php
 
 namespace App\Enums;
-//todo: encore utile ?
+
+/**
+ * Types d'actions possibles sur une demande de modification de parcours (ChangeParcours).
+ * Mappé en base de données sur la colonne ChangeParcours::$actionType.
+ */
 enum ParcoursActionTypeEnum: string
 {
     case MODIFY_LABEL = 'modify_label';

@@ -38,7 +38,8 @@ class VersioningParcours
     public function __construct(
         EntityManagerInterface $entityManager,
         Filesystem $fileSystem,
-        TypeDiplomeResolver $typeD
+        TypeDiplomeResolver $typeD,
+        private readonly ?\App\Referentiel\ReferentielManager $referentiels = null,
     ) {
         $this->entityManager = $entityManager;
         $this->typeD = $typeD;
@@ -424,8 +425,8 @@ class VersioningParcours
                 self::cleanUpComparison(
                     html_entity_decode(
                         DiffHelper::calculate(
-                            $lastVersion->getNiveauFrancais()?->libelle() ?? "",
-                            $parcours->getNiveauFrancais()?->libelle() ?? "",
+                            $this->referentiels?->label('niveau_langue', $lastVersion->getNiveauFrancaisValue()) ?? ($lastVersion->getNiveauFrancais()?->libelle() ?? ""),
+                            $this->referentiels?->label('niveau_langue', $parcours->getNiveauFrancaisValue()) ?? ($parcours->getNiveauFrancais()?->libelle() ?? ""),
                             $rendererName,
                             $differOptions,
                             $rendererOptions
@@ -514,8 +515,8 @@ class VersioningParcours
                 self::cleanUpComparison(
                     html_entity_decode(
                         DiffHelper::calculate(
-                            $lastVersion->getModalitesEnseignement()?->libelle() ?? "",
-                            $parcours->getModalitesEnseignement()?->libelle() ?? "",
+                            $this->getModaliteLabel($lastVersion),
+                            $this->getModaliteLabel($parcours),
                             $rendererName,
                             $differOptions,
                             $rendererOptions
@@ -769,5 +770,17 @@ class VersioningParcours
         }
 
         return 'Non';
+    }
+
+    private function getModaliteLabel(Parcours $parcours): string
+    {
+        $key = $parcours->getModalitesEnseignementValue();
+        if ($key === null) {
+            return '';
+        }
+
+        return $this->referentiels?->label('modalite_enseignement', $key)
+            ?? $parcours->getModalitesEnseignement()?->libelle()
+            ?? $key;
     }
 }

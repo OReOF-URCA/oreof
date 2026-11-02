@@ -5,6 +5,8 @@ namespace App\Controller\Offre;
 use App\Controller\BaseController;
 use App\Entity\Composante;
 use App\Entity\DpeFormation;
+use App\Entity\DpeParcours;
+use App\Entity\Formation;
 use App\Repository\AnneeRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DocumentConseilRepository;
@@ -18,6 +20,8 @@ use App\Repository\TypeDiplomeRepository;
 use App\Service\Validation\OffreValidationService;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Navigation\Breadcrumb\Attribute\Breadcrumb as BreadcrumbAttribute;
+use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -25,8 +29,11 @@ use Symfony\Component\Workflow\WorkflowInterface;
 
 final class OffreController extends BaseController
 {
+    use OffreAccessTrait;
+
     #[Route('/offrev2', name: 'app_offre_index')]
     #[Route('/offre/composante/{composante}', name: 'app_offre_composante_index')]
+    #[BreadcrumbAttribute(menuKey: 'pilotage.gestion_offre')]
     public function index(
         Request                                  $request,
         FormationRepository                      $formationRepository,
@@ -42,7 +49,11 @@ final class OffreController extends BaseController
         EntityManagerInterface                   $em,
         WorkflowInterface                        $dpeFormationWorkflow,
         ?Composante                              $composante = null,
+        ?BreadcrumbService                       $breadcrumb = null,
     ): Response {
+        if ($composante !== null && $breadcrumb !== null) {
+            $breadcrumb->add($composante->getLibelle() ?? 'Composante');
+        }
         if ($composante !== null) {
             if (!$this->isGranted('ROLE_ADMIN')) {
                 $this->denyAccessUnlessGranted('MANAGE', [
@@ -183,17 +194,38 @@ final class OffreController extends BaseController
             if ($formationCapacite <= 0) {
                 // Calcul en mémoire depuis les données préchargées (0 requête supplémentaire)
                 $tcAnneesCounted = [];
+                $portailsCounted = [];
                 $formationCapacite = 0;
+                $formation = $row['formation'];
                 foreach ($row['parcoursData'] as $pd) {
                     if (!$pd['isOuvert']) {
                         continue;
                     }
+                    $parcours = $pd['parcours'];
                     foreach ($pd['annees'] as $annee) {
                         if (!$annee->isOuvert()) {
                             continue;
                         }
                         $ordre = $annee->getOrdre();
-                        if ($ordre !== null && $row['formation']->isAnneeTroncCommun($ordre)) {
+                        if ($ordre === null) {
+                            continue;
+                        }
+                        $portail = $annee->getPortail();
+                        if ($portail !== null && $portail->getId() !== null) {
+                            if (!isset($portailsCounted[$portail->getId()])) {
+                                $formationCapacite += $annee->getCapaciteAccueil();
+                                $portailsCounted[$portail->getId()] = true;
+                            }
+                            continue;
+                        }
+                        $tc = $formation->getTroncCommunForParcours($parcours, $ordre);
+                        if ($tc !== null) {
+                            $tcKey = $tc['id'] . '_' . $ordre;
+                            if (!isset($tcAnneesCounted[$tcKey])) {
+                                $formationCapacite += $annee->getCapaciteAccueil();
+                                $tcAnneesCounted[$tcKey] = true;
+                            }
+                        } elseif ($formation->isAnneeTroncCommun($ordre, $parcours)) {
                             if (!isset($tcAnneesCounted[$ordre])) {
                                 $formationCapacite += $annee->getCapaciteAccueil();
                                 $tcAnneesCounted[$ordre] = true;
@@ -236,12 +268,51 @@ final class OffreController extends BaseController
             $composantesList = $composanteRepository->findBy([], ['libelle' => 'ASC']);
         }
 
-        // Lire les filtres de la requête
-        $q = trim((string)$request->query->get('q', ''));
-        $comp = $composante !== null ? (string)$composante->getId() : (string)$request->query->get('comp', '');
-        $type = (string)$request->query->get('type', '');
-        $plateforme = (string)$request->query->get('plateforme', '');
-        $statut = (string)$request->query->get('statut', '');
+        // Gestion de la persistance des filtres (session + paramètres de requête)
+        $session = $request->getSession();
+        $campagneId = $campagne->getId() ?? 0;
+        $sessionKey = sprintf('offre_filters_%d_%s', $campagneId, $composante !== null ? 'comp_' . $composante->getId() : 'all');
+
+        if ($request->query->getBoolean('reset')) {
+            $session->remove($sessionKey);
+            $q = '';
+            $comp = $composante !== null ? (string)$composante->getId() : '';
+            $type = '';
+            $plateforme = '';
+            $statut = '';
+        } elseif ($request->query->has('q') || $request->query->has('comp') || $request->query->has('type') || $request->query->has('plateforme') || $request->query->has('statut')) {
+            $q = trim((string)$request->query->get('q', ''));
+            $comp = $composante !== null ? (string)$composante->getId() : (string)$request->query->get('comp', '');
+            $type = (string)$request->query->get('type', '');
+            $plateforme = (string)$request->query->get('plateforme', '');
+            $statut = (string)$request->query->get('statut', '');
+
+            $hasActiveFilters = $q !== ''
+                || ($composante === null && $comp !== '')
+                || $type !== ''
+                || $plateforme !== ''
+                || $statut !== '';
+
+            if ($hasActiveFilters) {
+                $session->set($sessionKey, [
+                    'q' => $q,
+                    'comp' => $comp,
+                    'type' => $type,
+                    'plateforme' => $plateforme,
+                    'statut' => $statut,
+                ]);
+            } else {
+                $session->remove($sessionKey);
+            }
+        } else {
+            /** @var array{q?: string, comp?: string, type?: string, plateforme?: string, statut?: string} $savedFilters */
+            $savedFilters = $session->get($sessionKey, []);
+            $q = trim((string)($savedFilters['q'] ?? ''));
+            $comp = $composante !== null ? (string)$composante->getId() : (string)($savedFilters['comp'] ?? '');
+            $type = (string)($savedFilters['type'] ?? '');
+            $plateforme = (string)($savedFilters['plateforme'] ?? '');
+            $statut = (string)($savedFilters['statut'] ?? '');
+        }
 
         // Appliquer les filtres côté PHP sur le tableau tFormations
         if ($q || $comp || $type || $plateforme || $statut) {
@@ -538,5 +609,133 @@ final class OffreController extends BaseController
             'lignes' => $lignes,
             'tpaByTypeDiplome' => $typeDiplomePlateformeAdmissionRepository->findByCampagneIndexedByTypeDiplome($campagne),
         ]);
+    }
+
+    /**
+     * Modale d'aperçu rapide et de contrôle des informations saisies pour une formation.
+     */
+    #[Route('/offre/formation/{formation}/synthese-modal', name: 'offre_v2_formation_synthese_modal', methods: ['GET'])]
+    public function syntheseModal(
+        Formation $formation,
+        OffreValidationService $offreValidationService,
+        EntityManagerInterface $em,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $this->denyAccessUnlessCanConfigurerOffre($formation);
+        $campagne = $this->getCampagneCollecte();
+
+        $dpeFormation = $em->getRepository(DpeFormation::class)->findOneBy([
+            'formation' => $formation,
+            'campagneCollecte' => $campagne,
+        ]);
+
+        $anomaliesMessages = $offreValidationService->getAnomaliesMessagesFormation($formation, $campagne);
+
+        $dpeParcoursMap = [];
+        $parcoursList = $formation->getParcours()->toArray();
+        if ($parcoursList !== []) {
+            $dpeParcoursEntities = $em->getRepository(DpeParcours::class)->findBy([
+                'parcours' => $parcoursList,
+                'campagneCollecte' => $campagne,
+            ]);
+            foreach ($dpeParcoursEntities as $dp) {
+                if ($dp->getParcours() !== null) {
+                    $dpeParcoursMap[$dp->getParcours()->getId()] = $dp;
+                }
+            }
+        }
+
+        // Structure détaillée des parcours et années
+        $parcoursDetails = [];
+        $portailsMap = [];
+
+        foreach ($formation->getParcours() as $parcours) {
+            $pId = $parcours->getId();
+            $dpePar = $dpeParcoursMap[$pId] ?? null;
+            $isParcoursOuvert = $dpePar?->isOuvert() ?? false;
+
+            $anneesList = [];
+            $parcoursCapacite = 0;
+
+            foreach ($parcours->getAnnees() as $annee) {
+                $isAnneeOuverte = $annee->isOuvert();
+                $anneeCapacite = $annee->getCapaciteAccueil();
+                if ($isAnneeOuverte) {
+                    $parcoursCapacite += $anneeCapacite;
+                }
+
+                $plateformesActives = [];
+                foreach ($annee->getAdmissionPlateformeParametres() as $param) {
+                    if ($param->getCampagne() === $campagne && $param->isActive() && $param->getPlateforme() !== null) {
+                        $plateformesActives[] = [
+                            'plateforme' => $param->getPlateforme(),
+                            'capaciteSpecifique' => $param->getCapacite(),
+                        ];
+                    }
+                }
+
+                $portail = $annee->getPortail();
+                if ($portail !== null && $portail->getId() !== null) {
+                    $portailsMap[$portail->getId()] = $portail;
+                }
+
+                $anneesList[] = [
+                    'annee' => $annee,
+                    'isOuverte' => $isAnneeOuverte,
+                    'capacite' => $anneeCapacite,
+                    'plateformes' => $plateformesActives,
+                    'portail' => $portail,
+                    'isTroncCommun' => $formation->isAnneeTroncCommun($annee->getOrdre() ?? 0, $parcours),
+                ];
+            }
+
+            $anomaliesParcours = $offreValidationService->getAnomaliesParcours($parcours, $campagne, $dpePar);
+
+            $parcoursDetails[] = [
+                'parcours' => $parcours,
+                'dpeParcours' => $dpePar,
+                'isOuvert' => $isParcoursOuvert,
+                'capacite' => $parcoursCapacite,
+                'annees' => $anneesList,
+                'anomalies' => $anomaliesParcours,
+            ];
+        }
+
+        $formationCapacite = $formation->getCapaciteAccueil();
+        if ($formationCapacite <= 0) {
+            $formationCapacite = $formation->getCapacite();
+        }
+
+        $pvDocs = [];
+        $noteDocs = [];
+        foreach ($formation->getDocumentConseils() as $doc) {
+            if ($doc->getType() === 'pv') {
+                $pvDocs[] = $doc;
+            } elseif ($doc->getType() === 'note_explicative') {
+                $noteDocs[] = $doc;
+            }
+        }
+
+        return $turboStream->streamOpenModalFromTemplates(
+            'Synthèse de l\'offre — ' . $formation->getDisplayLong(),
+            $formation->getComposantePorteuse()?->getLibelle() ?? 'Offre de formation',
+            'offre_v2/_modal_formation_synthese.html.twig',
+            [
+                'formation' => $formation,
+                'campagne' => $campagne,
+                'dpeFormation' => $dpeFormation,
+                'anomaliesMessages' => $anomaliesMessages,
+                'parcoursDetails' => $parcoursDetails,
+                'formationCapacite' => $formationCapacite,
+                'pvDocs' => $pvDocs,
+                'noteDocs' => $noteDocs,
+                'troncsCommuns' => $formation->getTroncsCommuns(),
+                'portails' => array_values($portailsMap),
+            ],
+            'offre_v2/_modal_formation_synthese_footer.html.twig',
+            [
+                'formation' => $formation,
+            ]
+        );
     }
 }

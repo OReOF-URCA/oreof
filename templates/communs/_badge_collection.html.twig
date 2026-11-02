@@ -1,6 +1,7 @@
 <span class="inline-flex flex-wrap items-center gap-1 align-middle">
     {% for badge in badges %}
-        {{ component('Badge', { dto: badge }) }}
+        <twig:Badge :dto="badge" size="sm" />
     {% endfor %}
 </span>
+
 

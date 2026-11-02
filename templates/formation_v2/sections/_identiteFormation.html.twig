@@ -87,10 +87,10 @@
             <dd class="{{ ddClass }}">{{ formation.inRncp == true ? formation.codeRncp : 'Non inscrit' }}</dd>
 
             <dt class="{{ dtClass }}">Niveau à l'entrée de la formation</dt>
-            <dd class="{{ ddClass }}">{{ formation.niveauEntree.libelle }}</dd>
+            <dd class="{{ ddClass }}">{{ referentiel_label('niveau_formation', formation.niveauEntreeValue) ?? (formation.niveauEntree != null ? formation.niveauEntree.libelle : 'Non renseigné') }}</dd>
 
             <dt class="{{ dtClass }}">Niveau à la sortie de la formation</dt>
-            <dd class="{{ ddClass }}">{{ formation.niveauSortie.libelle }}</dd>
+            <dd class="{{ ddClass }}">{{ referentiel_label('niveau_formation', formation.niveauSortieValue) ?? (formation.niveauSortie != null ? formation.niveauSortie.libelle : 'Non renseigné') }}</dd>
 
 
         </dl>

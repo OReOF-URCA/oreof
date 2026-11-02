@@ -23,6 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class OffreValidationController extends BaseController
 {
@@ -43,6 +44,7 @@ final class OffreValidationController extends BaseController
         WorkflowInterface $dpeFormationWorkflow,
         TurboStreamResponseFactory $turboStream,
         RemplissageSuspension $remplissageSuspension,
+        TranslatorInterface $translator,
     ): Response {
         $campagne = $this->getCampagneCollecte();
 
@@ -355,7 +357,9 @@ final class OffreValidationController extends BaseController
             'type' => 'note_explicative',
         ], ['uploadedAt' => 'DESC']);
 
-        $modalTitle = $meta['label'] ?? sprintf('Validation — %s', $transition);
+        $modalTitle = isset($meta['label'])
+            ? $translator->trans($meta['label'], [], 'process')
+            : sprintf('Validation — %s', $transition);
 
         return $turboStream->streamOpenModalFromTemplates(
             $modalTitle,

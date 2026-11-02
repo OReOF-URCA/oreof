@@ -175,7 +175,7 @@
     {% endif %}
 
     {# Total Présentiel + Distanciel si mixte #}
-    {% if parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 1) %}
+    {% if parcours.modalitesEnseignementValue in ['1', 'hybride'] or (parcours.modalitesEnseignement != null and parcours.modalitesEnseignement.value == 1) %}
         <td class="px-4 py-3 align-middle text-right tabular-nums font-bold text-secondary-900 dark:text-white whitespace-nowrap">
             <span class="show_versioning d-none d-print-none">{{ diffEc ? diffEc.heuresEctsEc.sommeEcTotalPresDist|displayDiff : '' }}</span>
             <span class="show_current">{{ ec.heuresEctsEc.sommeEcTotalPresDist|filtreHeures }}</span>

@@ -246,11 +246,11 @@
             {% if formation.inRncp and formation.codeRncp %}
                 <span class="pdf-badge pdf-badge-success">RNCP : {{ formation.codeRncp }}</span>
             {% endif %}
-            {% if formation.niveauEntree is defined and formation.niveauEntree is not null %}
-                <span class="pdf-badge pdf-badge-gray">Entrée : {{ formation.niveauEntree.libelle }}</span>
+            {% if formation.niveauEntreeValue is defined and formation.niveauEntreeValue is not null or formation.niveauEntree is defined and formation.niveauEntree is not null %}
+                <span class="pdf-badge pdf-badge-gray">Entrée : {{ referentiel_label('niveau_formation', formation.niveauEntreeValue) ?? (formation.niveauEntree ? formation.niveauEntree.libelle : '') }}</span>
             {% endif %}
-            {% if formation.niveauSortie is defined and formation.niveauSortie is not null %}
-                <span class="pdf-badge pdf-badge-gray">Sortie : {{ formation.niveauSortie.libelle }}</span>
+            {% if formation.niveauSortieValue is defined and formation.niveauSortieValue is not null or formation.niveauSortie is defined and formation.niveauSortie is not null %}
+                <span class="pdf-badge pdf-badge-gray">Sortie : {{ referentiel_label('niveau_formation', formation.niveauSortieValue) ?? (formation.niveauSortie ? formation.niveauSortie.libelle : '') }}</span>
             {% endif %}
             {% if formation.hasParcours %}
                 <span class="pdf-badge pdf-badge-warning">{{ formation.parcours|length }} parcours</span>
@@ -319,10 +319,10 @@
                     {% endif %}
 
                     <dt>Niveau à l'entrée</dt>
-                    <dd>{{ formation.niveauEntree != null ? formation.niveauEntree.libelle : 'Non renseigné' }}</dd>
+                    <dd>{{ referentiel_label('niveau_formation', formation.niveauEntreeValue) ?? (formation.niveauEntree != null ? formation.niveauEntree.libelle : 'Non renseigné') }}</dd>
 
                     <dt>Niveau à la sortie</dt>
-                    <dd>{{ formation.niveauSortie != null ? formation.niveauSortie.libelle : 'Non renseigné' }}</dd>
+                    <dd>{{ referentiel_label('niveau_formation', formation.niveauSortieValue) ?? (formation.niveauSortie != null ? formation.niveauSortie.libelle : 'Non renseigné') }}</dd>
 
                     {% if formation.rythmeFormation != null %}
                         <dt>Rythme de formation</dt>
@@ -468,15 +468,16 @@
         {% endif %}
 
         {# 4.2 Descriptif pédagogique #}
-        {% if parcours.modalitesEnseignement != null or parcours.hasStage or parcours.hasProjet or parcours.hasMemoire or parcours.hasSituationPro %}
+        {% if parcours.modalitesEnseignementValue != null or parcours.modalitesEnseignement != null or parcours.hasStage or parcours.hasProjet or parcours.hasMemoire or parcours.hasSituationPro %}
             <div class="pdf-section">
                 <h2 class="pdf-section-title">5. Modalités & Descriptif pédagogique</h2>
                 <div class="pdf-grid-2">
                     <div class="pdf-col">
                         <dl class="pdf-dl">
-                            {% if parcours.modalitesEnseignement != null %}
+                            {% set modaliteLabel = referentiel_label('modalite_enseignement', parcours.modalitesEnseignementValue) ?? (parcours.modalitesEnseignement ? parcours.modalitesEnseignement.libelle : null) %}
+                            {% if modaliteLabel is not null %}
                                 <dt>Modalités d'enseignement</dt>
-                                <dd>{{ parcours.modalitesEnseignement.libelle }}</dd>
+                                <dd>{{ modaliteLabel }}</dd>
                             {% endif %}
 
                             {% if parcours.hasStage %}
@@ -602,9 +603,9 @@
             <div class="pdf-section">
                 <h2 class="pdf-section-title">7. Admission & Prérequis</h2>
                 <dl class="pdf-dl">
-                    {% if parcours.niveauFrancais %}
+                    {% if parcours.niveauFrancaisValue or parcours.niveauFrancais %}
                         <dt>Niveau de français requis</dt>
-                        <dd>{{ parcours.niveauFrancais.libelle }}</dd>
+                        <dd>{{ referentiel_label('niveau_langue', parcours.niveauFrancaisValue) ?? (parcours.niveauFrancais ? parcours.niveauFrancais.libelle : '') }}</dd>
                     {% endif %}
 
                     {% if parcours.prerequis %}
@@ -764,15 +765,16 @@
             {% endif %}
 
             {# Modalités pédagogiques du parcours #}
-            {% if parcours.modalitesEnseignement != null or parcours.hasStage or parcours.hasProjet or parcours.hasMemoire or parcours.hasSituationPro %}
+            {% if parcours.modalitesEnseignementValue != null or parcours.modalitesEnseignement != null or parcours.hasStage or parcours.hasProjet or parcours.hasMemoire or parcours.hasSituationPro %}
                 <div class="pdf-section">
                     <h3 class="pdf-section-title">Modalités & Descriptif pédagogique</h3>
                     <div class="pdf-grid-2">
                         <div class="pdf-col">
                             <dl class="pdf-dl">
-                                {% if parcours.modalitesEnseignement != null %}
+                                {% set modaliteLabel = referentiel_label('modalite_enseignement', parcours.modalitesEnseignementValue) ?? (parcours.modalitesEnseignement ? parcours.modalitesEnseignement.libelle : null) %}
+                                {% if modaliteLabel is not null %}
                                     <dt>Modalités d'enseignement</dt>
-                                    <dd>{{ parcours.modalitesEnseignement.libelle }}</dd>
+                                    <dd>{{ modaliteLabel }}</dd>
                                 {% endif %}
 
                                 {% if parcours.hasStage %}

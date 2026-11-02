@@ -23,6 +23,50 @@ class UserProfilRepository extends ServiceEntityRepository
         parent::__construct($registry, UserProfil::class);
     }
 
+    /**
+     * Profils et composantes (dédoublonnés) des identifiants donnés, en une seule requête.
+     *
+     * @param list<string> $usernames
+     *
+     * @return array<string, array{profils: list<string>, composantes: list<string>}>
+     */
+    public function findAffectationsByUsernames(array $usernames): array
+    {
+        if ($usernames === []) {
+            return [];
+        }
+
+        $rows = $this->createQueryBuilder('up')
+            ->select('u.username AS username, p.libelle AS profil, c.sigle AS sigle, c.libelle AS composante')
+            ->join('up.user', 'u')
+            ->leftJoin('up.profil', 'p')
+            ->leftJoin('up.composante', 'c')
+            ->where('u.username IN (:usernames)')
+            ->setParameter('usernames', $usernames)
+            ->orderBy('p.libelle', 'ASC')
+            ->getQuery()
+            ->getArrayResult();
+
+        $affectations = [];
+        foreach ($rows as $row) {
+            $entry = &$affectations[$row['username']];
+            $entry ??= ['profils' => [], 'composantes' => []];
+
+            $profil = $row['profil'];
+            if ($profil !== null && !in_array($profil, $entry['profils'], true)) {
+                $entry['profils'][] = $profil;
+            }
+
+            $composante = $row['sigle'] ?: $row['composante'];
+            if ($composante !== null && !in_array($composante, $entry['composantes'], true)) {
+                $entry['composantes'][] = $composante;
+            }
+            unset($entry);
+        }
+
+        return $affectations;
+    }
+
     public function findEnable(
         CampagneCollecte           $campagneCollecte,
         float|bool|int|string|null $sort,

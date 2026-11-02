@@ -1,0 +1,130 @@
+<div class="space-y-4 text-text">
+
+    {# 1. Bannière d'avertissement ambre/warning #}
+    <div class="rounded-xl border border-warning-200 bg-warning-50 p-4 dark:border-warning-800 dark:bg-warning-900/30">
+        <div class="flex items-start gap-3">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-warning-100 text-warning-700 dark:bg-warning-800 dark:text-warning-200">
+                <twig:UX:Icon name="ph:arrows-left-right-bold" class="h-5 w-5" />
+            </div>
+            <div class="space-y-1">
+                <div class="flex flex-wrap items-center gap-2">
+                    <h3 class="text-sm font-bold text-warning-900 dark:text-warning-100">
+                        Déplacement de parcours
+                    </h3>
+                    <twig:Badge variant="warning" size="sm" label="SES / Admin exclusivement" />
+                </div>
+                <p class="text-xs text-warning-800 dark:text-warning-200 leading-relaxed">
+                    Cette action permet de transférer définitivement le parcours <strong>« {{ parcours.libelle }} »</strong> vers une autre formation.
+                    Toutes ses données rattachées (DPE de parcours, demandes DPE, blocs de compétences, etc.) seront automatiquement réassociées à la nouvelle formation.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    {# 2. Contexte actuel : Formation & Composante porteuse #}
+    <div class="rounded-xl border border-secondary-200 bg-secondary-50/50 p-3 text-xs dark:border-secondary-700 dark:bg-secondary-800/40 space-y-1.5">
+        <div class="flex items-center justify-between gap-2">
+            <span class="text-secondary-500 dark:text-secondary-400">Formation d'origine :</span>
+            <span class="font-semibold text-secondary-900 dark:text-secondary-100 text-right">
+                {{ formation ? formation.displayLong : 'Non rattachée' }}
+            </span>
+        </div>
+        <div class="flex items-center justify-between gap-2">
+            <span class="text-secondary-500 dark:text-secondary-400">Composante porteuse :</span>
+            <span class="font-semibold text-secondary-900 dark:text-secondary-100 text-right">
+                {{ formation and formation.composantePorteuse ? formation.composantePorteuse.libelle : 'Non définie' }}
+            </span>
+        </div>
+    </div>
+
+    {# 3. Alertes structurelles (seul parcours ou parcours par défaut) #}
+    {% if analysis.isSeulParcoursDeLaFormation %}
+        <div class="rounded-xl border border-warning-200 bg-warning-50 p-3 text-xs text-warning-800 dark:border-warning-800 dark:bg-warning-900/30 dark:text-warning-200 flex items-center gap-2.5">
+            <twig:UX:Icon name="icon:warning" class="h-4 w-4 shrink-0 text-warning-600 dark:text-warning-300" />
+            <span><strong>Attention :</strong> Ce parcours est l'unique parcours rattaché à sa formation d'origine. Son transfert laissera la formation d'origine sans parcours.</span>
+        </div>
+    {% endif %}
+
+    {% if analysis.isParcoursDefaut %}
+        <div class="rounded-xl border border-warning-200 bg-warning-50 p-3 text-xs text-warning-800 dark:border-warning-800 dark:bg-warning-900/30 dark:text-warning-200 flex items-center gap-2.5">
+            <twig:UX:Icon name="icon:warning" class="h-4 w-4 shrink-0 text-warning-600 dark:text-warning-300" />
+            <span><strong>Attention :</strong> Ce parcours est actuellement configuré comme parcours par défaut de sa formation d'origine. Il sera converti en parcours standard dans la nouvelle formation.</span>
+        </div>
+    {% endif %}
+
+    {# 4. Éléments impactés #}
+    <div class="rounded-xl border border-secondary-200 bg-surface p-3 dark:border-secondary-700">
+        <div class="text-xs font-bold text-secondary-700 dark:text-secondary-300 mb-2">
+            Éléments réassociés à la nouvelle formation :
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-center sm:grid-cols-4">
+            <div class="rounded-lg bg-secondary-50 p-2 dark:bg-secondary-800">
+                <div class="text-sm font-bold text-secondary-900 dark:text-white">{{ analysis.nbDpeParcours }}</div>
+                <div class="text-[11px] text-secondary-500 dark:text-secondary-400">DPE Parcours</div>
+            </div>
+            <div class="rounded-lg bg-secondary-50 p-2 dark:bg-secondary-800">
+                <div class="text-sm font-bold text-secondary-900 dark:text-white">{{ analysis.nbDpeDemandes }}</div>
+                <div class="text-[11px] text-secondary-500 dark:text-secondary-400">Demandes DPE</div>
+            </div>
+            <div class="rounded-lg bg-secondary-50 p-2 dark:bg-secondary-800">
+                <div class="text-sm font-bold text-secondary-900 dark:text-white">{{ analysis.nbBlocCompetences }}</div>
+                <div class="text-[11px] text-secondary-500 dark:text-secondary-400">Blocs comp.</div>
+            </div>
+            <div class="rounded-lg bg-secondary-50 p-2 dark:bg-secondary-800">
+                <div class="text-sm font-bold text-secondary-900 dark:text-white">{{ analysis.nbChangeParcours }}</div>
+                <div class="text-[11px] text-secondary-500 dark:text-secondary-400">Modifications</div>
+            </div>
+        </div>
+    </div>
+
+    {# 5. Formulaire de déplacement #}
+    <form id="modal_form" action="{{ path('parcours_ses_deplacer_post', {parcours: parcours.id}) }}" method="post" class="space-y-4 pt-2">
+        <input type="hidden" name="_token" value="{{ csrf_token('parcours_move_' ~ parcours.id) }}">
+
+        <div>
+            <label for="target_formation_id" class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
+                Nouvelle formation de destination <span class="text-danger-600">*</span>
+            </label>
+            <select
+                name="target_formation_id"
+                id="target_formation_id"
+                required
+                class="w-full rounded-xl border border-secondary-300 bg-white px-3.5 py-2.5 text-sm font-medium text-secondary-900 shadow-sm transition focus:border-warning-500 focus:outline-none focus:ring-2 focus:ring-warning-500/20 dark:border-secondary-600 dark:bg-secondary-900 dark:text-secondary-100"
+                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
+            >
+                <option value="">-- Sélectionner la formation de destination --</option>
+                {% for composanteLibelle, formations in eligibleFormations %}
+                    <optgroup label="{{ composanteLibelle }}">
+                        {% for targetFormation in formations %}
+                            <option value="{{ targetFormation.id }}">
+                                {{ targetFormation.displayLong }}
+                            </option>
+                        {% endfor %}
+                    </optgroup>
+                {% endfor %}
+            </select>
+            <p class="text-[11px] text-secondary-500 dark:text-secondary-400 mt-1">
+                Toutes les formations de la même campagne sont sélectionnables, quelle que soit leur composante porteuse.
+            </p>
+        </div>
+
+        <div>
+            <label for="confirmation_text" class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
+                Saisissez le libellé du parcours ou « DEPLACER » pour confirmer <span class="text-danger-600">*</span>
+            </label>
+            <div class="text-[11px] text-secondary-500 dark:text-secondary-400 mb-1.5">
+                Texte attendu : <code class="rounded bg-secondary-100 px-1 py-0.5 font-mono font-bold text-warning-700 dark:bg-secondary-800 dark:text-warning-300">{{ parcours.libelle }}</code> ou <code class="rounded bg-secondary-100 px-1 py-0.5 font-mono font-bold text-warning-700 dark:bg-secondary-800 dark:text-warning-300">DEPLACER</code>
+            </div>
+            <input
+                type="text"
+                name="confirmation_text"
+                id="confirmation_text"
+                required
+                autocomplete="off"
+                placeholder="{{ parcours.libelle }}"
+                class="w-full rounded-xl border border-secondary-300 bg-white px-3.5 py-2.5 text-sm font-medium text-secondary-900 shadow-sm transition placeholder:text-secondary-400 focus:border-warning-500 focus:outline-none focus:ring-2 focus:ring-warning-500/20 dark:border-secondary-600 dark:bg-secondary-900 dark:text-secondary-100"
+            >
+        </div>
+    </form>
+
+</div>

@@ -12,7 +12,6 @@ namespace App\Service\FicheMatiere;
 use App\Entity\FicheMatiere;
 use App\Repository\ButApprentissageCritiqueRepository;
 use App\Repository\CompetenceRepository;
-use App\Repository\LangueRepository;
 use App\Repository\UserRepository;
 use App\Service\AbstractFieldUpdater;
 
@@ -20,7 +19,6 @@ final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
 {
     public function __construct(
         private readonly UserRepository                     $userRepo,
-        private readonly LangueRepository                   $langueRepo,
         private readonly CompetenceRepository               $competenceRepo,
         private readonly ButApprentissageCritiqueRepository $butApprentissageCritiqueRepo,
     ) {
@@ -115,22 +113,10 @@ final class FicheMatiereFieldUpdater extends AbstractFieldUpdater
                 $p->setObjectifs($this->toString($v));
             },
             'fiche_matiere_step2[langueDispense][]' => function (FicheMatiere $f, $v): void {
-                $this->syncCollection(
-                    $f->getLangueDispense(),
-                    $this->langueRepo,
-                    $v,
-                    fn($item) => $f->addLangueDispense($item),
-                    fn($item) => $f->removeLangueDispense($item)
-                );
+                $f->setLangueDispense($this->toArray($v));
             },
             'fiche_matiere_step2[langueSupport][]' => function (FicheMatiere $f, $v): void {
-                $this->syncCollection(
-                    $f->getLangueSupport(),
-                    $this->langueRepo,
-                    $v,
-                    fn($item) => $f->addLangueSupport($item),
-                    fn($item) => $f->removeLangueSupport($item)
-                );
+                $f->setLangueSupport($this->toArray($v));
             },
 
             // ----------------- STEP 3 (Mutualisation) -----------------

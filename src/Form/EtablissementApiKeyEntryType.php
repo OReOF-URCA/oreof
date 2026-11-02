@@ -22,7 +22,7 @@ class EtablissementApiKeyEntryType extends AbstractType
                 'label' => 'Plateforme tierce',
                 'required' => true,
                 'attr' => [
-                    'placeholder' => 'Ex : Apogée, Pégase, MonMaster, Parcoursup...',
+                    'placeholder' => 'Ex : Apogée, Pégase, ORéBUT, Apprentissage (RNCP), ROME...',
                     'autocomplete' => 'off',
                 ],
                 'constraints' => [

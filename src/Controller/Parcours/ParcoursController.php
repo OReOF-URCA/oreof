@@ -509,6 +509,7 @@ class ParcoursController extends BaseController
         Request $request,
         ParcoursDeleteService $deleteService,
         TurboStreamResponseFactory $turboStream,
+        EntityManagerInterface $entityManager,
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -559,7 +560,9 @@ class ParcoursController extends BaseController
         $this->addFlash('success', $flashMsg);
 
         $referer = (string)$request->headers->get('referer', '');
-        if ($formationSlug !== null && str_contains($referer, '/offre/')) {
+        if ($referer !== '' && !str_contains($referer, '/supprimer')) {
+            $redirectUrl = $referer;
+        } elseif ($formationSlug !== null && str_contains($referer, '/offre/')) {
             $redirectUrl = $this->generateUrl('offre_v2_configurer', ['slug' => $formationSlug]);
         } elseif ($formationSlug !== null) {
             $redirectUrl = $this->generateUrl('formation_v2_voir', ['slug' => $formationSlug]);
@@ -568,10 +571,23 @@ class ParcoursController extends BaseController
         }
 
         if ($isTurbo) {
+            $dpesParcours = [];
+            if ($formation !== null) {
+                $entityManager->refresh($formation);
+                foreach ($formation->getParcours() as $p) {
+                    $dpe = GetDpeParcours::getFromParcours($p);
+                    if ($dpe !== null) {
+                        $dpesParcours[$p->getId()] = $dpe;
+                    }
+                }
+            }
+
             return $turboStream->stream('parcours_v2/turbo/delete_success.stream.html.twig', [
                 'redirectUrl' => $redirectUrl,
                 'parcoursId' => $parcoursId,
                 'toastMessage' => $flashMsg,
+                'formation' => $formation,
+                'dpesParcours' => $dpesParcours,
             ]);
         }
 

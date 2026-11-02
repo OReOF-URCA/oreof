@@ -38,7 +38,6 @@ class UpdateDroitsCommand extends Command
     )
     {
         parent::__construct();
-        $this->campagne = $this->campagneCollecteRepository->find($this->idCampagne);
     }
 
     protected function configure(): void
@@ -49,6 +48,7 @@ class UpdateDroitsCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $this->campagne = $this->campagneCollecteRepository->find($this->idCampagne);
 
         $profilRf = $this->profilRepository->findOneBy(['code' => 'ROLE_RESP_FORMATION']);
         $profilCoRf = $this->profilRepository->findOneBy(['code' => 'ROLE_CO_RESP_FORMATION']);

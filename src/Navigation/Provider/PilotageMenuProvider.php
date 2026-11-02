@@ -55,66 +55,76 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
             key: 'pilotage',
             label: 'menu.admin.pilotage',
             route: 'app_section_pilotage',
-            icon: 'chart-bar',
+            icon: 'mdi:chart-bar',
             children: [
                 MenuItem::link(
                     'pilotage.tour_de_controle',
                     'menu.admin.tour_de_controle',
                     'app_admin_pilotage_campagne_index',
+                    icon: 'mdi:monitor-dashboard',
                 ),
 
                 MenuItem::link(
                     'pilotage.consulter_offre',
                     'menu.admin.consulter_offre',
                     'structure_composante_index',
+                    icon: 'mdi:book-search-outline',
                 ),
 
                 MenuItem::link(
                     'pilotage.gestion_offre',
                     'menu.admin.gestion_offre',
                     'app_offre_index',
+                    icon: 'mdi:notebook-edit-outline',
                 ),
 
                 MenuItem::link(
                     'pilotage.statistiques_offre',
                     'menu.admin.statistiques_offre',
                     'offre_v2_statistiques',
+                    icon: 'icon:chart-pie',
                 ),
 
                 MenuItem::link(
                     'pilotage.dpe_ouverts',
                     'menu.admin.dpe_ouverts',
                     'app_demande_dpe',
+                    icon: 'mdi:folder-open-outline',
                 ),
 
                 MenuItem::link(
                     'pilotage.validation_dpe',
                     'menu.admin.validation_dpe',
                     'app_validation_dpe_index',
+                    icon: 'mdi:folder-check-outline',
                 ),
 
                 MenuItem::link(
                     'pilotage.validation_fiches_ec',
                     'menu.admin.validation_fiches_ec',
                     'app_validation_fiche_index',
+                    icon: 'mdi:file-check-outline',
                 ),
 
                 MenuItem::link(
                     'pilotage.validation_rf',
                     'menu.admin.validation_rf',
                     'app_validation_change_rf_index',
+                    icon: 'mdi:account-check-outline',
                 ),
 
                 MenuItem::link(
                     'pilotage.controle_lheo',
                     'menu.admin.controle_lheo',
                     'app_parcours_lheo_invalid_list',
+                    icon: 'mdi:shield-check-outline',
                 ),
 
                 MenuItem::link(
                     'pilotage.exports',
                     'menu.admin.exports',
                     'app_export_index',
+                    icon: 'icon:download',
                 )->requires('SHOW', [
                     'route' => 'app_etablissement',
                     'subject' => 'etablissement',
@@ -131,7 +141,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
             return MenuItem::section(
                 key: 'pilotage',
                 label: 'menu.compo.pilotage',
-                icon: 'chart-bar',
+                icon: 'mdi:chart-bar',
                 children: [],
             );
         }
@@ -165,6 +175,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 label: 'menu.compo.gestion_composante',
                 route: 'app_composante',
                 routeParams: ['composante' => $composante->getId()],
+                icon: 'mdi:domain',
             )->inColumn($column);
 
             $children[] = MenuItem::link(
@@ -172,6 +183,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 label: 'menu.compo.gestion_offre',
                 route: 'app_offre_composante_index',
                 routeParams: ['composante' => $composante->getId()],
+                icon: 'mdi:notebook-edit-outline',
             )->inColumn($column);
 
             $children[] = MenuItem::link(
@@ -179,6 +191,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 label: 'menu.compo.dpe_ouvert',
                 route: 'app_demande_dpe_composante',
                 routeParams: ['composante' => $composante->getId()],
+                icon: 'mdi:folder-open-outline',
             )->inColumn($column);
 
             $children[] = MenuItem::link(
@@ -186,6 +199,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 label: 'menu.compo.validation_dpe',
                 route: 'app_validation_composante_dpe_index',
                 routeParams: ['composante' => $composante->getId()],
+                icon: 'mdi:folder-check-outline',
             )->inColumn($column);
 
             $children[] = MenuItem::link(
@@ -193,6 +207,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 label: 'menu.compo.validation_ec',
                 route: 'app_validation_composante_fiche_index',
                 routeParams: ['composante' => $composante->getId()],
+                icon: 'mdi:file-check-outline',
             )->inColumn($column);
 
             $children[] = MenuItem::link(
@@ -200,6 +215,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 label: 'menu.compo.validation_rf',
                 route: 'app_validation_composante_change_rf_index',
                 routeParams: ['composante' => $composante->getId()],
+                icon: 'mdi:account-check-outline',
             )->inColumn($column);
 
             $children[] = MenuItem::link(
@@ -207,6 +223,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 label: 'menu.compo.pilotage_visuel',
                 route: 'app_validation_composante_pilotage',
                 routeParams: ['composante' => $composante->getId()],
+                icon: 'mdi:view-dashboard-outline',
             )->inColumn($column);
 
             $children[] = MenuItem::link(
@@ -214,6 +231,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 label: 'menu.compo.exports',
                 route: 'app_export_composante_index',
                 routeParams: ['composante' => $composante->getId()],
+                icon: 'icon:download',
             )->inColumn($column);
 
             $children[] = MenuItem::link(
@@ -221,6 +239,7 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 label: 'menu.compo.communication',
                 route: 'app_plaquette',
                 routeParams: ['composante' => $composante->getId()],
+                icon: 'mdi:bullhorn-outline',
             )->inColumn($column);
         }
 
@@ -228,13 +247,14 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
             key: 'pilotage_composante.support',
             label: 'Aide & Support',
             description: 'Accédez à tous les guides administratifs et aux contacts de la scolarité centrale.',
+            icon: 'mdi:lifebuoy',
         )->inColumn('support');
 
         return MenuItem::section(
             key: 'pilotage',
             label: 'menu.compo.pilotage',
             route: 'app_section_pilotage',
-            icon: 'chart-bar',
+            icon: 'mdi:chart-bar',
             children: $children,
         )->asMegaMenu()->withPosition(20);
     }

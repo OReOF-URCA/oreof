@@ -398,7 +398,9 @@ class ParcoursExport {
             // 'objectifs' => CleanTexte::cleanTextArea($ficheMatiere?->getObjectifs()) ?? '-',
             'description' => $ficheMatiere?->getDescription() ?? '-',
             'objectifs' => $ficheMatiere?->getObjectifs() ?? '-',
-            'modalite_enseignement'=> $ficheMatiere?->getModaliteEnseignement()->value ?? '-',
+            'modalite_enseignement' => ($modaliteVal = $ficheMatiere?->getModaliteEnseignementValue()) !== null
+                ? (($legacy = \App\Referentiel\ModaliteEnseignement::legacyCase($modaliteVal)) !== null ? $legacy->value : $modaliteVal)
+                : '-',
             'langues_supports' => $ficheMatiere?->getLanguesSupportsArray() ?? [],
             'langues_dispense_cours' => $ficheMatiere?->getLanguesDispenseArray() ?? [],
             'ects'=> $ec->heuresEctsEc->ects,

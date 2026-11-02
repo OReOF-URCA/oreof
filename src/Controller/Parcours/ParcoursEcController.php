@@ -56,7 +56,7 @@ class ParcoursEcController extends BaseController
         $elementConstitutif->setFicheMatiere(null);
         $elementConstitutif->setParcours($parcours);
 
-        $elementConstitutif->setModaliteEnseignement($parcours->getModalitesEnseignement());
+        $elementConstitutif->setModaliteEnseignementValue($parcours->getModalitesEnseignementValue());
         $elementConstitutif->setUe($ue);
 
         $typeDiplome = $parcours->getFormation()?->getTypeDiplome();
@@ -232,7 +232,7 @@ class ParcoursEcController extends BaseController
         $form = $this->createForm(EcStep4Type::class, $ecHeures, [
             'isModal' => true,
             'data_class' => $ecHeures::class,
-            'modalite' => $parcours->getModalitesEnseignement(),
+            'modalite' => $parcours->getModalitesEnseignementValue(),
             'action' => $this->generateUrl(
                 'parcours_ec_saisir_heures',
                 [
@@ -262,7 +262,7 @@ class ParcoursEcController extends BaseController
             'parcours' => $parcours,
             'isParcoursProprietaire' => $isParcoursProprietaire,
             'isMutualisee' => $elementConstitutif->getFicheMatiere()?->getElementConstitutifs()->count() > 0, //todo: mais plus large ca peut venir de l'UE ou du semestre
-            'modalite' => $parcours->getModalitesEnseignement()
+            'modalite' => $parcours->getModalitesEnseignementValue()
         ]);
 
         $footer = $this->renderView('_ui/_footer_submit_cancel.html.twig', [

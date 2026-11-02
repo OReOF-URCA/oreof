@@ -6,13 +6,13 @@
 
         <dl>
             <dt>Modalités d'enseignement</dt>
-            <dd>{{ modalite.libelle }}</dd>
+            <dd>{{ referentiel_label('modalite_enseignement', modalite) ?? modalite }}</dd>
         </dl>
         <dl>
             <dt>ECTS</dt>
             <dd>{{ ects }}</dd>
         </dl>
-        {% if modalite.value != 2 %} {# todo: utile ? peut être différent du parcours ? #}
+        {% if modalite != constant('App\\Referentiel\\ModaliteEnseignement::DISTANCIELLE') %} {# todo: utile ? peut être différent du parcours ? #}
             <h3>Volume Présentiel</h3>
             <table class="table table-bordered">
                 <thead>
@@ -33,7 +33,7 @@
         {% else %}
             {{ component('alerte', {type:'info', message:'Formation proposée uniquement en distanciel'}) }}
         {% endif %}
-        {% if modalite.value != 0 %}
+        {% if modalite != constant('App\\Referentiel\\ModaliteEnseignement::PRESENTIELLE') %}
             <h3 class="mt-2">Volume Distanciel</h3>
             <table class="table table-bordered">
                 <thead>

@@ -20,10 +20,12 @@ use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Navigation\Breadcrumb\Breadcrumb as BreadcrumbService;
 use App\Repository\FormationTabStateRepository;
 use App\Repository\ParcoursTabStateRepository;
+use App\Service\Formation\FormationDeleteService;
 use App\Service\LheoXML;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
 use App\TypeDiplome\TypeDiplomeResolver;
+use App\Utils\TurboStreamResponseFactory;
 use Jfcherng\Diff\DiffHelper;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\Request;
@@ -384,4 +386,154 @@ class FormationController extends BaseController
         ]));
     }
 
+    #[Route('/{formation}/supprimer', name: 'supprimer', methods: ['GET'])]
+    public function supprimer(
+        Formation $formation,
+        Request $request,
+        FormationDeleteService $deleteService,
+        BreadcrumbService $breadcrumb,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $breadcrumb->add(
+            $formation->getDisplay(),
+            'formation_v2_voir',
+            ['slug' => $formation->getSlug()]
+        );
+        $breadcrumb->add('Suppression définitive');
+
+        $analysis = $deleteService->analyze($formation);
+
+        $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string) $request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
+
+        if ($isTurbo) {
+            return $turboStream->streamOpenModalFromTemplates(
+                'Supprimer définitivement la formation',
+                $formation->getDisplayLong(),
+                'formation_v2/_modal_delete.html.twig',
+                [
+                    'formation' => $formation,
+                    'analysis' => $analysis,
+                ],
+                'formation_v2/_modal_delete_footer.html.twig',
+                [
+                    'formation' => $formation,
+                    'analysis' => $analysis,
+                ]
+            );
+        }
+
+        return $this->render('formation_v2/supprimer.html.twig', [
+            'formation' => $formation,
+            'analysis' => $analysis,
+        ]);
+    }
+
+    #[Route('/{formation}/supprimer', name: 'supprimer_post', methods: ['POST'])]
+    public function supprimerPost(
+        Formation $formation,
+        Request $request,
+        FormationDeleteService $deleteService,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string) $request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
+
+        $csrfToken = (string) $request->request->get('_token', $request->request->get('csrf_token', ''));
+        if (!$this->isCsrfTokenValid('formation_delete_' . $formation->getId(), $csrfToken)) {
+            if ($isTurbo) {
+                return $turboStream->streamToastError('Token CSRF invalide ou expiré.');
+            }
+            $this->addFlash('danger', 'Token CSRF invalide ou expiré.');
+
+            return $this->redirectToRoute('formation_v2_supprimer', ['formation' => $formation->getId()]);
+        }
+
+        $analysis = $deleteService->analyze($formation);
+        if (!$analysis->canDelete()) {
+            $msg = implode(' ', $analysis->blockingReasons);
+            if ($isTurbo) {
+                return $turboStream->streamToastError($msg);
+            }
+            $this->addFlash('danger', $msg);
+
+            return $this->redirectToRoute('formation_v2_supprimer', ['formation' => $formation->getId()]);
+        }
+
+        $confirmationText = trim((string) $request->request->get('confirmation_text', ''));
+        $expectedTexts = array_filter([
+            trim($formation->getDisplayLong()),
+            trim((string) $formation->getDisplay()),
+            trim((string) $formation->getMention()?->getLibelle()),
+            trim((string) $formation->getSigle()),
+        ]);
+
+        $matches = mb_strtoupper($confirmationText) === 'SUPPRIMER';
+        if (!$matches) {
+            foreach ($expectedTexts as $exp) {
+                if (mb_strtoupper($confirmationText) === mb_strtoupper($exp)) {
+                    $matches = true;
+                    break;
+                }
+            }
+        }
+
+        if (!$matches) {
+            $msg = sprintf(
+                'Le texte saisi (« %s ») ne correspond pas au libellé de la formation (« %s ») ou à « SUPPRIMER ». La suppression a été annulée.',
+                $confirmationText,
+                $formation->getDisplay()
+            );
+            if ($isTurbo) {
+                return $turboStream->streamToastError($msg);
+            }
+            $this->addFlash('danger', $msg);
+
+            return $this->redirectToRoute('formation_v2_supprimer', ['formation' => $formation->getId()]);
+        }
+
+        $force = (bool) $request->request->get('force', false);
+        if ($analysis->hasSharedDependencies() && !$force) {
+            $msg = 'Des dépendances partagées ont été détectées. Vous devez cocher la confirmation explicite de forçage pour supprimer cette formation.';
+            if ($isTurbo) {
+                return $turboStream->streamToastError($msg);
+            }
+            $this->addFlash('danger', $msg);
+
+            return $this->redirectToRoute('formation_v2_supprimer', ['formation' => $formation->getId()]);
+        }
+
+        $libelle = $formation->getDisplay();
+        $formationId = $formation->getId();
+
+        $deleteService->delete($formation, $force);
+
+        $flashMsg = sprintf('La formation « %s » a été définitivement supprimée.', $libelle);
+        $this->addFlash('success', $flashMsg);
+
+        $referer = (string) $request->headers->get('referer', '');
+        if (str_contains($referer, '/offre/')) {
+            $redirectUrl = $this->generateUrl('offre_v2_index');
+        } elseif (str_contains($referer, '/structure/')) {
+            $redirectUrl = $this->generateUrl('structure_formation_index');
+        } else {
+            $redirectUrl = $this->generateUrl('app_formation_index');
+        }
+
+        if ($isTurbo) {
+            return $turboStream->stream('formation_v2/turbo/delete_success.stream.html.twig', [
+                'redirectUrl' => $redirectUrl,
+                'formationId' => $formationId,
+                'toastMessage' => $flashMsg,
+            ]);
+        }
+
+        return $this->redirect($redirectUrl);
+    }
 }

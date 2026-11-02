@@ -11,8 +11,7 @@ namespace App\Form;
 
 use App\Entity\FicheMatiere;
 use App\Entity\User;
-use App\Repository\UserRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Form\Type\InlineCreateEntitySelectType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -27,16 +26,11 @@ class FicheMatiereType extends AbstractType
                 'required' => true,
                 'attr' => ['maxlength' => 250],
             ])
-            ->add('responsableFicheMatiere', EntityType::class, [
+            ->add('responsableFicheMatiere', InlineCreateEntitySelectType::class, [
                 'class' => User::class,
-                'choice_label' => 'display',
-                'autocomplete' => true,
+                'label' => 'Responsable de la fiche matière',
+                'new_placeholder' => 'Email du responsable de la fiche matière',
                 'required' => true,
-                // limit results to avoid hydrating full user table when rendering the form
-                'query_builder' => function (UserRepository $ur) {
-                    return $ur->createQueryBuilder('u')
-                        ->orderBy('u.nom', 'ASC');
-                },
             ]);
     }
 

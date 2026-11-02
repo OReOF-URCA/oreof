@@ -16,6 +16,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class UserHorsUrcaType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -24,18 +26,31 @@ class UserHorsUrcaType extends AbstractType
             ->add('nom', TextType::class, [
                 'required' => true,
                 'label' => 'Nom',
-                'attr' => ['maxlength' => 255]
+                'attr' => ['maxlength' => 255],
+                'constraints' => [
+                    new Assert\NotBlank(message: 'Le nom est obligatoire.'),
+                    new Assert\Length(max: 255),
+                ],
             ])
             ->add('prenom', TextType::class, [
                 'required' => true,
                 'label' => 'Prenom',
-                'attr' => ['maxlength' => 255]
+                'attr' => ['maxlength' => 255],
+                'constraints' => [
+                    new Assert\NotBlank(message: 'Le prénom est obligatoire.'),
+                    new Assert\Length(max: 255),
+                ],
             ])
             ->add('email', EmailType::class, [
                 'required' => true,
                 'label' => 'Adresse email',
                 'help' => 'Adresse email valide',
-                'attr' => ['maxlength' => 255]
+                'attr' => ['maxlength' => 255],
+                'constraints' => [
+                    new Assert\NotBlank(message: 'L\'adresse email est obligatoire.'),
+                    new Assert\Email(message: 'L\'adresse email "{{ value }}" n\'est pas valide.'),
+                    new Assert\Length(max: 255),
+                ],
             ])
         ;
     }

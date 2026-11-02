@@ -1,0 +1,37 @@
+<div id="parcours_contacts_header" class="flex flex-wrap justify-between items-center gap-3 mb-4">
+    <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0 border border-primary-100 dark:border-primary-900/50">
+            <twig:UX:Icon name="icon:users" class="w-5 h-5"/>
+        </div>
+        <div>
+            <div class="flex items-center gap-2">
+                <h3 class="text-xs font-black uppercase tracking-wider text-secondary-800 dark:text-secondary-200">
+                    {{ 'parcours_step5.labels.contacts'|trans({}, 'form') }}
+                </h3>
+                {% if contacts|length == 0 %}
+                    <span class="text-[10px] font-bold text-danger-600 dark:text-danger-400 uppercase tracking-wider bg-danger-50 dark:bg-danger-950/40 px-2 py-0.5 rounded-full border border-danger-200 dark:border-danger-800">
+                        Requis
+                    </span>
+                {% else %}
+                    <twig:Badge
+                        :label="contacts|length ~ ' ' ~ (contacts|length > 1 ? 'contacts' : 'contact')"
+                        variant="primary"
+                        size="sm"
+                    />
+                {% endif %}
+            </div>
+            <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                {{ 'parcours_step5.helps.contacts.help'|trans({}, 'help') }}
+            </p>
+        </div>
+    </div>
+
+    <twig:Button
+        variant="success"
+        size="sm"
+        icon="icon:add"
+        label="Ajouter un contact"
+        dataAction="click->modalturbo#open"
+        href="{{ path('app_parcours_contacts_add', { parcours: parcours.id }) }}"
+    />
+</div>

@@ -13,6 +13,8 @@ use App\Classes\DataUserSession;
 use App\Entity\CampagneCollecte;
 use App\Entity\Constantes;
 use App\Entity\Etablissement;
+use App\Entity\User;
+use App\Repository\ComposanteRepository;
 use App\TypeDiplome\TypeDiplomeResolver;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -104,5 +106,55 @@ class BaseController extends AbstractController
     public function getEtablissement(): ?Etablissement
     {
         return $this->dataUserSession->getEtablissement();
+    }
+
+    public function canAccessCfvu(): bool
+    {
+        return $this->isGranted('ROLE_ADMIN')
+            || $this->isGranted('SHOW', ['route' => 'app_etablissement', 'subject' => 'etablissement']);
+    }
+
+    /**
+     * @return array<int, \App\Entity\Composante>
+     */
+    protected function getAuthorizedComposantes(ComposanteRepository $composanteRepository): array
+    {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            return $composanteRepository->findPorteuse();
+        }
+
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return [];
+        }
+
+        $candidates = [];
+        foreach ($user->getComposantes() as $c) {
+            $candidates[$c->getId()] = $c;
+        }
+        foreach ($user->getComposanteResponsableDpe() as $c) {
+            $candidates[$c->getId()] = $c;
+        }
+        foreach ($user->getUserProfils() as $up) {
+            if ($up->getComposante() !== null) {
+                $candidates[$up->getComposante()->getId()] = $up->getComposante();
+            }
+        }
+
+        $authorized = [];
+        foreach ($candidates as $c) {
+            if ($this->isGranted('SHOW', ['route' => 'app_composante', 'subject' => $c])
+                || $user->getComposantes()->contains($c)
+                || $user->getComposanteResponsableDpe()->contains($c)) {
+                $authorized[$c->getId()] = $c;
+            }
+        }
+
+        return array_values($authorized);
+    }
+
+    public function canAccessConseilComposante(ComposanteRepository $composanteRepository): bool
+    {
+        return count($this->getAuthorizedComposantes($composanteRepository)) > 0;
     }
 }

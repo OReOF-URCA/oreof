@@ -1,5 +1,5 @@
 {% set forma = formation|default(parcours.formation) %}
-{% set isCapaciteNulle = annee.isOuvert and (annee.capaciteAccueil is null or annee.capaciteAccueil <= 0) %}
+{% set isCapaciteNulle = annee.isOuvert and annee.hasCapacite is not same as(false) and (annee.capaciteAccueil is null or annee.capaciteAccueil <= 0) %}
 {% set hasActiveReqPlatWithoutCap = false %}
 {% for plat in plateformes|filter(p => annee.ordre in p.annees) %}
     {% set isReq = annee.ordre in (plat.anneesCapaciteRequise ?? []) %}
@@ -15,7 +15,12 @@
 {% set anneeComparaison = (comparaison[parcours.id] is defined and comparaison[parcours.id][annee.ordre] is defined) ? comparaison[parcours.id][annee.ordre] : null %}
 
 <div id="annee_{{ annee.id }}_capacite_summary" class="inline-flex items-center gap-2 text-xs text-secondary-600 dark:text-secondary-300 flex-wrap">
-    {% if annee.isOuvert %}
+    {% if annee.isOuvert and annee.hasCapacite is same as(false) %}
+        <span class="inline-flex items-center gap-1 font-semibold px-2.5 py-1 rounded-lg bg-secondary-100 dark:bg-secondary-800 text-secondary-800 dark:text-secondary-200">
+            <twig:UX:Icon name="icon:users" class="h-3.5 w-3.5 text-secondary-500" />
+            Pas de capacité d'accueil
+        </span>
+    {% elseif annee.isOuvert %}
         <span class="inline-flex items-center gap-1 font-semibold px-2.5 py-1 rounded-lg {{ isAnneeWarning ? 'border border-warning-300 bg-warning-50 text-warning-900 dark:bg-warning-900/30 dark:border-warning-700 dark:text-warning-200' : 'bg-secondary-100 dark:bg-secondary-800 text-secondary-800 dark:text-secondary-200' }}">
             <twig:UX:Icon name="icon:users" class="h-3.5 w-3.5 {{ isAnneeWarning ? 'text-warning-600 dark:text-warning-400' : 'text-secondary-500' }}" />
             Capacité : <strong id="annee_{{ annee.id }}_capacite_val" class="{{ isAnneeWarning ? 'text-warning-900 dark:text-warning-100' : 'text-text' }}">{{ annee.capaciteAccueil|default(0) }}</strong> pl.

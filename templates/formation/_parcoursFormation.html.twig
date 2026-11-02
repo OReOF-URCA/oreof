@@ -5,13 +5,15 @@
             {% set nbParcoursNonOuverts = 0 %}
             {% if formation.hasParcours %}
                 {% for parcours in formation.parcours|filter(parcours => parcours.formation.hasParcours) %}
-                    {% if dpesParcours[parcours.id].isNonOuvert %}
+                    {% set dpeP = dpesParcours[parcours.id] ?? null %}
+                    {% if dpeP and dpeP.isNonOuvert %}
                         {% set nbParcoursNonOuverts = nbParcoursNonOuverts + 1 %}
                     {% endif %}
                 {% endfor %}
             {% elseif formation.parcours|length > 0 %}
                 {% set parcours = formation.parcours[0] %}
-                {% if dpesParcours[parcours.id].isNonOuvert or formation.isNonOuvert %}
+                {% set dpeP = dpesParcours[parcours.id] ?? null %}
+                {% if (dpeP and dpeP.isNonOuvert) or formation.isNonOuvert %}
                     {% set nbParcoursNonOuverts = 1 %}
                 {% endif %}
             {% endif %}
@@ -49,7 +51,8 @@
                         <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
                         {% if formation.hasParcours %}
                              {% for parcours in formation.parcours|filter(parcours => parcours.formation.hasParcours) %}
-                                <tr class="align-top hover:bg-secondary-100 dark:hover:bg-secondary-700">
+                                {% set dpeP = dpesParcours[parcours.id] ?? null %}
+                                <tr id="parcours_row_{{ parcours.id }}" class="align-top hover:bg-secondary-100 dark:hover:bg-secondary-700">
                                     <td class="px-4 py-3">
                                         <div class="flex flex-col gap-1">
                                             <div class="flex flex-wrap items-center gap-2">
@@ -64,12 +67,12 @@
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">{{ parcours.localisation != null ? parcours.localisation.libelle : 'Non défini' }}</td>
-                                    {% if dpesParcours[parcours.id].isNonOuvert %}
+                                    {% if dpeP and dpeP.isNonOuvert %}
                                         <td colspan="5" class="px-4 py-3">
                                             <twig:Badge label="Parcours non ouvert" variant="warning" size="sm" extraClass="w-full justify-center"/>
                                         </td>
                                     {% else %}
-                                        <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: dpesParcours[parcours.id].etatValidation|badgeDpeDto }) }}</td>
+                                        <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: dpeP ? dpeP.etatValidation|badgeDpeDto : [] }) }}</td>
                                         <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(3)|badgeStepDto }) }}</td>
                                         <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(4)|badgeStepDto }) }}</td>
                                         <td class="px-4 py-3">{{ component('historique_pv', {parcours:parcours}) }}</td>
@@ -148,7 +151,8 @@
                                 </tr>
                              {% else %}
                                 {% set parcours = formation.parcours[0] %}
-                                <tr class="align-top hover:bg-secondary-100 dark:hover:bg-secondary-700">
+                                {% set dpeP = dpesParcours[parcours.id] ?? null %}
+                                <tr id="parcours_row_{{ parcours.id }}" class="align-top hover:bg-secondary-100 dark:hover:bg-secondary-700">
                                     <td class="px-4 py-3">
                                         <div class="font-medium text-text dark:text-secondary-100">{{ formation.display }}</div>
                                         <div class="mt-1 text-xs text-secondary-600 dark:text-secondary-400">
@@ -156,12 +160,12 @@
                                         </div>
                                     </td>
                                     <td class="px-4 py-3">{{ formation.localisationMention != null and formation.localisationMention|length >= 1 ? formation.localisationMention[0].libelle : 'Non défini' }}</td>
-                                    {% if dpesParcours[parcours.id].isNonOuvert or formation.isNonOuvert %}
+                                    {% if (dpeP and dpeP.isNonOuvert) or formation.isNonOuvert %}
                                         <td colspan="5" class="px-4 py-3">
                                             <twig:Badge label="Parcours non ouvert" variant="warning" size="sm" extraClass="w-full justify-center"/>
                                         </td>
                                     {% else %}
-                                        <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: dpesParcours[parcours.id].etatValidation|badgeDpeDto }) }}</td>
+                                        <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: dpeP ? dpeP.etatValidation|badgeDpeDto : [] }) }}</td>
                                         <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(3)|badgeStepDto }) }}</td>
                                         <td class="px-4 py-3">{{ component('Badge', { dto: parcours.etatStep(4)|badgeStepDto }) }}</td>
                                         <td class="px-4 py-3">{{ component('historique_pv', {parcours:parcours}) }}</td>
@@ -218,12 +222,10 @@
                                                         :soft="false"
                                                         icon="icon:delete"
                                                         size="sm"
-                                                        type="button"
-                                                        dataAction="click->crud#delete"
+                                                        href="{{ path('formation_v2_supprimer', {'formation': formation.id}) }}"
+                                                        dataAction="click->modalturbo#open"
                                                         tooltip="Supprimer la formation"
                                                         extraClass="text-xs"
-                                                        data-crud-url-param="{{ path('app_formation_delete',{'id': formation.id}) }}"
-                                                        data-crud-csrf-param="{{ csrf_token('delete' ~ formation.id) }}"
                                                 />
                                             {% endif %}
                                         </div>

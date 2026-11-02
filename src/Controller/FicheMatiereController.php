@@ -22,7 +22,6 @@ use App\Form\FicheMatiereType;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereMutualisableRepository;
 use App\Repository\FicheMatiereRepository;
-use App\Repository\LangueRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Repository\TypeEpreuveRepository;
 use App\Repository\UeRepository;
@@ -54,7 +53,6 @@ class FicheMatiereController extends BaseController
         TurboStreamResponseFactory $turboStream,
         UeRepository $ueRepository,
         EntityManagerInterface $entityManager,
-        LangueRepository $langueRepository,
         Request $request,
     ): Response {
         $ficheMatiere = new FicheMatiere();
@@ -76,13 +74,6 @@ class FicheMatiereController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $langueFr = $langueRepository->findOneBy(['codeIso' => 'fr']);
-            if ($langueFr !== null) {
-                $ficheMatiere->addLangueDispense($langueFr);
-                $langueFr->addFicheMatiere($ficheMatiere);
-                $ficheMatiere->addLangueSupport($langueFr);
-                $langueFr->addLanguesSupportsFicheMatiere($ficheMatiere);
-            }
             $entityManager->persist($ficheMatiere);
             $entityManager->flush();
 

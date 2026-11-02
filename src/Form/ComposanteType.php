@@ -11,18 +11,25 @@ namespace App\Form;
 
 use App\Entity\Composante;
 use App\Entity\User;
-use App\Form\Type\EntityWithAddType;
+use App\Form\Type\InlineCreateEntitySelectType;
 use App\Form\Type\YesNoType;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\CallbackTransformer;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ComposanteType extends AbstractType
+final class ComposanteType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $composante = $options['data'] ?? null;
+
         $builder
             ->add('libelle', TextType::class, [
                 'label' => 'Libellé',
@@ -38,12 +45,18 @@ class ComposanteType extends AbstractType
             ])
             ->add('composanteParent', EntityType::class, [
                 'class' => Composante::class,
-                'query_builder' => static function ($er) {
-                    return $er->createQueryBuilder('t')
-                        ->where('t.inscriptionUniquement = :inscription')
-                        ->orWhere('t.inscriptionUniquement IS NULL')
+                'query_builder' => static function (EntityRepository $er) use ($composante) {
+                    $qb = $er->createQueryBuilder('t')
+                        ->where('t.inscriptionUniquement = :inscription OR t.inscriptionUniquement IS NULL')
                         ->setParameter('inscription', false)
                         ->orderBy('t.libelle', 'ASC');
+
+                    if ($composante instanceof Composante && $composante->getId() !== null) {
+                        $qb->andWhere('t.id != :currentId')
+                            ->setParameter('currentId', $composante->getId());
+                    }
+
+                    return $qb;
                 },
                 'choice_label' => 'libelle',
                 'autocomplete' => true,
@@ -59,71 +72,88 @@ class ComposanteType extends AbstractType
                 'attr' => ['maxlength' => 2],
                 'required' => true,
             ])
-            ->add('directeur', EntityWithAddType::class, [
+            ->add('directeur', InlineCreateEntitySelectType::class, [
                 'class' => User::class,
-                'choice_label' => 'display',
-                'multiple' => false,
-                'autocomplete' => true,
-                'expanded' => false,
-                'query_builder' => static function ($er) {
-                    return $er->createQueryBuilder('t')
-                        ->orderBy('t.nom', 'ASC')
-                        ->addOrderBy('t.prenom', 'ASC');
-                },
-                'help_to_add' => 'Saisir l\'email urca de la personne à ajouter.',
-                'placeholder' => 'Choisir dans la liste ou choisir "+" pour ajouter un nouveau directeur',
                 'label' => 'Directeur de composante',
+                'new_placeholder' => 'Email du directeur de la composante',
                 'required' => false,
             ])
-            ->add('responsableDpe', EntityWithAddType::class, [
+            ->add('responsableDpe', InlineCreateEntitySelectType::class, [
                 'class' => User::class,
-                'choice_label' => 'display',
-                'multiple' => false,
-                'autocomplete' => true,
-                'expanded' => false,
-                'query_builder' => static function ($er) {
-                    return $er->createQueryBuilder('t')
-                        ->orderBy('t.nom', 'ASC')
-                        ->addOrderBy('t.prenom', 'ASC');
-                },
-                'empty_data' => 'null',
-                'help_to_add' => 'Saisir l\'email urca de la personne à ajouter.',
-                'placeholder' => 'Choisir dans la liste ou choisir "+" pour ajouter un nouveau responsable',
                 'label' => 'Responsable "DPE" de la composante',
                 'help' => 'Personne responsable de la validation des DPE des formations de la composante',
+                'new_placeholder' => 'Email du responsable DPE',
                 'required' => false,
             ])
             ->add('adresse', AdresseType::class, [
                 'label' => 'Adresse du site principal de la composante',
             ])
-            ->add('telStandard', TextType::class, [
+            ->add('telStandard', TelType::class, [
                 'label' => 'Téléphone standard de la composante',
                 'required' => false,
-                'attr' => ['maxlength' => 10]
+                'attr' => [
+                    'maxlength' => 14,
+                    'placeholder' => 'Ex : 03 26 91 30 00',
+                ],
+                'help' => 'Numéro français à 10 chiffres (espaces autorisés).',
             ])
-            ->add('telComplementaire', TextType::class, [
+            ->add('telComplementaire', TelType::class, [
                 'label' => 'Autre téléphone de la composante',
                 'required' => false,
-                'attr' => ['maxlength' => 10]
+                'attr' => [
+                    'maxlength' => 14,
+                    'placeholder' => 'Ex : 03 26 91 30 00',
+                ],
+                'help' => 'Numéro français à 10 chiffres (espaces autorisés).',
             ])
-            ->add('mailContact', TextType::class, [
+            ->add('mailContact', EmailType::class, [
                 'label' => 'Adresse mail de contact de la composante',
                 'required' => false,
-                'attr' => ['maxlength' => 255]
+                'attr' => [
+                    'maxlength' => 255,
+                    'placeholder' => 'contact@univ-reims.fr',
+                ],
             ])
-            ->add('urlSite', TextType::class, [
+            ->add('urlSite', UrlType::class, [
                 'label' => 'URL du site de la composante',
                 'required' => false,
-                'attr' => ['maxlength' => 255]
+                'default_protocol' => 'https',
+                'attr' => [
+                    'maxlength' => 255,
+                    'placeholder' => 'https://...',
+                ],
             ])
         ;
+
+        $frenchPhoneTransformer = new CallbackTransformer(
+            static function (?string $raw): string {
+                if ($raw === null || $raw === '') {
+                    return '';
+                }
+                $clean = preg_replace('/\D/', '', $raw) ?? '';
+                if (strlen($clean) === 10) {
+                    return trim(chunk_split($clean, 2, ' '));
+                }
+                return $raw;
+            },
+            static function (?string $formatted): ?string {
+                if ($formatted === null || $formatted === '') {
+                    return null;
+                }
+                $clean = preg_replace('/\D/', '', $formatted) ?? '';
+                return $clean !== '' ? substr($clean, 0, 10) : null;
+            }
+        );
+
+        $builder->get('telStandard')->addModelTransformer($frenchPhoneTransformer);
+        $builder->get('telComplementaire')->addModelTransformer($frenchPhoneTransformer);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Composante::class,
-            'translation_domain' => 'form'
+            'translation_domain' => 'form',
         ]);
     }
 }

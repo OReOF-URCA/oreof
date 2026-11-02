@@ -9,7 +9,7 @@
                     <h2 class="text-xl font-black text-secondary-800 tracking-tight">
                         Semestre {{ semestreParcours.ordre }}</h2>
                     <span class="inline-flex items-center gap-1 px-2 py-1 {% if semestreParcours.isOuvert == false %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %} text-[10px] font-black rounded uppercase leading-none">{% if semestreParcours.isOuvert == false %}
-                            <i class="fal fa-do-not-enter shrink-0"></i><span>Non ouvert</span>{% else %}
+                            <twig:UX:Icon name="mdi:do-not-enter" class="w-3.5 h-3.5 shrink-0" /><span>Non ouvert</span>{% else %}
                             <span>Ouvert</span>{% endif %}
                     </span>
                     {% if semestre.raccroche == true %}
@@ -161,8 +161,8 @@
                 {% if semestre.raccroche == true %}
                     {{ include('typeDiplome/'~constant('TEMPLATE_FOLDER', typeD)~'/structure/v2/_structure_semestre.html.twig', {
                         ordre:semestreParcours.ordre,
-                        presentiel: parcours.modalitesEnseignement.value == 0 or parcours.modalitesEnseignement.value == 1,
-                        distanciel: parcours.modalitesEnseignement.value == 2 or parcours.modalitesEnseignement.value == 1,
+                        presentiel: parcours.modalitesEnseignementValue in ['0', '1', 'presentielle', 'hybride'],
+                        distanciel: parcours.modalitesEnseignementValue in ['2', '1', 'distancielle', 'hybride'],
                         diffSemestre: null}) }}
                 {% else %}
                 <div

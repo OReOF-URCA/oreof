@@ -205,4 +205,59 @@ final class ParcoursDeleteTest extends WebTestCase
         $this->assertStringContainsString('border-l-danger', $content);
         $this->assertStringContainsString('ne correspond pas au libellé', $content);
     }
+
+    public function testSupprimerPostRedirectsToReferer(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $admin = $this->getOrCreateAdmin($em);
+        $parcours = $this->getOrCreateParcoursTest($em);
+        $parcoursId = $parcours->getId();
+
+        $client->loginUser($admin);
+        $crawler = $client->request('GET', '/parcours/v2/' . $parcoursId . '/supprimer');
+        $csrfToken = (string)$crawler->filter('input[name="_token"]')->attr('value');
+
+        $client->request('POST', '/parcours/v2/' . $parcoursId . '/supprimer', [
+            '_token' => $csrfToken,
+            'confirmation_text' => 'SUPPRIMER',
+            'force' => '1',
+        ], [], [
+            'HTTP_REFERER' => 'http://localhost/formation',
+        ]);
+
+        $this->assertResponseRedirects('http://localhost/formation');
+    }
+
+    public function testSupprimerPostTurboStreamSuccess(): void
+    {
+        $client = static::createClient();
+        $em = static::getContainer()->get('doctrine.orm.entity_manager');
+        $admin = $this->getOrCreateAdmin($em);
+        $parcours = $this->getOrCreateParcoursTest($em);
+        $formationId = $parcours->getFormation()?->getId();
+        $parcoursId = $parcours->getId();
+
+        $client->loginUser($admin);
+        $crawler = $client->request('GET', '/parcours/v2/' . $parcoursId . '/supprimer');
+        $csrfToken = (string)$crawler->filter('input[name="_token"]')->attr('value');
+
+        $client->request('POST', '/parcours/v2/' . $parcoursId . '/supprimer', [
+            '_token' => $csrfToken,
+            'confirmation_text' => 'SUPPRIMER',
+            'force' => '1',
+        ], [], [
+            'HTTP_ACCEPT' => 'text/vnd.turbo-stream.html',
+            'HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest',
+            'HTTP_REFERER' => 'http://localhost/formation',
+        ]);
+
+        $this->assertResponseIsSuccessful();
+        $content = (string)$client->getResponse()->getContent();
+        $this->assertStringContainsString('target="parcours_' . $formationId . '"', $content);
+        $this->assertStringContainsString('target="formation_parcours_count_' . $formationId . '"', $content);
+        $this->assertStringContainsString('target="flash_toasts"', $content);
+        $this->assertStringContainsString('a été définitivement supprimé', $content);
+    }
 }
+

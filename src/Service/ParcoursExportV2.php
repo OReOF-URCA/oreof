@@ -138,7 +138,7 @@ class ParcoursExportV2 {
                 'autonomie'=> $dto->heuresEctsFormation->sommeFormationTePres
             ],
             'ects' => $dto->heuresEctsFormation->sommeFormationEcts,
-            'niveau1' => []
+            'elements' => []
         ];
 
         if(!$isVersioning){
@@ -185,7 +185,7 @@ class ParcoursExportV2 {
                             'autonomie' => $sem->heuresEctsSemestre->sommeSemestreTePres
                         ],
                         'ects' => $sem->heuresEctsSemestre->sommeSemestreEcts,
-                        'niveau2' => []
+                        'elements' => []
                     ];
                     foreach ($sem->ues as $ue) {
                         $tUe = [
@@ -220,7 +220,7 @@ class ParcoursExportV2 {
                             $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
                         } elseif ($ue->ue->getNatureUeEc()?->isChoix() || count($ue->uesEnfants()) > 0) {
                             $tUe['description_libre_choix'] = $ue->ue->getDescriptionUeLibre();
-                            $tUe['niveau3'] = [];
+                            $tUe['elements'] = [];
                             $nb = 0;
                             foreach ($ue->uesEnfants() as $ueEnfant) {
                                 $tUeEnfant = [
@@ -254,7 +254,7 @@ class ParcoursExportV2 {
 
                                 $nb++;
                                 $tUe['nbChoix'] = $nb;
-                                $tUeEnfant['niveau4'] = $this->getEcFromUe($ueEnfant, 3, $isVersioning);
+                                $tUeEnfant['elements'] = $this->getEcFromUe($ueEnfant, 3, $isVersioning);
 
                                 /**
                                  * UE enfant dans une UE enfant
@@ -268,7 +268,7 @@ class ParcoursExportV2 {
                                 elseif($ueEnfant->ue->getNatureUeEc()?->isChoix() || count($ueEnfant->uesEnfants()) > 0){
                                     $nbDeuxiemeNiveau = 0;
                                     $tUeEnfant['description_libre_choix'] = $ueEnfant->ue->getDescriptionUeLibre();
-                                    $tUeEnfant['niveau4'] = [];
+                                    $tUeEnfant['elements'] = [];
                                     foreach($ueEnfant->uesEnfants() as $ueEnfantDeuxiemeNiveau){
                                         $tUeEnfantDeuxiemeNiveau = [
                                             'id' => $ueEnfantDeuxiemeNiveau->ue?->getId(),
@@ -302,22 +302,22 @@ class ParcoursExportV2 {
                                         $nbDeuxiemeNiveau++;
                                         $tUeEnfant['nbChoix'] = $nbDeuxiemeNiveau;
                                         $tUeEnfantDeuxiemeNiveau['niveau5'] = $this->getEcFromUe($ueEnfantDeuxiemeNiveau, 4, $isVersioning);
-                                        $tUeEnfant['niveau4'][] = $tUeEnfantDeuxiemeNiveau;
+                                        $tUeEnfant['elements'][] = $tUeEnfantDeuxiemeNiveau;
                                     }
                                 }
 
-                                $tUe['niveau3'][] = $tUeEnfant;
+                                $tUe['elements'][] = $tUeEnfant;
                             }
                         } else {
                             $tUe['ects'] = $ue->heuresEctsUe->sommeUeEcts;
-                            $tUe['niveau3'] = $this->getEcFromUe($ue, 2, $isVersioning);
+                            $tUe['elements'] = $this->getEcFromUe($ue, 2, $isVersioning);
                         }
-                        $semestre['niveau2'][] = $tUe;
+                        $semestre['elements'][] = $tUe;
                     }
                     if($isVersioning){
-                        usort($semestre['niveau2'], fn($ueA, $ueB) => $ueA['ordre'] <=> $ueB['ordre']);
+                        usort($semestre['elements'], fn($ueA, $ueB) => $ueA['ordre'] <=> $ueB['ordre']);
                     }
-                    $data['niveau1'][] = $semestre;
+                    $data['elements'][] = $semestre;
                 }
             }
         }
@@ -429,7 +429,9 @@ class ParcoursExportV2 {
             // 'objectifs' => CleanTexte::cleanTextArea($ficheMatiere?->getObjectifs()) ?? '-',
             'description' => $ficheMatiere?->getDescription() ?? '-',
             'objectifs' => $ficheMatiere?->getObjectifs() ?? '-',
-            'modalite_enseignement'=> $ficheMatiere?->getModaliteEnseignement()->value ?? '-',
+            'modalite_enseignement' => ($modaliteVal = $ficheMatiere?->getModaliteEnseignementValue()) !== null
+                ? (($legacy = \App\Referentiel\ModaliteEnseignement::legacyCase($modaliteVal)) !== null ? $legacy->value : $modaliteVal)
+                : '-',
             'langues_supports' => $ficheMatiere?->getLanguesSupportsArray() ?? [],
             'langues_dispense_cours' => $ficheMatiere?->getLanguesDispenseArray() ?? [],
             'ects'=> $ec->heuresEctsEc->ects,

@@ -1,49 +1,157 @@
 {% set sectionTitleClass = 'border-y border-secondary-200 bg-secondary-100/90 px-4 py-3.5 text-left text-sm font-extrabold tracking-wide text-secondary-700 dark:border-secondary-700 dark:bg-secondary-800/80 dark:text-secondary-100' %}
-{% set dataRowClass = 'border-b border-secondary-200 dark:border-secondary-700' %}
-{% set labelCellClass = 'px-4 py-4 align-top font-medium leading-relaxed text-secondary-700 dark:text-secondary-200' %}
-{% set valueCellClass = 'px-4 py-4 align-top leading-relaxed text-secondary-700 dark:text-secondary-200' %}
-{% set subLabelCellClass = 'px-4 py-3.5 pl-8 align-top leading-relaxed text-secondary-600 dark:text-secondary-300' %}
-{% set deepSubLabelCellClass = 'px-4 py-3.5 pl-12 align-top leading-relaxed text-secondary-600 dark:text-secondary-300' %}
-{% set choiceBadgeClass = 'ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200' %}
+{% set dataRowClass = 'border-b border-secondary-200 dark:border-secondary-700 hover:bg-secondary-50/50 dark:hover:bg-secondary-800/20 transition-colors' %}
+{% set labelCellClass = 'px-4 py-3.5 align-top font-medium leading-relaxed text-secondary-700 dark:text-secondary-200' %}
+{% set valueCellClass = 'px-4 py-3.5 align-top leading-relaxed text-secondary-700 dark:text-secondary-200' %}
+{% set subLabelCellClass = 'px-4 py-3 pl-8 align-top text-xs leading-relaxed text-secondary-600 dark:text-secondary-300' %}
+{% set deepSubLabelCellClass = 'px-4 py-3 pl-12 align-top text-xs leading-relaxed text-secondary-600 dark:text-secondary-300' %}
+{% set choiceBadgeClass = 'ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200' %}
 
-<div class="overflow-hidden rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
-    <div class="overflow-x-auto">
-        <table class="min-w-full text-sm text-secondary-700 dark:text-secondary-200">
-            <tbody>
-            <tr>
-                <th colspan="2" class="{{ sectionTitleClass }}">Présentation du parcours</th>
-            </tr>
-            <tr class="{{ dataRowClass }}">
-                <td class="{{ labelCellClass }}">Responsable du parcours</td>
-                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.respParcours|badgeValideDto }) }}</td>
-            </tr>
-            <tr class="{{ dataRowClass }}">
-                <td class="{{ labelCellClass }}">Objectifs du parcours</td>
-                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.objectifsParcours|badgeValideDto }) }}</td>
-            </tr>
-            <tr class="{{ dataRowClass }}">
-                <td class="{{ labelCellClass }}">Résultats attendus du parcours</td>
-                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.resultatsAttendus|badgeValideDto }) }}</td>
-            </tr>
-            <tr class="{{ dataRowClass }}">
-                <td class="{{ labelCellClass }}">Contenu du parcours</td>
-                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.contenuParcours|badgeValideDto }) }}</td>
-            </tr>
-            <tr class="{{ dataRowClass }}">
-                <td class="{{ labelCellClass }}">Mots clés du parcours</td>
-                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.motsCles|badgeValideDto }) }}</td>
-            </tr>
-            <tr class="{{ dataRowClass }}">
-                <td class="{{ labelCellClass }}">Rythme de formation du parcours</td>
-                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.rythmeParcours|badgeValideDto }) }}</td>
-            </tr>
-            <tr class="{{ dataRowClass }}">
-                <td class="{{ labelCellClass }}">Localisation du parcours</td>
-                <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.localisation|badgeValideDto }) }}</td>
-            </tr>
+{% set remplissage = valide.calcul() %}
+{% set pourcentage = remplissage.calcul() %}
+{% set isValide = valide.isParcoursValide() %}
+{% set total = remplissage.total %}
+{% set score = remplissage.score %}
+{% set incomplet = total - score %}
 
-            {{ include('parcours_state/_commun.html.twig') }}
-            </tbody>
-        </table>
+<div class="space-y-4" {{ stimulus_controller('parcours-state-filter', { current: 'all' }) }}>
+    {# ── Bandeau indicateurs clés (KPIs) ── #}
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <twig:Kpi
+            title="Complétude globale"
+            value="{{ pourcentage }}"
+            unit="%"
+            :percent="pourcentage"
+            variant="{{ pourcentage == 100 ? 'success' : (pourcentage >= 75 ? 'primary' : (pourcentage >= 50 ? 'warning' : 'danger')) }}"
+            icon="mdi:chart-pie"
+            description="{{ score }} sur {{ total }} critères renseignés"
+            help="Taux de complétude global de la fiche parcours"
+        />
+
+        <twig:Kpi
+            title="Statut validation"
+            value="{{ isValide ? 'Conforme' : (incomplet ~ ' à compléter') }}"
+            variant="{{ isValide ? 'success' : (incomplet > 3 ? 'danger' : 'warning') }}"
+            icon="{{ isValide ? 'icon:check-circle' : 'icon:warning' }}"
+            description="{{ isValide ? 'Prêt pour validation' : (incomplet ~ ' point' ~ (incomplet > 1 ? 's' : '') ~ ' d\'attention requis') }}"
+            help="Statut requis pour la validation et publication du parcours"
+        />
+
+        <twig:Kpi
+            title="Points conformes"
+            value="{{ score }}"
+            total="{{ total }}"
+            unit="critères"
+            variant="secondary"
+            icon="icon:check"
+            description="{{ incomplet == 0 ? 'Tous les champs sont valides' : (incomplet ~ ' critère' ~ (incomplet > 1 ? 's' : '') ~ ' manquant' ~ (incomplet > 1 ? 's' : '')) }}"
+            help="Nombre total de critères complétés avec succès"
+        />
+
+        {% if typeDiplome.classique %}
+            {% set structEtat = valide.etat.structure.global|default('non_concerne') %}
+            {% set structBadge = structEtat|badgeValideDto %}
+            <twig:Kpi
+                title="Structure maquette"
+                value="{{ structBadge.label }}"
+                variant="{{ structEtat == 'complet' ? 'success' : (structEtat == 'non_concerne' ? 'secondary' : 'warning') }}"
+                icon="mdi:file-tree"
+                description="Semestres, UE et EC"
+                help="Vérification des volumes horaires et crédits ECTS"
+            />
+        {% else %}
+            {% set maqEtat = valide.etat.maquette|default('non_concerne') %}
+            {% set maqBadge = maqEtat|badgeValideDto %}
+            <twig:Kpi
+                title="Maquette PDF"
+                value="{{ maqBadge.label }}"
+                variant="{{ maqEtat == 'complet' ? 'success' : 'warning' }}"
+                icon="icon:document"
+                description="Maquette déposée"
+                help="Vérification de la présence du document PDF de maquette"
+            />
+        {% endif %}
+    </div>
+
+    {# ── Barre de filtre rapide & état ── #}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-2.5 rounded-xl bg-secondary-50 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-700">
+        <div class="inline-flex items-center gap-1.5 p-1 bg-white dark:bg-secondary-900 rounded-lg border border-secondary-200 dark:border-secondary-700 shadow-2xs">
+            <button type="button"
+                    data-parcours-state-filter-target="filterBtn"
+                    data-action="click->parcours-state-filter#filter"
+                    data-filter-type="all"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">
+                <twig:UX:Icon name="icon:layers" class="w-3.5 h-3.5" />
+                <span>Tous les critères</span>
+                <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-secondary-200 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300">{{ total }}</span>
+            </button>
+            <button type="button"
+                    data-parcours-state-filter-target="filterBtn"
+                    data-action="click->parcours-state-filter#filter"
+                    data-filter-type="issues"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-secondary-100">
+                <twig:UX:Icon name="icon:warning" class="w-3.5 h-3.5 text-warning-500" />
+                <span>À compléter / points d'attention</span>
+                <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] {% if incomplet > 0 %}bg-warning-100 text-warning-800 dark:bg-warning-900/50 dark:text-warning-300 font-bold{% else %}bg-secondary-200 text-secondary-600 dark:bg-secondary-700 dark:text-secondary-400{% endif %}">{{ incomplet }}</span>
+            </button>
+        </div>
+
+        <div class="text-xs text-secondary-500 dark:text-secondary-400 px-2 flex items-center gap-1.5">
+            <twig:UX:Icon name="icon:info-circle" class="w-4 h-4 text-secondary-400" />
+            <span data-parcours-state-filter-target="countInfo">Affichage de tous les critères</span>
+        </div>
+    </div>
+
+    {# ── Message d'état vide si aucun problème en mode filtré ── #}
+    <div data-parcours-state-filter-target="emptyState" class="hidden p-8 text-center bg-white dark:bg-secondary-900 rounded-2xl border border-secondary-200 dark:border-secondary-700 shadow-xs">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success-50 dark:bg-success-950/40 text-success-600 dark:text-success-400 mb-3">
+            <twig:UX:Icon name="icon:check-circle" class="w-6 h-6" />
+        </div>
+        <h4 class="text-base font-semibold text-secondary-900 dark:text-white">Aucun point d'attention détecté</h4>
+        <p class="text-sm text-secondary-500 dark:text-secondary-400 mt-1 max-w-md mx-auto">
+            Tous les critères vérifiés pour ce parcours sont complets et conformes.
+        </p>
+    </div>
+
+    {# ── Tableau détaillé ── #}
+    <div data-parcours-state-filter-target="tableContainer" class="overflow-hidden rounded-2xl border border-secondary-200 bg-white shadow-xs dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="overflow-x-auto">
+            <table class="min-w-full text-sm text-secondary-700 dark:text-secondary-200">
+                <tbody>
+                <tr data-parcours-state-filter-target="section">
+                    <th colspan="2" class="{{ sectionTitleClass }}">Présentation du parcours</th>
+                </tr>
+                <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.respParcours }}">
+                    <td class="{{ labelCellClass }}">Responsable du parcours</td>
+                    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.respParcours|badgeValideDto" size="sm" /></td>
+                </tr>
+                <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.objectifsParcours }}">
+                    <td class="{{ labelCellClass }}">Objectifs du parcours</td>
+                    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.objectifsParcours|badgeValideDto" size="sm" /></td>
+                </tr>
+                <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.resultatsAttendus }}">
+                    <td class="{{ labelCellClass }}">Résultats attendus du parcours</td>
+                    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.resultatsAttendus|badgeValideDto" size="sm" /></td>
+                </tr>
+                <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.contenuParcours }}">
+                    <td class="{{ labelCellClass }}">Contenu du parcours</td>
+                    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.contenuParcours|badgeValideDto" size="sm" /></td>
+                </tr>
+                <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.motsCles }}">
+                    <td class="{{ labelCellClass }}">Mots clés du parcours</td>
+                    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.motsCles|badgeValideDto" size="sm" /></td>
+                </tr>
+                <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.rythmeParcours }}">
+                    <td class="{{ labelCellClass }}">Rythme de formation du parcours</td>
+                    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.rythmeParcours|badgeValideDto" size="sm" /></td>
+                </tr>
+                <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.localisation }}">
+                    <td class="{{ labelCellClass }}">Localisation du parcours</td>
+                    <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.localisation|badgeValideDto" size="sm" /></td>
+                </tr>
+
+                {{ include('parcours_state/_commun.html.twig') }}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

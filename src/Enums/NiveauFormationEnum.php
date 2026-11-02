@@ -9,6 +9,9 @@
 
 namespace App\Enums;
 
+/**
+ * @deprecated Use referential 'niveau_formation' and App\Referentiel\NiveauFormation instead.
+ */
 enum NiveauFormationEnum: int
 {
     //http://lheo.gouv.fr/2.3/lheo/dict-niveaux.html#dict-niveaux

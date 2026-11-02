@@ -64,9 +64,17 @@ class Formation
     #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: NiveauFormationEnum::class)]
     private ?NiveauFormationEnum $niveauEntree = null;
 
+    #[ORM\Column(name: 'niveau_entree_referentiel', length: 50, nullable: true)]
+    #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
+    private ?string $niveauEntreeReferentiel = null;
+
     #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
     #[ORM\Column(type: Types::INTEGER, nullable: true, enumType: NiveauFormationEnum::class)]
     private ?NiveauFormationEnum $niveauSortie = null;
+
+    #[ORM\Column(name: 'niveau_sortie_referentiel', length: 50, nullable: true)]
+    #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
+    private ?string $niveauSortieReferentiel = null;
 
     #[ORM\Column]
     #[Groups(['formation:read', 'formation_json_versioning'])]
@@ -238,7 +246,7 @@ class Formation
     #[ORM\OneToMany(mappedBy: 'formation', targetEntity: FormationTabState::class, orphanRemoval: true)]
     private Collection $formationTabStates;
 
-    public function __construct(?CampagneCollecte $anneeUniversitaire)
+    public function __construct(?CampagneCollecte $anneeUniversitaire = null)
     {
         $this->dpe = $anneeUniversitaire;
         $this->localisationMention = new ArrayCollection();
@@ -324,6 +332,48 @@ class Formation
         return $this;
     }
 
+    public function getEtablissement(): ?Etablissement
+    {
+        return $this->composantePorteuse?->getEtablissement();
+    }
+
+    /**
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getOrebutApiConfiguration(): ?array
+    {
+        return $this->getEtablissement()?->getOrebutApiConfiguration();
+    }
+
+    public function hasOrebutApi(): bool
+    {
+        return $this->getEtablissement()?->hasOrebutApi() ?? false;
+    }
+
+    public function getOrebutApiUrl(): string
+    {
+        return $this->getEtablissement()?->getOrebutApiUrl() ?? Etablissement::DEFAULT_OREBUT_API_URL;
+    }
+
+    /**
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getRncpApiConfiguration(): ?array
+    {
+        return $this->getEtablissement()?->getRncpApiConfiguration();
+    }
+
+    public function hasRncpApi(): bool
+    {
+        return $this->getEtablissement()?->hasRncpApi() ?? false;
+    }
+
+    public function getRncpApiUrl(): string
+    {
+        return $this->getEtablissement()?->getRncpApiUrl() ?? Etablissement::DEFAULT_APPRENTISSAGE_API_URL;
+    }
+
+
     public function getDpe(): ?CampagneCollecte
     {
         return $this->dpe;
@@ -360,26 +410,86 @@ class Formation
         return $this;
     }
 
-    public function getNiveauEntree(): ?NiveauFormationEnum
+    public function getNiveauEntreeValue(): ?string
     {
-        return $this->niveauEntree;
+        if ($this->niveauEntreeReferentiel !== null) {
+            return $this->niveauEntreeReferentiel;
+        }
+
+        return $this->niveauEntree !== null ? (string) $this->niveauEntree->value : null;
     }
 
-    public function setNiveauEntree(?NiveauFormationEnum $niveauEntree): self
+    public function setNiveauEntreeValue(?string $key): self
     {
-        $this->niveauEntree = $niveauEntree;
+        $this->niveauEntreeReferentiel = $key;
+        $this->niveauEntree = $key === null ? null : \App\Referentiel\NiveauFormation::legacyCase($key);
 
         return $this;
     }
 
+    /**
+     * @deprecated Use getNiveauEntreeValue() instead. Returns null for custom referential values.
+     */
+    public function getNiveauEntree(): ?NiveauFormationEnum
+    {
+        if ($this->niveauEntreeReferentiel !== null) {
+            return \App\Referentiel\NiveauFormation::legacyCase($this->niveauEntreeReferentiel);
+        }
+
+        return $this->niveauEntree;
+    }
+
+    /**
+     * @deprecated Use setNiveauEntreeValue() instead.
+     */
+    public function setNiveauEntree(?NiveauFormationEnum $niveauEntree): self
+    {
+        $this->niveauEntree = $niveauEntree;
+        if ($niveauEntree !== null || \App\Referentiel\NiveauFormation::legacyCase($this->niveauEntreeReferentiel) !== null) {
+            $this->niveauEntreeReferentiel = $niveauEntree !== null ? (string) $niveauEntree->value : null;
+        }
+
+        return $this;
+    }
+
+    public function getNiveauSortieValue(): ?string
+    {
+        if ($this->niveauSortieReferentiel !== null) {
+            return $this->niveauSortieReferentiel;
+        }
+
+        return $this->niveauSortie !== null ? (string) $this->niveauSortie->value : null;
+    }
+
+    public function setNiveauSortieValue(?string $key): self
+    {
+        $this->niveauSortieReferentiel = $key;
+        $this->niveauSortie = $key === null ? null : \App\Referentiel\NiveauFormation::legacyCase($key);
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Use getNiveauSortieValue() instead. Returns null for custom referential values.
+     */
     public function getNiveauSortie(): ?NiveauFormationEnum
     {
+        if ($this->niveauSortieReferentiel !== null) {
+            return \App\Referentiel\NiveauFormation::legacyCase($this->niveauSortieReferentiel);
+        }
+
         return $this->niveauSortie;
     }
 
+    /**
+     * @deprecated Use setNiveauSortieValue() instead.
+     */
     public function setNiveauSortie(?NiveauFormationEnum $niveauSortie): self
     {
         $this->niveauSortie = $niveauSortie;
+        if ($niveauSortie !== null || \App\Referentiel\NiveauFormation::legacyCase($this->niveauSortieReferentiel) !== null) {
+            $this->niveauSortieReferentiel = $niveauSortie !== null ? (string) $niveauSortie->value : null;
+        }
 
         return $this;
     }
@@ -516,6 +626,11 @@ class Formation
         return $texte;
     }
 
+    /**
+     * @deprecated Returns only legacy enum cases and drops custom referential values.
+     *             Use getRegimeInscriptionValues() for all new consumers.
+     * @return list<\App\Enums\RegimeInscriptionEnum>
+     */
     public function getRegimeInscription(): array
     {
         if ($this->regimeInscription === null) {
@@ -537,9 +652,15 @@ class Formation
         return $t;
     }
 
+    /** @return list<string> */
+    public function getRegimeInscriptionValues(): array
+    {
+        return \App\Referentiel\RegimeInscription::normalize($this->regimeInscription ?? []);
+    }
+
     public function setRegimeInscription(?array $regimeInscription): self
     {
-        $this->regimeInscription = $regimeInscription;
+        $this->regimeInscription = $regimeInscription === null ? [] : \App\Referentiel\RegimeInscription::normalize($regimeInscription);
 
         return $this;
     }
@@ -604,8 +725,106 @@ class Formation
         return $this;
     }
 
-    public function isAnneeTroncCommun(int $anneeOrdre): bool
+    /**
+     * @return list<array{id: string, nom: string, annees: list<int>, parcours: list<int>}>
+     */
+    public function getTroncsCommuns(): array
     {
+        $struct = $this->getStructureSemestres();
+        if (isset($struct['troncs_communs']) && is_array($struct['troncs_communs']) && !empty($struct['troncs_communs'])) {
+            return $struct['troncs_communs'];
+        }
+
+        // Rétrocompatibilité : construction automatique depuis annees_tronc_commun
+        $annees = $this->getAnneesTroncCommun();
+        if (!empty($annees)) {
+            $allParcoursIds = [];
+            foreach ($this->getParcours() as $p) {
+                if ($p->getId() !== null) {
+                    $allParcoursIds[] = $p->getId();
+                }
+            }
+            if (!empty($allParcoursIds)) {
+                return [
+                    [
+                        'id' => 'tc_1',
+                        'nom' => 'Tronc commun',
+                        'annees' => $annees,
+                        'parcours' => $allParcoursIds,
+                    ],
+                ];
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * @param list<array{id?: string, nom?: string, annees?: list<int>, parcours?: list<int>}> $troncsCommuns
+     */
+    public function setTroncsCommuns(array $troncsCommuns): self
+    {
+        $struct = $this->getStructureSemestres();
+        $cleaned = [];
+        $allAnnees = [];
+
+        foreach ($troncsCommuns as $tc) {
+            if (!is_array($tc)) {
+                continue;
+            }
+            $annees = array_values(array_unique(array_map('intval', $tc['annees'] ?? [])));
+            $parcours = array_values(array_unique(array_map('intval', $tc['parcours'] ?? [])));
+            if (empty($annees) || empty($parcours)) {
+                continue;
+            }
+            $id = !empty($tc['id']) ? (string) $tc['id'] : 'tc_' . (count($cleaned) + 1);
+            $nom = !empty($tc['nom']) ? (string) $tc['nom'] : 'Tronc commun ' . (count($cleaned) + 1);
+
+            $cleaned[] = [
+                'id' => $id,
+                'nom' => $nom,
+                'annees' => $annees,
+                'parcours' => $parcours,
+            ];
+
+            foreach ($annees as $a) {
+                if (!in_array($a, $allAnnees, true)) {
+                    $allAnnees[] = $a;
+                }
+            }
+        }
+
+        sort($allAnnees);
+        $struct['troncs_communs'] = $cleaned;
+        $struct['annees_tronc_commun'] = $allAnnees;
+
+        $this->setStructureSemestres($struct);
+
+        return $this;
+    }
+
+    public function isAnneeTroncCommun(int $anneeOrdre, int|Parcours|null $parcours = null): bool
+    {
+        $tcs = $this->getTroncsCommuns();
+        if (!empty($tcs)) {
+            if ($parcours !== null) {
+                $parcoursId = $parcours instanceof Parcours ? $parcours->getId() : $parcours;
+                foreach ($tcs as $tc) {
+                    if (in_array($anneeOrdre, $tc['annees'] ?? [], true) && in_array($parcoursId, $tc['parcours'] ?? [], true)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            foreach ($tcs as $tc) {
+                if (in_array($anneeOrdre, $tc['annees'] ?? [], true)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         $struct = $this->getStructureSemestres();
         if (isset($struct['annees_tronc_commun']) && is_array($struct['annees_tronc_commun'])) {
             if (in_array($anneeOrdre, array_map('intval', $struct['annees_tronc_commun']), true)) {
@@ -622,6 +841,42 @@ class Formation
         }
 
         return false;
+    }
+
+    /**
+     * @return array{id: string, nom: string, annees: list<int>, parcours: list<int>}|null
+     */
+    public function getTroncCommunForParcours(int|Parcours $parcours, int $anneeOrdre): ?array
+    {
+        $parcoursId = $parcours instanceof Parcours ? $parcours->getId() : $parcours;
+        foreach ($this->getTroncsCommuns() as $tc) {
+            if (in_array($anneeOrdre, $tc['annees'] ?? [], true) && in_array($parcoursId, $tc['parcours'] ?? [], true)) {
+                return $tc;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return list<Parcours>
+     */
+    public function getAutresParcoursInTroncCommun(int|Parcours $parcours, int $anneeOrdre): array
+    {
+        $tc = $this->getTroncCommunForParcours($parcours, $anneeOrdre);
+        if ($tc === null) {
+            return [];
+        }
+
+        $parcoursId = $parcours instanceof Parcours ? $parcours->getId() : $parcours;
+        $autres = [];
+        foreach ($this->getParcours() as $p) {
+            if ($p->getId() !== $parcoursId && in_array($p->getId(), $tc['parcours'] ?? [], true)) {
+                $autres[] = $p;
+            }
+        }
+
+        return $autres;
     }
 
     public function setAnneeTroncCommun(int $anneeOrdre, bool $isTroncCommun): self
@@ -719,6 +974,7 @@ class Formation
     {
         $capacite = 0;
         $tcAnneesCounted = [];
+        $portailsCounted = [];
 
         foreach ($this->getParcours() as $parcours) {
             if (!$parcours->isOuvert()) {
@@ -729,14 +985,36 @@ class Formation
                     continue;
                 }
                 $ordre = $annee->getOrdre();
-                if ($ordre !== null && $this->isAnneeTroncCommun($ordre)) {
-                    if (!isset($tcAnneesCounted[$ordre])) {
-                        $capacite += $annee->getCapaciteAccueil();
-                        $tcAnneesCounted[$ordre] = true;
-                    }
-                } else {
-                    $capacite += $annee->getCapaciteAccueil();
+                if ($ordre === null) {
+                    continue;
                 }
+
+                // 1. Dédoublonnage par Portail si l'année est rattachée à un portail
+                $portail = $annee->getPortail();
+                if ($portail !== null && $portail->getId() !== null) {
+                    $portailKey = $portail->getId();
+                    if (isset($portailsCounted[$portailKey])) {
+                        continue;
+                    }
+                    $portailsCounted[$portailKey] = true;
+                    $capacite += $annee->getCapaciteAccueil();
+                    continue;
+                }
+
+                // 2. Dédoublonnage par Tronc Commun
+                $tc = $this->getTroncCommunForParcours($parcours, $ordre);
+                if ($tc !== null) {
+                    $tcKey = $tc['id'] . '_' . $ordre;
+                    if (isset($tcAnneesCounted[$tcKey])) {
+                        continue;
+                    }
+                    $tcAnneesCounted[$tcKey] = true;
+                    $capacite += $annee->getCapaciteAccueil();
+                    continue;
+                }
+
+                // 3. Spécifique au parcours
+                $capacite += $annee->getCapaciteAccueil();
             }
         }
 

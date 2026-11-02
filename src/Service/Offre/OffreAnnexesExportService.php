@@ -15,6 +15,7 @@ use App\Entity\PlateformeAdmission;
 use App\Entity\PlateformeAdmissionParametre;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeDiplomePlateformeAdmission;
+use App\Entity\Ville;
 use App\Repository\AnneeRepository;
 use App\Repository\CampagneCollecteRepository;
 use App\Repository\DpeParcoursRepository;
@@ -756,6 +757,32 @@ final class OffreAnnexesExportService
     }
 
     /**
+     * Lieu affiché dans les exports : localisation saisie sur le parcours, puis ancien champ ville,
+     * puis première localisation de la mention.
+     */
+    public function resolveLieu(Parcours $parcours): string
+    {
+        $ville = $parcours->getLocalisation()
+            ?? $parcours->getVille()
+            ?? $parcours->getFormation()?->getLocalisationMention()->first();
+
+        return $ville instanceof Ville ? (string) $ville->getLibelle() : 'Reims';
+    }
+
+    /**
+     * Intégration à une plateforme : la case cochée fait foi quand le paramètre existe ;
+     * sans paramètre (année jamais configurée), on suit l'ouverture.
+     */
+    public function isIntegrationPlateforme(?PlateformeAdmissionParametre $param, bool $isOuvert): bool
+    {
+        if ($param === null) {
+            return $isOuvert;
+        }
+
+        return $isOuvert && $param->isActive();
+    }
+
+    /**
      * Unified row builder for eCandidat.
      *
      * @param array<int, DpeParcours> $allDpeParcours
@@ -811,9 +838,7 @@ final class OffreAnnexesExportService
 
             $diplCode = strtoupper($typeDiplome->getLibelleCourt() ?? '');
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
-            $loc = $formation->getLocalisationMention()->first();
-            $locVille = $loc instanceof \App\Entity\Ville ? (string)$loc->getLibelle() : 'Reims';
-            $ville = $parcours->getVille()?->getLibelle() ?? $locVille;
+            $ville = $this->resolveLieu($parcours);
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
 
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
@@ -876,7 +901,7 @@ final class OffreAnnexesExportService
 
                 // N data
                 $isOuvertN = $dpePar->isOuvert() && $annee->isOuvert();
-                $isECN = ($param && $param->isActive()) || $isOuvertN;
+                $isECN = $this->isIntegrationPlateforme($param, $isOuvertN);
                 $capaciteN = $param?->getCapaciteGlobale() ?? $annee->getCapaciteAccueil();
 
                 // N-1 Data
@@ -886,7 +911,7 @@ final class OffreAnnexesExportService
                 $capaciteN1 = '';
                 if ($n1['hasN1']) {
                     $ouvertureN1 = $n1['isOuvertN1'] ? 'OUI' : 'NON';
-                    $integrationEcN1 = ($n1['paramN1'] && $n1['paramN1']->isActive()) ? 'OUI' : ($n1['isOuvertN1'] ? 'OUI' : 'NON');
+                    $integrationEcN1 = $this->isIntegrationPlateforme($n1['paramN1'], $n1['isOuvertN1']) ? 'OUI' : 'NON';
                     $capaciteN1 = $n1['paramN1']?->getCapaciteGlobale() ?? $n1['anneeN1']?->getCapaciteAccueil() ?? '';
                 }
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
@@ -941,6 +966,10 @@ final class OffreAnnexesExportService
         array $paramsN1ByAnnee,
     ): array {
         $rows = [];
+        /** @var array<string, list<string>> $tcParcours */
+        $tcParcours = [];
+        /** @var array<string, list<string>> $tcLieux */
+        $tcLieux = [];
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
             $formation = $parcours?->getFormation();
@@ -970,9 +999,7 @@ final class OffreAnnexesExportService
 
             $diplCode = strtoupper($typeDiplome->getLibelleCourt() ?? '');
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
-            $loc = $formation->getLocalisationMention()->first();
-            $locVille = $loc instanceof \App\Entity\Ville ? (string)$loc->getLibelle() : 'Reims';
-            $ville = $parcours->getVille()?->getLibelle() ?? $locVille;
+            $ville = $this->resolveLieu($parcours);
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
             $typeRecrutement = in_array($diplCode, ['BUT', 'DEUST'], true) ? 'Sélective' : 'Non sélective';
 
@@ -996,21 +1023,47 @@ final class OffreAnnexesExportService
                     }
                 }
 
-                $capaciteN = ($param && $param->isActive() && $param->getCapaciteGlobale() !== null)
-                    ? $param->getCapaciteGlobale()
-                    : $annee->getCapaciteAccueil();
+                // N data : un parcours/une année fermé(e) ou non intégré(e) à Parcoursup n'a pas de capacité N
+                $isPsupN = $this->isIntegrationPlateforme($param, $dpePar->isOuvert() && $annee->isOuvert());
+                $capaciteN = 0;
+                if ($isPsupN) {
+                    $capaciteN = ($param && $param->getCapaciteGlobale() !== null)
+                        ? $param->getCapaciteGlobale()
+                        : $annee->getCapaciteAccueil();
+                }
 
                 // N-1 Data
                 $n1 = $this->resolveN1Data($parcours, $ordre, $psupPlatform, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee);
+                $isPsupN1 = $n1['hasN1'] && $this->isIntegrationPlateforme($n1['paramN1'], $n1['isOuvertN1']);
+
+                // Ni ouvert en N ni en N-1 sur Parcoursup : rien à présenter
+                if (!$isPsupN && !$isPsupN1) {
+                    continue;
+                }
+
                 $capaciteN1 = '';
                 if ($n1['hasN1']) {
                     $capaciteN1 = ($n1['paramN1'] && $n1['paramN1']->isActive() && $n1['paramN1']->getCapaciteGlobale() !== null)
                         ? $n1['paramN1']->getCapaciteGlobale()
                         : ($n1['anneeN1']?->getCapaciteAccueil() ?? '');
                 }
+
+                // Année en tronc commun : capacité partagée par tous les parcours, une seule ligne par mention
+                $tcKey = null;
+                if ($ordre !== null && $formation->getParcours()->count() > 1 && $formation->isAnneeTroncCommun($ordre)) {
+                    $tcKey = sprintf('tc-%d-%d', (int) $formation->getId(), $ordre);
+                    if (isset($rows[$tcKey])) {
+                        $tcParcours[$tcKey][] = (string) $parcours->getLibelle();
+                        $tcLieux[$tcKey][] = $ville;
+                        continue;
+                    }
+                    $tcParcours[$tcKey] = [(string) $parcours->getLibelle()];
+                    $tcLieux[$tcKey] = [$ville];
+                }
+
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
-                $rows[] = [
+                $row = [
                     'composante' => $compLibelle,
                     'diplome' => $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle(),
                     'mention' => $diffs['mention'],
@@ -1023,8 +1076,22 @@ final class OffreAnnexesExportService
                     'capacite_n' => $capaciteN,
                     'remarques' => $param?->getRemarques() ?? '',
                 ];
+
+                if ($tcKey !== null) {
+                    $rows[$tcKey] = $row;
+                } else {
+                    $rows[] = $row;
+                }
             }
         }
+
+        foreach ($tcParcours as $tcKey => $libelles) {
+            if (count($libelles) > 1) {
+                $rows[$tcKey]['parcours'] = 'Tronc commun : ' . implode(' / ', $libelles);
+                $rows[$tcKey]['lieu'] = implode(' / ', array_unique($tcLieux[$tcKey]));
+            }
+        }
+        $rows = array_values($rows);
 
         usort($rows, static fn($a, $b) => strcmp(
             ($a['composante']) . ($a['diplome']) . ($a['mention']) . ($a['parcours']),
@@ -1083,9 +1150,7 @@ final class OffreAnnexesExportService
                 }
             }
 
-            $loc = $formation->getLocalisationMention()->first();
-            $locVille = $loc instanceof \App\Entity\Ville ? (string)$loc->getLibelle() : 'Reims';
-            $ville = $parcours->getVille()?->getLibelle() ?? $locVille;
+            $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
 
@@ -1151,7 +1216,6 @@ final class OffreAnnexesExportService
                     'capacite_fi_n' => $capFiN,
                     'capacite_alt_n' => $capAltN,
                     'capacite_spe_n' => $capSpeN,
-                    'mentions_conseillees' => 'Licences recommandées pour la mention',
                     'remarques' => $param?->getRemarques() ?? '',
                 ];
             }
@@ -1196,9 +1260,7 @@ final class OffreAnnexesExportService
                 continue;
             }
 
-            $loc = $formation->getLocalisationMention()->first();
-            $locVille = $loc instanceof \App\Entity\Ville ? (string)$loc->getLibelle() : 'Reims';
-            $ville = $parcours->getVille()?->getLibelle() ?? $locVille;
+            $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
 
@@ -1292,9 +1354,7 @@ final class OffreAnnexesExportService
                 continue;
             }
 
-            $loc = $formation->getLocalisationMention()->first();
-            $locVille = $loc instanceof \App\Entity\Ville ? (string)$loc->getLibelle() : 'Reims';
-            $ville = $parcours->getVille()?->getLibelle() ?? $locVille;
+            $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
 

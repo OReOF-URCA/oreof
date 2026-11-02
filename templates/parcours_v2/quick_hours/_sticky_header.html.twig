@@ -14,7 +14,7 @@
                     </h1>
                 </div>
                 <div class="text-[11px] text-secondary-500 font-medium">
-                    Modalités : <span class="font-bold text-secondary-700">{{ parcours.modalitesEnseignement.libelle() }}</span>
+                    Modalités : <span class="font-bold text-secondary-700">{{ referentiel_label('modalite_enseignement', parcours.modalitesEnseignementValue) ?? (parcours.modalitesEnseignement ? parcours.modalitesEnseignement.libelle() : (parcours.modalitesEnseignementValue ?? '-')) }}</span>
                 </div>
             </div>
         </div>

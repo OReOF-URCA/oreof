@@ -43,6 +43,11 @@ export default class extends Controller {
   }
 
   fieldValue (el) {
+    if (el.tagName === 'SELECT' && el.multiple) {
+      const selected = Array.from(el.selectedOptions).map(opt => opt.value)
+      return JSON.stringify(selected)
+    }
+
     if (el.type === 'checkbox' && el.name.endsWith('[]')) {
       const checked = [...this.element.querySelectorAll(`input[name="${CSS.escape(el.name)}"]:checked`)]
         .map(x => x.value)

@@ -19,7 +19,7 @@
 <html lang="fr" data-footer="true" data-placement="horizontal" data-behaviour="pinned" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <title> {{ header_title }} - {{ product_name }}</title>
+    <title> {{ header_title|striptags }} - {{ product_name }}</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico', 'image_package') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
     <meta name="turbo-prefetch" content="false"/>

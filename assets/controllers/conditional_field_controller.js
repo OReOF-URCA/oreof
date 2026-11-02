@@ -1,32 +1,26 @@
-// assets/controllers/conditional_display_controller.js
 import { Controller } from '@hotwired/stimulus'
 
 export default class extends Controller {
   static targets = ['trigger', 'container']
-  static values = {
-    // Liste des valeurs qui déclenchent l'affichage (ex: ["AUTRE", "SPECIFIQUE"])
-    expectedValues: Array
-  }
+  static values = { expectedValues: Array }
 
   connect () {
-    this.toggle() // Gère le point 2 : Affichage correct au chargement
+    this.toggle()
   }
 
   toggle () {
-    const isVisible = this.triggerTargets.some(input => {
-      if (input.type === 'checkbox' || input.type === 'radio') {
-        // Vérifie si l'input est coché ET si sa valeur est dans la liste attendue
-        return input.checked && this.expectedValuesValue.includes(input.value)
-      }
-      return false
-    })
+    const expected = this.expectedValuesValue.map(String)
+    const visible = this.triggerTargets.some(input =>
+      (input.type === 'checkbox' || input.type === 'radio') &&
+      input.checked &&
+      expected.includes(input.value)
+    )
 
-    if (isVisible) {
-      this.containerTarget.classList.remove('d-none')
-    } else {
-      this.containerTarget.classList.add('d-none')
-      // Optionnel : vider le champ caché pour l'autosave si masqué
-      // this.containerTarget.querySelector('input, textarea')?.value = '';
-    }
+    // Tailwind V2 does not provide Bootstrap's d-none utility.
+    // Keep both the semantic hidden property and the Tailwind class in sync.
+    this.containerTargets.forEach(container => {
+      container.hidden = !visible
+      container.classList.toggle('hidden', !visible)
+    })
   }
 }

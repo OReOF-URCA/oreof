@@ -1,0 +1,21 @@
+<turbo-frame id="tab-content">
+    {{ include('parcours_v2/tabs/_header.html.twig', { tabKey: 'competences' }) }}
+
+    <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar space-y-4">
+        {# Information : référentiel national en lecture seule #}
+        <div class="rounded-xl border border-primary-200 bg-primary-50 p-4 text-xs text-primary-900 dark:border-primary-800 dark:bg-primary-950/40 dark:text-primary-100 flex items-start gap-3">
+            <twig:UX:Icon name="icon:info" class="w-5 h-5 text-primary-600 shrink-0 mt-0.5" />
+            <div class="space-y-1">
+                <span class="font-bold">Référentiel national de compétences B.U.T.</span>
+                <p class="text-primary-700 dark:text-primary-300">
+                    Les compétences, composantes essentielles, situations professionnelles, niveaux et apprentissages critiques sont issus du programme national officiel.
+                    Ils ne sont pas modifiables manuellement au niveau du parcours. Vous pouvez les actualiser depuis la formation via le bouton de synchronisation ORéBUT.
+                </p>
+            </div>
+        </div>
+
+        {# Affichage du référentiel #}
+        {{ include('typeDiplome/but/competences/_competences.html.twig') }}
+    </div>
+</turbo-frame>
+

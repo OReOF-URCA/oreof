@@ -91,6 +91,8 @@ Grilles : cartes `grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3` ; KPI `g
 `base.html.twig` affiche l'en-tête (titre, description, boutons, fil d'Ariane) via `<twig:PageHeader>` : **ne pas recréer
 cet en-tête dans une page**. Il est sticky par défaut sous la topbar ; une fois collé (`data-stuck="true"`, contrôleur
 Stimulus `page-header`) la description est masquée et le titre réduit ; actions et fil d'Ariane restent.
+Sur une page trop courte pour absorber la hauteur perdue (défilement restant sous le seuil), l'en-tête reste collé mais
+n'est pas réduit, pour éviter une oscillation.
 
 - Titre/description = **clés de traduction**, domaine `header` (`translations/header.fr.yaml`), résolues par route :
   `<route>.title` / `<route>.description` (repli : `page.<route>.*` du domaine `menu`, puis nom de route). Une page
@@ -208,6 +210,10 @@ Le rendu Symfony reste centralisé dans `templates/communs/form_theme_v2.html.tw
 - La résolution des clés d’aide (dont celles du workflow) est commune ; le domaine `help` est conservé.
 - Les erreurs sont lisibles en clair/sombre, sans capitales forcées. Les checkbox n’imbriquent plus deux labels.
   L’éditeur Trix possède l’ID attendu par son label et reçoit les attributs du widget.
+- Pour les champs `textarea` et `trix-editor`, si un attribut `maxlength` est défini (dans `attr.maxlength` ou `maxLength`),
+  un compteur de caractères s'affiche automatiquement sous le champ (`X / MAX caractères`), géré par le contrôleur
+  Stimulus `char-count` : coloration d'avertissement à 90 %, passage en rouge avec mention « (limite atteinte) » et blocage
+  effectif de la saisie clavier et du collage au-delà de la limite. Sans `maxlength`, aucun compteur n'est affiché.
 
 Les composants hors Symfony Form (`Select`, formulaire de recherche) relient aussi leur aide via `aria-describedby`.
 Un widget personnalisé qui n’utilise pas le rendu standard doit propager les attributs reçus vers son contrôle

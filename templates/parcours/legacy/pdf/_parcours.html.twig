@@ -663,9 +663,9 @@
         <div class="pdf-section">
             <h2 class="pdf-section-title">7. Admission & Prérequis</h2>
             <dl class="pdf-dl">
-                {% if parcours.niveauFrancais %}
+                {% if parcours.niveauFrancaisValue or parcours.niveauFrancais %}
                     <dt>Niveau de français requis</dt>
-                    <dd>{{ parcours.niveauFrancais.libelle }}</dd>
+                    <dd>{{ referentiel_label('niveau_langue', parcours.niveauFrancaisValue) ?? (parcours.niveauFrancais ? parcours.niveauFrancais.libelle : '') }}</dd>
                 {% endif %}
 
                 {% if parcours.prerequis %}

@@ -1,0 +1,562 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Unit\TypeDiplome;
+
+use App\Entity\CampagneCollecte;
+use App\Entity\Formation;
+use App\Entity\NatureUeEc;
+use App\Entity\TypeDiplome;
+use App\Entity\TypeEc;
+use App\Entity\TypeUe;
+use App\Enums\EtatDpeEnum;
+use App\Repository\CampagneCollecteRepository;
+use App\Repository\ElementConstitutifRepository;
+use App\Repository\FicheMatiereRepository;
+use App\Repository\NatureUeEcRepository;
+use App\Repository\TypeEcRepository;
+use App\Repository\TypeUeRepository;
+use App\Service\Api\OrebutApiService;
+use App\TypeDiplome\Synchronisation\But;
+use App\TypeDiplome\Synchronisation\ButSyncOptions;
+use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpKernel\KernelInterface;
+
+class ButSynchronisationTest extends TestCase
+{
+    private function createService(
+        OrebutApiService $orebutApiService,
+        ?EntityManagerInterface $em = null,
+        ?FicheMatiereRepository $fmRepo = null,
+    ): But {
+        $typeEcRepo = $this->createStub(TypeEcRepository::class);
+        $typeUeRepo = $this->createStub(TypeUeRepository::class);
+        $natureUeEcRepo = $this->createStub(NatureUeEcRepository::class);
+        $ecRepo = $this->createStub(ElementConstitutifRepository::class);
+        $kernel = $this->createStub(KernelInterface::class);
+        $kernel->method('getProjectDir')->willReturn('/tmp');
+
+        $typeEcRessource = new TypeEc();
+        $typeEcRessource->setLibelle('Ressource');
+        $typeEcSae = new TypeEc();
+        $typeEcSae->setLibelle('SAE');
+        $typeEcRepo->method('findOneBy')->willReturnCallback(function (array $criteria) use ($typeEcRessource, $typeEcSae) {
+            return ($criteria['libelle'] ?? '') === 'Ressource' ? $typeEcRessource : $typeEcSae;
+        });
+
+        $natureEc = new NatureUeEc();
+        $natureEc->setLibelle('EC obligatoire');
+        $natureUe = new NatureUeEc();
+        $natureUe->setLibelle('UE Obligatoire');
+        $natureUeEcRepo->method('findOneBy')->willReturnCallback(function (array $criteria) use ($natureEc, $natureUe) {
+            return ($criteria['libelle'] ?? '') === 'EC obligatoire' ? $natureEc : $natureUe;
+        });
+
+        $typeUe = new TypeUe();
+        $typeUe->setLibelle('Disciplinaire');
+        $typeUeRepo->method('findOneBy')->willReturn($typeUe);
+
+        $em = $em ?? $this->createStub(EntityManagerInterface::class);
+        $fmRepo = $fmRepo ?? $this->createStub(FicheMatiereRepository::class);
+        $campagneRepo = $this->createStub(CampagneCollecteRepository::class);
+
+        return new But(
+            $typeEcRepo,
+            $typeUeRepo,
+            $natureUeEcRepo,
+            $em,
+            $ecRepo,
+            $fmRepo,
+            $orebutApiService,
+            $campagneRepo,
+            $kernel,
+        );
+    }
+
+    public function testRejectsNonButFormation(): void
+    {
+        $apiService = $this->createStub(OrebutApiService::class);
+        $service = $this->createService($apiService);
+
+        $typeLicence = new TypeDiplome();
+        $typeLicence->setLibelleCourt('LICENCE');
+
+        $formation = new Formation(null);
+        $formation->setTypeDiplome($typeLicence);
+
+        $campagne = new CampagneCollecte();
+        $result = $service->synchroniserWithOptions($formation, $campagne, new ButSyncOptions());
+
+        $this->assertFalse($result->success);
+        $this->assertStringContainsString('n\'est pas un Bachelor', $result->errors[0]);
+    }
+
+    public function testRejectsUnknownDepartment(): void
+    {
+        $apiService = $this->createStub(OrebutApiService::class);
+        $apiService->method('getDepartement')->willReturn(null);
+        $apiService->method('getApiUrl')->willReturn('https://orebut.iut.fr/api');
+
+        $service = $this->createService($apiService);
+
+        $typeBut = new TypeDiplome();
+        $typeBut->setLibelleCourt('BUT');
+
+        $formation = new Formation(null);
+        $formation->setTypeDiplome($typeBut);
+        $formation->setSigle('INCONNU');
+
+        $campagne = new CampagneCollecte();
+        $result = $service->synchroniserWithOptions($formation, $campagne, new ButSyncOptions());
+
+        $this->assertFalse($result->success);
+        $this->assertStringContainsString('introuvable sur l\'API ORéBUT', $result->errors[0]);
+    }
+
+    public function testSyncParcoursAndCompetencesSuccess(): void
+    {
+        $apiService = $this->createStub(OrebutApiService::class);
+        $apiService->method('getDepartement')->willReturn([
+            'sigle' => 'INFO',
+            'libelle' => 'Informatique',
+            'typeStructure' => 'type2',
+            'apcParcours' => [
+                [
+                    'id' => 10,
+                    'code' => 'DA',
+                    'libelle' => 'Déploiement d\'applications',
+                    'textePresentation' => 'Présentation parcours DA',
+                    'apcParcoursNiveaux' => [
+                        [
+                            'niveau' => [
+                                'ordre' => 1,
+                                'annee' => ['libelle' => 'BUT1'],
+                                'competence' => [
+                                    'id' => 1,
+                                    'numero' => 1,
+                                    'nom_court' => 'Réaliser',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $apiService->method('getCompetences')->willReturn([
+            [
+                'id' => 1,
+                'numero' => 1,
+                'nom_court' => 'Réaliser',
+                'libelle' => 'Réaliser un développement d\'application',
+                'apcSituationProfessionnelles' => [['libelle' => 'Participer à la conception']],
+                'apcComposanteEssentielles' => [['libelle' => 'Qualité du code']],
+                'apcNiveaux' => [
+                    [
+                        'ordre' => 1,
+                        'libelle' => 'Développer des applications informatiques simples',
+                        'annee' => ['libelle' => 'BUT1'],
+                        'apcApprentissageCritiques' => [
+                            ['code' => 'AC11.01', 'libelle' => 'Implémenter des algorithmes'],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $em = $this->createStub(EntityManagerInterface::class);
+        $service = $this->createService($apiService, $em);
+
+        $typeBut = new TypeDiplome();
+        $typeBut->setLibelleCourt('BUT');
+
+        $formation = new Formation(null);
+        $formation->setTypeDiplome($typeBut);
+        $formation->setSigle('INFO');
+
+        $campagne = new CampagneCollecte();
+
+        $options = new ButSyncOptions(
+            syncParcours: true,
+            syncCompetences: true,
+            syncMaquette: false,
+        );
+
+        $result = $service->synchroniserWithOptions($formation, $campagne, $options);
+
+        $this->assertTrue($result->success);
+        $this->assertSame(1, $result->parcoursCreated);
+        $this->assertSame(1, $result->competencesCount);
+        $this->assertSame(1, $result->niveauxCount);
+        $this->assertSame(1, $result->acsCount);
+        $this->assertSame(2, $result->uesCreated); // 2 semestres en BUT1 (S1 & S2)
+
+        $parcours = $formation->getParcours()->first();
+        $this->assertNotNull($parcours);
+        $dpe = $parcours->getDpeParcours()->first();
+        $this->assertNotNull($dpe);
+        $this->assertSame(['en_cours_redaction' => 1], $dpe->getEtatValidation());
+        $demande = $parcours->getDpeDemandes()->first();
+        $this->assertNotNull($demande);
+        $this->assertSame(EtatDpeEnum::en_cours_redaction, $demande->getEtatDemande());
+
+        $this->assertSame(1, $parcours->getSemestreDebut());
+        $this->assertSame(6, $parcours->getSemestreFin());
+        $this->assertCount(3, $parcours->getAnnees());
+        $anneesOrdres = array_map(fn($a) => $a->getOrdre(), $parcours->getAnnees()->toArray());
+        sort($anneesOrdres);
+        $this->assertSame([1, 2, 3], $anneesOrdres);
+
+        foreach ($parcours->getSemestreParcours() as $sp) {
+            $this->assertNotNull($sp->getAnnee());
+            $this->assertSame((int) ceil($sp->getOrdre() / 2), $sp->getAnnee()->getOrdre());
+        }
+    }
+
+    public function testSyncMaquetteRessourcesAndSaesSuccess(): void
+    {
+        $apiService = $this->createStub(OrebutApiService::class);
+        $apiService->method('getDepartement')->willReturn([
+            'sigle' => 'INFO',
+            'libelle' => 'Informatique',
+            'typeStructure' => 'type2',
+            'apcParcours' => [
+                [
+                    'id' => 10,
+                    'code' => 'DA',
+                    'libelle' => 'Déploiement d\'applications',
+                    'apcParcoursNiveaux' => [
+                        [
+                            'niveau' => [
+                                'ordre' => 1,
+                                'annee' => ['libelle' => 'BUT1'],
+                                'competence' => [
+                                    'id' => 1,
+                                    'numero' => 1,
+                                    'nom_court' => 'Réaliser',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $apiService->method('getCompetences')->willReturn([
+            [
+                'id' => 1,
+                'numero' => 1,
+                'nom_court' => 'Réaliser',
+                'libelle' => 'Compétence 1',
+                'apcNiveaux' => [
+                    [
+                        'ordre' => 1,
+                        'libelle' => 'Niveau 1',
+                        'annee' => ['libelle' => 'BUT1'],
+                        'apcApprentissageCritiques' => [
+                            ['code' => 'AC11.01', 'libelle' => 'AC 1'],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $apiService->method('getRessources')->willReturn([
+            [
+                'codeMatiere' => 'R1.01',
+                'libelle' => 'Initiation au dev',
+                'description' => 'Bases de la programmation',
+                'cmPpn' => 10,
+                'tdPpn' => 15,
+                'tpPpn' => 20,
+                'heuresTotales' => 45,
+                'ordre' => 1,
+                'semestre' => ['ordreLmd' => 1],
+                'apcRessourceCompetences' => [
+                    ['competence' => ['id' => 1], 'coefficient' => 4],
+                ],
+                'apcRessourceApprentissageCritiques' => [
+                    ['apprentissageCritique' => ['code' => 'AC11.01']],
+                ],
+            ],
+        ]);
+
+        $apiService->method('getSaes')->willReturn([
+            [
+                'codeMatiere' => 'S1.01',
+                'libelle' => 'Projet dev',
+                'description' => 'Développement d\'un projet',
+                'objectifs' => 'Mise en application',
+                'heuresTotales' => 30,
+                'ordre' => 1,
+                'semestre' => ['ordreLmd' => 1],
+                'apcSaeCompetences' => [
+                    ['competence' => ['id' => 1], 'coefficient' => 6],
+                ],
+                'apcSaeApprentissageCritiques' => [
+                    ['apprentissageCritique' => ['code' => 'AC11.01']],
+                ],
+            ],
+        ]);
+
+        $em = $this->createStub(EntityManagerInterface::class);
+        $service = $this->createService($apiService, $em);
+
+        $typeBut = new TypeDiplome();
+        $typeBut->setLibelleCourt('BUT');
+
+        $formation = new Formation(null);
+        $formation->setTypeDiplome($typeBut);
+        $formation->setSigle('INFO');
+
+        $campagne = new CampagneCollecte();
+
+        $options = new ButSyncOptions(
+            syncParcours: true,
+            syncCompetences: true,
+            syncMaquette: true,
+        );
+
+        $result = $service->synchroniserWithOptions($formation, $campagne, $options);
+
+        $this->assertTrue($result->success);
+        $this->assertSame(1, $result->ressourcesCount);
+        $this->assertSame(1, $result->saesCount);
+        $this->assertSame(2, $result->ecsCount); // 1 EC Ressource + 1 EC SAE dans l'UE S1
+        $this->assertStringContainsString('1 ressources', $result->getSummary());
+        $this->assertStringContainsString('1 SAÉ', $result->getSummary());
+    }
+
+    public function testSelectiveParcoursAndYear2027(): void
+    {
+        $apiService = $this->createMock(OrebutApiService::class);
+        $apiService->expects($this->once())
+            ->method('getDepartement')
+            ->with('info', $this->isInstanceOf(Formation::class), 2027)
+            ->willReturn([
+                'sigle' => 'INFO',
+                'libelle' => 'Informatique 2027',
+                'typeStructure' => 'type2',
+                'apcParcours' => [
+                    ['id' => 1, 'code' => 'A', 'libelle' => 'Parcours A'],
+                    ['id' => 2, 'code' => 'B', 'libelle' => 'Parcours B'],
+                ],
+            ]);
+
+        $apiService->expects($this->once())
+            ->method('getCompetences')
+            ->with('info', $this->isInstanceOf(Formation::class), 2027)
+            ->willReturn([]);
+
+        $em = $this->createStub(EntityManagerInterface::class);
+        $service = $this->createService($apiService, $em);
+
+        $typeBut = new TypeDiplome();
+        $typeBut->setLibelleCourt('BUT');
+
+        $formation = new Formation(null);
+        $formation->setTypeDiplome($typeBut);
+        $formation->setSigle('INFO');
+
+        $campagne = new CampagneCollecte();
+
+        // On ne sélectionne QUE le parcours A
+        $options = new ButSyncOptions(
+            syncParcours: true,
+            syncCompetences: true,
+            syncMaquette: false,
+            selectedParcoursCodes: ['A'],
+            annee: 2027,
+        );
+
+        $result = $service->synchroniserWithOptions($formation, $campagne, $options);
+
+        $this->assertTrue($result->success);
+        $this->assertSame(1, $result->parcoursCreated);
+        $this->assertCount(1, $formation->getParcours());
+        $this->assertSame('A', $formation->getParcours()->first()->getSigle());
+    }
+
+    public function testFichesMatieresNeSontPasPartageesEntreFormationsDifferentes(): void
+    {
+        $apiService = $this->createMock(OrebutApiService::class);
+        $apiService->method('getDepartement')
+            ->willReturn([
+                'sigle' => 'gmp',
+                'libelle' => 'Génie Mécanique et Productique',
+                'typeStructure' => 'type2',
+                'apcParcours' => [
+                    ['id' => 10, 'code' => 'GMP-P1', 'libelle' => 'Parcours P1'],
+                ],
+            ]);
+
+        $apiService->method('getRessources')
+            ->willReturn([
+                [
+                    'codeMatiere' => 'R1.01',
+                    'libelle' => 'Mécanique',
+                    'semestre' => ['ordreLmd' => 1],
+                    'apcRessourceParcours' => [],
+                    'apcRessourceCompetences' => [],
+                ],
+            ]);
+
+        $apiService->method('getSaes')->willReturn([]);
+
+        $persistedFiches = [];
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->method('persist')->willReturnCallback(function ($entity) use (&$persistedFiches) {
+            if ($entity instanceof \App\Entity\FicheMatiere) {
+                $persistedFiches[] = $entity;
+            }
+        });
+
+        $service = $this->createService($apiService, $em);
+
+        $typeBut = new TypeDiplome();
+        $typeBut->setLibelleCourt('BUT');
+
+        // Formation 1 (ex: GMP Reims)
+        $formation1 = new Formation(null);
+        $formation1->setTypeDiplome($typeBut);
+        $formation1->setSigle('GMP');
+
+        // Formation 2 (ex: GMP Troyes)
+        $formation2 = new Formation(null);
+        $formation2->setTypeDiplome($typeBut);
+        $formation2->setSigle('GMP');
+
+        $campagne = new CampagneCollecte();
+        $options = new ButSyncOptions(
+            syncParcours: true,
+            syncCompetences: false,
+            syncMaquette: true,
+            annee: 2021,
+        );
+
+        // Synchro formation 1
+        $service->synchroniserWithOptions($formation1, $campagne, $options);
+        $this->assertCount(1, $persistedFiches);
+        $fiche1 = $persistedFiches[0];
+        $this->assertSame($formation1->getParcours()->first(), $fiche1->getParcours());
+
+        // Synchro formation 2
+        $service->synchroniserWithOptions($formation2, $campagne, $options);
+        // Une nouvelle fiche matière distincte DOIT être créée pour la formation 2
+        $this->assertCount(2, $persistedFiches);
+        $fiche2 = $persistedFiches[1];
+        $this->assertNotSame($fiche1, $fiche2);
+        $this->assertSame($formation2->getParcours()->first(), $fiche2->getParcours());
+    }
+
+    public function testRelancerSynchronisationReattacheLesEcsALaBonneFicheSansDoublon(): void
+    {
+        $apiService = $this->createMock(OrebutApiService::class);
+        $apiService->method('getDepartement')
+            ->willReturn([
+                'sigle' => 'gmp',
+                'libelle' => 'Génie Mécanique et Productique',
+                'typeStructure' => 'type2',
+                'apcParcours' => [
+                    ['id' => 10, 'code' => 'GMP-P1', 'libelle' => 'Parcours P1'],
+                ],
+            ]);
+
+        $apiService->method('getRessources')
+            ->willReturn([
+                [
+                    'codeMatiere' => 'R1.01',
+                    'libelle' => 'Mécanique',
+                    'semestre' => ['ordreLmd' => 1],
+                    'apcRessourceParcours' => [],
+                    'apcRessourceCompetences' => [
+                        [
+                            'competence' => ['id' => 1, 'numero' => 1],
+                            'coefficient' => 1.5,
+                        ],
+                    ],
+                ],
+            ]);
+
+        $apiService->method('getSaes')->willReturn([]);
+
+        $typeBut = new TypeDiplome();
+        $typeBut->setLibelleCourt('BUT');
+
+        $foreignFormation = new Formation(null);
+        $foreignFormation->setTypeDiplome($typeBut);
+        $foreignFormation->setSigle('INFO');
+        $foreignParcours = new \App\Entity\Parcours($foreignFormation);
+        $foreignFormation->addParcour($foreignParcours);
+
+        // Fiche étrangère d'une autre formation (ex: INFO) avec le même code R1.01
+        $foreignFiche = new \App\Entity\FicheMatiere();
+        $foreignFiche->setSigle('R1.01');
+        $foreignFiche->setTypeMatiere(\App\Entity\FicheMatiere::TYPE_MATIERE_RESSOURCE);
+        $foreignFiche->setParcours($foreignParcours);
+
+        // Notre formation GMP
+        $formation = new Formation(null);
+        $formation->setTypeDiplome($typeBut);
+        $formation->setSigle('GMP');
+
+        $parcours = new \App\Entity\Parcours($formation);
+        $parcours->setSigle('GMP-P1');
+        $formation->addParcour($parcours);
+
+        // Une mutualisation erronée pointant vers la fiche étrangère
+        $staleMutu = new \App\Entity\FicheMatiereMutualisable();
+        $staleMutu->setFicheMatiere($foreignFiche);
+        $staleMutu->setParcours($parcours);
+        $parcours->addFicheMatiereParcour($staleMutu);
+        $foreignFiche->addFicheMatiereParcour($staleMutu);
+
+        // Semestre et UE de notre formation
+        $semestre = new \App\Entity\Semestre();
+        $semestre->setOrdre(1);
+        $sp = new \App\Entity\SemestreParcours($semestre, $parcours);
+        $parcours->addSemestreParcour($sp);
+
+        $ue = new \App\Entity\Ue();
+        $ue->setOrdre(1);
+        $semestre->addUe($ue);
+
+        // Un EC existant qui pointait vers la fiche étrangère
+        $existingEc = new \App\Entity\ElementConstitutif();
+        $existingEc->setUe($ue);
+        $existingEc->setParcours($parcours);
+        $existingEc->setFicheMatiere($foreignFiche);
+        $ue->addElementConstitutif($existingEc);
+
+        $removedEntities = [];
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->method('remove')->willReturnCallback(function ($entity) use (&$removedEntities) {
+            $removedEntities[] = $entity;
+        });
+
+        $service = $this->createService($apiService, $em);
+        $campagne = new CampagneCollecte();
+        $options = new ButSyncOptions(
+            syncParcours: false,
+            syncCompetences: false,
+            syncMaquette: true,
+            annee: 2021,
+        );
+
+        $result = $service->synchroniserWithOptions($formation, $campagne, $options);
+
+        $this->assertTrue($result->success);
+        // La mutualisation vers la fiche étrangère a été supprimée
+        $this->assertContains($staleMutu, $removedEntities);
+        // Aucun doublon d'EC créé
+        $this->assertSame(0, $result->ecsCount);
+        $this->assertCount(1, $ue->getElementConstitutifs());
+        // L'EC existant a été ré-attaché à la nouvelle fiche propre à notre formation
+        $this->assertNotSame($foreignFiche, $existingEc->getFicheMatiere());
+        $this->assertSame('R1.01', $existingEc->getFicheMatiere()->getSigle());
+        $this->assertSame($parcours, $existingEc->getFicheMatiere()->getParcours());
+    }
+}
+

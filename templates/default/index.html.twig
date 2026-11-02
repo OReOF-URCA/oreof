@@ -49,7 +49,22 @@
             >
                 Vos fiches EC/matières
             </a>
-            {% if is_granted('MANAGE', {route: 'app_etablissement', subject: 'etablissement'}) %}
+            {% if canAccessConseilComposante|default(false) %}
+                {% set composanteLabel = singleComposante is defined and singleComposante ? 'Conseil : ' ~ singleComposante.libelle : 'Conseil de composante' %}
+                <a id="tab-conseil-composante"
+                   class="app-tab {% if step == 'conseil_composante' %}app-tab-active active{% endif %}"
+                   href="{{ path('app_homepage', { step: 'conseil_composante' }) }}" role="tab"
+                   aria-selected="{{ step == 'conseil_composante' ? 'true' : 'false' }}"
+                   aria-controls="step_1"
+                   tabindex="{{ step == 'conseil_composante' ? '0' : '-1' }}"
+                   data-step="conseil_composante"
+                   data-wizard-target="tab"
+                        {{ stimulus_action('wizard', 'changeStep', 'click', {step: 'conseil_composante'}) }}
+                >
+                    {{ composanteLabel }} (DPE: {{ user_data.campagneCollecte.libelle }})
+                </a>
+            {% endif %}
+            {% if canAccessCfvu|default(false) %}
                 <a id="tab-cfvu"
                    class="app-tab {% if step == 'cfvu' %}app-tab-active active{% endif %}"
                    href="{{ path('app_homepage', { step: 'cfvu' }) }}" role="tab"
@@ -60,7 +75,7 @@
                    data-wizard-target="tab"
                         {{ stimulus_action('wizard', 'changeStep', 'click', {step: 'cfvu'}) }}
                 >
-                    Vos formations en tant que conseiller CFVU (DPE: {{ user_data.campagneCollecte.libelle }})
+                    Conseil CFVU (DPE: {{ user_data.campagneCollecte.libelle }})
                 </a>
             {% endif %}
         </div>
