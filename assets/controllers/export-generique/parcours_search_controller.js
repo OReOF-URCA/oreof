@@ -340,7 +340,7 @@ export default class extends Controller {
 
     createListenerForParcoursFieldChoice(node){
         node.addEventListener('click', (event) => {
-            let badgeClassList = ['bg-gray-700', 'text-white'];
+            let badgeClassList = ['bg-gray-700', 'text-white', 'selectedField'];
             // Données du parcours
             if(this._typeExport === 'fiche_matiere'){
                 this._selectedFields = {};
@@ -372,7 +372,7 @@ export default class extends Controller {
 
     createListenerForFicheMatiereFieldChoice(node){
         node.addEventListener('click', (event) => {
-            let badgeClassList = ['bg-gray-700', 'text-white'];
+            let badgeClassList = ['bg-gray-700', 'text-white', 'selectedField'];
             // Données des fiches matières
             if(this._typeExport === 'parcours'){
                 this._selectedFields = {};
@@ -404,7 +404,7 @@ export default class extends Controller {
 
     createListenerForExportTemplateFieldChoice(node){
         node.addEventListener('click', event => {
-            let badgeClassList = ['bg-gray-700', 'text-white'];
+            let badgeClassList = ['bg-gray-700', 'text-white', 'selectedField'];
             // Données des parcours
             if(this._typeExport === 'parcours'){
                 this._selectedFields = {};
@@ -470,17 +470,17 @@ export default class extends Controller {
 
     deselectAllParcoursButton() {
         document.querySelectorAll('.textDivFieldChoice')
-            .forEach(e => e.classList.remove(...['bg-gray-700', 'text-white']));
+            .forEach(e => e.classList.remove(...['bg-gray-700', 'text-white', 'selectedField']));
     }
 
     deselectAllFicheMatiereButton() {
         document.querySelectorAll('.fmTextDivFieldChoice')
-            .forEach(e => e.classList.remove(...['bg-gray-700', 'text-white']));
+            .forEach(e => e.classList.remove(...['bg-gray-700', 'text-white', 'selectedField']));
     }
 
     deselectAllTemplateExportButton(){
         document.querySelectorAll('.textDivExportTemplateData')
-            .forEach(e => e.classList.remove(...['bg-gray-700', 'text-white']));
+            .forEach(e => e.classList.remove(...['bg-gray-700', 'text-white', 'selectedField']));
     }
 
     displayFicheMatiereChoices() {
