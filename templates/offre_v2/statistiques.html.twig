@@ -602,12 +602,21 @@
                                     <td class="px-4 py-2">{{ row.parcours }}</td>
                                     <td class="px-3 py-2 text-center">
                                         <span class="font-bold">{{ row.niveau }}</span>
-                                        {% if row.isTc %}
+                                        {% if row.mutualisation is defined and row.mutualisation %}
+                                            <span class="block text-[10px] text-primary-600 dark:text-primary-400 font-semibold" title="{{ row.mutualisation }}">
+                                                {{ row.mutualisation }}
+                                            </span>
+                                        {% elseif row.isTc %}
                                             <span class="text-[10px] text-primary-600 font-semibold">(TC)</span>
                                         {% endif %}
                                     </td>
                                     <td class="px-3 py-2 text-right text-secondary-500">{{ row.capaciteAccueil }}</td>
-                                    <td class="px-3 py-2 text-right font-bold text-secondary-900 dark:text-secondary-100">{{ row.capaciteComptee }}</td>
+                                    <td class="px-3 py-2 text-right font-bold text-secondary-900 dark:text-secondary-100">
+                                        {{ row.capaciteComptee }}
+                                        {% if row.capaciteComptee == 0 and row.capaciteAccueil > 0 and (row.mutualisation is defined and row.mutualisation) %}
+                                            <span class="block text-[9px] text-secondary-400 dark:text-secondary-500 font-normal">mutualisée</span>
+                                        {% endif %}
+                                    </td>
                                     <td class="px-3 py-2 text-center">
                                         {% if row.isRecrutement %}
                                             <span class="text-success-600 font-bold">Oui</span>

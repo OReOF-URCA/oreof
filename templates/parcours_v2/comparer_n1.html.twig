@@ -1,0 +1,805 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = 'app_parcours_comparer_n1.title'|trans({'%display%': parcours.display}, 'header') %}
+{% set header_description = 'app_parcours_comparer_n1.description'|trans({}, 'header') %}
+
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}">
+        Retour au parcours
+    </twig:Button>
+    <twig:Button variant="{{ onlyDiff ? 'primary' : 'secondary' }}"
+                 icon="icon:filter"
+                 href="{{ path('app_parcours_comparer_n1', {parcours: parcours.id, only_diff: onlyDiff ? 0 : 1, scope: scope, tab: activeTab}) }}">
+        {{ onlyDiff ? 'Afficher toute la maquette' : 'Afficher uniquement les écarts' }}
+    </twig:Button>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    {# ════════════ EN-TÊTE CONTEXTUEL ET INFOS N-1 / N ════════════ #}
+    <div class="rounded-xl border border-secondary-200 bg-surface p-5 shadow-sm dark:border-secondary-700">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                        {{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Formation' }}
+                    </span>
+                    <span class="text-secondary-300 dark:text-secondary-600">•</span>
+                    <span class="text-xs font-medium text-secondary-600 dark:text-secondary-300">
+                        {{ formation.display }}
+                    </span>
+                </div>
+                <h1 class="text-xl font-bold text-text">
+                    {{ parcours.libelle }} {% if parcours.sigle %}<span class="text-secondary-500 font-normal">({{ parcours.sigle }})</span>{% endif %}
+                </h1>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-secondary-600 dark:text-secondary-300 pt-1">
+                    <span><strong>Parcours N :</strong> #{{ parcours.id }}</span>
+                    <span><strong>Parcours N-1 :</strong>
+                        {% if result.parcoursN1 %}
+                            #{{ result.parcoursN1.id }} ({{ result.parcoursN1.sigle ?? result.parcoursN1.libelle }})
+                            {% if not result.isParcoursOriginDirect %}
+                                <twig:Badge label="Liaison N-1 résolue par sigle/libellé" variant="warning" size="sm" pill />
+                            {% endif %}
+                        {% else %}
+                            <twig:Badge label="Aucun parcours N-1 trouvé" variant="danger" size="sm" pill />
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            {% if is_granted('ROLE_ADMIN') and result.hasDifferences %}
+                <div class="flex items-center gap-2">
+                    <div class="rounded-lg bg-secondary-100 p-2.5 text-xs text-secondary-700 dark:bg-secondary-800 dark:text-secondary-300"
+                         {{ stimulus_controller('tooltip') }}
+                         title="Commande CLI pour restaurer les éléments écrasés ou perdus">
+                        <span class="font-mono select-all">php bin/console app:restore-parcours-from-n1 -p {{ parcours.id }} --dry-run</span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ════════════ BANNIÈRES D'ALERTES / DIAGNOSTICS ════════════ #}
+    {% if not result.hasParcoursN1 %}
+        <div class="rounded-xl border border-danger-300 bg-danger-50 p-4 text-danger-900 dark:border-danger-700 dark:bg-danger-900/30 dark:text-danger-200">
+            <div class="flex items-center gap-3">
+                <twig:UX:Icon name="icon:danger:bold" class="size-6 text-danger-600 dark:text-danger-400 shrink-0" />
+                <div>
+                    <h3 class="font-semibold">Parcours d'origine N-1 introuvable</h3>
+                    <p class="text-sm mt-0.5">
+                        Ce parcours ne possède pas de lien direct <code class="font-mono text-xs">parcoursOrigineCopie</code> et aucun parcours N-1 correspondant n'a pu être résolu dans la formation d'origine.
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% elseif result.countErrors > 0 %}
+        <div class="rounded-xl border border-danger-300 bg-danger-50 p-4 text-danger-900 dark:border-danger-700 dark:bg-danger-900/30 dark:text-danger-200">
+            <div class="flex items-start gap-3">
+                <twig:UX:Icon name="icon:danger:bold" class="size-6 text-danger-600 dark:text-danger-400 shrink-0 mt-0.5" />
+                <div class="space-y-1">
+                    <h3 class="font-semibold text-base">
+                        {{ result.countErrors }} anomalie(s) critique(s) détectée(s) pouvant être liée(s) à la synchronisation ORéBUT
+                    </h3>
+                    <p class="text-sm">
+                        Des fiches matières détachées d'ECs, fiches manquantes ou mutualisations perdues ont été identifiées. Consultez l'onglet « Diagnostics & Anomalies » pour le détail.
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% elseif result.countWarnings > 0 %}
+        <div class="rounded-xl border border-warning-300 bg-warning-50 p-4 text-warning-900 dark:border-warning-700 dark:bg-warning-900/30 dark:text-warning-200">
+            <div class="flex items-start gap-3">
+                <twig:UX:Icon name="icon:warning:bold" class="size-6 text-warning-600 dark:text-warning-400 shrink-0 mt-0.5" />
+                <div>
+                    <h3 class="font-semibold">
+                        {{ result.countWarnings }} point(s) d'attention détecté(s)
+                    </h3>
+                    <p class="text-sm mt-0.5">
+                        Des écarts sur les volumes horaires, les crédits ECTS ou des liens d'origine non référencés ont été relevés.
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="rounded-xl border border-success-300 bg-success-50 p-4 text-success-900 dark:border-success-700 dark:bg-success-900/30 dark:text-success-200">
+            <div class="flex items-center gap-3">
+                <twig:UX:Icon name="icon:check-circle" class="size-6 text-success-600 dark:text-success-400 shrink-0" />
+                <div>
+                    <h3 class="font-semibold">Parcours parfaitement conforme à l'année N-1</h3>
+                    <p class="text-sm mt-0.5">
+                        Aucune régression, perte de fiche matière ou divergence de structure n'a été détectée.
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# ════════════ CARTES KPI RÉCAPITULATIVES ════════════ #}
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div class="rounded-xl border border-secondary-200 bg-surface p-3.5 shadow-sm dark:border-secondary-700">
+            <span class="text-xs text-secondary-500 dark:text-secondary-400 font-medium">Anomalies</span>
+            <div class="mt-1 flex items-baseline gap-2">
+                <span class="text-2xl font-bold {{ result.countErrors > 0 ? 'text-danger-600 dark:text-danger-400' : 'text-text' }}">
+                    {{ result.countErrors }}
+                </span>
+                {% if result.countWarnings > 0 %}
+                    <span class="text-xs text-warning-600 dark:text-warning-400 font-medium">+{{ result.countWarnings }} avert.</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-secondary-200 bg-surface p-3.5 shadow-sm dark:border-secondary-700">
+            <span class="text-xs text-secondary-500 dark:text-secondary-400 font-medium">Fiches diff</span>
+            <div class="mt-1 flex items-baseline gap-2">
+                <span class="text-2xl font-bold {{ result.countFichesDifferences > 0 ? 'text-warning-600 dark:text-warning-400' : 'text-text' }}">
+                    {{ result.countFichesDifferences }}
+                </span>
+                <span class="text-xs text-secondary-500">/ {{ result.fiches|length }}</span>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-secondary-200 bg-surface p-3.5 shadow-sm dark:border-secondary-700">
+            <span class="text-xs text-secondary-500 dark:text-secondary-400 font-medium">ECs diff</span>
+            <div class="mt-1 flex items-baseline gap-2">
+                <span class="text-2xl font-bold {{ result.countEcsDifferences > 0 ? 'text-warning-600 dark:text-warning-400' : 'text-text' }}">
+                    {{ result.countEcsDifferences }}
+                </span>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-secondary-200 bg-surface p-3.5 shadow-sm dark:border-secondary-700">
+            <span class="text-xs text-secondary-500 dark:text-secondary-400 font-medium">Mutualisations diff</span>
+            <div class="mt-1 flex items-baseline gap-2">
+                <span class="text-2xl font-bold {{ result.countMutualisationsDifferences > 0 ? 'text-warning-600 dark:text-warning-400' : 'text-text' }}">
+                    {{ result.countMutualisationsDifferences }}
+                </span>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-secondary-200 bg-surface p-3.5 shadow-sm dark:border-secondary-700">
+            <span class="text-xs text-secondary-500 dark:text-secondary-400 font-medium">Δ Heures Présentiel</span>
+            <div class="mt-1 flex items-baseline gap-1">
+                {% set diffH = result.totauxGlobal ? result.totauxGlobal.diffTotalPres : 0 %}
+                <span class="text-2xl font-bold {{ diffH|abs > 0.001 ? 'text-primary' : 'text-text' }}">
+                    {{ diffH > 0 ? '+' ~ diffH|number_format(1, ',', ' ') : diffH|number_format(1, ',', ' ') }}h
+                </span>
+            </div>
+        </div>
+
+        <div class="rounded-xl border border-secondary-200 bg-surface p-3.5 shadow-sm dark:border-secondary-700">
+            <span class="text-xs text-secondary-500 dark:text-secondary-400 font-medium">Δ Total ECTS</span>
+            <div class="mt-1 flex items-baseline gap-1">
+                {% set diffE = result.totauxGlobal ? result.totauxGlobal.diffEcts : 0 %}
+                <span class="text-2xl font-bold {{ diffE|abs > 0.001 ? 'text-primary' : 'text-text' }}">
+                    {{ diffE > 0 ? '+' ~ diffE|number_format(1, ',', ' ') : diffE|number_format(1, ',', ' ') }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {# ════════════ ONGLETS DE NAVIGATION ════════════ #}
+    <div class="app-tabs space-y-6" {{ stimulus_controller('tabs', { rememberHash: true }) }}>
+        <div class="app-tabs-list flex-wrap gap-1.5" role="tablist" aria-label="Comparaison parcours N-1 => N">
+            <button type="button"
+                    id="tab-synthese"
+                    class="app-tab gap-2 cursor-pointer {{ activeTab == 'synthese' ? 'app-tab-active active' : '' }}"
+                    role="tab"
+                    aria-selected="{{ activeTab == 'synthese' ? 'true' : 'false' }}"
+                    aria-controls="panel-synthese"
+                    data-tabs-target="tab"
+                    data-action="click->tabs#change"
+                    data-tab-id="synthese">
+                <twig:UX:Icon name="icon:chart" class="size-4" />
+                <span>Volumes & ECTS</span>
+            </button>
+
+            <button type="button"
+                    id="tab-structure"
+                    class="app-tab gap-2 cursor-pointer {{ activeTab == 'structure' ? 'app-tab-active active' : '' }}"
+                    role="tab"
+                    aria-selected="{{ activeTab == 'structure' ? 'true' : 'false' }}"
+                    aria-controls="panel-structure"
+                    data-tabs-target="tab"
+                    data-action="click->tabs#change"
+                    data-tab-id="structure">
+                <twig:UX:Icon name="icon:layers" class="size-4" />
+                <span>Structure (Semestres / ECs)</span>
+                {% if result.countEcsDifferences > 0 %}
+                    <span class="rounded-full bg-warning-100 px-1.5 py-0.5 text-[10px] font-semibold text-warning-800 dark:bg-warning-900/40 dark:text-warning-300">
+                        {{ result.countEcsDifferences }}
+                    </span>
+                {% endif %}
+            </button>
+
+            <button type="button"
+                    id="tab-fiches"
+                    class="app-tab gap-2 cursor-pointer {{ activeTab == 'fiches' ? 'app-tab-active active' : '' }}"
+                    role="tab"
+                    aria-selected="{{ activeTab == 'fiches' ? 'true' : 'false' }}"
+                    aria-controls="panel-fiches"
+                    data-tabs-target="tab"
+                    data-action="click->tabs#change"
+                    data-tab-id="fiches">
+                <twig:UX:Icon name="icon:file-text" class="size-4" />
+                <span>Fiches Matières ({{ result.fiches|length }})</span>
+                {% if result.countFichesDifferences > 0 %}
+                    <span class="rounded-full bg-warning-100 px-1.5 py-0.5 text-[10px] font-semibold text-warning-800 dark:bg-warning-900/40 dark:text-warning-300">
+                        {{ result.countFichesDifferences }} diff
+                    </span>
+                {% endif %}
+            </button>
+
+            <button type="button"
+                    id="tab-mutus"
+                    class="app-tab gap-2 cursor-pointer {{ activeTab == 'mutus' ? 'app-tab-active active' : '' }}"
+                    role="tab"
+                    aria-selected="{{ activeTab == 'mutus' ? 'true' : 'false' }}"
+                    aria-controls="panel-mutus"
+                    data-tabs-target="tab"
+                    data-action="click->tabs#change"
+                    data-tab-id="mutus">
+                <twig:UX:Icon name="icon:users" class="size-4" />
+                <span>Mutualisations</span>
+                {% if result.countMutualisationsDifferences > 0 %}
+                    <span class="rounded-full bg-warning-100 px-1.5 py-0.5 text-[10px] font-semibold text-warning-800 dark:bg-warning-900/40 dark:text-warning-300">
+                        {{ result.countMutualisationsDifferences }}
+                    </span>
+                {% endif %}
+            </button>
+
+            <button type="button"
+                    id="tab-anomalies"
+                    class="app-tab gap-2 cursor-pointer {{ activeTab == 'anomalies' ? 'app-tab-active active' : '' }}"
+                    role="tab"
+                    aria-selected="{{ activeTab == 'anomalies' ? 'true' : 'false' }}"
+                    aria-controls="panel-anomalies"
+                    data-tabs-target="tab"
+                    data-action="click->tabs#change"
+                    data-tab-id="anomalies">
+                <twig:UX:Icon name="icon:warning:bold" class="size-4" />
+                <span>Diagnostics ({{ result.anomalies|length }})</span>
+                {% if result.countErrors > 0 %}
+                    <span class="rounded-full bg-danger-100 px-1.5 py-0.5 text-[10px] font-semibold text-danger-800 dark:bg-danger-900/40 dark:text-danger-300">
+                        {{ result.countErrors }}
+                    </span>
+                {% endif %}
+            </button>
+        </div>
+
+        {# ════════════ PANNEAU 1 : SYNTHÈSE & VOLUMES ════════════ #}
+        <div id="panel-synthese"
+             data-tabs-target="panel"
+             data-panel-id="synthese"
+             role="tabpanel"
+             aria-labelledby="tab-synthese"
+             class="space-y-6">
+
+            <div class="rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 overflow-hidden">
+                <div class="p-4 border-b border-secondary-200 dark:border-secondary-700 flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-text flex items-center gap-2">
+                        <twig:UX:Icon name="icon:clock" class="size-5 text-primary" />
+                        Récapitulatif des volumes horaires et crédits ECTS par semestre
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-secondary-200 text-xs dark:divide-secondary-700">
+                        <thead class="bg-secondary-50 text-left font-semibold text-secondary-600 uppercase tracking-wider dark:bg-secondary-900 dark:text-secondary-300">
+                            <tr>
+                                <th class="px-4 py-3">Semestre</th>
+                                <th class="px-3 py-3 text-center">Ouvert</th>
+                                <th class="px-3 py-3 text-right">CM Pres (N-1 / N)</th>
+                                <th class="px-3 py-3 text-right">TD Pres (N-1 / N)</th>
+                                <th class="px-3 py-3 text-right">TP Pres (N-1 / N)</th>
+                                <th class="px-3 py-3 text-right">TE Pres (N-1 / N)</th>
+                                <th class="px-3 py-3 text-right font-bold">Total Présentiel</th>
+                                <th class="px-3 py-3 text-right">Distanciel</th>
+                                <th class="px-3 py-3 text-right font-bold">Total Heures</th>
+                                <th class="px-3 py-3 text-right font-bold text-primary">ECTS</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-secondary-200 bg-white dark:bg-surface dark:divide-secondary-700">
+                            {% for sem in result.semestres %}
+                                {% set t1 = sem.totauxN1 %}
+                                {% set t2 = sem.totauxN %}
+                                {% set td = sem.totauxDiff %}
+                                <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40">
+                                    <td class="px-4 py-3 font-semibold text-text">
+                                        {{ sem.libelle }}
+                                    </td>
+                                    <td class="px-3 py-3 text-center">
+                                        {% if sem.ouvertN %}
+                                            <span class="inline-flex items-center rounded-full bg-success-50 px-2 py-0.5 text-[11px] font-medium text-success-700 dark:bg-success-900/30 dark:text-success-300">Oui</span>
+                                        {% else %}
+                                            <span class="inline-flex items-center rounded-full bg-secondary-100 px-2 py-0.5 text-[11px] font-medium text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">Non</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-mono">
+                                        {{ (t1.cmPres ?? 0)|number_format(1, ',', ' ') }}h / {{ (t2.cmPres ?? 0)|number_format(1, ',', ' ') }}h
+                                        {% if (td.cmPres ?? 0)|abs > 0.001 %}
+                                            <span class="text-[10px] {{ td.cmPres > 0 ? 'text-success-600' : 'text-danger-600' }}">({{ td.cmPres > 0 ? '+' : '' }}{{ td.cmPres|number_format(1, ',', ' ') }})</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-mono">
+                                        {{ (t1.tdPres ?? 0)|number_format(1, ',', ' ') }}h / {{ (t2.tdPres ?? 0)|number_format(1, ',', ' ') }}h
+                                        {% if (td.tdPres ?? 0)|abs > 0.001 %}
+                                            <span class="text-[10px] {{ td.tdPres > 0 ? 'text-success-600' : 'text-danger-600' }}">({{ td.tdPres > 0 ? '+' : '' }}{{ td.tdPres|number_format(1, ',', ' ') }})</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-mono">
+                                        {{ (t1.tpPres ?? 0)|number_format(1, ',', ' ') }}h / {{ (t2.tpPres ?? 0)|number_format(1, ',', ' ') }}h
+                                        {% if (td.tpPres ?? 0)|abs > 0.001 %}
+                                            <span class="text-[10px] {{ td.tpPres > 0 ? 'text-success-600' : 'text-danger-600' }}">({{ td.tpPres > 0 ? '+' : '' }}{{ td.tpPres|number_format(1, ',', ' ') }})</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-mono">
+                                        {{ (t1.tePres ?? 0)|number_format(1, ',', ' ') }}h / {{ (t2.tePres ?? 0)|number_format(1, ',', ' ') }}h
+                                        {% if (td.tePres ?? 0)|abs > 0.001 %}
+                                            <span class="text-[10px] {{ td.tePres > 0 ? 'text-success-600' : 'text-danger-600' }}">({{ td.tePres > 0 ? '+' : '' }}{{ td.tePres|number_format(1, ',', ' ') }})</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-mono font-semibold text-text">
+                                        {{ (t1.totalPres ?? 0)|number_format(1, ',', ' ') }}h / {{ (t2.totalPres ?? 0)|number_format(1, ',', ' ') }}h
+                                        {% if (td.totalPres ?? 0)|abs > 0.001 %}
+                                            <span class="text-[11px] font-bold {{ td.totalPres > 0 ? 'text-success-600 dark:text-success-400' : 'text-danger-600 dark:text-danger-400' }}">
+                                                ({{ td.totalPres > 0 ? '+' : '' }}{{ td.totalPres|number_format(1, ',', ' ') }})
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-mono">
+                                        {{ (t1.totalDist ?? 0)|number_format(1, ',', ' ') }}h / {{ (t2.totalDist ?? 0)|number_format(1, ',', ' ') }}h
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-mono font-semibold text-text">
+                                        {{ (t1.totalHeures ?? 0)|number_format(1, ',', ' ') }}h / {{ (t2.totalHeures ?? 0)|number_format(1, ',', ' ') }}h
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-mono font-bold text-primary">
+                                        {{ (t1.ects ?? 0)|number_format(1, ',', ' ') }} / {{ (t2.ects ?? 0)|number_format(1, ',', ' ') }}
+                                        {% if (td.ects ?? 0)|abs > 0.001 %}
+                                            <span class="text-[11px] {{ td.ects > 0 ? 'text-success-600' : 'text-danger-600' }}">({{ td.ects > 0 ? '+' : '' }}{{ td.ects|number_format(1, ',', ' ') }})</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        {% if result.totauxGlobal %}
+                            {% set tg = result.totauxGlobal %}
+                            <tfoot class="bg-secondary-100 dark:bg-secondary-900/60 font-bold text-text">
+                                <tr>
+                                    <td colspan="2" class="px-4 py-3 text-left">TOTAL PARCOURS</td>
+                                    <td class="px-3 py-3 text-right font-mono">{{ tg.cmPresN1|number_format(1, ',', ' ') }}h / {{ tg.cmPresN|number_format(1, ',', ' ') }}h</td>
+                                    <td class="px-3 py-3 text-right font-mono">{{ tg.tdPresN1|number_format(1, ',', ' ') }}h / {{ tg.tdPresN|number_format(1, ',', ' ') }}h</td>
+                                    <td class="px-3 py-3 text-right font-mono">{{ tg.tpPresN1|number_format(1, ',', ' ') }}h / {{ tg.tpPresN|number_format(1, ',', ' ') }}h</td>
+                                    <td class="px-3 py-3 text-right font-mono">{{ tg.tePresN1|number_format(1, ',', ' ') }}h / {{ tg.tePresN|number_format(1, ',', ' ') }}h</td>
+                                    <td class="px-3 py-3 text-right font-mono">
+                                        {{ tg.totalPresN1|number_format(1, ',', ' ') }}h / {{ tg.totalPresN|number_format(1, ',', ' ') }}h
+                                        {% if tg.diffTotalPres|abs > 0.001 %}
+                                            <span class="text-[11px] {{ tg.diffTotalPres > 0 ? 'text-success-600' : 'text-danger-600' }}">({{ tg.diffTotalPres > 0 ? '+' : '' }}{{ tg.diffTotalPres|number_format(1, ',', ' ') }})</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3 text-right font-mono">{{ tg.totalDistN1|number_format(1, ',', ' ') }}h / {{ tg.totalDistN|number_format(1, ',', ' ') }}h</td>
+                                    <td class="px-3 py-3 text-right font-mono">{{ tg.totalHeuresN1|number_format(1, ',', ' ') }}h / {{ tg.totalHeuresN|number_format(1, ',', ' ') }}h</td>
+                                    <td class="px-3 py-3 text-right font-mono text-primary">
+                                        {{ tg.ectsN1|number_format(1, ',', ' ') }} / {{ tg.ectsN|number_format(1, ',', ' ') }}
+                                        {% if tg.diffEcts|abs > 0.001 %}
+                                            <span class="text-[11px] {{ tg.diffEcts > 0 ? 'text-success-600' : 'text-danger-600' }}">({{ tg.diffEcts > 0 ? '+' : '' }}{{ tg.diffEcts|number_format(1, ',', ' ') }})</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# ════════════ PANNEAU 2 : STRUCTURE & MAQUETTE (SEMESTRES / ECs) ════════════ #}
+        <div id="panel-structure"
+             data-tabs-target="panel"
+             data-panel-id="structure"
+             role="tabpanel"
+             aria-labelledby="tab-structure"
+             class="space-y-6">
+
+            {% for sem in result.semestres %}
+                {% if not onlyDiff or sem.hasDifferences %}
+                    <div class="rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 overflow-hidden">
+                        <div class="p-4 bg-secondary-50/70 border-b border-secondary-200 dark:bg-secondary-900/40 dark:border-secondary-700 flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex items-center gap-3">
+                                <h3 class="text-base font-bold text-text">{{ sem.libelle }}</h3>
+                                {% if sem.ouvertN %}
+                                    <twig:Badge label="Semestre ouvert" variant="success" size="sm" pill />
+                                {% else %}
+                                    <twig:Badge label="Non ouvert" variant="secondary" size="sm" pill />
+                                {% endif %}
+                                {% if sem.ouvertN1 != sem.ouvertN %}
+                                    <twig:Badge label="Changement ouverture" variant="warning" size="sm" pill />
+                                {% endif %}
+                            </div>
+                            <span class="text-xs text-secondary-500 font-mono">
+                                {{ sem.countEcs }} EC(s) • {{ (sem.totauxN.ects ?? 0)|number_format(1, ',', ' ') }} ECTS • {{ (sem.totauxN.totalPres ?? 0)|number_format(1, ',', ' ') }}h Prés.
+                            </span>
+                        </div>
+
+                        <div class="p-4 space-y-4">
+                            {% for ue in sem.ues %}
+                                {% if not onlyDiff or ue.hasDifferences %}
+                                    <div class="rounded-lg border border-secondary-200/80 bg-white p-3.5 dark:border-secondary-700/80 dark:bg-surface">
+                                        <div class="flex items-center justify-between mb-3 border-b border-secondary-100 pb-2 dark:border-secondary-800">
+                                            <div class="flex items-center gap-2">
+                                                <twig:UX:Icon name="icon:book-open" class="size-4 text-primary" />
+                                                <span class="font-semibold text-sm text-text">{{ ue.libelle }}</span>
+                                                {% if ue.status == 'missing_in_n' %}
+                                                    <twig:Badge label="UE manquante en N" variant="danger" size="sm" pill />
+                                                {% elseif ue.status == 'added_in_n' %}
+                                                    <twig:Badge label="UE ajoutée en N" variant="success" size="sm" pill />
+                                                {% elseif ue.status == 'modified' %}
+                                                    <twig:Badge label="UE modifiée" variant="warning" size="sm" pill />
+                                                {% endif %}
+                                            </div>
+                                            <span class="text-xs text-secondary-500 font-mono">{{ ue.countEcs }} EC(s)</span>
+                                        </div>
+
+                                        <div class="overflow-x-auto">
+                                            <table class="min-w-full divide-y divide-secondary-100 text-xs dark:divide-secondary-800">
+                                                <thead class="text-secondary-500 text-left font-medium">
+                                                    <tr>
+                                                        <th class="py-2 pr-3">Code</th>
+                                                        <th class="py-2 pr-3">Intitulé EC</th>
+                                                        <th class="py-2 pr-3">Fiche Matière (N-1 -> N)</th>
+                                                        <th class="py-2 pr-3 text-right">ECTS (N-1 / N)</th>
+                                                        <th class="py-2 pr-3">Type / Nature</th>
+                                                        <th class="py-2 text-right">Statut / Anomalies</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800 font-sans">
+                                                    {% for ec in ue.ecs %}
+                                                        {% if not onlyDiff or ec.hasDifferences %}
+                                                            <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40 {{ ec.hasAttachmentError ? 'bg-danger-50/30 dark:bg-danger-900/20' : '' }}">
+                                                                <td class="py-2.5 pr-3 font-mono font-medium text-text">
+                                                                    {{ ec.code ?? '-' }}
+                                                                </td>
+                                                                <td class="py-2.5 pr-3 text-text font-medium">
+                                                                    {{ ec.libelle }}
+                                                                    {% if ec.isOriginLinkBroken %}
+                                                                        <span class="block text-[11px] text-warning-600 dark:text-warning-400">Lien N-1 reconstruit par code/libellé</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="py-2.5 pr-3">
+                                                                    {% if ec.attachmentStatus == 'ok' %}
+                                                                        {% if ec.ficheN %}
+                                                                            <span class="inline-flex items-center gap-1 text-xs text-secondary-700 dark:text-secondary-300">
+                                                                                <twig:UX:Icon name="icon:check" class="size-3.5 text-success-600" />
+                                                                                <strong>{{ ec.ficheN.sigle }}</strong> : {{ ec.ficheN.libelle }}
+                                                                            </span>
+                                                                        {% else %}
+                                                                            <span class="text-secondary-400 italic">Sans fiche</span>
+                                                                        {% endif %}
+                                                                    {% elseif ec.attachmentStatus == 'missing_fiche' %}
+                                                                        <div class="space-y-0.5">
+                                                                            <twig:Badge label="FICHE DÉTACHÉE EN N !" variant="danger" size="sm" pill />
+                                                                            <span class="block text-[11px] text-danger-700 dark:text-danger-300">
+                                                                                Était rattaché à : <strong>{{ ec.ficheN1 ? ec.ficheN1.sigle : 'N-1' }}</strong> ({{ ec.ficheN1 ? ec.ficheN1.libelle : '' }})
+                                                                            </span>
+                                                                        </div>
+                                                                    {% elseif ec.attachmentStatus == 'mismatched_fiche' %}
+                                                                        <div class="space-y-0.5">
+                                                                            <twig:Badge label="FICHE INCOHÉRENTE !" variant="danger" size="sm" pill />
+                                                                            <span class="block text-[11px] text-danger-700 dark:text-danger-300">
+                                                                                N-1 : {{ ec.ficheN1 ? ec.ficheN1.sigle : '-' }} ➔ N : {{ ec.ficheN ? ec.ficheN.sigle : '-' }}
+                                                                            </span>
+                                                                        </div>
+                                                                    {% elseif ec.attachmentStatus == 'new_fiche' %}
+                                                                        <span class="inline-flex items-center gap-1 text-xs text-info-700 dark:text-info-300">
+                                                                            <twig:UX:Icon name="icon:plus" class="size-3.5 text-info-600" />
+                                                                            {{ ec.ficheN ? ec.ficheN.sigle : '' }}
+                                                                        </span>
+                                                                    {% else %}
+                                                                        <span class="text-secondary-400">-</span>
+                                                                    {% endif %}
+                                                                </td>
+                                                                <td class="py-2.5 pr-3 text-right font-mono">
+                                                                    {% set ects1 = ec.ecN1 ? ec.ecN1.ects : null %}
+                                                                    {% set ects2 = ec.ecN ? ec.ecN.ects : null %}
+                                                                    {{ (ects1 ?? 0)|number_format(1, ',', ' ') }} / {{ (ects2 ?? 0)|number_format(1, ',', ' ') }}
+                                                                </td>
+                                                                <td class="py-2.5 pr-3 text-secondary-600 dark:text-secondary-300">
+                                                                    {{ ec.ecN ? ec.ecN.typeEc ? ec.ecN.typeEc.libelle : '-' : '-' }}
+                                                                </td>
+                                                                <td class="py-2.5 text-right">
+                                                                    {% if ec.status == 'missing_in_n' %}
+                                                                        <twig:Badge label="Manque en N" variant="danger" size="sm" pill />
+                                                                    {% elseif ec.status == 'added_in_n' %}
+                                                                        <twig:Badge label="Ajouté en N" variant="success" size="sm" pill />
+                                                                    {% elseif ec.hasAttachmentError %}
+                                                                        <twig:Badge label="Erreur fiche" variant="danger" size="sm" pill />
+                                                                    {% elseif ec.hasDifferences %}
+                                                                        <twig:Badge label="Modifié" variant="warning" size="sm" pill />
+                                                                    {% else %}
+                                                                        <twig:Badge label="Identique" variant="secondary" size="sm" pill />
+                                                                    {% endif %}
+                                                                </td>
+                                                            </tr>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {# ════════════ PANNEAU 3 : FICHES MATIÈRES ════════════ #}
+        <div id="panel-fiches"
+             data-tabs-target="panel"
+             data-panel-id="fiches"
+             role="tabpanel"
+             aria-labelledby="tab-fiches"
+             class="space-y-6">
+
+            <div class="rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 overflow-hidden">
+                <div class="p-4 border-b border-secondary-200 dark:border-secondary-700 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div class="space-y-0.5">
+                        <h2 class="text-base font-semibold text-text flex items-center gap-2">
+                            <twig:UX:Icon name="icon:file-text" class="size-5 text-primary" />
+                            Comparaison des Fiches Matières ({{ result.fiches|length }} affichée{{ result.fiches|length > 1 ? 's' : '' }})
+                        </h2>
+                        <p class="text-xs text-secondary-500">
+                            Périmètre actuel : {{ scope == 'formation' ? 'Toutes les fiches de la formation (mention complète)' : 'Fiches associées à ce parcours (portées, mutualisées et maquette)' }}
+                        </p>
+                    </div>
+
+                    <div class="inline-flex rounded-lg border border-secondary-200 bg-secondary-50 p-1 dark:border-secondary-700 dark:bg-secondary-800">
+                        <a href="{{ path('app_parcours_comparer_n1', {parcours: parcours.id, only_diff: onlyDiff ? 1 : 0, scope: 'parcours', tab: 'fiches'}) }}"
+                           class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors {{ scope == 'parcours' ? 'bg-white text-text shadow-sm dark:bg-surface dark:text-text' : 'text-secondary-600 hover:text-text dark:text-secondary-400 dark:hover:text-secondary-200' }}">
+                            <twig:UX:Icon name="icon:layers" class="size-3.5" />
+                            Fiches du parcours ({{ result.totalFichesParcours }})
+                        </a>
+                        <a href="{{ path('app_parcours_comparer_n1', {parcours: parcours.id, only_diff: onlyDiff ? 1 : 0, scope: 'formation', tab: 'fiches'}) }}"
+                           class="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors {{ scope == 'formation' ? 'bg-white text-text shadow-sm dark:bg-surface dark:text-text' : 'text-secondary-600 hover:text-text dark:text-secondary-400 dark:hover:text-secondary-200' }}">
+                            <twig:UX:Icon name="icon:book-open" class="size-3.5" />
+                            Toutes les fiches formation ({{ result.totalFichesFormation }})
+                        </a>
+                    </div>
+                </div>
+
+                <div class="bg-secondary-50/50 px-4 py-2.5 border-b border-secondary-100 text-xs text-secondary-600 dark:bg-secondary-900/30 dark:border-secondary-800 dark:text-secondary-300 flex items-center gap-2">
+                    <twig:UX:Icon name="icon:info:bold" class="size-4 text-info-600 shrink-0" />
+                    <span>
+                        <strong>Rappel B.U.T. :</strong> Les fiches de tronc commun (S1/S2) sont souvent portées par le 1er parcours ou mutualisées. Le mode <em>Fiches du parcours</em> agrège les fiches directes, mutualisées et celles rattachées aux ECs de sa maquette. Le mode <em>Toutes les fiches formation</em> compare l'intégralité de la mention.
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-secondary-200 text-xs dark:divide-secondary-700">
+                        <thead class="bg-secondary-50 text-left font-semibold text-secondary-600 uppercase tracking-wider dark:bg-secondary-900 dark:text-secondary-300">
+                            <tr>
+                                <th class="px-3 py-3">Statut</th>
+                                <th class="px-3 py-3">Origine</th>
+                                <th class="px-3 py-3">Sigle</th>
+                                <th class="px-3 py-3">Type</th>
+                                <th class="px-4 py-3">Intitulé (N-1 ➔ N)</th>
+                                <th class="px-3 py-3 text-right">CM (Pres)</th>
+                                <th class="px-3 py-3 text-right">TD (Pres)</th>
+                                <th class="px-3 py-3 text-right">TP (Pres)</th>
+                                <th class="px-3 py-3 text-right">TE</th>
+                                <th class="px-3 py-3 text-right font-bold">Total Heures</th>
+                                <th class="px-3 py-3 text-right font-bold text-primary">ECTS</th>
+                                <th class="px-3 py-3 text-center">Mutualisé</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-secondary-200 bg-white dark:bg-surface dark:divide-secondary-700">
+                            {% for f in result.fiches %}
+                                {% if not onlyDiff or f.hasDifferences %}
+                                    {% set f1 = f.ficheN1 %}
+                                    {% set f2 = f.ficheN %}
+                                    <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40 {{ f.isMissingInN or f.isDetachedFromParcours ? 'bg-danger-50/30 dark:bg-danger-900/20' : '' }}">
+                                        <td class="px-3 py-3 whitespace-nowrap">
+                                            {% if f.status == 'missing_in_n' %}
+                                                <twig:Badge label="Manque en N" variant="danger" size="sm" pill />
+                                            {% elseif f.status == 'added_in_n' %}
+                                                <twig:Badge label="Ajoutée en N" variant="success" size="sm" pill />
+                                            {% elseif f.status == 'unlinked' %}
+                                                <twig:Badge label="Lien N-1 brisé" variant="warning" size="sm" pill />
+                                            {% elseif f.status == 'modified' %}
+                                                <twig:Badge label="Modifiée" variant="warning" size="sm" pill />
+                                            {% else %}
+                                                <twig:Badge label="Identique" variant="secondary" size="sm" pill />
+                                            {% endif %}
+
+                                            {% if f.isDetachedFromParcours %}
+                                                <div class="mt-1" title="La fiche existe en N dans la formation mais n'est plus rattachée à ce parcours ni à ses ECs">
+                                                    <twig:Badge label="Détachée du parcours !" variant="danger" size="sm" pill />
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-3 py-3 whitespace-nowrap">
+                                            {% if f.scopeSource == 'portee' %}
+                                                <span title="Fiche portée directement par ce parcours">
+                                                    <twig:Badge label="Portée" variant="secondary" size="sm" pill />
+                                                </span>
+                                            {% elseif f.scopeSource == 'mutualisee' %}
+                                                <span title="Fiche mutualisée sur ce parcours">
+                                                    <twig:Badge label="Mutualisée" variant="info" size="sm" pill />
+                                                </span>
+                                            {% elseif f.scopeSource == 'maquette' %}
+                                                <span title="Fiche rattachée à un EC de la maquette de ce parcours (tronc commun S1/S2)">
+                                                    <twig:Badge label="Tronc commun (EC)" variant="primary" size="sm" pill />
+                                                </span>
+                                            {% elseif f.scopeSource == 'formation' %}
+                                                <span title="Fiche présente dans la formation (portée par un autre parcours)">
+                                                    <twig:Badge label="Autre parcours" variant="secondary" size="sm" pill />
+                                                </span>
+                                            {% else %}
+                                                <span class="text-secondary-400">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-3 py-3 font-mono font-bold text-text whitespace-nowrap">
+                                            {{ f.sigle }}
+                                        </td>
+                                        <td class="px-3 py-3 text-secondary-500 whitespace-nowrap">
+                                            {{ f.typeMatiere }}
+                                        </td>
+                                        <td class="px-4 py-3 text-text">
+                                            {% if f.libelleN1 and f.libelleN and f.libelleN1 != f.libelleN %}
+                                                <div class="line-through text-secondary-400">{{ f.libelleN1 }}</div>
+                                                <div class="font-medium text-text">{{ f.libelleN }}</div>
+                                            {% else %}
+                                                <span class="font-medium">{{ f.libelleN ?? f.libelleN1 }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="px-3 py-3 text-right font-mono whitespace-nowrap">
+                                            {{ (f1 ? f1.volumeCmPresentiel : 0)|number_format(1, ',', ' ') }} / {{ (f2 ? f2.volumeCmPresentiel : 0)|number_format(1, ',', ' ') }}
+                                        </td>
+                                        <td class="px-3 py-3 text-right font-mono whitespace-nowrap">
+                                            {{ (f1 ? f1.volumeTdPresentiel : 0)|number_format(1, ',', ' ') }} / {{ (f2 ? f2.volumeTdPresentiel : 0)|number_format(1, ',', ' ') }}
+                                        </td>
+                                        <td class="px-3 py-3 text-right font-mono whitespace-nowrap">
+                                            {{ (f1 ? f1.volumeTpPresentiel : 0)|number_format(1, ',', ' ') }} / {{ (f2 ? f2.volumeTpPresentiel : 0)|number_format(1, ',', ' ') }}
+                                        </td>
+                                        <td class="px-3 py-3 text-right font-mono whitespace-nowrap">
+                                            {{ (f1 ? f1.volumeTe : 0)|number_format(1, ',', ' ') }} / {{ (f2 ? f2.volumeTe : 0)|number_format(1, ',', ' ') }}
+                                        </td>
+                                        <td class="px-3 py-3 text-right font-mono font-bold whitespace-nowrap text-text">
+                                            {{ (f1 ? f1.volumeEtudiant : 0)|number_format(1, ',', ' ') }}h / {{ (f2 ? f2.volumeEtudiant : 0)|number_format(1, ',', ' ') }}h
+                                        </td>
+                                        <td class="px-3 py-3 text-right font-mono font-bold text-primary whitespace-nowrap">
+                                            {{ (f1 ? f1.ects : 0)|number_format(1, ',', ' ') }} / {{ (f2 ? f2.ects : 0)|number_format(1, ',', ' ') }}
+                                        </td>
+                                        <td class="px-3 py-3 text-center whitespace-nowrap">
+                                            {% if f2 and f2.enseignementMutualise %}
+                                                <twig:Badge label="Oui" variant="info" size="sm" pill />
+                                            {% else %}
+                                                <span class="text-secondary-400">Non</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# ════════════ PANNEAU 4 : MUTUALISATIONS ════════════ #}
+        <div id="panel-mutus"
+             data-tabs-target="panel"
+             data-panel-id="mutus"
+             role="tabpanel"
+             aria-labelledby="tab-mutus"
+             class="space-y-6">
+
+            <div class="rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 overflow-hidden">
+                <div class="p-4 border-b border-secondary-200 dark:border-secondary-700 flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-text flex items-center gap-2">
+                        <twig:UX:Icon name="icon:users" class="size-5 text-primary" />
+                        Mutualisations de fiches sur ce parcours
+                    </h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-secondary-200 text-xs dark:divide-secondary-700">
+                        <thead class="bg-secondary-50 text-left font-semibold text-secondary-600 uppercase tracking-wider dark:bg-secondary-900 dark:text-secondary-300">
+                            <tr>
+                                <th class="px-4 py-3">Statut</th>
+                                <th class="px-4 py-3">Sigle</th>
+                                <th class="px-4 py-3">Intitulé fiche</th>
+                                <th class="px-4 py-3">Parcours Porteur / Source</th>
+                                <th class="px-4 py-3">Parcours Bénéficiaire</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-secondary-200 bg-white dark:bg-surface dark:divide-secondary-700">
+                            {% for m in result.mutualisations %}
+                                <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/40 {{ m.isLost ? 'bg-danger-50/30 dark:bg-danger-900/20' : '' }}">
+                                    <td class="px-4 py-3 whitespace-nowrap">
+                                        {% if m.status == 'conserved' %}
+                                            <twig:Badge label="Conservée" variant="success" size="sm" pill />
+                                        {% elseif m.status == 'lost_in_n' %}
+                                            <twig:Badge label="PERDUE EN N !" variant="danger" size="sm" pill />
+                                        {% elseif m.status == 'added_in_n' %}
+                                            <twig:Badge label="Nouvelle" variant="info" size="sm" pill />
+                                        {% elseif m.status == 'external' %}
+                                            <twig:Badge label="Externe suspecte" variant="warning" size="sm" pill />
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3 font-mono font-bold text-text">
+                                        {{ m.sigle }}
+                                    </td>
+                                    <td class="px-4 py-3 text-text font-medium">
+                                        {{ m.libelle }}
+                                    </td>
+                                    <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">
+                                        {{ m.sourceParcours }}
+                                    </td>
+                                    <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">
+                                        {{ m.targetParcours }}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="px-4 py-6 text-center text-secondary-500">
+                                        Aucune mutualisation de fiche enregistrée sur ce parcours.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# ════════════ PANNEAU 5 : DIAGNOSTICS & ANOMALIES ════════════ #}
+        <div id="panel-anomalies"
+             data-tabs-target="panel"
+             data-panel-id="anomalies"
+             role="tabpanel"
+             aria-labelledby="tab-anomalies"
+             class="space-y-6">
+
+            <div class="rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 overflow-hidden">
+                <div class="p-4 border-b border-secondary-200 dark:border-secondary-700 flex items-center justify-between">
+                    <h2 class="text-base font-semibold text-text flex items-center gap-2">
+                        <twig:UX:Icon name="icon:warning:bold" class="size-5 text-primary" />
+                        Journal complet des diagnostics ({{ result.anomalies|length }} éléments)
+                    </h2>
+                </div>
+                <div class="divide-y divide-secondary-100 dark:divide-secondary-800">
+                    {% for item in result.anomalies %}
+                        <div class="p-4 flex items-start gap-3 hover:bg-secondary-50/50 dark:hover:bg-secondary-800/30">
+                            {% if item.severity == 'error' %}
+                                <twig:UX:Icon name="icon:danger:bold" class="size-5 text-danger-600 shrink-0 mt-0.5" />
+                            {% elseif item.severity == 'warning' %}
+                                <twig:UX:Icon name="icon:warning:bold" class="size-5 text-warning-600 shrink-0 mt-0.5" />
+                            {% else %}
+                                <twig:UX:Icon name="icon:info:bold" class="size-5 text-info-600 shrink-0 mt-0.5" />
+                            {% endif %}
+                            <div class="flex-1 space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <twig:Badge label="{{ item.category|upper }}" variant="{{ item.severity == 'error' ? 'danger' : (item.severity == 'warning' ? 'warning' : 'info') }}" size="sm" pill />
+                                    <span class="text-xs text-secondary-500 font-mono">
+                                        {% if item.severity == 'error' %}Anomalie critique{% elseif item.severity == 'warning' %}Avertissement{% else %}Information{% endif %}
+                                    </span>
+                                </div>
+                                <p class="text-sm font-medium text-text">
+                                    {{ item.message }}
+                                </p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="p-8 text-center text-secondary-500 space-y-2">
+                            <twig:UX:Icon name="icon:check-circle" class="size-8 text-success-600 mx-auto" />
+                            <p class="font-medium">Aucune anomalie détectée sur ce parcours.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -132,6 +132,75 @@ final class OffreAnnexesExportServiceTest extends TestCase
         self::assertSame(200, $rows[0]['capacite_n']);
     }
 
+    public function testParcoursupTroncCommunPartielConserveParcoursHorsTroncCommunEtCapaciteSpecifique(): void
+    {
+        $campagne = new CampagneCollecte();
+        $psup = $this->psup();
+        $licence = $this->licence(1, 'Sciences de la Vie');
+
+        // Configuration d'un tronc commun partiel couvrant uniquement SVT et Chimie
+        $licence->setTroncsCommuns([
+            [
+                'id' => 'tc_svt',
+                'nom' => 'Tronc commun SVT',
+                'annees' => [1],
+                'parcours' => [10, 11],
+            ],
+        ]);
+
+        $dpes = [];
+        $annees = [];
+        // SVT et Chimie ont une capacité mutualisée de 120
+        [$dpes[], $annees[10]] = $this->parcoursL1($licence, 10, 'SVT', 120);
+        $annees[10] = [$annees[10]];
+        [$dpes[], $annees[11]] = $this->parcoursL1($licence, 11, 'Chimie', 120);
+        $annees[11] = [$annees[11]];
+        // Accès Santé est hors tronc commun avec sa capacité propre de 30
+        [$dpes[], $annees[12]] = $this->parcoursL1($licence, 12, 'Accès Santé (LAS)', 30);
+        $annees[12] = [$annees[12]];
+
+        $rows = $this->buildParcoursupRows($dpes, $annees, [], $psup, $campagne);
+
+        // Doit produire 2 lignes distinctes : le Tronc Commun SVT (120 places) et Accès Santé (30 places)
+        self::assertCount(2, $rows);
+
+        // Première ligne triée : Accès Santé
+        self::assertSame('Accès Santé (LAS)', (string) $rows[0]['parcours']);
+        self::assertSame(30, $rows[0]['capacite_n']);
+
+        // Seconde ligne triée : Tronc Commun SVT regroupant SVT et Chimie
+        self::assertSame('Tronc commun SVT : SVT / Chimie', (string) $rows[1]['parcours']);
+        self::assertSame(120, $rows[1]['capacite_n']);
+    }
+
+    public function testFormatGroupParcoursLabel(): void
+    {
+        self::assertSame(
+            'Tronc commun : Parcours A / Parcours B',
+            $this->service->formatGroupParcoursLabel('Tronc commun', ['Parcours A', 'Parcours B'])
+        );
+
+        self::assertSame(
+            'Tronc commun SVT : Parcours A / Parcours B',
+            $this->service->formatGroupParcoursLabel('Tronc commun SVT', ['Parcours A', 'Parcours B'])
+        );
+
+        self::assertSame(
+            'Tronc commun Sciences : Parcours A / Parcours B',
+            $this->service->formatGroupParcoursLabel('Sciences', ['Parcours A', 'Parcours B'])
+        );
+
+        self::assertSame(
+            'Portail Pasteur : Parcours A / Parcours B',
+            $this->service->formatGroupParcoursLabel('Portail Pasteur', ['Parcours A', 'Parcours B'], 'portail')
+        );
+
+        self::assertSame(
+            'Tronc commun : Parcours Unique',
+            $this->service->formatGroupParcoursLabel('Tronc commun', ['Parcours Unique'])
+        );
+    }
+
     private function psup(): PlateformeAdmission
     {
         $psup = (new PlateformeAdmission())->setCode('parcoursup')->setLibelle('Parcoursup');

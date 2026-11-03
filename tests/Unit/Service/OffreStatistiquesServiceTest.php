@@ -347,6 +347,130 @@ final class OffreStatistiquesServiceTest extends TestCase
         self::assertSame(2, $stats['kpi']['totalParcours']);
     }
 
+    public function testDedupliqueCapaciteParTroncCommunEtConserveParcoursSpecifique(): void
+    {
+        $campagne = new CampagneCollecte();
+        $composante = new Composante();
+        $this->setId($composante, 10);
+        $typeDiplome = (new TypeDiplome())->setLibelle('Licence')->setLibelleCourt('L');
+        $this->setId($typeDiplome, 20);
+
+        $f = new Formation(null);
+        $this->setId($f, 100);
+        $f->setComposantePorteuse($composante);
+        $f->setTypeDiplome($typeDiplome);
+        $f->setTroncsCommuns([
+            [
+                'id' => 'tc_info',
+                'nom' => 'Tronc commun Info',
+                'annees' => [1],
+                'parcours' => [101, 102],
+            ],
+        ]);
+
+        $p1 = new Parcours($f);
+        $this->setId($p1, 101);
+        $p1->setLibelle('Ingénierie Logicielle');
+        $f->addParcour($p1);
+
+        $a1 = new \App\Entity\Annee();
+        $this->setId($a1, 301);
+        $a1->setOrdre(1);
+        $a1->setIsOuvert(true);
+        $a1->setCapaciteAccueil(80);
+        $a1->setParcours($p1);
+
+        $p2 = new Parcours($f);
+        $this->setId($p2, 102);
+        $p2->setLibelle('Intelligence Artificielle');
+        $f->addParcour($p2);
+
+        $a2 = new \App\Entity\Annee();
+        $this->setId($a2, 302);
+        $a2->setOrdre(1);
+        $a2->setIsOuvert(true);
+        $a2->setCapaciteAccueil(80);
+        $a2->setParcours($p2);
+
+        $p3 = new Parcours($f);
+        $this->setId($p3, 103);
+        $p3->setLibelle('Cybersécurité');
+        $f->addParcour($p3);
+
+        $a3 = new \App\Entity\Annee();
+        $this->setId($a3, 303);
+        $a3->setOrdre(1);
+        $a3->setIsOuvert(true);
+        $a3->setCapaciteAccueil(20);
+        $a3->setParcours($p3);
+
+        $dpe1 = (new \App\Entity\DpeParcours())->setParcours($p1);
+        $dpe2 = (new \App\Entity\DpeParcours())->setParcours($p2);
+        $dpe3 = (new \App\Entity\DpeParcours())->setParcours($p3);
+
+        $formationRepo = $this->createStub(FormationRepository::class);
+        $formationRepo->method('findByCampagneWithRelations')->willReturn([$f]);
+
+        $dpeParcoursRepo = $this->createStub(DpeParcoursRepository::class);
+        $dpeParcoursRepo->method('findByCampagneCollecte')->willReturn([$dpe1, $dpe2, $dpe3]);
+
+        $anneeRepo = $this->createStub(AnneeRepository::class);
+        $anneeRepo->method('findByCampagneIndexedByParcours')->willReturn([
+            101 => [$a1],
+            102 => [$a2],
+            103 => [$a3],
+        ]);
+
+        $plateformeRepo = $this->createStub(PlateformeAdmissionRepository::class);
+        $plateformeRepo->method('findBy')->willReturn([]);
+
+        $plateformeParamRepo = $this->createStub(PlateformeAdmissionParametreRepository::class);
+        $plateformeParamRepo->method('findByCampagneIndexedByAnnee')->willReturn([]);
+
+        $composanteRepo = $this->createStub(ComposanteRepository::class);
+        $typeDiplomeRepo = $this->createStub(TypeDiplomeRepository::class);
+        $chartBuilder = $this->createStub(ChartBuilderInterface::class);
+        $chartBuilder->method('createChart')->willReturn(new Chart(Chart::TYPE_BAR));
+
+        $service = new OffreStatistiquesService(
+            $formationRepo,
+            $dpeParcoursRepo,
+            $anneeRepo,
+            $plateformeRepo,
+            $plateformeParamRepo,
+            $composanteRepo,
+            $typeDiplomeRepo,
+            $chartBuilder
+        );
+
+        $stats = $service->getStats($campagne);
+
+        // Capacité globale : 80 (Tronc Commun Info) + 20 (Cybersécurité spécifique) = 100
+        self::assertSame(100, $stats['kpi']['totalCapacite']);
+        self::assertSame(100, $stats['kpi']['totalNiveau1']);
+        self::assertSame(1, $stats['kpi']['totalFormations']);
+        self::assertSame(3, $stats['kpi']['totalParcours']);
+
+        // Vérification des lignes détaillées
+        $detail = $stats['detailLignes'];
+        self::assertCount(3, $detail);
+
+        self::assertSame('Ingénierie Logicielle', $detail[0]['parcours']);
+        self::assertSame(80, $detail[0]['capaciteAccueil']);
+        self::assertSame(80, $detail[0]['capaciteComptee']);
+        self::assertSame('Tronc commun : Tronc commun Info', $detail[0]['mutualisation']);
+
+        self::assertSame('Intelligence Artificielle', $detail[1]['parcours']);
+        self::assertSame(80, $detail[1]['capaciteAccueil']);
+        self::assertSame(0, $detail[1]['capaciteComptee']);
+        self::assertSame('Tronc commun : Tronc commun Info', $detail[1]['mutualisation']);
+
+        self::assertSame('Cybersécurité', $detail[2]['parcours']);
+        self::assertSame(20, $detail[2]['capaciteAccueil']);
+        self::assertSame(20, $detail[2]['capaciteComptee']);
+        self::assertSame('', $detail[2]['mutualisation']);
+    }
+
     private function setId(object $entity, int $id): void
     {
         $ref = new \ReflectionProperty($entity, 'id');

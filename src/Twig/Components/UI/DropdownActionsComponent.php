@@ -36,4 +36,7 @@ class DropdownActionsComponent
 
     /** Permet de distinguer plusieurs dropdown sur une page (facultatif) */
     public ?string $id = null;
+
+    /** Icône du bouton dropdown */
+    public string $icon = 'icon:ellipsis-vertical';
 }

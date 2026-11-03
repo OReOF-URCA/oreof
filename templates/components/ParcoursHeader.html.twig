@@ -461,7 +461,7 @@
                 <div class="space-y-4">
                     <div>
                         <p class="{{ metaLabelClass }}">Gestion des versions & Comparaisons</p>
-                        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                        <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                             {# Bloc 1 : Consulter / Sauvegarder une version figée #}
                             <div class="flex flex-col justify-between rounded-xl border border-secondary-200 bg-secondary-50/50 p-3.5 dark:border-secondary-700 dark:bg-secondary-800/40">
                                 <div>
@@ -529,6 +529,30 @@
                                        title="Comparer les textes actuels avec l'année précédente (campagne N-1)">
                                         {{ ux_icon('icon:calendar', {class: 'h-3.5 w-3.5'}) }}
                                         <span>Campagne N-1</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {# Bloc 3 : Comparer la maquette & fiches avec N-1 #}
+                            <div class="flex flex-col justify-between rounded-xl border border-secondary-200 bg-secondary-50/50 p-3.5 dark:border-secondary-700 dark:bg-secondary-800/40">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-300">
+                                            {{ ux_icon('ph:git-diff-bold', {class: 'h-4 w-4'}) }}
+                                        </div>
+                                        <span class="text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-200">Maquette N-1 =&gt; N</span>
+                                    </div>
+                                    <p class="text-xs text-secondary-500 dark:text-secondary-400 mb-3">
+                                        Vérifier fiches matières, rattachements ECs, mutualisations et volumes N-1.
+                                    </p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-secondary-200/70 dark:border-secondary-700/70">
+                                    <a href="{{ path('app_parcours_comparer_n1', {parcours: parcours.id}) }}"
+                                       class="{{ quickBtnPrimary }} text-xs py-1.5 flex-1"
+                                       {{ stimulus_controller('tooltip') }}
+                                       title="Comparer la maquette et détecter les régressions / pertes de fiches depuis N-1">
+                                        {{ ux_icon('ph:scales-bold', {class: 'h-3.5 w-3.5'}) }}
+                                        <span>Comparer avec N-1</span>
                                     </a>
                                 </div>
                             </div>
