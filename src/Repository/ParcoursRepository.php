@@ -425,15 +425,10 @@ class ParcoursRepository extends ServiceEntityRepository
             $result->expr()->literal(' - '),
             'm.libelle',
             $result->expr()->literal(' '),
-            $result->expr()->literal('('),
-            "COALESCE(f.sigle, '')",
-            $result->expr()->literal(')'),
+            "COALESCE(CONCAT('(', f.sigle, ')'), '')",
             $result->expr()->literal(' - '),
             'p.libelle', 
-            $result->expr()->literal(' '),
-            $result->expr()->literal('('),
-            "COALESCE(p.sigle, '')", 
-            $result->expr()->literal(')'),
+            "COALESCE(CONCAT(' (', p.sigle, ')'), '')", 
         );
 
         $patternLibelleUpper = $result->expr()->concat(
