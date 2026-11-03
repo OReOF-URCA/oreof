@@ -332,6 +332,18 @@ class ExportGeneriqueFicheMatiere {
                     ]
                 ];
                 break;
+            case 'fmLibelleAnglais':
+                return [
+                    'type' => 'full_block',
+                    'libelle' => $exportType === 'xlsx' ? "Libellé Anglais" : "",
+                    'value' => [
+                        [
+                            'libelle' => 'Libellé Anglais',
+                            'content' => $ficheMatiere->getLibelleAnglais() ?? ""
+                        ]
+                    ]
+                ];
+                break;
         }
     }
 
@@ -339,11 +351,12 @@ class ExportGeneriqueFicheMatiere {
         return [
             'fmId' => 1,
             'fmLibelle' => 2,
-            'fmReferent' => 3,
-            'fmIsComplet' => 4,
-            'fmNbUtilisee' => 5,
-            'fmParcoursPorteur' => 6,
-            'fmFormation' => 7,
+            'fmLibelleAnglais' => 3,
+            'fmReferent' => 4,
+            'fmIsComplet' => 5,
+            'fmNbUtilisee' => 6,
+            'fmParcoursPorteur' => 7,
+            'fmFormation' => 8,
         ];
     }
 
