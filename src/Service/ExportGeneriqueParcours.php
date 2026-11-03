@@ -1035,6 +1035,18 @@ class ExportGeneriqueParcours {
                     ]
                 ];
                 break;
+            case 'identifiantParcours':
+                return [
+                    'type' => 'full_block',
+                    'libelle' => $exportType === 'xlsx' ? 'Identifiant du Parcours' : "",
+                    'value' => [
+                        [
+                            'libelle' => 'Identifiant du Parcours',
+                            'content' => $parcours?->getId() ? "#" . $parcours->getId() : ""
+                        ]
+                    ]
+                ];
+                break;
         }
     }
 
@@ -1078,6 +1090,7 @@ class ExportGeneriqueParcours {
             'dateConseil' => 36,
             'formationHasPV' => 37,
             'typeDuParcours' => 38,
+            'identifiantParcours' => 39,
         ];
     }
 

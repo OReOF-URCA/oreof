@@ -90,6 +90,10 @@ html[data-theme="dark"] {
         color: rgb(46, 41, 41);
         background-color: rgb(218, 209, 199);
     }
+
+    .badgeSelectedDiv span {
+        color: black;
+    }
 }
 
 input[data-export-generique--parcours-search-target="searchInput"]:focus-visible {
