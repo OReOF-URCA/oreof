@@ -214,7 +214,7 @@ export default class extends Controller {
         let textDiv = document.createElement('div');
         textDiv.classList.add('resultSearchNode', 'p-1.5', 'rounded-lg');
         textDiv.dataset.parcoursId = resultId;
-        let infoLibelle = this.displayTypeParcoursLibelle(typeParcours);
+        let infoLibelle = this.displayTypeParcoursLibelle(typeParcours) ?? "";
         if(infoLibelle.length > 0){
             infoLibelle = ' - ' + infoLibelle;
         }

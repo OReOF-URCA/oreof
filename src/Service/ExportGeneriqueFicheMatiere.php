@@ -339,9 +339,16 @@ class ExportGeneriqueFicheMatiere {
                     'value' => [
                         [
                             'libelle' => 'Libellé Anglais',
-                            'content' => $ficheMatiere->getLibelleAnglais() ?? ""
+                            'content' => $ficheMatiere?->getLibelleAnglais() ?? ""
                         ]
                     ]
+                ];
+                break;
+            case 'fmDescription':
+                return [
+                    'type' => 'longtext',
+                    'libelle' => 'Description',
+                    'value' => $ficheMatiere?->getDescription() ?? ""
                 ];
                 break;
         }
@@ -357,6 +364,7 @@ class ExportGeneriqueFicheMatiere {
             'fmNbUtilisee' => 6,
             'fmParcoursPorteur' => 7,
             'fmFormation' => 8,
+            'fmDescription' => 9
         ];
     }
 
