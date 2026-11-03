@@ -10,6 +10,7 @@ use App\Entity\CampagneCollecte;
 use App\Entity\Contact;
 use App\Entity\Parcours;
 use App\Entity\SemestreParcours;
+use App\Enums\TypeParcoursEnum;
 use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\Tools;
@@ -1020,6 +1021,20 @@ class ExportGeneriqueParcours {
                         , $parcours?->getFormation()?->getLocalisationMention()?->toArray() ?? []))
                 ];
                 break;
+            case 'typeDuParcours':
+                return [
+                    'type' => 'full_block',
+                    'libelle' => $exportType === 'xlsx' ? 'Type du Parcours' : "",
+                    'value' => [
+                        [
+                            'libelle' => 'Type du Parcours',
+                            'content' => $parcours?->getTypeParcours() !== null 
+                                    ? $parcours?->getTypeParcours()?->libelle()
+                                    : ""
+                        ]
+                    ]
+                ];
+                break;
         }
     }
 
@@ -1061,7 +1076,8 @@ class ExportGeneriqueParcours {
             'niveauEntree' => 34,
             'niveauSortie' => 35,
             'dateConseil' => 36,
-            'formationHasPV' => 37
+            'formationHasPV' => 37,
+            'typeDuParcours' => 38,
         ];
     }
 
