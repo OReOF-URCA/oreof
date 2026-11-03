@@ -508,6 +508,14 @@
                                                     target: '_blank'
                                                 },
                                                 {
+                                                    label: 'Gérer PV & Note',
+                                                    icon: 'ph:file-text',
+                                                    url: path('offre_v2_formation_documents_modal', {formation: formation.id}),
+                                                    modal: true,
+                                                    disabled: not (is_granted('ROLE_ADMIN') or is_granted('ROLE_SES') or (formation.composantePorteuse and is_granted('MANAGE', {route: 'app_composante', subject: formation.composantePorteuse}))),
+                                                    help: not (is_granted('ROLE_ADMIN') or is_granted('ROLE_SES') or (formation.composantePorteuse and is_granted('MANAGE', {route: 'app_composante', subject: formation.composantePorteuse}))) ? 'Action réservée aux gestionnaires' : null
+                                                },
+                                                {
                                                     label: 'Modifier',
                                                     icon: 'ph:arrows-left-right-light',
                                                     url: path('app_formation_edit_modal', {slug: formation.slug}),

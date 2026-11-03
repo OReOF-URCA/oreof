@@ -152,6 +152,18 @@
                             </a>
                         {% endfor %}
                     {% endif %}
+
+                    {% if can_edit %}
+                        <twig:Button variant="secondary"
+                                     size="xs"
+                                     href="{{ path('offre_v2_formation_documents_modal', { formation: formation.id }) }}"
+                                     data-turbo="true"
+                                     data-turbo-stream="true"
+                                     data-action="click->modalturbo#open"
+                                     icon="ph:note-pencil"
+                                     label="Gérer PV / Note"
+                        />
+                    {% endif %}
                 </div>
 
                 <div class="flex items-center gap-3">
