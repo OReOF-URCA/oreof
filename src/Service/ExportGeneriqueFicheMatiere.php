@@ -134,6 +134,9 @@ class ExportGeneriqueFicheMatiere {
                                 , $this->mapFicheMatiereExportWithValues($field, $fiche)['value']
                             ));
                         }
+                        elseif ($this->mapFicheMatiereExportWithValues($field, $fiche)['type'] === 'array_list') {
+                            return [implode(' - ', $this->mapFicheMatiereExportWithValues($field, $fiche)['value'])];
+                        }
                         else {
                             return [$this->mapFicheMatiereExportWithValues($field, $fiche)['value']];
                         }
@@ -351,6 +354,20 @@ class ExportGeneriqueFicheMatiere {
                     'value' => $ficheMatiere?->getDescription() ?? ""
                 ];
                 break;
+            case 'fmLanguesDispensees':
+                return [
+                    'type' => 'array_list',
+                    'libelle' => 'Enseignement dispensé en',
+                    'value' => $ficheMatiere?->getLanguesDispenseArray() ?? [],
+                ];
+                break;
+            case 'fmLanguesSupports':
+                return [
+                    'type' => 'array_list',
+                    'libelle' => 'Support de cours en',
+                    'value' => $ficheMatiere?->getLanguesSupportsArray() ?? [],
+                ];
+                break;
         }
     }
 
@@ -364,7 +381,9 @@ class ExportGeneriqueFicheMatiere {
             'fmNbUtilisee' => 6,
             'fmParcoursPorteur' => 7,
             'fmFormation' => 8,
-            'fmDescription' => 9
+            'fmLanguesDispensees' => 9,
+            'fmLanguesSupports' => 10,
+            'fmDescription' => 11
         ];
     }
 
