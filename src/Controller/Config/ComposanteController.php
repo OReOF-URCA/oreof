@@ -54,7 +54,7 @@ class ComposanteController extends AbstractController
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {//&& $form->isValid()
+        if ($form->isSubmitted() && $form->isValid()) {
             if ($composante->getDirecteur() === null) {
                 $usr = $addUser->addUser($request->request->get('directeur_toAdd'));
                 if ($usr !== null) {
@@ -160,7 +160,7 @@ class ComposanteController extends AbstractController
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) { //&& $form->isValid()
+        if ($form->isSubmitted() && $form->isValid()) {
             if ($composante->getDirecteur() === null) {
                 $usr = $addUser->addUser($request->request->get('directeur_toAdd'));
                 if ($usr !== null) {

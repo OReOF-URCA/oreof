@@ -31,30 +31,34 @@ final readonly class ConseilsMenuProvider implements MenuProviderInterface
                 key: 'conseils',
                 label: 'menu.menu_conseils',
                 route: 'app_section_conseils',
-                icon: 'scale',
+                icon: 'mdi:scale-balance',
                 children: [
                     MenuItem::link(
                         key: 'conseils.chgt_rf',
                         label: 'menu.conseils.chgt_rf',
                         route: 'app_formation_responsable_liste',
+                        icon: 'mdi:account-switch-outline',
                     ),
 
                     MenuItem::link(
                         key: 'conseils.synthese_modifs',
                         label: 'menu.conseils.synthses_modifs',
                         route: 'app_synthese_modification_export_pdf',
+                        icon: 'mdi:file-compare',
                     ),
 
                     MenuItem::link(
                         key: 'conseils.documents',
                         label: 'menu.conseils.documents',
                         route: 'app_conseils_documents_index',
+                        icon: 'mdi:file-document-multiple-outline',
                     ),
 
                     MenuItem::link(
                         key: 'conseils.synthese_offre',
                         label: 'menu.conseils.synthese_offre',
                         route: 'app_conseils_synthese_offre',
+                        icon: 'mdi:file-chart-outline',
                     ),
                 ],
             )->withPosition(30),

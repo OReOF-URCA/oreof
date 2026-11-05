@@ -8,41 +8,9 @@
     <div class="row mb-2">
         <div class="col-6">
             {{ form_row(form.langueDispense) }}
-            <a
-                    href="#"
-                    {{ stimulus_controller('modal', {
-                        size: 'lg',
-                        modalTitle: 'Ajouter une langue',
-                        nomEvenement: 'refreshStep',
-                        modalUrl: path('app_langue_new') }) }}
-                    data-action="click->modal#openModal"
-                    data-size="lg"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"
-                    title="Ajouter une langue"
-            >
-                <i class="{{ iconAdd }}"></i>
-                <span> Ajouter une langue manquante</span>
-            </a>
         </div>
         <div class="col-6">
             {{ form_row(form.langueSupport) }}
-            <a
-                    href="#"
-                    {{ stimulus_controller('modal', {
-                        size: 'lg',
-                        modalTitle: 'Ajouter une langue',
-                        nomEvenement: 'refreshStep',
-                        modalUrl: path('app_langue_new') }) }}
-                    data-action="click->modal#openModal"
-                    data-size="lg"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"
-                    title="Ajouter une langue"
-            >
-                <i class="{{ iconAdd }}"></i>
-                <span> Ajouter une langue manquante</span>
-            </a>
         </div>
     </div>
 

@@ -66,6 +66,7 @@ class Toast {
     toast.setAttribute('role', 'status')
     toast.setAttribute('aria-live', 'polite')
     toast.setAttribute('data-controller', 'toast')
+    toast.dataset.toastType = type
     toast.setAttribute('data-toast-timeout-value', String(timeout))
     toast.className = `max-w-md w-full rounded-xl border-y border-r border-l-4 ${style.box} shadow-lg p-4 flex items-start gap-3.5 transform transition-all duration-300 ease-out translate-x-full opacity-0 backdrop-blur-md`
 
@@ -97,7 +98,7 @@ class Toast {
   }
 
   error (text, title = null, options = {}) {
-    this.createAndShow('danger', text, title, options)
+    this.createAndShow('danger', text, title, { timeout: 0, ...options })
   }
 
   warning (text, title = null, options = {}) {

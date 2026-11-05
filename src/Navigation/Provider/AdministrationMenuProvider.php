@@ -14,29 +14,33 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                 key: 'administration',
                 label: 'menu.menu_administration',
                 route: 'app_section_administration',
-                icon: 'settings',
+                icon: 'mdi:cog-outline',
                 children: [
                     MenuItem::link(
                         key: 'administration.etablissement',
                         label: 'menu.config.etablissement',
                         route: 'app_etablissement_index',
+                        icon: 'mdi:domain',
                     )->inColumn('menu.config.menu_etablissement'),
 
                     MenuItem::link(
                         key: 'administration.composante',
                         label: 'menu.config.composante',
                         route: 'app_composante_index',
+                        icon: 'mdi:school-outline',
                     )->inColumn('menu.config.menu_etablissement'),
 
                     MenuItem::link(
                         key: 'administration.ville',
                         label: 'menu.config.ville',
                         route: 'app_ville_index',
+                        icon: 'mdi:map-marker-outline',
                     )->inColumn('menu.config.menu_config_globale'),
                     MenuItem::link(
                         key: 'administration.plateforme_adminission',
                         label: 'menu.config.plateforme_adminission',
                         route: 'app_plateforme_adminission_index',
+                        icon: 'mdi:account-arrow-right-outline',
                     )
                         ->inColumn('menu.config.menu_etablissement'),
 
@@ -44,150 +48,176 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                         key: 'administration.domaines',
                         label: 'menu.config.domaines',
                         route: 'app_domaine_index',
+                        icon: 'mdi:shape-outline',
                     )->inColumn('menu.config.offre_formation'),
 
                     MenuItem::link(
                         key: 'administration.mentions',
                         label: 'menu.config.mentions',
                         route: 'app_mention_index',
+                        icon: 'mdi:certificate-outline',
                     )->inColumn('menu.config.offre_formation'),
 
                     MenuItem::link(
                         key: 'administration.type_diplome',
                         label: 'menu.config.type_diplome',
                         route: 'app_type_diplome_index',
+                        icon: 'icon:graduation',
                     )->inColumn('menu.config.offre_formation'),
 
                     MenuItem::link(
                         key: 'administration.type_ue',
                         label: 'menu.config.type_ue',
                         route: 'app_type_ue_index',
+                        icon: 'mdi:view-grid-outline',
                     )->inColumn('menu.config.offre_formation'),
 
                     MenuItem::link(
                         key: 'administration.type_ec',
                         label: 'menu.config.type_ec',
                         route: 'app_type_ec_index',
+                        icon: 'mdi:puzzle-outline',
                     )->inColumn('menu.config.offre_formation'),
 
                     MenuItem::link(
                         key: 'administration.nature_ue',
                         label: 'menu.config.nature_ue',
                         route: 'app_nature_ue_ec_index',
+                        icon: 'mdi:tag-multiple-outline',
                     )->inColumn('menu.config.offre_formation'),
 
                     MenuItem::link(
                         key: 'administration.type_epreuve',
                         label: 'menu.config.type_epreuve',
                         route: 'app_type_epreuve_index',
+                        icon: 'mdi:clipboard-check-outline',
                     )->inColumn('menu.config.offre_formation'),
 
+
                     MenuItem::link(
-                        key: 'administration.langues',
-                        label: 'menu.config.langues',
-                        route: 'app_langue_index',
+                        key: 'administration.referentiels',
+                        label: 'menu.config.referentiels',
+                        route: 'admin_referentiel_index',
+                        icon: 'mdi:format-list-checks',
                     )->inColumn('menu.config.menu_config_globale'),
 
                     MenuItem::link(
                         key: 'administration.rythme_formation',
                         label: 'menu.config.rythme_formation',
                         route: 'app_rythme_formation_index',
+                        icon: 'mdi:timetable',
                     )->inColumn('menu.config.offre_formation'),
 
                     MenuItem::link(
                         key: 'administration.campagne_collecte',
                         label: 'menu.config.campagne_collecte',
                         route: 'app_campagne_collecte_index',
+                        icon: 'mdi:calendar-sync-outline',
                     )->inColumn('menu.config.menu_etablissement'),
 
                     MenuItem::link(
                         key: 'administration.annee_universitaire',
                         label: 'menu.config.annee_universitaire',
                         route: 'app_annee_universitaire_index',
+                        icon: 'mdi:calendar-range-outline',
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
                         key: 'administration.actualites',
                         label: 'menu.config.actualites',
                         route: 'app_actualite_index',
+                        icon: 'mdi:newspaper-variant-outline',
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
                         key: 'administration.notifications',
                         label: 'menu.config.notifications',
                         route: 'app_notication_liste',
+                        icon: 'mdi:bell-ring-outline',
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
                         key: 'administration.traductions',
                         label: 'menu.config.traductions',
                         route: 'translations_index',
+                        icon: 'icon:translate',
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
                         key: 'administration.config_emails',
                         label: 'menu.config.config_emails',
                         route: 'app_config_email',
+                        icon: 'mdi:email-edit-outline',
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
                         key: 'administration.help',
                         label: 'menu.config.help',
                         route: 'app_help_index',
+                        icon: 'mdi:help-circle-outline',
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
                         key: 'administration.faq',
                         label: 'menu.config.faq',
                         route: 'app_faq_index',
+                        icon: 'mdi:chat-question-outline',
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
                         key: 'administration.workflows',
                         label: 'menu.config.workflows',
                         route: 'app_admin_workflow_index',
+                        icon: 'mdi:routes',
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
                         key: 'administration.duplication_campagne',
                         label: 'menu.config.duplication_campagne',
                         route: 'app_admin_duplication_campagne_index',
+                        icon: 'mdi:content-duplicate',
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
                         key: 'administration.statistiques_visites',
                         label: 'menu.config.statistiques_visites',
                         route: 'app_admin_statistiques_visites_index',
+                        icon: 'mdi:chart-line',
                     )->inColumn('menu.config.menu_developpement'),
 
                     MenuItem::link(
                         key: 'administration.logs_applicatifs',
                         label: 'menu.admin.logs.applicatifs',
                         route: 'app_log_viewer_index',
+                        icon: 'mdi:script-text-outline',
                     )->inColumn('menu.config.menu_developpement'),
 
                     MenuItem::link(
                         key: 'administration.versioning_json',
                         label: 'menu.config.versioning_json',
                         route: 'app_admin_versioning_index',
+                        icon: 'mdi:code-json',
                     )->inColumn('menu.config.menu_developpement'),
 
                     MenuItem::link(
                         key: 'administration.styleguide',
                         label: 'menu.config.styleguide',
                         route: 'admin_styleguide_index',
+                        icon: 'mdi:palette-outline',
                     )->inColumn('menu.config.menu_developpement'),
 
                     MenuItem::link(
                         key: 'administration.api_documentation',
                         label: 'menu.config.api_documentation',
                         route: 'api_site_web_documentation',
+                        icon: 'mdi:api',
                     )->inColumn('menu.config.menu_developpement'),
 
                     MenuItem::info(
                         key: 'administration.support',
                         label: 'Aide & Support',
                         description: 'Accédez à tous les guides administratifs et aux contacts de la scolarité centrale.',
+                        icon: 'mdi:lifebuoy',
                     )->inColumn('support'),
                 ],
             )

@@ -243,6 +243,7 @@ class DpeParcoursRepository extends ServiceEntityRepository
             ->leftJoin('p.composanteInscription', 'pci')
             ->addSelect('p', 'f', 'cp', 'm', 'td', 'dom', 'fci', 'pci')
             ->where('dp.campagneCollecte = :campagneCollecte')
+            ->andWhere('td.classique = 1')
             ->setParameter('campagneCollecte', $campagneCollecte)
             ->orderBy('td.libelle', 'ASC')
             ->addOrderBy('m.libelle', 'ASC')

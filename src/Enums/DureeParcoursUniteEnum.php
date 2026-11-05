@@ -2,6 +2,9 @@
 
 namespace App\Enums;
 
+/** 
+ *  @deprecated
+ */
 enum DureeParcoursUniteEnum: string
 
 {

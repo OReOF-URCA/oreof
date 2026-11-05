@@ -1,6 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% set header_title = 'offre_v2_configurer.title'|trans({'%formation%': formation.displayLong}, 'header') %}
+{% set header_breadcrumb = true %}
 {% set typeDiplome = formation.typeDiplome %}
 {% set is_ses_or_admin = is_granted('ROLE_SES') or is_granted('ROLE_ADMIN') %}
 {% set is_brouillon = dpeFormation and dpeFormation.etatValidation.brouillon is defined %}
@@ -151,13 +152,28 @@
                             </a>
                         {% endfor %}
                     {% endif %}
+
+                    {% if can_edit %}
+                        <twig:Button variant="secondary"
+                                     size="xs"
+                                     href="{{ path('offre_v2_formation_documents_modal', { formation: formation.id }) }}"
+                                     data-turbo="true"
+                                     data-turbo-stream="true"
+                                     data-action="click->modalturbo#open"
+                                     icon="ph:note-pencil"
+                                     label="Gérer PV / Note"
+                        />
+                    {% endif %}
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <div data-autosave-capacites-target="status" class="text-xs font-semibold flex items-center gap-1 opacity-0 transition-opacity duration-300">
+                    <div data-autosave-capacites-target="status" role="status" aria-live="polite" aria-atomic="true" class="text-xs font-semibold flex items-center gap-1">
                     </div>
 
                     {% if can_edit %}
+                        <twig:Button type="button" variant="danger" size="sm" label="Réessayer"
+                                     extraClass="hidden" data-autosave-capacites-target="retry"
+                                     dataAction="click->autosave-capacites#retry" />
                         <button type="submit" class="rounded-lg border border-secondary-200 px-3 py-1.5 text-xs font-medium hover:bg-secondary-50 cursor-pointer dark:border-secondary-700 dark:bg-secondary-900 dark:hover:border-secondary-300 dark:hover:text-secondary-100">
                             Sauvegarder en brouillon
                         </button>
@@ -170,30 +186,18 @@
             </div>
         </twig:Card>
 
-        <!-- Configuration du Tronc commun -->
+        <!-- Configuration de la Mutualisation (Troncs communs & Portails) -->
         <twig:Card extraClass="mb-4"
-                   title="Tronc commun de la formation"
+                   title="Mutualisation des parcours : Troncs communs et Portails"
         >
-            <input type="hidden" name="has_tronc_commun_config" value="1">
-            <div id="configurer_tronc_commun_block">
-                <p class="text-xs text-secondary-600 dark:text-secondary-300 mb-3">
-                    Cochez les années communes à l'ensemble des parcours de cette mention / formation. Lorsqu'une année est déclarée en tronc commun, ses capacités d'accueil, régimes d'inscription et plateformes de recrutement sont automatiquement synchronisés entre les parcours.
-                </p>
-                <div class="flex items-center gap-2.5 flex-wrap">
-                    {% for anneeOrdre in formation.anneesOrdres %}
-                        {% set isTc = formation.isAnneeTroncCommun(anneeOrdre) %}
-                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border {{ isTc ? 'bg-primary-600 border-primary-600 text-white shadow-xs font-semibold' : 'bg-surface border-secondary-300 text-secondary-700 hover:bg-secondary-50 font-medium dark:bg-secondary-900 dark:text-secondary-300 dark:border-secondary-500 dark:hover:border-secondary-300 dark:hover:text-secondary-100' }} transition-colors cursor-pointer text-xs select-none">
-                            <input type="checkbox"
-                                   name="tronc_commun_annee_{{ anneeOrdre }}"
-                                   value="1"
-                                   {{ isTc ? 'checked' : '' }}
-                                   {{ not can_edit ? 'disabled' : '' }}
-                                   class="rounded text-primary-600 focus:ring-primary-500 dark:text-primary-400">
-                            <span>{{ typeDiplome.libelleCourt|default('Année') }} {{ anneeOrdre }} (Tronc commun)</span>
-                        </label>
-                    {% endfor %}
-                </div>
-            </div>
+            {{ include('offre_v2/_configurer_mutualisation_block.html.twig', {
+                formation: formation,
+                typeDiplome: typeDiplome,
+                can_edit: can_edit,
+                portailsCampagne: portailsCampagne|default([]),
+                formationsCampagneData: formationsCampagneData|default([]),
+                formationsCampagneObjets: formationsCampagneObjets|default([])
+            }) }}
         </twig:Card>
 
 
@@ -202,10 +206,6 @@
                 <div class="app-tabs-list flex-wrap overflow-visible gap-1.5" role="tablist" aria-label="Parcours de la formation">
                     {% for parcours in formation.parcours %}
                         {% set statP = tabStatistiques['parcours'][parcours.id] ?? null %}
-                        {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
-                        {% set categorieOuverture = dpe and dpe.etatReconduction ? dpe.etatReconduction.categorieOuverture.value : 'OUVERT' %}
-                        {% set isParcoursFerme = categorieOuverture != 'OUVERT' %}
-
                         <button type="button"
                                 id="tab-parcours-{{ parcours.id }}"
                                 class="app-tab gap-2 cursor-pointer {% if loop.first %}app-tab-active active{% endif %}"
@@ -218,17 +218,14 @@
                                 data-tab-id="parcours-{{ parcours.id }}"
                         >
                             <twig:UX:Icon name="icon:layers" class="size-4" />
-                            <span>{{ parcours.libelle }}</span>
-                            {% if isParcoursFerme %}
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-danger-100 text-danger-700 dark:bg-danger-900/60 dark:text-danger-300">
-                                    Fermé
-                                </span>
-                            {% endif %}
-                            {% if statP and statP.anomalies|length > 0 %}
-                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-warning-500 text-white shadow-xs" title="{{ statP.anomalies|length }} anomalie(s)">
-                                    {{ statP.anomalies|length }}
-                                </span>
-                            {% endif %}
+                            <span id="tab-parcours-{{ parcours.id }}-libelle">{{ parcours.libelle }}</span>
+                            <span id="tab-parcours-{{ parcours.id }}-badges" class="inline-flex items-center gap-1.5">
+                                {{ include('offre_v2/_parcours_tab_badges.html.twig', {
+                                    parcours: parcours,
+                                    statP: statP,
+                                    campagne: campagne
+                                }) }}
+                            </span>
                         </button>
                     {% endfor %}
                 </div>
@@ -375,7 +372,8 @@
                                                 'comparaison': comparaison,
                                                 'plateformes': plateformes,
                                                 'can_edit': can_edit,
-                                                'is_nouveau_parcours': is_nouveau_parcours
+                                                'is_nouveau_parcours': is_nouveau_parcours,
+                                                'portailsCampagne': portailsCampagne|default([])
                                             }) }}
                                         {% endfor %}
 

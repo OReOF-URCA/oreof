@@ -144,6 +144,11 @@ export default class extends Controller {
 
     if (!this._menu) return
 
+    this._menu.id ||= `actions-menu-${crypto.randomUUID()}`
+    this._button?.setAttribute('aria-controls', this._menu.id)
+    this._button?.setAttribute('aria-haspopup', 'menu')
+    this._button?.setAttribute('aria-expanded', 'false')
+    this._menu.querySelectorAll('[role="menuitem"]').forEach(item => item.setAttribute('tabindex', '-1'))
     this._originalParent = this._menu.parentNode
     this._nextSibling = this._menu.nextSibling
 
@@ -183,8 +188,54 @@ export default class extends Controller {
     }
   }
 
+  isOpen () {
+    return this._menu && this._menu.style.display !== 'none' && !this._menu.classList.contains('hidden')
+  }
+
+  enabledItems () {
+    return Array.from(this._menu.querySelectorAll('[role="menuitem"]')).filter(item =>
+      !item.disabled && item.getAttribute('aria-disabled') !== 'true' && item.getClientRects().length > 0
+    )
+  }
+
   onKeyDown (event) {
-    if (event.key === 'Escape') this.close()
+    const onButton = this._button?.contains(event.target)
+    const inMenu = this._menu?.contains(event.target)
+    if (!onButton && !inMenu) return
+    if (onButton && ['ArrowDown', 'ArrowUp'].includes(event.key)) {
+      event.preventDefault()
+      this.open(event.key === 'ArrowUp' ? 'last' : 'first')
+      return
+    }
+    if (!this.isOpen()) return
+    if (event.key === 'Escape') {
+      event.preventDefault()
+      event.stopPropagation()
+      this.close(true)
+      return
+    }
+    if (event.key === 'Tab') {
+      // The menu is portalled to body: continue tabbing from its trigger.
+      this._button.focus()
+      this.close()
+      return
+    }
+    if (!inMenu) return
+    const items = this.enabledItems()
+    if (!items.length) return
+    const index = items.indexOf(document.activeElement)
+    let next
+    if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = items.length - 1
+    else if (event.key === 'ArrowDown') next = (index + 1) % items.length
+    else if (event.key === 'ArrowUp') next = (index - 1 + items.length) % items.length
+    else if (event.key === ' ' && document.activeElement?.matches('a[role="menuitem"]')) {
+      event.preventDefault()
+      document.activeElement.click()
+      return
+    } else return
+    event.preventDefault()
+    items[next].focus()
   }
 
   toggle (event) {
@@ -244,7 +295,7 @@ export default class extends Controller {
     setTimeout(() => this.close(), 0)
   }
 
-  open () {
+  open (focus = 'first') {
     if (!this._menu || !this._button) return
 
     const btnRect = this._button.getBoundingClientRect()
@@ -266,14 +317,18 @@ export default class extends Controller {
     this._menu.style.left = `${Math.round(left)}px`
     this._menu.style.visibility = 'visible'
     this._button.setAttribute('aria-expanded', 'true')
+    const items = this.enabledItems()
+    const item = focus === 'last' ? items[items.length - 1] : items[0]
+    item?.focus()
   }
 
-  close () {
+  close (restoreFocus = this._menu?.contains(document.activeElement)) {
     if (!this._menu || !this._button) return
     this._menu.classList.add('hidden')
     this._menu.style.display = 'none'
     this._menu.style.visibility = ''
     this._button.setAttribute('aria-expanded', 'false')
+    if (restoreFocus) this._button.focus()
   }
 
   confirm (event) {

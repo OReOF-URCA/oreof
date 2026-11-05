@@ -9,9 +9,10 @@
         <div class="{{ blockClass }}">
             <dt class="{{ dtClass }}">Modalités d'enseignement</dt>
             <dd class="mt-1">
-                {% if parcours.modalitesEnseignement != null %}
+                {% set modaliteLabel = referentiel_label('modalite_enseignement', parcours.modalitesEnseignementValue) ?? (parcours.modalitesEnseignement ? parcours.modalitesEnseignement.libelle : null) %}
+                {% if modaliteLabel is not null %}
                     <span class="{{ badgeOkClass }}">
-                    {{ parcours.modalitesEnseignement.libelle }}
+                    {{ modaliteLabel }}
                 </span>
                 {% else %}
                     <span class="{{ badgeNoClass }}">

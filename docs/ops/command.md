@@ -13,6 +13,7 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 | `app:semestre:migrate-tronc-commun` | semestres tronc commun → semestres mutualisés (campagne courante) | `--apply`, `--campaign`, `--formation`, `--porteur`, `--mapping-file`, `--allow-cross-formation`, `--output` |
 | `app:parcours-copy-data` | recopie heures/ECTS/MCCC vers les fiches matières | voir `docs/ops/recopie-fiche-matiere.md` |
 | `app:parcours:delete` | suppression définitive d'un parcours (erreurs de création/recopie) avec analyse préalable d'impact | `id`, `--force`, `--dry-run` |
+| `app:formation:delete` | suppression définitive d'une formation (si pas de parcours ou parcours par défaut) avec analyse préalable d'impact | `id`, `--force`, `--dry-run` |
 
 ## Campagnes / années
 
@@ -20,7 +21,9 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 |---|---|---|
 | `app:duplicate-for-new-annee` | duplique une campagne de collecte pour l'année suivante | `--annee-source=<PK campagne>` |
 | `app:new-annee-universitaire` | duplique parcours et formations (ancien mécanisme) | `--generate-full-database` |
-| `app:create-annee` | création d'année | — |
+| `app:create-annee` | création et rattachement des années manquantes aux semestres | `--campagne=`, `--type-diplome=`, `--parcours=`, `--dry-run` |
+| `app:compare-parcours-n1` | compare la maquette, fiches matières, mutualisations et volumes N-1 => N pour détecter les régressions (ex. sync ORéBUT) | `--parcours=`, `--formation=`, `--campagne=`, `--type-diplome=`, `--scope=parcours\|formation`, `--all-fiches`, `--only-diff`, `--detail`, `--json` |
+| `app:restore-parcours-from-n1` | restaure et réaligne le contenu d'un parcours N depuis sa source N-1 (`parcoursOrigineCopie` / `ficheMatiereOrigineCopie`) | `--campagne=`, `--formation=`, `--parcours=`, `--type-diplome=`, `--clean-orphans`, `--dry-run` |
 | `app:update-timeline` | recopie les données des campagnes dans `timeline` | — |
 
 ## Calculs / mises à jour en masse

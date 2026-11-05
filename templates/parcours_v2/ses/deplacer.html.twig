@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title %}
+    Déplacement du parcours : <strong>{{ parcours.libelle }}</strong>
+{% endset %}
+
+{% block bouton_header %}
+    <twig:Button
+        href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}"
+        variant="secondary"
+        icon="icon:arrow-left"
+        label="Annuler et retourner au parcours"
+        tooltip="Annuler et retourner à la fiche du parcours"
+    />
+{% endblock %}
+
+{% block content %}
+    <div class="mx-auto max-w-3xl space-y-6">
+        <div class="rounded-2xl border border-warning-200 bg-surface p-6 shadow-xs dark:border-warning-800">
+            {% include 'parcours_v2/ses/_deplacer.html.twig' %}
+
+            <div class="flex items-center justify-between gap-3 pt-5 mt-6 border-t border-secondary-200 dark:border-secondary-700">
+                <twig:Button
+                    href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}"
+                    variant="secondary"
+                    label="Annuler"
+                />
+                <twig:Button
+                    type="submit"
+                    variant="primary"
+                    :soft="false"
+                    icon="ph:arrows-left-right-bold"
+                    label="Déplacer le parcours"
+                    form="modal_form"
+                />
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -41,7 +41,6 @@ final class StructureParcoursBut implements StructureInterface
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre
     {
-        $semestre = $semestreParcours->getSemestre() ?? new \App\Entity\Semestre();
-        return new StructureSemestre($semestre, $semestreParcours->getOrdre(), false, $semestreParcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
+        return $this->calculStructureParcoursBut->calculSemestre($semestreParcours, $optionsCalculStructure, $parcours);
     }
 }

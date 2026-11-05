@@ -66,52 +66,57 @@ class ApiJsonVersioningCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $generateIndexApi = $input->getOption('generate-index-api');
-        $isV2 = $input->getOption('version-two');
+        $generateIndexApi = (bool) $input->getOption('generate-index-api');
+        $isV2 = (bool) $input->getOption('version-two');
 
-        if($generateIndexApi){
-            ini_set('memory_limit', '2500M');
-            ini_set('max_execution_time', '300');
-
-            $apiV2 = false;
-            if($isV2){
-                $filename = "api_json_urca_versioning_v2.json";
-                $path = __DIR__ . "/../../public/api_json_v2/";
-                $apiV2 = true;
-            } else {
-                $filename = "api_json_urca_versioning.json";
-                $path = __DIR__ . "/../../public/api_json/";
-            }
-
-            try {
-                $hostname = $this->parameterBag->get('APP_HOSTNAME');
-            } catch (Exception $e) {
-                $io->warning("Définissez la variable APP_HOSTNAME pour continuer (.env)");
-                return Command::INVALID;
-            }
-
-            if($isV2){
-                $io->writeln("Génération de l'index de l'API JSON (V2) en cours...");
-            } else {
-                $io->writeln("Génération de l'index de l'API JSON en cours...");
-            }
-
-            if($this->fs->exists($path . $filename)){
-                $now = (new DateTime())->format('d-m-Y_H-i');
-                $this->fs->rename($path . $filename, $path . $now . "-" .  $filename);
-            }
-            
-            $apiJson = $this->apiJsonExport->generateApiVersioning($hostname, $io, $this->lheoXml, $this->lheoV2, $apiV2);
-            $this->fs->appendToFile($path . $filename, json_encode($apiJson));
-
-            if($isV2){
-                $io->success("Index de l'API JSON (versioning) V2 généré !");
-            } else {
-                $io->success("Index de l'API JSON (versioning) créé avec succès !");
-            }
-            return Command::SUCCESS;
+        if (!$generateIndexApi && !$isV2) {
+            $io->warning("Aucune option spécifiée. Utilisez --version-two pour générer l'API V2 ou --generate-index-api pour l'API V1.");
+            return Command::INVALID;
         }
 
+        ini_set('memory_limit', '2500M');
+        ini_set('max_execution_time', '300');
+
+        $apiV2 = false;
+        if ($isV2) {
+            $filename = "api_json_urca_versioning_v2.json";
+            $path = __DIR__ . "/../../public/api_json_v2/";
+            $apiV2 = true;
+        } else {
+            $filename = "api_json_urca_versioning.json";
+            $path = __DIR__ . "/../../public/api_json/";
+        }
+
+        try {
+            $hostname = $this->parameterBag->get('APP_HOSTNAME');
+        } catch (Exception $e) {
+            $io->warning("Définissez la variable APP_HOSTNAME pour continuer (.env)");
+            return Command::INVALID;
+        }
+
+        if ($isV2) {
+            $io->writeln("Génération de l'index de l'API JSON (V2) en cours...");
+        } else {
+            $io->writeln("Génération de l'index de l'API JSON en cours...");
+        }
+
+        if ($this->fs->exists($path . $filename)) {
+            $now = (new DateTime())->format('d-m-Y_H-i');
+            $this->fs->rename($path . $filename, $path . $now . "-" .  $filename);
+        }
+
+        if (!$this->fs->exists($path)) {
+            $this->fs->mkdir($path);
+        }
+
+        $apiJson = $this->apiJsonExport->generateApiVersioning($hostname, $io, $this->lheoXml, $this->lheoV2, $apiV2);
+        $this->fs->dumpFile($path . $filename, json_encode($apiJson));
+
+        if ($isV2) {
+            $io->success("Index de l'API JSON (versioning) V2 généré !");
+        } else {
+            $io->success("Index de l'API JSON (versioning) créé avec succès !");
+        }
 
         return Command::SUCCESS;
     }

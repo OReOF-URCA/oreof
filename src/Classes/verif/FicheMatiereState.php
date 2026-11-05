@@ -45,7 +45,7 @@ class FicheMatiereState
 
     public function isEmptyOnglet2(): bool
     {
-        return $this->ficheMatiere->getDescription() === null && $this->ficheMatiere->getLangueDispense()->count() === 0 && $this->ficheMatiere->getLangueSupport()->count() === 0 && $this->ficheMatiere->getObjectifs() === null && $this->ficheMatiere->getCompetences()->count() === 0;
+        return $this->ficheMatiere->getDescription() === null && count($this->ficheMatiere->getLangueDispense()) === 0 && count($this->ficheMatiere->getLangueSupport()) === 0 && $this->ficheMatiere->getObjectifs() === null && $this->ficheMatiere->getCompetences()->count() === 0;
     }
 
     public function isEmptyOnglet3(): bool
@@ -118,11 +118,11 @@ class FicheMatiereState
             $tab['error'][] = 'Vous devez indiquer les objectifs.';
         }
 
-        if ($this->ficheMatiere->getLangueDispense()->count() === 0) {
+        if (count($this->ficheMatiere->getLangueDispense()) === 0) {
             $tab['error'][] = 'Vous devez choisir au moins une langue de dispense.';
         }
 
-        if ($this->ficheMatiere->getLangueSupport()->count() === 0) {
+        if (count($this->ficheMatiere->getLangueSupport()) === 0) {
             $tab['error'][] = 'Vous devez choisir au moins une langue de support.';
         }
 

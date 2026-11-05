@@ -272,8 +272,7 @@ final class ButHandler extends AbstractTypeDiplomeHandler implements McccDisplay
 
     public function calculStructureSemestre(SemestreParcours $semestreParcours, Parcours $parcours, OptionsCalculStructure $optionsCalculStructure = new OptionsCalculStructure()): StructureSemestre
     {
-        $semestre = $semestreParcours->getSemestre() ?? new \App\Entity\Semestre();
-        return new StructureSemestre($semestre, $semestreParcours->getOrdre(), false, $semestreParcours, $optionsCalculStructure->withEcts, $optionsCalculStructure->withBcc);
+        return $this->structureParcoursBut->calculStructureSemestre($semestreParcours, $parcours, $optionsCalculStructure);
     }
 
     public function getValidator(): ValideParcoursInterface

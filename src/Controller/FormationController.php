@@ -39,6 +39,7 @@ use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
 use App\Utils\Access;
 use App\Utils\JsonRequest;
+use App\Utils\TurboStreamResponseFactory;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
@@ -72,27 +73,123 @@ class FormationController extends BaseController
 
     #[Route('/liste-cfvu', name: 'app_formation_liste_cfvu', methods: ['GET'])]
     public function listeCfvu(
-        DpeParcoursRepository $dpeParcoursRepository,
-    ): Response
-    {
-        $allparcours = [];
-        if ($this->isGranted('SHOW', ['route' => 'app_etablissement', 'subject' => 'etablissement'])) {
-            $allparcours = $dpeParcoursRepository->findByCampagneAndTypeValidation($this->getCampagneCollecte(), 'soumis_cfvu');
+        UserRepository        $userRepository,
+        FormationRepository   $formationRepository,
+        MentionRepository     $mentionRepository,
+        ComposanteRepository  $composanteRepository,
+        TypeDiplomeRepository $typeDiplomeRepository,
+        MentionProcess        $validationProcess,
+        Request               $request,
+    ): Response {
+        if (!$this->canAccessCfvu()) {
+            throw $this->createAccessDeniedException('Accès réservé aux membres de la CFVU et administrateurs.');
         }
 
-        $nbParcours = count($allparcours);
-        $tFormations = [];
-        foreach ($allparcours as $parcours) {
-            $tFormations[] = $parcours->getParcours()?->getFormation()?->getId();
-        }
-        $nbFormations = count(array_unique($tFormations));
+        $campagne = $this->getCampagneCollecte();
+        $params = $request->query->all();
 
-        return $this->render('validation/_liste.html.twig', [
+        $tFormations = $formationRepository->findBySearchAndCfvu(
+            $params['q'] ?? null,
+            $campagne,
+            $params
+        );
+
+        $nbFormations = count($tFormations);
+        $nbParcours = 0;
+        foreach ($tFormations as $formation) {
+            foreach ($formation->getParcours() as $parcours) {
+                $dpeP = $parcours->getDpeParcoursPourCampagne($campagne);
+                if ($dpeP !== null && array_key_first($dpeP->getEtatValidation()) === 'soumis_cfvu') {
+                    $nbParcours++;
+                }
+            }
+        }
+
+        return $this->render('formation/_liste.html.twig', [
             'nbFormations' => $nbFormations,
             'nbParcours' => $nbParcours,
-            'allparcours' => $allparcours,
-            'etape' => 'cfvu',
+            'responsables' => $userRepository->findUserWithResponsabilites(),
+            'formations' => $tFormations,
+            'mentions' => $mentionRepository->findBy([], ['libelle' => 'ASC']),
+            'composantes' => $composanteRepository->findPorteuse(),
+            'typeDiplomes' => $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']),
+            'params' => $params,
             'isCfvu' => true,
+            'isConseilComposante' => false,
+            'process' => $validationProcess->getProcess(),
+        ]);
+    }
+
+    #[Route('/liste-conseil-composante', name: 'app_formation_liste_conseil_composante', methods: ['GET'])]
+    public function listeConseilComposante(
+        UserRepository        $userRepository,
+        FormationRepository   $formationRepository,
+        MentionRepository     $mentionRepository,
+        ComposanteRepository  $composanteRepository,
+        TypeDiplomeRepository $typeDiplomeRepository,
+        MentionProcess        $validationProcess,
+        Request               $request,
+    ): Response {
+        if (!$this->canAccessConseilComposante($composanteRepository)) {
+            throw $this->createAccessDeniedException('Accès réservé aux membres des conseils de composante.');
+        }
+
+        $user = $this->getUser();
+        $campagne = $this->getCampagneCollecte();
+        $params = $request->query->all();
+
+        $accessibleComposantes = $this->getAuthorizedComposantes($composanteRepository);
+        if (empty($accessibleComposantes)) {
+            throw $this->createAccessDeniedException('Accès réservé aux membres autorisés d\'une composante.');
+        }
+
+        // Si l'utilisateur a choisi une composante, s'assurer qu'elle fait bien partie des composantes autorisées
+        if (!empty($params['composantePorteuse'])) {
+            $requestedId = (int) $params['composantePorteuse'];
+            $isAuthorized = false;
+            foreach ($accessibleComposantes as $c) {
+                if ($c->getId() === $requestedId) {
+                    $isAuthorized = true;
+                    break;
+                }
+            }
+            if (!$isAuthorized) {
+                throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé sur cette composante.');
+            }
+        } elseif (count($accessibleComposantes) === 1) {
+            $params['composantePorteuse'] = (string) $accessibleComposantes[0]->getId();
+        }
+
+        $tFormations = $formationRepository->findBySearchAndConseilComposante(
+            $params['q'] ?? null,
+            $campagne,
+            $params,
+            $accessibleComposantes
+        );
+
+        $nbFormations = count($tFormations);
+        $nbParcours = 0;
+        foreach ($tFormations as $formation) {
+            foreach ($formation->getParcours() as $parcours) {
+                $dpeP = $parcours->getDpeParcoursPourCampagne($campagne);
+                if ($dpeP !== null && array_key_first($dpeP->getEtatValidation()) === 'soumis_conseil') {
+                    $nbParcours++;
+                }
+            }
+        }
+
+        return $this->render('formation/_liste.html.twig', [
+            'nbFormations' => $nbFormations,
+            'nbParcours' => $nbParcours,
+            'responsables' => $userRepository->findUserWithResponsabilites(),
+            'formations' => $tFormations,
+            'mentions' => $mentionRepository->findBy([], ['libelle' => 'ASC']),
+            'composantes' => $accessibleComposantes,
+            'typeDiplomes' => $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']),
+            'params' => $params,
+            'isCfvu' => false,
+            'isConseilComposante' => true,
+            'process' => $validationProcess->getProcess(),
         ]);
     }
 
@@ -148,6 +245,7 @@ class FormationController extends BaseController
             'typeDiplomes' => $typeDiplomes,
             'params' => $request->query->all(),
             'isCfvu' => false,
+            'isConseilComposante' => false,
             'process' => $validationProcess->getProcess()
         ]);
     }
@@ -238,6 +336,7 @@ class FormationController extends BaseController
             'typeDiplomes' => $typeDiplomes,
             'params' => $request->query->all(),
             'isCfvu' => false,
+            'isConseilComposante' => false,
             'stats' => $stats
         ]);
     }
@@ -273,6 +372,7 @@ class FormationController extends BaseController
             'nbParcours' => $nbParcours,
             'params' => $request->query->all(),
             'isCfvu' => false,
+            'isConseilComposante' => false,
             'composantes' => $composanteRepository->findPorteuse(),
             'typeDiplomes' => $typeDiplomeRepository->findAll(),
             'mentions' => $mentionRepository->findAll(),
@@ -368,6 +468,7 @@ class FormationController extends BaseController
     }
 
     #[Route('/edit/formation/{slug}', name: 'app_formation_edit_modal', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function editModal(
         ProfilRepository $profilRepository,
         EventDispatcherInterface $eventDispatcher,
@@ -375,31 +476,30 @@ class FormationController extends BaseController
         MentionRepository        $mentionRepository,
         Request                  $request,
         FormationRepository      $formationRepository,
+        TurboStreamResponseFactory $turboStream,
         #[MapEntity(mapping: ['slug' => 'slug'])]
         Formation                $formation
     ): Response {
+        if ($formation->getDomaine() === null && $formation->getMention()?->getDomaines()?->first() !== null) {
+            $formation->setDomaine($formation->getMention()->getDomaines()->first());
+        }
+
         $form = $this->createForm(FormationSesType::class, $formation, [
             'action' => $this->generateUrl('app_formation_edit_modal', ['slug' => $formation->getSlug()]),
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            $savedMention = $formation->getMention();
-            $savedMentionTexte = $formation->getMentionTexte();
-
-            if (array_key_exists(
-                    'mention',
-                    $request->request->all()['formation_ses']
-                ) && $request->request->all()['formation_ses']['mention'] !== null && $request->request->all()['formation_ses']['mention'] !== 'autre')
-            {
-                $mention = $mentionRepository->find($request->request->all()['formation_ses']['mention']);
-                $formation->setMentionTexte(null);
-                $formation->setMention($mention);
-            }
-            else
-            {
-                $formation->setMention($savedMention);
-                $formation->setMentionTexte($savedMentionTexte);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $formationSesData = $request->request->all('formation_ses');
+            $mentionId = $formationSesData['mention'] ?? null;
+            if ($mentionId !== null && $mentionId !== '' && $mentionId !== 'autre') {
+                $mention = $mentionRepository->find($mentionId);
+                if ($mention !== null) {
+                    $formation->setMentionTexte(null);
+                    $formation->setMention($mention);
+                }
+            } elseif ($mentionId === 'autre') {
+                $formation->setMention(null);
             }
 
             $uow = $entityManager->getUnitOfWork();
@@ -408,27 +508,60 @@ class FormationController extends BaseController
 
             if (isset($changeSet['responsableMention'])) {
                 $profil = $profilRepository->findOneBy(['code' => 'ROLE_RESP_FORMATION']);
-                if ($profil === null) {
-                    throw new Exception('Profil ROLE_RESP_FORMATION non trouvé');
-                }
-                // retirer l'ancien resp des centres et droits et envoyer mail
-                $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][0], $profil, $this->getCampagneCollecte());
-                $eventDispatcher->dispatch($event, AddCentreFormationEvent::REMOVE_CENTRE_FORMATION);
+                if ($profil !== null) {
+                    if ($changeSet['responsableMention'][0] !== null) {
+                        $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][0], $profil, $this->getCampagneCollecte());
+                        $eventDispatcher->dispatch($event, AddCentreFormationEvent::REMOVE_CENTRE_FORMATION);
+                    }
 
-                // ajouter le nouveau resp, ajouter centre et droits et envoyer mail
-                $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][1], $profil, $this->getCampagneCollecte());
-                $eventDispatcher->dispatch($event, AddCentreFormationEvent::ADD_CENTRE_FORMATION);
+                    if ($changeSet['responsableMention'][1] !== null) {
+                        $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][1], $profil, $this->getCampagneCollecte());
+                        $eventDispatcher->dispatch($event, AddCentreFormationEvent::ADD_CENTRE_FORMATION);
+                    }
+                }
             }
 
             $formationRepository->save($formation, true);
 
-            return $this->redirectToRoute('formation_v2_modifier', ['slug' => $formation->getSlug()]);
+            $this->addFlash('toast', [
+                'type' => 'success',
+                'text' => 'Les informations de la formation ont été mises à jour.',
+                'title' => 'Succès',
+            ]);
+
+            $referer = (string) $request->headers->get('referer', '');
+            $targetRoute = str_contains($referer, '/voir') ? 'formation_v2_voir' : 'formation_v2_modifier';
+
+            return $this->redirectToRoute($targetRoute, ['slug' => $formation->getSlug()]);
         }
 
-        return $this->render('formation/editModal.html.twig', [
+        $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string) $request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
+
+        if ($isTurbo) {
+            return $turboStream->streamOpenModalFromTemplates(
+                'Modifier la formation',
+                $formation->getDisplayLong() ?: $formation->getDisplay(),
+                'formation/_new_form.html.twig',
+                [
+                    'formation' => $formation,
+                    'form' => $form->createView(),
+                    'is_modal' => true,
+                ],
+                '_ui/_footer_submit_cancel.html.twig',
+                [
+                    'submitLabel' => 'Enregistrer',
+                ],
+                $form->isSubmitted() && !$form->isValid() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK
+            );
+        }
+
+        return $this->render('formation/edit.html.twig', [
             'formation' => $formation,
-            'form' => $form->createView()
-        ]);
+            'form' => $form->createView(),
+            'is_modal' => false,
+        ], new Response(status: $form->isSubmitted() && !$form->isValid() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
     }
 
     #[Route('/api', name: 'app_formation_api', methods: ['GET'])]
@@ -568,56 +701,14 @@ class FormationController extends BaseController
     //     ]);
     // }
 
-    #[Route('/{id}', name: 'app_formation_delete', methods: ['DELETE'])]
+    #[Route('/supprimer/{id}', name: 'app_formation_delete', methods: ['GET', 'DELETE'])]
+    #[Route('/{id}', methods: ['GET', 'DELETE'])]
     public function delete(
-        EntityManagerInterface $entityManager,
-        Request                $request,
-        Formation              $formation,
-        FormationRepository    $formationRepository
+        Formation $formation,
     ): Response {
-        if ($this->isCsrfTokenValid(
-            'delete' . $formation->getId(),
-            JsonRequest::getValueFromRequest($request, 'csrf')
-        )) {
-            foreach ($formation->getParcours() as $parcours) {
-                foreach ($parcours->getBlocCompetences() as $blocs) {
-                    $entityManager->remove($blocs);
-                }
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-                foreach ($parcours->getSemestreParcours() as $semestreParcour) {
-                    $semestre = $semestreParcour->getSemestre();
-                    if ($semestre !== null) {
-                        foreach ($semestre->getUes() as $ue) {
-                            foreach ($ue->getElementConstitutifs() as $ec) {
-                                $entityManager->remove($ec);
-                            }
-                            if ($semestre->isTroncCommun() === false) {
-                                $entityManager->remove($ue);
-                            }
-                        }
-                        if ($semestre->isTroncCommun() === false) {
-                            $entityManager->remove($semestre);
-                        }
-                    }
-
-                    $entityManager->remove($semestreParcour);
-                }
-
-                foreach ($parcours->getFicheMatiereParcours() as $fiche) {
-                    $entityManager->remove($fiche);
-                }
-                $entityManager->flush();
-                $entityManager->remove($parcours);
-            }
-            foreach ($formation->getBlocCompetences() as $blocs) {
-                $entityManager->remove($blocs);
-            }
-            $formationRepository->remove($formation, true);
-
-            return $this->json(true);
-        }
-
-        return $this->json(false);
+        return $this->redirectToRoute('formation_v2_supprimer', ['formation' => $formation->getId()]);
     }
 
     #[Route('/{slug}/maquette_iframe', name: 'app_formation_maquette_iframe')]

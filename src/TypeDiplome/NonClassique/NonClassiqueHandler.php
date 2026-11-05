@@ -52,6 +52,7 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
             'parcours' => $parcours,
             'dureeParcours' => $parcours->getDureeParcours(),
             'dureeParcoursUnite' => $parcours->getDureeParcoursUnite(),
+            'dureeParcoursUniteValue' => $parcours->getDureeParcoursUniteValue(),
         ];
     }
 
@@ -142,6 +143,7 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
         // No semester structure — just store duration info for display
         $structure->dureeParcours = $parcours->getDureeParcours();
         $structure->dureeParcoursUnite = $parcours->getDureeParcoursUnite();
+        $structure->dureeParcoursUniteValue = $parcours->getDureeParcoursUniteValue();
         return $structure;
     }
 
@@ -264,8 +266,8 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
 
                 $formation->setHasParcours($plusieursParcours);
                 $formation->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_PARCOURS);
-                $formation->setNiveauEntree($data['niveauEntree']);
-                $formation->setNiveauSortie($data['niveauSortie']);
+                $formation->setNiveauEntreeValue($data['niveauEntree'] ?? null);
+                $formation->setNiveauSortieValue($data['niveauSortie'] ?? null);
 
                 if (!empty($data['localisationMention'])) {
                     foreach ($data['localisationMention'] as $ville) {
@@ -305,7 +307,7 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
             $parcours->setCoResponsable($coRespParcours);
             $parcours->setModalitesEnseignement(null);
             $parcours->setDureeParcours($data['dureeParcours'] ?? null);
-            $parcours->setDureeParcoursUnite($data['dureeParcoursUnite'] ?? null);
+            $parcours->setDureeParcoursUniteValue($data['dureeParcoursUnite'] ?? null);
 
             if ($estMono) {
                 $parcours->setComposanteInscription($formation->getComposantesInscription()->first() ?: null);

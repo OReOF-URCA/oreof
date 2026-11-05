@@ -12,6 +12,8 @@ export default class extends Controller {
   }
 
   connect() {
+    this.boundKeydown = this.onKeydown.bind(this)
+    this.element.addEventListener('keydown', this.boundKeydown)
     let initialTab = null
 
     if (this.rememberHashValue && window.location.hash) {
@@ -28,6 +30,30 @@ export default class extends Controller {
     if (initialTab) {
       this.activate(initialTab, false)
     }
+  }
+
+  disconnect() {
+    this.element.removeEventListener('keydown', this.boundKeydown)
+  }
+
+  onKeydown(event) {
+    // Ignore nested tabs and fields inside the active panel.
+    const tab = this.tabTargets.find(t => t === event.target)
+    if (!tab) return
+    const tabs = this.tabTargets.filter(t => !t.disabled && t.getAttribute('aria-disabled') !== 'true')
+    const index = tabs.indexOf(tab)
+    if (index < 0) return
+    const vertical = tab.closest('[role="tablist"]')?.getAttribute('aria-orientation') === 'vertical'
+    const rtl = getComputedStyle(this.element).direction === 'rtl'
+    let next
+    if (event.key === 'Home') next = 0
+    else if (event.key === 'End') next = tabs.length - 1
+    else if (event.key === (vertical ? 'ArrowDown' : (rtl ? 'ArrowLeft' : 'ArrowRight'))) next = (index + 1) % tabs.length
+    else if (event.key === (vertical ? 'ArrowUp' : (rtl ? 'ArrowRight' : 'ArrowLeft'))) next = (index - 1 + tabs.length) % tabs.length
+    else return
+    event.preventDefault()
+    this.activate(tabs[next].dataset.tabId, true)
+    tabs[next].focus()
   }
 
   hasTab(tabId) {

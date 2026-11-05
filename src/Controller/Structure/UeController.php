@@ -85,7 +85,7 @@ class UeController extends BaseController
         Semestre             $semestre,
         Parcours             $parcours
     ): Response {
-        //todo: deprecated
+        // Route legacy (conservée pour templates/structure/ue/_liste.html.twig) ; la gestion V2 est dans ParcoursUeController.
         $isAdmin = $this->isGranted('ROLE_ADMIN');
         $ue = new Ue();
         $ueOrigine = $request->query->get('ue');

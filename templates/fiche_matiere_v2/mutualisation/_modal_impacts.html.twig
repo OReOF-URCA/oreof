@@ -1,0 +1,48 @@
+{% set liaisons = ficheMatiere.ficheMatiereParcours %}
+{% if liaisons|length == 0 %}
+    <p class="text-muted">Aucun parcours mutualisé n'est associé à cette fiche.</p>
+{% else %}
+    <p class="text-warning fw-bold">
+        <i class="fas fa-exclamation-triangle me-1"></i>
+        Cette fiche matière est actuellement mutualisée avec {{ liaisons|length }} parcours.
+        En désactivant la mutualisation, toutes ces liaisons seront supprimées et les responsables de ces parcours
+        seront notifiés.
+    </p>
+    <table class="table table-sm table-bordered mt-2">
+        <thead class="table-light">
+        <tr>
+            <th>Formation</th>
+            <th>Parcours</th>
+            <th>Responsable de parcours</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for liaison in liaisons %}
+            <tr>
+                <td>
+                    {{ liaison.parcours is not null and liaison.parcours.formation is not null
+                    ? liaison.parcours.formation.display
+                    : 'Formation inconnue' }}
+                </td>
+                <td>
+                    {{ liaison.parcours is not null ? liaison.parcours.display ?? liaison.parcours.libelle : 'Parcours inconnu' }}
+                </td>
+                <td>
+                    {% if liaison.parcours is not null and liaison.parcours.respParcours is not null %}
+                        {{ liaison.parcours.respParcours.display }}
+                        {% if liaison.parcours.respParcours.email is not null %}
+                            <br><small class="text-muted">{{ liaison.parcours.respParcours.email }}</small>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Aucun responsable</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p class="text-danger mt-2">
+        <strong>Cette action est irréversible.</strong> Les responsables de ces parcours recevront une notification
+        in-app.
+    </p>
+{% endif %}

@@ -1,26 +1,26 @@
 {% for keyEc, ec in ecs %}
     {% set dataRowClass = dataRowClass|default('border-b border-secondary-200 dark:border-secondary-700') %}
-    {% set deepSubLabelCellClass = deepSubLabelCellClass|default('px-4 py-3.5 pl-12 align-top leading-relaxed text-secondary-600 dark:text-secondary-300') %}
-    {% set valueCellClass = valueCellClass|default('px-4 py-4 align-top leading-relaxed text-secondary-700 dark:text-secondary-200') %}
-    {% set choiceBadgeClass = choiceBadgeClass|default('ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200') %}
+    {% set deepSubLabelCellClass = deepSubLabelCellClass|default('px-4 py-3 pl-12 align-top text-xs leading-relaxed text-secondary-600 dark:text-secondary-300') %}
+    {% set valueCellClass = valueCellClass|default('px-4 py-3 align-top leading-relaxed text-secondary-700 dark:text-secondary-200') %}
+    {% set choiceBadgeClass = choiceBadgeClass|default('ml-2 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-medium text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200') %}
 
-    <tr class="{{ dataRowClass }}">
+    <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ ec.global }}">
         <td class="{{ deepSubLabelCellClass }}">
-            EC {{ ec.display }} {% if ec.enfants is defined %}<span class="{{ choiceBadgeClass }}">
-                    EC à choix</span>{% endif %}
+            EC {{ ec.display }} {% if ec.enfants is defined %}<span class="{{ choiceBadgeClass }}">EC à choix</span>{% endif %}
         </td>
         <td class="{{ valueCellClass }}">
             {{ ec.erreur|displayErreurs }}
-            {{ component('Badge', { dto: ec.global|badgeValideDto }) }}</td>
+            <twig:Badge :dto="ec.global|badgeValideDto" size="sm" />
+        </td>
     </tr>
     {% if ec.enfants is defined %}
         {% for ece in ec.enfants %}
-            <tr class="{{ dataRowClass }}">
-                <td class="{{ deepSubLabelCellClass }}"><span class="{{ choiceBadgeClass }}">Choix</span>
-                    EC {{ ece.display }}</td>
+            <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ ece.global }}">
+                <td class="{{ deepSubLabelCellClass }}"><span class="{{ choiceBadgeClass }}">Choix</span> EC {{ ece.display }}</td>
                 <td class="{{ valueCellClass }}">
                     {{ ece.erreur|displayErreurs }}
-                    {{ component('Badge', { dto: ece.global|badgeValideDto }) }}</td>
+                    <twig:Badge :dto="ece.global|badgeValideDto" size="sm" />
+                </td>
             </tr>
         {% endfor %}
     {% endif %}

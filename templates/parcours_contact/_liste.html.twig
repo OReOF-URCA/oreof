@@ -1,66 +1,126 @@
-<div class="row">
-    {% for contact in contacts %}
-    <div class="col-4 border border-secondary mb-2 p-2">
-        <h3>{{ contact.denomination }}</h3>
-        <p>{{ contact.display }}</p>
-        <p>{{ contact.telephone|tel_format }}</p>
-        <p>{{ contact.email|mailto }}</p>
-        <p>{{ contact.adresse != null ? contact.adresse.display|raw : 'Pas d\'adresse' }}</p>
-        <div class="row">
-            <div class="col-4">
-                <button
-                        {{ stimulus_controller('modal', {
-                            size: 'lg',
-                            modalTitle: 'Modifier un contact',
-                            modalUrl: path('app_parcours_contact_edit',{'id': contact.id}) }) }}
-                        data-action="click->modal#openModal"
-                        class="btn btn-sm text-warning"
-                        data-size="lg"
-                        data-bs-toggle="tooltip"
-                        data-bs-placement="bottom"
-                        title="Modifier un contact"
-                >
-                    <i class="{{ iconEdit }}"></i>
-                    <span> modifier</span>
-                </button>
+<div id="parcours_contacts_list">
+    {% if contacts|length > 0 %}
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {% for contact in contacts %}
+                <article class="rounded-xl border border-secondary-200 bg-bg p-4 shadow-2xs dark:border-secondary-700 flex flex-col justify-between hover:border-secondary-300 dark:hover:border-secondary-600 transition-colors">
+                    <div class="space-y-3">
+                        <div class="flex items-start justify-between gap-2 border-b border-secondary-100 dark:border-secondary-800 pb-2.5">
+                            <div class="min-w-0 flex-1">
+                                <h4 class="font-bold text-sm text-secondary-900 dark:text-secondary-100 truncate" title="{{ contact.denomination }}">
+                                    {{ contact.denomination }}
+                                </h4>
+                                {% if contact.display|trim != '' %}
+                                    <p class="text-xs font-medium text-secondary-600 dark:text-secondary-400 mt-0.5 flex items-center gap-1.5">
+                                        <twig:UX:Icon name="icon:info" class="w-3.5 h-3.5 text-secondary-400 shrink-0"/>
+                                        <span class="truncate">{{ contact.display }}</span>
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5 text-xs text-secondary-600 dark:text-secondary-400">
+                            {% if contact.telephone %}
+                                <div class="flex items-center gap-2">
+                                    <twig:UX:Icon name="icon:phone" class="w-3.5 h-3.5 text-secondary-400 shrink-0"/>
+                                    <a href="tel:{{ contact.telephone }}" class="hover:text-primary-600 hover:underline">
+                                        {{ contact.telephone|tel_format }}
+                                    </a>
+                                </div>
+                            {% endif %}
+
+                            {% if contact.email %}
+                                <div class="flex items-center gap-2">
+                                    <twig:UX:Icon name="icon:mail" class="w-3.5 h-3.5 text-secondary-400 shrink-0"/>
+                                    <a href="mailto:{{ contact.email }}" class="text-primary-600 dark:text-primary-400 hover:underline truncate" title="{{ contact.email }}">
+                                        {{ contact.email }}
+                                    </a>
+                                </div>
+                            {% endif %}
+
+                            <div class="flex items-start gap-2 pt-1 border-t border-secondary-100 dark:border-secondary-800/60">
+                                <twig:UX:Icon name="icon:home" class="w-3.5 h-3.5 text-secondary-400 shrink-0 mt-0.5"/>
+                                <span class="line-clamp-2 leading-relaxed">
+                                    {{ contact.adresse != null and contact.adresse.display|raw|trim != '' ? contact.adresse.display|raw : 'Pas d\'adresse renseignée' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-secondary-100 dark:border-secondary-800 flex items-center justify-end gap-1.5">
+                        <twig:Button
+                            variant="warning"
+                            size="sm"
+                            icon="icon:edit"
+                            label="Modifier"
+                            dataAction="click->modalturbo#open"
+                            href="{{ path('app_parcours_contact_edit', { id: contact.id }) }}"
+                        />
+
+                        <form method="post" action="{{ path('app_parcours_contact_duplicate', { id: contact.id }) }}" class="inline">
+                            <twig:Button
+                                type="submit"
+                                variant="secondary"
+                                size="sm"
+                                icon="icon:duplicate"
+                                label="Dupliquer"
+                                tooltip="Dupliquer ce contact"
+                            />
+                        </form>
+
+                        <twig:DeleteButton
+                            url="{{ path('app_parcours_contact_delete', { id: contact.id }) }}"
+                            csrfTokenId="{{ 'delete' ~ contact.id }}"
+                            method="DELETE"
+                            size="sm"
+                            title="Supprimer le contact"
+                            message="Êtes-vous sûr de vouloir supprimer définitivement le contact « {{ contact.denomination }} » ?"
+                            confirmLabel="Supprimer"
+                            tooltip="Supprimer ce contact"
+                            id="{{ 'contact-' ~ contact.id }}"
+                        />
+                    </div>
+                </article>
+            {% endfor %}
+
+            {# Carte d'ajout rapide dans la grille #}
+            <button
+                type="button"
+                data-action="click->modalturbo#open"
+                data-url="{{ path('app_parcours_contacts_add', { parcours: parcours.id }) }}"
+                class="group rounded-xl border-2 border-dashed border-secondary-200 dark:border-secondary-700 hover:border-primary-500 dark:hover:border-primary-500 bg-secondary-50/50 dark:bg-secondary-900/30 p-6 flex flex-col items-center justify-center text-center transition-colors cursor-pointer min-h-[170px]"
+            >
+                <div class="w-10 h-10 rounded-full bg-surface shadow-xs border border-secondary-200 dark:border-secondary-700 flex items-center justify-center text-secondary-500 group-hover:text-primary-600 group-hover:border-primary-300 dark:group-hover:text-primary-400 transition-colors mb-2">
+                    <twig:UX:Icon name="icon:add" class="w-5 h-5"/>
+                </div>
+                <span class="text-sm font-bold text-secondary-700 dark:text-secondary-300 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    Ajouter un contact
+                </span>
+                <span class="text-xs text-secondary-400 dark:text-secondary-500 mt-1">
+                    Secrétariat ou responsable pédagogique
+                </span>
+            </button>
+        </div>
+    {% else %}
+        <div class="rounded-xl border-2 border-dashed border-secondary-200 dark:border-secondary-700 bg-secondary-50/30 dark:bg-secondary-900/20 p-8 text-center space-y-4">
+            <div class="mx-auto w-12 h-12 rounded-full bg-danger-50 dark:bg-danger-950/40 text-danger-500 flex items-center justify-center">
+                <twig:UX:Icon name="icon:users" class="w-6 h-6"/>
             </div>
-            <div class="col-4">
-                <button {{ stimulus_action('crud', 'duplicate', 'click', {
-                    url:path('app_parcours_contact_duplicate',{'id': contact.id})
-                }) }} class="btn btn-sm text-success">
-                    <i class="{{ iconDuplicate }}"></i> Dupliquer
-                </button>
+            <div class="max-w-md mx-auto">
+                <h4 class="text-sm font-bold text-secondary-900 dark:text-secondary-100">Aucun contact renseigné</h4>
+                <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-1 leading-relaxed">
+                    Vous devez ajouter au moins un contact (ex. secrétariat pédagogique) pour que les étudiants et candidats puissent joindre la formation.
+                </p>
             </div>
-            <div class="col-4">
-                <button {{ stimulus_action('crud', 'delete', 'click', {
-                    url:path('app_parcours_contact_delete',{'id': contact.id}),
-                    csrf: csrf_token('delete' ~ contact.id)
-                }) }} class="btn btn-sm text-danger">
-                    <i class="{{ iconDelete }}"></i> Supprimer
-                </button>
+            <div>
+                <twig:Button
+                    variant="success"
+                    size="sm"
+                    icon="icon:add"
+                    label="Ajouter le premier contact"
+                    dataAction="click->modalturbo#open"
+                    href="{{ path('app_parcours_contacts_add', { parcours: parcours.id }) }}"
+                />
             </div>
         </div>
-    </div>
-        {% else %}
-            <div class="col-4">
-                {{ component('alerte', {message:'Vous devez ajouter au moins un contact', type:'danger'}) }}
-            </div>
-    {% endfor %}
-    <div class="col-4">
-        <button
-                {{ stimulus_controller('modal', {
-                    size: 'lg',
-                    modalTitle: 'Ajouter un contact',
-                    modalUrl: path('app_parcours_contacts_add', {parcours:parcours.id}) }) }}
-                data-action="click->modal#openModal"
-                class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-                data-size="lg"
-                data-bs-toggle="tooltip"
-                data-bs-placement="bottom"
-                title="Ajouter un contact"
-        >
-            <i class="{{ iconAdd }}"></i>
-            <span> Ajouter un contact</span>
-        </button>
-    </div>
+    {% endif %}
 </div>

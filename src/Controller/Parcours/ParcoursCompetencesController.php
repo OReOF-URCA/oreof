@@ -23,6 +23,7 @@ use App\Form\ParcoursStep5Type;
 use App\Form\ParcoursStep6Type;
 use App\Form\ParcoursStep7Type;
 use App\Repository\ParcoursRepository;
+use App\Repository\ParcoursTabStateRepository;
 use App\TypeDiplome\TypeDiplomeResolver;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,19 +35,22 @@ class ParcoursCompetencesController extends BaseController
 {
     #[Route('/{parcours}/', name: 'index')]
     public function competences(
-        TypeDiplomeResolver $typeDiplomeResolver,
-        Parcours            $parcours,
-        ParcoursRepository  $parcoursRepository
+        TypeDiplomeResolver        $typeDiplomeResolver,
+        Parcours                   $parcours,
+        ParcoursRepository         $parcoursRepository,
+        ParcoursTabStateRepository $statesRepo,
     ): Response
     {
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
         $listeParcours = $parcoursRepository->findBy(['formation' => $parcours->getFormation()]);
         $competences = $typeD->getStructureCompetences($parcours);
+        $tabStates = $statesRepo->indexByTabKey($parcours);
 
         return $this->render('typeDiplome/' . $typeD->getTemplateFolder() . '/competences/_competence_edit.html.twig', [
             'parcours' => $parcours,
             'listeParcours' => $listeParcours,
             'competences' => $competences,
+            'tabStates' => $tabStates,
         ]);
     }
 

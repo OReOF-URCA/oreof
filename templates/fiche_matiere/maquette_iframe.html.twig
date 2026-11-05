@@ -136,8 +136,8 @@
                         <h5 class="titre-section">Enseignement dispensé en</h5>
                         {% if fiche_matiere.langueDispense|length > 0 %}
                             <ul>
-                                {% for langue in fiche_matiere.langueDispense %}
-                                    <li>{{ langue.libelle }}</li>
+                                {% for code in fiche_matiere.langueDispense %}
+                                    <li>{{ code|language_name('fr')|capitalize }}</li>
                                 {% endfor %}
                             </ul>
                         {% else %}
@@ -150,8 +150,8 @@
                         <h5 class="titre-section">Support de cours en</h5>
                         {% if fiche_matiere.langueSupport|length > 0 %}
                             <ul>
-                                {% for langue in fiche_matiere.langueSupport %}
-                                    <li>{{ langue.libelle }}</li>
+                                {% for code in fiche_matiere.langueSupport %}
+                                    <li>{{ code|language_name('fr')|capitalize }}</li>
                                 {% endfor %}
                             </ul>
                         {% else %}

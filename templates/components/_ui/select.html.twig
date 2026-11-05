@@ -1,5 +1,12 @@
 {# templates/components/_ui/select.html.twig #}
 {% set selectId = id ?? 'select-' ~ random() %}
+{% set attr = attr|default({}) %}
+{% if help is not null and help != '' %}
+    {% set descriptions = attr['aria-describedby']|default('')|split(' ') %}
+    {% if (selectId ~ '_help') not in descriptions %}
+        {% set attr = attr|merge({'aria-describedby': (descriptions|merge([selectId ~ '_help']))|join(' ')|trim}) %}
+    {% endif %}
+{% endif %}
 {% set isDisabled = disabled or (attr.disabled is defined and attr.disabled) %}
 
 <div class="space-y-2 group mb-4">
@@ -75,8 +82,8 @@
         </div>
     {% endif %}
 
-    {% if help is not null %}
-        <div class="text-xs text-secondary-500 mt-1">
+    {% if help is not null and help != '' %}
+        <div id="{{ selectId }}_help" class="text-xs text-secondary-500 mt-1">
             {{ help|trans({}, translationDomain) }}
         </div>
     {% endif %}

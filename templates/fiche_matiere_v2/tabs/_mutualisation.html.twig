@@ -3,7 +3,9 @@
 
     <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar"
             {{ stimulus_controller('fichematiere--step1', {
-                urlMutualise: path('app_fiche_matiere_wizard_step_1_mutualise', {ficheMatiere:fiche_matiere.id}),
+                urlMutualise: path('fiche_matiere_v2_mutualisation_liste', {id: fiche_matiere.id}),
+                urlImpacts: path('fiche_matiere_v2_mutualisation_impacts', {id: fiche_matiere.id}),
+                urlRemoveAll: path('fiche_matiere_v2_mutualisation_remove_all', {id: fiche_matiere.id}),
             }) }}
     >
         {% form_theme form 'communs/form_theme_v2.html.twig' %}

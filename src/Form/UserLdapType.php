@@ -15,6 +15,8 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+use Symfony\Component\Validator\Constraints as Assert;
+
 class UserLdapType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -24,7 +26,12 @@ class UserLdapType extends AbstractType
                 'required' => true,
                 'label' => 'Adresse email',
                 'help' => 'Adresse email URCA',
-                'attr' => ['maxlength' => 255]
+                'attr' => ['maxlength' => 255],
+                'constraints' => [
+                    new Assert\NotBlank(message: 'L\'adresse email est obligatoire.'),
+                    new Assert\Email(message: 'L\'adresse email "{{ value }}" n\'est pas valide.'),
+                    new Assert\Length(max: 255),
+                ],
             ])
         ;
     }

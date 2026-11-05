@@ -1,212 +1,218 @@
-<table class="w-full border-collapse rounded-lg overflow-hidden border border-secondary-200 dark:border-secondary-700">
-    <thead>
-    <tr class="bg-secondary-50 border-b border-secondary-200 dark:bg-secondary-900/40 dark:border-secondary-700">
-        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300"
-            {% if constant('SOURCE', typeDiplome) == 'meef' %}colspan="2"{% endif %}>Libellé du parcours
-        </th>
-        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Responsable du parcours</th>
-        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Co Responsable du parcours</th>
-        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Remplissage</th>
-        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Etat</th>
-        <th class="px-4 py-3 text-right text-sm font-semibold text-secondary-700 dark:text-secondary-300">Actions</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for parcour in parcours|filter(parcour => parcour.parcoursParent == null) %}
-        <tr class="hover:bg-secondary-50 border-b border-secondary-200 transition-colors dark:hover:bg-secondary-800/30 dark:border-secondary-700">
-            <td class="px-4 py-3 text-sm" {% if constant('SOURCE', typeDiplome) == 'meef' %}colspan="2"{% endif %}>
-                <div class="font-medium text-text dark:text-secondary-100">{{ parcour.libelle }}</div>
-                {% set typeParcoursBadge = parcour.typeParcours|badgeTypeParcours %}
-                {% if typeParcoursBadge is not null %}
-                    <div class="text-xs text-secondary-600 mt-0.5 dark:text-secondary-400">{{ component('Badge', { dto: typeParcoursBadge }) }}</div>
-                {% endif %}
-            </td>
-            <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
-                {{ parcour.respParcours != null ? parcour.respParcours.display : '<span class="text-secondary-500 dark:text-secondary-500">Non défini</span>' }}
-            </td>
-            <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
-                {{ parcour.coResponsable != null ? parcour.coResponsable.display : '<span class="text-secondary-500 dark:text-secondary-500">Non défini</span>' }}
-            </td>
-            <td class="px-4 py-3 text-sm" style="width:15%">
-                {{ component('remplissage_progress', { value: parcour.remplissage }) }}
-            </td>
-            <td class="px-4 py-3 text-sm">
-                <div class="flex items-center gap-2">
-                    {{ include('communs/_badge_collection.html.twig', { badges: parcour.etatDpeParcours|badgeDpeDto }) }}
-                    {% if parcours.withCfvu is defined and parcours.withCfvu == true %}
-                        <twig:Badge label="CFVU" variant="warning" :soft="true" size="sm"/>
-                    {% endif %}
-                </div>
-            </td>
-            <td class="px-4 py-3 text-right space-y-2">
-                {% if not('non_ouverture' in parcour.etatDpeParcours|keys or 'non_ouverture_cfvu' in parcour.etatDpeParcours|keys or 'non_ouverture_ses' in parcour.etatDpeParcours|keys) %}
-                    <div class="flex flex-col sm:flex-row gap-2 justify-end flex-wrap">
-                        {% if constant('SOURCE', typeDiplome) != 'meef' %}
-                            <twig:Button
-                                    label="Modifier"
-                                    variant="warning"
-                                    icon="icon:edit"
-                                    href="{{ path('parcours_v2_modifier', {parcours:parcour.id}) }}"
-                                    target="_blank"
-                                    tooltip="Modifier la fiche du parcours"
-                                    size="sm"
-                            />
-                        {% endif %}
-                        <twig:Button
-                                label="Vérifier"
-                                variant="success"
-                                icon="icon:info"
-                                tooltip="Vérifier la saisie"
-                                size="sm"
-                                dataAction="click->modalturbo#open"
-                                href="{{ path('app_parcours_state', {parcours:parcour.id}) }}"
-                        />
-
-                        {% if is_granted('ROLE_ADMIN') %}
-                            <twig:Button
-                                    label="Supprimer"
-                                    variant="danger"
-                                    icon="icon:delete"
-                                    href="{{ path('parcours_v2_supprimer', {parcours: parcour.id}) }}"
-                                    tooltip="Supprimer définitivement ce parcours (Admin)"
-                                    size="sm"
-                                    dataAction="click->modalturbo#open"
-                            />
-                        {% endif %}
-
-                        <twig:Button
-                                label="Non ouverture"
-                                variant="secondary"
-                                icon="icon:close"
-                                tooltip="Demande de non ouverture"
-                                size="sm"
-                                href="{{ path('app_validation_demande_non_ouverture', {parcours: parcour.id}) }}"
-                                dataAction="click->modalturbo#open"
-                        />
-                    </div>
-                {% else %}
-                    {% if 'non_ouverture' in parcour.etatDpeParcours|keys %}
-                        <span class="text-sm text-info-600 dark:text-info-400">Parcours non ouvert pour {{ user_data.campagneCollecte.libelle }}</span>
-                    {% else %}
-                        <span class="text-sm text-warning-600 dark:text-warning-400">Demande de non ouverture en cours</span>
-                    {% endif %}
-                {% endif %}
-            </td>
+<div class="overflow-x-auto rounded-lg border border-secondary-200 dark:border-secondary-700">
+    <table class="w-full border-collapse">
+        <thead>
+        <tr class="bg-secondary-50 border-b border-secondary-200 dark:bg-secondary-900/40 dark:border-secondary-700">
+            <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300"
+                {% if constant('SOURCE', typeDiplome) == 'meef' %}colspan="2"{% endif %}>Libellé du parcours
+            </th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Responsable du parcours</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Co-responsable du parcours</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">Remplissage</th>
+            <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-700 dark:text-secondary-300">État</th>
+            <th class="px-4 py-3 text-right text-sm font-semibold text-secondary-700 dark:text-secondary-300">Actions</th>
         </tr>
-        {% if constant('SOURCE', typeDiplome) == 'meef' %}
-            {% for parc in parcour.parcoursEnfants %}
-                <tr class="hover:bg-secondary-50 border-b border-secondary-200 transition-colors border-l-2 border-l-info-500 dark:hover:bg-secondary-800/30 dark:border-secondary-700">
-                    <td class="px-4 py-3 text-sm text-secondary-500 dark:text-secondary-500"></td>
-                    <td class="px-4 py-3 text-sm">
-                        <div class="font-medium text-text dark:text-secondary-100">{{ parc.libelle }}</div>
-                    </td>
-                    <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
-                        {{ parc.respParcours != null ? parc.respParcours.display : '<span class="text-secondary-500 dark:text-secondary-500">Non défini</span>' }}
-                    </td>
-                    <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
-                        {{ parc.coResponsable != null ? parc.coResponsable.display : '<span class="text-secondary-500 dark:text-secondary-500">Non défini</span>' }}
-                    </td>
-                    <td class="px-4 py-3 text-sm" style="width:15%">
-                        {{ component('remplissage_progress', { value: parc.remplissage }) }}
-                    </td>
-                    <td class="px-4 py-3 text-right space-y-2">
+        </thead>
+        <tbody class="divide-y divide-secondary-200 bg-white dark:divide-secondary-700 dark:bg-secondary-900">
+        {% for parcour in parcours|filter(parcour => parcour.parcoursParent == null) %}
+            <tr class="hover:bg-secondary-50/70 transition-colors dark:hover:bg-secondary-800/30">
+                <td class="px-4 py-3 text-sm" {% if constant('SOURCE', typeDiplome) == 'meef' %}colspan="2"{% endif %}>
+                    <div class="font-medium text-text dark:text-secondary-100">{{ parcour.libelle }}</div>
+                    {% set typeParcoursBadge = parcour.typeParcours|badgeTypeParcours %}
+                    {% if typeParcoursBadge is not null %}
+                        <div class="mt-1">
+                            <twig:Badge :dto="typeParcoursBadge" size="sm" />
+                        </div>
+                    {% endif %}
+                </td>
+                <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
+                    {% if parcour.respParcours != null %}
+                        <span class="text-secondary-800 dark:text-secondary-200">{{ parcour.respParcours.display }}</span>
+                    {% else %}
+                        <twig:Badge label="Non défini" variant="secondary" :soft="true" size="sm" />
+                    {% endif %}
+                </td>
+                <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
+                    {% if parcour.coResponsable != null %}
+                        <span class="text-secondary-800 dark:text-secondary-200">{{ parcour.coResponsable.display }}</span>
+                    {% else %}
+                        <twig:Badge label="Non défini" variant="secondary" :soft="true" size="sm" />
+                    {% endif %}
+                </td>
+                <td class="px-4 py-3 text-sm w-44">
+                    <twig:remplissage_progress :value="parcour.remplissage" />
+                </td>
+                <td class="px-4 py-3 text-sm">
+                    <div class="flex items-center gap-2">
+                        {{ include('communs/_badge_collection.html.twig', { badges: parcour.etatDpeParcours|badgeDpeDto }) }}
+                        {% if parcours.withCfvu is defined and parcours.withCfvu == true %}
+                            <twig:Badge label="CFVU" variant="warning" :soft="true" size="sm"/>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="px-4 py-3 text-right">
+                    {% if not('non_ouverture' in parcour.etatDpeParcours|keys or 'non_ouverture_cfvu' in parcour.etatDpeParcours|keys or 'non_ouverture_ses' in parcour.etatDpeParcours|keys) %}
                         <div class="flex flex-col sm:flex-row gap-2 justify-end flex-wrap">
-                            <twig:Button
-                                    label="Modifier"
-                                    variant="warning"
-                                    icon="icon:pencil"
-                                    tooltip="Modifier une option"
-                                    size="sm"
-                                    href="{{ path('app_parcours_edit_modal', {parcours:parc.id}) }}"
-                                    dataAction="click->modalturbo#open"
-                            />
-                            <twig:Button
-                                    label="Fiche"
-                                    variant="secondary"
-                                    icon="icon:document"
-                                    href="{{ path('parcours_v2_modifier', {parcours:parc.id}) }}"
-                                    tooltip="Editer la fiche de l'option"
-                                    size="sm"
-                            />
-                            {% if is_granted('ROLE_ADMIN') %}
+                            {% if constant('SOURCE', typeDiplome) != 'meef' %}
                                 <twig:Button
-                                        label="Dupliquer"
-                                        variant="primary"
-                                        icon="icon:document-copy"
-                                        tooltip="Dupliquer l'option"
+                                        label="Modifier"
+                                        variant="warning"
+                                        icon="icon:edit"
+                                        href="{{ path('parcours_v2_modifier', {parcours:parcour.id}) }}"
+                                        target="_blank"
+                                        tooltip="Modifier la fiche du parcours"
                                         size="sm"
-
                                 />
-                                {#                                    {{ stimulus_action('formation--step3', 'dupliquerParcours', 'click', { #}
-                                {#                                        url:path('app_parcours_dupliquer',{'id': parc.id}), #}
-                                {#                                        id: parc.id}) }} #}
+                            {% endif %}
+                            <twig:Button
+                                    label="Vérifier"
+                                    variant="success"
+                                    icon="icon:info"
+                                    tooltip="Vérifier la saisie"
+                                    size="sm"
+                                    dataAction="click->modalturbo#open"
+                                    href="{{ path('app_parcours_state', {parcours:parcour.id}) }}"
+                            />
 
+                            {% if is_granted('ROLE_ADMIN') %}
                                 <twig:Button
                                         label="Supprimer"
                                         variant="danger"
                                         icon="icon:delete"
-                                        tooltip="Supprimer l'option"
+                                        href="{{ path('parcours_v2_supprimer', {parcours: parcour.id}) }}"
+                                        tooltip="Supprimer définitivement ce parcours (Admin)"
                                         size="sm"
-
+                                        dataAction="click->modalturbo#open"
                                 />
-                                {#                                    {{ stimulus_action('formation--step3', 'deleteParcours', 'click', { #}
-                                {#                                        url:path('app_parcours_delete',{'id': parc.id}), #}
-                                {#                                        id: parc.id, #}
-                                {#                                        csrf: csrf_token('delete' ~ parc.id) #}
-                                {#                                    }) }} #}
                             {% endif %}
                         </div>
-                    </td>
-                </tr>
-            {% else %}
-                <tr class="bg-warning-50 border-b border-secondary-200 border-l-2 border-l-info-500 dark:bg-warning-950/20 dark:border-secondary-700">
-                    <td class="px-4 py-3 text-sm text-secondary-500 dark:text-secondary-500"></td>
-                    <td colspan="5" class="px-4 py-3 text-center text-sm text-warning-800 font-medium dark:text-warning-300">Aucune option pour
-                        ce parcours.
-                    </td>
-                </tr>
-            {% endfor %}
-            <tr class="hover:bg-secondary-50 border-b border-secondary-200 border-l-2 border-l-info-500 dark:hover:bg-secondary-800/30 dark:border-secondary-700">
-                <td class="px-4 py-3 text-sm text-secondary-500 dark:text-secondary-500"></td>
-                <td colspan="5" class="px-4 py-3">
-                    <twig:Button
-                            label="Ajouter une option"
-                            variant="success"
-                            icon="icon:add"
-                            tooltip="Ajouter une option au parcours {{ parcour.display }}"
-                            href="{{ path('app_parcours_new', {formation:formation.id, parent:parcour.id}) }}"
-                            dataAction="click->modalturbo#open"
-                    />
+                    {% else %}
+                        <div class="flex justify-end">
+                            {% if 'non_ouverture' in parcour.etatDpeParcours|keys %}
+                                <twig:Badge
+                                        label="Parcours non ouvert pour {{ user_data.campagneCollecte.libelle }}"
+                                        variant="info"
+                                        icon="icon:info"
+                                        :soft="true"
+                                        size="sm"
+                                />
+                            {% else %}
+                                <twig:Badge
+                                        label="Demande de non ouverture en cours"
+                                        variant="warning"
+                                        icon="icon:warning"
+                                        :soft="true"
+                                        size="sm"
+                                />
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 </td>
             </tr>
-        {% endif %}
-    {% else %}
-        <tr>
-            <td colspan="{% if constant('SOURCE', typeDiplome) == 'meef' %}7{% else %}6{% endif %}"
-                class="px-4 py-6 text-center bg-warning-50 border-b border-secondary-200 dark:bg-warning-950/20 dark:border-secondary-700">
-                <p class="text-sm text-warning-800 font-medium dark:text-warning-300">Aucun parcours, veuillez en ajouter au moins un.</p>
-            </td>
-        </tr>
-    {% endfor %}
-    <tr>
-        <td colspan="{% if constant('SOURCE', typeDiplome) == 'meef' %}7{% else %}6{% endif %}">
-            <button
-                    {{ stimulus_controller('modal', {
-                        size: 'lg',
-                        nomEvenement: 'parcoursAdded',
-                        modalTitle: 'Ajouter un parcours',
-                        modalUrl: path('app_parcours_new', {formation:formation.id}) }) }}
-                    data-action="click->modal#openModal"
-                    class="btn btn-sm btn-outline-success btn-icon btn-icon-end"
-                    data-size="lg"
-                    data-bs-toggle="tooltip"
-                    data-bs-placement="bottom"
-                    title="Ajouter un parcours"
-            >
-                <i class="{{ iconAdd }}"></i>
-                <span> Ajouter un parcours</span>
-            </button>
-        </td>
-    </tr>
-    </tbody>
-</table>
+            {% if constant('SOURCE', typeDiplome) == 'meef' %}
+                {% for parc in parcour.parcoursEnfants %}
+                    <tr class="hover:bg-secondary-50/70 transition-colors border-l-2 border-l-info-500 dark:hover:bg-secondary-800/30">
+                        <td class="w-10 px-3 py-3 text-center text-sm text-secondary-400 dark:text-secondary-500">
+                            <twig:UX:Icon name="ph:arrow-elbow-down-right-light" class="inline-block w-4 h-4 text-secondary-400 dark:text-secondary-500" />
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <div class="font-medium text-text dark:text-secondary-100">{{ parc.libelle }}</div>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
+                            {% if parc.respParcours != null %}
+                                <span class="text-secondary-800 dark:text-secondary-200">{{ parc.respParcours.display }}</span>
+                            {% else %}
+                                <twig:Badge label="Non défini" variant="secondary" :soft="true" size="sm" />
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-secondary-600 dark:text-secondary-400">
+                            {% if parc.coResponsable != null %}
+                                <span class="text-secondary-800 dark:text-secondary-200">{{ parc.coResponsable.display }}</span>
+                            {% else %}
+                                <twig:Badge label="Non défini" variant="secondary" :soft="true" size="sm" />
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-sm w-44">
+                            <twig:remplissage_progress :value="parc.remplissage" />
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <div class="flex items-center gap-2">
+                                {{ include('communs/_badge_collection.html.twig', { badges: parc.etatDpeParcours|badgeDpeDto }) }}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex flex-col sm:flex-row gap-2 justify-end flex-wrap">
+                                <twig:Button
+                                        label="Modifier"
+                                        variant="warning"
+                                        icon="icon:edit"
+                                        tooltip="Modifier une option"
+                                        size="sm"
+                                        href="{{ path('app_parcours_edit_modal', {parcours:parc.id}) }}"
+                                        dataAction="click->modalturbo#open"
+                                />
+                                <twig:Button
+                                        label="Fiche"
+                                        variant="secondary"
+                                        icon="icon:document"
+                                        href="{{ path('parcours_v2_modifier', {parcours:parc.id}) }}"
+                                        tooltip="Éditer la fiche de l'option"
+                                        size="sm"
+                                        target="_blank"
+                                />
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <twig:Button
+                                            label="Dupliquer"
+                                            variant="primary"
+                                            icon="icon:duplicate"
+                                            tooltip="Dupliquer l'option"
+                                            size="sm"
+                                            href="{{ path('parcours_v2_dupliquer', {parcours: parc.id}) }}"
+                                            dataAction="click->modalturbo#open"
+                                    />
+                                    <twig:Button
+                                            label="Supprimer"
+                                            variant="danger"
+                                            icon="icon:delete"
+                                            tooltip="Supprimer l'option"
+                                            size="sm"
+                                            href="{{ path('parcours_v2_supprimer', {parcours: parc.id}) }}"
+                                            dataAction="click->modalturbo#open"
+                                    />
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr class="bg-warning-50/70 border-l-2 border-l-info-500 dark:bg-warning-950/20">
+                        <td class="w-10 px-3 py-3 text-center text-sm text-secondary-400 dark:text-secondary-500"></td>
+                        <td colspan="6" class="px-4 py-3 text-center text-sm text-warning-800 font-medium dark:text-warning-300">
+                            Aucune option pour ce parcours.
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr class="hover:bg-secondary-50/70 border-l-2 border-l-info-500 dark:hover:bg-secondary-800/30">
+                    <td class="w-10 px-3 py-3 text-center text-sm text-secondary-400 dark:text-secondary-500"></td>
+                    <td colspan="6" class="px-4 py-3">
+                        <twig:Button
+                                label="Ajouter une option"
+                                variant="success"
+                                icon="icon:add"
+                                tooltip="Ajouter une option au parcours {{ parcour.display }}"
+                                href="{{ path('app_parcours_new', {formation:formation.id, parent:parcour.id}) }}"
+                                dataAction="click->modalturbo#open"
+                                size="sm"
+                        />
+                    </td>
+                </tr>
+            {% endif %}
+        {% else %}
+            <tr>
+                <td colspan="{% if constant('SOURCE', typeDiplome) == 'meef' %}7{% else %}6{% endif %}"
+                    class="px-4 py-6 text-center bg-warning-50 dark:bg-warning-950/20">
+                    <p class="text-sm text-warning-800 font-medium dark:text-warning-300">Aucun parcours, veuillez en ajouter au moins un.</p>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

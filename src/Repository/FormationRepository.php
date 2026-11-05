@@ -87,18 +87,18 @@ class FormationRepository extends ServiceEntityRepository
         string|null $q = null
     ): array {
         $query = $this->createQueryBuilder('f')
-            ->join('f.dpeParcours', 'dp')
+            ->leftJoin('f.dpeParcours', 'dp', 'WITH', 'dp.campagneCollecte = :campagneCollecte')
             ->leftJoin('dp.parcours', 'parcours')
             ->leftJoin('f.mention', 'm')
             ->innerJoin(Composante::class, 'c', 'WITH', 'f.composantePorteuse = c.id')
             ->where('c.responsableDpe = :user')
-            ->andWhere('dp.campagneCollecte = :campagneCollecte')
+            ->andWhere('(f.dpe = :campagneCollecte OR dp.id IS NOT NULL)')
             ->setParameter('user', $user)
             ->setParameter('campagneCollecte', $campagneCollecte);
 
-        if ($q !== null) {
+        if ($q !== null && trim($q) !== '') {
             $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
-                ->setParameter('q', '%' . $q . '%');
+                ->setParameter('q', '%' . trim($q) . '%');
         }
 
         foreach ($sorts as $sort => $direction) {
@@ -130,18 +130,19 @@ class FormationRepository extends ServiceEntityRepository
         $direction = $options['direction'] ?? 'ASC';
 
         $filtres = [$sort => $direction];
-//todo: ne fonctionne que si au moins un parcours existe, donc pas pour les nouveaux parcours
         $query = $this->createQueryBuilder('f')
-            ->leftJoin('f.dpeParcours', 'p')
+            ->leftJoin('f.dpeParcours', 'p', 'WITH', 'p.campagneCollecte = :campagneCollecte')
             ->leftJoin('p.parcours', 'parcours')
             ->addSelect('p')
-            ->andWhere('p.campagneCollecte = :campagneCollecte')
+            ->leftJoin('f.mention', 'm')
+            ->andWhere('(f.dpe = :campagneCollecte OR p.id IS NOT NULL)')
             ->setParameter('campagneCollecte', $campagneCollecte)
-            ->innerJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id')
-            ->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
-
-            ->setParameter('q', '%' . $q . '%')
             ->orderBy('f.' . $sort, $direction);
+
+        if ($q !== null && trim($q) !== '') {
+            $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
+                ->setParameter('q', '%' . trim($q) . '%');
+        }
 
         if (array_key_exists('typeDiplome', $options) && null !== $options['typeDiplome']) {
             $query->andWhere('f.typeDiplome = :typeDiplome')
@@ -207,6 +208,10 @@ class FormationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @param array<string, mixed> $options
+     * @return array<int, Formation>
+     */
     public function findBySearchAndCfvu(
         string|null      $q,
         CampagneCollecte $campagneCollecte,
@@ -216,42 +221,39 @@ class FormationRepository extends ServiceEntityRepository
         $sort = $options['sort'] ?? 'typeDiplome';
         $direction = $options['direction'] ?? 'ASC';
 
+        $filtres = [$sort => $direction];
         $query = $this->createQueryBuilder('f')
-            ->innerJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id')
-            ->leftJoin('f.dpeParcours', 'p')
+            ->innerJoin('f.dpeParcours', 'p', 'WITH', 'p.campagneCollecte = :campagneCollecte')
+            ->leftJoin('p.parcours', 'parcours')
             ->addSelect('p')
-            ->where('p.campagneCollecte = :campagneCollecte')
+            ->leftJoin('f.mention', 'm')
             ->setParameter('campagneCollecte', $campagneCollecte)
-            ->andWhere('m.libelle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q ')
-            ->andWhere("JSON_CONTAINS(p.etatValidation, :etatDpe) = 1")
-            ->setParameter('etatDpe', json_encode(['soumis_cfvu' => 1]))
-            ->setParameter('q', '%' . $q . '%')
-            ->orderBy('f.' . $sort, $direction);
+            ->andWhere('JSON_CONTAINS(p.etatValidation, :etatDpe) = 1')
+            ->setParameter('etatDpe', json_encode(['soumis_cfvu' => 1]));
 
-        if (array_key_exists('typeDiplome', $options) && null !== $options['typeDiplome']) {
+        if ($q !== null && trim($q) !== '') {
+            $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
+                ->setParameter('q', '%' . trim($q) . '%');
+        }
+
+        if (array_key_exists('typeDiplome', $options) && null !== $options['typeDiplome'] && '' !== $options['typeDiplome']) {
             $query->andWhere('f.typeDiplome = :typeDiplome')
                 ->setParameter('typeDiplome', $options['typeDiplome']);
         }
 
-        if (array_key_exists('mention', $options) && null !== $options['mention']) {
+        if (array_key_exists('mention', $options) && null !== $options['mention'] && '' !== $options['mention']) {
             $query->andWhere('f.mention = :mention')
                 ->setParameter('mention', $options['mention']);
         }
 
-        if (array_key_exists('composantePorteuse', $options) && null !== $options['composantePorteuse']) {
-            $query->andWhere('f.composantePorteuse = :composante')
-                ->setParameter('composante', $options['composantePorteuse']);
+        if (array_key_exists('composantePorteuse', $options) && null !== $options['composantePorteuse'] && '' !== $options['composantePorteuse']) {
+            $query->andWhere('f.composantePorteuse = :composantePorteuse')
+                ->setParameter('composantePorteuse', $options['composantePorteuse']);
         }
 
-        if ($sort === 'mention') {
-            $query->addOrderBy(
-                'CASE
-                            WHEN f.mention IS NOT NULL THEN m.libelle
-                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
-                            ELSE f.mentionTexte
-                            END',
-                $direction
-            );
+        if (array_key_exists('responsable', $options) && null !== $options['responsable'] && '' !== $options['responsable']) {
+            $query->andWhere('f.responsableMention = :responsable OR f.coResponsable = :responsable OR parcours.respParcours = :responsable OR parcours.coResponsable = :responsable')
+                ->setParameter('responsable', $options['responsable']);
         }
 
         if ($composante !== null) {
@@ -259,19 +261,113 @@ class FormationRepository extends ServiceEntityRepository
                 ->setParameter('composante', $composante);
         }
 
-        return $query->getQuery()
-            ->getResult();
+        $query->orderBy('f.' . $sort, $direction);
+
+        if (isset($filtres['mention'])) {
+            $query->addOrderBy(
+                'CASE
+                            WHEN f.mention IS NOT NULL THEN m.libelle
+                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
+                            ELSE f.mentionTexte
+                            END',
+                $filtres['mention']
+            );
+        }
+
+        $results = $query->getQuery()->getResult();
+        $dedup = [];
+        foreach ($results as $f) {
+            $dedup[$f->getId()] = $f;
+        }
+
+        return array_values($dedup);
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     * @param array<int, Composante> $accessibleComposantes
+     * @return array<int, Formation>
+     */
+    public function findBySearchAndConseilComposante(
+        string|null      $q,
+        CampagneCollecte $campagneCollecte,
+        array            $options = [],
+        array            $accessibleComposantes = [],
+    ): array {
+        if (empty($accessibleComposantes)) {
+            return [];
+        }
+
+        $sort = $options['sort'] ?? 'typeDiplome';
+        $direction = $options['direction'] ?? 'ASC';
+
+        $filtres = [$sort => $direction];
+        $query = $this->createQueryBuilder('f')
+            ->innerJoin('f.dpeParcours', 'p', 'WITH', 'p.campagneCollecte = :campagneCollecte')
+            ->leftJoin('p.parcours', 'parcours')
+            ->addSelect('p')
+            ->leftJoin('f.mention', 'm')
+            ->setParameter('campagneCollecte', $campagneCollecte)
+            ->andWhere('f.composantePorteuse IN (:accessibleComposantes)')
+            ->setParameter('accessibleComposantes', $accessibleComposantes)
+            ->andWhere('JSON_CONTAINS(p.etatValidation, :etatDpe) = 1')
+            ->setParameter('etatDpe', json_encode(['soumis_conseil' => 1]));
+
+        if ($q !== null && trim($q) !== '') {
+            $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
+                ->setParameter('q', '%' . trim($q) . '%');
+        }
+
+        if (array_key_exists('typeDiplome', $options) && null !== $options['typeDiplome'] && '' !== $options['typeDiplome']) {
+            $query->andWhere('f.typeDiplome = :typeDiplome')
+                ->setParameter('typeDiplome', $options['typeDiplome']);
+        }
+
+        if (array_key_exists('mention', $options) && null !== $options['mention'] && '' !== $options['mention']) {
+            $query->andWhere('f.mention = :mention')
+                ->setParameter('mention', $options['mention']);
+        }
+
+        if (array_key_exists('composantePorteuse', $options) && null !== $options['composantePorteuse'] && '' !== $options['composantePorteuse']) {
+            $query->andWhere('f.composantePorteuse = :composantePorteuse')
+                ->setParameter('composantePorteuse', $options['composantePorteuse']);
+        }
+
+        if (array_key_exists('responsable', $options) && null !== $options['responsable'] && '' !== $options['responsable']) {
+            $query->andWhere('f.responsableMention = :responsable OR f.coResponsable = :responsable OR parcours.respParcours = :responsable OR parcours.coResponsable = :responsable')
+                ->setParameter('responsable', $options['responsable']);
+        }
+
+        $query->orderBy('f.' . $sort, $direction);
+
+        if (isset($filtres['mention'])) {
+            $query->addOrderBy(
+                'CASE
+                            WHEN f.mention IS NOT NULL THEN m.libelle
+                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
+                            ELSE f.mentionTexte
+                            END',
+                $filtres['mention']
+            );
+        }
+
+        $results = $query->getQuery()->getResult();
+        $dedup = [];
+        foreach ($results as $f) {
+            $dedup[$f->getId()] = $f;
+        }
+
+        return array_values($dedup);
     }
 
     public function findByResponsableOuCoResponsable(User $user, CampagneCollecte $campagneCollecte, array $sorts = []): array
     {
         $query = $this->createQueryBuilder('f')
-            ->leftJoin('f.dpeParcours', 'dp')
+            ->leftJoin('f.dpeParcours', 'dp', 'WITH', 'dp.campagneCollecte = :campagneCollecte')
             ->leftJoin('f.mention', 'm')
             ->addSelect('dp')
-            ->where('f.responsableMention = :user')
-            ->orWhere('f.coResponsable = :user')
-            ->andWhere('dp.campagneCollecte = :campagneCollecte')
+            ->where('(f.responsableMention = :user OR f.coResponsable = :user)')
+            ->andWhere('(f.dpe = :campagneCollecte OR dp.id IS NOT NULL)')
             ->setParameter('user', $user)
             ->setParameter('campagneCollecte', $campagneCollecte);
 
@@ -298,11 +394,11 @@ class FormationRepository extends ServiceEntityRepository
     {
         $query = $this->createQueryBuilder('f')
             ->innerJoin(Composante::class, 'c', 'WITH', 'f.composantePorteuse = c.id')
-            ->leftJoin('f.dpeParcours', 'dp')
+            ->leftJoin('f.dpeParcours', 'dp', 'WITH', 'dp.campagneCollecte = :campagneCollecte')
             ->leftJoin('f.mention', 'm')
             ->addSelect('dp')
             ->andWhere('c.id = :composante')
-            ->andWhere('dp.campagneCollecte = :campagneCollecte')
+            ->andWhere('(f.dpe = :campagneCollecte OR dp.id IS NOT NULL)')
             ->setParameter('campagneCollecte', $campagneCollecte)
             ->setParameter('composante', $composante);
 
@@ -360,13 +456,13 @@ class FormationRepository extends ServiceEntityRepository
     public function findByComposantePorteuse(mixed $composante, CampagneCollecte $campagneCollecte): array
     {
         return $this->createQueryBuilder('f')
-            ->innerJoin('f.dpeParcours', 'dp')
+            ->leftJoin('f.dpeParcours', 'dp', 'WITH', 'dp.campagneCollecte = :campagneCollecte')
             ->where('f.composantePorteuse = :composante')
-            ->andWhere('dp.campagneCollecte = :campagneCollecte')
+            ->andWhere('(f.dpe = :campagneCollecte OR dp.id IS NOT NULL)')
             ->setParameter('composante', $composante)
             ->setParameter('campagneCollecte', $campagneCollecte)
 
-            ->leftJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id')
+            ->leftJoin('f.mention', 'm')
             ->addOrderBy('f.typeDiplome', 'ASC')
             ->addOrderBy(
                 'CASE
@@ -383,12 +479,12 @@ class FormationRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('f')
             ->where('f.composantePorteuse = :composante')
-            ->leftJoin('f.dpeParcours', 'dp')
+            ->leftJoin('f.dpeParcours', 'dp', 'WITH', 'dp.campagneCollecte = :campagneCollecte')
             ->addSelect('dp')
-            ->andWhere('dp.campagneCollecte = :campagneCollecte')
+            ->andWhere('(f.dpe = :campagneCollecte OR dp.id IS NOT NULL)')
             ->setParameter('composante', $composante)
             ->setParameter('campagneCollecte', $campagneCollecte)
-            ->leftJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id')
+            ->leftJoin('f.mention', 'm')
             ->addOrderBy(
                 'CASE
                             WHEN f.mention IS NOT NULL THEN m.libelle
@@ -404,15 +500,15 @@ class FormationRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('f')
             ->where('f.composantePorteuse = :composante')
-            ->leftJoin('f.dpeParcours', 'dp')
+            ->leftJoin('f.dpeParcours', 'dp', 'WITH', 'dp.campagneCollecte = :campagneCollecte')
             ->addSelect('dp')
-            ->andWhere('dp.campagneCollecte = :campagneCollecte')
+            ->andWhere('(f.dpe = :campagneCollecte OR dp.id IS NOT NULL)')
             ->andWhere('f.typeDiplome = :typeDiplome')
 
             ->setParameter('composante', $composante)
             ->setParameter('campagneCollecte', $campagneCollecte)
             ->setParameter('typeDiplome', $typeDiplome)
-            ->leftJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id')
+            ->leftJoin('f.mention', 'm')
             ->addOrderBy(
                 'CASE
                             WHEN f.mention IS NOT NULL THEN m.libelle
@@ -427,13 +523,13 @@ class FormationRepository extends ServiceEntityRepository
     public function findByDpeAndTypeDiplome(CampagneCollecte $campagneCollecte, TypeDiplome $typeDiplome): array
     {
         return $this->createQueryBuilder('f')
-            ->leftJoin('f.dpeParcours', 'dp')
+            ->leftJoin('f.dpeParcours', 'dp', 'WITH', 'dp.campagneCollecte = :campagneCollecte')
             ->addSelect('dp')
-            ->andWhere('dp.campagneCollecte = :campagneCollecte')
+            ->andWhere('(f.dpe = :campagneCollecte OR dp.id IS NOT NULL)')
             ->andWhere('f.typeDiplome = :typeDiplome')
             ->setParameter('campagneCollecte', $campagneCollecte)
             ->setParameter('typeDiplome', $typeDiplome)
-            ->leftJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id')
+            ->leftJoin('f.mention', 'm')
             ->addOrderBy(
                 'CASE
                             WHEN f.mention IS NOT NULL THEN m.libelle
@@ -487,12 +583,12 @@ class FormationRepository extends ServiceEntityRepository
     public function findByCampagneCollecte(CampagneCollecte $campagneCollecte): array
     {
         return $this->createQueryBuilder('f')
-            ->leftJoin('f.dpeParcours', 'dp')
+            ->leftJoin('f.dpeParcours', 'dp', 'WITH', 'dp.campagneCollecte = :campagneCollecte')
             ->leftJoin('f.typeDiplome', 't')
             ->addSelect('dp')
-            ->andWhere('dp.campagneCollecte = :campagneCollecte')
+            ->andWhere('(f.dpe = :campagneCollecte OR dp.id IS NOT NULL)')
             ->setParameter('campagneCollecte', $campagneCollecte)
-            ->leftJoin(Mention::class, 'm', 'WITH', 'f.mention = m.id')
+            ->leftJoin('f.mention', 'm')
             ->addOrderBy('t.libelle_court', 'ASC')
             ->addOrderBy(
                 'CASE

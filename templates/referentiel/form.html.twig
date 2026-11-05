@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+{% set header_title = titre %}
+{% set header_description = 'Paramétrage des référentiels ORéOF.' %}
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ app.request.headers.get('referer') ?: path('admin_referentiel_index') }}">Retour</twig:Button>
+{% endblock %}
+{% block content %}
+<div class="max-w-3xl space-y-6">
+    <div class="rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        <div class="p-6 space-y-5">
+            {{ form_start(form) }}
+                {{ form_errors(form) }}
+                {{ form_widget(form) }}
+                <div class="mt-6 flex justify-end gap-3">
+                    <twig:Button variant="success" type="submit">Enregistrer</twig:Button>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

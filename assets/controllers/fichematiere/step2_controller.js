@@ -65,8 +65,10 @@ export default class extends Controller {
   }
 
   async _save(options) {
-    await saveData(this.urlValue, options).then(async () => {
+    return saveData(this.urlValue, options).then(async (data) => {
+      if (data === false || data?.success === false || data?.error?.length) return false
       await updateEtatOnglet(this.urlValue, 'onglet2', 'ec')
+      return data
     })
   }
 }

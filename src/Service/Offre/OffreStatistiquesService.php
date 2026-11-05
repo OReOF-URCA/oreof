@@ -14,7 +14,6 @@ use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
-use App\Repository\TypeDiplomePlateformeAdmissionRepository;
 use App\Repository\TypeDiplomeRepository;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
@@ -46,7 +45,6 @@ final class OffreStatistiquesService
         private readonly AnneeRepository                          $anneeRepository,
         private readonly PlateformeAdmissionRepository            $plateformeAdmissionRepository,
         private readonly PlateformeAdmissionParametreRepository   $plateformeParamRepository,
-        private readonly TypeDiplomePlateformeAdmissionRepository $typeDiplomePlateformeAdmissionRepository,
         private readonly ComposanteRepository                     $composanteRepository,
         private readonly TypeDiplomeRepository                    $typeDiplomeRepository,
         private readonly ChartBuilderInterface                    $chartBuilder,
@@ -127,6 +125,8 @@ final class OffreStatistiquesService
         $totalCapaciteMaster = 0;
         $totalCapaciteAlternance = 0;
         $formationsTraiteesIds = [];
+        $portailsCounted = [];
+        $portailPlateformesCounted = [];
 
         // 3. Parcours et agrégation des formations
         foreach ($formations as $formation) {
@@ -214,15 +214,46 @@ final class OffreStatistiquesService
 
                     $capaciteBrute = $annee->getCapaciteAccueil();
                     $isRecrutement = $annee->isProposeRecrutement();
-                    $isTc = $formation->isAnneeTroncCommun($ordre);
+                    $isTc = $formation->isAnneeTroncCommun($ordre, $parcours);
+                    $tc = $formation->getTroncCommunForParcours($parcours, $ordre);
+                    $portail = $annee->getPortail();
 
-                    // Dédoublonnage du Tronc Commun pour la capacité d'accueil
+                    $mutualisationNom = null;
+                    $mutualisationType = null;
+                    if ($portail !== null && $portail->getId() !== null) {
+                        $mutualisationNom = 'Portail : ' . ($portail->getLibelle() ?: '#' . $portail->getId());
+                        $mutualisationType = 'portail';
+                    } elseif ($tc !== null) {
+                        $tcNom = !empty($tc['nom']) ? $tc['nom'] : 'Tronc commun';
+                        $mutualisationNom = 'Tronc commun : ' . $tcNom;
+                        $mutualisationType = 'tc';
+                    } elseif ($isTc) {
+                        $mutualisationNom = 'Tronc commun';
+                        $mutualisationType = 'tc';
+                    }
+
+                    // Dédoublonnage Portail et Tronc Commun pour la capacité d'accueil
                     $capaciteComptee = $capaciteBrute;
-                    if ($isTc) {
-                        if (isset($tcAnneesCounted[$ordre])) {
+                    if ($portail !== null && $portail->getId() !== null) {
+                        $pKey = (string) $portail->getId();
+                        if (isset($portailsCounted[$pKey])) {
                             $capaciteComptee = 0;
                         } else {
-                            $tcAnneesCounted[$ordre] = true;
+                            $portailsCounted[$pKey] = true;
+                        }
+                    } elseif ($tc !== null) {
+                        $tcKey = $formation->getId() . '_' . $tc['id'] . '_' . $ordre;
+                        if (isset($tcAnneesCounted[$tcKey])) {
+                            $capaciteComptee = 0;
+                        } else {
+                            $tcAnneesCounted[$tcKey] = true;
+                        }
+                    } elseif ($isTc) {
+                        $tcKey = $formation->getId() . '_legacy_' . $ordre;
+                        if (isset($tcAnneesCounted[$tcKey])) {
+                            $capaciteComptee = 0;
+                        } else {
+                            $tcAnneesCounted[$tcKey] = true;
                         }
                     }
 
@@ -316,13 +347,33 @@ final class OffreStatistiquesService
                         $platCode = strtoupper(trim($plat->getCode()));
                         $anneePlatCodes[] = $platCode;
 
-                        $tcPlatKey = $ordre . '_' . $platId;
                         $pCapGlobale = (int)($param->getCapaciteGlobale() ?? 0);
                         $pCapFi = (int)($param->getCapaciteFi() ?? 0);
                         $pCapAlt = (int)($param->getCapaciteAlternance() ?? 0);
                         $pCapSpec = (int)($param->getCapaciteSpecifique() ?? 0);
 
-                        if ($isTc) {
+                        if ($portail !== null && $portail->getId() !== null) {
+                            $portailPlatKey = $portail->getId() . '_' . $platId;
+                            if (isset($portailPlateformesCounted[$portailPlatKey])) {
+                                $pCapGlobale = 0;
+                                $pCapFi = 0;
+                                $pCapAlt = 0;
+                                $pCapSpec = 0;
+                            } else {
+                                $portailPlateformesCounted[$portailPlatKey] = true;
+                            }
+                        } elseif ($tc !== null) {
+                            $tcPlatKey = $formation->getId() . '_' . $tc['id'] . '_' . $ordre . '_' . $platId;
+                            if (isset($tcPlateformesCounted[$tcPlatKey])) {
+                                $pCapGlobale = 0;
+                                $pCapFi = 0;
+                                $pCapAlt = 0;
+                                $pCapSpec = 0;
+                            } else {
+                                $tcPlateformesCounted[$tcPlatKey] = true;
+                            }
+                        } elseif ($isTc) {
+                            $tcPlatKey = $formation->getId() . '_legacy_' . $ordre . '_' . $platId;
                             if (isset($tcPlateformesCounted[$tcPlatKey])) {
                                 $pCapGlobale = 0;
                                 $pCapFi = 0;
@@ -355,7 +406,9 @@ final class OffreStatistiquesService
                         'formation' => $formation->getDisplayLong() ?? $formation->getDisplay(),
                         'parcours' => $parcours->getLibelle(),
                         'isOuvert' => $isParcoursOuvert,
-                        'isTc' => $isTc,
+                        'isTc' => $isTc || $tc !== null,
+                        'mutualisation' => $mutualisationNom ?? '',
+                        'mutualisationType' => $mutualisationType ?? '',
                         'niveau' => $niveauCode,
                         'ordre' => $ordre,
                         'capaciteAccueil' => $capaciteBrute,

@@ -8,6 +8,24 @@
     </template>
 </turbo-stream>
 
+<turbo-stream action="replace" target="tab-parcours-{{ parcours.id }}-libelle">
+    <template>
+        <span id="tab-parcours-{{ parcours.id }}-libelle">{{ parcours.libelle }}</span>
+    </template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="tab-parcours-{{ parcours.id }}-badges">
+    <template>
+        <span id="tab-parcours-{{ parcours.id }}-badges" class="inline-flex items-center gap-1.5">
+            {{ include('offre_v2/_parcours_tab_badges.html.twig', {
+                parcours: parcours,
+                statP: statP|default(null),
+                campagne: campagne
+            }) }}
+        </span>
+    </template>
+</turbo-stream>
+
 {{ include('_ui/_toast.stream.html.twig', {
     message: 'Le parcours a été mis à jour avec succès.',
     closeModal: true,

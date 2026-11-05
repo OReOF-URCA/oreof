@@ -14,6 +14,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class RythmeFormationType extends AbstractType
 {
@@ -22,6 +23,12 @@ class RythmeFormationType extends AbstractType
         $builder
             ->add('libelle', TextType::class, [
                 'label' => 'Libellé',
+                'required' => true,
+                'attr' => ['maxlength' => 255],
+                'constraints' => [
+                    new Assert\NotBlank(message: 'Le libellé est obligatoire.'),
+                    new Assert\Length(max: 255),
+                ],
             ])
         ;
     }

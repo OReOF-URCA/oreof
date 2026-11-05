@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service\Parcours;
 
 use App\DTO\ParcoursDeleteAnalysis;
+use App\Entity\Adresse;
 use App\Entity\Annee;
 use App\Entity\BlocCompetence;
 use App\Entity\ChangeParcours;
@@ -297,6 +298,10 @@ final class ParcoursDeleteService
         }
 
         // 11. Détacher les références d'autres parcours
+        $parcours->setParcoursParent(null);
+        $parcours->setParcoursOrigine(null);
+        $parcours->setParcoursOrigineCopie(null);
+
         $pRepo = $this->entityManager->getRepository(Parcours::class);
         /** @var list<Parcours> $enfants */
         $enfants = $pRepo->findBy(['parcoursParent' => $parcours]);
@@ -314,13 +319,32 @@ final class ParcoursDeleteService
             $copie->setParcoursOrigineCopie(null);
         }
 
-        // 12. Contacts
+        // 12. Contacts et adresses
+        $adresseRepo = $this->entityManager->getRepository(Adresse::class);
         foreach ($parcours->getContacts() as $contact) {
+            $adresse = $contact->getAdresse();
+            if ($adresse !== null) {
+                // Détacher les éventuelles adresses qui auraient été copiées depuis celle-ci
+                /** @var list<Adresse> $copiesAdresse */
+                $copiesAdresse = $adresseRepo->findBy(['adresseOrigineCopie' => $adresse]);
+                foreach ($copiesAdresse as $copieAdresse) {
+                    $copieAdresse->setAdresseOrigineCopie(null);
+                }
+                // Détacher la référence vers l'adresse d'origine
+                $adresse->setAdresseOrigineCopie(null);
+            }
             $this->entityManager->remove($contact);
         }
 
         // 13. Blocs de compétences et compétences
+        $bcRepo = $this->entityManager->getRepository(BlocCompetence::class);
         foreach ($parcours->getBlocCompetences() as $bloc) {
+            $bloc->setBlocCompetenceOrigineCopie(null);
+            /** @var list<BlocCompetence> $copiesBloc */
+            $copiesBloc = $bcRepo->findBy(['blocCompetenceOrigineCopie' => $bloc]);
+            foreach ($copiesBloc as $copieBloc) {
+                $copieBloc->setBlocCompetenceOrigineCopie(null);
+            }
             foreach ($bloc->getCompetences() as $comp) {
                 foreach ($comp->getFicheMatieres() as $fiche) {
                     $fiche->removeCompetence($comp);
@@ -399,6 +423,7 @@ final class ParcoursDeleteService
 
         // 19. SemestreParcours et Semestres propres
         foreach ($parcours->getSemestreParcours() as $sp) {
+            $sp->setAnnee(null);
             $semestre = $sp->getSemestre();
             $this->entityManager->remove($sp);
 
@@ -423,7 +448,18 @@ final class ParcoursDeleteService
         }
 
         // 20. Années
+        $anneeRepo = $this->entityManager->getRepository(Annee::class);
         foreach ($parcours->getAnnees() as $annee) {
+            foreach ($annee->getParcoursSemestre() as $sp) {
+                $sp->setAnnee(null);
+            }
+            $annee->setParcours(null);
+            $annee->setAnneeOrigineCopie(null);
+            /** @var list<Annee> $copiesAnnee */
+            $copiesAnnee = $anneeRepo->findBy(['anneeOrigineCopie' => $annee]);
+            foreach ($copiesAnnee as $copieAnnee) {
+                $copieAnnee->setAnneeOrigineCopie(null);
+            }
             foreach ($annee->getAdmissionPlateformeParametres() as $param) {
                 $this->entityManager->remove($param);
             }
@@ -434,7 +470,9 @@ final class ParcoursDeleteService
         $formation = $parcours->getFormation();
         if ($formation !== null) {
             $formation->getParcours()->removeElement($parcours);
+            $formation->suspendreRecalculRemplissage();
         }
+        $parcours->suspendreRecalculRemplissage();
 
         $this->entityManager->remove($parcours);
         $this->entityManager->flush();

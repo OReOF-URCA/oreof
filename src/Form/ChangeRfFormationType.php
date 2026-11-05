@@ -4,7 +4,6 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\Enums\TypeRfEnum;
-use App\Form\Type\EntityWithAddType;
 use App\Form\Type\InlineCreateEntitySelectType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
@@ -29,7 +28,6 @@ class ChangeRfFormationType extends AbstractType
                 },
             ])
             ->add('user', InlineCreateEntitySelectType::class, [
-                'help' => '',
                 'class' => User::class,
                 'choice_label' => 'display',
                 'query_builder' => function ($er) {

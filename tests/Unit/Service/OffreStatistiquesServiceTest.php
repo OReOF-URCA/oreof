@@ -15,7 +15,6 @@ use App\Repository\DpeParcoursRepository;
 use App\Repository\FormationRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
-use App\Repository\TypeDiplomePlateformeAdmissionRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\Offre\OffreStatistiquesService;
 use PHPUnit\Framework\TestCase;
@@ -33,7 +32,6 @@ final class OffreStatistiquesServiceTest extends TestCase
         $anneeRepo = $this->createStub(AnneeRepository::class);
         $plateformeRepo = $this->createStub(PlateformeAdmissionRepository::class);
         $plateformeParamRepo = $this->createStub(PlateformeAdmissionParametreRepository::class);
-        $typeDiplomePlateformeRepo = $this->createStub(TypeDiplomePlateformeAdmissionRepository::class);
         $composanteRepo = $this->createStub(ComposanteRepository::class);
         $typeDiplomeRepo = $this->createStub(TypeDiplomeRepository::class);
         $chartBuilder = $this->createStub(ChartBuilderInterface::class);
@@ -47,7 +45,6 @@ final class OffreStatistiquesServiceTest extends TestCase
             $anneeRepo,
             $plateformeRepo,
             $plateformeParamRepo,
-            $typeDiplomePlateformeRepo,
             $composanteRepo,
             $typeDiplomeRepo,
             $chartBuilder
@@ -206,7 +203,6 @@ final class OffreStatistiquesServiceTest extends TestCase
         $plateformeParamRepo = $this->createStub(PlateformeAdmissionParametreRepository::class);
         $plateformeParamRepo->method('findByCampagneIndexedByAnnee')->willReturn([]);
 
-        $typeDiplomePlateformeRepo = $this->createStub(TypeDiplomePlateformeAdmissionRepository::class);
         $composanteRepo = $this->createStub(ComposanteRepository::class);
         $typeDiplomeRepo = $this->createStub(TypeDiplomeRepository::class);
         $chartBuilder = $this->createStub(ChartBuilderInterface::class);
@@ -218,7 +214,6 @@ final class OffreStatistiquesServiceTest extends TestCase
             $anneeRepo,
             $plateformeRepo,
             $plateformeParamRepo,
-            $typeDiplomePlateformeRepo,
             $composanteRepo,
             $typeDiplomeRepo,
             $chartBuilder
@@ -239,6 +234,241 @@ final class OffreStatistiquesServiceTest extends TestCase
         self::assertArrayHasKey('L2', $parNiveau);
         self::assertSame(40, $parNiveau['L1']['capaciteTotale']);
         self::assertSame(45, $parNiveau['L2']['capaciteTotale']);
+    }
+
+    public function testStatsWithPortailInterFormations(): void
+    {
+        $campagne = new CampagneCollecte();
+        $this->setId($campagne, 1);
+        $campagne->setLibelle('2026-2027');
+
+        $composante = new Composante();
+        $this->setId($composante, 10);
+        $composante->setLibelle('UFR Sciences');
+
+        $typeDiplome = new TypeDiplome();
+        $typeDiplome->setLibelle('Licence');
+        $typeDiplome->setLibelleCourt('LICENCE');
+
+        $portail = new \App\Entity\Portail();
+        $this->setId($portail, 50);
+        $portail->setLibelle('Portail Sciences');
+        $portail->setCampagne($campagne);
+
+        // Formation 1: Licence Mathématiques
+        $f1 = new Formation($campagne);
+        $this->setId($f1, 100);
+        $f1->setComposantePorteuse($composante);
+        $f1->setTypeDiplome($typeDiplome);
+
+        $p1 = new Parcours($f1);
+        $this->setId($p1, 101);
+        $p1->setLibelle('Parcours Math');
+        $f1->addParcour($p1);
+
+        $a1 = new \App\Entity\Annee();
+        $this->setId($a1, 301);
+        $a1->setOrdre(1);
+        $a1->setIsOuvert(true);
+        $a1->setCapaciteAccueil(100);
+        $a1->setPortail($portail);
+        $a1->setParcours($p1);
+        $portail->addAnnee($a1);
+
+        // Formation 2: Licence Physique
+        $f2 = new Formation($campagne);
+        $this->setId($f2, 200);
+        $f2->setComposantePorteuse($composante);
+        $f2->setTypeDiplome($typeDiplome);
+
+        $p2 = new Parcours($f2);
+        $this->setId($p2, 201);
+        $p2->setLibelle('Parcours Physique');
+        $f2->addParcour($p2);
+
+        $a2 = new \App\Entity\Annee();
+        $this->setId($a2, 401);
+        $a2->setOrdre(1);
+        $a2->setIsOuvert(true);
+        $a2->setCapaciteAccueil(100);
+        $a2->setPortail($portail);
+        $a2->setParcours($p2);
+        $portail->addAnnee($a2);
+
+        $dpe1 = new \App\Entity\DpeParcours();
+        $this->setId($dpe1, 501);
+        $dpe1->setParcours($p1);
+
+        $dpe2 = new \App\Entity\DpeParcours();
+        $this->setId($dpe2, 502);
+        $dpe2->setParcours($p2);
+
+        $formationRepo = $this->createStub(FormationRepository::class);
+        $formationRepo->method('findByCampagneWithRelations')->willReturn([$f1, $f2]);
+
+        $dpeParcoursRepo = $this->createStub(DpeParcoursRepository::class);
+        $dpeParcoursRepo->method('findByCampagneCollecte')->willReturn([$dpe1, $dpe2]);
+
+        $anneeRepo = $this->createStub(AnneeRepository::class);
+        $anneeRepo->method('findByCampagneIndexedByParcours')->willReturn([
+            101 => [$a1],
+            201 => [$a2],
+        ]);
+
+        $plateformeRepo = $this->createStub(PlateformeAdmissionRepository::class);
+        $plateformeRepo->method('findBy')->willReturn([]);
+
+        $plateformeParamRepo = $this->createStub(PlateformeAdmissionParametreRepository::class);
+        $plateformeParamRepo->method('findByCampagneIndexedByAnnee')->willReturn([]);
+
+        $composanteRepo = $this->createStub(ComposanteRepository::class);
+        $typeDiplomeRepo = $this->createStub(TypeDiplomeRepository::class);
+        $chartBuilder = $this->createStub(ChartBuilderInterface::class);
+        $chartBuilder->method('createChart')->willReturn(new Chart(Chart::TYPE_BAR));
+
+        $service = new OffreStatistiquesService(
+            $formationRepo,
+            $dpeParcoursRepo,
+            $anneeRepo,
+            $plateformeRepo,
+            $plateformeParamRepo,
+            $composanteRepo,
+            $typeDiplomeRepo,
+            $chartBuilder
+        );
+
+        $stats = $service->getStats($campagne);
+
+        // Capacité globale : 100 (le portail est dédoublonné entre les 2 formations)
+        // Au lieu de 100 + 100 = 200
+        self::assertSame(100, $stats['kpi']['totalCapacite']);
+        self::assertSame(100, $stats['kpi']['totalNiveau1']);
+        self::assertSame(2, $stats['kpi']['totalFormations']);
+        self::assertSame(2, $stats['kpi']['totalParcours']);
+    }
+
+    public function testDedupliqueCapaciteParTroncCommunEtConserveParcoursSpecifique(): void
+    {
+        $campagne = new CampagneCollecte();
+        $composante = new Composante();
+        $this->setId($composante, 10);
+        $typeDiplome = (new TypeDiplome())->setLibelle('Licence')->setLibelleCourt('L');
+        $this->setId($typeDiplome, 20);
+
+        $f = new Formation(null);
+        $this->setId($f, 100);
+        $f->setComposantePorteuse($composante);
+        $f->setTypeDiplome($typeDiplome);
+        $f->setTroncsCommuns([
+            [
+                'id' => 'tc_info',
+                'nom' => 'Tronc commun Info',
+                'annees' => [1],
+                'parcours' => [101, 102],
+            ],
+        ]);
+
+        $p1 = new Parcours($f);
+        $this->setId($p1, 101);
+        $p1->setLibelle('Ingénierie Logicielle');
+        $f->addParcour($p1);
+
+        $a1 = new \App\Entity\Annee();
+        $this->setId($a1, 301);
+        $a1->setOrdre(1);
+        $a1->setIsOuvert(true);
+        $a1->setCapaciteAccueil(80);
+        $a1->setParcours($p1);
+
+        $p2 = new Parcours($f);
+        $this->setId($p2, 102);
+        $p2->setLibelle('Intelligence Artificielle');
+        $f->addParcour($p2);
+
+        $a2 = new \App\Entity\Annee();
+        $this->setId($a2, 302);
+        $a2->setOrdre(1);
+        $a2->setIsOuvert(true);
+        $a2->setCapaciteAccueil(80);
+        $a2->setParcours($p2);
+
+        $p3 = new Parcours($f);
+        $this->setId($p3, 103);
+        $p3->setLibelle('Cybersécurité');
+        $f->addParcour($p3);
+
+        $a3 = new \App\Entity\Annee();
+        $this->setId($a3, 303);
+        $a3->setOrdre(1);
+        $a3->setIsOuvert(true);
+        $a3->setCapaciteAccueil(20);
+        $a3->setParcours($p3);
+
+        $dpe1 = (new \App\Entity\DpeParcours())->setParcours($p1);
+        $dpe2 = (new \App\Entity\DpeParcours())->setParcours($p2);
+        $dpe3 = (new \App\Entity\DpeParcours())->setParcours($p3);
+
+        $formationRepo = $this->createStub(FormationRepository::class);
+        $formationRepo->method('findByCampagneWithRelations')->willReturn([$f]);
+
+        $dpeParcoursRepo = $this->createStub(DpeParcoursRepository::class);
+        $dpeParcoursRepo->method('findByCampagneCollecte')->willReturn([$dpe1, $dpe2, $dpe3]);
+
+        $anneeRepo = $this->createStub(AnneeRepository::class);
+        $anneeRepo->method('findByCampagneIndexedByParcours')->willReturn([
+            101 => [$a1],
+            102 => [$a2],
+            103 => [$a3],
+        ]);
+
+        $plateformeRepo = $this->createStub(PlateformeAdmissionRepository::class);
+        $plateformeRepo->method('findBy')->willReturn([]);
+
+        $plateformeParamRepo = $this->createStub(PlateformeAdmissionParametreRepository::class);
+        $plateformeParamRepo->method('findByCampagneIndexedByAnnee')->willReturn([]);
+
+        $composanteRepo = $this->createStub(ComposanteRepository::class);
+        $typeDiplomeRepo = $this->createStub(TypeDiplomeRepository::class);
+        $chartBuilder = $this->createStub(ChartBuilderInterface::class);
+        $chartBuilder->method('createChart')->willReturn(new Chart(Chart::TYPE_BAR));
+
+        $service = new OffreStatistiquesService(
+            $formationRepo,
+            $dpeParcoursRepo,
+            $anneeRepo,
+            $plateformeRepo,
+            $plateformeParamRepo,
+            $composanteRepo,
+            $typeDiplomeRepo,
+            $chartBuilder
+        );
+
+        $stats = $service->getStats($campagne);
+
+        // Capacité globale : 80 (Tronc Commun Info) + 20 (Cybersécurité spécifique) = 100
+        self::assertSame(100, $stats['kpi']['totalCapacite']);
+        self::assertSame(100, $stats['kpi']['totalNiveau1']);
+        self::assertSame(1, $stats['kpi']['totalFormations']);
+        self::assertSame(3, $stats['kpi']['totalParcours']);
+
+        // Vérification des lignes détaillées
+        $detail = $stats['detailLignes'];
+        self::assertCount(3, $detail);
+
+        self::assertSame('Ingénierie Logicielle', $detail[0]['parcours']);
+        self::assertSame(80, $detail[0]['capaciteAccueil']);
+        self::assertSame(80, $detail[0]['capaciteComptee']);
+        self::assertSame('Tronc commun : Tronc commun Info', $detail[0]['mutualisation']);
+
+        self::assertSame('Intelligence Artificielle', $detail[1]['parcours']);
+        self::assertSame(80, $detail[1]['capaciteAccueil']);
+        self::assertSame(0, $detail[1]['capaciteComptee']);
+        self::assertSame('Tronc commun : Tronc commun Info', $detail[1]['mutualisation']);
+
+        self::assertSame('Cybersécurité', $detail[2]['parcours']);
+        self::assertSame(20, $detail[2]['capaciteAccueil']);
+        self::assertSame(20, $detail[2]['capaciteComptee']);
+        self::assertSame('', $detail[2]['mutualisation']);
     }
 
     private function setId(object $entity, int $id): void

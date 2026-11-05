@@ -91,4 +91,32 @@ class EtablissementApiKeysTest extends TestCase
         $etablissement->setApiKeys(null);
         $this->assertSame([], $etablissement->getApiKeys());
     }
+
+    public function testOrebutApiDefaultFallback(): void
+    {
+        $etablissement = new Etablissement();
+        $this->assertFalse($etablissement->hasOrebutApi());
+        $this->assertNull($etablissement->getOrebutApiConfiguration());
+        $this->assertSame('https://orebut.iut.fr/api', $etablissement->getOrebutApiUrl());
+    }
+
+    public function testOrebutApiConfiguration(): void
+    {
+        $etablissement = new Etablissement();
+        $etablissement->setApiKeys([
+            [
+                'plateforme' => 'ORéBUT',
+                'url' => 'https://custom-orebut.mon-universite.fr/api/',
+                'apiKey' => 'mon_token_secret',
+            ],
+        ]);
+
+        $this->assertTrue($etablissement->hasOrebutApi());
+        $config = $etablissement->getOrebutApiConfiguration();
+        $this->assertNotNull($config);
+        $this->assertSame('ORéBUT', $config['plateforme']);
+        $this->assertSame('https://custom-orebut.mon-universite.fr/api/', $config['url']);
+        $this->assertSame('https://custom-orebut.mon-universite.fr/api', $etablissement->getOrebutApiUrl());
+    }
 }
+

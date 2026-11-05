@@ -61,3 +61,21 @@ Chaque grand domaine a une section avec route `app_section_<key>` ; le contrôle
   paramètres `label`, `route`, `menuKey`, `parentRoute`).
 - Niveau dynamique (entité) : injecter `App\Navigation\Breadcrumb\Breadcrumb` puis
   `$breadcrumb->add($formation->getDisplay(), 'formation_v2_voir', ['id' => $formation->getId()])`.
+
+## Accessibilité de la navigation principale
+
+Les dropdowns et méga-menus utilisent un modèle de dépliage de liens, sans rôles ARIA `menu`/`menuitem` :
+Tab parcourt les liens normalement. Le lien de section reste navigable ; un bouton distinct ouvre ses sous-liens
+(Entrée/Espace natifs), avec `aria-controls` et `aria-expanded`. Sans route de section, le bouton porte aussi le libellé.
+
+`navbar-dropdown` synchronise visibilité et état accessible : survol à la souris, ouverture au focus sur les liens,
+maintien tant que le focus est dans le groupe, fermeture en quittant le groupe ou au clic extérieur ; Échap ferme
+et rend le focus au bouton. Le survol ignore les pointeurs tactiles pour ne pas inverser la première activation.
+Les menus compte et campagne utilisent le même contrôleur et possèdent aussi un déclencheur identifié.
+
+`base.html.twig` propose en premier lien « Aller au contenu », visible au focus, vers `main#main-content`
+avec `tabindex="-1"`. La marge de défilement tient compte de l’en-tête sticky via `--page-header-offset`.
+
+Le rendu reste dans `templates/_layout/_breadcrumb.html.twig`, sans dépendance à shadcn. Seule la dernière
+entrée porte `aria-current="page"` ; les séparateurs sont masqués aux technologies d’assistance et les liens
+possèdent un focus visible.

@@ -5,6 +5,9 @@ namespace App\Serializer;
 use App\Enums\ModaliteEnseignementEnum;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
+/**
+ * @deprecated Use referential string keys and BackedEnumNormalizer for legacy compatibility.
+ */
 class ModaliteEnseignementEnumNormalizer implements DenormalizerInterface
 {
     public function supportsDenormalization($data, string $type, ?string $format = null, array $context = []): bool

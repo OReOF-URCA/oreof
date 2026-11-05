@@ -41,6 +41,11 @@ class ElementConstitutif implements McccCompletionCheckerInterface
     #[ORM\Column(length: 30, nullable: true, enumType: ModaliteEnseignementEnum::class)]
     private ?ModaliteEnseignementEnum $modaliteEnseignement = null;
 
+    /** Canonical referential key (nullable until backfilled from the legacy column). */
+    #[Groups(['parcours_json_versioning', 'DTO_json_versioning'])]
+    #[ORM\Column(name: 'modaliteEnseignement_referentiel', length: 100, nullable: true)]
+    private ?string $modaliteEnseignementReferentiel = null;
+
     #[ORM\Column(nullable: true)]
     private ?float $ects;
 
@@ -213,14 +218,54 @@ class ElementConstitutif implements McccCompletionCheckerInterface
         return $this->id;
     }
 
+    /**
+     * Stable persisted key, ready for configurable referential values.
+     * The legacy enum accessor remains unchanged for existing consumers.
+     */
+    public function getModaliteEnseignementValue(): ?string
+    {
+        if ($this->modaliteEnseignementReferentiel !== null) {
+            return $this->modaliteEnseignementReferentiel;
+        }
+
+        return $this->modaliteEnseignement === null
+            ? null
+            : \App\Referentiel\ModaliteEnseignement::key($this->modaliteEnseignement);
+    }
+
+    /**
+     * Write a configurable key without losing the existing legacy column.
+     * The legacy enum is only updated when the key has an exact enum match.
+     */
+    public function setModaliteEnseignementValue(?string $key): self
+    {
+        $this->modaliteEnseignementReferentiel = $key;
+        $this->modaliteEnseignement = $key === null ? null : \App\Referentiel\ModaliteEnseignement::legacyCase($key);
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Use getModaliteEnseignementValue() instead. Returns null for custom referential values.
+     */
     public function getModaliteEnseignement(): ?ModaliteEnseignementEnum
     {
+        if ($this->modaliteEnseignementReferentiel !== null) {
+            return \App\Referentiel\ModaliteEnseignement::legacyCase($this->modaliteEnseignementReferentiel);
+        }
+
         return $this->modaliteEnseignement;
     }
 
+    /**
+     * @deprecated Use setModaliteEnseignementValue() instead.
+     */
     public function setModaliteEnseignement(?ModaliteEnseignementEnum $modaliteEnseignement): self
     {
         $this->modaliteEnseignement = $modaliteEnseignement;
+        if ($modaliteEnseignement !== null || \App\Referentiel\ModaliteEnseignement::legacyCase($this->modaliteEnseignementReferentiel) !== null) {
+            $this->modaliteEnseignementReferentiel = $modaliteEnseignement === null ? null : (string) $modaliteEnseignement->value;
+        }
 
         return $this;
     }

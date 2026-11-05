@@ -9,14 +9,15 @@
 
 namespace App\Form;
 
+
+use App\Form\Type\LegacyReferentielEnumType;
 use App\Entity\Composante;
 use App\Entity\Parcours;
-use App\Enums\NiveauLangueEnum;
 use App\Enums\RegimeInscriptionEnum;
+use App\Form\Type\NiveauLangueType;
 use App\Form\Type\TextareaAutoSaveType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use UnitEnum;
@@ -26,11 +27,9 @@ class ParcoursStep5Type extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('niveauFrancais', EnumType::class, [
-                'class' => NiveauLangueEnum::class,
-                'choice_label' => static function (NiveauLangueEnum $choice): string {
-                    return $choice->libelle();
-                },
+            ->add('niveauFrancais', NiveauLangueType::class, [
+                'getter' => static fn (Parcours $entity): ?string => $entity->getNiveauFrancaisValue(),
+                'setter' => static function (Parcours $entity, ?string $value): void { $entity->setNiveauFrancaisValue($value); },
             ])
             ->add('prerequis', TextareaAutoSaveType::class, [
                 'attr' => ['rows' => 15, 'maxlength' => 3000],
@@ -48,9 +47,10 @@ class ParcoursStep5Type extends AbstractType
                 },
                 'autocomplete' => true,
             ])
-            ->add('regimeInscription', EnumType::class, [
-                'class' => RegimeInscriptionEnum::class,
+            ->add('regimeInscription', \App\Form\Type\RegimeInscriptionType::class, [
                 'translation_domain' => 'enum',
+                'getter' => static fn ($entity): array => $entity->getRegimeInscriptionValues(),
+                'setter' => static function ($entity, array $values): void { $entity->setRegimeInscription($values); },
                 'multiple' => true,
                 'expanded' => true,
                 'choice_attr' => function ($choice) {

@@ -119,17 +119,28 @@ final class OffreValidationService
                     // Récupérer la configuration des plateformes pour le type de diplôme
                     $formation = $parcours->getFormation();
                     $typeDiplome = $formation?->getTypeDiplome();
-                    $tpaMap = [];
-                    if ($typeDiplome !== null) {
+                    // Plateformes à capacité obligatoire pour cette année (id => libellé), résolues comme sur la
+                    // page « Configurer » : plateforme active et proposée pour l'année. Plusieurs configurations
+                    // peuvent exister pour une même plateforme : on ne garde que celles qui couvrent l'année.
+                    $anneeOrdre = $annee->getOrdre();
+                    $plateformesCapaciteRequise = [];
+                    if ($typeDiplome !== null && $anneeOrdre !== null) {
                         $typeDiplId = $typeDiplome->getId();
                         $tpaList = ($tpaByTypeDiplome !== null && $typeDiplId !== null)
                             ? ($tpaByTypeDiplome[$typeDiplId] ?? [])
                             : $typeDiplome->getTypeDiplomePlateformeAdmissions();
 
                         foreach ($tpaList as $tpa) {
-                            if ($tpa->getCampagne() === $campagne && $tpa->getPlateforme() !== null) {
-                                $tpaMap[$tpa->getPlateforme()->getId()] = $tpa;
+                            $tpaPlateforme = $tpa->getPlateforme();
+                            if ($tpa->getCampagne() !== $campagne
+                                || $tpaPlateforme === null
+                                || !$tpaPlateforme->getActive()
+                                || !in_array($anneeOrdre, array_map('intval', $tpa->getAnnees() ?? []), true)
+                                || !in_array($anneeOrdre, array_map('intval', $tpa->getAnneesCapaciteRequise() ?? []), true)
+                            ) {
+                                continue;
                             }
+                            $plateformesCapaciteRequise[$tpaPlateforme->getId()] = $tpaPlateforme->getLibelle() ?? 'Inconnue';
                         }
                     }
 
@@ -151,9 +162,7 @@ final class OffreValidationService
                         if ($platId !== null) {
                             $seenPlateformeIds[$platId] = true;
                         }
-                        $tpa = $platId ? ($tpaMap[$platId] ?? null) : null;
-                        $anneeOrdre = $annee->getOrdre();
-                        $isCapaciteRequise = $tpa !== null && $anneeOrdre !== null && $tpa->isCapaciteRequise($anneeOrdre);
+                        $isCapaciteRequise = $platId !== null && isset($plateformesCapaciteRequise[$platId]);
 
                         $capaciteGlobale = $param->getCapaciteGlobale();
                         $capaciteFi = $param->getCapaciteFi();
@@ -176,6 +185,25 @@ final class OffreValidationService
                                 $sujet,
                                 $anneeOrdre,
                                 $platLibelle
+                            );
+                        }
+
+                        // MonMaster : la capacité globale saisie doit valoir T = A (classique) + B (alternance) + C (spécifique)
+                        $sommeDetail = ($capaciteFi ?? 0) + ($capaciteAlternance ?? 0) + ($capaciteSpecifique ?? 0);
+                        if ($param->isActive()
+                            && in_array(strtolower($plateforme?->getCode() ?? ''), ['mm', 'monmaster'], true)
+                            && !$hasNegativeCapacite
+                            && $capaciteGlobale !== null
+                            && $sommeDetail > 0
+                            && $capaciteGlobale !== $sommeDetail
+                        ) {
+                            $anomalies[] = sprintf(
+                                '%s (Année %d) : capacité globale %s (%d) différente de classique + alternance + spécifique (%d).',
+                                $sujet,
+                                $anneeOrdre,
+                                $platLibelle,
+                                $capaciteGlobale,
+                                $sommeDetail
                             );
                         }
 
@@ -211,18 +239,14 @@ final class OffreValidationService
                     }
 
                     // Contrôle 4 : Plateforme avec capacité obligatoire configurée pour l'année mais sans aucun paramètre enregistré
-                    $anneeOrdre = $annee->getOrdre();
-                    if ($anneeOrdre !== null) {
-                        foreach ($tpaMap as $platId => $tpa) {
-                            if (!isset($seenPlateformeIds[$platId]) && $tpa->isCapaciteRequise($anneeOrdre)) {
-                                $platLibelle = $tpa->getPlateforme()?->getLibelle() ?? 'Inconnue';
-                                $anomalies[] = sprintf(
-                                    '%s (Année %d) : plateforme %s inactive et sans capacité alors que sa capacité est obligatoire.',
-                                    $sujet,
-                                    $anneeOrdre,
-                                    $platLibelle
-                                );
-                            }
+                    foreach ($plateformesCapaciteRequise as $platId => $platLibelle) {
+                        if (!isset($seenPlateformeIds[$platId])) {
+                            $anomalies[] = sprintf(
+                                '%s (Année %d) : plateforme %s inactive et sans capacité alors que sa capacité est obligatoire.',
+                                $sujet,
+                                $anneeOrdre,
+                                $platLibelle
+                            );
                         }
                     }
                 }

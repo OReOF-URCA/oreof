@@ -1,0 +1,74 @@
+<div {{ stimulus_controller('fichematiere--parcours-porteur', {
+    url: path('fiche_matiere_v2_mutualisation_change_parcours_porteur_ajax', {id: ficheMatiere.id}),
+    currentFormation: ficheMatiere.parcours != null and ficheMatiere.parcours.formation != null ? ficheMatiere.parcours.formation.id : 0,
+    currentParcours: ficheMatiere.parcours != null ? ficheMatiere.parcours.id : 0,
+}) }}>
+    <div class="alert alert-warning mb-3">
+        <strong>Attention</strong><br>
+        Le déplacement change le parcours porteur de la fiche matière. Si l’ancien parcours porteur utilise encore cette
+        fiche dans ses EC,
+        il sera automatiquement conservé dans la liste des parcours mutualisés.<br>
+        Pensez à vérifier ensuite les compétences, volumes horaires et MCCC si vous changez de mention.
+    </div>
+
+    <dl class="mb-3">
+        <dt>Parcours porteur actuel</dt>
+        <dd>
+            {% if ficheMatiere.parcours != null and ficheMatiere.parcours.formation != null %}
+                {{ ficheMatiere.parcours.formation.display }}
+                /
+                {% if ficheMatiere.parcours.isParcoursDefaut %}
+                    <span class="badge bg-info">Parcours par défaut</span>
+                {% else %}
+                    {{ ficheMatiere.parcours.display }}
+                {% endif %}
+            {% else %}
+                <span class="badge bg-warning">Aucun parcours porteur défini</span>
+            {% endif %}
+        </dd>
+    </dl>
+
+    <div class="mb-3">
+        <label for="change_parcours_porteur_formation" class="form-label">Choisir une mention</label>
+        <select
+                id="change_parcours_porteur_formation"
+                class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
+                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
+                {{ stimulus_target('fichematiere--parcours-porteur', 'formation') }}
+                data-action="change->fichematiere--parcours-porteur#changeFormation"
+        >
+            <option value="">Choisir une mention</option>
+            {% for formation in formations %}
+                <option value="{{ formation.id }}">{{ formation.displayLong }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="change_parcours_porteur_parcours" class="form-label">Choisir le parcours porteur</label>
+        <select
+                id="change_parcours_porteur_parcours"
+                class="form-select"
+                {{ stimulus_target('fichematiere--parcours-porteur', 'parcours') }}
+                data-action="change->fichematiere--parcours-porteur#updateSubmitState"
+        >
+            <option value="">Choisir d'abord une mention</option>
+        </select>
+        <div class="form-text">
+            Si la mention choisie ne contient qu’un parcours par défaut, il sera proposé automatiquement.
+            Le bouton reste désactivé tant qu’aucun vrai changement n’est sélectionné.
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button
+                type="button"
+                class="btn btn-warning"
+                {{ stimulus_target('fichematiere--parcours-porteur', 'submit') }}
+                data-action="click->fichematiere--parcours-porteur#deplacer"
+                disabled
+        >
+            Déplacer la fiche matière
+        </button>
+    </div>
+</div>

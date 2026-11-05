@@ -15,6 +15,7 @@ use App\Entity\PlateformeAdmission;
 use App\Entity\PlateformeAdmissionParametre;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeDiplomePlateformeAdmission;
+use App\Entity\Ville;
 use App\Repository\AnneeRepository;
 use App\Repository\CampagneCollecteRepository;
 use App\Repository\DpeParcoursRepository;
@@ -756,6 +757,121 @@ final class OffreAnnexesExportService
     }
 
     /**
+     * Lieu affiché dans les exports : localisation saisie sur le parcours, puis ancien champ ville,
+     * puis première localisation de la mention.
+     */
+    public function resolveLieu(Parcours $parcours): string
+    {
+        $ville = $parcours->getLocalisation()
+            ?? $parcours->getVille()
+            ?? $parcours->getFormation()?->getLocalisationMention()->first();
+
+        return $ville instanceof Ville ? (string) $ville->getLibelle() : 'Reims';
+    }
+
+    /**
+     * Intégration à une plateforme : la case cochée fait foi quand le paramètre existe ;
+     * sans paramètre (année jamais configurée), on suit l'ouverture.
+     */
+    public function isIntegrationPlateforme(?PlateformeAdmissionParametre $param, bool $isOuvert): bool
+    {
+        if ($param === null) {
+            return $isOuvert;
+        }
+
+        return $isOuvert && $param->isActive();
+    }
+
+    /**
+     * Résout les informations de mutualisation (Tronc Commun ou Portail) pour un parcours et une année donnés.
+     * Renvoie null si le parcours n'est pas mutualisé sur cette année.
+     *
+     * @return array{key: string, nom: string, id: string, type: 'tc'|'portail'}|null
+     */
+    public function resolveMutualisationGroup(Formation $formation, Parcours $parcours, Annee $annee): ?array
+    {
+        $ordre = $annee->getOrdre();
+        if ($ordre === null) {
+            return null;
+        }
+
+        // 1. Portail inter-formations ou intra-formation
+        $portail = $annee->getPortail();
+        if ($portail !== null && $portail->getId() !== null) {
+            return [
+                'key' => sprintf('portail-%d-%d-%d', (int) $formation->getId(), (int) $portail->getId(), $ordre),
+                'nom' => $portail->getLibelle() ?: sprintf('Portail #%d', $portail->getId()),
+                'id' => (string) $portail->getId(),
+                'type' => 'portail',
+            ];
+        }
+
+        // 2. Tronc commun intra-formation
+        if ($formation->getParcours()->count() > 1) {
+            $tc = $formation->getTroncCommunForParcours($parcours, $ordre);
+            if ($tc !== null) {
+                return [
+                    'key' => sprintf('tc-%d-%s-%d', (int) $formation->getId(), (string) $tc['id'], $ordre),
+                    'nom' => !empty($tc['nom']) ? trim((string) $tc['nom']) : 'Tronc commun',
+                    'id' => (string) $tc['id'],
+                    'type' => 'tc',
+                ];
+            }
+
+            // Fallback rétrocompatible pour les formations sans liste troncs_communs explicite
+            if ($formation->isAnneeTroncCommun($ordre, $parcours)) {
+                return [
+                    'key' => sprintf('tc-%d-legacy-%d', (int) $formation->getId(), $ordre),
+                    'nom' => 'Tronc commun',
+                    'id' => 'legacy',
+                    'type' => 'tc',
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Formate le libellé d'un groupe mutualisé (Tronc commun ou Portail) avec la liste des parcours membres.
+     *
+     * @param list<string> $parcoursLibelles
+     */
+    public function formatGroupParcoursLabel(string $groupNom, array $parcoursLibelles, string $groupType = 'tc'): string
+    {
+        $uniqueLibelles = array_values(array_unique(array_filter($parcoursLibelles)));
+        $parcoursListStr = implode(' / ', $uniqueLibelles);
+        $cleanNom = trim($groupNom);
+
+        if ($groupType === 'portail') {
+            if (stripos($cleanNom, 'portail') !== false) {
+                return count($uniqueLibelles) > 0 ? sprintf('%s : %s', $cleanNom, $parcoursListStr) : $cleanNom;
+            }
+
+            return count($uniqueLibelles) > 0 ? sprintf('Portail %s : %s', $cleanNom, $parcoursListStr) : sprintf('Portail %s', $cleanNom);
+        }
+
+        if ($cleanNom === '') {
+            $cleanNom = 'Tronc commun';
+        }
+
+        if (count($uniqueLibelles) > 1) {
+            if (stripos($cleanNom, 'tronc commun') !== false) {
+                return sprintf('%s : %s', $cleanNom, $parcoursListStr);
+            }
+
+            return sprintf('Tronc commun %s : %s', $cleanNom, $parcoursListStr);
+        }
+
+        // Un seul parcours présent dans l'export pour ce tronc commun
+        if (stripos($cleanNom, 'tronc commun') !== false) {
+            return count($uniqueLibelles) === 1 ? sprintf('%s : %s', $cleanNom, $uniqueLibelles[0]) : $cleanNom;
+        }
+
+        return count($uniqueLibelles) === 1 ? sprintf('Tronc commun %s : %s', $cleanNom, $uniqueLibelles[0]) : sprintf('Tronc commun %s', $cleanNom);
+    }
+
+    /**
      * Unified row builder for eCandidat.
      *
      * @param array<int, DpeParcours> $allDpeParcours
@@ -780,6 +896,16 @@ final class OffreAnnexesExportService
         array $paramsN1ByAnnee,
     ): array {
         $rows = [];
+        /** @var array<string, list<string>> $tcParcours */
+        $tcParcours = [];
+        /** @var array<string, list<string>> $tcLieux */
+        $tcLieux = [];
+        /** @var array<string, string> $tcNoms */
+        $tcNoms = [];
+        /** @var array<string, string> $tcTypes */
+        $tcTypes = [];
+        /** @var array<string, list<string>> $tcRemarques */
+        $tcRemarques = [];
 
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
@@ -811,9 +937,7 @@ final class OffreAnnexesExportService
 
             $diplCode = strtoupper($typeDiplome->getLibelleCourt() ?? '');
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
-            $loc = $formation->getLocalisationMention()->first();
-            $locVille = $loc instanceof \App\Entity\Ville ? (string)$loc->getLibelle() : 'Reims';
-            $ville = $parcours->getVille()?->getLibelle() ?? $locVille;
+            $ville = $this->resolveLieu($parcours);
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
 
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
@@ -876,7 +1000,7 @@ final class OffreAnnexesExportService
 
                 // N data
                 $isOuvertN = $dpePar->isOuvert() && $annee->isOuvert();
-                $isECN = ($param && $param->isActive()) || $isOuvertN;
+                $isECN = $this->isIntegrationPlateforme($param, $isOuvertN);
                 $capaciteN = $param?->getCapaciteGlobale() ?? $annee->getCapaciteAccueil();
 
                 // N-1 Data
@@ -886,12 +1010,32 @@ final class OffreAnnexesExportService
                 $capaciteN1 = '';
                 if ($n1['hasN1']) {
                     $ouvertureN1 = $n1['isOuvertN1'] ? 'OUI' : 'NON';
-                    $integrationEcN1 = ($n1['paramN1'] && $n1['paramN1']->isActive()) ? 'OUI' : ($n1['isOuvertN1'] ? 'OUI' : 'NON');
+                    $integrationEcN1 = $this->isIntegrationPlateforme($n1['paramN1'], $n1['isOuvertN1']) ? 'OUI' : 'NON';
                     $capaciteN1 = $n1['paramN1']?->getCapaciteGlobale() ?? $n1['anneeN1']?->getCapaciteAccueil() ?? '';
                 }
+                $mutualisation = $this->resolveMutualisationGroup($formation, $parcours, $annee);
+                $groupKey = $mutualisation['key'] ?? null;
+                if ($groupKey !== null) {
+                    if (isset($rows[$groupKey])) {
+                        $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        if ($ville !== '') {
+                            $tcLieux[$groupKey][] = $ville;
+                        }
+                        if ($param?->getRemarques()) {
+                            $tcRemarques[$groupKey][] = $param->getRemarques();
+                        }
+                        continue;
+                    }
+                    $tcParcours[$groupKey] = [(string) $parcours->getLibelle()];
+                    $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
+                    $tcNoms[$groupKey] = $mutualisation['nom'];
+                    $tcTypes[$groupKey] = $mutualisation['type'];
+                    $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                }
+
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
-                $rows[] = [
+                $row = [
                     'composante' => $compLibelle,
                     'diplome' => $diplCode ?: $typeDiplome->getLibelle(),
                     'mention' => $diffs['mention'],
@@ -907,12 +1051,31 @@ final class OffreAnnexesExportService
                     'capacite_n' => $capaciteN,
                     'remarques' => $param?->getRemarques() ?? '',
                 ];
+
+                if ($groupKey !== null) {
+                    $rows[$groupKey] = $row;
+                } else {
+                    $rows[] = $row;
+                }
             }
         }
 
+        foreach ($tcParcours as $gKey => $libelles) {
+            $nom = $tcNoms[$gKey] ?? 'Tronc commun';
+            $gType = $tcTypes[$gKey] ?? 'tc';
+            $rows[$gKey]['parcours'] = $this->formatGroupParcoursLabel($nom, $libelles, $gType);
+            if (!empty($tcLieux[$gKey])) {
+                $rows[$gKey]['lieu'] = implode(' / ', array_unique($tcLieux[$gKey]));
+            }
+            if (!empty($tcRemarques[$gKey])) {
+                $rows[$gKey]['remarques'] = implode(' | ', array_unique($tcRemarques[$gKey]));
+            }
+        }
+        $rows = array_values($rows);
+
         usort($rows, static fn($a, $b) => strcmp(
-            ($a['composante']) . ($a['diplome'] ?? '') . ($a['mention'] ?? '') . ($a['niveau'] ?? ''),
-            ($b['composante']) . ($b['diplome'] ?? '') . ($b['mention'] ?? '') . ($b['niveau'] ?? '')
+            ($a['composante']) . ($a['diplome'] ?? '') . ((string) ($a['mention'] ?? '')) . ($a['niveau'] ?? '') . ((string) ($a['parcours'] ?? '')),
+            ($b['composante']) . ($b['diplome'] ?? '') . ((string) ($b['mention'] ?? '')) . ($b['niveau'] ?? '') . ((string) ($b['parcours'] ?? ''))
         ));
 
         return $rows;
@@ -941,6 +1104,16 @@ final class OffreAnnexesExportService
         array $paramsN1ByAnnee,
     ): array {
         $rows = [];
+        /** @var array<string, list<string>> $tcParcours */
+        $tcParcours = [];
+        /** @var array<string, list<string>> $tcLieux */
+        $tcLieux = [];
+        /** @var array<string, string> $tcNoms */
+        $tcNoms = [];
+        /** @var array<string, string> $tcTypes */
+        $tcTypes = [];
+        /** @var array<string, list<string>> $tcRemarques */
+        $tcRemarques = [];
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
             $formation = $parcours?->getFormation();
@@ -970,9 +1143,7 @@ final class OffreAnnexesExportService
 
             $diplCode = strtoupper($typeDiplome->getLibelleCourt() ?? '');
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
-            $loc = $formation->getLocalisationMention()->first();
-            $locVille = $loc instanceof \App\Entity\Ville ? (string)$loc->getLibelle() : 'Reims';
-            $ville = $parcours->getVille()?->getLibelle() ?? $locVille;
+            $ville = $this->resolveLieu($parcours);
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
             $typeRecrutement = in_array($diplCode, ['BUT', 'DEUST'], true) ? 'Sélective' : 'Non sélective';
 
@@ -996,21 +1167,55 @@ final class OffreAnnexesExportService
                     }
                 }
 
-                $capaciteN = ($param && $param->isActive() && $param->getCapaciteGlobale() !== null)
-                    ? $param->getCapaciteGlobale()
-                    : $annee->getCapaciteAccueil();
+                // N data : un parcours/une année fermé(e) ou non intégré(e) à Parcoursup n'a pas de capacité N
+                $isPsupN = $this->isIntegrationPlateforme($param, $dpePar->isOuvert() && $annee->isOuvert());
+                $capaciteN = 0;
+                if ($isPsupN) {
+                    $capaciteN = ($param && $param->getCapaciteGlobale() !== null)
+                        ? $param->getCapaciteGlobale()
+                        : $annee->getCapaciteAccueil();
+                }
 
                 // N-1 Data
                 $n1 = $this->resolveN1Data($parcours, $ordre, $psupPlatform, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee);
+                $isPsupN1 = $n1['hasN1'] && $this->isIntegrationPlateforme($n1['paramN1'], $n1['isOuvertN1']);
+
+                // Ni ouvert en N ni en N-1 sur Parcoursup : rien à présenter
+                if (!$isPsupN && !$isPsupN1) {
+                    continue;
+                }
+
                 $capaciteN1 = '';
                 if ($n1['hasN1']) {
                     $capaciteN1 = ($n1['paramN1'] && $n1['paramN1']->isActive() && $n1['paramN1']->getCapaciteGlobale() !== null)
                         ? $n1['paramN1']->getCapaciteGlobale()
                         : ($n1['anneeN1']?->getCapaciteAccueil() ?? '');
                 }
+
+                // Mutualisation (Tronc commun ou Portail) : regroupement uniquement des parcours membres
+                $mutualisation = $this->resolveMutualisationGroup($formation, $parcours, $annee);
+                $groupKey = $mutualisation['key'] ?? null;
+                if ($groupKey !== null) {
+                    if (isset($rows[$groupKey])) {
+                        $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        if ($ville !== '') {
+                            $tcLieux[$groupKey][] = $ville;
+                        }
+                        if ($param?->getRemarques()) {
+                            $tcRemarques[$groupKey][] = $param->getRemarques();
+                        }
+                        continue;
+                    }
+                    $tcParcours[$groupKey] = [(string) $parcours->getLibelle()];
+                    $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
+                    $tcNoms[$groupKey] = $mutualisation['nom'];
+                    $tcTypes[$groupKey] = $mutualisation['type'];
+                    $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                }
+
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
-                $rows[] = [
+                $row = [
                     'composante' => $compLibelle,
                     'diplome' => $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle(),
                     'mention' => $diffs['mention'],
@@ -1023,12 +1228,31 @@ final class OffreAnnexesExportService
                     'capacite_n' => $capaciteN,
                     'remarques' => $param?->getRemarques() ?? '',
                 ];
+
+                if ($groupKey !== null) {
+                    $rows[$groupKey] = $row;
+                } else {
+                    $rows[] = $row;
+                }
             }
         }
 
+        foreach ($tcParcours as $gKey => $libelles) {
+            $nom = $tcNoms[$gKey] ?? 'Tronc commun';
+            $gType = $tcTypes[$gKey] ?? 'tc';
+            $rows[$gKey]['parcours'] = $this->formatGroupParcoursLabel($nom, $libelles, $gType);
+            if (!empty($tcLieux[$gKey])) {
+                $rows[$gKey]['lieu'] = implode(' / ', array_unique($tcLieux[$gKey]));
+            }
+            if (!empty($tcRemarques[$gKey])) {
+                $rows[$gKey]['remarques'] = implode(' | ', array_unique($tcRemarques[$gKey]));
+            }
+        }
+        $rows = array_values($rows);
+
         usort($rows, static fn($a, $b) => strcmp(
-            ($a['composante']) . ($a['diplome']) . ($a['mention']) . ($a['parcours']),
-            ($b['composante']) . ($b['diplome']) . ($b['mention']) . ($b['parcours'])
+            ($a['composante']) . ($a['diplome']) . ((string) $a['mention']) . ((string) $a['parcours']),
+            ($b['composante']) . ($b['diplome']) . ((string) $b['mention']) . ((string) $b['parcours'])
         ));
         return $rows;
     }
@@ -1056,6 +1280,16 @@ final class OffreAnnexesExportService
         array $paramsN1ByAnnee,
     ): array {
         $rows = [];
+        /** @var array<string, list<string>> $tcParcours */
+        $tcParcours = [];
+        /** @var array<string, list<string>> $tcLieux */
+        $tcLieux = [];
+        /** @var array<string, string> $tcNoms */
+        $tcNoms = [];
+        /** @var array<string, string> $tcTypes */
+        $tcTypes = [];
+        /** @var array<string, list<string>> $tcRemarques */
+        $tcRemarques = [];
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
             $formation = $parcours?->getFormation();
@@ -1083,9 +1317,7 @@ final class OffreAnnexesExportService
                 }
             }
 
-            $loc = $formation->getLocalisationMention()->first();
-            $locVille = $loc instanceof \App\Entity\Ville ? (string)$loc->getLibelle() : 'Reims';
-            $ville = $parcours->getVille()?->getLibelle() ?? $locVille;
+            $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
 
@@ -1132,9 +1364,29 @@ final class OffreAnnexesExportService
                     $capSpeN1 = $n1['paramN1']?->getCapaciteSpecifique() ?? 0;
                 }
 
+                $mutualisation = $this->resolveMutualisationGroup($formation, $parcours, $annee);
+                $groupKey = $mutualisation['key'] ?? null;
+                if ($groupKey !== null) {
+                    if (isset($rows[$groupKey])) {
+                        $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        if ($ville !== '') {
+                            $tcLieux[$groupKey][] = $ville;
+                        }
+                        if ($param?->getRemarques()) {
+                            $tcRemarques[$groupKey][] = $param->getRemarques();
+                        }
+                        continue;
+                    }
+                    $tcParcours[$groupKey] = [(string) $parcours->getLibelle()];
+                    $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
+                    $tcNoms[$groupKey] = $mutualisation['nom'];
+                    $tcTypes[$groupKey] = $mutualisation['type'];
+                    $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                }
+
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
-                $rows[] = [
+                $row = [
                     'composante' => $compLibelle,
                     'diplome' => $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle(),
                     'mention' => $diffs['mention'],
@@ -1151,15 +1403,33 @@ final class OffreAnnexesExportService
                     'capacite_fi_n' => $capFiN,
                     'capacite_alt_n' => $capAltN,
                     'capacite_spe_n' => $capSpeN,
-                    'mentions_conseillees' => 'Licences recommandées pour la mention',
                     'remarques' => $param?->getRemarques() ?? '',
                 ];
+
+                if ($groupKey !== null) {
+                    $rows[$groupKey] = $row;
+                } else {
+                    $rows[] = $row;
+                }
             }
         }
 
+        foreach ($tcParcours as $gKey => $libelles) {
+            $nom = $tcNoms[$gKey] ?? 'Tronc commun';
+            $gType = $tcTypes[$gKey] ?? 'tc';
+            $rows[$gKey]['parcours'] = $this->formatGroupParcoursLabel($nom, $libelles, $gType);
+            if (!empty($tcLieux[$gKey])) {
+                $rows[$gKey]['lieu'] = implode(' / ', array_unique($tcLieux[$gKey]));
+            }
+            if (!empty($tcRemarques[$gKey])) {
+                $rows[$gKey]['remarques'] = implode(' | ', array_unique($tcRemarques[$gKey]));
+            }
+        }
+        $rows = array_values($rows);
+
         usort($rows, static fn($a, $b) => strcmp(
-            ($a['composante']) . ($a['mention']) . ($a['parcours']),
-            ($b['composante']) . ($b['mention']) . ($b['parcours'])
+            ($a['composante']) . ((string) $a['mention']) . ((string) $a['parcours']),
+            ($b['composante']) . ((string) $b['mention']) . ((string) $b['parcours'])
         ));
         return $rows;
     }
@@ -1196,9 +1466,7 @@ final class OffreAnnexesExportService
                 continue;
             }
 
-            $loc = $formation->getLocalisationMention()->first();
-            $locVille = $loc instanceof \App\Entity\Ville ? (string)$loc->getLibelle() : 'Reims';
-            $ville = $parcours->getVille()?->getLibelle() ?? $locVille;
+            $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
 
@@ -1273,6 +1541,16 @@ final class OffreAnnexesExportService
         array $paramsN1ByAnnee,
     ): array {
         $rows = [];
+        /** @var array<string, list<string>> $tcParcours */
+        $tcParcours = [];
+        /** @var array<string, list<string>> $tcLieux */
+        $tcLieux = [];
+        /** @var array<string, string> $tcNoms */
+        $tcNoms = [];
+        /** @var array<string, string> $tcTypes */
+        $tcTypes = [];
+        /** @var array<string, list<string>> $tcRemarques */
+        $tcRemarques = [];
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
             $formation = $parcours?->getFormation();
@@ -1292,9 +1570,7 @@ final class OffreAnnexesExportService
                 continue;
             }
 
-            $loc = $formation->getLocalisationMention()->first();
-            $locVille = $loc instanceof \App\Entity\Ville ? (string)$loc->getLibelle() : 'Reims';
-            $ville = $parcours->getVille()?->getLibelle() ?? $locVille;
+            $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
             $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
 
@@ -1363,9 +1639,29 @@ final class OffreAnnexesExportService
                 $capFpN1 = $n1['hasN1'] ? 0 : '';
                 $capAltN1 = $n1['hasN1'] ? ($n1['paramN1']?->getCapaciteAlternance() ?? 0) : '';
                 $capSpeN1 = $n1['hasN1'] ? ($n1['paramN1']?->getCapaciteSpecifique() ?? 0) : '';
+                $mutualisation = $this->resolveMutualisationGroup($formation, $parcours, $annee);
+                $groupKey = $mutualisation['key'] ?? null;
+                if ($groupKey !== null) {
+                    if (isset($rows[$groupKey])) {
+                        $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        if ($ville !== '') {
+                            $tcLieux[$groupKey][] = $ville;
+                        }
+                        if ($param?->getRemarques()) {
+                            $tcRemarques[$groupKey][] = $param->getRemarques();
+                        }
+                        continue;
+                    }
+                    $tcParcours[$groupKey] = [(string) $parcours->getLibelle()];
+                    $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
+                    $tcNoms[$groupKey] = $mutualisation['nom'];
+                    $tcTypes[$groupKey] = $mutualisation['type'];
+                    $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                }
+
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
 
-                $rows[] = [
+                $row = [
                     'composante' => $compLibelle,
                     'diplome' => $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle(),
                     'mention' => $diffs['mention'],
@@ -1388,12 +1684,31 @@ final class OffreAnnexesExportService
                     'capacite_globale_n' => $capGlobaleN,
                     'remarques' => $param?->getRemarques() ?? '',
                 ];
+
+                if ($groupKey !== null) {
+                    $rows[$groupKey] = $row;
+                } else {
+                    $rows[] = $row;
+                }
             }
         }
 
+        foreach ($tcParcours as $gKey => $libelles) {
+            $nom = $tcNoms[$gKey] ?? 'Tronc commun';
+            $gType = $tcTypes[$gKey] ?? 'tc';
+            $rows[$gKey]['parcours'] = $this->formatGroupParcoursLabel($nom, $libelles, $gType);
+            if (!empty($tcLieux[$gKey])) {
+                $rows[$gKey]['lieu'] = implode(' / ', array_unique($tcLieux[$gKey]));
+            }
+            if (!empty($tcRemarques[$gKey])) {
+                $rows[$gKey]['remarques'] = implode(' | ', array_unique($tcRemarques[$gKey]));
+            }
+        }
+        $rows = array_values($rows);
+
         usort($rows, static fn($a, $b) => strcmp(
-            ($a['composante']) . ($a['diplome']) . ($a['mention']),
-            ($b['composante']) . ($b['diplome']) . ($b['mention'])
+            ($a['composante']) . ($a['diplome']) . ((string) $a['mention']) . ((string) $a['parcours']),
+            ($b['composante']) . ($b['diplome']) . ((string) $b['mention']) . ((string) $b['parcours'])
         ));
         return $rows;
     }

@@ -21,7 +21,7 @@ final class MainMenuProvider implements MenuProviderInterface
                 key: 'offre',
                 label: 'menu.offre_formation',
                 route: 'app_section_offre_formation',
-                icon: 'book-open',
+                icon: 'mdi:book-open-page-variant-outline',
                 children: [
                     MenuItem::link(
                         key: 'offre.detail_mentions',
@@ -33,13 +33,13 @@ final class MainMenuProvider implements MenuProviderInterface
                         key: 'offre.detail_fiches',
                         label: 'menu.detail_fiches',
                         route: 'structure_fiche_matiere_index',
-                        icon: 'mdi:file'
+                        icon: 'mdi:file-document-outline'
                     ),
                     MenuItem::link(
                         key: 'offre.detail_fiches_hd',
                         label: 'menu.detail_fiches_hd',
                         route: 'structure_fiche_matiere_index_hd',
-                        icon: 'mdi:file-lock'
+                        icon: 'mdi:file-lock-outline'
                     ),
                     MenuItem::link(
                         key: 'offre.exports',

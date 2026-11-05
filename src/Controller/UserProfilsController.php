@@ -48,7 +48,7 @@ final class UserProfilsController extends BaseController
             'user_profils/_gestion_profils.html.twig',
             [
                 'user' => $user,
-                'profils' => $profilRepository->findAll(),
+                'profils' => $this->isGranted('ROLE_ADMIN') ? $profilRepository->findAll() : $profilRepository->findByDpe(),
             ],
             '_ui/_footer_submit_cancel.html.twig',
             []

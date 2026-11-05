@@ -35,6 +35,8 @@
                             Changement du co-responsable de formation : {{ histo.complements.ancien }} &rarr; {{ histo.complements.nouveau }}
                         {% elseif histo.etape == 'laisserPasser' %}
                             {{ ('historique.laisserPasser.conseil')|trans(histo|etapeParams(type), 'process') }}
+                        {% elseif histo.etape == 'documents_conseil' %}
+                            Mise à jour des documents de conseil (PV / Note explicative)
                         {% else %}
                             {{ ('historique.'~histo.etape|etapeLabel(type))|trans(histo|etapeParams(type), 'process') }}
                         {% endif %}
@@ -99,7 +101,7 @@
                 <div class="text-sm text-gray-500 shrink-0 whitespace-nowrap">{{ histo.created|date('d/m/Y H:i') }}</div>
             </div>
 
-            {% if histo.commentaire is defined or histo.complements.fichier is defined or histo.complements.fichier_note is defined or (histo.changeRf is defined and histo.changeRf != null) %}
+            {% if histo.commentaire is defined or histo.documentPv is defined or histo.documentNote is defined or histo.complements.fichier is defined or histo.complements.fichier_note is defined or (histo.changeRf is defined and histo.changeRf != null) %}
                 <div class="mt-3 pt-3 border-t border-gray-200 space-y-2">
                     {% if histo.changeRf is defined and histo.changeRf != null %}
                         <p class="text-xs text-gray-600">
@@ -117,7 +119,20 @@
                             {{ histo.commentaire|raw }}
                         </div>
                     {% endif %}
-                    {% if histo.complements.fichier is defined and histo.complements.fichier %}
+                    {% if histo.documentPv %}
+                        <p>
+                            <twig:Button
+                                    href="{{ path('app_upload_download', {context: 'conseils', filename: histo.documentPv.filename, originalName: histo.documentPv.originalFilename}) }}"
+                                    variant="info"
+                                    size="sm"
+                                    icon="icon:download"
+                                    label="Voir le PV du conseil ({{ histo.documentPv.originalFilename }})"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    :centered="false"
+                            />
+                        </p>
+                    {% elseif histo.complements.fichier is defined and histo.complements.fichier %}
                         {% if histo.etape == 'change_rf' or histo.etape == 'change_co_rf' %}
                             <p>
                                 <twig:Button
@@ -147,7 +162,20 @@
                         {% endif %}
                     {% endif %}
 
-                    {% if histo.complements.fichier_note is defined and histo.complements.fichier_note %}
+                    {% if histo.documentNote %}
+                        <p>
+                            <twig:Button
+                                    href="{{ path('app_upload_download', {context: 'conseils', filename: histo.documentNote.filename, originalName: histo.documentNote.originalFilename}) }}"
+                                    variant="info"
+                                    size="sm"
+                                    icon="icon:download"
+                                    label="Voir la note explicative ({{ histo.documentNote.originalFilename }})"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    :centered="false"
+                            />
+                        </p>
+                    {% elseif histo.complements.fichier_note is defined and histo.complements.fichier_note %}
                         <p>
                             <twig:Button
                                     href="{{ path('app_upload_download', {context: 'conseils', filename: histo.complements.fichier_note, originalName: histo.complements.fichier_note_original|default(histo.complements.fichier_note)}) }}"
@@ -172,3 +200,32 @@
         'message': 'Aucune validation pour cette formation.'
     }) }}
 {% endfor %}
+
+{% if formation is defined and formation is not null and (is_granted('ROLE_ADMIN') or is_granted('ROLE_SES') or (formation.composantePorteuse and is_granted('MANAGE', {route: 'app_composante', subject: formation.composantePorteuse}))) %}
+    <div class="mt-6 rounded-xl border border-secondary-200 bg-secondary-50/60 p-4 dark:border-secondary-700 dark:bg-secondary-800/40">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <div class="text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-200 flex items-center gap-1.5">
+                    <twig:UX:Icon name="ph:files" class="size-4 text-primary-600" />
+                    <span>Documents officiels de la formation</span>
+                </div>
+                <div class="mt-1 flex items-center gap-2 flex-wrap text-xs text-secondary-500">
+                    {% set curPv = formation.documentConseils|filter(d => d.type == 'pv')|first %}
+                    {% set curNote = formation.documentConseils|filter(d => d.type == 'note_explicative')|first %}
+                    <span>PV : <strong class="text-secondary-700 dark:text-secondary-300">{{ curPv ? curPv.originalFilename : 'Non déposé' }}</strong></span>
+                    <span>·</span>
+                    <span>Note : <strong class="text-secondary-700 dark:text-secondary-300">{{ curNote ? curNote.originalFilename : 'Non déposée' }}</strong></span>
+                </div>
+            </div>
+            <twig:Button variant="primary"
+                         size="sm"
+                         href="{{ path('offre_v2_formation_documents_modal', { formation: formation.id }) }}"
+                         data-turbo="true"
+                         data-turbo-stream="true"
+                         data-action="click->modalturbo#open"
+                         icon="ph:note-pencil"
+                         label="Modifier / Gérer les documents"
+            />
+        </div>
+    </div>
+{% endif %}

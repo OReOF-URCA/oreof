@@ -1,0 +1,256 @@
+<div class="space-y-4 text-xs">
+    <!-- 1. CONTRÔLE DE CONFORMITÉ & SANTÉ GLOBALE -->
+    {% if anomaliesMessages is empty %}
+        <div class="rounded-xl border border-success-200 bg-success-50/70 p-3.5 text-success-900 dark:border-success-800/60 dark:bg-success-950/30 dark:text-success-200 flex items-start gap-3">
+            <div class="size-7 rounded-lg bg-success-100 dark:bg-success-900/60 text-success-700 dark:text-success-300 flex items-center justify-center shrink-0 mt-0.5">
+                <twig:UX:Icon name="ph:check-circle-bold" class="size-4" />
+            </div>
+            <div class="flex-1">
+                <div class="font-bold text-success-800 dark:text-success-200 text-sm">
+                    Offre complète & cohérente
+                </div>
+                <p class="text-success-700 dark:text-success-300 mt-0.5">
+                    Aucune anomalie ni incohérence détectée sur les parcours, capacités et plateformes d'admission de cette formation.
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <div class="rounded-xl border border-warning-300 bg-warning-50/80 p-3.5 text-warning-900 dark:border-warning-700 dark:bg-warning-950/40 dark:text-warning-200">
+            <div class="flex items-center gap-2 mb-2 font-bold text-warning-900 dark:text-warning-100 text-sm">
+                <twig:UX:Icon name="ph:warning-bold" class="size-4 text-warning-600 dark:text-warning-400" />
+                <span>{{ anomaliesMessages|length }} anomalie{{ anomaliesMessages|length > 1 ? 's' : '' }} à corriger avant validation :</span>
+            </div>
+            <ul class="list-disc list-inside space-y-1 text-warning-800 dark:text-warning-300 ml-1">
+                {% for message in anomaliesMessages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <!-- 2. SYNTHÈSE STATUT & PIÈCES JUSTIFICATIVES -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+        <!-- Statut du workflow -->
+        <div class="rounded-lg border border-secondary-200 bg-secondary-50/50 p-2.5 dark:border-secondary-700 dark:bg-secondary-800/40">
+            <div class="text-[11px] font-semibold text-secondary-500 uppercase tracking-wider mb-1">
+                Statut workflow
+            </div>
+            <div class="flex items-center gap-1.5 flex-wrap">
+                {% set activeState = dpeFormation ? (dpeFormation.etatValidation|keys|first) : 'brouillon' %}
+                {{ include('offre_v2/_etat_offre_badge.html.twig', {etat: activeState}) }}
+                {% if dpeFormation and dpeFormation.laissezPasser %}
+                    <span class="text-[10px] text-warning-700 bg-warning-100 rounded px-1.5 py-0.5 font-bold" title="Laissez-passer accordé">
+                        LP : {{ dpeFormation.laissezPasser }}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Capacité totale -->
+        <div class="rounded-lg border border-secondary-200 bg-secondary-50/50 p-2.5 dark:border-secondary-700 dark:bg-secondary-800/40">
+            <div class="text-[11px] font-semibold text-secondary-500 uppercase tracking-wider mb-1">
+                Capacité totale
+            </div>
+            <div class="text-sm font-bold text-secondary-900 dark:text-secondary-100 flex items-center gap-1">
+                <twig:UX:Icon name="icon:users" class="size-3.5 text-secondary-500" />
+                <span>{{ formationCapacite }}</span>
+                <span class="text-xs font-normal text-secondary-500">places</span>
+            </div>
+        </div>
+
+        <!-- PV de conseil -->
+        <div class="rounded-lg border border-secondary-200 bg-secondary-50/50 p-2.5 dark:border-secondary-700 dark:bg-secondary-800/40">
+            <div class="text-[11px] font-semibold text-secondary-500 uppercase tracking-wider mb-1">
+                PV de conseil
+            </div>
+            <div>
+                {% if pvDocs is not empty %}
+                    {% for doc in pvDocs %}
+                        <a href="{{ path('app_upload_download', {context: 'conseils', filename: doc.filename, originalName: doc.originalFilename}) }}"
+                           target="_blank"
+                           class="inline-flex items-center gap-1 text-primary-700 hover:underline font-semibold"
+                           title="{{ doc.originalFilename }}"
+                        >
+                            <twig:UX:Icon name="ph:file-bold" class="size-3 text-primary-600" />
+                            <span class="truncate max-w-[130px]">{{ doc.originalFilename }}</span>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-secondary-400 italic">Non déposé</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Note explicative -->
+        <div class="rounded-lg border border-secondary-200 bg-secondary-50/50 p-2.5 dark:border-secondary-700 dark:bg-secondary-800/40">
+            <div class="text-[11px] font-semibold text-secondary-500 uppercase tracking-wider mb-1">
+                Note explicative
+            </div>
+            <div>
+                {% if noteDocs is not empty %}
+                    {% for doc in noteDocs %}
+                        <a href="{{ path('app_upload_download', {context: 'conseils', filename: doc.filename, originalName: doc.originalFilename}) }}"
+                           target="_blank"
+                           class="inline-flex items-center gap-1 text-primary-700 hover:underline font-semibold"
+                           title="{{ doc.originalFilename }}"
+                        >
+                            <twig:UX:Icon name="ph:file-pdf-bold" class="size-3 text-primary-600" />
+                            <span class="truncate max-w-[130px]">{{ doc.originalFilename }}</span>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <span class="text-secondary-400 italic">Non déposée</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MATRICE DÉTAILLÉE PARCOURS & ANNÉES -->
+    <div class="rounded-xl border border-secondary-200 overflow-hidden dark:border-secondary-700 shadow-xs">
+        <div class="bg-secondary-100/70 dark:bg-secondary-800 px-3 py-2 border-b border-secondary-200 dark:border-secondary-700 flex items-center justify-between">
+            <h4 class="font-bold text-secondary-800 dark:text-secondary-100 flex items-center gap-1.5 text-xs">
+                <twig:UX:Icon name="icon:layers" class="size-3.5 text-secondary-500" />
+                <span>Détail par parcours et année</span>
+            </h4>
+            <span class="text-[11px] text-secondary-500">
+                {{ parcoursDetails|length }} parcours
+            </span>
+        </div>
+
+        <div class="overflow-x-auto max-h-72 overflow-y-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead class="bg-secondary-50 text-secondary-600 dark:bg-secondary-900/60 dark:text-secondary-300 text-[11px] uppercase tracking-wider sticky top-0 z-10 border-b border-secondary-200 dark:border-secondary-700">
+                    <tr>
+                        <th class="px-3 py-2 font-semibold">Parcours</th>
+                        <th class="px-3 py-2 font-semibold">Année</th>
+                        <th class="px-3 py-2 font-semibold text-center">Ouvert</th>
+                        <th class="px-3 py-2 font-semibold text-right">Capacité</th>
+                        <th class="px-3 py-2 font-semibold">Plateformes actives</th>
+                        <th class="px-3 py-2 font-semibold">Liaisons</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800">
+                    {% for pDetail in parcoursDetails %}
+                        {% set parcours = pDetail.parcours %}
+                        {% set tpBadge = parcours.typeParcours|badgeTypeParcours %}
+                        {% set isPFirst = true %}
+                        {% for anneeRow in pDetail.annees %}
+                            {% set annee = anneeRow.annee %}
+                            <tr class="hover:bg-secondary-50/60 dark:hover:bg-secondary-800/30 transition-colors {{ loop.first ? 'border-t border-secondary-200 dark:border-secondary-700' : '' }}">
+                                <td class="px-3 py-1.5 align-middle {{ loop.first ? 'font-semibold text-secondary-900 dark:text-secondary-100' : 'text-secondary-400' }}">
+                                    {% if loop.first %}
+                                        <div class="flex items-center gap-1.5">
+                                            <span>{{ parcours.libelle }}</span>
+                                            {% if tpBadge is not null %}
+                                                <twig:Badge :dto="tpBadge" size="xs" />
+                                            {% endif %}
+                                            {% if pDetail.anomalies|length > 0 %}
+                                                <span class="text-danger-600 font-bold" title="{{ pDetail.anomalies|join('\n') }}">⚠️</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-1.5 font-medium text-secondary-800 dark:text-secondary-200 whitespace-nowrap">
+                                    {{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}
+                                </td>
+                                <td class="px-3 py-1.5 text-center">
+                                    {% if anneeRow.isOuverte %}
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-success-100 text-success-800 dark:bg-success-900/40 dark:text-success-300">
+                                            Oui
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-secondary-100 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">
+                                            Non
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-1.5 text-right font-bold text-secondary-900 dark:text-secondary-100">
+                                    {{ anneeRow.capacite }}
+                                </td>
+                                <td class="px-3 py-1.5">
+                                    {% if anneeRow.plateformes is not empty %}
+                                        <div class="flex items-center gap-1 flex-wrap">
+                                            {% for pfItem in anneeRow.plateformes %}
+                                                <twig:Badge :variant="pfItem.plateforme.color"
+                                                            :label="pfItem.plateforme.code"
+                                                            size="xs"
+                                                            :title="pfItem.plateforme.libelle ~ (pfItem.capaciteSpecifique ? ' (' ~ pfItem.capaciteSpecifique ~ ' places spécifiques)' : '')"
+                                                />
+                                            {% endfor %}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-secondary-400 text-[11px] italic">Aucune</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-1.5">
+                                    <div class="flex items-center gap-1 flex-wrap text-[10px]">
+                                        {% if anneeRow.isTroncCommun %}
+                                            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded font-semibold bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-900/30 dark:text-primary-300">
+                                                <twig:UX:Icon name="ph:users-three-bold" class="size-2.5" />
+                                                TC
+                                            </span>
+                                        {% endif %}
+                                        {% if anneeRow.portail %}
+                                            <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded font-semibold bg-warning-50 text-warning-700 border border-warning-200 dark:bg-warning-900/30 dark:text-warning-300" title="{{ anneeRow.portail.libelle }}">
+                                                <twig:UX:Icon name="ph:circles-three-bold" class="size-2.5" />
+                                                {{ anneeRow.portail.libelle }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="px-3 py-4 text-center text-secondary-400 italic">
+                                Aucun parcours enregistré pour cette formation.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 4. MUTUALISATIONS (TRONCS COMMUNS & PORTAILS) -->
+    {% if troncsCommuns is not empty or portails is not empty %}
+        <div class="rounded-xl border border-secondary-200 p-3 bg-secondary-50/40 dark:border-secondary-700 dark:bg-secondary-800/30 space-y-2">
+            <h4 class="font-bold text-secondary-800 dark:text-secondary-200 text-xs flex items-center gap-1.5">
+                <twig:UX:Icon name="ph:arrows-merge-bold" class="size-3.5 text-primary-600" />
+                <span>Mutualisations configurées</span>
+            </h4>
+
+            {% if troncsCommuns is not empty %}
+                <div class="space-y-1">
+                    <span class="text-[11px] font-semibold text-secondary-600 dark:text-secondary-400">Troncs communs internes :</span>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        {% for tc in troncsCommuns %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] bg-primary-100 text-primary-800 font-medium dark:bg-primary-900/40 dark:text-primary-300">
+                                <twig:UX:Icon name="ph:users-three-bold" class="size-3" />
+                                <strong>{{ tc.nom }}</strong>
+                                <span class="text-secondary-500">
+                                    ({% if tc.annees is not empty %}Année {{ tc.annees|join(', ') }}{% endif %}{% if tc.parcours is not empty %} · {{ tc.parcours|length }} parcours{% endif %})
+                                </span>
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if portails is not empty %}
+                <div class="space-y-1 pt-1.5 border-t border-secondary-200/60 dark:border-secondary-700/60">
+                    <span class="text-[11px] font-semibold text-secondary-600 dark:text-secondary-400">Portails inter-formations :</span>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        {% for portail in portails %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] bg-warning-100 text-warning-800 font-medium dark:bg-warning-900/40 dark:text-warning-300">
+                                <twig:UX:Icon name="ph:circles-three-bold" class="size-3" />
+                                <strong>{{ portail.libelle }}</strong>
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+

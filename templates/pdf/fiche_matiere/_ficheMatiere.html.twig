@@ -295,7 +295,7 @@
                     <dt>Langue(s) d'enseignement</dt>
                     <dd>
                         {% if ficheMatiere.langueDispense|length > 0 %}
-                            {{ ficheMatiere.langueDispense|map(l => l.libelle)|join(', ') }}
+                            {{ ficheMatiere.langueDispense|map(code => code|language_name('fr')|capitalize)|join(', ') }}
                         {% else %}
                             Français
                         {% endif %}
@@ -304,7 +304,7 @@
                     <dt>Langue(s) des supports de cours</dt>
                     <dd>
                         {% if ficheMatiere.langueSupport|length > 0 %}
-                            {{ ficheMatiere.langueSupport|map(l => l.libelle)|join(', ') }}
+                            {{ ficheMatiere.langueSupport|map(code => code|language_name('fr')|capitalize)|join(', ') }}
                         {% else %}
                             Français
                         {% endif %}

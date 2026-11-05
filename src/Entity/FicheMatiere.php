@@ -20,6 +20,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Intl\Languages;
 use Symfony\Component\Serializer\Attribute\Groups;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -72,6 +73,11 @@ class FicheMatiere implements McccCompletionCheckerInterface
     #[Groups(['fiche_matiere:read', 'fiche_matiere_versioning'])]
     private ?ModaliteEnseignementEnum $modaliteEnseignement = ModaliteEnseignementEnum::NON_DEFINI;
 
+    /** Canonical referential key (nullable until backfilled from the legacy column). */
+    #[Groups(['fiche_matiere:read', 'fiche_matiere_versioning'])]
+    #[ORM\Column(name: 'modaliteEnseignement_referentiel', length: 100, nullable: true)]
+    private ?string $modaliteEnseignementReferentiel = null;
+
     #[ORM\Column(nullable: true)]
     private ?bool $isCmPresentielMutualise = null;
 
@@ -94,15 +100,19 @@ class FicheMatiere implements McccCompletionCheckerInterface
     #[Groups(['fiche_matiere:read', 'fiche_matiere_versioning'])]
     private ?User $responsableFicheMatiere = null;
 
+    /**
+     * @var array<string|array<string, mixed>>
+     */
     #[Groups(['fiche_matiere_versioning'])]
-    #[ORM\ManyToMany(targetEntity: Langue::class, inversedBy: 'ficheMatieres', cascade: ['persist'])]
-    #[ORM\JoinTable(name: 'fiche_matiere_langue_dispense')]
-    private Collection $langueDispense;
+    #[ORM\Column(type: Types::JSON)]
+    private array $langueDispense = [];
 
+    /**
+     * @var array<string|array<string, mixed>>
+     */
     #[Groups(['fiche_matiere_versioning'])]
-    #[ORM\ManyToMany(targetEntity: Langue::class, inversedBy: 'languesSupportsFicheMatieres', cascade: ['persist'])]
-    #[ORM\JoinTable(name: 'fiche_matiere_langue_support')]
-    private Collection $langueSupport;
+    #[ORM\Column(type: Types::JSON)]
+    private array $langueSupport = [];
 
     #[ORM\Column]
     #[Groups(['fiche_matiere:read'])]
@@ -249,8 +259,8 @@ class FicheMatiere implements McccCompletionCheckerInterface
     {
         $this->mcccs = new ArrayCollection();
         $this->competences = new ArrayCollection();
-        $this->langueDispense = new ArrayCollection();
-        $this->langueSupport = new ArrayCollection();
+        $this->langueDispense = ['fr'];
+        $this->langueSupport = ['fr'];
 
         for ($i = 1; $i <= 5; $i++) {
             $this->etatSteps[$i] = false;
@@ -379,13 +389,13 @@ class FicheMatiere implements McccCompletionCheckerInterface
         //calcul un remplissage de l'entité en fonction des champs obligatoires
         $remplissage = new Remplissage();
 
-        if ($this->langueDispense->isEmpty() === false) {
+        if (count($this->langueDispense) > 0) {
             $remplissage->add();
         } else {
             $remplissage->add(0);
         }
 
-        if ($this->langueSupport->isEmpty() === false) {
+        if (count($this->langueSupport) > 0) {
             $remplissage->add();
         } else {
             $remplissage->add(0);
@@ -472,51 +482,149 @@ class FicheMatiere implements McccCompletionCheckerInterface
     }
 
     /**
-     * @return Collection<int, Langue>
+     * @return string[]
      */
-    public function getLangueDispense(): Collection
+    public function getLangueDispense(): array
     {
-        return $this->langueDispense;
+        return empty($this->langueDispense) ? ['fr'] : $this->langueDispense;
     }
 
-    public function addLangueDispense(Langue $langueDispense): self
+    /**
+     * @param array<string|array<string, mixed>> $langueDispense
+     */
+    public function setLangueDispense(array $langueDispense): self
     {
-        if (!$this->langueDispense->contains($langueDispense)) {
-            $this->langueDispense->add($langueDispense);
-        }
-
-        return $this;
-    }
-
-    public function removeLangueDispense(Langue $langueDispense): self
-    {
-        $this->langueDispense->removeElement($langueDispense);
+        $this->langueDispense = self::normalizeLangueArray($langueDispense);
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Langue>
+     * @param string|array<string, mixed> $langueDispense
      */
-    public function getLangueSupport(): Collection
+    public function addLangueDispense(string|array $langueDispense): self
     {
-        return $this->langueSupport;
-    }
-
-    public function addLangueSupport(Langue $langueSupport): self
-    {
-        if (!$this->langueSupport->contains($langueSupport)) {
-            $this->langueSupport->add($langueSupport);
+        $code = self::normalizeLangueCode($langueDispense);
+        if ($code !== null && !in_array($code, $this->langueDispense, true)) {
+            $this->langueDispense[] = $code;
         }
 
         return $this;
     }
 
-    public function removeLangueSupport(Langue $langueSupport): self
+    /**
+     * @param string|array<string, mixed> $langueDispense
+     */
+    public function removeLangueDispense(string|array $langueDispense): self
     {
-        $this->langueSupport->removeElement($langueSupport);
+        $code = self::normalizeLangueCode($langueDispense);
+        if ($code !== null) {
+            $this->langueDispense = array_values(array_diff($this->langueDispense, [$code]));
+        }
 
         return $this;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getLangueSupport(): array
+    {
+        return empty($this->langueSupport) ? ['fr'] : $this->langueSupport;
+    }
+
+    /**
+     * @param array<string|array<string, mixed>> $langueSupport
+     */
+    public function setLangueSupport(array $langueSupport): self
+    {
+        $this->langueSupport = self::normalizeLangueArray($langueSupport);
+
+        return $this;
+    }
+
+    /**
+     * @param string|array<string, mixed> $langueSupport
+     */
+    public function addLangueSupport(string|array $langueSupport): self
+    {
+        $code = self::normalizeLangueCode($langueSupport);
+        if ($code !== null && !in_array($code, $this->langueSupport, true)) {
+            $this->langueSupport[] = $code;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string|array<string, mixed> $langueSupport
+     */
+    public function removeLangueSupport(string|array $langueSupport): self
+    {
+        $code = self::normalizeLangueCode($langueSupport);
+        if ($code !== null) {
+            $this->langueSupport = array_values(array_diff($this->langueSupport, [$code]));
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string|array<string, mixed> $langue
+     */
+    public static function normalizeLangueCode(string|array $langue): ?string
+    {
+        if (is_string($langue)) {
+            $clean = strtolower(trim($langue));
+            return $clean !== '' ? $clean : null;
+        }
+
+        if (isset($langue['codeIso']) && is_string($langue['codeIso']) && trim($langue['codeIso']) !== '') {
+            $code = strtolower(trim($langue['codeIso']));
+            return match ($code) {
+                'ch' => 'zh',
+                'fs' => 'fr',
+                default => $code,
+            };
+        }
+
+        if (isset($langue['libelle']) && is_string($langue['libelle'])) {
+            $libelle = mb_strtolower(trim($langue['libelle']));
+            return match ($libelle) {
+                'anglais' => 'en',
+                'espagnol' => 'es',
+                'allemand' => 'de',
+                'italien' => 'it',
+                'portugais' => 'pt',
+                'russe' => 'ru',
+                'chinois' => 'zh',
+                'néerlandais', 'neerlandais' => 'nl',
+                'grec ancien' => 'el',
+                'latin' => 'la',
+                default => 'fr',
+            };
+        }
+
+        return null;
+    }
+
+    /**
+     * @param array<string|array<string, mixed>> $langues
+     * @return string[]
+     */
+    public static function normalizeLangueArray(array $langues): array
+    {
+        $result = [];
+        foreach ($langues as $langue) {
+            $code = self::normalizeLangueCode($langue);
+            if ($code !== null) {
+                $result[] = $code;
+            }
+        }
+
+        $filtered = array_values(array_unique(array_filter($result)));
+
+        return empty($filtered) ? ['fr'] : $filtered;
     }
 
     public function getEtatSteps(): array
@@ -573,14 +681,54 @@ class FicheMatiere implements McccCompletionCheckerInterface
         return $this;
     }
 
+    /**
+     * Stable persisted key, ready for configurable referential values.
+     * The legacy enum accessor remains unchanged for existing consumers.
+     */
+    public function getModaliteEnseignementValue(): ?string
+    {
+        if ($this->modaliteEnseignementReferentiel !== null) {
+            return $this->modaliteEnseignementReferentiel;
+        }
+
+        return $this->modaliteEnseignement === null
+            ? null
+            : \App\Referentiel\ModaliteEnseignement::key($this->modaliteEnseignement);
+    }
+
+    /**
+     * Write a configurable key without losing the existing legacy column.
+     * The legacy enum is only updated when the key has an exact enum match.
+     */
+    public function setModaliteEnseignementValue(?string $key): self
+    {
+        $this->modaliteEnseignementReferentiel = $key;
+        $this->modaliteEnseignement = $key === null ? null : \App\Referentiel\ModaliteEnseignement::legacyCase($key);
+
+        return $this;
+    }
+
+    /**
+     * @deprecated Use getModaliteEnseignementValue() instead. Returns null for custom referential values.
+     */
     public function getModaliteEnseignement(): ?ModaliteEnseignementEnum
     {
+        if ($this->modaliteEnseignementReferentiel !== null) {
+            return \App\Referentiel\ModaliteEnseignement::legacyCase($this->modaliteEnseignementReferentiel);
+        }
+
         return $this->modaliteEnseignement ?? ModaliteEnseignementEnum::NON_DEFINI;
     }
 
+    /**
+     * @deprecated Use setModaliteEnseignementValue() instead.
+     */
     public function setModaliteEnseignement(?ModaliteEnseignementEnum $modaliteEnseignement): self
     {
         $this->modaliteEnseignement = $modaliteEnseignement;
+        if ($modaliteEnseignement !== null || \App\Referentiel\ModaliteEnseignement::legacyCase($this->modaliteEnseignementReferentiel) !== null) {
+            $this->modaliteEnseignementReferentiel = $modaliteEnseignement === null ? null : (string) $modaliteEnseignement->value;
+        }
 
         return $this;
     }
@@ -1143,24 +1291,26 @@ class FicheMatiere implements McccCompletionCheckerInterface
         return $this->isModifiable();
     }
 
-    public function getLanguesSupportsArray(): array
+    /**
+     * @return string[]
+     */
+    public function getLanguesSupportsArray(string $locale = 'fr'): array
     {
-        $langues = [];
-        foreach ($this->getLangueSupport() as $langue) {
-            $langues[] = $langue->getLibelle();
-        }
-
-        return $langues;
+        return array_map(
+            static fn(string $code): string => Languages::exists($code) ? Languages::getName($code, $locale) : $code,
+            $this->langueSupport
+        );
     }
 
-    public function getLanguesDispenseArray(): array
+    /**
+     * @return string[]
+     */
+    public function getLanguesDispenseArray(string $locale = 'fr'): array
     {
-        $langues = [];
-        foreach ($this->getLangueDispense() as $langue) {
-            $langues[] = $langue->getLibelle();
-        }
-
-        return $langues;
+        return array_map(
+            static fn(string $code): string => Languages::exists($code) ? Languages::getName($code, $locale) : $code,
+            $this->langueDispense
+        );
     }
 
     public function getCodeApogee(): ?string

@@ -2,7 +2,11 @@
         id="modal"
         class="fixed inset-0 z-50 hidden"
         data-modalturbo-target="wrapper"
-        data-action="keydown.esc@window->modalturbo#close keydown.enter->modalturbo#preventEnterSubmit"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal_title"
+        tabindex="-1"
+        data-action="keydown.enter->modalturbo#preventEnterSubmit"
 >
     <div id="modal_control"></div>
 

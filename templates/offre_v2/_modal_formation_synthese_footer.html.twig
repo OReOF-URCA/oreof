@@ -1,0 +1,15 @@
+<div class="flex items-center justify-between w-full gap-2 flex-wrap">
+    <button type="button"
+            class="app-modal-footer-btn app-modal-footer-btn--secondary cursor-pointer"
+            data-action="modalturbo#close">
+        Fermer
+    </button>
+    <a href="{{ path('offre_v2_configurer', { slug: formation.slug }) }}"
+       data-turbo-frame="_top"
+       class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+    >
+        <twig:UX:Icon name="mdi:settings" class="size-3.5" />
+        <span>Modifier la configuration</span>
+    </a>
+</div>
+

@@ -16,7 +16,20 @@
         class="mb-4 rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
     <div class="space-y-4 p-4 sm:p-5">
         <section
-                class="rounded-2xl border border-secondary-200 bg-secondary-50/80 p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800/50">
+                class="relative rounded-2xl border border-secondary-200 bg-secondary-50/80 p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800/50">
+            {% if is_granted('ROLE_ADMIN') %}
+                <div class="mb-3 flex justify-end sm:absolute sm:top-3 sm:right-3 sm:mb-0">
+                    <a href="{{ path('app_formation_edit_modal', {slug: formation.slug}) }}"
+                       data-turbo="true"
+                       data-action="click->modalturbo#open"
+                       class="inline-flex items-center gap-1.5 rounded-xl border border-secondary-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-secondary-700 shadow-sm transition hover:border-secondary-400 hover:bg-secondary-50 hover:text-secondary-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-400 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500 dark:hover:bg-secondary-700 dark:hover:text-white"
+                       {{ stimulus_controller('tooltip') }}
+                       title="Modifier les données de la formation">
+                        {{ ux_icon('icon:edit', {class: 'h-3.5 w-3.5'}) }}
+                        <span>Modifier</span>
+                    </a>
+                </div>
+            {% endif %}
             <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
                 <div>
                     <dt class="{{ metaLabelClass }}">Domaine</dt>
@@ -115,6 +128,20 @@
                         </span>
                 {% endif %}
 
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a
+                            class="{{ quickBtnSecondary }}"
+                            {{ stimulus_controller('tooltip') }}
+                            href="{{ path('app_formation_edit_modal', {slug: formation.slug}) }}"
+                            data-turbo="true"
+                            data-action="click->modalturbo#open"
+                            title="Modifier les données de la formation"
+                    >
+                        {{ ux_icon('icon:edit', {class: 'h-4 w-4'}) }}
+                        <span>Modifier formation</span>
+                    </a>
+                {% endif %}
+
                 <button class="{{ quickBtnSecondary }}"
                         data-toggle-group="accordion-formation"
                         data-toggle="actions"
@@ -136,6 +163,8 @@
                     <span>Exports</span>
                     {{ ux_icon('icon:chevron-up', {class: 'h-4 w-4 data-toggle-icon rotate-180 transition-transform duration-200'}) }}
                 </button>
+
+
 
                 {% if is_granted('ROLE_ADMIN') %}
                     <button class="{{ quickBtnSecondary }}"
@@ -303,11 +332,39 @@
                         </div>
                     </div>
 
+                    {% if formation.typeDiplome is defined and formation.typeDiplome.libelleCourt == 'BUT' %}
+                        <div class="border-t border-secondary-200 pt-3 dark:border-secondary-700">
+                            <p class="{{ metaLabelClass }}">Programme national B.U.T. (ORéBUT)</p>
+                            <div class="{{ panelGridClass }}">
+                                <div>
+                                    <a href="{{ path('app_formation_synchronisation_orebut_modal', {formation: formation.id}) }}"
+                                       data-turbo="true"
+                                       data-action="click->modalturbo#open"
+                                       class="{{ quickBtnPrimary }} w-full text-xs py-2"
+                                       {{ stimulus_controller('tooltip') }}
+                                       title="Synchroniser les parcours, compétences et maquette avec le référentiel national ORéBUT">
+                                        {{ ux_icon('mdi:sync', {class: 'h-4 w-4'}) }}
+                                        <span>Synchroniser avec ORéBUT</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
                     <div class="border-t border-secondary-200 pt-3 dark:border-secondary-700">
                         <p class="{{ metaLabelClass }}">Autres actions SES</p>
                         <div class="{{ panelGridClass }}">
                             <div>
-                                <button class="{{ quickBtnSecondary }} w-full">
+                                <a href="{{ path('app_formation_edit_modal', {slug: formation.slug}) }}"
+                                   data-turbo="true"
+                                   data-action="click->modalturbo#open"
+                                   class="{{ quickBtnSecondary }} w-full text-xs py-2">
+                                    {{ ux_icon('icon:edit', {class: 'h-4 w-4'}) }}
+                                    <span>Modifier la formation</span>
+                                </a>
+                            </div>
+                            <div>
+                                <button class="{{ quickBtnSecondary }} w-full text-xs py-2">
                                     {{ ux_icon('icon:gear', {class: 'h-4 w-4'}) }}
                                     <span>Gérer codification</span>
                                 </button>

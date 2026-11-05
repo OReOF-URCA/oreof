@@ -518,20 +518,11 @@ class LicenceMccc extends AbstractLicenceMccc
             $this->excelWriter->writeCellXY(self::COL_RESP_EC, $ligne, $ec->getFicheMatiere()->getResponsableFicheMatiere()?->getDisplay(), ['wrap' => true]);
 
             // langue
-            $texte = '';
-            foreach ($ec->getFicheMatiere()->getLangueDispense() as $langue) {
-                $texte .= $langue->getLibelle() . "; ";
-            }
-            $texte = substr($texte, 0, -2);
+            $texte = implode('; ', $ec->getFicheMatiere()->getLanguesDispenseArray());
             $this->excelWriter->writeCellXY(self::COL_LANGUE_EC, $ligne, $texte);
 
-            $anglais = false;
-            foreach ($ec->getFicheMatiere()->getLangueSupport() as $langue) {
-                if (strtolower($langue->getCodeIso()) === 'en') {
-                    $anglais = true;
-                }
-            }
-            $this->excelWriter->writeCellXY(self::COL_SUPPORT_ANGLAIS, $ligne, $anglais === true ? 'O' : 'N');
+            $anglais = in_array('en', array_map('strtolower', $ec->getFicheMatiere()->getLangueSupport()), true);
+            $this->excelWriter->writeCellXY(self::COL_SUPPORT_ANGLAIS, $ligne, $anglais ? 'O' : 'N');
 
             $this->excelWriter->writeCellXY(self::COL_COURS_MUTUALISE, $ligne, $ec->getFicheMatiere()->isEnseignementMutualise() === true ? 'O' : 'N');
 

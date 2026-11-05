@@ -43,6 +43,17 @@
                     label="Modifier le parcours"
                     tooltip="Modifier le parcours"
             />
+            <twig:Button
+                    href="{{ path('parcours_v2_dupliquer', {parcours: parcours.id}) }}"
+                    variant="primary"
+                    :soft="false"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:duplicate"
+                    label="Dupliquer"
+                    tooltip="Dupliquer l'intégralité du parcours"
+                    dataAction="click->modalturbo#open"
+            />
         {% endif %}
 
         {% if is_granted('ROLE_ADMIN') %}

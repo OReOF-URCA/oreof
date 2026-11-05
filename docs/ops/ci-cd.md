@@ -25,7 +25,7 @@ Légende de statut : **En place** = fonctionne dans le dépôt. **Cible** = déc
 | Fichier | Déclencheur | Contenu |
 |---|---|---|
 | `ci.yml` | PR vers `v2` et push sur `v2` ; appelable | Deux jobs : **Lint** (`composer validate` + `composer audit`, lint YAML et conteneur, lint Twig et ESLint informatifs, PHPStan) et **Tests** (mapping Doctrine, schéma + fixtures, PHPUnit suites Project et Smoke sur MariaDB 10.8, build Vite) |
-| `release-please.yml` | push sur `v2` et `main` | PR de release, changelog, version dans `composer.json` |
+| `release-please.yml` | push sur `v2` et `main` | PR de release, changelog (auteurs GitHub ajoutés seulement si une PR de release est ouverte) ; la version vit dans `package.json` et `.release-please-manifest.json`, plus dans `composer.json` |
 | `dependabot.yml` | hebdomadaire (actions : mensuel) | PR composer, npm, github-actions vers `v2` |
 
 Détails des tests : `docs/testing/README.md`.
@@ -59,7 +59,6 @@ check requis). Version de MariaDB figée à **10.8** (celle de la stack ; ne pas
 | ESLint | 96 erreurs (`no-undef`, `no-unused-vars`) | résorber puis retirer `continue-on-error` dans `ci.yml` |
 | `npm audit` | `source-map-js` (high), non exécuté en CI | `npm audit fix` (Dependabot propose aussi la mise à jour) |
 | Couverture | non mesurée en CI | à réintroduire avec un seuil qui ne fait que monter (voir `docs/testing/README.md`) |
-| `composer.lock` périmé à chaque release | release-please écrit `version` dans `composer.json` sans mettre à jour le `content-hash` du lock : `composer validate` échoue après chaque release | rafraîchir avec `composer update --lock --no-install --no-scripts` (hash seul), ou automatiser dans `release-please.yml`, ou retirer `composer.json` des `extra-files` de `release-please-config.json` (la version affichée vient de `package.json`) |
 | Smoke test des routes | 65 routes GET en échec toléré (`tests/Smoke/known-failures.txt`) : templates manquants (`communs/form_theme.html.twig`, `fiche_matiere/index.html.twig`), variables Twig absentes, services externes (Gotenberg, ACS) | corriger les routes et vider la liste |
 | Tests | 20 incomplets, 1 ignoré (`ParcoursCopyDataTest` exige le parcours 405 de production) | écrire les tests prioritaires de `docs/testing/README.md` |
 

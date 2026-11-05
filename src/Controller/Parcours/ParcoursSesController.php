@@ -15,6 +15,9 @@ use App\Entity\DpeParcours;
 use App\Enums\TypeModificationDpeEnum;
 use App\Form\Type\YesNoType;
 use App\Utils\TurboStreamResponseFactory;
+use App\Entity\Parcours;
+use App\Repository\FormationRepository;
+use App\Service\Parcours\ParcoursMoveService;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,7 +29,9 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ParcoursSesController extends BaseController
 {
     public function __construct(
-        private TurboStreamResponseFactory $turboStream
+        private TurboStreamResponseFactory $turboStream,
+        private ParcoursMoveService $parcoursMoveService,
+        private FormationRepository $formationRepository,
     )
     {
     }
@@ -122,4 +127,114 @@ class ParcoursSesController extends BaseController
             ]
         );
     }
+
+    #[Route('/deplacer/{parcours}', name: 'deplacer', methods: ['GET'])]
+    public function deplacer(
+        Parcours $parcours,
+        Request $request,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $analysis = $this->parcoursMoveService->analyze($parcours);
+        $eligibleFormations = $this->parcoursMoveService->getEligibleFormations($parcours);
+
+        $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string)$request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
+
+        if ($isTurbo) {
+            return $this->turboStream->streamOpenModalFromTemplates(
+                'Déplacer le parcours de formation',
+                'Parcours : ' . $parcours->getDisplay(),
+                'parcours_v2/ses/_deplacer.html.twig',
+                [
+                    'parcours' => $parcours,
+                    'formation' => $parcours->getFormation(),
+                    'analysis' => $analysis,
+                    'eligibleFormations' => $eligibleFormations,
+                ],
+                'parcours_v2/ses/_modal_deplacer_footer.html.twig',
+                [
+                    'parcours' => $parcours,
+                ]
+            );
+        }
+
+        return $this->render('parcours_v2/ses/deplacer.html.twig', [
+            'parcours' => $parcours,
+            'formation' => $parcours->getFormation(),
+            'analysis' => $analysis,
+            'eligibleFormations' => $eligibleFormations,
+        ]);
+    }
+
+    #[Route('/deplacer/{parcours}', name: 'deplacer_post', methods: ['POST'])]
+    public function deplacerPost(
+        Parcours $parcours,
+        Request $request,
+    ): Response {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string)$request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
+
+        $csrfToken = (string)$request->request->get('_token', $request->request->get('csrf_token', ''));
+        if (!$this->isCsrfTokenValid('parcours_move_' . $parcours->getId(), $csrfToken)) {
+            if ($isTurbo) {
+                return $this->turboStream->streamToastError('Token CSRF invalide ou expiré.');
+            }
+            $this->addFlash('danger', 'Token CSRF invalide ou expiré.');
+            return $this->redirectToRoute('parcours_ses_deplacer', ['parcours' => $parcours->getId()]);
+        }
+
+        $confirmationText = trim((string)$request->request->get('confirmation_text', ''));
+        $expectedText = trim($parcours->getLibelle() ?? '');
+
+        if (mb_strtoupper($confirmationText) !== mb_strtoupper($expectedText) && mb_strtoupper($confirmationText) !== 'DEPLACER') {
+            $msg = sprintf('Le texte saisi (« %s ») ne correspond pas au libellé du parcours (« %s ») ou à « DEPLACER ». Le déplacement a été annulé.', $confirmationText, $expectedText);
+            if ($isTurbo) {
+                return $this->turboStream->streamToastError($msg);
+            }
+            $this->addFlash('danger', $msg);
+            return $this->redirectToRoute('parcours_ses_deplacer', ['parcours' => $parcours->getId()]);
+        }
+
+        $targetFormationId = (int)$request->request->get('target_formation_id', 0);
+        $targetFormation = $targetFormationId > 0 ? $this->formationRepository->find($targetFormationId) : null;
+
+        if ($targetFormation === null) {
+            $msg = 'Veuillez sélectionner une formation de destination valide.';
+            if ($isTurbo) {
+                return $this->turboStream->streamToastError($msg);
+            }
+            $this->addFlash('danger', $msg);
+            return $this->redirectToRoute('parcours_ses_deplacer', ['parcours' => $parcours->getId()]);
+        }
+
+        try {
+            $this->parcoursMoveService->move($parcours, $targetFormation);
+        } catch (\LogicException|\InvalidArgumentException $e) {
+            if ($isTurbo) {
+                return $this->turboStream->streamToastError($e->getMessage());
+            }
+            $this->addFlash('danger', $e->getMessage());
+            return $this->redirectToRoute('parcours_ses_deplacer', ['parcours' => $parcours->getId()]);
+        }
+
+        $flashMsg = sprintf('Le parcours « %s » a été déplacé avec succès vers la formation « %s ».', $parcours->getLibelle(), $targetFormation->getDisplay());
+        $this->addFlash('success', $flashMsg);
+
+        $redirectUrl = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+
+        if ($isTurbo) {
+            return $this->turboStream->stream('parcours_v2/ses/turbo/move_success.stream.html.twig', [
+                'redirectUrl' => $redirectUrl,
+                'toastMessage' => $flashMsg,
+            ]);
+        }
+
+        return $this->redirect($redirectUrl);
+    }
 }
+

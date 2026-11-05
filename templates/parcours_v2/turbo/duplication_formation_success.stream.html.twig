@@ -1,0 +1,15 @@
+<turbo-stream action="replace" target="parcours_{{ formation.id }}">
+    <template>
+        {{ include('formation/_parcoursFormation.html.twig', {
+            formation: formation,
+            parcours: parcours,
+            dpesParcours: dpesParcours
+        }) }}
+    </template>
+</turbo-stream>
+
+{{ include('_ui/_toast.stream.html.twig', {
+    message: toastMessage|default('Le parcours a été dupliqué avec succès.'),
+    closeModal: true,
+    toast_type: 'success'
+}) }}

@@ -30,8 +30,8 @@
             <dt>Enseignement dispensé en</dt>
             <dd>
                 <ul>
-                    {% for langue in ficheMatiere.langueDispense %}
-                    <li>{{ langue.libelle }}</li>
+                    {% for code in ficheMatiere.langueDispense %}
+                    <li>{{ code|language_name('fr')|capitalize }}</li>
                     {% endfor %}
                 </ul>
             </dd>
@@ -52,8 +52,8 @@
             <dt>Support de cours en</dt>
             <dd>
                 <ul>
-                    {% for langue in ficheMatiere.langueSupport %}
-                    <li>{{ langue.libelle }}</li>
+                    {% for code in ficheMatiere.langueSupport %}
+                    <li>{{ code|language_name('fr')|capitalize }}</li>
                     {% endfor %}
                 </ul>
             </dd>

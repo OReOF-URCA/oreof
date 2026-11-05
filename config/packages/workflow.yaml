@@ -982,7 +982,7 @@ framework:
           to: 'soumis_ses'
           metadata:
             type: valider
-            label: 'Transmettre pour validation Scolarité'
+            label: 'btn.offre_v2.composante.transmettre'
             btn: success
             icon: ph:check
             hasUpload: true

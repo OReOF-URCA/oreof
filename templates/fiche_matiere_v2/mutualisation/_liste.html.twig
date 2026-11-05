@@ -1,0 +1,60 @@
+<table class="table">
+    <thead>
+    <tr>
+        <th>Composante</th>
+        <th>Mention/Spécialité</th>
+        <th>Parcours</th>
+        <th>Fiche utilisée ?</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for composante in ficheMatiere.composante %}
+        <tr>
+            <td>{{ composante.libelle }}</td>
+            <td colspan="2">Toutes les mentions</td>
+            <td></td>
+            <td class="text-end"></td>
+        </tr>
+    {% endfor %}
+
+    {% for fiche in ficheMatiere.ficheMatiereParcours %}
+        <tr>
+            <td>{{ fiche.parcours != null and fiche.parcours.formation != null ? fiche.parcours.formation.composantePorteuse.libelle : 'Erreur formation' }}</td>
+            <td>{{ fiche.parcours != null and fiche.parcours.formation != null ? fiche.parcours.formation.display : 'Erreur formation' }}</td>
+            <td>{{ fiche.parcours != null ? fiche.parcours.libelle : 'Erreur formation' }} {{ component('Badge', { dto: fiche.parcours.typeParcours|badgeTypeParcours }) }}</td>
+            <td>{{ fiche.parcours != null and ficheMatiere|hasParcours(fiche.parcours) == true ? '<span class="badge bg-success">Oui</span>' : '<span class="badge bg-danger">Non</span>' }}</td>
+            <td class="text-end">
+                <button {{ stimulus_action('fichematiere--step1', 'delete', 'click', {
+                    url: path('fiche_matiere_v2_mutualisation_ajax', {id: ficheMatiere.id}),
+                    fiche: fiche.id
+                }) }} class="btn btn-sm text-danger">
+                    <i class="{{ iconDelete }}"></i> Supprimer
+                </button>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+    <tr>
+        <td colspan="5">
+            <button
+                    {{ stimulus_controller('modal', {
+                        size: 'lg',
+                        modalTitle: 'Ajouter une formation pour la mutualisation',
+                        modalUrl: path('fiche_matiere_v2_mutualisation_add', {id: ficheMatiere.id})
+                    }) }}
+                    data-action="click->modal#openModal"
+                    class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
+                    data-size="lg"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="bottom"
+                    title="Ajouter une formation pour la mutualisation"
+            >
+                <i class="{{ iconAdd }}"></i>
+                <span> Ajouter une formation pour la mutualisation</span>
+            </button>
+        </td>
+    </tr>
+    </tfoot>
+</table>

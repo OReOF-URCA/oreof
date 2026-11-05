@@ -70,8 +70,8 @@
     {% endif %}
     <div class="col-sm-12">
         <table class="table table-striped table-hover">
-            {% set presentiel = parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 0 or parcours.modalitesEnseignement.value == 1) %}
-            {% set distanciel = parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 2 or parcours.modalitesEnseignement.value == 1) %}
+            {% set presentiel = parcours.modalitesEnseignementValue in ['0', '1', 'presentielle', 'hybride'] or (parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 0 or parcours.modalitesEnseignement.value == 1)) %}
+            {% set distanciel = parcours.modalitesEnseignementValue in ['2', '1', 'distancielle', 'hybride'] or (parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 2 or parcours.modalitesEnseignement.value == 1)) %}
 
             {% for ordre, semestre in dto.semestres|filter(semestre => (semestre.semestre.nonDispense == false)) %}
                 {% set diffSemestre = diffStructure is defined and diffStructure != null ? diffStructure.semestres[ordre] : null %}
@@ -184,7 +184,7 @@
                         </th>
                     {% endif %}
 
-                    {% if parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 1) %}
+                    {% if parcours.modalitesEnseignementValue in ['1', 'hybride'] or (parcours.modalitesEnseignement != null and parcours.modalitesEnseignement.value == 1) %}
                         <th>
                             <span class="show_versioning_campagne d-none d-print-none">
                                 {{ diffSemestreCampagne ? diffSemestreCampagne.heuresEctsSemestre.sommeSemestreTotalPresDist|displayDiff : '' }}
@@ -275,7 +275,7 @@
                     </th>
                 {% endif %}
 
-                {% if parcours.modalitesEnseignement != null and (parcours.modalitesEnseignement.value == 1) %}
+                {% if parcours.modalitesEnseignementValue in ['1', 'hybride'] or (parcours.modalitesEnseignement != null and parcours.modalitesEnseignement.value == 1) %}
                     <th>
                         <span class="show_versioning_campagne d-none d-print-none">
                             {{ diffStructureCampagne ? diffStructureCampagne.heuresEctsFormation.sommeFormationTotalPresDist|displayDiff : '' }}

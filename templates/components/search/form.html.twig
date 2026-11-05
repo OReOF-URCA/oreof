@@ -36,14 +36,17 @@
                         value="{{ resolvedKeyword }}"
                         placeholder="{{ resolvedPlaceholder }}"
                         class="block w-full rounded-2xl border border-secondary-200 bg-white py-3 pl-10 pr-4 text-text shadow-sm transition focus:border-primary-500 focus:ring-2 focus:ring-primary-200 dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-100 dark:placeholder:text-secondary-500"
+                        {% if resolvedHelperText != '' %}aria-describedby="{{ resolvedFieldId }}_help"{% endif %}
                         autocomplete="off"
                         spellcheck="false"
                         {% if resolvedAutofocus %}autofocus{% endif %}
                 >
             </div>
-            <p class="text-sm text-secondary-500 dark:text-secondary-400">
-                {{ resolvedHelperText }}
-            </p>
+            {% if resolvedHelperText != '' %}
+                <p id="{{ resolvedFieldId }}_help" class="text-sm text-secondary-500 dark:text-secondary-400">
+                    {{ resolvedHelperText }}
+                </p>
+            {% endif %}
         </div>
 
         <fieldset class="space-y-3">

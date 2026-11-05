@@ -6,7 +6,9 @@ use App\Controller\BaseController;
 use App\Entity\Composante;
 use App\Entity\DocumentConseil;
 use App\Entity\DpeFormation;
+use App\Entity\Formation;
 use App\Entity\HistoriqueFormation;
+use App\Entity\User;
 use App\Exception\FileUploadException;
 use App\Repository\AnneeRepository;
 use App\Repository\DocumentConseilRepository;
@@ -23,6 +25,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Workflow\WorkflowInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class OffreValidationController extends BaseController
 {
@@ -43,6 +46,7 @@ final class OffreValidationController extends BaseController
         WorkflowInterface $dpeFormationWorkflow,
         TurboStreamResponseFactory $turboStream,
         RemplissageSuspension $remplissageSuspension,
+        TranslatorInterface $translator,
     ): Response {
         $campagne = $this->getCampagneCollecte();
 
@@ -355,7 +359,9 @@ final class OffreValidationController extends BaseController
             'type' => 'note_explicative',
         ], ['uploadedAt' => 'DESC']);
 
-        $modalTitle = $meta['label'] ?? sprintf('Validation — %s', $transition);
+        $modalTitle = isset($meta['label'])
+            ? $translator->trans($meta['label'], [], 'process')
+            : sprintf('Validation — %s', $transition);
 
         return $turboStream->streamOpenModalFromTemplates(
             $modalTitle,
@@ -431,5 +437,245 @@ final class OffreValidationController extends BaseController
         }
 
         return $errors;
+    }
+
+    #[Route('/offre/formation/{formation}/documents-conseil', name: 'offre_v2_formation_documents_modal', methods: ['GET'])]
+    public function modalFormationDocuments(
+        Formation $formation,
+        DocumentConseilRepository $documentConseilRepository,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $this->denyAccessUnlessCanManageDocuments($formation);
+
+        $composante = $formation->getComposantePorteuse();
+
+        $currentPv = null;
+        $currentNote = null;
+        foreach ($formation->getDocumentConseils() as $doc) {
+            if ($doc->getType() === 'pv' && $currentPv === null) {
+                $currentPv = $doc;
+            } elseif ($doc->getType() === 'note_explicative' && $currentNote === null) {
+                $currentNote = $doc;
+            }
+        }
+
+        $existingPvs = $composante !== null ? $documentConseilRepository->findBy([
+            'composante' => $composante,
+            'type' => 'pv',
+        ], ['uploadedAt' => 'DESC']) : [];
+
+        $existingNotes = $composante !== null ? $documentConseilRepository->findBy([
+            'composante' => $composante,
+            'type' => 'note_explicative',
+        ], ['uploadedAt' => 'DESC']) : [];
+
+        return $turboStream->streamOpenModalFromTemplates(
+            'Documents de conseil — PV & Note explicative',
+            $formation->getDisplayLong(),
+            'offre_v2/_modal_formation_documents.html.twig',
+            [
+                'formation' => $formation,
+                'currentPv' => $currentPv,
+                'currentNote' => $currentNote,
+                'existingPvs' => $existingPvs,
+                'existingNotes' => $existingNotes,
+            ],
+            '_ui/_footer_submit_cancel.html.twig',
+            [
+                'submitLabel' => 'Enregistrer',
+            ]
+        );
+    }
+
+    #[Route('/offre/formation/{formation}/documents-conseil/sauvegarder', name: 'offre_v2_formation_documents_sauvegarder', methods: ['POST'])]
+    public function sauvegarderFormationDocuments(
+        Formation $formation,
+        Request $request,
+        DocumentConseilRepository $documentConseilRepository,
+        SecureUploadService $secureUploadService,
+        EntityManagerInterface $em,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $this->denyAccessUnlessCanManageDocuments($formation);
+
+        $csrfToken = (string)$request->request->get('_token');
+        if (!$this->isCsrfTokenValid('formation_documents_' . $formation->getId(), $csrfToken)) {
+            return $turboStream->streamToastError('Session expirée ou jeton CSRF invalide.');
+        }
+
+        $composante = $formation->getComposantePorteuse();
+        $dateStr = (string)$request->request->get('date_conseil');
+        $dateConseil = !empty($dateStr) ? new \DateTime($dateStr) : new \DateTime();
+        $commentaire = trim((string)$request->request->get('commentaire'));
+        /** @var User|null $currentUser */
+        $currentUser = $this->getUser() instanceof User ? $this->getUser() : null;
+
+        // Gestion du PV
+        $pvAction = (string)$request->request->get('pv_action', 'keep');
+        $docPv = null;
+
+        if ($pvAction === 'remove') {
+            foreach ($formation->getDocumentConseils() as $doc) {
+                if ($doc->getType() === 'pv') {
+                    $formation->removeDocumentConseil($doc);
+                }
+            }
+        } elseif ($pvAction === 'choose') {
+            $pvId = $request->request->get('pv_id');
+            if ($pvId) {
+                $docPv = $documentConseilRepository->findOneBy([
+                    'id' => (int)$pvId,
+                    'type' => 'pv',
+                ]);
+                if ($docPv !== null) {
+                    foreach ($formation->getDocumentConseils() as $doc) {
+                        if ($doc->getType() === 'pv' && $doc->getId() !== $docPv->getId()) {
+                            $formation->removeDocumentConseil($doc);
+                        }
+                    }
+                    $formation->addDocumentConseil($docPv);
+                }
+            }
+        } elseif ($pvAction === 'upload') {
+            if ($request->files->has('file_pv') && $request->files->get('file_pv') !== null) {
+                try {
+                    $uploadedPv = $secureUploadService->uploadFromRequest($request, 'file_pv', 'conseils');
+                    if ($uploadedPv !== null) {
+                        foreach ($formation->getDocumentConseils() as $doc) {
+                            if ($doc->getType() === 'pv') {
+                                $formation->removeDocumentConseil($doc);
+                            }
+                        }
+                        $docPv = new DocumentConseil();
+                        $docPv->setType('pv');
+                        $docPv->setFilename($uploadedPv->getStoredFilename());
+                        $docPv->setOriginalFilename($uploadedPv->getOriginalFilename());
+                        $docPv->setDateConseil($dateConseil);
+                        $docPv->setUploadedBy($currentUser);
+                        $docPv->setComposante($composante);
+                        $docPv->addFormation($formation);
+                        $em->persist($docPv);
+                        $formation->addDocumentConseil($docPv);
+                    }
+                } catch (FileUploadException $e) {
+                    return $turboStream->streamToastError($e->getPublicMessage());
+                }
+            }
+        } else {
+            // 'keep' : on conserve le PV existant
+            foreach ($formation->getDocumentConseils() as $doc) {
+                if ($doc->getType() === 'pv') {
+                    $docPv = $doc;
+                    break;
+                }
+            }
+        }
+
+        // Gestion de la Note explicative
+        $noteAction = (string)$request->request->get('note_action', 'keep');
+        $docNote = null;
+
+        if ($noteAction === 'remove') {
+            foreach ($formation->getDocumentConseils() as $doc) {
+                if ($doc->getType() === 'note_explicative') {
+                    $formation->removeDocumentConseil($doc);
+                }
+            }
+        } elseif ($noteAction === 'choose') {
+            $noteId = $request->request->get('note_id');
+            if ($noteId) {
+                $docNote = $documentConseilRepository->findOneBy([
+                    'id' => (int)$noteId,
+                    'type' => 'note_explicative',
+                ]);
+                if ($docNote !== null) {
+                    foreach ($formation->getDocumentConseils() as $doc) {
+                        if ($doc->getType() === 'note_explicative' && $doc->getId() !== $docNote->getId()) {
+                            $formation->removeDocumentConseil($doc);
+                        }
+                    }
+                    $formation->addDocumentConseil($docNote);
+                }
+            }
+        } elseif ($noteAction === 'upload') {
+            if ($request->files->has('file_note') && $request->files->get('file_note') !== null) {
+                try {
+                    $uploadedNote = $secureUploadService->uploadFromRequest($request, 'file_note', 'conseils');
+                    if ($uploadedNote !== null) {
+                        foreach ($formation->getDocumentConseils() as $doc) {
+                            if ($doc->getType() === 'note_explicative') {
+                                $formation->removeDocumentConseil($doc);
+                            }
+                        }
+                        $docNote = new DocumentConseil();
+                        $docNote->setType('note_explicative');
+                        $docNote->setFilename($uploadedNote->getStoredFilename());
+                        $docNote->setOriginalFilename($uploadedNote->getOriginalFilename());
+                        $docNote->setDateConseil($dateConseil);
+                        $docNote->setUploadedBy($currentUser);
+                        $docNote->setComposante($composante);
+                        $docNote->addFormation($formation);
+                        $em->persist($docNote);
+                        $formation->addDocumentConseil($docNote);
+                    }
+                } catch (FileUploadException $e) {
+                    return $turboStream->streamToastError($e->getPublicMessage());
+                }
+            }
+        } else {
+            // 'keep' : on conserve la Note existante
+            foreach ($formation->getDocumentConseils() as $doc) {
+                if ($doc->getType() === 'note_explicative') {
+                    $docNote = $doc;
+                    break;
+                }
+            }
+        }
+
+        // Trace dans l'historique
+        $campagne = $this->getCampagneCollecte();
+        $dpeFormation = $em->getRepository(DpeFormation::class)->findOneBy([
+            'formation' => $formation,
+            'campagneCollecte' => $campagne,
+        ]);
+
+        $histo = new HistoriqueFormation();
+        $histo->setFormation($formation);
+        $histo->setDpeFormation($dpeFormation);
+        $histo->setDate($dateConseil);
+        $histo->setUser($currentUser);
+        $histo->setEtape('documents_conseil');
+        $histo->setEtat('valide');
+        $histo->setCommentaire($commentaire !== '' ? $commentaire : 'Mise à jour des documents de conseil (PV / Note explicative)');
+        if ($docPv !== null) {
+            $histo->setDocumentPv($docPv);
+        }
+        if ($docNote !== null) {
+            $histo->setDocumentNote($docNote);
+        }
+        $em->persist($histo);
+
+        $em->flush();
+
+        return $turboStream->stream('offre_v2/turbo/apply_success.stream.html.twig', [
+            'message' => 'Les documents de conseil de la formation ont été mis à jour.',
+        ]);
+    }
+
+    private function denyAccessUnlessCanManageDocuments(Formation $formation): void
+    {
+        if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_SES')) {
+            return;
+        }
+
+        $composante = $formation->getComposantePorteuse();
+        if ($composante === null) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $this->denyAccessUnlessGranted('MANAGE', [
+            'route' => 'app_composante',
+            'subject' => $composante,
+        ]);
     }
 }

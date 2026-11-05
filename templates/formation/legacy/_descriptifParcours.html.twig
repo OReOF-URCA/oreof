@@ -3,9 +3,10 @@
         <dl>
             <dt class="text-[10px] font-black text-indigo-400 uppercase mt-3">Modalités d'enseignement</dt>
             <dd>
-                {% if parcours.modalitesEnseignement != null %}
+                {% set modaliteLabel = referentiel_label('modalite_enseignement', parcours.modalitesEnseignementValue) ?? (parcours.modalitesEnseignement ? parcours.modalitesEnseignement.libelle : null) %}
+                {% if modaliteLabel is not null %}
                     <span class="px-2 py-1 bg-primary-50 dark:bg-primary-800 rounded-lg text-xs font-bold text-primary-600 dark:text-primary-200 mt-1">
-                    {{ parcours.modalitesEnseignement.libelle }}
+                    {{ modaliteLabel }}
                 </span>
                 {% else %}
                     <span class="px-2 py-1 bg-orange-50 rounded-lg text-xs font-bold text-orange-600 mt-1">

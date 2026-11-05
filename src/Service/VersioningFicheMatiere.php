@@ -33,7 +33,8 @@ class VersioningFicheMatiere {
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        private readonly ?\App\Referentiel\ReferentielManager $referentiels = null,
     ){
         $this->entityManager = $entityManager;
         $this->filesystem = $filesystem;
@@ -81,8 +82,10 @@ class VersioningFicheMatiere {
             $ficheMatiereVersioning->setVersionValide(true);
         }
 
-        $modaliteEnseignement = $ficheMatiere->getModaliteEnseignement();
-        $modaliteEnseignementLibelle = $modaliteEnseignement?->libelle();
+        $modaliteValue = $ficheMatiere->getModaliteEnseignementValue();
+        $modaliteEnseignementLibelle = $modaliteValue !== null
+            ? ($this->referentiels?->label('modalite_enseignement', $modaliteValue) ?? $ficheMatiere->getModaliteEnseignement()?->libelle() ?? $modaliteValue)
+            : null;
 
         // Serialization
         $ficheMatiereJson = $this->serializer->serialize($ficheMatiere, 'json', [
@@ -193,18 +196,12 @@ class VersioningFicheMatiere {
                             "<p class=\"list-item\">"
                             . implode(
                                 "</p><p class=\"list-item\">",
-                                array_map(
-                                    fn ($langue) => $langue->getLibelle(),
-                                    $lastVersion->getLangueDispense()->toArray()
-                                )
+                                $lastVersion->getLanguesDispenseArray()
                             ) . "</p>",
                             "<p class=\"list-item\">"
                             . implode(
                                 "</p><p class=\"list-item\">",
-                                array_map(
-                                    fn ($langue) => $langue->getLibelle(),
-                                    $ficheMatiere->getLangueDispense()->toArray()
-                                )
+                                $ficheMatiere->getLanguesDispenseArray()
                             ) . "</p>",
                             $rendererName,
                             $differOptions,
@@ -218,18 +215,12 @@ class VersioningFicheMatiere {
                             "<p class=\"list-item\">"
                             . implode(
                                 "</p><p class=\"list-item\">",
-                                array_map(
-                                    fn ($langue) => $langue->getLibelle(),
-                                    $lastVersion->getLangueSupport()->toArray()
-                                )
+                                $lastVersion->getLanguesSupportsArray()
                             ) . "</p>",
                             "<p class=\"list-item\">"
                             . implode(
                                 "</p><p class=\"list-item\">",
-                                array_map(
-                                    fn ($langue) => $langue->getLibelle(),
-                                    $ficheMatiere->getLangueSupport()->toArray()
-                                )
+                                $ficheMatiere->getLanguesSupportsArray()
                             ) . "</p>",
                             $rendererName,
                             $differOptions,

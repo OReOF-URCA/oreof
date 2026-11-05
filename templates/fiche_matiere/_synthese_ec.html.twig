@@ -28,7 +28,7 @@
                                                 size: 'lg',
                                                 modalTitle: ficheMatiere.parcours != null ? 'Modifier le parcours porteur' : 'Définir le parcours porteur',
                                                 nomEvenement: 'refreshStep',
-                                                modalUrl: path('app_fiche_matiere_wizard_change_parcours_porteur', {ficheMatiere: ficheMatiere.id})
+                                                modalUrl: path('fiche_matiere_v2_mutualisation_change_parcours_porteur', {id: ficheMatiere.id})
                                             }) }}
                                             data-action="click->modal#openModal"
                                     >

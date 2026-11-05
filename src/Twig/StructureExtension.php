@@ -23,7 +23,6 @@ class StructureExtension extends AbstractExtension
 
     public function getFilters(): array
     {
-        // todo: Encore utile ?
         return [
             new TwigFilter('badgeEctsSemestre', $this->badgeEctsSemestre(...), ['is_safe' => ['html']]),
             new TwigFilter('badgeEctsUe', $this->badgeEctsUe(...), ['is_safe' => ['html']]),

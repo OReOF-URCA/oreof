@@ -54,7 +54,9 @@ class FormationController extends BaseController
         Composante $composante
     ): Response
     {
-        $formations = $formationRepository->findBy(['composantePorteuse' => $composante]);//todo: filtrer selon droits ? Ajouter les co-portées ? avec une mise en valeur et sans édition ? si resp DPE
+        $this->denyAccessUnlessGranted('SHOW', $composante);
+
+        $formations = $formationRepository->findBy(['composantePorteuse' => $composante]);
 
 
         return $this->render('structure/formation/_liste.html.twig', [

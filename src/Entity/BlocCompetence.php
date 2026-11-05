@@ -47,7 +47,7 @@ class BlocCompetence
     #[ORM\Column]
     private ?int $ordre = null;
 
-    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(targetEntity: self::class, cascade: ['persist'])]
     private ?self $blocCompetenceOrigineCopie = null;
 
     #[ORM\ManyToOne(inversedBy: 'blocCompetences')]

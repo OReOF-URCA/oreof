@@ -60,21 +60,22 @@ export async function handleToastResponse (response, options = {}) {
   if (contentType.includes('text/vnd.turbo-stream.html')) {
     renderStreamMessage(text)
 
-    return { handled: true, format: 'turbo-stream' }
+    return { handled: true, format: 'turbo-stream', success: response.ok && !text.includes('data-form-error-summary') && !/data-toast-type=["']danger/.test(text) }
   }
 
   const trimmed = text.trim()
   if (trimmed.startsWith('{')) {
     try {
       const payload = JSON.parse(trimmed)
-      const message = payload.message || (response.ok ? successFallbackMessage : errorFallbackMessage)
-      const level = normalizeToastType(payload.toast_type || payload.type || (response.ok ? 'success' : 'danger'))
+      const success = response.ok && payload.success !== false
+      const message = payload.message || (success ? successFallbackMessage : errorFallbackMessage)
+      const level = success ? normalizeToastType(payload.toast_type || payload.type || 'success') : 'danger'
 
       if (message) {
         callOut(message, level)
       }
 
-      return { handled: true, format: 'json', payload }
+      return { handled: true, format: 'json', payload, success }
     } catch {
       // Le body n'est pas un JSON exploitable; on applique les fallbacks ci-dessous.
     }
@@ -82,13 +83,13 @@ export async function handleToastResponse (response, options = {}) {
 
   if (response.ok && successFallbackMessage) {
     callOut(successFallbackMessage, 'success')
-    return { handled: true, format: 'fallback-success' }
+    return { handled: true, format: 'fallback-success', success: true }
   }
 
   if (!response.ok && errorFallbackMessage) {
     callOut(errorFallbackMessage, 'danger')
-    return { handled: true, format: 'fallback-error' }
+    return { handled: true, format: 'fallback-error', success: false }
   }
 
-  return { handled: false, format: 'unknown' }
+  return { handled: false, format: 'unknown', success: false }
 }

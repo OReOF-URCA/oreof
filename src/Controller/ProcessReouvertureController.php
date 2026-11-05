@@ -45,6 +45,7 @@ class ProcessReouvertureController extends BaseController
     }
 
     #[Route('/demande/non-ouverture/{parcours}', name: 'app_validation_demande_non_ouverture')]
+    // todo: encore utilisé ?
     public function demandeNonOuverture(
         Parcours           $parcours,
         VersioningParcours $versioningParcours,
