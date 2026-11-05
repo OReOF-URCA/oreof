@@ -210,6 +210,9 @@ class ApiJsonExport
                 foreach ($formationAnneeSuivante->getParcours() as $parcoursAnneeSuivante) {
                     if ($isV2 === false) {
                         $checkIsValidNextYearParcours = $lheoXmlService->isValidLHEO($parcoursAnneeSuivante);
+                        if (($parcoursAnneeSuivante?->getFormation()?->getTypeDiplome()?->isClassique() ?? false) === false) {
+                            $checkIsValidNextYearParcours = false;
+                        }
                     } elseif ($isV2 === true) {
                         $checkIsValidNextYearParcours = $lheoV2->isValidLHEO($parcoursAnneeSuivante);
                     }
