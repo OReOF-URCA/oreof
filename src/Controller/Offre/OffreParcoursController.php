@@ -13,9 +13,11 @@ use App\Entity\Parcours;
 use App\Entity\Semestre;
 use App\Entity\SemestreParcours;
 use App\Entity\User;
+use App\Entity\Ville;
 use App\Enums\RegimeInscriptionEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
+use App\Repository\VilleRepository;
 use App\Service\Offre\RemplissageSuspension;
 use App\Service\Parcours\GenereStructureParcours;
 use App\Service\Validation\OffreValidationService;
@@ -35,6 +37,7 @@ final class OffreParcoursController extends BaseController
         #[MapEntity(mapping: ['slug' => 'slug'])]
         Formation $formation,
         TurboStreamResponseFactory $turboStream,
+        VilleRepository $villeRepository,
     ): Response {
         $this->denyAccessUnlessCanConfigurerOffre($formation);
 
@@ -53,6 +56,7 @@ final class OffreParcoursController extends BaseController
                 'regimesInscription' => RegimeInscriptionEnum::cases(),
                 'typesParcours' => TypeParcoursEnum::cases(),
                 'anneesOrdres' => $formation->getOrdresAnneesPossibles(),
+                'villes' => $villeRepository->findBy([], ['libelle' => 'ASC']),
             ],
             '_ui/_footer_submit_cancel.html.twig',
             [
@@ -125,6 +129,17 @@ final class OffreParcoursController extends BaseController
             }
         }
         $parcours->setRegimeInscription($regimes);
+
+        $villeId = $request->request->getInt('ville');
+        $ville = $villeId > 0 ? $em->getRepository(Ville::class)->find($villeId) : null;
+        if ($ville === null && !$formation->getLocalisationMention()->isEmpty()) {
+            $firstLoc = $formation->getLocalisationMention()->first();
+            if ($firstLoc instanceof Ville) {
+                $ville = $firstLoc;
+            }
+        }
+        $parcours->setVille($ville);
+        $parcours->setLocalisation($ville);
 
         if ($formation->getResponsableMention() !== null) {
             $parcours->setRespParcours($formation->getResponsableMention());
@@ -204,6 +219,7 @@ final class OffreParcoursController extends BaseController
         Parcours $parcours,
         TurboStreamResponseFactory $turboStream,
         EntityManagerInterface $em,
+        VilleRepository $villeRepository,
     ): Response {
         $campagne = $this->getCampagneCollecte();
         $formation = $parcours->getFormation();
@@ -227,6 +243,7 @@ final class OffreParcoursController extends BaseController
                 'dpeParcours' => $dpeParcours,
                 'regimesInscription' => RegimeInscriptionEnum::cases(),
                 'typesParcours' => TypeParcoursEnum::cases(),
+                'villes' => $villeRepository->findBy([], ['libelle' => 'ASC']),
             ],
             '_ui/_footer_submit_cancel.html.twig',
             [
@@ -298,6 +315,11 @@ final class OffreParcoursController extends BaseController
             }
         }
         $parcours->setRegimeInscription($regimes);
+
+        $villeId = $request->request->getInt('ville');
+        $ville = $villeId > 0 ? $em->getRepository(Ville::class)->find($villeId) : null;
+        $parcours->setVille($ville);
+        $parcours->setLocalisation($ville);
 
         $dpeParcours = $em->getRepository(DpeParcours::class)->findOneBy([
             'parcours' => $parcours,

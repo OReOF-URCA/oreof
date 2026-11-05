@@ -139,10 +139,17 @@
                             <tr class="hover:bg-secondary-50/60 dark:hover:bg-secondary-800/30 transition-colors {{ loop.first ? 'border-t border-secondary-200 dark:border-secondary-700' : '' }}">
                                 <td class="px-3 py-1.5 align-middle {{ loop.first ? 'font-semibold text-secondary-900 dark:text-secondary-100' : 'text-secondary-400' }}">
                                     {% if loop.first %}
-                                        <div class="flex items-center gap-1.5">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
                                             <span>{{ parcours.libelle }}</span>
                                             {% if tpBadge is not null %}
                                                 <twig:Badge :dto="tpBadge" size="xs" />
+                                            {% endif %}
+                                            {% set parcoursVille = parcours.ville ?? parcours.localisation %}
+                                            {% if parcoursVille %}
+                                                <span class="inline-flex items-center gap-1 text-[10px] font-medium text-secondary-600 bg-secondary-100 dark:bg-secondary-800 dark:text-secondary-300 px-1.5 py-0.5 rounded" title="Ville : {{ parcoursVille.libelle }}">
+                                                    <twig:UX:Icon name="ph:map-pin" class="h-2.5 w-2.5 text-secondary-400" />
+                                                    {{ parcoursVille.libelle }}
+                                                </span>
                                             {% endif %}
                                             {% if pDetail.anomalies|length > 0 %}
                                                 <span class="text-danger-600 font-bold" title="{{ pDetail.anomalies|join('\n') }}">⚠️</span>

@@ -67,7 +67,7 @@ class ExportCarif implements ExportInterface
                     $this->excelWriter->writeCellXY('L', $ligne, CleanTexte::cleanTextArea($parcours->getPrerequis()), ['wrap' => true]);
 //                    $this->excelWriter->writeCellXY('N', $ligne, $dureeEntreprise);
 //                    $this->excelWriter->writeCellXY('O', $ligne, $dureeFormation);
-                    $this->excelWriter->writeCellXY('R', $ligne, $parcours->getLocalisation()?->getLibelle());
+                    $this->excelWriter->writeCellXY('R', $ligne, ($parcours->getLocalisation() ?? $parcours->getVille())?->getLibelle());
 
 //                    $this->excelWriter->getColumnsAutoSize('A', 'R');
                     $ligne++;

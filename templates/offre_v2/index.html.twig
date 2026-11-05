@@ -614,7 +614,7 @@
                                         {{ pd.composanteLibelle }}
                                     </td>
                                     <td class="px-4 py-3 font-semibold text-secondary-700 dark:text-secondary-100">
-                                        <div class="flex items-center gap-2">
+                                        <div class="flex items-center gap-2 flex-wrap">
                                             {% if pd.annees|length > 0 %}
                                                 <button type="button"
                                                         class="group/toggle inline-flex items-center gap-2 text-left cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-primary-500"
@@ -632,6 +632,13 @@
                                                 </button>
                                             {% else %}
                                                 <span>{{ parcours.libelle }}</span>
+                                            {% endif %}
+                                            {% set parcoursVille = parcours.ville ?? parcours.localisation %}
+                                            {% if parcoursVille %}
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-secondary-600 bg-secondary-100 dark:bg-secondary-800 dark:text-secondary-300 px-1.5 py-0.5 rounded-md" title="Lieu d'enseignement : {{ parcoursVille.libelle }}">
+                                                    <twig:UX:Icon name="ph:map-pin" class="h-3 w-3 text-secondary-400" />
+                                                    {{ parcoursVille.libelle }}
+                                                </span>
                                             {% endif %}
                                             <span class="text-xs font-normal text-secondary-400">({{ pd.annees|length }} année{{ pd.annees|length > 1 ? 's' : '' }})</span>
                                             {% set parcAnomalies = forma.parcoursAnomalies[parcours.id]|default([]) %}

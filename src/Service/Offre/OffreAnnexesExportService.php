@@ -912,11 +912,20 @@ final class OffreAnnexesExportService
      */
     public function resolveLieu(Parcours $parcours): string
     {
-        $ville = $parcours->getLocalisation()
-            ?? $parcours->getVille()
-            ?? $parcours->getFormation()?->getLocalisationMention()->first();
+        $ville = $parcours->getLocalisation() ?? $parcours->getVille();
+        if ($ville instanceof Ville) {
+            return (string) $ville->getLibelle();
+        }
 
-        return $ville instanceof Ville ? (string) $ville->getLibelle() : 'Reims';
+        $formationLoc = $parcours->getFormation()?->getLocalisationMention();
+        if ($formationLoc && !$formationLoc->isEmpty()) {
+            $first = $formationLoc->first();
+            if ($first instanceof Ville) {
+                return (string) $first->getLibelle();
+            }
+        }
+
+        return 'Reims';
     }
 
     /**

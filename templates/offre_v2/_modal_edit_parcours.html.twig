@@ -56,6 +56,31 @@
             </p>
         </div>
 
+        {# Ville d'enseignement #}
+        <div>
+            <label for="parcours_ville" class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1.5">
+                Ville d'enseignement
+            </label>
+            {% set currentVille = parcours.ville ?? parcours.localisation %}
+            {% set mentionVille = (formation.localisationMention is defined and formation.localisationMention is not empty) ? formation.localisationMention.first : null %}
+            {% set selectedVilleId = currentVille ? currentVille.id : (isAdd|default(false) and mentionVille ? mentionVille.id : null) %}
+            <select name="ville"
+                    id="parcours_ville"
+                    class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
+                    {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
+            >
+                <option value="">Sélectionner une ville…</option>
+                {% for v in villes|default([]) %}
+                    <option value="{{ v.id }}" {% if selectedVilleId == v.id %}selected{% endif %}>
+                        {{ v.libelle }}
+                    </option>
+                {% endfor %}
+            </select>
+            <p class="mt-1.5 text-xs text-secondary-500 dark:text-secondary-400">
+                Lieu d'enseignement de ce parcours (utilisé pour les exports ministériels et plateformes d'admission).
+            </p>
+        </div>
+
         {# Régime d'inscription #}
         <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-2">
