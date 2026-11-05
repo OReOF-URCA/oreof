@@ -8,7 +8,6 @@
 
 import { Controller } from '@hotwired/stimulus'
 import callOut from '../../js/callOut'
-import { Modal } from 'bootstrap'
 
 export default class extends Controller {
   static targets = ['configProfil', 'liste']
@@ -32,26 +31,35 @@ export default class extends Controller {
       })
   }
 
-  delete (event) {
-    console.log('coucou delete')
+  async delete (event) {
     event.preventDefault()
-    const { url } = event.params
-    const { csrf } = event.params
-    let modal = new Modal(document.getElementById('modal-delete'))
-    modal.show()
-    document.getElementById('btn-confirm-supprimer').addEventListener('click', async () => {
-      const body = {
+    const { url, csrf } = event.params
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce profil ?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(url, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           csrf,
         }),
-      }
-      modal = null
-      await fetch(url, body).then(() => {
-        callOut('Suppression effectuée', 'success')
-        this._updateListe()
       })
-    })
+
+      const data = await response.json()
+      if (response.ok && data.success) {
+        callOut(data.success || 'Suppression effectuée', 'success')
+        this._updateListe()
+      } else {
+        callOut(data.error || 'Erreur lors de la suppression', 'danger')
+      }
+    } catch {
+      callOut('Erreur lors de la suppression', 'danger')
+    }
   }
 
   addProfil(event) {
