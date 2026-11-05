@@ -670,8 +670,8 @@ final class OffreConfigurerController extends BaseController
 
         // Synchronisation des données des années en tronc commun
         foreach ($formation->getTroncsCommuns() as $tc) {
-            $tcParcoursIds = $tc['parcours'] ?? [];
-            foreach ($tc['annees'] ?? [] as $tcOrdre) {
+            $tcParcoursIds = array_map('intval', $tc['parcours'] ?? []);
+            foreach (array_map('intval', $tc['annees'] ?? []) as $tcOrdre) {
                 $anneesInGroup = [];
                 foreach ($formation->getParcours() as $p) {
                     if (!in_array($p->getId(), $tcParcoursIds, true)) {
@@ -933,8 +933,9 @@ final class OffreConfigurerController extends BaseController
         }
 
         foreach ($formationSource->getTroncsCommuns() as $tc) {
-            $tcParcours = $tc['parcours'] ?? [];
-            if (!in_array($parcoursSource->getId(), $tcParcours, true) || !in_array($source->getOrdre(), $tc['annees'] ?? [], true)) {
+            $tcParcours = array_map('intval', $tc['parcours'] ?? []);
+            $tcAnnees = array_map('intval', $tc['annees'] ?? []);
+            if (!in_array($parcoursSource->getId(), $tcParcours, true) || !in_array($source->getOrdre(), $tcAnnees, true)) {
                 continue;
             }
 

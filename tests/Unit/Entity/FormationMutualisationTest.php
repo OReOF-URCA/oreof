@@ -278,5 +278,70 @@ final class FormationMutualisationTest extends TestCase
         self::assertNull($annee->getPortail());
         self::assertFalse($portail->getAnnees()->contains($annee));
     }
+
+    public function testPartialTroncCommunExcludesUnselectedParcours(): void
+    {
+        $formation = new Formation();
+        $this->setId($formation, 1);
+
+        $pA = new Parcours($formation);
+        $this->setId($pA, 10);
+        $pB = new Parcours($formation);
+        $this->setId($pB, 20);
+        $pC = new Parcours($formation);
+        $this->setId($pC, 30);
+
+        $formation->addParcour($pA);
+        $formation->addParcour($pB);
+        $formation->addParcour($pC);
+
+        // Données avec mélange de types string et int (comme issu d'un POST ou JSON)
+        $formation->setTroncsCommuns([
+            [
+                'id' => 'tc_partial',
+                'nom' => 'Tronc commun A et B',
+                'annees' => ['1'],
+                'parcours' => ['10', '20'],
+            ],
+        ]);
+
+        self::assertTrue($formation->isAnneeTroncCommun(1, $pA));
+        self::assertTrue($formation->isAnneeTroncCommun(1, $pB));
+        self::assertFalse($formation->isAnneeTroncCommun(1, $pC));
+
+        self::assertNotNull($formation->getTroncCommunForParcours($pA, 1));
+        self::assertNotNull($formation->getTroncCommunForParcours($pB, 1));
+        self::assertNull($formation->getTroncCommunForParcours($pC, 1));
+
+        $autres = $formation->getAutresParcoursInTroncCommun($pA, 1);
+        self::assertCount(1, $autres);
+        self::assertSame(20, $autres[0]->getId());
+    }
+
+    public function testClearingTroncsCommunsPurgesResidualLegacyKeys(): void
+    {
+        $formation = new Formation();
+        $this->setId($formation, 1);
+
+        $p1 = new Parcours($formation);
+        $this->setId($p1, 10);
+        $formation->addParcour($p1);
+
+        // Anciennes clés résiduelles en BDD
+        $formation->setStructureSemestres([
+            'annee_1' => true,
+            '1' => 'tronc_commun',
+            '2' => 'tronc_commun',
+            'annees_tronc_commun' => [1],
+        ]);
+
+        // L'utilisateur supprime/vide tous les troncs communs
+        $formation->setTroncsCommuns([]);
+
+        self::assertSame([], $formation->getTroncsCommuns());
+        self::assertSame([], $formation->getAnneesTroncCommun());
+        self::assertFalse($formation->isAnneeTroncCommun(1));
+        self::assertFalse($formation->isAnneeTroncCommun(1, $p1));
+    }
 }
 
