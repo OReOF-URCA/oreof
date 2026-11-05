@@ -324,6 +324,42 @@ class ParcoursExportV2 {
         return $data;
     }
 
+    public function getMaquetteJsonMinimum(Parcours $p, TypeDiplome $td) {
+        $volumesVides = ['presentiel' => 0, 'distanciel' => 0];
+
+        $data = [
+            'id' => $p->getId(),
+            'uuid' => $this->getUuidForParcours($p),
+            'uuid_parcours' => $this->getUuidForParcours($p),
+            'id_precedent' => $p->getParcoursOrigineCopie()?->getId(),
+            'id_old' => $p->getParcoursOrigineCopie()?->getId(),
+            'formationId' => $p->getFormation()?->getId(),
+            'formationUuid' => $this->getUuidForFormation($p->getFormation()),
+            'uuid_formation' => $this->getUuidForFormation($p->getFormation()),
+            'formation_id_precedent' => $p->getFormation()?->getFormationOrigineCopie()?->getId(),
+            'formation_id_old' => $p->getFormation()?->getFormationOrigineCopie()?->getId(),
+            'formation' => $p->getFormation()?->getDisplay(),
+            'parcours' => $p->isParcoursDefaut() ? '' : $p->getLibelle(),
+            'typeDiplome' => $td->getLibelle(),
+            'composante' => $p->getFormation()?->getComposantePorteuse()?->getLibelle(),
+            'volumes' => [
+                'CM' => $volumesVides,
+                'TD' => $volumesVides,
+                'TP' => $volumesVides,
+                'autonomie' => 0
+            ],
+            'ects' => 0,
+            'elements' => [],
+            'path' => $this->router->generate(
+                'app_parcours_export_maquette_json_minimum_v2',
+                ['parcours' => $p->getId()],
+                UrlGeneratorInterface::ABSOLUTE_URL
+            )
+        ];
+
+        return $data;
+    }
+
     private function getEcFromUe(StructureUe $ue, int $parentDepth = 0, bool $isVersioning = false): array
     {
         $tEcs = [];

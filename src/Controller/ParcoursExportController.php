@@ -13,6 +13,7 @@ use App\Classes\MyGotenbergPdf;
 use App\Entity\Parcours;
 use App\Repository\ParcoursVersioningRepository;
 use App\Service\ParcoursExport;
+use App\Service\ParcoursExportV2;
 use App\Service\VersioningParcours;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\TypeDiplome\TypeDiplomeResolver;
@@ -162,6 +163,16 @@ class ParcoursExportController extends AbstractController
             'semestres' => []
         ];
 
+        return $this->json($jsonData);
+    }
+
+    #[Route('/parcours/{parcours}/v2/maquette-minimum/export-json', name: 'app_parcours_export_maquette_json_minimum_v2')]
+    public function exportMaquetteJsonMinimumv2(
+        Parcours $parcours,
+        ParcoursExportV2 $exportV2,
+    ) {        
+        $td = $parcours->getFormation()->getTypeDiplome();
+        $jsonData = $exportV2->getMaquetteJsonMinimum($parcours, $td);
         return $this->json($jsonData);
     }
 
