@@ -18,8 +18,24 @@ export default class extends Controller {
     urlAdd: String,
   }
 
+  hasChanges = false
+
   connect() {
     this._updateListe()
+  }
+
+  disconnect() {
+    if (this.hasChanges) {
+      this._reloadDataTable()
+    }
+  }
+
+  _reloadDataTable() {
+    if (typeof window.reloadAllDataTables === 'function') {
+      window.reloadAllDataTables()
+    } else {
+      window.dispatchEvent(new CustomEvent('datatable:reload'))
+    }
   }
 
   async _updateListe() {
@@ -52,8 +68,10 @@ export default class extends Controller {
 
       const data = await response.json()
       if (response.ok && data.success) {
+        this.hasChanges = true
         callOut(data.success || 'Suppression effectuée', 'success')
         this._updateListe()
+        this._reloadDataTable()
       } else {
         callOut(data.error || 'Erreur lors de la suppression', 'danger')
       }
@@ -89,8 +107,18 @@ export default class extends Controller {
       .then((response) => response.json())
       .then((json) => {
         if (json.success) {
+          this.hasChanges = true
           callOut('Centre ajouté', 'success')
           this._updateListe()
+          this._reloadDataTable()
+
+          const typeCentre = document.getElementById('typeCentre')
+          if (typeCentre?.tomselect) {
+            typeCentre.tomselect.clear()
+          } else if (typeCentre) {
+            typeCentre.value = ''
+          }
+          this.configProfilTarget.innerHTML = ''
         } else if (json.error === 'already_exist') {
           if (confirm('Le centre est déjà associé à un autre utilisateur, voulez-vous le remplacer ?')) {
             this._updateCentre(centreType, centreId, true)
