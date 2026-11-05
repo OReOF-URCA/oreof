@@ -1,0 +1,758 @@
+{% extends 'base.html.twig' %}
+
+{% set header_sticky = false %}
+
+{% block title %}Aperçu – {{ titre_annexe|default(plateforme.libelle) }}{% endblock %}
+
+{% block header %}{{ titre_annexe|default('Annexe – ' ~ plateforme.libelle) }}{% endblock %}
+
+{% block header_description %}
+    Campagne {{ campagne.libelle }}{% if composante %} — Composante : {{ composante.sigle|default(composante.libelle) }}{% endif %} — {{ rows|length }} ligne(s)
+{% endblock %}
+
+{% block bouton_header %}
+    <div class="flex items-center gap-2 flex-wrap">
+        <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme' : 'offre_v2_export_plateforme', { plateforme: plateforme.id, composante: composante ? composante.id : null, typeDiplome: type_diplome ? type_diplome.id : null }) }}"
+           data-turbo="false"
+           class="inline-flex items-center gap-1.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white px-3.5 py-2 text-xs font-semibold shadow-sm transition-colors">
+            {{ ux_icon('icon:download', {class: 'h-4 w-4'}) }}
+            <span>Télécharger (.xlsx)</span>
+        </a>
+        <button type="button"
+                id="btn-toggle-fullscreen"
+                class="inline-flex items-center gap-1.5 rounded-xl border border-secondary-300 bg-white hover:bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-800 dark:hover:bg-secondary-700 text-secondary-700 dark:text-secondary-200 px-3 py-2 text-xs font-medium shadow-sm transition-colors">
+            {{ ux_icon('icon:arrows-up-down-left-right', {class: 'h-4 w-4'}) }}
+            <span id="label-toggle-fullscreen">Plein écran</span>
+        </button>
+        <button type="button"
+                onclick="window.print()"
+                class="inline-flex items-center gap-1.5 rounded-xl border border-secondary-300 bg-white hover:bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-800 dark:hover:bg-secondary-700 text-secondary-700 dark:text-secondary-200 px-3 py-2 text-xs font-medium shadow-sm transition-colors">
+            {{ ux_icon('icon:print', {class: 'h-4 w-4'}) }}
+            <span>Imprimer</span>
+        </button>
+        <button type="button"
+                onclick="window.close()"
+                class="inline-flex items-center gap-1.5 rounded-xl border border-secondary-300 bg-white hover:bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-800 dark:hover:bg-secondary-700 text-secondary-700 dark:text-secondary-200 px-3 py-2 text-xs font-medium shadow-sm transition-colors">
+            {{ ux_icon('icon:close', {class: 'h-4 w-4'}) }}
+            <span>Fermer</span>
+        </button>
+    </div>
+{% endblock %}
+
+{% block content %}
+<div id="annexe-preview-root" class="space-y-3 flex flex-col flex-1 min-h-0 h-full overflow-hidden">
+    {# ── 1. En-tête avec résumé (harmonisé avec templates/formation/_liste.html.twig) ── #}
+    <div class="shrink-0 space-y-2.5">
+        <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
+            <div class="rounded-2xl border border-info-200 bg-info-50 px-3.5 py-2 text-xs text-info-900 dark:border-info-800 dark:bg-info-950/30 dark:text-info-100 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span>
+                        <strong id="annexe-count-display">{{ rows|length }}</strong> formation{{ rows|length > 1 ? 's' : '' }} trouvée{{ rows|length > 1 ? 's' : '' }}
+                    </span>
+                    <span class="text-xs opacity-75">•</span>
+                    <span>Plateforme : <strong>{{ plateforme.libelle }}</strong></span>
+                    {% if composante %}
+                        <span class="text-xs opacity-75">•</span>
+                        <span>Composante : <strong>{{ composante.sigle|default(composante.libelle) }}</strong></span>
+                    {% endif %}
+
+                    {# Badge des filtres actifs #}
+                    <span id="annexe-active-filters-badge" class="hidden inline-flex items-center gap-1.5 rounded-full bg-info-200 px-2 py-0.5 text-[11px] font-semibold dark:bg-info-900">
+                        {{ ux_icon('icon:filter', {class: 'h-3 w-3'}) }}
+                        <span id="annexe-active-filters-text">0 filtre actif</span>
+                    </span>
+                </div>
+            </div>
+
+            {# Légende des couleurs diff #}
+            <div class="flex items-center gap-2.5 text-[11px] bg-white dark:bg-secondary-800 px-3.5 py-2 rounded-2xl border border-secondary-200 dark:border-secondary-700 shadow-xs flex-wrap self-start sm:self-auto">
+                <span class="font-semibold text-secondary-700 dark:text-secondary-300">Légende :</span>
+                <span class="inline-flex items-center gap-1">
+                    <s class="text-red-600 font-semibold">Ancienne valeur</s>
+                    <span class="text-secondary-400">/</span>
+                    <b class="text-green-600 font-bold">Nouvelle valeur</b>
+                    <span class="text-secondary-500 dark:text-secondary-400">(diff N vs N-1)</span>
+                </span>
+                <span class="text-secondary-300 dark:text-secondary-600 hidden sm:inline">|</span>
+                <span class="inline-flex items-center gap-1">
+                    <b class="text-green-600 font-bold">Valeur en vert</b>
+                    <span class="text-secondary-500 dark:text-secondary-400">(création en N)</span>
+                </span>
+            </div>
+        </div>
+
+        {# ── 2. Filter Panel harmonisé (embed components/filter_panel.html.twig) ── #}
+        {% embed 'components/filter_panel.html.twig' with {
+            title: 'Filtres',
+            activeFilters: 0,
+            fieldsTitle: 'Filtres avancés',
+            collapsible: true,
+            collapsedByDefault: true
+        } %}
+            {% block search %}
+                <label for="filter-quick-search" class="sr-only">Recherche rapide</label>
+                <div class="relative">
+                    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-secondary-400">
+                        {{ ux_icon('icon:search', {class: 'h-4 w-4'}) }}
+                    </span>
+                    <input type="text"
+                           id="filter-quick-search"
+                           class="w-full rounded-lg border border-secondary-300 bg-white py-1.5 pl-9 pr-8 text-xs text-secondary-700 shadow-sm outline-none transition placeholder:text-secondary-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder:text-secondary-400 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
+                           placeholder="Rechercher une formation, mention, composante, parcours..."
+                           autocomplete="off">
+                    <button type="button"
+                            id="filter-quick-search-clear"
+                            class="absolute inset-y-0 right-2.5 hidden items-center text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-200"
+                            title="Effacer la recherche">
+                        {{ ux_icon('icon:close', {class: 'h-3 w-3'}) }}
+                    </button>
+                </div>
+            {% endblock %}
+
+            {% block actions %}
+                <button type="button"
+                        id="annexe-btn-reset"
+                        class="hidden inline-flex items-center gap-1 rounded-lg border border-danger-200 bg-danger-50 px-2.5 py-1.5 text-xs font-semibold text-danger-700 hover:bg-danger-100 transition-colors dark:border-danger-800 dark:bg-danger-950/40 dark:text-danger-300">
+                    {{ ux_icon('icon:sync', {class: 'h-3.5 w-3.5'}) }}
+                    <span>Réinitialiser</span>
+                </button>
+
+                {% if collapsible|default(false) %}
+                    <button type="button"
+                            data-crud-panel-toggle
+                            id="{{ toggleId }}"
+                            data-action="click->filter-panel#toggle"
+                            aria-expanded="{{ isOpen ? 'true' : 'false' }}"
+                            aria-controls="{{ fieldsId }}"
+                            class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-secondary-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-secondary-600 shadow-sm transition hover:border-secondary-300 hover:text-secondary-900 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500 dark:hover:text-white"
+                            title="Afficher/masquer les filtres"
+                            aria-label="Afficher ou masquer les filtres">
+                        {{ ux_icon('icon:filter', {class: 'h-3.5 w-3.5', 'aria-hidden': 'true'}) }}
+                        {{ panelTitle }}
+                        <span id="annexe-panel-badge" class="hidden inline-flex min-w-4 items-center justify-center rounded-full bg-primary-600 px-1.5 py-0.2 text-[10px] font-bold text-white dark:bg-primary-500">
+                            0
+                        </span>
+                    </button>
+                {% endif %}
+            {% endblock %}
+
+            {% block fields %}
+                <div>
+                    <label for="filter-composante" class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">
+                        Composante
+                    </label>
+                    <select id="filter-composante"
+                            class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-1.5 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50">
+                        <option value="">Toutes les composantes</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filter-niveau" class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">
+                        Niveau
+                    </label>
+                    <select id="filter-niveau"
+                            class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-1.5 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50">
+                        <option value="">Tous les niveaux</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filter-regime" class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">
+                        Régime d'inscription
+                    </label>
+                    <select id="filter-regime"
+                            class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-1.5 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50">
+                        <option value="">Tous les régimes</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filter-modifs" class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">
+                        Modifications N vs N-1
+                    </label>
+                    <select id="filter-modifs"
+                            class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-1.5 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50">
+                        <option value="all">Toutes les formations</option>
+                        <option value="diffs">Modifications & créations uniquement</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="filter-ouverture" class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">
+                        Année ouverte
+                    </label>
+                    <select id="filter-ouverture"
+                            class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-1.5 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50">
+                        <option value="all">Tous les statuts</option>
+                        <option value="OUI">Ouverte uniquement (OUI)</option>
+                        <option value="NON">Fermée uniquement (NON)</option>
+                    </select>
+                </div>
+            {% endblock %}
+        {% endembed %}
+    </div>
+
+    {# ── 3. Tableau avec En-têtes figés (Sticky Header) & Défilement indépendant ── #}
+    <div id="annexe-table-card" class="flex-1 min-h-0 flex flex-col rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900 overflow-hidden relative">
+        <div id="annexe-table-scroll-container"
+             class="annexe-preview-container flex-1 min-h-0 overflow-auto">
+            {% include platform_template %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Viewport verrouillé pour l'application d'aperçu d'annexe (pas de scrollbar sur window) */
+    html, body {
+        height: 100% !important;
+        overflow: hidden !important;
+    }
+
+    #root {
+        height: 100vh !important;
+        max-height: 100vh !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* Masquer les éléments hors contexte pour l'aperçu */
+    #root > footer,
+    footer,
+    .page-title-container {
+        display: none !important;
+    }
+
+    #main-content {
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    #main-content > div {
+        flex: 1 1 0% !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100% !important;
+        padding-bottom: 0.5rem !important;
+    }
+
+    /* Table layout & base styling harmonisée avec _liste.html.twig */
+    .annexe-preview-container table {
+        min-width: 100%;
+        width: max-content;
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+        font-size: 0.8125rem;
+        line-height: 1.4;
+        white-space: nowrap;
+        background-color: #ffffff;
+        color: var(--color-secondary-800, #1e293b);
+    }
+
+    /* thead et tr doivent rester static pour éviter les conflits de calcul sous Safari/WebKit */
+    .annexe-preview-container thead {
+        position: static !important;
+    }
+
+    .annexe-preview-container thead tr {
+        position: static !important;
+    }
+
+    /* Première ligne figée (Sticky Header) */
+    .annexe-preview-container thead th {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 30 !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 0.75rem !important;
+        font-weight: 900 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        text-align: left;
+        background-color: #1B365D !important;
+        color: #ffffff !important;
+        background-clip: padding-box !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-bottom: 2px solid #0f172a !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12) !important;
+        user-select: none;
+    }
+
+    /* Multi-tier header (ex: MonMaster) */
+    .annexe-preview-container thead tr:first-child th {
+        top: 0 !important;
+        z-index: 32 !important;
+    }
+
+    .annexe-preview-container thead tr:nth-child(2) th {
+        top: var(--header-row0-height, 42px) !important;
+        z-index: 31 !important;
+    }
+
+    /* Tri des colonnes façon _liste.html.twig */
+    .annexe-preview-container thead th.sortable {
+        cursor: pointer;
+        transition: background-color 0.15s ease, filter 0.15s ease;
+    }
+    .annexe-preview-container thead th.sortable:hover {
+        filter: brightness(1.12);
+    }
+    .annexe-preview-container thead th.sortable .sort-header-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        width: 100%;
+    }
+    .annexe-preview-container thead th.sortable .sort-icon {
+        display: inline-block;
+        flex-shrink: 0;
+        opacity: 0.6;
+        transition: opacity 0.15s ease, color 0.15s ease;
+    }
+    .annexe-preview-container thead th.sortable:hover .sort-icon {
+        opacity: 1;
+    }
+    .annexe-preview-container thead th.sortable.sort-asc .sort-icon,
+    .annexe-preview-container thead th.sortable.sort-desc .sort-icon {
+        opacity: 1;
+        color: #facc15;
+    }
+
+    /* Cellules de contenu */
+    .annexe-preview-container tbody td {
+        padding: 0.5rem 0.85rem;
+        border-right: 1px solid #e2e8f0;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+        color: #1e293b;
+        background-clip: padding-box;
+    }
+
+    .annexe-preview-container tbody tr:hover td {
+        background-color: #f8fafc;
+    }
+
+    /* Alignements */
+    .annexe-preview-container [data-xls-align="center"] {
+        text-align: center;
+    }
+    .annexe-preview-container [data-xls-align="right"] {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+    }
+    .annexe-preview-container [data-xls-align="left"] {
+        text-align: left;
+    }
+
+    /* Couleurs officielles des en-têtes d'annexes */
+    .annexe-preview-container thead th[data-xls-bg-color="#1B365D"] {
+        background-color: #1B365D !important;
+        color: #ffffff !important;
+    }
+    .annexe-preview-container thead th[data-xls-bg-color="#2F5597"] {
+        background-color: #2F5597 !important;
+        color: #ffffff !important;
+    }
+    .annexe-preview-container thead th[data-xls-bg-color="#D9E1F2"] {
+        background-color: #D9E1F2 !important;
+        color: #0f172a !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+    }
+    .annexe-preview-container thead th[data-xls-bg-color="#B4C6E7"] {
+        background-color: #B4C6E7 !important;
+        color: #0f172a !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Diff styling */
+    .annexe-preview-container [data-xls-font-color="#FFFFFF"] {
+        color: #ffffff !important;
+    }
+    .annexe-preview-container s[data-xls-font-color="#DC2626"],
+    .annexe-preview-container [data-xls-font-color="#DC2626"] {
+        color: #dc2626 !important;
+        text-decoration: line-through;
+        font-weight: 500;
+    }
+    .annexe-preview-container b[data-xls-font-color="#16A34A"],
+    .annexe-preview-container [data-xls-font-color="#16A34A"] {
+        color: #16a34a !important;
+        font-weight: 700;
+    }
+
+    /* Mode plein écran */
+    #annexe-table-card.is-fullscreen {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 99999 !important;
+        border-radius: 0 !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        width: 100vw !important;
+    }
+
+    @media print {
+        .page-title-container,
+        .space-y-2.5,
+        [data-crud-panel],
+        nav.topbar-nav {
+            display: none !important;
+        }
+        .annexe-preview-container {
+            overflow: visible !important;
+            max-height: none !important;
+            border: none !important;
+        }
+        .annexe-preview-container table {
+            font-size: 7.5pt !important;
+            width: 100% !important;
+        }
+        .annexe-preview-container thead th {
+            position: static !important;
+        }
+    }
+</style>
+
+<script>
+function initAnnexePreview() {
+    const table = document.querySelector('.annexe-preview-container table');
+    if (!table) return;
+
+    // Idempotence : éviter les doubles écoutes d'événements
+    if (table.dataset.annexeInitialized === 'true') return;
+    table.dataset.annexeInitialized = 'true';
+
+    const tbody = table.querySelector('tbody');
+    const thead = table.querySelector('thead');
+    if (!tbody || !thead) return;
+
+    // 1. Gestion dynamique de la première ligne figée pour tables à plusieurs lignes d'en-tête (MonMaster)
+    const headerRows = Array.from(thead.querySelectorAll('tr'));
+    if (headerRows.length > 1) {
+        const h0 = headerRows[0].getBoundingClientRect().height || headerRows[0].offsetHeight || 42;
+        table.style.setProperty('--header-row0-height', Math.round(h0) + 'px');
+    }
+
+    // 2. Application des couleurs data-xls-* sur les cellules
+    table.querySelectorAll('[data-xls-bg-color]').forEach(function (el) {
+        const bg = el.getAttribute('data-xls-bg-color');
+        if (bg) el.style.backgroundColor = bg;
+    });
+    table.querySelectorAll('[data-xls-font-color]').forEach(function (el) {
+        const color = el.getAttribute('data-xls-font-color');
+        if (color) el.style.color = color;
+    });
+
+    // 3. Identification des colonnes pour les filtres
+    const targetHeaderRow = headerRows[headerRows.length - 1];
+    const headerCols = Array.from(targetHeaderRow.querySelectorAll('th'));
+
+    let composanteColIdx = -1;
+    let niveauColIdx = -1;
+    let regimeColIdx = -1;
+    let ouvertureColIdx = -1;
+
+    headerCols.forEach(function (th, idx) {
+        const text = th.textContent.trim().toLowerCase();
+        if (text === 'composante') composanteColIdx = idx;
+        if (text === 'niveau' || text.startsWith('niveau')) niveauColIdx = idx;
+        if (text.includes('régime')) regimeColIdx = idx;
+        if (text.includes('ouverture') || text.includes('ouvert')) {
+            if (ouvertureColIdx === -1) ouvertureColIdx = idx;
+        }
+    });
+
+    const searchInput = document.getElementById('filter-quick-search');
+    const searchClear = document.getElementById('filter-quick-search-clear');
+    const composanteSelect = document.getElementById('filter-composante');
+    const niveauSelect = document.getElementById('filter-niveau');
+    const regimeSelect = document.getElementById('filter-regime');
+    const modifsSelect = document.getElementById('filter-modifs');
+    const ouvertureSelect = document.getElementById('filter-ouverture');
+    const resetBtn = document.getElementById('annexe-btn-reset');
+    const countDisplay = document.getElementById('annexe-count-display');
+    const activeFiltersBadge = document.getElementById('annexe-active-filters-badge');
+    const activeFiltersText = document.getElementById('annexe-active-filters-text');
+    const panelBadge = document.getElementById('annexe-panel-badge');
+
+    const rows = Array.from(tbody.querySelectorAll('tr')).filter(tr => tr.querySelectorAll('td').length > 1);
+
+    const uniqueComposantes = new Set();
+    const uniqueNiveaux = new Set();
+    const uniqueRegimes = new Set();
+
+    rows.forEach(function (row) {
+        const cells = Array.from(row.querySelectorAll('td'));
+        if (composanteColIdx >= 0 && cells[composanteColIdx]) {
+            const val = cells[composanteColIdx].textContent.trim();
+            if (val) uniqueComposantes.add(val);
+        }
+        if (niveauColIdx >= 0 && cells[niveauColIdx]) {
+            const val = cells[niveauColIdx].textContent.trim();
+            if (val) uniqueNiveaux.add(val);
+        }
+        if (regimeColIdx >= 0 && cells[regimeColIdx]) {
+            const val = cells[regimeColIdx].textContent.trim();
+            if (val) uniqueRegimes.add(val);
+        }
+
+        const hasDiff = row.querySelector('s[data-xls-font-color], b[data-xls-font-color="#16A34A"]');
+        row.dataset.hasDiff = hasDiff ? 'true' : 'false';
+
+        row.dataset.normalizedText = normalizeStr(row.textContent);
+    });
+
+    if (composanteSelect && composanteSelect.options.length <= 1) {
+        Array.from(uniqueComposantes).sort().forEach(function (comp) {
+            const opt = document.createElement('option');
+            opt.value = comp;
+            opt.textContent = comp;
+            composanteSelect.appendChild(opt);
+        });
+    }
+
+    if (niveauSelect && niveauSelect.options.length <= 1) {
+        Array.from(uniqueNiveaux).sort((a, b) => {
+            const numA = parseInt(a, 10);
+            const numB = parseInt(b, 10);
+            if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+            return a.localeCompare(b);
+        }).forEach(function (niv) {
+            const opt = document.createElement('option');
+            opt.value = niv;
+            opt.textContent = 'Niveau ' + niv;
+            niveauSelect.appendChild(opt);
+        });
+    }
+
+    if (regimeSelect && regimeSelect.options.length <= 1) {
+        Array.from(uniqueRegimes).sort().forEach(function (reg) {
+            const opt = document.createElement('option');
+            opt.value = reg;
+            opt.textContent = reg;
+            regimeSelect.appendChild(opt);
+        });
+    }
+
+    function normalizeStr(str) {
+        return (str || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase();
+    }
+
+    function applyFilters() {
+        const query = searchInput ? normalizeStr(searchInput.value.trim()) : '';
+        const queryTokens = query ? query.split(/\s+/) : [];
+        const selectedComposante = composanteSelect ? composanteSelect.value : '';
+        const selectedNiveau = niveauSelect ? niveauSelect.value : '';
+        const selectedRegime = regimeSelect ? regimeSelect.value : '';
+        const selectedModif = modifsSelect ? modifsSelect.value : 'all';
+        const selectedOuverture = ouvertureSelect ? ouvertureSelect.value : 'all';
+
+        if (searchClear) searchClear.style.display = query ? 'flex' : 'none';
+
+        let activeCount = 0;
+        if (query) activeCount++;
+        if (selectedComposante) activeCount++;
+        if (selectedNiveau) activeCount++;
+        if (selectedRegime) activeCount++;
+        if (selectedModif && selectedModif !== 'all') activeCount++;
+        if (selectedOuverture && selectedOuverture !== 'all') activeCount++;
+
+        if (activeFiltersBadge && activeFiltersText) {
+            if (activeCount > 0) {
+                activeFiltersBadge.classList.remove('hidden');
+                activeFiltersText.textContent = activeCount + ' filtre' + (activeCount > 1 ? 's' : '') + ' actif' + (activeCount > 1 ? 's' : '');
+                if (resetBtn) resetBtn.classList.remove('hidden');
+                if (panelBadge) {
+                    panelBadge.classList.remove('hidden');
+                    panelBadge.textContent = activeCount;
+                }
+            } else {
+                activeFiltersBadge.classList.add('hidden');
+                if (resetBtn) resetBtn.classList.add('hidden');
+                if (panelBadge) panelBadge.classList.add('hidden');
+            }
+        }
+
+        let visibleCount = 0;
+
+        rows.forEach(function (row) {
+            const cells = Array.from(row.querySelectorAll('td'));
+
+            if (selectedModif === 'diffs' && row.dataset.hasDiff !== 'true') {
+                row.style.display = 'none';
+                return;
+            }
+
+            if (selectedComposante && composanteColIdx >= 0 && cells[composanteColIdx]) {
+                if (cells[composanteColIdx].textContent.trim() !== selectedComposante) {
+                    row.style.display = 'none';
+                    return;
+                }
+            }
+
+            if (selectedNiveau && niveauColIdx >= 0 && cells[niveauColIdx]) {
+                if (cells[niveauColIdx].textContent.trim() !== selectedNiveau) {
+                    row.style.display = 'none';
+                    return;
+                }
+            }
+
+            if (selectedRegime && regimeColIdx >= 0 && cells[regimeColIdx]) {
+                if (cells[regimeColIdx].textContent.trim() !== selectedRegime) {
+                    row.style.display = 'none';
+                    return;
+                }
+            }
+
+            if (selectedOuverture !== 'all' && ouvertureColIdx >= 0 && cells[ouvertureColIdx]) {
+                const cellText = cells[ouvertureColIdx].textContent.trim().toUpperCase();
+                if (!cellText.includes(selectedOuverture)) {
+                    row.style.display = 'none';
+                    return;
+                }
+            }
+
+            if (queryTokens.length > 0) {
+                const text = row.dataset.normalizedText;
+                const matches = queryTokens.every(token => text.includes(token));
+                if (!matches) {
+                    row.style.display = 'none';
+                    return;
+                }
+            }
+
+            row.style.display = '';
+            visibleCount++;
+        });
+
+        if (countDisplay) countDisplay.textContent = visibleCount;
+    }
+
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    if (searchClear) searchClear.addEventListener('click', function () {
+        searchInput.value = '';
+        searchInput.focus();
+        applyFilters();
+    });
+    if (composanteSelect) composanteSelect.addEventListener('change', applyFilters);
+    if (niveauSelect) niveauSelect.addEventListener('change', applyFilters);
+    if (regimeSelect) regimeSelect.addEventListener('change', applyFilters);
+    if (modifsSelect) modifsSelect.addEventListener('change', applyFilters);
+    if (ouvertureSelect) ouvertureSelect.addEventListener('change', applyFilters);
+
+    if (resetBtn) resetBtn.addEventListener('click', function () {
+        if (searchInput) searchInput.value = '';
+        if (composanteSelect) composanteSelect.value = '';
+        if (niveauSelect) niveauSelect.value = '';
+        if (regimeSelect) regimeSelect.value = '';
+        if (modifsSelect) modifsSelect.value = 'all';
+        if (ouvertureSelect) ouvertureSelect.value = 'all';
+        applyFilters();
+    });
+
+    // 4. Tri interactif des colonnes
+    headerCols.forEach(function (th, colIdx) {
+        if (th.classList.contains('sortable')) return;
+        th.classList.add('sortable');
+        const originalContent = th.innerHTML.trim();
+
+        th.innerHTML = `
+            <span class="sort-header-link">
+                <span>${originalContent}</span>
+                <span class="sort-icon">
+                    <svg class="h-3.5 w-3.5" viewBox="0 0 256 256" fill="currentColor">
+                        <path d="M116.24,67.76a6,6,0,0,1,0,8.48L72.49,120H184a6,6,0,0,1,0,12H72.49l43.75,43.76a6,6,0,1,1-8.48,8.48l-54-54a6,6,0,0,1,0-8.48l54-54A6,6,0,0,1,116.24,67.76Zm108,54-54-54a6,6,0,0,0-8.48,8.48L205.51,120H96a6,6,0,0,0,0,12H205.51l-43.75,43.76a6,6,0,1,0,8.48,8.48l54-54A6,6,0,0,0,224.24,121.76Z" transform="rotate(90 128 128)"/>
+                    </svg>
+                </span>
+            </span>
+        `;
+
+        th.addEventListener('click', function () {
+            const currentAsc = th.classList.contains('sort-asc');
+            headerCols.forEach(h => {
+                h.classList.remove('sort-asc', 'sort-desc');
+                const icon = h.querySelector('.sort-icon');
+                if (icon) {
+                    icon.innerHTML = `
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 256 256" fill="currentColor">
+                            <path d="M116.24,67.76a6,6,0,0,1,0,8.48L72.49,120H184a6,6,0,0,1,0,12H72.49l43.75,43.76a6,6,0,1,1-8.48,8.48l-54-54a6,6,0,0,1,0-8.48l54-54A6,6,0,0,1,116.24,67.76Zm108,54-54-54a6,6,0,0,0-8.48,8.48L205.51,120H96a6,6,0,0,0,0,12H205.51l-43.75,43.76a6,6,0,1,0,8.48,8.48l54-54A6,6,0,0,0,224.24,121.76Z" transform="rotate(90 128 128)"/>
+                        </svg>
+                    `;
+                }
+            });
+
+            const newAsc = !currentAsc;
+            th.classList.add(newAsc ? 'sort-asc' : 'sort-desc');
+
+            const sortIcon = th.querySelector('.sort-icon');
+            if (sortIcon) {
+                if (newAsc) {
+                    sortIcon.innerHTML = `
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 256 256" fill="currentColor">
+                            <path d="M204.24,147.76a6,6,0,0,1,0,8.48l-72,72a6,6,0,0,1-8.48,0l-72-72a6,6,0,0,1,8.48-8.48L122,207.51V32a6,6,0,0,1,12,0V207.51l61.76-61.75A6,6,0,0,1,204.24,147.76Z" transform="rotate(180 128 128)"/>
+                        </svg>
+                    `;
+                } else {
+                    sortIcon.innerHTML = `
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 256 256" fill="currentColor">
+                            <path d="M204.24,147.76a6,6,0,0,1,0,8.48l-72,72a6,6,0,0,1-8.48,0l-72-72a6,6,0,0,1,8.48-8.48L122,207.51V32a6,6,0,0,1,12,0V207.51l61.76-61.75A6,6,0,0,1,204.24,147.76Z"/>
+                        </svg>
+                    `;
+                }
+            }
+
+            rows.sort(function (rowA, rowB) {
+                const cellA = rowA.querySelectorAll('td')[colIdx];
+                const cellB = rowB.querySelectorAll('td')[colIdx];
+                const valA = cellA ? cellA.textContent.trim() : '';
+                const valB = cellB ? cellB.textContent.trim() : '';
+
+                const numA = parseFloat(valA.replace(/\s+/g, '').replace(',', '.'));
+                const numB = parseFloat(valB.replace(/\s+/g, '').replace(',', '.'));
+
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    return newAsc ? numA - numB : numB - numA;
+                }
+                return newAsc ? valA.localeCompare(valB, 'fr') : valB.localeCompare(valA, 'fr');
+            });
+
+            rows.forEach(r => tbody.appendChild(r));
+        });
+    });
+
+    // 5. Bouton plein écran & touche Escape
+    const btnFullscreen = document.getElementById('btn-toggle-fullscreen');
+    const tableCard = document.getElementById('annexe-table-card');
+    const labelFullscreen = document.getElementById('label-toggle-fullscreen');
+    if (btnFullscreen && tableCard) {
+        btnFullscreen.addEventListener('click', function () {
+            tableCard.classList.toggle('is-fullscreen');
+            const isFull = tableCard.classList.contains('is-fullscreen');
+            if (labelFullscreen) labelFullscreen.textContent = isFull ? 'Quitter plein écran' : 'Plein écran';
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && tableCard.classList.contains('is-fullscreen')) {
+                tableCard.classList.remove('is-fullscreen');
+                if (labelFullscreen) labelFullscreen.textContent = 'Plein écran';
+            }
+        });
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAnnexePreview);
+} else {
+    initAnnexePreview();
+}
+document.addEventListener('turbo:load', initAnnexePreview);
+</script>
+{% endblock %}

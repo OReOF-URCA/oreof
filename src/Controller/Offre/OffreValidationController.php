@@ -3,6 +3,7 @@
 namespace App\Controller\Offre;
 
 use App\Controller\BaseController;
+use App\Entity\CampagneCollecte;
 use App\Entity\Composante;
 use App\Entity\DocumentConseil;
 use App\Entity\DpeFormation;
@@ -81,85 +82,16 @@ final class OffreValidationController extends BaseController
         $isRefuse = ($meta['type'] ?? '') === 'reserver' || str_starts_with($transition, 'reserver');
 
         // 3. Récupérer toutes les formations de la composante et leurs parcours
-        $allFormations = $formationRepository->findBy([
-            'dpe' => $campagne,
-            'composantePorteuse' => $composante,
-        ]);
-
-        $allParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne, $composante);
-        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne, $composante);
-        // Limité à la composante : sinon tous les parcours de la campagne sont gérés par l'EntityManager
-        // et leur remplissage (PreFlush) est recalculé à chaque flush().
-        $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne, $composante);
-
-        $dpeFormations = !empty($allFormations) ? $dpeFormationRepository->findBy([
-            'campagneCollecte' => $campagne,
-            'formation' => $allFormations,
-        ]) : [];
-
-        $dpeFormationByFormationId = [];
-        foreach ($dpeFormations as $df) {
-            if ($df->getFormation() !== null) {
-                $dpeFormationByFormationId[$df->getFormation()->getId()] = $df;
-            }
-        }
-
-        $parcoursByFormationId = [];
-        foreach ($allParcours as $dpePar) {
-            $parcours = $dpePar->getParcours();
-            if ($parcours === null) {
-                continue;
-            }
-            $formation = $parcours->getFormation();
-            if ($formation !== null) {
-                $parcoursByFormationId[$formation->getId()][] = $dpePar;
-            }
-        }
-
-        $formationsData = [];
-        foreach ($allFormations as $forma) {
-            $fId = $forma->getId();
-            $dpeParList = $parcoursByFormationId[$fId] ?? [];
-            $formaHasAnomalies = false;
-            $formaAnomaliesCount = 0;
-            $parcoursList = [];
-
-            foreach ($dpeParList as $dpePar) {
-                $parcours = $dpePar->getParcours();
-                if ($parcours === null) {
-                    continue;
-                }
-                $parcAnnees = $anneesByParcours[$parcours->getId()] ?? [];
-                $parcAnoms = $offreValidationService->getAnomaliesParcours($parcours, $campagne, $dpePar, $paramsByAnnee, $parcAnnees);
-                $isParcConforme = (count($parcAnoms) === 0);
-                if (!$isParcConforme) {
-                    $formaHasAnomalies = true;
-                    $formaAnomaliesCount += count($parcAnoms);
-                }
-
-                $capParcours = 0;
-                foreach ($parcAnnees as $an) {
-                    $capParcours += $an->getCapaciteAccueil();
-                }
-
-                $parcoursList[] = [
-                    'parcours' => $parcours,
-                    'dpeParcours' => $dpePar,
-                    'isOuvert' => $dpePar->isOuvert(),
-                    'capacite' => $capParcours,
-                    'isConforme' => $isParcConforme,
-                    'anomalies' => $parcAnoms,
-                ];
-            }
-
-            $formationsData[$fId] = [
-                'formation' => $forma,
-                'dpeFormation' => $dpeFormationByFormationId[$fId] ?? null,
-                'hasAnomalies' => $formaHasAnomalies,
-                'anomaliesCount' => $formaAnomaliesCount,
-                'parcoursList' => $parcoursList,
-            ];
-        }
+        [$allFormations, $formationsData] = $this->buildFormationsDataForComposante(
+            $composante,
+            $campagne,
+            $formationRepository,
+            $dpeParcoursRepository,
+            $dpeFormationRepository,
+            $anneeRepository,
+            $plateformeParamRepository,
+            $offreValidationService,
+        );
 
         // 4. Traitement POST
         if ($request->isMethod('POST')) {
@@ -215,7 +147,7 @@ final class OffreValidationController extends BaseController
             // Documents PV
             $docPv = null;
             $pvId = $request->request->get('pv_id');
-            if ($pvId) {
+            if ($pvId && is_numeric($pvId) && (int)$pvId > 0) {
                 $docPv = $documentConseilRepository->findOneBy(['id' => (int)$pvId, 'composante' => $composante, 'type' => 'pv']);
                 if ($docPv === null) {
                     return $turboStream->streamToastError('Le PV sélectionné est introuvable pour cette composante.');
@@ -243,7 +175,7 @@ final class OffreValidationController extends BaseController
             // Document Note
             $docNote = null;
             $noteId = $request->request->get('note_id');
-            if ($noteId) {
+            if ($noteId && is_numeric($noteId) && (int)$noteId > 0) {
                 $docNote = $documentConseilRepository->findOneBy(['id' => (int)$noteId, 'composante' => $composante, 'type' => 'note_explicative']);
                 if ($docNote === null) {
                     return $turboStream->streamToastError('La note explicative sélectionnée est introuvable pour cette composante.');
@@ -662,15 +594,372 @@ final class OffreValidationController extends BaseController
         ]);
     }
 
-    private function denyAccessUnlessCanManageDocuments(Formation $formation): void
-    {
-        if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_SES')) {
-            return;
+    #[Route('/offre/composante/{composante}/documents-conseil', name: 'offre_v2_composante_documents_modal', methods: ['GET'])]
+    public function composanteDocumentsModal(
+        Composante $composante,
+        FormationRepository $formationRepository,
+        DpeParcoursRepository $dpeParcoursRepository,
+        DpeFormationRepository $dpeFormationRepository,
+        DocumentConseilRepository $documentConseilRepository,
+        AnneeRepository $anneeRepository,
+        PlateformeAdmissionParametreRepository $plateformeParamRepository,
+        OffreValidationService $offreValidationService,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $this->denyAccessUnlessCanManageComposante($composante);
+
+        $campagne = $this->getCampagneCollecte();
+        [$allFormations, $formationsData] = $this->buildFormationsDataForComposante(
+            $composante,
+            $campagne,
+            $formationRepository,
+            $dpeParcoursRepository,
+            $dpeFormationRepository,
+            $anneeRepository,
+            $plateformeParamRepository,
+            $offreValidationService,
+        );
+
+        $existingPvs = $documentConseilRepository->findBy([
+            'composante' => $composante,
+            'type' => 'pv',
+        ], ['uploadedAt' => 'DESC']);
+
+        $existingNotes = $documentConseilRepository->findBy([
+            'composante' => $composante,
+            'type' => 'note_explicative',
+        ], ['uploadedAt' => 'DESC']);
+
+        return $turboStream->streamOpenModalFromTemplates(
+            'Documents de conseil — PV & Notes explicatives',
+            sprintf('Composante : %s', $composante->getLibelle()),
+            'offre_v2/_modal_validation_composante.html.twig',
+            [
+                'composante' => $composante,
+                'isDocumentsOnly' => true,
+                'actionUrl' => $this->generateUrl('offre_v2_composante_documents_sauvegarder', ['composante' => $composante->getId()]),
+                'csrfTokenName' => 'offre_v2_documents_' . $composante->getId(),
+                'formationsData' => $formationsData,
+                'existingPvs' => $existingPvs,
+                'existingNotes' => $existingNotes,
+                'meta' => [
+                    'hasUpload' => false,
+                    'hasUploadNote' => false,
+                ],
+                'isRefuse' => false,
+            ],
+            '_ui/_footer_submit_cancel.html.twig',
+            [
+                'submitLabel' => 'Enregistrer les documents',
+            ]
+        );
+    }
+
+    #[Route('/offre/composante/{composante}/documents-conseil/sauvegarder', name: 'offre_v2_composante_documents_sauvegarder', methods: ['POST'])]
+    public function composanteDocumentsSauvegarder(
+        Composante $composante,
+        Request $request,
+        FormationRepository $formationRepository,
+        DocumentConseilRepository $documentConseilRepository,
+        SecureUploadService $secureUploadService,
+        EntityManagerInterface $em,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $this->denyAccessUnlessCanManageComposante($composante);
+
+        $csrfToken = (string)$request->request->get('_token');
+        if (!$this->isCsrfTokenValid('offre_v2_documents_' . $composante->getId(), $csrfToken)) {
+            return $turboStream->streamToastError('Session expirée ou jeton CSRF invalide.');
         }
 
+        $selectedFormationIds = array_map('intval', (array)$request->request->all('formations'));
+        if ($selectedFormationIds === []) {
+            return $turboStream->streamToastError('Cochez au moins une formation.');
+        }
+
+        $campagne = $this->getCampagneCollecte();
+        $formations = $formationRepository->findBy([
+            'id' => $selectedFormationIds,
+            'composantePorteuse' => $composante,
+            'dpe' => $campagne,
+        ]);
+
+        if ($formations === []) {
+            return $turboStream->streamToastError('Aucune formation valide sélectionnée pour cette composante.');
+        }
+
+        $dateStr = (string)$request->request->get('date');
+        $dateConseil = !empty($dateStr) ? new \DateTime($dateStr) : new \DateTime();
+        $commentaire = trim((string)$request->request->get('commentaire'));
+        /** @var User|null $currentUser */
+        $currentUser = $this->getUser() instanceof User ? $this->getUser() : null;
+
+        // 1. PV
+        $pvId = (string)$request->request->get('pv_id', '');
+        $docPv = null;
+        $removePv = ($pvId === '__remove__');
+        $hasNewPvUpload = $request->files->has('file') && $request->files->get('file')?->isValid();
+
+        if ($pvId === '__upload__' && !$hasNewPvUpload) {
+            return $turboStream->streamToastError('Veuillez sélectionner un fichier PDF pour le nouveau PV.');
+        }
+
+        if ($hasNewPvUpload) {
+            try {
+                $uploadedPv = $secureUploadService->uploadFromRequest($request, 'file', 'conseils');
+                if ($uploadedPv !== null) {
+                    $docPv = new DocumentConseil();
+                    $docPv->setType('pv');
+                    $docPv->setFilename($uploadedPv->getStoredFilename());
+                    $docPv->setOriginalFilename($uploadedPv->getOriginalFilename());
+                    $docPv->setDateConseil($dateConseil);
+                    $docPv->setUploadedBy($currentUser);
+                    $docPv->setComposante($composante);
+                    $em->persist($docPv);
+                }
+            } catch (FileUploadException $e) {
+                return $turboStream->streamToastError($e->getPublicMessage());
+            }
+        } elseif (is_numeric($pvId) && (int)$pvId > 0) {
+            $docPv = $documentConseilRepository->findOneBy([
+                'id' => (int)$pvId,
+                'composante' => $composante,
+                'type' => 'pv',
+            ]);
+            if ($docPv === null) {
+                return $turboStream->streamToastError('Le PV sélectionné est introuvable pour cette composante.');
+            }
+        }
+
+        // 2. Note explicative
+        $noteId = (string)$request->request->get('note_id', '');
+        $docNote = null;
+        $removeNote = ($noteId === '__remove__');
+        $hasNewNoteUpload = $request->files->has('fileNote') && $request->files->get('fileNote')?->isValid();
+
+        if ($noteId === '__upload__' && !$hasNewNoteUpload) {
+            return $turboStream->streamToastError('Veuillez sélectionner un fichier PDF pour la nouvelle note explicative.');
+        }
+
+        if ($hasNewNoteUpload) {
+            try {
+                $uploadedNote = $secureUploadService->uploadFromRequest($request, 'fileNote', 'conseils');
+                if ($uploadedNote !== null) {
+                    $docNote = new DocumentConseil();
+                    $docNote->setType('note_explicative');
+                    $docNote->setFilename($uploadedNote->getStoredFilename());
+                    $docNote->setOriginalFilename($uploadedNote->getOriginalFilename());
+                    $docNote->setDateConseil($dateConseil);
+                    $docNote->setUploadedBy($currentUser);
+                    $docNote->setComposante($composante);
+                    $em->persist($docNote);
+                }
+            } catch (FileUploadException $e) {
+                return $turboStream->streamToastError($e->getPublicMessage());
+            }
+        } elseif (is_numeric($noteId) && (int)$noteId > 0) {
+            $docNote = $documentConseilRepository->findOneBy([
+                'id' => (int)$noteId,
+                'composante' => $composante,
+                'type' => 'note_explicative',
+            ]);
+            if ($docNote === null) {
+                return $turboStream->streamToastError('La note explicative sélectionnée est introuvable pour cette composante.');
+            }
+        }
+
+        // 3. Application aux formations sélectionnées
+        $dpeFormationRepo = $em->getRepository(DpeFormation::class);
+        $dpeFormations = $dpeFormationRepo->findBy([
+            'formation' => $formations,
+            'campagneCollecte' => $campagne,
+        ]);
+        $dpeFormationByFormationId = [];
+        foreach ($dpeFormations as $df) {
+            if ($df->getFormation() !== null) {
+                $dpeFormationByFormationId[$df->getFormation()->getId()] = $df;
+            }
+        }
+
+        foreach ($formations as $forma) {
+            if ($removePv) {
+                foreach ($forma->getDocumentConseils() as $doc) {
+                    if ($doc->getType() === 'pv') {
+                        $forma->removeDocumentConseil($doc);
+                    }
+                }
+            } elseif ($docPv !== null) {
+                foreach ($forma->getDocumentConseils() as $doc) {
+                    if ($doc->getType() === 'pv' && $doc->getId() !== $docPv->getId()) {
+                        $forma->removeDocumentConseil($doc);
+                    }
+                }
+                $docPv->addFormation($forma);
+                $forma->addDocumentConseil($docPv);
+            }
+
+            if ($removeNote) {
+                foreach ($forma->getDocumentConseils() as $doc) {
+                    if ($doc->getType() === 'note_explicative') {
+                        $forma->removeDocumentConseil($doc);
+                    }
+                }
+            } elseif ($docNote !== null) {
+                foreach ($forma->getDocumentConseils() as $doc) {
+                    if ($doc->getType() === 'note_explicative' && $doc->getId() !== $docNote->getId()) {
+                        $forma->removeDocumentConseil($doc);
+                    }
+                }
+                $docNote->addFormation($forma);
+                $forma->addDocumentConseil($docNote);
+            }
+
+            $histo = new HistoriqueFormation();
+            $histo->setFormation($forma);
+            $histo->setDpeFormation($dpeFormationByFormationId[$forma->getId()] ?? null);
+            $histo->setDate($dateConseil);
+            $histo->setUser($currentUser);
+            $histo->setEtape('documents_conseil');
+            $histo->setEtat('valide');
+            $histo->setCommentaire($commentaire !== '' ? $commentaire : 'Mise à jour groupée des documents de conseil');
+            if ($docPv !== null) {
+                $histo->setDocumentPv($docPv);
+            }
+            if ($docNote !== null) {
+                $histo->setDocumentNote($docNote);
+            }
+            $em->persist($histo);
+        }
+
+        $em->flush();
+
+        return $turboStream->stream('offre_v2/turbo/apply_success.stream.html.twig', [
+            'message' => sprintf('Documents de conseil mis à jour pour %d formation(s) de %s.', count($formations), $composante->getLibelle()),
+        ]);
+    }
+
+    /**
+     * @return array{0: array<int, Formation>, 1: array<int, array<string, mixed>>}
+     */
+    private function buildFormationsDataForComposante(
+        Composante $composante,
+        CampagneCollecte $campagne,
+        FormationRepository $formationRepository,
+        DpeParcoursRepository $dpeParcoursRepository,
+        DpeFormationRepository $dpeFormationRepository,
+        AnneeRepository $anneeRepository,
+        PlateformeAdmissionParametreRepository $plateformeParamRepository,
+        OffreValidationService $offreValidationService,
+    ): array {
+        $allFormations = $formationRepository->findBy([
+            'dpe' => $campagne,
+            'composantePorteuse' => $composante,
+        ]);
+
+        $allParcours = $dpeParcoursRepository->findByCampagneCollecte($campagne, $composante);
+        $paramsByAnnee = $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne, $composante);
+        $anneesByParcours = $anneeRepository->findByCampagneIndexedByParcours($campagne, $composante);
+
+        $dpeFormations = !empty($allFormations) ? $dpeFormationRepository->findBy([
+            'campagneCollecte' => $campagne,
+            'formation' => $allFormations,
+        ]) : [];
+
+        $dpeFormationByFormationId = [];
+        foreach ($dpeFormations as $df) {
+            if ($df->getFormation() !== null) {
+                $dpeFormationByFormationId[$df->getFormation()->getId()] = $df;
+            }
+        }
+
+        $parcoursByFormationId = [];
+        foreach ($allParcours as $dpePar) {
+            $parcours = $dpePar->getParcours();
+            if ($parcours === null) {
+                continue;
+            }
+            $formation = $parcours->getFormation();
+            if ($formation !== null) {
+                $parcoursByFormationId[$formation->getId()][] = $dpePar;
+            }
+        }
+
+        $formationsData = [];
+        foreach ($allFormations as $forma) {
+            $fId = $forma->getId();
+            $dpeParList = $parcoursByFormationId[$fId] ?? [];
+            $formaHasAnomalies = false;
+            $formaAnomaliesCount = 0;
+            $parcoursList = [];
+
+            foreach ($dpeParList as $dpePar) {
+                $parcours = $dpePar->getParcours();
+                if ($parcours === null) {
+                    continue;
+                }
+                $parcAnnees = $anneesByParcours[$parcours->getId()] ?? [];
+                $parcAnoms = $offreValidationService->getAnomaliesParcours($parcours, $campagne, $dpePar, $paramsByAnnee, $parcAnnees);
+                $isParcConforme = (count($parcAnoms) === 0);
+                if (!$isParcConforme) {
+                    $formaHasAnomalies = true;
+                    $formaAnomaliesCount += count($parcAnoms);
+                }
+
+                $capParcours = 0;
+                foreach ($parcAnnees as $an) {
+                    $capParcours += $an->getCapaciteAccueil();
+                }
+
+                $parcoursList[] = [
+                    'parcours' => $parcours,
+                    'dpeParcours' => $dpePar,
+                    'isOuvert' => $dpePar->isOuvert(),
+                    'capacite' => $capParcours,
+                    'isConforme' => $isParcConforme,
+                    'anomalies' => $parcAnoms,
+                ];
+            }
+
+            $pvDoc = null;
+            $noteDoc = null;
+            foreach ($forma->getDocumentConseils() as $doc) {
+                if ($doc->getType() === 'pv' && $pvDoc === null) {
+                    $pvDoc = $doc;
+                } elseif ($doc->getType() === 'note_explicative' && $noteDoc === null) {
+                    $noteDoc = $doc;
+                }
+            }
+
+            $formationsData[$fId] = [
+                'formation' => $forma,
+                'dpeFormation' => $dpeFormationByFormationId[$fId] ?? null,
+                'hasAnomalies' => $formaHasAnomalies,
+                'anomaliesCount' => $formaAnomaliesCount,
+                'parcoursList' => $parcoursList,
+                'hasPv' => $pvDoc !== null,
+                'hasNote' => $noteDoc !== null,
+                'pvDoc' => $pvDoc,
+                'noteDoc' => $noteDoc,
+            ];
+        }
+
+        return [$allFormations, $formationsData];
+    }
+
+    private function denyAccessUnlessCanManageDocuments(Formation $formation): void
+    {
         $composante = $formation->getComposantePorteuse();
         if ($composante === null) {
             throw $this->createAccessDeniedException();
+        }
+
+        $this->denyAccessUnlessCanManageComposante($composante);
+    }
+
+    private function denyAccessUnlessCanManageComposante(Composante $composante): void
+    {
+        if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_SES')) {
+            return;
         }
 
         $this->denyAccessUnlessGranted('MANAGE', [

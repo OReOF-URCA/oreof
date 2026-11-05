@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Service;
 
 use App\Entity\Annee;
 use App\Entity\CampagneCollecte;
+use App\Entity\Composante;
 use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\Parcours;
@@ -86,7 +87,7 @@ final class OffreAnnexesExportServiceTest extends TestCase
         self::assertFalse($this->service->isIntegrationPlateforme(null, false));
     }
 
-    public function testParcoursupExclutParcoursFermeEtPlateformeInactive(): void
+    public function testParcoursupComporteStatutsOuvertureEtPlateformeProposee(): void
     {
         $campagne = new CampagneCollecte();
         $psup = $this->psup();
@@ -106,9 +107,148 @@ final class OffreAnnexesExportServiceTest extends TestCase
             $campagne
         );
 
+        self::assertCount(3, $rows);
+
+        // Les lignes sont triées par libellé de parcours
+        // 1. LAS : fermé
+        self::assertSame('LAS', (string) $rows[0]['parcours']);
+        self::assertSame('NON', $rows[0]['annee_ouverte_n']);
+        self::assertSame(0, $rows[0]['capacite_n']);
+
+        // 2. Préprofessionnalisation : ouvert mais plateforme inactive
+        self::assertSame('Préprofessionnalisation', (string) $rows[1]['parcours']);
+        self::assertSame('OUI', $rows[1]['annee_ouverte_n']);
+        self::assertSame('Non active', $rows[1]['plateforme_proposee_n']);
+        self::assertSame(0, $rows[1]['capacite_n']);
+
+        // 3. Psychologie : ouvert et actif
+        self::assertSame('Psychologie', (string) $rows[2]['parcours']);
+        self::assertSame('OUI', $rows[2]['annee_ouverte_n']);
+        self::assertSame('Active', $rows[2]['plateforme_proposee_n']);
+        self::assertSame(150, $rows[2]['capacite_n']);
+    }
+
+    public function testParcoursDefautLaisseLaCelluleVide(): void
+    {
+        $campagne = new CampagneCollecte();
+        $psup = $this->psup();
+        $formation = $this->licence(1, 'Droit');
+
+        [$dpe, $l1] = $this->parcoursL1($formation, 10, Parcours::PARCOURS_DEFAUT, 100);
+
+        $rows = $this->buildParcoursupRows([$dpe], [10 => [$l1]], [], $psup, $campagne);
+
         self::assertCount(1, $rows);
-        self::assertSame('Psychologie', (string) $rows[0]['parcours']);
-        self::assertSame(150, $rows[0]['capacite_n']);
+        self::assertSame('', (string) $rows[0]['parcours']);
+    }
+
+    public function testTypeParcoursEstLeRegimeDInscription(): void
+    {
+        $campagne = new CampagneCollecte();
+        $psup = $this->psup();
+        $formation = $this->licence(1, 'Informatique');
+
+        [$dpe, $l1] = $this->parcoursL1($formation, 10, 'Parcours Info', 80);
+        $dpe->getParcours()->setRegimeInscription([\App\Referentiel\RegimeInscription::FI, \App\Referentiel\RegimeInscription::FC]);
+
+        $rows = $this->buildParcoursupRows([$dpe], [10 => [$l1]], [], $psup, $campagne);
+
+        self::assertCount(1, $rows);
+        self::assertSame('Formation Initiale, Formation Continue', (string) $rows[0]['type_parcours']);
+        self::assertSame('Formation Initiale, Formation Continue', (string) $rows[0]['regime_inscription']);
+    }
+
+    public function testNouvelleCreationEnNPasMiseEnDiff(): void
+    {
+        $campagne = new CampagneCollecte();
+        $psup = $this->psup();
+        $formation = $this->licence(1, 'Chimie');
+
+        [$dpe, $l1] = $this->parcoursL1($formation, 10, 'Chimie Appliquée', 60);
+
+        // Pas de N-1 fourni
+        $rows = $this->buildParcoursupRows([$dpe], [10 => [$l1]], [], $psup, $campagne);
+
+        self::assertCount(1, $rows);
+        /** @var \App\DTO\DiffObject $diffParcours */
+        $diffParcours = $rows[0]['parcours'];
+        self::assertNull($diffParcours->original);
+        self::assertSame('Chimie Appliquée', $diffParcours->new);
+
+        /** @var \App\DTO\DiffObject $diffOuvert */
+        $diffOuvert = $rows[0]['annee_ouverte'];
+        self::assertNull($diffOuvert->original);
+        self::assertSame('OUI', $diffOuvert->new);
+
+        /** @var \App\DTO\DiffObject $diffPlat */
+        $diffPlat = $rows[0]['plateforme_proposee'];
+        self::assertNull($diffPlat->original);
+        self::assertSame('Active', $diffPlat->new);
+    }
+
+    public function testDiffAppliqueSiChangementParRapportAN1(): void
+    {
+        $campagne = new CampagneCollecte();
+        $psup = $this->psup();
+        $formation = $this->licence(1, 'Physique');
+
+        [$dpeN, $l1N] = $this->parcoursL1($formation, 10, 'Physique Fondamentale', 50);
+        $dpeN->getParcours()->setRegimeInscription([\App\Referentiel\RegimeInscription::FI]);
+
+        [$dpeN1, $l1N1] = $this->parcoursL1($formation, 20, 'Physique Générale', 40);
+        $dpeN1->getParcours()->setRegimeInscription([\App\Referentiel\RegimeInscription::FC]);
+        $l1N1->setIsOuvert(false);
+        $dpeN->getParcours()->setParcoursOrigineCopie($dpeN1->getParcours());
+
+        $paramN1 = (new PlateformeAdmissionParametre())->setPlateforme($psup)->setActive(false);
+
+        $method = new \ReflectionMethod($this->service, 'buildParcoursupRows');
+        /** @var list<array<string, mixed>> $rows */
+        $rows = $method->invoke(
+            $this->service,
+            [$dpeN],
+            [10 => [$l1N]],
+            [],
+            [],
+            $psup,
+            $campagne,
+            null,
+            false,
+            [20 => $dpeN1],
+            [20 => [$l1N1]],
+            [$l1N1->getId() => [$paramN1]]
+        );
+
+        self::assertCount(1, $rows);
+        self::assertSame(1, $rows[0]['niveau']);
+
+        // 1. Parcours en diff
+        /** @var \App\DTO\DiffObject $diffParcours */
+        $diffParcours = $rows[0]['parcours'];
+        self::assertTrue($diffParcours->isDifferent());
+        self::assertSame('Physique Générale', $diffParcours->original);
+        self::assertSame('Physique Fondamentale', $diffParcours->new);
+
+        // 2. Année ouverte en diff (NON -> OUI)
+        /** @var \App\DTO\DiffObject $diffOuvert */
+        $diffOuvert = $rows[0]['annee_ouverte'];
+        self::assertTrue($diffOuvert->isDifferent());
+        self::assertSame('NON', $diffOuvert->original);
+        self::assertSame('OUI', $diffOuvert->new);
+
+        // 3. Plateforme proposée en diff (Non active -> Active)
+        /** @var \App\DTO\DiffObject $diffPlat */
+        $diffPlat = $rows[0]['plateforme_proposee'];
+        self::assertTrue($diffPlat->isDifferent());
+        self::assertSame('Non active', $diffPlat->original);
+        self::assertSame('Active', $diffPlat->new);
+
+        // 4. Régime d'inscription en diff (Formation Continue -> Formation Initiale)
+        /** @var \App\DTO\DiffObject $diffType */
+        $diffType = $rows[0]['type_parcours'];
+        self::assertTrue($diffType->isDifferent());
+        self::assertSame('Formation Continue', $diffType->original);
+        self::assertSame('Formation Initiale', $diffType->new);
     }
 
     public function testParcoursupRegroupeLAnneeEnTroncCommun(): void
@@ -207,6 +347,115 @@ final class OffreAnnexesExportServiceTest extends TestCase
         $this->setId($psup, 1);
 
         return $psup;
+    }
+
+    public function testBuildExportTitleAvecDiplomesMultiples(): void
+    {
+        $campagne = (new CampagneCollecte())->setAnnee(2027);
+        $plat = (new PlateformeAdmission())->setLibelle('eCandidat');
+
+        $rows = [
+            ['diplome' => 'M2'],
+            ['diplome' => 'DNO'],
+            ['diplome' => 'M2'], // doublon
+            ['diplome' => 'DE'],
+            ['diplome' => 'DAEU'],
+        ];
+
+        $titre = $this->service->buildExportTitle($plat, $campagne, null, null, $rows);
+        self::assertSame('Annexe – eCandidat – formations proposées (M2, DNO, DE, DAEU) pour 2027-2028', $titre);
+    }
+
+    public function testBuildExportTitleAvecComposanteEtDiplomeUnique(): void
+    {
+        $campagne = (new CampagneCollecte())->setAnnee(2027);
+        $plat = (new PlateformeAdmission())->setLibelle('eCandidat');
+        $compo = (new Composante())->setSigle('IUT');
+        $diplome = (new TypeDiplome())->setLibelleCourt('BUT');
+
+        $titre = $this->service->buildExportTitle($plat, $campagne, $compo, $diplome, []);
+        self::assertSame('Annexe – eCandidat – IUT – formations proposées (BUT) pour 2027-2028', $titre);
+    }
+
+    public function testSanitizeFilenameNettoieCaracteresInterdits(): void
+    {
+        $titre = 'Annexe – eCandidat – DU/DIU: Santé * ? <test>';
+        $safe = $this->service->sanitizeFilename($titre);
+
+        self::assertSame('Annexe – eCandidat – DU-DIU- Santé - - -test-', $safe);
+    }
+
+    public function testBuildSheetNameFormatEtLimite31Caracteres(): void
+    {
+        $plat = (new PlateformeAdmission())->setLibelle('eCandidat');
+        $date = new \DateTimeImmutable('2026-11-04 17:30:00');
+
+        $sheet = $this->service->buildSheetName($plat, null, $date);
+        self::assertSame('eCandidat (04-11 17h30)', $sheet);
+        self::assertLessThanOrEqual(31, mb_strlen($sheet));
+
+        $platTresLong = (new PlateformeAdmission())->setLibelle('Plateforme nationale extrêmement longue et verbeuse');
+        $sheetLong = $this->service->buildSheetName($platTresLong, null, $date);
+        self::assertLessThanOrEqual(31, mb_strlen($sheetLong));
+        self::assertStringEndsWith('(04-11 17h30)', $sheetLong);
+    }
+
+    public function testResolveEntityDiffPourParcoursDefautLaisseLeParcoursVide(): void
+    {
+        $formation = $this->licence(1, 'Informatique');
+        $parcours = (new Parcours($formation))->setLibelle(Parcours::PARCOURS_DEFAUT);
+
+        $diffs = $this->service->resolveEntityDiff($parcours, null);
+
+        self::assertSame('', (string) $diffs['parcours']->new);
+        self::assertNull($diffs['parcours']->original);
+    }
+
+    public function testResolveEntityDiffPourNouvelleCreationMetOriginalANullEtIsDifferentATrue(): void
+    {
+        $formation = $this->licence(1, 'Informatique');
+        $parcours = (new Parcours($formation))->setLibelle('Génie Logiciel');
+
+        $diffs = $this->service->resolveEntityDiff($parcours, null);
+
+        self::assertNull($diffs['parcours']->original);
+        self::assertSame('Génie Logiciel', $diffs['parcours']->new);
+        self::assertTrue($diffs['parcours']->isDifferent());
+        self::assertNull($diffs['mention']->original);
+        self::assertSame('Informatique', $diffs['mention']->new);
+        self::assertTrue($diffs['mention']->isDifferent());
+    }
+
+    public function testResolveRegimeInscriptionParcoursEtAnnee(): void
+    {
+        $formation = $this->licence(1, 'Droit');
+        $parcours = (new Parcours($formation))->setRegimeInscription(['FI']);
+        self::assertSame('FI', $this->service->resolveRegimeInscription($parcours));
+
+        $annee = (new Annee())->setRegimeInscription(['FI', 'FC']);
+        self::assertSame('FI, FC', $this->service->resolveRegimeInscription($parcours, $annee));
+    }
+
+    public function testResolveRowStatusAndDiffNouvelleCreation(): void
+    {
+        $formation = $this->licence(1, 'Histoire');
+        $parcours = (new Parcours($formation))->setLibelle('Histoire moderne')->setRegimeInscription(['FI']);
+        $annee = (new Annee())->setOrdre(1)->setIsOuvert(true)->setCapaciteAccueil(50);
+
+        $status = $this->service->resolveRowStatusAndDiff(
+            $parcours,
+            $annee,
+            true,
+            null,
+            ['hasN1' => false, 'anneeN1' => null, 'paramN1' => null, 'isOuvertN1' => false, 'isPsupN1' => false, 'isEcN1' => false, 'isMmN1' => false, 'dpeN1' => null]
+        );
+
+        self::assertTrue($status['diff_type_parcours']->isDifferent());
+        self::assertNull($status['diff_type_parcours']->original);
+        self::assertSame('FI', $status['diff_type_parcours']->new);
+        self::assertTrue($status['diff_annee_ouverte']->isDifferent());
+        self::assertNull($status['diff_annee_ouverte']->original);
+        self::assertSame('OUI', $status['diff_annee_ouverte']->new);
     }
 
     private function licence(int $id, string $mention): Formation

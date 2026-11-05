@@ -1,19 +1,27 @@
+{% set isDocumentsOnly = isDocumentsOnly|default(false) %}
 {% set hasUpload = meta.hasUpload|default(false) %}
 {% set hasUploadNote = meta.hasUploadNote|default(false) %}
+{% set formAction = actionUrl is defined and actionUrl is not empty
+    ? actionUrl
+    : (transition is defined and transition is not empty
+        ? path('offre_v2_composante_valider', { composante: composante.id, transition: transition })
+        : '') %}
 
 <form id="modal_form"
-      action="{{ path('offre_v2_composante_valider', { composante: composante.id, transition: transition }) }}"
+      action="{{ formAction }}"
       method="post"
       enctype="multipart/form-data"
       class="space-y-5"
 >
-    <input type="hidden" name="_token" value="{{ csrf_token('offre_v2_valider_' ~ composante.id) }}">
+    <input type="hidden" name="_token" value="{{ csrf_token(csrfTokenName|default('offre_v2_valider_' ~ composante.id)) }}">
 
     <!-- Alerte informative -->
     <twig:alerte type="{{ isRefuse ? 'warning' : 'info' }}">
         <p class="text-xs opacity-90">
             {% if isRefuse %}
                 Sélectionnez les formations et parcours à renvoyer pour modifications et indiquez le motif ci-dessous.
+            {% elseif isDocumentsOnly %}
+                Sélectionnez les formations de la composante concernées, puis déposez ou sélectionnez le PV de conseil et la note explicative à leur associer.
             {% else %}
                 Sélectionnez les formations et parcours de la composante que vous souhaitez valider pour cette campagne, puis déposez ou sélectionnez le PV de conseil et la note explicative associés.
             {% endif %}
@@ -28,7 +36,7 @@
                     Formations & Parcours de la composante
                 </h4>
                 <span class="text-xs text-secondary-500">
-                    Cochez les éléments concernés par cette validation
+                    Cochez les éléments concernés par cette action
                 </span>
             </div>
             <div class="flex items-center gap-2 text-xs font-semibold">
@@ -44,11 +52,25 @@
                     Tout décocher
                 </button>
                 <span class="text-secondary-300">|</span>
-                <button type="button"
-                        onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = (cb.dataset.conforme === '1')); syncFormationsCheckboxes();"
-                        class="text-success-700 dark:text-success-100 hover:text-success-800 hover:underline cursor-pointer dark:hover:text-success-300">
-                    Cocher les conformes
-                </button>
+                {% if isDocumentsOnly %}
+                    <button type="button"
+                            onclick="document.querySelectorAll('.formation-checkbox').forEach(cb => { cb.checked = (cb.dataset.hasPv === '0'); const fId = cb.dataset.formationId; document.querySelectorAll('.parcours-of-formation-' + fId).forEach(pcb => pcb.checked = cb.checked); });"
+                            class="text-warning-700 dark:text-warning-300 hover:underline cursor-pointer">
+                        Sans PV
+                    </button>
+                    <span class="text-secondary-300">|</span>
+                    <button type="button"
+                            onclick="document.querySelectorAll('.formation-checkbox').forEach(cb => { cb.checked = (cb.dataset.hasNote === '0'); const fId = cb.dataset.formationId; document.querySelectorAll('.parcours-of-formation-' + fId).forEach(pcb => pcb.checked = cb.checked); });"
+                            class="text-warning-700 dark:text-warning-300 hover:underline cursor-pointer">
+                        Sans Note
+                    </button>
+                {% else %}
+                    <button type="button"
+                            onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = (cb.dataset.conforme === '1')); syncFormationsCheckboxes();"
+                            class="text-success-700 dark:text-success-100 hover:text-success-800 hover:underline cursor-pointer dark:hover:text-success-300">
+                        Cocher les conformes
+                    </button>
+                {% endif %}
             </div>
         </div>
 
@@ -64,20 +86,35 @@
                                    value="{{ formation.id }}"
                                    checked
                                    data-formation-id="{{ formation.id }}"
+                                   data-has-pv="{{ fData.hasPv|default(false) ? '1' : '0' }}"
+                                   data-has-note="{{ fData.hasNote|default(false) ? '1' : '0' }}"
                                    class="formation-checkbox h-4 w-4 rounded border-secondary-300 dark:border-secondary-700 text-primary-600 focus:ring-primary-500 cursor-pointer dark:text-primary-400"
                                    onchange="document.querySelectorAll('.parcours-of-formation-{{ formation.id }}').forEach(cb => cb.checked = this.checked);"
                             >
                             <span>{{ formation.displayLong }}</span>
                         </label>
                         <div class="flex items-center gap-2 shrink-0">
-                            {% if fData.hasAnomalies %}
-                                <span class="inline-flex items-center gap-1 rounded-md bg-warning-50 dark:bg-warning-900/30 px-2 py-0.5 text-xs font-semibold text-warning-800 dark:text-warning-300 border border-warning-200 dark:border-warning-700" title="{{ fData.anomaliesCount }} anomalie(s) détectée(s)">
-                                    ⚠️ {{ fData.anomaliesCount }} à vérifier
-                                </span>
+                            {% if isDocumentsOnly %}
+                                {% if fData.hasPv|default(false) %}
+                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-success-50 text-success-700 border border-success-200 dark:bg-success-900/30 dark:text-success-300 dark:border-success-700">PV OK</span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 text-secondary-600 border border-secondary-200 dark:bg-secondary-800 dark:text-secondary-400">Sans PV</span>
+                                {% endif %}
+                                {% if fData.hasNote|default(false) %}
+                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-900/30 dark:text-primary-300 dark:border-primary-700">Note OK</span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 text-secondary-600 border border-secondary-200 dark:bg-secondary-800 dark:text-secondary-400">Sans Note</span>
+                                {% endif %}
                             {% else %}
-                                <span class="inline-flex items-center gap-1 rounded-md bg-success-50 dark:bg-success-900/30 px-2 py-0.5 text-xs font-semibold text-success-700 dark:text-success-300 border border-success-200 dark:border-success-700">
-                                    ✓ Conforme
-                                </span>
+                                {% if fData.hasAnomalies %}
+                                    <span class="inline-flex items-center gap-1 rounded-md bg-warning-50 dark:bg-warning-900/30 px-2 py-0.5 text-xs font-semibold text-warning-800 dark:text-warning-300 border border-warning-200 dark:border-warning-700" title="{{ fData.anomaliesCount }} anomalie(s) détectée(s)">
+                                        ⚠️ {{ fData.anomaliesCount }} à vérifier
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1 rounded-md bg-success-50 dark:bg-success-900/30 px-2 py-0.5 text-xs font-semibold text-success-700 dark:text-success-300 border border-success-200 dark:border-success-700">
+                                        ✓ Conforme
+                                    </span>
+                                {% endif %}
                             {% endif %}
                         </div>
                     </div>
@@ -136,31 +173,40 @@
                         </label>
                         <twig:Badge size="sm"
                                     :variant="hasUpload ? 'danger' : 'secondary'"
-                                    :label="hasUpload ? 'Requis sauf laissez-passer' : 'Optionnel'"
+                                    :label="isDocumentsOnly ? 'Optionnel' : (hasUpload ? 'Requis sauf laissez-passer' : 'Optionnel')"
                         />
                     </div>
 
-                    {% if existingPvs|length > 0 %}
+                    {% if existingPvs|length > 0 or isDocumentsOnly %}
                         <div class="mb-2">
                             <label for="pv_id" class="block text-[11px] font-medium text-secondary-500 mb-1">
-                                Choisir un PV déjà déposé :
+                                {{ isDocumentsOnly ? 'Action pour le PV :' : 'Choisir un PV :' }}
                             </label>
                             <select name="pv_id" id="pv_id"
-                                    onchange="document.getElementById('pv_file_input_wrapper').style.display = this.value ? 'none' : 'block';"
-                                    class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
-                                    {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
-                                <option value="">-- Téléverser un nouveau PV --</option>
-                                {% for pv in existingPvs %}
-                                    <option value="{{ pv.id }}">{{ pv.originalFilename }} (du {{ pv.uploadedAt|date('d/m/Y') }})</option>
-                                {% endfor %}
+                                    onchange="updatePvVisibility();"
+                                    class="app-filter-select w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface px-3 py-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 cursor-pointer">
+                                {% if isDocumentsOnly %}
+                                    <option value="">-- Ne pas modifier le PV --</option>
+                                    <option value="__upload__">📥 Modifier / Déposer une nouvelle PJ (PDF)</option>
+                                    <option value="__remove__">🗑️ Retirer / Dissocier le PV actuel</option>
+                                {% else %}
+                                    <option value="">📥 Téléverser une nouvelle PJ (PDF)</option>
+                                {% endif %}
+                                {% if existingPvs|length > 0 %}
+                                    <optgroup label="Ou réutiliser un PV déjà déposé :">
+                                        {% for pv in existingPvs %}
+                                            <option value="{{ pv.id }}">{{ pv.originalFilename }} (du {{ pv.uploadedAt|date('d/m/Y') }})</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endif %}
                             </select>
                         </div>
                     {% endif %}
                 </div>
 
-                <div id="pv_file_input_wrapper" class="space-y-1">
-                    <label for="file" class="block text-[11px] font-medium text-secondary-500">
-                        {{ existingPvs|length > 0 ? 'Ou téléverser un nouveau fichier PDF :' : 'Téléverser le fichier PDF :' }}
+                <div id="pv_file_input_wrapper" class="space-y-1.5 p-2.5 rounded-lg border border-primary-200 dark:border-primary-800 bg-primary-50/30 dark:bg-primary-950/20" style="{{ isDocumentsOnly ? 'display: none;' : '' }}">
+                    <label for="file" class="block text-[11px] font-semibold text-primary-900 dark:text-primary-200">
+                        {{ existingPvs|length > 0 or isDocumentsOnly ? 'Sélectionner le nouveau fichier PDF du PV (PJ) :' : 'Téléverser le fichier PDF :' }}
                     </label>
                     <input type="file" name="file" id="file" accept="application/pdf"
                            class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-1.5 text-xs text-secondary-700 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:text-primary-300">
@@ -173,7 +219,7 @@
                     <div class="flex flex-wrap items-center gap-2 mb-1">
                         <label for="date" class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide flex items-center gap-1.5">
                             <span>📅</span>
-                            <span>Date de validation</span>
+                            <span>Date de décision / conseil</span>
                         </label>
                         <twig:Badge size="sm" variant="danger" label="Requis" />
                     </div>
@@ -196,31 +242,33 @@
             </div>
         </div>
 
-        <!-- Ligne 2 : Laissez-passer optionnel -->
-        <div class="rounded-xl border border-warning-200 dark:border-warning-700 bg-warning-50/50 dark:bg-warning-900/30 p-3.5 space-y-2">
-            <label class="flex items-center gap-2.5 cursor-pointer font-bold text-warning-900 dark:text-warning-100 text-xs uppercase tracking-wide">
-                <input type="checkbox"
-                       name="laisserPasser"
-                       id="laisserPasser"
-                       value="1"
-                       onchange="document.getElementById('laisser_passer_justif_wrapper').style.display = this.checked ? 'block' : 'none';"
-                       class="h-4 w-4 rounded border-warning-300 text-warning-600 focus:ring-warning-500 cursor-pointer dark:text-warning-400">
-                <span>Demander / Activer un laissez-passer exceptionnel</span>
-            </label>
-            <div id="laisser_passer_justif_wrapper" style="display: none;" class="space-y-1 pt-1">
-                <div class="flex flex-wrap items-center gap-2">
-                    <label for="laisserPasserJustif" class="block text-[11px] font-medium text-warning-800 dark:text-warning-100">
-                        Justification du laissez-passer (PV différé, décision dérogatoire, etc.) :
-                    </label>
-                    <twig:Badge size="sm" variant="danger" label="Requis" />
+        {% if not isDocumentsOnly %}
+            <!-- Ligne 2 : Laissez-passer optionnel -->
+            <div class="rounded-xl border border-warning-200 dark:border-warning-700 bg-warning-50/50 dark:bg-warning-900/30 p-3.5 space-y-2">
+                <label class="flex items-center gap-2.5 cursor-pointer font-bold text-warning-900 dark:text-warning-100 text-xs uppercase tracking-wide">
+                    <input type="checkbox"
+                           name="laisserPasser"
+                           id="laisserPasser"
+                           value="1"
+                           onchange="document.getElementById('laisser_passer_justif_wrapper').style.display = this.checked ? 'block' : 'none';"
+                           class="h-4 w-4 rounded border-warning-300 text-warning-600 focus:ring-warning-500 cursor-pointer dark:text-warning-400">
+                    <span>Demander / Activer un laissez-passer exceptionnel</span>
+                </label>
+                <div id="laisser_passer_justif_wrapper" style="display: none;" class="space-y-1 pt-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <label for="laisserPasserJustif" class="block text-[11px] font-medium text-warning-800 dark:text-warning-100">
+                            Justification du laissez-passer (PV différé, décision dérogatoire, etc.) :
+                        </label>
+                        <twig:Badge size="sm" variant="danger" label="Requis" />
+                    </div>
+                    <input type="text"
+                           name="laisserPasserJustif"
+                           id="laisserPasserJustif"
+                           placeholder="Ex : PV en cours de signature, validation accordée en séance du..."
+                           class="w-full rounded-lg border border-warning-300 dark:border-secondary-600 bg-surface p-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-warning-500 focus:ring-warning-500">
                 </div>
-                <input type="text"
-                       name="laisserPasserJustif"
-                       id="laisserPasserJustif"
-                       placeholder="Ex : PV en cours de signature, validation accordée en séance du..."
-                       class="w-full rounded-lg border border-warning-300 dark:border-secondary-600 bg-surface p-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-warning-500 focus:ring-warning-500">
             </div>
-        </div>
+        {% endif %}
 
         <!-- Ligne 3 : Note explicative (obligatoire) -->
         <div class="space-y-2 rounded-xl border border-secondary-200 dark:border-secondary-700 bg-secondary-50/50 dark:bg-secondary-900/30 p-3.5">
@@ -232,7 +280,7 @@
                     </label>
                     <twig:Badge size="sm"
                                 :variant="hasUploadNote ? 'danger' : 'secondary'"
-                                :label="hasUploadNote ? 'Requis' : 'Optionnel'"
+                                :label="isDocumentsOnly ? 'Optionnel' : (hasUploadNote ? 'Requis' : 'Optionnel')"
                     />
                 </div>
                 <a href="{{ asset('modeles/note_explicative.docx') }}" target="_blank" class="text-[11px] font-semibold text-primary-600 hover:underline dark:text-primary-400">
@@ -240,26 +288,35 @@
                 </a>
             </div>
 
-            {% if existingNotes|length > 0 %}
+            {% if existingNotes|length > 0 or isDocumentsOnly %}
                 <div>
                     <label for="note_id" class="block text-[11px] font-medium text-secondary-500 mb-1">
-                        Choisir une Note déjà déposée :
+                        {{ isDocumentsOnly ? 'Action pour la Note :' : 'Choisir une Note :' }}
                     </label>
                     <select name="note_id" id="note_id"
-                            onchange="document.getElementById('note_file_input_wrapper').style.display = this.value ? 'none' : 'block';"
-                            class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
-                            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
-                        <option value="">-- Téléverser une nouvelle Note --</option>
-                        {% for note in existingNotes %}
-                            <option value="{{ note.id }}">{{ note.originalFilename }} (du {{ note.uploadedAt|date('d/m/Y') }})</option>
-                        {% endfor %}
+                            onchange="updateNoteVisibility();"
+                            class="app-filter-select w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface px-3 py-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 cursor-pointer">
+                        {% if isDocumentsOnly %}
+                            <option value="">-- Ne pas modifier la Note --</option>
+                            <option value="__upload__">📥 Modifier / Déposer une nouvelle Note (PDF)</option>
+                            <option value="__remove__">🗑️ Retirer / Dissocier la Note actuelle</option>
+                        {% else %}
+                            <option value="">📥 Téléverser une nouvelle Note (PDF)</option>
+                        {% endif %}
+                        {% if existingNotes|length > 0 %}
+                            <optgroup label="Ou réutiliser une Note déjà déposée :">
+                                {% for note in existingNotes %}
+                                    <option value="{{ note.id }}">{{ note.originalFilename }} (du {{ note.uploadedAt|date('d/m/Y') }})</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endif %}
                     </select>
                 </div>
             {% endif %}
 
-            <div id="note_file_input_wrapper" class="space-y-1">
-                <label for="fileNote" class="block text-[11px] font-medium text-secondary-500">
-                    {{ existingNotes|length > 0 ? 'Ou téléverser une nouvelle Note PDF :' : 'Téléverser le fichier PDF :' }}
+            <div id="note_file_input_wrapper" class="space-y-1.5 p-2.5 rounded-lg border border-primary-200 dark:border-primary-800 bg-primary-50/30 dark:bg-primary-950/20" style="{{ isDocumentsOnly ? 'display: none;' : '' }}">
+                <label for="fileNote" class="block text-[11px] font-semibold text-primary-900 dark:text-primary-200">
+                    {{ existingNotes|length > 0 or isDocumentsOnly ? 'Sélectionner le nouveau fichier PDF de la Note (PJ) :' : 'Téléverser le fichier PDF :' }}
                 </label>
                 <input type="file" name="fileNote" id="fileNote" accept="application/pdf"
                        class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-1.5 text-xs text-secondary-700 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:text-primary-300">
@@ -287,7 +344,7 @@
     <div class="border-t border-secondary-200 dark:border-secondary-700 pt-4">
         <div class="mb-1 flex flex-wrap items-center gap-2">
             <label for="commentaire" class="block text-xs font-bold text-secondary-700 dark:text-secondary-100 uppercase tracking-wide">
-                {{ isRefuse ? 'Motif du retour / modifications demandées :' : 'Commentaire / Remarques (optionnel) :' }}
+                {{ isRefuse ? 'Motif du retour / modifications demandées :' : (isDocumentsOnly ? 'Commentaire / Justification (optionnel) :' : 'Commentaire / Remarques (optionnel) :') }}
             </label>
             <twig:Badge size="sm"
                         :variant="isRefuse ? 'danger' : 'secondary'"
@@ -298,7 +355,7 @@
                   id="commentaire"
                   rows="2"
                   {{ isRefuse ? 'required' : '' }}
-                  placeholder="{{ isRefuse ? 'Précisez les corrections attendues...' : 'Ajouter une observation...' }}"
+                  placeholder="{{ isRefuse ? 'Précisez les corrections attendues...' : (isDocumentsOnly ? 'Ex : Remplacement du PV suite à commission du...' : 'Ajouter une observation...') }}"
                   class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500"></textarea>
     </div>
 
@@ -307,6 +364,42 @@
 </form>
 
 <script>
+    function updatePvVisibility() {
+        const pvSelect = document.getElementById('pv_id');
+        const pvWrapper = document.getElementById('pv_file_input_wrapper');
+        if (!pvWrapper) return;
+        if (!pvSelect) {
+            pvWrapper.style.display = 'block';
+            return;
+        }
+        const isDocOnly = {{ isDocumentsOnly ? 'true' : 'false' }};
+        if (isDocOnly) {
+            pvWrapper.style.display = (pvSelect.value === '__upload__') ? 'block' : 'none';
+        } else {
+            pvWrapper.style.display = (!pvSelect.value || pvSelect.value === '__upload__') ? 'block' : 'none';
+        }
+    }
+
+    function updateNoteVisibility() {
+        const noteSelect = document.getElementById('note_id');
+        const noteWrapper = document.getElementById('note_file_input_wrapper');
+        if (!noteWrapper) return;
+        if (!noteSelect) {
+            noteWrapper.style.display = 'block';
+            return;
+        }
+        const isDocOnly = {{ isDocumentsOnly ? 'true' : 'false' }};
+        if (isDocOnly) {
+            noteWrapper.style.display = (noteSelect.value === '__upload__') ? 'block' : 'none';
+        } else {
+            noteWrapper.style.display = (!noteSelect.value || noteSelect.value === '__upload__') ? 'block' : 'none';
+        }
+    }
+
+    // Initialisation
+    updatePvVisibility();
+    updateNoteVisibility();
+
     function syncFormationCheckbox(formationId) {
         const parcoursCbs = document.querySelectorAll('.parcours-of-formation-' + formationId);
         const formationCb = document.querySelector('input[data-formation-id="' + formationId + '"].formation-checkbox');

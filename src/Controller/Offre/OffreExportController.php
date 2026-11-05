@@ -81,6 +81,47 @@ final class OffreExportController extends BaseController
         return $exportService->exportPlatformSingle($plateforme, $campagne, $effectiveComposante, $typeDiplome);
     }
 
+    #[Route('/offrev2/preview-plateforme/{plateforme}', name: 'offre_v2_preview_plateforme', methods: ['GET'])]
+    #[Route('/offre/composante/{composante}/preview-plateforme/{plateforme}', name: 'offre_v2_composante_preview_plateforme', methods: ['GET'])]
+    public function previewPlateforme(
+        PlateformeAdmission $plateforme,
+        Request $request,
+        OffreAnnexesExportService $exportService,
+        TypeDiplomeRepository $typeDiplomeRepository,
+        ComposanteRepository $composanteRepository,
+        ?Composante $composante = null,
+    ): Response {
+        if ($composante !== null) {
+            if (!$this->isGranted('ROLE_ADMIN')) {
+                $this->denyAccessUnlessGranted('MANAGE', [
+                    'route' => 'app_composante',
+                    'subject' => $composante,
+                ]);
+            }
+        } else {
+            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        }
+
+        $campagne = $this->getCampagneCollecte();
+
+        $typeDiplomeId = $request->query->getInt('typeDiplome');
+        $typeDiplome = $typeDiplomeId > 0 ? $typeDiplomeRepository->find($typeDiplomeId) : null;
+
+        $targetComposanteId = $request->query->getInt('targetComposante');
+        $effectiveComposante = $composante ?? ($targetComposanteId > 0 ? $composanteRepository->find($targetComposanteId) : null);
+
+        $context = $exportService->getDataForPlatform($plateforme, $campagne, $effectiveComposante, $typeDiplome);
+        $platformTemplate = $exportService->getTemplateForPlatform($plateforme);
+
+        return $this->render('offre_v2/export/preview.html.twig', array_merge($context, [
+            'platform_template' => $platformTemplate,
+            'plateforme' => $plateforme,
+            'composante' => $effectiveComposante,
+            'type_diplome' => $typeDiplome,
+            'is_web_preview' => true,
+        ]));
+    }
+
     #[Route('/offrev2/export-plateforme-zip/{plateforme}', name: 'offre_v2_export_plateforme_zip', methods: ['GET'])]
     #[Route('/offre/composante/{composante}/export-plateforme-zip/{plateforme}', name: 'offre_v2_composante_export_plateforme_zip', methods: ['GET'])]
     public function exportPlateformeZip(

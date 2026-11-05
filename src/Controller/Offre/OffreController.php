@@ -126,6 +126,7 @@ final class OffreController extends BaseController
                     'parcoursAnomalies' => [],
                     'capacite' => 0,
                     'isOuverte' => false,
+                    'plateformesStatuts' => [],
                 ];
             }
 
@@ -143,10 +144,42 @@ final class OffreController extends BaseController
                 $tFormations[$idFormation]['anomalies'] = array_merge($tFormations[$idFormation]['anomalies'], $parcAnoms);
             }
 
-            // Calcul capacité parcours depuis les années préchargées (0 requête)
+            // Calcul capacité parcours depuis les années préchargées et statuts des plateformes (0 requête)
             $parcoursCapacite = 0;
             foreach ($parcoursAnnees as $annee) {
                 $parcoursCapacite += $annee->getCapaciteAccueil();
+
+                $anneeParams = $paramsByAnnee[$annee->getId()] ?? [];
+                foreach ($anneeParams as $param) {
+                    $plat = $param->getPlateforme();
+                    if ($plat === null || !$plat->getActive()) {
+                        continue;
+                    }
+                    $platId = $plat->getId();
+                    if ($platId === null) {
+                        continue;
+                    }
+                    if (!isset($tFormations[$idFormation]['plateformesStatuts'][$platId])) {
+                        $tFormations[$idFormation]['plateformesStatuts'][$platId] = [
+                            'plateforme' => $plat,
+                            'active' => false,
+                            'hasCapaciteInactive' => false,
+                            'capaciteInactive' => 0,
+                        ];
+                    }
+
+                    $capaciteTotale = ($param->getCapaciteGlobale() ?? 0)
+                        + ($param->getCapaciteFi() ?? 0)
+                        + ($param->getCapaciteAlternance() ?? 0)
+                        + ($param->getCapaciteSpecifique() ?? 0);
+
+                    if ($param->isActive()) {
+                        $tFormations[$idFormation]['plateformesStatuts'][$platId]['active'] = true;
+                    } elseif ($capaciteTotale > 0) {
+                        $tFormations[$idFormation]['plateformesStatuts'][$platId]['hasCapaciteInactive'] = true;
+                        $tFormations[$idFormation]['plateformesStatuts'][$platId]['capaciteInactive'] += $capaciteTotale;
+                    }
+                }
             }
 
             // Libellé composante inscription sans lazy-load (0 requête)
@@ -247,6 +280,10 @@ final class OffreController extends BaseController
             $dpeF = $dpeFormationMap[$fId] ?? null;
             $row['dpeFormation'] = $dpeF;
             $row['etatValidation'] = $dpeF?->getEtatValidation() ?? ['brouillon' => 1];
+
+            if (!empty($row['plateformesStatuts'])) {
+                uasort($row['plateformesStatuts'], static fn($a, $b) => strcmp($a['plateforme']->getLibelle() ?? '', $b['plateforme']->getLibelle() ?? ''));
+            }
         }
         unset($row);
 
@@ -350,19 +387,11 @@ final class OffreController extends BaseController
                     }
                 }
                 
-                // 4. Plateforme ID
+                // 4. Plateforme ID : la plateforme doit être active ou avoir une capacité saisie
                 if ($plateforme !== '') {
-                    $hasPlatform = false;
-                    $typeDiplId = $f->getTypeDiplome()?->getId();
-                    if ($typeDiplId && isset($tpaByTypeDiplome[$typeDiplId])) {
-                        foreach ($tpaByTypeDiplome[$typeDiplId] as $tpa) {
-                            if ($tpa->getPlateforme()?->getId() === (int)$plateforme && $tpa->getPlateforme()->getActive()) {
-                                $hasPlatform = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!$hasPlatform) {
+                    $platId = (int)$plateforme;
+                    $pStatut = $row['plateformesStatuts'][$platId] ?? null;
+                    if ($pStatut === null || (!$pStatut['active'] && !$pStatut['hasCapaciteInactive'])) {
                         return false;
                     }
                 }
@@ -560,6 +589,7 @@ final class OffreController extends BaseController
         AnneeRepository                          $anneeRepository,
         DpeParcoursRepository                    $dpeParcoursRepository,
         TypeDiplomePlateformeAdmissionRepository $typeDiplomePlateformeAdmissionRepository,
+        PlateformeAdmissionParametreRepository   $plateformeParamRepository,
         TurboStreamResponseFactory               $turboStream,
     ): Response {
         $ids = array_slice(array_values(array_unique(array_filter(
@@ -605,9 +635,14 @@ final class OffreController extends BaseController
             ];
         }
 
+        $paramsByAnnee = $parcoursAutorises !== []
+            ? $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne)
+            : [];
+
         return $turboStream->stream('offre_v2/_annees_parcours.stream.html.twig', [
             'lignes' => $lignes,
             'tpaByTypeDiplome' => $typeDiplomePlateformeAdmissionRepository->findByCampagneIndexedByTypeDiplome($campagne),
+            'paramsByAnnee' => $paramsByAnnee,
         ]);
     }
 

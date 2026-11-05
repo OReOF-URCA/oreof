@@ -286,26 +286,36 @@
                 </twig:alerte>
             {% endif %}
 
+            {% set defaultCollapseComposante = not composante and is_granted('ROLE_ADMIN') %}
+            {% set defaultCollapseFormation = composante is not null %}
+
             <!-- Table -->
             <div class="overflow-hidden rounded-xl border bg-surface shadow-sm" data-controller="offre-table"
-                 data-offre-table-annees-url-value="{{ path('offre_v2_annees_parcours') }}">
+                 data-offre-table-annees-url-value="{{ path('offre_v2_annees_parcours') }}"
+                 data-offre-table-user-id-value="{{ app.user ? app.user.id : '' }}"
+                 data-offre-table-context-value="{{ composante ? 'dpe_' ~ composante.id : 'admin' }}">
                 <!-- Table Controls -->
                 <div class="flex flex-wrap items-center justify-between gap-4 bg-secondary-50/70 px-4 py-3 border-b border-secondary-200 text-sm dark:border-secondary-700 dark:bg-secondary-800/70">
                     <div class="font-semibold text-secondary-700 dark:text-secondary-100">
                         Offre de formation {% if composante %}— <span class="text-primary font-bold">{{ composante.libelle }}</span>{% endif %}
                     </div>
-                    <div class="flex items-center gap-4 text-xs font-medium">
+                    <div class="flex items-center gap-4 text-xs font-medium flex-wrap">
                         {% if not composante %}
                             <div class="flex items-center gap-1.5 bg-surface border border-secondary-200 rounded-lg p-1 shadow-sm dark:border-secondary-700">
                                 <span class="text-secondary-400 px-1.5 font-normal">Composantes:</span>
-                                <button type="button" data-action="offre-table#expandComposantes" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400">Déplier tout</button>
-                                <button type="button" data-action="offre-table#collapseComposantes" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors">Replier tout</button>
+                                <button type="button" data-action="offre-table#expandComposantes" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400 cursor-pointer">Déplier tout</button>
+                                <button type="button" data-action="offre-table#collapseComposantes" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors cursor-pointer">Replier tout</button>
                             </div>
                         {% endif %}
                         <div class="flex items-center gap-1.5 bg-surface border border-secondary-200 rounded-lg p-1 shadow-sm dark:border-secondary-700">
-                            <span class="text-secondary-400 px-1.5 font-normal">Parcours:</span>
-                            <button type="button" data-action="offre-table#expandParcours" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400">Déplier tout</button>
-                            <button type="button" data-action="offre-table#collapseParcours" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors">Replier tout</button>
+                            <span class="text-secondary-400 px-1.5 font-normal">Mentions:</span>
+                            <button type="button" data-action="offre-table#expandFormations" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400 cursor-pointer">Déplier tout</button>
+                            <button type="button" data-action="offre-table#collapseFormations" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors cursor-pointer">Replier tout</button>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-surface border border-secondary-200 rounded-lg p-1 shadow-sm dark:border-secondary-700">
+                            <span class="text-secondary-400 px-1.5 font-normal">Années:</span>
+                            <button type="button" data-action="offre-table#expandParcours" class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400 cursor-pointer">Déplier tout</button>
+                            <button type="button" data-action="offre-table#collapseParcours" class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors cursor-pointer">Replier tout</button>
                         </div>
                     </div>
                 </div>
@@ -325,14 +335,14 @@
 
                     {% for compName, compGroup in groupedFormations %}
                     {# Un tbody par composante : data-collapsed (posé par offre-table) masque ses lignes enfants. #}
-                    <tbody class="group" data-offre-table-target="composante">
+                    <tbody class="group" data-offre-table-target="composante" data-composante-id="{{ compGroup.composante ? compGroup.composante.id : loop.index }}" {% if defaultCollapseComposante %}data-collapsed{% endif %}>
                         <!-- Group Composante -->
                         <tr class="bg-secondary-200/70 transition-colors border-t border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700/80">
                             <td colspan="3" class="px-4 py-3 font-semibold text-secondary-700 dark:text-secondary-100">
                                 <button type="button"
                                         class="group/toggle flex w-full items-center gap-2 text-left cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-primary-500"
                                         data-action="offre-table#toggleComposante"
-                                        aria-expanded="true">
+                                        aria-expanded="{{ defaultCollapseComposante ? 'false' : 'true' }}">
                                     <svg class="h-4 w-4 text-secondary-500 transition-transform duration-200 group-aria-expanded/toggle:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
                                     </svg>
@@ -346,20 +356,45 @@
                             <td class="px-4 py-3">&nbsp;</td>
                             <td class="px-4 py-3 text-right font-bold text-secondary-800 dark:text-secondary-100">{{ compGroup.capacite }}</td>
                             <td class="px-4 py-3">
+                                {% set canManageComp = compGroup.composante and (is_granted('ROLE_ADMIN') or is_granted('ROLE_SES') or is_granted('MANAGE', {route: 'app_composante', subject: compGroup.composante})) %}
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <twig:Badge variant="{{ compGroup.nbPv == compGroup.nbFormations and compGroup.nbFormations > 0 ? 'success' : (compGroup.nbPv > 0 ? 'warning' : 'secondary') }}"
                                                 label="{{ compGroup.nbPv }}/{{ compGroup.nbFormations }} PV"
                                                 icon="ph:file"
+                                                href="{{ canManageComp ? path('offre_v2_composante_documents_modal', { composante: compGroup.composante.id }) : null }}"
+                                                data-turbo="{{ canManageComp ? 'true' : null }}"
+                                                data-turbo-stream="{{ canManageComp ? 'true' : null }}"
+                                                data-action="{{ canManageComp ? 'click->modalturbo#open' : null }}"
+                                                title="{{ canManageComp ? 'Gérer les PV de la composante' : null }}"
                                     />
                                     <twig:Badge variant="{{ compGroup.nbNote == compGroup.nbFormations and compGroup.nbFormations > 0 ? 'primary' : (compGroup.nbNote > 0 ? 'warning' : 'secondary') }}"
                                                 label="{{ compGroup.nbNote }}/{{ compGroup.nbFormations }} Notes"
                                                 icon="ph:file-pdf"
+                                                href="{{ canManageComp ? path('offre_v2_composante_documents_modal', { composante: compGroup.composante.id }) : null }}"
+                                                data-turbo="{{ canManageComp ? 'true' : null }}"
+                                                data-turbo-stream="{{ canManageComp ? 'true' : null }}"
+                                                data-action="{{ canManageComp ? 'click->modalturbo#open' : null }}"
+                                                title="{{ canManageComp ? 'Gérer les notes explicatives de la composante' : null }}"
                                     />
                                 </div>
                             </td>
                             <td class="px-4 py-3 text-right">
-                                {% if compGroup.composante and compGroup.transitions|length > 0 %}
-                                    <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                    {% if canManageComp %}
+                                        <twig:Button size="sm"
+                                                     variant="secondary"
+                                                     icon="ph:file-plus"
+                                                     label="PV / Notes"
+                                                     href="{{ path('offre_v2_composante_documents_modal', { composante: compGroup.composante.id }) }}"
+                                                     data-turbo="true"
+                                                     data-turbo-stream="true"
+                                                     data-turbo-frame="_top"
+                                                     data-action="click->modalturbo#open"
+                                                     title="Déposer ou modifier les PV et notes explicatives de la composante"
+                                        />
+                                    {% endif %}
+
+                                    {% if compGroup.composante and compGroup.transitions|length > 0 %}
                                         {% for transition in compGroup.transitions %}
                                             <twig:Button size="sm"
                                                          :soft="false"
@@ -377,8 +412,8 @@
                                                          title="{{ transition.metadata.label|default(transition.name)|trans({}, 'process') }}"
                                              />
                                         {% endfor %}
-                                    </div>
-                                {% endif %}
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
 
@@ -389,7 +424,21 @@
                             <tr class="bg-secondary-100/80 hover:bg-secondary-100 transition-all duration-150 border-t border-secondary-200 group-data-[collapsed]:hidden dark:bg-secondary-800/80 dark:hover:bg-secondary-800 dark:border-secondary-700">
                                 <td class="px-4 py-3">
                                     <div class="font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-1.5 flex-wrap">
-                                        <span>{{ formation.display }}</span>
+                                        {% if forma.parcoursData|length > 0 %}
+                                            <button type="button"
+                                                    class="group/formation-toggle inline-flex items-center gap-2 text-left cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-primary-500 font-semibold text-secondary-900 dark:text-secondary-100"
+                                                    data-action="offre-table#toggleFormation"
+                                                    data-formation-id="{{ formation.id }}"
+                                                    aria-expanded="{{ defaultCollapseFormation ? 'false' : 'true' }}">
+                                                <svg class="h-4 w-4 text-secondary-500 transition-transform duration-200 group-aria-expanded/formation-toggle:rotate-90 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                                                </svg>
+                                                <span>{{ formation.display }}</span>
+                                                <span class="text-xs font-normal text-secondary-500">({{ forma.parcoursData|length }} parcours)</span>
+                                            </button>
+                                        {% else %}
+                                            <span>{{ formation.display }}</span>
+                                        {% endif %}
                                         {% if forma.anomalies|length > 0 %}
                                             <a href="{{ path('offre_v2_formation_synthese_modal', { formation: formation.id }) }}"
                                                data-turbo="true"
@@ -427,15 +476,22 @@
                                     <twig:Badge variant="{{ formationOuverte ? 'success' : 'danger' }}" label="{{ formationOuverte ? 'Oui' : 'Non' }}" />
                                 </td>
                                 <td class="px-4 py-3">
-                                    <div class="flex gap-1 flex-wrap">
-                                        {% set typeDiplId = formation.typeDiplome ? formation.typeDiplome.id : null %}
-                                        {% if typeDiplId and tpaByTypeDiplome[typeDiplId] is defined %}
-                                            {% for tpa in tpaByTypeDiplome[typeDiplId] %}
-                                                {% if tpa.plateforme and tpa.plateforme.active %}
-                                                   <twig:Badge :variant="tpa.plateforme.color" :label="tpa.plateforme.code" />
-                                                {% endif %}
-                                            {% endfor %}
-                                        {% endif %}
+                                    <div class="flex gap-1 flex-wrap items-center">
+                                        {% for pStatut in forma.plateformesStatuts|default([]) %}
+                                            {% set plat = pStatut.plateforme %}
+                                            {% if pStatut.active %}
+                                                <twig:Badge :variant="plat.color|default('primary')"
+                                                            :label="plat.code"
+                                                            title="{{ plat.libelle }} : active sur la formation"
+                                                />
+                                            {% elseif pStatut.hasCapaciteInactive %}
+                                                <twig:Badge variant="warning"
+                                                            icon="ph:warning"
+                                                            :label="plat.code"
+                                                            title="{{ plat.libelle }} : plateforme inactive mais capacité renseignée ({{ pStatut.capaciteInactive }})"
+                                                />
+                                            {% endif %}
+                                        {% endfor %}
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 text-right font-bold text-secondary-900 dark:text-secondary-100">{{ forma.capacite }}</td>
@@ -543,7 +599,9 @@
                                 {% set isParcoursOuvert = pd.isOuvert %}
                                 {% set dpeParc = pd.dpeParcours %}
                                 {# Lignes d'années chargées à la demande (offre-table → offre_v2_annees_parcours), insérées après cette ligne. #}
-                                <tr id="offre-parcours-{{ parcours.id }}" class="bg-surface hover:bg-secondary-50/70 transition-colors group-data-[collapsed]:hidden dark:bg-surface dark:hover:bg-secondary-800/40">
+                                <tr id="offre-parcours-{{ parcours.id }}"
+                                    data-formation-parcours="{{ formation.id }}"
+                                    class="bg-surface hover:bg-secondary-50/70 transition-colors group-data-[collapsed]:hidden dark:bg-surface dark:hover:bg-secondary-800/40 {{ defaultCollapseFormation ? 'hidden' : '' }}">
                                     <td>&nbsp;</td>
                                     <td class="px-4 py-3 text-secondary-500 font-medium">
                                         {{ pd.composanteLibelle }}

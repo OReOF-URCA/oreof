@@ -20,15 +20,26 @@
             <twig:Badge variant="{{ annee.isOuvert ? 'success' : 'danger' }}" label="{{ annee.isOuvert ? 'Oui' : 'Non' }}" />
         </td>
         <td class="px-4 py-3">
-            <div class="flex gap-1 flex-wrap">
-                {% set typeDiplId = formation.typeDiplome ? formation.typeDiplome.id : null %}
-                {% if typeDiplId and tpaByTypeDiplome[typeDiplId] is defined %}
-                    {% for tpa in tpaByTypeDiplome[typeDiplId] %}
-                        {% if tpa.plateforme and tpa.plateforme.active and tpa.annees and annee.ordre in tpa.annees %}
-                            <twig:Badge :variant="tpa.plateforme.color" :label="tpa.plateforme.code" />
+            <div class="flex gap-1 flex-wrap items-center">
+                {% set anneeParams = paramsByAnnee[annee.id]|default([]) %}
+                {% for param in anneeParams %}
+                    {% set plat = param.plateforme %}
+                    {% if plat and plat.active %}
+                        {% set capTotale = (param.capaciteGlobale|default(0)) + (param.capaciteFi|default(0)) + (param.capaciteAlternance|default(0)) + (param.capaciteSpecifique|default(0)) %}
+                        {% if param.active %}
+                            <twig:Badge :variant="plat.color|default('primary')"
+                                        :label="plat.code"
+                                        title="{{ plat.libelle }} : active pour cette année"
+                            />
+                        {% elseif capTotale > 0 %}
+                            <twig:Badge variant="warning"
+                                        icon="ph:warning"
+                                        :label="plat.code"
+                                        title="{{ plat.libelle }} : plateforme inactive mais capacité renseignée ({{ capTotale }})"
+                            />
                         {% endif %}
-                    {% endfor %}
-                {% endif %}
+                    {% endif %}
+                {% endfor %}
             </div>
         </td>
         <td class="px-4 py-3 text-right font-medium text-secondary-700 dark:text-secondary-100">{{ annee.capaciteAccueil|default(0) }}</td>
