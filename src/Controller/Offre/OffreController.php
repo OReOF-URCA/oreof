@@ -221,51 +221,47 @@ final class OffreController extends BaseController
             }
         }
 
-        // Calcul capacité de chaque formation et association des statuts documents
+        // Calcul capacité de chaque formation (calcul en mémoire depuis les données préchargées, 0 requête supplémentaire)
         foreach ($tFormations as $fId => &$row) {
-            $formationCapacite = $row['formation']->getCapaciteAccueil();
-            if ($formationCapacite <= 0) {
-                // Calcul en mémoire depuis les données préchargées (0 requête supplémentaire)
-                $tcAnneesCounted = [];
-                $portailsCounted = [];
-                $formationCapacite = 0;
-                $formation = $row['formation'];
-                foreach ($row['parcoursData'] as $pd) {
-                    if (!$pd['isOuvert']) {
+            $tcAnneesCounted = [];
+            $portailsCounted = [];
+            $formationCapacite = 0;
+            $formation = $row['formation'];
+            foreach ($row['parcoursData'] as $pd) {
+                if (!$pd['isOuvert']) {
+                    continue;
+                }
+                $parcours = $pd['parcours'];
+                foreach ($pd['annees'] as $annee) {
+                    if (!$annee->isOuvert()) {
                         continue;
                     }
-                    $parcours = $pd['parcours'];
-                    foreach ($pd['annees'] as $annee) {
-                        if (!$annee->isOuvert()) {
-                            continue;
-                        }
-                        $ordre = $annee->getOrdre();
-                        if ($ordre === null) {
-                            continue;
-                        }
-                        $portail = $annee->getPortail();
-                        if ($portail !== null && $portail->getId() !== null) {
-                            if (!isset($portailsCounted[$portail->getId()])) {
-                                $formationCapacite += $annee->getCapaciteAccueil();
-                                $portailsCounted[$portail->getId()] = true;
-                            }
-                            continue;
-                        }
-                        $tc = $formation->getTroncCommunForParcours($parcours, $ordre);
-                        if ($tc !== null) {
-                            $tcKey = $tc['id'] . '_' . $ordre;
-                            if (!isset($tcAnneesCounted[$tcKey])) {
-                                $formationCapacite += $annee->getCapaciteAccueil();
-                                $tcAnneesCounted[$tcKey] = true;
-                            }
-                        } elseif ($formation->isAnneeTroncCommun($ordre, $parcours)) {
-                            if (!isset($tcAnneesCounted[$ordre])) {
-                                $formationCapacite += $annee->getCapaciteAccueil();
-                                $tcAnneesCounted[$ordre] = true;
-                            }
-                        } else {
+                    $ordre = $annee->getOrdre();
+                    if ($ordre === null) {
+                        continue;
+                    }
+                    $portail = $annee->getPortail();
+                    if ($portail !== null && $portail->getId() !== null) {
+                        if (!isset($portailsCounted[$portail->getId()])) {
                             $formationCapacite += $annee->getCapaciteAccueil();
+                            $portailsCounted[$portail->getId()] = true;
                         }
+                        continue;
+                    }
+                    $tc = $formation->getTroncCommunForParcours($parcours, $ordre);
+                    if ($tc !== null) {
+                        $tcKey = $tc['id'] . '_' . $ordre;
+                        if (!isset($tcAnneesCounted[$tcKey])) {
+                            $formationCapacite += $annee->getCapaciteAccueil();
+                            $tcAnneesCounted[$tcKey] = true;
+                        }
+                    } elseif ($formation->isAnneeTroncCommun($ordre, $parcours)) {
+                        if (!isset($tcAnneesCounted[$ordre])) {
+                            $formationCapacite += $annee->getCapaciteAccueil();
+                            $tcAnneesCounted[$ordre] = true;
+                        }
+                    } else {
+                        $formationCapacite += $annee->getCapaciteAccueil();
                     }
                 }
             }
@@ -736,10 +732,7 @@ final class OffreController extends BaseController
             ];
         }
 
-        $formationCapacite = $formation->getCapaciteAccueil();
-        if ($formationCapacite <= 0) {
-            $formationCapacite = $formation->getCapacite();
-        }
+        $formationCapacite = $formation->getCapacite($campagne);
 
         $pvDocs = [];
         $noteDocs = [];

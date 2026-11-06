@@ -1105,7 +1105,7 @@ final class OffreConfigurerController extends BaseController
             ];
         }
 
-        $tabStatistiques['capacite'] = $formation->getCapacite();
+        $tabStatistiques['capacite'] = $formation->getCapacite($campagne);
         
         return [
             'tabStatistiques' => $tabStatistiques,

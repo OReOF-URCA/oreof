@@ -319,10 +319,6 @@ class Parcours
     #[ORM\OrderBy(['ordre' => 'ASC'])]
     private Collection $annees;
 
-    #[Groups('parcours_json_versioning')]
-    #[ORM\Column]
-    private ?int $capaciteAccueil = 0;
-
     #[ORM\Column(nullable: true)]
     private ?float $dureeParcours = null;
 
@@ -1935,15 +1931,31 @@ class Parcours
         return $this;
     }
 
-    public function getCapaciteAccueil(): ?int
+    public function getCapacite(): int
     {
-        return $this->capaciteAccueil ?? 0;
+        $capacite = 0;
+        foreach ($this->getAnnees() as $annee) {
+            if ($annee->isOuvert()) {
+                $capacite += $annee->getCapaciteAccueil();
+            }
+        }
+
+        return $capacite;
     }
 
+    /**
+     * @deprecated La capacité d'un parcours est calculée dynamiquement depuis ses années ouvertes.
+     */
+    public function getCapaciteAccueil(): int
+    {
+        return $this->getCapacite();
+    }
+
+    /**
+     * @deprecated La capacité d'accueil ne se configure plus au niveau du parcours.
+     */
     public function setCapaciteAccueil(int $capaciteAccueil): static
     {
-        $this->capaciteAccueil = $capaciteAccueil;
-
         return $this;
     }
 

@@ -343,5 +343,90 @@ final class FormationMutualisationTest extends TestCase
         self::assertFalse($formation->isAnneeTroncCommun(1));
         self::assertFalse($formation->isAnneeTroncCommun(1, $p1));
     }
+
+    public function testCapaciteAndCapaciteAccueilComputedFromParcours(): void
+    {
+        $formation = new Formation();
+        $this->setId($formation, 1);
+        // Ancien setter sans effet
+        $formation->setCapaciteAccueil(304);
+
+        $p1 = new Parcours($formation);
+        $this->setId($p1, 10);
+        $p2 = new Parcours($formation);
+        $this->setId($p2, 20);
+        $formation->addParcour($p1);
+        $formation->addParcour($p2);
+
+        // Deux parcours en tronc commun L1 (ordre 1) à 300 places
+        $formation->setTroncsCommuns([
+            [
+                'id' => 'tc_l1',
+                'nom' => 'Tronc commun L1',
+                'annees' => [1],
+                'parcours' => [10, 20],
+            ],
+        ]);
+
+        $a1 = new Annee();
+        $this->setId($a1, 101);
+        $a1->setOrdre(1);
+        $a1->setCapaciteAccueil(300);
+        $a1->setIsOuvert(true);
+        $a1->setParcours($p1);
+        $p1->addAnnee($a1);
+
+        $a2 = new Annee();
+        $this->setId($a2, 102);
+        $a2->setOrdre(1);
+        $a2->setCapaciteAccueil(300);
+        $a2->setIsOuvert(true);
+        $a2->setParcours($p2);
+        $p2->addAnnee($a2);
+
+        // La capacité de la formation doit être 300 (dédoublonnée), et les alias doivent renvoyer 300
+        self::assertSame(300, $formation->getCapacite());
+        self::assertSame(300, $formation->getCapaciteAccueil());
+        self::assertSame(300, $formation->getCapaciteCalculee());
+        self::assertSame(300, $p1->getCapacite());
+        self::assertSame(300, $p1->getCapaciteAccueil());
+        self::assertSame(300, $p2->getCapacite());
+        self::assertSame(300, $p2->getCapaciteAccueil());
+    }
+
+    public function testCapaciteCalculeeLegacyTroncCommunDeduplication(): void
+    {
+        $formation = new Formation();
+        $this->setId($formation, 1);
+
+        $p1 = new Parcours($formation);
+        $this->setId($p1, 10);
+        $p2 = new Parcours($formation);
+        $this->setId($p2, 20);
+        $formation->addParcour($p1);
+        $formation->addParcour($p2);
+
+        // Configuration historique uniquement via annees_tronc_commun
+        $formation->setStructureSemestres(['annees_tronc_commun' => [1]]);
+
+        $a1 = new Annee();
+        $this->setId($a1, 101);
+        $a1->setOrdre(1);
+        $a1->setCapaciteAccueil(250);
+        $a1->setIsOuvert(true);
+        $a1->setParcours($p1);
+        $p1->addAnnee($a1);
+
+        $a2 = new Annee();
+        $this->setId($a2, 102);
+        $a2->setOrdre(1);
+        $a2->setCapaciteAccueil(250);
+        $a2->setIsOuvert(true);
+        $a2->setParcours($p2);
+        $p2->addAnnee($a2);
+
+        // L1 en tronc commun historique -> dédoublonné à 250
+        self::assertSame(250, $formation->getCapacite());
+    }
 }
 

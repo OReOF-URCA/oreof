@@ -1243,7 +1243,7 @@ final class OffreAnnexesExportService
             
             if (empty($parAnnees)) {
                 // If parcours has no separate annee entities
-                $capaciteN = $formation->getCapaciteAccueil();
+                $capaciteN = $formation->getCapacite($campagne);
 
                 // N-1 Data
                 $n1 = $this->resolveN1Data($parcours, 1, $ecPlatform, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee);
@@ -2108,7 +2108,7 @@ final class OffreAnnexesExportService
 
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
             if (empty($parAnnees)) {
-                $capaciteGlobaleN = $formation->getCapaciteAccueil();
+                $capaciteGlobaleN = $formation->getCapacite($campagne);
 
                 // N-1 Data
                 $n1 = $this->resolveN1Data($parcours, 1, $plateforme, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee);

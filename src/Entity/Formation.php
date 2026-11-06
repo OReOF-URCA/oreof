@@ -225,9 +225,6 @@ class Formation
     #[ORM\OneToMany(mappedBy: 'formation', targetEntity: DpeDemande::class, cascade: ['persist'])]
     private Collection $dpeDemandes;
 
-    #[ORM\Column]
-    private ?int $capaciteAccueil = 0;
-
     /**
      * @var Collection<int, ChangeParcours>
      */
@@ -1009,14 +1006,15 @@ class Formation
         return $ordres;
     }
 
-    public function getCapaciteCalculee(): int
+    public function getCapaciteCalculee(?CampagneCollecte $campagne = null): int
     {
         $capacite = 0;
         $tcAnneesCounted = [];
         $portailsCounted = [];
 
         foreach ($this->getParcours() as $parcours) {
-            if (!$parcours->isOuvert()) {
+            $isOuvert = $campagne !== null ? $parcours->isOuvertPourCampagne($campagne) : $parcours->isOuvert();
+            if (!$isOuvert) {
                 continue;
             }
             foreach ($parcours->getAnnees() as $annee) {
@@ -1040,7 +1038,7 @@ class Formation
                     continue;
                 }
 
-                // 2. Dédoublonnage par Tronc Commun
+                // 2. Dédoublonnage par Tronc Commun (personnalisé ou rétrocompatible)
                 $tc = $this->getTroncCommunForParcours($parcours, $ordre);
                 if ($tc !== null) {
                     $tcKey = $tc['id'] . '_' . $ordre;
@@ -1048,6 +1046,13 @@ class Formation
                         continue;
                     }
                     $tcAnneesCounted[$tcKey] = true;
+                    $capacite += $annee->getCapaciteAccueil();
+                    continue;
+                } elseif ($this->isAnneeTroncCommun($ordre, $parcours)) {
+                    if (isset($tcAnneesCounted[$ordre])) {
+                        continue;
+                    }
+                    $tcAnneesCounted[$ordre] = true;
                     $capacite += $annee->getCapaciteAccueil();
                     continue;
                 }
@@ -1655,26 +1660,25 @@ class Formation
         return $this;
     }
 
-    public function getCapaciteAccueil(): ?int
+    /**
+     * @deprecated La capacité d'une formation est calculée dynamiquement depuis ses parcours/années.
+     */
+    public function getCapaciteAccueil(): int
     {
-        return $this->capaciteAccueil ?? 0;
+        return $this->getCapacite();
     }
 
+    /**
+     * @deprecated La capacité d'accueil ne se configure plus au niveau de la mention.
+     */
     public function setCapaciteAccueil(int $capaciteAccueil): static
     {
-        $this->capaciteAccueil = $capaciteAccueil;
-
         return $this;
     }
 
-    public function getCapacite(): int
+    public function getCapacite(?CampagneCollecte $campagne = null): int
     {
-        // si capacite accueil définie sur parcours, on retour cette valeur, sinon somme des capacités des parcours sans doublon de tronc commun
-        if ($this->capaciteAccueil !== null && $this->capaciteAccueil > 0) {
-            return $this->capaciteAccueil;
-        }
-
-        return $this->getCapaciteCalculee();
+        return $this->getCapaciteCalculee($campagne);
     }
 
     /**
