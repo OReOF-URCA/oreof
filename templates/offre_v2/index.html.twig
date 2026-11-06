@@ -465,10 +465,10 @@
                                                 {% set isAll = (totalParcours > 0 and (tc.parcours|default([]))|length >= totalParcours) %}
                                                 {% set nbParc = (tc.parcours|default([]))|length %}
                                                 <span class="inline-flex items-center gap-1 rounded bg-primary-50 px-1.5 py-0.5 text-[11px] font-semibold text-primary-700 border border-primary-200/80 dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
-                                                      title="{{ tc.nom }} : {% if isAll %}Tous les parcours ({{ totalParcours }}){% else %}{{ nbParc }}/{{ totalParcours }} parcours{% endif %} sur l'Année {{ (tc.annees|default([]))|join(', ') }}"
+                                                      title="{{ tc.nom }} : {% if isAll %}Tous les parcours ({{ totalParcours }}){% else %}{{ nbParc }}/{{ totalParcours }} parcours{% endif %} sur {{ (tc.annees|default([]))|length > 1 ? 'les Années' : 'l\'Année' }} {{ (tc.annees|default([]))|join(', ') }}"
                                                 >
                                                     <twig:UX:Icon name="ph:users-three-bold" class="h-3 w-3" />
-                                                    <span>{{ tc.nom }} (Année {{ (tc.annees|default([]))|join(', ') }}{% if not isAll %} · {{ nbParc }}/{{ totalParcours }} parc.{% endif %})</span>
+                                                    <span>{{ tc.nom }} (Année{{ (tc.annees|default([]))|length > 1 ? 's' : '' }} {{ (tc.annees|default([]))|join(', ') }}{% if not isAll %} · {{ nbParc }}/{{ totalParcours }} parc.{% endif %})</span>
                                                 </span>
                                             {% endfor %}
                                         {% endif %}

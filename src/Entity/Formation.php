@@ -727,14 +727,33 @@ class Formation
      */
     public function getTroncsCommuns(): array
     {
+        $validOrdres = $this->getAnneesOrdres();
         $struct = $this->getStructureSemestres();
         if (array_key_exists('troncs_communs', $struct)) {
-            return is_array($struct['troncs_communs']) ? $struct['troncs_communs'] : [];
+            $rawTcs = is_array($struct['troncs_communs']) ? $struct['troncs_communs'] : [];
+            $filteredTcs = [];
+            foreach ($rawTcs as $tc) {
+                if (!is_array($tc)) {
+                    continue;
+                }
+                $tAnnees = array_values(array_filter(
+                    array_map('intval', $tc['annees'] ?? []),
+                    fn(int $a) => in_array($a, $validOrdres, true)
+                ));
+                if (!empty($tAnnees)) {
+                    $tc['annees'] = $tAnnees;
+                    $filteredTcs[] = $tc;
+                }
+            }
+            return $filteredTcs;
         }
 
         // Rétrocompatibilité : construction automatique depuis annees_tronc_commun
         // UNIQUEMENT si la clé moderne 'troncs_communs' n'a jamais été initialisée sur la formation
-        $annees = $this->getAnneesTroncCommun();
+        $annees = array_values(array_filter(
+            $this->getAnneesTroncCommun(),
+            fn(int $a) => in_array($a, $validOrdres, true)
+        ));
         if (!empty($annees)) {
             $allParcoursIds = [];
             foreach ($this->getParcours() as $p) {
@@ -762,6 +781,7 @@ class Formation
      */
     public function setTroncsCommuns(array $troncsCommuns): self
     {
+        $validOrdres = $this->getAnneesOrdres();
         $struct = $this->getStructureSemestres();
         $cleaned = [];
         $allAnnees = [];
@@ -770,7 +790,10 @@ class Formation
             if (!is_array($tc)) {
                 continue;
             }
-            $annees = array_values(array_unique(array_map('intval', $tc['annees'] ?? [])));
+            $annees = array_values(array_unique(array_filter(
+                array_map('intval', $tc['annees'] ?? []),
+                fn(int $a) => in_array($a, $validOrdres, true)
+            )));
             $parcours = array_values(array_unique(array_map('intval', $tc['parcours'] ?? [])));
             if (empty($annees) || empty($parcours)) {
                 continue;
@@ -932,13 +955,14 @@ class Formation
 
     public function getAnneesTroncCommun(): array
     {
+        $validOrdres = $this->getAnneesOrdres();
         $struct = $this->getStructureSemestres();
         if (array_key_exists('troncs_communs', $struct) && is_array($struct['troncs_communs'])) {
             $res = [];
             foreach ($struct['troncs_communs'] as $tc) {
                 foreach ($tc['annees'] ?? [] as $a) {
                     $anneeNum = (int)$a;
-                    if ($anneeNum > 0 && !in_array($anneeNum, $res, true)) {
+                    if ($anneeNum > 0 && in_array($anneeNum, $validOrdres, true) && !in_array($anneeNum, $res, true)) {
                         $res[] = $anneeNum;
                     }
                 }
@@ -964,6 +988,7 @@ class Formation
                 }
             }
         }
+        $res = array_values(array_filter($res, fn(int $a) => in_array($a, $validOrdres, true)));
         sort($res);
 
         return $res;

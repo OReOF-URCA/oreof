@@ -192,7 +192,11 @@ final class OffreConfigurerController extends BaseController
                     if (!is_array($raw)) {
                         continue;
                     }
-                    $tAnnees = array_values(array_unique(array_map('intval', $raw['annees'] ?? [])));
+                    $validOrdres = $formation->getAnneesOrdres();
+                    $tAnnees = array_values(array_unique(array_filter(
+                        array_map('intval', $raw['annees'] ?? []),
+                        fn(int $a) => in_array($a, $validOrdres, true)
+                    )));
                     $tParcours = array_values(array_unique(array_map('intval', $raw['parcours'] ?? [])));
                     $nom = !empty($raw['nom']) ? trim((string)$raw['nom']) : 'Tronc commun ' . (count($cleanedTcs) + 1);
                     $cleanedTcs[] = [
