@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0](https://github.com/OReOF-URCA/oreof/compare/v2.5.0...v2.6.0) (2026-11-06)
+
+
+### Features
+
+* actions depuis offre ([95bba59](https://github.com/OReOF-URCA/oreof/commit/95bba59b234a08541d48e95ca21cef06ddc2ae52))
+* add modal de vérification pour la partie offre ([42f7523](https://github.com/OReOF-URCA/oreof/commit/42f7523bca6b02091cc1d77db18821a9dcfa962e))
+* affichage compétence en BUT + synchro ([3ca9800](https://github.com/OReOF-URCA/oreof/commit/3ca9800dc33d60c8de02886be97c45ec8781d388))
+* ajout d'un user depuis ldap ([65f005d](https://github.com/OReOF-URCA/oreof/commit/65f005da8b474845e6a0daf2ab3559423de0b2ee))
+* Amélioration partie portail/tronc commun ([a2a9546](https://github.com/OReOF-URCA/oreof/commit/a2a9546fc0f397e28f25751d3476da2cc5b39bc9))
+* badge portail + somme + global sur plateforme ([8660766](https://github.com/OReOF-URCA/oreof/commit/86607667dd7d4834756832bac204397d80404f67))
+* commande création année ([5215e0d](https://github.com/OReOF-URCA/oreof/commit/5215e0db7780b2afaf57c4ef0717fb5f461441fd))
+* comparaison + corrections statistiques ([d42914e](https://github.com/OReOF-URCA/oreof/commit/d42914ecf5d1921e57a54a330a946466811925cd))
+* export avec ville ([20df466](https://github.com/OReOF-URCA/oreof/commit/20df4661bfdec3a9b131914a027eb0abc81568bd))
+* export offre, amélioration des exports ([b492290](https://github.com/OReOF-URCA/oreof/commit/b492290f8e64eedb71c13990644cfaedca710496))
+* modification PV ([c744d4c](https://github.com/OReOF-URCA/oreof/commit/c744d4c172f91e91195d29ea7bbb28d3cd4ceda9))
+* parties conseils ([b10230d](https://github.com/OReOF-URCA/oreof/commit/b10230dc2ab6b3dc2c32d4b8c90c5aa08b6be556))
+* sauvegarde des filtres ([11ebe4c](https://github.com/OReOF-URCA/oreof/commit/11ebe4c2e24a88a22b7787df04834317f87c91b4))
+* synchro BUT avec années ([87a290a](https://github.com/OReOF-URCA/oreof/commit/87a290ae9293d0f45be06785d93ece8d1c6294ff))
+
+
+### Bug Fixes
+
+* affichage des noms de TC ([a0857bb](https://github.com/OReOF-URCA/oreof/commit/a0857bb1dbe0508370b0f13403280784aa8c7608))
+* calcul semestre BUT ([cba7f84](https://github.com/OReOF-URCA/oreof/commit/cba7f844c37c52df5ca4bb0dc285b7b46ae19dd3))
+* clés dans le json, v2 ([c8059cc](https://github.com/OReOF-URCA/oreof/commit/c8059ccf135f13fc444dd5e50f554fdf7f4bf659))
+* correction texte ([951db9f](https://github.com/OReOF-URCA/oreof/commit/951db9f80bf50bf8354d83441e89efe3d46c170b))
+* delete avec ancienne modal bootstrap retirée ([4a6b22b](https://github.com/OReOF-URCA/oreof/commit/4a6b22b74ab3980e30ae8e345dd55d1dab32e3ef))
+* export des portails ([9f20ba2](https://github.com/OReOF-URCA/oreof/commit/9f20ba2af5be520a442c605592d576e9aa4f9110))
+* Filtrage année 1 inutiles/incohérentes ([1b919aa](https://github.com/OReOF-URCA/oreof/commit/1b919aa5fd86d8af8ade823762d6123d35cfc37a))
+* icone sur les sections ([3cc5a47](https://github.com/OReOF-URCA/oreof/commit/3cc5a47296c584b6c86f4bbb4e7f520fcfccab2f))
+* import BUT, optimisations ([26a226c](https://github.com/OReOF-URCA/oreof/commit/26a226c4367a7821d52371980d9abbc7dc2ca9fb))
+* saisie impossible avec reload dom ([863661e](https://github.com/OReOF-URCA/oreof/commit/863661e81b54b5f8063d51087570f20e9dc7d569))
+* suppression capacité accueil inutile sur formation/parcours ([734b12f](https://github.com/OReOF-URCA/oreof/commit/734b12f1d0ffada0c3e9c83672662718ec8376b5))
+* synchronisation BUT et isolation maquettes ([66aa33e](https://github.com/OReOF-URCA/oreof/commit/66aa33e337842e1213203704a15a817cfc4d40c8))
+* total capacité des portails ([a030be1](https://github.com/OReOF-URCA/oreof/commit/a030be12c1376752dd1366f7ea316816f712b8c7))
+* troncs communs sur index ([aeef85a](https://github.com/OReOF-URCA/oreof/commit/aeef85ae1166d92cd785c1652fdacb67fd3c20e8))
+
 ## [2.5.0](https://github.com/OReOF-URCA/oreof/compare/v2.4.1...v2.5.0) (2026-10-30)
 
 
