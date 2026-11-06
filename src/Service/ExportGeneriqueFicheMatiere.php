@@ -368,6 +368,13 @@ class ExportGeneriqueFicheMatiere {
                     'value' => $ficheMatiere?->getLanguesSupportsArray() ?? [],
                 ];
                 break;
+            case 'fmObjectifs':
+                return [
+                    'type' => 'longtext',
+                    'libelle' => 'Objectifs',
+                    'value' => $ficheMatiere?->getObjectifs() ?? ""
+                ];
+                break;
         }
     }
 
@@ -383,7 +390,8 @@ class ExportGeneriqueFicheMatiere {
             'fmFormation' => 8,
             'fmLanguesDispensees' => 9,
             'fmLanguesSupports' => 10,
-            'fmDescription' => 11
+            'fmDescription' => 11,
+            'fmObjectifs' => 12
         ];
     }
 
