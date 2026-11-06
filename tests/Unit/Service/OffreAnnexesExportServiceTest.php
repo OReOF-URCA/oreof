@@ -12,6 +12,7 @@ use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\PlateformeAdmission;
 use App\Entity\PlateformeAdmissionParametre;
+use App\Entity\Portail;
 use App\Entity\TypeDiplome;
 use App\Entity\Ville;
 use App\Enums\TypeModificationDpeEnum;
@@ -456,6 +457,126 @@ final class OffreAnnexesExportServiceTest extends TestCase
         self::assertTrue($status['diff_annee_ouverte']->isDifferent());
         self::assertNull($status['diff_annee_ouverte']->original);
         self::assertSame('OUI', $status['diff_annee_ouverte']->new);
+    }
+
+    public function testParcoursupPortailMemeFormationAfficheLignePortailSansParcoursEtComposante(): void
+    {
+        $campagne = new CampagneCollecte();
+        $psup = $this->psup();
+        $ufrSciences = (new Composante())->setSigle('UFR Sciences');
+        $licence = $this->licence(1, 'Informatique');
+        $licence->setComposantePorteuse($ufrSciences);
+
+        $portail = (new Portail())->setLibelle('Portail Math-Info')->setCapaciteAccueil(150);
+        $this->setId($portail, 99);
+
+        [$dpe1, $annee1] = $this->parcoursL1($licence, 10, 'Parcours Info', 80);
+        $annee1->setPortail($portail);
+        [$dpe2, $annee2] = $this->parcoursL1($licence, 11, 'Parcours Math-Info', 70);
+        $annee2->setPortail($portail);
+
+        $dpes = [$dpe1, $dpe2];
+        $annees = [10 => [$annee1], 11 => [$annee2]];
+
+        $rows = $this->buildParcoursupRows($dpes, $annees, [], $psup, $campagne);
+
+        self::assertCount(1, $rows);
+        self::assertSame('UFR Sciences', $rows[0]['composante']);
+        self::assertSame(1, $rows[0]['niveau']);
+        self::assertSame('Portail Math-Info', (string) $rows[0]['mention']);
+        self::assertSame('', (string) $rows[0]['parcours']);
+        self::assertSame(150, $rows[0]['capacite_n']);
+    }
+
+    public function testParcoursupPortailInterFormationsComposantesDifferentesLaisseComposanteVide(): void
+    {
+        $campagne = new CampagneCollecte();
+        $psup = $this->psup();
+
+        $ufrSciences = (new Composante())->setSigle('UFR Sciences');
+        $ufrLettres = (new Composante())->setSigle('UFR Lettres');
+
+        $licenceSciences = $this->licence(1, 'Sciences et Humanités');
+        $licenceSciences->setComposantePorteuse($ufrSciences);
+
+        $licenceLettres = $this->licence(2, 'Humanités');
+        $licenceLettres->setComposantePorteuse($ufrLettres);
+
+        $portail = (new Portail())->setLibelle('Portail Sciences & Humanités');
+        $this->setId($portail, 101);
+
+        [$dpe1, $annee1] = $this->parcoursL1($licenceSciences, 20, 'Parcours Sciences', 60);
+        $annee1->setPortail($portail);
+
+        [$dpe2, $annee2] = $this->parcoursL1($licenceLettres, 21, 'Parcours Lettres', 40);
+        $annee2->setPortail($portail);
+
+        // Parcours 3 en L1 hors portail pour licenceSciences
+        [$dpe3, $annee3] = $this->parcoursL1($licenceSciences, 22, 'Parcours Hors Portail', 50);
+
+        $dpes = [$dpe1, $dpe2, $dpe3];
+        $annees = [20 => [$annee1], 21 => [$annee2], 22 => [$annee3]];
+
+        $rows = $this->buildParcoursupRows($dpes, $annees, [], $psup, $campagne);
+
+        // Doit produire 2 lignes : 1 pour le portail et 1 pour le parcours hors portail
+        self::assertCount(2, $rows);
+
+        // Ligne du portail et Ligne hors portail
+        $portailRow = null;
+        $horsPortailRow = null;
+        foreach ($rows as $r) {
+            if ($r['mention'] === 'Portail Sciences & Humanités') {
+                $portailRow = $r;
+            } else {
+                $horsPortailRow = $r;
+            }
+        }
+
+        self::assertNotNull($portailRow);
+        self::assertSame('', $portailRow['composante'], 'Composantes différentes -> composante vide');
+        self::assertSame('Portail Sciences & Humanités', (string) $portailRow['mention']);
+        self::assertSame('', (string) $portailRow['parcours'], 'Parcours doit être vide');
+        self::assertSame(100, $portailRow['capacite_n'], 'Capacités sommées quand le portail n\'a pas de capacité explicite');
+
+        self::assertNotNull($horsPortailRow);
+        self::assertSame('UFR Sciences', $horsPortailRow['composante']);
+        self::assertSame(1, $horsPortailRow['niveau']);
+        self::assertSame('Sciences et Humanités', (string) $horsPortailRow['mention']);
+        self::assertSame('Parcours Hors Portail', (string) $horsPortailRow['parcours']);
+    }
+
+    public function testEefPortailAfficheLignePortailSansParcours(): void
+    {
+        $campagne = new CampagneCollecte();
+        $ufrSciences = (new Composante())->setSigle('UFR Sciences');
+
+        $licence1 = $this->licence(1, 'Maths');
+        $licence1->setComposantePorteuse($ufrSciences);
+        $licence2 = $this->licence(2, 'Physique');
+        $licence2->setComposantePorteuse($ufrSciences);
+
+        $portail = (new Portail())->setLibelle('Portail Math-Physique');
+        $this->setId($portail, 202);
+
+        [$dpe1, $annee1] = $this->parcoursL1($licence1, 30, 'Parcours Maths', 50);
+        $annee1->setPortail($portail);
+
+        [$dpe2, $annee2] = $this->parcoursL1($licence2, 31, 'Parcours Physique', 50);
+        $annee2->setPortail($portail);
+
+        $dpes = [$dpe1, $dpe2];
+        $annees = [30 => [$annee1], 31 => [$annee2]];
+
+        $method = new \ReflectionMethod($this->service, 'buildEefRows');
+        /** @var list<array<string, mixed>> $rows */
+        $rows = $method->invoke($this->service, $dpes, $annees, $campagne, null, []);
+
+        self::assertCount(1, $rows);
+        self::assertSame('UFR Sciences', $rows[0]['composante']);
+        self::assertSame('Portail Math-Physique', (string) $rows[0]['mention']);
+        self::assertSame('', (string) $rows[0]['parcours']);
+        self::assertSame('L1', $rows[0]['niveau']);
     }
 
     private function licence(int $id, string $mention): Formation

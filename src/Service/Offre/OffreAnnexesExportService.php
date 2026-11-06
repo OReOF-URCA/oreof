@@ -13,6 +13,7 @@ use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Entity\PlateformeAdmission;
 use App\Entity\PlateformeAdmissionParametre;
+use App\Entity\Portail;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeDiplomePlateformeAdmission;
 use App\Entity\Ville;
@@ -945,7 +946,7 @@ final class OffreAnnexesExportService
      * Résout les informations de mutualisation (Tronc Commun ou Portail) pour un parcours et une année donnés.
      * Renvoie null si le parcours n'est pas mutualisé sur cette année.
      *
-     * @return array{key: string, nom: string, id: string, type: 'tc'|'portail'}|null
+     * @return array{key: string, nom: string, id: string, type: 'tc'|'portail', portail?: Portail|null}|null
      */
     public function resolveMutualisationGroup(Formation $formation, Parcours $parcours, Annee $annee): ?array
     {
@@ -956,12 +957,14 @@ final class OffreAnnexesExportService
 
         // 1. Portail inter-formations ou intra-formation
         $portail = $annee->getPortail();
-        if ($portail !== null && $portail->getId() !== null) {
+        if ($portail !== null) {
+            $pId = (string) ($portail->getId() ?? spl_object_id($portail));
             return [
-                'key' => sprintf('portail-%d-%d-%d', (int) $formation->getId(), (int) $portail->getId(), $ordre),
-                'nom' => $portail->getLibelle() ?: sprintf('Portail #%d', $portail->getId()),
-                'id' => (string) $portail->getId(),
+                'key' => sprintf('portail-%s-%d', $pId, $ordre),
+                'nom' => $portail->getLibelle() ?: sprintf('Portail #%s', $pId),
+                'id' => $pId,
                 'type' => 'portail',
+                'portail' => $portail,
             ];
         }
 
@@ -974,6 +977,7 @@ final class OffreAnnexesExportService
                     'nom' => !empty($tc['nom']) ? trim((string) $tc['nom']) : 'Tronc commun',
                     'id' => (string) $tc['id'],
                     'type' => 'tc',
+                    'portail' => null,
                 ];
             }
 
@@ -984,6 +988,7 @@ final class OffreAnnexesExportService
                     'nom' => 'Tronc commun',
                     'id' => 'legacy',
                     'type' => 'tc',
+                    'portail' => null,
                 ];
             }
         }
@@ -1034,6 +1039,129 @@ final class OffreAnnexesExportService
     }
 
     /**
+     * Finalise et fusionne les attributs d'une ligne mutualisée (Portail ou Tronc commun).
+     *
+     * @param array<string, mixed> $row
+     * @param list<string> $parcoursLibelles
+     * @param list<string> $composantes
+     * @param list<string> $diplomes
+     * @param list<string> $lieux
+     * @param list<string> $remarques
+     * @param list<mixed> $regimes
+     * @param list<mixed> $capacites
+     * @return array<string, mixed>
+     */
+    private function finalizeMutualisationRow(
+        array $row,
+        string $nom,
+        string $gType,
+        array $parcoursLibelles,
+        array $composantes,
+        array $diplomes,
+        array $lieux,
+        array $remarques,
+        array $regimes,
+        array $capacites,
+        ?Portail $portail = null,
+    ): array {
+        if ($gType === 'portail') {
+            // Composante : si commune, la renseigner, sinon laisser vide
+            $allComposantes = array_values(array_filter(array_map('trim', $composantes)));
+            $uniqueComposantes = array_values(array_unique($allComposantes));
+            if (count($uniqueComposantes) === 1 && count($allComposantes) === count($composantes)) {
+                $row['composante'] = $uniqueComposantes[0];
+            } else {
+                $row['composante'] = '';
+            }
+
+            // Mention : nom du portail
+            $row['mention'] = $nom;
+
+            // Parcours : laisser vide
+            $row['parcours'] = '';
+
+            // Diplôme : conserver si commun à tous les parcours membres
+            $uniqueDiplomes = array_values(array_unique(array_filter(array_map('trim', $diplomes))));
+            if (count($uniqueDiplomes) === 1) {
+                $row['diplome'] = $uniqueDiplomes[0];
+            }
+
+            // Régime d'inscription / type_parcours combiné
+            if (!empty($regimes)) {
+                $allRegimes = [];
+                foreach ($regimes as $reg) {
+                    if ($reg instanceof DiffObject) {
+                        $reg = $reg->new;
+                    }
+                    if ($reg !== null && $reg !== '') {
+                        foreach (explode(',', (string) $reg) as $part) {
+                            $part = trim($part);
+                            if ($part !== '' && !in_array($part, $allRegimes, true)) {
+                                $allRegimes[] = $part;
+                            }
+                        }
+                    }
+                }
+                if (!empty($allRegimes)) {
+                    $combinedRegime = implode(', ', $allRegimes);
+                    $row['type_parcours'] = $combinedRegime;
+                    $row['regime_inscription'] = $combinedRegime;
+                }
+            }
+
+            // Capacité d'accueil
+            if ($portail instanceof Portail && $portail->getCapaciteAccueil() > 0) {
+                $cap = $portail->getCapaciteAccueil();
+                if (array_key_exists('capacite_n', $row)) {
+                    $row['capacite_n'] = $cap;
+                }
+                if (array_key_exists('capacite_globale_n', $row)) {
+                    $row['capacite_globale_n'] = $cap;
+                }
+                if (array_key_exists('capacite_fi_n', $row)) {
+                    $row['capacite_fi_n'] = $cap;
+                }
+            } else {
+                $sumCap = 0;
+                $hasNumeric = false;
+                foreach ($capacites as $c) {
+                    if (is_numeric($c)) {
+                        $sumCap += (int) $c;
+                        $hasNumeric = true;
+                    }
+                }
+                if ($hasNumeric && $sumCap > 0) {
+                    if (array_key_exists('capacite_n', $row)) {
+                        $row['capacite_n'] = $sumCap;
+                    }
+                    if (array_key_exists('capacite_globale_n', $row)) {
+                        $row['capacite_globale_n'] = $sumCap;
+                    }
+                }
+            }
+        } else {
+            // Tronc commun classique intra-formation
+            $row['parcours'] = $this->formatGroupParcoursLabel($nom, $parcoursLibelles, 'tc');
+        }
+
+        if (!empty($lieux)) {
+            $cleanLieux = array_values(array_unique(array_filter(array_map('trim', $lieux))));
+            if (!empty($cleanLieux)) {
+                $row['lieu'] = implode(' / ', $cleanLieux);
+            }
+        }
+
+        if (!empty($remarques)) {
+            $cleanRemarques = array_values(array_unique(array_filter(array_map('trim', $remarques))));
+            if (!empty($cleanRemarques)) {
+                $row['remarques'] = implode(' | ', $cleanRemarques);
+            }
+        }
+
+        return $row;
+    }
+
+    /**
      * Unified row builder for eCandidat.
      *
      * @param array<int, DpeParcours> $allDpeParcours
@@ -1068,6 +1196,16 @@ final class OffreAnnexesExportService
         $tcTypes = [];
         /** @var array<string, list<string>> $tcRemarques */
         $tcRemarques = [];
+        /** @var array<string, list<string>> $tcComposantes */
+        $tcComposantes = [];
+        /** @var array<string, list<string>> $tcDiplomes */
+        $tcDiplomes = [];
+        /** @var array<string, list<mixed>> $tcRegimes */
+        $tcRegimes = [];
+        /** @var array<string, list<mixed>> $tcCapacites */
+        $tcCapacites = [];
+        /** @var array<string, Portail|null> $tcPortails */
+        $tcPortails = [];
 
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
@@ -1188,6 +1326,19 @@ final class OffreAnnexesExportService
                         if ($param?->getRemarques()) {
                             $tcRemarques[$groupKey][] = $param->getRemarques();
                         }
+                        $tcComposantes[$groupKey][] = $compLibelle;
+                        $tcDiplomes[$groupKey][] = $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle();
+                        $tcRegimes[$groupKey][] = $status['diff_type_parcours'];
+                        $tcCapacites[$groupKey][] = $capaciteN;
+                        if ($status['is_ouvert_n']) {
+                            $rows[$groupKey]['annee_ouverte_n'] = 'OUI';
+                            $rows[$groupKey]['annee_ouverte'] = 'OUI';
+                            $rows[$groupKey]['ouverture_n'] = 'OUI';
+                        }
+                        if ($status['plateforme_proposee_n'] === 'OUI') {
+                            $rows[$groupKey]['plateforme_proposee_n'] = 'OUI';
+                            $rows[$groupKey]['plateforme_proposee'] = 'OUI';
+                        }
                         continue;
                     }
                     $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
@@ -1195,6 +1346,11 @@ final class OffreAnnexesExportService
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
                     $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                    $tcComposantes[$groupKey] = [$compLibelle];
+                    $tcDiplomes[$groupKey] = [$typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle()];
+                    $tcRegimes[$groupKey] = [$status['diff_type_parcours']];
+                    $tcCapacites[$groupKey] = [$capaciteN];
+                    $tcPortails[$groupKey] = $mutualisation['portail'] ?? null;
                 }
 
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
@@ -1230,13 +1386,19 @@ final class OffreAnnexesExportService
         foreach ($tcParcours as $gKey => $libelles) {
             $nom = $tcNoms[$gKey] ?? 'Tronc commun';
             $gType = $tcTypes[$gKey] ?? 'tc';
-            $rows[$gKey]['parcours'] = $this->formatGroupParcoursLabel($nom, $libelles, $gType);
-            if (!empty($tcLieux[$gKey])) {
-                $rows[$gKey]['lieu'] = implode(' / ', array_unique($tcLieux[$gKey]));
-            }
-            if (!empty($tcRemarques[$gKey])) {
-                $rows[$gKey]['remarques'] = implode(' | ', array_unique($tcRemarques[$gKey]));
-            }
+            $rows[$gKey] = $this->finalizeMutualisationRow(
+                $rows[$gKey],
+                $nom,
+                $gType,
+                $libelles,
+                $tcComposantes[$gKey] ?? [],
+                $tcDiplomes[$gKey] ?? [],
+                $tcLieux[$gKey] ?? [],
+                $tcRemarques[$gKey] ?? [],
+                $tcRegimes[$gKey] ?? [],
+                $tcCapacites[$gKey] ?? [],
+                $tcPortails[$gKey] ?? null,
+            );
         }
         $rows = array_values($rows);
 
@@ -1281,6 +1443,16 @@ final class OffreAnnexesExportService
         $tcTypes = [];
         /** @var array<string, list<string>> $tcRemarques */
         $tcRemarques = [];
+        /** @var array<string, list<string>> $tcComposantes */
+        $tcComposantes = [];
+        /** @var array<string, list<string>> $tcDiplomes */
+        $tcDiplomes = [];
+        /** @var array<string, list<mixed>> $tcRegimes */
+        $tcRegimes = [];
+        /** @var array<string, list<mixed>> $tcCapacites */
+        $tcCapacites = [];
+        /** @var array<string, Portail|null> $tcPortails */
+        $tcPortails = [];
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
             $formation = $parcours?->getFormation();
@@ -1368,6 +1540,19 @@ final class OffreAnnexesExportService
                         if ($param?->getRemarques()) {
                             $tcRemarques[$groupKey][] = $param->getRemarques();
                         }
+                        $tcComposantes[$groupKey][] = $compLibelle;
+                        $tcDiplomes[$groupKey][] = $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle();
+                        $tcRegimes[$groupKey][] = $status['diff_type_parcours'];
+                        $tcCapacites[$groupKey][] = $capaciteN;
+                        if ($status['is_ouvert_n']) {
+                            $rows[$groupKey]['annee_ouverte_n'] = 'OUI';
+                            $rows[$groupKey]['annee_ouverte'] = 'OUI';
+                            $rows[$groupKey]['ouverture_n'] = 'OUI';
+                        }
+                        if ($status['plateforme_proposee_n'] === 'OUI') {
+                            $rows[$groupKey]['plateforme_proposee_n'] = 'OUI';
+                            $rows[$groupKey]['plateforme_proposee'] = 'OUI';
+                        }
                         continue;
                     }
                     $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
@@ -1375,6 +1560,11 @@ final class OffreAnnexesExportService
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
                     $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                    $tcComposantes[$groupKey] = [$compLibelle];
+                    $tcDiplomes[$groupKey] = [$typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle()];
+                    $tcRegimes[$groupKey] = [$status['diff_type_parcours']];
+                    $tcCapacites[$groupKey] = [$capaciteN];
+                    $tcPortails[$groupKey] = $mutualisation['portail'] ?? null;
                 }
 
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
@@ -1414,13 +1604,19 @@ final class OffreAnnexesExportService
         foreach ($tcParcours as $gKey => $libelles) {
             $nom = $tcNoms[$gKey] ?? 'Tronc commun';
             $gType = $tcTypes[$gKey] ?? 'tc';
-            $rows[$gKey]['parcours'] = $this->formatGroupParcoursLabel($nom, $libelles, $gType);
-            if (!empty($tcLieux[$gKey])) {
-                $rows[$gKey]['lieu'] = implode(' / ', array_unique($tcLieux[$gKey]));
-            }
-            if (!empty($tcRemarques[$gKey])) {
-                $rows[$gKey]['remarques'] = implode(' | ', array_unique($tcRemarques[$gKey]));
-            }
+            $rows[$gKey] = $this->finalizeMutualisationRow(
+                $rows[$gKey],
+                $nom,
+                $gType,
+                $libelles,
+                $tcComposantes[$gKey] ?? [],
+                $tcDiplomes[$gKey] ?? [],
+                $tcLieux[$gKey] ?? [],
+                $tcRemarques[$gKey] ?? [],
+                $tcRegimes[$gKey] ?? [],
+                $tcCapacites[$gKey] ?? [],
+                $tcPortails[$gKey] ?? null,
+            );
         }
         $rows = array_values($rows);
 
@@ -1464,6 +1660,16 @@ final class OffreAnnexesExportService
         $tcTypes = [];
         /** @var array<string, list<string>> $tcRemarques */
         $tcRemarques = [];
+        /** @var array<string, list<string>> $tcComposantes */
+        $tcComposantes = [];
+        /** @var array<string, list<string>> $tcDiplomes */
+        $tcDiplomes = [];
+        /** @var array<string, list<mixed>> $tcRegimes */
+        $tcRegimes = [];
+        /** @var array<string, list<mixed>> $tcCapacites */
+        $tcCapacites = [];
+        /** @var array<string, Portail|null> $tcPortails */
+        $tcPortails = [];
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
             $formation = $parcours?->getFormation();
@@ -1521,6 +1727,7 @@ final class OffreAnnexesExportService
 
                 // N data
                 $capGlobaleN = $param?->getCapaciteGlobale() ?? $annee->getCapaciteAccueil();
+                $capaciteN = $capGlobaleN;
                 $capFiN = $param?->getCapaciteFi() ?? $capGlobaleN;
                 $capAltN = $param?->getCapaciteAlternance() ?? 0;
                 $capSpeN = $param?->getCapaciteSpecifique() ?? 0;
@@ -1550,6 +1757,19 @@ final class OffreAnnexesExportService
                         if ($param?->getRemarques()) {
                             $tcRemarques[$groupKey][] = $param->getRemarques();
                         }
+                        $tcComposantes[$groupKey][] = $compLibelle;
+                        $tcDiplomes[$groupKey][] = $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle();
+                        $tcRegimes[$groupKey][] = $status['diff_type_parcours'];
+                        $tcCapacites[$groupKey][] = $capaciteN;
+                        if ($status['is_ouvert_n']) {
+                            $rows[$groupKey]['annee_ouverte_n'] = 'OUI';
+                            $rows[$groupKey]['annee_ouverte'] = 'OUI';
+                            $rows[$groupKey]['ouverture_n'] = 'OUI';
+                        }
+                        if ($status['plateforme_proposee_n'] === 'OUI') {
+                            $rows[$groupKey]['plateforme_proposee_n'] = 'OUI';
+                            $rows[$groupKey]['plateforme_proposee'] = 'OUI';
+                        }
                         continue;
                     }
                     $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
@@ -1557,6 +1777,11 @@ final class OffreAnnexesExportService
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
                     $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                    $tcComposantes[$groupKey] = [$compLibelle];
+                    $tcDiplomes[$groupKey] = [$typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle()];
+                    $tcRegimes[$groupKey] = [$status['diff_type_parcours']];
+                    $tcCapacites[$groupKey] = [$capaciteN];
+                    $tcPortails[$groupKey] = $mutualisation['portail'] ?? null;
                 }
 
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
@@ -1600,13 +1825,19 @@ final class OffreAnnexesExportService
         foreach ($tcParcours as $gKey => $libelles) {
             $nom = $tcNoms[$gKey] ?? 'Tronc commun';
             $gType = $tcTypes[$gKey] ?? 'tc';
-            $rows[$gKey]['parcours'] = $this->formatGroupParcoursLabel($nom, $libelles, $gType);
-            if (!empty($tcLieux[$gKey])) {
-                $rows[$gKey]['lieu'] = implode(' / ', array_unique($tcLieux[$gKey]));
-            }
-            if (!empty($tcRemarques[$gKey])) {
-                $rows[$gKey]['remarques'] = implode(' | ', array_unique($tcRemarques[$gKey]));
-            }
+            $rows[$gKey] = $this->finalizeMutualisationRow(
+                $rows[$gKey],
+                $nom,
+                $gType,
+                $libelles,
+                $tcComposantes[$gKey] ?? [],
+                $tcDiplomes[$gKey] ?? [],
+                $tcLieux[$gKey] ?? [],
+                $tcRemarques[$gKey] ?? [],
+                $tcRegimes[$gKey] ?? [],
+                $tcCapacites[$gKey] ?? [],
+                $tcPortails[$gKey] ?? null,
+            );
         }
         $rows = array_values($rows);
 
@@ -1631,6 +1862,19 @@ final class OffreAnnexesExportService
     ): array {
         $rows = [];
         $index = 1;
+        /** @var array<string, array{
+         *     portail: Portail,
+         *     ordre: int,
+         *     prefix: string,
+         *     composantes: list<string>,
+         *     diplomes: list<string>,
+         *     lieux: list<string>,
+         *     regimes: list<string>,
+         *     isOuvert: bool,
+         *     diplCode: string
+         * }> $portailGroups */
+        $portailGroups = [];
+
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
             $formation = $parcours?->getFormation();
@@ -1657,12 +1901,53 @@ final class OffreAnnexesExportService
 
             $niveauxOuverts = [];
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
+            $hasPortailOnly = !empty($parAnnees);
             foreach ($parAnnees as $annee) {
+                $portail = $annee->getPortail();
+                $prefix = in_array($diplCode, ['M', 'MASTER', 'MA'], true) ? 'M' : 'L';
+                if ($portail !== null) {
+                    $pId = (string) ($portail->getId() ?? spl_object_id($portail));
+                    $pKey = sprintf('portail-%s-%d', $pId, (int) $annee->getOrdre());
+                    if (!isset($portailGroups[$pKey])) {
+                        $portailGroups[$pKey] = [
+                            'portail' => $portail,
+                            'ordre' => (int) $annee->getOrdre(),
+                            'prefix' => $prefix,
+                            'composantes' => [$compLibelle],
+                            'diplomes' => [$typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle()],
+                            'lieux' => $ville !== '' ? [$ville] : [],
+                            'regimes' => [$this->resolveRegimeInscription($parcours)],
+                            'isOuvert' => $annee->isOuvert() && $isOuvert,
+                            'diplCode' => $diplCode,
+                        ];
+                    } else {
+                        $portailGroups[$pKey]['composantes'][] = $compLibelle;
+                        $portailGroups[$pKey]['diplomes'][] = $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle();
+                        if ($ville !== '') {
+                            $portailGroups[$pKey]['lieux'][] = $ville;
+                        }
+                        $reg = $this->resolveRegimeInscription($parcours);
+                        if ($reg !== '') {
+                            $portailGroups[$pKey]['regimes'][] = $reg;
+                        }
+                        if ($annee->isOuvert() && $isOuvert) {
+                            $portailGroups[$pKey]['isOuvert'] = true;
+                        }
+                    }
+                    continue;
+                }
+
+                $hasPortailOnly = false;
                 if ($annee->isOuvert()) {
-                    $prefix = in_array($diplCode, ['M', 'MASTER', 'MA'], true) ? 'M' : 'L';
                     $niveauxOuverts[] = $prefix . $annee->getOrdre();
                 }
             }
+
+            if ($hasPortailOnly && empty($niveauxOuverts)) {
+                // Toutes les années de ce parcours sont rattachées à un portail : ne pas afficher de ligne parcours individuelle
+                continue;
+            }
+
             $niveauxStr = !empty($niveauxOuverts) ? implode('/', $niveauxOuverts) : '-';
 
             $parcoursN1 = $parcours->getParcoursOrigine() ?? $parcours->getParcoursOrigineCopie();
@@ -1701,7 +1986,55 @@ final class OffreAnnexesExportService
             ];
         }
 
-        usort($rows, static fn($a, $b) => strcmp($a['composante'] . $a['diplome'] . $a['niveau'] . ((string) $a['mention']), $b['composante'] . $b['diplome'] . $b['niveau'] . ((string) $b['mention'])));
+        foreach ($portailGroups as $pGroup) {
+            $portail = $pGroup['portail'];
+            $allComps = array_values(array_filter(array_map('trim', $pGroup['composantes'])));
+            $uniqueComps = array_values(array_unique($allComps));
+            $commonComp = (count($uniqueComps) === 1 && count($allComps) === count($pGroup['composantes']))
+                ? $uniqueComps[0]
+                : '';
+            $uniqueDipls = array_values(array_unique(array_filter(array_map('trim', $pGroup['diplomes']))));
+            $commonDipl = count($uniqueDipls) === 1 ? $uniqueDipls[0] : implode(' / ', $uniqueDipls);
+            $niveauStr = $pGroup['prefix'] . $pGroup['ordre'];
+            $cleanLieux = array_values(array_unique(array_filter(array_map('trim', $pGroup['lieux']))));
+            $combinedLieux = !empty($cleanLieux) ? implode(' / ', $cleanLieux) : '';
+
+            $allRegs = [];
+            foreach ($pGroup['regimes'] as $regStr) {
+                foreach (explode(',', (string) $regStr) as $r) {
+                    $r = trim($r);
+                    if ($r !== '' && !in_array($r, $allRegs, true)) {
+                        $allRegs[] = $r;
+                    }
+                }
+            }
+            $regimeStr = implode(', ', $allRegs);
+            $diffType = new DiffObject(null, $regimeStr);
+
+            $rows[] = [
+                'composante' => $commonComp,
+                'diplome' => $commonDipl,
+                'niveau' => $niveauStr,
+                'mention' => $portail->getLibelle() ?: sprintf('Portail #%d', (int) $portail->getId()),
+                'parcours' => '',
+                'type_parcours' => $diffType,
+                'regime_inscription' => $diffType,
+                'lieu' => $combinedLieux,
+                'saisie' => '',
+                'numero' => $index++,
+                'etat_compo' => 'Validé',
+                'maj_tarif' => 'Non',
+                'etat_pv' => 'Déposé',
+                'niveaux_urca' => $niveauStr,
+                'ouverture' => $pGroup['isOuvert'] ? 'oui' : 'non',
+                'niveaux_eef' => $niveauStr,
+                'droits_differencies' => in_array($pGroup['diplCode'], ['M', 'MASTER', 'MA'], true) ? 3941 : 2850,
+                'niveau_francais' => 'B2',
+                'remarques' => '',
+            ];
+        }
+
+        usort($rows, static fn($a, $b) => strcmp(($a['composante']) . ($a['diplome']) . ($a['niveau']) . ((string) $a['mention']), ($b['composante']) . ($b['diplome']) . ($b['niveau']) . ((string) $b['mention'])));
         return $rows;
     }
 
@@ -1740,6 +2073,16 @@ final class OffreAnnexesExportService
         $tcTypes = [];
         /** @var array<string, list<string>> $tcRemarques */
         $tcRemarques = [];
+        /** @var array<string, list<string>> $tcComposantes */
+        $tcComposantes = [];
+        /** @var array<string, list<string>> $tcDiplomes */
+        $tcDiplomes = [];
+        /** @var array<string, list<mixed>> $tcRegimes */
+        $tcRegimes = [];
+        /** @var array<string, list<mixed>> $tcCapacites */
+        $tcCapacites = [];
+        /** @var array<string, Portail|null> $tcPortails */
+        $tcPortails = [];
         foreach ($allDpeParcours as $dpePar) {
             $parcours = $dpePar->getParcours();
             $formation = $parcours?->getFormation();
@@ -1828,6 +2171,7 @@ final class OffreAnnexesExportService
                 $status = $this->resolveRowStatusAndDiff($parcours, $annee, $dpePar->isOuvert(), $param, $n1);
 
                 $capGlobaleN = $param?->getCapaciteGlobale() ?? $annee->getCapaciteAccueil();
+                $capaciteN = $capGlobaleN;
 
                 $capGlobaleN1 = $n1['hasN1'] ? ($n1['paramN1']?->getCapaciteGlobale() ?? $n1['anneeN1']?->getCapaciteAccueil() ?? '') : '';
                 $capFiN1 = $n1['hasN1'] ? ($n1['paramN1']?->getCapaciteFi() ?? $capGlobaleN1) : '';
@@ -1848,6 +2192,19 @@ final class OffreAnnexesExportService
                         if ($param?->getRemarques()) {
                             $tcRemarques[$groupKey][] = $param->getRemarques();
                         }
+                        $tcComposantes[$groupKey][] = $compLibelle;
+                        $tcDiplomes[$groupKey][] = $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle();
+                        $tcRegimes[$groupKey][] = $status['diff_type_parcours'];
+                        $tcCapacites[$groupKey][] = $capaciteN;
+                        if ($status['is_ouvert_n']) {
+                            $rows[$groupKey]['annee_ouverte_n'] = 'OUI';
+                            $rows[$groupKey]['annee_ouverte'] = 'OUI';
+                            $rows[$groupKey]['ouverture_n'] = 'OUI';
+                        }
+                        if ($status['plateforme_proposee_n'] === 'OUI') {
+                            $rows[$groupKey]['plateforme_proposee_n'] = 'OUI';
+                            $rows[$groupKey]['plateforme_proposee'] = 'OUI';
+                        }
                         continue;
                     }
                     $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
@@ -1855,6 +2212,11 @@ final class OffreAnnexesExportService
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
                     $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                    $tcComposantes[$groupKey] = [$compLibelle];
+                    $tcDiplomes[$groupKey] = [$typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle()];
+                    $tcRegimes[$groupKey] = [$status['diff_type_parcours']];
+                    $tcCapacites[$groupKey] = [$capaciteN];
+                    $tcPortails[$groupKey] = $mutualisation['portail'] ?? null;
                 }
 
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
@@ -1902,13 +2264,19 @@ final class OffreAnnexesExportService
         foreach ($tcParcours as $gKey => $libelles) {
             $nom = $tcNoms[$gKey] ?? 'Tronc commun';
             $gType = $tcTypes[$gKey] ?? 'tc';
-            $rows[$gKey]['parcours'] = $this->formatGroupParcoursLabel($nom, $libelles, $gType);
-            if (!empty($tcLieux[$gKey])) {
-                $rows[$gKey]['lieu'] = implode(' / ', array_unique($tcLieux[$gKey]));
-            }
-            if (!empty($tcRemarques[$gKey])) {
-                $rows[$gKey]['remarques'] = implode(' | ', array_unique($tcRemarques[$gKey]));
-            }
+            $rows[$gKey] = $this->finalizeMutualisationRow(
+                $rows[$gKey],
+                $nom,
+                $gType,
+                $libelles,
+                $tcComposantes[$gKey] ?? [],
+                $tcDiplomes[$gKey] ?? [],
+                $tcLieux[$gKey] ?? [],
+                $tcRemarques[$gKey] ?? [],
+                $tcRegimes[$gKey] ?? [],
+                $tcCapacites[$gKey] ?? [],
+                $tcPortails[$gKey] ?? null,
+            );
         }
         $rows = array_values($rows);
 
