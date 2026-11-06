@@ -415,6 +415,8 @@ final class OffreController extends BaseController
         $nbFermetureDefinitive = 0;
         $capacite = 0;
         $groupedFormations = [];
+        $compPortailsCounted = [];
+        $globalPortailsCounted = [];
 
         foreach ($tFormations as $row) {
             $tabStatistiques['nbFormations']++;
@@ -442,8 +444,6 @@ final class OffreController extends BaseController
                 }
             }
 
-            $capacite += $row['capacite'];
-
             // Groupement pré-calculé par composante pour Twig
             $composanteObj = $row['formation']->getComposantePorteuse();
             $compLibelle = $composanteObj?->getLibelle() ?? 'Sans composante';
@@ -462,17 +462,78 @@ final class OffreController extends BaseController
             }
             $groupedFormations[$compLibelle]['nbFormations']++;
             $groupedFormations[$compLibelle]['nbParcours'] += count($row['dpeParcours']);
-            $groupedFormations[$compLibelle]['capacite'] += $row['capacite'];
+
+            // Calcul de la capacité ajoutée à la composante et au total global avec dédoublonnage strict des portails
+            $formationObj = $row['formation'];
+            $fTcAnneesCounted = [];
+            $compCapToAdd = 0;
+            $globalCapToAdd = 0;
+
+            foreach ($row['parcoursData'] as $pd) {
+                if ($pd['isOuvert']) {
+                    $groupedFormations[$compLibelle]['nbParcoursOuvert']++;
+                } else {
+                    continue;
+                }
+                $parcours = $pd['parcours'];
+                foreach ($pd['annees'] as $annee) {
+                    if (!$annee->isOuvert()) {
+                        continue;
+                    }
+                    $ordre = $annee->getOrdre();
+                    if ($ordre === null) {
+                        continue;
+                    }
+
+                    $anneeCap = $annee->getCapaciteAccueil();
+                    $portail = $annee->getPortail();
+                    $portailKey = ($portail !== null && $portail->getId() !== null) ? (string)$portail->getId() . '_' . $ordre : null;
+
+                    $tc = $formationObj->getTroncCommunForParcours($parcours, $ordre);
+                    $tcKey = $tc !== null ? $tc['id'] . '_' . $ordre : ($formationObj->isAnneeTroncCommun($ordre, $parcours) ? (string)$ordre : null);
+
+                    $isTcDuplicate = false;
+                    if ($tcKey !== null) {
+                        if (isset($fTcAnneesCounted[$tcKey])) {
+                            $isTcDuplicate = true;
+                        } else {
+                            $fTcAnneesCounted[$tcKey] = true;
+                        }
+                    }
+                    if ($isTcDuplicate) {
+                        continue;
+                    }
+
+                    // Décompte dans la composante (ne pas compter plusieurs fois le portail au sein de la même composante)
+                    if ($portailKey !== null) {
+                        if (!isset($compPortailsCounted[$compLibelle][$portailKey])) {
+                            $compCapToAdd += $anneeCap;
+                            $compPortailsCounted[$compLibelle][$portailKey] = true;
+                        }
+                    } else {
+                        $compCapToAdd += $anneeCap;
+                    }
+
+                    // Décompte dans le total global (ne pas compter plusieurs fois le portail sur toute l'offre)
+                    if ($portailKey !== null) {
+                        if (!isset($globalPortailsCounted[$portailKey])) {
+                            $globalCapToAdd += $anneeCap;
+                            $globalPortailsCounted[$portailKey] = true;
+                        }
+                    } else {
+                        $globalCapToAdd += $anneeCap;
+                    }
+                }
+            }
+
+            $groupedFormations[$compLibelle]['capacite'] += $compCapToAdd;
+            $capacite += $globalCapToAdd;
+
             if ($row['hasPv']) {
                 $groupedFormations[$compLibelle]['nbPv']++;
             }
             if ($row['hasNote']) {
                 $groupedFormations[$compLibelle]['nbNote']++;
-            }
-            foreach ($row['parcoursData'] as $pd) {
-                if ($pd['isOuvert']) {
-                    $groupedFormations[$compLibelle]['nbParcoursOuvert']++;
-                }
             }
             $groupedFormations[$compLibelle]['formations'][] = $row;
         }

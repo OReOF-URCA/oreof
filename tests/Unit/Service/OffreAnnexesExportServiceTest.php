@@ -508,7 +508,7 @@ final class OffreAnnexesExportServiceTest extends TestCase
         [$dpe1, $annee1] = $this->parcoursL1($licenceSciences, 20, 'Parcours Sciences', 60);
         $annee1->setPortail($portail);
 
-        [$dpe2, $annee2] = $this->parcoursL1($licenceLettres, 21, 'Parcours Lettres', 40);
+        [$dpe2, $annee2] = $this->parcoursL1($licenceLettres, 21, 'Parcours Lettres', 60);
         $annee2->setPortail($portail);
 
         // Parcours 3 en L1 hors portail pour licenceSciences
@@ -537,7 +537,7 @@ final class OffreAnnexesExportServiceTest extends TestCase
         self::assertSame('', $portailRow['composante'], 'Composantes différentes -> composante vide');
         self::assertSame('Portail Sciences & Humanités', (string) $portailRow['mention']);
         self::assertSame('', (string) $portailRow['parcours'], 'Parcours doit être vide');
-        self::assertSame(100, $portailRow['capacite_n'], 'Capacités sommées quand le portail n\'a pas de capacité explicite');
+        self::assertSame(60, $portailRow['capacite_n'], 'La capacité du portail ne doit pas être cumulée : elle affiche la capacité mutualisée saisie');
 
         self::assertNotNull($horsPortailRow);
         self::assertSame('UFR Sciences', $horsPortailRow['composante']);
