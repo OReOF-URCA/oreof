@@ -194,12 +194,12 @@
                 </twig:Kpi>
 
                 <twig:Kpi
-                    title="Capacité"
-                    value="{{ tabStatistiques.capacite }}"
+                    title="Places plateformes"
+                    value="{{ tabStatistiques.capacitePlateformes|default(0) }}"
                     unit="places"
                     variant="info"
                     icon="icon:users"
-                    help="Somme des capacités d'accueil cumulées des formations et parcours ouverts."
+                    help="Somme des places d'admission proposées sur les plateformes pour les formations et parcours ouverts."
                 />
 
                 <twig:Kpi
@@ -327,7 +327,7 @@
                         <th class="px-4 py-3">Parcours / année</th>
                         <th class="px-4 py-3">Ouvert</th>
                         <th class="px-4 py-3">Plateformes</th>
-                        <th class="px-4 py-3 text-right">Capacité</th>
+                        <th class="px-4 py-3 text-right">Places plateformes</th>
                         <th class="px-4 py-3">Statut</th>
                         <th class="px-4 py-3"></th>
                     </tr>
@@ -354,7 +354,7 @@
                                 <twig:Badge variant="secondary" label="{{ compGroup.nbParcoursOuvert }}/{{ compGroup.nbParcours }} ouverts" />
                             </td>
                             <td class="px-4 py-3">&nbsp;</td>
-                            <td class="px-4 py-3 text-right font-bold text-secondary-800 dark:text-secondary-100">{{ compGroup.capacite }}</td>
+                            <td class="px-4 py-3 text-right font-bold text-secondary-800 dark:text-secondary-100">{{ compGroup.capacitePlateformes|default(0) }}</td>
                             <td class="px-4 py-3">
                                 {% set canManageComp = compGroup.composante and (is_granted('ROLE_ADMIN') or is_granted('ROLE_SES') or is_granted('MANAGE', {route: 'app_composante', subject: compGroup.composante})) %}
                                 <div class="flex items-center gap-1.5 flex-wrap">
@@ -472,6 +472,18 @@
                                                 </span>
                                             {% endfor %}
                                         {% endif %}
+                                        {% if forma.portails is defined and forma.portails is not empty %}
+                                            {% for portailData in forma.portails %}
+                                                {% set isAllPortail = (totalParcours > 0 and portailData.parcoursIds|length >= totalParcours) %}
+                                                {% set nbParcPortail = portailData.parcoursIds|length %}
+                                                <span class="inline-flex items-center gap-1 rounded bg-warning-50 px-1.5 py-0.5 text-[11px] font-semibold text-warning-800 border border-warning-200/80 dark:border-warning-700 dark:bg-warning-900/30 dark:text-warning-300"
+                                                      title="Portail « {{ portailData.libelle }} » : {% if isAllPortail %}Tous les parcours ({{ totalParcours }}){% else %}{{ nbParcPortail }}/{{ totalParcours }} parcours{% endif %} sur {{ portailData.annees|length > 1 ? 'les Années' : 'l\'Année' }} {{ portailData.annees|join(', ') }}"
+                                                >
+                                                    <twig:UX:Icon name="ph:circles-three-bold" class="h-3 w-3" />
+                                                    <span>{{ portailData.libelle }} (Année{{ portailData.annees|length > 1 ? 's' : '' }} {{ portailData.annees|join(', ') }}{% if not isAllPortail %} · {{ nbParcPortail }}/{{ totalParcours }} parc.{% endif %})</span>
+                                                </span>
+                                            {% endfor %}
+                                        {% endif %}
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 text-secondary-600">
@@ -501,7 +513,7 @@
                                         {% endfor %}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-right font-bold text-secondary-900 dark:text-secondary-100">{{ forma.capacite }}</td>
+                                <td class="px-4 py-3 text-right font-bold text-secondary-900 dark:text-secondary-100">{{ forma.capacitePlateformes|default(0) }}</td>
                                 <td class="px-4 py-3">
                                     <div class="flex gap-1.5 flex-wrap items-center">
                                         {{ include('offre_v2/_etat_offre_badge.html.twig', {etat: forma.etatValidation|keys|first}) }}<br>
@@ -602,7 +614,7 @@
                             </tr>
                             {% for parcoursId, pd in forma.parcoursData %}
                                 {% set parcours = pd.parcours %}
-                                {% set parcoursCapacite = pd.capacite %}
+                                {% set parcoursCapacite = pd.capacitePlateformes|default(0) %}
                                 {% set isParcoursOuvert = pd.isOuvert %}
                                 {% set dpeParc = pd.dpeParcours %}
                                 {# Lignes d'années chargées à la demande (offre-table → offre_v2_annees_parcours), insérées après cette ligne. #}

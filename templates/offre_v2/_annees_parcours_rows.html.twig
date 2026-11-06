@@ -3,12 +3,21 @@
 {% for annee in annees %}
     {% set tc = formation.getTroncCommunForParcours(parcours, annee.ordre) %}
     {% set isAnneeTc = tc is not null or formation.isAnneeTroncCommun(annee.ordre, parcours) %}
-    <tr data-parcours-annee="{{ parcours.id }}" class="{{ isAnneeTc ? 'bg-primary-50/40 hover:bg-primary-50/70 border-l-4 border-l-primary-500 dark:bg-primary-900/30' : 'hover:bg-secondary-50/80' }} transition-all border-t border-secondary-100 group-data-[collapsed]:hidden">
+    {% set portail = annee.portail %}
+    <tr data-parcours-annee="{{ parcours.id }}" class="{{ portail ? 'bg-warning-50/20 hover:bg-warning-50/50 border-l-4 border-l-warning-400 dark:bg-warning-900/20' : (isAnneeTc ? 'bg-primary-50/40 hover:bg-primary-50/70 border-l-4 border-l-primary-500 dark:bg-primary-900/30' : 'hover:bg-secondary-50/80') }} transition-all border-t border-secondary-100 group-data-[collapsed]:hidden">
         <td>&nbsp;</td>
         <td>&nbsp;</td>
-        <td class="px-4 py-3 {{ isAnneeTc ? 'pl-6 font-semibold text-primary-950 dark:text-primary-100' : 'pl-8 text-secondary-600 font-medium' }}">
+        <td class="px-4 py-3 {{ portail ? 'pl-6 font-semibold text-warning-950 dark:text-warning-100' : (isAnneeTc ? 'pl-6 font-semibold text-primary-950 dark:text-primary-100' : 'pl-8 text-secondary-600 font-medium') }}">
             <div class="flex items-center gap-2 flex-wrap">
                 <span>{{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}</span>
+                {% if portail %}
+                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold bg-warning-100 text-warning-800 border border-warning-200 shadow-xs dark:border-warning-700 dark:bg-warning-900/30 dark:text-warning-300"
+                          title="Cette année participe au portail « {{ portail.libelle }} »"
+                    >
+                        <twig:UX:Icon name="ph:circles-three-bold" class="h-3 w-3" />
+                        {{ portail.libelle }}
+                    </span>
+                {% endif %}
                 {% if isAnneeTc %}
                     {% set tcNom = tc ? tc.nom : 'Tronc commun' %}
                     <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold bg-primary-100 text-primary-800 border border-primary-200 shadow-xs dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
@@ -26,11 +35,13 @@
         <td class="px-4 py-3">
             <div class="flex gap-1 flex-wrap items-center">
                 {% set anneeParams = paramsByAnnee[annee.id]|default([]) %}
+                {% set anneePlatPlaces = 0 %}
                 {% for param in anneeParams %}
                     {% set plat = param.plateforme %}
                     {% if plat and plat.active %}
-                        {% set capTotale = (param.capaciteGlobale|default(0)) + (param.capaciteFi|default(0)) + (param.capaciteAlternance|default(0)) + (param.capaciteSpecifique|default(0)) %}
+                        {% set capTotale = param.capaciteGlobale ?: ((param.capaciteFi|default(0)) + (param.capaciteAlternance|default(0)) + (param.capaciteSpecifique|default(0))) %}
                         {% if param.active %}
+                            {% set anneePlatPlaces = anneePlatPlaces + capTotale %}
                             <twig:Badge :variant="plat.color|default('primary')"
                                         :label="plat.code"
                                         title="{{ plat.libelle }} : active pour cette année"
@@ -46,7 +57,7 @@
                 {% endfor %}
             </div>
         </td>
-        <td class="px-4 py-3 text-right font-medium text-secondary-700 dark:text-secondary-100">{{ annee.capaciteAccueil|default(0) }}</td>
+        <td class="px-4 py-3 text-right font-medium text-secondary-700 dark:text-secondary-100">{{ anneePlatPlaces }}</td>
         <td class="px-4 py-3">
             {% if dpeParc %}
                 <div class="flex gap-1 flex-wrap">

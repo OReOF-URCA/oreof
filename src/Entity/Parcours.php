@@ -1943,6 +1943,35 @@ class Parcours
         return $capacite;
     }
 
+    public function getCapacitePlateformes(?CampagneCollecte $campagne = null): int
+    {
+        $capacite = 0;
+        foreach ($this->getAnnees() as $annee) {
+            if (!$annee->isOuvert()) {
+                continue;
+            }
+            foreach ($annee->getAdmissionPlateformeParametres() as $param) {
+                $plat = $param->getPlateforme();
+                if (!$param->isActive() || $plat === null || !$plat->getActive()) {
+                    continue;
+                }
+                if ($campagne !== null && $param->getCampagne()?->getId() !== $campagne->getId()) {
+                    continue;
+                }
+                $pCap = $param->getCapaciteGlobale();
+                if ($pCap === null || $pCap <= 0) {
+                    $fi = $param->getCapaciteFi() ?? 0;
+                    $alt = $param->getCapaciteAlternance() ?? 0;
+                    $spe = $param->getCapaciteSpecifique() ?? 0;
+                    $pCap = $fi + $alt + $spe;
+                }
+                $capacite += max(0, (int)$pCap);
+            }
+        }
+
+        return $capacite;
+    }
+
     /**
      * @deprecated La capacité d'un parcours est calculée dynamiquement depuis ses années ouvertes.
      */

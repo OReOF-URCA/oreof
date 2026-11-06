@@ -37,6 +37,9 @@ class DefaultController extends BaseController
         if ($step === 'conseil_composante' && !$canAccessConseilComposante) {
             $step = 'formation';
         }
+        if (!in_array($step, ['formation', 'formation_etablissement', 'fiche', 'conseil_composante', 'cfvu'], true)) {
+            $step = 'formation';
+        }
 
         return $this->render(
             'default/index.html.twig',
@@ -100,6 +103,9 @@ class DefaultController extends BaseController
         if ($step === 'conseil_composante' && !$canAccessConseilComposante) {
             $step = 'formation';
         }
+        if (!in_array($step, ['formation', 'formation_etablissement', 'fiche', 'conseil_composante', 'cfvu'], true)) {
+            $step = 'formation';
+        }
 
         $template = 'default/_formation.html.twig';
         $context = [
@@ -110,6 +116,10 @@ class DefaultController extends BaseController
         ];
 
         switch ($step) {
+            case 'formation_etablissement':
+                $template = 'default/_formation_etablissement.html.twig';
+                break;
+
             case 'fiche':
                 if ($this->isGranted('ROLE_ADMIN')) {
                     $template = 'default/_fichesSes.html.twig';

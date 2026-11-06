@@ -723,6 +723,27 @@ class Formation
     }
 
     /**
+     * @return list<Portail>
+     */
+    public function getPortails(?CampagneCollecte $campagne = null): array
+    {
+        $portails = [];
+        foreach ($this->getParcours() as $parcours) {
+            foreach ($parcours->getAnnees() as $annee) {
+                $portail = $annee->getPortail();
+                if ($portail !== null && $portail->getId() !== null) {
+                    if ($campagne !== null && $portail->getCampagne()?->getId() !== $campagne->getId()) {
+                        continue;
+                    }
+                    $portails[$portail->getId()] = $portail;
+                }
+            }
+        }
+
+        return array_values($portails);
+    }
+
+    /**
      * @return list<array{id: string, nom: string, annees: list<int>, parcours: list<int>}>
      */
     public function getTroncsCommuns(): array
@@ -1084,6 +1105,82 @@ class Formation
 
                 // 3. Spécifique au parcours
                 $capacite += $annee->getCapaciteAccueil();
+            }
+        }
+
+        return $capacite;
+    }
+
+    public function getCapacitePlateformes(?CampagneCollecte $campagne = null): int
+    {
+        $capacite = 0;
+        $tcPlateformesCounted = [];
+        $portailsCounted = [];
+
+        foreach ($this->getParcours() as $parcours) {
+            $isOuvert = $campagne !== null ? $parcours->isOuvertPourCampagne($campagne) : $parcours->isOuvert();
+            if (!$isOuvert) {
+                continue;
+            }
+            foreach ($parcours->getAnnees() as $annee) {
+                if (!$annee->isOuvert()) {
+                    continue;
+                }
+                $ordre = $annee->getOrdre();
+                if ($ordre === null) {
+                    continue;
+                }
+
+                $portail = $annee->getPortail();
+                $tc = $this->getTroncCommunForParcours($parcours, $ordre);
+                $isLegacyTc = $tc === null && $this->isAnneeTroncCommun($ordre, $parcours);
+
+                foreach ($annee->getAdmissionPlateformeParametres() as $param) {
+                    $plat = $param->getPlateforme();
+                    if (!$param->isActive() || $plat === null || !$plat->getActive()) {
+                        continue;
+                    }
+                    if ($campagne !== null && $param->getCampagne()?->getId() !== $campagne->getId()) {
+                        continue;
+                    }
+
+                    $platId = $plat->getId();
+                    if ($platId === null) {
+                        continue;
+                    }
+
+                    // 1. Dédoublonnage par Portail
+                    if ($portail !== null && $portail->getId() !== null) {
+                        $portailPlatKey = $portail->getId() . '_' . $ordre . '_' . $platId;
+                        if (isset($portailsCounted[$portailPlatKey])) {
+                            continue;
+                        }
+                        $portailsCounted[$portailPlatKey] = true;
+                    } elseif ($tc !== null) {
+                        // 2. Dédoublonnage par Tronc Commun
+                        $tcPlatKey = $tc['id'] . '_' . $ordre . '_' . $platId;
+                        if (isset($tcPlateformesCounted[$tcPlatKey])) {
+                            continue;
+                        }
+                        $tcPlateformesCounted[$tcPlatKey] = true;
+                    } elseif ($isLegacyTc) {
+                        $tcPlatKey = 'legacy_' . $ordre . '_' . $platId;
+                        if (isset($tcPlateformesCounted[$tcPlatKey])) {
+                            continue;
+                        }
+                        $tcPlateformesCounted[$tcPlatKey] = true;
+                    }
+
+                    $pCap = $param->getCapaciteGlobale();
+                    if ($pCap === null || $pCap <= 0) {
+                        $fi = $param->getCapaciteFi() ?? 0;
+                        $alt = $param->getCapaciteAlternance() ?? 0;
+                        $spe = $param->getCapaciteSpecifique() ?? 0;
+                        $pCap = $fi + $alt + $spe;
+                    }
+
+                    $capacite += max(0, (int)$pCap);
+                }
             }
         }
 

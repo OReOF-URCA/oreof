@@ -1,0 +1,14 @@
+<section
+        class="rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6"
+        {{ stimulus_controller('crud', {
+            url: path('app_formation_liste', { classique: 'false' }),
+            storageKey: 'formation_liste_etablissements',
+        }) }}
+        data-action="base:refreshListe@window->crud#refreshListe"
+>
+    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-sm font-black uppercase tracking-widest text-secondary-500 dark:text-secondary-400">Formations établissements</h2>
+    </div>
+    <div {{ stimulus_target('crud', 'liste') }}></div>
+</section>
+

@@ -204,17 +204,35 @@ class FormationController extends BaseController
         Request               $request,
     ): Response {
         $isEtablissement = $getFormations->isEtablissement();
+        $classiqueParam = $request->query->get('classique');
+        $classique = null;
+        if ($classiqueParam !== null && $classiqueParam !== '') {
+            $classique = filter_var($classiqueParam, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($classique === null) {
+                $classique = $classiqueParam === '1';
+            }
+        }
 
         if ($isEtablissement) {
             $responsables = $userRepository->findUserWithResponsabilites();
             $mentions = $mentionRepository->findBy([], ['libelle' => 'ASC']);
             $composantes = $composanteRepository->findPorteuse();
-            $typeDiplomes = $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']);
+            $criteria = [];
+            if ($classique !== null) {
+                $criteria['classique'] = $classique;
+            }
+            $typeDiplomes = $typeDiplomeRepository->findBy($criteria, ['libelle' => 'ASC']);
         } else {
             $baseFormations = $getFormations->getBaseFormations(
                 $this->getUser(),
                 $this->getCampagneCollecte()
             );
+            if ($classique !== null) {
+                $baseFormations = array_filter(
+                    $baseFormations,
+                    static fn (Formation $f) => ($f->getTypeDiplome()?->isClassique() ?? true) === $classique
+                );
+            }
             $filterOptions = $getFormations->getFilterOptions($baseFormations);
             $responsables = $filterOptions['responsables'];
             $mentions = $filterOptions['mentions'];
@@ -222,10 +240,15 @@ class FormationController extends BaseController
             $typeDiplomes = $filterOptions['typeDiplomes'];
         }
 
+        $params = $request->query->all();
+        if ($classique !== null) {
+            $params['classique'] = $classique ? '1' : '0';
+        }
+
         $tFormations = $getFormations->getFormations(
             $this->getUser(),
             $this->getCampagneCollecte(),
-            $request->query->all()
+            $params
         );
 
         $nbFormations = count($tFormations);
@@ -289,17 +312,35 @@ class FormationController extends BaseController
         Request               $request,
     ): Response {
         $isEtablissement = $getFormations->isEtablissement();
+        $classiqueParam = $request->query->get('classique');
+        $classique = null;
+        if ($classiqueParam !== null && $classiqueParam !== '') {
+            $classique = filter_var($classiqueParam, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($classique === null) {
+                $classique = $classiqueParam === '1';
+            }
+        }
 
         if ($isEtablissement) {
             $responsables = $userRepository->findUserWithResponsabilites();
             $mentions = $mentionRepository->findBy([], ['libelle' => 'ASC']);
             $composantes = $composanteRepository->findPorteuse();
-            $typeDiplomes = $typeDiplomeRepository->findBy([], ['libelle' => 'ASC']);
+            $criteria = [];
+            if ($classique !== null) {
+                $criteria['classique'] = $classique;
+            }
+            $typeDiplomes = $typeDiplomeRepository->findBy($criteria, ['libelle' => 'ASC']);
         } else {
             $baseFormations = $getFormations->getBaseFormations(
                 $this->getUser(),
                 $this->getCampagneCollecte()
             );
+            if ($classique !== null) {
+                $baseFormations = array_filter(
+                    $baseFormations,
+                    static fn (Formation $f) => ($f->getTypeDiplome()?->isClassique() ?? true) === $classique
+                );
+            }
             $filterOptions = $getFormations->getFilterOptions($baseFormations);
             $responsables = $filterOptions['responsables'];
             $mentions = $filterOptions['mentions'];
@@ -307,10 +348,15 @@ class FormationController extends BaseController
             $typeDiplomes = $filterOptions['typeDiplomes'];
         }
 
+        $params = $request->query->all();
+        if ($classique !== null) {
+            $params['classique'] = $classique ? '1' : '0';
+        }
+
         $tFormations = $getFormations->getFormations(
             $this->getUser(),
             $this->getCampagneCollecte(),
-            $request->query->all()
+            $params
         );
 
         $stats = [];

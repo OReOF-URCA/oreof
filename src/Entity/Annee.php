@@ -205,6 +205,30 @@ class Annee
         return $this->capaciteAccueil;
     }
 
+    public function getCapacitePlateformes(?CampagneCollecte $campagne = null): int
+    {
+        $capacite = 0;
+        foreach ($this->getAdmissionPlateformeParametres() as $param) {
+            $plat = $param->getPlateforme();
+            if (!$param->isActive() || $plat === null || !$plat->getActive()) {
+                continue;
+            }
+            if ($campagne !== null && $param->getCampagne()?->getId() !== $campagne->getId()) {
+                continue;
+            }
+            $pCap = $param->getCapaciteGlobale();
+            if ($pCap === null || $pCap <= 0) {
+                $fi = $param->getCapaciteFi() ?? 0;
+                $alt = $param->getCapaciteAlternance() ?? 0;
+                $spe = $param->getCapaciteSpecifique() ?? 0;
+                $pCap = $fi + $alt + $spe;
+            }
+            $capacite += max(0, (int)$pCap);
+        }
+
+        return $capacite;
+    }
+
     public function setCapaciteAccueil(int $capaciteAccueil = 0): static
     {
         $this->capaciteAccueil = $capaciteAccueil;

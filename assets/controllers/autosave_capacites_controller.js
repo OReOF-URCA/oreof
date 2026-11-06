@@ -21,27 +21,30 @@ export default class extends Controller {
       input: this.onInput.bind(this),
       change: this.onChange.bind(this),
       submit: this.onSubmit.bind(this),
-      focusin: this.onFocusIn.bind(this)
+      focusin: this.onFocusIn.bind(this),
+      focusout: this.onFocusOut.bind(this)
     }
     for (const [name, handler] of Object.entries(this.listeners)) this.element.addEventListener(name, handler)
 
-    this.boundBeforeStreamRender = (event) => {
-      const stream = event.target
-      const targetId = stream.getAttribute('target')
-      if (!targetId) return
+    if (typeof document !== 'undefined') {
+      this.boundBeforeStreamRender = (event) => {
+        const stream = event.target
+        const targetId = stream.getAttribute('target')
+        if (!targetId) return
 
-      const existingEl = document.getElementById(targetId)
-      const wasOpen = (existingEl && existingEl.querySelector('details')?.open) || (this.openContainerIds && this.openContainerIds.has(targetId))
+        const existingEl = document.getElementById(targetId)
+        const wasOpen = (existingEl && existingEl.querySelector('details')?.open) || (this.openContainerIds && this.openContainerIds.has(targetId))
 
-      if (wasOpen) {
-        const newDetails = stream.templateElement?.content?.querySelector('details')
-        if (newDetails) {
-          newDetails.setAttribute('open', '')
-          newDetails.open = true
+        if (wasOpen) {
+          const newDetails = stream.templateElement?.content?.querySelector('details')
+          if (newDetails) {
+            newDetails.setAttribute('open', '')
+            newDetails.open = true
+          }
         }
       }
+      document.addEventListener('turbo:before-stream-render', this.boundBeforeStreamRender)
     }
-    document.addEventListener('turbo:before-stream-render', this.boundBeforeStreamRender)
 
     this.setStatus('idle', 'Aucune modification en attente')
   }
@@ -51,7 +54,7 @@ export default class extends Controller {
     clearTimeout(this.timeout)
     this.pendingSave = false
     for (const [name, handler] of Object.entries(this.listeners)) this.element.removeEventListener(name, handler)
-    if (this.boundBeforeStreamRender) {
+    if (this.boundBeforeStreamRender && typeof document !== 'undefined') {
       document.removeEventListener('turbo:before-stream-render', this.boundBeforeStreamRender)
     }
   }
@@ -70,6 +73,64 @@ export default class extends Controller {
     if (event.target.tagName === 'SELECT') {
       this.previousValues[event.target.name] = event.target.value
     }
+  }
+
+  onFocusOut(event) {
+    if (!event.target) return
+    if (this.isPlateformeCapacityDetailInput(event.target)) {
+      const updated = this.updatePlateformeGlobale(event.target)
+      if (updated && !this.saving) {
+        clearTimeout(this.timeout)
+        this.save()
+      }
+    }
+  }
+
+  isPlateformeCapacityDetailInput(target) {
+    if (!target || !target.name) return false
+    return /^annee_\d+_plateforme_\d+_(classique|alternance|specifique)$/.test(target.name)
+  }
+
+  updatePlateformeGlobale(target) {
+    if (!target || !target.name) return false
+    const match = target.name.match(/^annee_(\d+)_plateforme_(\d+)_(classique|alternance|specifique)$/)
+    if (!match) return false
+
+    const anneeId = match[1]
+    const plateformeId = match[2]
+    const container = target.closest('[data-annee-ordre]') || this.element
+    const globaleInput = container.querySelector(`input[name="annee_${anneeId}_plateforme_${plateformeId}_globale"]`)
+    if (!globaleInput) return false
+
+    const classiqueInput = container.querySelector(`input[name="annee_${anneeId}_plateforme_${plateformeId}_classique"]`)
+    const alternanceInput = container.querySelector(`input[name="annee_${anneeId}_plateforme_${plateformeId}_alternance"]`)
+    const specifiqueInput = container.querySelector(`input[name="annee_${anneeId}_plateforme_${plateformeId}_specifique"]`)
+
+    let hasAnyValue = false
+    let total = 0
+    for (const input of [classiqueInput, alternanceInput, specifiqueInput]) {
+      if (input && input.value !== '') {
+        hasAnyValue = true
+        const parsed = parseInt(input.value, 10)
+        if (!isNaN(parsed)) {
+          total += parsed
+        }
+      }
+    }
+
+    const nextVal = hasAnyValue ? String(total) : ''
+    if (globaleInput.value !== nextVal) {
+      globaleInput.value = nextVal
+      this.syncTroncCommun(globaleInput)
+      return true
+    }
+    return false
+  }
+
+  recalculateAllPlateformeGlobales() {
+    if (!this.element || typeof this.element.querySelectorAll !== 'function') return
+    const detailInputs = this.element.querySelectorAll('input[name*="_plateforme_"][name$="_classique"]')
+    detailInputs.forEach(input => this.updatePlateformeGlobale(input))
   }
 
   updateRegimeBadgesForContainer(container) {
@@ -160,11 +221,20 @@ export default class extends Controller {
       }
     }
 
-    // Only debounce text and number fields
-    if (event.target.type === 'number' || event.target.type === 'text') {
-      if (this.statusState !== 'error') this.setStatus('typing', 'Modifications en attente d’enregistrement')
+    if (this.statusState !== 'error') this.setStatus('typing', 'Modifications en attente d’enregistrement')
+
+    // Pour les champs numériques (capacités d'accueil et de plateformes), le calcul et la sauvegarde
+    // se font à la perte de focus (change/focusout) afin d'éviter l'effet gênant de la saisie qui se recharge
+    // à chaque clic sur les flèches incrémentales (up).
+    if (event.target.type === 'number') {
       clearTimeout(this.timeout)
-      const delay = event.target.type === 'text' ? 1000 : 700
+      return
+    }
+
+    // Only debounce text fields
+    if (event.target.type === 'text') {
+      clearTimeout(this.timeout)
+      const delay = 1000
       this.timeout = setTimeout(() => {
         this.save()
       }, delay)
@@ -179,6 +249,10 @@ export default class extends Controller {
 
     this.revision += 1
     this.syncTroncCommun(event.target)
+
+    if (this.isPlateformeCapacityDetailInput(event.target)) {
+      this.updatePlateformeGlobale(event.target)
+    }
 
     const name = event.target.name
     const value = event.target.value
@@ -291,6 +365,7 @@ export default class extends Controller {
   async onSubmit(event) {
     event.preventDefault()
     clearTimeout(this.timeout)
+    this.recalculateAllPlateformeGlobales()
     await this.save(true)
   }
 
@@ -309,6 +384,7 @@ export default class extends Controller {
 
     this.setStatus('saving', 'Enregistrement en cours...')
 
+    this.recalculateAllPlateformeGlobales()
     const formData = new FormData(this.element)
     formData.append('is_autosave_capacites', '1')
 
