@@ -731,11 +731,12 @@ class Formation
     public function getTroncsCommuns(): array
     {
         $struct = $this->getStructureSemestres();
-        if (isset($struct['troncs_communs']) && is_array($struct['troncs_communs']) && !empty($struct['troncs_communs'])) {
-            return $struct['troncs_communs'];
+        if (array_key_exists('troncs_communs', $struct)) {
+            return is_array($struct['troncs_communs']) ? $struct['troncs_communs'] : [];
         }
 
         // Rétrocompatibilité : construction automatique depuis annees_tronc_commun
+        // UNIQUEMENT si la clé moderne 'troncs_communs' n'a jamais été initialisée sur la formation
         $annees = $this->getAnneesTroncCommun();
         if (!empty($annees)) {
             $allParcoursIds = [];
@@ -798,6 +799,21 @@ class Formation
         $struct['troncs_communs'] = $cleaned;
         $struct['annees_tronc_commun'] = $allAnnees;
 
+        // Purger les anciennes clés résiduelles pour éviter toute réapparition de TC fantômes
+        foreach ($struct as $k => $v) {
+            if (is_string($k) && str_starts_with($k, 'annee_')) {
+                unset($struct[$k]);
+            }
+        }
+        for ($s = 1; $s <= 12; $s++) {
+            if (isset($struct[$s]) && $struct[$s] === 'tronc_commun') {
+                unset($struct[$s]);
+            }
+            if (isset($struct[(string)$s]) && $struct[(string)$s] === 'tronc_commun') {
+                unset($struct[(string)$s]);
+            }
+        }
+
         $this->setStructureSemestres($struct);
 
         return $this;
@@ -805,12 +821,17 @@ class Formation
 
     public function isAnneeTroncCommun(int $anneeOrdre, int|Parcours|null $parcours = null): bool
     {
+        $struct = $this->getStructureSemestres();
+        $hasModernConfig = array_key_exists('troncs_communs', $struct);
         $tcs = $this->getTroncsCommuns();
-        if (!empty($tcs)) {
+
+        if ($hasModernConfig || !empty($tcs)) {
             if ($parcours !== null) {
-                $parcoursId = $parcours instanceof Parcours ? $parcours->getId() : $parcours;
+                $parcoursId = (int) ($parcours instanceof Parcours ? $parcours->getId() : $parcours);
                 foreach ($tcs as $tc) {
-                    if (in_array($anneeOrdre, $tc['annees'] ?? [], true) && in_array($parcoursId, $tc['parcours'] ?? [], true)) {
+                    $tcAnnees = array_map('intval', $tc['annees'] ?? []);
+                    $tcParcours = array_map('intval', $tc['parcours'] ?? []);
+                    if (in_array($anneeOrdre, $tcAnnees, true) && in_array($parcoursId, $tcParcours, true)) {
                         return true;
                     }
                 }
@@ -818,14 +839,15 @@ class Formation
             }
 
             foreach ($tcs as $tc) {
-                if (in_array($anneeOrdre, $tc['annees'] ?? [], true)) {
+                $tcAnnees = array_map('intval', $tc['annees'] ?? []);
+                if (in_array($anneeOrdre, $tcAnnees, true)) {
                     return true;
                 }
             }
             return false;
         }
 
-        $struct = $this->getStructureSemestres();
+        // Ancienne logique de rétrocompatibilité uniquement si aucune config moderne
         if (isset($struct['annees_tronc_commun']) && is_array($struct['annees_tronc_commun'])) {
             if (in_array($anneeOrdre, array_map('intval', $struct['annees_tronc_commun']), true)) {
                 return true;
@@ -848,9 +870,11 @@ class Formation
      */
     public function getTroncCommunForParcours(int|Parcours $parcours, int $anneeOrdre): ?array
     {
-        $parcoursId = $parcours instanceof Parcours ? $parcours->getId() : $parcours;
+        $parcoursId = (int) ($parcours instanceof Parcours ? $parcours->getId() : $parcours);
         foreach ($this->getTroncsCommuns() as $tc) {
-            if (in_array($anneeOrdre, $tc['annees'] ?? [], true) && in_array($parcoursId, $tc['parcours'] ?? [], true)) {
+            $tcAnnees = array_map('intval', $tc['annees'] ?? []);
+            $tcParcours = array_map('intval', $tc['parcours'] ?? []);
+            if (in_array($anneeOrdre, $tcAnnees, true) && in_array($parcoursId, $tcParcours, true)) {
                 return $tc;
             }
         }
@@ -868,10 +892,11 @@ class Formation
             return [];
         }
 
-        $parcoursId = $parcours instanceof Parcours ? $parcours->getId() : $parcours;
+        $parcoursId = (int) ($parcours instanceof Parcours ? $parcours->getId() : $parcours);
+        $tcParcours = array_map('intval', $tc['parcours'] ?? []);
         $autres = [];
         foreach ($this->getParcours() as $p) {
-            if ($p->getId() !== $parcoursId && in_array($p->getId(), $tc['parcours'] ?? [], true)) {
+            if ($p->getId() !== null && $p->getId() !== $parcoursId && in_array($p->getId(), $tcParcours, true)) {
                 $autres[] = $p;
             }
         }
@@ -911,6 +936,20 @@ class Formation
     public function getAnneesTroncCommun(): array
     {
         $struct = $this->getStructureSemestres();
+        if (array_key_exists('troncs_communs', $struct) && is_array($struct['troncs_communs'])) {
+            $res = [];
+            foreach ($struct['troncs_communs'] as $tc) {
+                foreach ($tc['annees'] ?? [] as $a) {
+                    $anneeNum = (int)$a;
+                    if ($anneeNum > 0 && !in_array($anneeNum, $res, true)) {
+                        $res[] = $anneeNum;
+                    }
+                }
+            }
+            sort($res);
+            return $res;
+        }
+
         $res = [];
         if (isset($struct['annees_tronc_commun']) && is_array($struct['annees_tronc_commun'])) {
             $res = array_map('intval', $struct['annees_tronc_commun']);

@@ -8,7 +8,6 @@
 
 import { Controller } from '@hotwired/stimulus'
 import callOut from '../../js/callOut'
-import { Modal } from 'bootstrap'
 
 export default class extends Controller {
   static targets = ['configProfil', 'liste']
@@ -19,8 +18,24 @@ export default class extends Controller {
     urlAdd: String,
   }
 
+  hasChanges = false
+
   connect() {
     this._updateListe()
+  }
+
+  disconnect() {
+    if (this.hasChanges) {
+      this._reloadDataTable()
+    }
+  }
+
+  _reloadDataTable() {
+    if (typeof window.reloadAllDataTables === 'function') {
+      window.reloadAllDataTables()
+    } else {
+      window.dispatchEvent(new CustomEvent('datatable:reload'))
+    }
   }
 
   async _updateListe() {
@@ -32,26 +47,37 @@ export default class extends Controller {
       })
   }
 
-  delete (event) {
-    console.log('coucou delete')
+  async delete (event) {
     event.preventDefault()
-    const { url } = event.params
-    const { csrf } = event.params
-    let modal = new Modal(document.getElementById('modal-delete'))
-    modal.show()
-    document.getElementById('btn-confirm-supprimer').addEventListener('click', async () => {
-      const body = {
+    const { url, csrf } = event.params
+
+    if (!confirm('Êtes-vous sûr de vouloir supprimer ce profil ?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(url, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           csrf,
         }),
-      }
-      modal = null
-      await fetch(url, body).then(() => {
-        callOut('Suppression effectuée', 'success')
-        this._updateListe()
       })
-    })
+
+      const data = await response.json()
+      if (response.ok && data.success) {
+        this.hasChanges = true
+        callOut(data.success || 'Suppression effectuée', 'success')
+        this._updateListe()
+        this._reloadDataTable()
+      } else {
+        callOut(data.error || 'Erreur lors de la suppression', 'danger')
+      }
+    } catch {
+      callOut('Erreur lors de la suppression', 'danger')
+    }
   }
 
   addProfil(event) {
@@ -81,8 +107,18 @@ export default class extends Controller {
       .then((response) => response.json())
       .then((json) => {
         if (json.success) {
+          this.hasChanges = true
           callOut('Centre ajouté', 'success')
           this._updateListe()
+          this._reloadDataTable()
+
+          const typeCentre = document.getElementById('typeCentre')
+          if (typeCentre?.tomselect) {
+            typeCentre.tomselect.clear()
+          } else if (typeCentre) {
+            typeCentre.value = ''
+          }
+          this.configProfilTarget.innerHTML = ''
         } else if (json.error === 'already_exist') {
           if (confirm('Le centre est déjà associé à un autre utilisateur, voulez-vous le remplacer ?')) {
             this._updateCentre(centreType, centreId, true)

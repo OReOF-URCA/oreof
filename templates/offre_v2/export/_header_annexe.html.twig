@@ -1,0 +1,16 @@
+{% if not (is_web_preview|default(false)) and titre_annexe is defined and titre_annexe is not empty %}
+    <tr>
+        <th colspan="{{ nb_cols }}" data-xls-colspan="{{ nb_cols }}" data-xls-font-size="13" data-xls-font-bold="true" data-xls-align="left" data-xls-valign="center" data-xls-height="26">
+            {{ titre_annexe }}
+        </th>
+    </tr>
+    <tr>
+        <th colspan="{{ nb_cols }}" data-xls-colspan="{{ nb_cols }}" data-xls-font-size="9" data-xls-font-italic="true" data-xls-font-color="#555555" data-xls-align="left" data-xls-valign="center" data-xls-height="18">
+            Document généré le {{ date_generation ? date_generation|date('d/m/Y à H:i') : 'now'|date('d/m/Y à H:i') }} — ORéOF
+        </th>
+    </tr>
+    <tr data-xls-height="8">
+        <th colspan="{{ nb_cols }}" data-xls-colspan="{{ nb_cols }}"></th>
+    </tr>
+{% endif %}
+

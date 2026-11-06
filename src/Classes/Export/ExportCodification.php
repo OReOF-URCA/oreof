@@ -59,7 +59,7 @@ class ExportCodification
                             $this->excelWriter->writeCellXY(2, $ligne, $formation->getDisplayLong());
                             $this->excelWriter->writeCellXY(3, $ligne, $parcours->getLibelle());
                             $this->excelWriter->writeCellXY(4, $ligne, $formation->getMention()?->getDomaine()?->getLibelle());
-                            $this->excelWriter->writeCellXY(5, $ligne, $parcours->getLocalisation()?->getLibelle());
+                            $this->excelWriter->writeCellXY(5, $ligne, ($parcours->getLocalisation() ?? $parcours->getVille())?->getLibelle());
                             $this->excelWriter->writeCellXY(6, $ligne, $parcours->getCodeDiplome($annee));
                             $this->excelWriter->writeCellXY(7, $ligne, $parcours->getCodeVersionDiplome($annee));
                             $this->excelWriter->writeCellXY(8, $ligne, 'Année ' . $annee);
@@ -77,7 +77,7 @@ class ExportCodification
                         $this->excelWriter->writeCellXY(2, $ligne, $formation->getDisplayLong());
                         $this->excelWriter->writeCellXY(3, $ligne, $parcours->getLibelle());
                         $this->excelWriter->writeCellXY(4, $ligne, $formation->getMention()?->getDomaine()?->getLibelle());
-                        $this->excelWriter->writeCellXY(5, $ligne, $parcours->getLocalisation()?->getLibelle());
+                        $this->excelWriter->writeCellXY(5, $ligne, ($parcours->getLocalisation() ?? $parcours->getVille())?->getLibelle());
                         $this->excelWriter->writeCellXY(6, $ligne, $parcours->getCodeDiplome($annee));
                         $this->excelWriter->writeCellXY(7, $ligne, $parcours->getCodeVersionDiplome($annee));
                         $this->excelWriter->writeCellXY(8, $ligne, 'Année ' . $annee);

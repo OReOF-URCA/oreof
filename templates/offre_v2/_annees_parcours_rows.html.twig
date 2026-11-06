@@ -1,17 +1,21 @@
 {# Lignes d'années d'un parcours dans la liste de l'offre, chargées à la demande (OffreController::anneesParcours).
    Paramètres : parcours, formation, annees, dpeParc (DpeParcours de la campagne ou null), tpaByTypeDiplome. #}
 {% for annee in annees %}
-    {% set isAnneeTc = formation.isAnneeTroncCommun(annee.ordre) %}
+    {% set tc = formation.getTroncCommunForParcours(parcours, annee.ordre) %}
+    {% set isAnneeTc = tc is not null or formation.isAnneeTroncCommun(annee.ordre, parcours) %}
     <tr data-parcours-annee="{{ parcours.id }}" class="{{ isAnneeTc ? 'bg-primary-50/40 hover:bg-primary-50/70 border-l-4 border-l-primary-500 dark:bg-primary-900/30' : 'hover:bg-secondary-50/80' }} transition-all border-t border-secondary-100 group-data-[collapsed]:hidden">
         <td>&nbsp;</td>
         <td>&nbsp;</td>
-        <td class="px-4 py-3 {{ isAnneeTc ? 'pl-6 font-semibold text-primary-950' : 'pl-8 text-secondary-600 font-medium' }}">
+        <td class="px-4 py-3 {{ isAnneeTc ? 'pl-6 font-semibold text-primary-950 dark:text-primary-100' : 'pl-8 text-secondary-600 font-medium' }}">
             <div class="flex items-center gap-2 flex-wrap">
                 <span>{{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}</span>
                 {% if isAnneeTc %}
-                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold bg-primary-100 text-primary-800 border border-primary-200 shadow-xs dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300" title="Cette année est commune à tous les parcours de la formation">
+                    {% set tcNom = tc ? tc.nom : 'Tronc commun' %}
+                    <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold bg-primary-100 text-primary-800 border border-primary-200 shadow-xs dark:border-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
+                          title="Cette année participe au tronc commun « {{ tcNom }} » pour ce parcours"
+                    >
                         <twig:UX:Icon name="ph:users-three-bold" class="h-3 w-3" />
-                        Tronc commun
+                        {{ tcNom }}
                     </span>
                 {% endif %}
             </div>
@@ -20,15 +24,26 @@
             <twig:Badge variant="{{ annee.isOuvert ? 'success' : 'danger' }}" label="{{ annee.isOuvert ? 'Oui' : 'Non' }}" />
         </td>
         <td class="px-4 py-3">
-            <div class="flex gap-1 flex-wrap">
-                {% set typeDiplId = formation.typeDiplome ? formation.typeDiplome.id : null %}
-                {% if typeDiplId and tpaByTypeDiplome[typeDiplId] is defined %}
-                    {% for tpa in tpaByTypeDiplome[typeDiplId] %}
-                        {% if tpa.plateforme and tpa.plateforme.active and tpa.annees and annee.ordre in tpa.annees %}
-                            <twig:Badge :variant="tpa.plateforme.color" :label="tpa.plateforme.code" />
+            <div class="flex gap-1 flex-wrap items-center">
+                {% set anneeParams = paramsByAnnee[annee.id]|default([]) %}
+                {% for param in anneeParams %}
+                    {% set plat = param.plateforme %}
+                    {% if plat and plat.active %}
+                        {% set capTotale = (param.capaciteGlobale|default(0)) + (param.capaciteFi|default(0)) + (param.capaciteAlternance|default(0)) + (param.capaciteSpecifique|default(0)) %}
+                        {% if param.active %}
+                            <twig:Badge :variant="plat.color|default('primary')"
+                                        :label="plat.code"
+                                        title="{{ plat.libelle }} : active pour cette année"
+                            />
+                        {% elseif capTotale > 0 %}
+                            <twig:Badge variant="warning"
+                                        icon="ph:warning"
+                                        :label="plat.code"
+                                        title="{{ plat.libelle }} : plateforme inactive mais capacité renseignée ({{ capTotale }})"
+                            />
                         {% endif %}
-                    {% endfor %}
-                {% endif %}
+                    {% endif %}
+                {% endfor %}
             </div>
         </td>
         <td class="px-4 py-3 text-right font-medium text-secondary-700 dark:text-secondary-100">{{ annee.capaciteAccueil|default(0) }}</td>

@@ -152,7 +152,7 @@ class ElementConstitutifType extends AbstractType
 //                },
 
                 // création (obligatoire)
-                'create' => function (string $label, EntityManagerInterface $em) {
+                'create' => function (string $label, $scope, EntityManagerInterface $em) {
                     $e = new FicheMatiere();
                     $e->setLibelle($label);
                     return $e; // persist/flush gérés par le type (ou tu peux le faire ici)

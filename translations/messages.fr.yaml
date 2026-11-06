@@ -121,7 +121,7 @@ fiche_matiere.historique.description: "Consultez l'historique des modifications 
 formation.historique.title: "Historique de la formation"
 formation.historique.description: "Consultez l'historique des modifications et des versions de la formation."
 ses.edit.commentaire.parcours: "Commentaire SES sur le parcours"
-Impersonner: "Prendre l'identité"
+Impersonner: "Prendre l'identité de "
 
 plateforme:
   libelle: "Plateforme"

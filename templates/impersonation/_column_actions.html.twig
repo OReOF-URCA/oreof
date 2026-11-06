@@ -1,13 +1,11 @@
 <div class="text-right">
-    <twig:Button
-        :label="'Impersonner'|trans ~ ' ' ~ item.display"
-        variant="info"
-        icon="icon:lock"
-        size="sm"
-        tooltip="Impersonner {{ item.display }}"
-        href="{{ path('app_homepage', {'_switch_user': item.username}) }}"
-        data-turbo="false"
-    />
-
-
+  <twig:Button
+    :label="'Impersonner'|trans ~ ' ' ~ item.display"
+    variant="info"
+    icon="icon:lock"
+    size="sm"
+    :tooltip="'Impersonner'|trans ~ ' ' ~ item.display"
+    href="{{ path('app_homepage', { _switch_user: item.username }) }}"
+    data-turbo="false"
+  />
 </div>
