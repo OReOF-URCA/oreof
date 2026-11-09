@@ -17,6 +17,7 @@ use App\Entity\Composante;
 use App\Entity\CampagneCollecte;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\CampagneCollecteRepository;
+use App\Service\ChangeRfTableFactory;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeParcoursRepository;
@@ -288,25 +289,30 @@ class ValidationComposanteController extends BaseController
 
     #[Route('{composante}/change-rf/liste', name: 'change_rf_liste')]
     public function changeRfListe(
-        ValidationProcessChangeRf $validationProcess,
-        ChangeRfRepository        $changeRfRepository,
-        ComposanteRepository      $composanteRepository,
-        Composante                $composante,
-        Request                   $request
+        ChangeRfRepository   $changeRfRepository,
+        ChangeRfTableFactory $tableFactory,
+        Composante           $composante,
+        Request              $request
     ): Response
     {
-        $typeValidation = $request->query->get('typeValidation');
+        $typeValidation = $request->query->get('typeValidation', $request->query->get('value'));
+        if (!is_string($typeValidation) || $typeValidation === '') {
+            return $this->render('validation/_listeChangeRf.html.twig', [
+                'table' => null,
+                'nbDemandes' => 0,
+                'etape' => null,
+                'oneDemande' => null,
+            ]);
+        }
 
-        $demandes = $changeRfRepository->findByComposanteTypeValidation(
-            $composante,
-            $this->getCampagneCollecte(),
-            $typeValidation
-        );
-
+        $campagne = $this->getCampagneCollecte();
+        $demandes = $changeRfRepository->findByComposanteTypeValidation($composante, $campagne, $typeValidation);
 
         return $this->render('validation/_listeChangeRf.html.twig', [
-            'demandes' => $demandes,
-            'etape' => $typeValidation ?? null,
+            'table' => $tableFactory->create($campagne, $typeValidation, $composante),
+            'nbDemandes' => count($demandes),
+            'etape' => $typeValidation,
+            'oneDemande' => $demandes[0] ?? null,
         ]);
     }
 
