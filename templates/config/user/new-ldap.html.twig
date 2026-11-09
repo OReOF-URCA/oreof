@@ -1,7 +1,7 @@
 <div>
     {% if not is_granted('ROLE_ADMIN') %}
         <div class="mb-3 rounded-lg border border-cyan-200 bg-cyan-50 p-3 text-sm text-cyan-800">
-            La demande sera validée par l'administration du site. L'utilisateur recevra un mail de confirmation dès l'activation complète de son accès.
+            {{ 'config.user.new_ldap.la_demande_sera_validee_par_l'|trans({}, 'modal') }}
         </div>
     {% endif %}
     {% form_theme form 'communs/form_theme_v2.html.twig' %}

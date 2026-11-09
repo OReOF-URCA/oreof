@@ -19,11 +19,11 @@
     <twig:alerte type="{{ isRefuse ? 'warning' : 'info' }}">
         <p class="text-xs opacity-90">
             {% if isRefuse %}
-                Sélectionnez les formations et parcours à renvoyer pour modifications et indiquez le motif ci-dessous.
+                {{ 'offre_v2.modal_validation_composante.selectionnez_les_formations_et_parcours_a'|trans({}, 'modal') }}
             {% elseif isDocumentsOnly %}
-                Sélectionnez les formations de la composante concernées, puis déposez ou sélectionnez le PV de conseil et la note explicative à leur associer.
+                {{ 'offre_v2.modal_validation_composante.selectionnez_les_formations_de_la_composante'|trans({}, 'modal') }}
             {% else %}
-                Sélectionnez les formations et parcours de la composante que vous souhaitez valider pour cette campagne, puis déposez ou sélectionnez le PV de conseil et la note explicative associés.
+                {{ 'offre_v2.modal_validation_composante.selectionnez_les_formations_et_parcours_de'|trans({}, 'modal') }}
             {% endif %}
         </p>
     </twig:alerte>
@@ -33,42 +33,42 @@
         <div class="flex flex-wrap items-center justify-between gap-2 border-b border-secondary-200 dark:border-secondary-700 pb-2">
             <div>
                 <h4 class="text-sm font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide">
-                    Formations & Parcours de la composante
+                    {{ 'offre_v2.modal_validation_composante.formations_parcours_composante'|trans({}, 'modal') }}
                 </h4>
                 <span class="text-xs text-secondary-500">
-                    Cochez les éléments concernés par cette action
+                    {{ 'offre_v2.modal_validation_composante.cochez_les_elements_concernes_par_cette'|trans({}, 'modal') }}
                 </span>
             </div>
             <div class="flex items-center gap-2 text-xs font-semibold">
                 <button type="button"
                         onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = true); document.querySelectorAll('.formation-checkbox').forEach(cb => cb.checked = true);"
                         class="text-primary-600 hover:text-primary-800 hover:underline cursor-pointer dark:text-primary-400 dark:hover:text-primary-300">
-                    Tout cocher
+                    {{ 'offre_v2.modal_validation_composante.tout_cocher'|trans({}, 'modal') }}
                 </button>
                 <span class="text-secondary-300">|</span>
                 <button type="button"
                         onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = false); document.querySelectorAll('.formation-checkbox').forEach(cb => cb.checked = false);"
                         class="text-secondary-500 hover:text-secondary-700 hover:underline cursor-pointer">
-                    Tout décocher
+                    {{ 'offre_v2.modal_validation_composante.tout_decocher'|trans({}, 'modal') }}
                 </button>
                 <span class="text-secondary-300">|</span>
                 {% if isDocumentsOnly %}
                     <button type="button"
                             onclick="document.querySelectorAll('.formation-checkbox').forEach(cb => { cb.checked = (cb.dataset.hasPv === '0'); const fId = cb.dataset.formationId; document.querySelectorAll('.parcours-of-formation-' + fId).forEach(pcb => pcb.checked = cb.checked); });"
                             class="text-warning-700 dark:text-warning-300 hover:underline cursor-pointer">
-                        Sans PV
+                        {{ 'offre_v2.modal_validation_composante.sans_pv'|trans({}, 'modal') }}
                     </button>
                     <span class="text-secondary-300">|</span>
                     <button type="button"
                             onclick="document.querySelectorAll('.formation-checkbox').forEach(cb => { cb.checked = (cb.dataset.hasNote === '0'); const fId = cb.dataset.formationId; document.querySelectorAll('.parcours-of-formation-' + fId).forEach(pcb => pcb.checked = cb.checked); });"
                             class="text-warning-700 dark:text-warning-300 hover:underline cursor-pointer">
-                        Sans Note
+                        {{ 'offre_v2.modal_validation_composante.sans_note'|trans({}, 'modal') }}
                     </button>
                 {% else %}
                     <button type="button"
                             onclick="document.querySelectorAll('.parcours-checkbox').forEach(cb => cb.checked = (cb.dataset.conforme === '1')); syncFormationsCheckboxes();"
                             class="text-success-700 dark:text-success-100 hover:text-success-800 hover:underline cursor-pointer dark:hover:text-success-300">
-                        Cocher les conformes
+                        {{ 'offre_v2.modal_validation_composante.cocher_les_conformes'|trans({}, 'modal') }}
                     </button>
                 {% endif %}
             </div>
@@ -96,23 +96,23 @@
                         <div class="flex items-center gap-2 shrink-0">
                             {% if isDocumentsOnly %}
                                 {% if fData.hasPv|default(false) %}
-                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-success-50 text-success-700 border border-success-200 dark:bg-success-900/30 dark:text-success-300 dark:border-success-700">PV OK</span>
+                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-success-50 text-success-700 border border-success-200 dark:bg-success-900/30 dark:text-success-300 dark:border-success-700">{{ 'offre_v2.modal_validation_composante.pv_ok'|trans({}, 'modal') }}</span>
                                 {% else %}
-                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 text-secondary-600 border border-secondary-200 dark:bg-secondary-800 dark:text-secondary-400">Sans PV</span>
+                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 text-secondary-600 border border-secondary-200 dark:bg-secondary-800 dark:text-secondary-400">{{ 'offre_v2.modal_validation_composante.sans_pv'|trans({}, 'modal') }}</span>
                                 {% endif %}
                                 {% if fData.hasNote|default(false) %}
-                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-900/30 dark:text-primary-300 dark:border-primary-700">Note OK</span>
+                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-900/30 dark:text-primary-300 dark:border-primary-700">{{ 'offre_v2.modal_validation_composante.note_ok'|trans({}, 'modal') }}</span>
                                 {% else %}
-                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 text-secondary-600 border border-secondary-200 dark:bg-secondary-800 dark:text-secondary-400">Sans Note</span>
+                                    <span class="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold bg-secondary-100 text-secondary-600 border border-secondary-200 dark:bg-secondary-800 dark:text-secondary-400">{{ 'offre_v2.modal_validation_composante.sans_note'|trans({}, 'modal') }}</span>
                                 {% endif %}
                             {% else %}
                                 {% if fData.hasAnomalies %}
                                     <span class="inline-flex items-center gap-1 rounded-md bg-warning-50 dark:bg-warning-900/30 px-2 py-0.5 text-xs font-semibold text-warning-800 dark:text-warning-300 border border-warning-200 dark:border-warning-700" title="{{ fData.anomaliesCount }} anomalie(s) détectée(s)">
-                                        ⚠️ {{ fData.anomaliesCount }} à vérifier
+                                        {{ 'offre_v2.modal_validation_composante.anomalies_a_verifier'|trans({'%count%': fData.anomaliesCount}, 'modal') }}
                                     </span>
                                 {% else %}
                                     <span class="inline-flex items-center gap-1 rounded-md bg-success-50 dark:bg-success-900/30 px-2 py-0.5 text-xs font-semibold text-success-700 dark:text-success-300 border border-success-200 dark:border-success-700">
-                                        ✓ Conforme
+                                        {{ 'offre_v2.modal_validation_composante.conforme'|trans({}, 'modal') }}
                                     </span>
                                 {% endif %}
                             {% endif %}
@@ -141,14 +141,14 @@
                                 </label>
 
                                 <div class="flex items-center gap-2">
-                                    <span class="text-secondary-500 font-medium">Capacité : <strong>{{ pData.capacite }}</strong></span>
+                                    <span class="text-secondary-500 font-medium">{{ 'offre_v2.modal_validation_composante.capacite'|trans({}, 'modal') }} <strong>{{ pData.capacite }}</strong></span>
                                     {% if pData.isConforme %}
                                         <span class="inline-flex items-center gap-0.5 text-success-700 dark:text-success-100 font-semibold text-[11px]">
-                                            ✓ Données OK
+                                            {{ 'offre_v2.modal_validation_composante.donnees_ok'|trans({}, 'modal') }}
                                         </span>
                                     {% else %}
                                         <span class="inline-flex items-center gap-0.5 text-warning-700 dark:text-warning-100 font-semibold text-[11px] cursor-help" title="{{ pData.anomalies|join('\n') }}">
-                                            ⚠️ {{ pData.anomalies|length }} anomalie{{ pData.anomalies|length > 1 ? 's' : '' }}
+                                            ⚠️ {{ 'offre_v2.modal_validation_composante.anomalies'|trans({'%count%': pData.anomalies|length}, 'modal') }}
                                         </span>
                                     {% endif %}
                                 </div>
@@ -169,7 +169,7 @@
                     <div class="flex items-center justify-between gap-2 mb-1">
                         <label class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide flex items-center gap-1.5">
                             <span>📄</span>
-                            <span>Procès-Verbal (PV)</span>
+                            <span>{{ 'offre_v2.modal_validation_composante.proces_verbal_pv'|trans({}, 'modal') }}</span>
                         </label>
                         <twig:Badge size="sm"
                                     :variant="hasUpload ? 'danger' : 'secondary'"
@@ -186,16 +186,16 @@
                                     onchange="updatePvVisibility();"
                                     class="app-filter-select w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface px-3 py-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 cursor-pointer">
                                 {% if isDocumentsOnly %}
-                                    <option value="">-- Ne pas modifier le PV --</option>
-                                    <option value="__upload__">📥 Modifier / Déposer une nouvelle PJ (PDF)</option>
-                                    <option value="__remove__">🗑️ Retirer / Dissocier le PV actuel</option>
+                                    <option value="">{{ 'offre_v2.modal_validation_composante.ne_pas_modifier_le_pv'|trans({}, 'modal') }}</option>
+                                    <option value="__upload__">{{ 'offre_v2.modal_validation_composante.modifier_deposer_une_nouvelle_pj_pdf'|trans({}, 'modal') }}</option>
+                                    <option value="__remove__">{{ 'offre_v2.modal_validation_composante.retirer_dissocier_le_pv_actuel'|trans({}, 'modal') }}</option>
                                 {% else %}
-                                    <option value="">📥 Téléverser une nouvelle PJ (PDF)</option>
+                                    <option value="">{{ 'offre_v2.modal_validation_composante.televerser_une_nouvelle_pj_pdf'|trans({}, 'modal') }}</option>
                                 {% endif %}
                                 {% if existingPvs|length > 0 %}
-                                    <optgroup label="Ou réutiliser un PV déjà déposé :">
+                                    <optgroup label="{{ 'offre_v2.modal_validation_composante.ou_reutiliser_un_pv_deja_depose'|trans({}, 'modal') }}">
                                         {% for pv in existingPvs %}
-                                            <option value="{{ pv.id }}">{{ pv.originalFilename }} (du {{ pv.uploadedAt|date('d/m/Y') }})</option>
+                                            <option value="{{ pv.id }}">{{ 'offre_v2.modal_formation_documents.fichier_du'|trans({'%fichier%': pv.originalFilename, '%date%': pv.uploadedAt|date('d/m/Y')}, 'modal') }}</option>
                                         {% endfor %}
                                     </optgroup>
                                 {% endif %}
@@ -219,18 +219,18 @@
                     <div class="flex flex-wrap items-center gap-2 mb-1">
                         <label for="date" class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide flex items-center gap-1.5">
                             <span>📅</span>
-                            <span>Date de décision / conseil</span>
+                            <span>{{ 'offre_v2.modal_validation_composante.date_de_decision_conseil'|trans({}, 'modal') }}</span>
                         </label>
-                        <twig:Badge size="sm" variant="danger" label="Requis" />
+                        <twig:Badge size="sm" variant="danger" label="{{ 'offre_v2.modal_validation_composante.requis'|trans({}, 'modal') }}" />
                     </div>
                     <p class="text-[11px] text-secondary-500">
-                        Date d'effet ou date de tenue du conseil / commission de décision.
+                        {{ 'offre_v2.modal_validation_composante.date_d_effet_ou_date_de'|trans({}, 'modal') }}
                     </p>
                 </div>
 
                 <div class="space-y-1">
                     <label for="date" class="block text-[11px] font-medium text-secondary-500">
-                        Sélectionner la date :
+                        {{ 'offre_v2.modal_validation_composante.selectionner_la_date'|trans({}, 'modal') }}
                     </label>
                     <input type="date"
                            name="date"
@@ -252,19 +252,19 @@
                            value="1"
                            onchange="document.getElementById('laisser_passer_justif_wrapper').style.display = this.checked ? 'block' : 'none';"
                            class="h-4 w-4 rounded border-warning-300 text-warning-600 focus:ring-warning-500 cursor-pointer dark:text-warning-400">
-                    <span>Demander / Activer un laissez-passer exceptionnel</span>
+                    <span>{{ 'offre_v2.modal_validation_composante.demander_activer_un_laissez_passer_exceptionnel'|trans({}, 'modal') }}</span>
                 </label>
                 <div id="laisser_passer_justif_wrapper" style="display: none;" class="space-y-1 pt-1">
                     <div class="flex flex-wrap items-center gap-2">
                         <label for="laisserPasserJustif" class="block text-[11px] font-medium text-warning-800 dark:text-warning-100">
-                            Justification du laissez-passer (PV différé, décision dérogatoire, etc.) :
+                            {{ 'offre_v2.modal_validation_composante.justification_du_laissez_passer_pv_differe'|trans({}, 'modal') }}
                         </label>
-                        <twig:Badge size="sm" variant="danger" label="Requis" />
+                        <twig:Badge size="sm" variant="danger" label="{{ 'offre_v2.modal_validation_composante.requis'|trans({}, 'modal') }}" />
                     </div>
                     <input type="text"
                            name="laisserPasserJustif"
                            id="laisserPasserJustif"
-                           placeholder="Ex : PV en cours de signature, validation accordée en séance du..."
+                           placeholder="{{ 'offre_v2.modal_validation_composante.ex_pv_en_cours_de_signature'|trans({}, 'modal') }}"
                            class="w-full rounded-lg border border-warning-300 dark:border-secondary-600 bg-surface p-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-warning-500 focus:ring-warning-500">
                 </div>
             </div>
@@ -276,7 +276,7 @@
                 <div class="flex items-center gap-2">
                     <label class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide flex items-center gap-1.5">
                         <span>📝</span>
-                        <span>Note explicative</span>
+                        <span>{{ 'offre_v2.modal_validation_composante.note_explicative'|trans({}, 'modal') }}</span>
                     </label>
                     <twig:Badge size="sm"
                                 :variant="hasUploadNote ? 'danger' : 'secondary'"
@@ -284,7 +284,7 @@
                     />
                 </div>
                 <a href="{{ asset('modeles/note_explicative.docx') }}" target="_blank" class="text-[11px] font-semibold text-primary-600 hover:underline dark:text-primary-400">
-                    Modèle .docx
+                    {{ 'offre_v2.modal_validation_composante.modele_docx'|trans({}, 'modal') }}
                 </a>
             </div>
 
@@ -297,16 +297,16 @@
                             onchange="updateNoteVisibility();"
                             class="app-filter-select w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface px-3 py-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 cursor-pointer">
                         {% if isDocumentsOnly %}
-                            <option value="">-- Ne pas modifier la Note --</option>
-                            <option value="__upload__">📥 Modifier / Déposer une nouvelle Note (PDF)</option>
-                            <option value="__remove__">🗑️ Retirer / Dissocier la Note actuelle</option>
+                            <option value="">{{ 'offre_v2.modal_validation_composante.ne_pas_modifier_la_note'|trans({}, 'modal') }}</option>
+                            <option value="__upload__">{{ 'offre_v2.modal_validation_composante.modifier_deposer_une_nouvelle_note_pdf'|trans({}, 'modal') }}</option>
+                            <option value="__remove__">{{ 'offre_v2.modal_validation_composante.retirer_dissocier_la_note_actuelle'|trans({}, 'modal') }}</option>
                         {% else %}
-                            <option value="">📥 Téléverser une nouvelle Note (PDF)</option>
+                            <option value="">{{ 'offre_v2.modal_validation_composante.televerser_une_nouvelle_note_pdf'|trans({}, 'modal') }}</option>
                         {% endif %}
                         {% if existingNotes|length > 0 %}
-                            <optgroup label="Ou réutiliser une Note déjà déposée :">
+                            <optgroup label="{{ 'offre_v2.modal_validation_composante.ou_reutiliser_une_note_deja_deposee'|trans({}, 'modal') }}">
                                 {% for note in existingNotes %}
-                                    <option value="{{ note.id }}">{{ note.originalFilename }} (du {{ note.uploadedAt|date('d/m/Y') }})</option>
+                                    <option value="{{ note.id }}">{{ 'offre_v2.modal_formation_documents.fichier_du'|trans({'%fichier%': note.originalFilename, '%date%': note.uploadedAt|date('d/m/Y')}, 'modal') }}</option>
                                 {% endfor %}
                             </optgroup>
                         {% endif %}
@@ -327,9 +327,9 @@
         <div class="border-t border-secondary-200 dark:border-secondary-700 pt-4">
             <div class="mb-1 flex flex-wrap items-center gap-2">
                 <label for="date" class="block text-xs font-bold text-secondary-700 dark:text-secondary-100 uppercase tracking-wide">
-                    Date de décision :
+                    {{ 'offre_v2.modal_validation_composante.date_de_decision'|trans({}, 'modal') }}
                 </label>
-                <twig:Badge size="sm" variant="danger" label="Requis" />
+                <twig:Badge size="sm" variant="danger" label="{{ 'offre_v2.modal_validation_composante.requis'|trans({}, 'modal') }}" />
             </div>
             <input type="date"
                    name="date"

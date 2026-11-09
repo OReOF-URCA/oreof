@@ -465,14 +465,14 @@ class HistoriqueSubscriber implements EventSubscriberInterface
 
     private function getCommentaire(Request $request): string
     {
-        if ($request->request->has('argumentaire')) {
-            $commentaire = $request->request->get('argumentaire');
-        } elseif ($request->request->has('argumentaire_demande_reouverture')) {
-            $commentaire = $request->request->get('argumentaire_demande_reouverture');
-        } else {
-            $commentaire = '';
+        // Le formulaire workflow ArgumentaireType poste un tableau : argumentaire[argumentaire]
+        $data = $request->request->all();
+        $commentaire = $data['argumentaire'] ?? $data['argumentaire_demande_reouverture'] ?? '';
+        if (is_array($commentaire)) {
+            $commentaire = $commentaire['argumentaire'] ?? '';
         }
-        return $commentaire;
+
+        return is_string($commentaire) ? $commentaire : '';
     }
 
     private function resolveUser(mixed $user): ?User

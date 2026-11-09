@@ -1,8 +1,8 @@
 <div class="flex items-center justify-between w-full">
     <twig:Button variant="secondary" size="sm" :outline="true" dataAction="modalturbo#close">
-        Fermer
+        {{ 'admin.versioning.modal_inspect_footer.fermer'|trans({}, 'modal') }}
     </twig:Button>
     <twig:Button variant="primary" size="sm" icon="icon:download" href="{{ path('app_admin_versioning_download_file', {path: file.relative_path}) }}">
-        Télécharger le JSON
+        {{ 'admin.versioning.modal_inspect_footer.telecharger_le_json'|trans({}, 'modal') }}
     </twig:Button>
 </div>

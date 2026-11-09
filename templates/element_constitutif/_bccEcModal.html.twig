@@ -7,8 +7,7 @@
         <div class="alert alert-info">
             <div class="row">
                     <div class="col-12">
-                        <p>Cet EC est raccroché, vous pouvez modifier les éléments librement, ou bien les
-                            synchroniser ou recopier depuis l'EC d'origine.</p>
+                        <p>{{ 'element_constitutif.bccEcModal.cet_ec_est_raccroche_vous_pouvez'|trans({}, 'modal') }}</p>
                     </div>
                     <div class="col-5">
                         <div class="form-check mb-2">
@@ -21,7 +20,7 @@
                                     {% if ec.synchroBcc == true %}checked{% endif %}
                             >
                             <label class="form-check-label"
-                                   for="synchroBcc"> Raccrocher les BCC
+                                   for="synchroBcc"> {{ 'element_constitutif.bccEcModal.raccrocher_les_bcc'|trans({}, 'modal') }}
                                 <i class="fal fa-question-circle ms-1" data-controller="tooltip"
                                    data-tooltip-placement-value="bottom"
                                    title="{{ 'parcours_bcc.helps.synchroBcc'|trans({}, 'help') }}"></i>
@@ -41,7 +40,7 @@
 {#                        </button>#}
                     </div>
                     {% if ec.synchroBcc == true %}
-                        Les BCC sont raccrochée depuis l'EC du parcours "...". Le raccrochement se fait sur le code de la compétence. Les données ne sont pas modifiables.
+                        {{ 'element_constitutif.bccEcModal.les_bcc_sont_raccrochee_depuis_l'|trans({}, 'modal') }}
                     {% endif %}
             </div>
         </div>
@@ -64,8 +63,8 @@
                         data-bcc-id="{{ bcc.id }}"
                         {{ stimulus_action('fichematiere--step3', 'toggleAllCompetences', 'click', {id:bcc.id}) }}
                         tabindex="0"
-                        title="Sélectionner ou désélectionner toutes les compétences de ce bloc">
-                    Tout sélectionner
+                        title="{{ 'element_constitutif.bccEcModal.selectionner_ou_deselectionner_toutes_les_compet'|trans({}, 'modal') }}">
+                    {{ 'element_constitutif.bccEcModal.tout_selectionner'|trans({}, 'modal') }}
                 </button>
             {% endif %}
             <div id="bcc_{{ bcc.id }}_competence"

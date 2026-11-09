@@ -889,8 +889,8 @@ final class OffreConfigurerController extends BaseController
      * Charge les paramètres de plateforme des années données (une requête) sans doublonner ceux déjà connus.
      *
      * @param list<Annee> $annees
-     * @param array<int, array<int, PlateformeAdmissionParametre>> $parametresParAnnee
-     * @param array<int, true> $parametresCharges
+     * @param array<int|string, array<int|string, PlateformeAdmissionParametre>> $parametresParAnnee
+     * @param array<int|string, true> $parametresCharges
      */
     private function chargerParametresPlateforme(
         array $annees,
@@ -922,9 +922,9 @@ final class OffreConfigurerController extends BaseController
     /**
      * Recopie les données de $source sur les autres années du tronc commun qui la contient (dans sa formation).
      *
-     * @param array<int, array<int, PlateformeAdmissionParametre>> $parametresParAnnee
-     * @param array<int, true> $parametresCharges
-     * @param array<int, true> $changedYears
+     * @param array<int|string, array<int|string, PlateformeAdmissionParametre>> $parametresParAnnee
+     * @param array<int|string, true> $parametresCharges
+     * @param array<int|string, true> $changedYears
      */
     private function propagerTroncCommun(
         Annee $source,
@@ -972,6 +972,9 @@ final class OffreConfigurerController extends BaseController
         }
     }
 
+    /**
+     * @param array<int|string, array<int|string, PlateformeAdmissionParametre>> $parametresParAnnee
+     */
     private function synchroniserDonneesAnnee(
         Annee $sourceAnnee,
         Annee $targetAnnee,

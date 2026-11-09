@@ -109,6 +109,13 @@ final class OffreValidationController extends BaseController
             // Validation partielle possible : on ne garde que les formations cochées qui peuvent franchir la transition.
             $formationsAValider = [];
             $nbIgnorees = 0;
+            // DpeFormation existants de la campagne : sans eux, chaque formation cochée serait traitée comme nouvelle.
+            $dpeFormationByFormationId = [];
+            foreach ($dpeFormationRepository->findBy(['formation' => $allFormations, 'campagneCollecte' => $campagne]) as $existingDpeF) {
+                if ($existingDpeF->getFormation() !== null) {
+                    $dpeFormationByFormationId[$existingDpeF->getFormation()->getId()] = $existingDpeF;
+                }
+            }
             foreach ($allFormations as $forma) {
                 $fId = $forma->getId();
                 if (!in_array($fId, $selectedFormationIds, true)) {

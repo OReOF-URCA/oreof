@@ -18,7 +18,7 @@
                 <div class="min-w-0 flex-1">
                     <h5 class="mb-0 truncate text-lg font-bold tracking-tight text-secondary-900 dark:text-secondary-100"
                         data-base-target="modalTitle">
-                        <twig:Spinner size="sm" variant="primary" label="Chargement..." />
+                        <twig:Spinner size="sm" variant="primary" label="{{ 'communs.modal.chargement'|trans({}, 'modal') }}" />
                     </h5>
                 </div>
                 <div class="flex items-center gap-2">
@@ -27,7 +27,7 @@
                             class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-secondary-200 bg-white text-secondary-500 shadow-sm transition hover:border-secondary-300 hover:bg-secondary-50 hover:text-secondary-700 dark:border-secondary-600 dark:bg-secondary-900 dark:text-secondary-300 dark:hover:border-secondary-500 dark:hover:bg-secondary-800"
                             data-bs-dismiss="modal"
                             data-action="base#modalClose"
-                            aria-label="Close">
+                            aria-label="{{ 'communs.modal.close'|trans({}, 'modal') }}">
                         {{ ux_icon('icon:close', {class: 'h-4 w-4'}) }}
                     </button>
                 </div>
@@ -35,7 +35,7 @@
             <div class="max-h-[70vh] overflow-auto px-5 py-4 text-secondary-700 dark:text-secondary-200"
                  data-base-target="modalBody">
                 <div class="flex justify-center py-6">
-                    <twig:Spinner size="md" variant="secondary" label="Chargement..." />
+                    <twig:Spinner size="md" variant="secondary" label="{{ 'communs.modal.chargement'|trans({}, 'modal') }}" />
                 </div>
             </div>
             <div class="flex items-center justify-end gap-2 border-t border-secondary-200 bg-secondary-50/80 px-5 py-4 dark:border-secondary-700 dark:bg-secondary-800/85">
@@ -44,7 +44,7 @@
                         data-action="base#modalClose"
                         data-bs-dismiss="modal"
                         data-base-target="btnClose">
-                    Fermer sans sauvegarder
+                    {{ 'communs.modal.fermer_sans_sauvegarder'|trans({}, 'modal') }}
                 </button>
             </div>
         </div>

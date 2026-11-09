@@ -8,7 +8,7 @@
         <table class="min-w-full text-sm text-secondary-700 dark:text-secondary-200">
             <tbody>
             <tr>
-                <th colspan="2" class="{{ sectionTitleClass }}">Localisation de la formation</th>
+                <th colspan="2" class="{{ sectionTitleClass }}">{{ 'formation_state.index.localisation_de_la_formation'|trans({}, 'modal') }}</th>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">{{ 'formation_step1.labels.responsableMention'|trans({}, 'form') }}</td>
@@ -32,7 +32,7 @@
             </tr>
 
             <tr>
-                <th colspan="2" class="{{ sectionTitleClass }}">Structure et organisation de la formation</th>
+                <th colspan="2" class="{{ sectionTitleClass }}">{{ 'formation_state.index.structure_et_organisation_de_la_formation'|trans({}, 'modal') }}</th>
             </tr>
             <tr class="{{ dataRowClass }}">
                 <td class="{{ labelCellClass }}">{{ 'formation_step3.labels.hasParcours'|trans({}, 'form') }}</td>
@@ -45,37 +45,37 @@
 
             {% if formation.isHasparcours == true %}
                 <tr class="{{ dataRowClass }}">
-                    <td class="{{ labelCellClass }}">Parcours présent ?</td>
+                    <td class="{{ labelCellClass }}">{{ 'formation_state.index.parcours_present'|trans({}, 'modal') }}</td>
                     <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.erreurHasParcours|badgeValideDto }) }}</td>
                 </tr>
             {% else %}
                 <tr class="{{ dataRowClass }}">
-                    <td class="{{ labelCellClass }}">Parcours unique présent ?</td>
+                    <td class="{{ labelCellClass }}">{{ 'formation_state.index.parcours_unique_present'|trans({}, 'modal') }}</td>
                     <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.erreurHasParcours|badgeValideDto }) }}</td>
                 </tr>
                 <tr class="{{ dataRowClass }}">
-                    <td class="{{ labelCellClass }}">Etat du parcours unique de la formation</td>
+                    <td class="{{ labelCellClass }}">{{ 'formation_state.index.etat_du_parcours_unique_de_la'|trans({}, 'modal') }}</td>
                     <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.valideParcours|badgeValideDto }) }}</td>
                 </tr>
 
                 {% if valide.etat.etatParcoursDefaut is defined %}
                     <tr>
-                        <th colspan="2" class="{{ sectionTitleClass }}">Présentation de la formation</th>
+                        <th colspan="2" class="{{ sectionTitleClass }}">{{ 'formation_state.index.presentation_de_la_formation'|trans({}, 'modal') }}</th>
                     </tr>
                     <tr class="{{ dataRowClass }}">
-                        <td class="{{ labelCellClass }}">Objectifs de la formation</td>
+                        <td class="{{ labelCellClass }}">{{ 'formation_state.index.objectifs_de_la_formation'|trans({}, 'modal') }}</td>
                         <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.objectifsFormation|badgeValideDto }) }}</td>
                     </tr>
                     <tr class="{{ dataRowClass }}">
-                        <td class="{{ labelCellClass }}">Résultats attendus de la formation</td>
+                        <td class="{{ labelCellClass }}">{{ 'formation_state.index.resultats_attendus_de_la_formation'|trans({}, 'modal') }}</td>
                         <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.resultatsAttendus|badgeValideDto }) }}</td>
                     </tr>
                     <tr class="{{ dataRowClass }}">
-                        <td class="{{ labelCellClass }}">Contenu de la formation</td>
+                        <td class="{{ labelCellClass }}">{{ 'formation_state.index.contenu_de_la_formation'|trans({}, 'modal') }}</td>
                         <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.contenuFormation|badgeValideDto }) }}</td>
                     </tr>
                     <tr class="{{ dataRowClass }}">
-                        <td class="{{ labelCellClass }}">Rythme de la formation</td>
+                        <td class="{{ labelCellClass }}">{{ 'formation_state.index.rythme_de_la_formation'|trans({}, 'modal') }}</td>
                         <td class="{{ valueCellClass }}">{{ component('Badge', { dto: valide.etat.rythmeFormation|badgeValideDto }) }}</td>
                     </tr>
 

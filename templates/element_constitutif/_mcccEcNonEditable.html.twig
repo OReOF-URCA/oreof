@@ -8,7 +8,7 @@
 
     <template {{ stimulus_target('modal', 'loadingTemplate') }}>
         <div class="flex justify-center py-6">
-            <twig:Spinner size="md" variant="secondary" label="Chargement..." />
+            <twig:Spinner size="md" variant="secondary" label="{{ 'element_constitutif.mcccEcNonEditable.chargement'|trans({}, 'modal') }}" />
         </div>
     </template>
 
@@ -28,10 +28,10 @@
     {% if isFromVersioning is defined and isFromVersioning != 'true' %}
         <h4 class="text-center text-primary mb-2">{{ libelleQuelleVersion }}</h4>
     {% endif %}
-    <h2>MCCC pour {{ ec.ficheMatiere.libelle ?? ec.libelle }}</h2>
+    <h2>{{ 'element_constitutif.mccc_ec_non_editable.titre'|trans({'%libelle%': ec.ficheMatiere.libelle ?? ec.libelle}, 'modal') }}</h2>
 
     {% set displayComparaisonEcts = (isFromVersioning ?? 'false' != 'true') and (isMcccFromVersion ?? false == true) %}
-    <h3>ECTS</h3>
+    <h3>{{ 'element_constitutif.mcccEcNonEditable.ects'|trans({}, 'modal') }}</h3>
     {{
         compareMacro.displayMccc(
             ects,

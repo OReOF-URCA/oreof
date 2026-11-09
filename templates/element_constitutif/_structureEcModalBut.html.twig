@@ -1,4 +1,4 @@
-<h2>Volumes horaires pour : {{ ficheMatiere.display }}</h2>
+<h2>{{ 'element_constitutif.structure_ec_modal_but.titre'|trans({'%libelle%': ficheMatiere.display}, 'modal') }}</h2>
 
 {% form_theme form 'communs/form_theme.html.twig' %}
     {{ form_start(form) }}
@@ -27,7 +27,7 @@
         {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
 >
     <i class="fal fa-floppy-disk"></i>
-    Enregistrer
+    {{ 'element_constitutif.structureEcModalBut.enregistrer'|trans({}, 'modal') }}
 </button>
 
 {{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont

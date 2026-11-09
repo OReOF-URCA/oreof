@@ -1,8 +1,8 @@
 <div class="flex items-center justify-end gap-3">
     <twig:Button type="button" variant="secondary" data-action="modalturbo#close">
-        Annuler
+        {{ 'offre_v2.modal_configurer_dates_footer.annuler'|trans({}, 'modal') }}
     </twig:Button>
     <twig:Button type="submit" form="configurer_dates_form" variant="primary" icon="icon:check">
-        Enregistrer et synchroniser
+        {{ 'offre_v2.modal_configurer_dates_footer.enregistrer_et_synchroniser'|trans({}, 'modal') }}
     </twig:Button>
 </div>

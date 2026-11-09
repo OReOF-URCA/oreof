@@ -2,12 +2,12 @@
     <button type="button"
             class="app-modal-footer-btn app-modal-footer-btn--secondary"
             data-action="modalturbo#close">
-        Annuler
+        {{ 'parcours_v2.modal_delete_footer.annuler'|trans({}, 'modal') }}
     </button>
 
     <button type="submit"
             class="app-modal-footer-btn app-modal-footer-btn--danger"
             form="modal_form">
-        Supprimer définitivement
+        {{ 'parcours_v2.modal_delete_footer.supprimer_definitivement'|trans({}, 'modal') }}
     </button>
 </div>

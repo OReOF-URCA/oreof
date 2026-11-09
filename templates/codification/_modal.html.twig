@@ -12,7 +12,7 @@
                        value="codifHaute"
                        id="codifHaute">
                 <label for="codifHaute" class="form-check-label">
-                    Uniquement la codification haute (diplôme, étape, VDI, VET)
+                    {{ 'codification.modal.uniquement_la_codification_haute_diplome_etape'|trans({}, 'modal') }}
                 </label>
             </div>
             <div class="form-check mt-2">
@@ -22,7 +22,7 @@
                        value="codifBasse"
                        id="codifBasse">
                 <label for="codifBasse" class="form-check-label">
-                    Uniquement la codification basse (ELP : semestre, UE, EC)
+                    {{ 'codification.modal.uniquement_la_codification_basse_elp_semestre'|trans({}, 'modal') }}
                 </label>
             </div>
             <div class="form-check mt-2">
@@ -32,7 +32,7 @@
                        value="codifHauteBasse"
                        id="codifHauteBasse">
                 <label for="codifHauteBasse" class="form-check-label">
-                    Toute la codification (haute et basse)
+                    {{ 'codification.modal.toute_la_codification_haute_et_basse'|trans({}, 'modal') }}
                 </label>
             </div>
 
@@ -41,6 +41,6 @@
     <button type="submit" class="btn btn-success"
             {{ stimulus_action('base','sauvegardeFormModal', 'click') }}>
         <i class="fal fa-floppy-disk"></i>
-        Générer les codes
+        {{ 'codification.modal.generer_les_codes'|trans({}, 'modal') }}
     </button>
 </form>

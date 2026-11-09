@@ -26,7 +26,7 @@
                     {% if process.label is defined and process.label %}
                         {{ ('valide.'~process.label~'.date.label')|trans({}, 'process') }}
                     {% else %}
-                        Date de validation
+                        {{ 'historique.edit.date_de_validation'|trans({}, 'modal') }}
                     {% endif %}
                     <span class="text-rose-500">*</span>
                     {% if process.label is defined and process.label %}
@@ -59,7 +59,7 @@
                                 title="{{ 'voir.le.pv.infobulle'|trans({}, 'process') }}"
                         >
                             <twig:UX:Icon name="icon:download" class="h-4 w-4" />
-                            <span>{{ 'voir.le.pv'|trans({}, 'process') }} (Conseil)</span>
+                            <span>{{ 'voir.le.pv'|trans({}, 'process') }} {{ 'historique.edit.conseil'|trans({}, 'modal') }}</span>
                         </a>
                     {% endif %}
                 </div>
@@ -72,7 +72,7 @@
                     {% if process.label is defined and process.label %}
                         {{ ('valide.'~process.label~'.fichier.label')|trans({}, 'process') }}
                     {% else %}
-                        Document / PV du conseil (PDF)
+                        {{ 'historique.edit.document_pv_du_conseil_pdf'|trans({}, 'modal') }}
                     {% endif %}
                     {% if process.label is defined and process.label %}
                         <span class="inline-block ml-1"
@@ -90,7 +90,7 @@
             <div class="space-y-2 flex flex-col justify-end">
                 {% if historique.complements.fichier is defined and historique.complements.fichier %}
                     <div>
-                        <span class="block text-xs text-secondary-500 mb-1">Fichier actuellement déposé :</span>
+                        <span class="block text-xs text-secondary-500 mb-1">{{ 'historique.edit.fichier_actuellement_depose'|trans({}, 'modal') }}</span>
                         <a
                                 href="{{ path('app_upload_download', {context: 'conseils', filename: historique.complements.fichier, originalName: historique.complements.fichier_original|default(historique.complements.fichier)}) }}"
                                 target="_blank"
@@ -104,7 +104,7 @@
                     </div>
                 {% else %}
                     <span class="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                        Pas de PV déposé
+                        {{ 'historique.edit.pas_de_pv_depose'|trans({}, 'modal') }}
                     </span>
                 {% endif %}
             </div>
@@ -127,7 +127,7 @@
                             <twig:UX:Icon name="icon:question" class="h-4 w-4 text-secondary-400 inline" />
                         </span>
                     {% else %}
-                        Demander un laisser-passer (en attente du PV définitif)
+                        {{ 'historique.edit.demander_un_laisser_passer_en_attente'|trans({}, 'modal') }}
                     {% endif %}
                 </label>
             </div>
@@ -135,11 +135,11 @@
 
         <div class="md:col-span-2 space-y-2">
             <label for="argumentaire" class="block text-sm font-medium text-secondary-700 dark:text-secondary-300">
-                Commentaire / Argumentaire
+                {{ 'historique.edit.commentaire_argumentaire'|trans({}, 'modal') }}
             </label>
             <textarea name="argumentaire" id="argumentaire" rows="3"
                       class="w-full rounded-md border border-secondary-300 px-3 py-2 text-sm text-secondary-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100"
-                      placeholder="Commentaire ou motif facultatif...">{{ historique.commentaire }}</textarea>
+                      placeholder="{{ 'historique.edit.commentaire_ou_motif_facultatif'|trans({}, 'modal') }}">{{ historique.commentaire }}</textarea>
         </div>
 
     </div>

@@ -1,6 +1,6 @@
 <div class="p-1">
     <div class="mb-5 rounded-xl border border-secondary-200 bg-secondary-50/50 p-3.5 dark:border-secondary-700 dark:bg-secondary-800/40">
-        <div class="text-xs font-semibold text-secondary-500 uppercase tracking-wider dark:text-secondary-400">Formation rattachée</div>
+        <div class="text-xs font-semibold text-secondary-500 uppercase tracking-wider dark:text-secondary-400">{{ 'offre_v2.modal_edit_parcours.formation_rattachee'|trans({}, 'modal') }}</div>
         <div class="mt-1 font-semibold text-secondary-900 dark:text-secondary-100 text-sm">
             {{ formation.displayLong }}
         </div>
@@ -12,7 +12,7 @@
         {# Libellé du parcours #}
         <div>
             <label for="parcours_libelle" class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1.5">
-                Intitulé du parcours <span class="text-red-500">*</span>
+                {{ 'offre_v2.modal_edit_parcours.intitule_du_parcours'|trans({}, 'modal') }} <span class="text-red-500">*</span>
             </label>
             <input type="text"
                    name="libelle"
@@ -20,17 +20,17 @@
                    value="{{ parcours.libelle }}"
                    required
                    class="w-full rounded-xl border border-secondary-300 bg-white px-3.5 py-2.5 text-sm font-medium text-secondary-900 shadow-sm transition placeholder:text-secondary-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-secondary-600 dark:bg-secondary-900 dark:text-secondary-100"
-                   placeholder="Ex: Parcours Métiers du Livre..."
+                   placeholder="{{ 'offre_v2.modal_edit_parcours.ex_parcours_metiers_du_livre'|trans({}, 'modal') }}"
             >
             {% if parcoursOrigine %}
                 <div class="mt-2 flex items-center gap-1.5 text-xs text-secondary-500 dark:text-secondary-400">
                     <twig:UX:Icon name="icon:info" class="h-3.5 w-3.5 text-indigo-500 shrink-0" />
-                    <span>Intitulé N-1 : <strong class="text-secondary-700 dark:text-secondary-300">{{ parcoursOrigine.libelle }}</strong></span>
+                    <span>{{ 'offre_v2.modal_edit_parcours.intitule_n_1'|trans({}, 'modal') }} <strong class="text-secondary-700 dark:text-secondary-300">{{ parcoursOrigine.libelle }}</strong></span>
                 </div>
             {% else %}
                 <div class="mt-2 flex items-center gap-1.5 text-xs text-secondary-400">
                     <twig:UX:Icon name="icon:info" class="h-3.5 w-3.5 text-secondary-400 shrink-0" />
-                    <span>Nouveau parcours (aucun parcours d'origine N-1)</span>
+                    <span>{{ 'offre_v2.modal_edit_parcours.nouveau_parcours_aucun_parcours_d_origine'|trans({}, 'modal') }}</span>
                 </div>
             {% endif %}
         </div>
@@ -38,7 +38,7 @@
         {# Type de parcours #}
         <div>
             <label for="parcours_type_parcours" class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1.5">
-                Type de parcours
+                {{ 'offre_v2.modal_edit_parcours.type_de_parcours'|trans({}, 'modal') }}
             </label>
             <select name="typeParcours"
                     id="parcours_type_parcours"
@@ -52,14 +52,14 @@
                 {% endfor %}
             </select>
             <p class="mt-1.5 text-xs text-secondary-500 dark:text-secondary-400">
-                Spécifie si ce parcours est une formation classique, une filière LAS (Accès santé), CPI, ou en alternance.
+                {{ 'offre_v2.modal_edit_parcours.specifie_si_ce_parcours_est_une'|trans({}, 'modal') }}
             </p>
         </div>
 
         {# Ville d'enseignement #}
         <div>
             <label for="parcours_ville" class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1.5">
-                Ville d'enseignement
+                {{ 'offre_v2.modal_edit_parcours.ville_d_enseignement'|trans({}, 'modal') }}
             </label>
             {% set currentVille = parcours.ville ?? parcours.localisation %}
             {% set mentionVille = (formation.localisationMention is defined and formation.localisationMention is not empty) ? formation.localisationMention.first : null %}
@@ -69,7 +69,7 @@
                     class="app-filter-select w-full rounded-lg border px-3 py-2 text-sm"
                     {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
             >
-                <option value="">Sélectionner une ville…</option>
+                <option value="">{{ 'offre_v2.modal_edit_parcours.selectionner_une_ville'|trans({}, 'modal') }}</option>
                 {% for v in villes|default([]) %}
                     <option value="{{ v.id }}" {% if selectedVilleId == v.id %}selected{% endif %}>
                         {{ v.libelle }}
@@ -77,14 +77,14 @@
                 {% endfor %}
             </select>
             <p class="mt-1.5 text-xs text-secondary-500 dark:text-secondary-400">
-                Lieu d'enseignement de ce parcours (utilisé pour les exports ministériels et plateformes d'admission).
+                {{ 'offre_v2.modal_edit_parcours.lieu_d_enseignement_de_ce_parcours'|trans({}, 'modal') }}
             </p>
         </div>
 
         {# Régime d'inscription #}
         <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-2">
-                Régime d'inscription
+                {{ 'offre_v2.modal_edit_parcours.regime_d_inscription'|trans({}, 'modal') }}
             </label>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {% for regime in regimesInscription %}
@@ -103,7 +103,7 @@
                 {% endfor %}
             </div>
             <p class="mt-1.5 text-xs text-secondary-500 dark:text-secondary-400">
-                Indique les régimes d'inscription proposés pour ce parcours (Formation Initiale, Apprentissage, Formation Continue...).
+                {{ 'offre_v2.modal_edit_parcours.indique_les_regimes_d_inscription_proposes'|trans({}, 'modal') }}
             </p>
         </div>
 
@@ -111,7 +111,7 @@
         {% if isAdd|default(false) and anneesOrdres is defined and anneesOrdres is not empty %}
             <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-2">
-                    Années à créer dans ce parcours
+                    {{ 'offre_v2.modal_edit_parcours.annees_a_creer_dans_ce_parcours'|trans({}, 'modal') }}
                 </label>
                 <div class="flex items-center gap-2.5 flex-wrap">
                     {% for anneeOrdre in anneesOrdres %}
@@ -129,7 +129,7 @@
                     {% endfor %}
                 </div>
                 <p class="mt-1.5 text-xs text-secondary-500 dark:text-secondary-400">
-                    Sélectionnez les années à créer pour saisir leurs capacités d'accueil sur la page configurer. Vous pourrez en ajouter ou en supprimer ultérieurement.
+                    {{ 'offre_v2.modal_edit_parcours.selectionnez_les_annees_a_creer_pour'|trans({}, 'modal') }}
                 </p>
             </div>
         {% endif %}

@@ -1,9 +1,9 @@
 {% if ecNotFound is defined and ecNotFound == true %}
     <div class="text-center">
-        Une erreur est survenue lors du chargement.
+        {{ 'element_constitutif.versioning_ecNotFound.une_erreur_est_survenue_lors_du'|trans({}, 'modal') }}
     </div>
 {% elseif structureEcNotFound is defined and structureEcNotFound == true %}
     <div class="text-center">
-        L'EC demandé n'a pas encore été versionné.
+        {{ 'element_constitutif.versioning_ecNotFound.l_ec_demande_n_a_pas'|trans({}, 'modal') }}
     </div>
 {% endif %}
