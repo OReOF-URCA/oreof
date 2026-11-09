@@ -1109,9 +1109,21 @@ final class OffreAnnexesExportService
                 }
             }
 
-            // Capacité d'accueil
+            // Capacité d'accueil : pour un portail, les années partagent une capacité commune (synchronisée).
+            // La ligne portail doit afficher exactement la valeur saisie, sans cumuler les parcours membres.
+            $cap = null;
             if ($portail instanceof Portail && $portail->getCapaciteAccueil() > 0) {
                 $cap = $portail->getCapaciteAccueil();
+            } else {
+                foreach ($capacites as $c) {
+                    if (is_numeric($c) && (int) $c > 0) {
+                        $cap = (int) $c;
+                        break;
+                    }
+                }
+            }
+
+            if ($cap !== null) {
                 if (array_key_exists('capacite_n', $row)) {
                     $row['capacite_n'] = $cap;
                 }
@@ -1120,23 +1132,6 @@ final class OffreAnnexesExportService
                 }
                 if (array_key_exists('capacite_fi_n', $row)) {
                     $row['capacite_fi_n'] = $cap;
-                }
-            } else {
-                $sumCap = 0;
-                $hasNumeric = false;
-                foreach ($capacites as $c) {
-                    if (is_numeric($c)) {
-                        $sumCap += (int) $c;
-                        $hasNumeric = true;
-                    }
-                }
-                if ($hasNumeric && $sumCap > 0) {
-                    if (array_key_exists('capacite_n', $row)) {
-                        $row['capacite_n'] = $sumCap;
-                    }
-                    if (array_key_exists('capacite_globale_n', $row)) {
-                        $row['capacite_globale_n'] = $sumCap;
-                    }
                 }
             }
         } else {
@@ -1243,7 +1238,7 @@ final class OffreAnnexesExportService
             
             if (empty($parAnnees)) {
                 // If parcours has no separate annee entities
-                $capaciteN = $formation->getCapaciteAccueil();
+                $capaciteN = $formation->getCapacite($campagne);
 
                 // N-1 Data
                 $n1 = $this->resolveN1Data($parcours, 1, $ecPlatform, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee);
@@ -2108,7 +2103,7 @@ final class OffreAnnexesExportService
 
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
             if (empty($parAnnees)) {
-                $capaciteGlobaleN = $formation->getCapaciteAccueil();
+                $capaciteGlobaleN = $formation->getCapacite($campagne);
 
                 // N-1 Data
                 $n1 = $this->resolveN1Data($parcours, 1, $plateforme, $dpeN1ByParcours, $anneesN1ByParcours, $paramsN1ByAnnee);

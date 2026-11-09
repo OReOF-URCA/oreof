@@ -236,6 +236,17 @@ readonly class GetFormations
                 }
             }
 
+            // Filtre par classique / accréditation
+            $classiqueFilter = $options['classique'] ?? $options['accreditation'] ?? null;
+            if ($classiqueFilter !== null && '' !== $classiqueFilter) {
+                $isCl = filter_var($classiqueFilter, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                $targetClassique = !($isCl === false || $classiqueFilter === '0' || $classiqueFilter === 0);
+                $isFormationClassique = $formation->getTypeDiplome()?->isClassique() ?? true;
+                if ($isFormationClassique !== $targetClassique) {
+                    continue;
+                }
+            }
+
             // Filtre par composante porteuse
             if (!empty($options['composantePorteuse'])) {
                 if ($formation->getComposantePorteuse()?->getId() !== (int) $options['composantePorteuse']) {

@@ -238,10 +238,19 @@
                                                        class="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 cursor-pointer">
                                             </td>
                                             <td class="px-4 py-3">
-                                                <input value="{{ plateformeCourante ? plateformeCourante.parametre.capaciteGlobale : '' }}"
+                                                {% set pGlobaleVal = '' %}
+                                                {% if plateformeCourante and (plateformeCourante.parametre.capaciteFi is not null or plateformeCourante.parametre.capaciteAlternance is not null or plateformeCourante.parametre.capaciteSpecifique is not null) %}
+                                                    {% set pGlobaleVal = (plateformeCourante.parametre.capaciteFi|default(0)) + (plateformeCourante.parametre.capaciteAlternance|default(0)) + (plateformeCourante.parametre.capaciteSpecifique|default(0)) %}
+                                                {% elseif plateformeCourante and plateformeCourante.parametre.capaciteGlobale is not null %}
+                                                    {% set pGlobaleVal = plateformeCourante.parametre.capaciteGlobale %}
+                                                {% endif %}
+                                                <input value="{{ pGlobaleVal }}"
                                                        name="annee_{{ annee.id }}_plateforme_{{ plateforme.id }}_globale"
                                                        data-tc-field="plateforme_{{ plateforme.id }}_globale"
-                                                       class="w-20 rounded border bg-surface text-text px-2 py-1 dark:border-secondary-600"
+                                                       readonly
+                                                       tabindex="-1"
+                                                       title="Capacité globale calculée (Classique + Alternance + Spécifique)"
+                                                       class="w-20 rounded border bg-secondary-100 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-300 dark:border-secondary-600 px-2 py-1 cursor-not-allowed select-none focus:outline-none"
                                                        type="number"
                                                        min="0">
                                                 {% if plateformePrecedente and plateformePrecedente.parametre %}
@@ -514,10 +523,13 @@
                                                        checked>
                                             </td>
                                             <td class="px-4 py-3">
-                                                <input value=""
+                                                <input value="0"
                                                        name="annee_{{ annee.id }}_plateforme_{{ plateforme.id }}_globale"
                                                        data-tc-field="plateforme_{{ plateforme.id }}_globale"
-                                                       class="w-20 rounded border bg-surface text-text px-2 py-1 dark:border-secondary-600"
+                                                       readonly
+                                                       tabindex="-1"
+                                                       title="Capacité globale calculée (Classique + Alternance + Spécifique)"
+                                                       class="w-20 rounded border bg-secondary-100 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-300 dark:border-secondary-600 px-2 py-1 cursor-not-allowed select-none focus:outline-none"
                                                        type="number"
                                                        min="0">
                                             </td>

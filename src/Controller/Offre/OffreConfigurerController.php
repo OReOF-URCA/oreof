@@ -192,7 +192,11 @@ final class OffreConfigurerController extends BaseController
                     if (!is_array($raw)) {
                         continue;
                     }
-                    $tAnnees = array_values(array_unique(array_map('intval', $raw['annees'] ?? [])));
+                    $validOrdres = $formation->getAnneesOrdres();
+                    $tAnnees = array_values(array_unique(array_filter(
+                        array_map('intval', $raw['annees'] ?? []),
+                        fn(int $a) => in_array($a, $validOrdres, true)
+                    )));
                     $tParcours = array_values(array_unique(array_map('intval', $raw['parcours'] ?? [])));
                     $nom = !empty($raw['nom']) ? trim((string)$raw['nom']) : 'Tronc commun ' . (count($cleanedTcs) + 1);
                     $cleanedTcs[] = [
@@ -624,11 +628,6 @@ final class OffreConfigurerController extends BaseController
                                     $parametre->setCapaciteAlternance(0);
                                     $parametre->setCapaciteSpecifique(0);
                                 } else {
-                                    if ($request->request->has($globaleKey)) {
-                                        $val = $request->request->get($globaleKey);
-                                        $parametre->setCapaciteGlobale($val !== '' ? (int)$val : null);
-                                    }
-                                    
                                     if ($request->request->has($classiqueKey)) {
                                         $val = $request->request->get($classiqueKey);
                                         $parametre->setCapaciteFi($val !== '' ? (int)$val : null);
@@ -642,6 +641,17 @@ final class OffreConfigurerController extends BaseController
                                     if ($request->request->has($specifiqueKey)) {
                                         $val = $request->request->get($specifiqueKey);
                                         $parametre->setCapaciteSpecifique($val !== '' ? (int)$val : null);
+                                    }
+
+                                    // Capacité globale calculée selon les données des autres champs disponibles sur la plateforme
+                                    $fi = $parametre->getCapaciteFi();
+                                    $alt = $parametre->getCapaciteAlternance();
+                                    $spe = $parametre->getCapaciteSpecifique();
+                                    if ($fi !== null || $alt !== null || $spe !== null) {
+                                        $parametre->setCapaciteGlobale(($fi ?? 0) + ($alt ?? 0) + ($spe ?? 0));
+                                    } elseif ($request->request->has($globaleKey)) {
+                                        $val = $request->request->get($globaleKey);
+                                        $parametre->setCapaciteGlobale($val !== '' ? (int)$val : null);
                                     }
 
                                     if ($request->request->has($remarquesKey)) {
@@ -1100,12 +1110,14 @@ final class OffreConfigurerController extends BaseController
                 'nbAnnees' => $parcours->getAnnees()->count(),
                 'nbAnneesOuvertes' => $nbAnneesOuvertes,
                 'capacite' => $parcoursCapacite,
+                'capacitePlateformes' => $parcours->getCapacitePlateformes($campagne),
                 'nbPlateformesActives' => $nbPlateformesActives,
                 'anomalies' => $anomaliesParcours,
             ];
         }
 
-        $tabStatistiques['capacite'] = $formation->getCapacite();
+        $tabStatistiques['capacite'] = $formation->getCapacite($campagne);
+        $tabStatistiques['capacitePlateformes'] = $formation->getCapacitePlateformes($campagne);
         
         return [
             'tabStatistiques' => $tabStatistiques,

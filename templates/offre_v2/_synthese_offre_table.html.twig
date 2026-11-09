@@ -43,13 +43,23 @@
                         {% set compId = loop.index %}
                         {% set compNbParcours = 0 %}
                         {% set compCapacite = 0 %}
+                        {% set compPortailsCounted = [] %}
                         {% for forma in formations %}
                             {% set compNbParcours = compNbParcours + forma.parcoursList|length %}
                             {% for pItem in forma.parcoursList %}
                                 {% for annee in pItem.annees %}
                                     {% set param = anneeParams[annee.id]|default(null) %}
                                     {% if param and param.active %}
-                                        {% set compCapacite = compCapacite + param.capaciteGlobale|default(annee.capaciteAccueil)|default(0) %}
+                                        {% set pCap = param.capaciteGlobale|default(annee.capaciteAccueil)|default(0) %}
+                                        {% if annee.portail and annee.portail.id %}
+                                            {% set portailYearKey = annee.portail.id ~ '_' ~ annee.ordre %}
+                                            {% if portailYearKey not in compPortailsCounted %}
+                                                {% set compCapacite = compCapacite + pCap %}
+                                                {% set compPortailsCounted = compPortailsCounted|merge([portailYearKey]) %}
+                                            {% endif %}
+                                        {% else %}
+                                            {% set compCapacite = compCapacite + pCap %}
+                                        {% endif %}
                                     {% endif %}
                                 {% endfor %}
                             {% endfor %}
