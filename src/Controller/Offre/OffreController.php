@@ -427,7 +427,7 @@ final class OffreController extends BaseController
 
         // Appliquer les filtres côté PHP sur le tableau tFormations
         if ($q || $comp || $type || $plateforme || $statut) {
-            $tFormations = array_filter($tFormations, function (array $row) use ($q, $comp, $type, $plateforme, $statut, $tpaByTypeDiplome): bool {
+            $tFormations = array_filter($tFormations, function (array $row) use ($q, $comp, $type, $plateforme, $statut): bool {
                 $f = $row['formation'];
                 
                 // 1. Libellé
