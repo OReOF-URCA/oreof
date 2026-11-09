@@ -1,0 +1,43 @@
+<div id="parcours_voir_actions" class="flex flex-wrap gap-2 justify-start lg:justify-end">
+    {% if (is_granted('EDIT', {route: 'app_parcours', subject: dpeParcours})
+        or is_granted('EDIT', {route: 'app_formation', subject: dpeParcours})
+        or is_granted('EDIT', {route: 'app_composante', subject: dpeParcours})
+        or is_granted('EDIT', {route: 'app_etbalissement', subject: dpeParcours})
+        or is_granted('ROLE_ADMIN')) and isOuvert(dpeParcours) %}
+        <twig:Button
+                href="{{ path('parcours_v2_modifier', {parcours: parcours.id}) }}"
+                variant="warning"
+                :soft="false"
+                :outline="true"
+                size="sm"
+                icon="icon:edit"
+                label="Modifier le parcours"
+                tooltip="Modifier le parcours"
+        />
+        <twig:Button
+                href="{{ path('parcours_v2_dupliquer', {parcours: parcours.id}) }}"
+                variant="primary"
+                :soft="false"
+                :outline="true"
+                size="sm"
+                icon="icon:duplicate"
+                label="Dupliquer"
+                tooltip="Dupliquer l'intégralité du parcours"
+                dataAction="click->modalturbo#open"
+        />
+    {% endif %}
+
+    {% if is_granted('ROLE_ADMIN') %}
+        <twig:Button
+                href="{{ path('parcours_v2_supprimer', {parcours: parcours.id}) }}"
+                variant="danger"
+                :soft="false"
+                :outline="true"
+                size="sm"
+                icon="icon:trash"
+                label="Supprimer définitivement"
+                tooltip="Supprimer définitivement ce parcours (Admin)"
+                dataAction="click->modalturbo#open"
+        />
+    {% endif %}
+</div>

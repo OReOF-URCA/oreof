@@ -51,6 +51,28 @@ class CampagneAccessibilityServiceTest extends TestCase
         $this->assertTrue($service->isModuleOpen(CampagneModuleEnum::DESCRIPTIFS, $campagne, $testDateOctober));
     }
 
+    public function testDpeModuleResolvesFromStringUsedInTemplates(): void
+    {
+        $dataUserSession = $this->createMock(DataUserSession::class);
+        $security = $this->createMock(Security::class);
+        $repository = $this->createMock(CampagneCollecteRepository::class);
+
+        $campagne = new CampagneCollecte();
+
+        $step = new TimelineDate();
+        $step->setLibelle('Gestion du DPE');
+        $step->setDateDebut(new DateTime('2026-10-01'));
+        $step->setDate(new DateTime('2026-10-31'));
+        $step->setModulesActifs([CampagneModuleEnum::DPE]);
+
+        $campagne->addTimelineDate($step);
+
+        $service = new CampagneAccessibilityService($dataUserSession, $security, $repository);
+
+        $this->assertTrue($service->canUserEditModule('dpe', $campagne, new DateTime('2026-10-15')));
+        $this->assertFalse($service->canUserEditModule('dpe', $campagne, new DateTime('2026-11-15')));
+    }
+
     public function testAdminBypassAllowsEditingEvenWhenClosed(): void
     {
         $dataUserSession = $this->createMock(DataUserSession::class);

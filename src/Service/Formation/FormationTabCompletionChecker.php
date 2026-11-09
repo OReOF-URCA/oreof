@@ -64,11 +64,11 @@ class FormationTabCompletionChecker extends AbstractChecker
         $issues = [];
 
         if ($f->getResponsableMention() === null) {
-            $issues[] = new TabIssue('formation_step1[responsableMention]', 'Responsable de la mention', 'Vous devez renseigner un responsable pour la mention est obligatoire.');
+            $issues[] = new TabIssue('formation_step1[responsableMention]', 'Responsable de la mention', 'Vous devez renseigner un responsable pour la mention.');
         }
 
         if ($f->getLocalisationMention()->count() === 0) {
-            $issues[] = new TabIssue('formation_step1[localisationMention]', 'Localisation de la mention', 'Vous devez renseigner uu moins une localisation pour la mention.');
+            $issues[] = new TabIssue('formation_step1[localisationMention]', 'Localisation de la mention', 'Vous devez renseigner au moins une localisation pour la mention.');
         }
 
         if ($f->getComposantesInscription()->count() === 0) {
@@ -82,7 +82,7 @@ class FormationTabCompletionChecker extends AbstractChecker
         //selon le type de régime, texte obligatoire
 
         if ($this->filled($f->getModalitesAlternance()) === false && ($this->regimeRules->requiresAlternanceDetails($f->getRegimeInscriptionValues()))) {
-            $issues[] = new TabIssue('formation_step1[modalitesAlternance]', 'Modalités d\'alternance', 'Vous avez indiquez FC en contrat pro ou FI en apprentissage, vous devez préciser les modalités.');
+            $issues[] = new TabIssue('formation_step1[modalitesAlternance]', 'Modalités d\'alternance', 'Vous avez indiqué FC en contrat pro ou FI en apprentissage, vous devez préciser les modalités.');
         }
 
         return $issues;

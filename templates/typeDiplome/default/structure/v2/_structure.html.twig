@@ -66,8 +66,8 @@
 		</div>
 	{% endif %}
 
-	{% for annee in dto.annees %}
-		{{ include('typeDiplome/licence/structure/v2/_structure_annee.html.twig', {annee:annee}) }}
+	{% for ordre, annee in dto.annees %}
+		{{ include('typeDiplome/licence/structure/v2/_structure_annee.html.twig', {annee:annee, ordre:ordre}) }}
 	{% endfor %}
 
 	{# Bilan global de la formation #}
