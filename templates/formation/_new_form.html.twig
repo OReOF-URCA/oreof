@@ -17,10 +17,6 @@
         </div>
     {% endif %}
 
-    <div class="hidden">
-        {{ form_row(form.typeDiplome) }}
-    </div>
-
     <div class="space-y-6 text-secondary-800 dark:text-secondary-100">
         <!-- Section 1: Rattachement institutionnel -->
         <div class="rounded-xl border border-secondary-100 bg-secondary-50/50 p-4 dark:border-secondary-800 dark:bg-secondary-800/30">
@@ -41,10 +37,18 @@
                 {% endif %}
             </div>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {% if form.typeDiplome is defined %}
+                    <div>{{ form_row(form.typeDiplome, {
+                        attr: stimulus_controller('symfony/ux-autocomplete/autocomplete').toArray()
+                    }) }}</div>
+                {% endif %}
                 <div>{{ form_row(form.domaine, {
                     attr: stimulus_controller('symfony/ux-autocomplete/autocomplete')|stimulus_action('formation', 'changeDomaine', 'change').toArray()
                 }) }}</div>
                 <div>{{ form_row(form.codeMentionApogee) }}</div>
+                {% if form.classique is defined %}
+                    <div>{{ form_row(form.classique) }}</div>
+                {% endif %}
                 {% if form.composantePorteuse is defined %}
                     <div class="md:col-span-2">{{ form_row(form.composantePorteuse, {
                         attr: stimulus_controller('symfony/ux-autocomplete/autocomplete').toArray()
