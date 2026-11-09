@@ -14,13 +14,12 @@ use App\Classes\ValidationProcess;
 use App\Classes\ValidationProcessChangeRf;
 use App\Classes\ValidationProcessFicheMatiere;
 use App\Entity\DpeParcours;
-use App\Entity\ChangeRf;
-use App\Enums\TypeRfEnum;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Repository\FicheMatiereRepository;
+use App\Service\ChangeRfTableFactory;
 use App\Service\DataTableBuilder;
 use App\Utils\Tools;
 use DateTime;
@@ -297,7 +296,7 @@ class ValidationAdminController extends BaseController
     public function changeRfListe(
         ComposanteRepository      $composanteRepository,
         ChangeRfRepository        $changeRfRepository,
-        DataTableBuilder          $builder,
+        ChangeRfTableFactory      $tableFactory,
         Request                   $request
     ): Response
     {
@@ -331,91 +330,7 @@ class ValidationAdminController extends BaseController
             );
         }
 
-        $campagneCollecte = $this->getCampagneCollecte();
-        $builder
-            ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
-            ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId())
-            ->addBaseWhere('JSON_CONTAINS(e.etatDemande, :etatDpe) = 1')
-            ->addBaseParameter('etatDpe', json_encode([$typeValidation => 1]));
-
-        if ($composante !== null) {
-            $builder
-                ->addBaseWhere('IDENTITY(formation_0.composantePorteuse) = :composanteId')
-                ->addBaseParameter('composanteId', $composante->getId());
-        }
-
-        $table = $builder
-            ->setEntity(ChangeRf::class)
-            ->setPerPage(20)
-            ->setDefaultSort('dateDemande', 'desc')
-            ->enableCheckboxSelection([
-                'name' => 'demandes[]',
-                'valueField' => 'id',
-                'inputClass' => 'validation-change-rf-item',
-                'allId' => 'validation-change-rf-all',
-            ])
-            ->addColumn('formation.composantePorteuse.libelle', [
-                'label' => 'Composante',
-                'sortable' => true,
-                'filterable' => true,
-                'sort_expression' => 'composantePorteuse_1.libelle',
-                'filter_expression' => 'composantePorteuse_1.libelle',
-                'class' => 'min-w-[12rem]',
-            ])
-            ->addColumn('formation.libelle', [
-                'label' => 'Formation',
-                'sortable' => true,
-                'filterable' => true,
-                'searchable' => true,
-                'template' => 'validation/datatable/_formation_change_rf.html.twig',
-                'class' => 'min-w-[18rem]',
-            ])
-            ->addColumn('typeRf', [
-                'label' => 'Co/RF',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'select',
-                'choices' => [
-                    TypeRfEnum::RF->value => 'Responsable',
-                    TypeRfEnum::CORF->value => 'Co-responsable',
-                ],
-                'template' => 'validation/datatable/_type_rf_change_rf.html.twig',
-            ])
-            ->addColumn('ancienResponsable.display', [
-                'label' => 'Actuel Co/RF',
-                'sortable' => true,
-                'filterable' => true,
-                'searchable' => true,
-            ])
-            ->addColumn('nouveauResponsable.display', [
-                'label' => 'Nouveau Co/RF',
-                'sortable' => true,
-                'filterable' => true,
-                'searchable' => true,
-            ])
-            ->addColumn('dateDemande', [
-                'label' => 'Date demande',
-                'sortable' => true,
-                'filterable' => true,
-                'type' => 'date',
-                'format' => 'datetime',
-            ])
-            ->addColumn('etatDemande', [
-                'label' => 'Suivi / Etat',
-                'sortable' => false,
-                'filterable' => true,
-                'template' => 'validation/datatable/_suivi_change_rf.html.twig',
-                'class' => 'min-w-[15rem]',
-            ])
-            ->addColumn('id', [
-                'label' => 'Actions',
-                'sortable' => false,
-                'filterable' => false,
-                'searchable' => false,
-                'template' => 'validation/datatable/_actions_change_rf.html.twig',
-                'class' => 'text-right min-w-[11rem]',
-            ])
-            ->build();
+        $table = $tableFactory->create($this->getCampagneCollecte(), $typeValidation, $composante);
 
         return $this->render('validation/_listeChangeRf.html.twig', [
             'table' => $table,
