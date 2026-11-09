@@ -16,7 +16,7 @@
         </ul>
     {% else %}
         <p class="text-sm text-secondary-600 dark:text-secondary-400">
-            Aucune fiche matière associée trouvée.
+            {{ 'search.associated_fiches.aucune_fiche_matiere_associee_trouvee'|trans({}, 'modal') }}
         </p>
     {% endif %}
 </div>
