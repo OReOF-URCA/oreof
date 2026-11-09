@@ -112,8 +112,11 @@ La bascule de schéma entre la version historique (`main` / V1) et la V2 s'artic
 - **Ajout de colonnes** :
   - `accreditation_id` (`INT DEFAULT NULL`, FK vers `accreditation`).
   - `sigle` (`VARCHAR(20) DEFAULT NULL`).
+- **Tables de jointure** :
+  - `mention_domaine` (`mention_id`, `domaine_id`) : rattachement à plusieurs domaines.
+  - `mention_type_diplome` (`mention_id`, `type_diplome_id`) : types de diplômes possibles par mention (`Version20261109220000`).
 - **Suppression / dissociation** :
-  - `type_diplome_id` : supprimé (`Version20261108201500`).
+  - `type_diplome_id` : supprimé (`Version20261108201500`) au profit de `mention_type_diplome`.
   - `domaine_id` : supprimé au profit de `mention_domaine`.
 
 ### `type_diplome`

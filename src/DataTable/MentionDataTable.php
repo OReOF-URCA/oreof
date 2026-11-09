@@ -49,6 +49,8 @@ final class MentionDataTable extends AbstractAppDataTable
                 ->setSearchField('accreditation.libelle'),
             TemplateColumn::new('domaines', 'Domaine(s)')
                 ->setTemplate('config/mention/_column_domaines.html.twig'),
+            TemplateColumn::new('typeDiplomes', 'Type(s) de diplôme')
+                ->setTemplate('config/mention/_column_type_diplomes.html.twig'),
             YesNoBadgeColumn::new('utilise', 'Utilisé ?'),
         ];
     }

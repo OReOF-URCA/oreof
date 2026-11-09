@@ -58,6 +58,12 @@ class TypeDiplome
     #[ORM\ManyToMany(targetEntity: TypeEpreuve::class, mappedBy: 'typeDiplomes')]
     private Collection $typeEpreuves;
 
+    /**
+     * @var Collection<int, Mention>
+     */
+    #[ORM\ManyToMany(targetEntity: Mention::class, mappedBy: 'typeDiplomes')]
+    private Collection $mentions;
+
     #[ORM\Column(nullable: true)]
     private ?bool $debutSemestreFlexible = null;
 
@@ -147,6 +153,7 @@ class TypeDiplome
         $this->formationDemandes = new ArrayCollection();
         $this->ficheMatieres = new ArrayCollection();
         $this->typeDiplomePlateformeAdmissions = new ArrayCollection();
+        $this->mentions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -745,5 +752,32 @@ class TypeDiplome
             ->filter(fn(TypeDiplomePlateformeAdmission $tpa) => $tpa->getCampagne() === $campagne)
             ->map(fn(TypeDiplomePlateformeAdmission $tpa) => $tpa->getPlateforme())
             ->filter(fn($p) => $p !== null);
+    }
+
+    /**
+     * @return Collection<int, Mention>
+     */
+    public function getMentions(): Collection
+    {
+        return $this->mentions;
+    }
+
+    public function addMention(Mention $mention): static
+    {
+        if (!$this->mentions->contains($mention)) {
+            $this->mentions->add($mention);
+            $mention->addTypeDiplome($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMention(Mention $mention): static
+    {
+        if ($this->mentions->removeElement($mention)) {
+            $mention->removeTypeDiplome($this);
+        }
+
+        return $this;
     }
 }

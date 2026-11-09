@@ -61,9 +61,15 @@ class MentionDto
     #[Assert\Count(min: 1, minMessage: 'Au moins un domaine doit être sélectionné')]
     public Collection $domaines;
 
+    /**
+     * @var Collection<int, \App\Entity\TypeDiplome> Les types de diplômes possibles
+     */
+    public Collection $typeDiplomes;
+
     public function __construct()
     {
         $this->domaines = new ArrayCollection();
+        $this->typeDiplomes = new ArrayCollection();
     }
 
     /**
@@ -80,6 +86,7 @@ class MentionDto
         $dto->codeApogee = $mention->getCodeApogee();
         $dto->accreditation = $mention->getAccreditation();
         $dto->domaines = $mention->getDomaines();
+        $dto->typeDiplomes = $mention->getTypeDiplomes();
 
         return $dto;
     }

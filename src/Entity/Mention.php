@@ -46,6 +46,13 @@ class Mention implements \Stringable
     #[ORM\ManyToMany(targetEntity: Domaine::class, inversedBy: 'mentions')]
     private Collection $domaines;
 
+    /**
+     * @var Collection<int, TypeDiplome>
+     */
+    #[ORM\ManyToMany(targetEntity: TypeDiplome::class, inversedBy: 'mentions')]
+    #[ORM\JoinTable(name: 'mention_type_diplome')]
+    private Collection $typeDiplomes;
+
     public function isUtilise(): bool
     {
         return $this->formations->count() > 0;
@@ -55,6 +62,7 @@ class Mention implements \Stringable
     {
         $this->formations = new ArrayCollection();
         $this->domaines = new ArrayCollection();
+        $this->typeDiplomes = new ArrayCollection();
     }
 
     public function __toString(): string
@@ -175,6 +183,30 @@ class Mention implements \Stringable
     public function removeDomaine(Domaine $domaine): static
     {
         $this->domaines->removeElement($domaine);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TypeDiplome>
+     */
+    public function getTypeDiplomes(): Collection
+    {
+        return $this->typeDiplomes;
+    }
+
+    public function addTypeDiplome(TypeDiplome $typeDiplome): static
+    {
+        if (!$this->typeDiplomes->contains($typeDiplome)) {
+            $this->typeDiplomes->add($typeDiplome);
+        }
+
+        return $this;
+    }
+
+    public function removeTypeDiplome(TypeDiplome $typeDiplome): static
+    {
+        $this->typeDiplomes->removeElement($typeDiplome);
 
         return $this;
     }

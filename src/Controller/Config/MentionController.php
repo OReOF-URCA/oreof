@@ -157,6 +157,14 @@ class MentionController extends AbstractController
                     'collection_property' => 'libelle',
                     'badge_class' => 'bg-primary',
                 ])
+                ->addField('typeDiplomes', [
+                    'label' => 'Type(s) de diplôme possible(s)',
+                    'type' => 'collection',
+                    'format' => 'badges',
+                    'collection_property' => 'libelle',
+                    'badge_class' => 'bg-info',
+                    'empty_text' => 'Aucun type de diplôme rattaché',
+                ])
                 ->addField('utilise', [
                     'label' => 'Utilisé ?',
                     'type' => 'boolean',

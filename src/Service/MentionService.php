@@ -13,6 +13,7 @@ use App\DTO\MentionDto;
 use App\Entity\Accreditation;
 use App\Entity\Domaine;
 use App\Entity\Mention;
+use App\Entity\TypeDiplome;
 use App\Repository\AccreditationRepository;
 use App\Repository\DomaineRepository;
 use App\Repository\MentionRepository;
@@ -201,6 +202,18 @@ class MentionService
         foreach ($mentionDto->domaines as $domaine) {
             if ($domaine instanceof Domaine && !$mention->getDomaines()->contains($domaine)) {
                 $mention->addDomaine($domaine);
+            }
+        }
+
+        // Sync typeDiplomes
+        foreach ($mention->getTypeDiplomes() as $typeDiplome) {
+            if (!$mentionDto->typeDiplomes->contains($typeDiplome)) {
+                $mention->removeTypeDiplome($typeDiplome);
+            }
+        }
+        foreach ($mentionDto->typeDiplomes as $typeDiplome) {
+            if ($typeDiplome instanceof TypeDiplome && !$mention->getTypeDiplomes()->contains($typeDiplome)) {
+                $mention->addTypeDiplome($typeDiplome);
             }
         }
     }

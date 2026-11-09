@@ -12,6 +12,7 @@ namespace App\Form;
 use App\Entity\Accreditation;
 use App\Entity\Domaine;
 use App\Entity\Mention;
+use App\Entity\TypeDiplome;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -54,6 +55,19 @@ class MentionType extends AbstractType
                 'multiple' => true,
                 'required' => true,
                 'label' => 'Domaine(s)',
+            ])
+            ->add('typeDiplomes', EntityType::class, [
+                'query_builder' => static function ($er) {
+                    return $er->createQueryBuilder('t')
+                        ->orderBy('t.libelle', 'ASC');
+                },
+                'class' => TypeDiplome::class,
+                'choice_label' => 'libelle',
+                'multiple' => true,
+                'expanded' => true,
+                'required' => false,
+                'label' => 'Type(s) de diplôme possible(s)',
+                'help' => 'Cochez un ou plusieurs type(s) de diplôme possibles pour cette mention.',
             ])
             ->add('codeApogee', TextType::class, [
                 'label' => 'Code Apogée',
