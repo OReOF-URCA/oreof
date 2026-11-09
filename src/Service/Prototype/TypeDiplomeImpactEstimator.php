@@ -23,7 +23,6 @@ final class TypeDiplomeImpactEstimator
      *     blockers: array<int, string>,
      *     counts: array{
      *         formations: int,
-     *         mentions: int,
      *         ficheMatieres: int,
      *         formationDemandes: int,
      *         typeEcs: int,
@@ -36,7 +35,6 @@ final class TypeDiplomeImpactEstimator
     {
         $counts = [
             'formations' => $typeDiplome->getFormations()->count(),
-            'mentions' => $typeDiplome->getMentions()->count(),
             'ficheMatieres' => $typeDiplome->getFicheMatieres()->count(),
             'formationDemandes' => $typeDiplome->getFormationDemandes()->count(),
             'typeEcs' => $typeDiplome->getTypeEcs()->count(),
@@ -46,7 +44,6 @@ final class TypeDiplomeImpactEstimator
 
         $score =
             ($counts['formations'] * 8)
-            + ($counts['mentions'] * 6)
             + ($counts['ficheMatieres'] * 5)
             + ($counts['formationDemandes'] * 4)
             + ($counts['typeEcs'] * 2)
@@ -62,9 +59,6 @@ final class TypeDiplomeImpactEstimator
         $blockers = [];
         if ($counts['formations'] > 0) {
             $blockers[] = 'Des formations sont encore rattachées.';
-        }
-        if ($counts['mentions'] > 0) {
-            $blockers[] = 'Des mentions sont encore rattachées.';
         }
         if ($counts['ficheMatieres'] > 0) {
             $blockers[] = 'Des fiches matière sont encore rattachées.';

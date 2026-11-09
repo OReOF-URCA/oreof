@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\DataTable;
 
 use App\DataTable\Column\YesNoBadgeColumn;
+use App\Entity\Accreditation;
 use App\Entity\Mention;
-use App\Entity\TypeDiplome;
 use Pentiminax\UX\DataTables\Attribute\AsDataTable;
 use Pentiminax\UX\DataTables\Column\TemplateColumn;
 use Pentiminax\UX\DataTables\Column\TextColumn;
@@ -33,9 +33,9 @@ final class MentionDataTable extends AbstractAppDataTable
             ->add(TextFilter::new('sigle')->label('Sigle'))
             ->add(TextFilter::new('codeApogee')->label('Code Apogée'))
             ->add(
-                ChoiceFilter::new('typeDiplome')
-                    ->label('Type de diplôme')
-                    ->entity(TypeDiplome::class, 'libelle')
+                ChoiceFilter::new('accreditation')
+                    ->label('Accréditation')
+                    ->entity(Accreditation::class, 'libelle')
             );
     }
 
@@ -45,8 +45,8 @@ final class MentionDataTable extends AbstractAppDataTable
             TextColumn::new('libelle', 'Libellé de la mention'),
             TextColumn::new('sigle', 'Sigle'),
             TextColumn::new('codeApogee', 'Code Apogée'),
-            TextColumn::new('typeDiplome', 'Type de diplôme')
-                ->setSearchField('typeDiplome.libelle'),
+            TextColumn::new('accreditation', 'Période d\'accréditation')
+                ->setSearchField('accreditation.libelle'),
             TemplateColumn::new('domaines', 'Domaine(s)')
                 ->setTemplate('config/mention/_column_domaines.html.twig'),
             YesNoBadgeColumn::new('utilise', 'Utilisé ?'),

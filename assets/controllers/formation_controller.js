@@ -15,49 +15,21 @@ export default class extends Controller {
     }
 
     connect() {
-        const typeDiplomeEl = document.getElementById('formation_ses_typeDiplome');
-        const domaineEl = document.getElementById('formation_ses_domaine');
-        
-        if (!typeDiplomeEl || !domaineEl) {
-            return;
-        }
-
-        this._updateListeMention(typeDiplomeEl.value, domaineEl.value).then(() => {
-            const mention = document.getElementById('formation_ses_mention');
-            const mentionTexte = document.getElementById('formation_ses_mentionTexte');
-
-            if (mention && mentionTexte) {
-                mentionTexte.disabled = mention.value !== 'autre' && mention.value.trim() !== 'null';
-            }
-        });
-    }
-
-    changeInscriptionRNCP(event) {
-        const inscriptionRNCP = event.target.value;
-        const codeRNCP = document.getElementById('formation_ses_codeRNCP');
-        if (codeRNCP) {
-            codeRNCP.disabled = parseInt(inscriptionRNCP, 10) !== 1;
-        }
-    }
-
-    changeTypeDiplome(event) {
-        const domaineEl = document.getElementById('formation_ses_domaine');
-        if (domaineEl) {
-            this._updateListeMention(event.target.value, domaineEl.value);
+        const mentionTexte = document.getElementById('formation_ses_mentionTexte');
+        if (mentionTexte) {
+            mentionTexte.disabled = false;
         }
     }
 
     changeDomaine(event) {
-        const typeDiplomeEl = document.getElementById('formation_ses_typeDiplome');
-        if (typeDiplomeEl) {
-            this._updateListeMention(typeDiplomeEl.value, event.target.value);
-        }
+        this._updateListeMention(event.target.value);
     }
 
     changeMention(event) {
+        const val = event.target ? event.target.value : '';
         const mentionTexte = document.getElementById('formation_ses_mentionTexte');
-        if (mentionTexte) {
-            mentionTexte.disabled = event.target.value !== 'autre' && event.target.value.trim() !== 'null';
+        if (mentionTexte && val !== 'autre' && val !== '') {
+            mentionTexte.value = '';
         }
     }
 
@@ -65,31 +37,30 @@ export default class extends Controller {
         if (event.target.value.trim() !== '') {
             const mention = document.getElementById('formation_ses_mention');
             if (mention) {
-                mention.value = 'autre';
                 const ts = mention.tomselect;
                 if (ts) {
-                    ts.sync();
                     ts.setValue('autre');
+                } else {
+                    mention.value = 'autre';
                 }
             }
         }
     }
 
-    async _updateListeMention(typeDiplome, domaine) {
+    async _updateListeMention(domaine) {
         if (!this.urlValue) return;
 
         let url;
         if (this.urlValue.includes('?')) {
-            url = `${this.urlValue}&typeDiplome=${typeDiplome}&domaine=${domaine}`;
+            url = `${this.urlValue}&domaine=${domaine}`;
         } else {
-            url = `${this.urlValue}?typeDiplome=${typeDiplome}&domaine=${domaine}`;
+            url = `${this.urlValue}?domaine=${domaine}`;
         }
 
         await fetch(url)
             .then((response) => response.json())
             .then((data) => {
-                const { mentions } = data;
-                const { selectedMention } = data;
+                const { mentions, selectedMention } = data;
                 const selectMention = document.getElementById('formation_ses_mention');
 
                 if (!selectMention) return;
@@ -97,6 +68,7 @@ export default class extends Controller {
                 const currentVal = selectMention.value;
                 const ts = selectMention.tomselect;
                 if (ts) {
+                    ts.clear();
                     ts.clearOptions();
                 }
 

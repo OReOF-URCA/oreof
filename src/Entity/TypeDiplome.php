@@ -49,9 +49,6 @@ class TypeDiplome
     #[ORM\OneToMany(mappedBy: 'typeDiplome', targetEntity: Formation::class)]
     private Collection $formations;
 
-    #[ORM\OneToMany(mappedBy: 'typeDiplome', targetEntity: Mention::class)]
-    private Collection $mentions;
-
     #[ORM\ManyToMany(targetEntity: TypeEc::class, mappedBy: 'typeDiplomes')]
     private Collection $typeEcs;
 
@@ -144,7 +141,6 @@ class TypeDiplome
     public function __construct()
     {
         $this->formations = new ArrayCollection();
-        $this->mentions = new ArrayCollection();
         $this->typeEcs = new ArrayCollection();
         $this->typeUes = new ArrayCollection();
         $this->typeEpreuves = new ArrayCollection();
@@ -286,35 +282,6 @@ class TypeDiplome
         return $this;
     }
 
-    /**
-     * @return Collection<int, Mention>
-     */
-    public function getMentions(): Collection
-    {
-        return $this->mentions;
-    }
-
-    public function addMention(Mention $mention): self
-    {
-        if (!$this->mentions->contains($mention)) {
-            $this->mentions->add($mention);
-            $mention->setTypeDiplome($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMention(Mention $mention): self
-    {
-        if ($this->mentions->removeElement($mention)) {
-            // set the owning side to null (unless already changed)
-            if ($mention->getTypeDiplome() === $this) {
-                $mention->setTypeDiplome(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, TypeEc>

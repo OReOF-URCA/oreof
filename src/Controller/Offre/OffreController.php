@@ -893,7 +893,7 @@ final class OffreController extends BaseController
                     if ($param->getCampagne() === $campagne && $param->isActive() && $param->getPlateforme() !== null) {
                         $plateformesActives[] = [
                             'plateforme' => $param->getPlateforme(),
-                            'capaciteSpecifique' => $param->getCapacite(),
+                            'capaciteSpecifique' => $param->getCapaciteSpecifique(),
                         ];
                     }
                 }

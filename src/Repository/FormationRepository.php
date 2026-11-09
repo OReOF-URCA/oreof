@@ -66,7 +66,7 @@ class FormationRepository extends ServiceEntityRepository
             ->leftJoin('f.composantesInscription', 'ci')
             ->addSelect('cp', 'm', 'td', 'dom', 'ci')
             ->where('f.dpe = :campagne')
-            ->andWhere('td.classique = 1')
+            ->andWhere('COALESCE(f.classique, td.classique) = 1')
             ->setParameter('campagne', $campagne)
             ->orderBy('td.libelle', 'ASC')
             ->addOrderBy('m.libelle', 'ASC')
@@ -162,9 +162,9 @@ class FormationRepository extends ServiceEntityRepository
             $query->leftJoin('f.typeDiplome', 'td');
             $isCl = filter_var($classiqueFilter, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
             if ($isCl === false || $classiqueFilter === '0' || $classiqueFilter === 0) {
-                $query->andWhere('td.classique = false');
+                $query->andWhere('COALESCE(f.classique, td.classique) = false');
             } else {
-                $query->andWhere('td.classique = true OR td.classique IS NULL');
+                $query->andWhere('COALESCE(f.classique, td.classique, true) = true');
             }
         }
 

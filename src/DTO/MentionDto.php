@@ -9,8 +9,9 @@
 
 namespace App\DTO;
 
+use App\Entity\Accreditation;
 use App\Entity\Mention;
-use App\Entity\TypeDiplome;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -52,13 +53,18 @@ class MentionDto
     public ?string $codeApogee = null;
 
     /**
-     * @var TypeDiplome|null Le type de diplôme associé
+     * @var Accreditation|null La période d'accréditation associée
      */
-    #[Assert\NotBlank(message: 'Le type de diplôme est obligatoire')]
-    public ?TypeDiplome $typeDiplomeId = null;
+    #[Assert\NotNull(message: 'La période d\'accréditation est obligatoire')]
+    public ?Accreditation $accreditation = null;
 
-    #[Assert\NotBlank(message: 'Le domaine est obligatoire')]
+    #[Assert\Count(min: 1, minMessage: 'Au moins un domaine doit être sélectionné')]
     public Collection $domaines;
+
+    public function __construct()
+    {
+        $this->domaines = new ArrayCollection();
+    }
 
     /**
      * Crée un DTO à partir d'une entité Mention existante.
@@ -69,10 +75,10 @@ class MentionDto
     public static function createFromEntity(Mention $mention): self
     {
         $dto = new self();
-        $dto->libelle = $mention->getLibelle();
+        $dto->libelle = $mention->getLibelle() ?? '';
         $dto->sigle = $mention->getSigle();
         $dto->codeApogee = $mention->getCodeApogee();
-        $dto->typeDiplomeId = $mention->getTypeDiplome();
+        $dto->accreditation = $mention->getAccreditation();
         $dto->domaines = $mention->getDomaines();
 
         return $dto;

@@ -316,6 +316,7 @@ final class MigrateV2Command extends Command
             'help' => "CREATE TABLE help (id INT AUTO_INCREMENT NOT NULL, title VARCHAR(255) DEFAULT NULL, content LONGTEXT DEFAULT NULL, route_slug VARCHAR(255) NOT NULL, is_active TINYINT(1) NOT NULL, centres_show JSON NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
             'help_image' => "CREATE TABLE help_image (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(255) NOT NULL, fichier VARCHAR(255) NOT NULL, date_creation DATETIME NOT NULL COMMENT '(DC2Type:datetime_immutable)', PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
             'document_conseil' => "CREATE TABLE document_conseil (id INT AUTO_INCREMENT NOT NULL, uploaded_by_id INT DEFAULT NULL, composante_id INT DEFAULT NULL, type VARCHAR(30) NOT NULL, filename VARCHAR(255) NOT NULL, original_filename VARCHAR(255) NOT NULL, date_conseil DATETIME DEFAULT NULL, uploaded_at DATETIME NOT NULL, commentaire LONGTEXT DEFAULT NULL, INDEX IDX_DOCUMENT_CONSEIL_USER (uploaded_by_id), INDEX IDX_DOCUMENT_CONSEIL_COMPOSANTE (composante_id), PRIMARY KEY(id), CONSTRAINT FK_DOCUMENT_CONSEIL_USER FOREIGN KEY (uploaded_by_id) REFERENCES `user` (id), CONSTRAINT FK_DOCUMENT_CONSEIL_COMPOSANTE FOREIGN KEY (composante_id) REFERENCES composante (id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
+            'accreditation' => "CREATE TABLE accreditation (id INT AUTO_INCREMENT NOT NULL, libelle VARCHAR(50) NOT NULL, annee_debut INT NOT NULL, annee_fin INT NOT NULL, actif TINYINT(1) DEFAULT 1 NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB",
         ];
         foreach ($tables as $table => $statement) {
             if (!$this->tableExists($table)) {
@@ -326,6 +327,9 @@ final class MigrateV2Command extends Command
         if (!$this->tableExists('document_conseil_formation')) {
             $sql['Création document_conseil_formation'] = "CREATE TABLE document_conseil_formation (document_conseil_id INT NOT NULL, formation_id INT NOT NULL, INDEX IDX_DCF_DOCUMENT (document_conseil_id), INDEX IDX_DCF_FORMATION (formation_id), PRIMARY KEY(document_conseil_id, formation_id), CONSTRAINT FK_DCF_DOCUMENT FOREIGN KEY (document_conseil_id) REFERENCES document_conseil (id) ON DELETE CASCADE, CONSTRAINT FK_DCF_FORMATION FOREIGN KEY (formation_id) REFERENCES formation (id) ON DELETE CASCADE) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB";
         }
+
+        $this->addColumn($sql, 'formation', 'classique', 'TINYINT(1) DEFAULT NULL');
+        $this->addColumn($sql, 'mention', 'accreditation_id', 'INT DEFAULT NULL');
 
         return $sql;
     }
@@ -498,12 +502,12 @@ final class MigrateV2Command extends Command
         $errors = [];
         $warnings = [];
 
-        foreach ([['plateforme_admission','mode_export'], ['parcours','duree_parcours'], ['type_diplome','has_ects'], ['type_diplome_plateforme_admission','annees'], ['type_diplome_plateforme_admission','annees_capacite_requise'], ['type_diplome_plateforme_admission','annees_capacite_specifique'], ['timeline_date','ordre'], ['annee','regime_inscription'], ['semestre','validation_status'], ['ue','validation_status'], ['element_constitutif','validation_status']] as [$table, $column]) {
+        foreach ([['plateforme_admission','mode_export'], ['parcours','duree_parcours'], ['type_diplome','has_ects'], ['type_diplome_plateforme_admission','annees'], ['type_diplome_plateforme_admission','annees_capacite_requise'], ['type_diplome_plateforme_admission','annees_capacite_specifique'], ['timeline_date','ordre'], ['annee','regime_inscription'], ['semestre','validation_status'], ['ue','validation_status'], ['element_constitutif','validation_status'], ['formation', 'classique'], ['mention', 'accreditation_id']] as [$table, $column]) {
             if (!$this->columnExists($table, $column)) {
                 $errors[] = "Colonne manquante : {$table}.{$column}";
             }
         }
-        foreach (['fiche_matiere_tab_state', 'formation_tab_state', 'parcours_tab_state', 'validation_issue', 'volume_horaire_parcours', 'faq', 'help', 'help_image', 'document_conseil', 'document_conseil_formation'] as $table) {
+        foreach (['fiche_matiere_tab_state', 'formation_tab_state', 'parcours_tab_state', 'validation_issue', 'volume_horaire_parcours', 'faq', 'help', 'help_image', 'document_conseil', 'document_conseil_formation', 'accreditation'] as $table) {
             if (!$this->tableExists($table)) {
                 $errors[] = 'Table manquante : '.$table;
             }

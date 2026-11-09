@@ -15,6 +15,7 @@ Point d'entrée agents : `AGENTS.md` (racine). Chaque fichier ci-dessous est aut
 | `formulaires/exemples-plateformes.md` | Définitions de champs par plateforme d'admission | configurer une plateforme |
 | `formulaires/guide-mode-assistant.md` | Guide utilisateur final du mode assistant | doc/aide utilisateur |
 | `architecture/migration-v2.md` | Commande `app:migrate:v2`, étapes, décisions de reprise | schéma BDD, bascule main → V2 |
+| `architecture/modifications-bdd-v1-v2.md` | Référentiel complet des écarts de schéma BDD main (V1) vs V2 | comparaison schéma V1/V2, audit BDD |
 | `architecture/maquette-modulaire.md` | Architecture cible maquette par profils de diplôme (non implémentée) | refonte structure/validation/rendu |
 | `testing/audit-form-feedback.md` | Audit des validations, retours usagers, usages callOut et points FORM-AUDIT | poursuivre les corrections de formulaires et fetch |
 | `testing/README.md` | Organisation des tests, helpers, commandes, priorités | écrire/lancer des tests |

@@ -31,29 +31,18 @@ class ConseilDocumentsController extends BaseController
 {
     #[Route('/conseils/documents', name: 'app_conseils_documents_index', methods: ['GET', 'POST'])]
     public function index(
-        Request                               $request,
-        ConseilDocumentsDpeParcoursDataTable  $parcoursTable,
-        ConseilDocumentsDpeFormationDataTable $formationTable,
-        ConseilDocumentsChangeRfDataTable     $changeRfTable,
+        Request $request,
     ): Response
     {
         $this->denyConseilDocumentsAccess();
 
         $process = (string) $request->query->get('process', 'dpe_parcours');
-        if (!in_array($process, ['dpe_parcours', 'dpe_formation', 'change_rf'], true)) {
-            $process = 'dpe_parcours';
-        }
 
-        $table = match ($process) {
-            'dpe_formation' => $formationTable,
-            'change_rf' => $changeRfTable,
-            default => $parcoursTable,
+        return match ($process) {
+            'change_rf' => $this->redirectToRoute('app_formation_responsable_liste', ['tab' => 'documents']),
+            'dpe_formation' => $this->redirectToRoute('app_conseils_synthese_offre', ['tab' => 'documents']),
+            default => $this->redirectToRoute('app_synthese_modification_export_pdf', ['tab' => 'documents']),
         };
-
-        return $this->render('conseils/documents/index.html.twig', [
-            'table' => $table,
-            'selectedProcess' => $process,
-        ]);
     }
 
     private function denyConseilDocumentsAccess(): void

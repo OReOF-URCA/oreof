@@ -241,7 +241,7 @@ readonly class GetFormations
             if ($classiqueFilter !== null && '' !== $classiqueFilter) {
                 $isCl = filter_var($classiqueFilter, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                 $targetClassique = !($isCl === false || $classiqueFilter === '0' || $classiqueFilter === 0);
-                $isFormationClassique = $formation->getTypeDiplome()?->isClassique() ?? true;
+                $isFormationClassique = $formation->isClassique();
                 if ($isFormationClassique !== $targetClassique) {
                     continue;
                 }

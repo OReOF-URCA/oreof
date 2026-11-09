@@ -19,7 +19,27 @@
 
             <div>
                 <dt class="{{ dtClass }}">Mention/Spécialité</dt>
-                <dd class="{{ ddClass }}">{{ formation.display }}</dd>
+                <dd class="{{ ddClass }} flex items-center gap-2 flex-wrap">
+                    <span>{{ formation.display }}</span>
+                    {% if formation.accreditation != null %}
+                        <span class="inline-flex items-center rounded-full bg-info-100 px-2.5 py-0.5 text-xs font-semibold text-info-800 dark:bg-info-900/40 dark:text-info-300">
+                            {{ formation.accreditation.libelle }}
+                        </span>
+                    {% endif %}
+                </dd>
+            </div>
+
+            <div>
+                <dt class="{{ dtClass }}">Période d'accréditation</dt>
+                <dd class="{{ ddClass }}">
+                    {% if formation.accreditation != null %}
+                        <span class="inline-flex items-center rounded-full bg-info-100 px-2.5 py-0.5 text-xs font-semibold text-info-800 dark:bg-info-900/40 dark:text-info-300">
+                            {{ formation.accreditation.libelle }}
+                        </span>
+                    {% else %}
+                        <span class="text-xs text-secondary-400 dark:text-secondary-500">Non définie</span>
+                    {% endif %}
+                </dd>
             </div>
 
             <div>

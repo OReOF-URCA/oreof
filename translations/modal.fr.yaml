@@ -77,6 +77,13 @@ langue:
 langue.edit.title: 'Modifier la langue'
 langue.new.title: 'Ajouter une langue'
 langue.show.title: 'Détails de la langue'
+accreditation:
+    edit:
+        title: "Modifier la période d'accréditation"
+    new:
+        title: "Ajouter une période d'accréditation"
+accreditation.edit.title: "Modifier la période d'accréditation"
+accreditation.new.title: "Ajouter une période d'accréditation"
 mention:
     edit:
         title: 'Modifier la mention'
@@ -236,6 +243,7 @@ communs.modal.fermer_sans_sauvegarder: 'Fermer sans sauvegarder'
 config.mention.codificationModal.generer_les_codes: 'Générer les codes'
 config.mention.codificationModal.tous_les_domaines: 'Tous les domaines'
 config.mention.codificationModal.tous_les_types_de_diplome: 'Tous les types de diplôme'
+config.mention.codificationModal.toutes_les_periodes: 'Toutes les périodes'
 element_constitutif.bccEcModal.cet_ec_est_raccroche_vous_pouvez: 'Cet EC est raccroché, vous pouvez modifier les éléments librement, ou bien les synchroniser ou recopier depuis l''EC d''origine.'
 element_constitutif.bccEcModal.les_bcc_sont_raccrochee_depuis_l: 'Les BCC sont raccrochée depuis l''EC du parcours "...". Le raccrochement se fait sur le code de la compétence. Les données ne sont pas modifiables.'
 element_constitutif.bccEcModal.raccrocher_les_bcc: 'Raccrocher les BCC'

@@ -6,6 +6,7 @@ use App\Classes\JsonReponse;
 use App\Classes\MyGotenbergPdf;
 use App\Classes\Process\ChangeRfProcess;
 use App\Classes\ValidationProcessChangeRf;
+use App\DataTable\ConseilDocumentsChangeRfDataTable;
 use App\DTO\ChangeRf;
 use App\Entity\Formation;
 use App\Enums\EtatChangeRfEnum;
@@ -194,18 +195,26 @@ class FormationResponsableController extends BaseController
         ]);
     }
 
-    #[Route('/formation/change-responsable/liste', name: 'app_formation_responsable_liste')]
+    #[Route('/formation/change-responsable/liste', name: 'app_formation_responsable_liste', methods: ['GET', 'POST'])]
     public function listeDemande(
-        DataTableBuilder $builder
+        Request $request,
+        DataTableBuilder $builder,
+        ConseilDocumentsChangeRfDataTable $documentsTable,
     ): Response {
+        $tab = (string) $request->query->get('tab', 'demandes');
+        if (!in_array($tab, ['demandes', 'documents'], true)) {
+            $tab = 'demandes';
+        }
+
         $campagneCollecte = $this->getCampagneCollecte();
 
-        $builder
-            ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
-            ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId());
+        $table = null;
+        if ($tab === 'demandes') {
+            $builder
+                ->addBaseWhere('IDENTITY(e.campagneCollecte) = :campagneCollecteId')
+                ->addBaseParameter('campagneCollecteId', $campagneCollecte->getId());
 
-        return $this->render('formation_responsable/liste.html.twig', [
-            'table' => $builder
+            $table = $builder
                 ->setEntity(\App\Entity\ChangeRf::class)
                 ->setPerPage(20)
                 ->setDefaultSort('dateDemande', 'desc')
@@ -259,7 +268,13 @@ class FormationResponsableController extends BaseController
                     'type' => 'date',
                     'format' => 'date',
                 ])
-                ->build(),
+                ->build();
+        }
+
+        return $this->render('formation_responsable/liste.html.twig', [
+            'tab' => $tab,
+            'table' => $table,
+            'documentsTable' => $documentsTable,
         ]);
     }
 

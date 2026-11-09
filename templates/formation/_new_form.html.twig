@@ -65,7 +65,9 @@
                 <div>{{ form_row(form.mention, {
                     attr: stimulus_controller('symfony/ux-autocomplete/autocomplete')|stimulus_action('formation', 'changeMention', 'change').toArray()
                 }) }}</div>
-                <div>{{ form_row(form.mentionTexte) }}</div>
+                <div>{{ form_row(form.mentionTexte, {
+                    attr: stimulus_action('formation', 'changeMentionTexte', 'input').toArray()
+                }) }}</div>
             </div>
         </div>
 

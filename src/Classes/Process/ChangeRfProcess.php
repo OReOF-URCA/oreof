@@ -103,9 +103,10 @@ class ChangeRfProcess extends AbstractProcess
     /**
      * Retourne toutes les formations liées dans la lignée (antécédents et duplications futures).
      *
+     * @param int|null $anneeMin Si renseigné, la remontée dans les antécédents s'arrête dès que l'année est inférieure à ce seuil.
      * @return Formation[]
      */
-    public function getLigneeFormations(Formation $formation): array
+    public function getLigneeFormations(Formation $formation, ?int $anneeMin = null): array
     {
         $formations = [];
         $formations[$formation->getId()] = $formation;
@@ -114,6 +115,10 @@ class ChangeRfProcess extends AbstractProcess
         $curr = $formation;
         while (($parent = $curr->getFormationOrigineCopie()) !== null) {
             if (isset($formations[$parent->getId()])) {
+                break;
+            }
+            $anneeParent = $parent->getDpe()?->getAnneeUniversitaire()?->getAnnee();
+            if ($anneeMin !== null && $anneeParent !== null && $anneeParent < $anneeMin) {
                 break;
             }
             $formations[$parent->getId()] = $parent;
@@ -144,9 +149,10 @@ class ChangeRfProcess extends AbstractProcess
         }
 
         $anneePriseFonction = $demande->getAnneeUniversitaireDebut();
-        $lignee = $this->getLigneeFormations($formation);
+        $lignee = $this->getLigneeFormations($formation, $anneePriseFonction);
 
         foreach ($lignee as $f) {
+            $f->suspendreRecalculRemplissage();
             $anneeF = $f->getDpe()?->getAnneeUniversitaire()?->getAnnee();
             if ($anneePriseFonction !== null && $anneeF !== null) {
                 // On applique le changement pour toute formation dont l'année universitaire >= année de début de prise de fonction
@@ -161,6 +167,7 @@ class ChangeRfProcess extends AbstractProcess
 
     private function applyChangeToFormation(ChangeRf $demande, Formation $formation): void
     {
+        $formation->suspendreRecalculRemplissage();
         $isRf = $demande->getTypeRf() === TypeRfEnum::RF;
         $role = $isRf ? 'ROLE_RESP_FORMATION' : 'ROLE_CO_RESP_FORMATION';
         $setter = $isRf ? 'setResponsableMention' : 'setCoResponsable';

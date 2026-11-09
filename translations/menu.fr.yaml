@@ -38,6 +38,7 @@ menu.config.campagne_collecte: 'Campagne Collecte'
 menu.config.composante: Composantes
 menu.config.config_emails: 'Configurations des emails'
 menu.config.domaines: Domaines
+menu.config.accreditations: Accréditations
 menu.config.duplication_campagne: 'Bascule & Duplication N ➔ N+1'
 menu.config.etablissement: Etablissement
 menu.config.faq: 'Configuration FAQ'
@@ -64,9 +65,13 @@ menu.config.versioning_json: 'Fichiers de versioning JSON'
 menu.config.ville: Villes
 menu.config.workflows: 'Cartographie des workflows'
 menu.conseils.chgt_rf: 'Changement RF/co RF'
+menu.conseils.description.chgt_rf: 'Consulter les demandes de changement de responsable ou co-responsable et télécharger les PV et justificatifs.'
 menu.conseils.documents: Documents
 menu.conseils.synthese_offre: 'Synthèse offre de formation'
+menu.conseils.description.synthese_offre: 'Consulter la synthèse de l''offre de formation par plateforme et accéder aux PV du conseil.'
 menu.conseils.synthses_modifs: 'Synthèse des modifications'
+menu.conseils.synthese_modifs: 'Synthèse des modifications'
+menu.conseils.description.synthese_modifs: 'Consulter la synthèse des modifications de maquette et exporter les synthèses et documents de conseil.'
 menu.detail_elts_mutualises: 'Détail des éléments mutualisés'
 menu.detail_fiches: 'Détail des fiches EC/matière'
 menu.detail_fiches_hd: 'Détail fiches EC/matières "hors diplômes"'
