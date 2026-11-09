@@ -7,10 +7,10 @@
             </div>
             <div class="flex-1">
                 <div class="font-bold text-success-800 dark:text-success-200 text-sm">
-                    Offre complète & cohérente
+                    {{ 'offre_v2.modal_formation_synthese.offre_complete_coherente'|trans({}, 'modal') }}
                 </div>
                 <p class="text-success-700 dark:text-success-300 mt-0.5">
-                    Aucune anomalie ni incohérence détectée sur les parcours, capacités et plateformes d'admission de cette formation.
+                    {{ 'offre_v2.modal_formation_synthese.aucune_anomalie_ni_incoherence_detectee_sur'|trans({}, 'modal') }}
                 </p>
             </div>
         </div>
@@ -18,7 +18,7 @@
         <div class="rounded-xl border border-warning-300 bg-warning-50/80 p-3.5 text-warning-900 dark:border-warning-700 dark:bg-warning-950/40 dark:text-warning-200">
             <div class="flex items-center gap-2 mb-2 font-bold text-warning-900 dark:text-warning-100 text-sm">
                 <twig:UX:Icon name="ph:warning-bold" class="size-4 text-warning-600 dark:text-warning-400" />
-                <span>{{ anomaliesMessages|length }} anomalie{{ anomaliesMessages|length > 1 ? 's' : '' }} à corriger avant validation :</span>
+                <span>{{ 'offre_v2.modal_formation_synthese.anomalies_a_corriger'|trans({'%count%': anomaliesMessages|length}, 'modal') }}</span>
             </div>
             <ul class="list-disc list-inside space-y-1 text-warning-800 dark:text-warning-300 ml-1">
                 {% for message in anomaliesMessages %}
@@ -33,14 +33,14 @@
         <!-- Statut du workflow -->
         <div class="rounded-lg border border-secondary-200 bg-secondary-50/50 p-2.5 dark:border-secondary-700 dark:bg-secondary-800/40">
             <div class="text-[11px] font-semibold text-secondary-500 uppercase tracking-wider mb-1">
-                Statut workflow
+                {{ 'offre_v2.modal_formation_synthese.statut_workflow'|trans({}, 'modal') }}
             </div>
             <div class="flex items-center gap-1.5 flex-wrap">
                 {% set activeState = dpeFormation ? (dpeFormation.etatValidation|keys|first) : 'brouillon' %}
                 {{ include('offre_v2/_etat_offre_badge.html.twig', {etat: activeState}) }}
                 {% if dpeFormation and dpeFormation.laissezPasser %}
-                    <span class="text-[10px] text-warning-700 bg-warning-100 rounded px-1.5 py-0.5 font-bold" title="Laissez-passer accordé">
-                        LP : {{ dpeFormation.laissezPasser }}
+                    <span class="text-[10px] text-warning-700 bg-warning-100 rounded px-1.5 py-0.5 font-bold" title="{{ 'offre_v2.modal_formation_synthese.laissez_passer_accorde'|trans({}, 'modal') }}">
+                        {{ 'offre_v2.modal_formation_synthese.lp'|trans({'%lp%': dpeFormation.laissezPasser}, 'modal') }}
                     </span>
                 {% endif %}
             </div>
@@ -49,19 +49,19 @@
         <!-- Capacité totale -->
         <div class="rounded-lg border border-secondary-200 bg-secondary-50/50 p-2.5 dark:border-secondary-700 dark:bg-secondary-800/40">
             <div class="text-[11px] font-semibold text-secondary-500 uppercase tracking-wider mb-1">
-                Capacité totale
+                {{ 'offre_v2.modal_formation_synthese.capacite_totale'|trans({}, 'modal') }}
             </div>
             <div class="text-sm font-bold text-secondary-900 dark:text-secondary-100 flex items-center gap-1">
                 <twig:UX:Icon name="icon:users" class="size-3.5 text-secondary-500" />
                 <span>{{ formationCapacite }}</span>
-                <span class="text-xs font-normal text-secondary-500">places</span>
+                <span class="text-xs font-normal text-secondary-500">{{ 'offre_v2.modal_formation_synthese.places'|trans({}, 'modal') }}</span>
             </div>
         </div>
 
         <!-- PV de conseil -->
         <div class="rounded-lg border border-secondary-200 bg-secondary-50/50 p-2.5 dark:border-secondary-700 dark:bg-secondary-800/40">
             <div class="text-[11px] font-semibold text-secondary-500 uppercase tracking-wider mb-1">
-                PV de conseil
+                {{ 'offre_v2.modal_formation_synthese.pv_de_conseil'|trans({}, 'modal') }}
             </div>
             <div>
                 {% if pvDocs is not empty %}
@@ -76,7 +76,7 @@
                         </a>
                     {% endfor %}
                 {% else %}
-                    <span class="text-secondary-400 italic">Non déposé</span>
+                    <span class="text-secondary-400 italic">{{ 'offre_v2.modal_formation_synthese.non_depose'|trans({}, 'modal') }}</span>
                 {% endif %}
             </div>
         </div>
@@ -84,7 +84,7 @@
         <!-- Note explicative -->
         <div class="rounded-lg border border-secondary-200 bg-secondary-50/50 p-2.5 dark:border-secondary-700 dark:bg-secondary-800/40">
             <div class="text-[11px] font-semibold text-secondary-500 uppercase tracking-wider mb-1">
-                Note explicative
+                {{ 'offre_v2.modal_formation_synthese.note_explicative'|trans({}, 'modal') }}
             </div>
             <div>
                 {% if noteDocs is not empty %}
@@ -99,7 +99,7 @@
                         </a>
                     {% endfor %}
                 {% else %}
-                    <span class="text-secondary-400 italic">Non déposée</span>
+                    <span class="text-secondary-400 italic">{{ 'offre_v2.modal_formation_synthese.non_deposee'|trans({}, 'modal') }}</span>
                 {% endif %}
             </div>
         </div>
@@ -110,10 +110,10 @@
         <div class="bg-secondary-100/70 dark:bg-secondary-800 px-3 py-2 border-b border-secondary-200 dark:border-secondary-700 flex items-center justify-between">
             <h4 class="font-bold text-secondary-800 dark:text-secondary-100 flex items-center gap-1.5 text-xs">
                 <twig:UX:Icon name="icon:layers" class="size-3.5 text-secondary-500" />
-                <span>Détail par parcours et année</span>
+                <span>{{ 'offre_v2.modal_formation_synthese.detail_par_parcours_et_annee'|trans({}, 'modal') }}</span>
             </h4>
             <span class="text-[11px] text-secondary-500">
-                {{ parcoursDetails|length }} parcours
+                {{ 'offre_v2.modal_formation_synthese.nb_parcours'|trans({'%count%': parcoursDetails|length}, 'modal') }}
             </span>
         </div>
 
@@ -121,12 +121,12 @@
             <table class="w-full text-left border-collapse text-xs">
                 <thead class="bg-secondary-50 text-secondary-600 dark:bg-secondary-900/60 dark:text-secondary-300 text-[11px] uppercase tracking-wider sticky top-0 z-10 border-b border-secondary-200 dark:border-secondary-700">
                     <tr>
-                        <th class="px-3 py-2 font-semibold">Parcours</th>
-                        <th class="px-3 py-2 font-semibold">Année</th>
-                        <th class="px-3 py-2 font-semibold text-center">Ouvert</th>
-                        <th class="px-3 py-2 font-semibold text-right">Capacité</th>
-                        <th class="px-3 py-2 font-semibold">Plateformes actives</th>
-                        <th class="px-3 py-2 font-semibold">Liaisons</th>
+                        <th class="px-3 py-2 font-semibold">{{ 'offre_v2.modal_formation_synthese.parcours'|trans({}, 'modal') }}</th>
+                        <th class="px-3 py-2 font-semibold">{{ 'offre_v2.modal_formation_synthese.annee'|trans({}, 'modal') }}</th>
+                        <th class="px-3 py-2 font-semibold text-center">{{ 'offre_v2.modal_formation_synthese.ouvert'|trans({}, 'modal') }}</th>
+                        <th class="px-3 py-2 font-semibold text-right">{{ 'offre_v2.modal_formation_synthese.capacite'|trans({}, 'modal') }}</th>
+                        <th class="px-3 py-2 font-semibold">{{ 'offre_v2.modal_formation_synthese.plateformes_actives'|trans({}, 'modal') }}</th>
+                        <th class="px-3 py-2 font-semibold">{{ 'offre_v2.modal_formation_synthese.liaisons'|trans({}, 'modal') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800">
@@ -158,16 +158,16 @@
                                     {% endif %}
                                 </td>
                                 <td class="px-3 py-1.5 font-medium text-secondary-800 dark:text-secondary-200 whitespace-nowrap">
-                                    {{ formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}
+                                    {{ 'offre_v2.modal_formation_synthese.annee_ordre'|trans({'%diplome%': formation.typeDiplome ? formation.typeDiplome.libelleCourt : 'offre_v2.modal_add_annee.annee'|trans({}, 'modal'), '%ordre%': annee.ordre}, 'modal') }}
                                 </td>
                                 <td class="px-3 py-1.5 text-center">
                                     {% if anneeRow.isOuverte %}
                                         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-success-100 text-success-800 dark:bg-success-900/40 dark:text-success-300">
-                                            Oui
+                                            {{ 'offre_v2.modal_formation_synthese.oui'|trans({}, 'modal') }}
                                         </span>
                                     {% else %}
                                         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-secondary-100 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">
-                                            Non
+                                            {{ 'offre_v2.modal_formation_synthese.non'|trans({}, 'modal') }}
                                         </span>
                                     {% endif %}
                                 </td>
@@ -186,7 +186,7 @@
                                             {% endfor %}
                                         </div>
                                     {% else %}
-                                        <span class="text-secondary-400 text-[11px] italic">Aucune</span>
+                                        <span class="text-secondary-400 text-[11px] italic">{{ 'offre_v2.modal_formation_synthese.aucune'|trans({}, 'modal') }}</span>
                                     {% endif %}
                                 </td>
                                 <td class="px-3 py-1.5">
@@ -194,7 +194,7 @@
                                         {% if anneeRow.isTroncCommun %}
                                             <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded font-semibold bg-primary-50 text-primary-700 border border-primary-200 dark:bg-primary-900/30 dark:text-primary-300">
                                                 <twig:UX:Icon name="ph:users-three-bold" class="size-2.5" />
-                                                TC
+                                                {{ 'offre_v2.modal_formation_synthese.tc'|trans({}, 'modal') }}
                                             </span>
                                         {% endif %}
                                         {% if anneeRow.portail %}
@@ -210,7 +210,7 @@
                     {% else %}
                         <tr>
                             <td colspan="6" class="px-3 py-4 text-center text-secondary-400 italic">
-                                Aucun parcours enregistré pour cette formation.
+                                {{ 'offre_v2.modal_formation_synthese.aucun_parcours_enregistre_pour_cette_formation'|trans({}, 'modal') }}
                             </td>
                         </tr>
                     {% endfor %}
@@ -224,12 +224,12 @@
         <div class="rounded-xl border border-secondary-200 p-3 bg-secondary-50/40 dark:border-secondary-700 dark:bg-secondary-800/30 space-y-2">
             <h4 class="font-bold text-secondary-800 dark:text-secondary-200 text-xs flex items-center gap-1.5">
                 <twig:UX:Icon name="ph:arrows-merge-bold" class="size-3.5 text-primary-600" />
-                <span>Mutualisations configurées</span>
+                <span>{{ 'offre_v2.modal_formation_synthese.mutualisations_configurees'|trans({}, 'modal') }}</span>
             </h4>
 
             {% if troncsCommuns is not empty %}
                 <div class="space-y-1">
-                    <span class="text-[11px] font-semibold text-secondary-600 dark:text-secondary-400">Troncs communs internes :</span>
+                    <span class="text-[11px] font-semibold text-secondary-600 dark:text-secondary-400">{{ 'offre_v2.modal_formation_synthese.troncs_communs_internes'|trans({}, 'modal') }}</span>
                     <div class="flex items-center gap-1.5 flex-wrap">
                         {% for tc in troncsCommuns %}
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] bg-primary-100 text-primary-800 font-medium dark:bg-primary-900/40 dark:text-primary-300">
@@ -246,7 +246,7 @@
 
             {% if portails is not empty %}
                 <div class="space-y-1 pt-1.5 border-t border-secondary-200/60 dark:border-secondary-700/60">
-                    <span class="text-[11px] font-semibold text-secondary-600 dark:text-secondary-400">Portails inter-formations :</span>
+                    <span class="text-[11px] font-semibold text-secondary-600 dark:text-secondary-400">{{ 'offre_v2.modal_formation_synthese.portails_inter_formations'|trans({}, 'modal') }}</span>
                     <div class="flex items-center gap-1.5 flex-wrap">
                         {% for portail in portails %}
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] bg-warning-100 text-warning-800 font-medium dark:bg-warning-900/40 dark:text-warning-300">

@@ -17,13 +17,13 @@
         <div class="app-modal-shell app-modal-content">
             <div class="app-modal-header">
                 <turbo-frame id="modal_title" class="app-modal-title-wrap">
-                    <div class="app-modal-title">Titre</div>
+                    <div class="app-modal-title">{{ 'ui.modal_wrapper.titre'|trans({}, 'modal') }}</div>
                 </turbo-frame>
 
                 <button type="button"
                         class="app-modal-footer-btn app-modal-footer-btn--secondary !px-2.5 !py-2 shadow-none"
                         data-action="modalturbo#close"
-                        aria-label="Fermer">
+                        aria-label="{{ 'ui.modal_wrapper.fermer'|trans({}, 'modal') }}">
                     <twig:UX:Icon name="icon:close" class="h-4 w-4"/>
                 </button>
             </div>

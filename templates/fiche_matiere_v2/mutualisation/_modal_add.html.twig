@@ -3,7 +3,7 @@
 }) }}>
     <div class="row">
         <div class="col-12">
-            <label for="composante">Choisir une composante</label>
+            <label for="composante">{{ 'fiche_matiere_v2.mutualisation.modal_add.choisir_une_composante'|trans({}, 'modal') }}</label>
             <select
                     class="form-select"
                     id="composante"
@@ -11,7 +11,7 @@
                     {{ stimulus_action('fichematiere--mutualise', 'changeComposante') }}
                     {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
             >
-                <option value="0">Choisir une composante</option>
+                <option value="0">{{ 'fiche_matiere_v2.mutualisation.modal_add.choisir_une_composante'|trans({}, 'modal') }}</option>
                 {% for composante in composantes %}
                     <option value="{{ composante.id }}">{{ composante.libelle }}</option>
                 {% endfor %}
@@ -20,22 +20,22 @@
     </div>
     <div class="row">
         <div class="col-12">
-            <label for="formation">Choisir une mention/spécialité</label>
+            <label for="formation">{{ 'fiche_matiere_v2.mutualisation.modal_add.choisir_une_mention_specialite'|trans({}, 'modal') }}</label>
             <select class="form-select" id="formation" name="formation"
                     {{ stimulus_action('fichematiere--mutualise', 'changeFormation') }}
                     {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
             >
-                <option value="">Choisir d'abord une composante</option>
+                <option value="">{{ 'fiche_matiere_v2.mutualisation.modal_add.choisir_d_abord_une_composante'|trans({}, 'modal') }}</option>
             </select>
         </div>
     </div>
     <div class="row">
         <div class="col-12">
-            <label for="parcours">Choisir un parcours</label>
+            <label for="parcours">{{ 'fiche_matiere_v2.mutualisation.modal_add.choisir_un_parcours'|trans({}, 'modal') }}</label>
             <select class="form-select" id="parcours" name="parcours"
                     {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}
             >
-                <option value="">Choisir d'abord une mention/spécialité</option>
+                <option value="">{{ 'fiche_matiere_v2.mutualisation.modal_add.choisir_d_abord_une_mention_specialite'|trans({}, 'modal') }}</option>
             </select>
         </div>
     </div>
@@ -46,6 +46,6 @@
 
     <button class="btn btn-success mt-2" data-action="fichematiere--mutualise#ajouter base#modalClose"
             data-bs-dismiss="modal">
-        Ajouter
+        {{ 'fiche_matiere_v2.mutualisation.modal_add.ajouter'|trans({}, 'modal') }}
     </button>
 </div>

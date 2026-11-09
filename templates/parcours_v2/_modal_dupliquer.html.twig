@@ -11,12 +11,12 @@
             <div class="space-y-1">
                 <div class="flex flex-wrap items-center gap-2">
                     <h3 class="text-sm font-bold text-primary-950 dark:text-primary-100">
-                        Duplication du parcours
+                        {{ 'parcours_v2.modal_dupliquer.duplication_du_parcours'|trans({}, 'modal') }}
                     </h3>
-                    <twig:Badge variant="info" size="sm" label="Copie intégrale" />
+                    <twig:Badge variant="info" size="sm" label="{{ 'parcours_v2.modal_dupliquer.copie_integrale'|trans({}, 'modal') }}" />
                 </div>
                 <p class="text-xs text-primary-800 dark:text-primary-200 leading-relaxed">
-                    Vous vous apprêtez à dupliquer le parcours <strong>« {{ parcours.libelle }} »</strong> au sein de la mention
+                    {{ 'parcours_v2.modal_dupliquer.vous_vous_appretez_a_dupliquer_le'|trans({}, 'modal') }} <strong>« {{ parcours.libelle }} »</strong> {{ 'parcours_v2.modal_dupliquer.au_sein_de_la_mention'|trans({}, 'modal') }}
                     <strong>{{ formation ? formation.displayLong : 'Non rattachée' }}</strong>.
                 </p>
             </div>
@@ -26,19 +26,19 @@
     {# 2. Compteurs synthétiques de la maquette #}
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <div class="rounded-xl border border-secondary-200 bg-surface p-2.5 text-center shadow-xs dark:border-secondary-700">
-            <span class="block text-xs text-secondary-500 dark:text-secondary-400">Semestres</span>
+            <span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ 'parcours_v2.modal_dupliquer.semestres'|trans({}, 'modal') }}</span>
             <span class="text-lg font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.nbSemestres }}</span>
         </div>
         <div class="rounded-xl border border-secondary-200 bg-surface p-2.5 text-center shadow-xs dark:border-secondary-700">
-            <span class="block text-xs text-secondary-500 dark:text-secondary-400">UEs</span>
+            <span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ 'parcours_v2.modal_dupliquer.ues'|trans({}, 'modal') }}</span>
             <span class="text-lg font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.nbUes }}</span>
         </div>
         <div class="rounded-xl border border-secondary-200 bg-surface p-2.5 text-center shadow-xs dark:border-secondary-700">
-            <span class="block text-xs text-secondary-500 dark:text-secondary-400">Éléments (EC)</span>
+            <span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ 'parcours_v2.modal_dupliquer.elements_ec'|trans({}, 'modal') }}</span>
             <span class="text-lg font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.nbEcs }}</span>
         </div>
         <div class="rounded-xl border border-secondary-200 bg-surface p-2.5 text-center shadow-xs dark:border-secondary-700">
-            <span class="block text-xs text-secondary-500 dark:text-secondary-400">Fiches matières</span>
+            <span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ 'parcours_v2.modal_dupliquer.fiches_matieres'|trans({}, 'modal') }}</span>
             <span class="text-lg font-bold text-secondary-900 dark:text-secondary-100">{{ analysis.nbFichesMatieres }}</span>
         </div>
     </div>
@@ -69,7 +69,7 @@
         {{ form_row(form.nouveauSigle) }}
 
         <div class="rounded-xl border border-secondary-200 bg-secondary-50/50 p-4 dark:border-secondary-700 dark:bg-secondary-800/30 space-y-3">
-            <span class="block text-xs font-bold text-secondary-800 dark:text-secondary-200 uppercase tracking-wide">Options de recopie</span>
+            <span class="block text-xs font-bold text-secondary-800 dark:text-secondary-200 uppercase tracking-wide">{{ 'parcours_v2.modal_dupliquer.options_de_recopie'|trans({}, 'modal') }}</span>
 
             {{ form_row(form.dupliquerFichesMatieres) }}
             {{ form_row(form.dupliquerContacts) }}
@@ -80,12 +80,12 @@
         <div class="rounded-xl border border-secondary-200 bg-surface p-3 text-xs dark:border-secondary-700">
             <span class="block font-semibold text-secondary-900 dark:text-secondary-100 mb-1.5 flex items-center gap-1.5">
                 <twig:UX:Icon name="icon:info" class="h-3.5 w-3.5 text-secondary-500" />
-                Rappel sur le nouveau parcours
+                {{ 'parcours_v2.modal_dupliquer.rappel_sur_le_nouveau_parcours'|trans({}, 'modal') }}
             </span>
             <ul class="list-disc list-inside space-y-1 text-secondary-600 dark:text-secondary-400 text-[11px]">
-                <li>Le statut sera réinitialisé (En cours de rédaction) et la version <strong>0.1</strong>.</li>
-                <li>Les validations officielles antérieures (CFVU) et l'historique d'audit ne sont pas transférés.</li>
-                <li>Le parcours d'origine reste inchangé et ne sera pas affecté par vos futures modifications.</li>
+                <li>{{ 'parcours_v2.modal_dupliquer.le_statut_sera_reinitialise_en_cours'|trans({}, 'modal') }} <strong>0.1</strong>.</li>
+                <li>{{ 'parcours_v2.modal_dupliquer.les_validations_officielles_anterieures_cfvu_et'|trans({}, 'modal') }}</li>
+                <li>{{ 'parcours_v2.modal_dupliquer.le_parcours_d_origine_reste_inchange'|trans({}, 'modal') }}</li>
             </ul>
         </div>
     </form>

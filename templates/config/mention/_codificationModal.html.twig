@@ -15,7 +15,7 @@
                        value="all"
                        id="typediplome" {{ stimulus_action('check_all', 'checkAll', 'click', {'classCheckAll' : 'typediplome', 'idCheckAll': 'typediplome'}) }}>
                 <label for="typediplome" class="form-check-label">
-                    Tous les types de diplôme
+                    {{ 'config.mention.codificationModal.tous_les_types_de_diplome'|trans({}, 'modal') }}
                 </label>
             </div>
             {% for typeDiplome in typeDiplomes %}
@@ -42,7 +42,7 @@
                        class="form-check-input"
                        id="domaine" {{ stimulus_action('check_all', 'checkAll', 'click', {'classCheckAll' : 'domaine', 'idCheckAll': 'domaine'}) }}>
                 <label for="domaine" class="form-check-label">
-                    Tous les domaines
+                    {{ 'config.mention.codificationModal.tous_les_domaines'|trans({}, 'modal') }}
                 </label>
             </div>
             {% for domaine in domaines %}
@@ -63,6 +63,6 @@
     <button type="submit" class="btn btn-success"
             {{ stimulus_action('base','sauvegardeFormModal', 'click') }}>
         <i class="fal fa-floppy-disk"></i>
-        Générer les codes
+        {{ 'config.mention.codificationModal.generer_les_codes'|trans({}, 'modal') }}
     </button>
 </form>

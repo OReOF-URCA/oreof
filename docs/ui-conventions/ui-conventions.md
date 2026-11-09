@@ -181,6 +181,10 @@ les erreurs de champs proposent un lien. Le contrôleur `form-errors` place le f
 est insérée (page ou modale), puis permet de rejoindre un contrôle, y compris Tom Select et un panneau `tabs`.
 Les widgets spécialisés sans contrôle identifiable restent à adapter au cas par cas.
 
+Textes des modales (`templates/**/*modal*.twig`, `_ui/modal_wrapper.html.twig`) : jamais en dur, toujours une clé du
+domaine `modal` (`translations/modal.fr.yaml`), de la forme `<dossier>.<modale>.<libellé>`, avec paramètres
+`%nom%` / `%count%` plutôt que du texte découpé autour d’un `{{ }}`.
+
 `form-feedback` sur le body suit les soumissions Turbo : état `aria-busy` restauré après traitement et message
 local persistant si la réponse échoue sans synthèse. Aucun succès générique n’est inventé : les confirmations
 restent celles du serveur. En cas d’erreur réseau, ne pas réessayer automatiquement un POST : le serveur peut

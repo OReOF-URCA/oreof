@@ -1,4 +1,4 @@
-<h2>MCCC pour {{ ficheMatiere.libelle }}</h2>
+<h2>{{ 'element_constitutif.mccc_ec_modal_but.titre'|trans({'%libelle%': ficheMatiere.libelle}, 'modal') }}</h2>
 <form method="post"
       action="{{ path('app_element_constitutif_mccc_but', {id:ficheMatiere.id}) }}" {{ stimulus_controller('ec--mccc') }}>
 
@@ -8,7 +8,7 @@
             {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
     >
         <i class="fal fa-floppy-disk"></i>
-        Enregistrer
+        {{ 'element_constitutif.mcccEcModalBut.enregistrer'|trans({}, 'modal') }}
     </button>
 
     {{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont
