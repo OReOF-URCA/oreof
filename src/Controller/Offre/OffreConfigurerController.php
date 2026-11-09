@@ -972,6 +972,9 @@ final class OffreConfigurerController extends BaseController
         }
     }
 
+    /**
+     * @param array<int|string, array<int|string, PlateformeAdmissionParametre>> $parametresParAnnee
+     */
     private function synchroniserDonneesAnnee(
         Annee $sourceAnnee,
         Annee $targetAnnee,
