@@ -75,7 +75,7 @@
 }
 
 .badgeSelectedDiv span {
-    color: black;
+    color: white;
 }
 
 html[data-a11y-contrast="high"][data-theme="dark"] {
