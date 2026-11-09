@@ -16,6 +16,7 @@ use App\Entity\Portail;
 use App\Entity\TypeDiplome;
 use App\Entity\Ville;
 use App\Enums\TypeModificationDpeEnum;
+use App\Enums\TypeParcoursEnum;
 use App\Service\Offre\OffreAnnexesExportService;
 use PHPUnit\Framework\TestCase;
 
@@ -141,6 +142,64 @@ final class OffreAnnexesExportServiceTest extends TestCase
 
         self::assertCount(1, $rows);
         self::assertSame('', (string) $rows[0]['parcours']);
+    }
+
+    public function testFormatParcoursLabelAjouteTypeParcoursSiNonClassique(): void
+    {
+        $formation = $this->licence(1, 'Chimie');
+
+        // null
+        self::assertSame('', $this->service->formatParcoursLabel(null));
+
+        // Parcours par défaut classique
+        $defautClassique = new Parcours($formation);
+        $defautClassique->setLibelle(Parcours::PARCOURS_DEFAUT);
+        $defautClassique->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE);
+        self::assertSame('', $this->service->formatParcoursLabel($defautClassique));
+
+        // Parcours par défaut LAS1 -> affiche le type
+        $defautLas = new Parcours($formation);
+        $defautLas->setLibelle(Parcours::PARCOURS_DEFAUT);
+        $defautLas->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_LAS1);
+        self::assertSame('LAS1', $this->service->formatParcoursLabel($defautLas));
+
+        // Parcours classique
+        $parcoursClassique = new Parcours($formation);
+        $parcoursClassique->setLibelle('Chimie Moléculaire');
+        $parcoursClassique->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE);
+        self::assertSame('Chimie Moléculaire', $this->service->formatParcoursLabel($parcoursClassique));
+
+        // Parcours LAS1
+        $parcoursLas1 = new Parcours($formation);
+        $parcoursLas1->setLibelle('Chimie Moléculaire');
+        $parcoursLas1->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_LAS1);
+        self::assertSame('Chimie Moléculaire - LAS1', $this->service->formatParcoursLabel($parcoursLas1));
+
+        // Parcours en alternance
+        $parcoursAlt = new Parcours($formation);
+        $parcoursAlt->setLibelle('Chimie Industrielle');
+        $parcoursAlt->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_ALTERNANCE);
+        self::assertSame('Chimie Industrielle - En alternance', $this->service->formatParcoursLabel($parcoursAlt));
+    }
+
+    public function testResolveEntityDiffPrendEnCompteTypeParcours(): void
+    {
+        $formation = $this->licence(1, 'Chimie');
+
+        $parcoursN1 = new Parcours($formation);
+        $parcoursN1->setLibelle('Chimie Moléculaire');
+        $parcoursN1->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE);
+        $dpeN1 = (new DpeParcours())->setParcours($parcoursN1);
+
+        $parcoursN = new Parcours($formation);
+        $parcoursN->setLibelle('Chimie Moléculaire');
+        $parcoursN->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_LAS1);
+
+        $diffs = $this->service->resolveEntityDiff($parcoursN, $dpeN1);
+
+        self::assertTrue($diffs['parcours']->isDifferent());
+        self::assertSame('Chimie Moléculaire', $diffs['parcours']->original);
+        self::assertSame('Chimie Moléculaire - LAS1', $diffs['parcours']->new);
     }
 
     public function testTypeParcoursEstLeRegimeDInscription(): void

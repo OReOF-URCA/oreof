@@ -17,6 +17,7 @@ use App\Entity\Portail;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeDiplomePlateformeAdmission;
 use App\Entity\Ville;
+use App\Enums\TypeParcoursEnum;
 use App\Repository\AnneeRepository;
 use App\Repository\CampagneCollecteRepository;
 use App\Repository\DpeParcoursRepository;
@@ -795,8 +796,30 @@ final class OffreAnnexesExportService
     }
 
     /**
+     * Formate le libellé d'un parcours pour les exports :
+     * - Si parcours par défaut classique, retourne une chaîne vide.
+     * - Si typeParcours différent de TYPE_PARCOURS_CLASSIQUE, ajoute le type (ex: "Parcours - LAS1" ou "LAS1").
+     */
+    public function formatParcoursLabel(?Parcours $parcours): string
+    {
+        if ($parcours === null) {
+            return '';
+        }
+
+        $libelle = $parcours->isParcoursDefaut() ? '' : ($parcours->getLibelle() ?: '');
+        $typeParcours = $parcours->getTypeParcours();
+
+        if ($typeParcours !== null && $typeParcours !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+            $typeLibelle = $typeParcours->libelle();
+            $libelle = $libelle !== '' ? sprintf('%s - %s', $libelle, $typeLibelle) : $typeLibelle;
+        }
+
+        return $libelle;
+    }
+
+    /**
      * Helper to compute diff for mention and parcours between N-1 and N.
-     * Si parcours est le parcours par défaut, la cellule est vide.
+     * Si parcours est le parcours par défaut, la cellule est vide (sauf si typeParcours non classique).
      * Si nouvelle création en N, pas mis en diff.
      *
      * @return array{mention: DiffObject, parcours: DiffObject}
@@ -810,9 +833,8 @@ final class OffreAnnexesExportService
         $isNouveauParcours = ($dpeN1 === null && $parcours->getParcoursOrigine() === null && $parcours->getParcoursOrigineCopie() === null);
         $isNouvelleFormation = ($formationN1 === null);
 
-        // Si parcours est le parcours par défaut, laisser la cellule vide
-        $parcoursN = $parcours->isParcoursDefaut() ? '' : ($parcours->getLibelle() ?: '');
-        $parcoursN1Libelle = ($parcoursN1 !== null && !$parcoursN1->isParcoursDefaut()) ? ($parcoursN1->getLibelle() ?: '') : '';
+        $parcoursN = $this->formatParcoursLabel($parcours);
+        $parcoursN1Libelle = $parcoursN1 !== null ? $this->formatParcoursLabel($parcoursN1) : '';
 
         $mentionN = $formation?->getDisplay() ?: '-';
         $mentionN1Display = $formationN1?->getDisplay() ?: null;
@@ -1312,8 +1334,9 @@ final class OffreAnnexesExportService
                 $groupKey = $mutualisation['key'] ?? null;
                 if ($groupKey !== null) {
                     if (isset($rows[$groupKey])) {
-                        if (!$parcours->isParcoursDefaut()) {
-                            $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        $pLabel = $this->formatParcoursLabel($parcours);
+                        if ($pLabel !== '') {
+                            $tcParcours[$groupKey][] = $pLabel;
                         }
                         if ($ville !== '') {
                             $tcLieux[$groupKey][] = $ville;
@@ -1336,7 +1359,8 @@ final class OffreAnnexesExportService
                         }
                         continue;
                     }
-                    $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
+                    $pLabel = $this->formatParcoursLabel($parcours);
+                    $tcParcours[$groupKey] = $pLabel !== '' ? [$pLabel] : [];
                     $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
@@ -1526,8 +1550,9 @@ final class OffreAnnexesExportService
                 $groupKey = $mutualisation['key'] ?? null;
                 if ($groupKey !== null) {
                     if (isset($rows[$groupKey])) {
-                        if (!$parcours->isParcoursDefaut()) {
-                            $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        $pLabel = $this->formatParcoursLabel($parcours);
+                        if ($pLabel !== '') {
+                            $tcParcours[$groupKey][] = $pLabel;
                         }
                         if ($ville !== '') {
                             $tcLieux[$groupKey][] = $ville;
@@ -1550,7 +1575,8 @@ final class OffreAnnexesExportService
                         }
                         continue;
                     }
-                    $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
+                    $pLabel = $this->formatParcoursLabel($parcours);
+                    $tcParcours[$groupKey] = $pLabel !== '' ? [$pLabel] : [];
                     $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
@@ -1743,8 +1769,9 @@ final class OffreAnnexesExportService
                 $groupKey = $mutualisation['key'] ?? null;
                 if ($groupKey !== null) {
                     if (isset($rows[$groupKey])) {
-                        if (!$parcours->isParcoursDefaut()) {
-                            $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        $pLabel = $this->formatParcoursLabel($parcours);
+                        if ($pLabel !== '') {
+                            $tcParcours[$groupKey][] = $pLabel;
                         }
                         if ($ville !== '') {
                             $tcLieux[$groupKey][] = $ville;
@@ -1767,7 +1794,8 @@ final class OffreAnnexesExportService
                         }
                         continue;
                     }
-                    $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
+                    $pLabel = $this->formatParcoursLabel($parcours);
+                    $tcParcours[$groupKey] = $pLabel !== '' ? [$pLabel] : [];
                     $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
@@ -2178,8 +2206,9 @@ final class OffreAnnexesExportService
                 $groupKey = $mutualisation['key'] ?? null;
                 if ($groupKey !== null) {
                     if (isset($rows[$groupKey])) {
-                        if (!$parcours->isParcoursDefaut()) {
-                            $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        $pLabel = $this->formatParcoursLabel($parcours);
+                        if ($pLabel !== '') {
+                            $tcParcours[$groupKey][] = $pLabel;
                         }
                         if ($ville !== '') {
                             $tcLieux[$groupKey][] = $ville;
@@ -2202,7 +2231,8 @@ final class OffreAnnexesExportService
                         }
                         continue;
                     }
-                    $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
+                    $pLabel = $this->formatParcoursLabel($parcours);
+                    $tcParcours[$groupKey] = $pLabel !== '' ? [$pLabel] : [];
                     $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
