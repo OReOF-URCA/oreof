@@ -165,9 +165,9 @@ readonly class GetFormations
         array $options = [],
         bool $isCfvu = false
     ): array {
-        $sort = $options['sort'] ?? 'typeDiplome';
-        if ($sort === 'default' || $sort === '') {
-            $sort = 'typeDiplome';
+        $sort = $options['sort'] ?? 'default';
+        if ($sort === '') {
+            $sort = 'default';
         }
         $direction = strtolower($options['direction'] ?? 'asc');
         $q = $options['q'] ?? null;
@@ -315,35 +315,59 @@ readonly class GetFormations
      */
     public function sortFormations(array $formations, string $sort, string $direction): array
     {
-        if ($sort === 'default' || $sort === '') {
-            $sort = 'typeDiplome';
+        if ($sort === '' || $sort === 'default') {
+            $sort = 'default';
         }
 
         uasort($formations, function ($a, $b) use ($sort, $direction) {
-            $valA = match ($sort) {
-                'composantePorteuse' => (string) ($a->getComposantePorteuse()?->getLibelle() ?? ''),
-                'typeDiplome' => (string) ($a->getTypeDiplome()?->getLibelle() ?? ''),
-                default => (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? ''),
-            };
-            $valB = match ($sort) {
-                'composantePorteuse' => (string) ($b->getComposantePorteuse()?->getLibelle() ?? ''),
-                'typeDiplome' => (string) ($b->getTypeDiplome()?->getLibelle() ?? ''),
-                default => (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? ''),
-            };
+            $compA = (string) ($a->getComposantePorteuse()?->getLibelle() ?? '');
+            $compB = (string) ($b->getComposantePorteuse()?->getLibelle() ?? '');
 
-            $cmp = $this->compareStrings($valA, $valB);
+            $tdA = (string) ($a->getTypeDiplome()?->getLibelle() ?? '');
+            $tdB = (string) ($b->getTypeDiplome()?->getLibelle() ?? '');
+
+            $mentionA = (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? '');
+            $mentionB = (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? '');
+
+            if ($sort === 'typeDiplome') {
+                $cmp = $this->compareStrings($tdA, $tdB);
+                if ($cmp !== 0) {
+                    return $direction === 'desc' ? -$cmp : $cmp;
+                }
+                $cmp = $this->compareStrings($compA, $compB);
+                if ($cmp !== 0) {
+                    return $cmp;
+                }
+                return $this->compareStrings($mentionA, $mentionB);
+            }
+
+            if ($sort === 'mention') {
+                $cmp = $this->compareStrings($mentionA, $mentionB);
+                if ($cmp !== 0) {
+                    return $direction === 'desc' ? -$cmp : $cmp;
+                }
+                $cmp = $this->compareStrings($compA, $compB);
+                if ($cmp !== 0) {
+                    return $cmp;
+                }
+                return $this->compareStrings($tdA, $tdB);
+            }
+
+            // 'default' ou 'composantePorteuse' :
+            // 1. Composante (valeur texte)
+            $cmp = $this->compareStrings($compA, $compB);
             if ($cmp !== 0) {
                 return $direction === 'desc' ? -$cmp : $cmp;
             }
 
-            // En cas d'égalité sur le critère principal (ou tri par composante/type diplôme), tri secondaire par mention alphabétique
-            if ($sort !== 'mention') {
-                $mentionA = (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? '');
-                $mentionB = (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? '');
-                return $this->compareStrings($mentionA, $mentionB);
+            // 2. Type de diplôme (valeur texte)
+            $cmp = $this->compareStrings($tdA, $tdB);
+            if ($cmp !== 0) {
+                return $cmp;
             }
 
-            return 0;
+            // 3. Mention (valeur texte)
+            return $this->compareStrings($mentionA, $mentionB);
         });
 
         return $formations;

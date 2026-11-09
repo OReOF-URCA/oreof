@@ -62,13 +62,23 @@ class GetFormationsTest extends TestCase
         $this->assertSame([1, 3, 2], $keysDesc);
     }
 
-    public function testSortFormationsByDefaultIsTypeDiplomeThenMention(): void
+    public function testSortFormationsByDefaultIsComposanteThenTypeDiplomeThenMention(): void
     {
+        $compDroit = new Composante();
+        $compDroit->setLibelle('Droit');
+        $this->setEntityId($compDroit, 99); // ID élevé pour prouver qu'on trie sur le texte et pas sur l'ID
+
+        $compLettres = new Composante();
+        $compLettres->setLibelle('Lettres');
+        $this->setEntityId($compLettres, 1);
+
         $tdBut = new TypeDiplome();
         $tdBut->setLibelle('BUT');
+        $this->setEntityId($tdBut, 50);
 
         $tdLicence = new TypeDiplome();
         $tdLicence->setLibelle('Licence');
+        $this->setEntityId($tdLicence, 2);
 
         $mBio = new Mention();
         $mBio->setLibelle('Biologie');
@@ -76,26 +86,43 @@ class GetFormationsTest extends TestCase
         $mChim = new Mention();
         $mChim->setLibelle('Chimie');
 
+        // f1: Lettres, BUT, Biologie
         $f1 = new Formation();
-        $f1->setTypeDiplome($tdLicence);
+        $f1->setComposantePorteuse($compLettres);
+        $f1->setTypeDiplome($tdBut);
         $f1->setMention($mBio);
-        $this->setId($f1, 1);
+        $this->setEntityId($f1, 1);
 
+        // f2: Droit, Licence, Biologie
         $f2 = new Formation();
-        $f2->setTypeDiplome($tdBut);
-        $f2->setMention($mChim);
-        $this->setId($f2, 2);
+        $f2->setComposantePorteuse($compDroit);
+        $f2->setTypeDiplome($tdLicence);
+        $f2->setMention($mBio);
+        $this->setEntityId($f2, 2);
 
+        // f3: Droit, BUT, Chimie
         $f3 = new Formation();
+        $f3->setComposantePorteuse($compDroit);
         $f3->setTypeDiplome($tdBut);
-        $f3->setMention($mBio);
-        $this->setId($f3, 3);
+        $f3->setMention($mChim);
+        $this->setEntityId($f3, 3);
 
-        $input = [1 => $f1, 2 => $f2, 3 => $f3];
+        // f4: Droit, BUT, Biologie
+        $f4 = new Formation();
+        $f4->setComposantePorteuse($compDroit);
+        $f4->setTypeDiplome($tdBut);
+        $f4->setMention($mBio);
+        $this->setEntityId($f4, 4);
 
-        // Default sort (typeDiplome then mention)
+        $input = [1 => $f1, 2 => $f2, 3 => $f3, 4 => $f4];
+
+        // Default sort : composante (text), typeDiplome (text), mention (text)
+        // 1er: Droit + BUT + Biologie (f4)
+        // 2e:  Droit + BUT + Chimie (f3)
+        // 3e:  Droit + Licence + Biologie (f2)
+        // 4e:  Lettres + BUT + Biologie (f1)
         $sortedDefault = $this->getFormations->sortFormations($input, 'default', 'asc');
-        $this->assertSame([3, 2, 1], array_keys($sortedDefault)); // BUT Bio (3), BUT Chimie (2), Licence Bio (1)
+        $this->assertSame([4, 3, 2, 1], array_keys($sortedDefault));
     }
 
     public function testSortFormationsHandlesFrenchAccentsBeforeZ(): void
@@ -156,8 +183,13 @@ class GetFormationsTest extends TestCase
 
     private function setId(Formation $formation, int $id): void
     {
-        $reflection = new \ReflectionProperty(Formation::class, 'id');
-        $reflection->setValue($formation, $id);
+        $this->setEntityId($formation, $id);
+    }
+
+    private function setEntityId(object $entity, int $id): void
+    {
+        $reflection = new \ReflectionProperty($entity::class, 'id');
+        $reflection->setValue($entity, $id);
     }
 }
 

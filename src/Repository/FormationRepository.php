@@ -126,9 +126,9 @@ class FormationRepository extends ServiceEntityRepository
         array            $options = [],
         Composante|null  $composante = null,
     ): array {
-        $sort = $options['sort'] ?? 'typeDiplome';
-        if ($sort === 'default' || $sort === '') {
-            $sort = 'typeDiplome';
+        $sort = $options['sort'] ?? 'default';
+        if ($sort === '') {
+            $sort = 'default';
         }
         $direction = strtoupper($options['direction'] ?? 'ASC');
 
@@ -142,13 +142,11 @@ class FormationRepository extends ServiceEntityRepository
             ->andWhere('(f.dpe = :campagneCollecte OR p.id IS NOT NULL)')
             ->setParameter('campagneCollecte', $campagneCollecte);
 
-        if ($sort === 'composantePorteuse') {
-            $query->orderBy('cp_sort.libelle', $direction)
-                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
-        } elseif ($sort === 'typeDiplome') {
+        if ($sort === 'typeDiplome') {
             $query->orderBy('td_sort.libelle', $direction)
+                ->addOrderBy('cp_sort.libelle', 'ASC')
                 ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
-        } else {
+        } elseif ($sort === 'mention') {
             $query->orderBy(
                 'CASE
                     WHEN f.mention IS NOT NULL THEN m.libelle
@@ -156,7 +154,14 @@ class FormationRepository extends ServiceEntityRepository
                     ELSE \'\'
                 END',
                 $direction
-            );
+            )
+            ->addOrderBy('cp_sort.libelle', 'ASC')
+            ->addOrderBy('td_sort.libelle', 'ASC');
+        } else {
+            // 'default' ou 'composantePorteuse'
+            $query->orderBy('cp_sort.libelle', $direction)
+                ->addOrderBy('td_sort.libelle', 'ASC')
+                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
         }
 
         if ($q !== null && trim($q) !== '') {
@@ -228,9 +233,9 @@ class FormationRepository extends ServiceEntityRepository
         array            $options = [],
         Composante|null  $composante = null,
     ): array {
-        $sort = $options['sort'] ?? 'typeDiplome';
-        if ($sort === 'default' || $sort === '') {
-            $sort = 'typeDiplome';
+        $sort = $options['sort'] ?? 'default';
+        if ($sort === '') {
+            $sort = 'default';
         }
         $direction = strtoupper($options['direction'] ?? 'ASC');
 
@@ -245,13 +250,11 @@ class FormationRepository extends ServiceEntityRepository
             ->andWhere('JSON_CONTAINS(p.etatValidation, :etatDpe) = 1')
             ->setParameter('etatDpe', json_encode(['soumis_cfvu' => 1]));
 
-        if ($sort === 'composantePorteuse') {
-            $query->orderBy('cp_sort.libelle', $direction)
-                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
-        } elseif ($sort === 'typeDiplome') {
+        if ($sort === 'typeDiplome') {
             $query->orderBy('td_sort.libelle', $direction)
+                ->addOrderBy('cp_sort.libelle', 'ASC')
                 ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
-        } else {
+        } elseif ($sort === 'mention') {
             $query->orderBy(
                 'CASE
                     WHEN f.mention IS NOT NULL THEN m.libelle
@@ -259,7 +262,14 @@ class FormationRepository extends ServiceEntityRepository
                     ELSE \'\'
                 END',
                 $direction
-            );
+            )
+            ->addOrderBy('cp_sort.libelle', 'ASC')
+            ->addOrderBy('td_sort.libelle', 'ASC');
+        } else {
+            // 'default' ou 'composantePorteuse'
+            $query->orderBy('cp_sort.libelle', $direction)
+                ->addOrderBy('td_sort.libelle', 'ASC')
+                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
         }
 
         if ($q !== null && trim($q) !== '') {
