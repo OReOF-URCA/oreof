@@ -73,6 +73,7 @@ final class OffreController extends BaseController
             'nbNonOuverture' => 0,
             'nbFermetureDefinitive' => 0,
             'capacite' => 0,
+            'capacitePlateformes' => 0,
             'nbAConfirmer' => 0,
             'nbAnomalies' => 0,
             'allAnomalies' => [],
@@ -93,7 +94,10 @@ final class OffreController extends BaseController
                 'anomalies' => [],
                 'parcoursAnomalies' => [],
                 'capacite' => 0,
+                'capacitePlateformes' => 0,
                 'isOuverte' => false,
+                'plateformesStatuts' => [],
+                'portails' => [],
             ];
         }
 
@@ -125,7 +129,10 @@ final class OffreController extends BaseController
                     'anomalies' => [],
                     'parcoursAnomalies' => [],
                     'capacite' => 0,
+                    'capacitePlateformes' => 0,
                     'isOuverte' => false,
+                    'plateformesStatuts' => [],
+                    'portails' => [],
                 ];
             }
 
@@ -143,10 +150,75 @@ final class OffreController extends BaseController
                 $tFormations[$idFormation]['anomalies'] = array_merge($tFormations[$idFormation]['anomalies'], $parcAnoms);
             }
 
-            // Calcul capacité parcours depuis les années préchargées (0 requête)
+            // Calcul capacité parcours depuis les années préchargées et statuts des plateformes (0 requête)
             $parcoursCapacite = 0;
+            $parcoursCapacitePlateformes = 0;
             foreach ($parcoursAnnees as $annee) {
-                $parcoursCapacite += $annee->getCapaciteAccueil();
+                $isAnneeOuverte = $annee->isOuvert();
+                if ($isAnneeOuverte) {
+                    $parcoursCapacite += $annee->getCapaciteAccueil();
+                }
+
+                $portail = $annee->getPortail();
+                if ($portail !== null && $portail->getId() !== null) {
+                    $portailId = $portail->getId();
+                    if (!isset($tFormations[$idFormation]['portails'][$portailId])) {
+                        $tFormations[$idFormation]['portails'][$portailId] = [
+                            'id' => $portailId,
+                            'portail' => $portail,
+                            'libelle' => $portail->getLibelle(),
+                            'annees' => [],
+                            'parcoursIds' => [],
+                        ];
+                    }
+                    $anneeOrdre = $annee->getOrdre();
+                    if ($anneeOrdre !== null && !in_array($anneeOrdre, $tFormations[$idFormation]['portails'][$portailId]['annees'], true)) {
+                        $tFormations[$idFormation]['portails'][$portailId]['annees'][] = $anneeOrdre;
+                        sort($tFormations[$idFormation]['portails'][$portailId]['annees']);
+                    }
+                    if (!in_array($parcours->getId(), $tFormations[$idFormation]['portails'][$portailId]['parcoursIds'], true)) {
+                        $tFormations[$idFormation]['portails'][$portailId]['parcoursIds'][] = $parcours->getId();
+                    }
+                }
+
+                $anneeParams = $paramsByAnnee[$annee->getId()] ?? [];
+                foreach ($anneeParams as $param) {
+                    $plat = $param->getPlateforme();
+                    if ($plat === null || !$plat->getActive()) {
+                        continue;
+                    }
+                    $platId = $plat->getId();
+                    if ($platId === null) {
+                        continue;
+                    }
+                    if (!isset($tFormations[$idFormation]['plateformesStatuts'][$platId])) {
+                        $tFormations[$idFormation]['plateformesStatuts'][$platId] = [
+                            'plateforme' => $plat,
+                            'active' => false,
+                            'hasCapaciteInactive' => false,
+                            'capaciteInactive' => 0,
+                        ];
+                    }
+
+                    $pCap = $param->getCapaciteGlobale();
+                    if ($pCap === null || $pCap <= 0) {
+                        $fi = $param->getCapaciteFi() ?? 0;
+                        $alt = $param->getCapaciteAlternance() ?? 0;
+                        $spe = $param->getCapaciteSpecifique() ?? 0;
+                        $pCap = $fi + $alt + $spe;
+                    }
+                    $pCap = max(0, (int)$pCap);
+
+                    if ($param->isActive()) {
+                        $tFormations[$idFormation]['plateformesStatuts'][$platId]['active'] = true;
+                        if ($isAnneeOuverte) {
+                            $parcoursCapacitePlateformes += $pCap;
+                        }
+                    } elseif ($pCap > 0) {
+                        $tFormations[$idFormation]['plateformesStatuts'][$platId]['hasCapaciteInactive'] = true;
+                        $tFormations[$idFormation]['plateformesStatuts'][$platId]['capaciteInactive'] += $pCap;
+                    }
+                }
             }
 
             // Libellé composante inscription sans lazy-load (0 requête)
@@ -160,6 +232,7 @@ final class OffreController extends BaseController
                 'dpeParcours' => $dpePar,
                 'isOuvert' => $isParcoursOuvert,
                 'capacite' => $parcoursCapacite,
+                'capacitePlateformes' => $parcoursCapacitePlateformes,
                 'annees' => $parcoursAnnees,
                 'composanteLibelle' => $compInscLibelle,
             ];
@@ -188,36 +261,35 @@ final class OffreController extends BaseController
             }
         }
 
-        // Calcul capacité de chaque formation et association des statuts documents
+        // Calcul capacité de chaque formation (calcul en mémoire depuis les données préchargées, 0 requête supplémentaire)
         foreach ($tFormations as $fId => &$row) {
-            $formationCapacite = $row['formation']->getCapaciteAccueil();
-            if ($formationCapacite <= 0) {
-                // Calcul en mémoire depuis les données préchargées (0 requête supplémentaire)
-                $tcAnneesCounted = [];
-                $portailsCounted = [];
-                $formationCapacite = 0;
-                $formation = $row['formation'];
-                foreach ($row['parcoursData'] as $pd) {
-                    if (!$pd['isOuvert']) {
+            $tcAnneesCounted = [];
+            $portailsCounted = [];
+            $tcPlateformesCounted = [];
+            $portailPlateformesCounted = [];
+            $formationCapacite = 0;
+            $formationCapacitePlateformes = 0;
+            $formation = $row['formation'];
+            foreach ($row['parcoursData'] as $pd) {
+                if (!$pd['isOuvert']) {
+                    continue;
+                }
+                $parcours = $pd['parcours'];
+                foreach ($pd['annees'] as $annee) {
+                    if (!$annee->isOuvert()) {
                         continue;
                     }
-                    $parcours = $pd['parcours'];
-                    foreach ($pd['annees'] as $annee) {
-                        if (!$annee->isOuvert()) {
-                            continue;
+                    $ordre = $annee->getOrdre();
+                    if ($ordre === null) {
+                        continue;
+                    }
+                    $portail = $annee->getPortail();
+                    if ($portail !== null && $portail->getId() !== null) {
+                        if (!isset($portailsCounted[$portail->getId()])) {
+                            $formationCapacite += $annee->getCapaciteAccueil();
+                            $portailsCounted[$portail->getId()] = true;
                         }
-                        $ordre = $annee->getOrdre();
-                        if ($ordre === null) {
-                            continue;
-                        }
-                        $portail = $annee->getPortail();
-                        if ($portail !== null && $portail->getId() !== null) {
-                            if (!isset($portailsCounted[$portail->getId()])) {
-                                $formationCapacite += $annee->getCapaciteAccueil();
-                                $portailsCounted[$portail->getId()] = true;
-                            }
-                            continue;
-                        }
+                    } else {
                         $tc = $formation->getTroncCommunForParcours($parcours, $ordre);
                         if ($tc !== null) {
                             $tcKey = $tc['id'] . '_' . $ordre;
@@ -234,9 +306,44 @@ final class OffreController extends BaseController
                             $formationCapacite += $annee->getCapaciteAccueil();
                         }
                     }
+
+                    // Décompte places plateformes de la formation
+                    $tc = $formation->getTroncCommunForParcours($parcours, $ordre);
+                    $tcKey = $tc !== null ? $tc['id'] . '_' . $ordre : ($formation->isAnneeTroncCommun($ordre, $parcours) ? (string)$ordre : null);
+                    $anneeParams = $paramsByAnnee[$annee->getId()] ?? [];
+                    foreach ($anneeParams as $param) {
+                        $plat = $param->getPlateforme();
+                        if ($plat === null || !$plat->getActive() || !$param->isActive()) {
+                            continue;
+                        }
+                        $platId = $plat->getId();
+                        if ($portail !== null && $portail->getId() !== null) {
+                            $portailPlatKey = $portail->getId() . '_' . $ordre . '_' . $platId;
+                            if (isset($portailPlateformesCounted[$portailPlatKey])) {
+                                continue;
+                            }
+                            $portailPlateformesCounted[$portailPlatKey] = true;
+                        } elseif ($tcKey !== null) {
+                            $tcPlatKey = $tcKey . '_' . $platId;
+                            if (isset($tcPlateformesCounted[$tcPlatKey])) {
+                                continue;
+                            }
+                            $tcPlateformesCounted[$tcPlatKey] = true;
+                        }
+
+                        $pCap = $param->getCapaciteGlobale();
+                        if ($pCap === null || $pCap <= 0) {
+                            $fi = $param->getCapaciteFi() ?? 0;
+                            $alt = $param->getCapaciteAlternance() ?? 0;
+                            $spe = $param->getCapaciteSpecifique() ?? 0;
+                            $pCap = $fi + $alt + $spe;
+                        }
+                        $formationCapacitePlateformes += max(0, (int)$pCap);
+                    }
                 }
             }
             $row['capacite'] = $formationCapacite;
+            $row['capacitePlateformes'] = $formationCapacitePlateformes;
 
             $docInfo = $docsByFormation[$fId] ?? ['hasPv' => false, 'pv' => null, 'hasNote' => false, 'note' => null];
             $row['hasPv'] = $docInfo['hasPv'];
@@ -247,6 +354,10 @@ final class OffreController extends BaseController
             $dpeF = $dpeFormationMap[$fId] ?? null;
             $row['dpeFormation'] = $dpeF;
             $row['etatValidation'] = $dpeF?->getEtatValidation() ?? ['brouillon' => 1];
+
+            if (!empty($row['plateformesStatuts'])) {
+                uasort($row['plateformesStatuts'], static fn($a, $b) => strcmp($a['plateforme']->getLibelle() ?? '', $b['plateforme']->getLibelle() ?? ''));
+            }
         }
         unset($row);
 
@@ -350,19 +461,11 @@ final class OffreController extends BaseController
                     }
                 }
                 
-                // 4. Plateforme ID
+                // 4. Plateforme ID : la plateforme doit être active ou avoir une capacité saisie
                 if ($plateforme !== '') {
-                    $hasPlatform = false;
-                    $typeDiplId = $f->getTypeDiplome()?->getId();
-                    if ($typeDiplId && isset($tpaByTypeDiplome[$typeDiplId])) {
-                        foreach ($tpaByTypeDiplome[$typeDiplId] as $tpa) {
-                            if ($tpa->getPlateforme()?->getId() === (int)$plateforme && $tpa->getPlateforme()->getActive()) {
-                                $hasPlatform = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!$hasPlatform) {
+                    $platId = (int)$plateforme;
+                    $pStatut = $row['plateformesStatuts'][$platId] ?? null;
+                    if ($pStatut === null || (!$pStatut['active'] && !$pStatut['hasCapaciteInactive'])) {
                         return false;
                     }
                 }
@@ -389,7 +492,12 @@ final class OffreController extends BaseController
         $nbNonOuverture = 0;
         $nbFermetureDefinitive = 0;
         $capacite = 0;
+        $capacitePlateformes = 0;
         $groupedFormations = [];
+        $compPortailsCounted = [];
+        $globalPortailsCounted = [];
+        $compPlatPortailsCounted = [];
+        $globalPlatPortailsCounted = [];
 
         foreach ($tFormations as $row) {
             $tabStatistiques['nbFormations']++;
@@ -417,8 +525,6 @@ final class OffreController extends BaseController
                 }
             }
 
-            $capacite += $row['capacite'];
-
             // Groupement pré-calculé par composante pour Twig
             $composanteObj = $row['formation']->getComposantePorteuse();
             $compLibelle = $composanteObj?->getLibelle() ?? 'Sans composante';
@@ -430,6 +536,7 @@ final class OffreController extends BaseController
                     'nbParcours' => 0,
                     'nbParcoursOuvert' => 0,
                     'capacite' => 0,
+                    'capacitePlateformes' => 0,
                     'nbPv' => 0,
                     'nbNote' => 0,
                     'formations' => [],
@@ -437,17 +544,127 @@ final class OffreController extends BaseController
             }
             $groupedFormations[$compLibelle]['nbFormations']++;
             $groupedFormations[$compLibelle]['nbParcours'] += count($row['dpeParcours']);
-            $groupedFormations[$compLibelle]['capacite'] += $row['capacite'];
+
+            // Calcul de la capacité ajoutée à la composante et au total global avec dédoublonnage strict des portails
+            $formationObj = $row['formation'];
+            $fTcAnneesCounted = [];
+            $fTcPlatCounted = [];
+            $compCapToAdd = 0;
+            $globalCapToAdd = 0;
+            $compPlatCapToAdd = 0;
+            $globalPlatCapToAdd = 0;
+
+            foreach ($row['parcoursData'] as $pd) {
+                if ($pd['isOuvert']) {
+                    $groupedFormations[$compLibelle]['nbParcoursOuvert']++;
+                } else {
+                    continue;
+                }
+                $parcours = $pd['parcours'];
+                foreach ($pd['annees'] as $annee) {
+                    if (!$annee->isOuvert()) {
+                        continue;
+                    }
+                    $ordre = $annee->getOrdre();
+                    if ($ordre === null) {
+                        continue;
+                    }
+
+                    $anneeCap = $annee->getCapaciteAccueil();
+                    $portail = $annee->getPortail();
+                    $portailKey = ($portail !== null && $portail->getId() !== null) ? (string)$portail->getId() . '_' . $ordre : null;
+
+                    $tc = $formationObj->getTroncCommunForParcours($parcours, $ordre);
+                    $tcKey = $tc !== null ? $tc['id'] . '_' . $ordre : ($formationObj->isAnneeTroncCommun($ordre, $parcours) ? (string)$ordre : null);
+
+                    $isTcDuplicate = false;
+                    if ($tcKey !== null) {
+                        if (isset($fTcAnneesCounted[$tcKey])) {
+                            $isTcDuplicate = true;
+                        } else {
+                            $fTcAnneesCounted[$tcKey] = true;
+                        }
+                    }
+                    if (!$isTcDuplicate) {
+                        // Décompte dans la composante (ne pas compter plusieurs fois le portail au sein de la même composante)
+                        if ($portailKey !== null) {
+                            if (!isset($compPortailsCounted[$compLibelle][$portailKey])) {
+                                $compCapToAdd += $anneeCap;
+                                $compPortailsCounted[$compLibelle][$portailKey] = true;
+                            }
+                        } else {
+                            $compCapToAdd += $anneeCap;
+                        }
+
+                        // Décompte dans le total global (ne pas compter plusieurs fois le portail sur toute l'offre)
+                        if ($portailKey !== null) {
+                            if (!isset($globalPortailsCounted[$portailKey])) {
+                                $globalCapToAdd += $anneeCap;
+                                $globalPortailsCounted[$portailKey] = true;
+                            }
+                        } else {
+                            $globalCapToAdd += $anneeCap;
+                        }
+                    }
+
+                    // Décompte places plateformes
+                    $anneeParams = $paramsByAnnee[$annee->getId()] ?? [];
+                    foreach ($anneeParams as $param) {
+                        $plat = $param->getPlateforme();
+                        if ($plat === null || !$plat->getActive() || !$param->isActive()) {
+                            continue;
+                        }
+                        $platId = $plat->getId();
+                        $isTcPlatDuplicate = false;
+                        if ($tcKey !== null) {
+                            $tcPlatKey = $tcKey . '_' . $platId;
+                            if (isset($fTcPlatCounted[$tcPlatKey])) {
+                                $isTcPlatDuplicate = true;
+                            } else {
+                                $fTcPlatCounted[$tcPlatKey] = true;
+                            }
+                        }
+                        if ($isTcPlatDuplicate) {
+                            continue;
+                        }
+
+                        $pCap = $param->getCapaciteGlobale();
+                        if ($pCap === null || $pCap <= 0) {
+                            $fi = $param->getCapaciteFi() ?? 0;
+                            $alt = $param->getCapaciteAlternance() ?? 0;
+                            $spe = $param->getCapaciteSpecifique() ?? 0;
+                            $pCap = $fi + $alt + $spe;
+                        }
+                        $pCap = max(0, (int)$pCap);
+
+                        $portailPlatKey = $portailKey !== null ? $portailKey . '_' . $platId : null;
+                        if ($portailPlatKey !== null) {
+                            if (!isset($compPlatPortailsCounted[$compLibelle][$portailPlatKey])) {
+                                $compPlatCapToAdd += $pCap;
+                                $compPlatPortailsCounted[$compLibelle][$portailPlatKey] = true;
+                            }
+                            if (!isset($globalPlatPortailsCounted[$portailPlatKey])) {
+                                $globalPlatCapToAdd += $pCap;
+                                $globalPlatPortailsCounted[$portailPlatKey] = true;
+                            }
+                        } else {
+                            $compPlatCapToAdd += $pCap;
+                            $globalPlatCapToAdd += $pCap;
+                        }
+                    }
+                }
+            }
+
+            $groupedFormations[$compLibelle]['capacite'] += $compCapToAdd;
+            $groupedFormations[$compLibelle]['capacitePlateformes'] += $compPlatCapToAdd;
+            $capacite += $globalCapToAdd;
+            $capacitePlateformes += $globalPlatCapToAdd;
+
             if ($row['hasPv']) {
                 $groupedFormations[$compLibelle]['nbPv']++;
             }
             if ($row['hasNote']) {
                 $groupedFormations[$compLibelle]['nbNote']++;
-            }
-            foreach ($row['parcoursData'] as $pd) {
-                if ($pd['isOuvert']) {
-                    $groupedFormations[$compLibelle]['nbParcoursOuvert']++;
-                }
             }
             $groupedFormations[$compLibelle]['formations'][] = $row;
         }
@@ -524,6 +741,7 @@ final class OffreController extends BaseController
         $tabStatistiques['nbNonOuverture'] = $nbNonOuverture;
         $tabStatistiques['nbFermetureDefinitive'] = $nbFermetureDefinitive;
         $tabStatistiques['capacite'] = $capacite;
+        $tabStatistiques['capacitePlateformes'] = $capacitePlateformes;
         $tabStatistiques['nbAConfirmer'] = $nbAConfirmer;
         $tabStatistiques['nbAnomalies'] = count($allAnomalies);
         $tabStatistiques['allAnomalies'] = $allAnomalies;
@@ -560,6 +778,7 @@ final class OffreController extends BaseController
         AnneeRepository                          $anneeRepository,
         DpeParcoursRepository                    $dpeParcoursRepository,
         TypeDiplomePlateformeAdmissionRepository $typeDiplomePlateformeAdmissionRepository,
+        PlateformeAdmissionParametreRepository   $plateformeParamRepository,
         TurboStreamResponseFactory               $turboStream,
     ): Response {
         $ids = array_slice(array_values(array_unique(array_filter(
@@ -605,9 +824,14 @@ final class OffreController extends BaseController
             ];
         }
 
+        $paramsByAnnee = $parcoursAutorises !== []
+            ? $plateformeParamRepository->findByCampagneIndexedByAnnee($campagne)
+            : [];
+
         return $turboStream->stream('offre_v2/_annees_parcours.stream.html.twig', [
             'lignes' => $lignes,
             'tpaByTypeDiplome' => $typeDiplomePlateformeAdmissionRepository->findByCampagneIndexedByTypeDiplome($campagne),
+            'paramsByAnnee' => $paramsByAnnee,
         ]);
     }
 
@@ -701,10 +925,7 @@ final class OffreController extends BaseController
             ];
         }
 
-        $formationCapacite = $formation->getCapaciteAccueil();
-        if ($formationCapacite <= 0) {
-            $formationCapacite = $formation->getCapacite();
-        }
+        $formationCapacite = $formation->getCapacite($campagne);
 
         $pvDocs = [];
         $noteDocs = [];

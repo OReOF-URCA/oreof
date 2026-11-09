@@ -84,7 +84,7 @@ class ExportRegime implements ExportInterface
                 $this->excelWriter->writeCellXY(3, $ligne, $formation->getDisplay());
                 if ($formation->isHasParcours()) {
                     $this->excelWriter->writeCellXY(4, $ligne, $parcours->getLibelle());
-                    $this->excelWriter->writeCellXY(5, $ligne, $parcours->getLocalisation()?->getLibelle());
+                    $this->excelWriter->writeCellXY(5, $ligne, ($parcours->getLocalisation() ?? $parcours->getVille())?->getLibelle());
                 } else {
                     $this->excelWriter->writeCellXY(4, $ligne, 'Pas de parcours');
                     $texte = '';

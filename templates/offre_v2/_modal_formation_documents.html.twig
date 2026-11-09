@@ -1,0 +1,233 @@
+<form action="{{ path('offre_v2_formation_documents_sauvegarder', { formation: formation.id }) }}"
+      method="POST"
+      enctype="multipart/form-data"
+      id="modal_form"
+      class="space-y-5"
+>
+    <input type="hidden" name="_token" value="{{ csrf_token('formation_documents_' ~ formation.id) }}">
+
+    <!-- 1. Procès-Verbal (PV) -->
+    <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-secondary-50/50 dark:bg-secondary-900/30 p-4 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="text-base">📄</span>
+                <span class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide">Procès-Verbal (PV)</span>
+            </div>
+            {% if currentPv %}
+                <twig:Badge variant="success" size="sm" label="PV actuel associé" icon="ph:check" />
+            {% else %}
+                <twig:Badge variant="secondary" size="sm" label="Aucun PV" />
+            {% endif %}
+        </div>
+
+        {% if currentPv %}
+            <div class="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-success-200 bg-success-50/50 dark:border-success-800 dark:bg-success-950/20 text-xs">
+                <div class="flex items-center gap-2 min-w-0">
+                    <twig:UX:Icon name="ph:file-pdf" class="size-4 text-success-600 dark:text-success-400 shrink-0" />
+                    <span class="font-medium text-success-900 dark:text-success-200 truncate">{{ currentPv.originalFilename }}</span>
+                    <span class="text-[11px] text-secondary-500 whitespace-nowrap">(déposé le {{ currentPv.uploadedAt|date('d/m/Y') }})</span>
+                </div>
+                <a href="{{ path('app_upload_download', {context: 'conseils', filename: currentPv.filename, originalName: currentPv.originalFilename}) }}"
+                   target="_blank"
+                   class="shrink-0 font-semibold text-primary-600 hover:underline dark:text-primary-400"
+                >
+                    Consulter
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- Actions PV -->
+        <div class="space-y-2 text-xs">
+            <span class="font-semibold text-secondary-700 dark:text-secondary-300">Action pour le PV :</span>
+            <div class="grid gap-2 sm:grid-cols-2">
+                {% if currentPv %}
+                    <label class="flex items-center gap-2 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700 bg-surface cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                        <input type="radio" name="pv_action" value="keep" checked
+                               onchange="document.getElementById('pv_upload_block').classList.add('hidden'); document.getElementById('pv_choose_block').classList.add('hidden');"
+                               class="text-primary-600 focus:ring-primary-500">
+                        <span>Conserver le PV actuel</span>
+                    </label>
+                {% endif %}
+
+                <label class="flex items-center gap-2 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700 bg-surface cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                    <input type="radio" name="pv_action" value="upload" {{ not currentPv ? 'checked' : '' }}
+                           onchange="document.getElementById('pv_upload_block').classList.remove('hidden'); document.getElementById('pv_choose_block').classList.add('hidden');"
+                           class="text-primary-600 focus:ring-primary-500">
+                    <span>Téléverser un nouveau PV</span>
+                </label>
+
+                {% if existingPvs|length > 0 %}
+                    <label class="flex items-center gap-2 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700 bg-surface cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                        <input type="radio" name="pv_action" value="choose"
+                               onchange="document.getElementById('pv_choose_block').classList.remove('hidden'); document.getElementById('pv_upload_block').classList.add('hidden');"
+                               class="text-primary-600 focus:ring-primary-500">
+                        <span>Choisir un PV déjà déposé</span>
+                    </label>
+                {% endif %}
+
+                {% if currentPv %}
+                    <label class="flex items-center gap-2 p-2 rounded-lg border border-danger-200 dark:border-danger-800 bg-danger-50/30 dark:bg-danger-950/20 cursor-pointer hover:bg-danger-50 text-danger-700 dark:text-danger-300">
+                        <input type="radio" name="pv_action" value="remove"
+                               onchange="document.getElementById('pv_upload_block').classList.add('hidden'); document.getElementById('pv_choose_block').classList.add('hidden');"
+                               class="text-danger-600 focus:ring-danger-500">
+                        <span>Dissocier le PV actuel</span>
+                    </label>
+                {% endif %}
+            </div>
+
+            <!-- Sous-bloc Upload PV -->
+            <div id="pv_upload_block" class="pt-2 {{ currentPv ? 'hidden' : '' }}">
+                <label for="file_pv" class="block text-[11px] font-medium text-secondary-600 dark:text-secondary-300 mb-1">
+                    Sélectionner le fichier PDF du PV :
+                </label>
+                <input type="file" name="file_pv" id="file_pv" accept="application/pdf"
+                       class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-1.5 text-xs text-secondary-700 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:text-primary-300">
+            </div>
+
+            <!-- Sous-bloc Choisir PV existant -->
+            {% if existingPvs|length > 0 %}
+                <div id="pv_choose_block" class="pt-2 hidden">
+                    <label for="pv_id" class="block text-[11px] font-medium text-secondary-600 dark:text-secondary-300 mb-1">
+                        Sélectionner un PV de la composante :
+                    </label>
+                    <select name="pv_id" id="pv_id"
+                            class="app-filter-select w-full rounded-lg border px-3 py-2 text-xs">
+                        {% for pv in existingPvs %}
+                            <option value="{{ pv.id }}" {{ currentPv and currentPv.id == pv.id ? 'selected' : '' }}>
+                                {{ pv.originalFilename }} (du {{ pv.uploadedAt|date('d/m/Y') }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 2. Note explicative -->
+    <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-secondary-50/50 dark:bg-secondary-900/30 p-4 space-y-3">
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="text-base">📝</span>
+                <span class="text-xs font-bold text-secondary-800 dark:text-secondary-100 uppercase tracking-wide">Note explicative</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{{ asset('modeles/note_explicative.docx') }}" target="_blank" class="text-[11px] font-semibold text-primary-600 hover:underline dark:text-primary-400">
+                    Modèle .docx
+                </a>
+                {% if currentNote %}
+                    <twig:Badge variant="primary" size="sm" label="Note actuelle associée" icon="ph:check" />
+                {% else %}
+                    <twig:Badge variant="secondary" size="sm" label="Aucune Note" />
+                {% endif %}
+            </div>
+        </div>
+
+        {% if currentNote %}
+            <div class="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-primary-200 bg-primary-50/50 dark:border-primary-800 dark:bg-primary-950/20 text-xs">
+                <div class="flex items-center gap-2 min-w-0">
+                    <twig:UX:Icon name="ph:file-pdf" class="size-4 text-primary-600 dark:text-primary-400 shrink-0" />
+                    <span class="font-medium text-primary-900 dark:text-primary-200 truncate">{{ currentNote.originalFilename }}</span>
+                    <span class="text-[11px] text-secondary-500 whitespace-nowrap">(déposée le {{ currentNote.uploadedAt|date('d/m/Y') }})</span>
+                </div>
+                <a href="{{ path('app_upload_download', {context: 'conseils', filename: currentNote.filename, originalName: currentNote.originalFilename}) }}"
+                   target="_blank"
+                   class="shrink-0 font-semibold text-primary-600 hover:underline dark:text-primary-400"
+                >
+                    Consulter
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- Actions Note -->
+        <div class="space-y-2 text-xs">
+            <span class="font-semibold text-secondary-700 dark:text-secondary-300">Action pour la Note :</span>
+            <div class="grid gap-2 sm:grid-cols-2">
+                {% if currentNote %}
+                    <label class="flex items-center gap-2 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700 bg-surface cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                        <input type="radio" name="note_action" value="keep" checked
+                               onchange="document.getElementById('note_upload_block').classList.add('hidden'); document.getElementById('note_choose_block').classList.add('hidden');"
+                               class="text-primary-600 focus:ring-primary-500">
+                        <span>Conserver la Note actuelle</span>
+                    </label>
+                {% endif %}
+
+                <label class="flex items-center gap-2 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700 bg-surface cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                    <input type="radio" name="note_action" value="upload" {{ not currentNote ? 'checked' : '' }}
+                           onchange="document.getElementById('note_upload_block').classList.remove('hidden'); document.getElementById('note_choose_block').classList.add('hidden');"
+                           class="text-primary-600 focus:ring-primary-500">
+                    <span>Téléverser une nouvelle Note</span>
+                </label>
+
+                {% if existingNotes|length > 0 %}
+                    <label class="flex items-center gap-2 p-2 rounded-lg border border-secondary-200 dark:border-secondary-700 bg-surface cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                        <input type="radio" name="note_action" value="choose"
+                               onchange="document.getElementById('note_choose_block').classList.remove('hidden'); document.getElementById('note_upload_block').classList.add('hidden');"
+                               class="text-primary-600 focus:ring-primary-500">
+                        <span>Choisir une Note déjà déposée</span>
+                    </label>
+                {% endif %}
+
+                {% if currentNote %}
+                    <label class="flex items-center gap-2 p-2 rounded-lg border border-danger-200 dark:border-danger-800 bg-danger-50/30 dark:bg-danger-950/20 cursor-pointer hover:bg-danger-50 text-danger-700 dark:text-danger-300">
+                        <input type="radio" name="note_action" value="remove"
+                               onchange="document.getElementById('note_upload_block').classList.add('hidden'); document.getElementById('note_choose_block').classList.add('hidden');"
+                               class="text-danger-600 focus:ring-danger-500">
+                        <span>Dissocier la Note actuelle</span>
+                    </label>
+                {% endif %}
+            </div>
+
+            <!-- Sous-bloc Upload Note -->
+            <div id="note_upload_block" class="pt-2 {{ currentNote ? 'hidden' : '' }}">
+                <label for="file_note" class="block text-[11px] font-medium text-secondary-600 dark:text-secondary-300 mb-1">
+                    Sélectionner le fichier PDF de la note explicative :
+                </label>
+                <input type="file" name="file_note" id="file_note" accept="application/pdf"
+                       class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-1.5 text-xs text-secondary-700 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:text-primary-300">
+            </div>
+
+            <!-- Sous-bloc Choisir Note existante -->
+            {% if existingNotes|length > 0 %}
+                <div id="note_choose_block" class="pt-2 hidden">
+                    <label for="note_id" class="block text-[11px] font-medium text-secondary-600 dark:text-secondary-300 mb-1">
+                        Sélectionner une Note de la composante :
+                    </label>
+                    <select name="note_id" id="note_id"
+                            class="app-filter-select w-full rounded-lg border px-3 py-2 text-xs">
+                        {% for note in existingNotes %}
+                            <option value="{{ note.id }}" {{ currentNote and currentNote.id == note.id ? 'selected' : '' }}>
+                                {{ note.originalFilename }} (du {{ note.uploadedAt|date('d/m/Y') }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 3. Date et commentaire -->
+    <div class="grid gap-3 sm:grid-cols-2 border-t border-secondary-200 dark:border-secondary-700 pt-3">
+        <div>
+            <label for="date_conseil" class="block text-xs font-semibold text-secondary-700 dark:text-secondary-300 mb-1">
+                Date du conseil / décision :
+            </label>
+            <input type="date"
+                   name="date_conseil"
+                   id="date_conseil"
+                   value="{{ currentPv and currentPv.dateConseil ? currentPv.dateConseil|date('Y-m-d') : (currentNote and currentNote.dateConseil ? currentNote.dateConseil|date('Y-m-d') : 'now'|date('Y-m-d')) }}"
+                   class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500">
+        </div>
+
+        <div>
+            <label for="commentaire" class="block text-xs font-semibold text-secondary-700 dark:text-secondary-300 mb-1">
+                Commentaire / Justification :
+            </label>
+            <input type="text"
+                   name="commentaire"
+                   id="commentaire"
+                   placeholder="Ex : Remplacement suite à correction du PV..."
+                   class="w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface p-2 text-xs text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500">
+        </div>
+    </div>
+</form>
+

@@ -14,6 +14,15 @@
         />
     {% endif %}
 
+    {# Badge ville / localisation #}
+    {% set parcoursVille = parcours.ville ?? parcours.localisation %}
+    {% if parcoursVille %}
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-secondary-100 text-secondary-700 border border-secondary-200 dark:bg-secondary-800 dark:text-secondary-200 dark:border-secondary-700" title="Ville d'enseignement">
+            <twig:UX:Icon name="ph:map-pin" class="h-3.5 w-3.5 text-secondary-500" />
+            {{ parcoursVille.libelle }}
+        </span>
+    {% endif %}
+
     {# Badge modifié par rapport à N-1 #}
     {% set dpe = parcours.getDpeParcours()|filter(d => d.campagneCollecte == campagne)|first %}
     {% set isModifieN1 = dpe and dpe.etatReconduction and dpe.etatReconduction.value == 'MODIFICATION_INTITULE' %}

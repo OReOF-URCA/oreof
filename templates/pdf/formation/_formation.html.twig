@@ -287,9 +287,9 @@
                     <dt>Inscription au RNCP</dt>
                     <dd>{{ formation.inRncp == true ? (formation.codeRncp|default('Oui')) : 'Non inscrit' }}</dd>
 
-                    {% if formation.capaciteAccueil is defined and formation.capaciteAccueil > 0 %}
+                    {% if formation.capacite > 0 %}
                         <dt>Capacité d'accueil</dt>
-                        <dd>{{ formation.capaciteAccueil }} places</dd>
+                        <dd>{{ formation.capacite }} places</dd>
                     {% endif %}
                 </dl>
             </div>

@@ -225,9 +225,6 @@ class Formation
     #[ORM\OneToMany(mappedBy: 'formation', targetEntity: DpeDemande::class, cascade: ['persist'])]
     private Collection $dpeDemandes;
 
-    #[ORM\Column]
-    private ?int $capaciteAccueil = 0;
-
     /**
      * @var Collection<int, ChangeParcours>
      */
@@ -726,17 +723,58 @@ class Formation
     }
 
     /**
+     * @return list<Portail>
+     */
+    public function getPortails(?CampagneCollecte $campagne = null): array
+    {
+        $portails = [];
+        foreach ($this->getParcours() as $parcours) {
+            foreach ($parcours->getAnnees() as $annee) {
+                $portail = $annee->getPortail();
+                if ($portail !== null && $portail->getId() !== null) {
+                    if ($campagne !== null && $portail->getCampagne()?->getId() !== $campagne->getId()) {
+                        continue;
+                    }
+                    $portails[$portail->getId()] = $portail;
+                }
+            }
+        }
+
+        return array_values($portails);
+    }
+
+    /**
      * @return list<array{id: string, nom: string, annees: list<int>, parcours: list<int>}>
      */
     public function getTroncsCommuns(): array
     {
+        $validOrdres = $this->getAnneesOrdres();
         $struct = $this->getStructureSemestres();
-        if (isset($struct['troncs_communs']) && is_array($struct['troncs_communs']) && !empty($struct['troncs_communs'])) {
-            return $struct['troncs_communs'];
+        if (array_key_exists('troncs_communs', $struct)) {
+            $rawTcs = is_array($struct['troncs_communs']) ? $struct['troncs_communs'] : [];
+            $filteredTcs = [];
+            foreach ($rawTcs as $tc) {
+                if (!is_array($tc)) {
+                    continue;
+                }
+                $tAnnees = array_values(array_filter(
+                    array_map('intval', $tc['annees'] ?? []),
+                    fn(int $a) => in_array($a, $validOrdres, true)
+                ));
+                if (!empty($tAnnees)) {
+                    $tc['annees'] = $tAnnees;
+                    $filteredTcs[] = $tc;
+                }
+            }
+            return $filteredTcs;
         }
 
         // Rétrocompatibilité : construction automatique depuis annees_tronc_commun
-        $annees = $this->getAnneesTroncCommun();
+        // UNIQUEMENT si la clé moderne 'troncs_communs' n'a jamais été initialisée sur la formation
+        $annees = array_values(array_filter(
+            $this->getAnneesTroncCommun(),
+            fn(int $a) => in_array($a, $validOrdres, true)
+        ));
         if (!empty($annees)) {
             $allParcoursIds = [];
             foreach ($this->getParcours() as $p) {
@@ -764,6 +802,7 @@ class Formation
      */
     public function setTroncsCommuns(array $troncsCommuns): self
     {
+        $validOrdres = $this->getAnneesOrdres();
         $struct = $this->getStructureSemestres();
         $cleaned = [];
         $allAnnees = [];
@@ -772,7 +811,10 @@ class Formation
             if (!is_array($tc)) {
                 continue;
             }
-            $annees = array_values(array_unique(array_map('intval', $tc['annees'] ?? [])));
+            $annees = array_values(array_unique(array_filter(
+                array_map('intval', $tc['annees'] ?? []),
+                fn(int $a) => in_array($a, $validOrdres, true)
+            )));
             $parcours = array_values(array_unique(array_map('intval', $tc['parcours'] ?? [])));
             if (empty($annees) || empty($parcours)) {
                 continue;
@@ -798,6 +840,21 @@ class Formation
         $struct['troncs_communs'] = $cleaned;
         $struct['annees_tronc_commun'] = $allAnnees;
 
+        // Purger les anciennes clés résiduelles pour éviter toute réapparition de TC fantômes
+        foreach ($struct as $k => $v) {
+            if (is_string($k) && str_starts_with($k, 'annee_')) {
+                unset($struct[$k]);
+            }
+        }
+        for ($s = 1; $s <= 12; $s++) {
+            if (isset($struct[$s]) && $struct[$s] === 'tronc_commun') {
+                unset($struct[$s]);
+            }
+            if (isset($struct[(string)$s]) && $struct[(string)$s] === 'tronc_commun') {
+                unset($struct[(string)$s]);
+            }
+        }
+
         $this->setStructureSemestres($struct);
 
         return $this;
@@ -805,12 +862,17 @@ class Formation
 
     public function isAnneeTroncCommun(int $anneeOrdre, int|Parcours|null $parcours = null): bool
     {
+        $struct = $this->getStructureSemestres();
+        $hasModernConfig = array_key_exists('troncs_communs', $struct);
         $tcs = $this->getTroncsCommuns();
-        if (!empty($tcs)) {
+
+        if ($hasModernConfig || !empty($tcs)) {
             if ($parcours !== null) {
-                $parcoursId = $parcours instanceof Parcours ? $parcours->getId() : $parcours;
+                $parcoursId = (int) ($parcours instanceof Parcours ? $parcours->getId() : $parcours);
                 foreach ($tcs as $tc) {
-                    if (in_array($anneeOrdre, $tc['annees'] ?? [], true) && in_array($parcoursId, $tc['parcours'] ?? [], true)) {
+                    $tcAnnees = array_map('intval', $tc['annees'] ?? []);
+                    $tcParcours = array_map('intval', $tc['parcours'] ?? []);
+                    if (in_array($anneeOrdre, $tcAnnees, true) && in_array($parcoursId, $tcParcours, true)) {
                         return true;
                     }
                 }
@@ -818,14 +880,15 @@ class Formation
             }
 
             foreach ($tcs as $tc) {
-                if (in_array($anneeOrdre, $tc['annees'] ?? [], true)) {
+                $tcAnnees = array_map('intval', $tc['annees'] ?? []);
+                if (in_array($anneeOrdre, $tcAnnees, true)) {
                     return true;
                 }
             }
             return false;
         }
 
-        $struct = $this->getStructureSemestres();
+        // Ancienne logique de rétrocompatibilité uniquement si aucune config moderne
         if (isset($struct['annees_tronc_commun']) && is_array($struct['annees_tronc_commun'])) {
             if (in_array($anneeOrdre, array_map('intval', $struct['annees_tronc_commun']), true)) {
                 return true;
@@ -848,9 +911,11 @@ class Formation
      */
     public function getTroncCommunForParcours(int|Parcours $parcours, int $anneeOrdre): ?array
     {
-        $parcoursId = $parcours instanceof Parcours ? $parcours->getId() : $parcours;
+        $parcoursId = (int) ($parcours instanceof Parcours ? $parcours->getId() : $parcours);
         foreach ($this->getTroncsCommuns() as $tc) {
-            if (in_array($anneeOrdre, $tc['annees'] ?? [], true) && in_array($parcoursId, $tc['parcours'] ?? [], true)) {
+            $tcAnnees = array_map('intval', $tc['annees'] ?? []);
+            $tcParcours = array_map('intval', $tc['parcours'] ?? []);
+            if (in_array($anneeOrdre, $tcAnnees, true) && in_array($parcoursId, $tcParcours, true)) {
                 return $tc;
             }
         }
@@ -868,10 +933,11 @@ class Formation
             return [];
         }
 
-        $parcoursId = $parcours instanceof Parcours ? $parcours->getId() : $parcours;
+        $parcoursId = (int) ($parcours instanceof Parcours ? $parcours->getId() : $parcours);
+        $tcParcours = array_map('intval', $tc['parcours'] ?? []);
         $autres = [];
         foreach ($this->getParcours() as $p) {
-            if ($p->getId() !== $parcoursId && in_array($p->getId(), $tc['parcours'] ?? [], true)) {
+            if ($p->getId() !== null && $p->getId() !== $parcoursId && in_array($p->getId(), $tcParcours, true)) {
                 $autres[] = $p;
             }
         }
@@ -910,7 +976,22 @@ class Formation
 
     public function getAnneesTroncCommun(): array
     {
+        $validOrdres = $this->getAnneesOrdres();
         $struct = $this->getStructureSemestres();
+        if (array_key_exists('troncs_communs', $struct) && is_array($struct['troncs_communs'])) {
+            $res = [];
+            foreach ($struct['troncs_communs'] as $tc) {
+                foreach ($tc['annees'] ?? [] as $a) {
+                    $anneeNum = (int)$a;
+                    if ($anneeNum > 0 && in_array($anneeNum, $validOrdres, true) && !in_array($anneeNum, $res, true)) {
+                        $res[] = $anneeNum;
+                    }
+                }
+            }
+            sort($res);
+            return $res;
+        }
+
         $res = [];
         if (isset($struct['annees_tronc_commun']) && is_array($struct['annees_tronc_commun'])) {
             $res = array_map('intval', $struct['annees_tronc_commun']);
@@ -928,6 +1009,7 @@ class Formation
                 }
             }
         }
+        $res = array_values(array_filter($res, fn(int $a) => in_array($a, $validOrdres, true)));
         sort($res);
 
         return $res;
@@ -970,14 +1052,15 @@ class Formation
         return $ordres;
     }
 
-    public function getCapaciteCalculee(): int
+    public function getCapaciteCalculee(?CampagneCollecte $campagne = null): int
     {
         $capacite = 0;
         $tcAnneesCounted = [];
         $portailsCounted = [];
 
         foreach ($this->getParcours() as $parcours) {
-            if (!$parcours->isOuvert()) {
+            $isOuvert = $campagne !== null ? $parcours->isOuvertPourCampagne($campagne) : $parcours->isOuvert();
+            if (!$isOuvert) {
                 continue;
             }
             foreach ($parcours->getAnnees() as $annee) {
@@ -1001,7 +1084,7 @@ class Formation
                     continue;
                 }
 
-                // 2. Dédoublonnage par Tronc Commun
+                // 2. Dédoublonnage par Tronc Commun (personnalisé ou rétrocompatible)
                 $tc = $this->getTroncCommunForParcours($parcours, $ordre);
                 if ($tc !== null) {
                     $tcKey = $tc['id'] . '_' . $ordre;
@@ -1011,10 +1094,93 @@ class Formation
                     $tcAnneesCounted[$tcKey] = true;
                     $capacite += $annee->getCapaciteAccueil();
                     continue;
+                } elseif ($this->isAnneeTroncCommun($ordre, $parcours)) {
+                    if (isset($tcAnneesCounted[$ordre])) {
+                        continue;
+                    }
+                    $tcAnneesCounted[$ordre] = true;
+                    $capacite += $annee->getCapaciteAccueil();
+                    continue;
                 }
 
                 // 3. Spécifique au parcours
                 $capacite += $annee->getCapaciteAccueil();
+            }
+        }
+
+        return $capacite;
+    }
+
+    public function getCapacitePlateformes(?CampagneCollecte $campagne = null): int
+    {
+        $capacite = 0;
+        $tcPlateformesCounted = [];
+        $portailsCounted = [];
+
+        foreach ($this->getParcours() as $parcours) {
+            $isOuvert = $campagne !== null ? $parcours->isOuvertPourCampagne($campagne) : $parcours->isOuvert();
+            if (!$isOuvert) {
+                continue;
+            }
+            foreach ($parcours->getAnnees() as $annee) {
+                if (!$annee->isOuvert()) {
+                    continue;
+                }
+                $ordre = $annee->getOrdre();
+                if ($ordre === null) {
+                    continue;
+                }
+
+                $portail = $annee->getPortail();
+                $tc = $this->getTroncCommunForParcours($parcours, $ordre);
+                $isLegacyTc = $tc === null && $this->isAnneeTroncCommun($ordre, $parcours);
+
+                foreach ($annee->getAdmissionPlateformeParametres() as $param) {
+                    $plat = $param->getPlateforme();
+                    if (!$param->isActive() || $plat === null || !$plat->getActive()) {
+                        continue;
+                    }
+                    if ($campagne !== null && $param->getCampagne()?->getId() !== $campagne->getId()) {
+                        continue;
+                    }
+
+                    $platId = $plat->getId();
+                    if ($platId === null) {
+                        continue;
+                    }
+
+                    // 1. Dédoublonnage par Portail
+                    if ($portail !== null && $portail->getId() !== null) {
+                        $portailPlatKey = $portail->getId() . '_' . $ordre . '_' . $platId;
+                        if (isset($portailsCounted[$portailPlatKey])) {
+                            continue;
+                        }
+                        $portailsCounted[$portailPlatKey] = true;
+                    } elseif ($tc !== null) {
+                        // 2. Dédoublonnage par Tronc Commun
+                        $tcPlatKey = $tc['id'] . '_' . $ordre . '_' . $platId;
+                        if (isset($tcPlateformesCounted[$tcPlatKey])) {
+                            continue;
+                        }
+                        $tcPlateformesCounted[$tcPlatKey] = true;
+                    } elseif ($isLegacyTc) {
+                        $tcPlatKey = 'legacy_' . $ordre . '_' . $platId;
+                        if (isset($tcPlateformesCounted[$tcPlatKey])) {
+                            continue;
+                        }
+                        $tcPlateformesCounted[$tcPlatKey] = true;
+                    }
+
+                    $pCap = $param->getCapaciteGlobale();
+                    if ($pCap === null || $pCap <= 0) {
+                        $fi = $param->getCapaciteFi() ?? 0;
+                        $alt = $param->getCapaciteAlternance() ?? 0;
+                        $spe = $param->getCapaciteSpecifique() ?? 0;
+                        $pCap = $fi + $alt + $spe;
+                    }
+
+                    $capacite += max(0, (int)$pCap);
+                }
             }
         }
 
@@ -1616,26 +1782,25 @@ class Formation
         return $this;
     }
 
-    public function getCapaciteAccueil(): ?int
+    /**
+     * @deprecated La capacité d'une formation est calculée dynamiquement depuis ses parcours/années.
+     */
+    public function getCapaciteAccueil(): int
     {
-        return $this->capaciteAccueil ?? 0;
+        return $this->getCapacite();
     }
 
+    /**
+     * @deprecated La capacité d'accueil ne se configure plus au niveau de la mention.
+     */
     public function setCapaciteAccueil(int $capaciteAccueil): static
     {
-        $this->capaciteAccueil = $capaciteAccueil;
-
         return $this;
     }
 
-    public function getCapacite(): int
+    public function getCapacite(?CampagneCollecte $campagne = null): int
     {
-        // si capacite accueil définie sur parcours, on retour cette valeur, sinon somme des capacités des parcours sans doublon de tronc commun
-        if ($this->capaciteAccueil !== null && $this->capaciteAccueil > 0) {
-            return $this->capaciteAccueil;
-        }
-
-        return $this->getCapaciteCalculee();
+        return $this->getCapaciteCalculee($campagne);
     }
 
     /**

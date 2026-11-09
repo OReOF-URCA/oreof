@@ -278,5 +278,216 @@ final class FormationMutualisationTest extends TestCase
         self::assertNull($annee->getPortail());
         self::assertFalse($portail->getAnnees()->contains($annee));
     }
+
+    public function testPartialTroncCommunExcludesUnselectedParcours(): void
+    {
+        $formation = new Formation();
+        $this->setId($formation, 1);
+
+        $pA = new Parcours($formation);
+        $this->setId($pA, 10);
+        $pB = new Parcours($formation);
+        $this->setId($pB, 20);
+        $pC = new Parcours($formation);
+        $this->setId($pC, 30);
+
+        $formation->addParcour($pA);
+        $formation->addParcour($pB);
+        $formation->addParcour($pC);
+
+        // Données avec mélange de types string et int (comme issu d'un POST ou JSON)
+        $formation->setTroncsCommuns([
+            [
+                'id' => 'tc_partial',
+                'nom' => 'Tronc commun A et B',
+                'annees' => ['1'],
+                'parcours' => ['10', '20'],
+            ],
+        ]);
+
+        self::assertTrue($formation->isAnneeTroncCommun(1, $pA));
+        self::assertTrue($formation->isAnneeTroncCommun(1, $pB));
+        self::assertFalse($formation->isAnneeTroncCommun(1, $pC));
+
+        self::assertNotNull($formation->getTroncCommunForParcours($pA, 1));
+        self::assertNotNull($formation->getTroncCommunForParcours($pB, 1));
+        self::assertNull($formation->getTroncCommunForParcours($pC, 1));
+
+        $autres = $formation->getAutresParcoursInTroncCommun($pA, 1);
+        self::assertCount(1, $autres);
+        self::assertSame(20, $autres[0]->getId());
+    }
+
+    public function testClearingTroncsCommunsPurgesResidualLegacyKeys(): void
+    {
+        $formation = new Formation();
+        $this->setId($formation, 1);
+
+        $p1 = new Parcours($formation);
+        $this->setId($p1, 10);
+        $formation->addParcour($p1);
+
+        // Anciennes clés résiduelles en BDD
+        $formation->setStructureSemestres([
+            'annee_1' => true,
+            '1' => 'tronc_commun',
+            '2' => 'tronc_commun',
+            'annees_tronc_commun' => [1],
+        ]);
+
+        // L'utilisateur supprime/vide tous les troncs communs
+        $formation->setTroncsCommuns([]);
+
+        self::assertSame([], $formation->getTroncsCommuns());
+        self::assertSame([], $formation->getAnneesTroncCommun());
+        self::assertFalse($formation->isAnneeTroncCommun(1));
+        self::assertFalse($formation->isAnneeTroncCommun(1, $p1));
+    }
+
+    public function testCapaciteAndCapaciteAccueilComputedFromParcours(): void
+    {
+        $formation = new Formation();
+        $this->setId($formation, 1);
+        // Ancien setter sans effet
+        $formation->setCapaciteAccueil(304);
+
+        $p1 = new Parcours($formation);
+        $this->setId($p1, 10);
+        $p2 = new Parcours($formation);
+        $this->setId($p2, 20);
+        $formation->addParcour($p1);
+        $formation->addParcour($p2);
+
+        // Deux parcours en tronc commun L1 (ordre 1) à 300 places
+        $formation->setTroncsCommuns([
+            [
+                'id' => 'tc_l1',
+                'nom' => 'Tronc commun L1',
+                'annees' => [1],
+                'parcours' => [10, 20],
+            ],
+        ]);
+
+        $a1 = new Annee();
+        $this->setId($a1, 101);
+        $a1->setOrdre(1);
+        $a1->setCapaciteAccueil(300);
+        $a1->setIsOuvert(true);
+        $a1->setParcours($p1);
+        $p1->addAnnee($a1);
+
+        $a2 = new Annee();
+        $this->setId($a2, 102);
+        $a2->setOrdre(1);
+        $a2->setCapaciteAccueil(300);
+        $a2->setIsOuvert(true);
+        $a2->setParcours($p2);
+        $p2->addAnnee($a2);
+
+        // La capacité de la formation doit être 300 (dédoublonnée), et les alias doivent renvoyer 300
+        self::assertSame(300, $formation->getCapacite());
+        self::assertSame(300, $formation->getCapaciteAccueil());
+        self::assertSame(300, $formation->getCapaciteCalculee());
+        self::assertSame(300, $p1->getCapacite());
+        self::assertSame(300, $p1->getCapaciteAccueil());
+        self::assertSame(300, $p2->getCapacite());
+        self::assertSame(300, $p2->getCapaciteAccueil());
+    }
+
+    public function testCapaciteCalculeeLegacyTroncCommunDeduplication(): void
+    {
+        $formation = new Formation();
+        $this->setId($formation, 1);
+
+        $p1 = new Parcours($formation);
+        $this->setId($p1, 10);
+        $p2 = new Parcours($formation);
+        $this->setId($p2, 20);
+        $formation->addParcour($p1);
+        $formation->addParcour($p2);
+
+        // Configuration historique uniquement via annees_tronc_commun
+        $formation->setStructureSemestres(['annees_tronc_commun' => [1]]);
+
+        $a1 = new Annee();
+        $this->setId($a1, 101);
+        $a1->setOrdre(1);
+        $a1->setCapaciteAccueil(250);
+        $a1->setIsOuvert(true);
+        $a1->setParcours($p1);
+        $p1->addAnnee($a1);
+
+        $a2 = new Annee();
+        $this->setId($a2, 102);
+        $a2->setOrdre(1);
+        $a2->setCapaciteAccueil(250);
+        $a2->setIsOuvert(true);
+        $a2->setParcours($p2);
+        $p2->addAnnee($a2);
+
+        // L1 en tronc commun historique -> dédoublonné à 250
+        self::assertSame(250, $formation->getCapacite());
+    }
+
+    public function testNonExistentYearsFilteredFromTroncsCommuns(): void
+    {
+        $formation = new Formation();
+        $this->setId($formation, 1);
+
+        $p1 = new Parcours($formation);
+        $this->setId($p1, 10);
+        $p2 = new Parcours($formation);
+        $this->setId($p2, 20);
+        $formation->addParcour($p1);
+        $formation->addParcour($p2);
+
+        // Cas LPro : seule l'Année 3 existe dans les parcours
+        $a1 = new Annee();
+        $this->setId($a1, 101);
+        $a1->setOrdre(3);
+        $a1->setIsOuvert(true);
+        $a1->setParcours($p1);
+        $p1->addAnnee($a1);
+
+        $a2 = new Annee();
+        $this->setId($a2, 102);
+        $a2->setOrdre(3);
+        $a2->setIsOuvert(true);
+        $a2->setParcours($p2);
+        $p2->addAnnee($a2);
+
+        // Données historiques résiduelles avec année 1 (inexistante dans la formation) et année 3
+        $formation->setStructureSemestres([
+            'annees_tronc_commun' => [1, 3],
+            'annee_1' => true,
+            'annee_3' => true,
+            '1' => 'tronc_commun',
+            '2' => 'tronc_commun',
+        ]);
+
+        // L'année 1 ne doit jamais être retournée car inexistante pour cette formation
+        self::assertSame([3], $formation->getAnneesTroncCommun());
+        $tcs = $formation->getTroncsCommuns();
+        self::assertCount(1, $tcs);
+        self::assertSame([3], $tcs[0]['annees']);
+
+        // isAnneeTroncCommun ne doit pas être vrai pour l'année 1
+        self::assertFalse($formation->isAnneeTroncCommun(1));
+        self::assertTrue($formation->isAnneeTroncCommun(3));
+
+        // Même si on essaie de sauvegarder [1, 3], l'année 1 doit être automatiquement filtrée
+        $formation->setTroncsCommuns([
+            [
+                'id' => 'tc_lp',
+                'nom' => 'Tronc commun LP',
+                'annees' => [1, 3],
+                'parcours' => [10, 20],
+            ],
+        ]);
+        $savedTcs = $formation->getTroncsCommuns();
+        self::assertCount(1, $savedTcs);
+        self::assertSame([3], $savedTcs[0]['annees']);
+        self::assertSame([3], $formation->getAnneesTroncCommun());
+    }
 }
 

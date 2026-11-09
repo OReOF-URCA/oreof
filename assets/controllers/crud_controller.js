@@ -203,8 +203,12 @@ export default class extends Controller {
       this.listeTarget.innerHTML = window.da.loaderStimulus
     }
 
+    const targetUrl = new URL(this.urlValue, window.location.origin)
     const _params = new URLSearchParams(params)
-    const response = await fetch(`${this.urlValue}?${_params.toString()}`)
+    _params.forEach((value, key) => {
+      targetUrl.searchParams.set(key, value)
+    })
+    const response = await fetch(targetUrl.toString())
     const html = await response.text()
     // Une réponse plus récente a été demandée entre-temps : on ignore celle-ci
     if (requestId !== this.requestId) {

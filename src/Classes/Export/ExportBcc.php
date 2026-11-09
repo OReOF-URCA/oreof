@@ -65,7 +65,7 @@ class ExportBcc implements ExportInterface
         $this->excelWriter->writeCellName('C5', 'Localisation', [
             'style' => 'HORIZONTAL_RIGHT',
         ]);
-        $this->excelWriter->writeCellName('D5', $parcours->getLocalisation()?->getLibelle());
+        $this->excelWriter->writeCellName('D5', ($parcours->getLocalisation() ?? $parcours->getVille())?->getLibelle());
         $this->excelWriter->getColumnDimension('A', 30);
         $this->excelWriter->getColumnDimension('B', 50);
 

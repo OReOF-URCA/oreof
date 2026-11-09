@@ -149,11 +149,19 @@ class FormationRepository extends ServiceEntityRepository
                 ->setParameter('typeDiplome', $options['typeDiplome']);
         }
 
-        // Filtre par accréditation : « accréditée » = type de diplôme classique (ou non
-        // renseigné), « non accréditée » = type de diplôme non classique.
-        if (array_key_exists('accreditation', $options) && null !== $options['accreditation'] && '' !== $options['accreditation']) {
+        // Filtre par classique / accréditation : « accréditée » / classique = type de diplôme classique (ou non
+        // renseigné), « non accréditée » / non classique = type de diplôme non classique.
+        $classiqueFilter = null;
+        if (array_key_exists('classique', $options) && null !== $options['classique'] && '' !== $options['classique']) {
+            $classiqueFilter = $options['classique'];
+        } elseif (array_key_exists('accreditation', $options) && null !== $options['accreditation'] && '' !== $options['accreditation']) {
+            $classiqueFilter = $options['accreditation'];
+        }
+
+        if ($classiqueFilter !== null) {
             $query->leftJoin('f.typeDiplome', 'td');
-            if ($options['accreditation'] === '0') {
+            $isCl = filter_var($classiqueFilter, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+            if ($isCl === false || $classiqueFilter === '0' || $classiqueFilter === 0) {
                 $query->andWhere('td.classique = false');
             } else {
                 $query->andWhere('td.classique = true OR td.classique IS NULL');

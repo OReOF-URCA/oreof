@@ -178,6 +178,8 @@ offre_v2_configurer.description: "Paramètrer les plateformes d'admissions, les 
 offre_v2_configurer.title: 'Configurer la formation : %formation%'
 parcours_v2_supprimer.description: 'Supprimer définitivement un parcours créé par erreur (Action réservée aux administrateurs).'
 parcours_v2_supprimer.title: 'Suppression définitive : %display%'
+app_parcours_comparer_n1.title: 'Comparaison N-1 => N : %display%'
+app_parcours_comparer_n1.description: 'Comparaison de la structure de maquette, fiches matières, mutualisations et volumes horaires entre l''année N et son origine N-1.'
 structure_composante_index.description: "Détail de l'offre de formation par composante"
 structure_composante_index.title: "Gestion de l'offre de formation"
 structure_fiche_matiere_index.description: 'Liste des fiches EC/matières associées à une mention / spécialité'

@@ -14,7 +14,7 @@ function setup() {
   c.connect()
   return { c, listeners }
 }
-globalThis.FormData = class {}
+globalThis.FormData = class { append() {} }
 function response(data = { success: true }) { return { ok: true, headers: { get: () => 'application/json' }, json: async () => data } }
 test('initial state makes no false claim that a save has occurred', () => {
   const { c } = setup()
@@ -58,7 +58,7 @@ test('application-level failures expose retry and manual retry saves again', asy
 })
 test('disconnect removes listeners and ignores a late response', async () => {
   const { c, listeners } = setup()
-  assert.equal(listeners.size, 4)
+  assert.equal(listeners.size, 5)
   let resolve
   globalThis.fetch = () => new Promise(done => { resolve = done })
   const saving = c.save()
@@ -67,4 +67,28 @@ test('disconnect removes listeners and ignores a late response', async () => {
   resolve(response())
   await saving
   assert.notEqual(c.statusState, 'saved')
+})
+
+test('updatePlateformeGlobale calculates sum of classique, alternance and specifique on focus loss', () => {
+  const { c } = setup()
+  const container = {
+    dataset: {},
+    querySelector: (sel) => {
+      for (const [name, input] of Object.entries(inputs)) {
+        if (sel.includes(`name="${name}"`)) return input
+      }
+      return null
+    }
+  }
+  const inputs = {
+    annee_1_plateforme_2_globale: { value: '', dataset: {}, closest: () => container },
+    annee_1_plateforme_2_classique: { value: '10', dataset: {}, closest: () => container },
+    annee_1_plateforme_2_alternance: { value: '5', dataset: {}, closest: () => container },
+    annee_1_plateforme_2_specifique: { value: '3', dataset: {}, closest: () => container }
+  }
+  const target = inputs.annee_1_plateforme_2_classique
+  target.name = 'annee_1_plateforme_2_classique'
+  const updated = c.updatePlateformeGlobale(target)
+  assert.equal(updated, true)
+  assert.equal(inputs.annee_1_plateforme_2_globale.value, '18')
 })

@@ -69,6 +69,7 @@ historiques : `role`, `user_centre`, `fiche_matiere_parcours`, `formation.versio
 Colonnes absentes du mapping V2 mais **conservées** en phase additive :
 
 - `campagne_collecte.date_ouverture_dpe`, `date_cloture_dpe` ;
+- `formation.capacite_accueil`, `parcours.capacite_accueil` (supprimées via la migration Doctrine `Version20261106114500` : en V2 les capacités sont portées par les années d'études `annee.capacite_accueil`) ;
 - `etablissement_information.mention_handicap`, `savoir_plus_orientation_insertion`, `relations_internationales`,
   `associations_etudiantes` (le générateur LHEO V2 utilise désormais des contenus génériques) : confirmer que les
   personnalisations de production peuvent être abandonnées ou archivées.

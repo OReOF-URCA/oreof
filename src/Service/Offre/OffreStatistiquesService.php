@@ -218,27 +218,42 @@ final class OffreStatistiquesService
                     $tc = $formation->getTroncCommunForParcours($parcours, $ordre);
                     $portail = $annee->getPortail();
 
+                    $mutualisationNom = null;
+                    $mutualisationType = null;
+                    if ($portail !== null && $portail->getId() !== null) {
+                        $mutualisationNom = 'Portail : ' . ($portail->getLibelle() ?: '#' . $portail->getId());
+                        $mutualisationType = 'portail';
+                    } elseif ($tc !== null) {
+                        $tcNom = !empty($tc['nom']) ? $tc['nom'] : 'Tronc commun';
+                        $mutualisationNom = 'Tronc commun : ' . $tcNom;
+                        $mutualisationType = 'tc';
+                    } elseif ($isTc) {
+                        $mutualisationNom = 'Tronc commun';
+                        $mutualisationType = 'tc';
+                    }
+
                     // Dédoublonnage Portail et Tronc Commun pour la capacité d'accueil
                     $capaciteComptee = $capaciteBrute;
                     if ($portail !== null && $portail->getId() !== null) {
-                        $pKey = $portail->getId();
+                        $pKey = (string) $portail->getId();
                         if (isset($portailsCounted[$pKey])) {
                             $capaciteComptee = 0;
                         } else {
                             $portailsCounted[$pKey] = true;
                         }
                     } elseif ($tc !== null) {
-                        $tcKey = $tc['id'] . '_' . $ordre;
+                        $tcKey = $formation->getId() . '_' . $tc['id'] . '_' . $ordre;
                         if (isset($tcAnneesCounted[$tcKey])) {
                             $capaciteComptee = 0;
                         } else {
                             $tcAnneesCounted[$tcKey] = true;
                         }
                     } elseif ($isTc) {
-                        if (isset($tcAnneesCounted[$ordre])) {
+                        $tcKey = $formation->getId() . '_legacy_' . $ordre;
+                        if (isset($tcAnneesCounted[$tcKey])) {
                             $capaciteComptee = 0;
                         } else {
-                            $tcAnneesCounted[$ordre] = true;
+                            $tcAnneesCounted[$tcKey] = true;
                         }
                     }
 
@@ -348,7 +363,7 @@ final class OffreStatistiquesService
                                 $portailPlateformesCounted[$portailPlatKey] = true;
                             }
                         } elseif ($tc !== null) {
-                            $tcPlatKey = $tc['id'] . '_' . $ordre . '_' . $platId;
+                            $tcPlatKey = $formation->getId() . '_' . $tc['id'] . '_' . $ordre . '_' . $platId;
                             if (isset($tcPlateformesCounted[$tcPlatKey])) {
                                 $pCapGlobale = 0;
                                 $pCapFi = 0;
@@ -358,7 +373,7 @@ final class OffreStatistiquesService
                                 $tcPlateformesCounted[$tcPlatKey] = true;
                             }
                         } elseif ($isTc) {
-                            $tcPlatKey = $ordre . '_' . $platId;
+                            $tcPlatKey = $formation->getId() . '_legacy_' . $ordre . '_' . $platId;
                             if (isset($tcPlateformesCounted[$tcPlatKey])) {
                                 $pCapGlobale = 0;
                                 $pCapFi = 0;
@@ -391,7 +406,9 @@ final class OffreStatistiquesService
                         'formation' => $formation->getDisplayLong() ?? $formation->getDisplay(),
                         'parcours' => $parcours->getLibelle(),
                         'isOuvert' => $isParcoursOuvert,
-                        'isTc' => $isTc,
+                        'isTc' => $isTc || $tc !== null,
+                        'mutualisation' => $mutualisationNom ?? '',
+                        'mutualisationType' => $mutualisationType ?? '',
                         'niveau' => $niveauCode,
                         'ordre' => $ordre,
                         'capaciteAccueil' => $capaciteBrute,

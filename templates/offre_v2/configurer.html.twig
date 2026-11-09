@@ -64,7 +64,7 @@
         <input type="hidden" name="_token" value="{{ csrf_token('offre_v2_configurer_' ~ formation.id) }}">
 
         <!-- KPI Globaux -->
-        <div id="configurer_global_stats" class="grid gap-4 md:grid-cols-2 xl:grid-cols-4 mb-4">
+        <div id="configurer_global_stats" class="grid gap-4 md:grid-cols-2 xl:grid-cols-5 mb-4">
             <twig:Kpi
                 title="Parcours ouverts"
                 value="{{ tabStatistiques.nbParcoursOuvert }}"
@@ -87,9 +87,18 @@
                 title="Capacité totale"
                 value="{{ tabStatistiques.capacite }}"
                 unit="places"
-                variant="info"
+                variant="secondary"
                 icon="icon:users"
                 help="Somme des capacités d'accueil de la formation (ou somme des parcours ouverts)."
+            />
+
+            <twig:Kpi
+                title="Places plateformes"
+                value="{{ tabStatistiques.capacitePlateformes|default(0) }}"
+                unit="places"
+                variant="info"
+                icon="ph:users-three-bold"
+                help="Somme des places globales proposées sur les plateformes d'admission actives."
             />
 
             <twig:Kpi
@@ -151,6 +160,18 @@
                                 📄 Note : {{ doc.originalFilename }}
                             </a>
                         {% endfor %}
+                    {% endif %}
+
+                    {% if can_edit %}
+                        <twig:Button variant="secondary"
+                                     size="xs"
+                                     href="{{ path('offre_v2_formation_documents_modal', { formation: formation.id }) }}"
+                                     data-turbo="true"
+                                     data-turbo-stream="true"
+                                     data-action="click->modalturbo#open"
+                                     icon="ph:note-pencil"
+                                     label="Gérer PV / Note"
+                        />
                     {% endif %}
                 </div>
 
@@ -272,7 +293,7 @@
                             </twig:block>
                             <!-- Parcours -->
                             <article>
-                                <div id="parcours_{{ parcours.id }}_stats" class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                                <div id="parcours_{{ parcours.id }}_stats" class="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                                     <twig:Kpi
                                         title="Années ouvertes"
                                         value="{{ statParcours.nbAnneesOuvertes }}"
@@ -293,8 +314,17 @@
                                         title="Capacité totale"
                                         value="{{ statParcours.capacite }}"
                                         unit="places"
-                                        variant="info"
+                                        variant="secondary"
                                         icon="icon:users"
+                                    />
+
+                                    <twig:Kpi
+                                        title="Places plateformes"
+                                        value="{{ statParcours.capacitePlateformes|default(0) }}"
+                                        unit="places"
+                                        variant="info"
+                                        icon="ph:users-three-bold"
+                                        help="Places proposées sur les plateformes pour ce parcours."
                                     />
 
                                     <twig:Kpi

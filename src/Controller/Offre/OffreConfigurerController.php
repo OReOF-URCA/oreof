@@ -160,9 +160,13 @@ final class OffreConfigurerController extends BaseController
         }
 
         $changedYears = [];
+        $structureChangedYears = [];
         $modifiedAnneesByOrdre = [];
         $modifiedAnnees = [];
         $parametresCharges = [];
+
+        $isAutosaveCapacites = $request->request->getBoolean('is_autosave_capacites');
+        $isMutualisationAction = $request->request->has('action_mutualisation');
 
         // Paramètres de plateforme existants des années de la formation, en une requête : [anneeId][plateformeId]
         $annees = [];
@@ -179,8 +183,8 @@ final class OffreConfigurerController extends BaseController
             }
         }
 
-        // Gestion de la configuration du tronc commun
-        if ($request->request->has('has_tronc_commun_config')) {
+        // Gestion de la configuration du tronc commun (ignorée lors d'un autosave de capacités)
+        if (!$isAutosaveCapacites && $request->request->has('has_tronc_commun_config')) {
             if ($request->request->has('troncs_communs')) {
                 $rawTcs = $request->request->all('troncs_communs');
                 $cleanedTcs = [];
@@ -188,7 +192,11 @@ final class OffreConfigurerController extends BaseController
                     if (!is_array($raw)) {
                         continue;
                     }
-                    $tAnnees = array_values(array_unique(array_map('intval', $raw['annees'] ?? [])));
+                    $validOrdres = $formation->getAnneesOrdres();
+                    $tAnnees = array_values(array_unique(array_filter(
+                        array_map('intval', $raw['annees'] ?? []),
+                        fn(int $a) => in_array($a, $validOrdres, true)
+                    )));
                     $tParcours = array_values(array_unique(array_map('intval', $raw['parcours'] ?? [])));
                     $nom = !empty($raw['nom']) ? trim((string)$raw['nom']) : 'Tronc commun ' . (count($cleanedTcs) + 1);
                     $cleanedTcs[] = [
@@ -247,7 +255,8 @@ final class OffreConfigurerController extends BaseController
         };
         $peutModifierAnnee = fn (Annee $a): bool => $peutModifierFormation($a->getParcours()?->getFormation());
 
-        // Gestion de la suppression de portails
+        if (!$isAutosaveCapacites) {
+            // Gestion de la suppression de portails
         $portailsSupprimes = $request->request->all('portails_supprimes');
         foreach ($portailsSupprimes as $pId) {
             $pId = (int)$pId;
@@ -479,6 +488,7 @@ final class OffreConfigurerController extends BaseController
                 }
             }
         }
+        }
 
         foreach ($formation->getParcours() as $parcours) {
             $parcoursKey = 'parcours_' . $parcours->getId() . '_reconduction';
@@ -522,6 +532,7 @@ final class OffreConfigurerController extends BaseController
 
                 if ($oldIsOuvert !== $newIsOuvert || $trackOpenClosedChanged) {
                     $changedYears[$anneeId] = true;
+                    $structureChangedYears[$anneeId] = true;
                     $annee->setIsOuvert($newIsOuvert);
                     $modifiedAnneesByOrdre[$annee->getOrdre()] = $modifiedAnnees[$annee->getId()] = $annee;
                 }
@@ -546,6 +557,7 @@ final class OffreConfigurerController extends BaseController
                     if ($annee->hasCapacite() !== $hasCapacite) {
                         $annee->setHasCapacite($hasCapacite);
                         $changedYears[$anneeId] = true;
+                        $structureChangedYears[$anneeId] = true;
                         $modifiedAnneesByOrdre[$annee->getOrdre()] = $modifiedAnnees[$annee->getId()] = $annee;
                     }
                     if (!$hasCapacite && $annee->getCapaciteAccueil() !== 0) {
@@ -616,11 +628,6 @@ final class OffreConfigurerController extends BaseController
                                     $parametre->setCapaciteAlternance(0);
                                     $parametre->setCapaciteSpecifique(0);
                                 } else {
-                                    if ($request->request->has($globaleKey)) {
-                                        $val = $request->request->get($globaleKey);
-                                        $parametre->setCapaciteGlobale($val !== '' ? (int)$val : null);
-                                    }
-                                    
                                     if ($request->request->has($classiqueKey)) {
                                         $val = $request->request->get($classiqueKey);
                                         $parametre->setCapaciteFi($val !== '' ? (int)$val : null);
@@ -634,6 +641,17 @@ final class OffreConfigurerController extends BaseController
                                     if ($request->request->has($specifiqueKey)) {
                                         $val = $request->request->get($specifiqueKey);
                                         $parametre->setCapaciteSpecifique($val !== '' ? (int)$val : null);
+                                    }
+
+                                    // Capacité globale calculée selon les données des autres champs disponibles sur la plateforme
+                                    $fi = $parametre->getCapaciteFi();
+                                    $alt = $parametre->getCapaciteAlternance();
+                                    $spe = $parametre->getCapaciteSpecifique();
+                                    if ($fi !== null || $alt !== null || $spe !== null) {
+                                        $parametre->setCapaciteGlobale(($fi ?? 0) + ($alt ?? 0) + ($spe ?? 0));
+                                    } elseif ($request->request->has($globaleKey)) {
+                                        $val = $request->request->get($globaleKey);
+                                        $parametre->setCapaciteGlobale($val !== '' ? (int)$val : null);
                                     }
 
                                     if ($request->request->has($remarquesKey)) {
@@ -662,8 +680,8 @@ final class OffreConfigurerController extends BaseController
 
         // Synchronisation des données des années en tronc commun
         foreach ($formation->getTroncsCommuns() as $tc) {
-            $tcParcoursIds = $tc['parcours'] ?? [];
-            foreach ($tc['annees'] ?? [] as $tcOrdre) {
+            $tcParcoursIds = array_map('intval', $tc['parcours'] ?? []);
+            foreach (array_map('intval', $tc['annees'] ?? []) as $tcOrdre) {
                 $anneesInGroup = [];
                 foreach ($formation->getParcours() as $p) {
                     if (!in_array($p->getId(), $tcParcoursIds, true)) {
@@ -806,6 +824,10 @@ final class OffreConfigurerController extends BaseController
         $remplissageSuspension->suspendre();
         $em->flush();
 
+        if ($isMutualisationAction) {
+            $structureChangedYears = $changedYears;
+        }
+
         // Si la requête demande explicitement du Turbo Stream
         if ($request->headers->get('Accept') === 'text/vnd.turbo-stream.html' || str_contains($request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')) {
             $statsData = $this->calculerStatistiques($formation, $this->getCampagneCollecte(), $comparaisonService, $offreValidationService);
@@ -844,6 +866,8 @@ final class OffreConfigurerController extends BaseController
                 'anomalies' => $statsData['anomalies'],
                 'comparaison' => $statsData['comparaison'],
                 'changedYears' => $changedYears,
+                'structureChangedYears' => $structureChangedYears,
+                'is_mutualisation_update' => $isMutualisationAction,
                 'portailsCampagne' => $portailsCampagne,
                 'formationsCampagneData' => $formationsCampagneData,
                 'formationsCampagneObjets' => $formationsCampagneObjets,
@@ -919,8 +943,9 @@ final class OffreConfigurerController extends BaseController
         }
 
         foreach ($formationSource->getTroncsCommuns() as $tc) {
-            $tcParcours = $tc['parcours'] ?? [];
-            if (!in_array($parcoursSource->getId(), $tcParcours, true) || !in_array($source->getOrdre(), $tc['annees'] ?? [], true)) {
+            $tcParcours = array_map('intval', $tc['parcours'] ?? []);
+            $tcAnnees = array_map('intval', $tc['annees'] ?? []);
+            if (!in_array($parcoursSource->getId(), $tcParcours, true) || !in_array($source->getOrdre(), $tcAnnees, true)) {
                 continue;
             }
 
@@ -1085,12 +1110,14 @@ final class OffreConfigurerController extends BaseController
                 'nbAnnees' => $parcours->getAnnees()->count(),
                 'nbAnneesOuvertes' => $nbAnneesOuvertes,
                 'capacite' => $parcoursCapacite,
+                'capacitePlateformes' => $parcours->getCapacitePlateformes($campagne),
                 'nbPlateformesActives' => $nbPlateformesActives,
                 'anomalies' => $anomaliesParcours,
             ];
         }
 
-        $tabStatistiques['capacite'] = $formation->getCapacite();
+        $tabStatistiques['capacite'] = $formation->getCapacite($campagne);
+        $tabStatistiques['capacitePlateformes'] = $formation->getCapacitePlateformes($campagne);
         
         return [
             'tabStatistiques' => $tabStatistiques,

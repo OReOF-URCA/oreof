@@ -281,12 +281,12 @@
                         <dd>{{ formation.composantePorteuse.libelle }}</dd>
                     {% endif %}
 
-                    {% if parcours.capaciteAccueil is defined and parcours.capaciteAccueil > 0 %}
+                    {% if parcours.capacite > 0 %}
                         <dt>Capacité d'accueil</dt>
-                        <dd>{{ parcours.capaciteAccueil }} places</dd>
-                    {% elseif formation != null and formation.capaciteAccueil is defined and formation.capaciteAccueil > 0 %}
+                        <dd>{{ parcours.capacite }} places</dd>
+                    {% elseif formation != null and formation.capacite > 0 %}
                         <dt>Capacité d'accueil</dt>
-                        <dd>{{ formation.capaciteAccueil }} places</dd>
+                        <dd>{{ formation.capacite }} places</dd>
                     {% endif %}
                 </dl>
             </div>

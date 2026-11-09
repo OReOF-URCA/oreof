@@ -95,7 +95,7 @@ final class OffreStatistiquesController extends BaseController
                 'Année (ordre)',
                 'Capacité d\'accueil',
                 'Capacité comptabilisée',
-                'Tronc commun',
+                'Mutualisation / Tronc commun',
                 'Proposé au recrutement',
                 'Plateformes actives',
             ], ';');
@@ -111,7 +111,7 @@ final class OffreStatistiquesController extends BaseController
                     $ligne['ordre'],
                     $ligne['capaciteAccueil'],
                     $ligne['capaciteComptee'],
-                    $ligne['isTc'] ? 'Oui' : 'Non',
+                    !empty($ligne['mutualisation']) ? $ligne['mutualisation'] : ($ligne['isTc'] ? 'Tronc commun' : 'Non'),
                     $ligne['isRecrutement'] ? 'Oui' : 'Non',
                     $ligne['plateformes'],
                 ], ';');

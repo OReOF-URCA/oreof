@@ -1,11 +1,13 @@
-<table data-xls-sheet="{{ (type_diplome ? (plateforme.libelle|default('Export') ~ ' - ' ~ (type_diplome.libelleCourt|default(type_diplome.libelle))) : (plateforme.libelle|default('Export')))|slice(0, 31) }}">
+<table data-xls-sheet="{{ nom_onglet|default((type_diplome ? (plateforme.libelle|default('Export') ~ ' - ' ~ (type_diplome.libelleCourt|default(type_diplome.libelle))) : (plateforme.libelle|default('Export')))|slice(0, 31)) }}" data-xls-autosize="true">
     <thead>
+        {% include 'offre_v2/export/_header_annexe.html.twig' with {nb_cols: 22} %}
         <tr>
             <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Composante</th>
             <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Type de Diplôme</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Niveau</th>
             <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Mention</th>
             <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Parcours</th>
-            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Type de Parcours</th>
+            <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Régime d'inscription</th>
             <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="left">Lieu</th>
 
             <th data-xls-bg-color="#1B365D" data-xls-font-color="#FFFFFF" data-xls-font-bold="true" data-xls-border="thin" data-xls-align="center">Ouvert (N-1)</th>
@@ -31,21 +33,44 @@
             <tr>
                 <td data-xls-border="thin" data-xls-align="left">{{ row.composante }}</td>
                 <td data-xls-border="thin" data-xls-align="left">{{ row.diplome }}</td>
+                <td data-xls-border="thin" data-xls-align="center" data-xls-type="number">{{ row.niveau }}</td>
                 <td data-xls-border="thin" data-xls-align="left">
-                    {% if row.mention.isDifferent is defined and row.mention.isDifferent() and row.mention.original is not empty %}
-                        <s data-xls-font-color="#DC2626">{{ row.mention.original }}</s><br/><b data-xls-font-color="#16A34A">{{ row.mention.new }}</b>
+                    {% if row.mention.isDifferent is defined and row.mention.isDifferent() %}
+                        {% if row.mention.original is not empty %}
+                            <s data-xls-font-color="#DC2626">{{ row.mention.original }}</s><br/><b data-xls-font-color="#16A34A">{{ row.mention.new }}</b>
+                        {% else %}
+                            <b data-xls-font-color="#16A34A">{{ row.mention.new }}</b>
+                        {% endif %}
                     {% else %}
                         {{ row.mention }}
                     {% endif %}
                 </td>
                 <td data-xls-border="thin" data-xls-align="left">
-                    {% if row.parcours.isDifferent is defined and row.parcours.isDifferent() and row.parcours.original is not empty %}
-                        <s data-xls-font-color="#DC2626">{{ row.parcours.original }}</s><br/><b data-xls-font-color="#16A34A">{{ row.parcours.new }}</b>
-                    {% else %}
+                    {% if row.parcours.new is defined and row.parcours.new is not empty %}
+                        {% if row.parcours.isDifferent is defined and row.parcours.isDifferent() %}
+                            {% if row.parcours.original is not empty %}
+                                <s data-xls-font-color="#DC2626">{{ row.parcours.original }}</s><br/><b data-xls-font-color="#16A34A">{{ row.parcours.new }}</b>
+                            {% else %}
+                                <b data-xls-font-color="#16A34A">{{ row.parcours.new }}</b>
+                            {% endif %}
+                        {% else %}
+                            {{ row.parcours }}
+                        {% endif %}
+                    {% elseif row.parcours is not empty and row.parcours.new is not defined %}
                         {{ row.parcours }}
                     {% endif %}
                 </td>
-                <td data-xls-border="thin" data-xls-align="left">{{ row.type_parcours }}</td>
+                <td data-xls-border="thin" data-xls-align="left">
+                    {% if row.type_parcours.isDifferent is defined and row.type_parcours.isDifferent() %}
+                        {% if row.type_parcours.original is not empty %}
+                            <s data-xls-font-color="#DC2626">{{ row.type_parcours.original }}</s><br/><b data-xls-font-color="#16A34A">{{ row.type_parcours.new }}</b>
+                        {% else %}
+                            <b data-xls-font-color="#16A34A">{{ row.type_parcours.new }}</b>
+                        {% endif %}
+                    {% else %}
+                        {{ row.type_parcours }}
+                    {% endif %}
+                </td>
                 <td data-xls-border="thin" data-xls-align="left">{{ row.lieu }}</td>
 
                 <td data-xls-border="thin" data-xls-align="center">{{ row.ouvert_n_1 }}</td>

@@ -35,7 +35,20 @@
                data-wizard-target="tab"
                     {{ stimulus_action('wizard', 'changeStep', 'click', {step: 'formation'}) }}
             >
-                Vos formations (DPE: {{ user_data.campagneCollecte.libelle }})
+                Diplômes nationaux (DPE: {{ user_data.campagneCollecte.libelle }})
+            </a>
+            <a id="tab-formation_etablissement"
+               class="app-tab {% if step == 'formation_etablissement' %}app-tab-active active{% endif %}"
+               href="{{ path('app_homepage', { step: 'formation_etablissement' }) }}"
+               role="tab"
+               aria-selected="{{ step == 'formation_etablissement' ? 'true' : 'false' }}"
+               aria-controls="step_1"
+               tabindex="{{ step == 'formation_etablissement' ? '0' : '-1' }}"
+               data-step="formation_etablissement"
+               data-wizard-target="tab"
+                    {{ stimulus_action('wizard', 'changeStep', 'click', {step: 'formation_etablissement'}) }}
+            >
+                Formations établissements (DPE: {{ user_data.campagneCollecte.libelle }})
             </a>
             <a id="tab-fiche"
                class="app-tab {% if step == 'fiche' %}app-tab-active active{% endif %}"

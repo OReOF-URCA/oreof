@@ -87,6 +87,15 @@
                                 <twig:ux:icon name="ph:file-archive-bold" class="h-4 w-4" />
                                 <span>Pack ZIP par diplôme</span>
                             </a>
+                            <a href="{{ path(composante ? 'offre_v2_composante_preview_plateforme' : 'offre_v2_preview_plateforme', { plateforme: p.id, composante: composante ? composante.id : null }) }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               data-turbo="false"
+                               class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-xs"
+                               title="Afficher l'annexe complète dans un nouvel onglet pour contrôle rapide">
+                                <twig:ux:icon name="ph:eye-bold" class="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                                <span>Aperçu web</span>
+                            </a>
                             <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme' : 'offre_v2_export_plateforme', { plateforme: p.id, composante: composante ? composante.id : null }) }}"
                                data-turbo="false"
                                class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
@@ -95,6 +104,15 @@
                                 <span>Fichier combiné (.xlsx)</span>
                             </a>
                         {% else %}
+                            <a href="{{ path(composante ? 'offre_v2_composante_preview_plateforme' : 'offre_v2_preview_plateforme', { plateforme: p.id, composante: composante ? composante.id : null }) }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               data-turbo="false"
+                               class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-xs"
+                               title="Afficher l'annexe complète dans un nouvel onglet pour contrôle rapide">
+                                <twig:ux:icon name="ph:eye-bold" class="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                                <span>Aperçu web</span>
+                            </a>
                             <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme' : 'offre_v2_export_plateforme', { plateforme: p.id, composante: composante ? composante.id : null }) }}"
                                data-turbo="false"
                                class="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3.5 py-2 text-xs font-semibold shadow-sm hover:bg-slate-800 dark:hover:bg-white transition-colors">
