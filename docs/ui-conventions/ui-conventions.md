@@ -1,7 +1,7 @@
 # Conventions UI (Tailwind + Twig Components)
 
 Quand lire : toute création/modification de template Twig, CSS ou composant UI, et toute migration Bootstrap → Tailwind.
-À mettre à jour si : `src/Twig/Components/UI/`, `templates/components/_ui/`, `templates/admin/styleguide/`, `templates/base.html.twig` (en-tête de page), `translations/header.fr.yaml`, `assets/controllers/page_header_controller.js`, `assets/js/chartTheme.js`, classes `app-*` ou tokens de `assets/styles/app.css`, `assets/styles/_timeline.scss`, `templates/default/_timeLine.html.twig`.
+À mettre à jour si : `src/Twig/Components/UI/`, `templates/components/_ui/`, `templates/admin/styleguide/`, `templates/base.html.twig` (en-tête de page), `translations/header.fr.yaml`, `assets/controllers/page_header_controller.js`, `assets/controllers/page_translations_drawer_controller.js`, `src/EventSubscriber/ModalTranslationsStreamSubscriber.php`, `templates/_layout/_translations_*`, `assets/js/chartTheme.js`, classes `app-*` ou tokens de `assets/styles/app.css`, `assets/styles/_timeline.scss`, `templates/default/_timeLine.html.twig`.
 
 ## Sources de vérité
 
@@ -187,6 +187,11 @@ domaine `modal` (`translations/modal.fr.yaml`), de la forme `<dossier>.<modale>.
 
 Un panneau flottant qui doit rester utilisable modale ouverte (aide, traductions) porte `data-modal-passthrough` sur son
 conteneur racine : `modalturbo` ne le rend pas `inert`, ne lui reprend pas le focus et ignore Échap/Tab venant de lui.
+
+Panneau « Textes de la page » (`_layout/_translations_drawer.html.twig`, une ligne = `_layout/_translations_item.html.twig`) :
+rempli au rendu de la page, puis complété par les clés des flux Turbo (contenu de modale, soumissions) : en mode clés,
+`ModalTranslationsStreamSubscriber` ajoute un `turbo-stream append` vers `#pageTranslationsItemList`, et le contrôleur
+`page-translations-drawer` fusionne les lignes (doublons ignorés, pastilles de domaine recalculées).
 
 `form-feedback` sur le body suit les soumissions Turbo : état `aria-busy` restauré après traitement et message
 local persistant si la réponse échoue sans synthèse. Aucun succès générique n’est inventé : les confirmations
