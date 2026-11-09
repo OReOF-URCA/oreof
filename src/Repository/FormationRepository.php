@@ -126,18 +126,38 @@ class FormationRepository extends ServiceEntityRepository
         array            $options = [],
         Composante|null  $composante = null,
     ): array {
-        $sort = $options['sort'] ?? 'typeDiplome';
-        $direction = $options['direction'] ?? 'ASC';
+        $sort = $options['sort'] ?? 'mention';
+        if ($sort === 'default' || $sort === '') {
+            $sort = 'mention';
+        }
+        $direction = strtoupper($options['direction'] ?? 'ASC');
 
-        $filtres = [$sort => $direction];
         $query = $this->createQueryBuilder('f')
             ->leftJoin('f.dpeParcours', 'p', 'WITH', 'p.campagneCollecte = :campagneCollecte')
             ->leftJoin('p.parcours', 'parcours')
             ->addSelect('p')
             ->leftJoin('f.mention', 'm')
+            ->leftJoin('f.typeDiplome', 'td_sort')
+            ->leftJoin('f.composantePorteuse', 'cp_sort')
             ->andWhere('(f.dpe = :campagneCollecte OR p.id IS NOT NULL)')
-            ->setParameter('campagneCollecte', $campagneCollecte)
-            ->orderBy('f.' . $sort, $direction);
+            ->setParameter('campagneCollecte', $campagneCollecte);
+
+        if ($sort === 'composantePorteuse') {
+            $query->orderBy('cp_sort.libelle', $direction)
+                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
+        } elseif ($sort === 'typeDiplome') {
+            $query->orderBy('td_sort.libelle', $direction)
+                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
+        } else {
+            $query->orderBy(
+                'CASE
+                    WHEN f.mention IS NOT NULL THEN m.libelle
+                    WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
+                    ELSE \'\'
+                END',
+                $direction
+            );
+        }
 
         if ($q !== null && trim($q) !== '') {
             $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
@@ -183,24 +203,6 @@ class FormationRepository extends ServiceEntityRepository
 //                ->setParameter('etatDpe', json_encode([$options['etatDpe'] => 1]));
 //        }
 
-        if (isset($filtres['mention'])) {
-            $query->addOrderBy(
-                'CASE
-                            WHEN f.mention IS NOT NULL THEN m.libelle
-                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
-                            ELSE f.mentionTexte
-                            END',
-                $filtres['mention']
-            );
-        }
-
-        if (isset($filtres['domaine'])) {
-            $query->addOrderBy(
-                'm.domaine',
-                $filtres['domaine']
-            );
-        }
-
         // si responsable rechercher sur formation ou parcours si responsable ou co-responsable
         if (array_key_exists('responsable', $options) && null !== $options['responsable']) {
             $query->andWhere('f.responsableMention = :responsable OR f.coResponsable = :responsable OR parcours.respParcours = :responsable OR parcours.coResponsable = :responsable')
@@ -226,18 +228,39 @@ class FormationRepository extends ServiceEntityRepository
         array            $options = [],
         Composante|null  $composante = null,
     ): array {
-        $sort = $options['sort'] ?? 'typeDiplome';
-        $direction = $options['direction'] ?? 'ASC';
+        $sort = $options['sort'] ?? 'mention';
+        if ($sort === 'default' || $sort === '') {
+            $sort = 'mention';
+        }
+        $direction = strtoupper($options['direction'] ?? 'ASC');
 
-        $filtres = [$sort => $direction];
         $query = $this->createQueryBuilder('f')
             ->innerJoin('f.dpeParcours', 'p', 'WITH', 'p.campagneCollecte = :campagneCollecte')
             ->leftJoin('p.parcours', 'parcours')
             ->addSelect('p')
             ->leftJoin('f.mention', 'm')
+            ->leftJoin('f.typeDiplome', 'td_sort')
+            ->leftJoin('f.composantePorteuse', 'cp_sort')
             ->setParameter('campagneCollecte', $campagneCollecte)
             ->andWhere('JSON_CONTAINS(p.etatValidation, :etatDpe) = 1')
             ->setParameter('etatDpe', json_encode(['soumis_cfvu' => 1]));
+
+        if ($sort === 'composantePorteuse') {
+            $query->orderBy('cp_sort.libelle', $direction)
+                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
+        } elseif ($sort === 'typeDiplome') {
+            $query->orderBy('td_sort.libelle', $direction)
+                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
+        } else {
+            $query->orderBy(
+                'CASE
+                    WHEN f.mention IS NOT NULL THEN m.libelle
+                    WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
+                    ELSE \'\'
+                END',
+                $direction
+            );
+        }
 
         if ($q !== null && trim($q) !== '') {
             $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
@@ -267,19 +290,6 @@ class FormationRepository extends ServiceEntityRepository
         if ($composante !== null) {
             $query->andWhere('f.composantePorteuse = :composante')
                 ->setParameter('composante', $composante);
-        }
-
-        $query->orderBy('f.' . $sort, $direction);
-
-        if (isset($filtres['mention'])) {
-            $query->addOrderBy(
-                'CASE
-                            WHEN f.mention IS NOT NULL THEN m.libelle
-                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
-                            ELSE f.mentionTexte
-                            END',
-                $filtres['mention']
-            );
         }
 
         $results = $query->getQuery()->getResult();

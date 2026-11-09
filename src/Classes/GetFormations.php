@@ -165,7 +165,10 @@ readonly class GetFormations
         array $options = [],
         bool $isCfvu = false
     ): array {
-        $sort = $options['sort'] ?? 'typeDiplome';
+        $sort = $options['sort'] ?? 'mention';
+        if ($sort === 'default' || $sort === '') {
+            $sort = 'mention';
+        }
         $direction = strtolower($options['direction'] ?? 'asc');
         $q = $options['q'] ?? null;
 
@@ -175,7 +178,7 @@ readonly class GetFormations
             foreach ($formations as $formation) {
                 $tFormations[(int) $formation->getId()] = $formation;
             }
-            return $tFormations;
+            return $this->sortFormations($tFormations, $sort, $direction);
         }
 
         if ($this->isEtablissement()) {
@@ -194,7 +197,7 @@ readonly class GetFormations
                 }
                 $tFormations[(int) $formation->getId()] = $formation;
             }
-            return $tFormations;
+            return $this->sortFormations($tFormations, $sort, $direction);
         }
 
         $baseFormations = $this->getBaseFormations($user, $campagneCollecte);
@@ -303,25 +306,39 @@ readonly class GetFormations
             $filtered[(int) $formation->getId()] = $formation;
         }
 
-        // Tri
-        uasort($filtered, function ($a, $b) use ($sort, $direction) {
+        return $this->sortFormations($filtered, $sort, $direction);
+    }
+
+    /**
+     * @param array<int, \App\Entity\Formation> $formations
+     * @return array<int, \App\Entity\Formation>
+     */
+    public function sortFormations(array $formations, string $sort, string $direction): array
+    {
+        uasort($formations, function ($a, $b) use ($sort, $direction) {
             $valA = match ($sort) {
-                'mention' => (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte()),
-                'composantePorteuse' => (string) $a->getComposantePorteuse()?->getLibelle(),
-                'typeDiplome' => (string) $a->getTypeDiplome()?->getLibelle(),
-                default => (string) $a->getDisplay(),
+                'mention', 'default' => (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? ''),
+                'composantePorteuse' => (string) ($a->getComposantePorteuse()?->getLibelle() ?? ''),
+                'typeDiplome' => (string) ($a->getTypeDiplome()?->getLibelle() ?? ''),
+                default => (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? ''),
             };
             $valB = match ($sort) {
-                'mention' => (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte()),
-                'composantePorteuse' => (string) $b->getComposantePorteuse()?->getLibelle(),
-                'typeDiplome' => (string) $b->getTypeDiplome()?->getLibelle(),
-                default => (string) $b->getDisplay(),
+                'mention', 'default' => (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? ''),
+                'composantePorteuse' => (string) ($b->getComposantePorteuse()?->getLibelle() ?? ''),
+                'typeDiplome' => (string) ($b->getTypeDiplome()?->getLibelle() ?? ''),
+                default => (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? ''),
             };
 
             $cmp = strcasecmp($valA, $valB);
+            if ($cmp === 0 && !in_array($sort, ['mention', 'default'], true)) {
+                $mentionA = (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? '');
+                $mentionB = (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? '');
+                return strcasecmp($mentionA, $mentionB);
+            }
+
             return $direction === 'desc' ? -$cmp : $cmp;
         });
 
-        return $filtered;
+        return $formations;
     }
 }
