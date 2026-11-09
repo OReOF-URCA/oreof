@@ -202,6 +202,47 @@ final class OffreAnnexesExportServiceTest extends TestCase
         self::assertSame('Chimie Moléculaire - LAS1', $diffs['parcours']->new);
     }
 
+    public function testResolveRemarquesFermetureDefinitive(): void
+    {
+        $formation = $this->licence(1, 'Chimie');
+        $parcours = new Parcours($formation);
+        $dpePar = (new DpeParcours())->setParcours($parcours);
+
+        // Cas 1: Ouvert, sans remarques
+        self::assertSame('', $this->service->resolveRemarques($formation, $dpePar, null));
+
+        // Cas 2: Paramètre plateforme avec remarques
+        $param = (new PlateformeAdmissionParametre())->setRemarques('Attention effectifs limités');
+        self::assertSame('Attention effectifs limités', $this->service->resolveRemarques($formation, $dpePar, $param));
+
+        // Cas 3: DpeParcours en fermeture définitive
+        $dpePar->setEtatReconduction(TypeModificationDpeEnum::FERMETURE_DEFINITIVE);
+        self::assertSame('Fermeture définitive', $this->service->resolveRemarques($formation, $dpePar, null));
+        self::assertSame('Fermeture définitive | Attention effectifs limités', $this->service->resolveRemarques($formation, $dpePar, $param));
+
+        // Cas 4: Formation en fermeture définitive (même si dpePar est OUVERT)
+        $dpePar->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
+        $formation->setEtatReconduction(TypeModificationDpeEnum::FERMETURE_DEFINITIVE);
+        self::assertSame('Fermeture définitive', $this->service->resolveRemarques($formation, $dpePar, null));
+        self::assertSame('Fermeture définitive | Attention effectifs limités', $this->service->resolveRemarques($formation, $dpePar, $param));
+    }
+
+    public function testExportParcoursupIndiqueFermetureDefinitive(): void
+    {
+        $campagne = new CampagneCollecte();
+        $psup = $this->psup();
+        $formation = $this->licence(1, 'Droit');
+
+        [$dpe, $l1] = $this->parcoursL1($formation, 10, 'Parcours Droit', 100);
+        $dpe->setEtatReconduction(TypeModificationDpeEnum::FERMETURE_DEFINITIVE);
+
+        $rows = $this->buildParcoursupRows([$dpe], [10 => [$l1]], [], $psup, $campagne);
+
+        self::assertCount(1, $rows);
+        self::assertSame('Fermeture définitive', $rows[0]['remarques']);
+        self::assertSame('Fermeture définitive', $rows[0]['commentaire']);
+    }
+
     public function testTypeParcoursEstLeRegimeDInscription(): void
     {
         $campagne = new CampagneCollecte();
