@@ -375,6 +375,19 @@ class ExportGeneriqueFicheMatiere {
                     'value' => $ficheMatiere?->getObjectifs() ?? ""
                 ];
                 break;
+            case 'fmCompetences':
+                return [
+                    'type' => 'array_list',
+                    'libelle' => 'Compétences Associées',
+                    'value' => (($ficheMatiere?->getParcours()?->getFormation()?->getTypeDiplome()?->getLibelleCourt() === 'BUT') ?? false)
+                        ?   array_map(fn($app) => $app->getCode() . ' - ' .$app->getLibelle(), 
+                            $ficheMatiere?->getApprentissagesCritiques()?->toArray() ?? []
+                        )
+                        :   array_map(fn($app) => $app->getCode() . ' - ' . $app->getLibelle(), 
+                            $ficheMatiere?->getCompetences()?->toArray() ?? []
+                        )
+                ];
+                break;
         }
     }
 
@@ -391,7 +404,8 @@ class ExportGeneriqueFicheMatiere {
             'fmLanguesDispensees' => 9,
             'fmLanguesSupports' => 10,
             'fmDescription' => 11,
-            'fmObjectifs' => 12
+            'fmObjectifs' => 12,
+            'fmCompetences' => 13
         ];
     }
 
