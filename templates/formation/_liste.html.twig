@@ -1,7 +1,7 @@
 <div class="space-y-4" {{ stimulus_controller('structure--formation', {
     url: path('app_parcours_formation_detail'),
 }) }}>
-    {% set sort = params.sort|default('mention') %}
+    {% set sort = params.sort|default('typeDiplome') %}
     {% set direction = params.direction|default('asc') %}
     {% set isGranted = is_granted('ROLE_ADMIN') or is_granted('SHOW', {route: 'app_etablissement', subject: 'etablissement'}) or isCfvu|default(false) or isConseilComposante|default(false) %}
 

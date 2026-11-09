@@ -126,9 +126,9 @@ class FormationRepository extends ServiceEntityRepository
         array            $options = [],
         Composante|null  $composante = null,
     ): array {
-        $sort = $options['sort'] ?? 'mention';
+        $sort = $options['sort'] ?? 'typeDiplome';
         if ($sort === 'default' || $sort === '') {
-            $sort = 'mention';
+            $sort = 'typeDiplome';
         }
         $direction = strtoupper($options['direction'] ?? 'ASC');
 
@@ -228,9 +228,9 @@ class FormationRepository extends ServiceEntityRepository
         array            $options = [],
         Composante|null  $composante = null,
     ): array {
-        $sort = $options['sort'] ?? 'mention';
+        $sort = $options['sort'] ?? 'typeDiplome';
         if ($sort === 'default' || $sort === '') {
-            $sort = 'mention';
+            $sort = 'typeDiplome';
         }
         $direction = strtoupper($options['direction'] ?? 'ASC');
 

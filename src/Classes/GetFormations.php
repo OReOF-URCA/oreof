@@ -165,9 +165,9 @@ readonly class GetFormations
         array $options = [],
         bool $isCfvu = false
     ): array {
-        $sort = $options['sort'] ?? 'mention';
+        $sort = $options['sort'] ?? 'typeDiplome';
         if ($sort === 'default' || $sort === '') {
-            $sort = 'mention';
+            $sort = 'typeDiplome';
         }
         $direction = strtolower($options['direction'] ?? 'asc');
         $q = $options['q'] ?? null;
@@ -315,30 +315,60 @@ readonly class GetFormations
      */
     public function sortFormations(array $formations, string $sort, string $direction): array
     {
+        if ($sort === 'default' || $sort === '') {
+            $sort = 'typeDiplome';
+        }
+
         uasort($formations, function ($a, $b) use ($sort, $direction) {
             $valA = match ($sort) {
-                'mention', 'default' => (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? ''),
                 'composantePorteuse' => (string) ($a->getComposantePorteuse()?->getLibelle() ?? ''),
                 'typeDiplome' => (string) ($a->getTypeDiplome()?->getLibelle() ?? ''),
                 default => (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? ''),
             };
             $valB = match ($sort) {
-                'mention', 'default' => (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? ''),
                 'composantePorteuse' => (string) ($b->getComposantePorteuse()?->getLibelle() ?? ''),
                 'typeDiplome' => (string) ($b->getTypeDiplome()?->getLibelle() ?? ''),
                 default => (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? ''),
             };
 
-            $cmp = strcasecmp($valA, $valB);
-            if ($cmp === 0 && !in_array($sort, ['mention', 'default'], true)) {
-                $mentionA = (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? '');
-                $mentionB = (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? '');
-                return strcasecmp($mentionA, $mentionB);
+            $cmp = $this->compareStrings($valA, $valB);
+            if ($cmp !== 0) {
+                return $direction === 'desc' ? -$cmp : $cmp;
             }
 
-            return $direction === 'desc' ? -$cmp : $cmp;
+            // En cas d'égalité sur le critère principal (ou tri par composante/type diplôme), tri secondaire par mention alphabétique
+            if ($sort !== 'mention') {
+                $mentionA = (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? '');
+                $mentionB = (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? '');
+                return $this->compareStrings($mentionA, $mentionB);
+            }
+
+            return 0;
         });
 
         return $formations;
+    }
+
+    private function compareStrings(string $a, string $b): int
+    {
+        static $collator = null;
+        if ($collator === null && class_exists(\Collator::class)) {
+            $collator = new \Collator('fr_FR');
+        }
+
+        if ($collator instanceof \Collator) {
+            $res = $collator->compare($a, $b);
+            if ($res !== false) {
+                return $res;
+            }
+        }
+
+        if (function_exists('transliterator_transliterate')) {
+            $cleanA = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $a) ?: $a;
+            $cleanB = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $b) ?: $b;
+            return strcasecmp($cleanA, $cleanB);
+        }
+
+        return strcasecmp($a, $b);
     }
 }
