@@ -10,6 +10,7 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 |---|---|---|
 | `app:migrate:v2` | migration additive main → V2 (dry-run par défaut) | `--apply`, `--check`, `--step=`, `--force` — voir `docs/architecture/migration-v2.md` |
 | `app:migrate:v2:cleanup` | suppressions destructives post-validation V2 | `--apply --confirm-backup` |
+| `app:transfer-mentions` | migration des mentions vers les périodes d'accréditation et report de `classique` sur les formations | `--apply` (dry-run par défaut) |
 | `app:semestre:migrate-tronc-commun` | semestres tronc commun → semestres mutualisés (campagne courante) | `--apply`, `--campaign`, `--formation`, `--porteur`, `--mapping-file`, `--allow-cross-formation`, `--output` |
 | `app:parcours-copy-data` | recopie heures/ECTS/MCCC vers les fiches matières | voir `docs/ops/recopie-fiche-matiere.md` |
 | `app:parcours:delete` | suppression définitive d'un parcours (erreurs de création/recopie) avec analyse préalable d'impact | `id`, `--force`, `--dry-run` |

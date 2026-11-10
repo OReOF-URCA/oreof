@@ -3,6 +3,7 @@
 namespace App\Controller\Offre;
 
 use App\Controller\BaseController;
+use App\DataTable\ConseilDocumentsDpeFormationDataTable;
 use App\Entity\PlateformeAdmission;
 use App\Repository\AnneeRepository;
 use App\Repository\DpeParcoursRepository;
@@ -16,9 +17,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class OffreSyntheseConseilController extends BaseController
 {
-    #[Route('/conseils/synthese-offre', name: 'app_conseils_synthese_offre')]
+    #[Route('/conseils/synthese-offre', name: 'app_conseils_synthese_offre', methods: ['GET', 'POST'])]
     public function syntheseOffre(
-        PlateformeAdmissionRepository $plateformeAdmissionRepository
+        Request $request,
+        PlateformeAdmissionRepository $plateformeAdmissionRepository,
+        ConseilDocumentsDpeFormationDataTable $documentsTable,
     ): Response
     {
         if (
@@ -31,8 +34,15 @@ final class OffreSyntheseConseilController extends BaseController
             throw $this->createAccessDeniedException('Accès refusé.');
         }
 
+        $tab = (string) $request->query->get('tab', 'offre');
+        if (!in_array($tab, ['offre', 'documents'], true)) {
+            $tab = 'offre';
+        }
+
         return $this->render('offre_v2/synthese_offre.html.twig', [
-            'plateformes' => $plateformeAdmissionRepository->findAll()
+            'tab' => $tab,
+            'plateformes' => $tab === 'offre' ? $plateformeAdmissionRepository->findAll() : [],
+            'documentsTable' => $documentsTable,
         ]);
     }
 

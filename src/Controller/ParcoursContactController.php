@@ -174,7 +174,7 @@ class ParcoursContactController extends BaseController
     /**
      * @throws JsonException
      */
-    #[Route('/{id}', name: 'app_parcours_contact_delete', methods: ['POST', 'DELETE'])]
+    #[Route('/parcours/contacts/{id}', name: 'app_parcours_contact_delete', requirements: ['id' => '\d+'], methods: ['POST', 'DELETE'])]
     public function delete(
         EntityManagerInterface $entityManager,
         Request $request,

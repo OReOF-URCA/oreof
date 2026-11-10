@@ -4,33 +4,51 @@ namespace App\Controller;
 
 use App\Classes\Export\ExportSyntheseModification;
 use App\Classes\GetDpeParcours;
+use App\DataTable\ConseilDocumentsDpeParcoursDataTable;
 use App\Entity\Composante;
 use App\Message\Export;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeDemandeRepository;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
 class SyntheseModificationController extends BaseController
 {
-    #[Route('/synthese/modifications', name: 'app_synthese_modification_export_pdf')]
+    #[Route('/synthese/modifications', name: 'app_synthese_modification_export_pdf', methods: ['GET', 'POST'])]
     public function exportSynthese(
+        Request $request,
         DpeDemandeRepository $dpeParcoursRepository,
         ComposanteRepository $composanteRepository,
+        ConseilDocumentsDpeParcoursDataTable $documentsTable,
     ): Response {
-        $dpes = $dpeParcoursRepository->findByCampagneWithModification($this->getCampagneCollecte());
+        $tab = (string) $request->query->get('tab', 'modifications');
+        if (!in_array($tab, ['modifications', 'documents'], true)) {
+            $tab = 'modifications';
+        }
+
+        $composantes = [];
         $comp = [];
-        foreach ($dpes as $dpe) {
-            if (!array_key_exists($dpe->getFormation()?->getComposantePorteuse()?->getId(), $comp)) {
-                $comp[$dpe->getFormation()?->getComposantePorteuse()?->getId()] = 0;
+        if ($tab === 'modifications') {
+            $dpes = $dpeParcoursRepository->findByCampagneWithModification($this->getCampagneCollecte());
+            foreach ($dpes as $dpe) {
+                $composanteId = $dpe->getFormation()?->getComposantePorteuse()?->getId();
+                if ($composanteId !== null) {
+                    if (!array_key_exists($composanteId, $comp)) {
+                        $comp[$composanteId] = 0;
+                    }
+                    $comp[$composanteId]++;
+                }
             }
-            $comp[$dpe->getFormation()?->getComposantePorteuse()?->getId()] ++;
+            $composantes = $composanteRepository->findPorteuse();
         }
 
         return $this->render('synthese_modification/index.html.twig', [
-            'composantes' => $composanteRepository->findPorteuse(),
-            'comp' => $comp
+            'tab' => $tab,
+            'composantes' => $composantes,
+            'comp' => $comp,
+            'documentsTable' => $documentsTable,
         ]);
     }
 

@@ -14,11 +14,10 @@ use App\DataTable\MentionDataTable;
 use App\DTO\MentionDto;
 use App\DTO\TranslatableKey;
 use App\Entity\Mention;
-use App\Entity\TypeDiplome;
 use App\Form\MentionDtoType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Repository\AccreditationRepository;
 use App\Repository\DomaineRepository;
-use App\Repository\TypeDiplomeRepository;
 use App\Service\DetailBuilder;
 use App\Service\MentionService;
 use App\Utils\JsonRequest;
@@ -42,7 +41,7 @@ class MentionController extends AbstractController
     public function __construct(
         private readonly MentionService        $mentionService,
         private readonly DomaineRepository     $domaineRepository,
-        private readonly TypeDiplomeRepository $typeDiplomeRepository
+        private readonly AccreditationRepository $accreditationRepository
     )
     {
     }
@@ -68,7 +67,7 @@ class MentionController extends AbstractController
     public function codificationModal(): Response
     {
         return $this->render('config/mention/_codificationModal.html.twig', [
-            'typeDiplomes' => $this->typeDiplomeRepository->findBy([], ['libelle' => 'ASC']),
+            'accreditations' => $this->accreditationRepository->findBy([], ['anneeDebut' => 'DESC']),
             'domaines' => $this->domaineRepository->findBy([], ['libelle' => 'ASC']),
         ]);
     }
@@ -147,8 +146,9 @@ class MentionController extends AbstractController
                     'label' => 'Code Apogée',
                     'empty_text' => 'Non renseigné',
                 ])
-                ->addField('typeDiplome.libelle', [
-                    'label' => 'Type de diplôme',
+                ->addField('accreditation.libelle', [
+                    'label' => 'Période d\'accréditation',
+                    'empty_text' => 'Non renseignée',
                 ])
                 ->addField('domaines', [
                     'label' => 'Domaine(s)',
@@ -156,6 +156,14 @@ class MentionController extends AbstractController
                     'format' => 'badges',
                     'collection_property' => 'libelle',
                     'badge_class' => 'bg-primary',
+                ])
+                ->addField('typeDiplomes', [
+                    'label' => 'Type(s) de diplôme possible(s)',
+                    'type' => 'collection',
+                    'format' => 'badges',
+                    'collection_property' => 'libelle',
+                    'badge_class' => 'bg-info',
+                    'empty_text' => 'Aucun type de diplôme rattaché',
                 ])
                 ->addField('utilise', [
                     'label' => 'Utilisé ?',

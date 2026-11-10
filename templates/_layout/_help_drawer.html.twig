@@ -11,7 +11,7 @@
 {# N'affiche le FAB / offcanvas que si une aide existe pour la page ou si l'utilisateur est admin #}
 {% if current_help or is_granted('ROLE_ADMIN') or embedded %}
 
-    {% if not embedded %}<div data-controller="help-drawer" data-action="keydown@window->help-drawer#onEscape">{% endif %}
+    {% if not embedded %}<div data-controller="help-drawer" data-action="keydown@window->help-drawer#onEscape" data-modal-passthrough>{% endif %}
 
         {% if not embedded %}
         <div id="help-fab-container" class="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 w-fit z-[65]">

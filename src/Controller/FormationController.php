@@ -25,6 +25,7 @@ use App\Entity\Constantes;
 use App\Enums\TypeModificationDpeEnum;
 use App\Events\AddCentreFormationEvent;
 use App\Form\FormationSesType;
+use App\Repository\AccreditationRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DomaineRepository;
 use App\Repository\DpeParcoursRepository;
@@ -230,7 +231,7 @@ class FormationController extends BaseController
             if ($classique !== null) {
                 $baseFormations = array_filter(
                     $baseFormations,
-                    static fn (Formation $f) => ($f->getTypeDiplome()?->isClassique() ?? true) === $classique
+                    static fn (Formation $f) => $f->isClassique() === $classique
                 );
             }
             $filterOptions = $getFormations->getFilterOptions($baseFormations);
@@ -338,7 +339,7 @@ class FormationController extends BaseController
             if ($classique !== null) {
                 $baseFormations = array_filter(
                     $baseFormations,
-                    static fn (Formation $f) => ($f->getTypeDiplome()?->isClassique() ?? true) === $classique
+                    static fn (Formation $f) => $f->isClassique() === $classique
                 );
             }
             $filterOptions = $getFormations->getFilterOptions($baseFormations);
@@ -612,24 +613,22 @@ class FormationController extends BaseController
 
     #[Route('/api', name: 'app_formation_api', methods: ['GET'])]
     public function api(
-        MentionRepository     $mentionRepository,
-        TypeDiplomeRepository $typeDiplomeRepository,
-        DomaineRepository     $domaineRepository,
-        Request               $request
+        MentionRepository       $mentionRepository,
+        DomaineRepository       $domaineRepository,
+        AccreditationRepository $accreditationRepository,
+        Request                 $request
     ): Response {
-        $domaine = $domaineRepository->find($request->query->get('domaine'));
+        $domaineId = $request->query->get('domaine');
+        $domaine = $domaineId !== null && $domaineId !== '' ? $domaineRepository->find($domaineId) : null;
 
-        if ($domaine === null) {
-            return $this->json([
-                'mentions' => [],
-            ]);
-        }
-
-        $typeDiplome = $typeDiplomeRepository->find($request->query->get('typeDiplome'));
+        $accreditationId = $request->query->get('accreditation');
+        $accreditation = $accreditationId !== null && $accreditationId !== ''
+            ? $accreditationRepository->find($accreditationId)
+            : $accreditationRepository->findActive();
 
         return $this->json([
-            'mentions' => $mentionRepository->findByDomaineAndTypeDiplomeArray($domaine, $typeDiplome),
-            'selectedMention' => $request->query->get('mention')
+            'mentions' => $mentionRepository->findByDomaineAndAccreditationArray($domaine, $accreditation),
+            'selectedMention' => $request->query->get('mention'),
         ]);
     }
 

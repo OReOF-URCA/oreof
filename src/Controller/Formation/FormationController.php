@@ -61,7 +61,7 @@ class FormationController extends BaseController
         
 
         $breadcrumb->add(
-            $formation->getDisplay(),
+            $formation->getDisplay() ?: ($formation->getDisplayLong() ?: 'Formation'),
             'formation_v2_voir',
             ['slug' => $formation->getSlug()]
         );
@@ -122,7 +122,7 @@ class FormationController extends BaseController
     ): Response
     {
         $breadcrumb->add(
-            $formation->getDisplay()
+            $formation->getDisplay() ?: ($formation->getDisplayLong() ?: 'Formation')
         );
 
         $typeDiplome = $formation->getTypeDiplome();
@@ -320,7 +320,7 @@ class FormationController extends BaseController
         }
 
         $breadcrumb->add(
-            $formation->getDisplay(),
+            $formation->getDisplay() ?: ($formation->getDisplayLong() ?: 'Formation'),
             'formation_v2_voir',
             ['slug' => $formation->getSlug()]
         );
@@ -397,7 +397,7 @@ class FormationController extends BaseController
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $breadcrumb->add(
-            $formation->getDisplay(),
+            $formation->getDisplay() ?: ($formation->getDisplayLong() ?: 'Formation'),
             'formation_v2_voir',
             ['slug' => $formation->getSlug()]
         );

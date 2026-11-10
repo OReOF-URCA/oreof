@@ -8,6 +8,7 @@ enum CampagneModuleEnum: string
     case MAQUETTES = 'maquettes';
     case DESCRIPTIFS = 'descriptifs';
     case MCCC = 'mccc';
+    case DPE = 'dpe';
 
     public function getLabel(): string
     {
@@ -15,7 +16,8 @@ enum CampagneModuleEnum: string
             self::OFFRE_FORMATION => 'Offre de formation (ouverture, capacités, ...)',
             self::MAQUETTES => 'Maquettes & Structures (semestres, UE, EC, volumes horaires)',
             self::DESCRIPTIFS => 'Descriptifs de formation & Fiches matières (objectifs, contenus, compétences)',
-            self::MCCC => 'Modalités de Contrôle des Connaissances (MCCC)'
+            self::MCCC => 'Modalités de Contrôle des Connaissances (MCCC)',
+            self::DPE => 'Gestion du DPE (demandes de réouverture, transmissions)'
         };
     }
 
@@ -25,7 +27,8 @@ enum CampagneModuleEnum: string
             self::OFFRE_FORMATION => 'Permet aux responsables et composantes de modifier et soumettre les mentions et parcours de l\'offre ainsi que les capacités.',
             self::MAQUETTES => 'Permet d\'éditer la maquette pédagogique, les UE, les EC et les volumes horaires des parcours.',
             self::DESCRIPTIFS => 'Permet aux enseignants et responsables de rédiger et compléter les descriptifs des formations et des fiches matières.',
-            self::MCCC => 'Permet de configurer et éditer les modalités de contrôle des connaissances et compétences.'
+            self::MCCC => 'Permet de configurer et éditer les modalités de contrôle des connaissances et compétences.',
+            self::DPE => 'Permet aux responsables de demander la réouverture d\'un DPE et de le faire avancer dans le circuit de validation.'
         };
     }
 
@@ -35,7 +38,8 @@ enum CampagneModuleEnum: string
             self::OFFRE_FORMATION => 'icon:book-open',
             self::MAQUETTES => 'icon:layers',
             self::DESCRIPTIFS => 'icon:file-text',
-            self::MCCC => 'icon:award'
+            self::MCCC => 'icon:award',
+            self::DPE => 'icon:check'
         };
     }
 

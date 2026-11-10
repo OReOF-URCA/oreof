@@ -49,9 +49,6 @@ class TypeDiplome
     #[ORM\OneToMany(mappedBy: 'typeDiplome', targetEntity: Formation::class)]
     private Collection $formations;
 
-    #[ORM\OneToMany(mappedBy: 'typeDiplome', targetEntity: Mention::class)]
-    private Collection $mentions;
-
     #[ORM\ManyToMany(targetEntity: TypeEc::class, mappedBy: 'typeDiplomes')]
     private Collection $typeEcs;
 
@@ -60,6 +57,12 @@ class TypeDiplome
 
     #[ORM\ManyToMany(targetEntity: TypeEpreuve::class, mappedBy: 'typeDiplomes')]
     private Collection $typeEpreuves;
+
+    /**
+     * @var Collection<int, Mention>
+     */
+    #[ORM\ManyToMany(targetEntity: Mention::class, mappedBy: 'typeDiplomes')]
+    private Collection $mentions;
 
     #[ORM\Column(nullable: true)]
     private ?bool $debutSemestreFlexible = null;
@@ -144,13 +147,13 @@ class TypeDiplome
     public function __construct()
     {
         $this->formations = new ArrayCollection();
-        $this->mentions = new ArrayCollection();
         $this->typeEcs = new ArrayCollection();
         $this->typeUes = new ArrayCollection();
         $this->typeEpreuves = new ArrayCollection();
         $this->formationDemandes = new ArrayCollection();
         $this->ficheMatieres = new ArrayCollection();
         $this->typeDiplomePlateformeAdmissions = new ArrayCollection();
+        $this->mentions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -286,35 +289,6 @@ class TypeDiplome
         return $this;
     }
 
-    /**
-     * @return Collection<int, Mention>
-     */
-    public function getMentions(): Collection
-    {
-        return $this->mentions;
-    }
-
-    public function addMention(Mention $mention): self
-    {
-        if (!$this->mentions->contains($mention)) {
-            $this->mentions->add($mention);
-            $mention->setTypeDiplome($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMention(Mention $mention): self
-    {
-        if ($this->mentions->removeElement($mention)) {
-            // set the owning side to null (unless already changed)
-            if ($mention->getTypeDiplome() === $this) {
-                $mention->setTypeDiplome(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, TypeEc>
@@ -778,5 +752,32 @@ class TypeDiplome
             ->filter(fn(TypeDiplomePlateformeAdmission $tpa) => $tpa->getCampagne() === $campagne)
             ->map(fn(TypeDiplomePlateformeAdmission $tpa) => $tpa->getPlateforme())
             ->filter(fn($p) => $p !== null);
+    }
+
+    /**
+     * @return Collection<int, Mention>
+     */
+    public function getMentions(): Collection
+    {
+        return $this->mentions;
+    }
+
+    public function addMention(Mention $mention): static
+    {
+        if (!$this->mentions->contains($mention)) {
+            $this->mentions->add($mention);
+            $mention->addTypeDiplome($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMention(Mention $mention): static
+    {
+        if ($this->mentions->removeElement($mention)) {
+            $mention->removeTypeDiplome($this);
+        }
+
+        return $this;
     }
 }

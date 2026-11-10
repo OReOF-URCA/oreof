@@ -1,6 +1,42 @@
 {% extends 'base.html.twig' %}
 
+{% block bouton_header %}
+    <twig:Button
+            href="{{ path('app_conseils_documents_download', { process: 'dpe_formation' }) }}"
+            variant="info"
+            size="sm"
+            icon="icon:download"
+            label="Télécharger les documents (ZIP)"
+            tooltip="Télécharger tous les PV et justificatifs pour la synthèse de l'offre"
+            extraClass="font-semibold"
+    />
+{% endblock %}
+
 {% block content %}
+    <div class="app-tabs mb-6">
+        <div class="app-tabs-list" role="tablist" aria-label="Synthèse de l'offre">
+            <a id="tab-offre"
+               class="app-tab gap-2 {% if tab != 'documents' %}app-tab-active active{% endif %}"
+               href="{{ path('app_conseils_synthese_offre', { tab: 'offre' }) }}"
+               role="tab"
+               aria-selected="{{ tab != 'documents' ? 'true' : 'false' }}"
+            >
+                <twig:UX:Icon name="mdi:file-chart-outline" class="size-4" />
+                Tableau de synthèse de l'offre
+            </a>
+            <a id="tab-documents"
+               class="app-tab gap-2 {% if tab == 'documents' %}app-tab-active active{% endif %}"
+               href="{{ path('app_conseils_synthese_offre', { tab: 'documents' }) }}"
+               role="tab"
+               aria-selected="{{ tab == 'documents' ? 'true' : 'false' }}"
+            >
+                <twig:UX:Icon name="icon:file-text" class="size-4" />
+                Documents du conseil (PV & notes)
+            </a>
+        </div>
+    </div>
+
+    {% if tab != 'documents' %}
 <div class="space-y-6">
     <!-- Navigation par Plateforme -->
     <div class="rounded-xl border bg-surface p-2 shadow-sm">
@@ -381,4 +417,25 @@
         document.getElementById('count-total').innerText = totalCount;
     }
 </script>
+    {% else %}
+        <div class="space-y-4">
+            <div class="rounded-xl border border-info-200 bg-info-50/50 p-4 text-sm text-info-800 dark:border-info-800 dark:bg-info-950/30 dark:text-info-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <twig:UX:Icon name="icon:info" class="size-5 shrink-0 text-info-600 dark:text-info-400" />
+                    <span>Retrouvez ici les procès-verbaux et notes justificatives déposés pour la consolidation de l'offre. Vous pouvez télécharger chaque document individuellement ou récupérer l'archive complète.</span>
+                </div>
+                <twig:Button
+                        href="{{ path('app_conseils_documents_download', { process: 'dpe_formation' }) }}"
+                        variant="info"
+                        size="sm"
+                        icon="icon:download"
+                        label="Télécharger tout (ZIP)"
+                        tooltip="Télécharger tous les PV et justificatifs en archive ZIP"
+                        extraClass="whitespace-nowrap font-semibold"
+                />
+            </div>
+
+            {{ include('_ui/_datatable_card.html.twig', { table: documentsTable }) }}
+        </div>
+    {% endif %}
 {% endblock %}

@@ -10,12 +10,13 @@
 namespace App\Service;
 
 use App\DTO\MentionDto;
+use App\Entity\Accreditation;
 use App\Entity\Domaine;
 use App\Entity\Mention;
 use App\Entity\TypeDiplome;
+use App\Repository\AccreditationRepository;
 use App\Repository\DomaineRepository;
 use App\Repository\MentionRepository;
-use App\Repository\TypeDiplomeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,9 +40,8 @@ class MentionService
         private readonly EntityManagerInterface $entityManager,
         private readonly MentionRepository      $mentionRepository,
         private readonly DomaineRepository      $domaineRepository,
-        private readonly TypeDiplomeRepository  $typeDiplomeRepository
-    )
-    {
+        private readonly AccreditationRepository $accreditationRepository
+    ) {
     }
 
     /**
@@ -54,7 +54,7 @@ class MentionService
      * @param int|null $offset Offset pour la pagination
      * @return array Liste des mentions
      */
-    public function getAllMentions(?string $search = null, string $sort = 'type_diplome', string $direction = 'asc', ?int $limit = null, ?int $offset = null): array
+    public function getAllMentions(?string $search = null, string $sort = 'accreditation', string $direction = 'asc', ?int $limit = null, ?int $offset = null): array
     {
         return $this->mentionRepository->findBySearch($search, $sort, $direction, $limit, $offset);
     }
@@ -160,19 +160,19 @@ class MentionService
      */
     public function generateCodification(Request $request): bool
     {
-        $checkTypeDiplome = $request->request->all()['typediplome'] ?? null;
+        $checkAccreditation = $request->request->all()['accreditation'] ?? null;
         $checkTypeDomaine = $request->request->all()['domaine'] ?? null;
 
-        if (null === $checkTypeDiplome || null === $checkTypeDomaine) {
+        if (null === $checkTypeDomaine) {
             return false;
         }
 
-        $typeDiplomes = $this->getTypeDiplomesFromRequest($checkTypeDiplome);
+        $accreditations = $this->getAccreditationsFromRequest($checkAccreditation);
         $domaines = $this->getDomainesFromRequest($checkTypeDomaine);
 
-        foreach ($typeDiplomes as $typeDiplome) {
+        foreach ($accreditations as $accreditation) {
             foreach ($domaines as $domaine) {
-                $this->processCodificationForTypeDiplomeAndDomaine($typeDiplome, $domaine);
+                $this->processCodificationForAccreditationAndDomaine($accreditation, $domaine);
             }
         }
 
@@ -191,28 +191,55 @@ class MentionService
         $mention->setLibelle($mentionDto->libelle);
         $mention->setSigle($mentionDto->sigle);
         $mention->setCodeApogee($mentionDto->codeApogee);
-        $mention->setTypeDiplome($mentionDto->typeDiplomeId);
-        foreach ($mentionDto->domaines as $idDomaine) {
-            $domaine = $this->domaineRepository->find($idDomaine);
-            if ($domaine && !$mention->getDomaines()->contains($domaine)) {
+        $mention->setAccreditation($mentionDto->accreditation);
+
+        // Sync domaines
+        foreach ($mention->getDomaines() as $domaine) {
+            if (!$mentionDto->domaines->contains($domaine)) {
+                $mention->removeDomaine($domaine);
+            }
+        }
+        foreach ($mentionDto->domaines as $domaine) {
+            if ($domaine instanceof Domaine && !$mention->getDomaines()->contains($domaine)) {
                 $mention->addDomaine($domaine);
+            }
+        }
+
+        // Sync typeDiplomes
+        foreach ($mention->getTypeDiplomes() as $typeDiplome) {
+            if (!$mentionDto->typeDiplomes->contains($typeDiplome)) {
+                $mention->removeTypeDiplome($typeDiplome);
+            }
+        }
+        foreach ($mentionDto->typeDiplomes as $typeDiplome) {
+            if ($typeDiplome instanceof TypeDiplome && !$mention->getTypeDiplomes()->contains($typeDiplome)) {
+                $mention->addTypeDiplome($typeDiplome);
             }
         }
     }
 
     /**
-     * Récupère les types de diplômes à partir de la requête.
+     * Récupère les accréditations à partir de la requête.
      *
-     * @param mixed $checkTypeDiplome Valeur du paramètre typediplome
-     * @return array Liste des types de diplômes
+     * @return array<Accreditation|null>
      */
-    private function getTypeDiplomesFromRequest(mixed $checkTypeDiplome): array
+    private function getAccreditationsFromRequest(mixed $checkAccreditation): array
     {
-        if ($checkTypeDiplome === 'all') {
-            return $this->typeDiplomeRepository->findBy([], ['libelle' => 'ASC']);
+        if ($checkAccreditation === null || $checkAccreditation === '' || $checkAccreditation === 'all') {
+            $all = $this->accreditationRepository->findBy([], ['anneeDebut' => 'DESC']);
+            return !empty($all) ? $all : [null];
         }
 
-        return is_array($checkTypeDiplome) ? $checkTypeDiplome : [$checkTypeDiplome];
+        $ids = is_array($checkAccreditation) ? $checkAccreditation : [$checkAccreditation];
+        $result = [];
+        foreach ($ids as $id) {
+            $acc = $this->accreditationRepository->find($id);
+            if ($acc !== null) {
+                $result[] = $acc;
+            }
+        }
+
+        return !empty($result) ? $result : [null];
     }
 
     /**
@@ -231,20 +258,18 @@ class MentionService
     }
 
     /**
-     * Traite la codification pour un type de diplôme et un domaine spécifiques.
-     *
-     * @param TypeDiplome $typeDiplome Type de diplôme
-     * @param Domaine $domaine Domaine
+     * Traite la codification pour une accréditation et un domaine spécifiques.
      */
-    private function processCodificationForTypeDiplomeAndDomaine(TypeDiplome $typeDiplome, Domaine $domaine): void
+    private function processCodificationForAccreditationAndDomaine(?Accreditation $accreditation, Domaine $domaine): void
     {
-        $mentions = $this->mentionRepository->findByDomaineAndTypeDiplome($domaine, $typeDiplome);
+        $mentions = $this->mentionRepository->findByDomaineAndAccreditation($domaine, $accreditation);
 
         $codeLettre = 0;
 
         foreach ($mentions as $mention) {
             $offset = 1;
-            $mention->setCodeApogee(self::TAB_CODE_PARCOURS[$codeLettre]);
+            $codeChar = self::TAB_CODE_PARCOURS[$codeLettre % count(self::TAB_CODE_PARCOURS)];
+            $mention->setCodeApogee($codeChar);
 
             // Traitement des formations et parcours
             foreach ($mention->getFormations() as $formation) {
@@ -255,16 +280,15 @@ class MentionService
                         $parcours->getComposanteInscription() !== $formation->getComposantePorteuse() &&
                         $parcours->getComposanteInscription()?->getComposanteParent() === null
                     ) {
-                        // Plusieurs parcours sur des composantes porteurs différentes
-                        $parcours->setCodeMentionApogee(self::TAB_CODE_PARCOURS[$codeLettre]);
+                        $parcours->setCodeMentionApogee($codeChar);
                         $offset++;
                     } else {
-                        $parcours->setCodeMentionApogee(self::TAB_CODE_PARCOURS[$codeLettre]);
+                        $parcours->setCodeMentionApogee($codeChar);
                     }
                 }
             }
 
-            $codeLettre = $codeLettre + $offset;
+            $codeLettre += $offset;
         }
     }
 }

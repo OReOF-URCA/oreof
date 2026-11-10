@@ -41,27 +41,27 @@ class ParcoursTabCompletionChecker extends AbstractChecker
         $issues = [];
 
         if ($p->getRespParcours() === null) {
-            $issues[] = new TabIssue('parcours_step1[respParcours]', 'Responsable du parcours', 'Sélectionne un responsable.');
+            $issues[] = new TabIssue('parcours_step1[respParcours]', 'Responsable du parcours', 'Sélectionnez un responsable.');
         }
         if ($p->getLocalisation() === null) {
-            $issues[] = new TabIssue('parcours_step1[localisation]', 'Localisation', 'Choisis une ville.');
+            $issues[] = new TabIssue('parcours_step1[localisation]', 'Localisation', 'Choisissez une ville.');
         }
         if (!$this->filled($p->getObjectifsParcours())) {
-            $issues[] = new TabIssue('parcours_step1[objectifsParcours]', 'Objectifs du parcours', 'Renseigne les objectifs.');
+            $issues[] = new TabIssue('parcours_step1[objectifsParcours]', 'Objectifs du parcours', 'Renseignez les objectifs.');
         }
         if (!$this->filled($p->getMotsCles())) {
-            $issues[] = new TabIssue('parcours_step1[motsCles]', 'Mots clés', 'Renseigne des mots clés.');
+            $issues[] = new TabIssue('parcours_step1[motsCles]', 'Mots clés', 'Renseignez des mots clés.');
         }
         if (!$this->filled($p->getResultatsAttendus())) {
-            $issues[] = new TabIssue('parcours_step1[resultatsAttendus]', 'Résultats attendus', 'Renseigne les résultats attendus.');
+            $issues[] = new TabIssue('parcours_step1[resultatsAttendus]', 'Résultats attendus', 'Renseignez les résultats attendus.');
         }
         if (!$this->filled($p->getContenuFormation())) {
-            $issues[] = new TabIssue('parcours_step1[contenuFormation]', 'Contenu de la formation', 'Décris le contenu.');
+            $issues[] = new TabIssue('parcours_step1[contenuFormation]', 'Contenu de la formation', 'Décrivez le contenu.');
         }
 
         $hasRythme = $p->getRythmeFormation() !== null || $this->filled($p->getRythmeFormationTexte());
         if (!$hasRythme) {
-            $issues[] = new TabIssue('parcours_step1[rythmeFormation]', 'Rythme de formation', 'Choisis un rythme ou précise le texte.');
+            $issues[] = new TabIssue('parcours_step1[rythmeFormation]', 'Rythme de formation', 'Choisissez un rythme ou précisez le texte.');
         }
 
         return $issues;
@@ -74,18 +74,18 @@ class ParcoursTabCompletionChecker extends AbstractChecker
         $typeDiplome = $p->getTypeDiplome();
 
         if ($p->getModalitesEnseignement() === null) {
-            $issues[] = new TabIssue('parcours_step2[modalitesEnseignement]', 'Modalités d’enseignement', 'Choisis une modalité.');
+            $issues[] = new TabIssue('parcours_step2[modalitesEnseignement]', 'Modalités d’enseignement', 'Choisissez une modalité.');
         }
         // Stage
         if ($typeDiplome?->isHasStage() === true) {
             if ($p->isHasStage() === null) {
-                $issues[] = new TabIssue('parcours_step2[hasStage]', 'Stage', 'Indique si un stage est prévu.');
+                $issues[] = new TabIssue('parcours_step2[hasStage]', 'Stage', 'Indiquez si un stage est prévu.');
             } elseif ($p->isHasStage() === true) {
                 if (!$this->filled($p->getStageText())) {
                     $issues[] = new TabIssue('parcours_step2[stageText]', 'Texte du stage', 'Obligatoire si stage = oui.');
                 }
                 if ($p->getNbHeuresStages() === null || $p->getNbHeuresStages() <= 0) {
-                    $issues[] = new TabIssue('parcours_step2[nbHeuresStages]', 'Heures de stage', 'Indique un volume horaire (>= 0).');
+                    $issues[] = new TabIssue('parcours_step2[nbHeuresStages]', 'Heures de stage', 'Indiquez un volume horaire (>= 0).');
                 }
             }
         }
@@ -93,13 +93,13 @@ class ParcoursTabCompletionChecker extends AbstractChecker
         // Projet
         if ($typeDiplome?->isHasProjet()) {
             if ($p->isHasProjet() === null) {
-                $issues[] = new TabIssue('parcours_step2[hasProjet]', 'Projet', 'Indique si un projet est prévu.');
+                $issues[] = new TabIssue('parcours_step2[hasProjet]', 'Projet', 'Indiquez si un projet est prévu.');
             } elseif ($p->isHasProjet() === true) {
                 if (!$this->filled($p->getProjetText())) {
                     $issues[] = new TabIssue('parcours_step2[projetText]', 'Texte du projet', 'Obligatoire si projet = oui.');
                 }
                 if ($p->getNbHeuresProjet() === null || $p->getNbHeuresProjet() <= 0) {
-                    $issues[] = new TabIssue('parcours_step2[nbHeuresProjet]', 'Heures de projet', 'Indique un volume horaire.');
+                    $issues[] = new TabIssue('parcours_step2[nbHeuresProjet]', 'Heures de projet', 'Indiquez un volume horaire.');
                 }
             }
         }
@@ -107,7 +107,7 @@ class ParcoursTabCompletionChecker extends AbstractChecker
         // Mémoire
         if ($typeDiplome?->isHasMemoire()) {
             if ($p->isHasMemoire() === null) {
-                $issues[] = new TabIssue('parcours_step2[hasMemoire]', 'Mémoire', 'Indique si un mémoire est prévu.');
+                $issues[] = new TabIssue('parcours_step2[hasMemoire]', 'Mémoire', 'Indiquez si un mémoire est prévu.');
             } elseif ($p->isHasMemoire() === true) {
                 if (!$this->filled($p->getMemoireText())) {
                     $issues[] = new TabIssue('parcours_step2[memoireText]', 'Texte du mémoire', 'Obligatoire si mémoire = oui.');
@@ -118,13 +118,13 @@ class ParcoursTabCompletionChecker extends AbstractChecker
         // Situation pro
         if ($typeDiplome?->isHasSituationPro() === true) {
             if ($p->isHasSituationPro() === null) {
-                $issues[] = new TabIssue('parcours_step2[hasSituationPro]', 'Situation professionnelle', 'Indique si une situation pro est prévue.');
+                $issues[] = new TabIssue('parcours_step2[hasSituationPro]', 'Situation professionnelle', 'Indiquez si une situation pro est prévue.');
             } elseif ($p->isHasSituationPro() === true) {
                 if (!$this->filled($p->getSituationProText())) {
                     $issues[] = new TabIssue('parcours_step2[situationProText]', 'Texte situation pro', 'Obligatoire si situation pro = oui.');
                 }
                 if ($p->getNbHeuresSituationPro() === null || $p->getNbHeuresSituationPro() <= 0) {
-                    $issues[] = new TabIssue('parcours_step2[nbHeuresSituationPro]', 'Heures situation pro', 'Indique un volume horaire.');
+                    $issues[] = new TabIssue('parcours_step2[nbHeuresSituationPro]', 'Heures situation pro', 'Indiquez un volume horaire.');
                 }
             }
         }
@@ -138,24 +138,24 @@ class ParcoursTabCompletionChecker extends AbstractChecker
         $issues = [];
 
         if ($p->getNiveauFrancais() === null) {
-            $issues[] = new TabIssue('parcours_step5[niveauFrancais]', 'Niveau de français', 'Choisis un niveau.');
+            $issues[] = new TabIssue('parcours_step5[niveauFrancais]', 'Niveau de français', 'Choisissez un niveau.');
         }
         if (!$this->filled($p->getPrerequis())) {
-            $issues[] = new TabIssue('parcours_step5[prerequis]', 'Prérequis', 'Renseigne les prérequis.');
+            $issues[] = new TabIssue('parcours_step5[prerequis]', 'Prérequis', 'Renseignez les prérequis.');
         }
         if ($p->getComposanteInscription() === null) {
-            $issues[] = new TabIssue('parcours_step5[composanteInscription]', 'Composante d’inscription', 'Choisis une composante.');
+            $issues[] = new TabIssue('parcours_step5[composanteInscription]', 'Composante d’inscription', 'Choisissez une composante.');
         }
 
         if ($this->filled($p->getModalitesAlternance()) === false && (in_array(RegimeInscriptionEnum::FC_CONTRAT_PRO, $p->getRegimeInscription(), true) || in_array(RegimeInscriptionEnum::FI_APPRENTISSAGE, $p->getRegimeInscription(), true))) {
-            $issues[] = new TabIssue('parcours_step5[modalitesAlternance]', 'Modalités d\'alternance', 'Vous avez indiquez FC en contrat pro ou FI en apprentissage, vous devez préciser les modalités.');
+            $issues[] = new TabIssue('parcours_step5[modalitesAlternance]', 'Modalités d\'alternance', 'Vous avez indiqué FC en contrat pro ou FI en apprentissage, vous devez préciser les modalités.');
         }
 
         if ($p->getContacts()->count() === 0) {
-            $issues[] = new TabIssue('parcours_step5[coordSecretariat]', 'Coordonnées secrétariat', 'Renseigne les coordonnées.');
+            $issues[] = new TabIssue('parcours_step5[coordSecretariat]', 'Coordonnées secrétariat', 'Renseignez les coordonnées.');
         }
         if (!$this->filled($p->getModalitesAdmission())) {
-            $issues[] = new TabIssue('parcours_step5[modalitesAdmission]', 'Modalités d’admission', 'Renseigne les modalités.');
+            $issues[] = new TabIssue('parcours_step5[modalitesAdmission]', 'Modalités d’admission', 'Renseignez les modalités.');
         }
 
         return $issues;
@@ -167,10 +167,10 @@ class ParcoursTabCompletionChecker extends AbstractChecker
         $issues = [];
 
         if (!$this->filled($p->getPoursuitesEtudes())) {
-            $issues[] = new TabIssue('parcours_step6[poursuitesEtudes]', 'Poursuites d’études', 'Renseigne les poursuites d’études.');
+            $issues[] = new TabIssue('parcours_step6[poursuitesEtudes]', 'Poursuites d’études', 'Renseignez les poursuites d’études.');
         }
         if (!$this->filled($p->getDebouches())) {
-            $issues[] = new TabIssue('parcours_step6[debouches]', 'Débouchés', 'Renseigne les débouchés.');
+            $issues[] = new TabIssue('parcours_step6[debouches]', 'Débouchés', 'Renseignez les débouchés.');
         }
 
         return $issues;

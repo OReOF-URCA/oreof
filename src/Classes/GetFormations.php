@@ -165,7 +165,10 @@ readonly class GetFormations
         array $options = [],
         bool $isCfvu = false
     ): array {
-        $sort = $options['sort'] ?? 'typeDiplome';
+        $sort = $options['sort'] ?? 'default';
+        if ($sort === '') {
+            $sort = 'default';
+        }
         $direction = strtolower($options['direction'] ?? 'asc');
         $q = $options['q'] ?? null;
 
@@ -175,7 +178,7 @@ readonly class GetFormations
             foreach ($formations as $formation) {
                 $tFormations[(int) $formation->getId()] = $formation;
             }
-            return $tFormations;
+            return $this->sortFormations($tFormations, $sort, $direction);
         }
 
         if ($this->isEtablissement()) {
@@ -194,7 +197,7 @@ readonly class GetFormations
                 }
                 $tFormations[(int) $formation->getId()] = $formation;
             }
-            return $tFormations;
+            return $this->sortFormations($tFormations, $sort, $direction);
         }
 
         $baseFormations = $this->getBaseFormations($user, $campagneCollecte);
@@ -241,7 +244,7 @@ readonly class GetFormations
             if ($classiqueFilter !== null && '' !== $classiqueFilter) {
                 $isCl = filter_var($classiqueFilter, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
                 $targetClassique = !($isCl === false || $classiqueFilter === '0' || $classiqueFilter === 0);
-                $isFormationClassique = $formation->getTypeDiplome()?->isClassique() ?? true;
+                $isFormationClassique = $formation->isClassique();
                 if ($isFormationClassique !== $targetClassique) {
                     continue;
                 }
@@ -303,25 +306,93 @@ readonly class GetFormations
             $filtered[(int) $formation->getId()] = $formation;
         }
 
-        // Tri
-        uasort($filtered, function ($a, $b) use ($sort, $direction) {
-            $valA = match ($sort) {
-                'mention' => (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte()),
-                'composantePorteuse' => (string) $a->getComposantePorteuse()?->getLibelle(),
-                'typeDiplome' => (string) $a->getTypeDiplome()?->getLibelle(),
-                default => (string) $a->getDisplay(),
-            };
-            $valB = match ($sort) {
-                'mention' => (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte()),
-                'composantePorteuse' => (string) $b->getComposantePorteuse()?->getLibelle(),
-                'typeDiplome' => (string) $b->getTypeDiplome()?->getLibelle(),
-                default => (string) $b->getDisplay(),
-            };
+        return $this->sortFormations($filtered, $sort, $direction);
+    }
 
-            $cmp = strcasecmp($valA, $valB);
-            return $direction === 'desc' ? -$cmp : $cmp;
+    /**
+     * @param array<int, \App\Entity\Formation> $formations
+     * @return array<int, \App\Entity\Formation>
+     */
+    public function sortFormations(array $formations, string $sort, string $direction): array
+    {
+        if ($sort === '' || $sort === 'default') {
+            $sort = 'default';
+        }
+
+        uasort($formations, function ($a, $b) use ($sort, $direction) {
+            $compA = (string) ($a->getComposantePorteuse()?->getLibelle() ?? '');
+            $compB = (string) ($b->getComposantePorteuse()?->getLibelle() ?? '');
+
+            $tdA = (string) ($a->getTypeDiplome()?->getLibelle() ?? '');
+            $tdB = (string) ($b->getTypeDiplome()?->getLibelle() ?? '');
+
+            $mentionA = (string) ($a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? $a->getDisplay() ?? '');
+            $mentionB = (string) ($b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? $b->getDisplay() ?? '');
+
+            if ($sort === 'typeDiplome') {
+                $cmp = $this->compareStrings($tdA, $tdB);
+                if ($cmp !== 0) {
+                    return $direction === 'desc' ? -$cmp : $cmp;
+                }
+                $cmp = $this->compareStrings($compA, $compB);
+                if ($cmp !== 0) {
+                    return $cmp;
+                }
+                return $this->compareStrings($mentionA, $mentionB);
+            }
+
+            if ($sort === 'mention') {
+                $cmp = $this->compareStrings($mentionA, $mentionB);
+                if ($cmp !== 0) {
+                    return $direction === 'desc' ? -$cmp : $cmp;
+                }
+                $cmp = $this->compareStrings($compA, $compB);
+                if ($cmp !== 0) {
+                    return $cmp;
+                }
+                return $this->compareStrings($tdA, $tdB);
+            }
+
+            // 'default' ou 'composantePorteuse' :
+            // 1. Composante (valeur texte)
+            $cmp = $this->compareStrings($compA, $compB);
+            if ($cmp !== 0) {
+                return $direction === 'desc' ? -$cmp : $cmp;
+            }
+
+            // 2. Type de diplôme (valeur texte)
+            $cmp = $this->compareStrings($tdA, $tdB);
+            if ($cmp !== 0) {
+                return $cmp;
+            }
+
+            // 3. Mention (valeur texte)
+            return $this->compareStrings($mentionA, $mentionB);
         });
 
-        return $filtered;
+        return $formations;
+    }
+
+    private function compareStrings(string $a, string $b): int
+    {
+        static $collator = null;
+        if ($collator === null && class_exists(\Collator::class)) {
+            $collator = new \Collator('fr_FR');
+        }
+
+        if ($collator instanceof \Collator) {
+            $res = $collator->compare($a, $b);
+            if ($res !== false) {
+                return $res;
+            }
+        }
+
+        if (function_exists('transliterator_transliterate')) {
+            $cleanA = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $a) ?: $a;
+            $cleanB = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $b) ?: $b;
+            return strcasecmp($cleanA, $cleanB);
+        }
+
+        return strcasecmp($a, $b);
     }
 }

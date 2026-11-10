@@ -13,6 +13,8 @@ const WIDTH_STORAGE_KEY = 'oreof:page-translations-drawer:width'
 const MIN_WIDTH = 340
 const MAX_WIDTH_RATIO = 0.9
 // Conteneurs masqués que « Repérer » sait ouvrir : sous-menus de la navbar (contrôleur navbar-dropdown) et <details>
+// Classes d'une pastille de filtre inactive (identiques à celles rendues côté serveur)
+const CHIP_CLASSES = 'rounded-md border border-secondary-200 bg-white px-2 py-0.5 text-[11px] font-medium text-secondary-700 hover:bg-secondary-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:bg-secondary-700 transition cursor-pointer'
 const REVEALABLE_SELECTOR = '[data-navbar-dropdown-target="content"], details'
 
 export default class extends Controller {
@@ -25,9 +27,13 @@ export default class extends Controller {
     'itemList',
     'item',
     'countBadge',
+    'chips',
   ]
 
   connect () {
+    // Les items ajoutés ensuite (flux Turbo des modales) déclenchent itemTargetConnected ; pas ceux du rendu initial.
+    this._ready = false
+    setTimeout(() => { this._ready = true }, 0)
     this.drawer = document.getElementById('pageTranslationsOffcanvas')
     this.backdrop = document.getElementById('pageTranslationsBackdrop')
     this.fab = document.getElementById('pageTranslationsFabToggle')
@@ -50,6 +56,76 @@ export default class extends Controller {
         this.filter()
       }
     }
+  }
+
+  // ── Clés ajoutées après coup (contenu de modale, soumission Turbo) ────────
+
+  itemTargetConnected (item) {
+    if (!this._ready) return
+    const twin = this.itemTargets.find(other => other !== item &&
+      other.dataset.translationKey === item.dataset.translationKey &&
+      other.dataset.translationDomain === item.dataset.translationDomain)
+    if (twin) {
+      item.remove()
+      return
+    }
+    if (this._refreshQueued) return
+    this._refreshQueued = true
+    queueMicrotask(() => {
+      this._refreshQueued = false
+      this._refreshChips()
+      this.filter()
+    })
+  }
+
+  _refreshChips () {
+    this.itemList?.querySelector('[data-role="empty-state"]')?.remove()
+    if (!this.hasChipsTarget) return
+
+    const total = this.itemTargets.length
+    const missing = this.itemTargets.filter(item => item.dataset.missing === 'true').length
+    const perDomain = new Map()
+    this.itemTargets.forEach(item => {
+      const domain = item.dataset.translationDomain || ''
+      perDomain.set(domain, (perDomain.get(domain) || 0) + 1)
+    })
+
+    const chipFor = domain => this.domainFilterTargets.find(btn => btn.dataset.domain === domain)
+    const makeChip = domain => {
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = CHIP_CLASSES
+      btn.dataset.domain = domain
+      btn.dataset.pageTranslationsDrawerTarget = 'domainFilter'
+      btn.dataset.action = 'click->page-translations-drawer#selectDomain'
+      this.chipsTarget.appendChild(btn)
+      return btn
+    }
+
+    const all = chipFor('all') || makeChip('all')
+    all.textContent = `Tous (${total})`
+
+    let missingChip = chipFor('__missing__')
+    if (!missingChip && missing > 0) {
+      missingChip = makeChip('__missing__')
+      missingChip.classList.add('inline-flex', 'items-center', 'gap-1')
+      all.after(missingChip)
+    }
+    if (missingChip) {
+      missingChip.replaceChildren()
+      const dot = document.createElement('span')
+      dot.className = 'inline-block h-1.5 w-1.5 rounded-full bg-danger-500'
+      dot.setAttribute('aria-hidden', 'true')
+      missingChip.append(dot, `Manquantes (${missing})`)
+    }
+
+    perDomain.forEach((count, domain) => {
+      (chipFor(domain) || makeChip(domain)).textContent = `${domain} (${count})`
+    })
+  }
+
+  get itemList () {
+    return this.hasItemListTarget ? this.itemListTarget : null
   }
 
   disconnect () {

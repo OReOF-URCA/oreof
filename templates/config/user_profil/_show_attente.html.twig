@@ -1,22 +1,22 @@
 <div class="space-y-6">
     <section class="rounded-xl border border-secondary-200 bg-secondary-50 px-4 py-3 shadow-sm">
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-secondary-500">Utilisateur</h3>
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-secondary-500">{{ 'config.user_profil.show_attente.utilisateur'|trans({}, 'modal') }}</h3>
         <p class="mt-2 text-sm text-secondary-700"><span
-                    class="font-medium text-secondary-900">Login :</span> {{ user.username }}</p>
-        <p class="mt-2 text-sm text-secondary-700"><span class="font-medium text-secondary-900">Nom :</span> {{ user.nom }}</p>
+                    class="font-medium text-secondary-900">{{ 'config.user_profil.show_attente.login'|trans({}, 'modal') }}</span> {{ user.username }}</p>
+        <p class="mt-2 text-sm text-secondary-700"><span class="font-medium text-secondary-900">{{ 'config.user_profil.show_attente.nom'|trans({}, 'modal') }}</span> {{ user.nom }}</p>
         <p class="mt-2 text-sm text-secondary-700"><span
-                    class="font-medium text-secondary-900">Prenom :</span> {{ user.prenom }}</p>
-        <p class="mt-2 text-sm text-secondary-700"><span class="font-medium text-secondary-900">Email :</span> {{ user.email }}
+                    class="font-medium text-secondary-900">{{ 'config.user_profil.show_attente.prenom'|trans({}, 'modal') }}</span> {{ user.prenom }}</p>
+        <p class="mt-2 text-sm text-secondary-700"><span class="font-medium text-secondary-900">{{ 'config.user_profil.show_attente.email'|trans({}, 'modal') }}</span> {{ user.email }}
         </p>
-        <p class="mt-2 text-sm text-secondary-700"><span class="font-medium text-secondary-900">Centre de gestion :</span>
+        <p class="mt-2 text-sm text-secondary-700"><span class="font-medium text-secondary-900">{{ 'config.user_profil.show_attente.centre_de_gestion'|trans({}, 'modal') }}</span>
             {% if user.composanteDemande != null %}
-                Composante demandée : {{ user.composanteDemande.libelle }}
+                {{ 'config.user_profil.show_attente.composante_demandee'|trans({}, 'modal') }} {{ user.composanteDemande.libelle }}
             {% elseif user.etablissementDemande != null %}
-                Etablissement demandé : {{ user.etablissementDemande.libelle }}
+                {{ 'config.user_profil.show_attente.etablissement_demande'|trans({}, 'modal') }} {{ user.etablissementDemande.libelle }}
             {% else %}
                 <twig:Badge
                         variant="danger"
-                        label="Erreur de demande"
+                        label="{{ 'config.user_profil.show_attente.erreur_de_demande'|trans({}, 'modal') }}"
                 />
             {% endif %}
         </p>
@@ -29,8 +29,8 @@
             <twig:Button
                     variant="danger"
                     :soft="true"
-                    label="Désactiver l'accès"
-                    tooltip="Désactiver l'accès"
+                    label="{{ 'config.user_profil.show_attente.desactiver_l_acces'|trans({}, 'modal') }}"
+                    tooltip="{{ 'config.user_profil.show_attente.desactiver_l_acces'|trans({}, 'modal') }}"
                     href="{{ path('app_user_gestion_revoque_admin', {user:user.id}) }}"
             />
         {% else %}
@@ -38,7 +38,7 @@
                 ) or user.isValideAdministration == false %}
                 <p class="mb-2">
                     {% if user.isValidDpe == false %}
-                        <twig:Badge variant="warning" label="Non validé par DPE"/>
+                        <twig:Badge variant="warning" label="{{ 'config.user_profil.show_attente.non_valide_par_dpe'|trans({}, 'modal') }}"/>
                     {% else %}
                         <twig:Badge variant="success" label="Validé par DPE le {{ user.dateValideDpe|dateTimeFr }}"/>
                     {% endif %}
@@ -49,15 +49,15 @@
                             href="{{ path('app_user_gestion_valid_dpe', {user:user.id}) }}"
                             variant="success"
                             :soft="false"
-                            label="Valider l'accès"
-                            tooltip="Valider l'accès pour cet utilisateur"
+                            label="{{ 'config.user_profil.show_attente.valider_l_acces'|trans({}, 'modal') }}"
+                            tooltip="{{ 'config.user_profil.show_attente.valider_l_acces_pour_cet_utilisateur'|trans({}, 'modal') }}"
                     />
 
                     <twig:Button
                             variant="danger"
                             :soft="true"
-                            label="Refuser l'accès"
-                            tooltip="Refuser l'accès pour cet utilisateur"
+                            label="{{ 'config.user_profil.show_attente.refuser_l_acces'|trans({}, 'modal') }}"
+                            tooltip="{{ 'config.user_profil.show_attente.refuser_l_acces_pour_cet_utilisateur'|trans({}, 'modal') }}"
                             dataAction="{{ stimulus_action('register', 'refuserAcces') }}"
                     />
 
@@ -68,8 +68,8 @@
                         <twig:Button
                                 variant="danger"
                                 :soft="true"
-                                label="Confirmer le refus d'accès"
-                                tooltip="Confirmer le refus d'accès"
+                                label="{{ 'config.user_profil.show_attente.confirmer_le_refus_d_acces'|trans({}, 'modal') }}"
+                                tooltip="{{ 'config.user_profil.show_attente.confirmer_le_refus_d_acces'|trans({}, 'modal') }}"
                                 dataAction="{{ stimulus_action('register', 'confirmeRefusAcces') }}"
                         />
                     </div>
@@ -82,15 +82,15 @@
                             href="{{ path('app_user_gestion_valid_admin', {user:user.id}) }}"
                             variant="success"
                             :soft="false"
-                            label="Valider l'accès"
-                            tooltip="Valider l'accès pour cet utilisateur"
+                            label="{{ 'config.user_profil.show_attente.valider_l_acces'|trans({}, 'modal') }}"
+                            tooltip="{{ 'config.user_profil.show_attente.valider_l_acces_pour_cet_utilisateur'|trans({}, 'modal') }}"
                     />
 
                     <twig:Button
                             variant="danger"
                             :soft="true"
-                            label="Refuser l'accès"
-                            tooltip="Refuser l'accès pour cet utilisateur"
+                            label="{{ 'config.user_profil.show_attente.refuser_l_acces'|trans({}, 'modal') }}"
+                            tooltip="{{ 'config.user_profil.show_attente.refuser_l_acces_pour_cet_utilisateur'|trans({}, 'modal') }}"
                             dataAction="{{ stimulus_action('register', 'refuserAcces') }}"
                     />
 
@@ -100,8 +100,8 @@
                         <twig:Button
                                 variant="danger"
                                 :soft="true"
-                                label="Confirmer le refus d'accès"
-                                tooltip="Confirmer le refus d'accès"
+                                label="{{ 'config.user_profil.show_attente.confirmer_le_refus_d_acces'|trans({}, 'modal') }}"
+                                tooltip="{{ 'config.user_profil.show_attente.confirmer_le_refus_d_acces'|trans({}, 'modal') }}"
                                 dataAction="{{ stimulus_action('register', 'confirmeRefusAcces') }}"
                         />
                     </div>
@@ -110,8 +110,8 @@
                             href="{{ path('app_user_gestion_revoque_admin', {user:user.id}) }}"
                             variant="danger"
                             :soft="false"
-                            label="Révoquer l'accès"
-                            tooltip="Révoquer l'accès pour cet utilisateur"
+                            label="{{ 'config.user_profil.show_attente.revoquer_l_acces'|trans({}, 'modal') }}"
+                            tooltip="{{ 'config.user_profil.show_attente.revoquer_l_acces_pour_cet_utilisateur'|trans({}, 'modal') }}"
                     />
                 {% endif %}
             {% endif %}

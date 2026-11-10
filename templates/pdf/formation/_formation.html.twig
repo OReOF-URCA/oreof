@@ -240,6 +240,9 @@
             {% if typeDiplome is defined and typeDiplome is not null %}
                 <span class="pdf-badge">{{ typeDiplome|typeDiplome }}</span>
             {% endif %}
+            {% if formation.accreditation != null %}
+                <span class="pdf-badge">{{ formation.accreditation.libelle }}</span>
+            {% endif %}
             {% if formation.composantePorteuse != null %}
                 <span class="pdf-badge pdf-badge-gray">{{ formation.composantePorteuse.libelle }}</span>
             {% endif %}
@@ -271,6 +274,11 @@
 
                     <dt>Mention / Spécialité</dt>
                     <dd>{{ formation.display }}</dd>
+
+                    {% if formation.accreditation != null %}
+                        <dt>Période d'accréditation</dt>
+                        <dd><span class="pdf-badge">{{ formation.accreditation.libelle }}</span></dd>
+                    {% endif %}
 
                     <dt>Domaine(s)</dt>
                     <dd>

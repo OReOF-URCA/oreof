@@ -9,15 +9,15 @@
                     </span>
                     <div>
                         <h3 class="font-bold text-slate-900 text-base dark:text-slate-100">
-                            Export global de toutes les plateformes
+                            {{ 'offre_v2.modal_annexes_ca.export_global_de_toutes_les_plateformes'|trans({}, 'modal') }}
                         </h3>
                         <p class="text-xs text-slate-600 dark:text-slate-400">
-                            Campagne <strong>{{ campagne.libelle }}</strong>{% if composante %} — Composante : <strong>{{ composante.sigle|default(composante.libelle) }}</strong>{% endif %}
+                            {{ 'offre_v2.modal_annexes_ca.campagne'|trans({}, 'modal') }} <strong>{{ campagne.libelle }}</strong>{% if composante %} {{ 'offre_v2.modal_annexes_ca.composante'|trans({}, 'modal') }} <strong>{{ composante.sigle|default(composante.libelle) }}</strong>{% endif %}
                         </p>
                     </div>
                 </div>
                 <p class="text-[11px] text-slate-500 dark:text-slate-400 pl-11">
-                    L'archive génère chaque plateforme selon sa configuration (fichier global ou fichiers découpés par type de diplôme).
+                    {{ 'offre_v2.modal_annexes_ca.l_archive_genere_chaque_plateforme_selon'|trans({}, 'modal') }}
                 </p>
             </div>
             <div class="shrink-0">
@@ -25,7 +25,7 @@
                    data-turbo="false"
                    class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
                     <twig:ux:icon name="ph:download-simple-bold" class="h-4 w-4" />
-                    <span>Télécharger toutes les plateformes (.ZIP)</span>
+                    <span>{{ 'offre_v2.modal_annexes_ca.telecharger_toutes_les_plateformes_zip'|trans({}, 'modal') }}</span>
                 </a>
             </div>
         </div>
@@ -38,7 +38,7 @@
         </div>
         <div class="relative flex justify-center text-xs uppercase tracking-wider">
             <span class="bg-white px-3 font-semibold text-slate-500 dark:bg-slate-900 dark:text-slate-400">
-                Exports par plateforme d'admission
+                {{ 'offre_v2.modal_annexes_ca.exports_par_plateforme_d_admission'|trans({}, 'modal') }}
             </span>
         </div>
     </div>
@@ -63,17 +63,17 @@
                                 {% if item.isExportParDiplome %}
                                     <span class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-950/50 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800/60">
                                         <twig:ux:icon name="ph:folders-bold" class="h-3 w-3" />
-                                        Export par type de diplôme
+                                        {{ 'offre_v2.modal_annexes_ca.export_par_type_de_diplome'|trans({}, 'modal') }}
                                     </span>
                                 {% else %}
                                     <span class="inline-flex items-center gap-1 text-[11px] font-medium text-sky-700 bg-sky-50 dark:text-sky-300 dark:bg-sky-950/50 px-2 py-0.5 rounded-md border border-sky-200 dark:border-sky-800/60">
                                         <twig:ux:icon name="ph:file-xls-bold" class="h-3 w-3" />
-                                        Export global unique
+                                        {{ 'offre_v2.modal_annexes_ca.export_global_unique'|trans({}, 'modal') }}
                                     </span>
                                 {% endif %}
                             </div>
                             <span class="text-xs text-slate-500 dark:text-slate-400">
-                                {{ item.totalRows }} ligne(s) / formation(s) concernée(s)
+                                {{ 'offre_v2.modal_annexes_ca.lignes_concernees'|trans({'%count%': item.totalRows}, 'modal') }}
                             </span>
                         </div>
                     </div>
@@ -85,23 +85,23 @@
                                data-turbo="false"
                                class="inline-flex items-center gap-1.5 rounded-xl bg-primary-600 text-white px-3.5 py-2 text-xs font-semibold shadow-sm hover:bg-primary-700 transition-colors">
                                 <twig:ux:icon name="ph:file-archive-bold" class="h-4 w-4" />
-                                <span>Pack ZIP par diplôme</span>
+                                <span>{{ 'offre_v2.modal_annexes_ca.pack_zip_par_diplome'|trans({}, 'modal') }}</span>
                             </a>
                             <a href="{{ path(composante ? 'offre_v2_composante_preview_plateforme' : 'offre_v2_preview_plateforme', { plateforme: p.id, composante: composante ? composante.id : null }) }}"
                                target="_blank"
                                rel="noopener noreferrer"
                                data-turbo="false"
                                class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-xs"
-                               title="Afficher l'annexe complète dans un nouvel onglet pour contrôle rapide">
+                               title="{{ 'offre_v2.modal_annexes_ca.afficher_l_annexe_complete_dans_un'|trans({}, 'modal') }}">
                                 <twig:ux:icon name="ph:eye-bold" class="h-4 w-4 text-primary-600 dark:text-primary-400" />
-                                <span>Aperçu web</span>
+                                <span>{{ 'offre_v2.modal_annexes_ca.apercu_web'|trans({}, 'modal') }}</span>
                             </a>
                             <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme' : 'offre_v2_export_plateforme', { plateforme: p.id, composante: composante ? composante.id : null }) }}"
                                data-turbo="false"
                                class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800 text-slate-700 dark:text-slate-200 px-3 py-2 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                               title="Télécharger toutes les données dans un seul fichier Excel">
+                               title="{{ 'offre_v2.modal_annexes_ca.telecharger_toutes_les_donnees_dans_un'|trans({}, 'modal') }}">
                                 <twig:ux:icon name="ph:file-xls" class="h-4 w-4 text-green-600" />
-                                <span>Fichier combiné (.xlsx)</span>
+                                <span>{{ 'offre_v2.modal_annexes_ca.fichier_combine_xlsx'|trans({}, 'modal') }}</span>
                             </a>
                         {% else %}
                             <a href="{{ path(composante ? 'offre_v2_composante_preview_plateforme' : 'offre_v2_preview_plateforme', { plateforme: p.id, composante: composante ? composante.id : null }) }}"
@@ -109,15 +109,15 @@
                                rel="noopener noreferrer"
                                data-turbo="false"
                                class="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-3 py-2 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-xs"
-                               title="Afficher l'annexe complète dans un nouvel onglet pour contrôle rapide">
+                               title="{{ 'offre_v2.modal_annexes_ca.afficher_l_annexe_complete_dans_un'|trans({}, 'modal') }}">
                                 <twig:ux:icon name="ph:eye-bold" class="h-4 w-4 text-primary-600 dark:text-primary-400" />
-                                <span>Aperçu web</span>
+                                <span>{{ 'offre_v2.modal_annexes_ca.apercu_web'|trans({}, 'modal') }}</span>
                             </a>
                             <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme' : 'offre_v2_export_plateforme', { plateforme: p.id, composante: composante ? composante.id : null }) }}"
                                data-turbo="false"
                                class="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3.5 py-2 text-xs font-semibold shadow-sm hover:bg-slate-800 dark:hover:bg-white transition-colors">
                                 <twig:ux:icon name="ph:file-xls" class="h-4 w-4 text-green-400 dark:text-green-600" />
-                                <span>Export complet (.xlsx)</span>
+                                <span>{{ 'offre_v2.modal_annexes_ca.export_complet_xlsx'|trans({}, 'modal') }}</span>
                             </a>
                         {% endif %}
                     </div>
@@ -131,14 +131,14 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                                     <twig:ux:icon name="ph:graduation-cap-bold" class="h-3.5 w-3.5 text-slate-400" />
-                                    Télécharger par type de diplôme
+                                    {{ 'offre_v2.modal_annexes_ca.telecharger_par_type_de_diplome'|trans({}, 'modal') }}
                                 </span>
                                 {% if item.typesDiplome|length > 1 and not item.isExportParDiplome %}
                                     <a href="{{ path(composante ? 'offre_v2_composante_export_plateforme_zip' : 'offre_v2_export_plateforme_zip', { plateforme: p.id, composante: composante ? composante.id : null, split: 'diplomes' }) }}"
                                        data-turbo="false"
                                        class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
                                         <twig:ux:icon name="ph:file-archive" class="h-3.5 w-3.5" />
-                                        <span>Pack ZIP diplômes</span>
+                                        <span>{{ 'offre_v2.modal_annexes_ca.pack_zip_diplomes'|trans({}, 'modal') }}</span>
                                     </a>
                                 {% endif %}
                             </div>
@@ -163,14 +163,14 @@
                             <div class="flex items-center justify-between">
                                 <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                                     <twig:ux:icon name="ph:buildings-bold" class="h-3.5 w-3.5 text-slate-400" />
-                                    Télécharger par composante
+                                    {{ 'offre_v2.modal_annexes_ca.telecharger_par_composante'|trans({}, 'modal') }}
                                 </span>
                                 {% if item.composantes|length > 1 %}
                                     <a href="{{ path('offre_v2_export_plateforme_zip', { plateforme: p.id, split: 'composantes' }) }}"
                                        data-turbo="false"
                                        class="inline-flex items-center gap-1 text-[11px] font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">
                                         <twig:ux:icon name="ph:file-archive" class="h-3.5 w-3.5" />
-                                        <span>Pack ZIP composantes</span>
+                                        <span>{{ 'offre_v2.modal_annexes_ca.pack_zip_composantes'|trans({}, 'modal') }}</span>
                                     </a>
                                 {% endif %}
                             </div>
@@ -192,7 +192,7 @@
             </div>
         {% else %}
             <div class="text-center py-8 text-slate-500 text-sm">
-                Aucune plateforme d'admission active trouvée.
+                {{ 'offre_v2.modal_annexes_ca.aucune_plateforme_d_admission_active_trouvee'|trans({}, 'modal') }}
             </div>
         {% endfor %}
     </div>

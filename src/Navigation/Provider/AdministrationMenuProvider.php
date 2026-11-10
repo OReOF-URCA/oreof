@@ -52,6 +52,13 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                     )->inColumn('menu.config.offre_formation'),
 
                     MenuItem::link(
+                        key: 'administration.accreditations',
+                        label: 'menu.config.accreditations',
+                        route: 'app_accreditation_index',
+                        icon: 'mdi:calendar-clock-outline',
+                    )->inColumn('menu.config.offre_formation'),
+
+                    MenuItem::link(
                         key: 'administration.mentions',
                         label: 'menu.config.mentions',
                         route: 'app_mention_index',

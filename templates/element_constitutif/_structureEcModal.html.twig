@@ -13,7 +13,7 @@ parcours.'}) }}
                 {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
         >
             <i class="fal fa-floppy-disk"></i>
-            Enregistrer
+            {{ 'element_constitutif.structureEcModal.enregistrer'|trans({}, 'modal') }}
         </button>
 
         {{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont

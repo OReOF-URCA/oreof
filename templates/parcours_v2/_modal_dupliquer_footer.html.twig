@@ -2,13 +2,13 @@
     <button type="button"
             class="app-modal-footer-btn app-modal-footer-btn--secondary"
             data-action="modalturbo#close">
-        Annuler
+        {{ 'parcours_v2.modal_dupliquer_footer.annuler'|trans({}, 'modal') }}
     </button>
 
     <button type="submit"
             class="app-modal-footer-btn app-modal-footer-btn--primary"
             form="modal_dupliquer_form">
         <twig:UX:Icon name="icon:duplicate" class="h-4 w-4 mr-1.5 inline" />
-        Confirmer et dupliquer
+        {{ 'parcours_v2.modal_dupliquer_footer.confirmer_et_dupliquer'|trans({}, 'modal') }}
     </button>
 </div>

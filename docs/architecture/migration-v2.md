@@ -63,6 +63,11 @@ historiques : `role`, `user_centre`, `fiche_matiere_parcours`, `formation.versio
   puis `NOT NULL`.
 - Workflow : aucune transformation. Les états `ChangeRf` historiques restent reconnus (dont `demande_initialisee`) ;
   `DpeParcours.etatValidation` et `FicheMatiere.etatFiche` gardent leurs colonnes.
+- Mentions & Accréditations (refonte novembre 2026) :
+  - Création de la table `accreditation` (périodes d'accréditation ex. « 2024-2028 »).
+  - Découplage `Mention` / `TypeDiplome` : `Mention` n'est plus liée à `TypeDiplome` mais à une `Accreditation` (`mention.accreditation_id`), et peut porter plusieurs domaines (`mention_domaine`).
+  - La `Formation` est directement rattachée à son `TypeDiplome` (`formation.type_diplome_id`), et porte désormais son propre booléen `formation.classique` (qui hérite par défaut de `type_diplome.classique` à la création). La mention sur formation devient optionnelle ou sous forme de libellé libre (`formation.mention_texte`).
+  - Migration Doctrine : `migrations/Version20261108201500.php`. Reprise des données existantes (fusion des doublons de mentions, rattachement à la période active, report de `classique` sur `formation`) : commande `app:transfer-mentions --apply`.
 
 ## À valider avant d'ajouter au cleanup
 

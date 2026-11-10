@@ -255,7 +255,8 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
 
             if ($formation === null) {
                 $formation = new Formation($context['campagne']);
-                $formation->setTypeDiplome($data['typeDiplome']);
+                $formation->setTypeDiplome($data['typeDiplome'] ?? $context['typeDiplome'] ?? null);
+                $formation->setClassique(false);
                 $formation->setMention($mention);
                 $formation->setSigle($mention->getSigle());
 

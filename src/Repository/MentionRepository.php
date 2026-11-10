@@ -9,6 +9,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Accreditation;
 use App\Entity\Composante;
 use App\Entity\Domaine;
 use App\Entity\Mention;
@@ -35,6 +36,20 @@ class MentionRepository extends ServiceEntityRepository
         return $this->findBy([], ['libelle' => 'ASC']);
     }
 
+    /**
+     * @return array<Mention>
+     */
+    public function findByComposante(Composante $composante): array
+    {
+        return $this->createQueryBuilder('m')
+            ->innerJoin('m.formations', 'f')
+            ->where('f.composantePorteuse = :composante')
+            ->setParameter('composante', $composante)
+            ->orderBy('m.libelle', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function save(Mention $entity, bool $flush = false): void
     {
         $this->getEntityManager()->persist($entity);
@@ -53,30 +68,63 @@ class MentionRepository extends ServiceEntityRepository
         }
     }
 
-    public function findByDomaineAndTypeDiplome(Domaine $domaine, TypeDiplome $typeDiplome): array
+    /**
+     * @return array<Mention>
+     */
+    public function findByDomaineAndAccreditation(?Domaine $domaine = null, ?Accreditation $accreditation = null): array
     {
         $qb = $this->createQueryBuilder('m')
-            ->where(':domaine MEMBER OF m.domaines')
-            ->andWhere('m.typeDiplome = :typeDiplome')
-            ->setParameter('domaine', $domaine)
-            ->setParameter('typeDiplome', $typeDiplome)
             ->orderBy('m.libelle', 'ASC');
+
+        if ($domaine !== null) {
+            $qb->andWhere(':domaine MEMBER OF m.domaines')
+                ->setParameter('domaine', $domaine);
+        }
+
+        if ($accreditation !== null) {
+            $qb->andWhere('m.accreditation = :accreditation')
+                ->setParameter('accreditation', $accreditation);
+        }
 
         return $qb->getQuery()->getResult();
     }
 
-    public function findByDomaineAndTypeDiplomeArray(Domaine $domaine, TypeDiplome $typeDiplome): array
+    /**
+     * @return array<array{id: int|null, libelle: string|null}>
+     */
+    public function findByDomaineAndAccreditationArray(?Domaine $domaine = null, ?Accreditation $accreditation = null): array
     {
-        $data = $this->findByDomaineAndTypeDiplome($domaine, $typeDiplome);
+        $data = $this->findByDomaineAndAccreditation($domaine, $accreditation);
 
         $result = [];
         foreach ($data as $item) {
             $result[] = [
                 'id' => $item->getId(),
-                'libelle' => $item->getLibelle()];
+                'libelle' => $item->getLibelle(),
+            ];
         }
 
         return $result;
+    }
+
+    /**
+     * Pour rétro-compatibilité : les mentions ne sont plus liées au TypeDiplome.
+     *
+     * @return array<Mention>
+     */
+    public function findByDomaineAndTypeDiplome(Domaine $domaine, ?TypeDiplome $typeDiplome = null): array
+    {
+        return $this->findByDomaineAndAccreditation($domaine);
+    }
+
+    /**
+     * Pour rétro-compatibilité.
+     *
+     * @return array<array{id: int|null, libelle: string|null}>
+     */
+    public function findByDomaineAndTypeDiplomeArray(Domaine $domaine, ?TypeDiplome $typeDiplome = null): array
+    {
+        return $this->findByDomaineAndAccreditationArray($domaine);
     }
 
     public function findBySearch(string|null $q, string|null $sort, string|null $direction, ?int $limit = null, ?int $offset = null): array
@@ -90,11 +138,11 @@ class MentionRepository extends ServiceEntityRepository
         }
 
         if ($sort !== null && $sort !== '') {
-            if ($sort === 'type_diplome') {
-                $query->leftJoin('m.typeDiplome', 't')
-                    ->orderBy('t.libelle', $direction);
+            if ($sort === 'accreditation' || $sort === 'type_diplome') {
+                $query->leftJoin('m.accreditation', 'a')
+                    ->orderBy('a.libelle', $direction);
             } elseif ($sort === 'domaine') {
-                $query->leftJoin('m.domaine', 'd')
+                $query->leftJoin('m.domaines', 'd')
                     ->orderBy('d.libelle', $direction);
             } else {
                 $query->orderBy('m.' . $sort, $direction);
@@ -118,7 +166,7 @@ class MentionRepository extends ServiceEntityRepository
      * @param string|null $q Terme de recherche
      * @return int Nombre total de mentions
      */
-    public function countBySearch(string|null $q): int
+    public function countBySearch(?string $q = null): int
     {
         $query = $this->createQueryBuilder('m')
             ->select('COUNT(m.id)');
@@ -129,17 +177,6 @@ class MentionRepository extends ServiceEntityRepository
                 ->setParameter('q', '%' . $q . '%');
         }
 
-        return (int)$query->getQuery()->getSingleScalarResult();
-    }
-
-    public function findByComposante(Composante $composante): array
-    {
-        return $this->createQueryBuilder('m')
-            ->innerJoin('m.formations', 'f')
-            ->where('f.composantePorteuse = :composante')
-            ->setParameter('composante', $composante)
-            ->orderBy('m.libelle', 'ASC')
-            ->getQuery()
-            ->getResult();
+        return (int) $query->getQuery()->getSingleScalarResult();
     }
 }

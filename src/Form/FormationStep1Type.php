@@ -34,7 +34,7 @@ class FormationStep1Type extends AbstractType
         // pour les formations non classiques uniquement ; verrouillés (grisés) pour les
         // classiques, où le changement passe par un circuit dédié.
         $formation = $builder->getData();
-        $verrouille = $formation?->getTypeDiplome()?->isClassique() ?? true;
+        $verrouille = $formation instanceof Formation ? $formation->isClassique() : true;
 
         $builder
             ->add('responsableMention', EntityType::class, [
