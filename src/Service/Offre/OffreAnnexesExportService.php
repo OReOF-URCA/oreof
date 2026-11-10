@@ -841,7 +841,7 @@ final class OffreAnnexesExportService
         $typeParcours = $parcours->getTypeParcours();
 
         if ($typeParcours !== null && $typeParcours !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
-            $typeLibelle = $typeParcours->libelle();
+            $typeLibelle = $typeParcours->getLabel();
             $libelle = $libelle !== '' ? sprintf('%s - %s', $libelle, $typeLibelle) : $typeLibelle;
         }
 
@@ -1764,7 +1764,7 @@ final class OffreAnnexesExportService
 
             $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
-            $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
+            $typeParcours = $parcours->getTypeParcours()?->getLabel() ?? 'Classique';
 
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
             foreach ($parAnnees as $annee) {
@@ -1967,7 +1967,7 @@ final class OffreAnnexesExportService
 
             $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
-            $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
+            $typeParcours = $parcours->getTypeParcours()?->getLabel() ?? 'Classique';
 
             $isOuvert = $dpePar->isOuvert();
 
@@ -2178,7 +2178,7 @@ final class OffreAnnexesExportService
 
             $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
-            $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
+            $typeParcours = $parcours->getTypeParcours()?->getLabel() ?? 'Classique';
 
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
             if (empty($parAnnees)) {
