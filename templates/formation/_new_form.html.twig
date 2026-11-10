@@ -11,9 +11,30 @@
         <div class="mb-6 rounded-xl border border-danger-200 bg-danger-50 p-4 text-sm text-danger-800 dark:border-danger-800 dark:bg-danger-950/40 dark:text-danger-200">
             <div class="flex items-center gap-2 font-bold mb-1">
                 <twig:UX:Icon name="icon:warning" class="size-5 shrink-0" />
-                <span>{{ 'formation.new_form.des_erreurs_sont_presentes_dans_le'|trans({}, 'modal') }}</span>
+                <span>{{ 'formation.new_form.des_erreurs_sont_presentes_dans_le'|trans({}, 'modal')|default('Des erreurs sont présentes dans le formulaire.') }}</span>
             </div>
             {{ form_errors(form) }}
+            {% set errors_to_show = form_errors_list|default([]) %}
+            {% if errors_to_show is empty %}
+                {% for child in form.children %}
+                    {% if not child.vars.valid and child.vars.errors|length > 0 %}
+                        {% for err in child.vars.errors %}
+                            {% set label = child.vars.label|default(child.vars.name|humanize) %}
+                            {% set errors_to_show = errors_to_show|merge([label ~ ' : ' ~ err.message]) %}
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if errors_to_show is not empty %}
+                <div class="mt-2 text-xs font-semibold uppercase tracking-wider text-danger-900 dark:text-danger-300">
+                    Champs à corriger ou compléter :
+                </div>
+                <ul class="mt-1 list-disc list-inside space-y-1 font-medium">
+                    {% for err in errors_to_show %}
+                        <li>{{ err }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         </div>
     {% endif %}
 

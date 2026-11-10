@@ -49,6 +49,7 @@ use Jfcherng\Diff\DiffHelper;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -482,11 +483,21 @@ class FormationController extends BaseController
                 $form = $this->createForm($formTypeClass, $formData, $formOptions);
                 $form->handleRequest($request);
 
-                if ($form->isSubmitted() && $form->isValid()) {
-                    $response = $handler->handleFormationSubmission($form, $request, $context);
-                    if ($response instanceof Response) {
-                        return $response;
+                if ($form->isSubmitted()) {
+                    if ($form->isValid()) {
+                        $response = $handler->handleFormationSubmission($form, $request, $context);
+                        if ($response instanceof Response) {
+                            return $response;
+                        }
                     }
+
+                    $errorMessage = $this->getFormErrorsMessage($form);
+                    $this->addFlash('toast', [
+                        'type' => 'danger',
+                        'text' => $errorMessage,
+                        'title' => 'Formulaire incomplet ou invalide',
+                    ]);
+                    $this->addFlash('danger', $errorMessage);
                 }
 
                 // If form is passed with data bound, we can retrieve the formation entity if mapped
@@ -496,12 +507,18 @@ class FormationController extends BaseController
             }
         }
 
+        $formErrorsList = ($form !== null && $form->isSubmitted() && !$form->isValid())
+            ? $this->getFormErrorsList($form)
+            : [];
+        $status = !empty($formErrorsList) ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK;
+
         if ($request->headers->has('Turbo-Frame') && $request->headers->get('Turbo-Frame') === 'formation_form_frame') {
             return $this->render('formation/_new_form_frame.html.twig', [
                 'form' => $form ? $form->createView() : null,
                 'formTemplate' => $formTemplate,
+                'form_errors_list' => $formErrorsList,
                 'domaines' => $domaineRepository->findAll(),
-            ]);
+            ], new Response(status: $status));
         }
 
         return $this->render('formation/new.html.twig', [
@@ -510,8 +527,9 @@ class FormationController extends BaseController
             'formation' => $formation,
             'form' => $form ? $form->createView() : null,
             'formTemplate' => $formTemplate,
+            'form_errors_list' => $formErrorsList,
             'domaines' => $domaineRepository->findAll(),
-        ]);
+        ], new Response(status: $status));
     }
 
     #[Route('/edit/formation/{slug}', name: 'app_formation_edit_modal', methods: ['GET', 'POST'])]
@@ -536,50 +554,62 @@ class FormationController extends BaseController
         ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $formationSesData = $request->request->all('formation_ses');
-            $mentionId = $formationSesData['mention'] ?? null;
-            if ($mentionId !== null && $mentionId !== '' && $mentionId !== 'autre') {
-                $mention = $mentionRepository->find($mentionId);
-                if ($mention !== null) {
-                    $formation->setMentionTexte(null);
-                    $formation->setMention($mention);
+        $formErrorsList = [];
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $formationSesData = $request->request->all('formation_ses');
+                $mentionId = $formationSesData['mention'] ?? null;
+                if ($mentionId !== null && $mentionId !== '' && $mentionId !== 'autre') {
+                    $mention = $mentionRepository->find($mentionId);
+                    if ($mention !== null) {
+                        $formation->setMentionTexte(null);
+                        $formation->setMention($mention);
+                    }
+                } elseif ($mentionId === 'autre') {
+                    $formation->setMention(null);
                 }
-            } elseif ($mentionId === 'autre') {
-                $formation->setMention(null);
+
+                $uow = $entityManager->getUnitOfWork();
+                $uow->computeChangeSets();
+                $changeSet = $uow->getEntityChangeSet($formation);
+
+                if (isset($changeSet['responsableMention'])) {
+                    $profil = $profilRepository->findOneBy(['code' => 'ROLE_RESP_FORMATION']);
+                    if ($profil !== null) {
+                        if ($changeSet['responsableMention'][0] !== null) {
+                            $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][0], $profil, $this->getCampagneCollecte());
+                            $eventDispatcher->dispatch($event, AddCentreFormationEvent::REMOVE_CENTRE_FORMATION);
+                        }
+
+                        if ($changeSet['responsableMention'][1] !== null) {
+                            $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][1], $profil, $this->getCampagneCollecte());
+                            $eventDispatcher->dispatch($event, AddCentreFormationEvent::ADD_CENTRE_FORMATION);
+                        }
+                    }
+                }
+
+                $formationRepository->save($formation, true);
+
+                $this->addFlash('toast', [
+                    'type' => 'success',
+                    'text' => 'Les informations de la formation ont été mises à jour.',
+                    'title' => 'Succès',
+                ]);
+
+                $referer = (string) $request->headers->get('referer', '');
+                $targetRoute = str_contains($referer, '/voir') ? 'formation_v2_voir' : 'formation_v2_modifier';
+
+                return $this->redirectToRoute($targetRoute, ['slug' => $formation->getSlug()]);
             }
 
-            $uow = $entityManager->getUnitOfWork();
-            $uow->computeChangeSets();
-            $changeSet = $uow->getEntityChangeSet($formation);
-
-            if (isset($changeSet['responsableMention'])) {
-                $profil = $profilRepository->findOneBy(['code' => 'ROLE_RESP_FORMATION']);
-                if ($profil !== null) {
-                    if ($changeSet['responsableMention'][0] !== null) {
-                        $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][0], $profil, $this->getCampagneCollecte());
-                        $eventDispatcher->dispatch($event, AddCentreFormationEvent::REMOVE_CENTRE_FORMATION);
-                    }
-
-                    if ($changeSet['responsableMention'][1] !== null) {
-                        $event = new AddCentreFormationEvent($formation, $changeSet['responsableMention'][1], $profil, $this->getCampagneCollecte());
-                        $eventDispatcher->dispatch($event, AddCentreFormationEvent::ADD_CENTRE_FORMATION);
-                    }
-                }
-            }
-
-            $formationRepository->save($formation, true);
-
+            $formErrorsList = $this->getFormErrorsList($form);
+            $errorMessage = $this->getFormErrorsMessage($form);
             $this->addFlash('toast', [
-                'type' => 'success',
-                'text' => 'Les informations de la formation ont été mises à jour.',
-                'title' => 'Succès',
+                'type' => 'danger',
+                'text' => $errorMessage,
+                'title' => 'Formulaire incomplet ou invalide',
             ]);
-
-            $referer = (string) $request->headers->get('referer', '');
-            $targetRoute = str_contains($referer, '/voir') ? 'formation_v2_voir' : 'formation_v2_modifier';
-
-            return $this->redirectToRoute($targetRoute, ['slug' => $formation->getSlug()]);
+            $this->addFlash('danger', $errorMessage);
         }
 
         $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
@@ -594,6 +624,7 @@ class FormationController extends BaseController
                 [
                     'formation' => $formation,
                     'form' => $form->createView(),
+                    'form_errors_list' => $formErrorsList,
                     'is_modal' => true,
                 ],
                 '_ui/_footer_submit_cancel.html.twig',
@@ -607,8 +638,120 @@ class FormationController extends BaseController
         return $this->render('formation/edit.html.twig', [
             'formation' => $formation,
             'form' => $form->createView(),
+            'form_errors_list' => $formErrorsList,
             'is_modal' => false,
         ], new Response(status: $form->isSubmitted() && !$form->isValid() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK));
+    }
+
+    /**
+     * Extrait le détail des erreurs et champs obligatoires manquants d'un formulaire.
+     *
+     * @return array{missing: list<string>, invalid: list<string>, all: list<string>}
+     */
+    private function getFormErrorsDetails(FormInterface $form): array
+    {
+        $missing = [];
+        $invalid = [];
+        $all = [];
+
+        foreach ($form->getErrors(true) as $error) {
+            $origin = $error->getOrigin();
+            $fieldName = $origin ? $origin->getName() : '';
+            $fieldLabel = null;
+
+            if ($origin !== null) {
+                $labelOption = $origin->getConfig()->getOption('label');
+                if (is_string($labelOption) && trim($labelOption) !== '') {
+                    $fieldLabel = trim($labelOption);
+                } else {
+                    $fieldLabel = match ($fieldName) {
+                        'typeDiplome' => 'Type de diplôme',
+                        'domaine' => 'Domaine',
+                        'composantePorteuse' => 'Composante',
+                        'mention', 'mentionExistante' => 'Mention',
+                        'mentionTexte' => 'Intitulé de la mention',
+                        'responsableMention' => 'Responsable de la mention',
+                        'coResponsable', 'coResponsableMention' => 'Co-responsable de la mention',
+                        'codeMentionApogee' => 'Code mention Apogée',
+                        'niveauEntree' => 'Niveau d\'entrée',
+                        'niveauSortie' => 'Niveau de sortie',
+                        'codeRNCP' => 'Code RNCP',
+                        'inRncp' => 'Inscription RNCP',
+                        'classique' => 'Formation classique / accréditée',
+                        default => $fieldName !== '' ? ucfirst($fieldName) : 'Formulaire',
+                    };
+                }
+            }
+
+            $message = $error->getMessage();
+
+            $emptyMessages = [
+                'Cette valeur ne doit pas être vide.',
+                'Cette valeur ne doit pas être nulle.',
+                'This value should not be blank.',
+                'This value should not be null.',
+            ];
+
+            if (in_array($message, $emptyMessages, true)) {
+                $label = $fieldLabel ?? $fieldName;
+                $missing[] = $label;
+                $all[] = sprintf('%s : Ce champ est obligatoire.', $label);
+            } else {
+                $item = $fieldLabel !== null ? sprintf('%s : %s', $fieldLabel, $message) : $message;
+                $invalid[] = $item;
+                $all[] = $item;
+            }
+        }
+
+        return [
+            'missing' => array_values(array_unique($missing)),
+            'invalid' => array_values(array_unique($invalid)),
+            'all' => array_values(array_unique($all)),
+        ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getFormErrorsList(FormInterface $form): array
+    {
+        return $this->getFormErrorsDetails($form)['all'];
+    }
+
+    /**
+     * Génère un message clair et détaillé indiquant les champs manquants ou invalides.
+     */
+    private function getFormErrorsMessage(FormInterface $form): string
+    {
+        $details = $this->getFormErrorsDetails($form);
+        $missing = $details['missing'];
+        $invalid = $details['invalid'];
+
+        if (empty($missing) && empty($invalid)) {
+            return 'Le formulaire contient des erreurs. Veuillez vérifier les champs saisis.';
+        }
+
+        $parts = [];
+        if (!empty($missing)) {
+            $parts[] = sprintf(
+                'Champ%s obligatoire%s manquant%s : %s',
+                count($missing) > 1 ? 's' : '',
+                count($missing) > 1 ? 's' : '',
+                count($missing) > 1 ? 's' : '',
+                implode(', ', $missing)
+            );
+        }
+
+        if (!empty($invalid)) {
+            $parts[] = sprintf(
+                'Autre%s erreur%s : %s',
+                count($invalid) > 1 ? 's' : '',
+                count($invalid) > 1 ? 's' : '',
+                implode(' ; ', $invalid)
+            );
+        }
+
+        return implode(' — ', $parts);
     }
 
     #[Route('/api', name: 'app_formation_api', methods: ['GET'])]
