@@ -16,6 +16,7 @@ use App\Entity\Portail;
 use App\Entity\TypeDiplome;
 use App\Entity\Ville;
 use App\Enums\TypeModificationDpeEnum;
+use App\Enums\TypeParcoursEnum;
 use App\Service\Offre\OffreAnnexesExportService;
 use PHPUnit\Framework\TestCase;
 
@@ -141,6 +142,105 @@ final class OffreAnnexesExportServiceTest extends TestCase
 
         self::assertCount(1, $rows);
         self::assertSame('', (string) $rows[0]['parcours']);
+    }
+
+    public function testFormatParcoursLabelAjouteTypeParcoursSiNonClassique(): void
+    {
+        $formation = $this->licence(1, 'Chimie');
+
+        // null
+        self::assertSame('', $this->service->formatParcoursLabel(null));
+
+        // Parcours par défaut classique
+        $defautClassique = new Parcours($formation);
+        $defautClassique->setLibelle(Parcours::PARCOURS_DEFAUT);
+        $defautClassique->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE);
+        self::assertSame('', $this->service->formatParcoursLabel($defautClassique));
+
+        // Parcours par défaut LAS1 -> affiche le type
+        $defautLas = new Parcours($formation);
+        $defautLas->setLibelle(Parcours::PARCOURS_DEFAUT);
+        $defautLas->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_LAS1);
+        self::assertSame('LAS1', $this->service->formatParcoursLabel($defautLas));
+
+        // Parcours classique
+        $parcoursClassique = new Parcours($formation);
+        $parcoursClassique->setLibelle('Chimie Moléculaire');
+        $parcoursClassique->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE);
+        self::assertSame('Chimie Moléculaire', $this->service->formatParcoursLabel($parcoursClassique));
+
+        // Parcours LAS1
+        $parcoursLas1 = new Parcours($formation);
+        $parcoursLas1->setLibelle('Chimie Moléculaire');
+        $parcoursLas1->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_LAS1);
+        self::assertSame('Chimie Moléculaire - LAS1', $this->service->formatParcoursLabel($parcoursLas1));
+
+        // Parcours en alternance
+        $parcoursAlt = new Parcours($formation);
+        $parcoursAlt->setLibelle('Chimie Industrielle');
+        $parcoursAlt->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_ALTERNANCE);
+        self::assertSame('Chimie Industrielle - En alternance', $this->service->formatParcoursLabel($parcoursAlt));
+    }
+
+    public function testResolveEntityDiffPrendEnCompteTypeParcours(): void
+    {
+        $formation = $this->licence(1, 'Chimie');
+
+        $parcoursN1 = new Parcours($formation);
+        $parcoursN1->setLibelle('Chimie Moléculaire');
+        $parcoursN1->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE);
+        $dpeN1 = (new DpeParcours())->setParcours($parcoursN1);
+
+        $parcoursN = new Parcours($formation);
+        $parcoursN->setLibelle('Chimie Moléculaire');
+        $parcoursN->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_LAS1);
+
+        $diffs = $this->service->resolveEntityDiff($parcoursN, $dpeN1);
+
+        self::assertTrue($diffs['parcours']->isDifferent());
+        self::assertSame('Chimie Moléculaire', $diffs['parcours']->original);
+        self::assertSame('Chimie Moléculaire - LAS1', $diffs['parcours']->new);
+    }
+
+    public function testResolveRemarquesFermetureDefinitive(): void
+    {
+        $formation = $this->licence(1, 'Chimie');
+        $parcours = new Parcours($formation);
+        $dpePar = (new DpeParcours())->setParcours($parcours);
+
+        // Cas 1: Ouvert, sans remarques
+        self::assertSame('', $this->service->resolveRemarques($formation, $dpePar, null));
+
+        // Cas 2: Paramètre plateforme avec remarques
+        $param = (new PlateformeAdmissionParametre())->setRemarques('Attention effectifs limités');
+        self::assertSame('Attention effectifs limités', $this->service->resolveRemarques($formation, $dpePar, $param));
+
+        // Cas 3: DpeParcours en fermeture définitive
+        $dpePar->setEtatReconduction(TypeModificationDpeEnum::FERMETURE_DEFINITIVE);
+        self::assertSame('Fermeture définitive', $this->service->resolveRemarques($formation, $dpePar, null));
+        self::assertSame('Fermeture définitive | Attention effectifs limités', $this->service->resolveRemarques($formation, $dpePar, $param));
+
+        // Cas 4: Formation en fermeture définitive (même si dpePar est OUVERT)
+        $dpePar->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
+        $formation->setEtatReconduction(TypeModificationDpeEnum::FERMETURE_DEFINITIVE);
+        self::assertSame('Fermeture définitive', $this->service->resolveRemarques($formation, $dpePar, null));
+        self::assertSame('Fermeture définitive | Attention effectifs limités', $this->service->resolveRemarques($formation, $dpePar, $param));
+    }
+
+    public function testExportParcoursupIndiqueFermetureDefinitive(): void
+    {
+        $campagne = new CampagneCollecte();
+        $psup = $this->psup();
+        $formation = $this->licence(1, 'Droit');
+
+        [$dpe, $l1] = $this->parcoursL1($formation, 10, 'Parcours Droit', 100);
+        $dpe->setEtatReconduction(TypeModificationDpeEnum::FERMETURE_DEFINITIVE);
+
+        $rows = $this->buildParcoursupRows([$dpe], [10 => [$l1]], [], $psup, $campagne);
+
+        self::assertCount(1, $rows);
+        self::assertSame('Fermeture définitive', $rows[0]['remarques']);
+        self::assertSame('Fermeture définitive', $rows[0]['commentaire']);
     }
 
     public function testTypeParcoursEstLeRegimeDInscription(): void

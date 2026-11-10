@@ -9,6 +9,13 @@
     </template>
 </turbo-stream>
 
+{# Boutons de la page « voir » : dépendent de l'état du DPE. Sans effet si la cible est absente (page « modifier »). #}
+<turbo-stream action="replace" target="parcours_voir_actions">
+    <template>
+        {{ include('parcours_v2/_voir_actions.html.twig', {parcours: dpeParcours.parcours, dpeParcours: dpeParcours}) }}
+    </template>
+</turbo-stream>
+
 {{ include('_ui/_toast.stream.html.twig', { message: ('toast.'~transition~'.'~type~'.success')|trans({},'process'), undo: null, type: 'success' }) }}
 
 {{ include('_ui/_force_close_modal.html.twig') }}

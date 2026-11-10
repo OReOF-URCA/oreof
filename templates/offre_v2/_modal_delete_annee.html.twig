@@ -3,20 +3,20 @@
         <div class="flex items-start gap-3">
             <span class="text-xl shrink-0">⚠️</span>
             <div class="space-y-1 text-sm text-danger-900 dark:text-danger-200">
-                <div class="font-bold">Confirmation de suppression</div>
+                <div class="font-bold">{{ 'offre_v2.modal_delete_annee.confirmation_de_suppression'|trans({}, 'modal') }}</div>
                 <p>
-                    Êtes-vous sûr de vouloir supprimer l'année <strong>{{ typeDiplome ? typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}</strong> du parcours <strong>« {{ parcours.libelle }} »</strong> ?
+                    {{ 'offre_v2.modal_delete_annee.etes_vous_sur_de_vouloir_supprimer'|trans({}, 'modal') }} <strong>{{ 'offre_v2.modal_delete_annee.annee_ordre'|trans({'%diplome%': typeDiplome ? typeDiplome.libelleCourt : 'offre_v2.modal_add_annee.annee'|trans({}, 'modal'), '%ordre%': annee.ordre}, 'modal') }}</strong> {{ 'offre_v2.modal_delete_annee.du_parcours'|trans({}, 'modal') }} <strong>« {{ parcours.libelle }} »</strong> ?
                 </p>
                 <p class="text-xs text-danger-700 dark:text-danger-300">
-                    Cette action supprimera également les capacités d'accueil et les configurations de plateformes associées à cette année pour ce parcours. Cette suppression est irréversible.
+                    {{ 'offre_v2.modal_delete_annee.cette_action_supprimera_egalement_les_capacites'|trans({}, 'modal') }}
                 </p>
             </div>
         </div>
     </div>
 
     <div class="rounded-xl border border-secondary-200 bg-secondary-50/50 p-3.5 dark:border-secondary-700 dark:bg-secondary-800/40 text-xs text-secondary-600 dark:text-secondary-300 space-y-1">
-        <div><strong>Formation :</strong> {{ formation.displayLong }}</div>
-        <div><strong>Parcours :</strong> {{ parcours.libelle }} (parcours nouvellement créé)</div>
-        <div><strong>Année à supprimer :</strong> {{ typeDiplome ? typeDiplome.libelleCourt : 'Année' }} {{ annee.ordre }}</div>
+        <div><strong>{{ 'offre_v2.modal_delete_annee.formation'|trans({}, 'modal') }}</strong> {{ formation.displayLong }}</div>
+        <div><strong>{{ 'offre_v2.modal_delete_annee.parcours'|trans({}, 'modal') }}</strong> {{ 'offre_v2.modal_delete_annee.parcours_nouvellement_cree'|trans({'%libelle%': parcours.libelle}, 'modal') }}</div>
+        <div><strong>{{ 'offre_v2.modal_delete_annee.annee_a_supprimer'|trans({}, 'modal') }}</strong> {{ 'offre_v2.modal_delete_annee.annee_ordre'|trans({'%diplome%': typeDiplome ? typeDiplome.libelleCourt : 'offre_v2.modal_add_annee.annee'|trans({}, 'modal'), '%ordre%': annee.ordre}, 'modal') }}</div>
     </div>
 </div>

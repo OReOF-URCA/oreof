@@ -66,7 +66,7 @@ class FormationRepository extends ServiceEntityRepository
             ->leftJoin('f.composantesInscription', 'ci')
             ->addSelect('cp', 'm', 'td', 'dom', 'ci')
             ->where('f.dpe = :campagne')
-            ->andWhere('td.classique = 1')
+            ->andWhere('COALESCE(f.classique, td.classique) = 1')
             ->setParameter('campagne', $campagne)
             ->orderBy('td.libelle', 'ASC')
             ->addOrderBy('m.libelle', 'ASC')
@@ -126,18 +126,43 @@ class FormationRepository extends ServiceEntityRepository
         array            $options = [],
         Composante|null  $composante = null,
     ): array {
-        $sort = $options['sort'] ?? 'typeDiplome';
-        $direction = $options['direction'] ?? 'ASC';
+        $sort = $options['sort'] ?? 'default';
+        if ($sort === '') {
+            $sort = 'default';
+        }
+        $direction = strtoupper($options['direction'] ?? 'ASC');
 
-        $filtres = [$sort => $direction];
         $query = $this->createQueryBuilder('f')
             ->leftJoin('f.dpeParcours', 'p', 'WITH', 'p.campagneCollecte = :campagneCollecte')
             ->leftJoin('p.parcours', 'parcours')
             ->addSelect('p')
             ->leftJoin('f.mention', 'm')
+            ->leftJoin('f.typeDiplome', 'td_sort')
+            ->leftJoin('f.composantePorteuse', 'cp_sort')
             ->andWhere('(f.dpe = :campagneCollecte OR p.id IS NOT NULL)')
-            ->setParameter('campagneCollecte', $campagneCollecte)
-            ->orderBy('f.' . $sort, $direction);
+            ->setParameter('campagneCollecte', $campagneCollecte);
+
+        if ($sort === 'typeDiplome') {
+            $query->orderBy('td_sort.libelle', $direction)
+                ->addOrderBy('cp_sort.libelle', 'ASC')
+                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
+        } elseif ($sort === 'mention') {
+            $query->orderBy(
+                'CASE
+                    WHEN f.mention IS NOT NULL THEN m.libelle
+                    WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
+                    ELSE \'\'
+                END',
+                $direction
+            )
+            ->addOrderBy('cp_sort.libelle', 'ASC')
+            ->addOrderBy('td_sort.libelle', 'ASC');
+        } else {
+            // 'default' ou 'composantePorteuse'
+            $query->orderBy('cp_sort.libelle', $direction)
+                ->addOrderBy('td_sort.libelle', 'ASC')
+                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
+        }
 
         if ($q !== null && trim($q) !== '') {
             $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
@@ -162,9 +187,9 @@ class FormationRepository extends ServiceEntityRepository
             $query->leftJoin('f.typeDiplome', 'td');
             $isCl = filter_var($classiqueFilter, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
             if ($isCl === false || $classiqueFilter === '0' || $classiqueFilter === 0) {
-                $query->andWhere('td.classique = false');
+                $query->andWhere('COALESCE(f.classique, td.classique) = false');
             } else {
-                $query->andWhere('td.classique = true OR td.classique IS NULL');
+                $query->andWhere('COALESCE(f.classique, td.classique, true) = true');
             }
         }
 
@@ -182,24 +207,6 @@ class FormationRepository extends ServiceEntityRepository
 //            $query->andWhere("JSON_CONTAINS(p.etatValidation, :etatDpe) = 1")
 //                ->setParameter('etatDpe', json_encode([$options['etatDpe'] => 1]));
 //        }
-
-        if (isset($filtres['mention'])) {
-            $query->addOrderBy(
-                'CASE
-                            WHEN f.mention IS NOT NULL THEN m.libelle
-                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
-                            ELSE f.mentionTexte
-                            END',
-                $filtres['mention']
-            );
-        }
-
-        if (isset($filtres['domaine'])) {
-            $query->addOrderBy(
-                'm.domaine',
-                $filtres['domaine']
-            );
-        }
 
         // si responsable rechercher sur formation ou parcours si responsable ou co-responsable
         if (array_key_exists('responsable', $options) && null !== $options['responsable']) {
@@ -226,18 +233,44 @@ class FormationRepository extends ServiceEntityRepository
         array            $options = [],
         Composante|null  $composante = null,
     ): array {
-        $sort = $options['sort'] ?? 'typeDiplome';
-        $direction = $options['direction'] ?? 'ASC';
+        $sort = $options['sort'] ?? 'default';
+        if ($sort === '') {
+            $sort = 'default';
+        }
+        $direction = strtoupper($options['direction'] ?? 'ASC');
 
-        $filtres = [$sort => $direction];
         $query = $this->createQueryBuilder('f')
             ->innerJoin('f.dpeParcours', 'p', 'WITH', 'p.campagneCollecte = :campagneCollecte')
             ->leftJoin('p.parcours', 'parcours')
             ->addSelect('p')
             ->leftJoin('f.mention', 'm')
+            ->leftJoin('f.typeDiplome', 'td_sort')
+            ->leftJoin('f.composantePorteuse', 'cp_sort')
             ->setParameter('campagneCollecte', $campagneCollecte)
             ->andWhere('JSON_CONTAINS(p.etatValidation, :etatDpe) = 1')
             ->setParameter('etatDpe', json_encode(['soumis_cfvu' => 1]));
+
+        if ($sort === 'typeDiplome') {
+            $query->orderBy('td_sort.libelle', $direction)
+                ->addOrderBy('cp_sort.libelle', 'ASC')
+                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
+        } elseif ($sort === 'mention') {
+            $query->orderBy(
+                'CASE
+                    WHEN f.mention IS NOT NULL THEN m.libelle
+                    WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
+                    ELSE \'\'
+                END',
+                $direction
+            )
+            ->addOrderBy('cp_sort.libelle', 'ASC')
+            ->addOrderBy('td_sort.libelle', 'ASC');
+        } else {
+            // 'default' ou 'composantePorteuse'
+            $query->orderBy('cp_sort.libelle', $direction)
+                ->addOrderBy('td_sort.libelle', 'ASC')
+                ->addOrderBy('CASE WHEN f.mention IS NOT NULL THEN m.libelle WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte ELSE \'\' END', 'ASC');
+        }
 
         if ($q !== null && trim($q) !== '') {
             $query->andWhere('m.libelle LIKE :q or f.sigle LIKE :q or m.sigle LIKE :q or f.mentionTexte LIKE :q or parcours.libelle LIKE :q or parcours.sigle LIKE :q')
@@ -267,19 +300,6 @@ class FormationRepository extends ServiceEntityRepository
         if ($composante !== null) {
             $query->andWhere('f.composantePorteuse = :composante')
                 ->setParameter('composante', $composante);
-        }
-
-        $query->orderBy('f.' . $sort, $direction);
-
-        if (isset($filtres['mention'])) {
-            $query->addOrderBy(
-                'CASE
-                            WHEN f.mention IS NOT NULL THEN m.libelle
-                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
-                            ELSE f.mentionTexte
-                            END',
-                $filtres['mention']
-            );
         }
 
         $results = $query->getQuery()->getResult();

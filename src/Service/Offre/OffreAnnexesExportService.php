@@ -17,6 +17,8 @@ use App\Entity\Portail;
 use App\Entity\TypeDiplome;
 use App\Entity\TypeDiplomePlateformeAdmission;
 use App\Entity\Ville;
+use App\Enums\TypeModificationDpeEnum;
+use App\Enums\TypeParcoursEnum;
 use App\Repository\AnneeRepository;
 use App\Repository\CampagneCollecteRepository;
 use App\Repository\DpeParcoursRepository;
@@ -795,8 +797,60 @@ final class OffreAnnexesExportService
     }
 
     /**
+     * Calcule la valeur de la colonne commentaire / remarques.
+     * Si la formation ou le parcours est en fermeture définitive sur l'année/campagne en cours,
+     * ajoute la mention "Fermeture définitive".
+     */
+    public function resolveRemarques(
+        ?Formation $formation,
+        ?DpeParcours $dpePar,
+        ?PlateformeAdmissionParametre $param = null,
+    ): string {
+        $parts = [];
+
+        $isFermetureDefinitive = ($formation?->getEtatReconduction() === TypeModificationDpeEnum::FERMETURE_DEFINITIVE)
+            || ($dpePar?->getEtatReconduction() === TypeModificationDpeEnum::FERMETURE_DEFINITIVE);
+
+        if ($isFermetureDefinitive) {
+            $parts[] = 'Fermeture définitive';
+        }
+
+        $paramRemarques = $param?->getRemarques();
+        if ($paramRemarques !== null && trim($paramRemarques) !== '') {
+            $trimmed = trim($paramRemarques);
+            if (!in_array($trimmed, $parts, true)) {
+                $parts[] = $trimmed;
+            }
+        }
+
+        return implode(' | ', $parts);
+    }
+
+    /**
+     * Formate le libellé d'un parcours pour les exports :
+     * - Si parcours par défaut classique, retourne une chaîne vide.
+     * - Si typeParcours différent de TYPE_PARCOURS_CLASSIQUE, ajoute le type (ex: "Parcours - LAS1" ou "LAS1").
+     */
+    public function formatParcoursLabel(?Parcours $parcours): string
+    {
+        if ($parcours === null) {
+            return '';
+        }
+
+        $libelle = $parcours->isParcoursDefaut() ? '' : ($parcours->getLibelle() ?: '');
+        $typeParcours = $parcours->getTypeParcours();
+
+        if ($typeParcours !== null && $typeParcours !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+            $typeLibelle = $typeParcours->getLabel();
+            $libelle = $libelle !== '' ? sprintf('%s - %s', $libelle, $typeLibelle) : $typeLibelle;
+        }
+
+        return $libelle;
+    }
+
+    /**
      * Helper to compute diff for mention and parcours between N-1 and N.
-     * Si parcours est le parcours par défaut, la cellule est vide.
+     * Si parcours est le parcours par défaut, la cellule est vide (sauf si typeParcours non classique).
      * Si nouvelle création en N, pas mis en diff.
      *
      * @return array{mention: DiffObject, parcours: DiffObject}
@@ -810,9 +864,8 @@ final class OffreAnnexesExportService
         $isNouveauParcours = ($dpeN1 === null && $parcours->getParcoursOrigine() === null && $parcours->getParcoursOrigineCopie() === null);
         $isNouvelleFormation = ($formationN1 === null);
 
-        // Si parcours est le parcours par défaut, laisser la cellule vide
-        $parcoursN = $parcours->isParcoursDefaut() ? '' : ($parcours->getLibelle() ?: '');
-        $parcoursN1Libelle = ($parcoursN1 !== null && !$parcoursN1->isParcoursDefaut()) ? ($parcoursN1->getLibelle() ?: '') : '';
+        $parcoursN = $this->formatParcoursLabel($parcours);
+        $parcoursN1Libelle = $parcoursN1 !== null ? $this->formatParcoursLabel($parcoursN1) : '';
 
         $mentionN = $formation?->getDisplay() ?: '-';
         $mentionN1Display = $formationN1?->getDisplay() ?: null;
@@ -1149,7 +1202,9 @@ final class OffreAnnexesExportService
         if (!empty($remarques)) {
             $cleanRemarques = array_values(array_unique(array_filter(array_map('trim', $remarques))));
             if (!empty($cleanRemarques)) {
-                $row['remarques'] = implode(' | ', $cleanRemarques);
+                $remarquesStr = implode(' | ', $cleanRemarques);
+                $row['remarques'] = $remarquesStr;
+                $row['commentaire'] = $remarquesStr;
             }
         }
 
@@ -1264,7 +1319,8 @@ final class OffreAnnexesExportService
                     'ouverture_n' => $status['annee_ouverte_n'],
                     'integration_ecandidat_n' => $status['is_ouvert_n'] ? 'OUI' : 'NON',
                     'capacite_n' => $capaciteN,
-                    'remarques' => '',
+                    'remarques' => $this->resolveRemarques($formation, $dpePar, null),
+                    'commentaire' => $this->resolveRemarques($formation, $dpePar, null),
                 ];
                 continue;
             }
@@ -1312,14 +1368,16 @@ final class OffreAnnexesExportService
                 $groupKey = $mutualisation['key'] ?? null;
                 if ($groupKey !== null) {
                     if (isset($rows[$groupKey])) {
-                        if (!$parcours->isParcoursDefaut()) {
-                            $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        $pLabel = $this->formatParcoursLabel($parcours);
+                        if ($pLabel !== '') {
+                            $tcParcours[$groupKey][] = $pLabel;
                         }
                         if ($ville !== '') {
                             $tcLieux[$groupKey][] = $ville;
                         }
-                        if ($param?->getRemarques()) {
-                            $tcRemarques[$groupKey][] = $param->getRemarques();
+                        $remarque = $this->resolveRemarques($formation, $dpePar, $param);
+                        if ($remarque !== '') {
+                            $tcRemarques[$groupKey][] = $remarque;
                         }
                         $tcComposantes[$groupKey][] = $compLibelle;
                         $tcDiplomes[$groupKey][] = $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle();
@@ -1336,11 +1394,13 @@ final class OffreAnnexesExportService
                         }
                         continue;
                     }
-                    $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
+                    $pLabel = $this->formatParcoursLabel($parcours);
+                    $tcParcours[$groupKey] = $pLabel !== '' ? [$pLabel] : [];
                     $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
-                    $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                    $remarque = $this->resolveRemarques($formation, $dpePar, $param);
+                    $tcRemarques[$groupKey] = $remarque !== '' ? [$remarque] : [];
                     $tcComposantes[$groupKey] = [$compLibelle];
                     $tcDiplomes[$groupKey] = [$typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle()];
                     $tcRegimes[$groupKey] = [$status['diff_type_parcours']];
@@ -1349,6 +1409,8 @@ final class OffreAnnexesExportService
                 }
 
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
+
+                $remarquesStr = $this->resolveRemarques($formation, $dpePar, $param);
 
                 $row = [
                     'composante' => $compLibelle,
@@ -1367,7 +1429,8 @@ final class OffreAnnexesExportService
                     'ouverture_n' => $status['annee_ouverte_n'],
                     'integration_ecandidat_n' => $isECN ? 'OUI' : 'NON',
                     'capacite_n' => $capaciteN,
-                    'remarques' => $param?->getRemarques() ?? '',
+                    'remarques' => $remarquesStr,
+                    'commentaire' => $remarquesStr,
                 ];
 
                 if ($groupKey !== null) {
@@ -1526,14 +1589,16 @@ final class OffreAnnexesExportService
                 $groupKey = $mutualisation['key'] ?? null;
                 if ($groupKey !== null) {
                     if (isset($rows[$groupKey])) {
-                        if (!$parcours->isParcoursDefaut()) {
-                            $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        $pLabel = $this->formatParcoursLabel($parcours);
+                        if ($pLabel !== '') {
+                            $tcParcours[$groupKey][] = $pLabel;
                         }
                         if ($ville !== '') {
                             $tcLieux[$groupKey][] = $ville;
                         }
-                        if ($param?->getRemarques()) {
-                            $tcRemarques[$groupKey][] = $param->getRemarques();
+                        $remarque = $this->resolveRemarques($formation, $dpePar, $param);
+                        if ($remarque !== '') {
+                            $tcRemarques[$groupKey][] = $remarque;
                         }
                         $tcComposantes[$groupKey][] = $compLibelle;
                         $tcDiplomes[$groupKey][] = $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle();
@@ -1550,11 +1615,13 @@ final class OffreAnnexesExportService
                         }
                         continue;
                     }
-                    $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
+                    $pLabel = $this->formatParcoursLabel($parcours);
+                    $tcParcours[$groupKey] = $pLabel !== '' ? [$pLabel] : [];
                     $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
-                    $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                    $remarque = $this->resolveRemarques($formation, $dpePar, $param);
+                    $tcRemarques[$groupKey] = $remarque !== '' ? [$remarque] : [];
                     $tcComposantes[$groupKey] = [$compLibelle];
                     $tcDiplomes[$groupKey] = [$typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle()];
                     $tcRegimes[$groupKey] = [$status['diff_type_parcours']];
@@ -1563,6 +1630,8 @@ final class OffreAnnexesExportService
                 }
 
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
+
+                $remarquesStr = $this->resolveRemarques($formation, $dpePar, $param);
 
                 $row = [
                     'composante' => $compLibelle,
@@ -1585,7 +1654,8 @@ final class OffreAnnexesExportService
                     'type_recrutement' => $typeRecrutement,
                     'capacite_n_1' => $capaciteN1,
                     'capacite_n' => $capaciteN,
-                    'remarques' => $param?->getRemarques() ?? '',
+                    'remarques' => $remarquesStr,
+                    'commentaire' => $remarquesStr,
                 ];
 
                 if ($groupKey !== null) {
@@ -1694,7 +1764,7 @@ final class OffreAnnexesExportService
 
             $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
-            $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
+            $typeParcours = $parcours->getTypeParcours()?->getLabel() ?? 'Classique';
 
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
             foreach ($parAnnees as $annee) {
@@ -1743,14 +1813,16 @@ final class OffreAnnexesExportService
                 $groupKey = $mutualisation['key'] ?? null;
                 if ($groupKey !== null) {
                     if (isset($rows[$groupKey])) {
-                        if (!$parcours->isParcoursDefaut()) {
-                            $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        $pLabel = $this->formatParcoursLabel($parcours);
+                        if ($pLabel !== '') {
+                            $tcParcours[$groupKey][] = $pLabel;
                         }
                         if ($ville !== '') {
                             $tcLieux[$groupKey][] = $ville;
                         }
-                        if ($param?->getRemarques()) {
-                            $tcRemarques[$groupKey][] = $param->getRemarques();
+                        $remarque = $this->resolveRemarques($formation, $dpePar, $param);
+                        if ($remarque !== '') {
+                            $tcRemarques[$groupKey][] = $remarque;
                         }
                         $tcComposantes[$groupKey][] = $compLibelle;
                         $tcDiplomes[$groupKey][] = $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle();
@@ -1767,11 +1839,13 @@ final class OffreAnnexesExportService
                         }
                         continue;
                     }
-                    $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
+                    $pLabel = $this->formatParcoursLabel($parcours);
+                    $tcParcours[$groupKey] = $pLabel !== '' ? [$pLabel] : [];
                     $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
-                    $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                    $remarque = $this->resolveRemarques($formation, $dpePar, $param);
+                    $tcRemarques[$groupKey] = $remarque !== '' ? [$remarque] : [];
                     $tcComposantes[$groupKey] = [$compLibelle];
                     $tcDiplomes[$groupKey] = [$typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle()];
                     $tcRegimes[$groupKey] = [$status['diff_type_parcours']];
@@ -1780,6 +1854,8 @@ final class OffreAnnexesExportService
                 }
 
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
+
+                $remarquesStr = $this->resolveRemarques($formation, $dpePar, $param);
 
                 $row = [
                     'composante' => $compLibelle,
@@ -1806,7 +1882,8 @@ final class OffreAnnexesExportService
                     'capacite_fi_n' => $capFiN,
                     'capacite_alt_n' => $capAltN,
                     'capacite_spe_n' => $capSpeN,
-                    'remarques' => $param?->getRemarques() ?? '',
+                    'remarques' => $remarquesStr,
+                    'commentaire' => $remarquesStr,
                 ];
 
                 if ($groupKey !== null) {
@@ -1890,7 +1967,7 @@ final class OffreAnnexesExportService
 
             $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
-            $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
+            $typeParcours = $parcours->getTypeParcours()?->getLabel() ?? 'Classique';
 
             $isOuvert = $dpePar->isOuvert();
 
@@ -1977,7 +2054,8 @@ final class OffreAnnexesExportService
                 'niveaux_eef' => $niveauxStr,
                 'droits_differencies' => in_array($diplCode, ['M', 'MASTER', 'MA'], true) ? 3941 : 2850,
                 'niveau_francais' => 'B2',
-                'remarques' => '',
+                'remarques' => $this->resolveRemarques($formation, $dpePar, null),
+                'commentaire' => $this->resolveRemarques($formation, $dpePar, null),
             ];
         }
 
@@ -2026,6 +2104,7 @@ final class OffreAnnexesExportService
                 'droits_differencies' => in_array($pGroup['diplCode'], ['M', 'MASTER', 'MA'], true) ? 3941 : 2850,
                 'niveau_francais' => 'B2',
                 'remarques' => '',
+                'commentaire' => '',
             ];
         }
 
@@ -2099,7 +2178,7 @@ final class OffreAnnexesExportService
 
             $ville = $this->resolveLieu($parcours);
             $compLibelle = $formation->getComposantePorteuse()?->getSigle() ?: $formation->getComposantePorteuse()?->getLibelle() ?: '';
-            $typeParcours = $parcours->getTypeParcours()?->libelle() ?? 'Classique';
+            $typeParcours = $parcours->getTypeParcours()?->getLabel() ?? 'Classique';
 
             $parAnnees = $anneesByParcours[$parcours->getId()] ?? [];
             if (empty($parAnnees)) {
@@ -2146,7 +2225,8 @@ final class OffreAnnexesExportService
                     'capacite_alt_n' => 0,
                     'capacite_spe_n' => 0,
                     'capacite_globale_n' => $capaciteGlobaleN,
-                    'remarques' => '',
+                    'remarques' => $this->resolveRemarques($formation, $dpePar, null),
+                    'commentaire' => $this->resolveRemarques($formation, $dpePar, null),
                 ];
                 continue;
             }
@@ -2178,14 +2258,16 @@ final class OffreAnnexesExportService
                 $groupKey = $mutualisation['key'] ?? null;
                 if ($groupKey !== null) {
                     if (isset($rows[$groupKey])) {
-                        if (!$parcours->isParcoursDefaut()) {
-                            $tcParcours[$groupKey][] = (string) $parcours->getLibelle();
+                        $pLabel = $this->formatParcoursLabel($parcours);
+                        if ($pLabel !== '') {
+                            $tcParcours[$groupKey][] = $pLabel;
                         }
                         if ($ville !== '') {
                             $tcLieux[$groupKey][] = $ville;
                         }
-                        if ($param?->getRemarques()) {
-                            $tcRemarques[$groupKey][] = $param->getRemarques();
+                        $remarque = $this->resolveRemarques($formation, $dpePar, $param);
+                        if ($remarque !== '') {
+                            $tcRemarques[$groupKey][] = $remarque;
                         }
                         $tcComposantes[$groupKey][] = $compLibelle;
                         $tcDiplomes[$groupKey][] = $typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle();
@@ -2202,11 +2284,13 @@ final class OffreAnnexesExportService
                         }
                         continue;
                     }
-                    $tcParcours[$groupKey] = !$parcours->isParcoursDefaut() ? [(string) $parcours->getLibelle()] : [];
+                    $pLabel = $this->formatParcoursLabel($parcours);
+                    $tcParcours[$groupKey] = $pLabel !== '' ? [$pLabel] : [];
                     $tcLieux[$groupKey] = $ville !== '' ? [$ville] : [];
                     $tcNoms[$groupKey] = $mutualisation['nom'];
                     $tcTypes[$groupKey] = $mutualisation['type'];
-                    $tcRemarques[$groupKey] = $param?->getRemarques() ? [$param->getRemarques()] : [];
+                    $remarque = $this->resolveRemarques($formation, $dpePar, $param);
+                    $tcRemarques[$groupKey] = $remarque !== '' ? [$remarque] : [];
                     $tcComposantes[$groupKey] = [$compLibelle];
                     $tcDiplomes[$groupKey] = [$typeDiplome->getLibelleCourt() ?: $typeDiplome->getLibelle()];
                     $tcRegimes[$groupKey] = [$status['diff_type_parcours']];
@@ -2215,6 +2299,8 @@ final class OffreAnnexesExportService
                 }
 
                 $diffs = $this->resolveEntityDiff($parcours, $n1['dpeN1']);
+
+                $remarquesStr = $this->resolveRemarques($formation, $dpePar, $param);
 
                 $row = [
                     'composante' => $compLibelle,
@@ -2245,7 +2331,8 @@ final class OffreAnnexesExportService
                     'capacite_alt_n' => $param?->getCapaciteAlternance() ?? 0,
                     'capacite_spe_n' => $param?->getCapaciteSpecifique() ?? 0,
                     'capacite_globale_n' => $capGlobaleN,
-                    'remarques' => $param?->getRemarques() ?? '',
+                    'remarques' => $remarquesStr,
+                    'commentaire' => $remarquesStr,
                 ];
 
                 if ($groupKey !== null) {

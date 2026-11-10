@@ -188,7 +188,9 @@
     </div>
 {% endblock %}
 
-{% set header_title = 'formation_v2_voir.title'|trans({'%display%': formation.display}, 'header') %}
+{% set header_title %}
+    {{ 'formation_v2_voir.title'|trans({'%display%': formation.display}, 'header') }}
+{% endset %}
 
 {% block bouton_header %}
     <div class="flex flex-wrap gap-2 justify-start lg:justify-end">

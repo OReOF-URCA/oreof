@@ -24,7 +24,7 @@
         {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
 >
     <i class="fal fa-floppy-disk"></i>
-    Enregistrer
+    {{ 'parcours.new.enregistrer'|trans({}, 'modal') }}
 </button>
 
 {{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont

@@ -38,28 +38,21 @@ final readonly class ConseilsMenuProvider implements MenuProviderInterface
                         label: 'menu.conseils.chgt_rf',
                         route: 'app_formation_responsable_liste',
                         icon: 'mdi:account-switch-outline',
-                    ),
+                    )->withDescription('menu.conseils.description.chgt_rf'),
 
                     MenuItem::link(
                         key: 'conseils.synthese_modifs',
                         label: 'menu.conseils.synthses_modifs',
                         route: 'app_synthese_modification_export_pdf',
                         icon: 'mdi:file-compare',
-                    ),
-
-                    MenuItem::link(
-                        key: 'conseils.documents',
-                        label: 'menu.conseils.documents',
-                        route: 'app_conseils_documents_index',
-                        icon: 'mdi:file-document-multiple-outline',
-                    ),
+                    )->withDescription('menu.conseils.description.synthese_modifs'),
 
                     MenuItem::link(
                         key: 'conseils.synthese_offre',
                         label: 'menu.conseils.synthese_offre',
                         route: 'app_conseils_synthese_offre',
                         icon: 'mdi:file-chart-outline',
-                    ),
+                    )->withDescription('menu.conseils.description.synthese_offre'),
                 ],
             )->withPosition(30),
         ];

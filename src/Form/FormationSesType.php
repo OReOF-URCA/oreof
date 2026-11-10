@@ -17,26 +17,24 @@ use App\Entity\User;
 use App\Form\Type\InlineCreateEntitySelectType;
 use App\Form\Type\NiveauFormationType;
 use App\Form\Type\YesNoType;
+use App\Repository\AccreditationRepository;
 use App\Repository\DomaineRepository;
 use App\Repository\MentionRepository;
-use App\Repository\TypeDiplomeRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class FormationSesType extends AbstractType
 {
     public function __construct(
         private readonly MentionRepository $mentionRepository,
         private readonly DomaineRepository $domaineRepository,
-        private readonly TypeDiplomeRepository $typeDiplomeRepository
+        private readonly AccreditationRepository $accreditationRepository
     ) {
     }
 
@@ -50,7 +48,17 @@ class FormationSesType extends AbstractType
                         ->orderBy('t.libelle', 'ASC');
                 },
                 'choice_label' => 'libelle',
-                'attr' => ['data-action' => 'change->formation#changeTypeDiplome']
+            ])
+            ->add('classique', ChoiceType::class, [
+                'label' => 'Formation classique / accréditée',
+                'choices' => [
+                    'Formation accréditée (classique)' => true,
+                    'Formation non accréditée' => false,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'required' => true,
+                'help' => 'Pré-rempli selon le type de diplôme, modifiable si nécessaire pour cette formation.',
             ])
             ->add('domaine', EntityType::class, [
                 'class' => Domaine::class,
@@ -61,7 +69,6 @@ class FormationSesType extends AbstractType
                 'choice_label' => 'libelle',
                 'autocomplete' => true,
                 'placeholder' => 'Choisir un domaine...',
-                'attr' => ['data-action' => 'change->formation#changeDomaine']
             ])
             ->add('composantePorteuse', EntityType::class, [
                 'placeholder' => 'Choisir la composante porteuse du projet',
@@ -76,7 +83,6 @@ class FormationSesType extends AbstractType
                 'help' => 'Indiquer la composante porteuse du projet, qui aura en charge le dépôt de la demande de création de la formation'
             ])
             ->add('mention', ChoiceType::class, [
-                'attr' => ['data-action' => 'change->formation#changeMention'],
                 'choices' => [
                     'Choisir une mention' => '',
                     'Autre mention' => 'autre'
@@ -86,7 +92,6 @@ class FormationSesType extends AbstractType
                 'help' => 'Si la mention n\'existe pas, veuillez la créer dans la section "Autre mention"'
             ])
             ->add('mentionTexte', TextType::class, [
-                'attr' => ['data-action' => 'change->formation#changeMentionTexte'],
                 'required' => false,
                 'help' => 'Si la mention existe, veuillez la sélectionner dans la liste déroulante'
             ])
@@ -103,9 +108,7 @@ class FormationSesType extends AbstractType
                 'getter' => static fn (Formation $entity): ?string => $entity->getNiveauSortieValue(),
                 'setter' => static function (Formation $entity, ?string $value): void { $entity->setNiveauSortieValue($value); },
             ])
-            ->add('inRncp', YesNoType::class, [
-                'attr' => ['data-action' => 'change->formation#changeInscriptionRNCP']
-            ])
+            ->add('inRncp', YesNoType::class)
             ->add('codeRNCP', TextType::class, [
                 'required' => false,
                 'attr' => ['maxlength' => 10],
@@ -127,40 +130,43 @@ class FormationSesType extends AbstractType
                 function (FormEvent $event) {
                     $formation = $event->getData();
                     if ($formation instanceof Formation) {
+                        if ($formation->getClassique() === null && $formation->getTypeDiplome() !== null) {
+                            $formation->setClassique($formation->getTypeDiplome()->isClassique());
+                        }
+
                         if ($formation->getDomaine() === null && $formation->getMention()?->getDomaines()?->first() !== null) {
                             $formation->setDomaine($formation->getMention()->getDomaines()->first());
                         }
-                        if ($formation->getDomaine() !== null && $formation->getTypeDiplome() !== null) {
-                            $form = $event->getForm();
-                            $mentions = $this->mentionRepository->findByDomaineAndTypeDiplome(
-                                $formation->getDomaine(),
-                                $formation->getTypeDiplome()
-                            );
-                            $tabMentions = [
-                                'Choisir une mention' => '',
-                            ];
-                            foreach ($mentions as $mention) {
-                                $tabMentions[$mention->getLibelle()] = (string)$mention->getId();
-                            }
-                            $tabMentions['Autre mention'] = 'autre';
 
-                            $initialValue = '';
-                            if ($formation->getMention() !== null) {
-                                $initialValue = (string)$formation->getMention()->getId();
-                            } elseif ($formation->getMentionTexte() !== null && $formation->getMentionTexte() !== '') {
-                                $initialValue = 'autre';
-                            }
+                        $activeAccreditation = $this->accreditationRepository->findActive();
+                        $mentions = $this->mentionRepository->findByDomaineAndAccreditation(
+                            $formation->getDomaine(),
+                            $activeAccreditation
+                        );
 
-                            $form->add('mention', ChoiceType::class, [
-                                'attr' => ['data-action' => 'change->formation#changeMention'],
-                                'choices' => $tabMentions,
-                                'label' => 'Mention',
-                                'required' => false,
-                                'mapped' => false,
-                                'data' => $initialValue,
-                                'help' => 'Si la mention n\'existe pas, veuillez la créer dans la section "Autre mention"'
-                            ]);
+                        $tabMentions = [
+                            'Choisir une mention' => '',
+                        ];
+                        foreach ($mentions as $mention) {
+                            $tabMentions[$mention->getLibelle()] = (string)$mention->getId();
                         }
+                        $tabMentions['Autre mention'] = 'autre';
+
+                        $initialValue = '';
+                        if ($formation->getMention() !== null) {
+                            $initialValue = (string)$formation->getMention()->getId();
+                        } elseif ($formation->getMentionTexte() !== null && $formation->getMentionTexte() !== '') {
+                            $initialValue = 'autre';
+                        }
+
+                        $event->getForm()->add('mention', ChoiceType::class, [
+                            'choices' => $tabMentions,
+                            'label' => 'Mention',
+                            'required' => false,
+                            'mapped' => false,
+                            'data' => $initialValue,
+                            'help' => 'Si la mention n\'existe pas, veuillez la créer dans la section "Autre mention"'
+                        ]);
                     }
                 }
             )
@@ -179,17 +185,11 @@ class FormationSesType extends AbstractType
                     ];
 
                     $domaineId = $data['domaine'] ?? null;
-                    $typeDiplomeId = $data['typeDiplome'] ?? null;
-
-                    if ($domaineId && $typeDiplomeId) {
-                        $domaine = $this->domaineRepository->find($domaineId);
-                        $typeDiplome = $this->typeDiplomeRepository->find($typeDiplomeId);
-                        if ($domaine && $typeDiplome) {
-                            $mentions = $this->mentionRepository->findByDomaineAndTypeDiplome($domaine, $typeDiplome);
-                            foreach ($mentions as $mention) {
-                                $tabMentions[$mention->getLibelle()] = (string)$mention->getId();
-                            }
-                        }
+                    $domaine = $domaineId ? $this->domaineRepository->find($domaineId) : null;
+                    $activeAccreditation = $this->accreditationRepository->findActive();
+                    $mentions = $this->mentionRepository->findByDomaineAndAccreditation($domaine, $activeAccreditation);
+                    foreach ($mentions as $mention) {
+                        $tabMentions[$mention->getLibelle()] = (string)$mention->getId();
                     }
 
                     $submittedMention = $data['mention'] ?? null;
@@ -232,7 +232,7 @@ class FormationSesType extends AbstractType
             );
 
         $formation = $builder->getData();
-        if ($formation instanceof Formation && ($formation->getTypeDiplome()?->isClassique() ?? true) === false) {
+        if ($formation instanceof Formation && !$formation->isClassique()) {
             $builder->remove('composantePorteuse');
         }
     }

@@ -34,7 +34,7 @@ export default class extends Controller {
       let branch = this.wrapperTarget
       while (branch.parentElement && branch !== document.body) {
         for (const sibling of branch.parentElement.children) {
-          if (sibling !== branch && !popups.includes(sibling) && !sibling.inert) {
+          if (sibling !== branch && !popups.includes(sibling) && !sibling.hasAttribute('data-modal-passthrough') && !sibling.inert) {
             this.inertElements.set(sibling, false)
             sibling.inert = true
           }
@@ -140,14 +140,21 @@ export default class extends Controller {
     )
   }
 
+  // Panneaux d'aide / de traductions : doivent rester utilisables au-dessus de la modale (data-modal-passthrough).
+  isPassthrough (target) {
+    return target instanceof Element && target.closest('[data-modal-passthrough]') !== null
+  }
+
   onFocus (event) {
-    if (this.isOpen && !this.wrapperTarget.contains(event.target) && !this.ownedPopup(event.target)) {
+    if (this.isOpen && !this.wrapperTarget.contains(event.target) && !this.ownedPopup(event.target) && !this.isPassthrough(event.target)) {
       (this.focusableElements()[0] || this.wrapperTarget).focus()
     }
   }
 
   onKeydown (event) {
     if (!this.isOpen || event.defaultPrevented) return
+    // Échap / Tab dans un panneau d'aide ou de traductions : ne pas fermer ni piéger la modale
+    if (this.isPassthrough(event.target)) return
     if (event.key === 'Escape') {
       // Let the active popup consume Escape before closing the whole modal.
       const selects = Array.from(this.wrapperTarget.querySelectorAll('select'))

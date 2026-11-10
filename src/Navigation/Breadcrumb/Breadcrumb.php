@@ -13,9 +13,14 @@ final class Breadcrumb
 {
     private array $items = [];
 
-    public function add(string $label, ?string $route = null, array $routeParams = []): self
+    public function add(?string $label, ?string $route = null, array $routeParams = []): self
     {
-        $this->items[] = new BreadcrumbItem($label, $route, $routeParams);
+        $cleanLabel = $label !== null ? trim($label) : '';
+        if ($cleanLabel === '') {
+            return $this;
+        }
+
+        $this->items[] = new BreadcrumbItem($cleanLabel, $route, $routeParams);
 
         return $this;
     }

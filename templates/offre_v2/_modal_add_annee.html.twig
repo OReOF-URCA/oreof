@@ -1,20 +1,20 @@
 <div class="p-1">
     <div class="mb-5 rounded-xl border border-secondary-200 bg-secondary-50/50 p-3.5 dark:border-secondary-700 dark:bg-secondary-800/40 space-y-2">
         <div>
-            <div class="text-xs font-semibold text-secondary-500 uppercase tracking-wider dark:text-secondary-400">Formation</div>
+            <div class="text-xs font-semibold text-secondary-500 uppercase tracking-wider dark:text-secondary-400">{{ 'offre_v2.modal_add_annee.formation'|trans({}, 'modal') }}</div>
             <div class="font-semibold text-secondary-900 dark:text-secondary-100 text-sm">
                 {{ formation.displayLong }}
             </div>
         </div>
         <div>
-            <div class="text-xs font-semibold text-secondary-500 uppercase tracking-wider dark:text-secondary-400">Parcours</div>
+            <div class="text-xs font-semibold text-secondary-500 uppercase tracking-wider dark:text-secondary-400">{{ 'offre_v2.modal_add_annee.parcours'|trans({}, 'modal') }}</div>
             <div class="font-semibold text-secondary-900 dark:text-secondary-100 text-sm">
                 {{ parcours.libelle }}
             </div>
         </div>
         {% if anneesExistantes is not empty %}
             <div>
-                <div class="text-xs font-semibold text-secondary-500 uppercase tracking-wider dark:text-secondary-400">Années actuelles</div>
+                <div class="text-xs font-semibold text-secondary-500 uppercase tracking-wider dark:text-secondary-400">{{ 'offre_v2.modal_add_annee.annees_actuelles'|trans({}, 'modal') }}</div>
                 <div class="mt-1 flex items-center gap-1.5 flex-wrap">
                     {% for ord in anneesExistantes %}
                         <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-secondary-200 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200">
@@ -25,7 +25,7 @@
             </div>
         {% else %}
             <div class="text-xs text-secondary-500 dark:text-secondary-400 italic">
-                Ce parcours ne dispose d'aucune année pour le moment.
+                {{ 'offre_v2.modal_add_annee.ce_parcours_ne_dispose_d_aucune'|trans({}, 'modal') }}
             </div>
         {% endif %}
     </div>
@@ -34,12 +34,12 @@
         <div class="rounded-xl border border-secondary-200 bg-secondary-50/70 p-4 text-sm text-secondary-800 dark:border-secondary-700 dark:bg-secondary-800/40 dark:text-secondary-200">
             <div class="flex items-center gap-2 font-semibold">
                 <twig:UX:Icon name="icon:check-circle" class="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                <span>Toutes les années autorisées sont déjà créées</span>
+                <span>{{ 'offre_v2.modal_add_annee.toutes_les_annees_autorisees_sont_deja'|trans({}, 'modal') }}</span>
             </div>
             <p class="mt-1.5 text-xs text-secondary-600 dark:text-secondary-400">
-                Toutes les années prévues pour ce type de diplôme
+                {{ 'offre_v2.modal_add_annee.toutes_les_annees_prevues_pour_ce'|trans({}, 'modal') }}
                 {% if typeDiplome %}({{ typeDiplome.libelleCourt }} {{ ordresPossibles|first }} à {{ ordresPossibles|last }}){% endif %}
-                ont déjà été ajoutées à ce parcours. Aucune année supplémentaire ne peut être créée.
+                {{ 'offre_v2.modal_add_annee.ont_deja_ete_ajoutees_a_ce'|trans({}, 'modal') }}
             </p>
         </div>
     {% else %}
@@ -48,7 +48,7 @@
 
             <div>
                 <label for="annee_ordre" class="block text-xs font-bold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1.5">
-                    Numéro / Ordre de l'année dans le parcours <span class="text-red-500">*</span>
+                    {{ 'offre_v2.modal_add_annee.numero_ordre_de_l_annee_dans'|trans({}, 'modal') }} <span class="text-red-500">*</span>
                 </label>
 
                 <select name="ordre" id="annee_ordre" required class="w-full rounded-xl border border-secondary-300 bg-white px-3.5 py-2.5 text-sm font-medium text-secondary-900 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-secondary-600 dark:bg-secondary-900 dark:text-secondary-100">
@@ -56,13 +56,13 @@
                         {% set isExisting = i in anneesExistantes %}
                         {% set isSelect = i in ordresDisponibles and i == ordresDisponibles|first %}
                         <option value="{{ i }}" {{ isExisting ? 'disabled' : '' }} {{ isSelect ? 'selected' : '' }}>
-                            {{ typeDiplome ? typeDiplome.libelleCourt : 'Année' }} {{ i }} (Ordre {{ i }}){% if isExisting %} — Déjà présente{% endif %}
+                            {{ 'offre_v2.modal_add_annee.option_annee'|trans({'%diplome%': typeDiplome ? typeDiplome.libelleCourt : 'offre_v2.modal_add_annee.annee'|trans({}, 'modal'), '%ordre%': i}, 'modal') }}{% if isExisting %} {{ 'offre_v2.modal_add_annee.deja_presente'|trans({}, 'modal') }}{% endif %}
                         </option>
                     {% endfor %}
                 </select>
 
                 <p class="mt-2 text-xs text-secondary-500 dark:text-secondary-400">
-                    Seules les années autorisées pour {{ typeDiplome ? typeDiplome.libelleCourt : 'ce diplôme' }} (semestres {{ parcours.semestreDebut }} à {{ parcours.semestreFin }}) peuvent être créées.
+                    {{ 'offre_v2.modal_add_annee.seules_annees_autorisees'|trans({'%diplome%': typeDiplome ? typeDiplome.libelleCourt : 'offre_v2.modal_add_annee.ce_diplome'|trans({}, 'modal'), '%debut%': parcours.semestreDebut, '%fin%': parcours.semestreFin}, 'modal') }}
                 </p>
             </div>
         </form>

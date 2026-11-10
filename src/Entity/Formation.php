@@ -157,6 +157,10 @@ class Formation
     #[ORM\ManyToOne(fetch: 'EAGER', inversedBy: 'formations')]
     private ?TypeDiplome $typeDiplome = null;
 
+    #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
+    #[ORM\Column(nullable: true)]
+    private ?bool $classique = null;
+
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['formation:read', 'fiche_matiere_versioning', 'formation_json_versioning', 'parcours_json_versioning'])]
     private ?string $sigle = null;
@@ -616,8 +620,12 @@ class Formation
     public function getDisplay(bool $avecSigle = true): ?string
     {
         $texte = $this->getMention() === null ? $this->getMentionTexte() : $this->getMention()->getLibelle();
+        if ($texte !== null && trim($texte) === '') {
+            $texte = null;
+        }
+
         if ($avecSigle && $this->sigle !== null && trim($this->sigle) !== '') {
-            $texte .= ' (' . $this->sigle . ')';
+            $texte = $texte !== null ? $texte . ' (' . $this->sigle . ')' : $this->sigle;
         }
 
         return $texte;
@@ -1323,8 +1331,37 @@ class Formation
     public function setTypeDiplome(?TypeDiplome $typeDiplome): self
     {
         $this->typeDiplome = $typeDiplome;
+        if ($this->classique === null && $typeDiplome !== null) {
+            $this->classique = $typeDiplome->isClassique();
+        }
 
         return $this;
+    }
+
+    public function isClassique(): bool
+    {
+        if ($this->classique !== null) {
+            return $this->classique;
+        }
+
+        return $this->typeDiplome?->isClassique() ?? true;
+    }
+
+    public function getClassique(): ?bool
+    {
+        return $this->classique;
+    }
+
+    public function setClassique(?bool $classique): static
+    {
+        $this->classique = $classique;
+
+        return $this;
+    }
+
+    public function getAccreditation(): ?Accreditation
+    {
+        return $this->mention?->getAccreditation();
     }
 
     public function getSigle(): ?string

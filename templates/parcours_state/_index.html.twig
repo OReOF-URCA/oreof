@@ -17,7 +17,7 @@
     {# ── Bandeau indicateurs clés (KPIs) ── #}
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <twig:Kpi
-            title="Complétude globale"
+            title="{{ 'parcours_state.index.completude_globale'|trans({}, 'modal') }}"
             value="{{ pourcentage }}"
             unit="%"
             :percent="pourcentage"
@@ -28,7 +28,7 @@
         />
 
         <twig:Kpi
-            title="Statut validation"
+            title="{{ 'parcours_state.index.statut_validation'|trans({}, 'modal') }}"
             value="{{ isValide ? 'Conforme' : (incomplet ~ ' à compléter') }}"
             variant="{{ isValide ? 'success' : (incomplet > 3 ? 'danger' : 'warning') }}"
             icon="{{ isValide ? 'icon:check-circle' : 'icon:warning' }}"
@@ -37,7 +37,7 @@
         />
 
         <twig:Kpi
-            title="Points conformes"
+            title="{{ 'parcours_state.index.points_conformes'|trans({}, 'modal') }}"
             value="{{ score }}"
             total="{{ total }}"
             unit="critères"
@@ -51,22 +51,22 @@
             {% set structEtat = valide.etat.structure.global|default('non_concerne') %}
             {% set structBadge = structEtat|badgeValideDto %}
             <twig:Kpi
-                title="Structure maquette"
+                title="{{ 'parcours_state.index.structure_maquette'|trans({}, 'modal') }}"
                 value="{{ structBadge.label }}"
                 variant="{{ structEtat == 'complet' ? 'success' : (structEtat == 'non_concerne' ? 'secondary' : 'warning') }}"
                 icon="mdi:file-tree"
-                description="Semestres, UE et EC"
+                description="{{ 'parcours_state.index.semestres_ue_et_ec'|trans({}, 'modal') }}"
                 help="Vérification des volumes horaires et crédits ECTS"
             />
         {% else %}
             {% set maqEtat = valide.etat.maquette|default('non_concerne') %}
             {% set maqBadge = maqEtat|badgeValideDto %}
             <twig:Kpi
-                title="Maquette PDF"
+                title="{{ 'parcours_state.index.maquette_pdf'|trans({}, 'modal') }}"
                 value="{{ maqBadge.label }}"
                 variant="{{ maqEtat == 'complet' ? 'success' : 'warning' }}"
                 icon="icon:document"
-                description="Maquette déposée"
+                description="{{ 'parcours_state.index.maquette_deposee'|trans({}, 'modal') }}"
                 help="Vérification de la présence du document PDF de maquette"
             />
         {% endif %}
@@ -81,7 +81,7 @@
                     data-filter-type="all"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors bg-primary-50 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">
                 <twig:UX:Icon name="icon:layers" class="w-3.5 h-3.5" />
-                <span>Tous les critères</span>
+                <span>{{ 'parcours_state.index.tous_les_criteres'|trans({}, 'modal') }}</span>
                 <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] bg-secondary-200 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300">{{ total }}</span>
             </button>
             <button type="button"
@@ -90,14 +90,14 @@
                     data-filter-type="issues"
                     class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md transition-colors text-secondary-600 hover:text-secondary-900 dark:text-secondary-400 dark:hover:text-secondary-100">
                 <twig:UX:Icon name="icon:warning" class="w-3.5 h-3.5 text-warning-500" />
-                <span>À compléter / points d'attention</span>
+                <span>{{ 'parcours_state.index.a_completer_points_d_attention'|trans({}, 'modal') }}</span>
                 <span class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] {% if incomplet > 0 %}bg-warning-100 text-warning-800 dark:bg-warning-900/50 dark:text-warning-300 font-bold{% else %}bg-secondary-200 text-secondary-600 dark:bg-secondary-700 dark:text-secondary-400{% endif %}">{{ incomplet }}</span>
             </button>
         </div>
 
         <div class="text-xs text-secondary-500 dark:text-secondary-400 px-2 flex items-center gap-1.5">
             <twig:UX:Icon name="icon:info-circle" class="w-4 h-4 text-secondary-400" />
-            <span data-parcours-state-filter-target="countInfo">Affichage de tous les critères</span>
+            <span data-parcours-state-filter-target="countInfo">{{ 'parcours_state.index.affichage_de_tous_les_criteres'|trans({}, 'modal') }}</span>
         </div>
     </div>
 
@@ -106,9 +106,9 @@
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-success-50 dark:bg-success-950/40 text-success-600 dark:text-success-400 mb-3">
             <twig:UX:Icon name="icon:check-circle" class="w-6 h-6" />
         </div>
-        <h4 class="text-base font-semibold text-secondary-900 dark:text-white">Aucun point d'attention détecté</h4>
+        <h4 class="text-base font-semibold text-secondary-900 dark:text-white">{{ 'parcours_state.index.aucun_point_d_attention_detecte'|trans({}, 'modal') }}</h4>
         <p class="text-sm text-secondary-500 dark:text-secondary-400 mt-1 max-w-md mx-auto">
-            Tous les critères vérifiés pour ce parcours sont complets et conformes.
+            {{ 'parcours_state.index.tous_les_criteres_verifies_pour_ce'|trans({}, 'modal') }}
         </p>
     </div>
 
@@ -118,34 +118,34 @@
             <table class="min-w-full text-sm text-secondary-700 dark:text-secondary-200">
                 <tbody>
                 <tr data-parcours-state-filter-target="section">
-                    <th colspan="2" class="{{ sectionTitleClass }}">Présentation du parcours</th>
+                    <th colspan="2" class="{{ sectionTitleClass }}">{{ 'parcours_state.index.presentation_du_parcours'|trans({}, 'modal') }}</th>
                 </tr>
                 <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.respParcours }}">
-                    <td class="{{ labelCellClass }}">Responsable du parcours</td>
+                    <td class="{{ labelCellClass }}">{{ 'parcours_state.index.responsable_du_parcours'|trans({}, 'modal') }}</td>
                     <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.respParcours|badgeValideDto" size="sm" /></td>
                 </tr>
                 <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.objectifsParcours }}">
-                    <td class="{{ labelCellClass }}">Objectifs du parcours</td>
+                    <td class="{{ labelCellClass }}">{{ 'parcours_state.index.objectifs_du_parcours'|trans({}, 'modal') }}</td>
                     <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.objectifsParcours|badgeValideDto" size="sm" /></td>
                 </tr>
                 <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.resultatsAttendus }}">
-                    <td class="{{ labelCellClass }}">Résultats attendus du parcours</td>
+                    <td class="{{ labelCellClass }}">{{ 'parcours_state.index.resultats_attendus_du_parcours'|trans({}, 'modal') }}</td>
                     <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.resultatsAttendus|badgeValideDto" size="sm" /></td>
                 </tr>
                 <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.contenuParcours }}">
-                    <td class="{{ labelCellClass }}">Contenu du parcours</td>
+                    <td class="{{ labelCellClass }}">{{ 'parcours_state.index.contenu_du_parcours'|trans({}, 'modal') }}</td>
                     <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.contenuParcours|badgeValideDto" size="sm" /></td>
                 </tr>
                 <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.motsCles }}">
-                    <td class="{{ labelCellClass }}">Mots clés du parcours</td>
+                    <td class="{{ labelCellClass }}">{{ 'parcours_state.index.mots_cles_du_parcours'|trans({}, 'modal') }}</td>
                     <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.motsCles|badgeValideDto" size="sm" /></td>
                 </tr>
                 <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.rythmeParcours }}">
-                    <td class="{{ labelCellClass }}">Rythme de formation du parcours</td>
+                    <td class="{{ labelCellClass }}">{{ 'parcours_state.index.rythme_de_formation_du_parcours'|trans({}, 'modal') }}</td>
                     <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.rythmeParcours|badgeValideDto" size="sm" /></td>
                 </tr>
                 <tr class="{{ dataRowClass }}" data-parcours-state-filter-target="row" data-state="{{ valide.etat.localisation }}">
-                    <td class="{{ labelCellClass }}">Localisation du parcours</td>
+                    <td class="{{ labelCellClass }}">{{ 'parcours_state.index.localisation_du_parcours'|trans({}, 'modal') }}</td>
                     <td class="{{ valueCellClass }}"><twig:Badge :dto="valide.etat.localisation|badgeValideDto" size="sm" /></td>
                 </tr>
 

@@ -2,14 +2,14 @@
     <button type="button"
             class="app-modal-footer-btn app-modal-footer-btn--secondary cursor-pointer"
             data-action="modalturbo#close">
-        Fermer
+        {{ 'offre_v2.modal_formation_synthese_footer.fermer'|trans({}, 'modal') }}
     </button>
     <a href="{{ path('offre_v2_configurer', { slug: formation.slug }) }}"
        data-turbo-frame="_top"
        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
     >
         <twig:UX:Icon name="mdi:settings" class="size-3.5" />
-        <span>Modifier la configuration</span>
+        <span>{{ 'offre_v2.modal_formation_synthese_footer.modifier_la_configuration'|trans({}, 'modal') }}</span>
     </a>
 </div>
 

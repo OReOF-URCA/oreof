@@ -17,6 +17,7 @@ use RuntimeException;
 use App\Events\AddCentreParcoursEvent;
 use App\Form\FormulaireGeneriqueType;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
+use App\Repository\AccreditationRepository;
 use App\Repository\MentionRepository;
 use App\Repository\ParcoursRepository;
 use App\Repository\ProfilRepository;
@@ -124,6 +125,7 @@ final class FormulaireGeneriqueController extends BaseController
                 if ($formation === null) {
                     $formation = new Formation($this->getCampagneCollecte());
                     $formation->setTypeDiplome($data['typeDiplome']);
+                    $formation->setClassique($data['typeDiplome']?->isClassique() ?? false);
                     $formation->setMention($mention);
                     // Le sigle est saisi sur la mention (modal de création) ; on le recopie
                     // sur la formation, qui possède son propre champ sigle (lu par le
@@ -315,25 +317,25 @@ final class FormulaireGeneriqueController extends BaseController
 
     #[Route('/mention/new', name: 'app_formulaire_generique_mention_new', methods: ['POST'])]
     public function newMention(
-        Request               $request,
-        TypeDiplomeRepository $typeDiplomeRepository,
-        DomaineRepository     $domaineRepository,
+        Request                 $request,
+        TypeDiplomeRepository   $typeDiplomeRepository,
+        DomaineRepository       $domaineRepository,
+        AccreditationRepository $accreditationRepository,
     ): Response
     {
         if (!$this->isCsrfTokenValid('mention_creation', $request->request->get('_token'))) {
             return $this->json(['success' => false, 'error' => 'Token CSRF invalide.'], Response::HTTP_FORBIDDEN);
         }
 
-        $typeDiplome = $typeDiplomeRepository->find((int)$request->request->get('typeDiplomeId', 0));
         $libelle = trim($request->request->get('libelle', ''));
 
-        if ($typeDiplome === null || $libelle === '') {
+        if ($libelle === '') {
             return $this->json(['success' => false, 'error' => 'Données invalides.'], Response::HTTP_BAD_REQUEST);
         }
 
         $mention = new Mention();
         $mention->setLibelle($libelle);
-        $mention->setTypeDiplome($typeDiplome);
+        $mention->setAccreditation($accreditationRepository->findActive());
 
         $sigle = trim($request->request->get('sigle', ''));
         if ($sigle !== '') {
@@ -365,20 +367,16 @@ final class FormulaireGeneriqueController extends BaseController
 
     #[Route('/mentions-by-type-diplome/{typeDiplome}', name: 'app_formulaire_generique_mentions_by_type_diplome', methods: ['GET'])]
     public function mentionsByTypeDiplome(
-        int                   $typeDiplome,
-        MentionRepository     $mentionRepository,
-        TypeDiplomeRepository $typeDiplomeRepository,
+        int                     $typeDiplome,
+        MentionRepository       $mentionRepository,
+        TypeDiplomeRepository   $typeDiplomeRepository,
+        AccreditationRepository $accreditationRepository,
     ): Response
     {
-        $typeDiplomeEntity = $typeDiplomeRepository->find($typeDiplome);
-        if ($typeDiplomeEntity === null) {
-            return $this->json([]);
-        }
-
-        $mentions = $mentionRepository->findBy(
-            ['typeDiplome' => $typeDiplomeEntity],
-            ['libelle' => 'ASC']
-        );
+        $activeAccreditation = $accreditationRepository->findActive();
+        $mentions = $activeAccreditation !== null
+            ? $mentionRepository->findBy(['accreditation' => $activeAccreditation], ['libelle' => 'ASC'])
+            : $mentionRepository->findBy([], ['libelle' => 'ASC']);
 
         return $this->json(array_map(
             fn(Mention $m) => ['id' => $m->getId(), 'libelle' => $m->getLibelle()],

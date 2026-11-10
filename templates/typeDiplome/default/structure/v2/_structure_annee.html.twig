@@ -1,6 +1,7 @@
-{% set displayAnnee = typeDiplome.libelleCourt ~' '~ annee.annee.ordre %}
+{% set anneeOrdre = annee.annee.ordre ?? ordre ?? '' %}
+{% set displayAnnee = typeDiplome.libelleCourt ~' '~ anneeOrdre %}
 {% set semestresActifs = annee.semestres|filter(semestre => (semestre.semestre.nonDispense == false)) %}
-<section id="annee{{ annee.annee.ordre }}" class="mb-24">
+<section id="annee{{ anneeOrdre }}" class="mb-24">
     <div class="sticky-year bg-bg backdrop-blur-sm py-4 border-b border-secondary-200 dark:border-secondary-700 mb-8 flex items-center justify-between">
         <h2 class="text-xl font-black text-secondary-800 dark:text-secondary-300 uppercase tracking-tighter">{{ displayAnnee }}</h2>
         <div class="flex gap-4">

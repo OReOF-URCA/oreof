@@ -13,6 +13,7 @@ use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\HistoriqueParcours;
 use App\Entity\Parcours;
+use App\Entity\TypeDiplome;
 use App\Entity\UserProfil;
 use App\Enums\TypeModificationDpeEnum;
 use App\Form\FormationSesType;
@@ -70,6 +71,12 @@ abstract class AbstractTypeDiplomeHandler implements TypeDiplomeHandlerInterface
                 $formation->setMentionTexte(null);
                 $formation->setMention($mention);
             }
+        }
+
+        if ($form->has('typeDiplome') && $form->get('typeDiplome')->getData() instanceof TypeDiplome) {
+            $formation->setTypeDiplome($form->get('typeDiplome')->getData());
+        } elseif ($formation->getTypeDiplome() === null && isset($context['typeDiplome']) && $context['typeDiplome'] instanceof TypeDiplome) {
+            $formation->setTypeDiplome($context['typeDiplome']);
         }
 
         $formation->addComposantesInscription($formation->getComposantePorteuse());

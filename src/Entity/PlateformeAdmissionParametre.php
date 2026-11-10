@@ -125,6 +125,11 @@ class PlateformeAdmissionParametre
         return $this->capaciteSpecifique;
     }
 
+    public function getCapacite(): ?int
+    {
+        return $this->capaciteSpecifique ?? $this->capaciteGlobale;
+    }
+
     public function setCapaciteSpecifique(?int $capaciteSpecifique): static
     {
         $this->capaciteSpecifique = $capaciteSpecifique;

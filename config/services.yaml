@@ -44,6 +44,9 @@ services:
     App\Serializer\ModaliteEnseignementEnumNormalizer:
         tags: [ 'serializer.normalizer' ]
 
+    App\Workflow\Operation\Handler\DpeReopeningOperationHandler:
+        tags: [ 'workflow_operations.handler' ]
+
       #    App\TypeDiplome\:
       #      resource: '../src/TypeDiplome/'
       #      exclude: '../src/TypeDiplome/DependencyInjection/'

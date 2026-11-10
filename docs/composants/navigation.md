@@ -24,9 +24,9 @@ Recherche : `NavigationSearchService`.
 
 - Fabriques : `MenuItem::section(key, label, route, icon, children)`, `MenuItem::link(key, label, route, routeParams,
   icon)`, `MenuItem::info(key, label, description, icon)`.
-- Chaînables : `withChildren([...])`, `withPosition(int)`, `requiresRole('ROLE_…')`, `requires('PERM', subject)`,
+- Chaînables : `withChildren([...])`, `withPosition(int)`, `withDescription('menu.description.…')`, `requiresRole('ROLE_…')`, `requires('PERM', subject)`,
   `asMegaMenu()` (sinon `MenuDisplayModeEnum::Dropdown`), `inColumn('menu.config.…')` (colonne de mega-menu et de page
-  de section), `description('menu.description.…')`.
+  de section).
 
 | Propriété | Règle |
 |---|---|

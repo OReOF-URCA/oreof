@@ -70,8 +70,6 @@ class AddCentreFormationSubscriber implements EventSubscriberInterface
             $eventNotif = new NotifCentreFormationEvent($formation, $user, $profil);
             $this->eventDispatcher->dispatch($eventNotif, NotifCentreFormationEvent::NOTIF_ADD_CENTRE);
         }
-
-        $this->entityManager->flush();
     }
 
     public function onRemoveCentreFormation(AddCentreFormationEvent $event): void

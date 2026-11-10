@@ -8,11 +8,11 @@
         </div>
         <div class="text-sm">
             <div class="font-semibold text-primary-900 dark:text-primary-100 flex items-center gap-2">
-                <span>Période de collecte de l'offre de formation</span>
-                <twig:Badge variant="primary" label="Module : Offre de formation" />
+                <span>{{ 'offre_v2.modal_configurer_dates.periode_de_collecte_de_l_offre'|trans({}, 'modal') }}</span>
+                <twig:Badge variant="primary" label="{{ 'offre_v2.modal_configurer_dates.module_offre_de_formation'|trans({}, 'modal') }}" />
             </div>
             <p class="mt-1 text-primary-700 dark:text-primary-300 text-xs">
-                Ces dates définissent la période pendant laquelle les composantes et responsables peuvent éditer et transmettre l'offre de formation et les capacités. Elles sont synchronisées directement avec la timeline de la campagne.
+                {{ 'offre_v2.modal_configurer_dates.ces_dates_definissent_la_periode_pendant'|trans({}, 'modal') }}
             </p>
         </div>
     </div>
@@ -21,7 +21,7 @@
     <div class="space-y-4">
         <div>
             <label for="libelle" class="block text-xs font-semibold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
-                Libellé de l'étape dans la timeline
+                {{ 'offre_v2.modal_configurer_dates.libelle_de_l_etape_dans_la'|trans({}, 'modal') }}
             </label>
             <input type="text" id="libelle" name="libelle"
                    value="{{ libelle|default('Saisie de l\'offre de formation (ouverture, capacités)') }}"
@@ -32,33 +32,33 @@
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
                 <label for="dateDebut" class="block text-xs font-semibold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
-                    Date de début
+                    {{ 'offre_v2.modal_configurer_dates.date_de_debut'|trans({}, 'modal') }}
                 </label>
                 <input type="date" id="dateDebut" name="dateDebut"
                        value="{{ dateDebut ? dateDebut|date('Y-m-d') : '' }}"
                        class="block w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm shadow-xs transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100">
-                <p class="mt-1 text-[11px] text-secondary-500">Date d'ouverture de la saisie</p>
+                <p class="mt-1 text-[11px] text-secondary-500">{{ 'offre_v2.modal_configurer_dates.date_d_ouverture_de_la_saisie'|trans({}, 'modal') }}</p>
             </div>
 
             <div>
                 <label for="dateFin" class="block text-xs font-semibold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
-                    Date de fin (échéance) <span class="text-danger-500">*</span>
+                    {{ 'offre_v2.modal_configurer_dates.date_de_fin_echeance'|trans({}, 'modal') }} <span class="text-danger-500">*</span>
                 </label>
                 <input type="date" id="dateFin" name="dateFin"
                        value="{{ dateFin ? dateFin|date('Y-m-d') : '' }}"
                        required
                        class="block w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm shadow-xs transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100">
-                <p class="mt-1 text-[11px] text-secondary-500">Date limite de transmission</p>
+                <p class="mt-1 text-[11px] text-secondary-500">{{ 'offre_v2.modal_configurer_dates.date_limite_de_transmission'|trans({}, 'modal') }}</p>
             </div>
 
             <div>
                 <label for="heureFin" class="block text-xs font-semibold uppercase tracking-wider text-secondary-700 dark:text-secondary-300 mb-1">
-                    Heure limite
+                    {{ 'offre_v2.modal_configurer_dates.heure_limite'|trans({}, 'modal') }}
                 </label>
                 <input type="time" id="heureFin" name="heureFin"
                        value="{{ heureFin ? heureFin|date('H:i') : '23:59' }}"
                        class="block w-full rounded-lg border border-secondary-300 bg-surface px-3 py-2 text-sm shadow-xs transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100">
-                <p class="mt-1 text-[11px] text-secondary-500">Heure de clôture (défaut: 23:59)</p>
+                <p class="mt-1 text-[11px] text-secondary-500">{{ 'offre_v2.modal_configurer_dates.heure_de_cloture_defaut_23_59'|trans({}, 'modal') }}</p>
             </div>
         </div>
 
@@ -66,7 +66,7 @@
             {# Oui / Non (équivalent YesNoType) : une case décochée n'est pas envoyée, la valeur serait perdue. #}
             <fieldset>
                 <legend class="text-sm font-medium text-secondary-700 dark:text-secondary-300">
-                    Afficher cette étape dans la frise chronologique (timeline) publique
+                    {{ 'offre_v2.modal_configurer_dates.afficher_cette_etape_dans_la_frise'|trans({}, 'modal') }}
                 </legend>
                 <div class="mt-2 flex items-center gap-4">
                     {% for valeur, libelle in {'1': 'Oui', '0': 'Non'} %}
@@ -86,7 +86,7 @@
     {% if campagne.timelineDates|length > 0 %}
         <div class="mt-4 pt-3 border-t border-secondary-200 dark:border-secondary-700">
             <h4 class="text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-2">
-                Toutes les étapes de la campagne ({{ campagne.timelineDates|length }})
+                {{ 'offre_v2.modal_configurer_dates.toutes_etapes_campagne'|trans({'%count%': campagne.timelineDates|length}, 'modal') }}
             </h4>
             <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1 text-xs">
                 {% for step in campagne.timelineDates %}
@@ -96,7 +96,7 @@
                             <twig:UX:Icon :name="step.icone|default('icon:clock')" class="h-3.5 w-3.5 opacity-70" />
                             <span>{{ step.libelle }}</span>
                             {% if isOffreStep %}
-                                <twig:Badge variant="primary" label="Actif ici" size="xs" />
+                                <twig:Badge variant="primary" label="{{ 'offre_v2.modal_configurer_dates.actif_ici'|trans({}, 'modal') }}" size="xs" />
                             {% endif %}
                         </div>
                         <div class="text-secondary-500 dark:text-secondary-400 text-[11px] whitespace-nowrap">

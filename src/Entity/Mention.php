@@ -13,11 +13,10 @@ use App\Repository\MentionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-
 use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: MentionRepository::class)]
-class Mention
+class Mention implements \Stringable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -32,8 +31,8 @@ class Mention
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $sigle = null;
 
-    #[ORM\ManyToOne(cascade: ['persist'], inversedBy: 'mentions')]
-    private ?TypeDiplome $typeDiplome = null;
+    #[ORM\ManyToOne(targetEntity: Accreditation::class, inversedBy: 'mentions')]
+    private ?Accreditation $accreditation = null;
 
     #[ORM\OneToMany(mappedBy: 'mention', targetEntity: Formation::class)]
     private Collection $formations;
@@ -47,6 +46,13 @@ class Mention
     #[ORM\ManyToMany(targetEntity: Domaine::class, inversedBy: 'mentions')]
     private Collection $domaines;
 
+    /**
+     * @var Collection<int, TypeDiplome>
+     */
+    #[ORM\ManyToMany(targetEntity: TypeDiplome::class, inversedBy: 'mentions')]
+    #[ORM\JoinTable(name: 'mention_type_diplome')]
+    private Collection $typeDiplomes;
+
     public function isUtilise(): bool
     {
         return $this->formations->count() > 0;
@@ -56,6 +62,12 @@ class Mention
     {
         $this->formations = new ArrayCollection();
         $this->domaines = new ArrayCollection();
+        $this->typeDiplomes = new ArrayCollection();
+    }
+
+    public function __toString(): string
+    {
+        return $this->display();
     }
 
     public function getId(): ?int
@@ -87,14 +99,14 @@ class Mention
         return $this;
     }
 
-    public function getTypeDiplome(): ?TypeDiplome
+    public function getAccreditation(): ?Accreditation
     {
-        return $this->typeDiplome;
+        return $this->accreditation;
     }
 
-    public function setTypeDiplome(?TypeDiplome $typeDiplome): self
+    public function setAccreditation(?Accreditation $accreditation): self
     {
-        $this->typeDiplome = $typeDiplome;
+        $this->accreditation = $accreditation;
 
         return $this;
     }
@@ -131,7 +143,12 @@ class Mention
 
     public function display(): string
     {
-        return $this->typeDiplome?->getLibelleCourt().' '.$this->getLibelle();
+        $texte = $this->libelle ?? '';
+        if ($this->sigle !== null && trim($this->sigle) !== '') {
+            $texte .= ' (' . $this->sigle . ')';
+        }
+
+        return $texte;
     }
 
     public function getCodeApogee(): ?string
@@ -166,6 +183,30 @@ class Mention
     public function removeDomaine(Domaine $domaine): static
     {
         $this->domaines->removeElement($domaine);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TypeDiplome>
+     */
+    public function getTypeDiplomes(): Collection
+    {
+        return $this->typeDiplomes;
+    }
+
+    public function addTypeDiplome(TypeDiplome $typeDiplome): static
+    {
+        if (!$this->typeDiplomes->contains($typeDiplome)) {
+            $this->typeDiplomes->add($typeDiplome);
+        }
+
+        return $this;
+    }
+
+    public function removeTypeDiplome(TypeDiplome $typeDiplome): static
+    {
+        $this->typeDiplomes->removeElement($typeDiplome);
 
         return $this;
     }

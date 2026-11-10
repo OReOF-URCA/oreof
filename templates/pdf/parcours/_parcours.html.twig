@@ -232,6 +232,9 @@
             {% if typeDiplome is defined and typeDiplome is not null %}
                 <span class="pdf-badge">{{ typeDiplome|typeDiplome }}</span>
             {% endif %}
+            {% if formation != null and formation.accreditation != null %}
+                <span class="pdf-badge">{{ formation.accreditation.libelle }}</span>
+            {% endif %}
             {% if parcours.typeParcours %}
                 <span class="pdf-badge pdf-badge-warning">{{ parcours.typeParcours.libelle }}</span>
             {% endif %}
@@ -261,6 +264,11 @@
 
                     <dt>Formation / Mention</dt>
                     <dd>{{ formation != null ? formation.display : 'Non définie' }}</dd>
+
+                    {% if formation != null and formation.accreditation != null %}
+                        <dt>Période d'accréditation</dt>
+                        <dd><span class="pdf-badge">{{ formation.accreditation.libelle }}</span></dd>
+                    {% endif %}
 
                     {% if not parcours.isParcoursDefaut %}
                         <dt>Intitulé du parcours</dt>

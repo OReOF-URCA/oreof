@@ -200,6 +200,27 @@ final class MenuItem
         );
     }
 
+    public function withDescription(?string $description): self
+    {
+        return new self(
+            key: $this->key,
+            label: $this->label,
+            route: $this->route,
+            routeParams: $this->routeParams,
+            icon: $this->icon,
+            role: $this->role,
+            permission: $this->permission,
+            subject: $this->subject,
+            children: $this->children,
+            showInTopbar: $this->showInTopbar,
+            showInOverview: $this->showInOverview,
+            description: $description,
+            displayMode: $this->displayMode,
+            column: $this->column,
+            position: $this->position,
+        );
+    }
+
     public function description(): ?string
     {
         return $this->description;

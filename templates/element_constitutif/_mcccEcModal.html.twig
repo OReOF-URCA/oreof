@@ -1,4 +1,4 @@
-<h2>MCCC pour {{ ec.ficheMatiere != null ? ec.ficheMatiere.libelle : ec.libelle }}</h2>
+<h2>{{ 'element_constitutif.mccc_ec_modal.titre'|trans({'%libelle%': ec.ficheMatiere != null ? ec.ficheMatiere.libelle : ec.libelle}, 'modal') }}</h2>
 <form method="post"
         {{ stimulus_controller('ec--mccc', {
             urlUpdate: path('app_parcours_ec_update'),
@@ -11,8 +11,7 @@
                 <div class="row">
                     {% if isMcccImpose == false and isEctsImpose == false %}
                         <div class="col-12">
-                            <p>Cet EC est raccroché, par défaut, les données sont celles de l'EC d'origine issue du
-                                parcours
+                            <p>{{ 'element_constitutif.mcccEcModal.cet_ec_est_raccroche_par_defaut'|trans({}, 'modal') }}
                                 <strong>{{ ec.parcours != null ? ec.parcours.display : '-non précisé-' }}</strong>
                             </p>{# todo: Si UE ou Semestre raccroché mettre le modal non editable et impossible spécifique #}
                         </div>
@@ -27,7 +26,7 @@
                                         {% if ec.ectsSpecifiques == true %}checked{% endif %}
                                 >
                                 <label class="form-check-label"
-                                       for="ectsSpecifiques"> ECTS spécifiques pour cet EC dans ce parcours
+                                       for="ectsSpecifiques"> {{ 'element_constitutif.mcccEcModal.ects_specifiques_pour_cet_ec_dans'|trans({}, 'modal') }}
                                     <i class="fal fa-question-circle ms-1" data-controller="tooltip"
                                        data-tooltip-placement-value="bottom"
                                        title="{{ 'parcours_ec.helps.ectsSpecifiques'|trans({}, 'help') }}"></i>
@@ -47,7 +46,7 @@
                                         {% if ec.mcccSpecifiques == true %}checked{% endif %}
                                 >
                                 <label class="form-check-label"
-                                       for="mcccSpecifiques"> MCCC spécifiques pour cet EC dans ce parcours
+                                       for="mcccSpecifiques"> {{ 'element_constitutif.mcccEcModal.mccc_specifiques_pour_cet_ec_dans'|trans({}, 'modal') }}
                                     <i class="fal fa-question-circle ms-1" data-controller="tooltip"
                                        data-tooltip-placement-value="bottom"
                                        title="{{ 'parcours_ec.helps.mcccSpecifiques'|trans({}, 'help') }}"></i>
@@ -56,10 +55,10 @@
                         </div>
                     {% else %}
                         {% if isEctsImpose == true %}
-                            Les ECTS sont imposés par la fiche matière. Les données ne sont pas modifiables.
+                            {{ 'element_constitutif.mcccEcModal.les_ects_sont_imposes_par_la'|trans({}, 'modal') }}
                         {% endif %}
                         {% if isMcccImpose == true %}
-                            Les MCCC sont imposées par la fiche matière. Les données ne sont pas modifiables.
+                            {{ 'element_constitutif.mcccEcModal.les_mccc_sont_imposees_par_la'|trans({}, 'modal') }}
                         {% endif %}
                     {% endif %}
                 </div>
@@ -100,9 +99,9 @@
                 </div>
             </div>
             {% if ec.ecParent != null and isEctsImpose == false %}
-                <p>Les ECTS sont fixés par l'EC parent</p>
+                <p>{{ 'element_constitutif.mcccEcModal.les_ects_sont_fixes_par_l'|trans({}, 'modal') }}</p>
             {% elseif isEctsImpose %}
-                <p>Les ECTS sont imposés par la fiche EC/matière</p>
+                <p>{{ 'element_constitutif.mcccEcModal.les_ects_sont_imposes_par_la_2'|trans({}, 'modal') }}</p>
             {% endif %}
         {% endif %}
 
@@ -132,7 +131,7 @@
                     {{ stimulus_target('required_text_area', 'displayDiv') }}
                 >
                     <label for="quitusArgumentaire" class="form-label">
-                        Argumentaire du quitus<span class="required"></span>
+                        {{ 'element_constitutif.mcccEcModal.argumentaire_du_quitus'|trans({}, 'modal') }}<span class="required"></span>
                     </label>
                     {% set quitusText = ec.mcccSpecifiques and ec.quitus
                         ? ec.quitusText
@@ -152,7 +151,7 @@
                     <div class="text-danger small my-2 {{ quitusText|length > minimumLengthTextArea ? 'd-none' : ''}}"
                         {{ stimulus_target('required_text_area', 'invalidFieldText') }}
                     >
-                        L'argumentaire doit faire au moins 15 caractères.
+                        {{ 'element_constitutif.mcccEcModal.l_argumentaire_doit_faire_au_moins'|trans({}, 'modal') }}
                     </div>
                 </div>
             </div>
@@ -214,7 +213,7 @@
             {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
     >
         <i class="fal fa-floppy-disk"></i>
-        Enregistrer
+        {{ 'element_constitutif.mcccEcModal.enregistrer'|trans({}, 'modal') }}
     </button>
 
     {% if is_granted('ROLE_ADMIN') %}
@@ -222,7 +221,7 @@
                 {{ stimulus_action('ec--mccc', 'forceRecompute', 'click') }}
         >
             <i class="fal fa-rotate-right"></i>
-            Forcer le recalcul MCCC
+            {{ 'element_constitutif.mcccEcModal.forcer_le_recalcul_mccc'|trans({}, 'modal') }}
         </button>
     {% endif %}
 

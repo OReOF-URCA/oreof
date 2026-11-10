@@ -2,31 +2,31 @@
     <div class="row" >
         {{ component('alerte', {
             'type': 'info',
-            'message': 'Veuillez sélectionner au moins un type de diplôme et au moins un domaine'
+            'message': 'Veuillez sélectionner au moins une période d\'accréditation et au moins un domaine'
         }) }}
         <div class="col-6" {{ stimulus_controller('check_all', {
-            'idCheckAll': 'typediplome',
-            'classCheckAll': '.typediplome',
+            'idCheckAll': 'accreditation',
+            'classCheckAll': '.accreditation',
         }) }}>
             <div class="form-check mt-2">
                 <input type="checkbox"
-                       name="allTypeDiplome"
+                       name="allAccreditation"
                        class="form-check-input"
                        value="all"
-                       id="typediplome" {{ stimulus_action('check_all', 'checkAll', 'click', {'classCheckAll' : 'typediplome', 'idCheckAll': 'typediplome'}) }}>
-                <label for="typediplome" class="form-check-label">
-                    Tous les types de diplôme
+                       id="accreditation" {{ stimulus_action('check_all', 'checkAll', 'click', {'classCheckAll' : 'accreditation', 'idCheckAll': 'accreditation'}) }}>
+                <label for="accreditation" class="form-check-label">
+                    {{ 'config.mention.codificationModal.toutes_les_periodes'|trans({}, 'modal') }}
                 </label>
             </div>
-            {% for typeDiplome in typeDiplomes %}
+            {% for accreditation in accreditations %}
                 <div class="form-check">
                     <input type="checkbox"
-                           name="typediplome[]"
-                           class="form-check-input typediplome"
-                           value="{{ typeDiplome.id }}"
-                           id="td_{{ typeDiplome.id }}" {{ stimulus_action('check_all', 'check', 'click', {'classcheckall' : 'typediplome', 'idcheckall': 'typediplome'}) }}>
-                    <label for="td_{{ typeDiplome.id }}" class="form-check-label">
-                        {{ typeDiplome.libelle }}
+                           name="accreditation[]"
+                           class="form-check-input accreditation"
+                           value="{{ accreditation.id }}"
+                           id="acc_{{ accreditation.id }}" {{ stimulus_action('check_all', 'check', 'click', {'classcheckall' : 'accreditation', 'idcheckall': 'accreditation'}) }}>
+                    <label for="acc_{{ accreditation.id }}" class="form-check-label">
+                        {{ accreditation.libelle }}
                     </label>
                 </div>
             {% endfor %}
@@ -42,7 +42,7 @@
                        class="form-check-input"
                        id="domaine" {{ stimulus_action('check_all', 'checkAll', 'click', {'classCheckAll' : 'domaine', 'idCheckAll': 'domaine'}) }}>
                 <label for="domaine" class="form-check-label">
-                    Tous les domaines
+                    {{ 'config.mention.codificationModal.tous_les_domaines'|trans({}, 'modal') }}
                 </label>
             </div>
             {% for domaine in domaines %}
@@ -63,6 +63,6 @@
     <button type="submit" class="btn btn-success"
             {{ stimulus_action('base','sauvegardeFormModal', 'click') }}>
         <i class="fal fa-floppy-disk"></i>
-        Générer les codes
+        {{ 'config.mention.codificationModal.generer_les_codes'|trans({}, 'modal') }}
     </button>
 </form>

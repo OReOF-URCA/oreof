@@ -9,6 +9,7 @@
 
 namespace App\Form;
 
+use App\Entity\Accreditation;
 use App\Entity\Domaine;
 use App\Entity\Mention;
 use App\Entity\TypeDiplome;
@@ -23,16 +24,16 @@ class MentionType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('typeDiplome', EntityType::class, [
-                'class' => TypeDiplome::class,
+            ->add('accreditation', EntityType::class, [
+                'class' => Accreditation::class,
                 'query_builder' => static function ($er) {
-                    return $er->createQueryBuilder('t')
-                        ->orderBy('t.libelle', 'ASC');
+                    return $er->createQueryBuilder('a')
+                        ->orderBy('a.anneeDebut', 'DESC');
                 },
                 'autocomplete' => true,
                 'choice_label' => 'libelle',
-                'label' => 'Type de diplôme',
-                'attr' => ['data-action' => 'change->formation#changeTypeDiplome']
+                'label' => 'Période d\'accréditation',
+                'required' => true,
             ])
             ->add('libelle', TextType::class, [
                 'label' => 'Libellé',
@@ -43,7 +44,7 @@ class MentionType extends AbstractType
                 'help' => 'Le sigle est la dénomination courte de la mention, s\'il existe.',
                 'required' => false,
             ])
-            ->add('domaine', EntityType::class, [
+            ->add('domaines', EntityType::class, [
                 'query_builder' => static function ($er) {
                     return $er->createQueryBuilder('d')
                         ->orderBy('d.libelle', 'ASC');
@@ -51,11 +52,27 @@ class MentionType extends AbstractType
                 'autocomplete' => true,
                 'class' => Domaine::class,
                 'choice_label' => 'libelle',
+                'multiple' => true,
+                'required' => true,
+                'label' => 'Domaine(s)',
+            ])
+            ->add('typeDiplomes', EntityType::class, [
+                'query_builder' => static function ($er) {
+                    return $er->createQueryBuilder('t')
+                        ->orderBy('t.libelle', 'ASC');
+                },
+                'class' => TypeDiplome::class,
+                'choice_label' => 'libelle',
+                'multiple' => true,
+                'expanded' => true,
+                'required' => false,
+                'label' => 'Type(s) de diplôme possible(s)',
+                'help' => 'Cochez un ou plusieurs type(s) de diplôme possibles pour cette mention.',
             ])
             ->add('codeApogee', TextType::class, [
                 'label' => 'Code Apogée',
                 'attr' => ['maxlength' => 1],
-                'required' => true,
+                'required' => false,
             ])
         ;
     }

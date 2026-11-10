@@ -10,6 +10,7 @@
 namespace App\Form;
 
 use App\DTO\MentionDto;
+use App\Entity\Accreditation;
 use App\Entity\Domaine;
 use App\Entity\TypeDiplome;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -26,19 +27,17 @@ class MentionDtoType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('typeDiplomeId', EntityType::class, [
-                'class' => TypeDiplome::class,
+            ->add('accreditation', EntityType::class, [
+                'class' => Accreditation::class,
                 'query_builder' => static function ($er) {
-                    return $er->createQueryBuilder('t')
-                        ->orderBy('t.libelle', 'ASC');
+                    return $er->createQueryBuilder('a')
+                        ->orderBy('a.anneeDebut', 'DESC');
                 },
                 'autocomplete' => true,
                 'choice_label' => 'libelle',
-                'choice_value' => 'id',
-                'label' => 'Type de diplôme',
-                'placeholder' => 'Sélectionnez un type de diplôme',
+                'label' => 'Période d\'accréditation',
+                'placeholder' => 'Sélectionnez une période d\'accréditation',
                 'required' => true,
-                'property_path' => 'typeDiplomeId',
             ])
             ->add('libelle', TextType::class, [
                 'label' => 'Libellé',
@@ -67,12 +66,23 @@ class MentionDtoType extends AbstractType
                 },
                 'autocomplete' => true,
                 'choice_label' => 'libelle',
-                'choice_value' => 'id',
                 'label' => 'Domaine(s)',
                 'placeholder' => 'Sélectionnez un ou plusieurs domaine(s)',
                 'required' => true,
                 'multiple' => true,
-                'property_path' => 'domaines',
+            ])
+            ->add('typeDiplomes', EntityType::class, [
+                'class' => TypeDiplome::class,
+                'query_builder' => static function ($er) {
+                    return $er->createQueryBuilder('t')
+                        ->orderBy('t.libelle', 'ASC');
+                },
+                'choice_label' => 'libelle',
+                'label' => 'Type(s) de diplôme possible(s)',
+                'multiple' => true,
+                'expanded' => true,
+                'required' => false,
+                'help' => 'Cochez un ou plusieurs type(s) de diplôme possibles pour cette mention.',
             ])
             ->add('codeApogee', TextType::class, [
                 'label' => 'Code Apogée',
@@ -81,7 +91,7 @@ class MentionDtoType extends AbstractType
                     'placeholder' => 'A-Z, 0-9',
                     'autocomplete' => 'off',
                 ],
-                'required' => true,
+                'required' => false,
                 'help' => 'Un seul caractère (lettre ou chiffre)',
             ]);
     }
@@ -92,7 +102,7 @@ class MentionDtoType extends AbstractType
             'data_class' => MentionDto::class,
             'translation_domain' => 'form',
             'attr' => [
-                'novalidate' => 'novalidate', // Désactive la validation HTML5 pour utiliser la validation côté serveur
+                'novalidate' => 'novalidate',
                 'autocomplete' => 'off',
             ],
         ]);
