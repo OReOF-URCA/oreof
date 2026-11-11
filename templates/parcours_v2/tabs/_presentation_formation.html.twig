@@ -1,27 +1,15 @@
 <turbo-frame id="tab-content">
     {{ include('parcours_v2/tabs/_header.html.twig', {tabKey: 'presentation_formation', withNoDone: true}) }}
 
-    <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar">
-        {{ include('typeDiplome/'~constant('TEMPLATE_FOLDER', typeD)~'/affiche/_presentationFormation.html.twig', {
-            formation: parcours.formation
+    <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar space-y-6">
+        {{ include('formation_v2/sections/_identiteFormation.html.twig', {
+            formation: parcours.formation,
+            typeDiplome: typeDiplome ?? parcours.formation.typeDiplome
         }) }}
 
-
-
-        {#        {% form_theme form 'communs/form_theme_v2.html.twig' %} #}
-        {#        {{ form_start(form, { #}
-        {#            attr: { #}
-        {#                id: 'tab_form_presentation_formation', #}
-        {#                'data-controller': 'autosave', #}
-        {#                'data-autosave-url-value': path('parcours_v2_tab_autosave', { id: parcours.id, tabKey: 'presentation_formation' }), #}
-        {#                'data-action': 'change->autosave#queue' #}
-
-        {#            } #}
-        {#        }) }} #}
-
-        {#        {{ form_errors(form) }} #}
-        {#        {{ form_widget(form) }} #}
-
-        {#        {{ form_end(form) }} #}
+        {{ include('formation_v2/sections/_presentationFormation.html.twig', {
+            formation: parcours.formation,
+            typeDiplome: typeDiplome ?? parcours.formation.typeDiplome
+        }) }}
     </div>
 </turbo-frame>
