@@ -32,8 +32,8 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 | Commande | Rôle | Options |
 |---|---|---|
 | `app:calcul-volume-horaire` | calcule et stocke les volumes horaires de tous les parcours | argument `campagne`, `--all`, `--historique` |
-| `app:formation:check-completion` | vérifie/met à jour la complétion | `--formation`, `--parcours`, `--fichematiere`, `--all`, `--dry-run`, `--save`, `--format`, `--output` |
-| `app:update-remplissage` | taux de remplissage des parcours | `--campagne` |
+| `app:formation:check-completion` | vérifie/met à jour la complétion des onglets de formation (`formation_tab_state`) | `--formation`, `--parcours`, `--fichematiere`, `--all`, `--dry-run`, `--save`, `--format`, `--output` |
+| `app:parcours:check-completion` | vérifie/met à jour la complétion des onglets de parcours (`parcours_tab_state`) et optionnellement des semestres | `--parcours`, `--formation`, `--campagne`, `--all`, `--with-semestres`, `--dry-run`, `--save`, `--format`, `--output` |
 | `app:update-pourcentage` | champ pourcentage des `FicheMatiere` | — |
 | `app:update-codification` | génère la codification des formations | — |
 | `app:update-code-bcc`, `app:update-ac` | codes BCC / apprentissages critiques | — |
