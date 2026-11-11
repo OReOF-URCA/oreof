@@ -7,6 +7,7 @@ use App\Repository\ParcoursTabStateRepository;
 use App\Service\Parcours\ParcoursFieldUpdater;
 use App\Service\Parcours\ParcoursTabCompletionChecker;
 use App\Service\Parcours\ParcoursTabRegistry;
+use App\Utils\Access;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
@@ -28,6 +29,10 @@ final class ParcoursTabController extends AbstractController
         EntityManagerInterface     $em,
     ): Response
     {
+        if (!$this->isGranted('EDIT', $parcours) || !Access::isTabEditable($parcours, $tabKey)) {
+            return new Response('Forbidden', 403);
+        }
+
         $field = (string)$request->request->get('field');
         $value = $request->request->get('value');
 
@@ -58,6 +63,10 @@ final class ParcoursTabController extends AbstractController
         EntityManagerInterface     $em,
     ): Response
     {
+        if (!$this->isGranted('EDIT', $parcours) || !Access::isTabEditable($parcours, $tabKey)) {
+            return new Response('Forbidden', 403);
+        }
+
         ParcoursTabRegistry::assertTab($tabKey);
 
         $state = $states->getOrCreate($parcours, $tabKey);

@@ -1,5 +1,6 @@
 <turbo-frame id="tab-content">
     {% set sem = semestre.semestre %}
+    {% set canEdit = canEditTab ?? isTabEditable(parcours, 'semestre') %}
     {% if semestre == null %}
         Semestre inexistant
     {% else %}
@@ -35,6 +36,7 @@
                 </div>
             </div>
             <div class="flex gap-3">
+                {% if canEdit %}
                 {{ component('dropdown_actions', {
                     label: 'Actions',
                     help: 'Actions disponibles pour ce semestre',
@@ -72,6 +74,7 @@
                             parcours:parcours.id}), danger: true},
                     ]
                 }) }}
+                {% endif %}
 
                 <div class="text-right">
                     <p class="text-[10px] font-black text-secondary-400 uppercase tracking-widest">
@@ -115,7 +118,22 @@
         {% endif %}
 
         <div class="flex-1 overflow-y-auto pt-3 custom-scrollbar">
-            {% if semestreParcours.semestre.nonDispense == true %}
+            {% if not canEdit %}
+                <twig:alerte type="warning">
+                    Ce semestre n'est pas modifiable dans le niveau d'ouverture actuel du parcours (modification sans passage en CFVU). Affichage en lecture seule.
+                </twig:alerte>
+                <div class="mt-4">
+                    {{ include([
+                        'typeDiplome/' ~ constant('TEMPLATE_FOLDER', typeD) ~ '/structure/v2/_structure_semestre.html.twig',
+                        'typeDiplome/default/structure/v2/_structure_semestre.html.twig'
+                    ], {
+                        ordre: semestreParcours.ordre,
+                        presentiel: parcours.modalitesEnseignementValue in ['0', '1', 'presentielle', 'hybride'],
+                        distanciel: parcours.modalitesEnseignementValue in ['2', '1', 'distancielle', 'hybride'],
+                        diffSemestre: null
+                    }) }}
+                </div>
+            {% elseif semestreParcours.semestre.nonDispense == true %}
                 <!-- html -->
                 <div
                         class="border-3 border-dashed border-orange-200 bg-orange-50 text-orange-700 p-4 rounded-sm flex items-center justify-between gap-4"

@@ -12,6 +12,7 @@ use App\Repository\ElementConstitutifRepository;
 use App\Service\Parcours\ParcoursHoursComparator;
 use App\Service\Validation\ValidationDirtyMarker;
 use App\TypeDiplome\TypeDiplomeResolver;
+use App\Utils\Access;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,6 +33,11 @@ class ParcoursQuickHoursController extends BaseController
         ParcoursHoursComparator $hoursComparator,
         BreadcrumbService $breadcrumb
     ): Response {
+        if (!$this->isGranted('EDIT', $parcours) || !Access::isTabEditable($parcours, 'maquette')) {
+            $this->addFlash('warning', 'La saisie rapide des heures n\'est pas disponible dans le niveau d\'ouverture actuel du parcours.');
+            return $this->redirectToRoute('parcours_v2_modifier', ['parcours' => $parcours->getId()]);
+        }
+
         $formation = $parcours->getFormation();
         if ($formation !== null) {
             $breadcrumb->add(
@@ -74,6 +80,10 @@ class ParcoursQuickHoursController extends BaseController
         ValidationDirtyMarker $dirtyMarker,
         EntityManagerInterface $entityManager
     ): JsonResponse {
+        if (!$this->isGranted('EDIT', $parcours) || !Access::isTabEditable($parcours, 'maquette')) {
+            return new JsonResponse(['error' => 'La maquette n\'est pas modifiable dans cet état.'], 403);
+        }
+
         $data = json_decode($request->getContent(), true) ?? $request->request->all();
 
         $ficheMatiere = $elementConstitutif->getFicheMatiere();

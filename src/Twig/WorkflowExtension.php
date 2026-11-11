@@ -58,6 +58,8 @@ class WorkflowExtension extends AbstractExtension
             new TwigFunction('isPublie', $this->isPublie(...)),
             new TwigFunction('isOuvrable', $this->isOuvrable(...)),
             new TwigFunction('isOuvert', $this->isOuvert(...)),
+            new TwigFunction('isEditable', $this->isEditable(...)),
+            new TwigFunction('isTabEditable', $this->isTabEditable(...)),
             new TwigFunction('isPlace', $this->isPlace(...)),
             new TwigFunction('isAccessible', $this->isAccessible(...)),
             new TwigFunction('hasHistorique', $this->hasHistorique(...)),
@@ -258,6 +260,16 @@ class WorkflowExtension extends AbstractExtension
     public function isOuvert(Parcours|Formation|DpeParcours $entity): bool
     {
         return Access::isOuvert($entity);
+    }
+
+    public function isEditable(Parcours|DpeParcours|null $entity): bool
+    {
+        return Access::isEditable($entity);
+    }
+
+    public function isTabEditable(Parcours|DpeParcours|null $entity, string $tab): bool
+    {
+        return Access::isTabEditable($entity, $tab);
     }
 
     private function getWorkflow(string $workflow): WorkflowInterface

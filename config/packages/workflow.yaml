@@ -484,38 +484,6 @@ framework:
             #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
-        reouvrir_tacite:
-          from: 'tacite_reconduction'
-          to: 'en_cours_redaction'
-          metadata:
-            type: reouvrir
-            button_class: 'warning'
-            button_icon: 'flowbite:undo-outline'
-            description: 'Relancer le parcours pour la nouvelle année'
-            context:
-              aliases:
-                argumentaire: motif
-            form:
-              fields: [ ]
-        #        reouvrir_tacite:
-        #          from: 'tacite_reconduction'
-        #          to: 'en_cours_redaction'
-        #          metadata:
-        #            recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
-        #            label: 'Réouvrir pour modification'
-        #            type: 'reouvrir'
-        #            description: 'Réouvrir le parcours reconduit pour modifications'
-        #            button_class: 'info'
-        #            button_icon: 'flowbite:edit-outline'
-        #            handler: "valider_commentaire"
-        #            form:
-        #              fields:
-        #                - name: argumentaire
-        #                  type: textarea
-        #                  required: true
-        #                  label: "Argumentaire"
-        #                  options:
-        #                    attr: { rows: 6 }
         ##### Rouvrir #####
         reouvrir_mccc:
           from: 'publie'

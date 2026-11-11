@@ -25,6 +25,7 @@ use App\Form\ParcoursStep7Type;
 use App\Repository\ParcoursRepository;
 use App\Repository\ParcoursTabStateRepository;
 use App\TypeDiplome\TypeDiplomeResolver;
+use App\Utils\Access;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -41,13 +42,28 @@ class ParcoursCompetencesController extends BaseController
         ParcoursTabStateRepository $statesRepo,
     ): Response
     {
+        if (!$this->isGranted('EDIT', $parcours)) {
+            $this->addFlash('danger', 'Le parcours est verrouillé ou vous n\'avez pas les droits de modification.');
+
+            $url = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+            $response = $this->redirect($url);
+            $response->headers->set('Turbo-Location', $url);
+
+            return $response;
+        }
+
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
         $listeParcours = $parcoursRepository->findBy(['formation' => $parcours->getFormation()]);
         $competences = $typeD->getStructureCompetences($parcours);
         $tabStates = $statesRepo->indexByTabKey($parcours);
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        $canEditTab = Access::isTabEditable($dpeParcours, 'competences');
 
         return $this->render('typeDiplome/' . $typeD->getTemplateFolder() . '/competences/_competence_edit.html.twig', [
             'parcours' => $parcours,
+            'dpeParcours' => $dpeParcours,
+            'canEditTab' => $canEditTab,
+            'typeD' => $typeD,
             'listeParcours' => $listeParcours,
             'competences' => $competences,
             'tabStates' => $tabStates,
@@ -60,10 +76,16 @@ class ParcoursCompetencesController extends BaseController
         Parcours            $parcours,
     ): Response
     {
+        if (!$this->isGranted('EDIT', $parcours) || !Access::isTabEditable($parcours, 'competences')) {
+            throw $this->createAccessDeniedException('Les compétences ne sont pas modifiables dans cet état.');
+        }
+
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
 
         return $this->render('typeDiplome/' . $typeD->getTemplateFolder() . '/competences/_competence_edit.html.twig', [
-            'parcours' => $parcours
+            'parcours' => $parcours,
+            'typeD' => $typeD,
+            'canEditTab' => true,
         ]);
     }
 
@@ -74,10 +96,16 @@ class ParcoursCompetencesController extends BaseController
         Parcours            $parcours,
     ): Response
     {
+        if (!$this->isGranted('EDIT', $parcours) || !Access::isTabEditable($parcours, 'competences')) {
+            throw $this->createAccessDeniedException('Les compétences ne sont pas modifiables dans cet état.');
+        }
+
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
 
         return $this->render('typeDiplome/' . $typeD->getTemplateFolder() . '/competences/_competence_edit.html.twig', [
-            'parcours' => $parcours
+            'parcours' => $parcours,
+            'typeD' => $typeD,
+            'canEditTab' => true,
         ]);
     }
 }

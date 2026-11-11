@@ -30,12 +30,14 @@
 {% endset %}
 
 {% block bouton_header %}
+    {% set canEditMaquette = isTabEditable(parcours, 'maquette') %}
     <twig:Button
-            href="{{ path('parcours_v2_saisie_rapide_heures', {parcours: parcours.id}) }}"
+            href="{{ canEditMaquette ? path('parcours_v2_saisie_rapide_heures', {parcours: parcours.id}) : '' }}"
             variant="warning"
             icon="icon:edit"
             label="Saisie rapide des heures"
-            tooltip="Ouvrir le mode tableur de saisie rapide des heures"
+            :disabled="not canEditMaquette"
+            tooltip="{{ canEditMaquette ? 'Ouvrir le mode tableur de saisie rapide des heures' : 'Non disponible en modification sans CFVU' }}"
     />
 
     <twig:Button
@@ -151,8 +153,11 @@
                    data-turbo-action="advance"
                    data-tabs-target="tab"
                 >
-                    <span class="flex items-center gap-3">
+                    <span class="flex items-center gap-2">
                         Compétences
+                        {% if not isTabEditable(parcours, 'competences') %}
+                            <twig:UX:Icon name="ph:lock-key" class="w-4 h-4 text-warning-500 shrink-0" title="Consultation seule (sans CFVU)" />
+                        {% endif %}
                     </span>
                     <span class="w-2 h-2 bg-{{ parcours.colorStep(3) }}-500 rounded-full"></span>
                 </a>
@@ -163,8 +168,11 @@
                         data-turbo-action="advance"
                         data-tabs-target="tab"
                         class="nav-link active w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold transition group">
-                    <span class="flex items-center gap-3">
+                    <span class="flex items-center gap-2">
                         Structure Maquette
+                        {% if not isTabEditable(parcours, 'maquette') %}
+                            <twig:UX:Icon name="ph:lock-key" class="w-4 h-4 text-warning-500 shrink-0" title="Consultation seule (sans CFVU)" />
+                        {% endif %}
                     </span>
                     <span id="tab_badge_maquette">
                       {{ include('communs/_badge.html.twig', { tabKey: 'maquette', status: tabStates['maquette'].status ?? 'red' }) }}

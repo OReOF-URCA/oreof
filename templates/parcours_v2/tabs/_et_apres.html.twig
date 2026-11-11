@@ -1,7 +1,16 @@
 <turbo-frame id="tab-content">
-    {{ include('parcours_v2/tabs/_header.html.twig', {tabKey: 'et_apres'}) }}
+    {% set canEdit = canEditTab ?? isTabEditable(parcours, 'et_apres') %}
+    {{ include('parcours_v2/tabs/_header.html.twig', {tabKey: 'et_apres', withNoDone: not canEdit}) }}
 
     <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar">
+        {% if not canEdit or form is null %}
+            <twig:alerte type="warning">
+                Cet onglet n'est pas modifiable dans le niveau d'ouverture actuel du parcours. Affichage en lecture seule.
+            </twig:alerte>
+            <div class="mt-4">
+                {{ include('parcours_v2/sections/_etApres.html.twig', {parcours: parcours}) }}
+            </div>
+        {% else %}
         {% form_theme form 'communs/form_theme_v2.html.twig' %}
         {{ form_start(form, {
             attr: {
@@ -124,6 +133,7 @@
 
 
         {{ form_end(form) }}
+        {% endif %}
     </div>
 
 </turbo-frame>

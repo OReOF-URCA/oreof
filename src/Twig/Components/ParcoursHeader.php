@@ -124,10 +124,7 @@ final class ParcoursHeader
 
     public function isEditable(): bool
     {
-        return in_array($this->place, [
-            'en_cours_redaction',
-            'en_cours_redaction_ss_cfvu',
-        ], true) || Access::isOuvert($this->dpeParcours);
+        return Access::isEditable($this->dpeParcours);
     }
 
     private function getPlace(): string

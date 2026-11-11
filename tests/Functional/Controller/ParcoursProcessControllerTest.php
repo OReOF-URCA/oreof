@@ -43,7 +43,7 @@ class ParcoursProcessControllerTest extends WebTestCase
         }
 
         // Appel de la modale pour une réouverture où TransitionModalViewBuilder retourne null
-        $client->request('GET', sprintf('/parcours/v2/process/reouvrir/%d/reouvrir_tacite', $dpeParcours->getId()));
+        $client->request('GET', sprintf('/parcours/v2/process/reouvrir/%d/reouvrir_tacite_mccc', $dpeParcours->getId()));
 
         $this->assertResponseIsSuccessful();
     }

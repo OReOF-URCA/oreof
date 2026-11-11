@@ -18,12 +18,19 @@ use App\Enums\TypeModificationDpeEnum;
 abstract class Access {
     public static function isAccessible(DpeParcours $dpeParcours, string $state = 'cfvu'): bool
     {
-        //todo: intégrer le isGranted ici ou dans les vues ?
-        if ($state === 'cfvu') {
-            return $dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC || $dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE;
+        if (!self::isEditable($dpeParcours)) {
+            return false;
         }
 
-        return $dpeParcours->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_TEXTE;
+        $places = array_keys($dpeParcours->getEtatValidation());
+        $currentPlace = $places[0] ?? null;
+
+        if ($state === 'cfvu') {
+            return $currentPlace !== 'en_cours_redaction_ss_cfvu'
+                && $dpeParcours->getEtatReconduction() !== TypeModificationDpeEnum::MODIFICATION_TEXTE;
+        }
+
+        return true;
     }
 
     public static function isAccessibleMention(Formation $formation, string $state): bool
@@ -80,5 +87,42 @@ abstract class Access {
         }
 
         return false;
+    }
+
+    public static function isEditable(Parcours|DpeParcours|null $entity): bool
+    {
+        if ($entity instanceof Parcours) {
+            $entity = GetDpeParcours::getFromParcours($entity);
+        }
+
+        if (!$entity instanceof DpeParcours || !self::isOuvert($entity)) {
+            return false;
+        }
+
+        $places = array_keys($entity->getEtatValidation());
+        $currentPlace = $places[0] ?? null;
+
+        return in_array($currentPlace, [
+            'en_cours_redaction',
+            'en_cours_redaction_ss_cfvu',
+            'soumis_dpe_composante_reserve_cfvu',
+        ], true);
+    }
+
+    public static function isTabEditable(Parcours|DpeParcours|null $entity, string $tab): bool
+    {
+        if ($entity instanceof Parcours) {
+            $entity = GetDpeParcours::getFromParcours($entity);
+        }
+
+        if (!$entity instanceof DpeParcours || !self::isEditable($entity)) {
+            return false;
+        }
+
+        return match ($tab) {
+            'maquette', 'semestre', 'annee', 'competences' => self::isAccessible($entity, 'cfvu'),
+            'presentation', 'descriptif', 'admission', 'et_apres', 'configuration' => self::isAccessible($entity, 'texte'),
+            default => false,
+        };
     }
 }
