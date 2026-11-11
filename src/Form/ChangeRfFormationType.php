@@ -29,7 +29,7 @@ class ChangeRfFormationType extends AbstractType
             ->add('user', InlineCreateEntitySelectType::class, [
                 'class' => User::class,
                 'label' => 'Nouveau (co-)responsable de formation',
-                'new_placeholder' => 'Email du responsable de la mention',
+                'new_placeholder' => 'Email du nouveau (co-)responsable de formation',
                 'placeholder' => 'Choisir dans la liste ou choisir "+" pour ajouter un utilisateur',
                 'required' => true,
             ])

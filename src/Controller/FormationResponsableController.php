@@ -156,7 +156,7 @@ class FormationResponsableController extends BaseController
         }
 
         return $turboStream->streamOpenModalFromTemplates(
-            'formation.change_rf.title',
+            new TranslatableKey('formation.change_rf.title', [], 'form'),
             'Dans : formation ' . $formation->getDisplay(),
             'formation_v2/change_rf/_demande.html.twig',
             [

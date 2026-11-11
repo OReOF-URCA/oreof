@@ -269,7 +269,7 @@ actualite.labels.texte: "Texte de l'actualité"
 actualite.labels.titre: "Titre de l'actualité"
 bloc_competence.labels.libelle: 'Libellé du bloc de compétences'
 but: 'Bachelor Universitaire de Technologie'
-change_rf_formation.labels.typeRf.label: 'la demande concerne le responsable ou Co-Responsale de la formation'
+change_rf_formation.labels.typeRf.label: 'La demande concerne le responsable ou le co-responsable de la formation'
 competence.labels.libelle: 'Libellé de la compétence'
 composante.labels.composanteParent: 'Composante parente'
 contact.labels.adresse.label: 'Adresse du contact'

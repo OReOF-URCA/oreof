@@ -237,3 +237,6 @@ plateforme:
 verifier.saisie.parcours.titre: 'Vérification de la saisie — %libelle%'
 verifier.saisie.parcours.description: 'Synthèse des points de contrôle et état de complétude du parcours.'
 
+
+validation.changeRf.valider.title: 'Valider la demande de changement de responsable'
+validation.changeRf.valider.subtitle: 'Vérifiez la demande, complétez les informations demandées puis enregistrez.'
