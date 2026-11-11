@@ -218,7 +218,7 @@ final class PublicationController extends AbstractController
             );
         } else {
             $urlMaquetteJson = $this->generateUrl(
-                'app_parcours_export_maquette_json_minimum',
+                'app_parcours_export_maquette_json_minimum_v2',
                 ['parcours' => $parcours->getId()],
                 UrlGeneratorInterface::ABSOLUTE_URL
             );

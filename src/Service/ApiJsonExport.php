@@ -98,6 +98,9 @@ class ApiJsonExport
                         ->findLastCfvuVersion($parcours);
                     if ($isV2 === false) {
                         $checkIsValidCurrentYearParcours = count($lastVersion) > 0 && $lheoXmlService->isValidLHEO($parcours);
+                        if(($parcours->getFormation()->getTypeDiplome()->isClassique() ?? false) === false) {
+                            $checkIsValidCurrentYearParcours = false;
+                        }
                     } elseif ($isV2 === true) {
                         $checkIsValidCurrentYearParcours = count($lastVersion) > 0 && $lheoV2->isValidLHEO($parcours);
                     }
@@ -210,6 +213,9 @@ class ApiJsonExport
                 foreach ($formationAnneeSuivante->getParcours() as $parcoursAnneeSuivante) {
                     if ($isV2 === false) {
                         $checkIsValidNextYearParcours = $lheoXmlService->isValidLHEO($parcoursAnneeSuivante);
+                        if (($parcoursAnneeSuivante?->getFormation()?->getTypeDiplome()?->isClassique() ?? false) === false) {
+                            $checkIsValidNextYearParcours = false;
+                        }
                     } elseif ($isV2 === true) {
                         $checkIsValidNextYearParcours = $lheoV2->isValidLHEO($parcoursAnneeSuivante);
                     }

@@ -113,6 +113,26 @@ class EtablissementController extends BaseController
                 'format' => 'html',
                 'empty_text' => 'Non renseigné',
             ])
+            ->addField('etablissementInformation.mentionHandicap', [
+                'label' => 'Mention Handicap (LHEO v2)',
+                'format' => 'html',
+                'empty_text' => 'Non renseigné'
+            ])
+            ->addField('etablissementInformation.savoirPlusOrientationInsertion', [
+                'label' => "En savoir plus sur l'orientation et l'insertion (LHEO v2)",
+                'format' => 'html',
+                'empty_text' => 'Non renseigné'
+            ])
+            ->addField('etablissementInformation.relationsInternationales', [
+                'label' => 'Relations internationales (LHEO v2)',
+                'format' => 'html',
+                'empty_text' => 'Non renseigné'
+            ])
+            ->addField('etablissementInformation.associationsEtudiantes', [
+                'label' => 'Associations Étudiantes (LHEO v2)',
+                'format' => 'html',
+                'empty_text' => 'Non renseigné'
+            ])
             ->addField('apiPlatformsList', [
                 'label' => 'APIs tierces configurées',
                 'empty_text' => 'Aucune API configurée',

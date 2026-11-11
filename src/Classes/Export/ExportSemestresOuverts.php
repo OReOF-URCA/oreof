@@ -14,6 +14,7 @@ use App\Classes\GetDpeParcours;
 use App\Entity\CampagneCollecte;
 use App\Entity\Parcours;
 use App\Entity\SemestreParcours;
+use App\Enums\TypeParcoursEnum;
 use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
@@ -64,6 +65,7 @@ class ExportSemestresOuverts implements ExportInterface
         $this->excelWriter->writeCellXY('M', 1, 'Semestre 6');
         $this->excelWriter->writeCellXY('N', 1, '# Mention');
         $this->excelWriter->writeCellXY('O', 1, '# parcours');
+        $this->excelWriter->writeCellXY('P', 1, 'Type du Parcours');
 
 
         $ligne = 2;
@@ -98,13 +100,15 @@ class ExportSemestresOuverts implements ExportInterface
 
                 $this->excelWriter->writeCellXY('N', $ligne, $formation->getId());
                 $this->excelWriter->writeCellXY('O', $ligne, $parcours->getId());
-
+                if($parcours->getTypeParcours() !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+                    $this->excelWriter->writeCellXY('P', $ligne, $parcours->getTypeParcours()->libelle());
+                }
                 $ligne++;
 
             }
         }
 
-
+        $this->excelWriter->getColumnsAutoSize('A', 'P');
         $this->fileName = Tools::FileName('CAP - Semestre - ' . (new DateTime())->format('d-m-Y-H-i'), 30);
     }
 

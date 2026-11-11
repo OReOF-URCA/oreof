@@ -12,6 +12,7 @@ namespace App\Classes\Export;
 use App\Classes\Excel\ExcelWriter;
 use App\Classes\GetHistorique;
 use App\Entity\CampagneCollecte;
+use App\Enums\TypeParcoursEnum;
 use App\Repository\FicheMatiereRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
@@ -51,6 +52,8 @@ class ExportListeFicheMatiere implements ExportInterface
         $this->excelWriter->writeCellXY(5, 1, 'Utilisée ?');
         $this->excelWriter->writeCellXY(6, 1, 'Parcours porteur');
         $this->excelWriter->writeCellXY(7, 1, 'Formation');
+        $this->excelWriter->writeCellXY(8, 1, 'Identifiant du Parcours Porteur');
+        $this->excelWriter->writeCellXY(9, 1, 'Type du Parcours Porteur');
 
         $ligne = 2;
         foreach ($fiches as $fiche) {
@@ -65,7 +68,12 @@ class ExportListeFicheMatiere implements ExportInterface
             $this->excelWriter->writeCellXY(7, $ligne,
                 $fiche->isHorsDiplome() === true ? 'Hors diplôme' : ($fiche->getParcours() !== null && $fiche->getParcours()->getFormation() !== null ? $fiche->getParcours()->getFormation()->getDisplayLong() : ''
                 ));
-
+            $this->excelWriter->writeCellXY(8, $ligne, $fiche->getParcours()?->getId() ?? "");
+            if($fiche->getParcours()?->getTypeParcours() !== null) {
+                if($fiche->getParcours()?->getTypeParcours() !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+                    $this->excelWriter->writeCellXY(9, $ligne, $fiche->getParcours()?->getTypeParcours()->libelle());
+                }
+            }
             $this->excelWriter->getColumnsAutoSize('A', 'M');
             $ligne++;
         }

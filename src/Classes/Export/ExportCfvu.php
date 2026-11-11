@@ -13,6 +13,7 @@ use App\Classes\Excel\ExcelWriter;
 use App\Classes\GetDpeParcours;
 use App\Classes\GetHistorique;
 use App\Entity\CampagneCollecte;
+use App\Enums\TypeParcoursEnum;
 use App\Repository\FormationRepository;
 use App\Service\ProjectDirProvider;
 use App\Utils\Tools;
@@ -53,6 +54,8 @@ class ExportCfvu implements ExportInterface
         $this->excelWriter->writeCellXY(8, 1, 'Validation Composante');
         $this->excelWriter->writeCellXY(9, 1, 'Présence PV');
         $this->excelWriter->writeCellXY(10, 1, 'Etat validation');
+        $this->excelWriter->writeCellXY(11, 1, 'Identifiant');
+        $this->excelWriter->writeCellXY(12, 1, 'Type du Parcours');
 
         $ligne = 2;
         foreach ($formations as $formation) {
@@ -80,9 +83,12 @@ class ExportCfvu implements ExportInterface
                 $dpeParcours = GetDpeParcours::getFromParcours($parcours);
                 $etatValidation = array_key_first($dpeParcours?->getEtatValidation() ?? []) ?? '-erreur état-';
                 $this->excelWriter->writeCellXY(10, $ligne, $etatValidation);
+                $this->excelWriter->writeCellXY(11, $ligne, $parcours->getId());
+                if($parcours->getTypeParcours() !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+                    $this->excelWriter->writeCellXY(12, $ligne, $parcours->getTypeParcours()->libelle());
+                }
 
-
-                $this->excelWriter->getColumnsAutoSize('A', 'J');
+                $this->excelWriter->getColumnsAutoSize('A', 'N');
                     $ligne++;
             }
         }
