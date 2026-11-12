@@ -6,6 +6,8 @@ namespace App\Tests\Unit\Service\Ai;
 
 use App\DTO\Comparison\FicheMatiereChangeItem;
 use App\DTO\Comparison\FicheMatiereChangeReport;
+use App\Entity\Etablissement;
+use App\Repository\EtablissementRepository;
 use App\Service\Ai\FicheMatiereAiSynthesizer;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
@@ -21,9 +23,9 @@ final class FicheMatiereAiSynthesizerTest extends TestCase
         $synthesizer = new FicheMatiereAiSynthesizer(
             httpClient: $httpClient,
             cache: $cache,
-            aiApiUrl: 'https://api.mistral.ai/v1/chat/completions',
-            aiApiKey: '',
-            aiModel: 'mistral-small-latest',
+            envAiUrl: 'https://api.mistral.ai/v1/chat/completions',
+            envAiKey: '',
+            envAiModel: 'mistral-small-latest',
         );
 
         $report = new FicheMatiereChangeReport(
@@ -61,7 +63,7 @@ final class FicheMatiereAiSynthesizerTest extends TestCase
         self::assertNotNull($result->fallbackReason);
     }
 
-    public function testSummarizeCallsLlmApiWhenApiKeyConfigured(): void
+    public function testSummarizeCallsLlmApiWhenApiKeyConfiguredViaEnv(): void
     {
         $mockResponse = new MockResponse((string) json_encode([
             'choices' => [
@@ -78,9 +80,9 @@ final class FicheMatiereAiSynthesizerTest extends TestCase
         $synthesizer = new FicheMatiereAiSynthesizer(
             httpClient: $httpClient,
             cache: $cache,
-            aiApiUrl: 'https://api.mistral.ai/v1/chat/completions',
-            aiApiKey: 'test-secret-key',
-            aiModel: 'mistral-small-latest',
+            envAiUrl: 'https://api.mistral.ai/v1/chat/completions',
+            envAiKey: 'test-secret-key',
+            envAiModel: 'mistral-small-latest',
         );
 
         $report = new FicheMatiereChangeReport(
@@ -109,6 +111,73 @@ final class FicheMatiereAiSynthesizerTest extends TestCase
         self::assertTrue($result->hasRegulatoryImpact);
         self::assertSame('La fiche matière évolue sur ses volumes horaires et ses crédits ECTS.', $result->summary);
         self::assertCount(2, $result->highlights);
+    }
+
+    public function testSummarizeUsesEtablissementConfiguration(): void
+    {
+        $etablissement = new Etablissement();
+        $etablissement->setLibelle('Université de Reims Champagne-Ardenne');
+        $etablissement->setApiKeys([
+            [
+                'plateforme' => 'Oratio (LLM)',
+                'url' => 'https://romeogate.univ-reims.fr/llm',
+                'login' => 'mistral-small-3.2-24b',
+                'apiKey' => 'sk-test-oratio-key',
+            ],
+        ]);
+
+        $etabRepo = $this->createStub(EtablissementRepository::class);
+        $etabRepo->method('findOneBy')->willReturn($etablissement);
+
+        $mockResponse = new MockResponse((string) json_encode([
+            'choices' => [
+                [
+                    'message' => [
+                        'content' => "Synthèse générée via Oratio ROMEO.\n- Modification majeure des volumes.",
+                    ],
+                ],
+            ],
+        ]));
+
+        $httpClient = new MockHttpClient([$mockResponse]);
+        $cache = new ArrayAdapter();
+        $synthesizer = new FicheMatiereAiSynthesizer(
+            httpClient: $httpClient,
+            cache: $cache,
+            etablissementRepository: $etabRepo,
+            envAiUrl: null,
+            envAiKey: null,
+            envAiModel: null,
+        );
+
+        $config = $synthesizer->resolveConfig();
+        self::assertSame('https://romeogate.univ-reims.fr/llm/chat/completions', $config['url']);
+        self::assertSame('sk-test-oratio-key', $config['apiKey']);
+        self::assertSame('mistral-small-3.2-24b', $config['model']);
+        self::assertTrue($synthesizer->isAiConfigured());
+
+        $report = new FicheMatiereChangeReport(
+            ficheId: 1,
+            ficheLibelle: 'Cours',
+            ficheSlug: 'cours',
+            sourceType: FicheMatiereChangeReport::SOURCE_SNAPSHOT_VALIDE,
+            sourceLabel: 'Snapshot 1',
+            hasSnapshotAvailable: true,
+            hasOrigineN1Available: false,
+            changes: [
+                new FicheMatiereChangeItem(
+                    category: FicheMatiereChangeItem::CATEGORY_VOLUMES,
+                    field: 'cm',
+                    label: 'CM',
+                    before: '10h',
+                    after: '20h',
+                ),
+            ],
+        );
+
+        $result = $synthesizer->summarize($report);
+        self::assertTrue($result->isAiGenerated);
+        self::assertSame('IA (mistral-small-3.2-24b)', $result->providerLabel);
     }
 }
 

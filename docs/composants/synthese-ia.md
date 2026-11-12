@@ -12,13 +12,25 @@ Quand lire : modification de l'analyseur d'écarts de fiche matière, du synthé
 | Route modale (`ROLE_ADMIN`) | `FicheMatiereController::syntheseModifications` (`/fiche-matiere/v2/{slug}/synthese-modifications`) | Paramètres GET optionnels : `source=auto|snapshot|origine_n1` et `refresh=1`. Retourne un flux Turbo ouvrant la modale. |
 | UI consultation | `templates/fiche_matiere_v2/voir.html.twig`, `templates/components/FicheMatiereHeader.html.twig` | Bandeau d'alerte en haut de la fiche si `changeReport.hasChanges` + boutons d'accès dans `FicheMatiereHeader` (`ROLE_ADMIN` uniquement). |
 
-## Configuration (`.env` / `.env.local`)
+## Configuration (Établissement ou `.env`)
+
+La configuration est double et hiérarchisée :
+
+1. **Priorité 1 : Configuration sur l'Établissement (Base de données / UI)** :
+   Dans l'interface administrateur (`Configuration > Établissement > APIs tierces` ou route `app_etablissement_api_keys`), ajouter une entrée :
+   - **Plateforme** : `Oratio (LLM)` (ou `ROMEO`, `LLM`, `IA`, `OpenAI`, `Mistral`)
+   - **URL** : ex. `https://romeogate.univ-reims.fr/llm` (auto-complète avec `/chat/completions`)
+   - **Clé API** : clé `sk-...`
+   - **Login (optionnel)** : nom du modèle cible (ex. `mistral-small-3.2-24b` ou `gpt-oss-120b`).
+
+2. **Priorité 2 : Variables d'environnement (`.env` / `.env.local`)** :
+   Si aucune configuration n'est définie sur l'établissement, le service lit les variables d'environnement :
 
 | Variable | Défaut | Description |
 |---|---|---|
-| `AI_API_URL` | `https://api.mistral.ai/v1/chat/completions` | Endpoint compatible OpenAI Chat Completions (Mistral, OpenAI, Ollama local, Albert/DINUM, vLLM). |
-| `AI_API_KEY` | *(vide)* | Clé Bearer. Si vide (hors endpoint `localhost`), le moteur local déterministe est utilisé sans erreur. |
-| `AI_MODEL` | `mistral-small-latest` | Nom du modèle cible envoyé dans le payload JSON. |
+| `AI_API_URL` | `https://romeogate.univ-reims.fr/llm` | Base URL ou endpoint complet de l'API LLM (auto-complète avec `/chat/completions` si omis). |
+| `AI_API_KEY` | *(vide)* | Clé individuelle `sk-...` obtenue auprès de ROMEO ou du fournisseur. Si vide (hors endpoint `localhost`), le moteur local déterministe est utilisé sans erreur. |
+| `AI_MODEL` | `mistral-small-3.2-24b` | Identifiant du modèle utilisé sur ROMEO / Oratio (ex: `mistral-small-3.2-24b`, `gpt-oss-120b`, `ilaas/llama-3.3-70b`). |
 
 ## Règles
 

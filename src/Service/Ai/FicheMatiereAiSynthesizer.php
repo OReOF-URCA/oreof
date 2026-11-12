@@ -7,6 +7,7 @@ namespace App\Service\Ai;
 use App\DTO\Comparison\AiDiffSummaryResult;
 use App\DTO\Comparison\FicheMatiereChangeItem;
 use App\DTO\Comparison\FicheMatiereChangeReport;
+use App\Repository\EtablissementRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -15,19 +16,17 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class FicheMatiereAiSynthesizer
 {
-    private const DEFAULT_API_URL = 'https://api.mistral.ai/v1/chat/completions';
-    private const DEFAULT_MODEL = 'mistral-small-latest';
-
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly CacheInterface $cache,
+        private readonly ?EtablissementRepository $etablissementRepository = null,
         private readonly ?LoggerInterface $logger = null,
         #[Autowire('%env(default::AI_API_URL)%')]
-        private readonly ?string $aiApiUrl = null,
+        private readonly ?string $envAiUrl = null,
         #[Autowire('%env(default::AI_API_KEY)%')]
-        private readonly ?string $aiApiKey = null,
+        private readonly ?string $envAiKey = null,
         #[Autowire('%env(default::AI_MODEL)%')]
-        private readonly ?string $aiModel = null,
+        private readonly ?string $envAiModel = null,
     ) {
     }
 
@@ -64,7 +63,7 @@ final class FicheMatiereAiSynthesizer
             return $this->buildDeterministicResult(
                 $report,
                 $hasRegulatoryImpact,
-                'Clé AI_API_KEY non configurée dans l\'environnement (.env.local) — synthèse déterministe locale activée.'
+                'Aucune configuration IA active (clé d\'API absente dans l\'établissement ou dans le fichier d\'environnement .env) — synthèse déterministe locale activée.'
             );
         }
 
@@ -88,33 +87,96 @@ final class FicheMatiereAiSynthesizer
         }
     }
 
+    /**
+     * Résout la configuration IA en cherchant :
+     * 1. Dans la configuration de l'établissement (Administration > Établissement > APIs tierces : Oratio, ROMEO, LLM, IA...)
+     * 2. Dans les variables d'environnement (AI_API_URL, AI_API_KEY, AI_MODEL)
+     *
+     * @return array{url: ?string, apiKey: ?string, model: ?string, source: string}
+     */
+    public function resolveConfig(): array
+    {
+        $etablissement = $this->etablissementRepository?->findOneBy([]);
+        $etabConfig = $etablissement?->getAiApiConfiguration();
+
+        if ($etabConfig !== null && !empty($etabConfig['url'])) {
+            $url = trim((string) $etabConfig['url']);
+            if (!str_ends_with($url, '/chat/completions')) {
+                $url = rtrim($url, '/') . '/chat/completions';
+            }
+
+            $apiKey = !empty($etabConfig['apiKey']) ? trim((string) $etabConfig['apiKey']) : null;
+            // Le champ 'login' de l'API tierce peut spécifier le modèle (ex: mistral-small-3.2-24b)
+            $model = !empty($etabConfig['login']) ? trim((string) $etabConfig['login']) : null;
+            if ($model === null && !empty($this->envAiModel)) {
+                $model = trim((string) $this->envAiModel);
+            }
+
+            return [
+                'url' => $url,
+                'apiKey' => $apiKey,
+                'model' => $model ?: 'default',
+                'source' => sprintf('Établissement (%s)', $etabConfig['plateforme']),
+            ];
+        }
+
+        $envUrl = trim((string) $this->envAiUrl);
+        $envKey = trim((string) $this->envAiKey);
+        $envModel = trim((string) $this->envAiModel);
+
+        if ($envUrl !== '') {
+            if (!str_ends_with($envUrl, '/chat/completions')) {
+                $envUrl = rtrim($envUrl, '/') . '/chat/completions';
+            }
+
+            return [
+                'url' => $envUrl,
+                'apiKey' => $envKey !== '' && $envKey !== 'change-me' ? $envKey : null,
+                'model' => $envModel !== '' ? $envModel : 'default',
+                'source' => 'Environnement (.env)',
+            ];
+        }
+
+        return [
+            'url' => null,
+            'apiKey' => null,
+            'model' => null,
+            'source' => 'none',
+        ];
+    }
+
     public function isAiConfigured(): bool
     {
-        $apiKey = trim((string) $this->aiApiKey);
-        if ($apiKey !== '' && $apiKey !== 'change-me') {
+        $config = $this->resolveConfig();
+        if ($config['url'] === null) {
+            return false;
+        }
+
+        if ($config['apiKey'] !== null) {
             return true;
         }
 
-        // Autoriser un endpoint local sans clé (ex: Ollama / vLLM sur localhost) si explicitement défini
-        $apiUrl = trim((string) $this->aiApiUrl);
-        if ($apiUrl !== '' && (str_contains($apiUrl, 'localhost') || str_contains($apiUrl, '127.0.0.1') || str_contains($apiUrl, 'host.docker.internal'))) {
-            return true;
-        }
-
-        return false;
+        // Autoriser un endpoint local sans clé (ex: Ollama / vLLM sur localhost)
+        $url = $config['url'];
+        return str_contains($url, 'localhost') || str_contains($url, '127.0.0.1') || str_contains($url, 'host.docker.internal');
     }
 
     private function callLlmApi(FicheMatiereChangeReport $report, bool $hasRegulatoryImpact): AiDiffSummaryResult
     {
-        $apiUrl = trim((string) $this->aiApiUrl) !== '' ? trim((string) $this->aiApiUrl) : self::DEFAULT_API_URL;
-        $model = trim((string) $this->aiModel) !== '' ? trim((string) $this->aiModel) : self::DEFAULT_MODEL;
-        $apiKey = trim((string) $this->aiApiKey);
+        $config = $this->resolveConfig();
+        $apiUrl = $config['url'];
+        if ($apiUrl === null) {
+            throw new \RuntimeException('URL de l\'API IA non configurée.');
+        }
+
+        $model = $config['model'] ?: 'default';
+        $apiKey = $config['apiKey'];
 
         $headers = [
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
         ];
-        if ($apiKey !== '' && $apiKey !== 'change-me') {
+        if ($apiKey !== null) {
             $headers['Authorization'] = 'Bearer ' . $apiKey;
         }
 
