@@ -64,9 +64,14 @@ class Export
 
     public function setTypeDocument(string $typeDocument): void
     {
-        $t = explode('-', $typeDocument);
-        $this->format = $t[0];
-        $this->typeDocument = $t[1];
+        if (str_contains($typeDocument, '-')) {
+            $t = explode('-', $typeDocument, 2);
+            $this->format = $t[0];
+            $this->typeDocument = $t[1];
+        } else {
+            $this->format = 'pdf';
+            $this->typeDocument = $typeDocument;
+        }
     }
 
     public function exportFormations(array $formations, ?CampagneCollecte $campagneCollecte = null): string
@@ -227,6 +232,6 @@ class Export
 
     private function exportSyntheseModifications(): string
     {
-        return $this->exportSyntheseModification->exportLink($this->formations, $this->campagneCollecte);
+        return $this->exportSyntheseModification->exportLink($this->formations, $this->campagneCollecte, $this->date);
     }
 }

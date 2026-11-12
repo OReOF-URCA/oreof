@@ -5,10 +5,13 @@ namespace App\Controller;
 use App\Classes\Export\ExportSyntheseModification;
 use App\Classes\GetDpeParcours;
 use App\DataTable\ConseilDocumentsDpeParcoursDataTable;
+use App\DTO\TranslatableKey;
 use App\Entity\Composante;
+use App\Form\CfvuExportDateType;
 use App\Message\Export;
 use App\Repository\ComposanteRepository;
 use App\Repository\DpeDemandeRepository;
+use App\Utils\TurboStreamResponseFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -52,11 +55,38 @@ class SyntheseModificationController extends BaseController
         ]);
     }
 
-    #[Route('/synthese/modifications/all', name: 'app_synthese_modification_export_all')]
+    #[Route('/synthese/modifications/all', name: 'app_synthese_modification_export_all', methods: ['GET', 'POST'])]
     public function exportSyntheseAll(
+        Request $request,
         DpeDemandeRepository $dpeParcoursRepository,
         MessageBusInterface $messageBus,
+        TurboStreamResponseFactory $turboStream,
     ): Response {
+        $form = $this->createForm(CfvuExportDateType::class, null, [
+            'action' => $this->generateUrl('app_synthese_modification_export_all'),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $turboStream->streamOpenModalFromTemplates(
+                new TranslatableKey('export.modal_cfvu_date.title', [], 'modal'),
+                new TranslatableKey('export.modal_cfvu_date.subtitle_synthese_all', [], 'modal'),
+                'export/_modal_cfvu_date.html.twig',
+                [
+                    'form' => $form->createView(),
+                ],
+                '_ui/_footer_submit_cancel.html.twig',
+                [
+                    'submitLabel' => 'export.modal_cfvu_date.submit_generate',
+                ],
+                $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK,
+            );
+        }
+
+        /** @var ?\DateTimeInterface $dateCfvu */
+        $dateCfvu = $form->get('dateCfvu')->getData();
+
         // récupèrer les formations qui sont ouvertes avec CFVU
         $dpes = $dpeParcoursRepository->findByCampagneWithModification($this->getCampagneCollecte());
         $formations = [];
@@ -73,11 +103,13 @@ class SyntheseModificationController extends BaseController
                 }
 
                 if ($dpe->getParcours() !== null) {
-                    $dpeParcours = GetDpeParcours::getFromParcours($dpe->getParcours());
+                    $parcours = $dpe->getParcours();
+                    $dpeParcours = GetDpeParcours::getFromParcours($parcours);
                     if ($dpeParcours !== null &&
                         (array_key_exists('soumis_cfvu', $dpeParcours->getEtatValidation())
                             || array_key_exists('non_ouverture_cfvu', $dpeParcours->getEtatValidation()))) {
-                        $formations[$formationId]['parcours'][] = $dpe->getParcours();
+                        $formations[$formationId]['parcours'][$parcours->getId()]['parcours'] = $parcours;
+                        $formations[$formationId]['parcours'][$parcours->getId()]['dpeDemande'] = $dpe;
                         $formations[$formationId]['hasModif'] = true;
                     }
                 }
@@ -88,25 +120,61 @@ class SyntheseModificationController extends BaseController
         $messageBus->dispatch(
             new Export(
                 $user instanceof \App\Entity\User ? $user->getId() : null,
-                'synthese_modification',
+                'pdf-synthese_modification',
                 $formations,
                 $this->getCampagneCollecte(),
-                null
+                $dateCfvu
             )
         );
+
+        if ($this->isTurboFrameRequest()) {
+            return $turboStream->streamToastSuccess(
+                'Les documents sont en cours de génération, un mail vous sera envoyé une fois les documents prêts.',
+                true,
+            );
+        }
 
         $this->addFlashBag('success', 'Les documents sont en cours de génération, un mail vous sera envoyé une fois les documents prêts.');
 
         return $this->redirectToRoute('app_synthese_modification_export_pdf');
     }
 
-    #[Route('/synthese/modifications/composante/{composante}', name: 'app_synthese_modification_export_composante')]
+    #[Route('/synthese/modifications/composante/{composante}', name: 'app_synthese_modification_export_composante', methods: ['GET', 'POST'])]
     public function exportSyntheseComposante(
+        Request $request,
         ExportSyntheseModification $exportSyntheseModification,
         MessageBusInterface $messageBus,
         DpeDemandeRepository $dpeParcoursRepository,
-        Composante          $composante
+        Composante          $composante,
+        TurboStreamResponseFactory $turboStream,
     ): Response {
+        $form = $this->createForm(CfvuExportDateType::class, null, [
+            'action' => $this->generateUrl('app_synthese_modification_export_composante', [
+                'composante' => $composante->getId(),
+            ]),
+            'method' => 'POST',
+        ]);
+        $form->handleRequest($request);
+
+        if (!$form->isSubmitted() || !$form->isValid()) {
+            return $turboStream->streamOpenModalFromTemplates(
+                new TranslatableKey('export.modal_cfvu_date.title', [], 'modal'),
+                new TranslatableKey('export.modal_cfvu_date.subtitle_synthese_composante', ['%composante%' => (string) $composante->getLibelle()], 'modal'),
+                'export/_modal_cfvu_date.html.twig',
+                [
+                    'form' => $form->createView(),
+                ],
+                '_ui/_footer_submit_cancel.html.twig',
+                [
+                    'submitLabel' => 'export.modal_cfvu_date.submit_generate',
+                ],
+                $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK,
+            );
+        }
+
+        /** @var ?\DateTimeInterface $dateCfvu */
+        $dateCfvu = $form->get('dateCfvu')->getData();
+
         //récupère toutes les formations de la composante qui sont ouvertes en CFVU
         $dpes = $dpeParcoursRepository->findParcoursByComposante($this->getCampagneCollecte(), $composante);
 
@@ -147,9 +215,16 @@ class SyntheseModificationController extends BaseController
                 'pdf-synthese_modification',
                 $formations,
                 $this->getCampagneCollecte(),
-                null
+                $dateCfvu
             )
         );
+
+        if ($this->isTurboFrameRequest()) {
+            return $turboStream->streamToastSuccess(
+                'Les documents sont en cours de génération, un mail vous sera envoyé une fois les documents prêts.',
+                true,
+            );
+        }
 
         $this->addFlashBag('success', 'Les documents sont en cours de génération, un mail vous sera envoyé une fois les documents prêts.');
 

@@ -2,6 +2,7 @@
 
 namespace App\Form;
 
+use App\Form\Type\CfvuDateType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -29,7 +30,9 @@ class ChangeRfValidationType extends AbstractType
         }
 
         if (!empty($meta['hasDate'])) {
-            $builder->add('date', DateType::class, [
+            $dateFieldType = str_contains((string) $transition, 'cfvu') ? CfvuDateType::class : DateType::class;
+
+            $builder->add('date', $dateFieldType, [
                 'widget' => 'single_text',
                 'required' => true,
                 'constraints' => [
