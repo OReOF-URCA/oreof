@@ -9,6 +9,8 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -68,6 +70,16 @@ class EtablissementApiKeyEntryType extends AbstractType
                     new NotBlank(message: 'Veuillez renseigner la clé API ou le token.'),
                 ],
             ]);
+    }
+
+    public function finishView(FormView $view, FormInterface $form, array $options): void
+    {
+        if (isset($view->children['apiKey'])) {
+            $data = $form->get('apiKey')->getData();
+            if ($data !== null && $data !== '') {
+                $view->children['apiKey']->vars['value'] = (string) $data;
+            }
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
