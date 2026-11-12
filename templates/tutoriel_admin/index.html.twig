@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block bouton_header %}
+    <twig:Button label="Voir la page" variant="secondary" icon="icon:eye" size="sm" href="{{ path('app_tutoriel_index') }}" class="mx-2" />
+    <twig:Button label="Ajouter une vidéo" variant="success" icon="icon:add" size="sm" href="{{ path('app_tutoriel_admin_new') }}" class="mx-2" />
+{% endblock %}
+
+{% block content %}
+    {% if tutoriels is empty %}
+        <div class="rounded-lg border border-info-200 bg-info-50 p-4 text-info-900 dark:border-info-700 dark:bg-info-900/20 dark:text-info-200">
+            <p class="font-medium">Aucune vidéo pour le moment.</p>
+            <a href="{{ path('app_tutoriel_admin_new') }}" class="font-semibold text-info-700 hover:underline dark:text-info-300">Ajoutez la première vidéo.</a>
+        </div>
+    {% else %}
+        <div class="overflow-hidden rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                    <tr class="border-b border-secondary-200 bg-secondary-50 dark:border-secondary-700 dark:bg-secondary-800">
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-100">Ordre</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-100">Statut</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-100">Vidéo</th>
+                        <th class="px-4 py-3 text-left text-sm font-semibold text-secondary-900 dark:text-secondary-100">Lien à partager</th>
+                        <th class="px-4 py-3 text-right text-sm font-semibold text-secondary-900 dark:text-secondary-100">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                    {% for tutoriel in tutoriels %}
+                        <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                            <td class="px-4 py-3 text-sm text-secondary-700 dark:text-secondary-300">{{ tutoriel.ordre }}</td>
+                            <td class="px-4 py-3">
+                                {% if tutoriel.active %}
+                                    <twig:Badge label="Publiée" variant="success" icon="icon:check" />
+                                {% else %}
+                                    <twig:Badge label="Non publiée" variant="danger" icon="icon:close" />
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    {% if tutoriel.youtubeId %}
+                                        <img src="https://i.ytimg.com/vi/{{ tutoriel.youtubeId }}/default.jpg" alt="" loading="lazy" class="h-12 w-20 rounded object-cover">
+                                    {% endif %}
+                                    <div>
+                                        <strong class="text-secondary-900 dark:text-secondary-100">{{ tutoriel.titre }}</strong>
+                                        {% if tutoriel.duree %}<span class="text-sm text-secondary-500"> · {{ tutoriel.duree }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-sm">
+                                <a href="{{ path('app_tutoriel_show', {slug: tutoriel.slug}) }}" class="text-primary-700 hover:underline dark:text-primary-300">/tutoriels/{{ tutoriel.slug }}</a>
+                            </td>
+                            <td class="px-4 py-3 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <twig:CopyLinkButton url="{{ url('app_tutoriel_show', {slug: tutoriel.slug}) }}" label="Copier" copiedLabel="Copié" size="md" />
+                                    <twig:Button icon="icon:edit" variant="warning" size="md" href="{{ path('app_tutoriel_admin_edit', {id: tutoriel.id}) }}" tooltip="Modifier cette vidéo" />
+                                    <form method="post" action="{{ path('app_tutoriel_admin_delete', {id: tutoriel.id}) }}" class="inline"
+                                          onsubmit="return confirm('Supprimer cette vidéo ? Les liens déjà envoyés ne fonctionneront plus.');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete_tutoriel' ~ tutoriel.id) }}">
+                                        <twig:Button type="submit" icon="icon:delete" variant="danger" size="md" tooltip="Supprimer cette vidéo" />
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

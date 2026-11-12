@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = tutoriel.id ? 'Modifier une vidéo tutoriel' : 'Ajouter une vidéo tutoriel' %}
+
+{% block bouton_header %}
+    <twig:Button label="Retour à la liste" variant="secondary" icon="icon:arrow-left" size="sm" href="{{ path('app_tutoriel_admin_index') }}" class="mx-2" />
+{% endblock %}
+
+{% block content %}
+    {% form_theme form 'communs/form_theme_v2.html.twig' %}
+
+    <div class="mx-auto max-w-3xl rounded-2xl border border-secondary-200 bg-surface p-6 shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+        {{ form_start(form) }}
+        <div class="space-y-4">
+            {{ form_row(form.titre) }}
+            {{ form_row(form.youtubeUrl) }}
+            {{ form_row(form.slug) }}
+            {{ form_row(form.description) }}
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {{ form_row(form.duree) }}
+                {{ form_row(form.ordre) }}
+            </div>
+            {{ form_row(form.isActive) }}
+        </div>
+        <div class="mt-6 flex justify-end gap-2">
+            <twig:Button label="Annuler" variant="secondary" href="{{ path('app_tutoriel_admin_index') }}" size="md" />
+            <twig:Button label="Enregistrer" variant="success" :soft="false" type="submit" icon="icon:save" size="md" />
+        </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

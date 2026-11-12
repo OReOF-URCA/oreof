@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = tutoriel.titre %}
+{% set header_description = 'Tutoriel vidéo ORéOF' ~ (tutoriel.duree ? ' · ' ~ tutoriel.duree : '') %}
+
+{% block bouton_header %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <twig:Button label="Modifier" variant="secondary" icon="icon:edit" size="sm" href="{{ path('app_tutoriel_admin_edit', {id: tutoriel.id}) }}" class="mx-2" />
+    {% endif %}
+    <twig:Button label="Toutes les vidéos" variant="secondary" icon="mdi:view-grid-outline" size="sm" href="{{ path('app_tutoriel_index') }}" class="mx-2" />
+{% endblock %}
+
+{% block content %}
+    <div class="mx-auto max-w-5xl space-y-8">
+        {% if not tutoriel.active %}
+            <twig:alerte type="warning" message="Cette vidéo n'est pas publiée : seuls les administrateurs voient cette page." />
+        {% endif %}
+
+        <section class="overflow-hidden rounded-2xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
+            {% if tutoriel.youtubeId %}
+                <div class="aspect-video w-full bg-black">
+                    <iframe class="h-full w-full"
+                            src="https://www.youtube-nocookie.com/embed/{{ tutoriel.youtubeId }}?rel=0"
+                            title="{{ tutoriel.titre }}"
+                            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                            referrerpolicy="strict-origin-when-cross-origin"
+                            allowfullscreen></iframe>
+                </div>
+            {% endif %}
+            <div class="space-y-4 p-6">
+                {% if tutoriel.description %}
+                    <p class="whitespace-pre-line text-secondary-700 dark:text-secondary-200">{{ tutoriel.description }}</p>
+                {% endif %}
+                <div class="flex flex-wrap items-center gap-3">
+                    <twig:CopyLinkButton url="{{ url('app_tutoriel_show', {slug: tutoriel.slug}) }}" variant="primary" size="md" />
+                    <code class="break-all rounded bg-secondary-100 px-2 py-1 text-sm text-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">{{ url('app_tutoriel_show', {slug: tutoriel.slug}) }}</code>
+                </div>
+                {% if tutoriel.youtubeUrl %}
+                    <p class="text-sm text-secondary-500 dark:text-secondary-400">
+                        La vidéo ne se lance pas ?
+                        <a href="{{ tutoriel.youtubeUrl }}" target="_blank" rel="noopener" class="font-medium text-primary-700 hover:underline dark:text-primary-300">Ouvrez-la sur YouTube</a>.
+                    </p>
+                {% endif %}
+            </div>
+        </section>
+
+        {% if autres is not empty %}
+            <section class="space-y-4">
+                <h2 class="text-lg font-semibold text-secondary-900 dark:text-secondary-100">Autres vidéos tutoriel</h2>
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {% for autre in autres %}
+                        <twig:TutorielCard :tutoriel="autre" :withDescription="false" />
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    </div>
+{% endblock %}
