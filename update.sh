@@ -218,17 +218,152 @@ fi
 
 log_info "Propriétaire cible des fichiers : ${BOLD}$TARGET_USER${NC} (groupe: ${BOLD}$TARGET_GROUP${NC}, serveur web: ${BOLD}$HTTPD_USER${NC})"
 
-# --- 4. Git Pull ---
+# --- 4. Git Pull & Fusion intelligente des traductions de prod ---
 PREV_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "")
+TRANS_MERGE_DIR=""
+TRANS_MERGED=true
+
+restore_translations_on_error() {
+    if [ "$TRANS_MERGED" = false ] && [ -n "$TRANS_MERGE_DIR" ] && [ -d "$TRANS_MERGE_DIR/prod" ]; then
+        log_warn "Restauration des fichiers de traduction de production suite à une erreur..."
+        cp -f "$TRANS_MERGE_DIR/prod/"* translations/ 2>/dev/null || true
+        rm -rf "$TRANS_MERGE_DIR"
+        TRANS_MERGED=true
+    fi
+}
+
+merge_prod_translations() {
+    if [ "$TRANS_MERGED" = true ] || [ -z "$TRANS_MERGE_DIR" ] || [ ! -d "$TRANS_MERGE_DIR/prod" ]; then
+        return 0
+    fi
+    if [ ! -f "vendor/autoload.php" ]; then
+        return 1
+    fi
+
+    log_info "Fusion des traductions modifiées en production (priorité aux valeurs de prod)..."
+    $PHP_BIN -r '
+        require "vendor/autoload.php";
+        use Symfony\Component\Yaml\Yaml;
+
+        $mergeDir = $argv[1];
+        $prodDir  = $mergeDir . "/prod";
+        $baseDir  = $mergeDir . "/base";
+        $transDir = "translations";
+
+        $flatten = static function (array $array, string $prefix = "") use (&$flatten): array {
+            $result = [];
+            foreach ($array as $key => $value) {
+                $newKey = $prefix === "" ? (string) $key : $prefix . "." . $key;
+                if (is_array($value)) {
+                    $result += $flatten($value, $newKey);
+                } else {
+                    $result[$newKey] = $value;
+                }
+            }
+            return $result;
+        };
+
+        $parseSafe = static function (string $file) use ($flatten): array {
+            if (!is_file($file)) {
+                return [];
+            }
+            $parsed = Yaml::parseFile($file);
+            return is_array($parsed) ? $flatten($parsed) : [];
+        };
+
+        foreach (glob($prodDir . "/*.{yaml,yml}", GLOB_BRACE) ?: [] as $prodFile) {
+            $fname      = basename($prodFile);
+            $baseFile   = $baseDir . "/" . $fname;
+            $targetFile = $transDir . "/" . $fname;
+
+            try {
+                $base   = $parseSafe($baseFile);
+                $prod   = $parseSafe($prodFile);
+                $remote = $parseSafe($targetFile);
+
+                $merged = $remote;
+
+                // Supprimer les clés retirées en prod si elles n ont pas changé côté Git
+                foreach ($base as $k => $baseVal) {
+                    if (!array_key_exists($k, $prod) && array_key_exists($k, $merged) && $merged[$k] === $baseVal) {
+                        unset($merged[$k]);
+                    }
+                }
+
+                // Appliquer les clés ajoutées ou modifiées en prod (la prod est prioritaire)
+                $keptCount = 0;
+                foreach ($prod as $k => $prodVal) {
+                    if (!array_key_exists($k, $base) || $base[$k] !== $prodVal) {
+                        $merged[$k] = $prodVal;
+                        $keptCount++;
+                    }
+                }
+
+                ksort($merged);
+                file_put_contents($targetFile, Yaml::dump($merged, 2, 4));
+                echo "  - {$fname} : {$keptCount} surcharge(s) de prod préservée(s), " . count($merged) . " clés au total.\n";
+            } catch (\Throwable $e) {
+                fwrite(STDERR, "  ! Avertissement sur {$fname} : " . $e->getMessage() . "\n");
+            }
+        }
+    ' "$TRANS_MERGE_DIR" || {
+        log_warn "La fusion YAML a rencontré un problème, restauration des fichiers de traduction de prod."
+        cp -f "$TRANS_MERGE_DIR/prod/"* translations/ 2>/dev/null || true
+    }
+
+    rm -rf "$TRANS_MERGE_DIR"
+    TRANS_MERGED=true
+    log_success "Traductions de production fusionnées avec succès."
+}
+
+trap restore_translations_on_error EXIT
 
 if [ "$DO_GIT_PULL" = true ]; then
     # Éviter l'erreur "fatal: detected dubious ownership in repository" si l'utilisateur courant diffère du propriétaire
     git config --global --add safe.directory "$TARGET_DIR" 2>/dev/null || true
 
+    # Détecter les fichiers translations/*.yaml modifiés ou ajoutés localement en prod
+    MODIFIED_TRANS_FILES=()
+    while IFS= read -r file; do
+        if [ -n "$file" ] && [ -f "$file" ]; then
+            MODIFIED_TRANS_FILES+=("$file")
+        fi
+    done < <(
+        {
+            git diff --name-only -- 'translations/*.yaml' 'translations/*.yml' 2>/dev/null
+            git diff --cached --name-only -- 'translations/*.yaml' 'translations/*.yml' 2>/dev/null
+            git ls-files --others --exclude-standard -- 'translations/*.yaml' 'translations/*.yml' 2>/dev/null
+        } | sort -u
+    )
+
+    if [ "${#MODIFIED_TRANS_FILES[@]}" -gt 0 ]; then
+        log_info "Modifications locales détectées dans translations/ (${#MODIFIED_TRANS_FILES[@]} fichier(s)) -> sauvegarde avant git pull..."
+        TRANS_MERGE_DIR=$(mktemp -d "${TMPDIR:-/tmp}/oreof_translations_XXXXXX")
+        mkdir -p "$TRANS_MERGE_DIR/base" "$TRANS_MERGE_DIR/prod"
+        TRANS_MERGED=false
+        BACKUP_TS=$(date +%Y%m%d_%H%M%S)
+
+        for trans_file in "${MODIFIED_TRANS_FILES[@]}"; do
+            fname=$(basename "$trans_file")
+            cp -f "$trans_file" "$TRANS_MERGE_DIR/prod/$fname"
+            cp -f "$trans_file" "translations/${fname}.bak_update_${BACKUP_TS}"
+            git show "HEAD:$trans_file" > "$TRANS_MERGE_DIR/base/$fname" 2>/dev/null || rm -f "$TRANS_MERGE_DIR/base/$fname"
+
+            if git ls-files --error-unmatch "$trans_file" >/dev/null 2>&1; then
+                git checkout HEAD -- "$trans_file" 2>/dev/null || true
+            else
+                rm -f "$trans_file"
+            fi
+        done
+    fi
+
     log_info "Récupération des modifications Git (branche : $BRANCH)..."
     git fetch origin "$BRANCH" || { log_error "Échec du git fetch"; exit 1; }
     git pull origin "$BRANCH" || { log_error "Échec du git pull"; exit 1; }
     log_success "Dépôt Git synchronisé."
+
+    # Fusionner immédiatement si vendor/autoload.php est déjà présent
+    merge_prod_translations || true
 else
     log_info "Étape Git ignorée (--no-pull)."
 fi
@@ -262,6 +397,9 @@ $COMPOSER_BIN install --no-dev --prefer-dist --optimize-autoloader --no-interact
     exit 1
 }
 log_success "Dépendances PHP à jour."
+
+# Si la fusion des traductions n'avait pas pu s'exécuter avant composer install (vendor absent), on la lance maintenant
+merge_prod_translations || true
 
 # --- 6. Compilation des assets front-end (Vite) ---
 if [ "$BUILD_ASSETS" = true ]; then
@@ -343,6 +481,7 @@ WRITABLE_DIRS=(
     "var/cache"
     "var/log"
     "var/sessions"
+    "translations"
     "public/uploads"
     "public/mccc-export"
     "public/temp"

@@ -38,7 +38,7 @@ make reset-passwords APP=v2                                   # tous les mots de
   Node.js 20+, Nginx/Apache avec document root `public/`.
 - Variables d'environnement système (jamais dans un `.env` versionné) : `APP_ENV=prod`, `APP_DEBUG=0`, `APP_SECRET`,
   `DATABASE_URL`, `MAILER_DSN`, `LDAP_*`, `MERCURE_*` selon usage.
-- Écriture pour l'utilisateur web : `var/cache/`, `var/log/`, `var/sessions/`.
+- Écriture pour l'utilisateur web : `var/cache/`, `var/log/`, `var/sessions/`, `translations/`.
 
 ```bash
 composer install --no-dev --prefer-dist --optimize-autoloader
@@ -51,7 +51,7 @@ php bin/console messenger:consume async_export async_email async_mccc_backup --t
 ```
 
 Déploiement cible (releases + bascule atomique, heures creuses) : `docs/ops/ci-cd.md`. Déploiement manuel actuel : tag de release → dépendances + build → secrets → migrations → cache → redémarrage PHP-FPM/serveur web et
-workers → contrôle de `var/log/` et de l'application. Un script `update.sh` (situé dans le dossier parent ou à la racine) automatise ces étapes de mise à jour et la configuration robuste des permissions (ACLs, chown/chmod) :
+workers → contrôle de `var/log/` et de l'application. Un script `update.sh` (situé dans le dossier parent ou à la racine) automatise ces étapes de mise à jour, fusionne automatiquement les traductions modifiées en production (`translations/*.yaml`) avec les nouvelles clés Git (sans conflit, avec priorité aux libellés de production) et configure les permissions (ACLs, chown/chmod) :
 
 ```bash
 ./update.sh [OPTIONS]
