@@ -405,7 +405,25 @@
                         </a>
                     {% endif %}
                 </div>
-                <div></div>
+                <div>
+                    {% if is_granted('ROLE_ADMIN') and this.hasModifications %}
+                        <twig:Button
+                                type="button"
+                                variant="warning"
+                                :soft="false"
+                                :outline="true"
+                                size="sm"
+                                icon="icon:git-pull-request"
+                                label="Synthèse IA des modifs ({{ this.modificationsCount }})"
+                                :fullWidth="true"
+                                data-action="click->modalturbo#open"
+                                data-turbo="true"
+                                href="{{ path('fiche_matiere_v2_synthese_modifications', {slug: ficheMatiere.slug}) }}"
+                                tooltip="Consulter la synthèse IA des modifications de cette fiche matière"
+                                extraClass="{{ quickBtnWarning }}"
+                        />
+                    {% endif %}
+                </div>
             </div>
         </div>
 
@@ -453,6 +471,23 @@
                                 label="Gérer la version"
                                 :fullWidth="true"
                                 extraClass="{{ quickBtnSecondary }}"
+                        />
+                    </div>
+                    <div>
+                        <twig:Button
+                                type="button"
+                                variant="info"
+                                :soft="false"
+                                :outline="true"
+                                size="sm"
+                                icon="icon:git-pull-request"
+                                label="Synthèse IA des modifications"
+                                :fullWidth="true"
+                                data-action="click->modalturbo#open"
+                                data-turbo="true"
+                                href="{{ path('fiche_matiere_v2_synthese_modifications', {slug: ficheMatiere.slug}) }}"
+                                tooltip="Comparer avec la version de référence et générer la synthèse IA"
+                                extraClass="{{ quickBtnInfo }}"
                         />
                     </div>
                 </div>

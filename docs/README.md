@@ -10,6 +10,7 @@ Point d'entrée agents : `AGENTS.md` (racine). Chaque fichier ci-dessous est aut
 | `composants/recherche.md` | Recherche approchée (fuzzy) des parcours : moteur, pondération, affichage | page `/recherche/parcours`, réutiliser le moteur fuzzy |
 | `composants/synchronisation-orebut.md` | Synchronisation des maquettes, compétences et parcours B.U.T. avec l'API ORéBUT | synchronisation B.U.T. / ORéBUT |
 | `composants/rncp-api.md` | API Apprentissage / France Compétences, composant RncpField et vérification | code RNCP, API Apprentissage, composant RncpField |
+| `composants/synthese-ia.md` | Analyseur d'écarts `FicheMatiere` (snapshot JSON / N-1) et synthèse IA (`ROLE_ADMIN`) | synthèse des modifications de fiche matière, configuration `AI_*` |
 | `composants/aides-faq.md` | Aides contextuelles, FAQ, galerie d'images, éditeur Markdown, import/export entre instances | admin aides/FAQ, transfert vers la pré-prod |
 | `composants/tutoriels-video.md` | Page `/tutoriels` des vidéos tutoriel (une page par vidéo), administration, bouton « Copier le lien » | page tutoriels, lien partageable, composant CopyLinkButton |
 | `formulaires/README.md` | `JsonConfigType` + `DynamicFieldsType` (technique) | champ JSON configurable |

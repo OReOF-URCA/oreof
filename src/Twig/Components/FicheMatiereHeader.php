@@ -5,10 +5,12 @@ namespace App\Twig\Components;
 use App\Classes\ValidationProcessFicheMatiere;
 use App\Entity\FicheMatiere;
 use App\Repository\HistoriqueFicheMatiereRepository;
+use App\Service\FicheMatiere\FicheMatiereDiffAnalyzer;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationBlocker;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationStatus;
 use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationInspector;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Workflow\WorkflowInterface;
 use Symfony\UX\LiveComponent\Attribute\AsLiveComponent;
@@ -37,6 +39,9 @@ final class FicheMatiereHeader
 
     public string $place = '';
     public bool $hasDemande = true;
+    public bool $hasModifications = false;
+    public int $modificationsCount = 0;
+    public bool $hasVersionReference = false;
 
     #[LiveProp(writable: true)]
     public ?int $ficheMatiereId = null;
@@ -48,6 +53,8 @@ final class FicheMatiereHeader
         private readonly ValidationProcessFicheMatiere    $validationProcess,
         private readonly WorkflowOperationInspector       $operationInspector,
         private readonly EntityManagerInterface           $em,
+        private readonly FicheMatiereDiffAnalyzer         $diffAnalyzer,
+        private readonly Security                         $security,
         #[Target('fiche')]
         protected WorkflowInterface                       $ficheWorkflow
 
@@ -66,6 +73,13 @@ final class FicheMatiereHeader
         $this->getHistorique();
         $this->processSteps = $this->validationProcess->getProcess();
         $this->validationOptions = $this->getVisibleValidationOptions();
+
+        if ($this->ficheMatiere !== null && $this->security->isGranted('ROLE_ADMIN')) {
+            $report = $this->diffAnalyzer->analyze($this->ficheMatiere);
+            $this->hasVersionReference = $report->hasReference();
+            $this->hasModifications = $report->hasChanges();
+            $this->modificationsCount = $report->countChanges();
+        }
     }
 
     private function getVisibleValidationOptions(): array

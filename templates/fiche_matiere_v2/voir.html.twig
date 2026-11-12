@@ -35,6 +35,42 @@
         <twig:FicheMatiereHeader ficheMatiereId="{{ ficheMatiere.id }}"/>
     </div>
 
+    {% if is_granted('ROLE_ADMIN') and changeReport is defined and changeReport is not null and changeReport.hasChanges %}
+        <div id="fiche_matiere_diff_banner"
+             class="mb-4 flex flex-col gap-3 rounded-2xl border border-warning-300 bg-warning-50 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between dark:border-warning-700 dark:bg-warning-900">
+            <div class="flex items-start gap-3">
+                <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-warning-100 text-warning-700 dark:bg-warning-800 dark:text-warning-300">
+                    {{ ux_icon('icon:git-pull-request', {class: 'h-5 w-5'}) }}
+                </span>
+                <div class="space-y-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <p class="text-sm font-semibold text-warning-900 dark:text-warning-100">
+                            Fiche matière modifiée ({{ changeReport.countChanges }} {{ changeReport.countChanges > 1 ? 'écarts détectés' : 'écart détecté' }})
+                        </p>
+                        {% for catLabel in changeReport.impactedCategoriesLabels %}
+                            <twig:Badge label="{{ catLabel }}" variant="warning" size="sm" />
+                        {% endfor %}
+                    </div>
+                    <p class="text-xs text-warning-800 dark:text-warning-200">
+                        Comparaison par rapport à : <strong>{{ changeReport.sourceLabel }}</strong>
+                    </p>
+                </div>
+            </div>
+            <div class="shrink-0">
+                <twig:Button
+                        variant="warning"
+                        size="sm"
+                        :soft="false"
+                        icon="icon:star"
+                        label="Synthèse IA des modifications"
+                        data-action="click->modalturbo#open"
+                        data-turbo="true"
+                        href="{{ path('fiche_matiere_v2_synthese_modifications', {slug: ficheMatiere.slug}) }}"
+                />
+            </div>
+        </div>
+    {% endif %}
+
     <div class="flex" data-controller="scroll-spy">
         <aside class="app-scrollspy-aside w-72 flex flex-col p-3 space-y-8">
             <div class="sticky top-[calc(var(--page-header-offset,4rem)+0.5rem)] space-y-8">
