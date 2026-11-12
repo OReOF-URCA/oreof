@@ -11,6 +11,7 @@ namespace App\Utils;
 
 use App\Classes\GetDpeParcours;
 use App\Entity\DpeParcours;
+use App\Entity\FicheMatiere;
 use App\Entity\Formation;
 use App\Entity\Parcours;
 use App\Enums\TypeModificationDpeEnum;
@@ -45,8 +46,12 @@ abstract class Access {
         return $formation->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_TEXTE;
     }
 
-    public static function isOuvert(Parcours|Formation|DpeParcours $entity): bool
+    public static function isOuvert(Parcours|Formation|DpeParcours|FicheMatiere $entity): bool
     {
+        if ($entity instanceof FicheMatiere) {
+            return $entity->isModifiable();
+        }
+
         if ($entity instanceof DpeParcours) {
             $places = array_keys($entity->getEtatValidation());
             $currentPlace = $places[0] ?? null;
@@ -89,8 +94,12 @@ abstract class Access {
         return false;
     }
 
-    public static function isEditable(Parcours|DpeParcours|null $entity): bool
+    public static function isEditable(Parcours|DpeParcours|FicheMatiere|null $entity): bool
     {
+        if ($entity instanceof FicheMatiere) {
+            return $entity->isModifiable();
+        }
+
         if ($entity instanceof Parcours) {
             $entity = GetDpeParcours::getFromParcours($entity);
         }

@@ -31,6 +31,7 @@ use App\Service\FicheMatiere\FicheMatiereDiffAnalyzer;
 use App\Service\VersioningFicheMatiere;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\TypeDiplome\McccDisplayInterface;
+use App\Utils\Access;
 use App\Utils\TurboStreamResponseFactory;
 use Jfcherng\Diff\DiffHelper;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
@@ -156,6 +157,7 @@ class FicheMatiereController extends BaseController
         $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiere);
         return $this->render('fiche_matiere_v2/voir.html.twig', [
             'ficheMatiere' => $ficheMatiere,
+            'isEditable' => Access::isEditable($ficheMatiere),
             'ficheMatiereParcours' => $ficheMatiereParcours,
             'ecParcours' => $ecParcours,
             'formation' => $formation,

@@ -257,12 +257,12 @@ class WorkflowExtension extends AbstractExtension
         return false;
     }
 
-    public function isOuvert(Parcours|Formation|DpeParcours $entity): bool
+    public function isOuvert(Parcours|Formation|DpeParcours|FicheMatiere $entity): bool
     {
         return Access::isOuvert($entity);
     }
 
-    public function isEditable(Parcours|DpeParcours|null $entity): bool
+    public function isEditable(Parcours|DpeParcours|FicheMatiere|null $entity): bool
     {
         return Access::isEditable($entity);
     }

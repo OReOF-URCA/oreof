@@ -131,24 +131,18 @@
 
 {% block bouton_header %}
     <div class="flex flex-wrap gap-3">
-        {% if is_granted('EDIT_FICHE_MATIERE', ficheMatiere) or ((
-            is_granted('EDIT', {route: 'app_fiche_matiere', subject: ficheMatiere})
-            or is_granted('EDIT', {route: 'app_fiche_matiere_hd', subject: 'etablissement'})
-            or is_granted('EDIT', {route: 'app_fiche_matiere', subject: 'formation'})
-            or is_granted('EDIT', {route: 'app_fiche_matiere', subject: 'parcours'})
-            or is_granted('ROLE_ADMIN')
-        ) and ficheMatiere.isModifiable) %}
-            <twig:Button
-                    label="Modifier"
-                    variant="warning"
-                    :soft="false"
-                    :outline="true"
-                    size="sm"
-                    icon="icon:edit"
-                    href="{{ path('fiche_matiere_v2_modifier', {slug: ficheMatiere.slug}) }}"
-                    tooltip="Modifier une fiche EC/matière"
-            />
-        {% endif %}
+        {% set canEditFicheMatiere = isEditable is defined ? isEditable : isEditable(ficheMatiere) %}
+        <twig:Button
+                label="Modifier"
+                variant="warning"
+                :soft="false"
+                :outline="true"
+                size="sm"
+                icon="icon:edit"
+                href="{{ canEditFicheMatiere ? path('fiche_matiere_v2_modifier', {slug: ficheMatiere.slug}) : '' }}"
+                :disabled="not canEditFicheMatiere"
+                tooltip="{{ canEditFicheMatiere ? 'Modifier une fiche EC/matière' : 'Fiche matière verrouillée' }}"
+        />
 
         <twig:Button
                 label="Télécharger en PDF"
