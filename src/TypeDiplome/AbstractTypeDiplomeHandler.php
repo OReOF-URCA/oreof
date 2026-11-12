@@ -79,7 +79,10 @@ abstract class AbstractTypeDiplomeHandler implements TypeDiplomeHandlerInterface
             $formation->setTypeDiplome($context['typeDiplome']);
         }
 
-        $formation->addComposantesInscription($formation->getComposantePorteuse());
+        // Pas de composante porteuse pour les types non classiques (champ retiré de FormationSesType).
+        if (null !== $formation->getComposantePorteuse()) {
+            $formation->addComposantesInscription($formation->getComposantePorteuse());
+        }
         $formation->setHasParcours(true);
         $formation->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_PARCOURS);
         $em->persist($formation);
