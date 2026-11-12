@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -54,11 +55,11 @@ class EtablissementApiKeyEntryType extends AbstractType
                     new Length(max: 255, maxMessage: 'L\'identifiant ne doit pas dépasser {{ limit }} caractères.'),
                 ],
             ])
-            ->add('apiKey', TextType::class, [
+            ->add('apiKey', PasswordType::class, [
                 'label' => 'Clé API / Token secret',
                 'required' => true,
+                'always_empty' => false,
                 'attr' => [
-                    'type' => 'password',
                     'placeholder' => 'Clé d\'authentification ou jeton secret',
                     'autocomplete' => 'new-password',
                     'data-password-toggle-target' => 'input',
