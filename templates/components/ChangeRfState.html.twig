@@ -118,13 +118,14 @@
 
                                 {% if (place != 'soumis_ses' and place != 'soumis_cfvu') or is_granted('ROLE_ADMIN') %}
                                     <twig:DeleteButton
-                                        :label="'btn.validation.changeRf.suppression'|trans({}, 'process')"
                                         :variant="'danger'"
                                         :outline="true"
                                         :soft="true"
                                         icon="icon:delete"
                                         :url="path('app_formation_change_rf_suppression', {demande:demande.id})"
                                         :tooltip="('btn.validation.changeRf.suppression'|trans({}, 'process'))"
+                                        :title="('btn.validation.changeRf.suppression'|trans({}, 'process'))"
+                                        message="Cette demande sera définitivement supprimée. Voulez-vous continuer ?"
                                     />
                                 {% endif %}
                             </div>

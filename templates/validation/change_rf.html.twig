@@ -22,6 +22,8 @@
     } %}
 
     <section
+            {{ stimulus_controller('validation--step-counts') }}
+            data-action="validation:bulk-success@window->validation--step-counts#refresh"
             class="space-y-4 rounded-2xl border border-secondary-200 bg-white p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-900 sm:p-6">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div class="space-y-1">
@@ -70,7 +72,7 @@
                             <div class="lg:col-span-4">
                                 <p class="text-xs font-semibold uppercase tracking-widest text-secondary-400 dark:text-secondary-500">
                                     Nb demandes</p>
-                                <div class="mt-1">
+                                <div class="mt-1" data-step-count="{{ value }}">
                                     {% if hasData %}
                                         <span class="inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold {{ tone.badge }}">
                                             Demandes : {{ statistiquesStep }}

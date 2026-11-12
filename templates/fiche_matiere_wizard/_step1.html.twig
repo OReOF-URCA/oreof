@@ -4,7 +4,7 @@
     urlImpacts: path('app_fiche_matiere_wizard_step_1_mutualise_impacts', {ficheMatiere:ficheMatiere.id}),
     urlRemoveAll: path('app_fiche_matiere_wizard_step_1_mutualise_remove_all', {ficheMatiere:ficheMatiere.id}),
 }) }}>
-    {% form_theme form 'communs/form_theme.html.twig' %}
+    {% form_theme form 'communs/form_theme_v2.html.twig' %}
 
     {{ form_row(form.responsableFicheMatiere) }}
     <small>Si le champ est laissé vide, le responsable de parcours/formation sera indiqué comme contact pour orienter les étudiants.</small><br>
