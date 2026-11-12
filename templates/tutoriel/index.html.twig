@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block bouton_header %}
+    <twig:CopyLinkButton url="{{ url('app_tutoriel_index') }}" label="Copier le lien de la page" class="mx-2" />
+    {% if is_granted('ROLE_ADMIN') %}
+        <twig:Button label="Gérer" variant="secondary" icon="fa-solid:cog" size="sm" href="{{ path('app_tutoriel_admin_index') }}" class="mx-2" />
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if tutoriels is empty %}
+        <div class="rounded-lg border border-info-200 bg-info-50 p-6 text-center dark:border-info-800 dark:bg-info-950/30">
+            {{ ux_icon('icon:info-circle', {class: 'mx-auto mb-3 h-14 w-14 text-info-600 dark:text-info-400'}) }}
+            <p class="text-sm text-info-900 dark:text-info-100">Aucune vidéo tutoriel n'est disponible pour le moment.</p>
+        </div>
+    {% else %}
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {% for tutoriel in tutoriels %}
+                <twig:TutorielCard :tutoriel="tutoriel" id="{{ tutoriel.slug }}" />
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% set showUrl = path('app_tutoriel_show', {slug: tutoriel.slug}) %}
+<article {{ attributes.defaults({class: 'group flex flex-col overflow-hidden rounded-2xl border border-secondary-200 bg-surface shadow-sm transition hover:border-primary-300 hover:shadow-md dark:border-secondary-700 dark:bg-secondary-900'}) }}>
+    <a href="{{ showUrl }}" class="relative block aspect-video overflow-hidden bg-secondary-100 dark:bg-secondary-800" tabindex="-1" aria-hidden="true">
+        {% if tutoriel.youtubeId %}
+            <img src="https://i.ytimg.com/vi/{{ tutoriel.youtubeId }}/hqdefault.jpg" alt="" loading="lazy"
+                 class="h-full w-full object-cover transition group-hover:scale-105">
+        {% endif %}
+        <span class="absolute inset-0 flex items-center justify-center">
+            <span class="flex h-14 w-14 items-center justify-center rounded-full bg-black/60 text-white transition group-hover:bg-primary-600">
+                {{ ux_icon('mdi:play', {class: 'h-8 w-8'}) }}
+            </span>
+        </span>
+        {% if tutoriel.duree %}
+            <span class="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 text-xs font-medium text-white">{{ tutoriel.duree }}</span>
+        {% endif %}
+    </a>
+    <div class="flex flex-1 flex-col gap-3 p-4">
+        <h2 class="text-base font-semibold text-secondary-900 dark:text-secondary-100">
+            <a href="{{ showUrl }}" class="hover:text-primary-700 hover:underline dark:hover:text-primary-300">{{ tutoriel.titre }}</a>
+        </h2>
+        {% if not tutoriel.active %}
+            <twig:Badge label="Non publiée" variant="warning" size="sm" />
+        {% endif %}
+        {% if withDescription and tutoriel.description %}
+            <p class="line-clamp-3 text-sm text-secondary-600 dark:text-secondary-300">{{ tutoriel.description }}</p>
+        {% endif %}
+        <div class="mt-auto">
+            <twig:CopyLinkButton url="{{ url('app_tutoriel_show', {slug: tutoriel.slug}) }}" />
+        </div>
+    </div>
+</article>

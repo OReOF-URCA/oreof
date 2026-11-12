@@ -1,0 +1,16 @@
+{#
+Composant CopyLinkButton : copie `url` dans le presse-papiers et affiche « Lien copié » quelques secondes.
+  <twig:CopyLinkButton url="{{ url('app_tutoriel_show', {slug: tutoriel.slug}) }}" />
+#}
+<span {{ attributes.defaults({class: 'inline-flex'}) }}
+        {{ stimulus_controller('copy-link', {url: url, copiedLabel: copiedLabel}) }}>
+    <twig:Button
+            :label="label"
+            :variant="variant"
+            :size="size"
+            icon="mdi:link-variant"
+            dataAction="copy-link#copy"
+            :attr="{'data-copy-link-target': 'button', title: url}"
+    />
+    <span class="sr-only" aria-live="polite" data-copy-link-target="status"></span>
+</span>

@@ -11,6 +11,7 @@ Point d'entrée agents : `AGENTS.md` (racine). Chaque fichier ci-dessous est aut
 | `composants/synchronisation-orebut.md` | Synchronisation des maquettes, compétences et parcours B.U.T. avec l'API ORéBUT | synchronisation B.U.T. / ORéBUT |
 | `composants/rncp-api.md` | API Apprentissage / France Compétences, composant RncpField et vérification | code RNCP, API Apprentissage, composant RncpField |
 | `composants/aides-faq.md` | Aides contextuelles, FAQ, galerie d'images, éditeur Markdown, import/export entre instances | admin aides/FAQ, transfert vers la pré-prod |
+| `composants/tutoriels-video.md` | Page `/tutoriels` des vidéos tutoriel (une page par vidéo), administration, bouton « Copier le lien » | page tutoriels, lien partageable, composant CopyLinkButton |
 | `formulaires/README.md` | `JsonConfigType` + `DynamicFieldsType` (technique) | champ JSON configurable |
 | `formulaires/exemples-plateformes.md` | Définitions de champs par plateforme d'admission | configurer une plateforme |
 | `formulaires/guide-mode-assistant.md` | Guide utilisateur final du mode assistant | doc/aide utilisateur |

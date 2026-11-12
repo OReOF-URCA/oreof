@@ -64,6 +64,12 @@ app_faq_index.description: 'Organisez et gérez les questions fréquemment posé
 app_faq_index.title: 'Gestion de la FAQ'
 app_faq_new.description: 'Créez ou modifiez une question pour une page spécifique.'
 app_faq_new.title: 'Créer une question FAQ'
+app_tutoriel_index.description: 'Vidéos de prise en main d''ORéOF. Chaque vidéo a son propre lien, que vous pouvez copier et envoyer par mail.'
+app_tutoriel_index.title: 'Tutoriels vidéo'
+app_tutoriel_admin_index.description: 'Ajoutez, ordonnez et publiez les vidéos affichées sur la page Tutoriels vidéo.'
+app_tutoriel_admin_index.title: 'Gestion des tutoriels vidéo'
+app_tutoriel_admin_new.title: 'Ajouter une vidéo tutoriel'
+app_tutoriel_admin_edit.title: 'Modifier une vidéo tutoriel'
 app_formation_edit_modal.title: "Modifier une fiche d'identité de la formation"
 app_formation_index.description: 'Détails des mentions/spécialités'
 app_formation_index.title: 'Détails des formations'

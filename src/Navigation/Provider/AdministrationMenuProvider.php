@@ -172,6 +172,13 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
+                        key: 'administration.tutoriels',
+                        label: 'menu.config.tutoriels',
+                        route: 'app_tutoriel_admin_index',
+                        icon: 'mdi:youtube',
+                    )->inColumn('menu.menu_configuration'),
+
+                    MenuItem::link(
                         key: 'administration.workflows',
                         label: 'menu.config.workflows',
                         route: 'app_admin_workflow_index',
