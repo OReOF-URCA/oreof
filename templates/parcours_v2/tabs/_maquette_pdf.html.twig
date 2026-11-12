@@ -8,6 +8,14 @@
                 name="maquettePdf" type="file" accept=".pdf" id="maquettePdfUpload"
                 placeholder="Sélectionnez un fichier..."    
             />
+            {% if parcours.maquettePdfNomOriginal %}
+                <span>Fichier actuel :</span>
+                <span class="p-1 rounded bg-gray-100 text-gray-800 border border-gray-800">
+                    {{ parcours.maquettePdfNomOriginal }}
+                </span>
+            {% else %}
+                <h5 class="text-gray-700 text-base italic">Aucun fichier actuellement enregistré</h5>
+            {% endif %}
             <label 
                 class="mt-12 w-full md:w-9/12 lg:w-5/12 xl:w-3/12 2xl:w-2/12 border border-blue-800 hover:bg-blue-300 bg-blue-100 text-blue-800 rounded text-center py-1 px-0 cursor-pointer"
                 for="maquettePdfUpload"
