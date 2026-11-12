@@ -158,7 +158,11 @@
                 </a>
 
                 <a
-                        href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'maquette' }) }}"
+                        {% if parcours.formation.isClassique %}
+                            href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'maquette' }) }}"
+                        {% else %}
+                            href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'maquette_pdf' }) }}"
+                        {% endif %}
                         data-turbo-frame="tab-content"
                         data-turbo-action="advance"
                         data-tabs-target="tab"

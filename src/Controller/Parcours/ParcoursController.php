@@ -370,7 +370,7 @@ class ParcoursController extends BaseController
         );
         $breadcrumb->add('Modifier le parcours');
 
-        $validTabs = ['presentation_formation', 'presentation', 'maquette', 'descriptif', 'admission', 'et_apres', 'configuration'];
+        $validTabs = ['presentation_formation', 'presentation', 'maquette', 'maquette_pdf', 'descriptif', 'admission', 'et_apres', 'configuration'];
         if (!in_array($tab, $validTabs, true)) {
             throw $this->createNotFoundException('Onglet inconnu : ' . $tab);
         }
