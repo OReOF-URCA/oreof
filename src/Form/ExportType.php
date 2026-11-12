@@ -33,7 +33,7 @@ class ExportType extends AbstractType
                 'choice_label' => 'libelle',
                 'placeholder' => 'Choisir une composante',
                 'label' => 'Composante',
-                'required' => true,
+                'required' => false,
                 'autocomplete' => true,
                 'attr' => [
                     'data-export-target' => 'composante',
