@@ -91,5 +91,7 @@ final class FicheMatiereDiffAnalyzerTest extends TestCase
         self::assertArrayHasKey(FicheMatiereChangeItem::CATEGORY_DESCRIPTIFS, $byCategory);
         self::assertArrayHasKey(FicheMatiereChangeItem::CATEGORY_VOLUMES, $byCategory);
         self::assertArrayHasKey(FicheMatiereChangeItem::CATEGORY_MCCC, $byCategory);
+        self::assertSame('Identité & organisation', $byCategory[FicheMatiereChangeItem::CATEGORY_IDENTITE][0]->getCategoryLabel());
+        self::assertContains('Identité & organisation', $report->getImpactedCategoriesLabels());
     }
 }

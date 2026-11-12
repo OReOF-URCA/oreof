@@ -294,3 +294,4 @@ final class FicheMatiereCompletionCheckCommand extends Command
         ];
     }
 }
+

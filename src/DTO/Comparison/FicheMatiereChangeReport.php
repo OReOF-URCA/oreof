@@ -61,7 +61,7 @@ final class FicheMatiereChangeReport
     {
         $labels = [];
         foreach (array_keys($this->getChangesByCategory()) as $cat) {
-            $labels[] = FicheMatiereChangeItem::categoryLabel($cat);
+            $labels[] = FicheMatiereChangeItem::labelForCategory($cat);
         }
 
         return $labels;

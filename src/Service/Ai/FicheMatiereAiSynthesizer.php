@@ -234,7 +234,7 @@ final class FicheMatiereAiSynthesizer
         ];
 
         foreach ($report->getChangesByCategory() as $category => $items) {
-            $lines[] = sprintf("\n[%s]", FicheMatiereChangeItem::categoryLabel($category));
+            $lines[] = sprintf("\n[%s]", FicheMatiereChangeItem::labelForCategory($category));
             foreach ($items as $item) {
                 $before = mb_strlen($item->before) > 350 ? mb_substr($item->before, 0, 350) . '…' : $item->before;
                 $after = mb_strlen($item->after) > 350 ? mb_substr($item->after, 0, 350) . '…' : $item->after;

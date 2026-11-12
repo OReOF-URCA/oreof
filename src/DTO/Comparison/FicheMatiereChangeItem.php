@@ -24,10 +24,10 @@ final class FicheMatiereChangeItem
 
     public function getCategoryLabel(): string
     {
-        return self::categoryLabel($this->category);
+        return self::labelForCategory($this->category);
     }
 
-    public static function categoryLabel(string $category): string
+    public static function labelForCategory(string $category): string
     {
         return match ($category) {
             self::CATEGORY_IDENTITE => 'Identité & organisation',
