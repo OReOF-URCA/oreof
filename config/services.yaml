@@ -5,6 +5,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    assistance_pieces_jointes_dir: '%kernel.project_dir%/var/assistance'
     BASE_URL: '%env(BASE_URL)%'
     LDAP_HOST: '%env(LDAP_HOST)%'
     LDAP_LOGIN: '%env(LDAP_LOGIN)%'
@@ -188,3 +189,7 @@ services:
     App\Navigation\MenuRegistry:
       arguments:
         $providers: !tagged_iterator app.menu_provider
+
+when@test:
+    parameters:
+        assistance_pieces_jointes_dir: '%kernel.project_dir%/var/assistance_test'

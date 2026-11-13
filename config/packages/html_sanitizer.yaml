@@ -1,0 +1,16 @@
+framework:
+    html_sanitizer:
+        sanitizers:
+            # HTML des mails d'assistance : éléments sûrs uniquement, aucune ressource distante,
+            # liens limités à https et mailto.
+            assistance_sanitizer:
+                allow_safe_elements: true
+                allowed_link_schemes: ['https', 'mailto']
+                allow_relative_links: false
+                allow_relative_medias: false
+                # images et médias supprimés : pas de pixel de suivi ni de chargement distant
+                drop_elements: ['img', 'picture', 'source', 'video', 'audio', 'iframe']
+                force_attributes:
+                    a:
+                        rel: noopener noreferrer
+                        target: _blank
