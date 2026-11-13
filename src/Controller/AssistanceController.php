@@ -15,6 +15,7 @@ use App\Repository\FormationRepository;
 use App\Repository\UserRepository;
 use App\Service\Assistance\FusionDemandesAssistance;
 use App\Service\Assistance\IntegrationMailAssistance;
+use App\Service\Assistance\ReponseAssistance;
 use App\Service\Assistance\Source\ImapSource;
 use App\Service\Assistance\StockagePieceJointe;
 use DateTimeImmutable;
@@ -115,6 +116,7 @@ class AssistanceController extends AbstractController
         DemandeAssistanceRepository $repository,
         UserRepository $userRepository,
         FormationRepository $formationRepository,
+        ReponseAssistance $reponse,
     ): Response {
         return $this->render('assistance/show.html.twig', [
             'demande' => $demande,
@@ -122,7 +124,30 @@ class AssistanceController extends AbstractController
             'equipe' => $userRepository->findByRole('ROLE_ADMIN'),
             'formations' => $formationRepository->findBy([], ['id' => 'DESC']),
             'candidatesFusion' => $repository->candidatesFusion($demande),
+            'destinatairesProposes' => $reponse->destinatairesProposes($demande),
         ]);
+    }
+
+    #[Route('/{id}/repondre', name: 'repondre', requirements: ['id' => '\d+'], methods: ['POST'])]
+    public function repondre(Request $request, DemandeAssistance $demande, ReponseAssistance $reponse): Response
+    {
+        $auteur = $this->getUser();
+        if (!$this->jetonValide($request, $demande) || !$auteur instanceof User) {
+            return $this->retourDemande($demande);
+        }
+
+        $destinataires = preg_split('/[\s,;]+/', $request->request->getString('destinataires')) ?: [];
+
+        try {
+            $reponse->repondre($demande, $auteur, $request->request->getString('corps'), $destinataires, $request->request->getBoolean('resoudre'));
+            $this->addFlash('success', 'Réponse envoyée.');
+        } catch (\InvalidArgumentException $e) {
+            $this->addFlash('warning', $e->getMessage());
+        } catch (Throwable $e) {
+            $this->addFlash('error', 'Envoi impossible : ' . $e->getMessage());
+        }
+
+        return $this->retourDemande($demande);
     }
 
     #[Route('/{id}/statut', name: 'statut', requirements: ['id' => '\d+'], methods: ['POST'])]

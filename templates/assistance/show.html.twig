@@ -23,6 +23,32 @@
                 <twig:MessageAssistanceCard :message="message" />
             {% endfor %}
 
+            <section class="{{ panneau }}" id="assistance-reponse">
+                <h2 class="{{ titre_panneau }}">{{ ux_icon('icon:mail', {class: 'h-4 w-4 text-primary-600'}) }} Répondre depuis oreof@univ-reims.fr</h2>
+                <form method="post" action="{{ path('app_assistance_repondre', {id: demande.id}) }}" class="space-y-3">
+                    <input type="hidden" name="_token" value="{{ jeton }}">
+                    <div>
+                        <label for="assistance-reponse-destinataires" class="mb-1 block text-xs text-secondary-500 dark:text-secondary-400">Destinataires (séparés par des virgules)</label>
+                        <input type="text" id="assistance-reponse-destinataires" name="destinataires" required
+                               value="{{ destinatairesProposes|join(', ') }}"
+                               class="w-full rounded-lg border border-secondary-200 bg-white px-3 py-2 text-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100">
+                    </div>
+                    <div>
+                        <label for="assistance-reponse-corps" class="mb-1 block text-xs text-secondary-500 dark:text-secondary-400">Message</label>
+                        <input type="hidden" id="assistance-reponse-corps" name="corps">
+                        <trix-editor input="assistance-reponse-corps" class="trix-content min-h-32 rounded-lg border border-secondary-200 bg-white text-sm dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100"></trix-editor>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <twig:Button label="Envoyer" variant="primary" :soft="false" type="submit" icon="icon:mail" />
+                        <label class="inline-flex items-center gap-2 text-sm text-text">
+                            <input type="checkbox" name="resoudre" value="1" class="rounded border-secondary-300 dark:border-secondary-600">
+                            Marquer la demande comme résolue
+                        </label>
+                    </div>
+                    <p class="text-xs text-secondary-500 dark:text-secondary-400">Sans case cochée, la demande passe « en attente de l'usager ». Sa réponse la rouvrira.</p>
+                </form>
+            </section>
+
             <section class="{{ panneau }}" id="assistance-note">
                 <h2 class="{{ titre_panneau }}">{{ ux_icon('icon:pencil', {class: 'h-4 w-4 text-warning-600'}) }} Note interne</h2>
                 <form method="post" action="{{ path('app_assistance_note', {id: demande.id}) }}" class="space-y-2">

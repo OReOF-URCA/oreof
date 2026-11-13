@@ -203,4 +203,24 @@ class AssistanceControllerTest extends WebTestCase
         self::assertResponseHeaderSame('content-type', 'application/pdf');
         self::assertStringContainsString('attachment', (string) $this->client->getResponse()->headers->get('content-disposition'));
     }
+
+    public function testRepondreEnvoieLeMailEtEnregistreLaReponse(): void
+    {
+        $demande = $this->demande('Réponse assistance');
+        $this->connecterAdmin();
+        $url = '/administration/assistance/' . $demande->getId();
+
+        $this->client->request('POST', $url . '/repondre', [
+            'destinataires' => 'usager-assistance@univ-test.fr',
+            'corps' => '<div>Bonjour, c\'est réglé.</div>',
+            '_token' => $this->jeton($url, '/repondre'),
+        ]);
+
+        self::assertResponseRedirects($url);
+        self::assertEmailCount(1);
+        $this->em->clear();
+        $relue = $this->em->find(DemandeAssistance::class, $demande->getId());
+        self::assertSame(SensMessageAssistanceEnum::SORTANT, $relue->getMessages()->last()->getSens());
+        self::assertSame(StatutDemandeAssistanceEnum::EN_ATTENTE_USAGER, $relue->getStatut());
+    }
 }
