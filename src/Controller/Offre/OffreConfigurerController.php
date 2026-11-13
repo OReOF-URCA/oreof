@@ -47,9 +47,10 @@ final class OffreConfigurerController extends BaseController
 
         if ($formation->getComposantePorteuse() !== null) {
             $composante = $formation->getComposantePorteuse();
+            $targetRoute = $formation->isClassique() ? 'app_offre_composante_index' : 'app_offre_etablissement_composante_index';
             $breadcrumb->add(
                 $composante->getLibelle() ?? 'Composante',
-                'app_offre_composante_index',
+                    $targetRoute,
                 ['composante' => $composante->getId()]
             );
         }
@@ -137,7 +138,7 @@ final class OffreConfigurerController extends BaseController
         $isSesOrAdmin = $this->isGranted('ROLE_SES') || $this->isGranted('ROLE_ADMIN');
 
         if (!$isSesOrAdmin) {
-            if (!$campagne->isPeriodActive()) {
+            if ($formation->isClassique() && !$campagne->isPeriodActive()) {
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'La campagne de collecte est fermée. Modification impossible.'

@@ -230,7 +230,7 @@ class DpeParcoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findByCampagneCollecte(CampagneCollecte $campagneCollecte, ?Composante $composante = null): array
+    public function findByCampagneCollecte(CampagneCollecte $campagneCollecte, ?Composante $composante = null, bool $classique = true): array
     {
         $qb = $this->createQueryBuilder('dp')
             ->join('dp.parcours', 'p')
@@ -243,8 +243,9 @@ class DpeParcoursRepository extends ServiceEntityRepository
             ->leftJoin('p.composanteInscription', 'pci')
             ->addSelect('p', 'f', 'cp', 'm', 'td', 'dom', 'fci', 'pci')
             ->where('dp.campagneCollecte = :campagneCollecte')
-            ->andWhere('COALESCE(f.classique, td.classique) = 1')
+            ->andWhere('COALESCE(f.classique, td.classique) = :classique')
             ->setParameter('campagneCollecte', $campagneCollecte)
+            ->setParameter('classique', $classique ? 1 : 0)
             ->orderBy('td.libelle', 'ASC')
             ->addOrderBy('m.libelle', 'ASC')
             ->addOrderBy('f.mentionTexte', 'ASC')

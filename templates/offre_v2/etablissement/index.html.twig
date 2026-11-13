@@ -1,0 +1,548 @@
+{% extends 'base.html.twig' %}
+
+{% block bouton_header %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <twig:Button
+                href="{{ path('app_formation_new', { redirect: composante ? 'app_offre_etablissement_composante_index' : 'app_offre_etablissement_index', composante: composante ? composante.id : null }) }}"
+                variant="success" class="mr-2">
+            <twig:UX:Icon name="icon:add" class="size-4"/>
+            Créer une formation
+        </twig:Button>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <turbo-frame id="offre_table">
+        <!-- Navigation / Titre de section -->
+        <div class="mb-4 border-b border-secondary-200 dark:border-secondary-700">
+            <nav class="-mb-px flex space-x-6" aria-label="Sections de l'offre d'établissement">
+                <a href="{{ composante ? path('app_offre_etablissement_composante_index', {composante: composante.id}) : path('app_offre_etablissement_index') }}"
+                   class="inline-flex items-center gap-2 border-b-2 border-primary-500 pb-3 text-sm font-semibold text-primary-600 dark:text-primary-400">
+                    <twig:UX:Icon name="icon:layers" class="h-4 w-4"/>
+                    Offre d'établissement
+                </a>
+            </nav>
+        </div>
+
+        <!-- Bandeau d'information : processus simplifié au fil de l'eau -->
+        <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-secondary-200 bg-surface px-4 py-3 shadow-xs dark:border-secondary-700 dark:bg-secondary-800">
+            <div class="flex items-center gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">
+                    <twig:UX:Icon name="mdi:school-outline" class="h-5 w-5"/>
+                </div>
+                <div>
+                    <div class="text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
+                        Formations d'établissement (hors accréditation)
+                    </div>
+                    <div class="text-sm font-semibold text-secondary-900 dark:text-secondary-100">
+                        Processus simplifié : modifications à chaque instant, sans PV/Note, transmission et validation
+                        SES au fil de l'eau.
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <twig:Badge variant="success" label="Saisie permanente au fil de l'eau" icon="icon:check"/>
+            </div>
+        </div>
+
+        {% set formUrl = composante ? path('app_offre_etablissement_composante_index', {composante: composante.id}) : path('app_offre_etablissement_index') %}
+        <form method="get" action="{{ formUrl }}" data-turbo-frame="offre_table" data-turbo-action="replace"
+              class="space-y-6"
+              data-controller="auto-submit">
+            <!-- KPI -->
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+                <twig:Kpi
+                        title="Formations"
+                        value="{{ tabStatistiques.nbFormations }}"
+                        variant="default"
+                        icon="icon:graduation"
+                />
+                <twig:Kpi
+                        title="Parcours"
+                        value="{{ tabStatistiques.nbParcours }}"
+                        variant="default"
+                        icon="icon:layers"
+                />
+                <twig:Kpi
+                        title="Parcours ouverts"
+                        value="{{ tabStatistiques.nbParcoursOuvert }}"
+                        variant="success"
+                        icon="icon:check"
+                />
+                <twig:Kpi
+                        title="Non ouverts"
+                        value="{{ tabStatistiques.nbParcoursNonOuvert }}"
+                        variant="danger"
+                        icon="mdi:cancel"
+                />
+                <twig:Kpi
+                        title="Capacité d'accueil"
+                        value="{{ tabStatistiques.capacitePlateformes }}"
+                        variant="primary"
+                        icon="icon:users"
+                />
+                <twig:Kpi
+                        title="Anomalies"
+                        value="{{ tabStatistiques.nbAnomalies }}"
+                        variant="{{ tabStatistiques.nbAnomalies > 0 ? 'warning' : 'default' }}"
+                        icon="icon:warning"
+                />
+            </div>
+
+            <!-- Filtres -->
+            <div class="rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700 dark:bg-secondary-800">
+                <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+                    <!-- Recherche textuelle -->
+                    <div class="lg:col-span-2">
+                        <label for="q"
+                               class="mb-1 block text-xs font-semibold text-secondary-500 uppercase">Recherche</label>
+                        <input type="text" id="q" name="q" value="{{ filters.q|default('') }}"
+                               placeholder="Mention, intitulé, parcours..."
+                               data-action="input->auto-submit#debouncedSubmit"
+                               class="app-filter-input w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface px-3 py-2 text-sm text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 placeholder:text-secondary-400">
+                    </div>
+
+                    <!-- Composante -->
+                    <div>
+                        <label for="comp" class="mb-1 block text-xs font-semibold text-secondary-500 uppercase">Composante</label>
+                        <select id="comp" name="comp" {{ composante ? 'disabled' : '' }}
+                                data-action="change->auto-submit#submit"
+                                class="app-filter-select w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface px-3 py-2 text-sm text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 cursor-pointer">
+                            {% if not composante %}
+                                <option value="">Toutes</option>{% endif %}
+                            {% for c in composantes %}
+                                <option value="{{ c.id }}" {{ filters.comp == c.id or (composante and composante.id == c.id) ? 'selected' : '' }}>{{ c.libelle }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Type de diplôme -->
+                    <div>
+                        <label for="type"
+                               class="mb-1 block text-xs font-semibold text-secondary-500 uppercase">Diplôme</label>
+                        <select id="type" name="type"
+                                data-action="change->auto-submit#submit"
+                                class="app-filter-select w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface px-3 py-2 text-sm text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 cursor-pointer">
+                            <option value="">Tous</option>
+                            {% for t in typesDiplome %}
+                                <option value="{{ t.id }}" {{ filters.type == t.id ? 'selected' : '' }}>{{ t.libelle }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Statut -->
+                    <div>
+                        <label for="statut"
+                               class="mb-1 block text-xs font-semibold text-secondary-500 uppercase">Statut</label>
+                        <select id="statut" name="statut"
+                                data-action="change->auto-submit#submit"
+                                class="app-filter-select w-full rounded-lg border border-secondary-300 dark:border-secondary-600 bg-surface px-3 py-2 text-sm text-secondary-800 dark:text-secondary-100 shadow-xs focus:border-primary-500 focus:ring-primary-500 cursor-pointer">
+                            <option value="">Tous les statuts</option>
+                            <option value="brouillon" {{ filters.statut == 'brouillon' ? 'selected' : '' }}>Brouillon
+                            </option>
+                            <option value="soumis_ses" {{ filters.statut == 'soumis_ses' ? 'selected' : '' }}>En attente
+                                validation SES
+                            </option>
+                            <option value="publie" {{ filters.statut == 'publie' ? 'selected' : '' }}>Validé / Publié
+                            </option>
+                            <option value="Anomalie" {{ filters.statut == 'Anomalie' ? 'selected' : '' }}>Avec
+                                anomalies
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Bouton réinitialiser -->
+                    <div class="flex items-end">
+                        {% set resetUrl = composante ? path('app_offre_etablissement_composante_index', {composante: composante.id, reset: 1}) : path('app_offre_etablissement_index', {reset: 1}) %}
+                        <a href="{{ resetUrl }}" data-turbo-frame="offre_table" data-turbo-action="replace"
+                           class="inline-flex items-center justify-center rounded-lg border border-danger-200 bg-danger-50 hover:bg-danger-100 px-3 py-2 text-sm font-semibold text-danger-700 transition-colors w-full text-center dark:border-danger-700 dark:bg-danger-900/30 dark:text-danger-300">
+                            Effacer
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alertes anomalies -->
+            {% if tabStatistiques.allAnomalies|length > 0 %}
+                <twig:alerte type="warning">
+                    <h2 class="font-semibold">{{ tabStatistiques.allAnomalies|length }}
+                        point{{ tabStatistiques.allAnomalies|length > 1 ? 's' : '' }} à vérifier</h2>
+                    <ul class="mt-2 list-disc pl-5 text-sm space-y-1 max-h-40 overflow-y-auto">
+                        {% for anomaly in tabStatistiques.allAnomalies %}
+                            <li>{{ anomaly }}</li>
+                        {% endfor %}
+                    </ul>
+                </twig:alerte>
+            {% endif %}
+
+            {% set defaultCollapseComposante = not composante and is_granted('ROLE_ADMIN') %}
+            {% set defaultCollapseFormation = composante is not null %}
+
+            <!-- Table -->
+            <div class="overflow-hidden rounded-xl border bg-surface shadow-sm" data-controller="offre-table"
+                 data-offre-table-annees-url-value="{{ path('offre_v2_annees_parcours') }}"
+                 data-offre-table-user-id-value="{{ app.user ? app.user.id : '' }}"
+                 data-offre-table-context-value="{{ composante ? 'dpe_etab_' ~ composante.id : 'admin_etab' }}">
+                <!-- Table Controls -->
+                <div class="flex flex-wrap items-center justify-between gap-4 bg-secondary-50/70 px-4 py-3 border-b border-secondary-200 text-sm dark:border-secondary-700 dark:bg-secondary-800/70">
+                    <div class="font-semibold text-secondary-700 dark:text-secondary-100">
+                        Offre d'établissement {% if composante %}— <span
+                                class="text-primary font-bold">{{ composante.libelle }}</span>{% endif %}
+                    </div>
+                    <div class="flex items-center gap-4 text-xs font-medium flex-wrap">
+                        {% if not composante %}
+                            <div class="flex items-center gap-1.5 bg-surface border border-secondary-200 rounded-lg p-1 shadow-sm dark:border-secondary-700">
+                                <span class="text-secondary-400 px-1.5 font-normal">Composantes:</span>
+                                <button type="button" data-action="offre-table#expandComposantes"
+                                        class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400 cursor-pointer">
+                                    Déplier tout
+                                </button>
+                                <button type="button" data-action="offre-table#collapseComposantes"
+                                        class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors cursor-pointer">
+                                    Replier tout
+                                </button>
+                            </div>
+                        {% endif %}
+                        <div class="flex items-center gap-1.5 bg-surface border border-secondary-200 rounded-lg p-1 shadow-sm dark:border-secondary-700">
+                            <span class="text-secondary-400 px-1.5 font-normal">Mentions:</span>
+                            <button type="button" data-action="offre-table#expandFormations"
+                                    class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400 cursor-pointer">
+                                Déplier tout
+                            </button>
+                            <button type="button" data-action="offre-table#collapseFormations"
+                                    class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors cursor-pointer">
+                                Replier tout
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-1.5 bg-surface border border-secondary-200 rounded-lg p-1 shadow-sm dark:border-secondary-700">
+                            <span class="text-secondary-400 px-1.5 font-normal">Années:</span>
+                            <button type="button" data-action="offre-table#expandParcours"
+                                    class="px-2 py-1 hover:bg-secondary-50 text-primary-600 rounded font-semibold transition-colors dark:text-primary-400 cursor-pointer">
+                                Déplier tout
+                            </button>
+                            <button type="button" data-action="offre-table#collapseParcours"
+                                    class="px-2 py-1 hover:bg-secondary-50 text-secondary-600 rounded font-semibold transition-colors cursor-pointer">
+                                Replier tout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <table class="w-full text-sm">
+                    <thead class="bg-secondary-50 text-left text-xs uppercase text-secondary-500 dark:bg-secondary-800">
+                    <tr>
+                        <th class="px-4 py-3">Formation</th>
+                        <th class="px-4 py-3">Composante</th>
+                        <th class="px-4 py-3">Parcours / année</th>
+                        <th class="px-4 py-3">Ouvert</th>
+                        <th class="px-4 py-3">Plateformes</th>
+                        <th class="px-4 py-3 text-right">Places</th>
+                        <th class="px-4 py-3">Statut</th>
+                        <th class="px-4 py-3"></th>
+                    </tr>
+                    </thead>
+
+                    {% for compName, compGroup in groupedFormations %}
+                        <tbody class="group" data-offre-table-target="composante"
+                               data-composante-id="{{ compGroup.composante ? compGroup.composante.id : loop.index }}"
+                               {% if defaultCollapseComposante %}data-collapsed{% endif %}>
+                        <!-- Group Composante -->
+                        <tr class="bg-secondary-200/70 transition-colors border-t border-secondary-300 dark:border-secondary-600 dark:bg-secondary-700/80">
+                            <td colspan="3" class="px-4 py-3 font-bold text-secondary-900 dark:text-secondary-100">
+                                <button type="button"
+                                        class="group/toggle inline-flex items-center gap-2 text-left cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-primary-500"
+                                        data-action="offre-table#toggleComposante"
+                                        aria-expanded="{{ defaultCollapseComposante ? 'false' : 'true' }}">
+                                    <svg class="h-4 w-4 text-secondary-500 transition-transform duration-200 group-aria-expanded/toggle:rotate-90 shrink-0"
+                                         fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                              d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                    <span class="text-base text-secondary-900 dark:text-secondary-100">{{ compGroup.libelle }}</span>
+                                    <span class="text-xs font-normal text-secondary-500 ml-1">({{ compGroup.nbFormations }} formation{{ compGroup.nbFormations > 1 ? 's' : '' }} · {{ compGroup.nbParcours }} parcours)</span>
+                                </button>
+                            </td>
+                            <td class="px-4 py-3">
+                                <twig:Badge variant="secondary"
+                                            label="{{ compGroup.nbParcoursOuvert }}/{{ compGroup.nbParcours }} ouverts"/>
+                            </td>
+                            <td class="px-4 py-3">&nbsp;</td>
+                            <td class="px-4 py-3 text-right font-bold text-secondary-800 dark:text-secondary-100">{{ compGroup.capacitePlateformes|default(0) }}</td>
+                            <td class="px-4 py-3">&nbsp;</td>
+                            <td class="px-4 py-3 text-right">
+                                <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                    {% if compGroup.composante and compGroup.transitions|length > 0 %}
+                                        {% for transition in compGroup.transitions %}
+                                            <twig:Button size="sm"
+                                                         :soft="false"
+                                                         :variant="transition.metadata.btn|default('') == 'success' ? 'success' : (transition.metadata.btn|default('') == 'warning' ? 'warning' : 'primary')"
+                                                         :icon="transition.metadata.icon|default('')"
+                                                         :label="transition.metadata.label|default(transition.name)|trans({}, 'process')"
+                                                         href="{{ path('offre_v2_composante_valider', {
+                                                             composante: compGroup.composante.id,
+                                                             transition: transition.name
+                                                         }) }}"
+                                                         data-turbo="true"
+                                                         data-turbo-stream="true"
+                                                         data-turbo-frame="_top"
+                                                         data-action="click->modalturbo#open"
+                                                         title="{{ transition.metadata.label|default(transition.name)|trans({}, 'process') }}"
+                                            />
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+
+                        {% for forma in compGroup.formations %}
+                            {% set formation = forma.formation %}
+                            {% set formationOuverte = forma.isOuverte %}
+                            <!-- Ligne Mention (Formation) -->
+                            <tr class="bg-secondary-100/80 hover:bg-secondary-100 transition-all duration-150 border-t border-secondary-200 group-data-[collapsed]:hidden dark:bg-secondary-800/80 dark:hover:bg-secondary-800 dark:border-secondary-700">
+                                <td class="px-4 py-3">
+                                    <div class="font-semibold text-secondary-900 dark:text-secondary-100 flex items-center gap-1.5 flex-wrap">
+                                        {% if forma.parcoursData|length > 0 %}
+                                            <button type="button"
+                                                    class="group/formation-toggle inline-flex items-center gap-2 text-left cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-primary-500 font-semibold text-secondary-900 dark:text-secondary-100"
+                                                    data-action="offre-table#toggleFormation"
+                                                    data-formation-id="{{ formation.id }}"
+                                                    aria-expanded="{{ defaultCollapseFormation ? 'false' : 'true' }}">
+                                                <svg class="h-4 w-4 text-secondary-500 transition-transform duration-200 group-aria-expanded/formation-toggle:rotate-90 shrink-0"
+                                                     fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                     aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                          stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                                                </svg>
+                                                <span>{{ formation.display }}</span>
+                                                <span class="text-xs font-normal text-secondary-500">({{ forma.parcoursData|length }} parcours)</span>
+                                            </button>
+                                        {% else %}
+                                            <span>{{ formation.display }}</span>
+                                        {% endif %}
+                                        {% if forma.anomalies|length > 0 %}
+                                            <a href="{{ path('offre_v2_formation_synthese_modal', { formation: formation.id }) }}"
+                                               data-turbo="true"
+                                               data-turbo-stream="true"
+                                               data-action="click->modalturbo#open"
+                                               class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] font-bold bg-danger-100 text-danger-800 border border-danger-200 hover:bg-danger-200 transition-colors dark:bg-danger-900/40 dark:text-danger-300 dark:border-danger-700 cursor-pointer"
+                                               title="{{ forma.anomalies|length }} point(s) à vérifier : cliquer pour voir le détail"
+                                            >
+                                                <twig:UX:Icon name="icon:warning" class="size-3"/>
+                                                <span>{{ forma.anomalies|length }}</span>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-secondary-600 dark:text-secondary-300">
+                                    {{ formation.composantePorteuse ? formation.composantePorteuse.libelle : '-' }}
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs text-secondary-500">{{ forma.parcoursData|length }} parcours</span>
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            <a href="{{ path('offre_v2_parcours_modal_add', { slug: formation.slug }) }}"
+                                               data-turbo="true"
+                                               data-turbo-stream="true"
+                                               data-action="click->modalturbo#open"
+                                               class="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 transition-colors dark:bg-primary-950/40 dark:text-primary-300 dark:border-primary-800"
+                                               title="Ajouter un parcours (réservé admin)"
+                                            >
+                                                <twig:UX:Icon name="icon:add" class="size-3"/>
+                                                <span>Ajouter</span>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <twig:Badge variant="{{ formationOuverte ? 'success' : 'danger' }}"
+                                                label="{{ formationOuverte ? 'Oui' : 'Non' }}"/>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-1 flex-wrap">
+                                        {% for pStatut in forma.plateformesStatuts %}
+                                            {% set plat = pStatut.plateforme %}
+                                            {% if pStatut.active %}
+                                                <twig:Badge :variant="plat.color|default('primary')"
+                                                            :label="plat.code"
+                                                            title="{{ plat.libelle }} : active sur la formation"
+                                                />
+                                            {% elseif pStatut.hasCapaciteInactive %}
+                                                <twig:Badge variant="warning"
+                                                            icon="ph:warning"
+                                                            :label="plat.code"
+                                                            title="{{ plat.libelle }} : plateforme inactive mais capacité renseignée ({{ pStatut.capaciteInactive }})"
+                                                />
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-right font-bold text-secondary-900 dark:text-secondary-100">{{ forma.capacitePlateformes|default(0) }}</td>
+                                <td class="px-4 py-3">
+                                    <div class="flex gap-1.5 flex-wrap items-center">
+                                        {{ include('offre_v2/_etat_offre_badge.html.twig', {etat: forma.etatValidation|keys|first}) }}
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-right">
+                                    <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                        <twig:Button variant="success"
+                                                     size="sm"
+                                                     href="{{ path('offre_v2_formation_synthese_modal', { formation: formation.id }) }}"
+                                                     data-turbo="true"
+                                                     data-turbo-stream="true"
+                                                     data-action="click->modalturbo#open"
+                                                     icon="ph:check"
+                                                     title="Vérification rapide et contrôle des informations saisies"
+                                        >
+                                            Vérification
+                                        </twig:Button>
+                                        <twig:Button variant="primary"
+                                                     size="sm"
+                                                     href="{{ path('offre_v2_configurer', { slug: formation.slug, composante: composante ? composante.id : null }) }}"
+                                                     data-turbo-frame="_top"
+                                        >
+                                            Configurer
+                                        </twig:Button>
+                                        {{ component('dropdown_actions', {
+                                            label: 'Actions',
+                                            labelSrOnly: true,
+                                            help: 'Actions pour la formation',
+                                            icon: 'icon:ellipsis-vertical',
+                                            items: [
+                                                {
+                                                    label: 'Voir la fiche',
+                                                    icon: 'icon:info',
+                                                    url: path('formation_v2_voir', {slug: formation.slug}),
+                                                    target: '_blank'
+                                                },
+                                                {
+                                                    label: 'Modifier',
+                                                    icon: 'ph:arrows-left-right-light',
+                                                    url: path('app_formation_edit_modal', {slug: formation.slug}),
+                                                    modal: true,
+                                                    disabled: not is_granted('ROLE_ADMIN'),
+                                                    help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : null
+                                                },
+                                                {
+                                                    label: 'Supprimer',
+                                                    icon: 'icon:delete',
+                                                    color: 'danger',
+                                                    url: path('formation_v2_supprimer', {formation: formation.id}),
+                                                    modal: true,
+                                                    disabled: not is_granted('ROLE_ADMIN'),
+                                                    help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : null
+                                                }
+                                            ]
+                                        }) }}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% for parcoursId, pd in forma.parcoursData %}
+                                {% set parcours = pd.parcours %}
+                                {% set parcoursCapacite = pd.capacitePlateformes|default(0) %}
+                                {% set isParcoursOuvert = pd.isOuvert %}
+                                {% set dpeParc = pd.dpeParcours %}
+                                <tr id="offre-parcours-{{ parcours.id }}"
+                                    data-formation-parcours="{{ formation.id }}"
+                                    class="bg-surface hover:bg-secondary-50/70 transition-colors group-data-[collapsed]:hidden dark:bg-surface dark:hover:bg-secondary-800/40 {{ defaultCollapseFormation ? 'hidden' : '' }}">
+                                    <td>&nbsp;</td>
+                                    <td class="px-4 py-3 text-secondary-500 font-medium">
+                                        {{ pd.composanteLibelle }}
+                                    </td>
+                                    <td class="px-4 py-3 font-semibold text-secondary-700 dark:text-secondary-100">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            {% if pd.annees|length > 0 %}
+                                                <button type="button"
+                                                        class="group/toggle inline-flex items-center gap-2 text-left cursor-pointer rounded focus-visible:outline-2 focus-visible:outline-primary-500"
+                                                        data-action="offre-table#toggleParcours"
+                                                        data-parcours-id="{{ parcours.id }}"
+                                                        aria-expanded="false">
+                                                    <svg class="h-4 w-4 text-secondary-400 transition-transform duration-200 group-aria-expanded/toggle:rotate-90"
+                                                         fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                                                         aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                              stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                                                    </svg>
+                                                    <span>{{ parcours.libelle }}
+                                                        {% if parcours.typeParcours is not null and parcours.typeParcours.value != 'classique' %}
+                                                            <twig:Badge label="{{ parcours.typeParcours.getLabel() }}"
+                                                                        variant="{{ parcours.typeParcours.getColor() }}"
+                                                                        size="sm"/>
+                                                        {% endif %}
+                                                    </span>
+                                                </button>
+                                            {% else %}
+                                                <span>{{ parcours.libelle }}</span>
+                                            {% endif %}
+                                            {% set parcoursVille = parcours.ville ?? parcours.localisation %}
+                                            {% if parcoursVille %}
+                                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-secondary-600 bg-secondary-100 dark:bg-secondary-800 dark:text-secondary-300 px-1.5 py-0.5 rounded-md"
+                                                      title="Lieu d'enseignement : {{ parcoursVille.libelle }}">
+                                                    <twig:UX:Icon name="ph:map-pin" class="h-3 w-3 text-secondary-400"/>
+                                                    {{ parcoursVille.libelle }}
+                                                </span>
+                                            {% endif %}
+                                            <span class="text-xs font-normal text-secondary-400">({{ pd.annees|length }} année{{ pd.annees|length > 1 ? 's' : '' }})</span>
+                                            {% set parcAnomalies = forma.parcoursAnomalies[parcours.id]|default([]) %}
+                                            {% if parcAnomalies|length > 0 %}
+                                                <a href="{{ path('offre_v2_formation_synthese_modal', { formation: formation.id }) }}"
+                                                   data-turbo="true"
+                                                   data-turbo-stream="true"
+                                                   data-action="click->modalturbo#open"
+                                                   class="inline-flex items-center text-danger-600 hover:text-danger-800 ml-1 cursor-pointer dark:text-danger-400"
+                                                   title="{{ parcAnomalies|join('\n') }} (Cliquer pour voir la synthèse)"
+                                                >⚠️</a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <twig:Badge variant="{{ isParcoursOuvert ? 'success' : 'danger' }}"
+                                                    label="{{ isParcoursOuvert ? 'Oui' : 'Non' }}"/>
+                                    </td>
+                                    <td class="px-4 py-3">&nbsp;</td>
+                                    <td class="px-4 py-3 text-right font-semibold text-secondary-700 dark:text-secondary-100">{{ parcoursCapacite }}</td>
+                                    <td class="px-4 py-3">&nbsp;</td>
+                                    <td class="px-4 py-3 text-right">
+                                        <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                                            {{ component('dropdown_actions', {
+                                                label: 'Actions',
+                                                labelSrOnly: true,
+                                                help: 'Actions pour le parcours',
+                                                icon: 'icon:ellipsis-vertical',
+                                                items: [
+                                                    {
+                                                        label: 'Voir la fiche',
+                                                        icon: 'icon:info',
+                                                        url: path('parcours_v2_voir', {parcours: parcours.id}),
+                                                        target: '_blank'
+                                                    },
+                                                    {
+                                                        label: 'Déplacer',
+                                                        icon: 'ph:arrows-left-right-light',
+                                                        url: path('parcours_ses_deplacer', {parcours: parcours.id}),
+                                                        modal: true,
+                                                        disabled: not is_granted('ROLE_ADMIN'),
+                                                        help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : null
+                                                    },
+                                                    {
+                                                        label: 'Supprimer',
+                                                        icon: 'icon:delete',
+                                                        color: 'danger',
+                                                        url: path('parcours_v2_supprimer', {parcours: parcours.id}),
+                                                        modal: true,
+                                                        disabled: not is_granted('ROLE_ADMIN'),
+                                                        help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : null
+                                                    }
+                                                ]
+                                            }) }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                        </tbody>
+                    {% endfor %}
+                </table>
+            </div>
+        </form>
+    </turbo-frame>
+{% endblock %}

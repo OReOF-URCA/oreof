@@ -565,7 +565,7 @@
                                         </twig:Button>
                                         <twig:Button variant="primary"
                                                      size="sm"
-                                                     href="{{ path('offre_v2_configurer', { slug: formation.slug }) }}"
+                                                     href="{{ path('offre_v2_configurer', { slug: formation.slug, composante: composante ? composante.id : null }) }}"
                                                      data-turbo-frame="_top"
                                         >
                                             Configurer

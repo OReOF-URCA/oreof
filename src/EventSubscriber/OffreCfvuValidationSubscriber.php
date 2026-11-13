@@ -23,6 +23,7 @@ final class OffreCfvuValidationSubscriber implements EventSubscriberInterface
             'workflow.dpeFormation.transition.valider_cfvu_avec_pv' => 'onDpeFormationCfvuTransition',
             'workflow.dpeFormation.transition.valider_cfvu_attente_pv' => 'onDpeFormationCfvuTransition',
             'workflow.dpeFormation.transition.deposer_pv' => 'onDpeFormationCfvuTransition',
+            'workflow.dpeFormation.transition.valider_ses_etablissement' => 'onDpeFormationCfvuTransition',
             'workflow.dpeParcours.transition.valider_cfvu' => 'onDpeParcoursCfvuTransition',
             'workflow.dpeParcours.transition.valider_reserve_cfvu' => 'onDpeParcoursCfvuTransition',
             'workflow.dpeParcours.transition.valider_reserve_central_cfvu' => 'onDpeParcoursCfvuTransition',

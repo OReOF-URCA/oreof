@@ -109,6 +109,10 @@ app_notication_liste.description: 'Paramétrer les notifications par profil et w
 app_notication_liste.title: 'Gérer les notifications'
 app_offre_composante_index.description: "Gestion de l'offre de formation de votre composante. Capacités d''accueil, ouvertures, ..."
 app_offre_composante_index.title: "Gestion de l'offre de formation"
+app_offre_etablissement_composante_index.description: "Gestion de l'offre d'établissement de votre composante (hors accréditation). Modifications au fil de l'eau."
+app_offre_etablissement_composante_index.title: "Offre d'établissement"
+app_offre_etablissement_index.description: "Synthèse de l'offre de formation d'établissement. Processus simplifié au fil de l'eau."
+app_offre_etablissement_index.title: "Offre d'établissement"
 app_offre_index.description: 'Synthèse de l’offre de formation. Ouverture, plateformes, capacités et validations.'
 app_offre_index.title: 'Synthèse de l’offre de formation'
 app_parcours_bcc_but.title: 'BCC pour le parcours %libelle%'

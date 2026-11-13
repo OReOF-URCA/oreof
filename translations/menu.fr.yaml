@@ -11,6 +11,7 @@ menu.admin.descriptifs_parcours: 'Descriptifs haut de page'
 menu.admin.dpe_ouverts: 'DPE ouverts'
 menu.admin.exports: Exports
 menu.admin.gestion_offre: "Gestion de l'offre et capacités"
+menu.admin.gestion_offre_etablissement: "Offre d'établissement"
 menu.admin.gestion_offre_old: "Gestion de l'offre et capacités"
 menu.admin.impersonation.user: "Impersonation d'un utilisateur"
 menu.admin.logs.applicatifs: "Logs de l'application"
@@ -27,6 +28,7 @@ menu.compo.dpe_ouvert: 'DPE ouverts'
 menu.compo.exports: Exports
 menu.compo.gestion_composante: 'Gérer ma composante'
 menu.compo.gestion_offre: "Gestion de l'offre"
+menu.compo.gestion_offre_etablissement: "Offre d'établissement"
 menu.compo.pilotage: Pilotage
 menu.compo.pilotage_visuel: 'Pilotage visuel'
 menu.compo.validation_dpe: 'Validation DPE'
@@ -150,6 +152,10 @@ page.app_notication_liste.description: 'Paramétrer les notifications par profil
 page.app_notication_liste.title: Notifications
 page.app_offre_composante_index.description: "Gestion de l'offre de formation de votre composante. Capacités d''accueil, ouvertures, ..."
 page.app_offre_composante_index.title: "Gestion de l'offre de formation"
+page.app_offre_etablissement_composante_index.description: "Gestion de l'offre d'établissement de votre composante (hors accréditation). Modifications au fil de l'eau."
+page.app_offre_etablissement_composante_index.title: "Offre d'établissement"
+page.app_offre_etablissement_index.description: "Synthèse de l'offre de formation d'établissement. Processus simplifié au fil de l'eau."
+page.app_offre_etablissement_index.title: "Offre d'établissement"
 page.app_offre_index.description: 'Synthèse de l’offre de formation. Ouverture, plateformes, capacités et validations.'
 page.app_offre_index.title: "Gestion de l'offre et capacités"
 page.app_admin_pilotage_descriptifs_index.description: 'Revue et édition des textes de haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'

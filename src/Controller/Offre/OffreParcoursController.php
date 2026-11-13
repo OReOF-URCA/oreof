@@ -41,6 +41,10 @@ final class OffreParcoursController extends BaseController
     ): Response {
         $this->denyAccessUnlessCanConfigurerOffre($formation);
 
+        if (!$formation->isClassique() && !$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('La création d\'un parcours d\'établissement est réservée aux administrateurs.');
+        }
+
         $parcours = new Parcours($formation);
 
         return $turboStream->streamOpenModalFromTemplates(
@@ -77,6 +81,10 @@ final class OffreParcoursController extends BaseController
     ): Response {
         $this->denyAccessUnlessCanConfigurerOffre($formation);
 
+        if (!$formation->isClassique() && !$this->isGranted('ROLE_ADMIN')) {
+            return $turboStream->streamToastError('La création d\'un parcours d\'établissement est réservée aux administrateurs.');
+        }
+
         $csrfToken = (string)$request->request->get('_token');
         if (!$this->isCsrfTokenValid('parcours_add_' . $formation->getId(), $csrfToken)) {
             return $turboStream->streamToastError('Token CSRF invalide.');
@@ -86,7 +94,7 @@ final class OffreParcoursController extends BaseController
 
         $isSesOrAdmin = $this->isGranted('ROLE_SES') || $this->isGranted('ROLE_ADMIN');
         if (!$isSesOrAdmin) {
-            if (!$campagne->isPeriodActive()) {
+            if ($formation->isClassique() && !$campagne->isPeriodActive()) {
                 return $turboStream->streamToastError('La campagne de collecte est fermée. Ajout impossible.');
             }
 
@@ -273,7 +281,7 @@ final class OffreParcoursController extends BaseController
 
         $isSesOrAdmin = $this->isGranted('ROLE_SES') || $this->isGranted('ROLE_ADMIN');
         if (!$isSesOrAdmin) {
-            if (!$campagne->isPeriodActive()) {
+            if ($formation?->isClassique() && !$campagne->isPeriodActive()) {
                 return $turboStream->streamToastError('La campagne de collecte est fermée. Modification impossible.');
             }
 
@@ -425,7 +433,7 @@ final class OffreParcoursController extends BaseController
         $campagne = $this->getCampagneCollecte();
         $isSesOrAdmin = $this->isGranted('ROLE_SES') || $this->isGranted('ROLE_ADMIN');
         if (!$isSesOrAdmin) {
-            if (!$campagne->isPeriodActive()) {
+            if ($formation?->isClassique() && !$campagne->isPeriodActive()) {
                 return $turboStream->streamToastError('La campagne de collecte est fermée. Ajout impossible.');
             }
 
@@ -566,7 +574,7 @@ final class OffreParcoursController extends BaseController
 
         $isSesOrAdmin = $this->isGranted('ROLE_SES') || $this->isGranted('ROLE_ADMIN');
         if (!$isSesOrAdmin) {
-            if (!$campagne->isPeriodActive()) {
+            if ($formation?->isClassique() && !$campagne->isPeriodActive()) {
                 return $turboStream->streamToastError('La campagne de collecte est fermée. Suppression impossible.');
             }
 

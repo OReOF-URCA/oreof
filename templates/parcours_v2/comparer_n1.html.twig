@@ -490,7 +490,8 @@
                                                                         </div>
                                                                     {% elseif ec.attachmentStatus == 'new_fiche' %}
                                                                         <span class="inline-flex items-center gap-1 text-xs text-info-700 dark:text-info-300">
-                                                                            <twig:UX:Icon name="icon:plus" class="size-3.5 text-info-600" />
+                                                                            <twig:UX:Icon name="icon:add"
+                                                                                          class="size-3.5 text-info-600"/>
                                                                             {{ ec.ficheN ? ec.ficheN.sigle : '' }}
                                                                         </span>
                                                                     {% else %}
