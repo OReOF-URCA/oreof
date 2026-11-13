@@ -85,6 +85,19 @@ class MessageAssistance
         return $this->id;
     }
 
+    /**
+     * Ramène un identifiant de mail à 255 caractères maximum (colonne indexée) de façon stable :
+     * un identifiant trop long est remplacé par son empreinte, aussi bien à l'enregistrement qu'à la recherche.
+     */
+    public static function normaliserId(?string $id): ?string
+    {
+        if ($id === null || $id === '') {
+            return null;
+        }
+
+        return strlen($id) > 255 ? '<' . sha1($id) . '@id-long.assistance>' : $id;
+    }
+
     public function getDemande(): ?DemandeAssistance
     {
         return $this->demande;
@@ -121,7 +134,7 @@ class MessageAssistance
 
     public function setMessageId(?string $messageId): static
     {
-        $this->messageId = $messageId;
+        $this->messageId = self::normaliserId($messageId);
 
         return $this;
     }
@@ -133,7 +146,7 @@ class MessageAssistance
 
     public function setInReplyTo(?string $inReplyTo): static
     {
-        $this->inReplyTo = $inReplyTo;
+        $this->inReplyTo = self::normaliserId($inReplyTo);
 
         return $this;
     }
@@ -155,6 +168,7 @@ class MessageAssistance
      */
     public function setReferences(array $references): static
     {
+        $references = array_values(array_filter(array_map(self::normaliserId(...), $references)));
         $this->references = $references === [] ? null : implode(' ', $references);
 
         return $this;
@@ -167,7 +181,7 @@ class MessageAssistance
 
     public function setExpediteurEmail(string $expediteurEmail): static
     {
-        $this->expediteurEmail = mb_strtolower($expediteurEmail);
+        $this->expediteurEmail = mb_substr(mb_strtolower($expediteurEmail), 0, 180);
 
         return $this;
     }

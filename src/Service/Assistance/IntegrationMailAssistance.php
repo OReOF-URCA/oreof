@@ -17,6 +17,9 @@ use App\Service\Assistance\Source\SourceMailInterface;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use Psr\Log\LoggerInterface;
+use Throwable;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
 
@@ -29,7 +32,7 @@ class IntegrationMailAssistance
     public const FENETRE_SUJET_JOURS = 30;
 
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
+        private readonly ManagerRegistry $doctrine,
         private readonly DemandeAssistanceRepository $demandeRepository,
         private readonly MessageAssistanceRepository $messageRepository,
         private readonly UserRepository $userRepository,
@@ -37,15 +40,31 @@ class IntegrationMailAssistance
         private readonly StockagePieceJointe $stockage,
         #[Target('assistance_sanitizer')]
         private readonly HtmlSanitizerInterface $sanitizer,
+        private readonly LoggerInterface $logger,
     ) {
     }
 
+    /**
+     * Intègre tous les mails d'une source. Une erreur sur un mail est journalisée et n'interrompt pas la relève.
+     */
     public function integrerTout(SourceMailInterface $source, DateTimeImmutable $depuis): int
     {
         $nombre = 0;
-        foreach ($source->lire($depuis) as $mail) {
-            if ($this->integrer($mail) !== null) {
-                ++$nombre;
+        $estConnu = fn (string $messageId): bool => $this->messageRepository->existe($messageId);
+
+        foreach ($source->lire($depuis, $estConnu) as $mail) {
+            try {
+                if ($this->integrer($mail) !== null) {
+                    ++$nombre;
+                }
+            } catch (Throwable $e) {
+                $this->logger->error('Assistance : intégration d\'un mail impossible', [
+                    'messageId' => $mail->messageId,
+                    'expediteur' => $mail->expediteurEmail,
+                    'sujet' => $mail->sujet,
+                    'exception' => $e,
+                ]);
+                $this->reouvrirSiFerme();
             }
         }
 
@@ -58,7 +77,7 @@ class IntegrationMailAssistance
     public function integrer(MailEntrant $mail): ?MessageAssistance
     {
         $messageId = $mail->messageId ?? $this->idCalcule($mail);
-        if ($this->messageRepository->findOneBy(['messageId' => $messageId]) !== null) {
+        if ($this->messageRepository->existe($messageId)) {
             return null;
         }
 
@@ -81,14 +100,22 @@ class IntegrationMailAssistance
             ->setAutomatique($mail->automatique)
             ->setAuteur($sens === SensMessageAssistanceEnum::SORTANT ? $this->userRepository->findOneBy(['email' => $mail->expediteurEmail]) : null);
 
-        foreach ($mail->piecesJointes as $piece) {
-            $message->addPieceJointe(
-                (new PieceJointeAssistance())
-                    ->setNomOriginal($piece->nom)
-                    ->setMimeType($piece->mimeType)
-                    ->setTaille(strlen($piece->contenu))
-                    ->setChemin($this->stockage->enregistrer($piece))
-            );
+        $fichiers = [];
+        try {
+            foreach ($mail->piecesJointes as $piece) {
+                $chemin = $this->stockage->enregistrer($piece);
+                $fichiers[] = $chemin;
+                $message->addPieceJointe(
+                    (new PieceJointeAssistance())
+                        ->setNomOriginal(str_replace(['/', '\\'], '-', $piece->nom))
+                        ->setMimeType($piece->mimeType)
+                        ->setTaille(strlen($piece->contenu))
+                        ->setChemin($chemin)
+                );
+            }
+        } catch (Throwable $e) {
+            $this->stockage->supprimer($fichiers);
+            throw $e;
         }
 
         $demande->addMessage($message);
@@ -98,13 +125,21 @@ class IntegrationMailAssistance
             $demande->setStatut(StatutDemandeAssistanceEnum::EN_COURS);
         }
 
-        $this->entityManager->persist($demande);
+        $entityManager = $this->doctrine->getManager();
+        assert($entityManager instanceof EntityManagerInterface);
+        $entityManager->persist($demande);
 
         try {
-            $this->entityManager->flush();
+            $entityManager->flush();
         } catch (UniqueConstraintViolationException) {
             // relève concurrente : le mail vient d'être intégré par un autre processus
+            $this->stockage->supprimer($fichiers);
+            $this->reouvrirSiFerme();
+
             return null;
+        } catch (Throwable $e) {
+            $this->stockage->supprimer($fichiers);
+            throw $e;
         }
 
         return $message;
@@ -139,6 +174,8 @@ class IntegrationMailAssistance
         }
 
         return (new DemandeAssistance())
+            // rebond ou réponse automatique hors de tout échange connu : rien à traiter
+            ->setStatut($mail->automatique ? StatutDemandeAssistanceEnum::RESOLUE : StatutDemandeAssistanceEnum::NOUVELLE)
             ->setSujet($mail->sujet !== '' ? $mail->sujet : '(sans sujet)')
             ->setSujetNormalise($sujetNormalise)
             ->setDemandeurEmail($demandeurEmail)
@@ -146,6 +183,18 @@ class IntegrationMailAssistance
             ->setDemandeur($this->userRepository->findOneBy(['email' => $demandeurEmail]))
             ->setCreated($mail->date)
             ->setDateDernierMessage($mail->date);
+    }
+
+    /**
+     * Après une erreur de base, Doctrine ferme le gestionnaire d'entités : on le réinitialise
+     * pour que les mails suivants puissent être intégrés.
+     */
+    private function reouvrirSiFerme(): void
+    {
+        $entityManager = $this->doctrine->getManager();
+        if ($entityManager instanceof EntityManagerInterface && !$entityManager->isOpen()) {
+            $this->doctrine->resetManager();
+        }
     }
 
     private function estEquipe(string $email): bool

@@ -2,6 +2,7 @@
 
 namespace App\Service\Assistance\Source;
 
+use Closure;
 use DateTimeImmutable;
 use InvalidArgumentException;
 use Webklex\PHPIMAP\Message;
@@ -18,7 +19,7 @@ class EmlSource implements SourceMailInterface
     ) {
     }
 
-    public function lire(DateTimeImmutable $depuis): iterable
+    public function lire(DateTimeImmutable $depuis, ?Closure $estConnu = null): iterable
     {
         if (is_dir($this->chemin)) {
             $fichiers = glob(rtrim($this->chemin, '/') . '/*.eml') ?: [];
@@ -30,7 +31,11 @@ class EmlSource implements SourceMailInterface
         }
 
         foreach ($fichiers as $fichier) {
-            yield $this->factory->depuisMessage(Message::fromFile($fichier));
+            $mail = $this->factory->depuisMessage(Message::fromFile($fichier));
+            if ($estConnu !== null && $mail->messageId !== null && $estConnu($mail->messageId)) {
+                continue;
+            }
+            yield $mail;
         }
     }
 }

@@ -122,7 +122,7 @@ class DemandeAssistance
 
     public function setDemandeurEmail(string $demandeurEmail): static
     {
-        $this->demandeurEmail = mb_strtolower($demandeurEmail);
+        $this->demandeurEmail = mb_substr(mb_strtolower($demandeurEmail), 0, 180);
 
         return $this;
     }

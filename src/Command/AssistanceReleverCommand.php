@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Service\Assistance\IntegrationMailAssistance;
 use App\Service\Assistance\Source\ImapSource;
+use App\Service\Assistance\VerrouReleveAssistance;
 use DateTimeImmutable;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -22,6 +23,7 @@ class AssistanceReleverCommand extends Command
     public function __construct(
         private readonly IntegrationMailAssistance $integration,
         private readonly ImapSource $source,
+        private readonly VerrouReleveAssistance $verrou,
     ) {
         parent::__construct();
     }
@@ -41,6 +43,12 @@ class AssistanceReleverCommand extends Command
             return Command::FAILURE;
         }
 
+        if (!$this->verrou->acquerir()) {
+            $io->warning('Une relève est déjà en cours.');
+
+            return Command::SUCCESS;
+        }
+
         $jours = max(1, (int) $input->getOption('depuis'));
 
         try {
@@ -49,6 +57,8 @@ class AssistanceReleverCommand extends Command
             $io->error($e->getMessage());
 
             return Command::FAILURE;
+        } finally {
+            $this->verrou->liberer();
         }
 
         $io->success(sprintf('%d mail(s) intégré(s).', $nombre));

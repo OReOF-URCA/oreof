@@ -67,6 +67,14 @@ class MailEntrantFactory
     }
 
     /**
+     * Message-ID normalisé « <id> » d'un message, lisible sans télécharger le corps.
+     */
+    public function messageId(Message $message): ?string
+    {
+        return $this->ids($message->get('message_id'))[0] ?? null;
+    }
+
+    /**
      * @return list<Address>
      */
     private function adresses(mixed $attribut): array

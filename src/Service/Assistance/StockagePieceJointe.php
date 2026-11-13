@@ -39,4 +39,18 @@ class StockagePieceJointe
 
         return $this->dossier . '/' . $relatif;
     }
+
+    /**
+     * Supprime des fichiers enregistrés (nettoyage après un échec d'intégration).
+     *
+     * @param list<string> $chemins chemins relatifs renvoyés par enregistrer()
+     */
+    public function supprimer(array $chemins): void
+    {
+        foreach ($chemins as $relatif) {
+            if ($relatif !== '' && !str_contains($relatif, '..')) {
+                $this->filesystem->remove($this->dossier . '/' . $relatif);
+            }
+        }
+    }
 }

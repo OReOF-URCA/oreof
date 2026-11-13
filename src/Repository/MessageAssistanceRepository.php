@@ -23,7 +23,7 @@ class MessageAssistanceRepository extends ServiceEntityRepository
      */
     public function findOneByMessageIds(array $ids): ?MessageAssistance
     {
-        $ids = array_values(array_unique(array_filter($ids, static fn (?string $id) => $id !== null && $id !== '')));
+        $ids = array_values(array_unique(array_filter(array_map(MessageAssistance::normaliserId(...), $ids))));
         if ($ids === []) {
             return null;
         }
@@ -35,5 +35,10 @@ class MessageAssistanceRepository extends ServiceEntityRepository
             ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function existe(string $messageId): bool
+    {
+        return $this->count(['messageId' => MessageAssistance::normaliserId($messageId)]) > 0;
     }
 }

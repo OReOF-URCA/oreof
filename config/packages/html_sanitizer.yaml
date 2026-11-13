@@ -5,6 +5,8 @@ framework:
             # liens limités à https et mailto.
             assistance_sanitizer:
                 allow_safe_elements: true
+                # mails Outlook/Exchange : souvent 30–100 Ko de HTML (défaut Symfony : 20 000 caractères, au-delà le texte est coupé)
+                max_input_length: 2000000
                 allowed_link_schemes: ['https', 'mailto']
                 allow_relative_links: false
                 allow_relative_medias: false

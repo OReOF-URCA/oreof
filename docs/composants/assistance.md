@@ -16,20 +16,26 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
 
 ## Fonctionnement
 
-1. **Relève** (`app:assistance:relever`, cron toutes les 5 min, ou bouton « Relever maintenant ») : lecture IMAP des
-   7 derniers jours via `webklex/php-imap` (pur PHP, pas d'extension `imap`). La boîte n'est jamais modifiée (messages
-   laissés non lus). Un mail déjà connu (même `Message-ID`) est ignoré ; sans `Message-ID`, un identifiant stable est
-   calculé (expéditeur + date + sujet).
+1. **Relève** (`app:assistance:relever`, cron toutes les 5 min sur 7 jours ; bouton « Relever maintenant » sur 1 jour) :
+   lecture IMAP via `webklex/php-imap` (pur PHP, pas d'extension `imap`). La boîte n'est jamais modifiée (lecture
+   « peek » avec flags : l'état lu/non lu est conservé). Les en-têtes sont lus d'abord : le corps et les pièces jointes
+   ne sont téléchargés que pour les `Message-ID` inconnus ; sans `Message-ID`, un identifiant est calculé (expéditeur
+   + date + sujet). Un verrou fichier (`var/assistance-releve.lock`, `VerrouReleveAssistance`) empêche deux relèves
+   simultanées. Un mail illisible (date invalide → date du jour, contenu introuvable) ou en erreur à l'intégration est
+   journalisé et ignoré : la relève continue (le gestionnaire d'entités est réinitialisé si besoin, les pièces jointes
+   déjà écrites sont supprimées).
 2. **Regroupement** (`IntegrationMailAssistance`), dans l'ordre :
    - `In-Reply-To` / `References` pointant vers un message connu → même demande ;
    - sinon même sujet normalisé (`SujetNormaliseur` : sans `Re:`, `TR:`, `Fwd:`, `[ORéOF]`, `***IMPORTANT***`, casse)
      qu'une demande active dans les 30 jours précédant le mail → même demande ;
    - sinon nouvelle demande (statut « Nouvelle »).
    Un mail reçu non automatique rouvre une demande « Résolue » ou « En attente de l'usager » (→ « En cours »).
-   Les rebonds et réponses automatiques (`Auto-Submitted`, `MAILER-DAEMON`, `postmaster`) sont rattachés sans rouvrir.
+   Les rebonds et réponses automatiques (`Auto-Submitted`, `MAILER-DAEMON`, `postmaster`) sont rattachés sans rouvrir ;
+   hors de tout échange connu, ils créent une demande directement « Résolue ».
    Un mail dont l'expéditeur est `oreof@` ou un `ROLE_ADMIN` est classé « Réponse envoyée ».
 3. **Stockage** : HTML nettoyé à l'enregistrement par le sanitizer `assistance_sanitizer` (pas de script, pas d'image
-   ni média, liens `https`/`mailto` seulement) ; pièces jointes sous `var/assistance/AAAA/MM/<aléatoire>`, servies par
+   ni média, liens `https`/`mailto` seulement, entrée jusqu'à 2 Mo : la limite Symfony par défaut de 20 000 caractères
+   couperait les mails Outlook) ; identifiants de mail de plus de 255 caractères remplacés par leur empreinte ; pièces jointes sous `var/assistance/AAAA/MM/<aléatoire>`, servies par
    `app_assistance_piece_jointe` en téléchargement.
 4. **Réponse** (`ReponseAssistance`) : envoyée depuis `oreof@univ-reims.fr` (`From` et `Reply-To`), avec
    `In-Reply-To`/`References` du dernier message et un `Message-ID` enregistré : la réponse de l'usager revient dans

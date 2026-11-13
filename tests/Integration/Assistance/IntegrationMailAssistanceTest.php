@@ -161,4 +161,90 @@ class IntegrationMailAssistanceTest extends TestCase
         self::assertFileExists($chemin);
         self::assertStringStartsWith('%PDF', (string) file_get_contents($chemin));
     }
+
+    private function mailSimple(string $messageId, string $sujet, ?string $html = null, bool $automatique = false, ?string $inReplyTo = null): MailEntrant
+    {
+        return new MailEntrant(
+            messageId: $messageId,
+            inReplyTo: $inReplyTo,
+            references: [],
+            expediteurEmail: 'usager@univ-test.fr',
+            expediteurNom: null,
+            destinataires: ['oreof@univ-reims.fr'],
+            sujet: $sujet,
+            corpsTexte: 'texte',
+            corpsHtml: $html,
+            date: new DateTimeImmutable('2026-11-13 09:00'),
+            automatique: $automatique,
+        );
+    }
+
+    public function testHtmlLongEstConserveEnEntier(): void
+    {
+        $html = '<p>' . str_repeat('Lorem ipsum dolor sit amet. ', 2000) . 'FIN-DU-MAIL</p>';
+
+        $message = $this->integration->integrer($this->mailSimple('<long-html@test>', 'Mail long', $html));
+
+        self::assertStringContainsString('FIN-DU-MAIL', (string) $message->getCorpsHtml());
+    }
+
+    public function testIdentifiantsTropLongsNeBloquentPas(): void
+    {
+        $idLong = '<' . str_repeat('x', 300) . '@test>';
+
+        $premier = $this->integration->integrer($this->mailSimple($idLong, 'Id long'));
+        $reponse = $this->integration->integrer($this->mailSimple('<rep-long@test>', 'Autre sujet', null, false, $idLong));
+
+        self::assertNotNull($premier);
+        self::assertSame($premier->getDemande(), $reponse->getDemande());
+        self::assertNull($this->integration->integrer($this->mailSimple($idLong, 'Id long')));
+    }
+
+    public function testRebondSansFilCreeUneDemandeDejaResolue(): void
+    {
+        $message = $this->integration->integrer($this->mail('06'));
+
+        self::assertSame(StatutDemandeAssistanceEnum::RESOLUE, $message->getDemande()->getStatut());
+    }
+
+    public function testUneErreurSurUnMailNInterrompPasLaReleve(): void
+    {
+        $stockage = $this->createStub(StockagePieceJointe::class);
+        $stockage->method('enregistrer')->willThrowException(new \RuntimeException('disque plein'));
+        $integration = new IntegrationMailAssistance(
+            $this->getService(\Doctrine\Persistence\ManagerRegistry::class),
+            $this->getService(\App\Repository\DemandeAssistanceRepository::class),
+            $this->getService(\App\Repository\MessageAssistanceRepository::class),
+            $this->getService(\App\Repository\UserRepository::class),
+            new \App\Service\Assistance\SujetNormaliseur(),
+            $stockage,
+            $this->getService('html_sanitizer.sanitizer.assistance_sanitizer'),
+            new \Psr\Log\NullLogger(),
+        );
+
+        $nombre = $integration->integrerTout(new EmlSource(self::DOSSIER, new MailEntrantFactory()), new DateTimeImmutable('-7 days'));
+
+        self::assertSame(5, $nombre, 'seul le mail avec pièce jointe (01) échoue');
+    }
+
+    public function testIntegrerToutSignaleALaSourceLesMailsDejaConnus(): void
+    {
+        $this->integration->integrer($this->mail('01'));
+        $source = new class implements \App\Service\Assistance\Source\SourceMailInterface {
+            public ?\Closure $estConnu = null;
+
+            public function lire(DateTimeImmutable $depuis, ?\Closure $estConnu = null): iterable
+            {
+                $this->estConnu = $estConnu;
+
+                return [];
+            }
+        };
+
+        $this->integration->integrerTout($source, new DateTimeImmutable('-7 days'));
+
+        self::assertNotNull($source->estConnu);
+        self::assertTrue(($source->estConnu)('<demande-geotp-1@univ-test.fr>'));
+        self::assertFalse(($source->estConnu)('<inconnu@test>'));
+    }
 }

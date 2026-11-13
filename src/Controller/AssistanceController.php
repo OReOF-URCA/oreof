@@ -18,6 +18,7 @@ use App\Service\Assistance\IntegrationMailAssistance;
 use App\Service\Assistance\ReponseAssistance;
 use App\Service\Assistance\Source\ImapSource;
 use App\Service\Assistance\StockagePieceJointe;
+use App\Service\Assistance\VerrouReleveAssistance;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -72,7 +73,7 @@ class AssistanceController extends AbstractController
     }
 
     #[Route('/relever', name: 'relever', methods: ['POST'])]
-    public function relever(Request $request, ImapSource $source, IntegrationMailAssistance $integration): Response
+    public function relever(Request $request, ImapSource $source, IntegrationMailAssistance $integration, VerrouReleveAssistance $verrou): Response
     {
         if (!$this->isCsrfTokenValid('assistance_relever', $request->request->getString('_token'))) {
             return $this->redirectToRoute('app_assistance_index');
@@ -84,11 +85,20 @@ class AssistanceController extends AbstractController
             return $this->redirectToRoute('app_assistance_index');
         }
 
+        if (!$verrou->acquerir()) {
+            $this->addFlash('info', 'Une relève est déjà en cours, réessayez dans quelques instants.');
+
+            return $this->redirectToRoute('app_assistance_index');
+        }
+
         try {
-            $nombre = $integration->integrerTout($source, new DateTimeImmutable('-7 days'));
+            // fenêtre courte : la relève complète (7 jours) est faite par le cron, hors requête web
+            $nombre = $integration->integrerTout($source, new DateTimeImmutable('-1 day'));
             $this->addFlash('success', sprintf('%d nouveau(x) mail(s) relevé(s).', $nombre));
         } catch (Throwable $e) {
             $this->addFlash('error', $e->getMessage());
+        } finally {
+            $verrou->liberer();
         }
 
         return $this->redirectToRoute('app_assistance_index');
