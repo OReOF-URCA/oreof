@@ -262,6 +262,31 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @param array<int, Composante> $composantes
+     * @return array<int, Parcours>
+     */
+    public function findByCampagneAndComposantes(CampagneCollecte $campagneCollecte, array $composantes): array
+    {
+        if ($composantes === []) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('p')
+            ->join('p.dpeParcours', 'dp')
+            ->leftJoin('p.formation', 'f')
+            ->leftJoin('p.composanteInscription', 'ci')
+            ->andWhere('dp.campagneCollecte = :campagneCollecte')
+            ->andWhere('p.libelle <> :libelle')
+            ->andWhere('(f.composantePorteuse IN (:composantes) OR ci IN (:composantes))')
+            ->setParameter('libelle', Parcours::PARCOURS_DEFAUT)
+            ->setParameter('campagneCollecte', $campagneCollecte)
+            ->setParameter('composantes', $composantes)
+            ->orderBy('p.libelle', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findFromAnneeUniversitaire(int $idCampagneCollecte) : array {
         $qb = $this->createQueryBuilder('parcours');
 

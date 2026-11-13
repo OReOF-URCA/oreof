@@ -13,6 +13,7 @@ use App\DTO\TranslatableKey;
 use App\Entity\User;
 use App\Entity\UserProfil;
 use App\Enums\CentreGestionEnum;
+use App\Enums\TypeRfEnum;
 use App\Events\NotifCentreComposanteEvent;
 use App\Events\NotifCentreEtablissementEvent;
 use App\Events\NotifCentreFormationEvent;
@@ -75,7 +76,7 @@ final class UserProfilsController extends BaseController
         return $this->render('user_profils/_gestion_profils.html.twig', [
             'user' => $user,
             'userProfils' => $user->getUserProfils(),
-            'profils' => $profilRepository->findAll()
+            'profils' => $this->isGranted('ROLE_ADMIN') ? $profilRepository->findAll() : $profilRepository->findByDpe()
         ]);
     }
 
@@ -95,20 +96,46 @@ final class UserProfilsController extends BaseController
     {
         $data = JsonRequest::getFromRequest($request);
 
-        $profil = $profilRepository->find($data['centreType']);
+        $profil = $profilRepository->find($data['centreType'] ?? null);
         if (!$profil) {
             return $this->json(['error' => 'Ce rôle n\'existe pas'], 400);
         }
 
-        $nCentre = new UserProfil()
-            ->setUser($user)
-            ->setCampagneCollecte($this->getCampagneCollecte())
-            ->setProfil($profil);
-        $entityManager->persist($nCentre);
-
         $centreType = $profil->getCentre() ?? CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT;
-        $centreId = $data['centreId'];
-        $force = (bool)$data['force'];
+        $centreId = $data['centreId'] ?? null;
+        $force = (bool)($data['force'] ?? false);
+
+        if (empty($centreId)) {
+            return $this->json(['error' => 'Veuillez sélectionner un centre'], 400);
+        }
+
+        // Si l'utilisateur n'est pas ROLE_ADMIN et tente d'ajouter un rôle RF ou CORF,
+        // on transforme la tentative en redirection vers la demande officielle de changement de RF/CORF
+        if (!$this->isGranted('ROLE_ADMIN') && in_array($profil->getCode(), ['ROLE_RESP_FORMATION', 'ROLE_CO_RESP_FORMATION'], true)) {
+            $formation = $formationRepository->find($centreId);
+            if (!$formation) {
+                return $this->json(['error' => 'La formation spécifiée n\'existe pas'], 400);
+            }
+
+            $authorizedComposantes = $this->getAuthorizedComposantes($composanteRepository);
+            $isAllowed = in_array($formation->getComposantePorteuse(), $authorizedComposantes, true)
+                || $formation->getComposantesInscription()->exists(fn($key, $c) => in_array($c, $authorizedComposantes, true));
+            if (!$isAllowed) {
+                return $this->json(['error' => 'Vous n\'avez pas accès à cette formation'], 403);
+            }
+
+            $typeRf = ($profil->getCode() === 'ROLE_RESP_FORMATION') ? TypeRfEnum::RF->value : TypeRfEnum::CORF->value;
+            $redirectUrl = $this->generateUrl('app_formation_change_rf', [
+                'formation' => $formation->getId(),
+                'user' => $user->getId(),
+                'typeRf' => $typeRf,
+            ]);
+
+            return $this->json([
+                'redirectModal' => $redirectUrl,
+                'message' => 'L\'attribution d\'un rôle de (co-)responsable de formation nécessite une demande officielle soumise au conseil. Redirection vers le formulaire de demande...',
+            ]);
+        }
 
         $centre = match ($centreType) {
             CentreGestionEnum::CENTRE_GESTION_COMPOSANTE => $composanteRepository->find($centreId),
@@ -121,6 +148,35 @@ final class UserProfilsController extends BaseController
         if (!$centre) {
             return $this->json(['error' => 'Le centre spécifié n\'existe pas'], 400);
         }
+
+        // Contrôle d'accès par composante pour les utilisateurs non-admins
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            $authorizedComposantes = $this->getAuthorizedComposantes($composanteRepository);
+            if ($centreType === CentreGestionEnum::CENTRE_GESTION_COMPOSANTE && !in_array($centre, $authorizedComposantes, true)) {
+                return $this->json(['error' => 'Vous n\'avez pas accès à cette composante'], 403);
+            }
+            if ($centreType === CentreGestionEnum::CENTRE_GESTION_FORMATION) {
+                $isAllowed = in_array($centre->getComposantePorteuse(), $authorizedComposantes, true)
+                    || $centre->getComposantesInscription()->exists(fn($key, $c) => in_array($c, $authorizedComposantes, true));
+                if (!$isAllowed) {
+                    return $this->json(['error' => 'Vous n\'avez pas accès à cette formation'], 403);
+                }
+            }
+            if ($centreType === CentreGestionEnum::CENTRE_GESTION_PARCOURS) {
+                $pFormation = $centre->getFormation();
+                $isAllowed = ($pFormation !== null && in_array($pFormation->getComposantePorteuse(), $authorizedComposantes, true))
+                    || ($centre->getComposanteInscription() !== null && in_array($centre->getComposanteInscription(), $authorizedComposantes, true));
+                if (!$isAllowed) {
+                    return $this->json(['error' => 'Vous n\'avez pas accès à ce parcours'], 403);
+                }
+            }
+        }
+
+        $nCentre = new UserProfil()
+            ->setUser($user)
+            ->setCampagneCollecte($this->getCampagneCollecte())
+            ->setProfil($profil);
+        $entityManager->persist($nCentre);
 
         $existingCentre = match ($centreType) {
             CentreGestionEnum::CENTRE_GESTION_COMPOSANTE => $userProfilRepository->findOneBy(['user' => $user, 'composante' => $centre]),
@@ -207,6 +263,20 @@ final class UserProfilsController extends BaseController
 
         if ($profil !== null) {
             $centre = $profil->getCentre() ?? CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT;
+            $isAdmin = $this->isGranted('ROLE_ADMIN');
+            $authorizedComposantes = $isAdmin ? [] : $this->getAuthorizedComposantes($composanteRepository);
+
+            $composantes = $isAdmin
+                ? $composanteRepository->findAll()
+                : $authorizedComposantes;
+
+            $formations = $isAdmin
+                ? $formationRepository->findByCampagneCollecte($this->getCampagneCollecte())
+                : $formationRepository->findByCampagneAndComposantes($this->getCampagneCollecte(), $authorizedComposantes);
+
+            $parcours = $isAdmin
+                ? $parcoursRepository->findByCampagneCollecte($this->getCampagneCollecte())
+                : $parcoursRepository->findByCampagneAndComposantes($this->getCampagneCollecte(), $authorizedComposantes);
 
             return match ($centre) {
                 CentreGestionEnum::CENTRE_GESTION_ETABLISSEMENT => $this->render('user_profils/_config_profil_etablissement.html.twig', [
@@ -217,17 +287,17 @@ final class UserProfilsController extends BaseController
                 CentreGestionEnum::CENTRE_GESTION_COMPOSANTE => $this->render('user_profils/_config_profil_composante.html.twig', [
                     'user' => $user,
                     'profil' => $profil,
-                    'composantes' => $composanteRepository->findAll()
+                    'composantes' => $composantes,
                 ]),
                 CentreGestionEnum::CENTRE_GESTION_FORMATION => $this->render('user_profils/_config_profil_formation.html.twig', [
                     'user' => $user,
                     'profil' => $profil,
-                    'formations' => $formationRepository->findByCampagneCollecte($this->getCampagneCollecte())
+                    'formations' => $formations,
                 ]),
                 CentreGestionEnum::CENTRE_GESTION_PARCOURS => $this->render('user_profils/_config_profil_parcours.html.twig', [
                     'user' => $user,
                     'profil' => $profil,
-                    'parcours' => $parcoursRepository->findByCampagneCollecte($this->getCampagneCollecte())
+                    'parcours' => $parcours,
                 ]),
                 default => $this->render('communs/_erreur.html.twig', [
                     'message' => 'Le centre de gestion n\'est pas reconnu'
@@ -259,6 +329,27 @@ final class UserProfilsController extends BaseController
             $profil = $userProfil->getProfil();
             if ($profil === null) {
                 return $this->json(['error' => 'Ce profil n\'existe pas'], 400);
+            }
+
+            // Interdiction de suppression directe d'un RF/CORF pour les non-admins : redirection vers la demande
+            if (!$this->isGranted('ROLE_ADMIN') && in_array($profil->getCode(), ['ROLE_RESP_FORMATION', 'ROLE_CO_RESP_FORMATION'], true)) {
+                $formation = $userProfil->getFormation();
+                if ($formation !== null) {
+                    $typeRf = ($profil->getCode() === 'ROLE_RESP_FORMATION') ? TypeRfEnum::RF->value : TypeRfEnum::CORF->value;
+                    $redirectUrl = $this->generateUrl('app_formation_change_rf', [
+                        'formation' => $formation->getId(),
+                        'typeRf' => $typeRf,
+                    ]);
+
+                    return $this->json([
+                        'redirectModal' => $redirectUrl,
+                        'message' => 'La suppression d’un (co-)responsable de formation nécessite une demande officielle soumise au conseil. Redirection vers le formulaire de demande...',
+                    ]);
+                }
+
+                return $this->json([
+                    'error' => 'La suppression directe d’un (co-)responsable de formation est réservée aux administrateurs. Pour modifier un (co-)responsable, veuillez soumettre une demande de changement depuis la page de la formation concernée.'
+                ], Response::HTTP_FORBIDDEN);
             }
 
             $centreType = $profil->getCentre();

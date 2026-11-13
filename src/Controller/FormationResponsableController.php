@@ -16,6 +16,7 @@ use App\Form\CfvuExportDateType;
 use App\Form\ChangeRfFormationType;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
+use App\Repository\UserRepository;
 use App\Service\DataTableBuilder;
 use App\Service\SecureUploadService;
 use App\Utils\Tools;
@@ -57,9 +58,32 @@ class FormationResponsableController extends BaseController
         TurboStreamResponseFactory $turboStream,
         ChangeRfRepository $changeRfRepository,
         Formation $formation,
-        Request $request
+        Request        $request,
+        UserRepository $userRepository
     ): Response {
         $changeRf = new ChangeRf();
+
+        if ($request->isMethod('GET')) {
+            $userId = $request->query->get('user');
+            if ($userId !== null && $userId !== '') {
+                $targetUser = $userRepository->find($userId);
+                if ($targetUser !== null) {
+                    $changeRf->setUser($targetUser);
+                }
+            }
+
+            $typeRfParam = $request->query->get('typeRf');
+            if (is_string($typeRfParam) && $typeRfParam !== '') {
+                $typeRfEnum = TypeRfEnum::tryFrom($typeRfParam);
+                if ($typeRfEnum !== null) {
+                    $changeRf->setTypeRf($typeRfEnum);
+                }
+            }
+
+            if ($changeRf->getDatePriseFonction() === null) {
+                $changeRf->setDatePriseFonction(new DateTime());
+            }
+        }
 
         $form = $this->createForm(ChangeRfFormationType::class, $changeRf, [
             'action' => $this->generateUrl(
@@ -157,6 +181,18 @@ class FormationResponsableController extends BaseController
             }
         }
 
+        $demandesEnCours = [];
+        foreach ($changeRfRepository->findBy(['formation' => $formation], ['dateDemande' => 'DESC']) as $demande) {
+            $marking = $this->changeRfWorkflow->getMarking($demande);
+            if (!$marking->has('effectuee')) {
+                $places = array_keys($marking->getPlaces());
+                $demandesEnCours[] = [
+                    'demande' => $demande,
+                    'place' => $places[0] ?? 'soumis_conseil',
+                ];
+            }
+        }
+
         return $turboStream->streamOpenModalFromTemplates(
             new TranslatableKey('formation.change_rf.title', [], 'form'),
             'Dans : formation ' . $formation->getDisplay(),
@@ -164,6 +200,7 @@ class FormationResponsableController extends BaseController
             [
                 'form' => $form->createView(),
                 'formation' => $formation,
+                'demandesEnCours' => $demandesEnCours,
             ],
             '_ui/_footer_submit_cancel.html.twig',
             [

@@ -77,6 +77,39 @@ class CampagneAccessibilityService
     }
 
     /**
+     * Vérifie si au moins une étape de la timeline est actuellement active et autorise des actions (au moins un module actif).
+     */
+    public function isTimelineOpen(?CampagneCollecte $campagne = null, ?DateTimeInterface $date = null): bool
+    {
+        $targetCampagne = $this->getCampagne($campagne);
+        if ($targetCampagne === null) {
+            return true;
+        }
+
+        $now = $date ? DateTimeImmutable::createFromInterface($date) : new DateTimeImmutable();
+
+        foreach ($targetCampagne->getTimelineDates() as $step) {
+            if ($this->isStepActiveAt($step, $now) && count($step->getModulesActifs()) > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Vérifie si l'utilisateur courant peut effectuer des actions selon la timeline (étape active autorisant des actions ou ROLE_ADMIN).
+     */
+    public function canUserEditTimeline(?CampagneCollecte $campagne = null, ?DateTimeInterface $date = null): bool
+    {
+        if ($this->security->isGranted('ROLE_ADMIN')) {
+            return true;
+        }
+
+        return $this->isTimelineOpen($campagne, $date);
+    }
+
+    /**
      * Renvoie le statut d'accessibilité détaillé pour un module (état, dates, messages).
      *
      * @return array{

@@ -172,8 +172,8 @@
                     <p class="text-xs opacity-80">
                         {% if this.editable %}
                             Suivez l'avancement et les actions disponibles pour ce DPE.
-                        {% elseif not can_edit_module('dpe') %}
-                            {{ module_status('dpe').message }}
+                        {% elseif not can_edit_timeline() %}
+                            Période de saisie fermée pour cette campagne.
                         {% else %}
                             Suivez l'avancement et les actions disponibles pour ce DPE.
                         {% endif %}
@@ -226,8 +226,9 @@
                 </button>
 
                 {% set canEditDpe = can_edit_module('dpe') %}
-                {% set canReouvrirMccc = is_module_open('maquettes') or is_module_open('mccc') %}
-                {% if canEditDpe and validationOptions|length > 0 %}
+                {% set canReouvrirMccc = can_edit_module('maquettes') or can_edit_module('mccc') %}
+                {% set canEditTimeline = can_edit_timeline() %}
+                {% if canEditTimeline and validationOptions|length > 0 %}
                     <div class="relative" data-controller="navbar-dropdown"
                          data-action="click@window->navbar-dropdown#close">
                         <button class="{{ quickBtnSuccess }}"
@@ -241,10 +242,10 @@
                         <ul data-navbar-dropdown-target="content"
                             class="hidden absolute right-0 top-full z-30 mt-2 min-w-[22rem] rounded-2xl border border-secondary-200 bg-white p-2 shadow-2xl dark:border-secondary-700 dark:bg-secondary-900">
                             {% for key, option in validationOptions %}
-                                {% set isReouverture = option.metadata.type == 'reouvrir' or key starts with 'reouvrir' %}
                                 {% set isReouvertureMccc = key in ['reouvrir_tacite_mccc', 'reouvrir_mccc'] %}
-                                {% set isOptionDisabled = (isReouverture and not canEditDpe) or (isReouvertureMccc and not canReouvrirMccc) %}
-                                {% set disabledReason = (isReouvertureMccc and not canReouvrirMccc) ? module_status('mccc').message : module_status('dpe').message %}
+                                {% set isReouvertureDpe = (option.metadata.type == 'reouvrir' or key starts with 'reouvrir') and not isReouvertureMccc %}
+                                {% set isOptionDisabled = (isReouvertureDpe and not canEditDpe) or (isReouvertureMccc and not canReouvrirMccc) %}
+                                {% set disabledReason = isReouvertureMccc ? module_status('mccc').message : module_status('dpe').message %}
                                 {% set itemStyle = dpeItemStyles[option.metadata.button_class]|default(dpeItemStyles['secondary']) %}
                                 <li>
                                     {% if isOptionDisabled %}
@@ -287,7 +288,7 @@
                             type="button"
                             disabled
                             {{ stimulus_controller('tooltip') }}
-                            title="{{ not canEditDpe ? module_status('dpe').message : 'Aucune action disponible pour le statut actuel.' }}">
+                            title="{{ not canEditTimeline ? 'Aucune étape de la timeline n\'autorise d\'action actuellement.' : 'Aucune action disponible pour le statut actuel.' }}">
                         {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
                         <span>Gestion du DPE</span>
                     </button>

@@ -1,3 +1,19 @@
+{% if not is_granted('ROLE_ADMIN') and profil.code in ['ROLE_RESP_FORMATION', 'ROLE_CO_RESP_FORMATION'] %}
+    <div class="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+        <div class="flex items-center gap-2 font-semibold">
+            <twig:UX:Icon name="icon:info" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0"/>
+            <span>Demande officielle de changement requise</span>
+        </div>
+        <p class="mt-1 text-xs text-amber-800 dark:text-amber-300">
+            L'attribution d'un rôle de (co-)responsable de formation doit faire l'objet d'une demande officielle soumise
+            au conseil.
+            En sélectionnant la formation et en cliquant sur
+            « {{ 'user_profils.gestion_profils.ajouter_le_centre'|trans({}, 'modal') }} », vous serez directement
+            redirigé vers le formulaire officiel de demande pré-rempli.
+        </p>
+    </div>
+{% endif %}
+
 {% embed 'user_profils/_config_profil_select.html.twig' with {
     profil: profil,
     selectLabel: 'Choisir la formation pour ce profil',

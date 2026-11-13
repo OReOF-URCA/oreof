@@ -629,6 +629,38 @@ class FormationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @param array<int, Composante> $composantes
+     * @return array<int, Formation>
+     */
+    public function findByCampagneAndComposantes(CampagneCollecte $campagneCollecte, array $composantes): array
+    {
+        if ($composantes === []) {
+            return [];
+        }
+
+        return $this->createQueryBuilder('f')
+            ->leftJoin('f.dpeParcours', 'dp', 'WITH', 'dp.campagneCollecte = :campagneCollecte')
+            ->leftJoin('f.composantesInscription', 'ci')
+            ->leftJoin('f.typeDiplome', 't')
+            ->addSelect('dp')
+            ->andWhere('(f.dpe = :campagneCollecte OR dp.id IS NOT NULL)')
+            ->andWhere('(f.composantePorteuse IN (:composantes) OR ci IN (:composantes))')
+            ->setParameter('campagneCollecte', $campagneCollecte)
+            ->setParameter('composantes', $composantes)
+            ->leftJoin('f.mention', 'm')
+            ->addOrderBy('t.libelle_court', 'ASC')
+            ->addOrderBy(
+                'CASE
+                            WHEN f.mention IS NOT NULL THEN m.libelle
+                            WHEN f.mentionTexte IS NOT NULL THEN f.mentionTexte
+                            ELSE f.mentionTexte
+                            END',
+                'ASC'
+            )->getQuery()
+            ->getResult();
+    }
+
     public function countByComposanteForCampagne(CampagneCollecte $campagneCollecte): array
     {
         $rows = $this->createQueryBuilder('f')
