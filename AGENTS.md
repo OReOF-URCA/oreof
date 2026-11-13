@@ -40,6 +40,7 @@ Icons, Chart.js). Métier universitaire : offre de formation, maquettes, parcour
 | Menu, section, breadcrumb | `docs/composants/navigation.md` |
 | Aides contextuelles, FAQ, import/export des aides | `docs/composants/aides-faq.md` |
 | Page `/tutoriels` des vidéos tutoriel, composant `CopyLinkButton` | `docs/composants/tutoriels-video.md` |
+| Module Assistance (demandes reçues par mail, relève IMAP, `/administration/assistance`) | `docs/composants/assistance.md` |
 | Recherche plein texte (`/recherche/parcours`, moteur fuzzy) | `docs/composants/recherche.md` |
 | Synchronisation B.U.T. / ORéBUT | `docs/composants/synchronisation-orebut.md` |
 | API Apprentissage / RNCP & composant RncpField | `docs/composants/rncp-api.md` |

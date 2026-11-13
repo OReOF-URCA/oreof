@@ -18,7 +18,7 @@ class MailEntrantFactory
     public function depuisMessage(Message $message): MailEntrant
     {
         $expediteur = $this->adresses($message->get('from'))[0] ?? null;
-        $expediteurEmail = mb_strtolower((string) ($expediteur?->mail ?? ''));
+        $expediteurEmail = mb_strtolower((string) ($expediteur->mail ?? ''));
 
         $html = trim($message->getHTMLBody());
         $texte = trim($message->getTextBody());

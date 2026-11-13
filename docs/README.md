@@ -13,6 +13,7 @@ Point d'entrée agents : `AGENTS.md` (racine). Chaque fichier ci-dessous est aut
 | `composants/synthese-ia.md` | Analyseur d'écarts `FicheMatiere` (snapshot JSON / N-1) et synthèse IA (`ROLE_ADMIN`) | synthèse des modifications de fiche matière, configuration `AI_*` |
 | `composants/aides-faq.md` | Aides contextuelles, FAQ, galerie d'images, éditeur Markdown, import/export entre instances | admin aides/FAQ, transfert vers la pré-prod |
 | `composants/tutoriels-video.md` | Page `/tutoriels` des vidéos tutoriel (une page par vidéo), administration, bouton « Copier le lien » | page tutoriels, lien partageable, composant CopyLinkButton |
+| `composants/assistance.md` | Suivi des demandes d'assistance reçues par mail : relève IMAP, regroupement, réponse, contexte usager | module Assistance, commandes `app:assistance:*` |
 | `formulaires/README.md` | `JsonConfigType` + `DynamicFieldsType` (technique) | champ JSON configurable |
 | `formulaires/exemples-plateformes.md` | Définitions de champs par plateforme d'admission | configurer une plateforme |
 | `formulaires/guide-mode-assistant.md` | Guide utilisateur final du mode assistant | doc/aide utilisateur |
