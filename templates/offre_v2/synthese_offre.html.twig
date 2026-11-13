@@ -1,6 +1,18 @@
 {% extends 'base.html.twig' %}
 
 {% block bouton_header %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <twig:Button
+                href="{{ path('app_conseils_synthese_offre_modifications_pdf') }}"
+                target="_blank"
+                variant="primary"
+                size="sm"
+                icon="ph:file-pdf"
+                label="Synthèse modifications (PDF)"
+                tooltip="Exporter en PDF la synthèse des modifications et créations (libellés et régimes) par composante pour les conseillers"
+                extraClass="font-semibold"
+        />
+    {% endif %}
     <twig:Button
             href="{{ path('app_conseils_documents_download', { process: 'dpe_formation' }) }}"
             variant="info"
