@@ -81,7 +81,10 @@
             </dl>
         </section>
 
+        {% set parcoursDefaut = formation.hasParcours == false ? formation.parcours.first : null %}
+        {% set formationVerrouillee = parcoursDefaut ? not isEditable(parcoursDefaut) : not isOuvert(formation) %}
         <section class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+            {% if formationVerrouillee %}
             <div class="flex items-center gap-3 rounded-2xl border border-warning-200 bg-warning-50 px-4 py-3 text-warning-800 dark:border-warning-800/70 dark:bg-warning-500/10 dark:text-warning-300">
                 <div class="flex h-10 w-10 items-center justify-center rounded-full bg-warning-100 text-warning-700 dark:bg-warning-500/15 dark:text-warning-300"
                         {{ stimulus_controller('tooltip') }}
@@ -100,6 +103,7 @@
                     </p>
                 </div>
             </div>
+            {% endif %}
 
             <div class="rounded-2xl border border-secondary-200 bg-white px-4 py-3 shadow-sm dark:border-secondary-700 dark:bg-secondary-800/70">
                 <p class="mb-2 text-[11px] font-black uppercase tracking-[0.18em] text-secondary-400 dark:text-secondary-500">
