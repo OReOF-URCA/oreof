@@ -42,6 +42,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Jfcherng\Diff\DiffHelper;
 use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -825,6 +827,25 @@ class ParcoursController extends BaseController
             }
 
             return $turbo->stream('parcours_v2/tabs/_maquette_pdf.delete.stream.html.twig'); 
+        }
+    }
+
+    #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION')"))]
+    #[Route('/{parcours}/maquette_pdf/show', name: 'show_maquette_pdf')]
+    public function showMaquettePdf(Parcours $parcours, Filesystem $fs) {
+        $filePath = __DIR__ . "/../../../public/uploads/maquettes/" . $parcours->getMaquettePdf();
+        if($fs->exists($filePath)) {
+            return new BinaryFileResponse(
+                $filePath, 
+                status: 200,
+                headers: [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename=' . $parcours->getMaquettePdfNomOriginal()
+                ]
+            );
+        }
+        else {
+            return new JsonResponse(['error' => 'File not found']);
         }
     }
 }
