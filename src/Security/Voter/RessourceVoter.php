@@ -86,11 +86,20 @@ class RessourceVoter extends Voter
         }
 
         if ($subject instanceof Parcours || $subject instanceof DpeParcours) {
-            return [RessourceEnum::app_parcours->value, $subject];
+            return [[
+                RessourceEnum::app_parcours->value,
+                RessourceEnum::app_formation->value,
+                RessourceEnum::app_composante->value,
+                RessourceEnum::app_etablissement->value,
+            ], $subject];
         }
 
         if ($subject instanceof Formation) {
-            return [RessourceEnum::app_formation->value, $subject];
+            return [[
+                RessourceEnum::app_formation->value,
+                RessourceEnum::app_composante->value,
+                RessourceEnum::app_etablissement->value,
+            ], $subject];
         }
 
         if ($subject instanceof FicheMatiere) {
@@ -99,7 +108,10 @@ class RessourceVoter extends Voter
         }
 
         if ($subject instanceof Composante) {
-            return [RessourceEnum::app_composante->value, $subject];
+            return [[
+                RessourceEnum::app_composante->value,
+                RessourceEnum::app_etablissement->value,
+            ], $subject];
         }
 
         if ($subject instanceof Etablissement) {
@@ -165,12 +177,15 @@ class RessourceVoter extends Voter
         // Récupère tous les profils liés à l'utilisateur
         $userProfils = $this->userProfilRepository->findBy(['user' => $user]);
 
+        $routesToCheck = is_array($route) ? $route : [$route];
         $attributesToCheck = $this->getAttributesIncludingStronger($attribute);
         foreach ($userProfils as $userProfil) {
             $profile = $userProfil->getProfil();
             foreach ($attributesToCheck as $attr) {
-                if ($this->profilDroitsRepository->hasDroit($profile, $attr, $route) && $this->checkScope($userProfil, $object, $attribute)) {
-                    return true;
+                foreach ($routesToCheck as $r) {
+                    if ($this->profilDroitsRepository->hasDroit($profile, $attr, $r) && $this->checkScope($userProfil, $object, $attribute)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -394,6 +409,10 @@ class RessourceVoter extends Voter
         }
 
         if ($dpeParcours === null) {
+            return true;
+        }
+
+        if (Access::isEditable($dpeParcours)) {
             return true;
         }
 

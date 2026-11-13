@@ -28,8 +28,8 @@ final readonly class ParcoursAccessExplainer
     {
         // 1. Calendrier / Campagne de saisie
         if (!$this->security->isGranted('ROLE_ADMIN')) {
-            $moduleStatus = $this->campagneAccessibilityService->getModuleStatus(CampagneModuleEnum::OFFRE_FORMATION);
-            if (!$moduleStatus['canEdit']) {
+            if (!$this->campagneAccessibilityService->isTimelineOpen()) {
+                $moduleStatus = $this->campagneAccessibilityService->getModuleStatus(CampagneModuleEnum::OFFRE_FORMATION);
                 return sprintf('La campagne de modification est fermée : %s', $moduleStatus['message']);
             }
         }
