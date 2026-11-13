@@ -840,13 +840,17 @@ class ParcoursController extends BaseController
         Parcours $parcours, 
         Request $r,
         Filesystem $fs,
-        TurboStreamResponseFactory $turbo
+        TurboStreamResponseFactory $turbo,
+        EntityManagerInterface $em,
     ) {
         if($r->headers->has('Turbo-Frame')) {
             if($parcours->getMaquettePdf() !== null) {
                 $file = __DIR__ . "/../../../public/uploads/maquettes/" . $parcours->getMaquettePdf();
                 if($fs->exists($file)) {
+                    $parcours->setMaquettePdfNomOriginal(null);
+                    $parcours->setMaquettePdf(null);
                     $fs->remove($file);
+                    $em->flush();
                 }
             }
 
