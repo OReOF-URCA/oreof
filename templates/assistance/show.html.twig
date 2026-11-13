@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = 'app_assistance_show.title'|trans({'%sujet%': demande.sujet}, 'header') %}
+{% set jeton = csrf_token('assistance_' ~ demande.id) %}
+{% set panneau = 'rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700' %}
+{% set titre_panneau = 'mb-3 flex items-center gap-2 text-sm font-semibold text-text' %}
+
+{% block bouton_header %}
+    <twig:Button label="Retour à la liste" variant="secondary" icon="icon:arrow-left" href="{{ path('app_assistance_index') }}" />
+{% endblock %}
+
+{% block content %}
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="space-y-4 lg:col-span-2">
+            <div class="flex flex-wrap items-center gap-2 text-sm text-secondary-600 dark:text-secondary-300">
+                <twig:Badge :label="demande.statut.libelle" :variant="demande.statut.badgeVariant" />
+                <span>Demandeur : <strong class="text-text">{{ demande.demandeurNom ?? demande.demandeurEmail }}</strong>
+                    {% if demande.demandeurNom %}({{ demande.demandeurEmail }}){% endif %}</span>
+                <span>· ouverte le {{ demande.created|date('d/m/Y') }}</span>
+            </div>
+
+            {% for message in demande.messages %}
+                <twig:MessageAssistanceCard :message="message" />
+            {% endfor %}
+
+            <section class="{{ panneau }}" id="assistance-note">
+                <h2 class="{{ titre_panneau }}">{{ ux_icon('icon:pencil', {class: 'h-4 w-4 text-warning-600'}) }} Note interne</h2>
+                <form method="post" action="{{ path('app_assistance_note', {id: demande.id}) }}" class="space-y-2">
+                    <input type="hidden" name="_token" value="{{ jeton }}">
+                    <label for="assistance-note-contenu" class="sr-only">Note interne</label>
+                    <textarea id="assistance-note-contenu" name="contenu" rows="3" required
+                              class="w-full rounded-lg border border-secondary-200 bg-white px-3 py-2 text-sm focus:border-cyan-400 focus:ring-2 focus:ring-cyan-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100"
+                              placeholder="Visible uniquement par l'équipe ORéOF"></textarea>
+                    <twig:Button label="Ajouter la note" variant="warning" type="submit" icon="icon:add" size="sm" />
+                </form>
+            </section>
+        </div>
+
+        <aside class="space-y-4">
+            <section class="{{ panneau }}">
+                <h2 class="{{ titre_panneau }}">{{ ux_icon('icon:gear', {class: 'h-4 w-4 text-primary-600'}) }} Suivi</h2>
+                <form method="post" action="{{ path('app_assistance_statut', {id: demande.id}) }}" class="mb-3 flex items-end gap-2">
+                    <input type="hidden" name="_token" value="{{ jeton }}">
+                    <div class="grow">
+                        <label for="assistance-statut" class="mb-1 block text-xs text-secondary-500 dark:text-secondary-400">Statut</label>
+                        <select id="assistance-statut" name="statut" class="app-filter-select app-select-required"
+                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                            {% for statut in statuts %}
+                                <option value="{{ statut.value }}" {{ demande.statut == statut ? 'selected' }}>{{ statut.libelle }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <twig:Button label="OK" variant="primary" type="submit" size="sm" />
+                </form>
+                <form method="post" action="{{ path('app_assistance_responsable', {id: demande.id}) }}" class="flex items-end gap-2">
+                    <input type="hidden" name="_token" value="{{ jeton }}">
+                    <div class="grow">
+                        <label for="assistance-responsable" class="mb-1 block text-xs text-secondary-500 dark:text-secondary-400">Responsable</label>
+                        <select id="assistance-responsable" name="responsable" class="app-filter-select"
+                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                            <option value="">Personne</option>
+                            {% for membre in equipe %}
+                                <option value="{{ membre.id }}" {{ demande.responsable and demande.responsable.id == membre.id ? 'selected' }}>{{ membre.display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <twig:Button label="OK" variant="primary" type="submit" size="sm" />
+                </form>
+            </section>
+
+            <section class="{{ panneau }}">
+                <h2 class="{{ titre_panneau }}">{{ ux_icon('icon:layers', {class: 'h-4 w-4 text-info-600'}) }} Formation concernée</h2>
+                <form method="post" action="{{ path('app_assistance_rattacher', {id: demande.id}) }}" class="space-y-2">
+                    <input type="hidden" name="_token" value="{{ jeton }}">
+                    <div>
+                        <label for="assistance-formation" class="mb-1 block text-xs text-secondary-500 dark:text-secondary-400">Formation</label>
+                        <select id="assistance-formation" name="formation" class="app-filter-select"
+                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                            <option value="">Aucune</option>
+                            {% for formation in formations %}
+                                <option value="{{ formation.id }}" {{ demande.formation and demande.formation.id == formation.id ? 'selected' }}>{{ formation.display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% if demande.formation %}
+                        <div>
+                            <label for="assistance-parcours" class="mb-1 block text-xs text-secondary-500 dark:text-secondary-400">Parcours</label>
+                            <select id="assistance-parcours" name="parcours" class="app-filter-select"
+                                    {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                                <option value="">Aucun</option>
+                                {% for parcours in demande.formation.parcours %}
+                                    <option value="{{ parcours.id }}" {{ demande.parcours and demande.parcours.id == parcours.id ? 'selected' }}>{{ parcours.display }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    {% endif %}
+                    <twig:Button label="Enregistrer" variant="success" type="submit" icon="icon:save" size="sm" />
+                </form>
+            </section>
+
+            {% if candidatesFusion is not empty %}
+                <section class="{{ panneau }}">
+                    <h2 class="{{ titre_panneau }}">{{ ux_icon('mdi:call-merge', {class: 'h-4 w-4 text-secondary-600'}) }} Fusionner avec une autre demande</h2>
+                    <form method="post" action="{{ path('app_assistance_fusionner', {id: demande.id}) }}" class="space-y-2"
+                          onsubmit="return confirm('Fusionner les deux demandes ? Les messages seront regroupés dans la plus ancienne.');">
+                        <input type="hidden" name="_token" value="{{ jeton }}">
+                        <label for="assistance-fusion" class="sr-only">Demande à fusionner</label>
+                        <select id="assistance-fusion" name="source" class="app-filter-select" required
+                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                            <option value="">Choisir une demande…</option>
+                            {% for autre in candidatesFusion %}
+                                <option value="{{ autre.id }}">{{ autre.sujet }} — {{ autre.demandeurEmail }} ({{ autre.dateDernierMessage|date('d/m/Y') }})</option>
+                            {% endfor %}
+                        </select>
+                        <twig:Button label="Fusionner" variant="warning" type="submit" size="sm" />
+                    </form>
+                </section>
+            {% endif %}
+        </aside>
+    </div>
+{% endblock %}

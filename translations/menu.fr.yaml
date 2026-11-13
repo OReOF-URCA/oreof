@@ -43,6 +43,7 @@ menu.config.duplication_campagne: 'Bascule & Duplication N ➔ N+1'
 menu.config.etablissement: Etablissement
 menu.config.faq: 'Configuration FAQ'
 menu.config.tutoriels: 'Tutoriels vidéo'
+menu.config.assistance: 'Assistance (mails)'
 menu.config.help: 'Configurations des aides'
 menu.config.langues: Langues
 menu.config.mentions: Mentions
@@ -130,6 +131,8 @@ page.app_faq_index.description: 'Gérer la FAQ.'
 page.app_faq_index.title: FAQ
 page.app_tutoriel_admin_index.description: 'Gérer les vidéos tutoriel.'
 page.app_tutoriel_admin_index.title: 'Tutoriels vidéo'
+page.app_assistance_index.title: 'Assistance'
+page.app_assistance_index.description: 'Suivi des demandes reçues par mail.'
 menu.tutoriels: 'Tutoriels vidéo'
 page.app_formation_index.description: 'Détails des mentions/spécialités'
 page.app_formation_index.title: 'Détail des formations'

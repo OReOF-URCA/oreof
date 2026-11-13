@@ -70,6 +70,9 @@ app_tutoriel_admin_index.description: 'Ajoutez, ordonnez et publiez les vidéos 
 app_tutoriel_admin_index.title: 'Gestion des tutoriels vidéo'
 app_tutoriel_admin_new.title: 'Ajouter une vidéo tutoriel'
 app_tutoriel_admin_edit.title: 'Modifier une vidéo tutoriel'
+app_assistance_index.title: 'Assistance'
+app_assistance_index.description: 'Demandes reçues par mail, regroupées par échange. Suivez leur statut et leur responsable.'
+app_assistance_show.title: 'Assistance : %sujet%'
 app_formation_edit_modal.title: "Modifier une fiche d'identité de la formation"
 app_formation_index.description: 'Détails des mentions/spécialités'
 app_formation_index.title: 'Détails des formations'

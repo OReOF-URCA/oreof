@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block bouton_header %}
+    <form method="post" action="{{ path('app_assistance_relever') }}" class="inline">
+        <input type="hidden" name="_token" value="{{ csrf_token('assistance_relever') }}">
+        <twig:Button label="Relever maintenant" variant="primary" icon="icon:refresh" type="submit" />
+    </form>
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-6">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <twig:Kpi title="Demandes ouvertes" :value="ouvertes" variant="warning" icon="mdi:lifebuoy" />
+        </div>
+
+        <section class="rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700">
+            <div class="p-4">
+                <form method="get" class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-12">
+                    <div class="md:col-span-5">
+                        <label for="assistance-q" class="sr-only">Rechercher</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-secondary">{{ ux_icon('icon:search', {class: 'h-4 w-4'}) }}</span>
+                            <input type="search" id="assistance-q" name="q" value="{{ filtres.q }}"
+                                   class="w-full rounded-lg border border-secondary-200 bg-white px-10 py-2 text-sm text-text placeholder:text-secondary-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder:text-secondary-400 dark:focus:border-primary-400 dark:focus:ring-primary-900"
+                                   placeholder="Sujet, email ou nom du demandeur…">
+                        </div>
+                    </div>
+                    <div class="md:col-span-3">
+                        <label for="assistance-statut" class="sr-only">Statut</label>
+                        <select id="assistance-statut" name="statut" class="app-filter-select app-select-required"
+                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                            <option value="ouvertes" {{ filtres.statut == 'ouvertes' ? 'selected' }}>Demandes ouvertes</option>
+                            <option value="toutes" {{ filtres.statut == 'toutes' ? 'selected' }}>Toutes les demandes</option>
+                            {% for statut in statuts %}
+                                <option value="{{ statut.value }}" {{ filtres.statut == statut.value ? 'selected' }}>{{ statut.libelle }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="assistance-responsable" class="sr-only">Responsable</label>
+                        <select id="assistance-responsable" name="responsable" class="app-filter-select"
+                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                            <option value="">Tous les responsables</option>
+                            <option value="moi" {{ filtres.responsable == 'moi' ? 'selected' }}>Mes demandes</option>
+                            {% for membre in equipe %}
+                                <option value="{{ membre.id }}" {{ filtres.responsable == membre.id ~ '' ? 'selected' }}>{{ membre.display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-2 md:col-span-2">
+                        <twig:Button label="Filtrer" variant="primary" type="submit" icon="icon:search" size="sm" />
+                        <twig:Button label="Réinitialiser" variant="secondary" :outline="true" size="sm" href="{{ path('app_assistance_index') }}" />
+                    </div>
+                </form>
+
+                {% if total == 0 %}
+                    <p class="py-8 text-center text-secondary-400">Aucune demande.</p>
+                {% else %}
+                    <div class="overflow-x-auto">
+                        <table class="table w-full text-sm">
+                            <thead class="bg-secondary-50 text-left text-[11px] font-semibold uppercase tracking-wider text-secondary-600 dark:bg-secondary-900 dark:text-secondary-300">
+                                <tr>
+                                    <th class="px-3 py-2">Sujet</th>
+                                    <th class="px-3 py-2">Demandeur</th>
+                                    <th class="px-3 py-2">Statut</th>
+                                    <th class="px-3 py-2">Responsable</th>
+                                    <th class="px-3 py-2">Messages</th>
+                                    <th class="px-3 py-2">Dernier message</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                                {% for demande in demandes %}
+                                    <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800">
+                                        <td class="px-3 py-2">
+                                            <a href="{{ path('app_assistance_show', {id: demande.id}) }}" class="font-medium text-primary-700 hover:underline dark:text-primary-300">{{ demande.sujet }}</a>
+                                        </td>
+                                        <td class="px-3 py-2 text-text">
+                                            {{ demande.demandeurNom ?? demande.demandeurEmail }}
+                                            {% if demande.demandeurNom %}<span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ demande.demandeurEmail }}</span>{% endif %}
+                                        </td>
+                                        <td class="px-3 py-2"><twig:Badge :label="demande.statut.libelle" :variant="demande.statut.badgeVariant" size="sm" /></td>
+                                        <td class="px-3 py-2 text-text">{{ demande.responsable ? demande.responsable.display : '—' }}</td>
+                                        <td class="px-3 py-2 text-text">{{ demande.messages|length }}</td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-secondary-600 dark:text-secondary-300">{{ demande.dateDernierMessage|date('d/m/Y H:i') }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {% if pages > 1 %}
+                        <nav class="mt-4 flex items-center justify-between text-sm" aria-label="Pagination">
+                            <span class="text-secondary-500 dark:text-secondary-400">{{ total }} demande(s) — page {{ page }} / {{ pages }}</span>
+                            <div class="flex gap-2">
+                                {% if page > 1 %}
+                                    <twig:Button label="Précédente" variant="secondary" size="sm" href="{{ path('app_assistance_index', filtres|merge({page: page - 1})) }}" />
+                                {% endif %}
+                                {% if page < pages %}
+                                    <twig:Button label="Suivante" variant="secondary" size="sm" href="{{ path('app_assistance_index', filtres|merge({page: page + 1})) }}" />
+                                {% endif %}
+                            </div>
+                        </nav>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </section>
+    </div>
+{% endblock %}
