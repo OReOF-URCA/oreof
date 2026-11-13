@@ -103,6 +103,19 @@
                     </p>
                 </div>
             </div>
+            {% else %}
+            <div class="flex items-center gap-3 rounded-2xl border border-success-200 bg-success-50 px-4 py-3 text-success-800 shadow-sm dark:border-success-800/70 dark:bg-success-500/10 dark:text-success-300">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-success-100 text-success-700 dark:bg-success-500/15 dark:text-success-300"
+                        {{ stimulus_controller('tooltip') }}
+                     aria-label="Formation en cours de modification"
+                     data-bs-title="Formation en cours de modification">
+                    {{ ux_icon('icon:unlock', {class: 'h-4 w-4'}) }}
+                </div>
+                <div>
+                    <p class="text-sm font-semibold">Formation en cours de modification</p>
+                    <p class="text-xs opacity-80">Suivez l'avancement et les actions disponibles pour cette formation.</p>
+                </div>
+            </div>
             {% endif %}
 
             <div class="rounded-2xl border border-secondary-200 bg-white px-4 py-3 shadow-sm dark:border-secondary-700 dark:bg-secondary-800/70">
