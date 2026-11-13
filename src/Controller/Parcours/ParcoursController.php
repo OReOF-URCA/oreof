@@ -41,6 +41,7 @@ use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Jfcherng\Diff\DiffHelper;
 use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -785,9 +786,16 @@ class ParcoursController extends BaseController
         Request $r,
         SecureUploadService $uploadService,
         EntityManagerInterface $em,
-        TurboStreamResponseFactory $turboStream
+        TurboStreamResponseFactory $turboStream,
+        Filesystem $fs,
     ) {
         if($r->headers->has('Turbo-Frame')) {
+            if($parcours->getMaquettePdf() !== null) {
+                $filePath = __DIR__ . "/../../../public/uploads/maquettes/" . $parcours->getMaquettePdf(); 
+                if($fs->exists($filePath)) {
+                    $fs->remove($filePath);
+                }
+            }
             $file = $uploadService->uploadFromRequest($r, 'maquettePdf', 'maquettes');
             $parcours->setMaquettePdf($file->getStoredFilename());
             $parcours->setMaquettePdfNomOriginal($file->getOriginalFilename());
