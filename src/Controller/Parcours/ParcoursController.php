@@ -802,8 +802,29 @@ class ParcoursController extends BaseController
             $em->flush();
             
             return $turboStream->stream('parcours_v2/tabs/_maquette_pdf_success.stream.html.twig', [
-                'pdfNomOriginal' => $parcours->getMaquettePdfNomOriginal()
+                'pdfNomOriginal' => $parcours->getMaquettePdfNomOriginal(),
+                'parcours_id' => $parcours->getId(),
             ]);
+        }
+    }
+
+    #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION')"))]
+    #[Route('/{parcours}/maquette_pdf/delete', name: 'delete_maquette_pdf')]
+    public function deleteMaquettePdf(
+        Parcours $parcours, 
+        Request $r,
+        Filesystem $fs,
+        TurboStreamResponseFactory $turbo
+    ) {
+        if($r->headers->has('Turbo-Frame')) {
+            if($parcours->getMaquettePdf() !== null) {
+                $file = __DIR__ . "/../../../public/uploads/maquettes/" . $parcours->getMaquettePdf();
+                if($fs->exists($file)) {
+                    $fs->remove($file);
+                }
+            }
+
+            return $turbo->stream('parcours_v2/tabs/_maquette_pdf.delete.stream.html.twig'); 
         }
     }
 }
