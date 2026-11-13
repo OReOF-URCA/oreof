@@ -210,6 +210,7 @@ titre.parcours.configuration.header: 'Configuration du parcours'
 titre.parcours.descriptif.header: 'Descriptif et organisation des études'
 titre.parcours.et_apres.header: "Et après ? Poursuites d'études & débouchés"
 titre.parcours.maquette.header: 'Structure de la maquette'
+titre.parcours.maquette_pdf.header: 'Structure de la maquette au format PDF'
 titre.parcours.presentation.header: 'Présentation du parcours'
 titre.parcours.presentation_formation.header: 'Présentation de la formation'
 tpl.admin.duplication.index.description: "Création guidée d'une nouvelle année universitaire et duplication de la maquette de formation (Formations, Parcours, DPE, Compétences, Fiches Matières, UEs et MCCC) avec reconduction tacite et gestion des collisions d'URLs."
