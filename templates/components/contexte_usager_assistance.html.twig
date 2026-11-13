@@ -1,0 +1,77 @@
+{% set contexte = this.contexte %}
+<section {{ attributes.defaults({class: 'rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700'}) }}>
+    <h2 class="mb-3 flex items-center gap-2 text-sm font-semibold text-text">
+        {{ ux_icon('icon:users', {class: 'h-4 w-4 text-info-600'}) }} Contexte ORéOF du demandeur
+    </h2>
+
+    {% if contexte is null %}
+        <p class="text-sm text-secondary-400">Aucun compte ORéOF pour {{ demande.demandeurEmail }}.</p>
+    {% else %}
+        {% set user = contexte.user %}
+        <div class="space-y-4 text-sm">
+            <div>
+                <p class="font-medium text-text">{{ user.display }} <span class="text-secondary-500 dark:text-secondary-400">({{ user.username }})</span></p>
+                <div class="mt-1 flex flex-wrap gap-1">
+                    <twig:Badge :label="contexte.compteValide ? 'Compte actif' : 'Compte non activé'" :variant="contexte.compteValide ? 'success' : 'danger'" size="sm" />
+                    {% for role in contexte.roles|filter(r => r != 'ROLE_USER') %}
+                        <twig:Badge :label="role" variant="secondary" size="sm" />
+                    {% endfor %}
+                </div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                    <twig:Button label="Fiche utilisateur" variant="info" size="sm" icon="icon:info" href="{{ path('app_user_show', {id: user.id}) }}" />
+                    <twig:Button label="Se connecter en tant que" variant="secondary" size="sm" icon="icon:login" href="{{ path('app_homepage', {_switch_user: user.username}) }}" />
+                </div>
+            </div>
+
+            <div>
+                <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">Profils</h3>
+                {% if contexte.profils is empty %}
+                    <p class="text-secondary-400">Aucun profil.</p>
+                {% else %}
+                    <ul class="space-y-1">
+                        {% for userProfil in contexte.profils %}
+                            <li class="text-text">
+                                <strong>{{ userProfil.profil ? userProfil.profil.libelle : '—' }}</strong>
+                                {% if userProfil.displayCentre %} · {{ userProfil.displayCentre }}{% endif %}
+                                {% if userProfil.campagneCollecte %}
+                                    <span class="text-secondary-500 dark:text-secondary-400">— {{ userProfil.campagneCollecte.libelle }}</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            {% for bloc in contexte.campagnes %}
+                <div>
+                    <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                        Périodes de saisie — {{ bloc.campagne.libelle }}{% if bloc.campagne.defaut %} (par défaut){% endif %}
+                    </h3>
+                    <ul class="space-y-1">
+                        {% for statut in bloc.modules %}
+                            <li class="flex items-start gap-2">
+                                <twig:Dot :variant="statut.isOpen ? 'success' : 'danger'" />
+                                <span class="text-text"><strong>{{ statut.module.label }}</strong> : {{ statut.message }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+
+            {% if contexte.demandesAcces is not empty %}
+                <div>
+                    <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">Dernières demandes de modification</h3>
+                    <ul class="space-y-1">
+                        {% for dpe in contexte.demandesAcces %}
+                            <li class="text-text">
+                                {{ dpe.dateDemande ? dpe.dateDemande|date('d/m/Y') : '' }} —
+                                {{ dpe.parcours ? dpe.parcours.display : (dpe.formation ? dpe.formation.display : '—') }}
+                                {% if dpe.etatDemande %}<twig:Badge :label="dpe.etatDemande.libelle" :variant="dpe.etatDemande.badgeVariant" size="sm" />{% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>

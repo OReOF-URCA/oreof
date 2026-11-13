@@ -223,4 +223,19 @@ class AssistanceControllerTest extends WebTestCase
         self::assertSame(SensMessageAssistanceEnum::SORTANT, $relue->getMessages()->last()->getSens());
         self::assertSame(StatutDemandeAssistanceEnum::EN_ATTENTE_USAGER, $relue->getStatut());
     }
+
+    public function testFicheAfficheLeContexteDuDemandeurConnu(): void
+    {
+        $admin = $this->connecterAdmin();
+        $demande = $this->demande('Contexte assistance');
+        $demande->setDemandeurEmail((string) $admin->getEmail());
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', '/administration/assistance/' . $demande->getId());
+
+        self::assertResponseIsSuccessful();
+        self::assertStringContainsString('Contexte ORéOF du demandeur', $crawler->text());
+        self::assertStringContainsString('Périodes de saisie', $crawler->text());
+        self::assertSelectorExists('a[href*="_switch_user=admin-test-assistance"]');
+    }
 }
