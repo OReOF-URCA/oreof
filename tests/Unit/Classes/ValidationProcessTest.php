@@ -41,4 +41,21 @@ class ValidationProcessTest extends KernelTestCase
         $this->assertNotEmpty($options['initialiser']['metadata']['type']);
         $this->assertSame('valider', $options['initialiser']['metadata']['type']);
     }
+
+    public function testGetProcessAllForListeContainsAllPlaces(): void
+    {
+        self::bootKernel();
+        $validationProcess = static::getContainer()->get(ValidationProcess::class);
+
+        $processForListe = $validationProcess->getProcessForListe();
+        $processAllForListe = $validationProcess->getProcessAllForListe();
+
+        $this->assertNotEmpty($processForListe);
+        $this->assertNotEmpty($processAllForListe);
+        $this->assertGreaterThan(count($processForListe), count($processAllForListe));
+
+        $this->assertContains('en_cours_redaction', $processAllForListe);
+        $this->assertContains('tacite_reconduction', $processAllForListe);
+        $this->assertContains('publie', $processAllForListe);
+    }
 }

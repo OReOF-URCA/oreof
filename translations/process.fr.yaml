@@ -568,7 +568,7 @@ reserve.validation.soumis_conseil.date.label: 'Date du conseil de composante'
 reserve.validation.soumis_conseil.helps.argumentaire.help: 'Indiquez les réserves du conseil de composante.'
 reserve.validation.soumis_conseil.helps.date.help: 'Date du conseil de composante.'
 reserver_ses: 'Émettre des réserves'
-ses.change_etat.alerte: "La modification de l'état aura un impact direct sur la visibilité du dossier."
+ses.change_etat.alerte: "La modification de l'état du workflow ou de l'état d'ouverture aura un impact direct sur la visibilité du dossier et la saisie des maquettes."
 ses.change_ouverture.alerte: "La modification de l'ouverture impactera la saisie des maquettes."
 ses.commentaires.alerte: 'Attention : un commentaire SES a été émis sur ce dossier.'
 soumis.cfvu: 'Soumis CFVU'
@@ -1086,13 +1086,22 @@ workflow.validation.error.parcours.responsable.missing: 'Le responsable du parco
 workflow.validation.error.remplissage.insufficient: 'Le taux de remplissage du parcours est insuffisant. Minimum requis : %min%%, actuel : %current%%.'
 workflow.validation.error.structure.semestres.empty: "Aucun semestre n'est défini pour ce parcours."
 workflow.validation.error.type_diplome.missing: "Le type de diplôme n'est pas défini."
+workflow.en_cours_redaction.parcours: 'Parcours en cours de rédaction'
+workflow.tacite_reconduction.parcours: 'Tacite reconduction'
+workflow.validation.initialisation_dpe: 'Initialisation du DPE'
+workflow.validation.autorisation_saisie: 'Autorisation de saisie'
 workflow.validation.fiche_matiere: 'Validation de la fiche EC/matière'
 workflow.validation.formation: 'Validation de la formation par le responsable de formation'
 workflow.validation.parcours: 'Validation du parcours par le rédacteur (= transmission)'
 workflow.validation.parcours_rf: 'Validation du parcours par le responsable de formation'
 workflow.validation.publication: 'Validation du DPE pour publication'
+workflow.validation.publie: 'Offre de formation publiée'
+workflow.validation.conseil: 'Validation de la formation par le conseil de composante'
 workflow.validation.ses: 'Validation du SES'
 workflow.validation.soumis_conseil: 'Validation de la formation par le conseil de composante'
+workflow.validation.non_ouvert: 'Non ouvert'
+workflow.validation.non_ouverture_ses: 'Non ouverture (SES)'
+workflow.validation.en_cours_redaction_ss_cfvu: 'En cours de rédaction (sans CFVU)'
 workflow.validation.warning.cfvu.codes_rome.missing: "Les codes ROME ne sont pas renseignés. Ils sont utiles pour l'orientation des étudiants."
 workflow.validation.warning.cfvu.conseil.not_passed: 'Vérifiez que le parcours a bien été validé par le service central (SES).'
 workflow.validation.warning.cfvu.ects.slight_mismatch: 'Le total ECTS (%actual%) diffère légèrement du total attendu (%expected%).'

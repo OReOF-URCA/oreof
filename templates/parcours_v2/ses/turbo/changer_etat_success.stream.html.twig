@@ -1,0 +1,24 @@
+<turbo-stream action="replace" target="parcours_header_component">
+    <template>
+        <div id="parcours_header_component">
+            <twig:ParcoursHeader
+                    parcoursId="{{ dpeParcours.parcours.id }}"
+                    formationId="{{ dpeParcours.parcours.formation.id }}"
+            />
+        </div>
+    </template>
+</turbo-stream>
+
+{# Boutons de la page « voir » : dépendent de l'état du DPE. Sans effet si la cible est absente (page « modifier »). #}
+<turbo-stream action="replace" target="parcours_voir_actions">
+    <template>
+        {{ include('parcours_v2/_voir_actions.html.twig', {parcours: dpeParcours.parcours, dpeParcours: dpeParcours}) }}
+    </template>
+</turbo-stream>
+
+{{ include('_ui/_toast.stream.html.twig', {
+    message: toastMessage|default('État du parcours modifié avec succès.'),
+    undo: null,
+    toast_type: 'success',
+    closeModal: true
+}) }}

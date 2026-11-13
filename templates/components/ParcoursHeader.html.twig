@@ -589,36 +589,59 @@
                     <div class="border-t border-secondary-200 pt-3 dark:border-secondary-700">
                         <p class="{{ metaLabelClass }}">Autres actions SES</p>
                         <div class="{{ panelGridClass }}">
-                            <div>
-                                <a class="{{ quickBtnSecondary }} w-full"
-                                   data-action="click->modalturbo#open"
-                                   data-turbo="true"
-                                   href="{{ path('parcours_ses_changer_etat', { dpeParcours: dpeParcours.id }) }}">
-                                    {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
-                                    <span>Changer état DPE</span>
-                                </a>
-                            </div>
-                            <div>
-                                <a class="{{ quickBtnSecondary }} w-full"
-                                   data-action="click->modalturbo#open"
-                                   data-turbo="true"
-                                   href="{{ path('parcours_ses_changer_ouverture', { dpeParcours: dpeParcours.id }) }}">
-                                    {{ ux_icon('icon:unlock', {class: 'h-4 w-4'}) }}
-                                    <span>Modifier ouverture</span>
-                                </a>
-                            </div>
-                            <div>
-                                <a class="{{ quickBtnSecondary }} relative w-full"
-                                   data-action="click->modalturbo#open"
-                                   data-turbo="true"
-                                   href="{{ path('parcours_ses_commentaires', { dpeParcours: dpeParcours.id }) }}">
-                                    {{ ux_icon('icon:info', {class: 'h-4 w-4'}) }}
-                                    <span>Commentaires</span>
-                                    {% if parcours.commentaire != null %}
-                                        <span class="absolute -right-1 -top-1 inline-flex h-3 w-3 rounded-full border border-white bg-danger-500 dark:border-secondary-900"></span>
-                                    {% endif %}
-                                </a>
-                            </div>
+                            {% if dpeParcours != null %}
+                                <div>
+                                    <a class="{{ quickBtnSecondary }} w-full"
+                                       data-action="click->modalturbo#open"
+                                       data-turbo="true"
+                                       href="{{ path('parcours_ses_changer_etat', { dpeParcours: dpeParcours.id }) }}">
+                                        {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
+                                        <span>Changer état DPE</span>
+                                    </a>
+                                </div>
+                                <div>
+                                    <a class="{{ quickBtnSecondary }} w-full"
+                                       data-action="click->modalturbo#open"
+                                       data-turbo="true"
+                                       href="{{ path('parcours_ses_changer_ouverture', { dpeParcours: dpeParcours.id }) }}">
+                                        {{ ux_icon('icon:unlock', {class: 'h-4 w-4'}) }}
+                                        <span>Modifier ouverture</span>
+                                    </a>
+                                </div>
+                                <div>
+                                    <a class="{{ quickBtnSecondary }} relative w-full"
+                                       data-action="click->modalturbo#open"
+                                       data-turbo="true"
+                                       href="{{ path('parcours_ses_commentaires', { dpeParcours: dpeParcours.id }) }}">
+                                        {{ ux_icon('icon:info', {class: 'h-4 w-4'}) }}
+                                        <span>Commentaires</span>
+                                        {% if parcours.commentaire != null %}
+                                            <span class="absolute -right-1 -top-1 inline-flex h-3 w-3 rounded-full border border-white bg-danger-500 dark:border-secondary-900"></span>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div>
+                                    <button class="{{ quickBtnSecondary }} w-full opacity-60 cursor-not-allowed"
+                                            type="button"
+                                            disabled
+                                            {{ stimulus_controller('tooltip') }}
+                                            title="Aucun DPE associé à ce parcours.">
+                                        {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
+                                        <span>Changer état DPE</span>
+                                    </button>
+                                </div>
+                                <div>
+                                    <button class="{{ quickBtnSecondary }} w-full opacity-60 cursor-not-allowed"
+                                            type="button"
+                                            disabled
+                                            {{ stimulus_controller('tooltip') }}
+                                            title="Aucun DPE associé à ce parcours.">
+                                        {{ ux_icon('icon:unlock', {class: 'h-4 w-4'}) }}
+                                        <span>Modifier ouverture</span>
+                                    </button>
+                                </div>
+                            {% endif %}
                             <div>
                                 <button class="{{ quickBtnSecondary }} w-full">
                                     {{ ux_icon('icon:print', {class: 'h-4 w-4'}) }}

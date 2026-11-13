@@ -12,18 +12,23 @@ namespace App\Controller\Parcours;
 use App\Classes\ValidationProcess;
 use App\Controller\BaseController;
 use App\Entity\DpeParcours;
-use App\Enums\TypeModificationDpeEnum;
-use App\Form\Type\YesNoType;
-use App\Utils\TurboStreamResponseFactory;
 use App\Entity\Parcours;
+use App\Entity\User;
+use App\Enums\TypeModificationDpeEnum;
+use App\Events\HistoriqueParcoursEvent;
+use App\Form\Type\YesNoType;
 use App\Repository\FormationRepository;
 use App\Service\Parcours\ParcoursMoveService;
+use App\Utils\TurboStreamResponseFactory;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EnumType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 #[Route('/parcours/v2/ses', name: 'parcours_ses_')]
 class ParcoursSesController extends BaseController
@@ -32,29 +37,95 @@ class ParcoursSesController extends BaseController
         private TurboStreamResponseFactory $turboStream,
         private ParcoursMoveService $parcoursMoveService,
         private FormationRepository $formationRepository,
+        private EntityManagerInterface   $entityManager,
+        private EventDispatcherInterface $eventDispatcher,
     )
     {
     }
 
-    #[Route('/changer-etat/{dpeParcours}', name: 'changer_etat')]
+    #[Route('/changer-etat/{dpeParcours}', name: 'changer_etat', methods: ['GET', 'POST'])]
     public function changerEtat(
         ValidationProcess $validationProcess,
         Request           $request,
         DpeParcours       $dpeParcours
     ): Response
     {
-        $process = $validationProcess->getProcessForListe();
-        $form = $this->createFormBuilder(null, [
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $currentPlace = array_key_first($dpeParcours->getEtatValidation()) ?? '';
+        $process = $validationProcess->getProcessAllForListe();
+
+        $form = $this->createFormBuilder([
+            'etat' => $currentPlace,
+            'etatReconduction' => $dpeParcours->getEtatReconduction(),
+            'inHistorique' => false,
+        ], [
+            'action' => $this->generateUrl('parcours_ses_changer_etat', ['dpeParcours' => $dpeParcours->getId()]),
+            'method' => 'POST',
             'attr' => ['id' => 'modal_form'],
             'translation_domain' => 'form'
         ])
             ->add('etat', ChoiceType::class, [
+                'label' => 'Nouvel état du workflow (DPE)',
                 'choices' => $process,
                 'choice_translation_domain' => 'process',
+                'autocomplete' => true,
             ])
-            ->add('inHistorique', YesNoType::class, ['data' => false])
+            ->add('etatReconduction', EnumType::class, [
+                'class' => TypeModificationDpeEnum::class,
+                'choice_label' => fn(TypeModificationDpeEnum $c) => $c->getLibelle(),
+                'label' => 'État d\'ouverture',
+                'placeholder' => 'Choisir un état d\'ouverture...',
+                'required' => false,
+                'autocomplete' => true,
+            ])
+            ->add('inHistorique', YesNoType::class, [
+                'label' => 'Ajouter une entrée dans l\'historique',
+            ])
             ->getForm();
 
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $newEtat = $data['etat'];
+            $newEtatReconduction = $data['etatReconduction'] ?? null;
+            $inHistorique = (bool)($data['inHistorique'] ?? false);
+
+            $dpeParcours->setEtatValidation([$newEtat => 1]);
+            $dpeParcours->setEtatReconduction($newEtatReconduction);
+
+            if ($inHistorique) {
+                $user = $this->getUser();
+                if ($user instanceof User) {
+                    $event = new HistoriqueParcoursEvent(
+                        $dpeParcours->getParcours(),
+                        $user,
+                        $newEtat,
+                        'force_admin',
+                        $request
+                    );
+                    $this->eventDispatcher->dispatch($event, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
+                }
+            }
+
+            $this->entityManager->flush();
+
+            $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+                || str_contains((string)$request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+                || $request->isXmlHttpRequest();
+
+            if ($isTurbo) {
+                return $this->turboStream->stream('parcours_v2/ses/turbo/changer_etat_success.stream.html.twig', [
+                    'dpeParcours' => $dpeParcours,
+                    'parcours' => $dpeParcours->getParcours(),
+                    'toastMessage' => 'État du parcours modifié avec succès.',
+                ]);
+            }
+
+            $this->addFlash('success', 'État du parcours modifié avec succès.');
+            return $this->redirectToRoute('parcours_v2_voir', ['parcours' => $dpeParcours->getParcours()?->getId()]);
+        }
 
         return $this->turboStream->streamOpenModalFromTemplates(
             'Modifier l\'état du parcours',
@@ -72,24 +143,54 @@ class ParcoursSesController extends BaseController
         );
     }
 
-    #[Route('/changer-ouverture/{dpeParcours}', name: 'changer_ouverture')]
+    #[Route('/changer-ouverture/{dpeParcours}', name: 'changer_ouverture', methods: ['GET', 'POST'])]
     public function changerOuverture(
         Request     $request,
         DpeParcours $dpeParcours
     ): Response
     {
-        $form = $this->createFormBuilder(null, [
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $form = $this->createFormBuilder([
+            'etat' => $dpeParcours->getEtatReconduction(),
+        ], [
+            'action' => $this->generateUrl('parcours_ses_changer_ouverture', ['dpeParcours' => $dpeParcours->getId()]),
+            'method' => 'POST',
             'attr' => ['id' => 'modal_form'],
             'translation_domain' => 'form'
         ])
-            ->add('etat', ChoiceType::class, [
-                'choices' => TypeModificationDpeEnum::cases(),
-                'choice_label' => fn(TypeModificationDpeEnum $c) => 'type_modif_dpe.' . $c->value,
-                'choice_value' => fn(?TypeModificationDpeEnum $c) => $c?->value,
-                'choice_translation_domain' => 'process',
+            ->add('etat', EnumType::class, [
+                'class' => TypeModificationDpeEnum::class,
+                'choice_label' => fn(TypeModificationDpeEnum $c) => $c->getLibelle(),
+                'label' => 'État d\'ouverture',
+                'placeholder' => 'Choisir un état d\'ouverture...',
+                'required' => false,
+                'autocomplete' => true,
             ])
             ->getForm();
 
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $dpeParcours->setEtatReconduction($data['etat']);
+            $this->entityManager->flush();
+
+            $isTurbo = $request->getPreferredFormat() === 'turbo-stream'
+                || str_contains((string)$request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+                || $request->isXmlHttpRequest();
+
+            if ($isTurbo) {
+                return $this->turboStream->stream('parcours_v2/ses/turbo/changer_etat_success.stream.html.twig', [
+                    'dpeParcours' => $dpeParcours,
+                    'parcours' => $dpeParcours->getParcours(),
+                    'toastMessage' => 'État d\'ouverture modifié avec succès.',
+                ]);
+            }
+
+            $this->addFlash('success', 'État d\'ouverture modifié avec succès.');
+            return $this->redirectToRoute('parcours_v2_voir', ['parcours' => $dpeParcours->getParcours()?->getId()]);
+        }
 
         return $this->turboStream->streamOpenModalFromTemplates(
             'Modifier l\'état d\'ouverture du parcours',
