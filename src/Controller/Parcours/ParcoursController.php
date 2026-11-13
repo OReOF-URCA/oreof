@@ -31,6 +31,7 @@ use App\Service\LheoXML;
 use App\Service\Parcours\ParcoursAccessExplainer;
 use App\Service\Parcours\ParcoursDeleteService;
 use App\Service\Parcours\ParcoursDuplicationService;
+use App\Service\SecureUploadService;
 use App\Service\Validation\SemesterValidationRefresher;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
@@ -776,7 +777,15 @@ class ParcoursController extends BaseController
     }
 
     #[Route('/{parcours}/maquette_pdf', name: 'maquette_pdf')]
-    public function uploadMaquettePdf(Parcours $parcours) {
-
+    public function uploadMaquettePdf(
+        Parcours $parcours, 
+        Request $r,
+        SecureUploadService $uploadService,
+        EntityManagerInterface $em
+    ) {
+        $file = $uploadService->uploadFromRequest($r, 'maquettePdf', 'maquettes');
+        $parcours->setMaquettePdf($file->getStoredFilename());
+        $parcours->setMaquettePdfNomOriginal($file->getOriginalFilename());
+        $em->flush();
     }
 }

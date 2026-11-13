@@ -6,7 +6,10 @@
         >
             <h3 class="font-bold text-black text-lg mb-5">Maquette du parcours au format PDF</h3>
             <form
+                id="maquettePdfForm"
                 action="{{ path('parcours_v2_maquette_pdf', {parcours: parcours.id}) }}"
+                method="post"
+                enctype="multipart/form-data"
             >
                 <input 
                     class="hidden" 
@@ -15,16 +18,18 @@
                     {{ stimulus_target('maquette-pdf', 'inputPdf') }}
                     {{ stimulus_action('maquette-pdf', 'onSelectFile', 'change') }}
                 />
+                <div class="flex flex-row" id="currentFileName">
                 {% if parcours.maquettePdfNomOriginal %}
-                    <span>Fichier actuel :</span>
-                    <span class="p-1 rounded bg-gray-100 text-gray-800 border border-gray-800 text-center">
+                    <span class="px-2 py-1 rounded bg-gray-100 text-gray-800 border border-gray-800 text-center">
                         {{ parcours.maquettePdfNomOriginal }}
                     </span>
+                    <twig:UX:Icon name="icon:delete" class="p-2 bg-red-100 rounded-xl hover:text-red-100 hover:bg-red-800 ml-4 text-red-800 w-8 h-8 cursor-pointer"/>
                 {% else %}
                     <h5 class="text-gray-700 text-base italic text-center">Aucun fichier actuellement enregistré</h5>
                 {% endif %}
+                </div>
                 <div class="flex flex-row justify-center">
-                    <div class="flex flex-auto">
+                    <div class="flex w-10/12 md:w-9/12 lg:w-7/12 xl:w-6/12 2xl:w-5/12">
                         <label 
                             class="mt-12 w-full border border-blue-800 hover:bg-blue-300 bg-blue-100 text-blue-800 rounded text-center py-1 px-0 cursor-pointer"
                             for="maquettePdfUpload"
@@ -32,12 +37,13 @@
                             Sélectionnez un fichier...
                         </label>
                     </div>
-                    <div class="flex flex-auto">
-                        <twig:UX:Icon 
-                            name="icon:check" 
-                            class="h-8 w-8 p-2 rounded-xl bg-green-100 text-green-800 hover:bg-green-800 hover:text-green-100 cursor-pointer self-end ml-4"
-                            data-controller-target="submitButton"
-                        />
+                    <div class="flex">
+                        <button type="submit" class="self-end">
+                            <twig:UX:Icon 
+                                name="icon:check" 
+                                class="h-8 w-8 p-2 rounded-xl bg-green-100 text-green-800 hover:bg-green-800 hover:text-green-100 cursor-pointer ml-4"
+                            />
+                        </button>
                     </div>
                 </div>
                 <div class="flex flex-row justify-center mt-5">
