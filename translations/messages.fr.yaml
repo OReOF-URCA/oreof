@@ -97,11 +97,16 @@ Téléphone: Téléphone
 'Volume TD': 'Volume TD'
 'Volume TP': 'Volume TP'
 admin.edit.modal.help: "Ces actions doivent être réalisées avec précaution. Elles permettent de court-circuiter ou modifier le processus de validation initialement établi ou d'agir directement sur certaines informations."
+bloc_competence.labels.code: "Code du bloc"
 bloc_competence.labels.libelle: "Libellé du bloc de compétences"
+bloc_competence.liste_transverse.titre: "Ajouter des compétences transversales (RNCP)"
+bloc_competence.liste_transverse.description: "Sélectionnez les blocs ou compétences du référentiel transverse à intégrer dans ce parcours."
+bloc_competence.liste_transverse.no_bcc: "Aucun bloc de compétences transversales n'a été trouvé pour cette campagne de collecte."
 bug_report.description: 'Vous avez rencontré un bug sur l’application ? Merci de nous aider à l’améliorer en nous le signalant !'
 bug_report.titre: 'Signaler un bug'
 campagne_collecte.configure_publication.description: 'Paramétrer la publication des maquettes et MCCC'
 campagne_collecte.configure_publication.title: 'Configuration de la publication'
+competence.labels.code: "Code de la compétence"
 competence.labels.libelle: "Libellé de la compétence"
 fiche_matiere.step1_change_rf.title: 'Changement de responsable ou de co-responsable de formation'
 form.labels.email: "Adresse email"

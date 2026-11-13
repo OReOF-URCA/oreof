@@ -20,10 +20,14 @@ class CompetenceType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('code', TextType::class, [
+                'required' => false,
+                'attr' => ['maxlength' => 10],
+                'help' => 'Laisser vide pour générer automatiquement (ex: 1A)',
+            ])
             ->add('libelle', TextType::class, [
                 'attr' => ['maxlength' => 400],
-                'help' => '-'
-                ])
+            ])
         ;
     }
 

@@ -58,9 +58,18 @@ final class CampagneCollecteDataTable extends AbstractAppDataTable
             ->icon(Icon::Wrench)
             ->setClassName('inline-flex items-center gap-1 rounded-md border border-primary-300 bg-primary-50 px-2.5 py-1 text-xs font-semibold text-primary-700 transition hover:bg-primary-100 dark:bg-primary-900 dark:text-primary-300 dark:border-primary-500 dark:hover:border-primary-300 dark:hover:text-primary-100');
 
+        $competencesTransversesAction = Action::new('competences_transverses', 'Compétences transverses')
+            ->linkToRoute('app_campagne_collecte_competences_transverses', static fn(CampagneCollecte $c): array => ['id' => $c->getId()])
+            ->htmlAttributes([
+                'title' => 'Gérer les compétences transversales (RNCP) de cette campagne',
+            ])
+            ->icon(Icon::ListChecks)
+            ->setClassName('inline-flex items-center gap-1 rounded-md border border-info-300 bg-info-50 px-2.5 py-1 text-xs font-semibold text-info-700 transition hover:bg-info-100 dark:bg-info-900 dark:text-info-300 dark:border-info-500 dark:hover:border-info-300 dark:hover:text-info-100');
+
         return $actions
             ->add($this->createShowAction('app_campagne_collecte_show', static fn(CampagneCollecte $c): array => ['id' => $c->getId()], modal: false))
             ->add($this->createEditAction('app_campagne_collecte_edit', static fn(CampagneCollecte $c): array => ['id' => $c->getId()], modal: false))
+            ->add($competencesTransversesAction)
             ->add($this->createDuplicateAction('app_campagne_collecte_duplicate', static fn(CampagneCollecte $c): array => ['id' => $c->getId()]))
             ->add($configurePublicationAction)
             ->add($this->createDeleteAction(

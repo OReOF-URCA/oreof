@@ -15,16 +15,32 @@ export default class extends Controller {
   }
 
   changeBcc(event) {
-    if (event.target.checked) {
-      document.getElementById(`bcc_${event.params.id}_competence`).classList.remove('d-none')
-    } else {
-      document.getElementById(`bcc_${event.params.id}_competence`).classList.add('d-none')
-      document.querySelectorAll(`.bcc_${event.params.id}`).forEach((element) => {
-        element.checked = false
+      const bccId = event.params.id
+      const isChecked = event.currentTarget.checked
+      const competenceCheckboxes = this.element.querySelectorAll(`.bcc_${bccId}`)
+      competenceCheckboxes.forEach((checkbox) => {
+          checkbox.checked = isChecked
       })
-      this._save({ action: 'removeBcc', value: event.params.id })
+  }
+
+    changeCompetence(event) {
+        const bccId = event.params.bccId
+        const bccCheckbox = this.element.querySelector(`#bcc_${bccId}`)
+        const competenceCheckboxes = this.element.querySelectorAll(`.bcc_${bccId}`)
+        if (bccCheckbox && competenceCheckboxes.length > 0) {
+            const anyChecked = Array.from(competenceCheckboxes).some((cb) => cb.checked)
+            bccCheckbox.checked = anyChecked
     }
   }
+
+    toggleAll(event) {
+        event.preventDefault()
+        const checkboxes = this.element.querySelectorAll('input[type="checkbox"]')
+        const allChecked = Array.from(checkboxes).every((cb) => cb.checked)
+        checkboxes.forEach((cb) => {
+            cb.checked = !allChecked
+        })
+    }
 
   sauvegardeFormModal(event) {
     event.preventDefault()

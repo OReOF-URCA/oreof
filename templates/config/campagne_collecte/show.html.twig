@@ -196,6 +196,15 @@
 {% block bouton_header %}
     <div class="flex items-center gap-2">
         <twig:Button
+                href="{{ path('app_campagne_collecte_competences_transverses', { id: campagne_collecte.id }) }}"
+                variant="info"
+                :soft="false"
+                :outline="false"
+                icon="mdi:format-list-checks"
+                label="Compétences transverses"
+                tooltip="Gérer les compétences transversales (RNCP) de cette campagne"
+        />
+        <twig:Button
                 href="{{ path('app_campagne_collecte_edit', { id: campagne_collecte.id }) }}"
                 variant="primary"
                 :soft="false"

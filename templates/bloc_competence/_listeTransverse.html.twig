@@ -1,37 +1,83 @@
-{# todo: repasser en tailwindcss + UX #}
-<div {{ stimulus_controller('parcours--bcc') }}
-        data-action="parcours--bcc:modalClose@window->base#modalHide"
->
-    <form action="{{ path('app_bloc_competence_liste_transverse', {parcours:parcours.id}) }}" method="post">
-        {% for bcc in bccs %}
-            <div class="form-check mb-2">
-                <input
-                        class="form-check-input"
-                        type="checkbox" name="bccs[]" value="{{ bcc.id }}" id="bcc_{{ bcc.id }}"
-                       {% if ecBccs[bcc.id] is defined %}checked{% endif %}
-                        {{ stimulus_action('parcours--bcc', 'changeBcc', 'change', {id:bcc.id}) }}
-                >
-                <label for="bcc_{{ bcc.id }}" class="form-check-label"><strong>{{ bcc.display }}</strong></label>
-                <div id="bcc_{{ bcc.id }}_competence" class="{% if ecBccs[bcc.id] is not defined %}d-none {% endif %} mb-2 ms-3">
-                    {% for competence in bcc.competences %}
-                        <div class="form-check">
-                            <input type="checkbox" name="competences[]"
-                                   {% if ecComps[competence.id] is defined %}checked{% endif %}
-                                   value="{{ competence.id }}"
-                                   id="competence_{{ competence.id }}"
-                                   class="form-check-input bcc_{{ bcc.id }}"
-                                    {{ stimulus_action('fichematiere--step3', 'changeCompetence', 'change', {id:competence.id}) }}
+<div {{ stimulus_controller('parcours--bcc') }} class="space-y-4">
+    {% if bccs is empty %}
+        <twig:alerte type="warning">
+            {{ 'bloc_competence.liste_transverse.no_bcc'|trans({}, 'messages') }}
+        </twig:alerte>
+    {% else %}
+        <div class="flex items-center justify-between gap-3 text-xs text-secondary-600 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-800/50 p-3 rounded-lg border border-secondary-200/60 dark:border-secondary-700/60">
+            <span>
+                Sélectionnez les blocs ou compétences transversales (RNCP) à importer dans ce parcours.
+            </span>
+            <button type="button"
+                    class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 hover:underline shrink-0 flex items-center gap-1.5"
+                    {{ stimulus_action('parcours--bcc', 'toggleAll', 'click') }}
+            >
+                <twig:UX:Icon name="icon:check" class="w-3.5 h-3.5"/>
+                <span>Tout sélectionner / désélectionner</span>
+            </button>
+        </div>
+
+        <form id="modal_form"
+              action="{{ path('app_bloc_competence_liste_transverse', {parcours: parcours.id}) }}"
+              method="post"
+              class="space-y-3"
+        >
+            {% for bcc in bccs %}
+                <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 p-4 shadow-sm transition hover:border-secondary-300 dark:hover:border-secondary-600">
+                    <div class="flex items-center justify-between gap-3 pb-3 border-b border-secondary-100 dark:border-secondary-700">
+                        <label class="flex items-center gap-3 cursor-pointer select-none flex-1 min-w-0">
+                            <input
+                                    type="checkbox"
+                                    name="bccs[]"
+                                    value="{{ bcc.id }}"
+                                    id="bcc_{{ bcc.id }}"
+                                    class="rounded border-secondary-300 dark:border-secondary-600 text-primary-600 focus:ring-primary-500 h-4.5 w-4.5 dark:bg-secondary-900 cursor-pointer"
+                                    {{ stimulus_action('parcours--bcc', 'changeBcc', 'change', {id: bcc.id}) }}
                             >
-                            <label for="competence_{{ competence.id }}" class="form-check-label">{{ competence.display }}</label>
+                            <div class="flex items-center gap-2 flex-wrap min-w-0">
+                                <span class="inline-flex items-center justify-center px-2 py-0.5 rounded bg-primary-50 dark:bg-primary-950/60 text-primary-700 dark:text-primary-400 font-bold text-xs">
+                                    {{ bcc.code ?? ('BC ' ~ loop.index) }}
+                                </span>
+                                <span class="font-bold text-sm text-secondary-900 dark:text-secondary-100 truncate">
+                                    {{ bcc.libelle }}
+                                </span>
+                            </div>
+                        </label>
+                        {% if bcc.competences|length > 0 %}
+                            <span class="text-xs text-secondary-500 dark:text-secondary-400 shrink-0">
+                                {{ bcc.competences|length }} {{ bcc.competences|length > 1 ? 'compétences' : 'compétence' }}
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    {% if bcc.competences|length > 0 %}
+                        <div class="mt-3 pl-7 space-y-2">
+                            {% for competence in bcc.competences %}
+                                <label class="flex items-start gap-3 p-2.5 rounded-lg border border-secondary-100 dark:border-secondary-700 hover:bg-secondary-50 dark:hover:bg-secondary-700/40 cursor-pointer transition select-none">
+                                    <input
+                                            type="checkbox"
+                                            name="competences[]"
+                                            value="{{ competence.id }}"
+                                            id="competence_{{ competence.id }}"
+                                            class="mt-0.5 rounded border-secondary-300 dark:border-secondary-600 text-primary-600 focus:ring-primary-500 h-4 w-4 dark:bg-secondary-900 bcc_{{ bcc.id }} cursor-pointer"
+                                            {{ stimulus_action('parcours--bcc', 'changeCompetence', 'change', {bccId: bcc.id, id: competence.id}) }}
+                                    >
+                                    <span class="text-sm text-secondary-700 dark:text-secondary-200 leading-snug">
+                                        {% if competence.code %}
+                                            <strong class="text-secondary-900 dark:text-secondary-100 font-semibold">{{ competence.code }}</strong> -
+                                        {% endif %}
+                                        {{ competence.libelle }}
+                                    </span>
+                                </label>
+                            {% endfor %}
                         </div>
-                    {% endfor %}
+                    {% else %}
+                        <p class="mt-2 pl-7 text-xs text-secondary-400 italic">
+                            Aucune compétence détaillée pour ce bloc.
+                        </p>
+                    {% endif %}
                 </div>
-            </div>
-        {% else %}
-            {{ component('alerte', {
-                type: 'warning',
-                message: 'fiche_matiere.alerte.no_bcc'|trans({}, 'form')
-            }) }}
-        {% endfor %}
-    </form>
+            {% endfor %}
+        </form>
+    {% endif %}
 </div>
