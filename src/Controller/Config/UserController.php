@@ -64,26 +64,81 @@ class UserController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $email = $user->getEmail();
-            $dataUsers = $ldap->getDatas($email);
-            if ($dataUsers === null) {
-                return $turboStream->streamToastError("L'utilisateur n'a pas été trouvé dans l'annuaire LDAP");
-            }
+            $email = trim((string)$user->getEmail());
 
             $existingUser = $userRepository->findOneBy(['email' => $email]);
             if ($existingUser !== null) {
-                $user = $existingUser;
-                $user->setIsDeleted(false);
-                $user->setUsername($dataUsers['username']);
-                $user->setNom($dataUsers['nom']);
-                $user->setPrenom($dataUsers['prenom']);
-                $this->addFlash('info', "L'utilisateur existant a été mis à jour avec les informations LDAP.");
-            } else {
-                $user->setUsername($dataUsers['username']);
-                $user->setNom($dataUsers['nom']);
-                $user->setPrenom($dataUsers['prenom']);
+                $existingUser->setIsDeleted(false);
+                $existingUser->setIsEnable(true);
+                $existingUser->setIsValideAdministration(true);
+
+                if ($dpe) {
+                    $currentUser = $this->getUser();
+                    if (!$currentUser instanceof User) {
+                        throw $this->createAccessDeniedException();
+                    }
+
+                    $existingUser->setIsValidDpe(true);
+                    $composanteResponsableDpe = $currentUser->getComposanteResponsableDpe()->first();
+                    if ($composanteResponsableDpe !== false) {
+                        $existingUser->setComposanteDemande($composanteResponsableDpe);
+                    }
+                }
+
+                // Tentative optionnelle de rafraîchissement LDAP (sans bloquer si le serveur LDAP est injoignable)
+                $ldapResult = $ldap->lookupUser($email);
+                if ($ldapResult->isSuccess()) {
+                    $ldapData = $ldapResult->getData();
+                    if ($ldapData !== null) {
+                        if (!empty($ldapData['username'])) {
+                            $existingUser->setUsername($ldapData['username']);
+                        }
+                        if (!empty($ldapData['nom'])) {
+                            $existingUser->setNom($ldapData['nom']);
+                        }
+                        if (!empty($ldapData['prenom'])) {
+                            $existingUser->setPrenom($ldapData['prenom']);
+                        }
+                    }
+                }
+
+                $userRepository->save($existingUser, true);
+
+                $profils = $dpe ? $profilRepository->findByDpe() : $profilRepository->findAll();
+
+                return $turboStream->appendStreams(
+                    $turboStream->renderModalStreams(
+                        new TranslatableKey('user.gestion_profil.title', [], 'modal'),
+                        'Utilisateur : ' . $existingUser->getDisplay(),
+                        'user_profils/_gestion_profils.html.twig',
+                        [
+                            'user' => $existingUser,
+                            'profils' => $profils,
+                        ],
+                        '_ui/_footer_cancel.html.twig',
+                        []
+                    ),
+                    $turboStream->renderToastStream(
+                        sprintf("L'utilisateur « %s » existe déjà en base de données. Basculement sur la gestion de ses profils.", $existingUser->getDisplay()),
+                        'info'
+                    )
+                );
             }
 
+            $ldapResult = $ldap->lookupUser($email);
+            if (!$ldapResult->isSuccess()) {
+                $errorMessage = $ldapResult->getErrorMessage() ?? "L'utilisateur n'a pas été trouvé dans l'annuaire LDAP.";
+                return $turboStream->streamToastError($errorMessage);
+            }
+
+            $dataUsers = $ldapResult->getData();
+            if ($dataUsers === null) {
+                return $turboStream->streamToastError("Données LDAP introuvables pour cet utilisateur.");
+            }
+
+            $user->setUsername($dataUsers['username']);
+            $user->setNom($dataUsers['nom']);
+            $user->setPrenom($dataUsers['prenom']);
             $user->setIsEnable(true);
             $user->setIsValideAdministration(true);
             $user->setDateValideAdministration(new DateTime());
@@ -97,7 +152,6 @@ class UserController extends BaseController
                 $user->setIsValidDpe(true);
                 $composanteResponsableDpe = $currentUser->getComposanteResponsableDpe()->first();
                 $user->setComposanteDemande($composanteResponsableDpe !== false ? $composanteResponsableDpe : null);
-                $user->setDateDemande(new DateTime());
                 $user->setDateValideDpe(new DateTime());
             }
 

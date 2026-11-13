@@ -43,4 +43,26 @@ final class TurboStreamResponseFactoryTest extends TestCase
         $form->vars['valid'] = false;
         self::assertSame(403, $this->factory()->streamOpenModalFromTemplates('Titre', '', 'body', ['form' => $form], status: 403)->getStatusCode());
     }
+
+    public function testToastInfoAndWarningReturn200WithStreamContentType(): void
+    {
+        $factory = $this->factory();
+        $infoResponse = $factory->streamToastInfo('Info message');
+        self::assertSame(200, $infoResponse->getStatusCode());
+        self::assertSame('text/vnd.turbo-stream.html', $infoResponse->headers->get('Content-Type'));
+
+        $warningResponse = $factory->streamToastWarning('Warning message');
+        self::assertSame(200, $warningResponse->getStatusCode());
+        self::assertSame('text/vnd.turbo-stream.html', $warningResponse->headers->get('Content-Type'));
+    }
+
+    public function testRenderModalStreamsAndRenderToastStreamReturnStrings(): void
+    {
+        $factory = $this->factory();
+        $modalString = $factory->renderModalStreams('Title', 'Subtitle', 'template.html.twig', []);
+        self::assertNotEmpty($modalString);
+
+        $toastString = $factory->renderToastStream('Toast text', 'info');
+        self::assertNotEmpty($toastString);
+    }
 }
