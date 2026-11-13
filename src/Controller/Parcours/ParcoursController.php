@@ -40,9 +40,11 @@ use App\Utils\Access;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Jfcherng\Diff\DiffHelper;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/parcours/v2', name: 'parcours_v2_')]
 class ParcoursController extends BaseController
@@ -776,16 +778,24 @@ class ParcoursController extends BaseController
         return $this->redirect($redirectUrl);
     }
 
+    #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION')"))]
     #[Route('/{parcours}/maquette_pdf', name: 'maquette_pdf')]
     public function uploadMaquettePdf(
         Parcours $parcours, 
         Request $r,
         SecureUploadService $uploadService,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        TurboStreamResponseFactory $turboStream
     ) {
-        $file = $uploadService->uploadFromRequest($r, 'maquettePdf', 'maquettes');
-        $parcours->setMaquettePdf($file->getStoredFilename());
-        $parcours->setMaquettePdfNomOriginal($file->getOriginalFilename());
-        $em->flush();
+        if($r->headers->has('Turbo-Frame')) {
+            $file = $uploadService->uploadFromRequest($r, 'maquettePdf', 'maquettes');
+            $parcours->setMaquettePdf($file->getStoredFilename());
+            $parcours->setMaquettePdfNomOriginal($file->getOriginalFilename());
+            $em->flush();
+            
+            return $turboStream->stream('parcours_v2/tabs/_maquette_pdf_success.stream.html.twig', [
+                'pdfNomOriginal' => $parcours->getMaquettePdfNomOriginal()
+            ]);
+        }
     }
 }
