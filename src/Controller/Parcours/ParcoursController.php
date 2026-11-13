@@ -774,4 +774,9 @@ class ParcoursController extends BaseController
 
         return $this->redirect($redirectUrl);
     }
+
+    #[Route('/{parcours}/maquette_pdf', name: 'maquette_pdf')]
+    public function uploadMaquettePdf(Parcours $parcours) {
+
+    }
 }
