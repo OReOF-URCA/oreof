@@ -40,6 +40,7 @@
     "symfony/flex": "^2",
     "symfony/form": "8.1.*",
     "symfony/framework-bundle": "8.1.*",
+    "symfony/html-sanitizer": "8.1.*",
     "symfony/http-client": "8.1.*",
     "symfony/intl": "8.1.*",
     "symfony/ldap": "8.1.*",
@@ -67,7 +68,8 @@
     "twig/intl-extra": "*",
     "twig/markdown-extra": "^3.24",
     "twig/string-extra": "^3.24",
-    "twig/twig": "^2.12|^3.0"
+    "twig/twig": "^2.12|^3.0",
+    "webklex/php-imap": "^6.2"
   },
   "config": {
     "allow-plugins": {
