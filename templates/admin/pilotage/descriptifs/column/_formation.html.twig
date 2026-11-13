@@ -1,0 +1,22 @@
+{% set formation = row.formation %}
+{% if formation %}
+    <div class="space-y-1">
+        <div class="text-xs font-medium text-text leading-tight">
+            {{ formation.displayLong ?: formation.display }}
+        </div>
+        <div class="flex flex-wrap items-center gap-1.5 text-xs text-secondary-500">
+            {% if formation.composantePorteuse %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-secondary-100 dark:bg-secondary-800 text-secondary-700 dark:text-secondary-300">
+                    {{ formation.composantePorteuse.sigle ?: formation.composantePorteuse.libelle }}
+                </span>
+            {% endif %}
+            {% if formation.typeDiplome %}
+                <span class="text-[11px] text-secondary-400 font-mono">
+                    {{ formation.typeDiplome.libelleCourt ?: formation.typeDiplome.libelleCourt }}
+                </span>
+            {% endif %}
+        </div>
+    </div>
+{% else %}
+    <span class="text-xs text-secondary-400 italic">—</span>
+{% endif %}

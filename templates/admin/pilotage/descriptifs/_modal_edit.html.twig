@@ -1,0 +1,60 @@
+<div class="space-y-5">
+    {# Contexte du parcours #}
+    <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-4 dark:border-secondary-700 dark:bg-secondary-800/50">
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <h4 class="text-sm font-bold text-text">{{ parcours.display }}</h4>
+                {% if parcours.formation %}
+                    <p class="text-xs text-secondary-600 dark:text-secondary-400 mt-1">
+                        <span class="font-medium">{{ parcours.formation.displayLong ?: parcours.formation.display }}</span>
+                        {% if parcours.formation.composantePorteuse %}
+                            — <span
+                                class="text-secondary-500">{{ parcours.formation.composantePorteuse.libelle }}</span>
+                        {% endif %}
+                    </p>
+                {% endif %}
+            </div>
+            <span class="rounded bg-secondary-200 px-2 py-0.5 font-mono text-xs text-secondary-700 dark:bg-secondary-700 dark:text-secondary-200">
+                #{{ parcours.id }}
+            </span>
+        </div>
+    </div>
+
+    {# Formulaire #}
+    {% form_theme form 'communs/form_theme_v2.html.twig' %}
+    {{ form_start(form, {'attr': {'id': 'modal_form', 'autocomplete': 'off'}}) }}
+
+    <div class="space-y-4">
+        <div class="space-y-2">
+            {{ form_row(form.descriptifHautPageAutomatique) }}
+
+            {% if suggestedAuto and suggestedAuto != parcours.descriptifHautPageAutomatique %}
+                <div class="rounded-xl border border-info-200 bg-info-50/70 p-3.5 text-xs text-info-900 dark:border-info-800 dark:bg-info-950/40 dark:text-info-200 flex flex-col gap-2">
+                    <div class="flex items-center justify-between gap-2">
+                            <span class="flex items-center gap-1.5 font-semibold text-info-800 dark:text-info-300">
+                                <twig:UX:Icon name="mdi:lightbulb-outline"
+                                              class="w-4 h-4 text-info-600 dark:text-info-400"/>
+                                Suggestion calculée par les règles d'ouverture :
+                            </span>
+                        <button type="button"
+                                class="inline-flex items-center gap-1 px-2 py-1 rounded text-[11px] font-semibold bg-info-200/80 hover:bg-info-300 text-info-900 dark:bg-info-900 dark:hover:bg-info-800 dark:text-info-100 transition cursor-pointer"
+                                data-suggestion="{{ suggestedAuto|e('html_attr') }}"
+                                onclick="const target = document.getElementById('{{ form.descriptifHautPageAutomatique.vars.id }}'); if (target) { target.value = this.dataset.suggestion; }">
+                            <twig:UX:Icon name="mdi:content-copy" class="w-3 h-3"/>
+                            Utiliser la suggestion
+                        </button>
+                    </div>
+                    <div class="italic text-slate-700 dark:text-slate-300 pl-5">
+                        « {{ suggestedAuto }} »
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div>
+            {{ form_row(form.descriptifHautPage) }}
+        </div>
+    </div>
+
+    {{ form_end(form) }}
+</div>

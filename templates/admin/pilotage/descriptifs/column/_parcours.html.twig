@@ -1,0 +1,17 @@
+<div>
+    <div class="font-semibold text-text text-sm">
+        <a href="{{ path('parcours_v2_voir', {parcours: row.id}) }}" target="_blank"
+           class="hover:text-primary transition inline-flex items-center gap-1.5" title="Consulter le parcours">
+            <span>{{ row.display }}</span>
+            <twig:UX:Icon name="mdi:open-in-new" class="w-3.5 h-3.5 text-secondary-400 hover:text-primary"/>
+        </a>
+    </div>
+    <div class="flex items-center gap-2 mt-1 text-xs text-secondary-500">
+        <span class="font-mono text-secondary-400">#{{ row.id }}</span>
+        {% if row.codeApogee %}
+            <span class="px-1.5 py-0.5 rounded bg-secondary-100 dark:bg-secondary-800 text-secondary-600 dark:text-secondary-300 font-mono text-[11px]">
+                {{ row.codeApogee }}
+            </span>
+        {% endif %}
+    </div>
+</div>

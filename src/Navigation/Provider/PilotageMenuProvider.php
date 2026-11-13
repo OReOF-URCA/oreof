@@ -121,6 +121,13 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 ),
 
                 MenuItem::link(
+                    'pilotage.descriptifs_parcours',
+                    'menu.admin.descriptifs_parcours',
+                    'app_admin_pilotage_descriptifs_index',
+                    icon: 'mdi:card-text-outline',
+                ),
+
+                MenuItem::link(
                     'pilotage.exports',
                     'menu.admin.exports',
                     'app_export_index',
