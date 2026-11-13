@@ -37,6 +37,7 @@ services:
             - '../src/DTO/'
             - '../src/Kernel.php'
             - '../src/TypeDiplome/DependencyInjection/'
+            - '../src/Service/Assistance/Source/EmlSource.php'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
@@ -137,6 +138,15 @@ services:
     App\EventSubscriber\CreateUserSubscriber:
       tags:
         - { name: doctrine.event_subscriber }
+
+    App\Service\Assistance\Source\ImapSource:
+        arguments:
+            $host: '%env(ASSISTANCE_IMAP_HOST)%'
+            $port: '%env(int:ASSISTANCE_IMAP_PORT)%'
+            $encryption: '%env(ASSISTANCE_IMAP_ENCRYPTION)%'
+            $username: '%env(ASSISTANCE_IMAP_USER)%'
+            $password: '%env(ASSISTANCE_IMAP_PASSWORD)%'
+            $folder: '%env(ASSISTANCE_IMAP_FOLDER)%'
 
     App\Service\SecureUploadService:
       arguments:

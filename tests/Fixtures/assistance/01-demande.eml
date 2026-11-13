@@ -1,0 +1,23 @@
+Message-ID: <demande-geotp-1@univ-test.fr>
+Date: Fri, 13 Nov 2026 08:27:00 +0100
+From: Catalin Popa <catalin.popa@univ-test.fr>
+To: ORéOF <oreof@univ-reims.fr>
+Subject: Demande de mise =?UTF-8?Q?=C3=A0?= jour des informations du parcours LP GEOTP
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="BOUNDARY01"
+
+--BOUNDARY01
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Bonjour,
+Pouvez-vous mettre à jour les informations du parcours LP GEOTP ?
+Cordialement
+
+--BOUNDARY01
+Content-Type: application/pdf; name="fiche.pdf"
+Content-Disposition: attachment; filename="fiche.pdf"
+Content-Transfer-Encoding: base64
+
+JVBERi0xLjQKMSAwIG9iajw8Pj5lbmRvYmoKdHJhaWxlcjw8Pj4KJSVFT0YK
+--BOUNDARY01--
