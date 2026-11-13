@@ -49,7 +49,11 @@ class FormationController extends BaseController
         Formation                   $formation
     ): Response
     {
-        if (!$this->isGranted('EDIT', $formation)) {
+        $firstParcoursGarde = $formation->isHasParcours() === false ? ($formation->getParcours()->first() ?: null) : null;
+        $verrouilleParWorkflow = $firstParcoursGarde instanceof Parcours
+            && !Access::isEditable($firstParcoursGarde);
+
+        if ($verrouilleParWorkflow || !$this->isGranted('EDIT', $formation)) {
             $this->addFlash('danger', 'La formation est verrouillée ou vous n\'avez pas les droits de modification.');
 
             $url = $this->generateUrl('formation_v2_voir', ['slug' => $formation->getSlug()]);
@@ -58,7 +62,7 @@ class FormationController extends BaseController
 
             return $response;
         }
-        
+
 
         $breadcrumb->add(
             $formation->getDisplay() ?: ($formation->getDisplayLong() ?: 'Formation'),
