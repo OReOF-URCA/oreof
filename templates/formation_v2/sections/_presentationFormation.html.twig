@@ -85,16 +85,30 @@
                                 {{ component('Badge', { dto: parcours.dpeParcours[0].etatReconduction|badgeTypeModificationDto }) }}
                             </td>
                             <td class="px-4 py-3 text-center">
-                                <twig:Button
-                                        href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        variant="info"
-                                        size="sm"
-                                        icon="icon:info"
-                                        label="Fiche descriptive"
-                                        tooltip="Voir la fiche descriptive du parcours"
-                                />
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <twig:Button
+                                            href="{{ path('parcours_v2_voir', {parcours: parcours.id}) }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            variant="info"
+                                            size="sm"
+                                            icon="icon:info"
+                                            label="Fiche descriptive"
+                                            tooltip="Voir la fiche descriptive du parcours"
+                                    />
+                                    {% if is_granted('ROLE_ADMIN') or is_granted('EDIT', parcours) or is_granted('RELATED_TO_PARCOURS', parcours) %}
+                                        {% set canEditP = isOuvert(parcours) and isEditable(parcours) and (is_granted('ROLE_ADMIN') or is_granted('EDIT', parcours)) %}
+                                        <twig:Button
+                                                href="{{ canEditP ? path('parcours_v2_modifier', {parcours: parcours.id}) : '' }}"
+                                                variant="warning"
+                                                size="sm"
+                                                icon="icon:edit"
+                                                label="Modifier"
+                                                :disabled="not canEditP"
+                                                tooltip="{{ canEditP ? 'Modifier le parcours (descriptifs, maquette...)' : 'Parcours verrouillé' }}"
+                                        />
+                                    {% endif %}
+                                </div>
                             </td>
                             <td class="px-4 py-3 text-center">
                                 {{ include('btn/export_mccc.html.twig') }}

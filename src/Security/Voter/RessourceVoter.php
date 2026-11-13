@@ -332,6 +332,10 @@ class RessourceVoter extends Voter
                 }
             }
 
+            if ($object->getEtatReconduction() === null || $object->getEtatReconduction() === TypeModificationDpeEnum::OUVERT) {
+                return true;
+            }
+
             return in_array($object->getEtatReconduction()->value, [
                 TypeModificationDpeEnum::MODIFICATION->value,
                 TypeModificationDpeEnum::MODIFICATION_TEXTE->value,
@@ -400,12 +404,7 @@ class RessourceVoter extends Voter
         }
 
         if ($attribute === 'manage') {
-            return $dpeParcours === null || (
-                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_mccc') ||
-                $this->dpeParcoursWorkflow->can($dpeParcours, 'relancer_annee') ||
-                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_tacite_mccc') ||
-                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_avant_publie')
-            );
+            return $dpeParcours === null || count($this->dpeParcoursWorkflow->getEnabledTransitions($dpeParcours)) > 0;
         }
 
         if ($dpeParcours === null) {

@@ -478,10 +478,10 @@ framework:
           from: 'tacite_reconduction'
           to: 'soumis_central'
           metadata:
-            recipients: [ 'RF', 'CoRF', 'RP', 'CoRP' ]
+            recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            label: 'Valider la tacite reconduction'
+            description: 'Reconduire le parcours sans modification'
             type: valider
-            #            btn: success
-            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
         ##### Rouvrir #####
@@ -490,6 +490,7 @@ framework:
           to: 'en_cours_redaction'
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            timeline_modules: [ 'maquettes', 'mccc' ]
             label: 'Réouvrir (MCCC)'
             description: 'Réouvrir pour modification des MCCC'
             button_class: 'info'
@@ -505,6 +506,7 @@ framework:
           to: 'en_cours_redaction_ss_cfvu'
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            timeline_modules: [ 'descriptifs' ]
             label: 'Modification sans CFVU'
             description: 'Modifications mineures sans passage en CFVU'
             button_class: 'info'
@@ -526,6 +528,7 @@ framework:
           to: 'en_cours_redaction'
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            timeline_modules: [ 'maquettes', 'mccc' ]
             label: 'Réouvrir (MCCC)'
             description: 'Réouvrir pour modification des MCCC'
             button_class: 'info'
@@ -539,6 +542,7 @@ framework:
           to: 'en_cours_redaction_ss_cfvu'
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            timeline_modules: [ 'descriptifs' ]
             label: 'Modification sans CFVU'
             description: 'Modifications mineures sans passage en CFVU'
             button_class: 'info'

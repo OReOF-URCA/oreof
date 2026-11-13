@@ -10,6 +10,10 @@ app_actualite_index.description: 'Gérer les actualités ORéOF.'
 app_actualite_index.title: 'Gestion des actualités'
 app_admin_pilotage_campagne_index.description: "Tableau de bord stratégique : matrice d'avancement par composante, détection des goulets d'étranglement et alertes SLA."
 app_admin_pilotage_campagne_index.title: 'Tour de Contrôle & Pilotage de Campagne'
+app_admin_pilotage_descriptifs_index.description: 'Revue et édition des textes de présentation en haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
+app_admin_pilotage_descriptifs_index.title: 'Pilotage des descriptifs haut de page'
+app_admin_pilotage_parcours_descriptifs.description: 'Revue et édition des textes de présentation en haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
+app_admin_pilotage_parcours_descriptifs.title: 'Pilotage des descriptifs haut de page'
 app_admin_statistiques_visites_index.description: "Connexions, utilisateurs uniques et pages vues, calculés à partir des journaux de l'application."
 app_admin_statistiques_visites_index.title: 'Statistiques de visites'
 app_admin_workflow_index.description: "Visualisation interactive, matrice des transitions et audit des règles de validation de l'application."

@@ -7,6 +7,7 @@ Modifier: Modifier
 breadcrumb.home: Accueil
 menu.admin.consulter_offre: "Consulter l'offre de formation"
 menu.admin.controle_lheo: 'Controle LHEO'
+menu.admin.descriptifs_parcours: 'Descriptifs haut de page'
 menu.admin.dpe_ouverts: 'DPE ouverts'
 menu.admin.exports: Exports
 menu.admin.gestion_offre: "Gestion de l'offre et capacités"
@@ -151,6 +152,10 @@ page.app_offre_composante_index.description: "Gestion de l'offre de formation de
 page.app_offre_composante_index.title: "Gestion de l'offre de formation"
 page.app_offre_index.description: 'Synthèse de l’offre de formation. Ouverture, plateformes, capacités et validations.'
 page.app_offre_index.title: "Gestion de l'offre et capacités"
+page.app_admin_pilotage_descriptifs_index.description: 'Revue et édition des textes de haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
+page.app_admin_pilotage_descriptifs_index.title: 'Descriptifs haut de page'
+page.app_admin_pilotage_parcours_descriptifs.description: 'Revue et édition des textes de haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
+page.app_admin_pilotage_parcours_descriptifs.title: 'Descriptifs haut de page'
 page.app_parcours_lheo_invalid_list.description: "Contrôle de la conformité au format LHEO de l'offre"
 page.app_parcours_lheo_invalid_list.title: "Contrôle LHEO de l'offre"
 page.app_plaquette.description: 'Générer et consulter les plaquettes des formations.'

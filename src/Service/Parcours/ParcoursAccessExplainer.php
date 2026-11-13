@@ -52,7 +52,7 @@ final readonly class ParcoursAccessExplainer
         }
 
         // 4. Étape de validation dans le workflow DPE
-        if ($dpeParcours !== null) {
+        if ($dpeParcours !== null && !\App\Utils\Access::isEditable($dpeParcours)) {
             $places = array_keys($dpeParcours->getEtatValidation());
             $currentPlace = $places[0] ?? null;
 

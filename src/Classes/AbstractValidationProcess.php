@@ -97,6 +97,7 @@ abstract class AbstractValidationProcess
             'view',
             'validation',
             'form',
+            'timeline_modules',
         ];
     }
 
@@ -135,6 +136,7 @@ abstract class AbstractValidationProcess
             'view' => null,
             'validation' => [],
             'form' => [],
+            'timeline_modules' => [],
         ]);
 
         $resolver->setAllowedTypes('label', ['null', 'string']);
@@ -153,6 +155,7 @@ abstract class AbstractValidationProcess
         $resolver->setAllowedTypes('view', ['null', 'string']);
         $resolver->setAllowedTypes('validation', 'array');
         $resolver->setAllowedTypes('form', 'array');
+        $resolver->setAllowedTypes('timeline_modules', ['array', 'null']);
 
         return $resolver;
     }

@@ -23,7 +23,19 @@ class CampagneAccessibilityExtension extends AbstractExtension
             new TwigFunction('is_timeline_open', [$this, 'isTimelineOpen']),
             new TwigFunction('can_edit_timeline', [$this, 'canEditTimeline']),
             new TwigFunction('module_status', [$this, 'getModuleStatus']),
+            new TwigFunction('can_execute_transition', [$this, 'canExecuteTransition']),
+            new TwigFunction('transition_disabled_reason', [$this, 'getTransitionDisabledReason']),
         ];
+    }
+
+    public function canExecuteTransition(string $transitionName, array $metadata = [], ?CampagneCollecte $campagne = null): bool
+    {
+        return $this->accessibilityService->canExecuteTransition($transitionName, $metadata, $campagne);
+    }
+
+    public function getTransitionDisabledReason(string $transitionName, array $metadata = [], ?CampagneCollecte $campagne = null): ?string
+    {
+        return $this->accessibilityService->getTransitionDisabledReason($transitionName, $metadata, $campagne);
     }
 
     public function isTimelineOpen(?CampagneCollecte $campagne = null): bool

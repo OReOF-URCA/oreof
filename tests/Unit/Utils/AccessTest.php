@@ -13,23 +13,25 @@ use PHPUnit\Framework\TestCase;
 
 class AccessTest extends TestCase
 {
-    public function testDpeParcoursInTaciteReconductionIsOuvertAndEditable(): void
+    public function testDpeParcoursInTaciteReconductionIsOuvertButNotYetEditable(): void
     {
         $dpeParcours = new DpeParcours();
         $dpeParcours->setEtatValidation(['tacite_reconduction' => 1]);
         $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
 
         $this->assertTrue(Access::isOuvert($dpeParcours));
-        $this->assertTrue(Access::isEditable($dpeParcours));
+        $this->assertFalse(Access::isEditable($dpeParcours));
     }
 
-    public function testTaciteReconductionLocksCfvuTabsButOpensTextTabs(): void
+    public function testEnCoursRedactionSsCfvuLocksCfvuTabsButOpensTextTabs(): void
     {
         $dpeParcours = new DpeParcours();
-        $dpeParcours->setEtatValidation(['tacite_reconduction' => 1]);
+        $dpeParcours->setEtatValidation(['en_cours_redaction_ss_cfvu' => 1]);
         $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
 
-        // CFVU should be false in tacite_reconduction
+        $this->assertTrue(Access::isEditable($dpeParcours));
+
+        // CFVU should be false in en_cours_redaction_ss_cfvu
         $this->assertFalse(Access::isAccessible($dpeParcours, 'cfvu'));
         // Texte should be true
         $this->assertTrue(Access::isAccessible($dpeParcours, 'texte'));

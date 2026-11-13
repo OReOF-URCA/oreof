@@ -248,5 +248,85 @@ class RessourceVoterTest extends TestCase
         // Direct vote on DpeParcours entity
         $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, $dpeParcours, ['EDIT']));
     }
+
+    public function testResponsableDpeCanEditParcoursInTaciteReconduction(): void
+    {
+        $user = $this->createMock(User::class);
+        $user->method('getId')->willReturn(10);
+
+        $token = $this->createMock(TokenInterface::class);
+        $token->method('getUser')->willReturn($user);
+        $this->security->method('isGranted')->with('ROLE_ADMIN')->willReturn(false);
+
+        $composante = new Composante();
+        $formation = new Formation(null);
+        $formation->setComposantePorteuse($composante);
+
+        $parcours = new Parcours($formation);
+        $dpeParcours = new DpeParcours();
+        $dpeParcours->setParcours($parcours);
+        $dpeParcours->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
+        $dpeParcours->setEtatValidation(['tacite_reconduction' => 1]);
+        $parcours->addDpeParcour($dpeParcours);
+
+        $profil = new Profil();
+        $profil->setCentre(CentreGestionEnum::CENTRE_GESTION_COMPOSANTE);
+
+        $userProfil = new UserProfil();
+        $userProfil->setUser($user);
+        $userProfil->setProfil($profil);
+        $userProfil->setComposante($composante);
+
+        $this->userProfilRepository->method('findBy')->with(['user' => $user])->willReturn([$userProfil]);
+
+        $this->profilDroitsRepository->method('hasDroit')
+            ->willReturnCallback(function (Profil $p, string $droit, string $route) use ($profil) {
+                return $p === $profil && in_array($droit, ['manage', 'show', 'edit'], true) && $route === 'app_composante';
+            });
+
+        $transitionMock = $this->createMock(\Symfony\Component\Workflow\Transition::class);
+        $this->dpeParcoursWorkflow->method('getEnabledTransitions')->with($dpeParcours)->willReturn([$transitionMock]);
+
+        // Direct vote on Parcours / DpeParcours entity: MANAGE is granted
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, $parcours, ['MANAGE']));
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, $dpeParcours, ['MANAGE']));
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, $parcours, ['SHOW']));
+
+        // EDIT is denied until reopened
+        $this->assertSame(VoterInterface::ACCESS_DENIED, $this->voter->vote($token, $parcours, ['EDIT']));
+    }
+
+    public function testResponsableDpeCanEditMultiparcoursFormationWithNullEtatReconduction(): void
+    {
+        $user = $this->createMock(User::class);
+        $user->method('getId')->willReturn(10);
+
+        $token = $this->createMock(TokenInterface::class);
+        $token->method('getUser')->willReturn($user);
+        $this->security->method('isGranted')->with('ROLE_ADMIN')->willReturn(false);
+
+        $composante = new Composante();
+        $formation = new Formation(null);
+        $formation->setHasParcours(true);
+        $formation->setComposantePorteuse($composante);
+        $formation->setEtatReconduction(null);
+
+        $profil = new Profil();
+        $profil->setCentre(CentreGestionEnum::CENTRE_GESTION_COMPOSANTE);
+
+        $userProfil = new UserProfil();
+        $userProfil->setUser($user);
+        $userProfil->setProfil($profil);
+        $userProfil->setComposante($composante);
+
+        $this->userProfilRepository->method('findBy')->with(['user' => $user])->willReturn([$userProfil]);
+
+        $this->profilDroitsRepository->method('hasDroit')
+            ->willReturnCallback(function (Profil $p, string $droit, string $route) use ($profil) {
+                return $p === $profil && in_array($droit, ['edit', 'show'], true) && $route === 'app_composante';
+            });
+
+        $this->assertSame(VoterInterface::ACCESS_GRANTED, $this->voter->vote($token, $formation, ['EDIT']));
+    }
 }
 

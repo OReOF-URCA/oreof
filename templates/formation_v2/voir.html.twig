@@ -194,30 +194,32 @@
 
 {% block bouton_header %}
     <div class="flex flex-wrap gap-2 justify-start lg:justify-end">
+        {% set userCanEditFormation = is_granted('EDIT', {route: 'app_formation', subject: formation})
+            or is_granted('EDIT', {route: 'app_composante', subject: formation})
+            or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
+            or is_granted('ROLE_ADMIN') %}
         {% if formation.hasParcours == true %}
-            {% if (is_granted('EDIT', {route: 'app_formation', subject: formation})
-                or is_granted('EDIT', {route: 'app_composante', subject: formation})
-                or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
-                or is_granted('ROLE_ADMIN')) and isOuvert(formation) %}
+            {% set canEditFormation = userCanEditFormation and isOuvert(formation) %}
+            {% if userCanEditFormation %}
                 <twig:Button
-                        href="{{ path('formation_v2_modifier', {slug:formation.slug}) }}"
+                        href="{{ canEditFormation ? path('formation_v2_modifier', {slug:formation.slug}) : '' }}"
                         variant="warning"
                         icon="icon:edit"
                         label="Modifier le DPE"
-                        tooltip="Modifier le DPE"
+                        :disabled="not canEditFormation"
+                        tooltip="{{ canEditFormation ? 'Modifier le DPE' : 'Formation verrouillée' }}"
                 />
             {% endif %}
         {% else %}
-            {% if (is_granted('EDIT', {route: 'app_formation', subject: formation})
-                or is_granted('EDIT', {route: 'app_composante', subject: formation})
-                or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
-                or is_granted('ROLE_ADMIN')) and dpeParcours is not null and isOuvert(dpeParcours) and isEditable(dpeParcours) %}
+            {% set canEditFormation = userCanEditFormation and dpeParcours is not null and isOuvert(dpeParcours) and isEditable(dpeParcours) %}
+            {% if userCanEditFormation %}
                 <twig:Button
-                        href="{{ path('formation_v2_modifier', {slug:formation.slug}) }}"
+                        href="{{ canEditFormation ? path('formation_v2_modifier', {slug:formation.slug}) : '' }}"
                         variant="warning"
                         icon="icon:edit"
                         label="Modifier le DPE"
-                        tooltip="Modifier le DPE"
+                        :disabled="not canEditFormation"
+                        tooltip="{{ canEditFormation ? 'Modifier le DPE' : 'Formation verrouillée' }}"
                 />
             {% endif %}
         {% endif %}
