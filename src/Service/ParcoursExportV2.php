@@ -324,7 +324,8 @@ class ParcoursExportV2 {
         return $data;
     }
 
-    public function getMaquetteJsonMinimum(Parcours $p, TypeDiplome $td) {
+    public function getMaquetteJsonMinimum(Parcours $p, TypeDiplome $td): array
+    {
         $volumesVides = ['presentiel' => 0, 'distanciel' => 0];
 
         $data = [
@@ -360,7 +361,7 @@ class ParcoursExportV2 {
         return $data;
     }
 
-    private function getEcFromUe(StructureUe $ue, int $parentDepth = 0, bool $isVersioning = false, TypeDiplome $td): array
+    private function getEcFromUe(StructureUe $ue, int $parentDepth, bool $isVersioning, TypeDiplome $td): array
     {
         $tEcs = [];
         $depth = $parentDepth + 1;
@@ -392,7 +393,7 @@ class ParcoursExportV2 {
         return $tEcs;
     }
 
-    private function getEc(StructureEc $ec, bool $isVersioning = false, TypeDiplome $td): array
+    private function getEc(StructureEc $ec, bool $isVersioning, TypeDiplome $td): array
     {
 
         $ficheMatiere = $ec->elementConstitutif->getFicheMatiere();

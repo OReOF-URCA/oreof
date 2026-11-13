@@ -69,10 +69,9 @@ class ExportListeFicheMatiere implements ExportInterface
                 $fiche->isHorsDiplome() === true ? 'Hors diplôme' : ($fiche->getParcours() !== null && $fiche->getParcours()->getFormation() !== null ? $fiche->getParcours()->getFormation()->getDisplayLong() : ''
                 ));
             $this->excelWriter->writeCellXY(8, $ligne, $fiche->getParcours()?->getId() ?? "");
-            if($fiche->getParcours()?->getTypeParcours() !== null) {
-                if($fiche->getParcours()?->getTypeParcours() !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
-                    $this->excelWriter->writeCellXY(9, $ligne, $fiche->getParcours()?->getTypeParcours()->libelle());
-                }
+            $typeParcours = $fiche->getParcours()?->getTypeParcours();
+            if ($typeParcours !== null && $typeParcours !== TypeParcoursEnum::TYPE_PARCOURS_CLASSIQUE) {
+                $this->excelWriter->writeCellXY(9, $ligne, $typeParcours->libelle());
             }
             $this->excelWriter->getColumnsAutoSize('A', 'M');
             $ligne++;
