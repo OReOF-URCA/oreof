@@ -27,6 +27,15 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 | `app:restore-parcours-from-n1` | restaure et réaligne le contenu d'un parcours N depuis sa source N-1 (`parcoursOrigineCopie` / `ficheMatiereOrigineCopie`) | `--campagne=`, `--formation=`, `--parcours=`, `--type-diplome=`, `--clean-orphans`, `--dry-run` |
 | `app:update-timeline` | recopie les données des campagnes dans `timeline` | — |
 
+## Assistance (demandes reçues par mail)
+
+Voir `docs/composants/assistance.md`.
+
+| Commande | Rôle | Options |
+|---|---|---|
+| `app:assistance:relever` | relève la boîte IMAP d'assistance (variables `ASSISTANCE_IMAP_*`) et regroupe les nouveaux mails en demandes ; la boîte n'est pas modifiée ; échoue si la boîte n'est pas configurée | `--depuis=7` (jours relus) |
+| `app:assistance:importer-eml` | importe des mails `.eml` (fichier ou dossier) : tests, reprise d'historique exporté de Roundcube | `chemin` |
+
 ## Calculs / mises à jour en masse
 
 | Commande | Rôle | Options |

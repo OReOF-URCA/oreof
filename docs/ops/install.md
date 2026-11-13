@@ -37,8 +37,12 @@ make reset-passwords APP=v2                                   # tous les mots de
 - Prérequis : PHP 8.4+ (`ctype`, `iconv`, `zip`, `intl`, `pdo_mysql`, `opcache`), MariaDB/MySQL, Composer 2,
   Node.js 20+, Nginx/Apache avec document root `public/`.
 - Variables d'environnement système (jamais dans un `.env` versionné) : `APP_ENV=prod`, `APP_DEBUG=0`, `APP_SECRET`,
-  `DATABASE_URL`, `MAILER_DSN`, `LDAP_*`, `MERCURE_*` selon usage.
-- Écriture pour l'utilisateur web : `var/cache/`, `var/log/`, `var/sessions/`, `translations/`.
+  `DATABASE_URL`, `MAILER_DSN`, `LDAP_*`, `MERCURE_*` selon usage, `ASSISTANCE_IMAP_*` pour la boîte d'assistance
+  (hôte vide = relève désactivée).
+- Écriture pour l'utilisateur web : `var/cache/`, `var/log/`, `var/sessions/`, `var/assistance/` (pièces jointes des
+  mails d'assistance), `translations/`.
+- Cron de relève de la boîte d'assistance (si configurée) :
+  `*/5 * * * * cd /chemin/oreof && php bin/console app:assistance:relever --env=prod >> var/log/assistance.log 2>&1`.
 
 ```bash
 composer install --no-dev --prefer-dist --optimize-autoloader
