@@ -27,6 +27,7 @@ use App\Repository\UserRepository;
 use App\Service\DetailBuilder;
 use App\Utils\TurboStreamResponseFactory;
 use DateTime;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -66,65 +67,22 @@ class UserController extends BaseController
         if ($form->isSubmitted() && $form->isValid()) {
             $email = trim((string)$user->getEmail());
 
-            $existingUser = $userRepository->findOneBy(['email' => $email]);
-            if ($existingUser !== null) {
-                $existingUser->setIsDeleted(false);
-                $existingUser->setIsEnable(true);
-                $existingUser->setIsValideAdministration(true);
-
-                if ($dpe) {
-                    $currentUser = $this->getUser();
-                    if (!$currentUser instanceof User) {
-                        throw $this->createAccessDeniedException();
-                    }
-
-                    $existingUser->setIsValidDpe(true);
-                    $composanteResponsableDpe = $currentUser->getComposanteResponsableDpe()->first();
-                    if ($composanteResponsableDpe !== false) {
-                        $existingUser->setComposanteDemande($composanteResponsableDpe);
-                    }
-                }
-
-                // Tentative optionnelle de rafraîchissement LDAP (sans bloquer si le serveur LDAP est injoignable)
-                $ldapResult = $ldap->lookupUser($email);
-                if ($ldapResult->isSuccess()) {
-                    $ldapData = $ldapResult->getData();
-                    if ($ldapData !== null) {
-                        if (!empty($ldapData['username'])) {
-                            $existingUser->setUsername($ldapData['username']);
-                        }
-                        if (!empty($ldapData['nom'])) {
-                            $existingUser->setNom($ldapData['nom']);
-                        }
-                        if (!empty($ldapData['prenom'])) {
-                            $existingUser->setPrenom($ldapData['prenom']);
-                        }
-                    }
-                }
-
-                $userRepository->save($existingUser, true);
-
-                $profils = $dpe ? $profilRepository->findByDpe() : $profilRepository->findAll();
-
-                return $turboStream->appendStreams(
-                    $turboStream->renderModalStreams(
-                        new TranslatableKey('user.gestion_profil.title', [], 'modal'),
-                        'Utilisateur : ' . $existingUser->getDisplay(),
-                        'user_profils/_gestion_profils.html.twig',
-                        [
-                            'user' => $existingUser,
-                            'profils' => $profils,
-                        ],
-                        '_ui/_footer_cancel.html.twig',
-                        []
-                    ),
-                    $turboStream->renderToastStream(
-                        sprintf("L'utilisateur « %s » existe déjà en base de données. Basculement sur la gestion de ses profils.", $existingUser->getDisplay()),
-                        'info'
-                    )
+            // 1. Vérification par adresse email en base de données
+            $existingUserByEmail = $userRepository->findOneBy(['email' => $email]);
+            if ($existingUserByEmail !== null) {
+                return $this->handleExistingUser(
+                    $existingUserByEmail,
+                    $email,
+                    $dpe,
+                    $ldap,
+                    $userRepository,
+                    $profilRepository,
+                    $turboStream,
+                    sprintf("L'utilisateur « %s » existe déjà en base de données. Basculement sur la gestion de ses profils.", $existingUserByEmail->getDisplay())
                 );
             }
 
+            // 2. Recherche dans l'annuaire LDAP
             $ldapResult = $ldap->lookupUser($email);
             if (!$ldapResult->isSuccess()) {
                 $errorMessage = $ldapResult->getErrorMessage() ?? "L'utilisateur n'a pas été trouvé dans l'annuaire LDAP.";
@@ -132,11 +90,45 @@ class UserController extends BaseController
             }
 
             $dataUsers = $ldapResult->getData();
-            if ($dataUsers === null) {
-                return $turboStream->streamToastError("Données LDAP introuvables pour cet utilisateur.");
+            if ($dataUsers === null || empty($dataUsers['username'])) {
+                return $turboStream->streamToastError("Données LDAP introuvables ou identifiant (uid) manquant pour cet utilisateur.");
             }
 
-            $user->setUsername($dataUsers['username']);
+            $username = $dataUsers['username'];
+
+            // 3. Vérification par login URCA en BDD (cas d'un collègue avec plusieurs emails : nom composé, mariage, alias...)
+            $existingUserByUsername = $userRepository->findOneBy(['username' => $username]);
+            if ($existingUserByUsername !== null) {
+                $oldEmail = $existingUserByUsername->getEmail();
+                $toastMessage = ($oldEmail !== null && strcasecmp($oldEmail, $email) !== 0)
+                    ? sprintf(
+                        "L'utilisateur « %s » existe déjà avec le login URCA « %s » (enregistré sous « %s »). Son adresse a été actualisée (« %s ») et vous avez été redirigé vers la gestion de ses profils.",
+                        $existingUserByUsername->getDisplay(),
+                        $username,
+                        $oldEmail,
+                        $email
+                    )
+                    : sprintf(
+                        "L'utilisateur « %s » existe déjà avec le login URCA « %s ». Basculement sur la gestion de ses profils.",
+                        $existingUserByUsername->getDisplay(),
+                        $username
+                    );
+
+                return $this->handleExistingUser(
+                    $existingUserByUsername,
+                    $email,
+                    $dpe,
+                    $ldap,
+                    $userRepository,
+                    $profilRepository,
+                    $turboStream,
+                    $toastMessage,
+                    $dataUsers
+                );
+            }
+
+            // 4. Nouvel utilisateur : initialisation et enregistrement
+            $user->setUsername($username);
             $user->setNom($dataUsers['nom']);
             $user->setPrenom($dataUsers['prenom']);
             $user->setIsEnable(true);
@@ -155,13 +147,22 @@ class UserController extends BaseController
                 $user->setDateValideDpe(new DateTime());
             }
 
+            try {
+                $userRepository->save($user, true);
+            } catch (UniqueConstraintViolationException) {
+                $existing = $userRepository->findOneBy(['username' => $username]) ?? $userRepository->findOneBy(['email' => $email]);
+                $existingInfo = $existing ? sprintf(" (associé à « %s », email : « %s »)", $existing->getDisplay(), (string)$existing->getEmail()) : '';
+                return $turboStream->streamToastError(
+                    sprintf("Impossible d'enregistrer : le login URCA « %s » est déjà présent en base de données%s.", $username, $existingInfo)
+                );
+            }
+
             $myMailer->initEmail();
             $myMailer->setTemplate(
                 'mails/user/acces_ajoute.txt.twig',
                 ['user' => $user]
             );
             $myMailer->sendMessage([$user->getEmail()], '[ORéOF] Accès ORéOF');
-            $userRepository->save($user, true);
 
             $profils = $dpe ? $profilRepository->findByDpe() : $profilRepository->findAll();
 
@@ -188,6 +189,85 @@ class UserController extends BaseController
             '_ui/_footer_submit_cancel.html.twig',
             [],
             $form->isSubmitted() ? Response::HTTP_UNPROCESSABLE_ENTITY : Response::HTTP_OK
+        );
+    }
+
+    /**
+     * @param array{username: string, nom: string, prenom: string, email: string}|null $dataUsers
+     */
+    private function handleExistingUser(
+        User                       $existingUser,
+        string                     $email,
+        bool                       $dpe,
+        Ldap                       $ldap,
+        UserRepository             $userRepository,
+        ProfilRepository           $profilRepository,
+        TurboStreamResponseFactory $turboStream,
+        string                     $toastMessage,
+        ?array                     $dataUsers = null
+    ): Response
+    {
+        $existingUser->setIsDeleted(false);
+        $existingUser->setIsEnable(true);
+        $existingUser->setIsValideAdministration(true);
+
+        if ($dpe) {
+            $currentUser = $this->getUser();
+            if (!$currentUser instanceof User) {
+                throw $this->createAccessDeniedException();
+            }
+
+            $existingUser->setIsValidDpe(true);
+            $composanteResponsableDpe = $currentUser->getComposanteResponsableDpe()->first();
+            if ($composanteResponsableDpe !== false) {
+                $existingUser->setComposanteDemande($composanteResponsableDpe);
+            }
+        }
+
+        if ($dataUsers === null) {
+            $ldapResult = $ldap->lookupUser($email);
+            if ($ldapResult->isSuccess()) {
+                $dataUsers = $ldapResult->getData();
+            }
+        }
+
+        if ($dataUsers !== null) {
+            if (!empty($dataUsers['username'])) {
+                $existingUser->setUsername($dataUsers['username']);
+            }
+            if (!empty($dataUsers['nom'])) {
+                $existingUser->setNom($dataUsers['nom']);
+            }
+            if (!empty($dataUsers['prenom'])) {
+                $existingUser->setPrenom($dataUsers['prenom']);
+            }
+        }
+
+        if ($email !== '' && filter_var($email, \FILTER_VALIDATE_EMAIL)) {
+            $existingUser->setEmail($email);
+        }
+
+        try {
+            $userRepository->save($existingUser, true);
+        } catch (UniqueConstraintViolationException) {
+            // Ne bloque pas si l'email ou un champ secondaire est en conflit
+        }
+
+        $profils = $dpe ? $profilRepository->findByDpe() : $profilRepository->findAll();
+
+        return $turboStream->appendStreams(
+            $turboStream->renderModalStreams(
+                new TranslatableKey('user.gestion_profil.title', [], 'modal'),
+                'Utilisateur : ' . $existingUser->getDisplay(),
+                'user_profils/_gestion_profils.html.twig',
+                [
+                    'user' => $existingUser,
+                    'profils' => $profils,
+                ],
+                '_ui/_footer_cancel.html.twig',
+                []
+            ),
+            $turboStream->renderToastStream($toastMessage, 'info')
         );
     }
 
