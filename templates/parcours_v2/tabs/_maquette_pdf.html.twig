@@ -10,6 +10,7 @@
                 action="{{ path('parcours_v2_maquette_pdf', {parcours: parcours.id}) }}"
                 method="post"
                 enctype="multipart/form-data"
+                class="w-full"
             >
                 <input 
                     class="hidden" 
@@ -18,7 +19,7 @@
                     {{ stimulus_target('maquette-pdf', 'inputPdf') }}
                     {{ stimulus_action('maquette-pdf', 'onSelectFile', 'change') }}
                 />
-                <div class="flex flex-row" id="currentFileName">
+                <div class="flex flex-row justify-center" id="currentFileName">
                 {% if parcours.maquettePdfNomOriginal %}
                     <span class="px-2 py-1 rounded bg-gray-100 text-gray-800 border border-gray-800 text-center">
                         {{ parcours.maquettePdfNomOriginal }}
@@ -29,7 +30,7 @@
                 {% endif %}
                 </div>
                 <div class="flex flex-row justify-center">
-                    <div class="flex w-10/12 md:w-9/12 lg:w-7/12 xl:w-6/12 2xl:w-5/12">
+                    <div class="flex w-10/12 md:w-9/12 lg:w-4/12 2xl:w-3/12">
                         <label 
                             class="mt-12 w-full border border-blue-800 hover:bg-blue-300 bg-blue-100 text-blue-800 rounded text-center py-1 px-0 cursor-pointer"
                             for="maquettePdfUpload"
