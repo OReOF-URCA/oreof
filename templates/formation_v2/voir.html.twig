@@ -211,7 +211,7 @@
             {% if (is_granted('EDIT', {route: 'app_formation', subject: formation})
                 or is_granted('EDIT', {route: 'app_composante', subject: formation})
                 or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
-                or is_granted('ROLE_ADMIN')) and dpeParcours is not null and isOuvert(dpeParcours) %}
+                or is_granted('ROLE_ADMIN')) and dpeParcours is not null and isOuvert(dpeParcours) and isEditable(dpeParcours) %}
                 <twig:Button
                         href="{{ path('formation_v2_modifier', {slug:formation.slug}) }}"
                         variant="warning"
