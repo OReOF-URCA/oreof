@@ -2,6 +2,8 @@
 {% set currentAnnee = formation.dpe ? (formation.dpe.anneeUniversitaire ? formation.dpe.anneeUniversitaire.annee : null) : null %}
 
 <div data-controller="change-rf-date" data-change-rf-date-current-annee-value="{{ currentAnnee }}">
+    {{ include('formation_v2/change_rf/_recap_responsables.html.twig') }}
+
     {{ form_start(form, {
         'attr': {
             'id': 'modal_form'

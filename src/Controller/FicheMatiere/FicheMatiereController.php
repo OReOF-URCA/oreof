@@ -10,6 +10,7 @@
 namespace App\Controller\FicheMatiere;
 
 use App\Controller\BaseController;
+use App\DTO\TranslatableKey;
 use App\Entity\FicheMatiere;
 use App\Form\FicheMatiereStep1Type;
 use App\Form\FicheMatiereStep1bType;
@@ -25,14 +26,19 @@ use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereMutualisableRepository;
 use App\Repository\FicheMatiereTabStateRepository;
 use App\Repository\TypeDiplomeRepository;
+use App\Service\Ai\FicheMatiereAiSynthesizer;
+use App\Service\FicheMatiere\FicheMatiereDiffAnalyzer;
 use App\Service\VersioningFicheMatiere;
 use App\TypeDiplome\Exceptions\TypeDiplomeNotFoundException;
 use App\TypeDiplome\McccDisplayInterface;
+use App\Utils\Access;
+use App\Utils\TurboStreamResponseFactory;
 use Jfcherng\Diff\DiffHelper;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/fiche-matiere/v2', name: 'fiche_matiere_v2_')]
 class FicheMatiereController extends BaseController
@@ -103,6 +109,7 @@ class FicheMatiereController extends BaseController
         FicheMatiereMutualisableRepository $ficheMatiereMutualisableRepository,
         TypeDiplomeRepository              $typeDiplomeRepository,
         VersioningFicheMatiere             $ficheMatiereVersioningService,
+        FicheMatiereDiffAnalyzer           $ficheMatiereDiffAnalyzer,
         BreadcrumbService                  $breadcrumb
     ): Response {
         $breadcrumb->add($ficheMatiere->getLibelle());
@@ -142,10 +149,15 @@ class FicheMatiereController extends BaseController
         $textDifferences = $ficheMatiereVersioningService
             ->getStringDifferencesWithBetweenFicheMatiereAndLastVersion($ficheMatiere);
 
+        $changeReport = $this->isGranted('ROLE_ADMIN')
+            ? $ficheMatiereDiffAnalyzer->analyze($ficheMatiere)
+            : null;
+
         $ficheMatiereParcours = $ficheMatiereMutualisableRepository->findByFicheMatieres($ficheMatiere);
         $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiere);
         return $this->render('fiche_matiere_v2/voir.html.twig', [
             'ficheMatiere' => $ficheMatiere,
+            'isEditable' => Access::isEditable($ficheMatiere),
             'ficheMatiereParcours' => $ficheMatiereParcours,
             'ecParcours' => $ecParcours,
             'formation' => $formation,
@@ -157,8 +169,54 @@ class FicheMatiereController extends BaseController
             'bccs' => $bccs,
             'typeMccc' => $ficheMatiere->getTypeMccc(),
             'stringDifferences' => $textDifferences,
-            'cssDiff' => $cssDiff
+            'cssDiff' => $cssDiff,
+            'changeReport' => $changeReport,
         ]);
+    }
+
+    #[Route('/{slug}/synthese-modifications', name: 'synthese_modifications', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function syntheseModifications(
+        #[MapEntity(mapping: ['slug' => 'slug'])]
+        FicheMatiere               $ficheMatiere,
+        Request                    $request,
+        FicheMatiereDiffAnalyzer   $ficheMatiereDiffAnalyzer,
+        FicheMatiereAiSynthesizer  $aiSynthesizer,
+        TurboStreamResponseFactory $turboStream,
+    ): Response {
+        $rawSource = (string) $request->query->get('source', 'auto');
+        $source = in_array($rawSource, ['auto', 'snapshot', 'origine_n1'], true) ? $rawSource : 'auto';
+        $refresh = $request->query->getBoolean('refresh', false);
+
+        $report = $ficheMatiereDiffAnalyzer->analyze($ficheMatiere, $source);
+        $aiSummary = $aiSynthesizer->summarize($report, $refresh);
+
+        return $turboStream->streamOpenModalFromTemplates(
+            new TranslatableKey(
+                'fiche_matiere_v2.synthese_modifications.modal_title',
+                ['%libelle%' => (string) $ficheMatiere->getLibelle()],
+                'modal'
+            ),
+            new TranslatableKey(
+                'fiche_matiere_v2.synthese_modifications.modal_subtitle',
+                ['%source%' => $report->sourceLabel],
+                'modal'
+            ),
+            'fiche_matiere_v2/_modal_synthese_modifications.html.twig',
+            [
+                'ficheMatiere' => $ficheMatiere,
+                'report' => $report,
+                'aiSummary' => $aiSummary,
+                'selectedSource' => $source,
+                'cssDiff' => DiffHelper::getStyleSheet(),
+            ],
+            'fiche_matiere_v2/_modal_synthese_modifications_footer.html.twig',
+            [
+                'ficheMatiere' => $ficheMatiere,
+                'report' => $report,
+                'selectedSource' => $source,
+            ]
+        );
     }
 
 

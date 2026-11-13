@@ -49,6 +49,55 @@ final class TurboStreamResponseFactory
             'toast_type' => 'success',]);
     }
 
+    public function streamToastInfo(string|TranslatableKey $message, bool $closeModal = false): Response
+    {
+        return $this->stream('_ui/_toast.stream.html.twig', [
+            'message' => $this->translateText($message),
+            'closeModal' => $closeModal,
+            'toast_type' => 'info',]);
+    }
+
+    public function streamToastWarning(string|TranslatableKey $message, bool $closeModal = false): Response
+    {
+        return $this->stream('_ui/_toast.stream.html.twig', [
+            'message' => $this->translateText($message),
+            'closeModal' => $closeModal,
+            'toast_type' => 'warning',]);
+    }
+
+    public function renderToastStream(
+        string|TranslatableKey $message,
+        string                 $toastType = 'info',
+        bool                   $closeModal = false
+    ): string
+    {
+        return $this->twig->render('_ui/_toast.stream.html.twig', [
+            'message' => $this->translateText($message),
+            'closeModal' => $closeModal,
+            'toast_type' => $toastType,
+        ]);
+    }
+
+    public function renderModalStreams(
+        string|TranslatableKey      $title,
+        string|TranslatableKey|null $subtitle,
+        string                      $bodyTemplate,
+        array                       $bodyContext,
+        string                      $footerTemplate = '_ui/_footer_cancel.html.twig',
+        array                       $footerContext = []
+    ): string
+    {
+        $bodyHtml = $this->twig->render($bodyTemplate, $bodyContext);
+        $footerHtml = $this->twig->render($footerTemplate, $footerContext);
+
+        return $this->twig->render('_ui/open.stream.html.twig', [
+            'title' => $this->translateText($title),
+            'subtitle' => $this->translateText($subtitle),
+            'body' => $bodyHtml,
+            'footer' => $footerHtml,
+        ]);
+    }
+
     public function stream(string $template, array $context = [], int $status = 200): Response
     {
         return new Response(

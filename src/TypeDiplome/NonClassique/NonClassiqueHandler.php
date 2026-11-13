@@ -270,6 +270,11 @@ final class NonClassiqueHandler extends AbstractTypeDiplomeHandler
                 $formation->setNiveauEntreeValue($data['niveauEntree'] ?? null);
                 $formation->setNiveauSortieValue($data['niveauSortie'] ?? null);
 
+                if (!empty($data['composantePorteuse'])) {
+                    $formation->setComposantePorteuse($data['composantePorteuse']);
+                    $formation->addComposantesInscription($data['composantePorteuse']);
+                }
+
                 if (!empty($data['localisationMention'])) {
                     foreach ($data['localisationMention'] as $ville) {
                         $formation->addLocalisationMention($ville);

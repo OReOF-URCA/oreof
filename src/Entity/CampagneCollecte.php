@@ -647,6 +647,21 @@ class CampagneCollecte
     }
 
     /**
+     * @return list<TimelineDate>
+     */
+    public function getCfvuTimelineDates(): array
+    {
+        $dates = [];
+        foreach ($this->getTimelineDates() as $time) {
+            if ($time->isCfvu() === true && $time->getDate() !== null) {
+                $dates[] = $time;
+            }
+        }
+
+        return $dates;
+    }
+
+    /**
      * @return Collection<int, TypeDiplomePlateformeAdmission>
      */
     public function getTypeDiplomePlateformeAdmissions(): Collection

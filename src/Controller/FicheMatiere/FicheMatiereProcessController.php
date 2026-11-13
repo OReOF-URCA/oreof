@@ -75,7 +75,7 @@ class FicheMatiereProcessController extends BaseController
         $form->handleRequest($request);
 
         if ($form->isSubmitted()) {
-            if ($view->mode === 'report' && $view->canSubmit === false) {
+            if ($view !== null && $view->mode === 'report' && $view->canSubmit === false) {
                 $message = implode(' ', array_column($view->messages, 'message'));
 
                 return $turboStream->stream('fiche_matiere_v2/turbo/apply_error.stream.html.twig', [
@@ -151,7 +151,7 @@ class FicheMatiereProcessController extends BaseController
             '_ui/_footer_submit_cancel.html.twig',
             [
                 'submitLabel' => 'modal_submit.' . $transition . '.' . $metaDto->type,
-                'submitDisabled' => ($view?->mode === 'report' && $view->canSubmit === false),
+                'submitDisabled' => ($view !== null && $view->mode === 'report' && $view->canSubmit === false),
             ]
         );
     }

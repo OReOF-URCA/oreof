@@ -25,9 +25,8 @@ final readonly class DpeReopeningOperationHandler implements OperationHandlerInt
         'reouvrir_sans_cfvu',
         'reouvrir_tacite_sans_cfvu',
         'reouvrir_avant_publie',
-        'reouvrir_tacite',
         'reouvrir_tacite_mccc',
-        'reouvrir_mccc',
+        // 'reouvrir_mccc' est géré par ReouvrirMcccOperationHandler (un seul handler par transition).
     ];
 
     public function __construct(private EntityManagerInterface $entityManager)

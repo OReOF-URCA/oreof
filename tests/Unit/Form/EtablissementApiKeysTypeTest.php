@@ -53,4 +53,23 @@ class EtablissementApiKeysTypeTest extends TypeTestCase
         $this->assertSame('https://apogee.univ-reims.fr/api', $etablissement->getApiKeys()[0]['url']);
         $this->assertSame('mon_secret_123', $etablissement->getApiKeys()[0]['apiKey']);
     }
+
+    public function testExistingApiKeyPreservedInFormView(): void
+    {
+        $etablissement = new Etablissement();
+        $etablissement->setApiKeys([
+            [
+                'plateforme' => 'Oratio (LLM)',
+                'url' => 'https://romeogate.univ-reims.fr/llm',
+                'login' => 'mistral-small-3.2-24b',
+                'apiKey' => 'sk-secret-token-12345',
+            ],
+        ]);
+
+        $form = $this->factory->create(EtablissementApiKeysType::class, $etablissement);
+        $view = $form->createView();
+
+        $this->assertTrue(isset($view->children['apiKeys']->children[0]->children['apiKey']));
+        $this->assertSame('sk-secret-token-12345', $view->children['apiKeys']->children[0]->children['apiKey']->vars['value']);
+    }
 }

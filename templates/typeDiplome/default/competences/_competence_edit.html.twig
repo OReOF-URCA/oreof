@@ -25,9 +25,17 @@
     {#        </div> #}
     {#    </header> #}
 
-    {{ include('parcours_v2/tabs/_header.html.twig', { tabKey: 'competences' }) }}
+    {% set canEdit = canEditTab ?? isTabEditable(parcours, 'competences') %}
+    {{ include('parcours_v2/tabs/_header.html.twig', { tabKey: 'competences', withNoDone: not canEdit }) }}
 
-
+    {% if not canEdit %}
+        <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar space-y-4">
+            <twig:alerte type="warning">
+                Les compétences ne sont pas modifiables dans le niveau d'ouverture actuel du parcours (modification sans passage en CFVU). Affichage en lecture seule.
+            </twig:alerte>
+            {{ include(typeD is defined ? typeD.competencesTemplate : 'typeDiplome/default/competences/_competences.html.twig', {parcours: parcours}) }}
+        </div>
+    {% else %}
     <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar">
         <div id="alertEtatStructure"></div>
 
@@ -145,4 +153,5 @@
             {{ include('typeDiplome/licence/competences/_refCompetences.html.twig') }}
         </div>
     </div>
+    {% endif %}
 </turbo-frame>

@@ -161,7 +161,7 @@ final class OffreAnnexesExportServiceTest extends TestCase
         $defautLas = new Parcours($formation);
         $defautLas->setLibelle(Parcours::PARCOURS_DEFAUT);
         $defautLas->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_LAS1);
-        self::assertSame('LAS1', $this->service->formatParcoursLabel($defautLas));
+        self::assertSame('Accès santé', $this->service->formatParcoursLabel($defautLas));
 
         // Parcours classique
         $parcoursClassique = new Parcours($formation);
@@ -173,7 +173,7 @@ final class OffreAnnexesExportServiceTest extends TestCase
         $parcoursLas1 = new Parcours($formation);
         $parcoursLas1->setLibelle('Chimie Moléculaire');
         $parcoursLas1->setTypeParcours(TypeParcoursEnum::TYPE_PARCOURS_LAS1);
-        self::assertSame('Chimie Moléculaire - LAS1', $this->service->formatParcoursLabel($parcoursLas1));
+        self::assertSame('Chimie Moléculaire - Accès santé', $this->service->formatParcoursLabel($parcoursLas1));
 
         // Parcours en alternance
         $parcoursAlt = new Parcours($formation);
@@ -199,7 +199,7 @@ final class OffreAnnexesExportServiceTest extends TestCase
 
         self::assertTrue($diffs['parcours']->isDifferent());
         self::assertSame('Chimie Moléculaire', $diffs['parcours']->original);
-        self::assertSame('Chimie Moléculaire - LAS1', $diffs['parcours']->new);
+        self::assertSame('Chimie Moléculaire - Accès santé', $diffs['parcours']->new);
     }
 
     public function testResolveRemarquesFermetureDefinitive(): void

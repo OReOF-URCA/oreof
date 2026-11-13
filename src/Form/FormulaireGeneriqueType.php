@@ -73,6 +73,15 @@ class FormulaireGeneriqueType extends AbstractType
                 'required' => true,
                 'mapped' => false,
             ])
+            ->add('composantePorteuse', EntityType::class, [
+                'class' => Composante::class,
+                'query_builder' => fn($er) => $er->createQueryBuilder('c')->orderBy('c.libelle', 'ASC'),
+                'choice_label' => 'libelle',
+                'label' => 'Composante',
+                'placeholder' => 'Choisissez une composante',
+                'required' => true,
+                'autocomplete' => true,
+            ])
             ->add('niveauEntree', NiveauFormationType::class, [
                 'label' => 'Niveau d\'entrée',
             ])

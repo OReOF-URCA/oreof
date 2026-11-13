@@ -82,12 +82,19 @@ class VersioningFormation
         }
     }
 
-    public function loadFormationFromVersion(FormationVersioning $formationVersioning): Formation
+    public function loadFormationFromVersion(FormationVersioning $formationVersioning): ?Formation
     {
-        $version = (string) file_get_contents(
-            __DIR__ . "/../../versioning_json/formation/{$formationVersioning->getSlug()}/"
-            . "{$formationVersioning->getFilename()}.json"
-        );
+        $path = __DIR__ . "/../../versioning_json/formation/{$formationVersioning->getSlug()}/"
+            . "{$formationVersioning->getFilename()}.json";
+
+        if (!is_file($path)) {
+            return null;
+        }
+
+        $version = file_get_contents($path);
+        if ($version === false || trim($version) === '') {
+            return null;
+        }
 
         return $this->serializer->deserialize($version, Formation::class, 'json');
     }
@@ -183,26 +190,26 @@ class VersioningFormation
                 )),
                 "responsableDeFormation" => html_entity_decode(DiffHelper::calculate(
                     // Version
-                    (
-                        $lastVersion?->getResponsableMention()->getNom()
-                     . " " .
-                        $lastVersion?->getResponsableMention()->getPrenom()
-                    ),
+                    $lastVersion?->getResponsableMention() ? (
+                        $lastVersion->getResponsableMention()->getNom()
+                        . " " .
+                        $lastVersion->getResponsableMention()->getPrenom()
+                    ) : "",
                     // Actuel
-                    (
+                    $formation->getResponsableMention() ? (
                         $formation->getResponsableMention()->getNom()
-                     . " " .
-                     $formation->getResponsableMention()->getPrenom()
-                    ),
+                        . " " .
+                        $formation->getResponsableMention()->getPrenom()
+                    ) : "",
                     $rendererName,
                     $differOptions,
                     $rendererOptions
                 )),
                 "emailResponsableFormation" => html_entity_decode(DiffHelper::calculate(
                     // Version
-                    $lastVersion?->getResponsableMention()->getEmail() ?? "",
+                    $lastVersion?->getResponsableMention()?->getEmail() ?? "",
                     // Actuel
-                    $formation->getResponsableMention()->getEmail() ?? "",
+                    $formation->getResponsableMention()?->getEmail() ?? "",
                     $rendererName,
                     [...$differOptions, 'ignoreLineEnding' => false],
                     [...$rendererOptions, 'detailLevel' => 'none']

@@ -12,11 +12,14 @@ use App\Entity\Formation;
 use App\Enums\EtatChangeRfEnum;
 use App\Enums\TypeRfEnum;
 use App\Exception\FileUploadException;
+use App\Form\CfvuExportDateType;
 use App\Form\ChangeRfFormationType;
 use App\Repository\ChangeRfRepository;
 use App\Repository\ComposanteRepository;
+use App\Repository\UserRepository;
 use App\Service\DataTableBuilder;
 use App\Service\SecureUploadService;
+use App\Utils\Tools;
 use App\Utils\TurboStreamResponseFactory;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
@@ -55,9 +58,32 @@ class FormationResponsableController extends BaseController
         TurboStreamResponseFactory $turboStream,
         ChangeRfRepository $changeRfRepository,
         Formation $formation,
-        Request $request
+        Request        $request,
+        UserRepository $userRepository
     ): Response {
         $changeRf = new ChangeRf();
+
+        if ($request->isMethod('GET')) {
+            $userId = $request->query->get('user');
+            if ($userId !== null && $userId !== '') {
+                $targetUser = $userRepository->find($userId);
+                if ($targetUser !== null) {
+                    $changeRf->setUser($targetUser);
+                }
+            }
+
+            $typeRfParam = $request->query->get('typeRf');
+            if (is_string($typeRfParam) && $typeRfParam !== '') {
+                $typeRfEnum = TypeRfEnum::tryFrom($typeRfParam);
+                if ($typeRfEnum !== null) {
+                    $changeRf->setTypeRf($typeRfEnum);
+                }
+            }
+
+            if ($changeRf->getDatePriseFonction() === null) {
+                $changeRf->setDatePriseFonction(new DateTime());
+            }
+        }
 
         $form = $this->createForm(ChangeRfFormationType::class, $changeRf, [
             'action' => $this->generateUrl(
@@ -155,13 +181,26 @@ class FormationResponsableController extends BaseController
             }
         }
 
+        $demandesEnCours = [];
+        foreach ($changeRfRepository->findBy(['formation' => $formation], ['dateDemande' => 'DESC']) as $demande) {
+            $marking = $this->changeRfWorkflow->getMarking($demande);
+            if (!$marking->has('effectuee')) {
+                $places = array_keys($marking->getPlaces());
+                $demandesEnCours[] = [
+                    'demande' => $demande,
+                    'place' => $places[0] ?? 'soumis_conseil',
+                ];
+            }
+        }
+
         return $turboStream->streamOpenModalFromTemplates(
-            'formation.change_rf.title',
+            new TranslatableKey('formation.change_rf.title', [], 'form'),
             'Dans : formation ' . $formation->getDisplay(),
             'formation_v2/change_rf/_demande.html.twig',
             [
                 'form' => $form->createView(),
                 'formation' => $formation,
+                'demandesEnCours' => $demandesEnCours,
             ],
             '_ui/_footer_submit_cancel.html.twig',
             [
@@ -283,19 +322,48 @@ class FormationResponsableController extends BaseController
         Request $request,
         MyGotenbergPdf $myGotenbergPdf,
         ChangeRfRepository $changeRfRepository,
-        ComposanteRepository $composanteRepository
+        ComposanteRepository $composanteRepository,
+        TurboStreamResponseFactory $turboStream,
     ): Response {
-
-        $demandes = $changeRfRepository->findByTypeValidation(EtatChangeRfEnum::soumis_cfvu->value, $this->getCampagneCollecte());
-
         if ($request->query->has('composante')) {
             $composanteId = $request->query->get('composante');
             $composantes = $composanteRepository->findBy(['id' => $composanteId]);
-        } else if ($this->isGranted('ROLE_ADMIN')) {
+        } elseif ($this->isGranted('ROLE_ADMIN')) {
             $composantes = $composanteRepository->findAll();
         } else {
             throw new AccessDeniedException("Vous n'avez pas les droits pour accéder à cette page.");
         }
+
+        $form = $this->createForm(CfvuExportDateType::class, null, [
+            'action' => $this->generateUrl('app_formation_responsable_liste_export'),
+            'method' => 'GET',
+        ]);
+
+        if ($this->isTurboFrameRequest() && '1' !== $request->query->get('download')) {
+            return $turboStream->streamOpenModalFromTemplates(
+                new TranslatableKey('export.modal_cfvu_date.title', [], 'modal'),
+                new TranslatableKey('export.modal_cfvu_date.subtitle_change_rf', [], 'modal'),
+                'export/_modal_cfvu_date.html.twig',
+                [
+                    'form' => $form->createView(),
+                    'downloadMode' => true,
+                    'composanteId' => $request->query->get('composante'),
+                ],
+                '_ui/_footer_submit_cancel.html.twig',
+                [
+                    'submitLabel' => 'export.modal_cfvu_date.submit_download',
+                ],
+            );
+        }
+
+        $form->handleRequest($request);
+        $dateCfvu = $form->isSubmitted() ? $form->get('dateCfvu')->getData() : null;
+        if (!$dateCfvu instanceof \DateTimeInterface && $request->query->has('dateCfvu')) {
+            $dateCfvu = Tools::convertDate($request->query->getString('dateCfvu'));
+        }
+        $dateCfvu ??= $this->getCampagneCollecte()->getDateCfvu();
+
+        $demandes = $changeRfRepository->findByTypeValidation(EtatChangeRfEnum::soumis_cfvu->value, $this->getCampagneCollecte());
 
         $tDemandes = [];
         foreach ($composantes as $composante) {
@@ -315,18 +383,10 @@ class FormationResponsableController extends BaseController
             $tDemandes[$composanteId][$formationId]['demandes'][] = $demande;
         }
 
-        foreach ($this->getCampagneCollecte()->getTimelineDates() as $date) {
-            if ($date->isCfvu()) {
-                $dateCfvu = $date->getDate();
-                break;
-            }
-        }
-
-
         return $myGotenbergPdf->render('pdf/formation_responsable_liste.html.twig', [
             'titre' => 'Demandes de modification de responsable de formation',
             'demandes' => $tDemandes,
-            'dateCfvu' => $dateCfvu ?? null,
+            'dateCfvu' => $dateCfvu,
             'composantes' => $composantes,
             'dpe' => $this->getCampagneCollecte()
         ], 'synthese_changement_rf_'.(new DateTime())->format('d-m-Y_H-i-s'));

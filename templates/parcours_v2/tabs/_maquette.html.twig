@@ -1,7 +1,20 @@
 <turbo-frame id="tab-content">
-    {{ include('parcours_v2/tabs/_header.html.twig', {tabKey: 'maquette'}) }}
+    {% set canEdit = canEditTab ?? isTabEditable(parcours, 'maquette') %}
+    {{ include('parcours_v2/tabs/_header.html.twig', {tabKey: 'maquette', withNoDone: not canEdit}) }}
 
     <div class="flex-1 overflow-y-auto mt-4 custom-scrollbar">
+        {% if not canEdit %}
+            <twig:alerte type="warning">
+                La structure de la maquette n'est pas modifiable dans le niveau d'ouverture actuel du parcours (modification sans passage en CFVU). Affichage en lecture seule.
+            </twig:alerte>
+
+            <div class="mt-4 space-y-4">
+                {{ render(controller('App\\Controller\\StructureShowController::parcoursShowV2', {
+                    parcours: parcours.id,
+                    hasLastVersion: false,
+                })) }}
+            </div>
+        {% else %}
         {% form_theme form 'communs/form_theme_v2.html.twig' %}
         {{ form_start(form, {
             attr: {
@@ -199,6 +212,7 @@
             <twig:Button
                     href="{{ path('parcours_structure_genere', {parcours: parcours.id}) }}"
                     submitLabel="Générer la structure"></twig:Button>
+        {% endif %}
         {% endif %}
     </div>
 </turbo-frame>

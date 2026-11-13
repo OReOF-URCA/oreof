@@ -31,17 +31,38 @@
                         <td class="px-4 py-3 text-sm text-secondary-700">{{ component('Badge', { dto: userProfil|badgeTypeCentreDto }) }}</td>
                         <td class="px-4 py-3 text-sm text-secondary-700">{{ userProfil|centre }}</td>
                         <td class="px-4 py-3 text-right">
-                            <button
-                                    type="button"
-                                    {{ stimulus_action('profil--user', 'delete', 'click', {
-                                        url:path('app_user_profils_delete',{'userProfil': userProfil.id}),
-                                        csrf: csrf_token('delete' ~ userProfil.id)
-                                    }) }}
-                                    class="inline-flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:border-red-300 hover:bg-red-100"
-                            >
-                                <i class="{{ iconDelete }}"></i>
-                                Supprimer
-                            </button>
+                            {% set isRfRole = userProfil.profil != null and userProfil.profil.code in ['ROLE_RESP_FORMATION', 'ROLE_CO_RESP_FORMATION'] %}
+                            {% if isRfRole and not is_granted('ROLE_ADMIN') %}
+                                {% if userProfil.formation is not null %}
+                                    <a href="{{ path('app_formation_change_rf', {formation: userProfil.formation.id, typeRf: (userProfil.profil.code == 'ROLE_RESP_FORMATION' ? 'RF' : 'CORF')}) }}"
+                                       data-action="click->modalturbo#open"
+                                       class="inline-flex items-center gap-1.5 rounded-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 text-xs font-semibold text-amber-800 transition hover:border-amber-400 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/50 dark:text-amber-200"
+                                       title="La modification ou suppression d'un (co-)responsable nécessite une demande de changement officielle. Cliquez pour faire la demande.">
+                                        <twig:UX:Icon name="icon:sync"
+                                                      class="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0"/>
+                                        Demander un changement
+                                    </a>
+                                {% else %}
+                                    <span class="inline-flex items-center gap-1.5 rounded-md border border-secondary-200 bg-secondary-100 px-2.5 py-1 text-xs font-medium text-secondary-600 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-300"
+                                          title="La suppression d'un (co-)responsable de formation doit faire l'objet d'une demande de changement depuis la page de la formation.">
+                                        <twig:UX:Icon name="icon:lock"
+                                                      class="w-3.5 h-3.5 text-secondary-400 dark:text-secondary-500"/>
+                                        Demande requise
+                                    </span>
+                                {% endif %}
+                            {% else %}
+                                <button
+                                        type="button"
+                                        {{ stimulus_action('profil--user', 'delete', 'click', {
+                                            url:path('app_user_profils_delete',{'userProfil': userProfil.id}),
+                                            csrf: csrf_token('delete' ~ userProfil.id)
+                                        }) }}
+                                        class="inline-flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700 transition hover:border-red-300 hover:bg-red-100"
+                                >
+                                    <i class="{{ iconDelete }}"></i>
+                                    Supprimer
+                                </button>
+                            {% endif %}
                         </td>
                     </tr>
                 {% else %}

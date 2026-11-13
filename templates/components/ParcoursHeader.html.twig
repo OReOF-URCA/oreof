@@ -172,8 +172,8 @@
                     <p class="text-xs opacity-80">
                         {% if this.editable %}
                             Suivez l'avancement et les actions disponibles pour ce DPE.
-                        {% elseif not can_edit_module('dpe') %}
-                            {{ module_status('dpe').message }}
+                        {% elseif not can_edit_timeline() %}
+                            Période de saisie fermée pour cette campagne.
                         {% else %}
                             Suivez l'avancement et les actions disponibles pour ce DPE.
                         {% endif %}
@@ -226,7 +226,9 @@
                 </button>
 
                 {% set canEditDpe = can_edit_module('dpe') %}
-                {% if canEditDpe and validationOptions|length > 0 %}
+                {% set canReouvrirMccc = can_edit_module('maquettes') or can_edit_module('mccc') %}
+                {% set canEditTimeline = can_edit_timeline() %}
+                {% if canEditTimeline and validationOptions|length > 0 %}
                     <div class="relative" data-controller="navbar-dropdown"
                          data-action="click@window->navbar-dropdown#close">
                         <button class="{{ quickBtnSuccess }}"
@@ -240,19 +242,22 @@
                         <ul data-navbar-dropdown-target="content"
                             class="hidden absolute right-0 top-full z-30 mt-2 min-w-[22rem] rounded-2xl border border-secondary-200 bg-white p-2 shadow-2xl dark:border-secondary-700 dark:bg-secondary-900">
                             {% for key, option in validationOptions %}
-                                {% set isReouverture = option.metadata.type == 'reouvrir' or key starts with 'reouvrir' %}
+                                {% set isReouvertureMccc = key in ['reouvrir_tacite_mccc', 'reouvrir_mccc'] %}
+                                {% set isReouvertureDpe = (option.metadata.type == 'reouvrir' or key starts with 'reouvrir') and not isReouvertureMccc %}
+                                {% set isOptionDisabled = (isReouvertureDpe and not canEditDpe) or (isReouvertureMccc and not canReouvrirMccc) %}
+                                {% set disabledReason = isReouvertureMccc ? module_status('mccc').message : module_status('dpe').message %}
                                 {% set itemStyle = dpeItemStyles[option.metadata.button_class]|default(dpeItemStyles['secondary']) %}
                                 <li>
-                                    {% if isReouverture and not canEditDpe %}
+                                    {% if isOptionDisabled %}
                                         <div class="flex items-start gap-3 rounded-xl px-3 py-3 text-sm text-secondary-400 opacity-60 cursor-not-allowed select-none dark:text-secondary-500"
                                              {{ stimulus_controller('tooltip') }}
-                                             title="{{ module_status('dpe').message }}">
+                                             title="{{ disabledReason }}">
                                             <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary-100 text-secondary-400 dark:bg-secondary-800">
                                                 <i class="fas {{ option.metadata.button_icon|default('fa-check') }} text-xs"></i>
                                             </span>
                                             <span class="min-w-0">
                                                 <span class="block font-semibold text-secondary-500 dark:text-secondary-400">{{ ('workflow.'~key~'.menu.label')|trans({}, 'process') }}</span>
-                                                <span class="block text-xs text-secondary-400 dark:text-secondary-500">{{ module_status('dpe').message }}</span>
+                                                <span class="block text-xs text-secondary-400 dark:text-secondary-500">{{ disabledReason }}</span>
                                             </span>
                                         </div>
                                     {% else %}
@@ -283,7 +288,7 @@
                             type="button"
                             disabled
                             {{ stimulus_controller('tooltip') }}
-                            title="{{ not canEditDpe ? module_status('dpe').message : 'Aucune action disponible pour le statut actuel.' }}">
+                            title="{{ not canEditTimeline ? 'Aucune étape de la timeline n\'autorise d\'action actuellement.' : 'Aucune action disponible pour le statut actuel.' }}">
                         {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
                         <span>Gestion du DPE</span>
                     </button>
@@ -466,6 +471,25 @@
         {% if is_granted('ROLE_ADMIN') %}
             <div class="{{ panelClass }}" id="actions-panel-admin-parcours">
                 <div class="space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-secondary-200 bg-secondary-50/70 px-4 py-3 dark:border-secondary-700 dark:bg-secondary-800/50">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="{{ metaLabelClass }} mb-0">État du workflow (DPE) :</span>
+                            {% if dpeParcours != null %}
+                                {{ include('communs/_badge_collection.html.twig', { badges: dpeParcours.etatValidation|badgeDpeDto }) }}
+                            {% endif %}
+                            <code class="rounded bg-secondary-200 px-1.5 py-0.5 font-mono text-xs text-secondary-700 dark:bg-secondary-700 dark:text-secondary-200">{{ this.place }}</code>
+                        </div>
+                        {% if dpeParcours != null %}
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="{{ metaLabelClass }} mb-0">État d'ouverture :</span>
+                                <twig:Badge :dto="dpeParcours.etatReconduction|badgeTypeModificationDto" size="sm" />
+                                {% if dpeParcours.etatReconduction != null %}
+                                    <code class="rounded bg-secondary-200 px-1.5 py-0.5 font-mono text-xs text-secondary-700 dark:bg-secondary-700 dark:text-secondary-200">{{ dpeParcours.etatReconduction.value }}</code>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+
                     <div>
                         <p class="{{ metaLabelClass }}">Gestion des versions & Comparaisons</p>
                         <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">

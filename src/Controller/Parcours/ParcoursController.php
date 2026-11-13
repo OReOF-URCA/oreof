@@ -89,27 +89,25 @@ class ParcoursController extends BaseController
         $breadcrumb->add('Modifier le parcours');
 
         $tabStates = $statesRepo->indexByTabKey($parcours);
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        $canEditTab = Access::isTabEditable($dpeParcours, 'presentation');
+        $form = $canEditTab ? $this->createForm(ParcoursStep1Type::class, $parcours) : null;
 
         $parameters = [
             'tab' => 'presentation',
             'parcours' => $parcours,
-            'form' => $this->createForm(ParcoursStep1Type::class, $parcours),
+            'form' => $form?->createView(),
             'titre' => 'Présentation du parcours',
             'texte_help' => 'Indiquez les éléments du parcours',
-            'dpeParcours' => GetDpeParcours::getFromParcours($parcours),
+            'dpeParcours' => $dpeParcours,
+            'canEditTab' => $canEditTab,
             'tabStates' => $tabStates,
             'typeDiplome' => $parcours->getFormation()?->getTypeDiplome(),
         ];
 
         // Si Turbo charge un frame, ne calcule pas la structure complète
         if ($request->headers->has('Turbo-Frame')) {
-            return $this->render('parcours_v2/tabs/_presentation.html.twig', [
-                'parcours' => $parcours,
-                'form' => $parameters['form']->createView(),
-                'titre' => $parameters['titre'],
-                'texte_help' => $parameters['texte_help'],
-                'tabStates' => $tabStates,
-            ]);
+            return $this->render('parcours_v2/tabs/_presentation.html.twig', $parameters);
         }
 
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
@@ -174,10 +172,12 @@ class ParcoursController extends BaseController
 
         $canSeeDifferences = $this->isGranted('RELATED_TO_PARCOURS', $parcours);
         $displayComparaison = $request->query->get('optionDisplay', 'false');
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
 
         return $this->render('parcours_v2/voir.html.twig', [
             'parcours' => $parcours,
-            'dpeParcours' => GetDpeParcours::getFromParcours($parcours),
+            'dpeParcours' => $dpeParcours,
+            'isEditable' => Access::isEditable($dpeParcours),
             'formation' => $formation,
             'typeDiplome' => $typeDiplome,
             'hasParcours' => $formation->isHasParcours(),
@@ -228,9 +228,13 @@ class ParcoursController extends BaseController
         );
         $breadcrumb->add('Année ' . $annee->getOrdre());
 
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+
         return $this->render('parcours_v2/tabs/_annee.html.twig', [
             'annee' => $annee,
-            'parcours' => $parcours
+            'parcours' => $parcours,
+            'dpeParcours' => $dpeParcours,
+            'canEditTab' => Access::isTabEditable($dpeParcours, 'annee'),
         ]);
     }
 
@@ -275,11 +279,15 @@ class ParcoursController extends BaseController
 
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
         $dtoSemestre = $typeD->calculStructureSemestre($semestreParcours, $parcours);
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        $canEditTab = Access::isTabEditable($dpeParcours, 'semestre');
 
         $parameters = [
             'semestreParcours' => $semestreParcours,
             'semestre' => $dtoSemestre,
             'parcours' => $parcours,
+            'dpeParcours' => $dpeParcours,
+            'canEditTab' => $canEditTab,
             'typeD' => $typeD,
             'validationsIssues' => $validationIssueRepository->findBySemestre($dtoSemestre->semestre->getId())
         ];
@@ -294,7 +302,6 @@ class ParcoursController extends BaseController
         // Sinon renvoyer la page complète (index) qui inclura le fragment dans son corps
         return $this->render('parcours_v2/modifier.html.twig', array_merge($parameters, [
             'tab' => 'semestre',
-            'dpeParcours' => GetDpeParcours::getFromParcours($parcours),
             'dto' => $dto
         ]));
     }
@@ -381,6 +388,9 @@ class ParcoursController extends BaseController
             throw $this->createNotFoundException('Onglet inconnu : ' . $tab);
         }
 
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        $canEditTab = Access::isTabEditable($dpeParcours, $tab);
+
         $form = null;
         $tabView = $tab;
         $titre = null;
@@ -392,36 +402,48 @@ class ParcoursController extends BaseController
                 $texte_help = 'Indiquez les éléments de la formation, commun aux parcours';
                 break;
             case 'presentation':
-                $form = $this->createForm(ParcoursStep1Type::class, $parcours);
+                if ($canEditTab) {
+                    $form = $this->createForm(ParcoursStep1Type::class, $parcours);
+                }
                 $titre = 'Présentation du parcours';
                 $texte_help = 'Indiquez les éléments du parcours';
                 break;
             case 'maquette':
-                $form = $this->createForm(ParcoursStep3Type::class, $parcours, [
-                    'typeDiplome' => $parcours->getFormation()?->getTypeDiplome()
-                ]);
+                if ($canEditTab) {
+                    $form = $this->createForm(ParcoursStep3Type::class, $parcours, [
+                        'typeDiplome' => $parcours->getFormation()?->getTypeDiplome()
+                    ]);
+                }
                 $titre = 'Structure de la maquette';
                 $texte_help = '...??...';
                 break;
             case 'descriptif':
-                $form = $this->createForm(ParcoursStep2Type::class, $parcours, [
-                    'typeDiplome' => $parcours->getTypeDiplome()
-                ]);
+                if ($canEditTab) {
+                    $form = $this->createForm(ParcoursStep2Type::class, $parcours, [
+                        'typeDiplome' => $parcours->getTypeDiplome()
+                    ]);
+                }
                 $titre = 'Descriptif du parcours';
                 $texte_help = 'Description du parcours';
                 break;
             case 'admission':
-                $form = $this->createForm(ParcoursStep5Type::class, $parcours);
+                if ($canEditTab) {
+                    $form = $this->createForm(ParcoursStep5Type::class, $parcours);
+                }
                 $titre = 'Admission au parcours';
                 $texte_help = '...';
                 break;
             case 'et_apres':
-                $form = $this->createForm(ParcoursStep6Type::class, $parcours);
+                if ($canEditTab) {
+                    $form = $this->createForm(ParcoursStep6Type::class, $parcours);
+                }
                 $titre = 'Et après le parcours';
                 $texte_help = '...';
                 break;
             case 'configuration':
-                $form = $this->createForm(ParcoursStep7Type::class, $parcours);
+                if ($canEditTab) {
+                    $form = $this->createForm(ParcoursStep7Type::class, $parcours);
+                }
                 $titre = 'Configuration du parcours';
                 $texte_help = '...';
                 break;
@@ -432,6 +454,8 @@ class ParcoursController extends BaseController
 
         $parameters = [
             'parcours' => $parcours,
+            'dpeParcours' => $dpeParcours,
+            'canEditTab' => $canEditTab,
             'form' => $form?->createView(),
             'titre' => $titre,
             'typeD' => $typeD,

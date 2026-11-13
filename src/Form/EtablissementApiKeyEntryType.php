@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -22,7 +25,7 @@ class EtablissementApiKeyEntryType extends AbstractType
                 'label' => 'Plateforme tierce',
                 'required' => true,
                 'attr' => [
-                    'placeholder' => 'Ex : Apogée, Pégase, ORéBUT, Apprentissage (RNCP), ROME...',
+                    'placeholder' => 'Ex : Apogée, Pégase, ORéBUT, Apprentissage (RNCP), ROME, Oratio (LLM)...',
                     'autocomplete' => 'off',
                 ],
                 'constraints' => [
@@ -54,11 +57,11 @@ class EtablissementApiKeyEntryType extends AbstractType
                     new Length(max: 255, maxMessage: 'L\'identifiant ne doit pas dépasser {{ limit }} caractères.'),
                 ],
             ])
-            ->add('apiKey', TextType::class, [
+            ->add('apiKey', PasswordType::class, [
                 'label' => 'Clé API / Token secret',
                 'required' => true,
+                'always_empty' => false,
                 'attr' => [
-                    'type' => 'password',
                     'placeholder' => 'Clé d\'authentification ou jeton secret',
                     'autocomplete' => 'new-password',
                     'data-password-toggle-target' => 'input',
@@ -67,6 +70,16 @@ class EtablissementApiKeyEntryType extends AbstractType
                     new NotBlank(message: 'Veuillez renseigner la clé API ou le token.'),
                 ],
             ]);
+    }
+
+    public function finishView(FormView $view, FormInterface $form, array $options): void
+    {
+        if (isset($view->children['apiKey'])) {
+            $data = $form->get('apiKey')->getData();
+            if ($data !== null && $data !== '') {
+                $view->children['apiKey']->vars['value'] = (string) $data;
+            }
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void

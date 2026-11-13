@@ -132,6 +132,71 @@
     {{ parent() }}
 {% endblock form_widget_simple %}
 
+{% block cfvu_date_widget %}
+    {% set cfvuDates = (user_data is defined and user_data.campagneCollecte) ? user_data.campagneCollecte.cfvuTimelineDates : [] %}
+    {% if cfvuDates is not empty %}
+        {% set presetValues = [] %}
+        {% for td in cfvuDates %}
+            {% if td.date %}
+                {% set presetValues = presetValues|merge([td.date|date('Y-m-d')]) %}
+            {% endif %}
+        {% endfor %}
+
+        {% if value is not empty %}
+            {% if value in presetValues %}
+                {% set selectedOption = value %}
+            {% else %}
+                {% set selectedOption = 'custom' %}
+            {% endif %}
+        {% elseif presetValues|length == 1 %}
+            {% set selectedOption = presetValues[0] %}
+            {% set value = presetValues[0] %}
+        {% else %}
+            {% set selectedOption = '' %}
+        {% endif %}
+
+        {% set selectClass = 'w-full p-2 rounded-sm font-bold focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none transition-all shadow-sm appearance-none bg-secondary-50 border border-secondary-200 text-secondary-800 cursor-pointer dark:bg-secondary-900 dark:border-secondary-700 dark:text-secondary-100' %}
+        <div {{ stimulus_controller('cfvu-date', { required: required }) }} class="space-y-2">
+            <div class="relative">
+                <select id="{{ id }}_cfvu_select"
+                        class="{{ selectClass }}"
+                        data-cfvu-date-target="select"
+                        data-action="change->cfvu-date#onSelectChange"
+                        aria-label="{{ label ? label|trans(label_translation_parameters, translation_domain) : 'Date de la CFVU' }}"
+                        {% if required %}required="required"{% endif %}>
+                    <option value="" {% if selectedOption == '' %}selected{% endif %}>Choisir une date de CFVU de la timeline…</option>
+                    {% for td in cfvuDates %}
+                        {% if td.date %}
+                            {% set tdDate = td.date|date('Y-m-d') %}
+                            {% set tdLabel = td.libelle ? (td.libelle ~ ' (' ~ td.date|date('d/m/Y') ~ ')') : ('CFVU du ' ~ td.date|date('d/m/Y')) %}
+                            <option value="{{ tdDate }}" {% if selectedOption == tdDate %}selected{% endif %}>{{ tdLabel }}</option>
+                        {% endif %}
+                    {% endfor %}
+                    <option value="custom" {% if selectedOption == 'custom' %}selected{% endif %}>Autre date (saisie libre)…</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-secondary-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div data-cfvu-date-target="customContainer"
+                 class="{{ selectedOption == 'custom' ? '' : 'hidden' }}"
+                 {% if selectedOption != 'custom' %}hidden{% endif %}>
+                <label for="{{ id }}" class="block text-xs font-semibold text-secondary-600 dark:text-secondary-300 mb-1">
+                    Préciser une autre date de CFVU
+                </label>
+                {% set attr = attr|merge({'data-cfvu-date-target': 'input'}) %}
+                {% set required = (selectedOption == 'custom' and required) %}
+                {{ block('form_widget_simple') }}
+            </div>
+        </div>
+    {% else %}
+        {{ block('form_widget_simple') }}
+    {% endif %}
+{% endblock cfvu_date_widget %}
+
 {# --- TEXTAREA --- #}
 {% block textarea_widget %}
     {% set maxlength = attr.maxlength|default(attr['maxlength']|default(maxLength|default(form.vars.attr.maxlength|default(null)))) %}

@@ -25,6 +25,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -78,6 +79,7 @@ class FormationSesType extends AbstractType
                         ->orderBy('c.libelle', 'ASC');
                 },
                 'choice_label' => 'libelle',
+                'label' => 'Composante',
                 'required' => true,
                 'autocomplete' => true,
                 'help' => 'Indiquer la composante porteuse du projet, qui aura en charge le dépôt de la demande de création de la formation'
@@ -219,22 +221,30 @@ class FormationSesType extends AbstractType
                     }
                     $form = $event->getForm();
                     $mention = $form->get('mention')->getData();
+                    $mentionTexte = trim((string)$form->get('mentionTexte')->getData());
+
                     if ($mention !== '' && $mention !== null && $mention !== 'autre') {
                         $objMention = $this->mentionRepository->find($mention);
-                        $formation->setMention($objMention);
-                        $formation->setMentionTexte(null);
+                        if ($objMention !== null) {
+                            $formation->setMention($objMention);
+                            $formation->setMentionTexte(null);
+                        } else {
+                            $form->get('mention')->addError(new FormError('La mention sélectionnée est introuvable.'));
+                        }
                     } elseif ($mention === 'autre') {
-                        $formation->setMention(null);
+                        if ($mentionTexte === '') {
+                            $form->get('mentionTexte')->addError(new FormError('Veuillez saisir le libellé de la mention.'));
+                        } else {
+                            $formation->setMention(null);
+                            $formation->setMentionTexte($mentionTexte);
+                        }
                     } else {
-                        $formation->setMention(null);
+                        if ($mentionTexte === '' && $formation->getMention() === null) {
+                            $form->get('mention')->addError(new FormError('Veuillez sélectionner une mention ou saisir un intitulé via "Autre mention".'));
+                        }
                     }
                 }
             );
-
-        $formation = $builder->getData();
-        if ($formation instanceof Formation && !$formation->isClassique()) {
-            $builder->remove('composantePorteuse');
-        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void

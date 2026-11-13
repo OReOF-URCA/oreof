@@ -20,8 +20,20 @@ class CampagneAccessibilityExtension extends AbstractExtension
         return [
             new TwigFunction('is_module_open', [$this, 'isModuleOpen']),
             new TwigFunction('can_edit_module', [$this, 'canEditModule']),
+            new TwigFunction('is_timeline_open', [$this, 'isTimelineOpen']),
+            new TwigFunction('can_edit_timeline', [$this, 'canEditTimeline']),
             new TwigFunction('module_status', [$this, 'getModuleStatus']),
         ];
+    }
+
+    public function isTimelineOpen(?CampagneCollecte $campagne = null): bool
+    {
+        return $this->accessibilityService->isTimelineOpen($campagne);
+    }
+
+    public function canEditTimeline(?CampagneCollecte $campagne = null): bool
+    {
+        return $this->accessibilityService->canUserEditTimeline($campagne);
     }
 
     public function isModuleOpen(string|CampagneModuleEnum $module, ?CampagneCollecte $campagne = null): bool

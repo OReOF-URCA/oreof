@@ -1,0 +1,17 @@
+<div class="flex items-center justify-between w-full">
+    <twig:Button variant="secondary" size="sm" :outline="true" dataAction="modalturbo#close">
+        {{ 'fiche_matiere_v2.synthese_modifications_footer.fermer'|trans({}, 'modal') }}
+    </twig:Button>
+    <div class="flex items-center gap-2">
+        <twig:Button
+                variant="secondary"
+                size="sm"
+                :outline="true"
+                icon="icon:save"
+                href="{{ path('app_fiche_matiere_versioning_save', {slug: ficheMatiere.slug}) }}"
+        >
+            {{ 'fiche_matiere_v2.synthese_modifications_footer.sauvegarder_snapshot'|trans({}, 'modal') }}
+        </twig:Button>
+    </div>
+</div>
+

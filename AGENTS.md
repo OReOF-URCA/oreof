@@ -39,9 +39,11 @@ Icons, Chart.js). Métier universitaire : offre de formation, maquettes, parcour
 | Icônes (Symfony UX Icons : `mdi:*`, `ph:*` en priorité, `icon:*`) | `docs/ui-conventions/icones.md` |
 | Menu, section, breadcrumb | `docs/composants/navigation.md` |
 | Aides contextuelles, FAQ, import/export des aides | `docs/composants/aides-faq.md` |
+| Page `/tutoriels` des vidéos tutoriel, composant `CopyLinkButton` | `docs/composants/tutoriels-video.md` |
 | Recherche plein texte (`/recherche/parcours`, moteur fuzzy) | `docs/composants/recherche.md` |
 | Synchronisation B.U.T. / ORéBUT | `docs/composants/synchronisation-orebut.md` |
 | API Apprentissage / RNCP & composant RncpField | `docs/composants/rncp-api.md` |
+| Synthèse IA des modifications (`FicheMatiere`, configuration `AI_*`) | `docs/composants/synthese-ia.md` |
 | Champs JSON configurables (`JsonConfigType`, `DynamicFieldsType`) | `docs/formulaires/README.md` |
 | Entité, colonne, migration, bascule V2 | `docs/architecture/migration-v2.md`, `docs/architecture/modifications-bdd-v1-v2.md` |
 | Refonte structure/validation/rendu de maquette | `docs/architecture/maquette-modulaire.md` |

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Form\Workflow;
 
 use App\DTO\Workflow\ArgumentaireDateData;
+use App\Form\Type\CfvuDateType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -17,13 +18,15 @@ final class ArgumentaireDateType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $dateFieldType = 'dateCfvu' === $options['date_property'] ? CfvuDateType::class : DateType::class;
+
         $builder
             ->add('argumentaire', TextareaType::class, [
                 'label' => 'Argumentaire',
                 'attr' => ['rows' => 6],
                 'constraints' => [new NotBlank(message: 'L\'argumentaire est obligatoire.')],
             ])
-            ->add($options['date_property'], DateType::class, [
+            ->add($options['date_property'], $dateFieldType, [
                 'widget' => 'single_text',
                 'label' => $options['date_label'],
                 'constraints' => [new NotNull(message: 'La date est obligatoire.')],

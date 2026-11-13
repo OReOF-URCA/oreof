@@ -1830,7 +1830,7 @@ class Formation
     /**
      * @deprecated La capacité d'accueil ne se configure plus au niveau de la mention.
      */
-    public function setCapaciteAccueil(int $capaciteAccueil): static
+    public function setCapaciteAccueil(int $capaciteAccueil = 0): static
     {
         return $this;
     }

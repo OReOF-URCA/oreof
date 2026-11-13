@@ -5,7 +5,8 @@
     </div>
     <div class="flex gap-3 min-w-[20rem]">
         <div class="h-full flex items-center flex-1">
-            {% if not (withNoDone is defined and withNoDone == true) %}
+            {% set isTabAllowed = canEditTab ?? isTabEditable(parcours, tabKey) %}
+            {% if not (withNoDone is defined and withNoDone == true) and isTabAllowed %}
             <div id="tab_done_block_{{ tabKey }}" class="w-full">
                 {{ include('parcours_v2/tabs/_done_block.html.twig', {
                     parcours: parcours,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\DTO\TranslatableKey;
 use App\Entity\User;
 use App\Utils\TurboStreamResponseFactory;
 use App\Workflow\Bulk\BulkWorkflowManager;
@@ -84,7 +85,7 @@ final class WorkflowBulkController extends BaseController
         }
 
         return $turboStream->streamOpenModalFromTemplates(
-            'modal_title.'.$transition.'.'.$metadata->type,
+            new TranslatableKey('modal_title.'.$transition.'.'.$metadata->type, [], 'modal'),
             sprintf(
                 '%d %s%s sélectionné%s',
                 count($selectedIds),

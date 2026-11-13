@@ -3,6 +3,7 @@
 {% block bouton_header %}
     <twig:Button
             href="{{ path('app_formation_responsable_liste_export') }}"
+            dataAction="click->modalturbo#open"
             variant="outline-info"
             size="sm"
             icon="icon:download"

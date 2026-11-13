@@ -125,4 +125,50 @@ class CampagneAccessibilityServiceTest extends TestCase
         $this->assertFalse($statusAfter['isOpen']);
         $this->assertStringContainsString('Période de saisie terminée', $statusAfter['message']);
     }
+
+    public function testIsTimelineOpenReturnsTrueWhenAnyStepWithActiveModulesIsCurrent(): void
+    {
+        $dataUserSession = $this->createMock(DataUserSession::class);
+        $security = $this->createMock(Security::class);
+        $repository = $this->createMock(CampagneCollecteRepository::class);
+
+        $campagne = new CampagneCollecte();
+
+        $stepDescriptifs = new TimelineDate();
+        $stepDescriptifs->setLibelle('Saisie des descriptifs');
+        $stepDescriptifs->setDateDebut(new DateTime('2026-10-01'));
+        $stepDescriptifs->setDate(new DateTime('2026-10-31'));
+        $stepDescriptifs->setModulesActifs([CampagneModuleEnum::DESCRIPTIFS]);
+        $campagne->addTimelineDate($stepDescriptifs);
+
+        $dataUserSession->method('getCampagneCollecte')->willReturn($campagne);
+        $service = new CampagneAccessibilityService($dataUserSession, $security, $repository);
+
+        // Outside period
+        $this->assertFalse($service->isTimelineOpen($campagne, new DateTime('2026-09-15')));
+
+        // During Descriptifs period (dpe is closed, but timeline is open!)
+        $this->assertTrue($service->isTimelineOpen($campagne, new DateTime('2026-10-15')));
+        $this->assertFalse($service->isModuleOpen(CampagneModuleEnum::DPE, $campagne, new DateTime('2026-10-15')));
+    }
+
+    public function testCanUserEditTimelineAdminBypass(): void
+    {
+        $dataUserSession = $this->createMock(DataUserSession::class);
+        $security = $this->createMock(Security::class);
+        $repository = $this->createMock(CampagneCollecteRepository::class);
+
+        $campagne = new CampagneCollecte();
+        $dataUserSession->method('getCampagneCollecte')->willReturn($campagne);
+
+        $service = new CampagneAccessibilityService($dataUserSession, $security, $repository);
+
+        $security->method('isGranted')->with('ROLE_ADMIN')->willReturn(false);
+        $this->assertFalse($service->canUserEditTimeline($campagne, new DateTime('2026-09-15')));
+
+        $securityAdmin = $this->createMock(Security::class);
+        $securityAdmin->method('isGranted')->with('ROLE_ADMIN')->willReturn(true);
+        $serviceAdmin = new CampagneAccessibilityService($dataUserSession, $securityAdmin, $repository);
+        $this->assertTrue($serviceAdmin->canUserEditTimeline($campagne, new DateTime('2026-09-15')));
+    }
 }

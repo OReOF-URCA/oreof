@@ -20,6 +20,7 @@ use App\Service\VersioningStructureExtractDiff;
 use App\TypeDiplome\Dto\OptionsCalculStructure;
 use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\Tools;
+use DateTimeInterface;
 use ZipArchive;
 
 class ExportSyntheseModification
@@ -38,8 +39,9 @@ class ExportSyntheseModification
         $this->dir = $projectDirProvider->getProjectDir() . '/public/';
     }
 
-    public function exportLink(array $formations, CampagneCollecte $campagneCollecte): string
+    public function exportLink(array $formations, CampagneCollecte $campagneCollecte, ?DateTimeInterface $dateCfvu = null): string
     {
+        $resolvedDateCfvu = $dateCfvu ?? $campagneCollecte->getDateCfvu();
         $typeEpreuves = [];
         $epreuves = $this->typeEpreuveRepository->findAll();
         foreach ($epreuves as $epreuve) {
@@ -90,6 +92,7 @@ class ExportSyntheseModification
                         'titre' => 'Liste des demandes de changement MCCC et maquettes',
                         'demandes' => $tDemandes,
                         'dpe' => $campagneCollecte,
+                        'dateCfvu' => $resolvedDateCfvu,
                     ],
                     Tools::FileName($form->getSlug())
                 );

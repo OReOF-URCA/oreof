@@ -1,7 +1,7 @@
 {% extends 'pdf/base-pdf.html.twig' %}
 
 {% block content %}
-    <h1 class="text-center">CFVU du {{ dpe.dateCfvu|date('d/m/Y') }}</h1>
+    <h1 class="text-center">CFVU du {{ (dateCfvu ?? dpe.dateCfvu)|date('d/m/Y') }}</h1>
     {% for demande in demandes %}
         {% set formation = demande.formation %}
         {% set dto = demande.dto %}

@@ -27,7 +27,7 @@
 {% endset %}
 
 {% block bouton_header %}
-    {{ include('parcours_v2/_voir_actions.html.twig', {parcours: parcours, dpeParcours: dpeParcours}) }}
+    {{ include('parcours_v2/_voir_actions.html.twig', {parcours: parcours, dpeParcours: dpeParcours, isEditable: isEditable}) }}
 {% endblock %}
 
 {% block content %}

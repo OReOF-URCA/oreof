@@ -408,6 +408,36 @@ class Etablissement
         return null;
     }
 
+    /**
+     * Retourne la configuration de l'API IA / LLM si présente dans l'établissement.
+     * Détecte les plateformes nommées 'oratio', 'romeo', 'llm', 'ia', 'openai', 'mistral', 'albert'.
+     *
+     * @return array{plateforme: string, url: string, login?: string|null, apiKey?: string|null}|null
+     */
+    public function getAiApiConfiguration(): ?array
+    {
+        foreach ($this->getApiKeys() as $config) {
+            $platform = (string) ($config['plateforme'] ?? '');
+            if (stripos($platform, 'oratio') !== false
+                || stripos($platform, 'romeo') !== false
+                || stripos($platform, 'llm') !== false
+                || stripos($platform, 'ia') !== false
+                || stripos($platform, 'openai') !== false
+                || stripos($platform, 'mistral') !== false
+                || stripos($platform, 'albert') !== false
+            ) {
+                return $config;
+            }
+        }
+
+        return null;
+    }
+
+    public function hasAiApi(): bool
+    {
+        return $this->getAiApiConfiguration() !== null;
+    }
+
     public const DEFAULT_OREBUT_API_URL = 'https://orebut.iut.fr/api';
 
     public function hasRomeApi(): bool

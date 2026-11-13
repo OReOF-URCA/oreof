@@ -37,6 +37,11 @@ readonly class AddUser
 
             $user = $this->ldap->getDatas($email);
             if ($user) {
+                $existUsername = $this->userRepository->findOneBy(['username' => $user['username']]);
+                if ($existUsername) {
+                    return $existUsername;
+                }
+
                 $usr = new User();
                 $usr->setUsername($user['username']);
                 $usr->setEmail($email);

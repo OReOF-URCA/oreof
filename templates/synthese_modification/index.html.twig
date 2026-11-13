@@ -3,6 +3,7 @@
 {% block bouton_header %}
     <twig:Button
             href="{{ path('app_synthese_modification_export_all') }}"
+            dataAction="click->modalturbo#open"
             variant="outline-info"
             size="sm"
             icon="icon:download"
@@ -63,6 +64,7 @@
                                 {% if comp[composante.id] is defined %}
                                     <twig:Button
                                             href="{{ path('app_synthese_modification_export_composante', {composante: composante.id}) }}"
+                                            dataAction="click->modalturbo#open"
                                             variant="info"
                                             size="sm"
                                             icon="icon:download"

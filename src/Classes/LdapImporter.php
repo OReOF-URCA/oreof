@@ -38,6 +38,11 @@ readonly class LdapImporter
             return null;
         }
 
+        $findExistByUsername = $this->userRepo->findOneBy(['username' => $datas['username']]);
+        if ($findExistByUsername !== null) {
+            return $findExistByUsername;
+        }
+
         $user = new User();
         $user->setEmail($email);
         $user->setNom($datas['nom']);

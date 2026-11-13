@@ -7,6 +7,7 @@
  */
 
 import { Controller } from '@hotwired/stimulus'
+import {renderStreamMessage} from '@hotwired/turbo'
 import callOut from '../../js/callOut'
 
 export default class extends Controller {
@@ -67,6 +68,14 @@ export default class extends Controller {
       })
 
       const data = await response.json()
+        if (data.redirectModal) {
+            if (data.message) {
+                callOut(data.message, 'info')
+            }
+            this._loadModalStream(data.redirectModal)
+            return
+        }
+
       if (response.ok && data.success) {
         this.hasChanges = true
         callOut(data.success || 'Suppression effectuée', 'success')
@@ -95,6 +104,32 @@ export default class extends Controller {
     this._updateCentre(centreType, centreId, false)
   }
 
+    _loadModalStream(url) {
+        const bodyFrame = document.getElementById('modal_body')
+        const loaderTemplate = document.getElementById('global-loader-stimulus')
+        if (loaderTemplate && bodyFrame) {
+            bodyFrame.innerHTML = ''
+            bodyFrame.appendChild(loaderTemplate.content.cloneNode(true))
+        }
+
+        fetch(url, {
+            headers: {
+                'Accept': 'text/vnd.turbo-stream.html, text/html',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+            .then(async (res) => {
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`)
+                }
+                const html = await res.text()
+                renderStreamMessage(html)
+            })
+            .catch(() => {
+                callOut('Erreur lors du chargement de la demande de changement', 'danger')
+            })
+    }
+
   _updateCentre(centreType, centreId, force = false) {
     fetch(this.urlAddValue, {
       method: 'POST',
@@ -106,6 +141,14 @@ export default class extends Controller {
     })
       .then((response) => response.json())
       .then((json) => {
+          if (json.redirectModal) {
+              if (json.message) {
+                  callOut(json.message, 'info')
+              }
+              this._loadModalStream(json.redirectModal)
+              return
+          }
+
         if (json.success) {
           this.hasChanges = true
           callOut('Centre ajouté', 'success')
@@ -124,8 +167,11 @@ export default class extends Controller {
             this._updateCentre(centreType, centreId, true)
           }
         } else {
-          callOut(json.error, 'error')
+            callOut(json.error || 'Une erreur est survenue lors de l\'enregistrement', 'danger')
         }
+      })
+        .catch(() => {
+            callOut('Une erreur inattendue est survenue lors de l\'enregistrement', 'danger')
       })
   }
 

@@ -45,7 +45,9 @@ final readonly class DpeParcoursOperationCompletionHandler implements OperationC
         }
 
         $previousPlace = $context->runtime['previous_place'] ?? null;
-        if ('soumis_central_sans_cfvu' === $previousPlace) {
+        // Réserves du SES : le parcours retourne en rédaction sans CFVU, la réouverture « texte » doit rester active.
+        if ('soumis_central_sans_cfvu' === $previousPlace
+            && 'en_cours_redaction_ss_cfvu' !== $operation->primaryTargetPlace()) {
             $subject->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
         }
 

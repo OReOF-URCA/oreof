@@ -388,7 +388,7 @@ class RessourceVoter extends Voter
             return $dpeParcours === null || (
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_mccc') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'relancer_annee') ||
-                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_tacite') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_tacite_mccc') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_avant_publie')
             );
         }

@@ -2,6 +2,103 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/OReOF-URCA/oreof/compare/v2.6.0...v2.7.0) (2026-11-13)
+
+
+### Features
+
+* export avec choix de la date CFVU ([641342d](https://github.com/OReOF-URCA/oreof/commit/641342dd330277474dea567ee6d3ccbadbd96bef))
+* **fiche-matiere:** afficher le bouton modifier en permanence et désactivé si non ouverte ([bc4115c](https://github.com/OReOF-URCA/oreof/commit/bc4115cab4ef7a8f5ba08f7cec3b8b4c061f10d4))
+* **fiche-matiere:** commande app:fiche-matiere:check-completion pour vérifier et persister la complétion des onglets ([ab31bbf](https://github.com/OReOF-URCA/oreof/commit/ab31bbf950451799c6699254cc760b4cc7e41959))
+* **ldap:** implement LdapLookupResult for structured LDAP responses and enhance user lookup functionality ([94ed09c](https://github.com/OReOF-URCA/oreof/commit/94ed09c8cdf1962d8d72092876aaee6320829330))
+* synthèse IA des modifications de fiche matière pour ROLE_ADMIN ([1fa7cc1](https://github.com/OReOF-URCA/oreof/commit/1fa7cc154da1539b3341f242f3aee2eceef8bda2))
+* **user:** enhance user creation process with LDAP checks and handle existing users ([a13ee10](https://github.com/OReOF-URCA/oreof/commit/a13ee10db5be676a29845e025d8203cc1453910d))
+* **user:** enhance user profile management with role-based access control and modal redirection for RF/CORF changes ([baa26f2](https://github.com/OReOF-URCA/oreof/commit/baa26f219bc1db8358d9c729209e37c3d2c0c559))
+
+
+### Bug Fixes
+
+* **change-rf:** traductions, libellés et confirmation de suppression ([eaefc2b](https://github.com/OReOF-URCA/oreof/commit/eaefc2b30f198bd0f11dc32c9a47c9ae201d3ef7))
+* **diff:** renommer la méthode statique categoryLabel en labelForCategory pour éviter conflit Twig ([2f15701](https://github.com/OReOF-URCA/oreof/commit/2f157010d3c838652ef679377a70d211914df3c9))
+* export ([fd2fc5b](https://github.com/OReOF-URCA/oreof/commit/fd2fc5b6dd4db2a0313d97cdf5637ad47141dc69))
+* **fiche-matiere:** sécurisation modal workflow view null et configuration dynamique IA ([98d781c](https://github.com/OReOF-URCA/oreof/commit/98d781c4b9ec886c40ecf94930d56a7f09521575))
+* **form:** passer le champ apiKey en PasswordType dans EtablissementApiKeyEntryType ([c47703f](https://github.com/OReOF-URCA/oreof/commit/c47703f3b19bce4bafb2e09382ddf7388a9040eb))
+* **form:** préserver la valeur existante des clés API dans FormView pour PasswordType ([febd4c8](https://github.com/OReOF-URCA/oreof/commit/febd4c89b57a7459dc23f580d301badb3425586c))
+* **templates:** thème de formulaire form_theme_v2 dans les templates encore sur l'ancien ([d238a0c](https://github.com/OReOF-URCA/oreof/commit/d238a0c46318a18ca9dfddfb45be2930f8cbab13))
+* **validation:** traductions de la modale de lot RF/Co-RF et décompte des étapes à jour ([b75acad](https://github.com/OReOF-URCA/oreof/commit/b75acad3ac33b1d9cbf5c080326427b35320b698))
+* **workflow:** réouverture « sans CFVU » et création des formations non classiques ([905acfc](https://github.com/OReOF-URCA/oreof/commit/905acfc47f1c6bc988a4b3bc96e0fcc219664d05))
+* **workflow:** réouverture sans CFVU, création formations non classiques, thème de formulaire ([e58042b](https://github.com/OReOF-URCA/oreof/commit/e58042b739e6b615c344e2e43109a37edf7034b4))
+
+## [2.6.0](https://github.com/OReOF-URCA/oreof/compare/v2.5.0...v2.6.0) (2026-11-12)
+
+
+### Features
+
+* actions depuis offre ([95bba59](https://github.com/OReOF-URCA/oreof/commit/95bba59b234a08541d48e95ca21cef06ddc2ae52))
+* add modal de vérification pour la partie offre ([42f7523](https://github.com/OReOF-URCA/oreof/commit/42f7523bca6b02091cc1d77db18821a9dcfa962e))
+* affichage compétence en BUT + synchro ([3ca9800](https://github.com/OReOF-URCA/oreof/commit/3ca9800dc33d60c8de02886be97c45ec8781d388))
+* ajout d'un user depuis ldap ([65f005d](https://github.com/OReOF-URCA/oreof/commit/65f005da8b474845e6a0daf2ab3559423de0b2ee))
+* ajout type parcours dans libellé ([502ff84](https://github.com/OReOF-URCA/oreof/commit/502ff84be7e61324d704b937d3b5cf896005524f))
+* Amélioration partie portail/tronc commun ([a2a9546](https://github.com/OReOF-URCA/oreof/commit/a2a9546fc0f397e28f25751d3476da2cc5b39bc9))
+* badge portail + somme + global sur plateforme ([8660766](https://github.com/OReOF-URCA/oreof/commit/86607667dd7d4834756832bac204397d80404f67))
+* commande création année ([5215e0d](https://github.com/OReOF-URCA/oreof/commit/5215e0db7780b2afaf57c4ef0717fb5f461441fd))
+* commande de mise à jour des tabcheck ([738921a](https://github.com/OReOF-URCA/oreof/commit/738921a2de1cd526e3f59d0e60b346366d72402f))
+* comparaison + corrections statistiques ([d42914e](https://github.com/OReOF-URCA/oreof/commit/d42914ecf5d1921e57a54a330a946466811925cd))
+* DPE (module campagne, boutons de la page parcours) et corrections diverses ([6d0b562](https://github.com/OReOF-URCA/oreof/commit/6d0b562cb60d8761411e834762fd0157ee48372e))
+* export avec ville ([20df466](https://github.com/OReOF-URCA/oreof/commit/20df4661bfdec3a9b131914a027eb0abc81568bd))
+* export offre, amélioration des exports ([b492290](https://github.com/OReOF-URCA/oreof/commit/b492290f8e64eedb71c13990644cfaedca710496))
+* gestion modifier/réouverture parcours ([cfa10b7](https://github.com/OReOF-URCA/oreof/commit/cfa10b775c759f4db9a73479310603d9b6dbd68f))
+* **i18n:** clés des modales dans le panneau « Textes de la page » ([2099136](https://github.com/OReOF-URCA/oreof/commit/20991365bc064703dfe90b755c9aa7d92c7fc114))
+* **i18n:** contenus de modales hors fichiers *modal* en clés de traduction ([3d1715e](https://github.com/OReOF-URCA/oreof/commit/3d1715e43cd97b0bd021db2b9108d71cf7642b8c))
+* **i18n:** textes des modales en clés + panneaux aide/traductions au-dessus des modales ([f1e853f](https://github.com/OReOF-URCA/oreof/commit/f1e853fb29b8f3309092ec9f452b73adb432807e))
+* **i18n:** textes des modales en clés de traduction (domaine modal) ([c6a265a](https://github.com/OReOF-URCA/oreof/commit/c6a265a0036a9faa1e70752aecb6ae7388cd951f))
+* listes des TD sur mention ([cf4a26c](https://github.com/OReOF-URCA/oreof/commit/cf4a26ca6b6fb3a2cf284170814052e60345845c))
+* mention avec accréditation + classique/non classique sur formation ([8f234df](https://github.com/OReOF-URCA/oreof/commit/8f234dfc2c6de9f4f86b9ac403f9dd8196f385c5))
+* modification PV ([c744d4c](https://github.com/OReOF-URCA/oreof/commit/c744d4c172f91e91195d29ea7bbb28d3cd4ceda9))
+* parties conseils ([b10230d](https://github.com/OReOF-URCA/oreof/commit/b10230dc2ab6b3dc2c32d4b8c90c5aa08b6be556))
+* sauvegarde des filtres ([11ebe4c](https://github.com/OReOF-URCA/oreof/commit/11ebe4c2e24a88a22b7787df04834317f87c91b4))
+* synchro BUT avec années ([87a290a](https://github.com/OReOF-URCA/oreof/commit/87a290ae9293d0f45be06785d93ece8d1c6294ff))
+
+
+### Bug Fixes
+
+* affichage des noms de TC ([a0857bb](https://github.com/OReOF-URCA/oreof/commit/a0857bb1dbe0508370b0f13403280784aa8c7608))
+* affichage du label ([979b6a6](https://github.com/OReOF-URCA/oreof/commit/979b6a658c267bcd8af608b0e9dd52eb1ae17b0e))
+* ajout remarque fermeture définitive ([4f2940d](https://github.com/OReOF-URCA/oreof/commit/4f2940d683ac221eede52207d6f0729cbc6c61b5))
+* bug non ([aa9f101](https://github.com/OReOF-URCA/oreof/commit/aa9f1012965a9a592ecdfcd516f68beccf2f57c0))
+* calcul semestre BUT ([cba7f84](https://github.com/OReOF-URCA/oreof/commit/cba7f844c37c52df5ca4bb0dc285b7b46ae19dd3))
+* capacité ([8a430e8](https://github.com/OReOF-URCA/oreof/commit/8a430e8bfecbc456f6e65c25f8ef6a620daf3f00))
+* **ci:** erreurs PHPStan du contrôleur Offre (déjà rouges sur v2) ([dcbadbb](https://github.com/OReOF-URCA/oreof/commit/dcbadbbb1ec0dd8774e43f2568f2929ac0578e2b))
+* **ci:** mises à jour de sécurité Symfony (composer audit) ([8e1fd09](https://github.com/OReOF-URCA/oreof/commit/8e1fd0927bdbb6423e36d88ae34b51678c77fb0c))
+* **ci:** PHPStan, type du paramètre par référence de synchroniserDonneesAnnee ([3229517](https://github.com/OReOF-URCA/oreof/commit/3229517b16b12c28785ef246fdf288db68fc6fe5))
+* **ci:** rafraîchir le content-hash de composer.lock ([d7a3262](https://github.com/OReOF-URCA/oreof/commit/d7a326215e5f255eafb85b781e6b2293661335db))
+* clés dans le json, v2 ([c8059cc](https://github.com/OReOF-URCA/oreof/commit/c8059ccf135f13fc444dd5e50f554fdf7f4bf659))
+* correction texte ([951db9f](https://github.com/OReOF-URCA/oreof/commit/951db9f80bf50bf8354d83441e89efe3d46c170b))
+* creation d'une formation ([241e499](https://github.com/OReOF-URCA/oreof/commit/241e499ecfcee8687db8e9458aec2e66a4da2d84))
+* delete avec ancienne modal bootstrap retirée ([4a6b22b](https://github.com/OReOF-URCA/oreof/commit/4a6b22b74ab3980e30ae8e345dd55d1dab32e3ef))
+* edit type diplome ([2605099](https://github.com/OReOF-URCA/oreof/commit/260509972d5426eafe3db11d41169405acdf4625))
+* export ([14d16ba](https://github.com/OReOF-URCA/oreof/commit/14d16bad551fbb6c63d1d1cf8ea2725461195331))
+* export des portails ([9f20ba2](https://github.com/OReOF-URCA/oreof/commit/9f20ba2af5be520a442c605592d576e9aa4f9110))
+* Filtrage année 1 inutiles/incohérentes ([1b919aa](https://github.com/OReOF-URCA/oreof/commit/1b919aa5fd86d8af8ade823762d6123d35cfc37a))
+* **i18n:** textes et traductions manquantes du changement de responsable ([ce467df](https://github.com/OReOF-URCA/oreof/commit/ce467dfc03f1e9de17fb693d79fa1374cef89c88))
+* **i18n:** textes et traductions manquantes du changement de responsable ([7b7a25a](https://github.com/OReOF-URCA/oreof/commit/7b7a25ae0eb433ead6a33037c5cf4c03623a4040))
+* icone sur les sections ([3cc5a47](https://github.com/OReOF-URCA/oreof/commit/3cc5a47296c584b6c86f4bbb4e7f520fcfccab2f))
+* import BUT, optimisations ([26a226c](https://github.com/OReOF-URCA/oreof/commit/26a226c4367a7821d52371980d9abbc7dc2ca9fb))
+* **offre:** 500 sur la modale de synthèse de formation ([11a221a](https://github.com/OReOF-URCA/oreof/commit/11a221aaebf66ad5aa96cdb3fc3995382abe81cf))
+* **offre:** 500 sur la modale de synthèse de formation ([c2804aa](https://github.com/OReOF-URCA/oreof/commit/c2804aa0528563115b455c89c89dd2901662b15c))
+* saisie impossible avec reload dom ([863661e](https://github.com/OReOF-URCA/oreof/commit/863661e81b54b5f8063d51087570f20e9dc7d569))
+* sort ([0fe8f68](https://github.com/OReOF-URCA/oreof/commit/0fe8f68c1dc4645d6983719bae4c954f67c1823e))
+* suppression capacité accueil inutile sur formation/parcours ([734b12f](https://github.com/OReOF-URCA/oreof/commit/734b12f1d0ffada0c3e9c83672662718ec8376b5))
+* synchronisation BUT et isolation maquettes ([66aa33e](https://github.com/OReOF-URCA/oreof/commit/66aa33e337842e1213203704a15a817cfc4d40c8))
+* tab présentation ([85b851d](https://github.com/OReOF-URCA/oreof/commit/85b851d09a3495e69b79f1c7a3fa5ea5ed22f33f))
+* total capacité des portails ([a030be1](https://github.com/OReOF-URCA/oreof/commit/a030be12c1376752dd1366f7ea316816f712b8c7))
+* tri ([e1c2b87](https://github.com/OReOF-URCA/oreof/commit/e1c2b878411cea1451cae18c7f1b73a77c812b7b))
+* tris par défaut ([b78346f](https://github.com/OReOF-URCA/oreof/commit/b78346f4bc62bc4147d8dad8fb355ca2c1a639cc))
+* troncs communs sur index ([aeef85a](https://github.com/OReOF-URCA/oreof/commit/aeef85ae1166d92cd785c1652fdacb67fd3c20e8))
+* **ui:** aide et panneau de traductions utilisables modale ouverte ([a40022a](https://github.com/OReOF-URCA/oreof/commit/a40022ae45dafecf3a12a87433f89e40757cf1a0))
+* **validation:** liste des demandes de changement RF/Co-RF vide côté composante ([4c36126](https://github.com/OReOF-URCA/oreof/commit/4c361265b2c129cf8bb2464bd7e4998e7019bd76))
+* **validation:** liste des demandes de changement RF/Co-RF vide côté composante ([f4ebaa0](https://github.com/OReOF-URCA/oreof/commit/f4ebaa0957d3a288b9f30f6f768cf822a0a9f88c))
+
 ## [2.5.0](https://github.com/OReOF-URCA/oreof/compare/v2.4.1...v2.5.0) (2026-10-30)
 
 

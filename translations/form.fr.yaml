@@ -98,7 +98,7 @@ Couleur: Couleur
 "Date d'ouverture du DPE": "Date d'ouverture de la campagne de collecte des projets de DPE"
 'Date de clôture de la campagne de collecte DPE': 'Date de clôture de la campagne de collecte DPE'
 'Date de clôture du DPE': 'Date de clôture de la campagne de collecte des projets de DPE'
-'Date de la CFVU': 'Date prévue de passage des projets de DPE en CFVU'
+'Date de la CFVU': 'Date prévue de passage en CFVU'
 'Date de publication': 'Date de publication des DPE'
 'Date limite de transmission des dossiers': 'Date limite de transmission des projets de DPE'
 'Dates de la campagne de collecte': 'Dates de la campagne de collecte'
@@ -269,7 +269,7 @@ actualite.labels.texte: "Texte de l'actualité"
 actualite.labels.titre: "Titre de l'actualité"
 bloc_competence.labels.libelle: 'Libellé du bloc de compétences'
 but: 'Bachelor Universitaire de Technologie'
-change_rf_formation.labels.typeRf.label: 'la demande concerne le responsable ou Co-Responsale de la formation'
+change_rf_formation.labels.typeRf.label: 'La demande concerne le responsable ou le co-responsable de la formation'
 competence.labels.libelle: 'Libellé de la compétence'
 composante.labels.composanteParent: 'Composante parente'
 contact.labels.adresse.label: 'Adresse du contact'
