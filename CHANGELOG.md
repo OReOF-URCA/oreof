@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/OReOF-URCA/oreof/compare/v2.6.0...v2.7.0) (2026-11-13)
+
+
+### Features
+
+* export avec choix de la date CFVU ([641342d](https://github.com/OReOF-URCA/oreof/commit/641342dd330277474dea567ee6d3ccbadbd96bef))
+* **fiche-matiere:** afficher le bouton modifier en permanence et désactivé si non ouverte ([bc4115c](https://github.com/OReOF-URCA/oreof/commit/bc4115cab4ef7a8f5ba08f7cec3b8b4c061f10d4))
+* **fiche-matiere:** commande app:fiche-matiere:check-completion pour vérifier et persister la complétion des onglets ([ab31bbf](https://github.com/OReOF-URCA/oreof/commit/ab31bbf950451799c6699254cc760b4cc7e41959))
+* **ldap:** implement LdapLookupResult for structured LDAP responses and enhance user lookup functionality ([94ed09c](https://github.com/OReOF-URCA/oreof/commit/94ed09c8cdf1962d8d72092876aaee6320829330))
+* synthèse IA des modifications de fiche matière pour ROLE_ADMIN ([1fa7cc1](https://github.com/OReOF-URCA/oreof/commit/1fa7cc154da1539b3341f242f3aee2eceef8bda2))
+* **user:** enhance user creation process with LDAP checks and handle existing users ([a13ee10](https://github.com/OReOF-URCA/oreof/commit/a13ee10db5be676a29845e025d8203cc1453910d))
+* **user:** enhance user profile management with role-based access control and modal redirection for RF/CORF changes ([baa26f2](https://github.com/OReOF-URCA/oreof/commit/baa26f219bc1db8358d9c729209e37c3d2c0c559))
+
+
+### Bug Fixes
+
+* **change-rf:** traductions, libellés et confirmation de suppression ([eaefc2b](https://github.com/OReOF-URCA/oreof/commit/eaefc2b30f198bd0f11dc32c9a47c9ae201d3ef7))
+* **diff:** renommer la méthode statique categoryLabel en labelForCategory pour éviter conflit Twig ([2f15701](https://github.com/OReOF-URCA/oreof/commit/2f157010d3c838652ef679377a70d211914df3c9))
+* export ([fd2fc5b](https://github.com/OReOF-URCA/oreof/commit/fd2fc5b6dd4db2a0313d97cdf5637ad47141dc69))
+* **fiche-matiere:** sécurisation modal workflow view null et configuration dynamique IA ([98d781c](https://github.com/OReOF-URCA/oreof/commit/98d781c4b9ec886c40ecf94930d56a7f09521575))
+* **form:** passer le champ apiKey en PasswordType dans EtablissementApiKeyEntryType ([c47703f](https://github.com/OReOF-URCA/oreof/commit/c47703f3b19bce4bafb2e09382ddf7388a9040eb))
+* **form:** préserver la valeur existante des clés API dans FormView pour PasswordType ([febd4c8](https://github.com/OReOF-URCA/oreof/commit/febd4c89b57a7459dc23f580d301badb3425586c))
+* **templates:** thème de formulaire form_theme_v2 dans les templates encore sur l'ancien ([d238a0c](https://github.com/OReOF-URCA/oreof/commit/d238a0c46318a18ca9dfddfb45be2930f8cbab13))
+* **validation:** traductions de la modale de lot RF/Co-RF et décompte des étapes à jour ([b75acad](https://github.com/OReOF-URCA/oreof/commit/b75acad3ac33b1d9cbf5c080326427b35320b698))
+* **workflow:** réouverture « sans CFVU » et création des formations non classiques ([905acfc](https://github.com/OReOF-URCA/oreof/commit/905acfc47f1c6bc988a4b3bc96e0fcc219664d05))
+* **workflow:** réouverture sans CFVU, création formations non classiques, thème de formulaire ([e58042b](https://github.com/OReOF-URCA/oreof/commit/e58042b739e6b615c344e2e43109a37edf7034b4))
+
 ## [2.6.0](https://github.com/OReOF-URCA/oreof/compare/v2.5.0...v2.6.0) (2026-11-12)
 
 
