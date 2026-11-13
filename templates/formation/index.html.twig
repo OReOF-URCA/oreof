@@ -9,13 +9,7 @@
             }) }}
          data-action="base:refreshListe@window->crud#refreshListe"
     >
-        {{ include('_layout/_section_shell.html.twig', {
-            title_card: header_title,
-            description_card: 'Consultez et administrez rapidement les mentions et spécialités de l\'offre de formation.',
-            badge_card: 'Détails des mentions/specialites'
-        }) }}
-
-        <div class="rounded-xl border border-secondary-200 bg-secondary-50/60 p-3 dark:border-secondary-700 dark:bg-secondary-950/30 sm:p-4" {{ stimulus_target('crud', 'liste') }}>
+        <div {{ stimulus_target('crud', 'liste') }}>
         </div>
     </section>
 {% endblock %}
