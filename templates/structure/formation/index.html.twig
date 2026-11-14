@@ -1,36 +1,17 @@
-{% extends 'base.html.twig' %}
+{# {% extends 'base.html.twig' %} #}
 
-{% block content %}
-    <div
-            {{ stimulus_controller('crud', {
-                url: path('structure_formation_liste'),
-                storageKey: 'structure_formation_liste',
-            }) }}
+{# {% block content %} #}
+{#    <div #}
+{#            {{ stimulus_controller('crud', { #}
+{#                url: path('structure_formation_liste'), #}
+{#                storageKey: 'structure_formation_liste', #}
+{#            }) }} #}
 {#            data-action="base:refreshListe@window->crud#refreshListe"#}
-            {{ stimulus_target('crud', 'liste') }}>
+{#            {{ stimulus_target('crud', 'liste') }}> #}
 
-    </div>
-{% endblock %}
+{#    </div> #}
+{# {% endblock %} #}
 
-{% block bouton_header %}
-        {% if is_granted('CAN_FORMATION_ADD_ALL', app.user) %}
-{#   todo: a reprendre         <a href="{{ path('app_formation_etat_send_ouverture') }}"#}
-{#               class="btn btn-sm btn-outline-warning btn-icon btn-icon-end w-100 w-sm-auto mx-2"#}
-{#               data-bs-toggle="tooltip"#}
-{#               data-bs-placement="bottom"#}
-{#               title="Ouvrir les formations"#}
-{#            >#}
-{#                <i class="{{ iconAdd }}"></i>#}
-{#                <span> Ouvrir les formations</span>#}
-{#            </a>#}
-            <a href="{{ path('app_formation_new')  }}"
-               class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-               data-bs-toggle="tooltip"
-               data-bs-placement="bottom"
-               title="Ajouter une formation"
-            >
-                <i class="{{ iconAdd }}"></i>
-                <span> Ajouter une formation</span>
-            </a>
-        {% endif %}
-{% endblock %}
+{# {% block bouton_header %} #}
+
+{# {% endblock %} #}
