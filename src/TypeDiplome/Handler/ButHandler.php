@@ -22,6 +22,7 @@ use App\Entity\SemestreParcours;
 use App\Repository\ButCompetenceRepository;
 use App\TypeDiplome\Diplomes\But\Services\ButMccc;
 use App\TypeDiplome\Diplomes\But\Services\ButMcccVersion;
+use App\TypeDiplome\Diplomes\But\Services\CalculBccCroiseBut;
 use App\TypeDiplome\Diplomes\But\StructureParcoursBut;
 use App\TypeDiplome\DiplomeExportInterface;
 use App\TypeDiplome\Diplomes\But\ValideParcoursBut;
@@ -78,7 +79,8 @@ final class ButHandler extends AbstractTypeDiplomeHandler implements McccDisplay
         protected ButMcccVersion                 $butMcccVersion,
         private readonly ButCompetenceRepository $butCompetenceRepository,
         private readonly StructureParcoursBut $structureParcoursBut,
-        private readonly ValideParcoursBut    $valideParcoursBut
+        private readonly ValideParcoursBut   $valideParcoursBut,
+        private readonly ?CalculBccCroiseBut $calculBccCroiseBut = null
     )
     {
     }
@@ -108,6 +110,28 @@ final class ButHandler extends AbstractTypeDiplomeHandler implements McccDisplay
         return $this->butCompetenceRepository->findBy([
             'formation' => $parcours->getFormation(),
         ]);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getBccCroiseData(Parcours $parcours, ?int $semestre = null): array
+    {
+        if ($this->calculBccCroiseBut !== null) {
+            return $this->calculBccCroiseBut->calcul($parcours, $semestre);
+        }
+
+        return parent::getBccCroiseData($parcours, $semestre);
+    }
+
+    public function getBccCroiseTemplate(): string
+    {
+        return 'parcours_bcc/but/_tableauCroise.html.twig';
+    }
+
+    public function getBccCroiseSemestreTemplate(): string
+    {
+        return 'parcours_bcc/but/_semestre_table.html.twig';
     }
 
     public function exportExcelMccc(

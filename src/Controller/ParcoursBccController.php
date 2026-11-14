@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Classes\GetDpeParcours;
 use App\Classes\JsonReponse;
 use App\Entity\Parcours;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
@@ -10,7 +11,7 @@ use App\Repository\ButApprentissageCritiqueRepository;
 use App\Repository\CompetenceRepository;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereRepository;
-use App\TypeDiplome\Dto\OptionsCalculStructure;
+use App\Utils\Access;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,6 +23,7 @@ class ParcoursBccController extends BaseController
     #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function index(
         Parcours          $parcours,
+        Request $request,
         BreadcrumbService $breadcrumb
     ): Response
     {
@@ -40,11 +42,53 @@ class ParcoursBccController extends BaseController
         $breadcrumb->add('BCC');
 
         $typeD = $this->typeDiplomeResolver->fromParcours($parcours);
-        $dto = $typeD->calcul($parcours, new OptionsCalculStructure(false, true, false));
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        $editable = $this->isGranted('EDIT', $parcours) && Access::isTabEditable($dpeParcours, 'competences');
+
+        $bccData = $typeD->getBccCroiseData($parcours);
+        $bccTemplate = $typeD->getBccCroiseTemplate();
+
+        $semestresDisponibles = $bccData['semestresDisponibles'] ?? [];
+        $firstSemestre = !empty($semestresDisponibles) ? (int)array_key_first($semestresDisponibles) : 1;
+        $activeSemestre = $request->query->getInt('semestre', $firstSemestre);
+
         return $this->render('parcours_bcc/index.html.twig', [
             'parcours' => $parcours,
-            'dto' => $dto,
-            'editable' => true //todo: déterminer selon l'état du process ...
+            'typeD' => $typeD,
+            'dto' => $bccData['dto'] ?? null,
+            'bccData' => $bccData,
+            'bccTemplate' => $bccTemplate,
+            'activeSemestre' => $activeSemestre,
+            'editable' => $editable,
+            'dpeParcours' => $dpeParcours,
+        ]);
+    }
+
+    #[Route('/parcours/bcc/{parcours}/semestre/{semestre}', name: 'app_parcours_bcc_semestre', methods: ['GET'])]
+    public function semestreTable(
+        Parcours $parcours,
+        int      $semestre,
+        Request  $request
+    ): Response
+    {
+        $typeD = $this->typeDiplomeResolver->fromParcours($parcours);
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        $editable = $this->isGranted('EDIT', $parcours) && Access::isTabEditable($dpeParcours, 'competences');
+
+        $bccData = $typeD->getBccCroiseData($parcours, $semestre);
+        $template = $typeD->getBccCroiseSemestreTemplate();
+
+        $sData = $bccData['semestresData'][$semestre] ?? null;
+
+        return $this->render($template, [
+            'parcours' => $parcours,
+            'typeD' => $typeD,
+            'semOrdre' => $semestre,
+            'sData' => $sData,
+            'bccData' => $bccData,
+            'dto' => $bccData['dto'] ?? null,
+            'editable' => $editable,
+            'dpeParcours' => $dpeParcours,
         ]);
     }
 
@@ -52,79 +96,11 @@ class ParcoursBccController extends BaseController
     #[Breadcrumb(menuKey: 'offre.detail_mentions')]
     public function bccBut(
         Parcours          $parcours,
+        Request $request,
         BreadcrumbService $breadcrumb
     ): Response
     {
-        if ($parcours->getFormation() !== null) {
-            $breadcrumb->add(
-                $parcours->getFormation()->getDisplay(),
-                'formation_v2_voir',
-                ['slug' => $parcours->getFormation()->getSlug()]
-            );
-        }
-        $breadcrumb->add(
-            $parcours->getDisplay(),
-            'parcours_v2_voir',
-            ['parcours' => $parcours->getId()]
-        );
-        $breadcrumb->add('BCC BUT');
-        $competences = $parcours->getFormation()?->getButCompetences();
-        $niveaux = [];
-
-        foreach ($competences as $competence) {
-            foreach ($competence->getButNiveaux() as $niveau) {
-                if ($niveau->getAnnee() === 'BUT1') {
-                    $niveaux[$competence->getId()][1] = [];
-                    $niveaux[$competence->getId()][2] = [];
-                    foreach ($niveau->getButApprentissageCritiques() as $bac) {
-                        $niveaux[$competence->getId()][1][] = $bac;
-                        $niveaux[$competence->getId()][2][] = $bac;
-                    }
-                } elseif ($niveau->getAnnee() === 'BUT2') {
-                    $niveaux[$competence->getId()][3] = [];
-                    $niveaux[$competence->getId()][4] = [];
-                    foreach ($niveau->getButApprentissageCritiques() as $bac) {
-                        $niveaux[$competence->getId()][3][] = $bac;
-                        $niveaux[$competence->getId()][4][] = $bac;
-                    }
-                } elseif ($niveau->getAnnee() === 'BUT3') {
-                    $niveaux[$competence->getId()][5] = [];
-                    $niveaux[$competence->getId()][6] = [];
-                    foreach ($niveau->getButApprentissageCritiques() as $bac) {
-                        $niveaux[$competence->getId()][5][] = $bac;
-                        $niveaux[$competence->getId()][6][] = $bac;
-                    }
-                }
-            }
-        }
-
-        $tabFichesMatieres = [];
-        $apprentissagesCritiques = [];
-        $tabUeEc = [];
-
-        foreach ($parcours->getSemestreParcours() as $semParc) {
-            foreach ($semParc->getSemestre()?->getUes() as $ue) {
-                foreach ($ue->getElementConstitutifs() as $ec) {
-                    if ($ec->getFicheMatiere() !== null) {
-                        $tabUeEc[$semParc->getOrdre()][$ue->getOrdre()][$ec->getFicheMatiere()->getId()] = 'x';
-                        $tabFichesMatieres[$semParc->getOrdre()][$ec->getFicheMatiere()->getId()] = $ec->getFicheMatiere();
-                        foreach ($ec->getFicheMatiere()->getApprentissagesCritiques() as $ac) {
-                            $apprentissagesCritiques[$ec->getFicheMatiere()->getId()][$ac->getId()] = 'ok';
-                        }
-                    }
-                }
-                ksort($tabFichesMatieres[$semParc->getOrdre()]);
-            }
-        }
-
-        return $this->render('parcours_bcc/but.html.twig', [
-            'parcours' => $parcours,
-            'tabFichesMatieres' => $tabFichesMatieres,
-            'competences' => $competences,
-            'niveaux' => $niveaux,
-            'apprentissagesCritiques' => $apprentissagesCritiques,
-            'tabUeEc' => $tabUeEc,
-        ]);
+        return $this->index($parcours, $request, $breadcrumb);
     }
 
     #[Route('/parcours/bcc/{parcours}/update-competence', name: 'app_parcours_bcc_update_competence', methods: ['POST'])]
@@ -135,6 +111,11 @@ class ParcoursBccController extends BaseController
         Request                      $request,
         Parcours                     $parcours
     ): Response {
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        if (!$this->isGranted('EDIT', $parcours) || !Access::isTabEditable($dpeParcours, 'competences')) {
+            return JsonReponse::error('Modification non autorisée dans l\'état actuel du parcours');
+        }
+
         $ec = $ecRepository->find($request->request->get('ec'));
         $competence = $competenceRepository->find($request->request->get('competence'));
         if ($competence === null || $ec === null) {
@@ -144,15 +125,14 @@ class ParcoursBccController extends BaseController
         if ($ec->getFicheMatiere() === null) {
             return JsonReponse::error('EC sans fiche matière');
         }
+
         if ($request->request->get('checked') === 'true') {
-            // on ajoute
             if ($ec->getFicheMatiere()->getParcours() === $parcours) {
                 $ec->getFicheMatiere()->addCompetence($competence);
             } else {
                 $ec->addCompetence($competence);
             }
         } else {
-
             if ($ec->getFicheMatiere()->getParcours() === $parcours) {
                 $ec->getFicheMatiere()->removeCompetence($competence);
             } else {
@@ -170,7 +150,13 @@ class ParcoursBccController extends BaseController
         FicheMatiereRepository             $ficheMatiereRepository,
         ButApprentissageCritiqueRepository $butApprentissageCritiqueRepository,
         Request                            $request,
+        Parcours $parcours
     ): Response {
+        $dpeParcours = GetDpeParcours::getFromParcours($parcours);
+        if (!$this->isGranted('EDIT', $parcours) || !Access::isTabEditable($dpeParcours, 'competences')) {
+            return JsonReponse::error('Modification non autorisée dans l\'état actuel du parcours');
+        }
+
         $fiche = $ficheMatiereRepository->find($request->request->get('ec'));
         $ac = $butApprentissageCritiqueRepository->find($request->request->get('competence'));
         if ($ac === null || $fiche === null) {
@@ -178,7 +164,6 @@ class ParcoursBccController extends BaseController
         }
 
         if ($request->request->get('checked') === 'true') {
-            // on ajoute
             $fiche->addApprentissagesCritique($ac);
         } else {
             $fiche->removeApprentissagesCritique($ac);

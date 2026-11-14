@@ -1,0 +1,220 @@
+{# Contenu du tableau croisé pour un semestre Licence (utilisable dans le turbo-frame ou en export PDF) #}
+{% set editable = editable is not defined ? false : editable %}
+{% set isPdf = isPdf is not defined ? false : isPdf %}
+
+<div {{ stimulus_controller('parcours--bcc', {
+    urlUpdateComptence: path('app_parcours_bcc_update_competence', {parcours: parcours.id})
+}) }} class="space-y-4">
+
+    {% if sData is defined and sData is not null %}
+        <section
+                class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface shadow-sm overflow-hidden"
+                data-parcours--bcc-target="section"
+                data-semester="{{ semOrdre }}">
+
+            {% if isPdf %}
+                <div class="pdf-semestre-header">
+                    <span class="pdf-semestre-badge">S{{ semOrdre }}</span>
+                    <span class="pdf-semestre-title">{{ sData.display|default('Semestre ' ~ semOrdre) }}</span>
+                    <span class="pdf-semestre-meta">
+                        {{ sData.leafColumns|length }} élément{{ sData.leafColumns|length > 1 ? 's' : '' }} constitutif{{ sData.leafColumns|length > 1 ? 's' : '' }} &bull;
+                        {{ sData.totalMobilisationsInSemestre }} mobilisation{{ sData.totalMobilisationsInSemestre > 1 ? 's' : '' }}
+                    </span>
+                </div>
+            {% endif %}
+
+            {# Matrice tableau #}
+            <div class="overflow-x-auto {% if not isPdf %}max-h-[75vh]{% endif %}">
+                <table class="min-w-full border-separate border-spacing-0 text-xs {% if isPdf %}table-croise-pdf{% endif %}">
+                    <thead>
+                    {# Ligne 1 : UE #}
+                    <tr class="bg-secondary-100 dark:bg-secondary-800 text-secondary-700 dark:text-secondary-300">
+                        <th colspan="2"
+                            rowspan="{{ sData.hasChildEcs ? 3 : 2 }}"
+                            class="sticky left-0 top-0 z-40 bg-secondary-100 dark:bg-secondary-800 px-4 py-2.5 text-left font-bold border-b border-r border-secondary-200 dark:border-secondary-700 w-[380px] min-w-[380px] shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)] {% if isPdf %}col-competences{% endif %}">
+                            Blocs de compétences & Compétences
+                        </th>
+                        {% for ueH in sData.ueHeaders %}
+                            <th colspan="{{ ueH.colspan }}"
+                                class="sticky top-0 z-20 px-3 py-2 text-center font-bold uppercase text-[11px] tracking-wide border-b border-r-2 border-secondary-200 dark:border-secondary-700 {% if ueH.isChild %}bg-primary-50/60 dark:bg-primary-950/40 text-primary-800 dark:text-primary-300{% else %}bg-secondary-100 dark:bg-secondary-800 text-text{% endif %}">
+                                <div class="truncate max-w-[280px] mx-auto" title="{{ ueH.label }}">
+                                    {{ ueH.label }}
+                                </div>
+                            </th>
+                        {% endfor %}
+                        <th rowspan="{{ sData.hasChildEcs ? 3 : 2 }}"
+                            class="sticky right-0 top-0 z-40 bg-secondary-100 dark:bg-secondary-800 px-3 py-2 text-center font-bold border-b border-l-2 border-secondary-200 dark:border-secondary-700 w-20 min-w-20 shadow-[-2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                            Total EC
+                        </th>
+                    </tr>
+
+                    {# Ligne 2 : EC #}
+                    <tr class="bg-secondary-50 dark:bg-secondary-900/80 text-secondary-600 dark:text-secondary-300">
+                        {% for ecH in sData.ecHeaders %}
+                            <th colspan="{{ ecH.colspan }}"
+                                rowspan="{{ ecH.rowspan }}"
+                                class="sticky top-9 z-20 px-2 py-2 text-center font-semibold border-b border-r border-secondary-200 dark:border-secondary-700 min-w-20 max-w-28 bg-secondary-50 dark:bg-secondary-900">
+                                <div class="flex items-center justify-center gap-1 font-bold text-text truncate"
+                                     title="{{ ecH.display }}">
+                                    <span>{{ ecH.code|default('EC') }}</span>
+                                    {% if not isPdf %}
+                                        <span class="inline-flex cursor-help text-secondary-400 hover:text-secondary-600"
+                                              data-controller="tooltip"
+                                              data-tooltip-placement-value="bottom"
+                                              title="{{ ecH.display }}">
+                                                {{ ux_icon('icon:info-circle', {class: 'h-3 w-3'}) }}
+                                            </span>
+                                    {% endif %}
+                                </div>
+                                {% if ecH.isChoix %}
+                                    <span class="inline-flex items-center text-[10px] font-normal text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-1 rounded mt-0.5">
+                                            Choix
+                                        </span>
+                                {% endif %}
+                            </th>
+                        {% endfor %}
+                    </tr>
+
+                    {# Ligne 3 : EC enfants (si choix existants) #}
+                    {% if sData.hasChildEcs %}
+                        <tr class="bg-secondary-50/70 dark:bg-secondary-900/60 text-secondary-500">
+                            {% for ecChild in sData.ecChildrenHeaders %}
+                                <th class="sticky top-18 z-20 px-2 py-1.5 text-center font-medium border-b border-r border-secondary-200 dark:border-secondary-700 min-w-20 max-w-28 bg-secondary-50 dark:bg-secondary-900">
+                                    <div class="flex items-center justify-center gap-1 truncate text-[11px]"
+                                         title="{{ ecChild.display }}">
+                                        <span class="text-secondary-700 dark:text-secondary-300">{{ ecChild.code }}</span>
+                                        {% if not isPdf %}
+                                            <span class="inline-flex cursor-help text-secondary-400 hover:text-secondary-600"
+                                                  data-controller="tooltip"
+                                                  data-tooltip-placement-value="bottom"
+                                                  title="{{ ecChild.display }}">
+                                                    {{ ux_icon('icon:info-circle', {class: 'h-2.5 w-2.5'}) }}
+                                                </span>
+                                        {% endif %}
+                                    </div>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    {% endif %}
+                    </thead>
+
+                    <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800">
+                    {% for bcc in bccData.blocCompetences %}
+                        {% set compList = bcc.competences %}
+                        {% for comp in compList %}
+                            <tr class="hover:bg-secondary-50/50 dark:hover:bg-secondary-800/30 transition-colors">
+                                {# Cellule BCC #}
+                                {% if loop.first %}
+                                    <td rowspan="{{ compList|length }}"
+                                        class="sticky left-0 z-10 bg-surface px-3 py-2.5 font-bold text-text text-xs border-r border-b border-secondary-200 dark:border-secondary-700 align-top w-40 min-w-40 max-w-40 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                                        <div class="sticky top-28 space-y-1">
+                                                <span class="inline-flex items-center gap-1 rounded bg-primary-100 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300 font-bold px-2 py-0.5 text-[11px]">
+                                                    {{ bcc.code|default('BCC ' ~ loop.parent.loop.index) }}
+                                                </span>
+                                            <div class="text-xs font-semibold text-text leading-snug line-clamp-3"
+                                                 title="{{ bcc.libelle }}">
+                                                {{ bcc.libelle }}
+                                            </div>
+                                        </div>
+                                    </td>
+                                {% endif %}
+
+                                {# Cellule Compétence #}
+                                <td class="sticky left-40 z-10 bg-surface px-3 py-2 text-xs border-r border-b border-secondary-200 dark:border-secondary-700 w-60 min-w-60 max-w-60 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.04)]">
+                                    <div class="flex items-start gap-1.5">
+                                        <span class="font-bold text-primary-700 dark:text-primary-400 shrink-0">{{ comp.code }}</span>
+                                        <span class="text-secondary-700 dark:text-secondary-300 text-[11px] leading-tight line-clamp-2"
+                                              title="{{ comp.libelle }}">
+                                                {{ comp.libelle }}
+                                            </span>
+                                    </div>
+                                </td>
+
+                                {# Cellules EC du semestre #}
+                                {% for col in sData.leafColumns %}
+                                    {% set isChecked = sData.matrix[comp.id][col.id] ?? false %}
+                                    <td class="text-center px-1.5 py-1.5 border-r border-b border-secondary-200 dark:border-secondary-700 align-middle">
+                                        {% if editable %}
+                                            <label class="sr-only" for="comp_{{ comp.id }}_{{ col.id }}">
+                                                {{ comp.code }} mobilisée dans {{ col.code }}
+                                            </label>
+                                            <input type="checkbox"
+                                                   id="comp_{{ comp.id }}_{{ col.id }}"
+                                                   class="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 cursor-pointer transition-transform hover:scale-110"
+                                                   data-semester="{{ sData.ordre }}"
+                                                   data-comp-id="{{ comp.id }}"
+                                                   data-ec-id="{{ col.id }}"
+                                                    {{ stimulus_action('parcours--bcc', 'updateCompetence', 'change', {
+                                                        competence: comp.id,
+                                                        ec: col.id
+                                                    }) }}
+                                                   value="X"
+                                                    {% if isChecked %}checked{% endif %}>
+                                        {% else %}
+                                            {% if isChecked %}
+                                                {% if isPdf %}
+                                                    <span class="pdf-check">&#10003;</span>
+                                                {% else %}
+                                                    <span class="inline-flex items-center justify-center h-5 w-5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                                            {{ ux_icon('icon:check', {class: 'h-3.5 w-3.5'}) }}
+                                                        </span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-secondary-300 dark:text-secondary-600 text-xs">-</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                {% endfor %}
+
+                                {# Total EC pour cette compétence dans ce semestre #}
+                                {% set compTotal = sData.competenceTotals[comp.id] ?? 0 %}
+                                <td class="sticky right-0 z-10 bg-surface px-2 py-1.5 text-center border-l-2 border-b border-secondary-200 dark:border-secondary-700 shadow-[-2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                                        <span id="total_comp_{{ sData.ordre }}_{{ comp.id }}"
+                                              class="inline-flex items-center justify-center min-w-6 px-1.5 py-0.5 rounded-full text-[11px] font-bold {% if compTotal == 0 %}bg-danger-100 text-danger-700 dark:bg-danger-900/40 dark:text-danger-300{% else %}bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300{% endif %}">
+                                            {{ compTotal }}
+                                        </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="{{ sData.leafColumns|length + 3 }}"
+                                class="px-4 py-8 text-center text-secondary-500">
+                                Aucun bloc de compétences défini pour ce parcours.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+
+                    {# Ligne Total bas : compétences mobilisées par EC #}
+                    <tfoot>
+                    <tr class="bg-secondary-100 dark:bg-secondary-800 text-secondary-700 dark:text-secondary-200 font-bold">
+                        <td colspan="2"
+                            class="sticky left-0 bottom-0 z-30 bg-secondary-100 dark:bg-secondary-800 px-4 py-2.5 text-left border-t-2 border-r border-secondary-300 dark:border-secondary-600 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                            Total compétences mobilisées
+                        </td>
+                        {% for col in sData.leafColumns %}
+                            {% set ecTotal = sData.ecTotals[col.id] ?? 0 %}
+                            <td class="text-center px-1.5 py-2 border-t-2 border-r border-secondary-300 dark:border-secondary-600">
+                                    <span id="total_ec_{{ sData.ordre }}_{{ col.id }}"
+                                          class="inline-flex items-center justify-center min-w-6 px-1.5 py-0.5 rounded-full text-[11px] font-bold {% if ecTotal == 0 %}bg-warning-100 text-warning-800 dark:bg-warning-900/40 dark:text-warning-300{% else %}bg-secondary-100 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200{% endif %}">
+                                        {{ ecTotal }}
+                                    </span>
+                            </td>
+                        {% endfor %}
+                        <td class="sticky right-0 bottom-0 z-30 bg-secondary-100 dark:bg-secondary-800 px-2 py-2 text-center border-t-2 border-l-2 border-secondary-300 dark:border-secondary-600 shadow-[-2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                                <span class="inline-flex items-center justify-center min-w-6 px-2 py-0.5 rounded-full text-[11px] font-bold bg-primary-600 text-white">
+                                    {{ sData.totalMobilisationsInSemestre }}
+                                </span>
+                        </td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+    {% else %}
+        <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface p-8 text-center text-secondary-500 shadow-sm">
+            <p class="text-sm font-semibold text-text">Données non disponibles pour le semestre {{ semOrdre }}.</p>
+        </div>
+    {% endif %}
+</div>

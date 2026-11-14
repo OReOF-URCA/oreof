@@ -1,204 +1,49 @@
+{# Tableau croisé Compétences / EC pour Licence et diplômes universitaires classiques #}
 {% set editable = editable is not defined ? false : editable %}
-<div class="card" {{ stimulus_controller('parcours--bcc', {
-    urlUpdateComptence: path('app_parcours_bcc_update_competence', {parcours: parcours.id})
-}) }}>
-    <div class="card-body">
-        {% for semestre in dto.semestres %}
-            <h2>{{ semestre.semestreParcours.display }}</h2>
-            <table class="table table-bordered table-hover">
-                <thead>
-                <tr>
-                    <th colspan="2" rowspan="3">&nbsp;</th>
-                    {% for ue in semestre.ues %}
-                        {% if ue.uesEnfants|length == 0 %}
-                            {% set nbEc = 0 %}
-                            {% for ec in ue.elementConstitutifs %}
-                                {% if ec.elementConstitutif.natureUeEc.isChoix %}
-                                    {% set nbEc = nbEc +  ec.elementsConstitutifsEnfants|length %}
-                                {% else %}
-                                    {% set nbEc = nbEc + 1 %}
-                                {% endif %}
-                            {% endfor %}
+{% set semestresDisponibles = bccData.semestresDisponibles|default([]) %}
+{% set activeSemestre = activeSemestre|default(semestresDisponibles|keys|first|default(1)) %}
 
+{% if semestresDisponibles|length > 0 %}
+    <div {{ stimulus_controller('parcours--bcc', {
+        urlUpdateComptence: path('app_parcours_bcc_update_competence', {parcours: parcours.id})
+    }) }} class="app-tabs space-y-6">
 
-                            <th colspan="{{ nbEc }}"
-                                class="text-center">{{ ue.display }}</th>
-                        {% else %}
-                            {% for uee in ue.uesEnfants %}
-                                {% set nbEc = 0 %}
-                                {% for ec in uee.elementConstitutifs %}
-                                    {% if ec.elementConstitutif.natureUeEc.isChoix %}
-                                        {% set nbEc = nbEc +  ec.elementsConstitutifsEnfants|length %}
-                                    {% else %}
-                                        {% set nbEc = nbEc + 1 %}
-                                    {% endif %}
-                                {% endfor %}
-                                <th colspan="{{ nbEc }}"
-                                    class="text-center">{{ uee.display }}</th>
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-                <tr>
-                    {% for ue in semestre.ues %}
-                        {% if ue.uesEnfants|length == 0 %}
-                            {% for ec in ue.elementConstitutifs %}
-                                <th class="text-center"
-                                        {% if ec.elementConstitutif.natureUeEc.isChoix %} colspan="{{ ec.elementsConstitutifsEnfants|length }}" {% else %} rowspan="2" {% endif %}>
-                                    {{ ec.elementConstitutif.code }} <i
-                                            class="fal fa-question-circle ms-1"
-                                            data-controller="tooltip"
-                                            data-tooltip-placement-value="bottom"
-                                            title="{{ ec.elementConstitutif.display }}"></i>
-                                </th>
-                            {% endfor %}
-                        {% else %}
-                            {% for uee in ue.uesEnfants %}
-                                {% for ec in uee.elementConstitutifs %}
-                                    <th class="text-center"
-                                            {% if ec.elementConstitutif.natureUeEc.isChoix %} colspan="{{ ec.elementsConstitutifsEnfants|length }}" {% else %} rowspan="2"{% endif %}
-                                    >{{ ec.elementConstitutif.code }} <i
-                                                class="fal fa-question-circle ms-1"
-                                                data-controller="tooltip"
-                                                data-tooltip-placement-value="bottom"
-                                                title="{{ ec.elementConstitutif.display }}"></i>
-                                    </th>
-                                {% endfor %}
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-                <!-- Ligne des EC enfants -->
-                <tr>
-                    {% for ue in semestre.ues %}
-                        {% if ue.uesEnfants|length == 0 %}
-                            {% for ec in ue.elementConstitutifs %}
-                                {% for ece in ec.elementsConstitutifsEnfants %}
-                                    <th class="text-center">
-                                        {{ ece.elementConstitutif.code }} <i
-                                                class="fal fa-question-circle ms-1"
-                                                data-controller="tooltip"
-                                                data-tooltip-placement-value="bottom"
-                                                title="{{ ece.elementConstitutif.display }}"></i>
-                                    </th>
-                                {% endfor %}
-                            {% endfor %}
-                        {% else %}
-                            {% for uee in ue.uesEnfants %}
-                                {% for ec in uee.elementConstitutifs %}
-                                    {% for ece in ec.elementsConstitutifsEnfants %}
-                                        <th class="text-center">{{ ece.elementConstitutif.code }} <i
-                                                    class="fal fa-question-circle ms-1"
-                                                    data-controller="tooltip"
-                                                    data-tooltip-placement-value="bottom"
-                                                    title="{{ ece.elementConstitutif.display }}"></i>
-                                        </th>
-                                    {% endfor %}
-                                {% endfor %}
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-                </thead>
-                <tbody>
-                {% for bcc in parcours.blocCompetences %}
-                    {% for competence in bcc.competences %}
-                        <tr>
-                            {% if loop.first %}
-                                <td rowspan="{{ bcc.competences|length }}">{{ bcc.display }}</td>
-                            {% endif %}
-                            {# todo: faire une classe qui calcul le référentiel en amaont, nootamment pour gérer le raccrocher #}
-                            <td>{{ competence.display }}</td>
-                            {% for ue in semestre.ues %}
-                                {% if ue.uesEnfants|length == 0 %}
-                                    {% for ec in ue.elementConstitutifs %}
-                                        {% if ec.elementConstitutif.natureUeEc.isChoix %}
-                                            {% for ece in ec.elementsConstitutifsEnfants %}
+        {# 1. Onglets des semestres disponibles (S1, S2, ...) sans "Tous les semestres" #}
+        <div class="app-tabs-list flex-wrap gap-1.5" role="tablist" aria-label="Semestres du parcours">
+            {% for semOrdre, sInfo in semestresDisponibles %}
+                {% set isActive = (semOrdre == activeSemestre) %}
+                <a href="{{ path('app_parcours_bcc_semestre', {parcours: parcours.id, semestre: semOrdre}) }}"
+                   id="tab-semestre-{{ semOrdre }}"
+                   class="app-tab gap-2 cursor-pointer {% if isActive %}app-tab-active active{% endif %}"
+                   role="tab"
+                   aria-selected="{{ isActive ? 'true' : 'false' }}"
+                   data-parcours--bcc-target="tabButton"
+                   data-semester="{{ semOrdre }}"
+                        {{ stimulus_action('parcours--bcc', 'switchTab', 'click') }}
+                   data-turbo-frame="bcc_table_semestre_frame">
+                    <span class="font-bold text-xs tracking-wide">S{{ semOrdre }}</span>
+                </a>
+            {% endfor %}
+        </div>
 
+        {# 2. Conteneur unique du tableau chargé en Lazy Load pour le semestre sélectionné #}
+        <turbo-frame id="bcc_table_semestre_frame"
+                     src="{{ path('app_parcours_bcc_semestre', {parcours: parcours.id, semestre: activeSemestre}) }}">
+            <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface p-12 text-center text-secondary-500 shadow-sm">
+                <div class="mb-3 flex justify-center">
+                    <twig:Spinner size="sm" variant="primary"/>
+                </div>
+                <p class="text-sm font-semibold text-text">Chargement du tableau croisé...</p>
+                <p class="text-xs text-secondary-400 mt-1">Calcul de la matrice et des croisements EC / Compétences</p>
+            </div>
+        </turbo-frame>
 
-
-                                                <td class="text-center">
-                                                {% set checked = "" %}
-                                                {% if competence.code in ece.bccs|keys %}
-                                                    {% set checked = "X" %}
-                                                {% endif %}
-                                                {% if editable == true %}
-                                                    <label class="sr-only"
-                                                           for="competences_{{ competence.id }}_{{ ec.elementConstitutif.id }}">Compétence
-                                                        mobilisée</label>
-                                                    <input type="checkbox" class="form-check"
-                                                           id="competences_{{ competence.id }}_{{ ece.elementConstitutif.id }}"
-                                                            {{ stimulus_action('parcours--bcc', 'updateCompetence', 'change', {
-                                                                competence: competence.id,
-                                                                ec: ece.elementConstitutif.id
-                                                            }) }}
-                                                           value="X"
-                                                            {% if checked == "X" %}checked{% endif %}>
-                                                {% else %}
-                                                    {{ checked }}
-                                                {% endif %}
-
-
-
-
-                                            {% endfor %}
-                                        {% else %}
-                                            <td class="text-center">
-                                            {% set checked = "" %}
-                                            {% if competence.code in ec.bccs|keys %}
-                                                {% set checked = "X" %}
-                                            {% endif %}
-                                            {% if editable == true %}
-                                                <label class="sr-only"
-                                                       for="competences_{{ competence.id }}_{{ ec.elementConstitutif.id }}">Compétence
-                                                    mobilisée</label>
-                                                <input type="checkbox" class="form-check"
-                                                       id="competences_{{ competence.id }}_{{ ec.elementConstitutif.id }}"
-                                                        {{ stimulus_action('parcours--bcc', 'updateCompetence', 'change', {
-                                                            competence: competence.id,
-                                                            ec: ec.elementConstitutif.id
-                                                        }) }}
-                                                       value="X"
-                                                        {% if checked == "X" %}checked{% endif %}>
-                                            {% else %}
-                                                {{ checked }}
-                                            {% endif %}
-                                        {% endif %}
-                                        </td>
-                                    {% endfor %}
-                                {% else %}
-                                    {% for uee in ue.uesEnfants %}
-                                        {% for ec in uee.elementConstitutifs %}
-                                            <td class="text-center">
-                                                {% set checked = "" %}
-                                                {% if competence.code in ec.bccs|keys %}
-                                                    {% set checked = "X" %}
-                                                {% endif %}
-                                                {% if editable == true %}
-                                                    <label class="sr-only"
-                                                           for="competences_{{ competence.id }}_{{ ec.elementConstitutif.id }}">Compétence
-                                                        mobilisée</label>
-                                                    <input type="checkbox" class="form-check"
-                                                           id="competences_{{ competence.id }}_{{ ec.elementConstitutif.id }}"
-                                                            {{ stimulus_action('parcours--bcc', 'updateCompetence', 'change', {
-                                                                competence: competence.id,
-                                                                ec: ec.elementConstitutif.id
-                                                            }) }}
-                                                           value="X"
-                                                            {% if checked == "X" %}checked{% endif %}>
-                                                {% else %}
-                                                    {{ checked }}
-                                                {% endif %}
-                                            </td>
-                                        {% endfor %}
-                                    {% endfor %}
-                                {% endif %}
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                {% endfor %}
-                </tbody>
-            </table>
-        {% endfor %}
     </div>
-</div>
+{% else %}
+    <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface p-8 text-center text-secondary-500 shadow-sm">
+        {{ ux_icon('ph:folders-light', {class: 'h-8 w-8 text-secondary-400 mx-auto mb-2'}) }}
+        <p class="text-sm font-semibold text-text">Aucun semestre configuré</p>
+        <p class="text-xs text-secondary-400 mt-1">Ce parcours ne contient aucun semestre ou élément constitutif
+            actif.</p>
+    </div>
+{% endif %}

@@ -24,6 +24,7 @@ use App\Repository\BlocCompetenceRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\TypeDiplome\Diplomes\Licence\Dto;
 use App\TypeDiplome\Diplomes\Licence\Form\McccType;
+use App\TypeDiplome\Diplomes\Licence\Services\CalculBccCroiseLicence;
 use App\TypeDiplome\Diplomes\Licence\Services\LicenceMccc;
 use App\TypeDiplome\Diplomes\Licence\Services\LicenceMcccVersion;
 use App\TypeDiplome\Diplomes\Licence\StructureParcoursLicence;
@@ -84,7 +85,8 @@ class UniversityHandler extends AbstractTypeDiplomeHandler implements McccDispla
         protected LicenceMcccVersion              $licenceMcccVersion,
         private readonly BlocCompetenceRepository $blocCompetenceRepository,
         private readonly StructureParcoursLicence $structureParcoursLicence,
-        private readonly ValideParcoursLicence    $valideParcoursLicence
+        private readonly ValideParcoursLicence   $valideParcoursLicence,
+        private readonly ?CalculBccCroiseLicence $calculBccCroiseLicence = null
     )
     {
         //todo: comment gérer avec le code ?
@@ -128,6 +130,28 @@ class UniversityHandler extends AbstractTypeDiplomeHandler implements McccDispla
     public function getStructureCompetences(Parcours $parcours): array
     {
         return $this->blocCompetenceRepository->findByParcours($parcours);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getBccCroiseData(Parcours $parcours, ?int $semestre = null): array
+    {
+        if ($this->calculBccCroiseLicence !== null) {
+            return $this->calculBccCroiseLicence->calcul($parcours, $semestre);
+        }
+
+        return parent::getBccCroiseData($parcours, $semestre);
+    }
+
+    public function getBccCroiseTemplate(): string
+    {
+        return 'parcours_bcc/_tableauCroise.html.twig';
+    }
+
+    public function getBccCroiseSemestreTemplate(): string
+    {
+        return 'parcours_bcc/_semestre_table.html.twig';
     }
 
     public function exportExcelMccc(

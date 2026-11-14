@@ -52,7 +52,6 @@
                 <dl>
                     <dt>Formation(s) pouvant mobiliser la fiche EC/matière</dt>
                     <dd>
-                        {# todo: mettre une "coche" si réellement utilisée #}
                         {% if ficheMatiere.horsDiplome == true %}
                             <span class="badge bg-info">Fiche hors diplôme, utilisable partout.</span>
                         {% elseif ficheMatiere.enseignementMutualise == true or ficheMatiere.ficheMatiereParcours|length > 0 %}

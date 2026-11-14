@@ -1,0 +1,13 @@
+{# Template de rendu d'un semestre individuel pour Turbo-Frame (Licence) #}
+{% set editable = editable is not defined ? false : editable %}
+
+<turbo-frame id="bcc_table_semestre_frame">
+    {{ include('parcours_bcc/_semestre_table_content.html.twig', {
+        parcours: parcours,
+        semOrdre: semOrdre,
+        sData: sData,
+        bccData: bccData,
+        editable: editable,
+        isPdf: false
+    }) }}
+</turbo-frame>

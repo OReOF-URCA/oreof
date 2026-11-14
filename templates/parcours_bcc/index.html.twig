@@ -1,48 +1,145 @@
 {% extends 'base.html.twig' %}
 
-{% block content %}
-    {{ include('parcours_bcc/_tableauCroise.html.twig') }}
-{% endblock %}
-
 {% set header_title %}
-    {{ 'tpl.parcours_bcc.index.title'|trans({}, 'header') }} {{ parcours.libelle }} {# todo: ou formation? #}
+    {{ 'tpl.parcours_bcc.index.title'|trans({}, 'header') }} {{ parcours.display }}
+{% endset %}
+
+{% set header_description %}
+    Tableau de croisement et de cohérence entre le référentiel de compétences et les éléments constitutifs (EC) du parcours.
 {% endset %}
 
 {% block bouton_header %}
-    <a href="{{ path('app_competence_export_bcc', {parcours:parcours.id}) }}"
-       class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title=" Export des BCC"
-    >
-        <i class="{{ iconDownload }}"></i>
-        <span> Export des BCC</span>
-    </a>
-    <a href="{{ path('app_competence_export_croise', {parcours:parcours.id}) }}"
-       class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Export du tableau croisé BCC/EC"
-    >
-        <i class="{{ iconDownload }}"></i>
-        <span> Export du tableau croisé BCC/EC (PDF)</span>
-    </a>
-    <a href="{{ path('app_competence_export_croise_global', {parcours:parcours.id}) }}"
-       class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Export du tableau croisé BCC/EC"
-    >
-        <i class="{{ iconDownload }}"></i>
-        <span> Export du tableau croisé BCC/EC (Xlsx)</span>
-    </a>
-    <a href="{{ path('parcours_v2_modifier', {parcours:parcours.id}) }}"
-       class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Retour au parcours"
-    >
-        <i class="{{ iconBack }}"></i>
-        <span> Retour au parcours</span>{# todo: ou formation? #}
-    </a>
+    <twig:Button variant="secondary"
+                 :outline="true"
+                 size="sm"
+                 icon="ph:file-text-light"
+                 :href="path('app_competence_export_bcc', {parcours: parcours.id})"
+                 tooltip="Exporter le référentiel de compétences au format PDF">
+        Export des BCC
+    </twig:Button>
+
+    <twig:Button variant="secondary"
+                 :outline="true"
+                 size="sm"
+                 icon="ph:file-pdf-light"
+                 :href="path('app_competence_export_croise', {parcours: parcours.id})"
+                 tooltip="Exporter le tableau croisé compétences/EC au format PDF">
+        Export PDF
+    </twig:Button>
+
+    <twig:Button variant="secondary"
+                 :outline="true"
+                 size="sm"
+                 icon="ph:file-xls-light"
+                 :href="path('app_competence_export_croise_global', {parcours: parcours.id})"
+                 tooltip="Exporter le tableau croisé compétences/EC au format Excel (.xlsx)">
+        Export Excel
+    </twig:Button>
+
+    <twig:Button variant="secondary"
+                 size="sm"
+                 icon="icon:arrow-left"
+                 :href="path('parcours_v2_voir', {parcours: parcours.id})"
+                 tooltip="Revenir à la fiche du parcours">
+        Retour au parcours
+    </twig:Button>
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-6 pb-12">
+
+        {# 1. Bannière d'état (Édition vs Consultation seule) #}
+        {% if editable %}
+            <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-primary-200 bg-primary-50/70 p-4 text-xs text-primary-900 dark:border-primary-800/60 dark:bg-primary-950/30 dark:text-primary-200 shadow-sm">
+                <div class="flex items-center gap-2.5">
+                    {{ ux_icon('icon:info-circle', {class: 'h-5 w-5 shrink-0 text-primary-600 dark:text-primary-400'}) }}
+                    <div>
+                        <span class="font-bold">Mode édition actif :</span>
+                        <span>Cochez ou décochez les cases pour associer les compétences aux éléments constitutifs. Chaque modification est enregistrée automatiquement en temps réel.</span>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1.5 font-semibold text-emerald-800 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-900/50 px-2.5 py-1 rounded-full text-[11px] shadow-sm">
+                    {{ ux_icon('icon:check', {class: 'h-3.5 w-3.5'}) }} Sauvegarde automatique
+                </span>
+            </div>
+        {% else %}
+            <twig:alerte type="warning">
+                Le tableau croisé est affiché en <strong>consultation seule</strong>. Les compétences et liens EC ne
+                sont modifiables que lorsque le parcours est en cours de rédaction dans la campagne active.
+            </twig:alerte>
+        {% endif %}
+
+        {# 2. Blocs KPI / Statistiques de couverture #}
+        {% if bccData.stats is defined %}
+            {% set stats = bccData.stats %}
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+                {% if stats.totalBcc is defined %}
+                    <twig:Kpi title="Blocs de compétences"
+                              :value="stats.totalBcc"
+                              description="Blocs définis"
+                              variant="primary"
+                              icon="ph:certificate-light"/>
+                {% endif %}
+
+                <twig:Kpi title="Compétences"
+                          :value="stats.totalCompetences"
+                          description="Compétences du parcours"
+                          variant="info"
+                          icon="ph:tree-structure-light"/>
+
+                <twig:Kpi title="Éléments constitutifs"
+                          :value="stats.totalEcs|default(stats.totalFiches|default(0))"
+                          description="EC / Ressources mobilisables"
+                          variant="secondary"
+                          icon="ph:books-light"/>
+
+                {% if stats.tauxCouverture is defined %}
+                    <twig:Kpi title="Taux de couverture"
+                              :value="stats.nbCompetencesCouvertes|default(stats.nbAcCouvertes|default(0))"
+                              :total="stats.totalCompetences|default(stats.totalAc|default(0))"
+                              :percent="stats.tauxCouverture"
+                              :showProgress="true"
+                              :variant="stats.tauxCouverture == 100 ? 'success' : (stats.tauxCouverture >= 75 ? 'info' : 'warning')"
+                              icon="ph:chart-pie-slice-light"/>
+                {% endif %}
+
+                <twig:Kpi title="Mobilisations"
+                          :value="stats.totalMobilisations"
+                          description="Liens Compétence ↔ EC"
+                          variant="secondary"
+                          icon="ph:check-square-offset-light"/>
+            </div>
+
+            {# Alerte si des compétences ne sont jamais mobilisées #}
+            {% if stats.competencesNonCouvertes is defined and stats.competencesNonCouvertes|length > 0 %}
+                <div class="rounded-xl border border-warning-200 bg-warning-50/70 p-4 text-xs text-warning-900 dark:border-warning-800/60 dark:bg-warning-950/30 dark:text-warning-200">
+                    <div class="flex items-start gap-2.5">
+                        {{ ux_icon('icon:warning', {class: 'h-4 w-4 shrink-0 text-warning-600 dark:text-warning-400 mt-0.5'}) }}
+                        <div>
+                            <span class="font-bold">Attention : {{ stats.competencesNonCouvertes|length }} compétence(s) orpheline(s)</span>
+                            <p class="mt-0.5 text-warning-800 dark:text-warning-300">
+                                Les compétences suivantes ne sont mobilisées dans aucun EC du parcours :
+                                <span class="font-semibold">
+                                    {% for orphan in stats.competencesNonCouvertes %}
+                                        {{ orphan.code }} ({{ orphan.libelle }}){% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {# 3. Tableau croisé décliné selon le type de diplôme #}
+        {{ include(bccTemplate|default('parcours_bcc/_tableauCroise.html.twig'), {
+            parcours: parcours,
+            bccData: bccData,
+            dto: dto,
+            activeSemestre: activeSemestre|default(null),
+            editable: editable,
+            typeD: typeD
+        }) }}
+
+    </div>
 {% endblock %}

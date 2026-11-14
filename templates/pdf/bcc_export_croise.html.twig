@@ -1,6 +1,411 @@
 {% extends 'pdf/base-pdf.html.twig' %}
 
-{% block content %}
-    {{ include('parcours_bcc/_tableauCroise.html.twig') }}
+{% block title %}Tableau croisé Compétences / EC - {{ parcours.display }}{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        body {
+            font-size: 8px;
+            color: #1e293b;
+            background-color: #ffffff;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Supprimer les effets interactifs et positionnements écran */
+        .sticky, [class*="sticky"] {
+            position: static !important;
+        }
+
+        .shadow-sm, [class*="shadow"] {
+            box-shadow: none !important;
+        }
+
+        .overflow-x-auto, .overflow-hidden {
+            overflow: visible !important;
+        }
+
+        /* Méta-informations du document */
+        .pdf-meta-bar {
+            border-bottom: 1.5px solid #cbd5e1;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+        }
+
+        .pdf-header-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pdf-header-table td {
+            vertical-align: middle;
+            border: none;
+            padding: 0;
+        }
+
+        .pdf-formation-title {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .pdf-report-meta {
+            font-size: 7.5px;
+            color: #64748b;
+        }
+
+        .pdf-header-badge {
+            display: inline-block;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            font-size: 7.5px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        /* Cartes KPI synthétiques */
+        .pdf-kpi-grid {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 5px;
+            margin-bottom: 8px;
+        }
+
+        .pdf-kpi-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 4px 6px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .pdf-kpi-val {
+            font-size: 12px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .pdf-kpi-lbl {
+            font-size: 7px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-top: 1px;
+            letter-spacing: 0.2px;
+        }
+
+        .pdf-kpi-highlight {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .pdf-kpi-highlight .pdf-kpi-val {
+            color: #15803d;
+        }
+
+        /* Barre de légende */
+        .pdf-legend-bar {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 3px 6px;
+            margin-bottom: 12px;
+            font-size: 7px;
+            color: #475569;
+        }
+
+        .pdf-legend-item {
+            display: inline-block;
+            margin-right: 14px;
+        }
+
+        .pdf-legend-icon {
+            font-weight: bold;
+            margin-right: 3px;
+        }
+
+        /* En-tête de semestre */
+        .pdf-semestre-header {
+            background-color: #0f172a;
+            color: #ffffff;
+            padding: 5px 8px;
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .pdf-semestre-badge {
+            background-color: #780016;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 8px;
+            padding: 1.5px 5px;
+            border-radius: 3px;
+            margin-right: 6px;
+        }
+
+        .pdf-semestre-title {
+            font-weight: 700;
+            font-size: 9px;
+        }
+
+        .pdf-semestre-meta {
+            font-size: 7px;
+            color: #cbd5e1;
+            margin-left: auto;
+        }
+
+        /* Tableau croisé optimisé */
+        .table-croise-pdf {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            border-spacing: 0 !important;
+            font-size: 7px !important;
+            page-break-inside: auto;
+            border: 1px solid #94a3b8 !important;
+        }
+
+        .table-croise-pdf thead {
+            display: table-header-group !important;
+        }
+
+        .table-croise-pdf tfoot {
+            display: table-footer-group !important;
+        }
+
+        .table-croise-pdf tr {
+            page-break-inside: avoid !important;
+        }
+
+        .table-croise-pdf th,
+        .table-croise-pdf td {
+            border: 1px solid #cbd5e1 !important;
+            padding: 2px 3px !important;
+            vertical-align: middle !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        .table-croise-pdf th {
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+            font-weight: 700 !important;
+            text-align: center !important;
+        }
+
+        .table-croise-pdf th.col-competences {
+            width: 220px !important;
+            min-width: 180px !important;
+            max-width: 240px !important;
+            text-align: left !important;
+            background-color: #e2e8f0 !important;
+        }
+
+        .table-croise-pdf td.align-top {
+            vertical-align: top !important;
+        }
+
+        /* Checkmark et badges PDF */
+        .pdf-check {
+            display: inline-block;
+            color: #15803d;
+            font-weight: 900;
+            font-size: 9.5px;
+            line-height: 1;
+        }
+
+        /* Saut de page entre semestres */
+        .semestre-block {
+            margin-bottom: 16px;
+            page-break-inside: auto;
+        }
+
+        .semestre-block:not(:first-child) {
+            page-break-before: always;
+            break-before: page;
+        }
+    </style>
 {% endblock %}
 
+{% block content %}
+    {# 1. Méta-informations du parcours et de la formation #}
+    <div class="pdf-meta-bar">
+        <table class="pdf-header-table">
+            <tr>
+                <td>
+                    <div class="pdf-formation-title">
+                        {{ formation.displayLong|default(formation.display) }} &bull; Parcours : {{ parcours.display }}
+                    </div>
+                    <div class="pdf-report-meta">
+                        {% if formation.composante is defined and formation.composante is not null %}
+                            {{ formation.composante.display }} &bull;
+                        {% endif %}
+                        Édité le {{ 'now'|date('d/m/Y à H:i') }}
+                    </div>
+                </td>
+                <td style="text-align: right; width: 35%;">
+                    <span class="pdf-header-badge">
+                        {{ typeD.type|default('Licence')|upper }}
+                    </span>
+                    {% if formation.mention is defined and formation.mention is not null %}
+                        <span style="font-size: 7.5px; color: #475569; margin-left: 6px;">
+                            Mention {{ formation.mention.display }}
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {# 2. Grille de statistiques KPI #}
+    {% if bccData.stats is defined %}
+        {% set stats = bccData.stats %}
+        <table class="pdf-kpi-grid">
+            <tr>
+                {% if stats.totalBcc is defined %}
+                    <td class="pdf-kpi-card" style="width: 20%;">
+                        <div class="pdf-kpi-val">{{ stats.totalBcc }}</div>
+                        <div class="pdf-kpi-lbl">Blocs de compétences</div>
+                    </td>
+                {% endif %}
+
+                <td class="pdf-kpi-card" style="width: 20%;">
+                    <div class="pdf-kpi-val">{{ stats.totalCompetences|default(stats.totalAc|default(0)) }}</div>
+                    <div class="pdf-kpi-lbl">Compétences du parcours</div>
+                </td>
+
+                <td class="pdf-kpi-card" style="width: 20%;">
+                    <div class="pdf-kpi-val">{{ stats.totalEcs|default(stats.totalFiches|default(0)) }}</div>
+                    <div class="pdf-kpi-lbl">Éléments constitutifs (EC)</div>
+                </td>
+
+                {% if stats.tauxCouverture is defined %}
+                    <td class="pdf-kpi-card pdf-kpi-highlight" style="width: 20%;">
+                        <div class="pdf-kpi-val">{{ stats.tauxCouverture }} %</div>
+                        <div class="pdf-kpi-lbl">Taux de couverture</div>
+                    </td>
+                {% endif %}
+
+                <td class="pdf-kpi-card" style="width: 20%;">
+                    <div class="pdf-kpi-val">{{ stats.totalMobilisations|default(0) }}</div>
+                    <div class="pdf-kpi-lbl">Mobilisations Compétence ↔ EC</div>
+                </td>
+            </tr>
+        </table>
+    {% endif %}
+
+    {# 3. Barre de légende #}
+    <div class="pdf-legend-bar">
+        <span class="pdf-legend-item">
+            <span class="pdf-legend-icon pdf-check">&#10003;</span> Compétence mobilisée dans l'EC
+        </span>
+        <span class="pdf-legend-item">
+            <span class="pdf-legend-icon" style="color: #94a3b8;">-</span> Non mobilisée
+        </span>
+        <span class="pdf-legend-item">
+            <span class="pdf-legend-icon" style="font-weight: 700;">Total EC</span> : Nombre d'EC contribuant à la compétence
+        </span>
+        <span class="pdf-legend-item">
+            <span class="pdf-legend-icon" style="font-weight: 700;">Total Compétences</span> : Nombre de compétences mobilisées par l'EC
+        </span>
+    </div>
+
+    {# 4. Rendu des tableaux de semestre #}
+    {% set editable = false %}
+    {% if bccData.semestresData is defined and bccData.semestresData|length > 0 %}
+        {# Rendu Licence et diplômes universitaires #}
+        {% for semOrdre, sData in bccData.semestresData %}
+            <div class="semestre-block">
+                {{ include('parcours_bcc/_semestre_table_content.html.twig', {
+                    parcours: parcours,
+                    semOrdre: semOrdre,
+                    sData: sData,
+                    bccData: bccData,
+                    editable: false,
+                    isPdf: true
+                }) }}
+            </div>
+        {% endfor %}
+    {% elseif bccData.semestresDisponibles is defined and bccData.semestresDisponibles|length > 0 %}
+        {# Rendu BUT (Apprentissages critiques x Fiches matières SAÉ / Ressources) #}
+        {% set competences = bccData.competences|default([]) %}
+        {% set niveaux = bccData.niveaux|default([]) %}
+        {% set tabFichesMatieres = bccData.tabFichesMatieres|default([]) %}
+        {% set apprentissagesCritiques = bccData.apprentissagesCritiques|default([]) %}
+        {% set tabUeEc = bccData.tabUeEc|default([]) %}
+
+        {% for semOrdre, sInfo in bccData.semestresDisponibles %}
+            {% set fichesInSemestre = tabFichesMatieres[semOrdre] ?? [] %}
+            <div class="semestre-block">
+                <div class="pdf-semestre-header">
+                    <span class="pdf-semestre-badge">S{{ semOrdre }}</span>
+                    <span class="pdf-semestre-title">{{ sInfo.display|default('Semestre ' ~ semOrdre) }}</span>
+                    <span class="pdf-semestre-meta">
+                        {{ fichesInSemestre|length }} ressource(s) et SAÉ
+                    </span>
+                </div>
+
+                {% if fichesInSemestre|length > 0 %}
+                    <table class="table-croise-pdf">
+                        <thead>
+                        <tr>
+                            <th class="col-competences">Apprentissages critiques (AC)</th>
+                            {% for fiche in fichesInSemestre %}
+                                <th>
+                                    <div style="font-weight: 700;">{{ fiche.sigle|default(fiche.code) }}</div>
+                                    <div style="font-size: 6px; color: #64748b; font-weight: normal;">{{ fiche.nature|default('EC') }}</div>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for competence in competences %}
+                            {% if niveaux[competence.id][semOrdre] is defined and niveaux[competence.id][semOrdre]|length > 0 %}
+                                <tr style="background-color: #f1f5f9;">
+                                    <td colspan="{{ fichesInSemestre|length + 1 }}"
+                                        style="font-weight: 700; color: #0f172a; padding: 3px 5px;">
+                                        C{{ competence.numero }} — {{ competence.nomCourt }} ({{ competence.libelle }})
+                                    </td>
+                                </tr>
+                                {% for ac in niveaux[competence.id][semOrdre] %}
+                                    <tr>
+                                        <td style="padding: 2px 4px;">
+                                            <strong style="color: #780016;">{{ ac.code }}</strong> — {{ ac.libelle }}
+                                        </td>
+                                        {% for fiche in fichesInSemestre %}
+                                            <td style="text-align: center;">
+                                                {% if tabUeEc[semOrdre][competence.numero][fiche.id] is defined %}
+                                                    {% if apprentissagesCritiques[fiche.id][ac.id] is defined %}
+                                                        <span class="pdf-check">&#10003;</span>
+                                                    {% else %}
+                                                        <span style="color: #cbd5e1;">-</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span style="color: #e2e8f0;">&bull;</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div style="padding: 12px; text-align: center; color: #64748b; border: 1px solid #e2e8f0; border-top: none;">
+                        Aucune ressource ou SAÉ configurée pour le semestre {{ semOrdre }}.
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div style="padding: 20px; text-align: center; color: #64748b; border: 1px solid #e2e8f0; border-radius: 4px;">
+            Aucune donnée de compétences ou d'éléments constitutifs disponible pour l'export.
+        </div>
+    {% endif %}
+{% endblock %}
