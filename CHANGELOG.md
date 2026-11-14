@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.8.0](https://github.com/OReOF-URCA/oreof/compare/v2.7.0...v2.8.0) (2026-11-14)
+
+
+### Features
+
+* **access:** ajout du champ classique/non classique ([50962dd](https://github.com/OReOF-URCA/oreof/commit/50962dd481c7416e5bfe1b71e0dc42e6619964af))
+* **access:** enhance resource access control with support for multiple routes and timeline checks ([f6dd3b9](https://github.com/OReOF-URCA/oreof/commit/f6dd3b9ba94d18d6337d45db92b5004ba8b54fc2))
+* **access:** enhance transition management with timeline module checks and update recipient lists ([a6562cc](https://github.com/OReOF-URCA/oreof/commit/a6562cc349c4aae99d6b0a218fca20a186b7883d))
+* **bcc:** implement BCC cross-reference templates and update PDF export functionality ([900ee4c](https://github.com/OReOF-URCA/oreof/commit/900ee4c092c02555fa536b9b655999b0dfaca916))
+* **compétences:** implement management for transverse competencies with import and new UI components ([d3467cd](https://github.com/OReOF-URCA/oreof/commit/d3467cdeca3d4abce1367839c0b23ba669a6853d))
+* **descriptifs:** add management for parcours descriptifs with automatic and manual options ([7b76bc1](https://github.com/OReOF-URCA/oreof/commit/7b76bc122f3e946c356596366fb53f5b4750064e))
+* **etablissement:** implement management for establishment offers with new routes and validation transitions ([7fb0370](https://github.com/OReOF-URCA/oreof/commit/7fb0370a70bad0916f42bc1f95dfc1df32467acb))
+* **export:** add PDF export for modifications summary of offers ([59bf6bb](https://github.com/OReOF-URCA/oreof/commit/59bf6bb94ff8ca52abf7757f7b5e053575286ed7))
+* **parcours:** enhance state management with new workflow options and validation updates ([29cebb2](https://github.com/OReOF-URCA/oreof/commit/29cebb2d10186f401a8b75b140beb709899342a9))
+
+
+### Bug Fixes
+
+* **formation:** « Modifier le DPE » et bannière respectent le verrou du workflow ([56adeeb](https://github.com/OReOF-URCA/oreof/commit/56adeeb674a501206d7f71cb0fefa59023bd575e))
+
 ## [2.7.0](https://github.com/OReOF-URCA/oreof/compare/v2.6.0...v2.7.0) (2026-11-13)
 
 
