@@ -216,6 +216,13 @@ class HistoriqueSubscriber implements EventSubscriberInterface
             }
         }
 
+        $input = $event->getInput();
+        if (array_key_exists('etat_depart', $input)) {
+            $tab['etat_depart'] = (string)$input['etat_depart'];
+        } elseif ($request->request->has('etat_depart')) {
+            $tab['etat_depart'] = $request->request->getString('etat_depart');
+        }
+
         // Dépôt de fichier (PV) ou liaison PV existant
         $pvId = $request->request->get('pv_id');
         if ($pvId) {
@@ -395,6 +402,12 @@ class HistoriqueSubscriber implements EventSubscriberInterface
             } elseif ($request->request->has($argumentKey)) {
                 $tab[$argumentKey] = $request->request->get($argumentKey);
             }
+        }
+
+        if (array_key_exists('etat_depart', $input)) {
+            $tab['etat_depart'] = (string)$input['etat_depart'];
+        } elseif ($request->request->has('etat_depart')) {
+            $tab['etat_depart'] = $request->request->getString('etat_depart');
         }
 
         if ($fileName !== null && $fileName !== '') {

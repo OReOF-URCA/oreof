@@ -20,16 +20,20 @@ class HistoriqueFormationEvent extends AbstractHistoriqueEvent
 
     private Formation $formation;
     private ?string $fileName;
+    /** @var array<string, mixed> */
+    private array $input;
 
     /**
      * @param Formation $formation
+     * @param array<string, mixed> $input
      */
-    public function __construct(Formation $formation, UserInterface $user, string $etape, string $etat, Request $request, ?string $fileName = null)
+    public function __construct(Formation $formation, UserInterface $user, string $etape, string $etat, Request $request, ?string $fileName = null, array $input = [])
     {
         parent::__construct($user, $etape, $etat, $request);
 
         $this->formation = $formation;
         $this->fileName = $fileName;
+        $this->input = $input;
     }
 
     public function getFormation(): Formation
@@ -41,4 +45,13 @@ class HistoriqueFormationEvent extends AbstractHistoriqueEvent
     {
         return $this->fileName;
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getInput(): array
+    {
+        return $this->input;
+    }
 }
+

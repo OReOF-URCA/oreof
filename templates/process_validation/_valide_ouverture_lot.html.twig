@@ -1,9 +1,0 @@
-<form action="{{ path('app_validation_valide_ouverture_lot', {etape:etape}) }}" method="post">
-    <input type="hidden" name="parcours" value="{{ sParcours }}">
-    <div class="mt-2">
-        <button type="submit" class="btn btn-success">
-            <i class="fal fa-floppy-disk"></i>
-            {{ ('btn.'~etape~'.valide')|trans({}, 'process') }}
-        </button>
-    </div>
-</form>

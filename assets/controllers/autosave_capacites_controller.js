@@ -70,16 +70,34 @@ export default class extends Controller {
   }
 
   onFocusIn(event) {
-    if (event.target.tagName === 'SELECT') {
+      if (event.target && event.target.name) {
       this.previousValues[event.target.name] = event.target.value
     }
   }
 
   onFocusOut(event) {
     if (!event.target) return
-    if (this.isPlateformeCapacityDetailInput(event.target)) {
-      const updated = this.updatePlateformeGlobale(event.target)
-      if (updated && !this.saving) {
+      if (event.target.closest('#configurer_mutualisation_block') || event.target.closest('[data-controller="mutualisation"]')) {
+          return
+      }
+
+      const target = event.target
+      const name = target.name
+      if (!name) return
+
+      // Les champs de saisie (texte et nombre) sont enregistrés à la perte de focus (blur)
+      if (target.tagName === 'INPUT' && (target.type === 'number' || target.type === 'text')) {
+          let detailUpdated = false
+          if (this.isPlateformeCapacityDetailInput(target)) {
+              detailUpdated = this.updatePlateformeGlobale(target)
+          }
+
+          const hasPrev = Object.prototype.hasOwnProperty.call(this.previousValues, name)
+          const prevVal = hasPrev ? this.previousValues[name] : target.defaultValue
+          const currentVal = target.value
+
+          if (!hasPrev || prevVal !== currentVal || detailUpdated) {
+              this.previousValues[name] = currentVal
         clearTimeout(this.timeout)
         this.save()
       }
@@ -196,6 +214,9 @@ export default class extends Controller {
           otherInput.checked = target.checked
         } else {
           otherInput.value = target.value
+            if (this.isPlateformeCapacityDetailInput(otherInput)) {
+                this.updatePlateformeGlobale(otherInput)
+            }
         }
       }
       if (tcField.startsWith('regime_')) {
@@ -213,9 +234,13 @@ export default class extends Controller {
     this.revision += 1
     this.syncTroncCommun(event.target)
 
+      if (this.isPlateformeCapacityDetailInput(event.target)) {
+          this.updatePlateformeGlobale(event.target)
+      }
+
     if (event.target.name && event.target.name.startsWith('annee_') && event.target.name.endsWith('_capaciteAccueil')) {
       const anneeId = event.target.name.split('_')[1]
-      const capValEl = this.element.querySelector(`#annee_${anneeId}_capacite_val`)
+        const capValEl = typeof this.element.querySelector === 'function' ? this.element.querySelector(`#annee_${anneeId}_capacite_val`) : null
       if (capValEl) {
         capValEl.textContent = event.target.value || '0'
       }
@@ -223,22 +248,7 @@ export default class extends Controller {
 
     if (this.statusState !== 'error') this.setStatus('typing', 'Modifications en attente d’enregistrement')
 
-    // Pour les champs numériques (capacités d'accueil et de plateformes), le calcul et la sauvegarde
-    // se font à la perte de focus (change/focusout) afin d'éviter l'effet gênant de la saisie qui se recharge
-    // à chaque clic sur les flèches incrémentales (up).
-    if (event.target.type === 'number') {
       clearTimeout(this.timeout)
-      return
-    }
-
-    // Only debounce text fields
-    if (event.target.type === 'text') {
-      clearTimeout(this.timeout)
-      const delay = 1000
-      this.timeout = setTimeout(() => {
-        this.save()
-      }, delay)
-    }
   }
 
   onChange(event) {
@@ -246,6 +256,12 @@ export default class extends Controller {
     if (event.target.closest('#configurer_mutualisation_block') || event.target.closest('[data-controller="mutualisation"]')) {
       return
     }
+
+      // Les champs de saisie (texte et nombre) sont désormais enregistrés au blur (focusout)
+      // afin d'éviter tout rechargement pendant la saisie ou au clic répété sur les steppers.
+      if (event.target.tagName === 'INPUT' && (event.target.type === 'number' || event.target.type === 'text')) {
+          return
+      }
 
     this.revision += 1
     this.syncTroncCommun(event.target)
@@ -330,12 +346,7 @@ export default class extends Controller {
       }
     }
 
-    // 3. For check boxes and other selects, or direct change on text/number
-    if (event.target.type === 'number' || event.target.type === 'text') {
-      clearTimeout(this.timeout)
-      this.save()
-      return
-    }
+      // 3. For check boxes and other selects
 
     if (event.target.type === 'checkbox' || event.target.tagName === 'SELECT') {
       if (name) {

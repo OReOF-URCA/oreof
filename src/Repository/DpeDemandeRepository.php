@@ -58,6 +58,20 @@ class DpeDemandeRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
+    public function findLastUnclosedDemandeMention(Formation $formation): ?DpeDemande
+    {
+        return $this->createQueryBuilder('d')
+            ->where('d.formation = :formation')
+            ->andWhere('d.parcours IS NULL')
+            ->andWhere('d.dateCloture IS NULL')
+            ->setParameter('formation', $formation)
+            ->orderBy('d.updated', 'DESC')
+            ->addOrderBy('d.id', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     public function findLastOpenedDemandeMention(Formation $formation, EtatDpeEnum $etat): ?DpeDemande
     {
         return $this->createQueryBuilder('d')

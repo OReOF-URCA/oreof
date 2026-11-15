@@ -283,4 +283,10 @@ final class ParcoursHeader
 
         return $this->em->getRepository(ParcoursVersioning::class)->findLastVersion($this->parcours);
     }
+
+    public function isReouvert(): bool
+    {
+        return $this->dpeParcours !== null && $this->dpeParcours->isReouvert();
+    }
 }
+

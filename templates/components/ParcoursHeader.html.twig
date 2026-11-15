@@ -290,6 +290,19 @@
                     </button>
                 {% endif %}
 
+                {% if dpeParcours != null and dpeParcours.isReouvert %}
+                    <a class="{{ quickBtnWarning }} relative"
+                       data-action="click->modalturbo#open"
+                       data-turbo="true"
+                       href="{{ path('app_validation_demande_reouverture_cloture', {parcours: parcours.id}) }}"
+                            {{ stimulus_controller('tooltip') }}
+                       title="Clôturer ou annuler la réouverture en cours de ce parcours">
+                        {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
+                        <span>Clôturer / Annuler réouverture</span>
+                        <span class="inline-flex h-2 w-2 rounded-full bg-warning-500 animate-pulse"></span>
+                    </a>
+                {% endif %}
+
                 <button class="{{ quickBtnSecondary }}"
                         data-toggle-group="accordion-parcours"
                         data-toggle="actions" data-target="#actions-panel-parcours"
@@ -330,6 +343,19 @@
 
         <div class="{{ panelClass }}" id="actions-panel-parcours">
             <div class="{{ panelGridClass }}">
+                {% if dpeParcours != null and dpeParcours.isReouvert %}
+                    <div>
+                        <a class="{{ quickBtnWarning }} w-full"
+                           data-action="click->modalturbo#open"
+                           data-turbo="true"
+                           href="{{ path('app_validation_demande_reouverture_cloture', {parcours: parcours.id}) }}"
+                                {{ stimulus_controller('tooltip') }}
+                           title="Clôturer les modifications ou annuler la réouverture du parcours">
+                            {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
+                            <span>Clôturer / Annuler réouverture</span>
+                        </a>
+                    </div>
+                {% endif %}
                 <div>
                     <a class="{{ quickBtnPrimary }} w-full"
                        href="{{ path('app_parcours_bcc', {parcours:parcours.id}) }}">
@@ -608,6 +634,17 @@
                                         <span>Modifier ouverture</span>
                                     </a>
                                 </div>
+                                {% if dpeParcours.isReouvert %}
+                                    <div>
+                                        <a class="{{ quickBtnWarning }} w-full"
+                                           data-action="click->modalturbo#open"
+                                           data-turbo="true"
+                                           href="{{ path('app_validation_demande_reouverture_cloture', { parcours: parcours.id }) }}">
+                                            {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
+                                            <span>Clôturer / Annuler réouverture</span>
+                                        </a>
+                                    </div>
+                                {% endif %}
                                 <div>
                                     <a class="{{ quickBtnSecondary }} relative w-full"
                                        data-action="click->modalturbo#open"

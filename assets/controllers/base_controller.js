@@ -81,16 +81,21 @@ export default class extends Controller {
       })
       .then(async (success) => {
         if (!success) return
-        this.modal.hide()
+          if (this.modal && typeof this.modal.hide === 'function') {
+              this.modal.hide()
+          }
+          window.dispatchEvent(new CustomEvent('modal:close'))
         document.querySelectorAll('.modal-backdrop').forEach((e) => {
           e.remove()
         })
 
         // tester si l'objet json updateComponent n'est pas vide et contient les clés id et event
-        if (Object.keys(this.updateComponent).length > 0 && this.updateComponent.id && this.updateComponent.event) {
+          if (this.updateComponent && Object.keys(this.updateComponent).length > 0 && this.updateComponent.id && this.updateComponent.event) {
           // this.refreshPage()
-          const component = document.getElementById(this.updateComponent.id).__component
-          component.emit(this.updateComponent.event)
+              const component = document.getElementById(this.updateComponent.id)?.__component
+              component?.emit(this.updateComponent.event)
+          } else {
+              window.location.reload()
         }
 
         this.dispatch(this.nomEvenement, { detail: this.details })

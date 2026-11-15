@@ -344,16 +344,35 @@ class VersioningFormation
 
     public function rollbackToLastVersion(Formation $formation): void
     {
-        if (count($this->formationTextDifferences) > 0) {
-            //todo: a finir
-            //                $formation->setC($this->formationTextDifferences['composanteInscriptionFormation']);
-            //                $formation->setRegimeInscription($lastVersion->getRegimeInscription());
-            //                $formation->setResponsableMention($lastVersion->getResponsableMention());
-            //                $formation->setCoResponsable($lastVersion->getCoResponsable());
-            //                $formation->setLocalisationMention($lastVersion->getLocalisationMention());
-            //                $formation->setObjectifsFormation($lastVersion->getObjectifsFormation());
-            //                $formation->setContenuFormation($lastVersion->getContenuFormation());
-            //                $formation->setResultatsAttendus($lastVersion->getResultatsAttendus());
+        $lastVersion = $this->getLastVersion($formation);
+        if ($lastVersion === null) {
+            return;
+        }
+
+        $oldFormation = $this->loadFormationFromVersion($lastVersion);
+        if ($oldFormation === null) {
+            return;
+        }
+
+        $formation->setContenuFormation($oldFormation->getContenuFormation());
+        $formation->setObjectifsFormation($oldFormation->getObjectifsFormation());
+        $formation->setResultatsAttendus($oldFormation->getResultatsAttendus());
+        $formation->setResponsableMention($oldFormation->getResponsableMention());
+        $formation->setCoResponsable($oldFormation->getCoResponsable());
+        $formation->setRegimeInscription($oldFormation->getRegimeInscription());
+        $formation->setRegimeInscriptionTexte($oldFormation->getRegimeInscriptionTexte());
+        $formation->setRythmeFormation($oldFormation->getRythmeFormation());
+        $formation->setRythmeFormationTexte($oldFormation->getRythmeFormationTexte());
+        $formation->setModalitesAlternance($oldFormation->getModalitesAlternance());
+
+        $formation->getLocalisationMention()->clear();
+        foreach ($oldFormation->getLocalisationMention() as $ville) {
+            $formation->addLocalisationMention($ville);
+        }
+
+        $formation->getComposantesInscription()->clear();
+        foreach ($oldFormation->getComposantesInscription() as $comp) {
+            $formation->addComposantesInscription($comp);
         }
     }
 }
