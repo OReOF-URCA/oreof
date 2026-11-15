@@ -92,8 +92,18 @@
 
     {% block javascripts %}
         {#            {% block importmap %}{{ importmap('app') }}{% endblock %} #}
+        {% set _allToasts = [] %}
+        {% for _toastItem in app.flashes('toast') %}
+            {% set _allToasts = _allToasts|merge([_toastItem]) %}
+        {% endfor %}
+        {% for _label, _messages in app.flashes %}
+            {% for _msg in _messages %}
+                {% set _toastType = _label == 'error' ? 'danger' : (_label == 'notice' ? 'warning' : _label) %}
+                {% set _allToasts = _allToasts|merge([{ text: _msg, type: _toastType }]) %}
+            {% endfor %}
+        {% endfor %}
         <script>
-          window.toasts = {{ app.flashes('toast')|json_encode|raw }};
+            window.toasts = {{ _allToasts|json_encode|raw }};
         </script>
         {{ reprise_entry_script_tags('app') }}
     {% endblock %}
@@ -152,22 +162,6 @@
         />
     {% endblock %}
     <main id="main-content" tabindex="-1" class="flex-1 scroll-mt-[calc(var(--page-header-offset,var(--topbar-height,4rem))+1rem)]">
-        <!-- messages flash (Tailwind) -->
-        {# read and display all flash messages #}
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                {% set bgClass = label == 'info' ? 'bg-indigo-600' : label == 'success' ? 'bg-green-600' : label == 'warning' ? 'bg-yellow-500' : label == 'danger' ? 'bg-red-600' : 'bg-gray-600' %}
-                <div class="fixed top-4 right-4 z-50 max-w-[28rem] flex items-start space-x-3 p-3 rounded-lg shadow-lg text-white {{ bgClass }}"
-                     role="status">
-                    <div class="flex-1 text-sm">{{ message }}</div>
-                    <button type="button" class="ml-2 text-white opacity-80 hover:opacity-100" aria-label="Close"
-                            onclick="this.closest('[role=\'status\']').remove()">&times;
-                    </button>
-                </div>
-            {% endfor %}
-        {% endfor %}
-
-        <!-- fin messages flash -->
         <div class="mx-auto w-full px-4 sm:px-6 lg:px-8">
             <!-- Title and Top Buttons End -->
             {% block content %}

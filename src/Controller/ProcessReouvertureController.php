@@ -6,6 +6,7 @@ use App\Classes\GetDpeParcours;
 use App\Classes\JsonReponse;
 use App\Classes\ValidationProcess;
 use App\Entity\DpeDemande;
+use App\Entity\DpeParcours;
 use App\Entity\Formation;
 use App\Entity\HistoriqueFormation;
 use App\Entity\HistoriqueParcours;
@@ -351,9 +352,9 @@ class ProcessReouvertureController extends BaseController
 
             $this->entityManager->flush();
 
-            $messageSuccess = $hasDifferences
-                ? 'Réouverture annulée, les modifications ont été annulées et l\'état initial restauré (' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ').'
-                : 'Réouverture annulée, l\'état initial a été restauré (' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ').';
+            $messageSuccess = ($targetState === 'tacite_reconduction')
+                ? 'La réouverture est annulée, le parcours est restauré en tacite reconduction.'
+                : 'La réouverture est annulée, le parcours est restauré en état publié.';
 
             return $this->handleClotureSuccessParcours($parcours, $messageSuccess, $request);
         }
@@ -463,9 +464,9 @@ class ProcessReouvertureController extends BaseController
             $this->eventDispatcher->dispatch(new DpeDemandeEvent($demande, $currentUser), DpeDemandeEvent::DPE_DEMANDE_CLOSED);
             $this->entityManager->flush();
 
-            $messageSuccess = $hasDifferences
-                ? 'Réouverture de la mention annulée, les modifications ont été annulées et l\'état initial restauré (' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ').'
-                : 'Réouverture de la mention annulée, l\'état initial a été restauré (' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ').';
+            $messageSuccess = ($targetState === 'tacite_reconduction')
+                ? 'La réouverture est annulée, la mention est restaurée en tacite reconduction.'
+                : 'La réouverture est annulée, la mention est restaurée en état publié.';
 
             return $this->handleClotureSuccessFormation($formation, $messageSuccess, $request);
         }
@@ -545,14 +546,19 @@ class ProcessReouvertureController extends BaseController
 
     private function handleClotureSuccessParcours(Parcours $parcours, string $message, Request $request): Response
     {
-        $this->addFlash('success', $message);
+        $this->toast('success', $message);
         $redirectUrl = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
 
         if ($this->isTurbo($request)) {
+            /** @var DpeParcoursRepository $dpeParcoursRepository */
+            $dpeParcoursRepository = $this->entityManager->getRepository(DpeParcours::class);
+            $dpeParcours = $dpeParcoursRepository->findLastDpeForParcours($parcours);
+
             return $this->turboStream->stream('process_validation/turbo/cloture_success.stream.html.twig', [
                 'redirectUrl' => $redirectUrl,
                 'toastMessage' => $message,
                 'parcours' => $parcours,
+                'dpeParcours' => $dpeParcours,
             ]);
         }
 
@@ -561,7 +567,7 @@ class ProcessReouvertureController extends BaseController
 
     private function handleClotureErrorParcours(Parcours $parcours, string $errorMessage, Request $request): Response
     {
-        $this->addFlash('danger', $errorMessage);
+        $this->toast('danger', $errorMessage);
         $redirectUrl = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
 
         if ($this->isTurbo($request)) {
@@ -573,7 +579,7 @@ class ProcessReouvertureController extends BaseController
 
     private function handleClotureSuccessFormation(Formation $formation, string $message, Request $request): Response
     {
-        $this->addFlash('success', $message);
+        $this->toast('success', $message);
         $redirectUrl = $this->generateUrl('formation_v2_voir', ['slug' => $formation->getSlug()]);
 
         if ($this->isTurbo($request)) {
@@ -589,7 +595,7 @@ class ProcessReouvertureController extends BaseController
 
     private function handleClotureErrorFormation(Formation $formation, string $errorMessage, Request $request): Response
     {
-        $this->addFlash('danger', $errorMessage);
+        $this->toast('danger', $errorMessage);
         $redirectUrl = $this->generateUrl('formation_v2_voir', ['slug' => $formation->getSlug()]);
 
         if ($this->isTurbo($request)) {
