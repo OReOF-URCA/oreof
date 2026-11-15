@@ -296,9 +296,9 @@
                        data-turbo="true"
                        href="{{ path('app_validation_demande_reouverture_cloture', {parcours: parcours.id}) }}"
                             {{ stimulus_controller('tooltip') }}
-                       title="Clôturer ou annuler la réouverture en cours de ce parcours">
+                       title="Annuler la réouverture en cours de ce parcours">
                         {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
-                        <span>Clôturer / Annuler réouverture</span>
+                        <span>Annuler réouverture</span>
                         <span class="inline-flex h-2 w-2 rounded-full bg-warning-500 animate-pulse"></span>
                     </a>
                 {% endif %}
@@ -350,9 +350,9 @@
                            data-turbo="true"
                            href="{{ path('app_validation_demande_reouverture_cloture', {parcours: parcours.id}) }}"
                                 {{ stimulus_controller('tooltip') }}
-                           title="Clôturer les modifications ou annuler la réouverture du parcours">
+                           title="Annuler la réouverture du parcours">
                             {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
-                            <span>Clôturer / Annuler réouverture</span>
+                            <span>Annuler réouverture</span>
                         </a>
                     </div>
                 {% endif %}
@@ -641,7 +641,7 @@
                                            data-turbo="true"
                                            href="{{ path('app_validation_demande_reouverture_cloture', { parcours: parcours.id }) }}">
                                             {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
-                                            <span>Clôturer / Annuler réouverture</span>
+                                            <span>Annuler réouverture</span>
                                         </a>
                                     </div>
                                 {% endif %}

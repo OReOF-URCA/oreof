@@ -28,21 +28,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\DependencyInjection\Attribute\Target;
-use Symfony\Component\Workflow\WorkflowInterface;
-use Dannebicque\WorkflowOperationsBundle\Operation\OperationContextNormalizer;
-use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
 
 class ProcessReouvertureController extends BaseController
 {
     public function __construct(
         private readonly EventDispatcherInterface   $eventDispatcher,
         private readonly EntityManagerInterface     $entityManager,
-        private readonly ValidationProcess          $validationProcess,
-        private readonly WorkflowOperationExecutor  $operationExecutor,
-        private readonly OperationContextNormalizer $operationContextNormalizer,
-        #[Target('dpeParcours')]
-        private readonly WorkflowInterface          $dpeParcoursWorkflow,
         private readonly TurboStreamResponseFactory $turboStream,
     ) {
     }
@@ -292,7 +283,7 @@ class ProcessReouvertureController extends BaseController
             }
             if ($this->isTurbo($request)) {
                 return $this->turboStream->streamOpenModalFromTemplates(
-                    'Clôture / Annulation de la réouverture',
+                    'Annulation de la réouverture',
                     $parcours->getDisplay(),
                     'process_validation/_demande_introuvable.html.twig',
                     ['message' => 'Aucune demande de réouverture en cours de rédaction n\'a été trouvée pour ce parcours.'],
@@ -310,7 +301,7 @@ class ProcessReouvertureController extends BaseController
 
         $hasDifferences = false;
         foreach ($textDifferencesParcours as $value) {
-            if ($value !== '') {
+            if (is_string($value) && trim(strip_tags($value)) !== '') {
                 $hasDifferences = true;
                 break;
             }
@@ -319,10 +310,10 @@ class ProcessReouvertureController extends BaseController
         // Si c'est le parcours par défaut, tester aussi les différences au niveau de la formation
         if ($parcours->isParcoursDefaut() && $parcours->getFormation() !== null) {
             $textDifferencesFormation = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($parcours->getFormation());
-            foreach ($textDifferencesFormation as $value) {
-                if ($value !== '') {
+            foreach ($textDifferencesFormation as $key => $value) {
+                if (is_string($value) && trim(strip_tags($value)) !== '') {
                     $hasDifferences = true;
-                    break;
+                    $textDifferencesParcours[$key] = $value;
                 }
             }
         }
@@ -334,107 +325,37 @@ class ProcessReouvertureController extends BaseController
             }
 
             $currentUser = $this->getCurrentUserOrFail();
-            $action = (string)$request->request->get('action', '');
-            $isAnnulation = $action === 'annuler' || $request->request->getBoolean('annuler');
             $targetState = $this->resolveInitialStateForParcours($parcours);
 
-            // 1. Si aucune différence détectée OU si l'utilisateur demande explicitement d'annuler la réouverture :
-            // Restaurer l'état initial (tacite_reconduction ou publie) sans rejouer les processus de validation !
-            if (!$hasDifferences || $isAnnulation) {
-                if ($hasDifferences && $isAnnulation) {
-                    // Annulation explicite avec rollback des modifications apportées
-                    $versioningParcours->rollbackToLastVersion($parcours);
-                    if ($parcours->isParcoursDefaut() && $parcours->getFormation() !== null) {
-                        $versioningFormation->rollbackToLastVersion($parcours->getFormation());
-                    }
+            // Annulation de la réouverture :
+            // Si des différences existent, rollback des modifications apportées
+            if ($hasDifferences) {
+                $versioningParcours->rollbackToLastVersion($parcours);
+                if ($parcours->isParcoursDefaut() && $parcours->getFormation() !== null) {
+                    $versioningFormation->rollbackToLastVersion($parcours->getFormation());
                 }
-
-                $dpe->setEtatValidation([$targetState => 1]);
-                $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-
-                $demande->setDateCloture(new DateTime('now'));
-                $demande->setEtatDemande(EtatDpeEnum::tryFrom($targetState) ?? EtatDpeEnum::publie);
-                $demande->setNiveauModification(TypeModificationDpeEnum::ANNULATION_REOUVERTURE);
-
-                $etapeHisto = $isAnnulation ? 'annulation_reouverture' : 'cloture_reouverture_sans_modif';
-                $histoEvent = new HistoriqueParcoursEvent($parcours, $currentUser, $etapeHisto, 'valide', $request);
-                $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
-
-                // Notification événementielle de clôture de la demande
-                $this->eventDispatcher->dispatch(new DpeDemandeEvent($demande, $currentUser), DpeDemandeEvent::DPE_DEMANDE_CLOSED);
-
-                $this->entityManager->flush();
-
-                $messageSuccess = $isAnnulation
-                    ? 'Réouverture annulée, les modifications ont été annulées et l\'état initial restauré (' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ').'
-                    : 'Réouverture clôturée sans modification (état initial ' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ' restauré sans processus additionnel).';
-
-                return $this->handleClotureSuccessParcours($parcours, $messageSuccess, $request);
             }
 
-            // 2. Si des différences existent et que l'utilisateur confirme la soumission :
-            if ($dpe->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_TEXTE) {
-                $dpe->setEtatValidation(['publie' => 1]);
-                $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-
-                $histoEvent = new HistoriqueParcoursEvent($parcours, $currentUser, 'cloture_ses_ss_cfvu', 'valide', $request);
-                $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
-
-                $demande->setDateCloture(new DateTime('now'));
-                $demande->setEtatDemande(EtatDpeEnum::publie);
-                $demande->setNiveauModification(TypeModificationDpeEnum::MODIFICATION_TEXTE);
-
-                $this->eventDispatcher->dispatch(new DpeDemandeEvent($demande, $currentUser), DpeDemandeEvent::DPE_DEMANDE_CLOSED);
-                $this->entityManager->flush();
-
-                return $this->handleClotureSuccessParcours($parcours, 'Modifications de texte enregistrées et publiées', $request);
-            }
-
-            if ($dpe->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC || $dpe->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE) {
-                $currentPlace = array_key_first($dpe->getEtatValidation()) ?? 'inconnue';
-                $nextStep = $this->validationProcess->getNextStepFromPlace($currentPlace);
-                if (null === $nextStep) {
-                    return $this->handleClotureErrorParcours($parcours, 'Aucune transition de validation disponible pour clôturer ce DPE', $request);
-                }
-
-                $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-                $this->operationExecutor->execute(
-                    $this->dpeParcoursWorkflow,
-                    $dpe,
-                    $nextStep['transition'],
-                    $this->operationContextNormalizer->normalize(
-                        workflow: $this->dpeParcoursWorkflow,
-                        transitionName: $nextStep['transition'],
-                        actor: $currentUser,
-                        input: [],
-                    )->withRuntime(['previous_place' => $currentPlace]),
-                );
-
-                $histoEvent = new HistoriqueParcoursEvent(
-                    $parcours,
-                    $currentUser,
-                    $currentPlace,
-                    'valide',
-                    $request,
-                );
-                $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
-
-                $demande->setDateCloture(new DateTime('now'));
-                $demande->setEtatDemande(EtatDpeEnum::publie);
-                $demande->setNiveauModification(TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE);
-
-                $this->eventDispatcher->dispatch(new DpeDemandeEvent($demande, $currentUser), DpeDemandeEvent::DPE_DEMANDE_CLOSED);
-                $this->entityManager->flush();
-
-                return $this->handleClotureSuccessParcours($parcours, 'DPE clôturé et transmis pour validation', $request);
-            }
+            $dpe->setEtatValidation([$targetState => 1]);
+            $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
 
             $demande->setDateCloture(new DateTime('now'));
-            $demande->setEtatDemande(EtatDpeEnum::publie);
+            $demande->setEtatDemande(EtatDpeEnum::tryFrom($targetState) ?? EtatDpeEnum::publie);
+            $demande->setNiveauModification(TypeModificationDpeEnum::ANNULATION_REOUVERTURE);
+
+            $histoEvent = new HistoriqueParcoursEvent($parcours, $currentUser, 'annulation_reouverture', 'valide', $request);
+            $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
+
+            // Notification événementielle de clôture de la demande
             $this->eventDispatcher->dispatch(new DpeDemandeEvent($demande, $currentUser), DpeDemandeEvent::DPE_DEMANDE_CLOSED);
+
             $this->entityManager->flush();
 
-            return $this->handleClotureSuccessParcours($parcours, 'DPE clôturé', $request);
+            $messageSuccess = $hasDifferences
+                ? 'Réouverture annulée, les modifications ont été annulées et l\'état initial restauré (' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ').'
+                : 'Réouverture annulée, l\'état initial a été restauré (' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ').';
+
+            return $this->handleClotureSuccessParcours($parcours, $messageSuccess, $request);
         }
 
         $targetState = $this->resolveInitialStateForParcours($parcours);
@@ -449,7 +370,7 @@ class ProcessReouvertureController extends BaseController
 
         if ($this->isTurbo($request)) {
             return $this->turboStream->streamOpenModalFromTemplates(
-                'Clôture / Annulation de la réouverture',
+                'Annulation de la réouverture',
                 $parcours->getDisplay(),
                 'process_validation/_demande_reouverture_cloture.html.twig',
                 $context,
@@ -492,7 +413,7 @@ class ProcessReouvertureController extends BaseController
             }
             if ($this->isTurbo($request)) {
                 return $this->turboStream->streamOpenModalFromTemplates(
-                    'Clôture / Annulation de la réouverture',
+                    'Annulation de la réouverture de la mention',
                     $formation->getDisplay(),
                     'process_validation/_demande_introuvable.html.twig',
                     ['message' => 'Aucune demande de réouverture en cours de rédaction n\'a été trouvée pour cette mention.'],
@@ -509,7 +430,7 @@ class ProcessReouvertureController extends BaseController
 
         $hasDifferences = false;
         foreach ($textDifferencesParcours as $value) {
-            if ($value !== '') {
+            if (is_string($value) && trim(strip_tags($value)) !== '') {
                 $hasDifferences = true;
                 break;
             }
@@ -517,72 +438,36 @@ class ProcessReouvertureController extends BaseController
 
         if ($request->isMethod('POST')) {
             $currentUser = $this->getCurrentUserOrFail();
-            $action = (string)$request->request->get('action', '');
-            $isAnnulation = $action === 'annuler' || $request->request->getBoolean('annuler');
             $targetState = $this->resolveInitialStateForFormation($formation);
 
-            // 1. Si aucune différence détectée OU si annulation demandée :
-            if (!$hasDifferences || $isAnnulation) {
-                if ($hasDifferences && $isAnnulation) {
-                    $versioningFormation->rollbackToLastVersion($formation);
-                }
-
-                $formation->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-                $dpe = GetDpeParcours::getFromFormation($formation);
-                if ($dpe !== null) {
-                    $dpe->setEtatValidation([$targetState => 1]);
-                    $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-                }
-
-                $demande->setDateCloture(new DateTime('now'));
-                $demande->setEtatDemande(EtatDpeEnum::tryFrom($targetState) ?? EtatDpeEnum::publie);
-                $demande->setNiveauModification(TypeModificationDpeEnum::ANNULATION_REOUVERTURE);
-
-                $etapeHisto = $isAnnulation ? 'annulation_reouverture' : 'cloture_reouverture_sans_modif';
-                $histoEvent = new HistoriqueFormationEvent($formation, $currentUser, $etapeHisto, 'valide', $request);
-                $this->eventDispatcher->dispatch($histoEvent, HistoriqueFormationEvent::ADD_HISTORIQUE_FORMATION);
-
-                $this->eventDispatcher->dispatch(new DpeDemandeEvent($demande, $currentUser), DpeDemandeEvent::DPE_DEMANDE_CLOSED);
-                $this->entityManager->flush();
-
-                $messageSuccess = $isAnnulation
-                    ? 'Réouverture de la mention annulée, état initial restauré (' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ').'
-                    : 'Réouverture de la mention clôturée sans modification (état initial ' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ' restauré).';
-
-                return $this->handleClotureSuccessFormation($formation, $messageSuccess, $request);
-            }
-
-            // 2. Si des différences existent et qu'on soumet :
-            if ($formation->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_TEXTE) {
-                $formation->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-                $dpe = GetDpeParcours::getFromFormation($formation);
-                if ($dpe !== null) {
-                    $dpe->setEtatValidation(['publie' => 1]);
-                    $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-                }
-
-                $histoEvent = new HistoriqueFormationEvent($formation, $currentUser, 'cloture_ses_ss_cfvu', 'valide', $request);
-                $this->eventDispatcher->dispatch($histoEvent, HistoriqueFormationEvent::ADD_HISTORIQUE_FORMATION);
-
-                $demande->setDateCloture(new DateTime('now'));
-                $demande->setEtatDemande(EtatDpeEnum::publie);
-                $demande->setNiveauModification(TypeModificationDpeEnum::MODIFICATION_TEXTE);
-
-                $this->eventDispatcher->dispatch(new DpeDemandeEvent($demande, $currentUser), DpeDemandeEvent::DPE_DEMANDE_CLOSED);
-                $this->entityManager->flush();
-
-                return $this->handleClotureSuccessFormation($formation, 'Modifications de la mention enregistrées et publiées', $request);
+            // Annulation de la réouverture :
+            // Si des différences existent, rollback des modifications apportées
+            if ($hasDifferences) {
+                $versioningFormation->rollbackToLastVersion($formation);
             }
 
             $formation->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
+            $dpe = GetDpeParcours::getFromFormation($formation);
+            if ($dpe !== null) {
+                $dpe->setEtatValidation([$targetState => 1]);
+                $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
+            }
+
             $demande->setDateCloture(new DateTime('now'));
-            $demande->setEtatDemande(EtatDpeEnum::publie);
-            $demande->setNiveauModification($formation->getEtatReconduction() ?? TypeModificationDpeEnum::MODIFICATION_PARCOURS);
+            $demande->setEtatDemande(EtatDpeEnum::tryFrom($targetState) ?? EtatDpeEnum::publie);
+            $demande->setNiveauModification(TypeModificationDpeEnum::ANNULATION_REOUVERTURE);
+
+            $histoEvent = new HistoriqueFormationEvent($formation, $currentUser, 'annulation_reouverture', 'valide', $request);
+            $this->eventDispatcher->dispatch($histoEvent, HistoriqueFormationEvent::ADD_HISTORIQUE_FORMATION);
 
             $this->eventDispatcher->dispatch(new DpeDemandeEvent($demande, $currentUser), DpeDemandeEvent::DPE_DEMANDE_CLOSED);
             $this->entityManager->flush();
 
-            return $this->handleClotureSuccessFormation($formation, 'DPE clôturé', $request);
+            $messageSuccess = $hasDifferences
+                ? 'Réouverture de la mention annulée, les modifications ont été annulées et l\'état initial restauré (' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ').'
+                : 'Réouverture de la mention annulée, l\'état initial a été restauré (' . ($targetState === 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié') . ').';
+
+            return $this->handleClotureSuccessFormation($formation, $messageSuccess, $request);
         }
 
         $targetState = $this->resolveInitialStateForFormation($formation);
@@ -597,7 +482,7 @@ class ProcessReouvertureController extends BaseController
 
         if ($this->isTurbo($request)) {
             return $this->turboStream->streamOpenModalFromTemplates(
-                'Clôture / Annulation de la réouverture',
+                'Annulation de la réouverture de la mention',
                 $formation->getDisplay(),
                 'process_validation/_demande_reouverture_formation_cloture.html.twig',
                 $context,

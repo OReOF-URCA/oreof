@@ -22,7 +22,10 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 final readonly class ReouvrirMcccOperationHandler implements OperationHandlerInterface
 {
-    public function __construct(private EntityManagerInterface $entityManager)
+    public function __construct(
+        private EntityManagerInterface          $entityManager,
+        private \App\Service\VersioningParcours $versioningParcours,
+    )
     {
     }
 
@@ -68,5 +71,8 @@ final readonly class ReouvrirMcccOperationHandler implements OperationHandlerInt
 
         $subject->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE);
         $this->entityManager->persist($demande);
+
+        // Sauvegarde de la version de référence pour comparaison ultérieure lors de la clôture
+        $this->versioningParcours->saveVersionOfParcours($parcours, new \DateTimeImmutable('now'), true);
     }
 }

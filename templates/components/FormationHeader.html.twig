@@ -164,9 +164,9 @@
                        data-turbo="true"
                        href="{{ path('app_validation_demande_reouverture_cloture_mention', {formation: formation.id}) }}"
                             {{ stimulus_controller('tooltip') }}
-                       title="Clôturer ou annuler la réouverture de la mention">
+                       title="Annuler la réouverture de la mention">
                         {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
-                        <span>Clôturer / Annuler réouverture</span>
+                        <span>Annuler réouverture</span>
                         <span class="inline-flex h-2 w-2 rounded-full bg-warning-500 animate-pulse"></span>
                     </a>
                 {% elseif is_granted('ROLE_ADMIN') %}
@@ -227,9 +227,9 @@
                            data-turbo="true"
                            href="{{ path('app_validation_demande_reouverture_cloture_mention', {formation: formation.id}) }}"
                                 {{ stimulus_controller('tooltip') }}
-                           title="Clôturer les modifications ou annuler la réouverture de la mention">
+                           title="Annuler la réouverture de la mention">
                             {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
-                            <span>Clôturer / Annuler réouverture</span>
+                            <span>Annuler réouverture</span>
                         </a>
                     </div>
                 {% endif %}
@@ -420,7 +420,7 @@
                                        data-action="click->modalturbo#open"
                                        class="{{ quickBtnWarning }} w-full text-xs py-2">
                                         {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
-                                        <span>Clôturer / Annuler réouverture</span>
+                                        <span>Annuler réouverture</span>
                                     </a>
                                 </div>
                             {% else %}

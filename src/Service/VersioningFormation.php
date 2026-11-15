@@ -101,23 +101,25 @@ class VersioningFormation
 
     public function getDifferencesBetweenFormationAndLastVersion(Formation $formation, bool $fromLastYear = false): array
     {
-        $this->formationTextDifferences = [];
-        $lastVersion = $this->entityManager->getRepository(FormationVersioning::class)->findBy(
-            ['formation' => $formation],
-            ['version_timestamp' => 'DESC']
-        );
-        $lastVersion = count($lastVersion) > 0 ? $lastVersion[0] : null;
-        if( ($lastVersion && $fromLastYear === false) 
-            || ($fromLastYear && $formation->getFormationOrigineCopie() !== null)
-        ) {
-            if($fromLastYear){
+        $lastVersion = null;
+        if ($fromLastYear) {
+            $lastVersion = $formation->getFormationOrigineCopie();
+        } else {
+            $lastVersionObj = $this->getLastVersion($formation);
+            if ($lastVersionObj !== null) {
+                $lastVersion = $this->loadFormationFromVersion($lastVersionObj);
+            }
+            if ($lastVersion === null && $formation->getFormationOrigineCopie() !== null) {
                 $lastVersion = $formation->getFormationOrigineCopie();
             }
-            else {
-                $lastVersion = $this->loadFormationFromVersion($lastVersion);
-            }
-            // Configuration du calcul des différences
-            $rendererName = 'Combined';
+        }
+
+        if ($lastVersion === null) {
+            return $this->formationTextDifferences;
+        }
+
+        // Configuration du calcul des différences
+        $rendererName = 'Combined';
             $differOptions = [
                 'context' => 1,
                 'ignoreWhitespace' => true,
@@ -133,13 +135,10 @@ class VersioningFormation
                 'wordGlues' => [' ', '.']
             ];
 
-            $localisationVersion = '';
-            if ($lastVersion !== null) {
-                $localisationVersion = implode(", ", array_map(
-                    fn($ville) => $ville->getLibelle(),
-                    $lastVersion->getLocalisationMention()->toArray()
-                ));
-            }
+        $localisationVersion = implode(", ", array_map(
+            fn($ville) => $ville->getLibelle(),
+            $lastVersion->getLocalisationMention()->toArray()
+        ));
             $localisationActuelle = implode(", ", array_map(
                 fn ($ville) => $ville->getLibelle(),
                 $formation->getLocalisationMention()->toArray()
@@ -152,7 +151,7 @@ class VersioningFormation
                         "</p><p class=\"list-item\">",
                         array_map(
                             fn ($composante) => $composante->getLibelle(),
-                            $lastVersion?->getComposantesInscription()->toArray() ?? []
+                            $lastVersion->getComposantesInscription()->toArray()
                         )
                     ) . "</p>",
                     "<p class=\"list-item\">"
@@ -173,7 +172,7 @@ class VersioningFormation
                         "</p><p class=\"list-item\">",
                         array_map(
                             fn ($regime) => $regime->value,
-                            $lastVersion?->getRegimeInscription() ?? []
+                            $lastVersion->getRegimeInscription()
                         )
                     ) . "</p>",
                     "<p class=\"list-item\">"
@@ -190,7 +189,7 @@ class VersioningFormation
                 )),
                 "responsableDeFormation" => html_entity_decode(DiffHelper::calculate(
                     // Version
-                    $lastVersion?->getResponsableMention() ? (
+                    $lastVersion->getResponsableMention() ? (
                         $lastVersion->getResponsableMention()->getNom()
                         . " " .
                         $lastVersion->getResponsableMention()->getPrenom()
@@ -207,7 +206,7 @@ class VersioningFormation
                 )),
                 "emailResponsableFormation" => html_entity_decode(DiffHelper::calculate(
                     // Version
-                    $lastVersion?->getResponsableMention()?->getEmail() ?? "",
+                    $lastVersion->getResponsableMention()?->getEmail() ?? "",
                     // Actuel
                     $formation->getResponsableMention()?->getEmail() ?? "",
                     $rendererName,
@@ -216,7 +215,7 @@ class VersioningFormation
                 )),
                 "coResponsableDeFormation" => html_entity_decode(DiffHelper::calculate(
                     // Version
-                    $lastVersion?->getCoResponsable() ?
+                    $lastVersion->getCoResponsable() ?
                     (
                         $lastVersion->getCoResponsable()->getNom()
                      . " " .
@@ -235,7 +234,7 @@ class VersioningFormation
                 )),
                 "emailCoResponsable" => html_entity_decode(DiffHelper::calculate(
                     // Version
-                    $lastVersion?->getCoResponsable()?->getEmail() ?? "",
+                    $lastVersion->getCoResponsable()?->getEmail() ?? "",
                     // Actuel
                     $formation->getCoResponsable()?->getEmail() ?? "",
                     $rendererName,
@@ -254,7 +253,7 @@ class VersioningFormation
                 'presentationFormationObjectifsFormation' =>
                 VersioningParcours::cleanUpComparison(
                     html_entity_decode(DiffHelper::calculate(
-                        VersioningParcours::cleanUpHtmlTextForComparison($lastVersion?->getObjectifsFormation() ?? ""),
+                        VersioningParcours::cleanUpHtmlTextForComparison($lastVersion->getObjectifsFormation() ?? ""),
                         VersioningParcours::cleanUpHtmlTextForComparison($formation->getObjectifsFormation() ?? ""),
                         $rendererName,
                         $differOptions,
@@ -264,7 +263,7 @@ class VersioningFormation
                 'presentationFormationContenuFormation' =>
                 VersioningParcours::cleanUpComparison(
                     html_entity_decode(DiffHelper::calculate(
-                        VersioningParcours::cleanUpHtmlTextForComparison($lastVersion?->getContenuFormation() ?? ""),
+                        VersioningParcours::cleanUpHtmlTextForComparison($lastVersion->getContenuFormation() ?? ""),
                         VersioningParcours::cleanUpHtmlTextForComparison($formation->getContenuFormation() ?? ""),
                         $rendererName,
                         $differOptions,
@@ -274,7 +273,7 @@ class VersioningFormation
                 'presentationFormationResultatsAttendus' =>
                 VersioningParcours::cleanUpComparison(
                     html_entity_decode(DiffHelper::calculate(
-                        VersioningParcours::cleanUpHtmlTextForComparison($lastVersion?->getResultatsAttendus() ?? ""),
+                        VersioningParcours::cleanUpHtmlTextForComparison($lastVersion->getResultatsAttendus() ?? ""),
                         VersioningParcours::cleanUpHtmlTextForComparison($formation->getResultatsAttendus() ?? ""),
                         $rendererName,
                         $differOptions,
@@ -284,7 +283,7 @@ class VersioningFormation
                 'rythmeDeFormation' =>
                 VersioningParcours::cleanUpComparison(
                     html_entity_decode(DiffHelper::calculate(
-                            $lastVersion?->getRythmeFormation()?->getLibelle() ?? "",
+                        $lastVersion->getRythmeFormation()?->getLibelle() ?? "",
                             $formation->getRythmeFormation()?->getLibelle() ?? "",
                             $rendererName,
                             $differOptions,
@@ -295,7 +294,7 @@ class VersioningFormation
                 'rythmeDeFormationTexte' =>
                 VersioningParcours::cleanUpComparison(
                     html_entity_decode(DiffHelper::calculate(
-                            $lastVersion?->getRythmeFormationTexte() ?? "",
+                        $lastVersion->getRythmeFormationTexte() ?? "",
                             $formation->getRythmeFormationTexte() ?? "",
                             $rendererName,
                             $differOptions,
@@ -306,7 +305,7 @@ class VersioningFormation
                 'regimeInscriptionTexte' =>
                 VersioningParcours::cleanUpComparison(
                     html_entity_decode(DiffHelper::calculate(
-                            $lastVersion?->getRegimeInscriptionTexte() ?? "",
+                        $lastVersion->getRegimeInscriptionTexte() ?? "",
                             $formation->getRegimeInscriptionTexte() ?? "",
                             $rendererName,
                             $differOptions,
@@ -317,7 +316,7 @@ class VersioningFormation
                 'modaliteAlternanceFormation' =>
                 VersioningParcours::cleanUpComparison(
                     html_entity_decode(DiffHelper::calculate(
-                            $lastVersion?->getModalitesAlternance() ?? "",
+                        $lastVersion->getModalitesAlternance() ?? "",
                             $formation->getModalitesAlternance() ?? "",
                             $rendererName,
                             $differOptions,
@@ -326,14 +325,13 @@ class VersioningFormation
                     )
                 )
             ];
-        }
 
         return $this->formationTextDifferences;
     }
 
     public function hasLastVersion(Formation $formation): bool
     {
-        return $this->getLastVersion($formation) !== null;
+        return $this->getLastVersion($formation) !== null || $formation->getFormationOrigineCopie() !== null;
     }
 
     private function getLastVersion(Formation $formation): FormationVersioning|null
@@ -344,12 +342,16 @@ class VersioningFormation
 
     public function rollbackToLastVersion(Formation $formation): void
     {
+        $oldFormation = null;
         $lastVersion = $this->getLastVersion($formation);
-        if ($lastVersion === null) {
-            return;
+        if ($lastVersion !== null) {
+            $oldFormation = $this->loadFormationFromVersion($lastVersion);
         }
 
-        $oldFormation = $this->loadFormationFromVersion($lastVersion);
+        if ($oldFormation === null && $formation->getFormationOrigineCopie() !== null) {
+            $oldFormation = $formation->getFormationOrigineCopie();
+        }
+
         if ($oldFormation === null) {
             return;
         }
