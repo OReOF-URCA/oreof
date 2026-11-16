@@ -8,6 +8,8 @@ instances (local → pré-production → production).
 `templates/components/{help_editor,faq_editor,help_image_manager,markdown_toolbar}.html.twig`,
 `public/js/editor_helpers.js`, `src/Command/Migration/V2HelpSeedData.php`.
 
+Rédaction du contenu (ton, structure, Markdown, prompt IA) : voir `redaction-aides-faq.md`.
+
 ## Où regarder
 
 | Sujet | Code |
