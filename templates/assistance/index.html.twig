@@ -15,19 +15,20 @@
 
         <section class="rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700">
             <div class="p-4">
-                <form method="get" class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-12">
+                <form method="get" class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-12" data-controller="auto-submit">
                     <div class="lg:col-span-4">
                         <label for="assistance-q" class="sr-only">Rechercher</label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-secondary">{{ ux_icon('icon:search', {class: 'h-4 w-4'}) }}</span>
                             <input type="search" id="assistance-q" name="q" value="{{ filtres.q }}"
                                    class="w-full rounded-lg border border-secondary-200 bg-white px-10 py-2 text-sm text-text placeholder:text-secondary-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-100 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder:text-secondary-400 dark:focus:border-primary-400 dark:focus:ring-primary-900"
-                                   placeholder="Sujet, email ou nom du demandeur…">
+                                   placeholder="Sujet, email ou nom du demandeur…" autocomplete="off"
+                                   data-action="input->auto-submit#debouncedSubmit">
                         </div>
                     </div>
                     <div class="lg:col-span-3">
                         <label for="assistance-statut" class="sr-only">Statut</label>
-                        <select id="assistance-statut" name="statut" class="app-filter-select app-select-required"
+                        <select id="assistance-statut" name="statut" class="app-filter-select app-select-required" data-action="change->auto-submit#submit"
                                 {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                             <option value="ouvertes" {{ filtres.statut == 'ouvertes' ? 'selected' }}>Demandes ouvertes</option>
                             <option value="toutes" {{ filtres.statut == 'toutes' ? 'selected' }}>Toutes les demandes</option>
@@ -38,7 +39,7 @@
                     </div>
                     <div class="lg:col-span-3">
                         <label for="assistance-responsable" class="sr-only">Responsable</label>
-                        <select id="assistance-responsable" name="responsable" class="app-filter-select"
+                        <select id="assistance-responsable" name="responsable" class="app-filter-select" data-action="change->auto-submit#submit"
                                 {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                             <option value="">Tous les responsables</option>
                             <option value="moi" {{ filtres.responsable == 'moi' ? 'selected' }}>Mes demandes</option>

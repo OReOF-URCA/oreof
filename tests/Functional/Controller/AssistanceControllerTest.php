@@ -118,6 +118,18 @@ class AssistanceControllerTest extends WebTestCase
         self::assertStringNotContainsString('Sujet résolu assistance', $crawler->text());
     }
 
+    public function testFiltresSAppliquentSansCliquerSurFiltrer(): void
+    {
+        $this->connecterAdmin();
+
+        $crawler = $this->client->request('GET', '/administration/assistance');
+
+        $formulaire = $crawler->filter('form[data-controller~="auto-submit"]');
+        self::assertCount(1, $formulaire);
+        self::assertCount(2, $formulaire->filter('select[data-action~="change->auto-submit#submit"]'));
+        self::assertCount(1, $formulaire->filter('input[name="q"][data-action~="input->auto-submit#debouncedSubmit"]'));
+    }
+
     public function testFicheAfficheLeFil(): void
     {
         $demande = $this->demande('Fiche assistance');
