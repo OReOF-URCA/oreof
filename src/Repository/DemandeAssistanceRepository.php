@@ -58,6 +58,8 @@ class DemandeAssistanceRepository extends ServiceEntityRepository
     {
         $qb = $this->createQueryBuilder('d')
             ->leftJoin('d.responsable', 'r')->addSelect('r')
+            // messages chargés avec la liste (fils dépliables) : pas de requête par demande
+            ->leftJoin('d.messages', 'm')->addSelect('m')
             ->orderBy('d.dateDernierMessage', 'DESC')
             ->setFirstResult(max(0, $page - 1) * $parPage)
             ->setMaxResults($parPage);

@@ -13,6 +13,7 @@ use App\Enums\StatutDemandeAssistanceEnum;
 use App\Repository\DemandeAssistanceRepository;
 use App\Repository\FormationRepository;
 use App\Repository\UserRepository;
+use App\Service\Assistance\FilMessagesAssistance;
 use App\Service\Assistance\FusionDemandesAssistance;
 use App\Service\Assistance\IntegrationMailAssistance;
 use App\Service\Assistance\ReponseAssistance;
@@ -45,7 +46,7 @@ class AssistanceController extends AbstractController
     }
 
     #[Route('', name: 'index', methods: ['GET'])]
-    public function index(Request $request, DemandeAssistanceRepository $repository, UserRepository $userRepository): Response
+    public function index(Request $request, DemandeAssistanceRepository $repository, UserRepository $userRepository, FilMessagesAssistance $fil): Response
     {
         $statut = $request->query->getString('statut', 'ouvertes');
         $filtreResponsable = $request->query->getString('responsable');
@@ -62,6 +63,7 @@ class AssistanceController extends AbstractController
 
         return $this->render('assistance/index.html.twig', [
             'demandes' => $demandes,
+            'fil' => $fil,
             'total' => count($demandes),
             'page' => $page,
             'pages' => max(1, (int) ceil(count($demandes) / self::PAR_PAGE)),

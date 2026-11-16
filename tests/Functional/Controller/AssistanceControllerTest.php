@@ -130,6 +130,66 @@ class AssistanceControllerTest extends WebTestCase
         self::assertCount(1, $formulaire->filter('input[name="q"][data-action~="input->auto-submit#debouncedSubmit"]'));
     }
 
+    private function ajouterReponse(DemandeAssistance $demande, MessageAssistance $parent, string $texte, string $date): MessageAssistance
+    {
+        $reponse = (new MessageAssistance())
+            ->setSens(SensMessageAssistanceEnum::ENTRANT)
+            ->setMessageId('<' . uniqid('rep', true) . '@univ-test.fr>')
+            ->setInReplyTo($parent->getMessageId())
+            ->setExpediteurEmail('collegue-assistance@univ-test.fr')
+            ->setSujet('Re: ' . $demande->getSujet())
+            ->setCorpsTexte($texte)
+            ->setDateEnvoi(new \DateTimeImmutable($date));
+        $demande->addMessage($reponse);
+        $this->em->flush();
+
+        return $reponse;
+    }
+
+    public function testListeDeplieLesMessagesEnArbre(): void
+    {
+        $demande = $this->demande('Fil dépliable assistance');
+        $reponse = $this->ajouterReponse($demande, $demande->getMessages()->first(), "Moi non plus.\n\nLe 12/11/2026 à 10:00, X a écrit :\n> cité", '+1 hour');
+        $this->connecterAdmin();
+
+        $crawler = $this->client->request('GET', '/administration/assistance');
+
+        $fil = $crawler->filter('details.assistance-fil')->reduce(static fn ($n) => str_contains($n->text(), 'Fil dépliable assistance'));
+        self::assertCount(1, $fil);
+        self::assertStringContainsString('2 messages', $fil->filter('summary')->text());
+        $ligne = $fil->filter(sprintf('a[href$="#message-%d"]', $reponse->getId()));
+        self::assertCount(1, $ligne);
+        self::assertSame('1', $ligne->attr('data-profondeur'));
+        self::assertStringContainsString('Moi non plus.', $ligne->text());
+        self::assertStringNotContainsString('cité', $ligne->text());
+    }
+
+    public function testListeUnSeulMessage(): void
+    {
+        $this->demande('Message unique assistance');
+        $this->connecterAdmin();
+
+        $crawler = $this->client->request('GET', '/administration/assistance');
+
+        $summary = $crawler->filter('details.assistance-fil summary')->reduce(static fn ($n) => str_contains($n->text(), 'Message unique assistance'));
+        self::assertStringContainsString('1 message', $summary->text());
+        self::assertStringNotContainsString('1 messages', $summary->text());
+    }
+
+    public function testListePaginationAvecMessagesJoints(): void
+    {
+        for ($i = 0; $i < 31; ++$i) {
+            $demande = $this->demande(sprintf('Pagination fil assistance %02d', $i));
+            $this->ajouterReponse($demande, $demande->getMessages()->first(), 'Réponse', '+1 hour');
+        }
+        $this->connecterAdmin();
+
+        $crawler = $this->client->request('GET', '/administration/assistance?q=Pagination+fil+assistance');
+
+        self::assertCount(30, $crawler->filter('details.assistance-fil'));
+        self::assertStringContainsString('31 demande(s)', $crawler->text());
+    }
+
     public function testFicheAfficheLeFil(): void
     {
         $demande = $this->demande('Fiche assistance');
