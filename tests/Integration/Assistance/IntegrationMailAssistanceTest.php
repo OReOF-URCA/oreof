@@ -211,6 +211,37 @@ class IntegrationMailAssistanceTest extends TestCase
         self::assertSame(StatutDemandeAssistanceEnum::EN_COURS, $demande->getStatut());
     }
 
+    public function testSignalementRelayeParLApplicationVientDeLUsager(): void
+    {
+        $message = $this->integration->integrer($this->mail('09'));
+
+        self::assertSame(SensMessageAssistanceEnum::ENTRANT, $message->getSens());
+        self::assertSame('stephanie.francois@univ-test.fr', $message->getExpediteurEmail());
+        self::assertSame('stephanie.francois@univ-test.fr', $message->getDemande()->getDemandeurEmail());
+        self::assertSame(StatutDemandeAssistanceEnum::NOUVELLE, $message->getDemande()->getStatut());
+    }
+
+    public function testMailDeLEquipeAvecReplyToDeLEquipeResteSortant(): void
+    {
+        $message = $this->integration->integrer(new MailEntrant(
+            messageId: '<equipe-replyto@univ-reims.fr>',
+            inReplyTo: null,
+            references: [],
+            expediteurEmail: 'oreof@univ-reims.fr',
+            expediteurNom: 'ORéOF',
+            destinataires: ['catalin.popa@univ-test.fr'],
+            sujet: 'Information',
+            corpsTexte: 'Bonjour',
+            corpsHtml: null,
+            date: new DateTimeImmutable('2026-11-13 11:00'),
+            automatique: false,
+            repondreA: 'oreof@univ-reims.fr',
+        ));
+
+        self::assertSame(SensMessageAssistanceEnum::SORTANT, $message->getSens());
+        self::assertSame('catalin.popa@univ-test.fr', $message->getDemande()->getDemandeurEmail());
+    }
+
     public function testRebondSansFilCreeUneDemandeDejaResolue(): void
     {
         $message = $this->integration->integrer($this->mail('06'));

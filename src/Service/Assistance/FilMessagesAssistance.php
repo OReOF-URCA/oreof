@@ -77,7 +77,9 @@ class FilMessagesAssistance
      */
     public function extrait(MessageAssistance $message, int $longueur = 100): string
     {
-        $texte = trim((string) preg_replace('/\s+/u', ' ', $this->separateur->separerTexte($message->getCorpsTexte())[0]));
+        // certains mails (texte généré depuis le HTML) gardent des entités : &quot; &#039;
+        $visible = html_entity_decode($this->separateur->separerTexte($message->getCorpsTexte())[0], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $texte = trim((string) preg_replace('/\s+/u', ' ', $visible));
 
         return mb_strlen($texte) > $longueur ? mb_substr($texte, 0, $longueur) . '…' : $texte;
     }

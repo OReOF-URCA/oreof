@@ -86,6 +86,11 @@ class IntegrationMailAssistance
             return null;
         }
 
+        if ($mail->repondreA !== null && $this->estEquipe($mail->expediteurEmail) && !$this->estEquipe($mail->repondreA)) {
+            // mail envoyé par l'application pour le compte d'un usager (ex. signalement de bug, Reply-To = l'usager)
+            $mail = $mail->avecExpediteur($mail->repondreA, null);
+        }
+
         $sens = $this->estEquipe($mail->expediteurEmail) ? SensMessageAssistanceEnum::SORTANT : SensMessageAssistanceEnum::ENTRANT;
         $annonce = $sens === SensMessageAssistanceEnum::SORTANT && count($mail->destinataires) > self::SEUIL_ANNONCE;
         $sujetNormalise = $this->sujetNormaliseur->normaliser($mail->sujet);

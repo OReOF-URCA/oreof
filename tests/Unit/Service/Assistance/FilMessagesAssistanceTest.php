@@ -99,5 +99,8 @@ class FilMessagesAssistanceTest extends TestCase
         self::assertStringEndsWith('…', $this->fil->extrait($long));
 
         self::assertSame('', $this->fil->extrait(new MessageAssistance()));
+
+        $encode = (new MessageAssistance())->setCorpsTexte('Export &quot;Annexes CA&quot; : la saisie n&#039;apparait pas');
+        self::assertSame('Export "Annexes CA" : la saisie n\'apparait pas', $this->fil->extrait($encode));
     }
 }

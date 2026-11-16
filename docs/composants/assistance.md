@@ -34,7 +34,10 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
    hors de tout échange connu, ils créent une demande directement « Résolue ». Les notifications de l'application
    (sujet commençant par `[ORéOF]`) sont traitées de même, sauf les signalements de bug `[ORéOF][Bug] …` (vraies
    demandes) ; une réponse « Re: [ORéOF] … » d'un usager rouvre la demande.
-   Un mail dont l'expéditeur est `oreof@` ou un `ROLE_ADMIN` est classé « Réponse envoyée ».
+   Un mail dont l'expéditeur est `oreof@` ou un `ROLE_ADMIN` est classé « Réponse envoyée », sauf s'il porte un
+   `Reply-To` extérieur à l'équipe : c'est alors un mail envoyé par l'application pour le compte d'un usager (ex.
+   formulaire « Signaler un bug », `BugReportController`), attribué à l'adresse du `Reply-To` (message reçu, demandeur,
+   contexte et destinataire de la réponse).
    **Annonces** : un mail de l'équipe à plus de 10 destinataires (`IntegrationMailAssistance::SEUIL_ANNONCE`, To + Cc)
    est une annonce (`DemandeAssistance::$annonce`, statut « Résolue », badge « Annonce », pas de formulaire de
    réponse). Elle ne rejoint qu'une autre annonce du même fil, et le regroupement par fil l'ignore : chaque usager qui

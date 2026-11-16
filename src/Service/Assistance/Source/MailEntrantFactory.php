@@ -46,6 +46,7 @@ class MailEntrantFactory
         }
 
         $sujet = trim($this->decoder($this->premiereValeur($message->get('subject')) ?? ''));
+        $repondreA = mb_strtolower((string) ($this->adresses($message->get('reply_to'))[0]->mail ?? ''));
 
         $autoSubmitted = mb_strtolower(trim($this->premiereValeur($message->get('auto_submitted')) ?? ''));
         $automatique = ($autoSubmitted !== '' && $autoSubmitted !== 'no')
@@ -68,6 +69,7 @@ class MailEntrantFactory
             date: $this->date($message->get('date')),
             automatique: $automatique,
             piecesJointes: $piecesJointes,
+            repondreA: $repondreA !== '' ? $repondreA : null,
         );
     }
 

@@ -45,6 +45,14 @@ class EmlSourceTest extends TestCase
         self::assertFalse($mails['09']->automatique, 'Un signalement de bug est une vraie demande');
     }
 
+    public function testReplyToEstLu(): void
+    {
+        $mails = $this->lire();
+
+        self::assertSame('stephanie.francois@univ-test.fr', $mails['09']->repondreA);
+        self::assertNull($mails['01']->repondreA);
+    }
+
     public function testReponseExposeInReplyTo(): void
     {
         $mails = $this->lire();
